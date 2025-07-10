@@ -34,7 +34,7 @@ export const CV_PATIENT_WITH_OBS_RESULTS: QdmTestCaseProcessingScenario = {
     json: "",
     patientId: "c519b55c-489f-43e9-b734-1089006badd2",
     hapiOperationOutcome: null,
-    testCaseValidationStatus: null,
+    validationStatus: null,
     groupPopulations: [
       {
         groupId: "6598592b4fc1aa5fa9481b6c",
@@ -370,7 +370,7 @@ export const CV_EPISODE_WITH_STRAT_OBS_RESULTS: QdmTestCaseProcessingScenario =
       json: "{}",
       patientId: "9725b9af-6f64-472f-ab52-9805c7c26394",
       hapiOperationOutcome: null,
-      testCaseValidationStatus: null,
+      validationStatus: null,
       groupPopulations: [
         {
           groupId: "659c25644fc1aa5fa9481b70",
@@ -861,7 +861,7 @@ export const RATIO_PATIENTBASED_WITH_OBS_RESULTS: QdmTestCaseProcessingScenario 
       json: '{"qdmVersion":"5.6","dataElements":[{"dataElementCodes":[{"code":"448951000124107","system":"2.16.840.1.113883.6.96","version":null,"display":"Admission to observation unit (procedure)"}],"_id":"65401ebfd9e14800002ab193","participant":[],"relatedTo":[],"qdmTitle":"Encounter, Performed","hqmfOid":"2.16.840.1.113883.10.20.28.4.5","qdmCategory":"encounter","qdmStatus":"performed","qdmVersion":"5.6","_type":"QDM::EncounterPerformed","description":"Encounter, Performed: Observation Services","codeListId":"2.16.840.1.113762.1.4.1111.143","id":"65401ec2d9e14800002ab19c","authorDatetime":"2023-10-26T00:00:00.000+00:00","relevantPeriod":{"low":"2023-10-18T00:00:00.000+00:00","high":"2023-10-25T00:00:00.000+00:00","lowClosed":true,"highClosed":true},"facilityLocations":[],"diagnoses":[]},{"dataElementCodes":[{"code":"4525004","system":"2.16.840.1.113883.6.96","version":null,"display":"Emergency department patient visit (procedure)"}],"_id":"65401ebfd9e14800002ab197","participant":[],"relatedTo":[],"qdmTitle":"Encounter, Performed","hqmfOid":"2.16.840.1.113883.10.20.28.4.5","qdmCategory":"encounter","qdmStatus":"performed","qdmVersion":"5.6","_type":"QDM::EncounterPerformed","description":"Encounter, Performed: Emergency Department Visit","codeListId":"2.16.840.1.113883.3.117.1.7.1.292","id":"65401ed9d9e14800002ab1b2","relevantPeriod":{"low":"2023-10-19T00:00:00.000+00:00","high":"2023-10-24T00:00:00.000+00:00","lowClosed":true,"highClosed":true},"facilityLocations":[],"diagnoses":[]}],"_id":"65401ebfd9e14800002ab199"}',
       patientId: "dc788bd3-f02b-4b3c-89a2-104c0b6e753e",
       hapiOperationOutcome: null,
-      testCaseValidationStatus: null,
+      validationStatus: null,
       groupPopulations: [
         {
           groupId: "Group1",
@@ -1134,7 +1134,7 @@ export const RATIO_EPISODEBASED_WITH_OBS_RESULTS: QdmTestCaseProcessingScenario 
       json: "{}",
       patientId: "fdbb6404-872b-4d42-92fa-9c9f952da64a",
       hapiOperationOutcome: null,
-      testCaseValidationStatus: null,
+      validationStatus: null,
       groupPopulations: [
         {
           groupId: "6540ef82854d323018920e01",

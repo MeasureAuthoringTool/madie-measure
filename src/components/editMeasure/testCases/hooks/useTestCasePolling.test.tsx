@@ -2,6 +2,7 @@ import * as React from "react";
 import { render, act, cleanup } from "@testing-library/react";
 import { useTestCasePolling } from "./useTestCasePolling";
 import axios from "../../../../api/axios-instance";
+import { ValidationStatus } from "@madie/madie-models";
 
 jest.mock("../../../../api/axios-instance");
 const mockedAxios = axios as jest.Mocked<typeof axios>;
@@ -32,7 +33,7 @@ describe("useTestCasePolling", () => {
   it("should start polling and call getTestCase every 5 seconds for Pending status", async () => {
     mockedAxios.get.mockResolvedValue({
       data: {
-        testCaseValidationStatus: "Pending",
+        validationStatus: ValidationStatus.PENDING,
         id: "123",
       },
     });
@@ -58,9 +59,15 @@ describe("useTestCasePolling", () => {
 
   it("should stop polling when status becomes Valid", async () => {
     mockedAxios.get
-      .mockResolvedValueOnce({ data: { testCaseValidationStatus: "Pending" } })
-      .mockResolvedValueOnce({ data: { testCaseValidationStatus: "Pending" } })
-      .mockResolvedValueOnce({ data: { testCaseValidationStatus: "Valid" } });
+      .mockResolvedValueOnce({
+        data: { validationStatus: ValidationStatus.PENDING },
+      })
+      .mockResolvedValueOnce({
+        data: { validationStatus: ValidationStatus.PENDING },
+      })
+      .mockResolvedValueOnce({
+        data: { validationStatus: ValidationStatus.VALID },
+      });
 
     await act(async () => {
       render(<WrapperComponent shouldStart={true} />);
@@ -77,7 +84,7 @@ describe("useTestCasePolling", () => {
 
   it("should stop polling on unmount", async () => {
     mockedAxios.get.mockResolvedValue({
-      data: { testCaseValidationStatus: "Pending" },
+      data: { validationStatus: ValidationStatus.PENDING },
     });
 
     let unmount: any;
@@ -105,8 +112,12 @@ describe("useTestCasePolling", () => {
 
   it("should stop polling if api call fails and returns an error message", async () => {
     mockedAxios.get
-      .mockResolvedValueOnce({ data: { testCaseValidationStatus: "Pending" } })
-      .mockResolvedValueOnce({ data: { testCaseValidationStatus: "Pending" } })
+      .mockResolvedValueOnce({
+        data: { validationStatus: ValidationStatus.PENDING },
+      })
+      .mockResolvedValueOnce({
+        data: { validationStatus: ValidationStatus.PENDING },
+      })
       .mockRejectedValueOnce(new Error("Unable to retrieve test case object"));
     await act(async () => {
       render(<WrapperComponent shouldStart={true} />);

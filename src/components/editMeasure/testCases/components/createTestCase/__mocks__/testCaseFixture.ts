@@ -2,7 +2,7 @@ import {
   MeasureScoring,
   PopulationType,
   TestCase,
-  TestCaseValidationStatus,
+  ValidationStatus,
 } from "@madie/madie-models";
 
 export const testCaseFixture: TestCase = {
@@ -25,7 +25,7 @@ export const testCaseFixture: TestCase = {
     outcomeResponse: null,
     successful: true,
   },
-  testCaseValidationStatus: TestCaseValidationStatus.VALID,
+  validationStatus: ValidationStatus.VALID,
   groupPopulations: [
     {
       groupId: "1",

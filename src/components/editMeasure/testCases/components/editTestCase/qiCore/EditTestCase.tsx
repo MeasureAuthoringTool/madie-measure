@@ -27,6 +27,7 @@ import {
   PopulationExpectedValue,
   MeasureErrorType,
   Model,
+  ValidationStatus,
 } from "@madie/madie-models";
 import useTestCaseServiceApi from "../../../api/useTestCaseServiceApi";
 import Editor from "../../editor/Editor";
@@ -89,6 +90,10 @@ import {
   isHapiOutcomeIssueCodeInformational,
 } from "./EditTestCaseUtil";
 import { useTestCasePolling } from "../../../hooks/useTestCasePolling";
+import WarningIcon from "@mui/icons-material/Warning";
+import KeyboardTabIcon from "@mui/icons-material/KeyboardTab";
+import Box from "@mui/material/Box";
+import Skeleton from "@mui/material/Skeleton";
 
 const TestCaseForm = tw.form`m-3`;
 const ValidationErrorsButton = tw.button`
@@ -425,7 +430,11 @@ const EditTestCase = (props: EditTestCaseProps) => {
         }
         resetForm({ values: _.cloneDeep(nextTc) });
         handleHapiOutcome(nextTc?.hapiOperationOutcome);
-        if (["Pending", "Validating"].includes(tc.testCaseValidationStatus)) {
+        if (
+          [ValidationStatus.PENDING, ValidationStatus.VALIDATING].includes(
+            tc.validationStatus
+          )
+        ) {
           setShouldPoll(true);
         } else {
           setShouldPoll(false);
@@ -554,7 +563,7 @@ const EditTestCase = (props: EditTestCaseProps) => {
         measureId
       );
       // initiate polling for validation response
-      if (updatedTestCase.testCaseValidationStatus === "Pending") {
+      if (updatedTestCase.validationStatus === ValidationStatus.PENDING) {
         setShouldPoll(true);
       } else {
         setShouldPoll(false);
@@ -668,7 +677,7 @@ const EditTestCase = (props: EditTestCaseProps) => {
     if (testCase && testCase.id) {
       const validationErrors =
         testCase?.hapiOperationOutcome?.outcomeResponse?.issue;
-      if (testCase.testCaseValidationStatus === "Pending") {
+      if (testCase.validationStatus === ValidationStatus.PENDING) {
         if (timezoneUpdated) {
           showToast(
             <div>
@@ -969,9 +978,8 @@ const EditTestCase = (props: EditTestCaseProps) => {
         <EditTestCaseBreadCrumbs testCase={testCase} measureId={measureId} />
         <div className="allotment-wrapper">
           <Allotment
-            minSize={10}
             ref={allotmentRef}
-            defaultSizes={[200, 200, 10]}
+            defaultSizes={[48, 48, 4]}
             vertical={false}
           >
             <Allotment.Pane>
@@ -1061,7 +1069,6 @@ const EditTestCase = (props: EditTestCaseProps) => {
                 )}
               </div>
             </Allotment.Pane>
-
             <Allotment.Pane>
               <div className="right-panel">
                 <CreateTestCaseRightPanelNavTabs
@@ -1275,93 +1282,133 @@ const EditTestCase = (props: EditTestCaseProps) => {
                 )}
               </div>
             </Allotment.Pane>
-            <Allotment.Pane>
-              <div className="validation-panel">
-                {showValidationErrors ? (
-                  <aside
-                    tw="w-full h-full flex flex-col"
-                    data-testid="open-json-validation-errors-aside"
-                  >
-                    <button
-                      data-testid="hide-json-validation-errors-button"
-                      onClick={() => {
-                        setShowValidationErrors((prevState) => {
-                          allotmentRef.current.resize([200, 200, 10]);
-                          return !prevState;
-                        });
-                      }}
-                    >
-                      <StyledIcon
-                        icon={faExclamationCircle}
-                        errorSeverity={severityOfValidationErrors(
-                          validationErrors
-                        )}
-                      />
-                      Validation Errors
-                    </button>
 
+            <Allotment.Pane minSize={4}>
+              <div
+                className={`validation-panel ${
+                  showValidationErrors ? "open" : "closed"
+                }`}
+              >
+                {showValidationErrors ? (
+                  <>
+                    <div className="flex justify-between items-center w-full mb-2">
+                      <div className="validation-header">
+                        <div className="header-left">
+                          {[
+                            ValidationStatus.PENDING,
+                            ValidationStatus.VALIDATING,
+                          ].includes(testCase?.validationStatus) ? (
+                            <MadieSpinner style={{ width: 20, height: 20 }} />
+                          ) : (
+                            <WarningIcon color="warning" />
+                          )}
+
+                          <span className="ml-2">
+                            Validations ({validationErrors?.length || 0})
+                          </span>
+                        </div>
+
+                        <Button
+                          variant="action"
+                          data-testid="hide-json-validation-errors-button"
+                          onClick={() => {
+                            setShowValidationErrors(false);
+                            setTimeout(() => {
+                              allotmentRef.current.resize([48, 48, 4]);
+                            }, 0);
+                          }}
+                          className="validation-panel-toggle-button"
+                          title="Close Panel"
+                        >
+                          <KeyboardTabIcon />
+                        </Button>
+                      </div>
+                    </div>
                     <div
-                      tw="h-full flex flex-col overflow-y-scroll"
-                      data-testid="json-validation-errors-list"
                       className="validation-content"
+                      data-testid="json-validation-errors-list"
                     >
-                      {validationErrors && validationErrors.length > 0 ? (
+                      {[
+                        ValidationStatus.PENDING,
+                        ValidationStatus.VALIDATING,
+                      ].includes(testCase?.validationStatus) ? (
+                        <Box
+                          data-testid="validation-skeleton-box"
+                          aria-label="Validation loading skeletons"
+                          sx={{
+                            width: 480,
+                            height: 50,
+                            backgroundColor: "#f5f5f5",
+                            borderRadius: 1,
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            marginLeft: "10px",
+                          }}
+                        >
+                          <Skeleton
+                            data-testid="validation-skeleton"
+                            aria-label="Validation loading skeleton"
+                            width={300}
+                            height={30}
+                            animation="wave"
+                            sx={{ marginLeft: "-160px" }}
+                          />
+                        </Box>
+                      ) : validationErrors && validationErrors.length > 0 ? (
                         validationErrors
                           .filter(
-                            (error) =>
-                              /^information/.exec(error?.severity) === null
+                            (error) => !/^information/.test(error?.severity)
                           )
-                          .map((error) => {
-                            return (
-                              <ValidationAlertCard
-                                key={error.key}
-                                status={
-                                  error.diagnostics.includes("Meta.profile")
-                                    ? "meta"
-                                    : error.severity
-                                    ? error.severity
-                                    : "error"
-                                }
-                              >
-                                {error.diagnostics.includes("Meta.profile")
-                                  ? "Meta.profile: "
-                                  : error.severity
-                                  ? error.severity.charAt(0).toUpperCase() +
-                                    error.severity.slice(1) +
-                                    ": "
-                                  : ""}
-                                {error.diagnostics}
-                              </ValidationAlertCard>
-                            );
-                          })
+                          .map((error) => (
+                            <ValidationAlertCard
+                              key={error.key}
+                              status={
+                                error.diagnostics.includes("Meta.profile")
+                                  ? "meta"
+                                  : error.severity || "error"
+                              }
+                            >
+                              {error.diagnostics.includes("Meta.profile")
+                                ? "Meta.profile: "
+                                : error.severity
+                                ? error.severity.charAt(0).toUpperCase() +
+                                  error.severity.slice(1) +
+                                  ": "
+                                : ""}
+                              {error.diagnostics}
+                            </ValidationAlertCard>
+                          ))
                       ) : (
                         <span>Nothing to see here!</span>
                       )}
                     </div>
-                  </aside>
+                  </>
                 ) : (
-                  <aside
-                    tw="h-full w-full"
-                    data-testid="closed-json-validation-errors-aside"
-                  >
-                    <ValidationErrorsButton
-                      data-testid="show-json-validation-errors-button"
-                      onClick={() =>
-                        setShowValidationErrors((prevState) => {
-                          allotmentRef.current.resize([200, 200, 50]);
-                          return !prevState;
-                        })
-                      }
-                    >
-                      <StyledIcon
-                        icon={faExclamationCircle}
-                        errorSeverity={severityOfValidationErrors(
-                          validationErrors
+                  <div data-testid="closed-json-validation-errors-aside">
+                    <div className="closed-header">
+                      <Button
+                        size="small"
+                        data-testid="show-json-validation-errors-button"
+                        onClick={() => {
+                          setShowValidationErrors(true);
+                          allotmentRef.current.resize([34, 33, 33]);
+                        }}
+                        className="validation-panel-toggle-button"
+                        title="Open Validations"
+                      >
+                        {[
+                          ValidationStatus.PENDING,
+                          ValidationStatus.VALIDATING,
+                        ].includes(testCase?.validationStatus) ? (
+                          <MadieSpinner style={{ width: 20, height: 20 }} />
+                        ) : (
+                          <WarningIcon color="warning" />
                         )}
-                      />
-                      Validation Errors
-                    </ValidationErrorsButton>
-                  </aside>
+                      </Button>
+                    </div>
+                    <div className="closed-body"></div>
+                  </div>
                 )}
               </div>
             </Allotment.Pane>

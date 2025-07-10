@@ -29,6 +29,7 @@ import {
   PopulationType,
   TestCase,
   TestCaseImportOutcome,
+  ValidationStatus,
 } from "@madie/madie-models";
 import useTestCaseServiceApi, {
   TestCaseServiceApi,
@@ -274,7 +275,7 @@ const testCases = [
         ] as PopulationExpectedValue[],
       },
     ] as GroupPopulation[],
-    testCaseValidationStatus: "Valid",
+    validationStatus: ValidationStatus.VALID,
   },
   {
     id: "2",
@@ -303,7 +304,7 @@ const testCases = [
         ] as PopulationExpectedValue[],
       },
     ] as GroupPopulation[],
-    testCaseValidationStatus: "Valid",
+    validationStatus: ValidationStatus.VALID,
   },
   {
     id: "3",
