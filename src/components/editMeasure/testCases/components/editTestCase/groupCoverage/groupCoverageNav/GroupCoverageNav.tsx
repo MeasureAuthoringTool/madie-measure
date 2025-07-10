@@ -22,6 +22,7 @@ interface Props {
   onClick: Function;
   includeSDE?: boolean;
   includeRAV?: boolean;
+  model?: string;
 }
 
 const GroupCoverageNav = ({
@@ -32,8 +33,15 @@ const GroupCoverageNav = ({
   onClick,
   includeSDE,
   includeRAV,
+  model,
 }: Props) => {
   const featureFlags = useFeatureFlags();
+
+  // TODO Remove parameter when either of these flags are removed, or when both feature flags are removed
+  const relatedFeatureFlag =
+    model === "qiCore"
+      ? featureFlags?.QICoreIncludeRAVValues
+      : featureFlags?.QDMIncludeRAVValues;
 
   return (
     <>
@@ -71,7 +79,7 @@ const GroupCoverageNav = ({
             }}
           />
         )}
-        {featureFlags?.QDMIncludeRAVValues && includeRAV && (
+        {relatedFeatureFlag && includeRAV && (
           <Tab
             type="C"
             label="RAV"
