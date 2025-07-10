@@ -97,6 +97,7 @@ const TestCaseSeries = ({
       <AutoComplete
         id="test-case-series"
         dataTestId="test-case-series"
+        label="Group"
         disabled={disabled}
         placeholder="Start typing or select"
         options={getOptions()}
