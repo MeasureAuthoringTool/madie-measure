@@ -8,6 +8,7 @@ import {
   PopulationType,
   SupplementalData,
   Group,
+  RiskAdjustment,
 } from "@madie/madie-models";
 import { Select } from "@madie/madie-design-system/dist/react";
 import GroupCoverageNav, {
@@ -37,7 +38,9 @@ interface Props {
   cqlDefinitionCallstack?: CqlDefinitionCallstack;
   mainCqlLibraryName: string;
   includeSDE: boolean;
+  includeRAV: boolean;
   supplementalData: SupplementalData[];
+  riskAdjustments: RiskAdjustment[];
   groups: Group[];
 }
 
@@ -70,7 +73,9 @@ const QiCoreGroupCoverage = ({
   cqlDefinitionCallstack,
   mainCqlLibraryName,
   includeSDE,
+  includeRAV,
   supplementalData,
+  riskAdjustments,
   groups,
 }: Props) => {
   // selected group/criteria
@@ -254,32 +259,32 @@ const QiCoreGroupCoverage = ({
     );
   };
 
-  const changeSDE = (population) => {
+  const changeDefinitionsByType = (population, definitions) => {
     setSelectedHighlightingTab(population);
     if (mappedCalculationResults) {
       const statementResults =
         mappedCalculationResults[getGroupDisplayId(selectedCriteria)][
           "statementResults"
         ];
-      const filteredSDEDefinitions = supplementalData?.reduce((acc, item) => {
+      const filteredDefinitions = definitions?.reduce((acc, item) => {
         if (statementResults[item?.definition]) {
           acc[item?.definition] = statementResults[item?.definition];
         }
         return acc;
       }, {});
-      setSelectedAllDefinitions(filteredSDEDefinitions);
+      setSelectedAllDefinitions(filteredDefinitions);
     }
   };
 
   const onHighlightingNavTabClick = (selectedTab) => {
     if (isPopulation(selectedTab.name)) {
       changePopulation(selectedTab);
+    } else if (selectedTab.name === "SDE") {
+      changeDefinitionsByType(selectedTab, supplementalData);
+    } else if (selectedTab.name === "RAV") {
+      changeDefinitionsByType(selectedTab, riskAdjustments);
     } else {
-      if (selectedTab.name === "SDE") {
-        changeSDE(selectedTab);
-      } else {
-        changeDefinitions(selectedTab);
-      }
+      changeDefinitions(selectedTab);
     }
   };
 
@@ -399,6 +404,8 @@ const QiCoreGroupCoverage = ({
             selectedHighlightingTab={selectedHighlightingTab}
             onClick={onHighlightingNavTabClick}
             includeSDE={includeSDE}
+            includeRAV={includeRAV}
+            model={"qiCore"}
           />
         </div>
 
