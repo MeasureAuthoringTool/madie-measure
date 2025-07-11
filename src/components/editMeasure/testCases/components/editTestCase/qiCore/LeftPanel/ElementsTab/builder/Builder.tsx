@@ -27,6 +27,11 @@ import {
 } from "@madie/madie-design-system/dist/react";
 import { useFormikContext } from "formik";
 import "./Builder.scss";
+import {
+  getTopLevelElements,
+  getLastPart,
+} from "../../../../../../api/fhirDefinitionServiceUtilities";
+import { ContinuousVariableBoolean } from "../../../../../../api/__mocks__/TestCaseProcessingScenarios";
 
 interface BuilderProps {
   testCase: TestCase;
@@ -150,7 +155,7 @@ const Builder = ({
         {activeTab === "Available" && canEdit && (
           <ResourceList
             resourceIdentifiers={resources}
-            onClick={(resourceIdentifier: ResourceIdentifier) => {
+            onClick={async (resourceIdentifier: ResourceIdentifier) => {
               const id = uuidv4();
               const newEntry = {
                 fullUrl: `https://madie.cms.gov/${resourceIdentifier.type}/${id}`,
@@ -164,6 +169,31 @@ const Builder = ({
                   profile: [resourceIdentifier.profile],
                 };
               }
+              await fhirDefinitionsService.current
+                .getResourceTree(resourceIdentifier.id)
+                .then((resourceTree) => {
+                  const selectedResource = {
+                    ...resourceTree,
+                    bundleEntry: newEntry,
+                  };
+
+                  const topElements = getTopLevelElements(selectedResource);
+                  const requiredElements = [
+                    ...topElements.filter((e) => e.min > 0),
+                  ];
+
+                  requiredElements.forEach((element) => {
+                    if (
+                      element.min === 1 &&
+                      element.max === "1" &&
+                      element.patternCodeableConcept
+                    ) {
+                      newEntry.resource[getLastPart(element.path)] = {
+                        ...element.patternCodeableConcept,
+                      };
+                    }
+                  });
+                });
               dispatch({
                 type: ResourceActionType.ADD_BUNDLE_ENTRY,
                 payload: newEntry,
