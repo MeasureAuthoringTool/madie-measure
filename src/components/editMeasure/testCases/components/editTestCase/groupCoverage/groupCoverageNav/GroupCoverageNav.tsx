@@ -38,10 +38,11 @@ const GroupCoverageNav = ({
   const featureFlags = useFeatureFlags();
 
   // TODO Remove parameter when either of these flags are removed, or when both feature flags are removed
-  const relatedFeatureFlag =
-    model === "qiCore"
+  const showRAVTab =
+    includeRAV &&
+    (model === "qiCore"
       ? featureFlags?.QICoreIncludeRAVValues
-      : featureFlags?.QDMIncludeRAVValues;
+      : featureFlags?.QDMIncludeRAVValues);
 
   return (
     <>
@@ -79,7 +80,7 @@ const GroupCoverageNav = ({
             }}
           />
         )}
-        {relatedFeatureFlag && includeRAV && (
+        {showRAVTab && (
           <Tab
             type="C"
             label="RAV"
