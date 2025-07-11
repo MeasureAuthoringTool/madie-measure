@@ -4,8 +4,10 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import DoNotDisturbOnIcon from "@mui/icons-material/DoNotDisturbOn";
 import ErrorIcon from "@mui/icons-material/Error";
+import RefreshIcon from "@mui/icons-material/Refresh";
 import { Box, useTheme } from "@mui/material";
 import * as _ from "lodash";
+import { PaletteAugmentColorOptions } from "@mui/material/styles/createPalette";
 
 interface TestCaseProps {
   executionStatus: string;
@@ -49,6 +51,74 @@ export const TestCaseStatus = (props: TestCaseProps) => {
     );
   }
   return <Box style={{ display: "flex", alignItems: "center" }}>{content}</Box>;
+};
+
+interface TestCaseValidationProps {
+  validationStatus: string;
+}
+
+export const TestCaseValidationStatus = (props: TestCaseValidationProps) => {
+  const { validationStatus } = props;
+  const theme = useTheme();
+  let content;
+  if (
+    validationStatus === "Invalid" ||
+    validationStatus === "Invalid JSON" ||
+    validationStatus === "Not Complete" ||
+    _.isNil(validationStatus)
+  ) {
+    content = (
+      <>
+        <ErrorIcon
+          sx={{
+            color: theme.palette.secondary.main,
+          }}
+        />
+        <span style={{ width: 10 }} />
+        Invalid
+      </>
+    );
+  } else if (
+    validationStatus === "Pending" ||
+    validationStatus === "Validating"
+  ) {
+    content = (
+      <>
+        <RefreshIcon sx={{ color: theme.palette.grey[500] }} />
+        <span style={{ width: 10 }} />
+        Pending
+      </>
+    );
+  } else if (validationStatus === "Valid") {
+    content = (
+      <>
+        <CheckCircleIcon sx={{ color: theme.palette.success.main }} />
+        <span style={{ width: 10 }} />
+        Valid
+      </>
+    );
+  }
+  return <Box style={{ display: "flex", alignItems: "center" }}>{content}</Box>;
+};
+
+export const getTranslatedValidationStatus = (validationStatus) => {
+  if (
+    validationStatus === "Invalid" ||
+    validationStatus === "Invalid JSON" ||
+    validationStatus === "Not Complete" ||
+    _.isNil(validationStatus)
+  ) {
+    return "Invalid";
+  } else if (
+    validationStatus === "Pending" ||
+    validationStatus === "Validating"
+  ) {
+    return "Pending";
+  } else if (validationStatus === "Valid") {
+    return "Valid";
+  } else {
+    return null;
+  }
 };
 
 type TCRow = {
