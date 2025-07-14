@@ -4,15 +4,22 @@ import CalculationResults, {
   mapCalculationResults,
 } from "./CalculationResults";
 import { DetailedPopulationGroupResult } from "fqm-execution/build/types/Calculator";
-import { GroupPopulation, SupplementalData, Group } from "@madie/madie-models";
+import {
+  GroupPopulation,
+  SupplementalData,
+  Group,
+  RiskAdjustment,
+} from "@madie/madie-models";
 import { FinalResult, PopulationType, Relevance } from "fqm-execution";
 import userEvent from "@testing-library/user-event";
+import { useFeatureFlags } from "@madie/madie-util";
 
-jest.mock("@madie/madie-util", () => {
-  return {
-    useFeatureFlags: jest.fn(),
-  };
-});
+jest.mock("@madie/madie-util", () => ({
+  useFeatureFlags: jest.fn().mockReturnValue({
+    QDMIncludeRAVValues: false,
+    QICoreIncludeRAVValues: false,
+  }),
+}));
 
 const supplementalData = [
   {
@@ -26,6 +33,19 @@ const supplementalData = [
     ],
   },
 ] as SupplementalData[];
+
+const riskAdjustments = [
+  {
+    definition: "test",
+    description: "",
+    includeInReportType: [
+      "Individual",
+      "Subject List",
+      "Summary",
+      "Data Collection",
+    ],
+  },
+] as RiskAdjustment[];
 
 const groups = [
   {
@@ -130,7 +150,9 @@ const renderCoverageComponent = (
       calculationErrors={calculationErrors}
       mainCqlLibraryName={mainCqlLibraryName}
       includeSDE={true}
+      includeRAV={true}
       supplementalData={supplementalData}
+      riskAdjustments={riskAdjustments}
       groups={measureGroups}
     />
   );
@@ -398,6 +420,7 @@ describe("CalculationResults with new tabbed highlighting layout on", () => {
     expect(screen.getByText("No results available")).toBeInTheDocument();
     expect(screen.getByText("Functions")).toBeInTheDocument();
     expect(screen.getByText("No results available")).toBeInTheDocument();
+    expect(screen.queryByTestId("RAV")).not.toBeInTheDocument();
 
     await assertPopulationTabs();
 
@@ -414,6 +437,9 @@ describe("CalculationResults with new tabbed highlighting layout on", () => {
   });
 
   test("render highlighting view with coverage results for 2 groups", async () => {
+    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
+      QICoreIncludeRAVValues: true,
+    }));
     const mainCqlLibraryName = "OncologyMeasureTest";
     renderCoverageComponent(calculationResults, null, mainCqlLibraryName);
     await assertPopulationTabs();
@@ -456,6 +482,14 @@ describe("CalculationResults with new tabbed highlighting layout on", () => {
     // Check for SDE result value
     const result2 = await screen.findByTestId("results-section");
     expect(result2).toHaveTextContent("true");
+
+    const rav = await screen.findByTestId("rav-tab");
+    expect(rav).toBeInTheDocument();
+    userEvent.click(rav);
+
+    // Check for RAV result value
+    const result3 = await screen.findByTestId("results-section");
+    expect(result3).toHaveTextContent("true");
 
     // select population criteria 2
     const criteriaOptions = await getCriteriaOptions();
