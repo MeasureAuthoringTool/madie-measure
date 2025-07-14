@@ -374,7 +374,15 @@ export default function MeasureList(props: {
       header: "CMS ID",
       cell: (info) => (
         <TruncateText
-          text={info.row.original.actions?.measureSet?.cmsId?.toString() || ""}
+          text={(() => {
+            const cmsId =
+              info.row.original.actions?.measureSet?.cmsId?.toString();
+            const model = info.row.original.actions?.model;
+
+            if (!cmsId) return "";
+
+            return model?.startsWith("QI-Core") ? `${cmsId}FHIR` : cmsId;
+          })()}
           maxLength={60}
           dataTestId={`measure-cmsId-${info.row.original.id}`}
         />
