@@ -32,7 +32,7 @@ export function useTestCasePolling({
           measureId,
           validateTest
         );
-        const status = updated.testCaseValidationStatus;
+        const status = updated.validationStatus;
 
         if (!["Pending", "Validating"].includes(status)) {
           onUpdate(updated);

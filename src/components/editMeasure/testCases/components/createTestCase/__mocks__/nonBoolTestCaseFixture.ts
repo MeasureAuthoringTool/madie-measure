@@ -1,7 +1,7 @@
 import {
   PopulationType,
   TestCase,
-  TestCaseValidationStatus,
+  ValidationStatus,
 } from "@madie/madie-models";
 
 export const nonBoolTestCaseFixture: TestCase = {
@@ -35,7 +35,7 @@ export const nonBoolTestCaseFixture: TestCase = {
       ],
     },
   },
-  testCaseValidationStatus: TestCaseValidationStatus.VALID,
+  validationStatus: ValidationStatus.VALID,
   groupPopulations: [
     {
       groupId: "6329ce9d1368254f5c078c11",

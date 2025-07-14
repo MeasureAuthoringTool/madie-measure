@@ -8,9 +8,9 @@ import * as _ from "lodash";
 import { SortingState } from "@tanstack/react-table";
 
 export const customSort = (a: string, b: string) => {
-  if (a === undefined || a === "") {
+  if (a === null || a === undefined || a === "") {
     return 1;
-  } else if (b === undefined || b === "") {
+  } else if (b === null || b === undefined || b === "") {
     return -1;
   }
   if (typeof a === "number" && typeof b === "number") {

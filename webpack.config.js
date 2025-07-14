@@ -18,14 +18,20 @@ module.exports = (webpackConfigEnv, argv) => {
   try {
     if (protocol === "https") {
       https = {
-        key: fs.readFileSync(path.resolve(__dirname, "localhost.key"), "utf-8"),
-        cert: fs.readFileSync(
-          path.resolve(__dirname, "localhost.crt"),
-          "utf-8"
-        ),
+        type: "https",
+        options: {
+          key: fs.readFileSync(
+            path.resolve(__dirname, "localhost.key"),
+            "utf-8"
+          ),
+          cert: fs.readFileSync(
+            path.resolve(__dirname, "localhost.crt"),
+            "utf-8"
+          ),
+        },
       };
     } else {
-      https = false;
+      https = { type: "http" };
     }
   } catch {
     console.warn(
@@ -91,7 +97,7 @@ module.exports = (webpackConfigEnv, argv) => {
       ],
     },
     devServer: {
-      https,
+      server: https,
       static: [
         {
           directory: path.join(__dirname, "local-dev-env"),
