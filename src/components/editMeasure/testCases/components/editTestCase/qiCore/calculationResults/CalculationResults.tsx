@@ -8,6 +8,7 @@ import {
   PopulationType,
   SupplementalData,
   Group,
+  RiskAdjustment,
 } from "@madie/madie-models";
 import { useFeatureFlags } from "@madie/madie-util";
 import { Relevance } from "fqm-execution";
@@ -27,7 +28,9 @@ type CalculationResultType = {
   cqlDefinitionCallstack?: CqlDefinitionCallstack;
   mainCqlLibraryName: string;
   includeSDE: boolean;
+  includeRAV: boolean;
   supplementalData: SupplementalData[];
+  riskAdjustments: RiskAdjustment[];
   groups: Group[];
 };
 
@@ -121,7 +124,9 @@ const CalculationResults = ({
   cqlDefinitionCallstack = {},
   mainCqlLibraryName,
   includeSDE,
+  includeRAV,
   supplementalData,
+  riskAdjustments,
   groups,
 }: CalculationResultType) => {
   // template for group name coming from execution engine
@@ -173,7 +178,9 @@ const CalculationResults = ({
           cqlDefinitionCallstack={cqlDefinitionCallstack}
           mainCqlLibraryName={mainCqlLibraryName}
           includeSDE={includeSDE}
+          includeRAV={includeRAV}
           supplementalData={supplementalData}
+          riskAdjustments={riskAdjustments}
           groups={groups}
         />
       )}

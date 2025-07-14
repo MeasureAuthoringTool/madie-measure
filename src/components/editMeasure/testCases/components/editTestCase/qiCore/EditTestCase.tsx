@@ -1114,7 +1114,9 @@ const EditTestCase = (props: EditTestCaseProps) => {
                         groupPopulations={groupPopulations}
                         cqlDefinitionCallstack={callstackMap}
                         includeSDE={measure?.testCaseConfiguration?.sdeIncluded}
+                        includeRAV={measure?.testCaseConfiguration?.ravIncluded}
                         supplementalData={measure?.supplementalData}
+                        riskAdjustments={measure?.riskAdjustments}
                         groups={measure?.groups}
                       />
                     )}
