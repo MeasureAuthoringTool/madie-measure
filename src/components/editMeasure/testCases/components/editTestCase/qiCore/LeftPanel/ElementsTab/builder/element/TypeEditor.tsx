@@ -529,10 +529,40 @@ const TypeEditor = ({
         {childDefs?.map((childDef) => {
           // if it's not a component dataType, we should render a header since it will have it's own property paths
           if (_.endsWith(childDef.id, "[x]") && childDef?.type?.length > 1) {
+            const excludedTypes = [
+              "base64Binary",
+              "markdown",
+              "Expression",
+              "ParameterDefinition",
+              "Annotation",
+              "Attachment",
+              "Contributor",
+              "SampledData",
+              "HumanName",
+              "RelatedArtifact",
+              "TriggerDefinition",
+              "UsageContext",
+              "Meta",
+              "Address",
+              "ContactPoint",
+              "ContactDetail",
+              "DataRequirement",
+            ];
+
+            const filteredChildDef = {
+              ...childDef,
+              type: childDef.type.filter(
+                (typeItem) =>
+                  !excludedTypes.some(
+                    (excluded) =>
+                      typeItem.code.toLowerCase() === excluded.toLowerCase()
+                  )
+              ),
+            };
             //Let's render a select that allows us to select the type of childDef we want to render.
             return (
               <ChoiceType
-                childDef={childDef}
+                childDef={filteredChildDef}
                 resource={resource}
                 structureDefinition={structureDefinition}
                 parentStructureDefinition={parentStructureDefinition}

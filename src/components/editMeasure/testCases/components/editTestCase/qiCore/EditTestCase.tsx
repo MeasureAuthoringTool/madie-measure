@@ -1084,7 +1084,9 @@ const EditTestCase = (props: EditTestCaseProps) => {
                         groupPopulations={groupPopulations}
                         cqlDefinitionCallstack={callstackMap}
                         includeSDE={measure?.testCaseConfiguration?.sdeIncluded}
+                        includeRAV={measure?.testCaseConfiguration?.ravIncluded}
                         supplementalData={measure?.supplementalData}
+                        riskAdjustments={measure?.riskAdjustments}
                         groups={measure?.groups}
                       />
                     )}
@@ -1226,17 +1228,6 @@ const EditTestCase = (props: EditTestCaseProps) => {
                       </div>
 
                       <div tw="mt-6">
-                        <label
-                          htmlFor="test-case-series"
-                          tw="text-gray-980"
-                          style={{
-                            fontFamily: "Rubik",
-                            fontSize: "14px",
-                            textTransform: "capitalize",
-                          }}
-                        >
-                          Group
-                        </label>
                         <TestCaseSeries
                           disabled={!canEdit}
                           value={formik.values.series}
