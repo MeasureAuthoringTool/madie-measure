@@ -95,14 +95,6 @@ const DetailsSection = (props: DetailsSectionProps) => {
             maxLength={250}
           />
           <div>
-            <InputLabel
-              htmlFor={"test-case-series"}
-              style={{ marginBottom: 8, height: 16 }}
-              sx={InputLabelStyle}
-              disabled={!canEdit}
-            >
-              Groups
-            </InputLabel>
             <TestCaseSeries
               disabled={!canEdit}
               value={formik?.values?.series || ""} // this additional check is needed since formik is blank and undefined breaks update
