@@ -8,11 +8,7 @@ import {
 } from "@madie/madie-util";
 import { TestCase, MeasureErrorType } from "@madie/madie-models";
 import "../qiCore/EditTestCase.scss";
-import {
-  Button,
-  Toast,
-  MadieDiscardDialog,
-} from "@madie/madie-design-system";
+import { Button, Toast, MadieDiscardDialog } from "@madie/madie-design-system";
 import qdmCalculationService from "../../../api/QdmCalculationService";
 import { Allotment } from "allotment";
 import RightPanel from "./RightPanel/RightPanel";

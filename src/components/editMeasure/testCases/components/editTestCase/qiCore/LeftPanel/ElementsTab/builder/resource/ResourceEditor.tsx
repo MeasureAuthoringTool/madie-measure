@@ -27,11 +27,7 @@ import {
   stripAllIndexes,
 } from "../../../../../../../api/fhirDefinitionServiceUtilities";
 import { useFormikContext } from "formik";
-import {
-  MadieDiscardDialog,
-  Tab,
-  Tabs,
-} from "@madie/madie-design-system";
+import { MadieDiscardDialog, Tab, Tabs } from "@madie/madie-design-system";
 import AddElementDialog from "./AddElementDialog";
 import useFhirDefinitionsServiceApi from "../../../../../../../api/useFhirDefinitionsService";
 import tw from "twin.macro";

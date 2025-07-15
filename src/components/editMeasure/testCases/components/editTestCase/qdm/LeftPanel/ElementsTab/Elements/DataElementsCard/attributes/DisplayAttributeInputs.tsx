@@ -1,10 +1,6 @@
 import React, { useState } from "react";
 import { QDMDate, CQL, DataElement } from "cqm-models";
-import {
-  DateField,
-  TimeField,
-  Button,
-} from "@madie/madie-design-system";
+import { DateField, TimeField, Button } from "@madie/madie-design-system";
 import IntegerInput from "../../../../../../../common/IntegerInput/IntegerInput";
 import "./DisplayAttributeInputs.scss";
 import RatioInput from "../../../../../../../common/ratioInput/RatioInput";

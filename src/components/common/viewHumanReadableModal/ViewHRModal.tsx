@@ -1,8 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import {
-  MadieDialog,
-  MadieSpinner,
-} from "@madie/madie-design-system";
+import { MadieDialog, MadieSpinner } from "@madie/madie-design-system";
 import useMeasureServiceApi from "../../../api/useMeasureServiceApi";
 import { DialogContent, Typography, Backdrop } from "@mui/material";
 

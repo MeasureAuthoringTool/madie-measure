@@ -2,7 +2,7 @@ import React from "react";
 import "styled-components/macro";
 import { isEmpty } from "lodash";
 import { DetailedPopulationGroupResult } from "fqm-execution/build/types/Calculator";
-import { MadieAlert } from "@madie/madie-design-system"
+import { MadieAlert } from "@madie/madie-design-system";
 import {
   GroupPopulation,
   PopulationType,

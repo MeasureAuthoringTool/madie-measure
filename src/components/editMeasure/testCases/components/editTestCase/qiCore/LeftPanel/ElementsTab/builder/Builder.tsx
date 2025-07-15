@@ -20,11 +20,7 @@ import useFhirDefinitionsServiceApi from "../../../../../../api/useFhirDefinitio
 import { ResourceIdentifier } from "../../../../../../api/models/ResourceIdentifier";
 import useFhirElmTranslationServiceApi from "../../../../../../../../../api/useFhirElmTranslationServiceApi";
 import useExecutionContext from "../../../../../routes/qiCore/useExecutionContext";
-import {
-  Tabs,
-  Tab,
-  MadieDiscardDialog,
-} from "@madie/madie-design-system";
+import { Tabs, Tab, MadieDiscardDialog } from "@madie/madie-design-system";
 import { useFormikContext } from "formik";
 import "./Builder.scss";
 

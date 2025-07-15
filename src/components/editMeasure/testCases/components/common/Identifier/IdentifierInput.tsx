@@ -1,5 +1,5 @@
 import React from "react";
-import { TextField } from "@madie/madie-design-system"
+import { TextField } from "@madie/madie-design-system";
 import "twin.macro";
 import "styled-components/macro";
 

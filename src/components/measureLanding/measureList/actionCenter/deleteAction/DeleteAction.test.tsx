@@ -1,3 +1,4 @@
+import { jest } from "@jest/globals";
 import * as React from "react";
 import { render, screen } from "@testing-library/react";
 import DeleteAction, { DEL_MEASURE, NOTHING_SELECTED } from "./DeleteAction";

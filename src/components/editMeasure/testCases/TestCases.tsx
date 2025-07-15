@@ -3,8 +3,12 @@ import { Measure } from "@madie/madie-models";
 import { measureStore } from "@madie/madie-util";
 
 // Stable lazy imports
-const QdmTestCaseRoutes = lazy(() => import("./components/routes/qdm/TestCaseRoutes"));
-const QiCoreTestCaseRoutes = lazy(() => import("./components/routes/qiCore/TestCaseRoutes"));
+const QdmTestCaseRoutes = lazy(
+  () => import("./components/routes/qdm/TestCaseRoutes")
+);
+const QiCoreTestCaseRoutes = lazy(
+  () => import("./components/routes/qiCore/TestCaseRoutes")
+);
 const EmptyRoutes = lazy(() => import("./components/routes/EmptyRoutes"));
 
 const TestCases = () => {

@@ -10,9 +10,12 @@ const lifecycles = singleSpaReact({
   rootComponent: Root,
   renderType: "createRoot",
   errorBoundary(err, info, props) {
-    console.log('madie-measure-error', err)
-    // console.log('madie-measure-info', info);
-    return <div>The app has fallen, and cannot get up. Please contact the help desk</div>;
+    console.log("madie-measure-error", err);
+    return (
+      <div>
+        The app has fallen, and cannot get up. Please contact the help desk
+      </div>
+    );
   },
 });
 

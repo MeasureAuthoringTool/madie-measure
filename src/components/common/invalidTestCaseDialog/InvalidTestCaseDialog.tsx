@@ -1,9 +1,6 @@
 import React from "react";
 import { Backdrop } from "@mui/material";
-import {
-  MadieDialog,
-  MadieSpinner,
-} from "@madie/madie-design-system";
+import { MadieDialog, MadieSpinner } from "@madie/madie-design-system";
 import ErrorIcon from "@mui/icons-material/Error";
 
 interface InvalidTestCaseDialogProps {

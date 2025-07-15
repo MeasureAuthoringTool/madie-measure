@@ -1,10 +1,5 @@
 import React, { useState } from "react";
-import {
-  Button,
-  Tabs,
-  Tab,
-  Popover,
-} from "@madie/madie-design-system";
+import { Button, Tabs, Tab, Popover } from "@madie/madie-design-system";
 import AddIcon from "@mui/icons-material/Add";
 import FileUploadIcon from "@mui/icons-material/FileUpload";
 import * as _ from "lodash";

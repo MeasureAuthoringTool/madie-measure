@@ -3,21 +3,21 @@ import { IconButton } from "@mui/material";
 import Tooltip from "@mui/material/Tooltip";
 import { Measure, Model } from "@madie/madie-models";
 import { useOktaTokens } from "@madie/madie-util";
+import {
+  ASSOCIATE_CMS_ID,
+  MUST_SELECT_ONE_QDM_AND_ONE_QI_CORE_MEASURE,
+  MUST_BE_DRAFT,
+  MUST_BE_OWNER,
+  MUST_HAVE_CMS_ID,
+  MUST_NOT_HAVE_CMS_ID,
+  SELECT_TWO_MEASURES,
+} from "./constants";
 import IconLink from "../../../../../icons/IconLink";
 
 interface PropTypes {
   measures: Measure[];
   onClick: () => void;
 }
-
-export const MUST_BE_OWNER = "Must own both selected measures";
-export const MUST_SELECT_ONE_QDM_AND_ONE_QI_CORE_MEASURE =
-  "Must select one QDM and one QI-Core measure";
-export const MUST_BE_DRAFT = "QI-Core measure must be in a draft status";
-export const MUST_HAVE_CMS_ID = "QDM measure must contain a CMS ID";
-export const MUST_NOT_HAVE_CMS_ID = "QI-Core measure must NOT contain a CMS ID";
-export const ASSOCIATE_CMS_ID = "Associate CMS ID";
-export const SELECT_TWO_MEASURES = "Select two measures";
 
 export default function AssociateCmsIdAction(props: PropTypes) {
   const { measures } = props;
@@ -27,7 +27,6 @@ export default function AssociateCmsIdAction(props: PropTypes) {
 
   const { getUserName } = useOktaTokens();
   const userName = getUserName();
-
   const validateAssociateCmsIdActionState = useCallback(() => {
     if (measures?.length === 2) {
       const qdmMeasure = measures.find(

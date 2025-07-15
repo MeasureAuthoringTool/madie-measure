@@ -1,9 +1,5 @@
 import React, { useState } from "react";
-import {
-  MadieDiscardDialog,
-  Tabs,
-  Tab,
-} from "@madie/madie-design-system";
+import { MadieDiscardDialog, Tabs, Tab } from "@madie/madie-design-system";
 import "./CreateTestCaseNavTabs.scss";
 import "twin.macro";
 import "styled-components/macro";

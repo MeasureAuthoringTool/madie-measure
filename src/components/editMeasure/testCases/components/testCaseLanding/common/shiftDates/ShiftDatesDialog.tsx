@@ -1,9 +1,6 @@
 import React from "react";
 import { TestCase } from "@madie/madie-models";
-import {
-  MadieDialog,
-  NumberInput,
-} from "@madie/madie-design-system";
+import { MadieDialog, NumberInput } from "@madie/madie-design-system";
 import { useFormik } from "formik";
 import * as _ from "lodash";
 import "./ShiftDatesDialog.scss";

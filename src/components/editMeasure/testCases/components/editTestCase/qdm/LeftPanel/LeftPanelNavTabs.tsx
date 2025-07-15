@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Tabs, Tab } from "@madie/madie-design-system"
+import { Tabs, Tab } from "@madie/madie-design-system";
 import { useFeatureFlags } from "@madie/madie-util";
 
 export interface NavTabProps {

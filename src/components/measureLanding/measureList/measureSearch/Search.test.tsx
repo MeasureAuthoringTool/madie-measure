@@ -1,6 +1,8 @@
 import * as React from "react";
+import { jest } from "@jest/globals";
 import { render, screen, waitFor } from "@testing-library/react";
 import Search from "./Search";
+
 import userEvent from "@testing-library/user-event";
 import { within } from "@testing-library/dom";
 
@@ -63,7 +65,7 @@ describe("Search Component", () => {
 
     const input = screen.getByTestId("measure-search-input");
 
-    userEvent.type(input, "Diabetes");
+    await userEvent.type(input, "Diabetes");
     expect(input).toHaveValue("Diabetes");
 
     const searchIcon = await screen.findByTestId("search-icon");
@@ -89,7 +91,7 @@ describe("Search Component", () => {
     const clearButton = screen.getByRole("button", { name: /Clear-Search/i });
     expect(clearButton).toBeVisible();
 
-    userEvent.click(clearButton);
+    await userEvent.click(clearButton);
 
     expect(mockSetSearchCriteria).toHaveBeenCalledWith({
       searchField: "",

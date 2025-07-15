@@ -11,6 +11,7 @@
     "module": "ESNext",
     "moduleResolution": "node",
     "sourceMap": true,
+    "noImplicitAny": false,
     "skipLibCheck": true
   },
   "files": ["src/madie-madie-measure.tsx"],

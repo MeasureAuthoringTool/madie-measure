@@ -5,11 +5,7 @@ import "styled-components/macro";
 import { CircularProgress, Divider } from "@mui/material";
 import { readImportFile } from "../../../../util/FhirImportHelper";
 import { useDropzone } from "react-dropzone";
-import {
-  Button,
-  Toast,
-  MadieDialog,
-} from "@madie/madie-design-system";
+import { Button, Toast, MadieDialog } from "@madie/madie-design-system";
 import "./TestCaseImportDialog.css";
 import * as _ from "lodash";
 import useTestCaseServiceApi from "../../../../api/useTestCaseServiceApi";

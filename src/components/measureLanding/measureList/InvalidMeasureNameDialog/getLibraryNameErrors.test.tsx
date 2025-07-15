@@ -1,3 +1,4 @@
+import { jest } from "@jest/globals";
 import getLibraryNameErrors, { ERROR_MAP } from "./getLibraryNameErrors";
 import "@testing-library/jest-dom";
 import { describe, expect, test } from "@jest/globals";

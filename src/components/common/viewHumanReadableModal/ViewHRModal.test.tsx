@@ -1,3 +1,4 @@
+import { jest } from "@jest/globals";
 import { act, render, screen } from "@testing-library/react";
 import * as React from "react";
 import clearAllMocks = jest.clearAllMocks;

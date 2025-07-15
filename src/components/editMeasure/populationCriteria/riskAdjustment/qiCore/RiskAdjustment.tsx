@@ -12,10 +12,7 @@ import {
 import { CqlAntlr } from "@madie/cql-antlr-parser/dist/src";
 import MetaDataWrapper from "../../../details/MetaDataWrapper";
 import MultipleSelectDropDown from "../../MultipleSelectDropDown";
-import {
-  MadieDiscardDialog,
-  Toast,
-} from "@madie/madie-design-system";
+import { MadieDiscardDialog, Toast } from "@madie/madie-design-system";
 import {
   Measure,
   MeasureReportType,

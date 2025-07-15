@@ -8,11 +8,7 @@ import timezone from "dayjs/plugin/timezone";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import advancedFormat from "dayjs/plugin/advancedFormat";
-import {
-  Select,
-  TimeField,
-  InputLabel,
-} from "@madie/madie-design-system";
+import { Select, TimeField, InputLabel } from "@madie/madie-design-system";
 import DateField from "./DateField";
 
 dayjs.extend(utc);

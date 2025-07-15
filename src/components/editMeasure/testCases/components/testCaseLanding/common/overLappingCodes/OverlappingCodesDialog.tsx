@@ -13,11 +13,7 @@ import {
   ColumnDef,
   flexRender,
 } from "@tanstack/react-table";
-import {
-  MadieDialog,
-  Pagination,
-  Toast,
-} from "@madie/madie-design-system";
+import { MadieDialog, Pagination, Toast } from "@madie/madie-design-system";
 import tw from "twin.macro";
 import "styled-components/macro";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";

@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { TypeComponentProps } from "./TypeComponentProps";
 import Box from "@mui/system/Box";
 import { MenuItem } from "@mui/material";
-import { Select } from "@madie/madie-design-system"
+import { Select } from "@madie/madie-design-system";
 import * as _ from "lodash";
 import useFhirDefinitionsServiceApi from "../../../../../../../../api/useFhirDefinitionsService";
 import { getValueSetUrl } from "../../../../../../../../api/fhirDefinitionServiceUtilities";

@@ -1,11 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import ElementSection from "../../../../common/ElementSection";
 import { useFormikContext } from "formik";
-import {
-  TextField,
-  InputLabel,
-  TextArea,
-} from "@madie/madie-design-system"
+import { TextField, InputLabel, TextArea } from "@madie/madie-design-system";
 import TestCaseSeries from "../../../../createTestCase/TestCaseSeries";
 import { useParams } from "react-router-dom";
 import useTestCaseServiceApi from "../../../../../api/useTestCaseServiceApi";

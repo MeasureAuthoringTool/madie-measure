@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { jest } from "@jest/globals";
 // These functions are listed so that they can be referenced in jest files since jest cannot see browser.
 // some functions are copy pasted from the source since their side effects are required for tests.
 export function useKeyPress(targetKey) {
@@ -19,7 +20,6 @@ export function useKeyPress(targetKey) {
     }
   };
 
-
   // Add event listeners
   useEffect(() => {
     window.addEventListener("keydown", downHandler);
@@ -35,15 +35,13 @@ export function useKeyPress(targetKey) {
   return keyPressed;
 }
 
-export const useOktaTokens = (storageKey = "okta-token-storage") => {
-  return {
-    getAccessToken: () => "test-token",
-    getAccessTokenObj: () => {},
-    getUserName: () => "test-fake-user@email.com", //#nosec
-    getIdToken: () => "test-id-token",
-    getIdTokenObj: () => {},
-  };
-};
+export const useOktaTokens = jest.fn(() => ({
+  getAccessTokenObj: jest.fn(() => {}),
+  getAccessToken: jest.fn(() => "test-token"),
+  getUserName: jest.fn(() => "test-fake-user@email.com"),
+  getIdToken: jest.fn(() => "test-id-token"),
+  getIdTokenObj: jest.fn(() => {}),
+}));
 
 export function useOnClickOutside(ref, handler) {
   useEffect(() => {

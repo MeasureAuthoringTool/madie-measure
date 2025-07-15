@@ -1,10 +1,7 @@
 import React, { useEffect, useState } from "react";
 import _ from "lodash";
 import { useDebouncedCallback } from "use-debounce";
-import {
-  TextArea,
-  RichTextEditor,
-} from "@madie/madie-design-system";
+import { TextArea, RichTextEditor } from "@madie/madie-design-system";
 import { useFeatureFlags } from "@madie/madie-util";
 
 type Props = {

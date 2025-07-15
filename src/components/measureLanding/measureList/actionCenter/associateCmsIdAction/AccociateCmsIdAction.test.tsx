@@ -1,6 +1,23 @@
+import { beforeAll, expect, jest } from "@jest/globals";
 import * as React from "react";
-import { render, screen } from "@testing-library/react";
-import AssociateCmsIdAction, {
+import { render, screen, waitFor } from "@testing-library/react";
+import { Measure, MeasureSet, Model } from "@madie/madie-models";
+import userEvent from "@testing-library/user-event";
+const mockUser = "test user";
+
+jest.unstable_mockModule("@madie/madie-util", () => ({
+  useOktaTokens: () => ({
+    getUserName: () => mockUser,
+  }),
+}));
+
+let AssociateCmsIdAction: any;
+beforeAll(async () => {
+  const module = await import("./AccociateCmsIdAction");
+  AssociateCmsIdAction = module.default;
+});
+
+import {
   ASSOCIATE_CMS_ID,
   MUST_SELECT_ONE_QDM_AND_ONE_QI_CORE_MEASURE,
   MUST_BE_DRAFT,
@@ -8,16 +25,7 @@ import AssociateCmsIdAction, {
   MUST_HAVE_CMS_ID,
   MUST_NOT_HAVE_CMS_ID,
   SELECT_TWO_MEASURES,
-} from "./AccociateCmsIdAction";
-import { Measure, MeasureSet, Model } from "@madie/madie-models";
-import userEvent from "@testing-library/user-event";
-
-const mockUser = "test user";
-jest.mock("@madie/madie-util", () => ({
-  useOktaTokens: () => ({
-    getUserName: () => mockUser,
-  }),
-}));
+} from "./constants";
 
 const mockMeasureSet = {
   cmsId: "124",
@@ -113,18 +121,19 @@ describe("AssociateCmsIdAction", () => {
 
   it("Should disable action btn if the QI-Core measure is not a draft", async () => {
     const measure1 = { ...qiCoreMeasure, measureMetaData: { draft: false } };
-
     render(
       <AssociateCmsIdAction
         measures={[measure1, qdmMeasure]}
         onClick={associateCmsId}
       />
     );
-    expect(screen.getByTestId("associate-cms-id-action-btn")).toBeDisabled();
-    expect(screen.getByTestId("associate-cms-id-tooltip")).toHaveAttribute(
-      "aria-label",
-      MUST_BE_DRAFT
-    );
+    await waitFor(() => {
+      expect(screen.getByTestId("associate-cms-id-action-btn")).toBeDisabled();
+      expect(screen.getByTestId("associate-cms-id-tooltip")).toHaveAttribute(
+        "aria-label",
+        MUST_BE_DRAFT
+      );
+    });
   });
 
   it("Should disable action btn if the QDM measure does not have a CMS id", async () => {
@@ -164,7 +173,7 @@ describe("AssociateCmsIdAction", () => {
     );
   });
 
-  it("Should enable action btn if one QDM measure and QI-Core is selected, QDM measure has CMS id, QICore measure has no CMS ID and is in draft state, and both measures are owned by user", () => {
+  it("Should enable action btn if one QDM measure and QI-Core is selected, QDM measure has CMS id, QICore measure has no CMS ID and is in draft state, and both measures are owned by user", async () => {
     render(
       <AssociateCmsIdAction
         measures={[qdmMeasure, qiCoreMeasure]}
@@ -176,7 +185,9 @@ describe("AssociateCmsIdAction", () => {
       "aria-label",
       ASSOCIATE_CMS_ID
     );
-    userEvent.click(screen.getByTestId("associate-cms-id-action-btn"));
-    expect(associateCmsId).toHaveBeenCalled();
+    await userEvent.click(screen.getByTestId("associate-cms-id-action-btn"));
+    await waitFor(() => {
+      expect(associateCmsId).toHaveBeenCalled();
+    });
   });
 });

@@ -1,11 +1,7 @@
 import React, { useCallback, useRef, useState } from "react";
 import "twin.macro";
 import "styled-components/macro";
-import {
-  Button,
-  Toast,
-  MadieDialog,
-} from "@madie/madie-design-system";
+import { Button, Toast, MadieDialog } from "@madie/madie-design-system";
 import FolderZipOutlinedIcon from "@mui/icons-material/FolderZipOutlined";
 import { useDropzone } from "react-dropzone";
 import "./TestCaseImportDialog.css";

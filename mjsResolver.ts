@@ -1,18 +1,17 @@
-import type { SyncResolver } from 'jest-resolve'
+import type { SyncResolver } from "jest-resolve";
 
 const mjsResolver: SyncResolver = (path, options) => {
-  const mjsExtRegex = /\.mjs$/i
-  const resolver = options.defaultResolver
+  const mjsExtRegex = /\.mjs$/i;
+  const resolver = options.defaultResolver;
   if (mjsExtRegex.test(path)) {
     try {
-      return resolver(path.replace(mjsExtRegex, '.mts'), options)
+      return resolver(path.replace(mjsExtRegex, ".mts"), options);
     } catch {
       // use default resolver
     }
   }
 
-  return resolver(path, options)
-}
+  return resolver(path, options);
+};
 
-export default mjsResolver
-
+export default mjsResolver;

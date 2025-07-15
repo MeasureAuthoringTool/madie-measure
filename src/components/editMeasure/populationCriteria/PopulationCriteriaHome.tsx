@@ -10,16 +10,30 @@ import QDMReporting from "./QDMReporting/QDMReporting";
 import MeasureGroupAlerts from "./groups/MeasureGroupAlerts";
 
 // Stable lazy imports. Without this child component infinitely renders.
-const QdmSupplementalData = lazy(() => import("./supplementalData/qdm/SupplementalData"));
-const QiCoreSupplementalData = lazy(() => import("./supplementalData/qiCore/SupplementalData"));
-const EmptySupplementalData = lazy(() => import("./supplementalData/EmptySupplementalData"));
+const QdmSupplementalData = lazy(
+  () => import("./supplementalData/qdm/SupplementalData")
+);
+const QiCoreSupplementalData = lazy(
+  () => import("./supplementalData/qiCore/SupplementalData")
+);
+const EmptySupplementalData = lazy(
+  () => import("./supplementalData/EmptySupplementalData")
+);
 
-const QdmRiskAdjustment = lazy(() => import("./riskAdjustment/qdm/RiskAdjustment"));
-const QiCoreRiskAdjustment = lazy(() => import("./riskAdjustment/qiCore/RiskAdjustment"));
-const EmptyRiskAdjustment = lazy(() => import("./riskAdjustment/EmptyRiskAdjustment"));
+const QdmRiskAdjustment = lazy(
+  () => import("./riskAdjustment/qdm/RiskAdjustment")
+);
+const QiCoreRiskAdjustment = lazy(
+  () => import("./riskAdjustment/qiCore/RiskAdjustment")
+);
+const EmptyRiskAdjustment = lazy(
+  () => import("./riskAdjustment/EmptyRiskAdjustment")
+);
 
 const QdmMeasureGroups = lazy(() => import("./groups/QDM/QDMMeasureGroups"));
-const QicoreMeasureGroups = lazy(() => import("./groups/QICore/QICoreMeasureGroups"));
+const QicoreMeasureGroups = lazy(
+  () => import("./groups/QICore/QICoreMeasureGroups")
+);
 
 export const COMPLETE = "complete";
 export const INCOMPLETE = "incomplete";
@@ -111,9 +125,23 @@ export function PopulationCriteriaHome() {
     measure?.baseConfigurationTypes?.length > 0;
 
   const checkReporting = () => {
-    const { improvementNotation, improvementNotationDescription, rateAggregation } = measure || {};
-    if (improvementNotation && improvementNotationDescription && rateAggregation) return COMPLETE;
-    if (!improvementNotation && !improvementNotationDescription && !rateAggregation) return NONE;
+    const {
+      improvementNotation,
+      improvementNotationDescription,
+      rateAggregation,
+    } = measure || {};
+    if (
+      improvementNotation &&
+      improvementNotationDescription &&
+      rateAggregation
+    )
+      return COMPLETE;
+    if (
+      !improvementNotation &&
+      !improvementNotationDescription &&
+      !rateAggregation
+    )
+      return NONE;
     return INCOMPLETE;
   };
 

@@ -15,7 +15,10 @@ module.exports = (webpackConfigEnv, argv) => {
     if (protocol === "https") {
       https = {
         key: fs.readFileSync(path.resolve(__dirname, "localhost.key"), "utf-8"),
-        cert: fs.readFileSync(path.resolve(__dirname, "localhost.crt"), "utf-8"),
+        cert: fs.readFileSync(
+          path.resolve(__dirname, "localhost.crt"),
+          "utf-8"
+        ),
       };
     } else {
       https = false;
@@ -98,8 +101,8 @@ module.exports = (webpackConfigEnv, argv) => {
       "react-dom": "react-dom",
       "react-dom/client": "react-dom/client",
 
-      'react/jsx-runtime': 'react/jsx-runtime',
-      'react/jsx-dev-runtime': 'react/jsx-dev-runtime',
+      "react/jsx-runtime": "react/jsx-runtime",
+      "react/jsx-dev-runtime": "react/jsx-dev-runtime",
 
       "@madie/madie-util": "@madie/madie-util",
       "@madie/madie-editor": "@madie/madie-editor",
@@ -146,7 +149,7 @@ module.exports = (webpackConfigEnv, argv) => {
         },
       ],
     },
-     plugins: [
+    plugins: [
       new HtmlWebpackPlugin({
         template: path.join(
           __dirname,
