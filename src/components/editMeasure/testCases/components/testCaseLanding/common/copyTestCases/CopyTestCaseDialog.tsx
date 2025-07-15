@@ -215,6 +215,7 @@ const CopyTestCaseDialog = ({ open, onClose, measure, selectedTestCases }) => {
       const selectedTestCaseIds = selectedTestCases.map((tc) => tc.id);
       const filteredTestCases = allTestCases.filter(
         (tc) =>
+          measure?.model === "QI-Core v6.0.0" &&
           selectedTestCaseIds.includes(tc.id) &&
           (tc.validationStatus === ValidationStatus.PENDING ||
             tc.validationStatus === ValidationStatus.VALIDATING)

@@ -523,11 +523,12 @@ describe("Copy Test Case Dialog Component", () => {
         getTestCasesByMeasureId: getAllTestCasesFn,
       } as unknown as TestCaseServiceApi;
     });
+    const currenMeasure = { ...mockCurrentMeasure, model: Model.QICORE_6_0_0 };
     render(
       <CopyTestCaseDialog
         open={true}
         onClose={closeFn}
-        measure={mockCurrentMeasure}
+        measure={currenMeasure}
         selectedTestCases={testCases}
       />
     );
