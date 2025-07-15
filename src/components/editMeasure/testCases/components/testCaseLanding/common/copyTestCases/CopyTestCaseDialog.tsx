@@ -34,7 +34,7 @@ import {
   CollapseIcon,
 } from "../../../../../../../icons/MeasureListTableRightArrowIcons";
 import { customSort } from "../Hooks/UseTestCases";
-import { Measure, TestCase } from "@madie/madie-models";
+import { Measure, TestCase, ValidationStatus } from "@madie/madie-models";
 import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
@@ -191,6 +191,38 @@ const CopyTestCaseDialog = ({ open, onClose, measure, selectedTestCases }) => {
     open,
   ]);
 
+  const [allTestCases, setAllTestCases] = useState<TestCase[]>([]);
+  const retrieveTestCases = useCallback(() => {
+    testCaseServiceApi.current
+      .getTestCasesByMeasureId(measure?.id)
+      .then((testCaseList: TestCase[]) => {
+        setAllTestCases(testCaseList);
+      })
+      .catch((err) => {
+        console.error("Error retrieving test cases:", err);
+      });
+  }, [measure?.id]);
+
+  useEffect(() => {
+    if (measure?.id) {
+      retrieveTestCases();
+    }
+  }, [measure?.id, retrieveTestCases]);
+
+  // This effect is used to determine if the test cases can be copied based on their validation status
+  useEffect(() => {
+    if (allTestCases?.length > 0 && selectedTestCases?.length > 0) {
+      const selectedTestCaseIds = selectedTestCases.map((tc) => tc.id);
+      const filteredTestCases = allTestCases.filter(
+        (tc) =>
+          selectedTestCaseIds.includes(tc.id) &&
+          (tc.validationStatus === ValidationStatus.PENDING ||
+            tc.validationStatus === ValidationStatus.VALIDATING)
+      );
+      setCannotCopy(filteredTestCases?.length > 0 ? true : false);
+    }
+  }, [selectedTestCases, measure?.id, allTestCases]);
+
   useEffect(() => {
     fetchMeasures();
     return () => {
@@ -199,6 +231,23 @@ const CopyTestCaseDialog = ({ open, onClose, measure, selectedTestCases }) => {
       }
     };
   }, [fetchMeasures, measure?.id]);
+
+  const [cannotCopy, setCannotCopy] = useState<boolean>(false);
+  useEffect(() => {
+    let timer;
+    if (open && cannotCopy) {
+      // Set a timeout to close the modal after the specified delay
+      timer = setTimeout(() => {
+        onClose();
+      }, 3000);
+    }
+
+    // Cleanup function to clear the timeout if the modal is closed manually
+    // or the component unmounts before the timer expires
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [open, onClose, cannotCopy]); // Re-run effect when these props change
 
   const handleRowClick = async (actions) => {
     if (!isRowExpanded || selectedIdForExpansion !== actions?.measureSetId) {
@@ -460,7 +509,7 @@ const CopyTestCaseDialog = ({ open, onClose, measure, selectedTestCases }) => {
       }}
       maxWidth={"lg"}
     >
-      {!executing && (
+      {!executing && !cannotCopy && (
         <div id="measure-landing" data-testid="measure-landing">
           <div id="tc-search">
             <div>
@@ -711,6 +760,24 @@ const CopyTestCaseDialog = ({ open, onClose, measure, selectedTestCases }) => {
             <Typography color="inherit">Copying Test Cases...</Typography>
           </div>
         </>
+      )}
+      {cannotCopy && (
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            marginTop: "1rem",
+          }}
+          data-testid="copy-test-cases-cannot-copy-message"
+          aria-describedby="copy-test-cases-cannot-copy-message-description"
+        >
+          <Typography color="error">
+            Some of the selected test cases are pending validation. Test cases
+            cannot be copied at this time. Once validations are complete, please
+            try again.
+          </Typography>
+        </div>
       )}
     </MadieDialog>
   );

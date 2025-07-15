@@ -1,7 +1,13 @@
 import CopyTestCaseDialog from "./CopyTestCaseDialog";
 import { render, screen, waitFor, fireEvent } from "@testing-library/react";
 import * as React from "react";
-import { Measure, MeasureSet, Model, TestCase } from "@madie/madie-models";
+import {
+  Measure,
+  MeasureSet,
+  Model,
+  TestCase,
+  ValidationStatus,
+} from "@madie/madie-models";
 import * as _ from "lodash";
 import useMeasureServiceApi, {
   MeasureServiceApi,
@@ -29,7 +35,8 @@ const testCases = [
     series: "IPP_Pass",
     lastModifiedAt: "2024-09-10T09:56:14.382Z",
     validResource: true,
-  },
+    validationStatus: ValidationStatus.VALID,
+  } as unknown as TestCase,
   {
     id: "2",
     description: "Test IPP Fail when something is wrong",
@@ -37,6 +44,7 @@ const testCases = [
     series: "IPP_Fail",
     lastModifiedAt: "2024-09-10T09:57:14.382Z",
     validResource: true,
+    validationStatus: ValidationStatus.PENDING,
   },
   {
     id: "3",
@@ -45,6 +53,7 @@ const testCases = [
     series: "IPP_Fail",
     lastModifiedAt: "2024-09-10T09:58:14.382Z",
     validResource: false,
+    validationStatus: ValidationStatus.VALIDATING,
   },
 ] as TestCase[];
 
@@ -193,11 +202,18 @@ const useMeasureServiceMockResolvedWithNoMeasure = {
   searchMeasuresByCriteria: jest
     .fn()
     .mockResolvedValueOnce(mockMeasureSearchResponseWithNoMeasures),
+  getTestCasesByMeasureId: jest.fn().mockResolvedValue(testCases),
 } as unknown as MeasureServiceApi;
 
 jest.mock("../../../../api/useTestCaseServiceApi");
 const useTestCaseServiceMock =
   useTestCaseServiceApi as jest.Mock<TestCaseServiceApi>;
+
+const searchMeasuresByCriteriaFn = jest
+  .fn()
+  .mockResolvedValue(mockMeasureSearchResponse);
+const getAllTestCasesFn = jest.fn().mockResolvedValue(testCases);
+const closeFn = jest.fn().mockName("close");
 
 describe("Copy Test Case Dialog Component", () => {
   afterEach(() => {
@@ -211,6 +227,7 @@ describe("Copy Test Case Dialog Component", () => {
     useTestCaseServiceMock.mockImplementation(() => {
       return {
         copyTestCasesToMeasure: jest.fn().mockResolvedValueOnce(["1", "2"]),
+        getTestCasesByMeasureId: getAllTestCasesFn,
       } as unknown as TestCaseServiceApi;
     });
     (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
@@ -262,17 +279,23 @@ describe("Copy Test Case Dialog Component", () => {
   });
 
   it("Filter and Search, changes, fire, clear", async () => {
-    const testFn = jest.fn().mockResolvedValue(mockMeasureSearchResponse);
     (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
       EditTestsOnVersionedMeasures: false,
     }));
     const useMeasureServiceMockResolvedMultiple = {
-      searchMeasuresByCriteria: testFn,
+      searchMeasuresByCriteria: searchMeasuresByCriteriaFn,
     } as unknown as MeasureServiceApi;
 
     useMeasureServiceMock.mockImplementation(() => {
       return useMeasureServiceMockResolvedMultiple;
     });
+
+    useTestCaseServiceMock.mockImplementation(() => {
+      return {
+        getTestCasesByMeasureId: getAllTestCasesFn,
+      } as unknown as TestCaseServiceApi;
+    });
+
     const test = new AbortController();
     render(
       <CopyTestCaseDialog
@@ -283,7 +306,9 @@ describe("Copy Test Case Dialog Component", () => {
       />
     );
 
-    await waitFor(() => expect(testFn).toHaveBeenCalledTimes(1));
+    await waitFor(() =>
+      expect(searchMeasuresByCriteriaFn).toHaveBeenCalledTimes(1)
+    );
     const table = await findByTestId("measure-list-tbl");
     const tableHeaders = table.querySelectorAll("thead th");
     expect(tableHeaders[1]).toHaveTextContent("Measure Name");
@@ -317,8 +342,10 @@ describe("Copy Test Case Dialog Component", () => {
 
     userEvent.type(searchFieldInput, "test{enter}");
 
-    await waitFor(() => expect(testFn).toHaveBeenCalledTimes(2));
-    expect(testFn).toHaveBeenNthCalledWith(
+    await waitFor(() =>
+      expect(searchMeasuresByCriteriaFn).toHaveBeenCalledTimes(2)
+    );
+    expect(searchMeasuresByCriteriaFn).toHaveBeenNthCalledWith(
       2, // Second call
       true,
       5,
@@ -338,8 +365,10 @@ describe("Copy Test Case Dialog Component", () => {
     // Finally, check the second call for the correct values
     const clearIcon = getByTestId("ClearIcon");
     userEvent.click(clearIcon);
-    await waitFor(() => expect(testFn).toHaveBeenCalledTimes(3));
-    expect(testFn).toHaveBeenNthCalledWith(
+    await waitFor(() =>
+      expect(searchMeasuresByCriteriaFn).toHaveBeenCalledTimes(3)
+    );
+    expect(searchMeasuresByCriteriaFn).toHaveBeenNthCalledWith(
       3,
       true,
       5,
@@ -358,8 +387,10 @@ describe("Copy Test Case Dialog Component", () => {
     );
 
     userEvent.type(searchFieldInput, "test{enter}");
-    await waitFor(() => expect(testFn).toHaveBeenCalledTimes(4));
-    expect(testFn).toHaveBeenNthCalledWith(
+    await waitFor(() =>
+      expect(searchMeasuresByCriteriaFn).toHaveBeenCalledTimes(4)
+    );
+    expect(searchMeasuresByCriteriaFn).toHaveBeenNthCalledWith(
       4,
       true,
       5,
@@ -381,6 +412,11 @@ describe("Copy Test Case Dialog Component", () => {
   it("should display a text when user doesn't have any other measures from same model", async () => {
     useMeasureServiceMock.mockImplementation(() => {
       return useMeasureServiceMockResolvedWithNoMeasure;
+    });
+    useTestCaseServiceMock.mockImplementation(() => {
+      return {
+        getTestCasesByMeasureId: getAllTestCasesFn,
+      } as unknown as TestCaseServiceApi;
     });
     render(
       <CopyTestCaseDialog
@@ -408,10 +444,8 @@ describe("Copy Test Case Dialog Component", () => {
   });
 
   it("should display a spinner while copying", async () => {
-    const testFn = jest.fn().mockResolvedValue(mockMeasureSearchResponse);
-    const closeFn = jest.fn().mockName("close");
     const useMeasureServiceMockResolvedMultiple = {
-      searchMeasuresByCriteria: testFn,
+      searchMeasuresByCriteria: searchMeasuresByCriteriaFn,
     } as unknown as MeasureServiceApi;
 
     useMeasureServiceMock.mockImplementation(() => {
@@ -424,10 +458,11 @@ describe("Copy Test Case Dialog Component", () => {
           copiedTestCases: testCases,
           didClearExpectedValues: false,
         }),
+        getTestCasesByMeasureId: getAllTestCasesFn,
       } as unknown as TestCaseServiceApi;
     });
     const test = new AbortController();
-    await prepCopy(closeFn, testFn);
+    await prepCopy(closeFn, searchMeasuresByCriteriaFn);
     await runCopy();
     expect(closeFn).toHaveBeenCalledTimes(1);
     expect(closeFn).toHaveBeenCalledWith(
@@ -437,26 +472,17 @@ describe("Copy Test Case Dialog Component", () => {
   });
 
   it("should return toast message indicating cleared expected values", async () => {
-    const testFn = jest.fn().mockResolvedValue(mockMeasureSearchResponse);
-    const closeFn = jest.fn().mockName("close");
-    const useMeasureServiceMockResolvedMultiple = {
-      searchMeasuresByCriteria: testFn,
-    } as unknown as MeasureServiceApi;
-
-    useMeasureServiceMock.mockImplementation(() => {
-      return useMeasureServiceMockResolvedMultiple;
-    });
-
     useTestCaseServiceMock.mockImplementation(() => {
       return {
         copyTestCasesToMeasure: jest.fn().mockResolvedValue({
           copiedTestCases: testCases,
           didClearExpectedValues: true,
         }),
+        getTestCasesByMeasureId: getAllTestCasesFn,
       } as unknown as TestCaseServiceApi;
     });
     const test = new AbortController();
-    await prepCopy(closeFn, testFn);
+    await prepCopy(closeFn, searchMeasuresByCriteriaFn);
     await runCopy();
     expect(closeFn).toHaveBeenCalledTimes(1);
     expect(closeFn).toHaveBeenCalledWith(
@@ -466,32 +492,75 @@ describe("Copy Test Case Dialog Component", () => {
   });
 
   it("should return toast message indicating partial copy", async () => {
-    const testFn = jest.fn().mockResolvedValue(mockMeasureSearchResponse);
-    const closeFn = jest.fn().mockName("close");
-    const useMeasureServiceMockResolvedMultiple = {
-      searchMeasuresByCriteria: testFn,
-    } as unknown as MeasureServiceApi;
-
-    useMeasureServiceMock.mockImplementation(() => {
-      return useMeasureServiceMockResolvedMultiple;
-    });
-
     useTestCaseServiceMock.mockImplementation(() => {
       return {
         copyTestCasesToMeasure: jest.fn().mockResolvedValue({
           copiedTestCases: [...testCases].pop(),
           didClearExpectedValues: true,
         }),
+        getTestCasesByMeasureId: getAllTestCasesFn,
       } as unknown as TestCaseServiceApi;
     });
     const test = new AbortController();
-    await prepCopy(closeFn, testFn);
+    await prepCopy(closeFn, searchMeasuresByCriteriaFn);
     await runCopy();
     expect(closeFn).toHaveBeenCalledTimes(1);
     expect(closeFn).toHaveBeenCalledWith(
       "Test Cases could not copied.",
       "danger"
     );
+  });
+
+  it("should display cannot copy message on CopyTestCaseDialog when test cases have validationStatus Pending or Validating", async () => {
+    const useMeasureServiceMockResolvedMultiple = {
+      searchMeasuresByCriteria: searchMeasuresByCriteriaFn,
+    } as unknown as MeasureServiceApi;
+    useMeasureServiceMock.mockImplementation(() => {
+      return useMeasureServiceMockResolvedMultiple;
+    });
+    useTestCaseServiceMock.mockImplementation(() => {
+      return {
+        getTestCasesByMeasureId: getAllTestCasesFn,
+      } as unknown as TestCaseServiceApi;
+    });
+    render(
+      <CopyTestCaseDialog
+        open={true}
+        onClose={closeFn}
+        measure={mockCurrentMeasure}
+        selectedTestCases={testCases}
+      />
+    );
+
+    await waitFor(() => {
+      expect(
+        screen.getByTestId("copy-test-cases-cannot-copy-message")
+      ).toBeInTheDocument();
+      expect(
+        screen.getByTestId("copy-test-cases-cannot-copy-message")
+      ).toHaveTextContent(
+        "Some of the selected test cases are pending validation. Test cases cannot be copied at this time. Once validations are complete, please try again."
+      );
+    });
+  });
+
+  it("does not show cannot copy message when all selected test cases are valid", () => {
+    useTestCaseServiceMock.mockImplementation(() => {
+      return {
+        getTestCasesByMeasureId: jest.fn().mockResolvedValue(testCases),
+      } as unknown as TestCaseServiceApi;
+    });
+    render(
+      <CopyTestCaseDialog
+        open={true}
+        onClose={closeFn}
+        measure={{ id: "m1", model: "QI-Core" }}
+        selectedTestCases={[testCases[0]]}
+      />
+    );
+    expect(
+      screen.queryByTestId("copy-test-cases-cannot-copy-message")
+    ).not.toBeInTheDocument();
   });
 });
 
