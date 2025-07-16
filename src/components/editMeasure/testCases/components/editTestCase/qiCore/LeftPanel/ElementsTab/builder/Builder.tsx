@@ -27,6 +27,7 @@ import {
 } from "@madie/madie-design-system/dist/react";
 import { useFormikContext } from "formik";
 import "./Builder.scss";
+import { handleCancel, handleRowEdit } from "./BuilderUtils";
 
 interface BuilderProps {
   testCase: TestCase;
@@ -178,21 +179,17 @@ const Builder = ({
                 selectedResourceID={selectedResourceID}
                 setValidationSchema={setValidationSchema}
                 setInitialFormikValuesStu6={setInitialFormikValuesStu6}
-                onCancel={() => {
-                  setSelectedResourceId(null);
-                  scrollToElementByIdWhenAvailable(savedGridID);
-                }}
+                onCancel={() =>
+                  handleCancel(setSelectedResourceId, savedGridID)
+                }
                 canEdit={canEdit}
               />
             )}
             <TestCaseSummaryGrid
               bundle={state?.bundle}
-              onRowEdit={(row) => {
-                setSelectedResourceId(row?.resource?.id);
-                scrollToElementByIdWhenAvailable("tc-builder-resource-editor");
-                // need to rememeber what our last edit id was to scroll back to it.
-                setSavedGridID(`action-center-${row.resource.id}`);
-              }}
+              onRowEdit={(row) =>
+                handleRowEdit(row, setSelectedResourceId, setSavedGridID)
+              }
               onRowDelete={(row) => {
                 dispatch({
                   type: ResourceActionType.REMOVE_BUNDLE_ENTRY,

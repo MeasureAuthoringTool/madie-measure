@@ -4,34 +4,33 @@ import TestCaseSummaryGrid from "./TestCaseSummaryGrid";
 import { within } from "@testing-library/dom";
 import userEvent from "@testing-library/user-event";
 
-describe("TestCaseSummaryGrid", () => {
-  const mockBundle = {
-    entry: [
-      {
-        resource: {
-          resourceType: "Encounter",
-          id: "ec-1",
-          meta: {
-            profile: ["www.wwww.www.com"], // Partially covered case
-            extensions: {
-              nested: {
-                deeper: {
-                  key: "value",
-                },
+export const mockBundle = {
+  entry: [
+    {
+      resource: {
+        resourceType: "Encounter",
+        id: "ec-1",
+        meta: {
+          profile: ["www.wwww.www.com"], // Partially covered case
+          extensions: {
+            nested: {
+              deeper: {
+                key: "value",
               },
             },
           },
         },
       },
-      {
-        resource: {
-          resourceType: "Procedure",
-          id: "pd-1",
-        },
+    },
+    {
+      resource: {
+        resourceType: "Procedure",
+        id: "pd-1",
       },
-    ],
-  };
-
+    },
+  ],
+};
+describe("TestCaseSummaryGrid", () => {
   const mockOnRowEdit = jest.fn();
   const mockOnRowDelete = jest.fn();
 
