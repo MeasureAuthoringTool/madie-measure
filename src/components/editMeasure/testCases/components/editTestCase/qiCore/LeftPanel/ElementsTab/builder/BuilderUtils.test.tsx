@@ -1,5 +1,6 @@
-import { handleCancel, handleRowEdit } from "./BuilderUtils";
+import { handleCancel, handleRowDelete, handleRowEdit } from "./BuilderUtils";
 import { scrollToElementByIdWhenAvailable } from "./Builder";
+import { ResourceActionType } from "../../../../../../util/QiCorePatientProvider";
 
 jest.mock("./Builder", () => ({
   scrollToElementByIdWhenAvailable: jest.fn(),
@@ -35,5 +36,17 @@ describe("Builder handler functions", () => {
     expect(setSelectedResourceId).toHaveBeenCalledWith("xyz-789");
     expect(mockScroll).toHaveBeenCalledWith("tc-builder-resource-editor");
     expect(setSavedGridID).toHaveBeenCalledWith("action-center-xyz-789");
+  });
+
+  it("dispatches on delete, nothing explodes.", () => {
+    const row = { resource: { id: "abc-123" } };
+    const dispatch = jest.fn();
+
+    handleRowDelete(row, dispatch);
+
+    expect(dispatch).toHaveBeenCalledWith({
+      type: ResourceActionType.REMOVE_BUNDLE_ENTRY,
+      payload: row,
+    });
   });
 });

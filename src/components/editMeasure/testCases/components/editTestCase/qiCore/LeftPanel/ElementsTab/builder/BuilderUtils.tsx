@@ -1,4 +1,5 @@
 import { scrollToElementByIdWhenAvailable } from "./Builder";
+import { ResourceActionType } from "../../../../../../util/QiCorePatientProvider";
 
 export function handleCancel(
   setSelectedResourceId: (id: string | null) => void,
@@ -17,4 +18,14 @@ export function handleRowEdit(
   setSelectedResourceId(id);
   scrollToElementByIdWhenAvailable("tc-builder-resource-editor");
   setSavedGridID(`action-center-${id}`);
+}
+
+export function handleRowDelete(
+  row: any,
+  dispatch: (action: { type: string; payload: any }) => void
+) {
+  dispatch({
+    type: ResourceActionType.REMOVE_BUNDLE_ENTRY,
+    payload: row,
+  });
 }

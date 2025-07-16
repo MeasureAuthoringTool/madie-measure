@@ -26,8 +26,8 @@ import {
   MadieDiscardDialog,
 } from "@madie/madie-design-system/dist/react";
 import { useFormikContext } from "formik";
+import { handleCancel, handleRowDelete, handleRowEdit } from "./BuilderUtils";
 import "./Builder.scss";
-import { handleCancel, handleRowEdit } from "./BuilderUtils";
 
 interface BuilderProps {
   testCase: TestCase;
@@ -190,12 +190,7 @@ const Builder = ({
               onRowEdit={(row) =>
                 handleRowEdit(row, setSelectedResourceId, setSavedGridID)
               }
-              onRowDelete={(row) => {
-                dispatch({
-                  type: ResourceActionType.REMOVE_BUNDLE_ENTRY,
-                  payload: row,
-                });
-              }}
+              onRowDelete={(row) => handleRowDelete(row, dispatch)}
             />
           </>
         )}
