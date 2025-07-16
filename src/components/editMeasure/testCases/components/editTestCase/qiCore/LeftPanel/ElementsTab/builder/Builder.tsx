@@ -80,7 +80,7 @@ const Builder = ({
 
   const [selectedResourceID, setSelectedResourceId] = useState<string>(null); // one single source of truth.
   const [resources, setResources] = useState<ResourceIdentifier[]>(null);
-  const addedResources = state?.bundle?.entry.length || 0;
+  const addedResources = state?.bundle?.entry?.length || 0;
 
   useEffect(() => {
     const resourcesPromise = fhirDefinitionsService.current.getResources();
