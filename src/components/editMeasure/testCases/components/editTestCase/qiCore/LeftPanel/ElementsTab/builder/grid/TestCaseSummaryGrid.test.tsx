@@ -78,7 +78,7 @@ describe("TestCaseSummaryGrid", () => {
     );
 
     const firstActionCenterButton = screen.getByTestId(
-      "action-center-button-0"
+      "action-center-button-pd-1"
     );
     userEvent.click(firstActionCenterButton);
     const editAction = await screen.findByRole("menuitem", { name: "Edit" });
@@ -99,7 +99,7 @@ describe("TestCaseSummaryGrid", () => {
     );
 
     const firstActionCenterButton = screen.getByTestId(
-      "action-center-button-0"
+      "action-center-button-ec-1"
     );
     userEvent.click(firstActionCenterButton);
     const editAction = await screen.findByRole("menuitem", { name: "Edit" });
@@ -118,7 +118,7 @@ describe("TestCaseSummaryGrid", () => {
     );
 
     const firstActionCenterButton = screen.getByTestId(
-      "action-center-button-0"
+      "action-center-button-ec-1"
     );
     userEvent.click(firstActionCenterButton);
     const deleteButton = await screen.findByRole("menuitem", {

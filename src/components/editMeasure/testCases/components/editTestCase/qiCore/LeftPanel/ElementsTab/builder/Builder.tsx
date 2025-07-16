@@ -81,7 +81,7 @@ const Builder = ({
   const [selectedResourceID, setSelectedResourceId] = useState<string>(null); // one single source of truth.
   const [resources, setResources] = useState<ResourceIdentifier[]>(null);
   const addedResources = state?.bundle?.entry?.length || 0;
-
+  const [savedGridID, setSavedGridID] = useState(null);
   useEffect(() => {
     const resourcesPromise = fhirDefinitionsService.current.getResources();
     const relevantElementsPromise =
@@ -178,7 +178,10 @@ const Builder = ({
                 selectedResourceID={selectedResourceID}
                 setValidationSchema={setValidationSchema}
                 setInitialFormikValuesStu6={setInitialFormikValuesStu6}
-                onCancel={() => setSelectedResourceId(null)}
+                onCancel={() => {
+                  setSelectedResourceId(null)
+                  scrollToElementByIdWhenAvailable(savedGridID)
+                }}
                 canEdit={canEdit}
               />
             )}
@@ -187,6 +190,8 @@ const Builder = ({
               onRowEdit={(row) => {
                 setSelectedResourceId(row?.resource?.id);
                 scrollToElementByIdWhenAvailable("tc-builder-resource-editor");
+                // need to rememeber what our last edit id was to scroll back to it.
+                setSavedGridID(`action-center-${row.resource.id}`)
               }}
               onRowDelete={(row) => {
                 dispatch({

@@ -20,7 +20,10 @@ const ActionCenter = ({ actions, testId, target }: PropTypes) => {
   const [deleteAction, setDeleteAction] = useState<ActionItemDef>();
 
   return (
-    <div data-testid={`action-center-${testId}`}>
+    <div 
+      data-testid={`action-center-${testId}`}
+      id={`action-center-${testId}`}
+    >
       <SpeedDial
         ariaLabel="Action center"
         data-testid={`action-center-button-${testId}`}
