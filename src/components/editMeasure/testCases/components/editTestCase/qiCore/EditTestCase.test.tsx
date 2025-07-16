@@ -164,6 +164,7 @@ const defaultMeasure = {
   id: "m1234",
   measureScoring: MeasureScoring.COHORT,
   createdBy: MEASURE_CREATEDBY,
+  model: Model.QICORE,
   groups: [
     {
       groupId: "Group1_ID",
@@ -892,9 +893,7 @@ describe("EditTestCase component", () => {
       userEvent.click(createBtn);
 
       const debugOutput = await screen.findByTestId("success-toast");
-      expect(debugOutput).toHaveTextContent(
-        "Test case updated successfully! Test case validation has started running, please continue working in MADiE."
-      );
+      expect(debugOutput).toHaveTextContent("Test case updated successfully!");
       expect(debugOutput).not.toHaveTextContent(
         "MADiE only supports a timezone offset of 0. MADiE has overwritten any timezone offsets that are not zero."
       );
@@ -965,6 +964,7 @@ describe("EditTestCase component", () => {
       userEvent.click(createBtn);
 
       const debugOutput = await screen.findByTestId("success-toast");
+      //here
       expect(debugOutput).toHaveTextContent(
         "Test case updated successfully! Test case validation has started running, please continue working in MADiE."
       );
