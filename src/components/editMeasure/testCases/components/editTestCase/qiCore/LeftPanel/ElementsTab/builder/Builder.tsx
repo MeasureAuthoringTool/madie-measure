@@ -179,8 +179,8 @@ const Builder = ({
                 setValidationSchema={setValidationSchema}
                 setInitialFormikValuesStu6={setInitialFormikValuesStu6}
                 onCancel={() => {
-                  setSelectedResourceId(null)
-                  scrollToElementByIdWhenAvailable(savedGridID)
+                  setSelectedResourceId(null);
+                  scrollToElementByIdWhenAvailable(savedGridID);
                 }}
                 canEdit={canEdit}
               />
@@ -191,7 +191,7 @@ const Builder = ({
                 setSelectedResourceId(row?.resource?.id);
                 scrollToElementByIdWhenAvailable("tc-builder-resource-editor");
                 // need to rememeber what our last edit id was to scroll back to it.
-                setSavedGridID(`action-center-${row.resource.id}`)
+                setSavedGridID(`action-center-${row.resource.id}`);
               }}
               onRowDelete={(row) => {
                 dispatch({
