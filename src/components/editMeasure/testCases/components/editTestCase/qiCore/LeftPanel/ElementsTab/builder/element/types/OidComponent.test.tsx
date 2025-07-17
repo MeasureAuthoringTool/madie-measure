@@ -33,8 +33,11 @@ describe("OidComponent", () => {
         fieldRequired={false}
         onChange={handleChange}
         structureDefinition={null}
+        addTitle={"OID"}
+        showAddAttributeButton={true}
       />
     );
+    expect(screen.getByText("Add OID")).toBeInTheDocument();
 
     const oidInput = screen.getByTestId("field-input-OID") as HTMLInputElement;
 
