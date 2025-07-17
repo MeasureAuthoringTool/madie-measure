@@ -144,7 +144,6 @@ describe("DateTimeComponent", () => {
       />
     );
     expect(screen.getByText("Add Birthday")).toBeInTheDocument();
-
     fireEvent.change(
       screen.getByTestId("date-time-format-selector-input-field-birthday"),
       {
