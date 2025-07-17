@@ -18,20 +18,23 @@
       margin-left: 24px;
     }
   }
+
   .element-editor-add-row {
     display: flex;
     flex-direction: row;
-    gap: 10px; /* 5px gap between columns */
+    gap: 10px;
     width: 100%;
+
     > div:first-child {
       flex: 3;
     }
-    // could be 2nd child.
+
     > .element-add-container {
       display: flex;
       flex: 1;
       justify-content: flex-start;
-      margin-top: 24px; //height of label, makes it appear verticallt oriented
+      margin-top: 24px;
+
       > button {
         flex: 1;
         justify-content: flex-start;
