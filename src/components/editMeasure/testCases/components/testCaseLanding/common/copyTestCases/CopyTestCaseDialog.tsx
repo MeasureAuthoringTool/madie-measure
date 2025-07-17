@@ -213,14 +213,15 @@ const CopyTestCaseDialog = ({ open, onClose, measure, selectedTestCases }) => {
   useEffect(() => {
     if (allTestCases?.length > 0 && selectedTestCases?.length > 0) {
       const selectedTestCaseIds = selectedTestCases.map((tc) => tc.id);
-      const filteredTestCases = allTestCases.filter(
-        (tc) =>
-          measure?.model === "QI-Core v6.0.0" &&
-          selectedTestCaseIds.includes(tc.id) &&
-          (tc.validationStatus === ValidationStatus.PENDING ||
-            tc.validationStatus === ValidationStatus.VALIDATING)
+      setCannotCopy(
+        allTestCases.some(
+          (tc) =>
+            measure?.model === "QI-Core v6.0.0" &&
+            selectedTestCaseIds.includes(tc.id) &&
+            (tc.validationStatus === ValidationStatus.PENDING ||
+              tc.validationStatus === ValidationStatus.VALIDATING)
+        )
       );
-      setCannotCopy(filteredTestCases?.length > 0 ? true : false);
     }
   }, [selectedTestCases, measure?.id, allTestCases]);
 
