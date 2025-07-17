@@ -435,6 +435,65 @@ describe("EditTestCase component", () => {
       expect(JSON.parse(editor.value)).toEqual(addValues(testcaseBundle));
     });
 
+    it("should display isQICore6 validation running message in toast when test case is created and isQICore6 is true", async () => {
+      const testCase = {
+        id: "1234",
+        description: "Test IPP",
+        series: "SeriesA",
+        createdBy: MEASURE_CREATEDBY,
+        createdAt: "",
+        lastModifiedAt: "",
+        lastModifiedBy: "null",
+        title: "TestIPP",
+        name: "TestIPP",
+        executionStatus: "false",
+        json: null,
+        validationStatus: ValidationStatus.PENDING,
+      } as TestCase;
+
+      // Set up measure with QICORE_6_0_0 model
+      const measure = {
+        ...defaultMeasure,
+        model: Model.QICORE_6_0_0,
+        testCases: [],
+      };
+
+      mockedAxios.get.mockClear().mockImplementation((args) => {
+        if (args && args.endsWith("series")) {
+          return Promise.resolve({ data: ["SeriesA"] });
+        } else if (args && args.endsWith("resources")) {
+          return Promise.resolve({
+            data: [...resourceIdentifiers],
+          });
+        }
+        return Promise.resolve({ data: testCase });
+      });
+
+      mockedAxios.post.mockResolvedValue({
+        data: {
+          ...testCase,
+          hapiOperationOutcome: hapiOperationSuccessOutcome,
+        },
+      });
+
+      renderWithRouter(
+        ["/measures/m1234/edit/test-cases"],
+        "/measures/:measureId/edit/test-cases",
+        measure
+      );
+
+      userEvent.click(screen.getByTestId("details-tab"));
+      await testTitle("TC1");
+
+      const saveButton = screen.getByRole("button", { name: "Save" });
+      userEvent.click(saveButton);
+
+      const debugOutput = await screen.findByTestId("success-toast");
+      expect(debugOutput).toHaveTextContent(
+        "Test case created successfully! Test case validation has started running, please continue working in MADiE."
+      );
+    });
+
     it("should report error for empty test case file import", async () => {
       mockApplyDefaults = true;
       const bundle = { ...testcaseBundle, entry: [] };
