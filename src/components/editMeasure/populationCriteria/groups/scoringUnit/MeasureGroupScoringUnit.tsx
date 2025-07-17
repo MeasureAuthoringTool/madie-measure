@@ -44,7 +44,7 @@ const MeasureGroupScoringUnit = ({
       <TextField
         error={error}
         helperText={helperText}
-        disabled={!canEdit}
+        readOnly={!canEdit}
         inputProps={{ "data-testid": "scoring-unit-text-input" }}
         label="Scoring Unit"
         id="scoring-unit-text-input"

@@ -594,6 +594,6 @@ describe("Measure Observation Details", () => {
       name: "Numerator Observation Description",
     });
     expect(observationDescription).toHaveValue(measureObservation.description);
-    expect(observationDescription).toHaveAttribute("disabled");
+    expect(observationDescription).toHaveAttribute("readonly");
   });
 });

@@ -24,7 +24,7 @@ const IntegerInput = ({
       <div tw="w-32">
         <TextField
           value={intValue}
-          disabled={!canEdit}
+          readOnly={!canEdit}
           label={label}
           placeholder={`Enter ${label}`}
           id={`integer-field-${label}`}

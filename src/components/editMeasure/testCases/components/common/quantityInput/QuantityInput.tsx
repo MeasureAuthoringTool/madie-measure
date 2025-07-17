@@ -149,7 +149,7 @@ const QuantityInput = ({
       <div tw="w-28">
         <TextField
           value={currentQuantity.value}
-          disabled={!canEdit}
+          readOnly={!canEdit}
           placeholder="value"
           label={label}
           id={`quantity-value-field-${label.toLowerCase()}`}
@@ -181,7 +181,7 @@ const QuantityInput = ({
       <div tw="w-56">
         <TextField
           id={`quantity-unit-input-${label.toLowerCase()}`}
-          disabled={!canEdit}
+          readOnly={!canEdit}
           label="Unit"
           error={error}
           helperText={helperText}

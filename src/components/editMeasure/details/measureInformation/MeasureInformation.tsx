@@ -457,7 +457,7 @@ export default function MeasureInformation(props: MeasureInformationProps) {
             onFocus={() => onFocus("measureName")}
             placeholder="Measure Name"
             required
-            disabled={!canEdit}
+            readOnly={!canEdit}
             label="Measure Name"
             id="measureName"
             inputProps={{
@@ -485,7 +485,7 @@ export default function MeasureInformation(props: MeasureInformationProps) {
             onFocus={() => onFocus("cqlLibraryName")}
             placeholder="Enter CQL Library Name"
             required
-            disabled={!canEdit}
+            readOnly={!canEdit}
             label="Measure CQL Library Name"
             id="cqlLibraryName"
             data-testid="cql-library-name"
@@ -534,7 +534,7 @@ export default function MeasureInformation(props: MeasureInformationProps) {
           <TextField
             placeholder="eCQM Name"
             required
-            disabled={!canEdit}
+            readOnly={!canEdit}
             label="eCQM Abbreviated Title"
             id="ecqmTitle"
             data-testid="ecqm-text-field"

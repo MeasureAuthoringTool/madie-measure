@@ -189,7 +189,7 @@ const CodeInput = ({
                   label="Custom Code System"
                   placeholder="Custom Code System"
                   required={required}
-                  disabled={!canEdit}
+                  readOnly={!canEdit}
                   inputProps={{
                     "data-testid": `custom-code-system-input${type}`,
                   }}
@@ -206,7 +206,7 @@ const CodeInput = ({
                   label="Custom Code"
                   placeholder="Custom Code"
                   required={required}
-                  disabled={!canEdit}
+                  readOnly={!canEdit}
                   inputProps={{
                     "data-testid": `custom-code-input${type}`,
                   }}

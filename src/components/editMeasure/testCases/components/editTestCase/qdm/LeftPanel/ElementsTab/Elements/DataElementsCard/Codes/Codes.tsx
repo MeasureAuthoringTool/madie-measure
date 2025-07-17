@@ -245,7 +245,7 @@ const Codes = ({
                     tw="w-full"
                     label="Custom Code System"
                     placeholder="Custom Code System"
-                    disabled={!canEdit}
+                    readOnly={!canEdit}
                     inputProps={{
                       "data-testid": "custom-code-system-input",
                     }}
@@ -261,7 +261,7 @@ const Codes = ({
                     tw="w-full"
                     label="Custom Code"
                     placeholder="Custom Code"
-                    disabled={!canEdit}
+                    readOnly={!canEdit}
                     inputProps={{
                       "data-testid": "custom-code-input",
                     }}

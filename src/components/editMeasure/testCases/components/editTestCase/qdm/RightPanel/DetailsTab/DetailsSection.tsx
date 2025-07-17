@@ -62,7 +62,7 @@ const DetailsSection = (props: DetailsSectionProps) => {
             label="Title"
             placeholder="Test Case Title"
             required
-            disabled={!canEdit}
+            readOnly={!canEdit}
             id="test-case-title"
             inputProps={{
               "data-testid": "test-case-title",
@@ -80,7 +80,7 @@ const DetailsSection = (props: DetailsSectionProps) => {
             placeholder="Test Case Description"
             id="test-case-description"
             data-testid="test-case-description"
-            disabled={!canEdit}
+            readOnly={!canEdit}
             {...formik.getFieldProps("description")}
             label="Description"
             required={false}

@@ -87,34 +87,8 @@ const measureMetaDataNotDraft = {
   ...measureMetaDataDraft,
   draft: false,
 };
-const measure = {
-  id: "test measure",
-  measureName: "TestM123",
-  cqlLibraryName: "TestLibray123",
-  model: "QI-Core v4.1.1",
-  ecqmTitle: "ecqmTitle",
-  measurementPeriodStart: "01/01/2022",
-  measurementPeriodEnd: "12/02/2022",
-  createdBy: "john doe",
-  measureSetId: "testMeasureId",
-  acls: [{ userId: "othertestuser@example.com", roles: ["SHARED_WITH"] }],
-  elmJson: `{}`,
-  measureMetaData: {
-    experimental: false,
-    endorsements: [
-      {
-        endorsementId: "NQF",
-        endorser: "1234",
-      },
-    ],
-  },
-  measureSet: {
-    id: "id1",
-    cmsId: 23,
-    measureSetId: "testMeasureId",
-    owner: "test.com",
-  },
-} as unknown as Measure;
+
+let measure;
 
 jest.mock("@madie/madie-editor", () => ({
   synchingEditorCqlContent: jest
@@ -185,6 +159,36 @@ describe("MeasureInformation component", () => {
       createCmsId: jest.fn().mockResolvedValue(2),
     } as unknown as MeasureServiceApi;
     useMeasureServiceApiMock.mockImplementation(() => serviceApiMock);
+
+    measure = {
+      id: "test measure",
+      measureName: "TestM123",
+      cqlLibraryName: "TestLibray123",
+      model: "QI-Core v4.1.1",
+      ecqmTitle: "ecqmTitle",
+      measurementPeriodStart: "01/01/2022",
+      measurementPeriodEnd: "12/02/2022",
+      createdBy: "john doe",
+      measureSetId: "testMeasureId",
+      acls: [{ userId: "othertestuser@example.com", roles: ["SHARED_WITH"] }],
+      elmJson: `{}`,
+      measureMetaData: {
+        experimental: false,
+        endorsements: [
+          {
+            endorsementId: "NQF",
+            endorser: "1234",
+          },
+        ],
+      },
+      measureSet: {
+        id: "id1",
+        cmsId: 23,
+        measureSetId: "testMeasureId",
+        owner: "test.com",
+      },
+    } as unknown as Measure;
+
     measureStore.state.mockImplementation(() => measure);
   });
   const {
@@ -858,7 +862,7 @@ describe("MeasureInformation component", () => {
     expect(endorser).toBeEnabled();
   });
 
-  it("Should disable all elements if measure is not shared with the user", async () => {
+  it("Should should set the following elements to read only if measure is not shared with the user", async () => {
     (checkUserCanEdit as jest.Mock).mockImplementation(() => {
       return false;
     });
@@ -871,29 +875,24 @@ describe("MeasureInformation component", () => {
       const measureNameInput = screen.getByRole("textbox", {
         name: "Measure Name",
       }) as HTMLInputElement;
-      expect(measureNameInput).toBeDisabled();
+
+      expect(measureNameInput).toBeInTheDocument();
+      expect(measureNameInput).toHaveTextContent("TestM123");
+      expect(measureNameInput).toHaveAttribute("readonly");
 
       const cqlLibraryNameText = screen.getByRole("textbox", {
         name: "Measure CQL Library Name",
       }) as HTMLInputElement;
-      expect(cqlLibraryNameText).toBeDisabled();
+      expect(cqlLibraryNameText).toBeInTheDocument();
+      expect(cqlLibraryNameText).toHaveTextContent("TestLibray123");
+      expect(cqlLibraryNameText).toHaveAttribute("readonly");
 
       const ecqmTitleText = screen.getByRole("textbox", {
         name: "eCQM Abbreviated Title",
       }) as HTMLInputElement;
-      expect(ecqmTitleText).toBeDisabled();
-    });
-  });
-
-  it("Should should set the following elements to read only if measure is not shared with the user", async () => {
-    (checkUserCanEdit as jest.Mock).mockImplementation(() => {
-      return false;
-    });
-    measure.model = Model.QDM_5_6;
-    await act(async () => {
-      render(<MeasureInformation setErrorMessage={setErrorMessage} />);
-      const result: HTMLElement = getByTestId("measure-information-form");
-      expect(result).toBeInTheDocument();
+      expect(ecqmTitleText).toBeInTheDocument();
+      expect(ecqmTitleText).toHaveTextContent("ecqmTitle");
+      expect(ecqmTitleText).toHaveAttribute("readonly");
 
       const endorser = screen.getByRole("textbox", {
         name: "Endorsing Organization",
@@ -1055,8 +1054,6 @@ describe("MeasureInformation component", () => {
       const endorserId = getByTestId(
         "endorsement-number-input"
       ) as HTMLInputElement;
-
-      screen.logTestingPlaygroundURL();
 
       const clearButton = screen.getByTestId("CloseIcon") as HTMLButtonElement;
       fireEvent.click(clearButton);

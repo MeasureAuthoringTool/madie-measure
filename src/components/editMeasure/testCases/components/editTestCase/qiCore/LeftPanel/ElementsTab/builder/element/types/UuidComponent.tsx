@@ -25,7 +25,7 @@ const UuidComponent = ({
   return (
     <TextField
       required={fieldRequired}
-      disabled={!canEdit}
+      readOnly={!canEdit}
       label={`> ${label}`}
       labelColor="#1976d2"
       inputProps={{

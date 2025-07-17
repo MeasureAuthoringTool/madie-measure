@@ -303,7 +303,7 @@ const CodingComponent = ({
                   label="Custom Code System"
                   placeholder="Custom Code System"
                   required={true}
-                  disabled={!canEdit}
+                  readOnly={!canEdit}
                   inputProps={{
                     "data-testid": "custom-code-system-input",
                   }}
@@ -320,7 +320,7 @@ const CodingComponent = ({
                   label="Custom Code"
                   placeholder="Custom Code"
                   required={true}
-                  disabled={!canEdit || !selectedConcept?.system}
+                  readOnly={!canEdit || !selectedConcept?.system}
                   inputProps={{
                     "data-testid": "custom-code-input",
                   }}
