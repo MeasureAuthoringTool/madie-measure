@@ -3,6 +3,7 @@ import "twin.macro";
 import "styled-components/macro";
 import { Coding } from "fhir/r4";
 import CodingComponent from "./CodingComponent";
+import AddElementButton from "../../../../../../../common/AddElementButton";
 
 const CodeableConceptComponent = ({
   canEdit,
@@ -10,6 +11,8 @@ const CodeableConceptComponent = ({
   label,
   value,
   onChange,
+  showAddAttributeButton,
+  addTitle,
 }) => {
   const handleChange = useCallback(
     (value: Coding) => {
@@ -17,9 +20,10 @@ const CodeableConceptComponent = ({
     },
     [onChange]
   );
-
   return (
     <CodingComponent
+      addTitle={addTitle}
+      showAddAttributeButton={showAddAttributeButton}
       label={label}
       canEdit={canEdit}
       structureDefinition={structureDefinition}
