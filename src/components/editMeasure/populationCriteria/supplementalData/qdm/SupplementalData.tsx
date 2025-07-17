@@ -137,7 +137,7 @@ const SupplementalData = () => {
         <TextEditor
           label="Description"
           setFieldValue={formik.setFieldValue}
-          canEdit={canEdit}
+          readOnly={!canEdit}
           {...formik.getFieldProps("supplementalDataDescription")}
         />
       </div>

@@ -123,7 +123,7 @@ const TransmissionFormat = (props: TransmissionFormatProps) => {
             <TextEditor
               label="Description"
               setFieldValue={formik.setFieldValue}
-              canEdit={canEdit}
+              readOnly={!canEdit}
               error={
                 formik.touched.transmissionFormat &&
                 Boolean(formik.errors.transmissionFormat)

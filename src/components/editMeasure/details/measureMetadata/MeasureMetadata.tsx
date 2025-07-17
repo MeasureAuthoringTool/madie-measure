@@ -143,7 +143,7 @@ export default function MeasureMetadata(props: MeasureMetadataProps) {
           label={measureMetadataType}
           setFieldValue={formik.setFieldValue}
           required={required}
-          canEdit={canEdit}
+          readOnly={!canEdit}
           data-testid={`measure-${_.kebabCase(measureMetadataType)}-input`}
           {...formik.getFieldProps("genericField")}
         />

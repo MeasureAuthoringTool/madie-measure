@@ -136,7 +136,7 @@ const RiskAdjustment = () => {
         <TextEditor
           label="Description"
           setFieldValue={formik.setFieldValue}
-          canEdit={canEdit}
+          readOnly={!canEdit}
           {...formik.getFieldProps("riskAdjustmentDescription")}
         />
       </div>

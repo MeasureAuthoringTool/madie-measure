@@ -1186,7 +1186,7 @@ const EditTestCase = (props: EditTestCaseProps) => {
                       <TextField
                         placeholder="Test Case Title"
                         required
-                        disabled={!canEdit}
+                        readOnly={!canEdit}
                         label="Title"
                         id="test-case-title"
                         inputProps={{
@@ -1208,7 +1208,7 @@ const EditTestCase = (props: EditTestCaseProps) => {
                           placeholder="Test Case Description"
                           id="test-case-description"
                           data-testid="test-case-description"
-                          disabled={!canEdit}
+                          readOnly={!canEdit}
                           {...formik.getFieldProps("description")}
                           label="Description"
                           required={false}

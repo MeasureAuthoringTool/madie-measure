@@ -747,7 +747,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                           measureGroupNumber + 1
                         } Description`}
                         setFieldValue={formik.setFieldValue}
-                        canEdit={canEdit}
+                        readOnly={!canEdit}
                         {...formik.getFieldProps("groupDescription")}
                       />
                     </FieldSeparator>
@@ -885,7 +885,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                                   />
                                   {/* PopulationDescription */}
                                   <TextEditor
-                                    canEdit={canEdit}
+                                    readOnly={!canEdit}
                                     label={
                                       population?.name
                                         ? `${camelCaseConverter(
@@ -1011,7 +1011,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                                           i + 1
                                         } Description`}
                                         setFieldValue={formik.setFieldValue}
-                                        canEdit={canEdit}
+                                        readOnly={!canEdit}
                                         {...formik.getFieldProps(
                                           `stratifications[${i}].description`
                                         )}

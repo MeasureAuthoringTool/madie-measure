@@ -823,7 +823,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                           measureGroupNumber + 1
                         } Description`}
                         setFieldValue={formik.setFieldValue}
-                        canEdit={canEdit}
+                        readOnly={!canEdit}
                         {...formik.getFieldProps("groupDescription")}
                       />
                     </FieldSeparator>
@@ -1096,7 +1096,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                                   />
                                   {/* PopulationDescription */}
                                   <TextEditor
-                                    canEdit={canEdit}
+                                    readOnly={!canEdit}
                                     label={
                                       population?.name
                                         ? `${camelCaseConverter(
@@ -1346,7 +1346,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                                     </div>
                                     <div tw="lg:col-span-2">
                                       <TextEditor
-                                        canEdit={canEdit}
+                                        readOnly={!canEdit}
                                         label={`Stratification ${
                                           i + 1
                                         } Description`}
@@ -1393,7 +1393,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                       <TextEditor
                         label="Rate Aggregation"
                         setFieldValue={formik.setFieldValue}
-                        canEdit={canEdit}
+                        readOnly={!canEdit}
                         {...formik.getFieldProps("rateAggregation")}
                       />
                     </Box>
@@ -1426,7 +1426,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                       <TextEditor
                         label="Improvement Notation Description"
                         setFieldValue={formik.setFieldValue}
-                        canEdit={canEdit}
+                        readOnly={!canEdit}
                         {...formik.getFieldProps(
                           "improvementNotationDescription"
                         )}

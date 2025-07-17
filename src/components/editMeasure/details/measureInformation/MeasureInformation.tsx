@@ -66,7 +66,6 @@ export default function MeasureInformation(props: MeasureInformationProps) {
   const fhirElmTranslationService = useFhirElmTranslationServiceApi();
 
   const [endorsers, setEndorsers] = useState<string[]>();
-  const [endorsementIdRequired, setEndorsementIdRequired] = useState<boolean>();
   const { updateMeasure } = measureStore;
   const [measure, setMeasure] = useState<any>(measureStore.state);
   const [translatorVersion, setTranslatorVersion] = useState("");
@@ -273,11 +272,9 @@ export default function MeasureInformation(props: MeasureInformationProps) {
 
     formik.setFieldValue("endorsements", newList);
     if (selectedValue === null) {
-      setEndorsementIdRequired(false);
       formik.setFieldValue("endorsementId", "");
       formik.setFieldValue("endorserSystemId", null);
     } else {
-      setEndorsementIdRequired(true);
       formik.setFieldValue(
         "endorserSystemId",
         "https://madie.cms.gov/measure/nqfId"
@@ -582,7 +579,7 @@ export default function MeasureInformation(props: MeasureInformationProps) {
         <Box sx={formRowGapped}>
           <AutoComplete
             id="endorser"
-            dataTestId="endorser"
+            data-testid="endorser"
             label="Endorsing Organization"
             placeholder="-"
             disabled={!canEdit}
@@ -603,7 +600,11 @@ export default function MeasureInformation(props: MeasureInformationProps) {
             onFocus={() => onFocus("endorsementId")}
             placeholder="-"
             required
-            disabled={!canEdit || !endorsementIdRequired}
+            readOnly={!canEdit}
+            disabled={
+              canEdit &&
+              !formik.getFieldProps("endorsements").value[0]?.endorser
+            }
             label="Endorsement #"
             id="endorsementId"
             inputProps={{

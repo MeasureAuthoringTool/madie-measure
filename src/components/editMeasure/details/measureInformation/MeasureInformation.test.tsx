@@ -871,27 +871,45 @@ describe("MeasureInformation component", () => {
       const measureNameInput = screen.getByRole("textbox", {
         name: "Measure Name",
       }) as HTMLInputElement;
-      expect(measureNameInput).toHaveProperty("readOnly", true);
+      expect(measureNameInput).toBeDisabled();
 
       const cqlLibraryNameText = screen.getByRole("textbox", {
         name: "Measure CQL Library Name",
       }) as HTMLInputElement;
-      expect(cqlLibraryNameText).toHaveProperty("readOnly", true);
+      expect(cqlLibraryNameText).toBeDisabled();
 
       const ecqmTitleText = screen.getByRole("textbox", {
         name: "eCQM Abbreviated Title",
       }) as HTMLInputElement;
-      expect(ecqmTitleText).toHaveProperty("readOnly", true);
+      expect(ecqmTitleText).toBeDisabled();
+    });
+  });
+
+  it("Should should set the following elements to read only if measure is not shared with the user", async () => {
+    (checkUserCanEdit as jest.Mock).mockImplementation(() => {
+      return false;
+    });
+    measure.model = Model.QDM_5_6;
+    await act(async () => {
+      render(<MeasureInformation setErrorMessage={setErrorMessage} />);
+      const result: HTMLElement = getByTestId("measure-information-form");
+      expect(result).toBeInTheDocument();
 
       const endorser = screen.getByRole("textbox", {
         name: "Endorsing Organization",
-      }) as HTMLInputElement;
-      expect(endorser).toHaveProperty("readOnly", true);
+      });
+
+      expect(endorser).toBeInTheDocument();
+      expect(endorser).toHaveTextContent("1234");
+      expect(endorser).toHaveAttribute("readonly");
 
       const endorserId = screen.getByRole("textbox", {
         name: "Endorsement #",
-      }) as HTMLInputElement;
-      expect(endorserId).toHaveProperty("readOnly", true);
+      });
+
+      expect(endorserId).toBeInTheDocument();
+      expect(endorserId).toHaveTextContent("NQF");
+      expect(endorserId).toHaveAttribute("readonly");
     });
   });
 
@@ -951,7 +969,7 @@ describe("MeasureInformation component", () => {
     const clearButton = screen.getByTestId("CloseIcon") as HTMLButtonElement;
     fireEvent.click(clearButton);
     expect(endorserComboBox).toHaveValue("");
-    expect(getByTestId("endorsement-number-text-field")).toHaveValue("-");
+    expect(endorserId).toHaveValue("");
   });
 
   it("Discard dialog opens and succeeds", async () => {
@@ -1032,19 +1050,29 @@ describe("MeasureInformation component", () => {
     await act(async () => {
       render(<MeasureInformation setErrorMessage={setErrorMessage} />);
       const endorserAutoComplete = await screen.findByTestId("endorser");
+      const endorserComboBox =
+        within(endorserAutoComplete).getByRole("combobox");
+      const endorserId = getByTestId(
+        "endorsement-number-input"
+      ) as HTMLInputElement;
+
+      screen.logTestingPlaygroundURL();
+
+      const clearButton = screen.getByTestId("CloseIcon") as HTMLButtonElement;
+      fireEvent.click(clearButton);
+      expect(endorserComboBox).toHaveValue("");
+
+      //verifies endorserId is disabled
+      expect(endorserId).toBeDisabled();
+
       fireEvent.keyDown(endorserAutoComplete, { key: "ArrowDown" });
       // selects 2nd option
       const endorserOptions = await screen.findAllByRole("option");
       fireEvent.click(endorserOptions[1]);
 
       // verifies if the option is selected
-      const endorserComboBox =
-        within(endorserAutoComplete).getByRole("combobox");
       expect(endorserComboBox).toHaveValue("NQF");
       //verifies endorserId was enabled
-      const endorserId = getByTestId(
-        "endorsement-number-input"
-      ) as HTMLInputElement;
       expect(endorserId).toBeEnabled();
       //Add input for endorserId
       fireEvent.change(endorserId, {
@@ -1058,12 +1086,9 @@ describe("MeasureInformation component", () => {
       fireEvent.click(endorserOptions2[0]);
 
       // verifies if the option is selected and endorserId has been cleared and disabled
-      expect(endorserComboBox).toHaveValue("-");
-      expect(getByTestId("endorsement-number-text-field")).toHaveProperty(
-        "readOnly",
-        true
-      );
-      expect(getByTestId("endorsement-number-text-field")).toHaveValue("-");
+      expect(endorserComboBox).toHaveValue("");
+      expect(endorserId).toHaveValue("");
+      expect(endorserId).toBeDisabled();
     });
   });
 
