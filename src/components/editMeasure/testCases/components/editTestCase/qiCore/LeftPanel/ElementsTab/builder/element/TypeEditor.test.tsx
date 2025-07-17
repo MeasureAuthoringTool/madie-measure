@@ -786,7 +786,7 @@ describe("TypeEditor Component", () => {
               id: "Observation.issued",
               path: "Observation.issued",
               min: 0,
-              max: "*",
+              max: "1",
               type: [
                 {
                   code: "instant",
@@ -804,7 +804,6 @@ describe("TypeEditor Component", () => {
     const dateInput = screen.getByTestId("Observation.issued_instant-input");
     expect(dateInput).toBeInTheDocument();
     expect(dateInput.getAttribute("aria-invalid")).toBe("false");
-    expect(screen.getByText("Add Issued")).toBeInTheDocument();
   });
 
   test("Should render errors if Invalid Instant format", () => {
