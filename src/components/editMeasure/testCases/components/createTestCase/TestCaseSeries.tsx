@@ -3,7 +3,7 @@ import { AutoComplete } from "@madie/madie-design-system/dist/react";
 import * as _ from "lodash";
 
 export interface TestCaseSeriesProps {
-  disabled?: boolean;
+  readOnly?: boolean;
   value: string;
   onChange: (nextValue: string) => void;
   seriesOptions?: string[];
@@ -11,7 +11,7 @@ export interface TestCaseSeriesProps {
 }
 
 const TestCaseSeries = ({
-  disabled,
+  readOnly,
   value,
   onChange,
   seriesOptions = [],
@@ -98,7 +98,7 @@ const TestCaseSeries = ({
         id="test-case-series"
         dataTestId="test-case-series"
         label="Group"
-        disabled={disabled}
+        readOnly={readOnly}
         placeholder="Start typing or select"
         options={getOptions()}
         freeSolo={true}
@@ -118,7 +118,7 @@ const TestCaseSeries = ({
           }
         }}
       />
-      {!disabled && (
+      {!readOnly && (
         <span
           style={{
             fontFamily: "Rubik",

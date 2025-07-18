@@ -30,7 +30,7 @@ const IntegerComponent = ({
   return (
     <TextField
       required={fieldRequired}
-      disabled={!canEdit}
+      readOnly={!canEdit}
       id={`integer-field-${label}`}
       label={label}
       inputProps={{

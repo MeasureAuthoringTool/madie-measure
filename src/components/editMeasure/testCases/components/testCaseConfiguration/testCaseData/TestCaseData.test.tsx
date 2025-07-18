@@ -352,6 +352,8 @@ describe("TestCaseData", () => {
       name: "Discard Changes",
     });
     expect(shiftTestCaseDatesInput).toHaveAttribute("readonly");
+    expect(shiftTestCaseDatesInput).toHaveValue("-");
+
     expect(saveButton).toBeDisabled();
     expect(discardButton).toBeDisabled();
   });

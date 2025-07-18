@@ -2,7 +2,7 @@ import * as React from "react";
 import Builder, { scrollToElementByIdWhenAvailable } from "./Builder";
 import { render, screen, waitFor } from "@testing-library/react";
 import { Measure, TestCase } from "@madie/madie-models";
-import { QiCoreResourceProvider } from "../../../../../../util/QiCorePatientProvider";
+import { QiCoreResourceContext } from "../../../../../../util/QiCorePatientProvider";
 import { ExecutionContextProvider } from "../../../../../routes/qiCore/ExecutionContext";
 import userEvent from "@testing-library/user-event";
 import {
@@ -10,6 +10,7 @@ import {
   ServiceConfig,
 } from "../../../../../../../../../api/ServiceContext";
 import { useFormikContext } from "formik";
+import { mockBundle } from "./grid/TestCaseSummaryGrid.test";
 
 const serviceConfig: ServiceConfig = {
   measureService: {
@@ -125,14 +126,19 @@ const renderBuilderComponent = () => {
           contextFailure: false,
         }}
       >
-        <QiCoreResourceProvider>
+        <QiCoreResourceContext.Provider
+          value={{
+            state: { bundle: mockBundle },
+            dispatch: jest.fn(),
+          }}
+        >
           <Builder
             canEdit={true}
             testCase={{} as TestCase}
             setInitialFormikValuesStu6={jest.fn()}
             setValidationSchema={jest.fn()}
           />
-        </QiCoreResourceProvider>
+        </QiCoreResourceContext.Provider>
       </ExecutionContextProvider>
     </ApiContextProvider>
   );
@@ -149,7 +155,7 @@ describe("Builder Component", () => {
     (useFormikContext as jest.Mock).mockReturnValue({ resetForm, dirty: true });
 
     renderBuilderComponent();
-    const addedTab = screen.getByText("Added (0)");
+    const addedTab = screen.getByText("Added (2)");
 
     userEvent.click(addedTab);
     const discardDialog = await screen.getByRole("dialog", {
@@ -182,7 +188,7 @@ describe("Builder Component", () => {
     renderBuilderComponent();
 
     const availableTab = await screen.findByText("Available");
-    const addedTab = await screen.findByText("Added (0)");
+    const addedTab = await screen.findByText("Added (2)");
 
     expect(availableTab).toHaveAttribute("aria-selected", "true");
     expect(await screen.findByLabelText("Search")).toBeInTheDocument();

@@ -39,7 +39,7 @@ const BooleanComponent = ({
           "aria-describedby": `boolean-input-field-helper-text-${label}`,
         }}
         data-testid={`boolean-field-${label}`}
-        disabled={!canEdit}
+        readOnly={!canEdit}
         SelectDisplayProps={{
           "aria-required": "true",
         }}

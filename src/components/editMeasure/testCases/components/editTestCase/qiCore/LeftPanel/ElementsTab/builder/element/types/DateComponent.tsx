@@ -108,7 +108,7 @@ const DateTimeComponent = ({
               "aria-describedby": `date-format-selector-input-field-helper-text-${label}`,
             }}
             data-testid={`date-format-selector-field-${label}`}
-            disabled={!canEdit}
+            readOnly={!canEdit}
             SelectDisplayProps={{
               "aria-required": "true",
             }}

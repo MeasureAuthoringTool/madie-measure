@@ -65,7 +65,7 @@ const MeasureObservationDetails = ({
             SelectDisplayProps={{
               "aria-required": required ? true : false,
             }}
-            disabled={!canEdit}
+            readOnly={!canEdit}
             label={label ? label : "Observation"}
             id={`measure-observation-${name}`}
             data-testid={`select-measure-observation-${name}`}
@@ -103,7 +103,7 @@ const MeasureObservationDetails = ({
               }
               required={required}
               id={`${name}-observation-description`}
-              disabled={!canEdit}
+              readOnly={!canEdit}
               content={measureObservation?.description || ""}
               onChange={(value: string) => {
                 onChange({
@@ -123,7 +123,7 @@ const MeasureObservationDetails = ({
               placeholder="-"
               // to do: input following props
               value={measureObservation?.description || ""}
-              disabled={!canEdit}
+              readOnly={!canEdit}
               onChange={(e) => {
                 if (onChange) {
                   onChange({
@@ -140,7 +140,7 @@ const MeasureObservationDetails = ({
       <div className="second" style={{ width: 300 }}>
         <Select
           placeHolder={{ name: "Select Aggregate Function", value: "" }}
-          disabled={!canEdit}
+          readOnly={!canEdit}
           required={required}
           label="Aggregate Function"
           id={`measure-observation-aggregate-${name}`}

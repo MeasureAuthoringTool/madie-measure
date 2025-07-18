@@ -84,7 +84,7 @@ const TestCaseSummaryGrid = ({
         cell: ({ row }) => (
           <ActionCenter
             actions={actions}
-            testId={row.id}
+            testId={row.original.resource.id}
             target={row.original}
           />
         ),
