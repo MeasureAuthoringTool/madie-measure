@@ -26,7 +26,7 @@ import {
   recursiveAddYupObject,
   addCardinalityToElement,
   formatChoiceType,
-  filterElements,
+  modifySliceNameForReadability,
 } from "./fhirDefinitionServiceUtilities";
 import _ from "lodash";
 
@@ -703,5 +703,17 @@ describe("addCardinalityToElement", () => {
     expect(result).toEqual([
       { id: "Patient.name", max: "1", path: "Patient.name" },
     ]);
+  });
+  it.only("Should handle modifySliceNameForReadability all cases", () => {
+    const r1 = modifySliceNameForReadability("cardiology");
+    expect(r1).toBe("Cardiology");
+    const r2 = modifySliceNameForReadability("mental-health");
+    expect(r2).toBe("Mental Health");
+    const r3 = modifySliceNameForReadability("us-core");
+    expect(r3).toBe("US Core");
+    const r4 = modifySliceNameForReadability("us-vital-signs");
+    expect(r4).toBe("US Vital Signs");
+    const r5 = modifySliceNameForReadability("us-core-pediatric-growth");
+    expect(r5).toBe("US Core Pediatric Growth");
   });
 });
