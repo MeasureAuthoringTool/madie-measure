@@ -185,7 +185,7 @@ const SupplementalData = () => {
             id="supplemental-data"
             label="Definition"
             placeHolder={{ name: "", value: "" }}
-            disabled={!canEdit}
+            readOnly={!canEdit}
             error={false}
             helperText=""
             multipleSelect={true}
@@ -250,7 +250,7 @@ const SupplementalData = () => {
                   id={`${supplementalData.definition}-include-in-report-type`}
                   label={`${supplementalData.definition} - Include in Report Type`}
                   placeHolder={[{ code: "", display: "" }]}
-                  disabled={!canEdit}
+                  readOnly={!canEdit}
                   error={false}
                   helperText=""
                   multipleSelect={true}

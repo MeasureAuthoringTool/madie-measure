@@ -52,7 +52,7 @@ const AttributeSelector = ({
               "data-testid": `${kebabCase(attributeProps.label)}-select-input`,
             }}
             data-testid={`${kebabCase(attributeProps.label)}-select`}
-            disabled={!canEdit}
+            readOnly={!canEdit}
             size="small"
             SelectDisplayProps={{
               "aria-required": "true",
@@ -77,7 +77,7 @@ const AttributeSelector = ({
               )}-select-input`,
             }}
             data-testid={`${kebabCase(attributeTypeProps.label)}-select`}
-            disabled={!canEdit}
+            readOnly={!canEdit}
             size="small"
             SelectDisplayProps={{
               "aria-required": "true",

@@ -878,21 +878,21 @@ describe("MeasureInformation component", () => {
 
       expect(measureNameInput).toBeInTheDocument();
       expect(measureNameInput).toHaveTextContent("TestM123");
-      expect(measureNameInput).toHaveAttribute("readonly");
+      expect(measureNameInput).toHaveProperty("readOnly", true);
 
       const cqlLibraryNameText = screen.getByRole("textbox", {
         name: "Measure CQL Library Name",
       }) as HTMLInputElement;
       expect(cqlLibraryNameText).toBeInTheDocument();
       expect(cqlLibraryNameText).toHaveTextContent("TestLibray123");
-      expect(cqlLibraryNameText).toHaveAttribute("readonly");
+      expect(cqlLibraryNameText).toHaveProperty("readOnly", true);
 
       const ecqmTitleText = screen.getByRole("textbox", {
         name: "eCQM Abbreviated Title",
       }) as HTMLInputElement;
       expect(ecqmTitleText).toBeInTheDocument();
       expect(ecqmTitleText).toHaveTextContent("ecqmTitle");
-      expect(ecqmTitleText).toHaveAttribute("readonly");
+      expect(ecqmTitleText).toHaveProperty("readOnly", true);
 
       const endorser = screen.getByRole("textbox", {
         name: "Endorsing Organization",
@@ -900,7 +900,7 @@ describe("MeasureInformation component", () => {
 
       expect(endorser).toBeInTheDocument();
       expect(endorser).toHaveTextContent("1234");
-      expect(endorser).toHaveAttribute("readonly");
+      expect(endorser).toHaveProperty("readOnly", true);
 
       const endorserId = screen.getByRole("textbox", {
         name: "Endorsement #",
@@ -908,7 +908,7 @@ describe("MeasureInformation component", () => {
 
       expect(endorserId).toBeInTheDocument();
       expect(endorserId).toHaveTextContent("NQF");
-      expect(endorserId).toHaveAttribute("readonly");
+      expect(endorserId).toHaveProperty("readOnly", true);
     });
   });
 

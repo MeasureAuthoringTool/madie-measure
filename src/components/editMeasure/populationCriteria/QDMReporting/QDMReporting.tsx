@@ -180,7 +180,7 @@ const QDMReporting = () => {
                 inputProps={{
                   "data-testid": "improvement-notation-input",
                 }}
-                disabled={!canEdit}
+                readOnly={!canEdit}
                 data-testid="improvement-notation-select"
                 {...formik.getFieldProps("improvementNotation")}
                 size="small"

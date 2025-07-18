@@ -281,7 +281,7 @@ const CodingComponent = ({
           "data-testid": `value-set-selector-input-${label}`,
         }}
         data-testid={`value-set-${label}`}
-        disabled={!canEdit}
+        readOnly={!canEdit}
         options={getValueSetMenuOptions()}
         value={selectedValueSet ? selectedValueSet?.name : ""}
         renderValue={(value) => {
@@ -343,7 +343,7 @@ const CodingComponent = ({
                     "data-testid": "code-system-selector-input",
                   }}
                   data-testid="code-system-selector"
-                  disabled={!canEdit}
+                  readOnly={!canEdit}
                   required="true"
                   SelectDisplayProps={{
                     "aria-required": "true",
@@ -363,7 +363,7 @@ const CodingComponent = ({
                     "data-testid": "code-selector-input",
                   }}
                   data-testid="code-selector"
-                  disabled={!canEdit}
+                  readOnly={!canEdit}
                   required={true}
                   SelectDisplayProps={{
                     "aria-required": "true",

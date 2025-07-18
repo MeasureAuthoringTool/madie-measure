@@ -65,7 +65,7 @@ const MeasureObservationDetails = ({
             SelectDisplayProps={{
               "aria-required": required ? true : false,
             }}
-            disabled={!canEdit}
+            readOnly={!canEdit}
             label={label ? label : "Observation"}
             id={`measure-observation-${name}`}
             data-testid={`select-measure-observation-${name}`}
@@ -140,7 +140,7 @@ const MeasureObservationDetails = ({
       <div className="second" style={{ width: 300 }}>
         <Select
           placeHolder={{ name: "Select Aggregate Function", value: "" }}
-          disabled={!canEdit}
+          readOnly={!canEdit}
           required={required}
           label="Aggregate Function"
           id={`measure-observation-aggregate-${name}`}

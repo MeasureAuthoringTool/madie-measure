@@ -216,7 +216,7 @@ const Codes = ({
       <div tw="flex md:flex-wrap mt-3">
         <div tw="w-1/4">
           <Select
-            disabled={!canEdit}
+            readOnly={!canEdit}
             placeHolder={{
               name: "Select Code System",
               value: "",

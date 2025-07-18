@@ -972,7 +972,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                                         )}
 
                                         <Select
-                                          disabled={!canEdit}
+                                          readOnly={!canEdit}
                                           placeHolder={{
                                             name: "Select Definition",
                                             value: "",

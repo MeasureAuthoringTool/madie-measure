@@ -148,7 +148,7 @@ const SupplementalData = () => {
           id="supplemental-data"
           label="Definition"
           placeHolder={{ name: "", value: "" }}
-          disabled={!canEdit}
+          readOnly={!canEdit}
           error={false}
           helperText=""
           multipleSelect={true}

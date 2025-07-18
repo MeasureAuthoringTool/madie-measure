@@ -1229,7 +1229,7 @@ const EditTestCase = (props: EditTestCaseProps) => {
 
                       <div tw="mt-6">
                         <TestCaseSeries
-                          disabled={!canEdit}
+                          readOnly={!canEdit}
                           value={formik.values.series}
                           onChange={(nextValue) =>
                             formik.setFieldValue("series", nextValue)

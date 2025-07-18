@@ -148,7 +148,7 @@ const RiskAdjustment = () => {
           label="Definition"
           placeHolder={{ name: "", value: "" }}
           required={false}
-          disabled={!canEdit}
+          readOnly={!canEdit}
           error={false}
           helperText=""
           multipleSelect={true}

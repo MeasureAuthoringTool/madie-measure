@@ -542,7 +542,7 @@ const MeasureReferences = (props: MeasureReferencesProps) => {
                 "data-testid": `measure-referenceType-input`,
               }}
               data-testid={`measure-referenceType`}
-              disabled={!canEdit}
+              readOnly={!canEdit}
               required
               SelectDisplayProps={{
                 "aria-required": "true",

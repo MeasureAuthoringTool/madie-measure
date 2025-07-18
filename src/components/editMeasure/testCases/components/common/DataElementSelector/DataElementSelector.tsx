@@ -63,7 +63,7 @@ const DataElementSelector = ({
   };
   return (
     <Select
-      disabled={!canEdit}
+      readOnly={!canEdit}
       placeHolder={{ name: `--`, value: "" }}
       value={value}
       id="data-element-selector"

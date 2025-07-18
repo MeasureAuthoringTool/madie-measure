@@ -130,9 +130,6 @@ const DraftMeasureDialog = ({ open, onClose, onSubmit, measure, loading }) => {
                   id: "model-select",
                   "aria-describedby": "model-select-helper-text",
                   required: true,
-                  readOnly: featureFlags?.qiCore7
-                    ? measure?.model === "QI-Core v7.0.0"
-                    : measure?.model === "QI-Core v6.0.0",
                 }}
                 readOnly={
                   featureFlags?.qiCore7

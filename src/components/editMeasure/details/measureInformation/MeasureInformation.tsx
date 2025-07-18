@@ -582,7 +582,7 @@ export default function MeasureInformation(props: MeasureInformationProps) {
             data-testid="endorser"
             label="Endorsing Organization"
             placeholder="-"
-            disabled={!canEdit}
+            readOnly={!canEdit}
             error={formik.touched.endorsements && formik.errors["endorsements"]}
             helperText={
               formik.touched.endorsements && formik.errors["endorsements"]
@@ -654,7 +654,7 @@ export default function MeasureInformation(props: MeasureInformationProps) {
               }}
               data-testid="intended-venue"
               value={`${formik.values?.intendedVenue}`}
-              disabled={!canEdit}
+              readOnly={!canEdit}
               size="small"
               SelectDisplayProps={{
                 "aria-required": "true",

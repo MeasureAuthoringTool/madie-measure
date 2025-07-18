@@ -338,13 +338,13 @@ describe("QDMReporting component", () => {
     const improvementNotationSelect = screen.getByTestId(
       "improvement-notation-select"
     ) as HTMLInputElement;
-    expect(improvementNotationSelect).toHaveAttribute("readonly");
+    expect(improvementNotationSelect).toHaveProperty("readOnly", true);
     expect(improvementNotationSelect).toHaveTextContent("-");
 
     const description = screen.getByTestId(
       "improvement-notation-description-text"
     ) as HTMLInputElement;
-    expect(description).toHaveAttribute("readonly");
+    expect(description).toHaveProperty("readOnly", true);
     expect(description).toHaveTextContent("-");
   });
 });
