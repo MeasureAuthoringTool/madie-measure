@@ -666,7 +666,11 @@ const EditTestCase = (props: EditTestCaseProps) => {
           );
         } else {
           showToast(
-            `Test case ${action}d successfully! Test case validation has started running, please continue working in MADiE.`,
+            `Test case ${action}d successfully!${
+              isQICore6
+                ? " Test case validation has started running, please continue working in MADiE."
+                : ""
+            }`,
             "success"
           );
         }
