@@ -130,7 +130,7 @@ const SDEPage = ({ setExecutionContextReady }) => {
             onChange={(e) => {
               formik.setFieldValue("sdeIncluded", e.target.value === "true");
             }}
-            disabled={!canEdit}
+            readOnly={!canEdit}
           />
         </div>
       </div>

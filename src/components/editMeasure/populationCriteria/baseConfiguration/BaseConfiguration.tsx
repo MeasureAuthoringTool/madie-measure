@@ -187,7 +187,7 @@ const BaseConfiguration = () => {
               placeHolder={{ name: "", value: "" }}
               defaultValue={formik.values.baseConfigurationTypes}
               required={true}
-              disabled={!canEdit}
+              readOnly={!canEdit}
               error={
                 formik.touched.baseConfigurationTypes &&
                 Boolean(formik.errors.baseConfigurationTypes)
@@ -221,7 +221,7 @@ const BaseConfiguration = () => {
               data-testid="scoring-select"
               {...formik.getFieldProps("scoring")}
               error={formik.touched.scoring && Boolean(formik.errors.scoring)}
-              disabled={!canEdit}
+              readOnly={!canEdit}
               helperText={
                 formik.touched.scoring &&
                 Boolean(formik.errors.scoring) &&
@@ -268,7 +268,7 @@ const BaseConfiguration = () => {
                 formik.touched.patientBasis &&
                 Boolean(formik.errors.patientBasis)
               }
-              disabled={!canEdit}
+              readOnly={!canEdit}
               helperText={
                 formik.touched.patientBasis &&
                 Boolean(formik.errors.patientBasis) &&

@@ -83,7 +83,7 @@ const ShiftDatesDialog = ({
             data-testid="shift-dates-number-input"
             label="Shift Test Case Dates"
             placeholder="# of Years"
-            disabled={!canEdit || _.isEmpty(testCases)}
+            readOnly={!canEdit || _.isEmpty(testCases)}
             required={true}
             allowNegative={true}
             {...formik.getFieldProps("shiftDatesInput")}

@@ -167,7 +167,7 @@ const QDMReporting = () => {
               label="Rate Aggregation"
               name="rateAggregation"
               setFieldValue={formik.setFieldValue}
-              canEdit={canEdit}
+              readOnly={!canEdit}
               {...formik.getFieldProps("rateAggregation")}
             />
             <div />
@@ -180,7 +180,7 @@ const QDMReporting = () => {
                 inputProps={{
                   "data-testid": "improvement-notation-input",
                 }}
-                disabled={!canEdit}
+                readOnly={!canEdit}
                 data-testid="improvement-notation-select"
                 {...formik.getFieldProps("improvementNotation")}
                 size="small"
@@ -198,10 +198,10 @@ const QDMReporting = () => {
               <TextEditor
                 label="Improvement Notation Description"
                 setFieldValue={formik.setFieldValue}
-                canEdit={
-                  canEdit &&
-                  !_.isEmpty(formik.getFieldProps("improvementNotation").value)
-                }
+                readOnly={!canEdit}
+                disabled={_.isEmpty(
+                  formik.getFieldProps("improvementNotation").value
+                )}
                 helperText={
                   formik.touched.improvementNotationDescription &&
                   formik.errors.improvementNotationDescription

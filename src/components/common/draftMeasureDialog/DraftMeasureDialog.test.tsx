@@ -54,33 +54,6 @@ describe("DraftMeasureDialog component", () => {
     expect(screen.getByTestId("create-draft-continue-button")).toBeEnabled();
   });
 
-  it("should render draft measure in readOnly", async () => {
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-      qiCore7: false,
-    }));
-    const QICore6Measure = { ...measure, model: Model.QICORE_6_0_0 };
-    render(
-      <DraftMeasureDialog
-        open={true}
-        onClose={onCloseFn}
-        onSubmit={onSubmitFn}
-        measure={QICore6Measure}
-        loading={false}
-      />
-    );
-    expect(screen.getByText("Create Draft")).toBeInTheDocument();
-    const measureName = (await screen.findByRole("textbox", {
-      name: "Measure Name",
-    })) as HTMLInputElement;
-    expect(measureName.value).toEqual(measure.measureName);
-    const modelSelect = screen.getByTestId("measure-model-select");
-    const modelSelectDropdown = within(modelSelect).getByRole(
-      "combobox"
-    ) as HTMLInputElement;
-    userEvent.click(modelSelectDropdown);
-    expect(screen.queryByRole("listbox")).not.toBeInTheDocument();
-  });
-
   it("should check for required measure name", async () => {
     renderComponent();
     expect(screen.getByText("Create Draft")).toBeInTheDocument();
@@ -244,7 +217,34 @@ describe("DraftMeasureDialog component", () => {
     expect(screen.getByTestId("create-draft-continue-button")).toBeEnabled();
   });
 
-  it("should render draft measure in readOnly (QICORE7)", async () => {
+  it("should render Update Model Version field in readOnly (QICORE6)", async () => {
+    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
+      qiCore7: false,
+    }));
+    const QICore6Measure = { ...measure, model: Model.QICORE_6_0_0 };
+    render(
+      <DraftMeasureDialog
+        open={true}
+        onClose={onCloseFn}
+        onSubmit={onSubmitFn}
+        measure={QICore6Measure}
+        loading={false}
+      />
+    );
+    expect(screen.getByText("Create Draft")).toBeInTheDocument();
+    const measureName = (await screen.findByRole("textbox", {
+      name: "Measure Name",
+    })) as HTMLInputElement;
+    expect(measureName.value).toEqual(measure.measureName);
+
+    const modelSelect = screen.getByTestId(
+      "measure-model-select"
+    ) as HTMLInputElement;
+    expect(modelSelect).toHaveProperty("readOnly", true);
+    expect(modelSelect).toHaveTextContent("QI-Core v6.0.0");
+  });
+
+  it("should render Update Model Version field in readOnly (QICORE7)", async () => {
     (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
       qiCore7: true,
     }));
@@ -263,11 +263,11 @@ describe("DraftMeasureDialog component", () => {
       name: "Measure Name",
     })) as HTMLInputElement;
     expect(measureName.value).toEqual(measure.measureName);
-    const modelSelect = screen.getByTestId("measure-model-select");
-    const modelSelectDropdown = within(modelSelect).getByRole(
-      "combobox"
+
+    const modelSelect = screen.getByTestId(
+      "measure-model-select"
     ) as HTMLInputElement;
-    userEvent.click(modelSelectDropdown);
-    expect(screen.queryByRole("listbox")).not.toBeInTheDocument();
+    expect(modelSelect).toHaveProperty("readOnly", true);
+    expect(modelSelect).toHaveTextContent("QI-Core v7.0.0");
   });
 });

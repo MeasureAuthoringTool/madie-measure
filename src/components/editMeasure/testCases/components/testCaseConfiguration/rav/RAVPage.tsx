@@ -130,7 +130,7 @@ const RAVPage = ({ setExecutionContextReady }) => {
             onChange={(e) => {
               formik.setFieldValue("ravIncluded", e.target.value === "true");
             }}
-            disabled={!canEdit}
+            readOnly={!canEdit}
           />
         </div>
       </div>

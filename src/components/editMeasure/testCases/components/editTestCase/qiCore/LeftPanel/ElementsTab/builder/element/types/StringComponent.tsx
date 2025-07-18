@@ -25,7 +25,7 @@ const StringComponent = ({
   return (
     <TextField
       required={fieldRequired}
-      disabled={!canEdit}
+      readOnly={!canEdit}
       id={`string-field-${label}`}
       label={label}
       helperText={helperText}

@@ -97,7 +97,6 @@ const ExtensionComponent = ({
           SelectDisplayProps={{
             "aria-required": "true",
           }}
-          disabled={false}
           required={valueElement?.min > 0}
           options={[
             <MenuItem
@@ -143,7 +142,6 @@ const ExtensionComponent = ({
           SelectDisplayProps={{
             "aria-required": "true",
           }}
-          disabled={false}
           required={valueElement?.min > 0}
           options={[
             <MenuItem
