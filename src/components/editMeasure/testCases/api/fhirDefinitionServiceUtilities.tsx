@@ -33,7 +33,6 @@ export function modifySliceNameForReadability(sliceName) {
   if (!sliceSplit.length) {
     return _.startCase(sliceSplit);
   }
-  console.log("sliceSplit", sliceSplit);
   sliceSplit = sliceSplit.map((el) => {
     if (el === "us") {
       return "US";
