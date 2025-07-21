@@ -87,6 +87,9 @@ describe("Measure Page", () => {
     jest.clearAllMocks();
   });
   beforeEach(() => {
+    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
+      MeasureSearch: true,
+    }));
     localStorage.clear();
   });
   const renderRouter = (initialEntries) => {
@@ -121,12 +124,15 @@ describe("Measure Page", () => {
         abortController.signal
       );
     });
-    const myMeasuresTab = screen.getByRole("tab", { name: "My Measures" });
-    expect(myMeasuresTab).toBeInTheDocument();
-    expect(myMeasuresTab).toHaveClass("Mui-selected");
-    const allMeasuresTab = screen.getByRole("tab", { name: "All Measures" });
-    expect(allMeasuresTab).toBeInTheDocument();
+
+    const myMeasuresTab = screen.getByRole("tab", {
+      name: "My Measures (12)",
+    });
+    const allMeasuresTab = screen.getByRole("tab", {
+      name: "All Measures (12)",
+    });
     expect(allMeasuresTab).not.toHaveClass("Mui-selected");
+    expect(myMeasuresTab).toHaveClass("Mui-selected");
   });
 
   test("all measure nav click triggers nav", async () => {
@@ -381,9 +387,6 @@ describe("Measure Page", () => {
   });
 
   test("shows measure counts on page load", async () => {
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-      MeasureSearch: true,
-    }));
     renderRouter(["/measures"]);
     await waitFor(() => {
       expect(

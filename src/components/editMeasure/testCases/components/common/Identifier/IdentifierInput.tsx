@@ -46,7 +46,7 @@ const IdentifierInput = ({
           <TextField
             value={identifier?.namingSystem}
             label={namingLabel}
-            disabled={!canEdit}
+            readOnly={!canEdit}
             id={`identifier-field-${namingPlaceholder}`}
             data-testid={`identifier-field-${namingPlaceholder}`}
             inputProps={{
@@ -61,7 +61,7 @@ const IdentifierInput = ({
           <TextField
             value={identifier?.value}
             label={valueLabel}
-            disabled={!canEdit}
+            readOnly={!canEdit}
             id={`identifier-value-field-${valueLabel}`}
             data-testid={`identifier-value-field-${valueLabel}`}
             inputProps={{

@@ -62,7 +62,7 @@ const DetailsSection = (props: DetailsSectionProps) => {
             label="Title"
             placeholder="Test Case Title"
             required
-            disabled={!canEdit}
+            readOnly={!canEdit}
             id="test-case-title"
             inputProps={{
               "data-testid": "test-case-title",
@@ -80,7 +80,7 @@ const DetailsSection = (props: DetailsSectionProps) => {
             placeholder="Test Case Description"
             id="test-case-description"
             data-testid="test-case-description"
-            disabled={!canEdit}
+            readOnly={!canEdit}
             {...formik.getFieldProps("description")}
             label="Description"
             required={false}
@@ -95,16 +95,8 @@ const DetailsSection = (props: DetailsSectionProps) => {
             maxLength={250}
           />
           <div>
-            <InputLabel
-              htmlFor={"test-case-series"}
-              style={{ marginBottom: 8, height: 16 }}
-              sx={InputLabelStyle}
-              disabled={!canEdit}
-            >
-              Groups
-            </InputLabel>
             <TestCaseSeries
-              disabled={!canEdit}
+              readOnly={!canEdit}
               value={formik?.values?.series || ""} // this additional check is needed since formik is blank and undefined breaks update
               onChange={(nextValue) =>
                 formik.setFieldValue("series", nextValue)

@@ -281,7 +281,7 @@ const CodingComponent = ({
           "data-testid": `value-set-selector-input-${label}`,
         }}
         data-testid={`value-set-${label}`}
-        disabled={!canEdit}
+        readOnly={!canEdit}
         options={getValueSetMenuOptions()}
         value={selectedValueSet ? selectedValueSet?.name : ""}
         renderValue={(value) => {
@@ -303,7 +303,7 @@ const CodingComponent = ({
                   label="Custom Code System"
                   placeholder="Custom Code System"
                   required={true}
-                  disabled={!canEdit}
+                  readOnly={!canEdit}
                   inputProps={{
                     "data-testid": "custom-code-system-input",
                   }}
@@ -320,7 +320,7 @@ const CodingComponent = ({
                   label="Custom Code"
                   placeholder="Custom Code"
                   required={true}
-                  disabled={!canEdit || !selectedConcept?.system}
+                  readOnly={!canEdit || !selectedConcept?.system}
                   inputProps={{
                     "data-testid": "custom-code-input",
                   }}
@@ -343,7 +343,7 @@ const CodingComponent = ({
                     "data-testid": "code-system-selector-input",
                   }}
                   data-testid="code-system-selector"
-                  disabled={!canEdit}
+                  readOnly={!canEdit}
                   required="true"
                   SelectDisplayProps={{
                     "aria-required": "true",
@@ -363,7 +363,7 @@ const CodingComponent = ({
                     "data-testid": "code-selector-input",
                   }}
                   data-testid="code-selector"
-                  disabled={!canEdit}
+                  readOnly={!canEdit}
                   required={true}
                   SelectDisplayProps={{
                     "aria-required": "true",

@@ -50,6 +50,7 @@ const MultipleSelectDropDown = ({
   defaultValue = undefined,
   required = false,
   disabled = false,
+  readOnly = false,
   error = false,
   helperText = undefined,
   options,
@@ -63,7 +64,7 @@ const MultipleSelectDropDown = ({
   value,
   ...rest
 }) => {
-  if (disabled) {
+  if (readOnly) {
     return (
       <ReadOnlyTextField
         required={required}
@@ -185,6 +186,7 @@ MultipleSelectDropDown.propTypes = {
   defaultValue: PropTypes.any,
   required: PropTypes.bool,
   disabled: PropTypes.bool,
+  readOnly: PropTypes.bool,
   error: PropTypes.bool,
   handleToggleSelectAll: PropTypes.func,
   helperText: PropTypes.string,

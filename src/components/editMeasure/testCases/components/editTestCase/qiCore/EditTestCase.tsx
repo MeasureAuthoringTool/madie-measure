@@ -14,10 +14,7 @@ import EditTestCaseBreadCrumbs from "../EditTestCaseBreadCrumbs";
 
 import tw, { styled } from "twin.macro";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faExclamationCircle,
-  faTimes,
-} from "@fortawesome/free-solid-svg-icons";
+import { faTimes } from "@fortawesome/free-solid-svg-icons";
 import "styled-components/macro";
 import {
   Group,
@@ -90,23 +87,11 @@ import {
   isHapiOutcomeIssueCodeInformational,
 } from "./EditTestCaseUtil";
 import { useTestCasePolling } from "../../../hooks/useTestCasePolling";
-import WarningIcon from "@mui/icons-material/Warning";
 import KeyboardTabIcon from "@mui/icons-material/KeyboardTab";
-import Box from "@mui/material/Box";
-import Skeleton from "@mui/material/Skeleton";
+import ValidationPanel from "./ValidationPanel";
+import ValidationStatusIcon from "./ValidationStatusIcon";
 
 const TestCaseForm = tw.form`m-3`;
-const ValidationErrorsButton = tw.button`
-  text-lg
-  -translate-y-6
-  w-[160px]
-  h-[30px]
-  origin-bottom-left
-  rotate-90
-  border-solid
-  border-2
-  border-gray-500
-`;
 
 interface AlertProps {
   status?: "success" | "warning" | "error" | "info" | "meta" | null;
@@ -140,21 +125,6 @@ const Alert = styled.div<AlertProps>(({ status = "default" }) => [
   styles[status],
   tw`rounded-lg p-2 m-2 text-base inline-flex items-center w-11/12`,
 ]);
-
-const ValidationAlertCard = styled.p<AlertProps>(({ status = "default" }) => [
-  tw`text-xs bg-white p-3 rounded-xl mx-3 my-1 break-words`,
-  styles[status],
-]);
-
-const StyledIcon = styled(FontAwesomeIcon)(
-  ({ errorSeverity }: { errorSeverity: string }) => [
-    errorSeverity !== "default"
-      ? errorSeverity === "error"
-        ? tw`text-red-700`
-        : tw`text-yellow-700`
-      : "",
-  ]
-);
 
 const testCaseSeriesStyles = {
   border: "1px solid #8c8c8c",
@@ -696,7 +666,11 @@ const EditTestCase = (props: EditTestCaseProps) => {
           );
         } else {
           showToast(
-            `Test case ${action}d successfully! Test case validation has started running, please continue working in MADiE.`,
+            `Test case ${action}d successfully!${
+              isQICore6
+                ? " Test case validation has started running, please continue working in MADiE."
+                : ""
+            }`,
             "success"
           );
         }
@@ -1216,7 +1190,7 @@ const EditTestCase = (props: EditTestCaseProps) => {
                       <TextField
                         placeholder="Test Case Title"
                         required
-                        disabled={!canEdit}
+                        readOnly={!canEdit}
                         label="Title"
                         id="test-case-title"
                         inputProps={{
@@ -1238,7 +1212,7 @@ const EditTestCase = (props: EditTestCaseProps) => {
                           placeholder="Test Case Description"
                           id="test-case-description"
                           data-testid="test-case-description"
-                          disabled={!canEdit}
+                          readOnly={!canEdit}
                           {...formik.getFieldProps("description")}
                           label="Description"
                           required={false}
@@ -1258,19 +1232,8 @@ const EditTestCase = (props: EditTestCaseProps) => {
                       </div>
 
                       <div tw="mt-6">
-                        <label
-                          htmlFor="test-case-series"
-                          tw="text-gray-980"
-                          style={{
-                            fontFamily: "Rubik",
-                            fontSize: "14px",
-                            textTransform: "capitalize",
-                          }}
-                        >
-                          Group
-                        </label>
                         <TestCaseSeries
-                          disabled={!canEdit}
+                          readOnly={!canEdit}
                           value={formik.values.series}
                           onChange={(nextValue) =>
                             formik.setFieldValue("series", nextValue)
@@ -1296,14 +1259,9 @@ const EditTestCase = (props: EditTestCaseProps) => {
                     <div className="flex justify-between items-center w-full mb-2">
                       <div className="validation-header">
                         <div className="header-left">
-                          {[
-                            ValidationStatus.PENDING,
-                            ValidationStatus.VALIDATING,
-                          ].includes(testCase?.validationStatus) ? (
-                            <MadieSpinner style={{ width: 20, height: 20 }} />
-                          ) : (
-                            <WarningIcon color="warning" />
-                          )}
+                          <ValidationStatusIcon
+                            validationStatus={testCase?.validationStatus}
+                          />
 
                           <span className="ml-2">
                             Validations ({validationErrors?.length || 0})
@@ -1330,60 +1288,10 @@ const EditTestCase = (props: EditTestCaseProps) => {
                       className="validation-content"
                       data-testid="json-validation-errors-list"
                     >
-                      {[
-                        ValidationStatus.PENDING,
-                        ValidationStatus.VALIDATING,
-                      ].includes(testCase?.validationStatus) ? (
-                        <Box
-                          data-testid="validation-skeleton-box"
-                          aria-label="Validation loading skeletons"
-                          sx={{
-                            width: 480,
-                            height: 50,
-                            backgroundColor: "#f5f5f5",
-                            borderRadius: 1,
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            marginLeft: "10px",
-                          }}
-                        >
-                          <Skeleton
-                            data-testid="validation-skeleton"
-                            aria-label="Validation loading skeleton"
-                            width={300}
-                            height={30}
-                            animation="wave"
-                            sx={{ marginLeft: "-160px" }}
-                          />
-                        </Box>
-                      ) : validationErrors && validationErrors.length > 0 ? (
-                        validationErrors
-                          .filter(
-                            (error) => !/^information/.test(error?.severity)
-                          )
-                          .map((error) => (
-                            <ValidationAlertCard
-                              key={error.key}
-                              status={
-                                error.diagnostics.includes("Meta.profile")
-                                  ? "meta"
-                                  : error.severity || "error"
-                              }
-                            >
-                              {error.diagnostics.includes("Meta.profile")
-                                ? "Meta.profile: "
-                                : error.severity
-                                ? error.severity.charAt(0).toUpperCase() +
-                                  error.severity.slice(1) +
-                                  ": "
-                                : ""}
-                              {error.diagnostics}
-                            </ValidationAlertCard>
-                          ))
-                      ) : (
-                        <span>Nothing to see here!</span>
-                      )}
+                      <ValidationPanel
+                        testCase={testCase}
+                        validationErrors={validationErrors}
+                      />
                     </div>
                   </>
                 ) : (
@@ -1397,16 +1305,15 @@ const EditTestCase = (props: EditTestCaseProps) => {
                           allotmentRef.current.resize([34, 33, 33]);
                         }}
                         className="validation-panel-toggle-button"
-                        title="Open Validations"
+                        title={
+                          testCase?.validationStatus
+                            ? testCase?.validationStatus
+                            : "Open Validations"
+                        }
                       >
-                        {[
-                          ValidationStatus.PENDING,
-                          ValidationStatus.VALIDATING,
-                        ].includes(testCase?.validationStatus) ? (
-                          <MadieSpinner style={{ width: 20, height: 20 }} />
-                        ) : (
-                          <WarningIcon color="warning" />
-                        )}
+                        <ValidationStatusIcon
+                          validationStatus={testCase?.validationStatus}
+                        />
                       </Button>
                     </div>
                     <div className="closed-body"></div>

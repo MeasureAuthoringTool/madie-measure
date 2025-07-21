@@ -26,6 +26,7 @@ import {
   MadieDiscardDialog,
 } from "@madie/madie-design-system/dist/react";
 import { useFormikContext } from "formik";
+import { handleCancel, handleRowDelete, handleRowEdit } from "./BuilderUtils";
 import "./Builder.scss";
 import {
   getTopLevelElements,
@@ -85,8 +86,8 @@ const Builder = ({
 
   const [selectedResourceID, setSelectedResourceId] = useState<string>(null); // one single source of truth.
   const [resources, setResources] = useState<ResourceIdentifier[]>(null);
-  const addedResources = state?.bundle?.entry.length || 0;
-
+  const addedResources = state?.bundle?.entry?.length || 0;
+  const [savedGridID, setSavedGridID] = useState(null);
   useEffect(() => {
     const resourcesPromise = fhirDefinitionsService.current.getResources();
     const relevantElementsPromise =
@@ -208,22 +209,18 @@ const Builder = ({
                 selectedResourceID={selectedResourceID}
                 setValidationSchema={setValidationSchema}
                 setInitialFormikValuesStu6={setInitialFormikValuesStu6}
-                onCancel={() => setSelectedResourceId(null)}
+                onCancel={() =>
+                  handleCancel(setSelectedResourceId, savedGridID)
+                }
                 canEdit={canEdit}
               />
             )}
             <TestCaseSummaryGrid
               bundle={state?.bundle}
-              onRowEdit={(row) => {
-                setSelectedResourceId(row?.resource?.id);
-                scrollToElementByIdWhenAvailable("tc-builder-resource-editor");
-              }}
-              onRowDelete={(row) => {
-                dispatch({
-                  type: ResourceActionType.REMOVE_BUNDLE_ENTRY,
-                  payload: row,
-                });
-              }}
+              onRowEdit={(row) =>
+                handleRowEdit(row, setSelectedResourceId, setSavedGridID)
+              }
+              onRowDelete={(row) => handleRowDelete(row, dispatch)}
             />
           </>
         )}

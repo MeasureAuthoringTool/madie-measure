@@ -107,7 +107,7 @@ const ComponentType = ({
               "data-testid": "result-select-input",
             }}
             data-testid={"result-select"}
-            disabled={!canEdit}
+            readOnly={!canEdit}
             size="small"
             SelectDisplayProps={{
               "aria-required": "true",

@@ -11,7 +11,7 @@ const UrlComponent = ({
   return (
     <TextField
       required={fieldRequired}
-      disabled={!canEdit}
+      readOnly={!canEdit}
       id={`url-field-${label}`}
       label={label}
       placeholder={label}

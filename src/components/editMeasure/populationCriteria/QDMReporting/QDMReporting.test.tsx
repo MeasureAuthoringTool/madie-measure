@@ -290,11 +290,11 @@ describe("QDMReporting component", () => {
       name: "Improvement Notation Description",
     }) as HTMLInputElement;
     // if no notation is selected
-    expect(description).toHaveAttribute("readonly");
+    expect(description).toBeDisabled();
     // select notation
     await selectAnOptionForImprovementNotation(otherNotation);
     expect(description).toBeEnabled();
-    expect(description.value).toBe("-");
+    expect(description.value).toBe("");
     const saveButton = getByRole("button", {
       name: "Save",
     });
@@ -310,11 +310,15 @@ describe("QDMReporting component", () => {
 
   test("Improvement Notation description is not mandatory for Increased Improvement Notation", async () => {
     render(<QDMReporting />);
-    // for increased notation
-    await selectAnOptionForImprovementNotation(increasedNotation);
     let description = screen.getByTestId(
       "improvement-notation-description-text"
     ) as HTMLInputElement;
+    // if no notation is selected
+    expect(description).toHaveAttribute("disabled");
+    expect(description).toBeDisabled();
+    // select notation
+    await selectAnOptionForImprovementNotation(increasedNotation);
+    expect(description).toBeEnabled();
     expect(description.value).toBe("");
     // save btn should not be disabled
     await waitFor(() =>
@@ -324,6 +328,24 @@ describe("QDMReporting component", () => {
         })
       ).toBeEnabled()
     );
+  });
+
+  test("Improvement Notation and Increased Notation Description are both read only fields when checkUserCanEdit returns false", async () => {
+    checkUserCanEdit.mockReturnValue(false);
+
+    render(<QDMReporting />);
+
+    const improvementNotationSelect = screen.getByTestId(
+      "improvement-notation-select"
+    ) as HTMLInputElement;
+    expect(improvementNotationSelect).toHaveProperty("readOnly", true);
+    expect(improvementNotationSelect).toHaveTextContent("-");
+
+    const description = screen.getByTestId(
+      "improvement-notation-description-text"
+    ) as HTMLInputElement;
+    expect(description).toHaveProperty("readOnly", true);
+    expect(description).toHaveTextContent("-");
   });
 });
 
