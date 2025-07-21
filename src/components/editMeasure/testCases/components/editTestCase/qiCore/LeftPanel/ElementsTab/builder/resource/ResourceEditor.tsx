@@ -235,7 +235,22 @@ const ResourceEditor = ({
       }
 
       if (_.isNil(currentValue)) {
-        _.set(nextEntry.resource, elemPath, "");
+        if (!elemPath.includes("extension:")) {
+          _.set(nextEntry.resource, elemPath, "");
+        } else {
+          const filtered = allElements.filter((ele) =>
+            ele.id.includes(elemPath)
+          );
+          const extension = {
+            url: filtered?.[0]?.type?.[0]?.profile?.[0],
+            extension: [],
+          };
+          let extensions = nextEntry.resource.extension
+            ? nextEntry.resource.extension
+            : [];
+          extensions.push(extension);
+          nextEntry.resource.extension = extensions;
+        }
       }
     });
     // Update resource state

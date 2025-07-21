@@ -24,7 +24,12 @@ interface ElementSelectorProps {
 export const getOptionLabel = (option: ElementDefinition, basePath: string) => {
   const label = option.path?.substring(basePath.length + 1);
   if (option.sliceName) {
-    return `${label}:${option.sliceName}`;
+    //to prevent label like: extension:race:race
+    if (!label.includes(option.sliceName)) {
+      return `${label}:${option.sliceName}`;
+    } else {
+      return label;
+    }
   }
   if (label.endsWith("[x]")) {
     return `${label.substring(0, label.length - 3)}${_.upperFirst(
