@@ -28,6 +28,22 @@ export const formatChoiceType = (
   return element.id;
 };
 
+// slicenames are separated with hyphens.
+// example test case
+//  const r4 = modifySliceNameForReadability("us-vital-signs");
+//  expect(r4).toBe("US Vital Signs");
+export function modifySliceNameForReadability(sliceName) {
+  let sliceSplit = sliceName.split("-");
+  sliceSplit = sliceSplit.map((el) => {
+    if (el === "us") {
+      return "US";
+    } else {
+      return _.startCase(el);
+    }
+  });
+  return sliceSplit.join(" ");
+}
+
 export function getElementName(
   element: ElementDefinition,
   basePath: string,
@@ -48,7 +64,9 @@ export function getElementName(
     }
   }
   if (element.sliceName) {
-    return `${requiredIndicator}${element.sliceName}${index}`;
+    return `${requiredIndicator}${_.startCase(
+      getLastPart(element.path)
+    )} (${modifySliceNameForReadability(element.sliceName)}${index})`;
   }
   if (element.path?.endsWith("[x]") || element.id?.endsWith("[x]")) {
     // if the path ends with [x], we need to get the type code (which in the values we have here is the only type on the element even though it's a choiceType because we handled that with the naming convention in testcase editor JSON as choice[x] == choiceType where x = Type )
