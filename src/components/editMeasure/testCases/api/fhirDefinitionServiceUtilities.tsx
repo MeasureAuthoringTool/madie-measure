@@ -63,9 +63,9 @@ export function getElementName(
     }
   }
   if (element.sliceName) {
-    return `${requiredIndicator} 
-    ${_.startCase(getLastPart(element.path))}
-     (${modifySliceNameForReadability(element.sliceName)}${index})`;
+    return `${requiredIndicator}${_.startCase(
+      getLastPart(element.path)
+    )} (${modifySliceNameForReadability(element.sliceName)}${index})`;
   }
   if (element.path?.endsWith("[x]") || element.id?.endsWith("[x]")) {
     // if the path ends with [x], we need to get the type code (which in the values we have here is the only type on the element even though it's a choiceType because we handled that with the naming convention in testcase editor JSON as choice[x] == choiceType where x = Type )

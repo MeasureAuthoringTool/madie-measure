@@ -247,33 +247,30 @@ describe("getElementName", () => {
 
   it("returns the slice if exists", () => {
     const element = {
-      id: "testSlice",
+      id: "some.path",
       min: 0,
-      sliceName: "testSlice",
       path: "some.path",
     };
-    expect(getElementName(element, "some", [])).toBe("testSlice");
+    expect(getElementName(element, "some", [])).toBe("path");
   });
   it("should handles not a number index", () => {
     const element = {
       id: "Patient.name[asdf]",
-      sliceName: "nameSlice",
       min: 1,
     } as any;
     const basePath = "Patient";
     const result = getElementName(element, basePath, [{}, {}]);
-    expect(result).toBe(" *nameSlice");
+    expect(result).toBe(" *name[asdf]");
   });
 
   it("should handle retrievedIndex and Number(retrievedIndex) > 0 to add correct index", () => {
     const element = {
       id: "Patient.name[1]",
-      sliceName: "nameSlice",
       min: 1,
     } as any;
     const basePath = "Patient";
     const result = getElementName(element, basePath, [{}, {}]);
-    expect(result).toBe(" *nameSlice 2 ");
+    expect(result).toBe(" *name 2 ");
   });
 
   it("should format for ChoiceType elements correctly", () => {
@@ -293,11 +290,10 @@ describe("getElementName", () => {
     const element = {
       id: "Patient.name[0]",
       min: 0,
-      sliceName: "nameSlice",
     } as any;
     const basePath = "Patient";
     const result = getElementName(element, basePath, [{}, {}]);
-    expect(result).toBe("nameSlice 1 ");
+    expect(result).toBe("name 1 ");
   });
 
   it("returns path minus base", () => {
@@ -314,18 +310,20 @@ describe("getElementName", () => {
     const element = {
       id: "some.path",
       min: 1,
-      sliceName: "testSlice",
       path: "some.path",
     };
-    expect(getElementName(element, "some", {})).toBe(" *testSlice");
+    expect(getElementName(element, "some", {})).toBe(" *path");
   });
   it("returns sliceName with index and requiredIndicator if sliceName exists", () => {
     const element = {
       id: "Patient.name[0].given",
+      path: "Patient.name.given",
       min: 1,
-      sliceName: "givenName",
+      sliceName: "someothergivenname",
     };
-    expect(getElementName(element as any, "Patient", [])).toBe(" *givenName");
+    expect(getElementName(element as any, "Patient", [])).toBe(
+      " *Given (Someothergivenname)"
+    );
   });
 
   it("returns path without basePath and indexes if no sliceName", () => {
@@ -704,7 +702,7 @@ describe("addCardinalityToElement", () => {
       { id: "Patient.name", max: "1", path: "Patient.name" },
     ]);
   });
-  it.only("Should handle modifySliceNameForReadability all cases", () => {
+  it("Should handle modifySliceNameForReadability all cases", () => {
     const r1 = modifySliceNameForReadability("cardiology");
     expect(r1).toBe("Cardiology");
     const r2 = modifySliceNameForReadability("mental-health");
