@@ -28,11 +28,12 @@ export const formatChoiceType = (
   return element.id;
 };
 
+// slicenames are separated with hyphens.
+// example test case
+//  const r4 = modifySliceNameForReadability("us-vital-signs");
+//  expect(r4).toBe("US Vital Signs");
 export function modifySliceNameForReadability(sliceName) {
   let sliceSplit = sliceName.split("-");
-  if (!sliceSplit.length) {
-    return _.startCase(sliceSplit);
-  }
   sliceSplit = sliceSplit.map((el) => {
     if (el === "us") {
       return "US";
