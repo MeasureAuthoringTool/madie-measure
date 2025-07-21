@@ -32,7 +32,6 @@ import {
   getTopLevelElements,
   getLastPart,
 } from "../../../../../../api/fhirDefinitionServiceUtilities";
-import { ContinuousVariableBoolean } from "../../../../../../api/__mocks__/TestCaseProcessingScenarios";
 
 interface BuilderProps {
   testCase: TestCase;
