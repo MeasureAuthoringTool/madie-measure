@@ -71,7 +71,7 @@ const DateTimeInput = ({
   return (
     <DateTimeField
       id={kebabCase(label)}
-      disabled={!canEdit}
+      readOnly={!canEdit}
       label={label}
       handleDateTimeChange={handleDateTimeChange}
       dateTimeValue={toDayJS(dateTime)}

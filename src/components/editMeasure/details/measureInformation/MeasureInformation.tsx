@@ -66,7 +66,6 @@ export default function MeasureInformation(props: MeasureInformationProps) {
   const fhirElmTranslationService = useFhirElmTranslationServiceApi();
 
   const [endorsers, setEndorsers] = useState<string[]>();
-  const [endorsementIdRequired, setEndorsementIdRequired] = useState<boolean>();
   const { updateMeasure } = measureStore;
   const [measure, setMeasure] = useState<any>(measureStore.state);
   const [translatorVersion, setTranslatorVersion] = useState("");
@@ -273,11 +272,9 @@ export default function MeasureInformation(props: MeasureInformationProps) {
 
     formik.setFieldValue("endorsements", newList);
     if (selectedValue === null) {
-      setEndorsementIdRequired(false);
       formik.setFieldValue("endorsementId", "");
       formik.setFieldValue("endorserSystemId", null);
     } else {
-      setEndorsementIdRequired(true);
       formik.setFieldValue(
         "endorserSystemId",
         "https://madie.cms.gov/measure/nqfId"
@@ -460,7 +457,7 @@ export default function MeasureInformation(props: MeasureInformationProps) {
             onFocus={() => onFocus("measureName")}
             placeholder="Measure Name"
             required
-            disabled={!canEdit}
+            readOnly={!canEdit}
             label="Measure Name"
             id="measureName"
             inputProps={{
@@ -488,7 +485,7 @@ export default function MeasureInformation(props: MeasureInformationProps) {
             onFocus={() => onFocus("cqlLibraryName")}
             placeholder="Enter CQL Library Name"
             required
-            disabled={!canEdit}
+            readOnly={!canEdit}
             label="Measure CQL Library Name"
             id="cqlLibraryName"
             data-testid="cql-library-name"
@@ -537,7 +534,7 @@ export default function MeasureInformation(props: MeasureInformationProps) {
           <TextField
             placeholder="eCQM Name"
             required
-            disabled={!canEdit}
+            readOnly={!canEdit}
             label="eCQM Abbreviated Title"
             id="ecqmTitle"
             data-testid="ecqm-text-field"
@@ -582,10 +579,10 @@ export default function MeasureInformation(props: MeasureInformationProps) {
         <Box sx={formRowGapped}>
           <AutoComplete
             id="endorser"
-            dataTestId="endorser"
+            data-testid="endorser"
             label="Endorsing Organization"
             placeholder="-"
-            disabled={!canEdit}
+            readOnly={!canEdit}
             error={formik.touched.endorsements && formik.errors["endorsements"]}
             helperText={
               formik.touched.endorsements && formik.errors["endorsements"]
@@ -603,7 +600,11 @@ export default function MeasureInformation(props: MeasureInformationProps) {
             onFocus={() => onFocus("endorsementId")}
             placeholder="-"
             required
-            disabled={!canEdit || !endorsementIdRequired}
+            readOnly={!canEdit}
+            disabled={
+              canEdit &&
+              !formik.getFieldProps("endorsements").value[0]?.endorser
+            }
             label="Endorsement #"
             id="endorsementId"
             inputProps={{
@@ -653,7 +654,7 @@ export default function MeasureInformation(props: MeasureInformationProps) {
               }}
               data-testid="intended-venue"
               value={`${formik.values?.intendedVenue}`}
-              disabled={!canEdit}
+              readOnly={!canEdit}
               size="small"
               SelectDisplayProps={{
                 "aria-required": "true",

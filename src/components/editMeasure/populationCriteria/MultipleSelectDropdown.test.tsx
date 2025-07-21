@@ -37,16 +37,24 @@ describe("MultipleSelectDropDown Component", () => {
 
   it("Should render readonly state", () => {
     render(
-      <MultipleSelectDropDown {...props} disabled={true} value={["Option 2"]} />
+      <MultipleSelectDropDown {...props} readOnly={true} value={["Option 2"]} />
     );
-    const developers = screen.getByRole("textbox");
-    expect(developers).toHaveValue("Option 2");
-    expect(developers).toHaveAttribute("readonly");
+
+    const developers = screen.getByRole("textbox", {
+      name: "Type",
+    }) as HTMLInputElement;
+
+    expect(developers).toHaveProperty("readOnly", true);
+    expect(developers).toHaveTextContent("Option 2");
   });
 
-  it("Should render - for readonly state if state is absent", () => {
-    render(<MultipleSelectDropDown {...props} disabled={true} />);
-    const developers = screen.getByRole("textbox");
+  it("Should render - for readonly state if value is absent", () => {
+    render(<MultipleSelectDropDown {...props} readOnly={true} />);
+    const developers = screen.getByRole("textbox", {
+      name: "Type",
+    }) as HTMLInputElement;
+
+    expect(developers).toHaveProperty("readOnly", true);
     expect(developers).toHaveValue("-");
   });
 });

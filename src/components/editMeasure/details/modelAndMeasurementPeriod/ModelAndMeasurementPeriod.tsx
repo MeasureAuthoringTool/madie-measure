@@ -190,7 +190,7 @@ const ModelAndMeasurementPeriod = (props: ModelAndMeasurementPeriodProps) => {
         <Box sx={formGridStyle} data-testid="measurement-period-div">
           <DateField
             id="measurement-period-start"
-            disabled={!canEdit}
+            readOnly={!canEdit}
             required={true}
             label="Measurement Period - Start Date"
             handleDateChange={(startDate) =>
@@ -213,7 +213,7 @@ const ModelAndMeasurementPeriod = (props: ModelAndMeasurementPeriodProps) => {
           />
           <DateField
             id="measurement-period-end"
-            disabled={!canEdit}
+            readOnly={!canEdit}
             required={true}
             label="Measurement Period - End Date"
             handleDateChange={(endDate) =>

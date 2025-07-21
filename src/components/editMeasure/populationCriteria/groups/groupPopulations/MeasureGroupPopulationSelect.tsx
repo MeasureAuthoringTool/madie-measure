@@ -65,7 +65,7 @@ const MeasureGroupPopulationSelect = ({
         <Select
           placeHolder={{ name: `Select ${label}`, value: "" }}
           required={required}
-          disabled={!canEdit}
+          readOnly={!canEdit}
           label={
             label === "Initial Population 2"
               ? removeSecondIPLabelTemplate()

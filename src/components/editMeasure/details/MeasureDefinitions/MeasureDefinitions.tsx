@@ -515,10 +515,9 @@ const MeasureDefinitions = (props: MeasureDefinitionsProps) => {
           <div>
             <TextField
               required
-              disabled={!canEdit}
+              readOnly={!canEdit}
               label="Term"
               placeholder="Placeholder"
-              readOnly={!canEdit}
               id="measure-definition-term"
               data-testid="measure-definition-term"
               inputProps={{
@@ -532,10 +531,9 @@ const MeasureDefinitions = (props: MeasureDefinitionsProps) => {
 
             <TextArea
               required
-              disabled={!canEdit}
+              readOnly={!canEdit}
               label="Definition"
               placeholder="Enter"
-              readOnly={!canEdit}
               id="measure-definition"
               data-testid="measure-definition"
               inputProps={{

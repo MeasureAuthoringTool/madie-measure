@@ -542,7 +542,7 @@ const MeasureReferences = (props: MeasureReferencesProps) => {
                 "data-testid": `measure-referenceType-input`,
               }}
               data-testid={`measure-referenceType`}
-              disabled={!canEdit}
+              readOnly={!canEdit}
               required
               SelectDisplayProps={{
                 "aria-required": "true",
@@ -553,10 +553,9 @@ const MeasureReferences = (props: MeasureReferencesProps) => {
 
             <TextArea
               required
-              disabled={!canEdit}
+              readOnly={!canEdit}
               label="Reference"
               placeholder="Enter"
-              readOnly={!canEdit}
               id="measure-referenceText"
               data-testid="measure-referenceText"
               inputProps={{
