@@ -687,6 +687,12 @@ describe("TestCase component", () => {
     const onCloneTestCase = jest.fn();
     const setSelectedTestCasesMock = jest.fn();
 
+    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
+      applyDefaults: mockApplyDefaults,
+      EditTestsOnVersionedMeasures: false,
+      stu6TestCaseValidation: true,
+    }));
+
     renderWithTestCase(
       testCases,
       true,
@@ -712,5 +718,44 @@ describe("TestCase component", () => {
 
     expect(buttons[2].textContent).toBe("Validation");
     fireEvent.click(buttons[2]);
+  });
+
+  it("should  render test case table without validation status for qiCore6 when flag is disabled", async () => {
+    const deleteTestCase = jest.fn();
+    const exportTestCase = jest.fn();
+    const onCloneTestCase = jest.fn();
+    const setSelectedTestCasesMock = jest.fn();
+
+    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
+      applyDefaults: mockApplyDefaults,
+      EditTestsOnVersionedMeasures: false,
+      stu6TestCaseValidation: false,
+    }));
+
+    renderWithTestCase(
+      testCases,
+      true,
+      deleteTestCase,
+      exportTestCase,
+      onCloneTestCase,
+      measures[3],
+      setSelectedTestCasesMock
+    );
+
+    const rows = await screen.findByTestId(`test-case-row-0`);
+    const columns = rows.querySelectorAll("td");
+    expect(columns[1]).toHaveTextContent("1");
+    expect(columns[2]).toHaveTextContent("Pass");
+    expect(columns[3]).toHaveTextContent(testCase.series);
+    expect(columns[4]).toHaveTextContent(testCase.title);
+    expect(columns[5]).toHaveTextContent(testCase.description);
+    expect(columns[6]).toHaveTextContent("09/06/202415:15:14 (UTC)");
+
+    const buttons = await screen.findAllByRole("button");
+    expect(buttons).toHaveLength(12);
+
+    expect(buttons.every((button) => button.textContent !== "Validation")).toBe(
+      true
+    );
   });
 });
