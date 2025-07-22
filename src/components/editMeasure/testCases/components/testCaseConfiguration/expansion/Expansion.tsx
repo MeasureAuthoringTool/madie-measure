@@ -183,7 +183,7 @@ const Expansion = () => {
               { label: "Latest", value: false },
               { label: "Manifest", value: true },
             ]}
-            disabled={!canEdit}
+            readOnly={!canEdit}
             value={Boolean(formik.values.isManifestExpansion)}
             onChange={(e) =>
               formik.setFieldValue(
@@ -206,7 +206,7 @@ const Expansion = () => {
               SelectDisplayProps={{
                 "aria-required": "true",
               }}
-              disabled={!canEdit}
+              readOnly={!canEdit}
               error={
                 formik.touched.manifestExpansionId &&
                 Boolean(formik.errors.manifestExpansionId)

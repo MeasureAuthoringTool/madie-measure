@@ -172,7 +172,7 @@ const TestCaseData = (props: TestCaseListProps) => {
           label="Shift Test Case Dates"
           id="shift-test-case-dates"
           placeholder="# of Years"
-          disabled={!canEdit || _.isEmpty(measure?.testCases || executing)}
+          readOnly={!canEdit || _.isEmpty(measure?.testCases || executing)}
           {...formik.getFieldProps("shiftTestCaseDates")}
           error={
             formik.touched.shiftTestCaseDates &&

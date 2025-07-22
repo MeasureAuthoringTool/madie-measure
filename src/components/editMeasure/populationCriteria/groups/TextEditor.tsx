@@ -12,7 +12,8 @@ type Props = {
   value: string;
   setFieldValue: Function;
   label?: string;
-  canEdit: boolean;
+  readOnly?: boolean;
+  disabled?: boolean;
   helperText?: string;
   error?: boolean;
   required?: boolean;
@@ -24,7 +25,8 @@ const TextEditor = (props: Props) => {
     value,
     setFieldValue,
     label,
-    canEdit,
+    readOnly = false,
+    disabled = false,
     helperText,
     error,
     required,
@@ -53,7 +55,8 @@ const TextEditor = (props: Props) => {
           label={label}
           required={required}
           id={`${name}`}
-          disabled={!canEdit}
+          readOnly={readOnly}
+          disabled={disabled}
           content={localText}
           onChange={(value: string) => {
             setLocalText(value);
@@ -69,7 +72,8 @@ const TextEditor = (props: Props) => {
           placeholder="-"
           name={name}
           id={name}
-          disabled={!canEdit}
+          readOnly={readOnly}
+          disabled={disabled}
           helperText={helperText}
           error={error}
           required={required}

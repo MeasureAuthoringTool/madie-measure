@@ -57,7 +57,8 @@ export default function MeasureList(props: {
     page: number,
     searchCriteria: MeasureSearchCriteria,
     sort: string,
-    direction: string
+    direction: string,
+    doUpdateMeasureCount: boolean
   ) => void;
   measureList: Measure[];
   setMeasureList;
@@ -734,7 +735,7 @@ export default function MeasureList(props: {
     handleContinueDialog();
   };
 
-  const doUpdateList = () => {
+  const doUpdateList = (doUpdateMeasureCount = false) => {
     const tabStorageKey =
       props.activeTab === 0 ? "myMeasurePageOptions" : "allMeasurePageOptions";
     const tabPageOptions = JSON.parse(localStorage.getItem(tabStorageKey)) || {
@@ -744,13 +745,14 @@ export default function MeasureList(props: {
 
     const currentLimit = tabPageOptions.limit || 10;
 
-    props.retrieveMeasures(
+    retrieveMeasures(
       props.activeTab,
       currentLimit,
       props.currentPage,
       props.searchCriteria,
       props.currentSort,
-      props.currentDirection
+      props.currentDirection,
+      doUpdateMeasureCount
     );
   };
 
@@ -903,7 +905,7 @@ export default function MeasureList(props: {
         props.setToastType("success");
         props.setToastMessage("Measure successfully deleted");
         props.setToastOpen(true);
-        doUpdateList();
+        doUpdateList(true);
         handleDialogClose();
 
         const values = queryString.parse(props.search);
@@ -1019,7 +1021,7 @@ export default function MeasureList(props: {
                     className="header-cell"
                   >
                     {/* Only render a <button> for sortable columns.
-                        For non-sortable columns like "Action", render the header content directly, not inside a <button>. 
+                        For non-sortable columns like "Action", render the header content directly, not inside a <button>.
                     */}
                     {header.isPlaceholder ? null : header.column.getCanSort() ? (
                       <button

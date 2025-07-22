@@ -247,7 +247,7 @@ const DemographicsSection = ({ canEdit }) => {
                   id="demographics-living-status-select-id"
                   defaultValue="Living"
                   label="Living Status"
-                  disabled={!canEdit}
+                  readOnly={!canEdit}
                   inputProps={{
                     "data-testid": `demographics-living-status-input`,
                   }}
@@ -284,7 +284,7 @@ const DemographicsSection = ({ canEdit }) => {
                   labelId="demographics-race-select-label"
                   id="demographics-race-select-id"
                   label="Race"
-                  disabled={!canEdit}
+                  readOnly={!canEdit}
                   inputProps={{
                     "data-testid": `demographics-race-input`,
                   }}
@@ -299,7 +299,7 @@ const DemographicsSection = ({ canEdit }) => {
                   labelId="demographics-gender-select-label"
                   id="demographics-gender-select-id"
                   label="Sex"
-                  disabled={!canEdit}
+                  readOnly={!canEdit}
                   inputProps={{
                     "data-testid": `demographics-gender-input`,
                   }}
@@ -317,7 +317,7 @@ const DemographicsSection = ({ canEdit }) => {
                   id="demographics-ethnicity-select-id"
                   label="Ethnicity"
                   className="demographics-ethnicity"
-                  disabled={!canEdit}
+                  readOnly={!canEdit}
                   inputProps={{
                     "data-testid": `demographics-ethnicity-input`,
                   }}

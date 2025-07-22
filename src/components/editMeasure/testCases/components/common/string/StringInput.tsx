@@ -35,7 +35,7 @@ const StringInput = ({
           {title}
         </h4>
         <TextField
-          disabled={!canEdit}
+          readOnly={!canEdit}
           label={label}
           placeholder={label}
           id={`string-field-${kebabCase(label)}`}

@@ -22,7 +22,7 @@ const DecimalInput = ({
       <div tw="w-28">
         <TextField
           value={value}
-          disabled={!canEdit}
+          readOnly={!canEdit}
           type="number"
           min="0"
           label={label}
