@@ -159,17 +159,18 @@ export default function CreateCodeCoverageNavTabs(props: NavTabProps) {
           data-testid="coverage-tab"
           value="coverage"
         />
-        {_.isEqual(measure?.model, Model.QICORE_6_0_0) && (
-          <Tab
-            type="B"
-            tabIndex={0}
-            aria-label="Validation tab panel"
-            sx={defaultStyle}
-            label={getValidationResultsDisplay("Valid")}
-            data-testid="validation-tab"
-            value="validation"
-          />
-        )}
+        {_.isEqual(measure?.model, Model.QICORE_6_0_0) &&
+          featureFlags?.stu6TestCaseValidation && (
+            <Tab
+              type="B"
+              tabIndex={0}
+              aria-label="Validation tab panel"
+              sx={defaultStyle}
+              label={getValidationResultsDisplay("Valid")}
+              data-testid="validation-tab"
+              value="validation"
+            />
+          )}
       </Tabs>
       <div tw="flex flex-wrap space-x-4 justify-end h-10">
         {featureFlags.OverlappingValueSets && (
