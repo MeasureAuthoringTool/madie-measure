@@ -51,7 +51,7 @@ const CodesComponent = ({
         SelectDisplayProps={{
           "aria-required": "true",
         }}
-        disabled={!canEdit}
+        readOnly={!canEdit}
         options={
           codes
             ? codes.map((concept) => (

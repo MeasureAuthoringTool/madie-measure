@@ -823,7 +823,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                           measureGroupNumber + 1
                         } Description`}
                         setFieldValue={formik.setFieldValue}
-                        canEdit={canEdit}
+                        readOnly={!canEdit}
                         {...formik.getFieldProps("groupDescription")}
                       />
                     </FieldSeparator>
@@ -837,7 +837,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                     placeHolder={{ name: "Select Measure Group", value: "" }}
                     defaultValue={formik.values.measureGroupTypes}
                     required={true}
-                    disabled={!canEdit}
+                    readOnly={!canEdit}
                     error={
                       formik.touched.measureGroupTypes &&
                       Boolean(formik.errors.measureGroupTypes)
@@ -864,7 +864,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                     label="Population Basis"
                     placeholder="Select Population Basis"
                     required={true}
-                    disabled={!canEdit}
+                    readOnly={!canEdit}
                     error={formik.errors.populationBasis}
                     helperText={formik.errors.populationBasis}
                     options={populationBasisValues}
@@ -888,7 +888,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                     error={
                       formik.touched.scoring && Boolean(formik.errors.scoring)
                     }
-                    disabled={!canEdit}
+                    readOnly={!canEdit}
                     helperText={
                       formik.touched.scoring &&
                       Boolean(formik.errors.scoring) &&
@@ -951,7 +951,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                     placeholder="UCUM Code or Name"
                   />
                   <NumberInput
-                    disabled={!canEdit}
+                    readOnly={!canEdit}
                     label="Scoring Precision"
                     name="scoring-precision"
                     id="scoring-precision"
@@ -1096,7 +1096,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                                   />
                                   {/* PopulationDescription */}
                                   <TextEditor
-                                    canEdit={canEdit}
+                                    readOnly={!canEdit}
                                     label={
                                       population?.name
                                         ? `${camelCaseConverter(
@@ -1194,7 +1194,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                                             </DSLink>
                                           )}
                                         <Select
-                                          disabled={!canEdit}
+                                          readOnly={!canEdit}
                                           placeHolder={{
                                             name: "Select Definition",
                                             value: "",
@@ -1281,7 +1281,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                                           {...formik.getFieldProps(
                                             `stratifications[${i}].associations`
                                           )}
-                                          disabled={!canEdit}
+                                          readOnly={!canEdit}
                                           options={
                                             ["Select All"].concat(
                                               Object.values(stratAssociation)
@@ -1346,7 +1346,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                                     </div>
                                     <div tw="lg:col-span-2">
                                       <TextEditor
-                                        canEdit={canEdit}
+                                        readOnly={!canEdit}
                                         label={`Stratification ${
                                           i + 1
                                         } Description`}
@@ -1393,7 +1393,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                       <TextEditor
                         label="Rate Aggregation"
                         setFieldValue={formik.setFieldValue}
-                        canEdit={canEdit}
+                        readOnly={!canEdit}
                         {...formik.getFieldProps("rateAggregation")}
                       />
                     </Box>
@@ -1409,7 +1409,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                         inputProps={{
                           "data-testid": "improvement-notation-input",
                         }}
-                        disabled={!canEdit}
+                        readOnly={!canEdit}
                         helperText={formik.errors.improvementNotation}
                         data-testid="improvement-notation-select"
                         {...formik.getFieldProps("improvementNotation")}
@@ -1426,7 +1426,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                       <TextEditor
                         label="Improvement Notation Description"
                         setFieldValue={formik.setFieldValue}
-                        canEdit={canEdit}
+                        readOnly={!canEdit}
                         {...formik.getFieldProps(
                           "improvementNotationDescription"
                         )}

@@ -163,7 +163,7 @@ const CodeInput = ({
           "data-testid": `value-set-selector-input${type}`,
         }}
         data-testid={`value-set-selector${type}`}
-        disabled={!canEdit}
+        readOnly={!canEdit}
         required={required}
         SelectDisplayProps={{
           "aria-required": "true",
@@ -189,7 +189,7 @@ const CodeInput = ({
                   label="Custom Code System"
                   placeholder="Custom Code System"
                   required={required}
-                  disabled={!canEdit}
+                  readOnly={!canEdit}
                   inputProps={{
                     "data-testid": `custom-code-system-input${type}`,
                   }}
@@ -206,7 +206,7 @@ const CodeInput = ({
                   label="Custom Code"
                   placeholder="Custom Code"
                   required={required}
-                  disabled={!canEdit}
+                  readOnly={!canEdit}
                   inputProps={{
                     "data-testid": `custom-code-input${type}`,
                   }}
@@ -229,7 +229,7 @@ const CodeInput = ({
                     "data-testid": `code-system-selector-input${type}`,
                   }}
                   data-testid={`code-system-selector${type}`}
-                  disabled={!canEdit}
+                  readOnly={!canEdit}
                   required={required}
                   SelectDisplayProps={{
                     "aria-required": "true",
@@ -247,7 +247,7 @@ const CodeInput = ({
                     "data-testid": `code-selector-input${type}`,
                   }}
                   data-testid={`code-selector${type}`}
-                  disabled={!canEdit}
+                  readOnly={!canEdit}
                   required={required}
                   SelectDisplayProps={{
                     "aria-required": "true",

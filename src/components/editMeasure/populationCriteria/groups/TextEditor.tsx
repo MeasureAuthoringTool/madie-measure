@@ -12,10 +12,12 @@ type Props = {
   value: string;
   setFieldValue: Function;
   label?: string;
-  canEdit: boolean;
+  readOnly?: boolean;
+  disabled?: boolean;
   helperText?: string;
   error?: boolean;
   required?: boolean;
+  onBlur: Function;
 };
 
 const TextEditor = (props: Props) => {
@@ -24,10 +26,12 @@ const TextEditor = (props: Props) => {
     value,
     setFieldValue,
     label,
-    canEdit,
+    readOnly = false,
+    disabled = false,
     helperText,
     error,
     required,
+    onBlur,
   } = props;
   const { ...rest } = props;
   //   preserve a local copy of state. Update against formik values
@@ -50,14 +54,19 @@ const TextEditor = (props: Props) => {
     <>
       {featureFlags.EnhancedTextFormatting ? (
         <RichTextEditor
+          id={name}
+          name={name}
           label={label}
           required={required}
-          id={`${name}`}
-          disabled={!canEdit}
+          readOnly={readOnly}
+          disabled={disabled}
+          helperText={helperText}
+          error={error}
           content={localText}
           onChange={(value: string) => {
             setLocalText(value);
           }}
+          onBlur={onBlur}
         />
       ) : (
         <TextArea
@@ -69,7 +78,8 @@ const TextEditor = (props: Props) => {
           placeholder="-"
           name={name}
           id={name}
-          disabled={!canEdit}
+          readOnly={readOnly}
+          disabled={disabled}
           helperText={helperText}
           error={error}
           required={required}

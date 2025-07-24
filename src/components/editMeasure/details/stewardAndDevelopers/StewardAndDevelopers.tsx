@@ -177,7 +177,7 @@ export default function StewardAndDevelopers(props: StewardAndDevelopersProps) {
                 label="Steward"
                 placeholder="-"
                 required={true}
-                disabled={!canEdit}
+                readOnly={!canEdit}
                 error={formik.touched.steward && formik.errors["steward"]}
                 helperText={formik.touched.steward && formik.errors["steward"]}
                 options={organizations.map((element) => element.name)}
@@ -194,7 +194,7 @@ export default function StewardAndDevelopers(props: StewardAndDevelopersProps) {
                 placeHolder="-"
                 defaultValue={formik.values.developers}
                 required={true}
-                disabled={!canEdit}
+                readOnly={!canEdit}
                 error={
                   formik.touched.developers && Boolean(formik.errors.developers)
                 }

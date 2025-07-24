@@ -12,7 +12,11 @@ import useMeasureServiceApi, {
 import { Measure } from "@madie/madie-models";
 import QDMReporting from "./QDMReporting";
 import userEvent from "@testing-library/user-event";
-import { checkUserCanEdit, measureStore } from "@madie/madie-util";
+import {
+  checkUserCanEdit,
+  measureStore,
+  useFeatureFlags,
+} from "@madie/madie-util";
 
 jest.mock("../../../../api/useMeasureServiceApi");
 
@@ -69,7 +73,13 @@ const otherNotation = "Other";
 
 describe("QDMReporting component", () => {
   beforeEach(() => {
+    jest.clearAllMocks();
+
     measureStore.state = jest.fn().mockImplementation(() => measure);
+
+    (useFeatureFlags as jest.Mock).mockImplementation(() => ({
+      EnhancedTextFormatting: false,
+    }));
   });
   const { getByText, getByRole, getByLabelText } = screen;
 
@@ -290,11 +300,11 @@ describe("QDMReporting component", () => {
       name: "Improvement Notation Description",
     }) as HTMLInputElement;
     // if no notation is selected
-    expect(description).toHaveAttribute("readonly");
+    expect(description).toBeDisabled();
     // select notation
     await selectAnOptionForImprovementNotation(otherNotation);
     expect(description).toBeEnabled();
-    expect(description.value).toBe("-");
+    expect(description.value).toBe("");
     const saveButton = getByRole("button", {
       name: "Save",
     });
@@ -310,11 +320,15 @@ describe("QDMReporting component", () => {
 
   test("Improvement Notation description is not mandatory for Increased Improvement Notation", async () => {
     render(<QDMReporting />);
-    // for increased notation
-    await selectAnOptionForImprovementNotation(increasedNotation);
     let description = screen.getByTestId(
       "improvement-notation-description-text"
     ) as HTMLInputElement;
+    // if no notation is selected
+    expect(description).toHaveAttribute("disabled");
+    expect(description).toBeDisabled();
+    // select notation
+    await selectAnOptionForImprovementNotation(increasedNotation);
+    expect(description).toBeEnabled();
     expect(description.value).toBe("");
     // save btn should not be disabled
     await waitFor(() =>
@@ -324,6 +338,100 @@ describe("QDMReporting component", () => {
         })
       ).toBeEnabled()
     );
+  });
+
+  test("Improvement Notation description is not mandatory for 'Increased Improvement Notation' when EnhancedTextFormatting is enabled", async () => {
+    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
+      EnhancedTextFormatting: true,
+    }));
+
+    render(<QDMReporting />);
+
+    let editor = within(
+      screen.getByTestId("improvement-notation-description-rich-text-editor")
+    ).getByRole("textbox");
+    expect(editor).toBeInTheDocument();
+    expect(editor).toHaveAttribute("contenteditable", "false");
+
+    await selectAnOptionForImprovementNotation(increasedNotation);
+
+    await waitFor(() => {
+      editor = within(
+        screen.getByTestId("improvement-notation-description-rich-text-editor")
+      ).getByRole("textbox");
+    });
+
+    expect(editor).toHaveAttribute("contenteditable", "true");
+
+    const saveButton = screen.getByRole("button", {
+      name: "Save",
+    });
+    expect(saveButton).toBeInTheDocument();
+
+    await waitFor(() => {
+      expect(saveButton).toBeEnabled();
+    });
+  });
+
+  test("Improvement Notation description is mandatory for 'Other' when EnhancedTextFormatting is enabled", async () => {
+    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
+      EnhancedTextFormatting: true,
+    }));
+
+    render(<QDMReporting />);
+
+    let editor = within(
+      screen.getByTestId("improvement-notation-description-rich-text-editor")
+    ).getByRole("textbox");
+    expect(editor).toBeInTheDocument();
+    expect(editor).toHaveAttribute("contenteditable", "false");
+
+    await selectAnOptionForImprovementNotation(otherNotation);
+
+    await waitFor(() => {
+      editor = within(
+        screen.getByTestId("improvement-notation-description-rich-text-editor")
+      ).getByRole("textbox");
+    });
+
+    expect(editor).toHaveAttribute("contenteditable", "true");
+
+    const saveButton = screen.getByRole("button", {
+      name: "Save",
+    });
+    expect(saveButton).toBeInTheDocument();
+
+    await waitFor(() => {
+      expect(saveButton).toBeDisabled();
+    });
+
+    fireEvent.input(editor, {
+      target: { textContent: "Test description" },
+    });
+
+    expect(editor).toHaveTextContent("Test description");
+
+    await waitFor(() => {
+      expect(saveButton).toBeEnabled();
+    });
+  });
+
+  test("Improvement Notation and Increased Notation Description are both read only fields when checkUserCanEdit returns false", async () => {
+    checkUserCanEdit.mockReturnValue(false);
+
+    render(<QDMReporting />);
+
+    const improvementNotationSelect = screen.getByTestId(
+      "improvement-notation-select"
+    ) as HTMLInputElement;
+    expect(improvementNotationSelect).toHaveProperty("readOnly", true);
+    expect(improvementNotationSelect).toHaveTextContent("-");
+
+    const description = screen.getByTestId(
+      "improvement-notation-description-text"
+    ) as HTMLInputElement;
+    expect(description).toHaveProperty("readOnly", true);
+    expect(description).toHaveTextContent("-");
   });
 });
 

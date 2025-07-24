@@ -14,7 +14,7 @@ const UriComponent = ({
   return (
     <TextField
       required={fieldRequired}
-      disabled={!canEdit}
+      readOnly={!canEdit}
       id={`uri-field-${label}`}
       label={`${label}`}
       labelColor="#1976d2"

@@ -69,7 +69,7 @@ describe("DateComponent", () => {
     );
     expect(formatSelectorField).toBeInTheDocument();
     expect(formatSelectorField.value).toBe("Invalid Format");
-    expect(dateFieldInput.value).toBe("-");
+    expect(dateFieldInput.value).toBe("");
     expect(setTouched).toHaveBeenCalled();
   });
 

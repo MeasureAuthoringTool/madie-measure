@@ -35,7 +35,7 @@ const Base64BinaryComponent = ({
     <TextField
       label={`${label}`}
       required={fieldRequired}
-      disabled={!canEdit}
+      readOnly={!canEdit}
       inputProps={{
         "data-testid": `field-input-${label}`,
         "aria-describedby": `field-input-helper-text-${label}`,
