@@ -5,8 +5,15 @@ export const QDMReportingValidator = Yup.object().shape({
     .trim()
     .when("improvementNotation", {
       is: "Other",
-      then: Yup.string().required(
-        "Improvement Notation Description is required when Other is selected"
-      ),
+      then: (schema) =>
+        schema
+          .required(
+            "Improvement Notation Description is required when Other is selected"
+          )
+          .notOneOf(
+            ["<p></p>"],
+            "Improvement Notation Description is required when Other is selected"
+          ),
+      otherwise: (schema) => schema,
     }),
 });
