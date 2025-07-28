@@ -1,23 +1,98 @@
 import * as React from "react";
-import { render, cleanup, waitFor } from "@testing-library/react";
+import { render, cleanup, waitFor, screen } from "@testing-library/react";
 import MeasureDefinitionRow from "./MeasureMetaDataRow";
-import userEvent from "@testing-library/user-event";
+import { useFeatureFlags } from "@madie/madie-util";
 
 afterEach(cleanup);
 
+jest.mock("@madie/madie-util", () => ({
+  useFeatureFlags: jest.fn(() => {
+    return {
+      EnhancedTextFormatting: false,
+    };
+  }),
+}));
+
+const testDescription = `"this is a statement
+      this is a statement
+           this is a statement"`;
+const testDescriptionWithHtml = `"<p>this is a statement</p><p><strong>this is a statement</strong></p><p><u>this is a statement</u></p>"`;
+const measureDefinitionRowId = "cdbf1bb6-2c18-4edb-ae57-123a1f263633";
+
 describe("Measure MetaData Row Component", () => {
-  it("Measure MetaData rows renders Measure Reference", async () => {
+  beforeEach(() => {
+    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
+      EnhancedTextFormatting: false,
+    }));
+  });
+
+  it("Measure MetaData rows renders Measure Reference with description", async () => {
     const { getByText } = render(
       <MeasureDefinitionRow
         name="MeasureReference"
-        description="Measure reference description"
+        description={testDescription}
+        id={measureDefinitionRowId}
         type="reference"
       />
     );
     const name = getByText("MeasureReference");
     expect(name).toBeInTheDocument();
-    const description = getByText("Measure reference description");
-    expect(description).toBeInTheDocument();
+
+    const readOnlyDescription = screen.getByTestId(
+      `measure-reference-${measureDefinitionRowId}-description`
+    );
+    expect(readOnlyDescription).toBeInTheDocument();
+    expect(readOnlyDescription.textContent).toEqual(testDescription);
+  });
+
+  it("Measure MetaData rows renders Measure Reference with description (with no html in description) if EnhancedTextFormatting flag is true", async () => {
+    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
+      EnhancedTextFormatting: true,
+    }));
+
+    const { getByText } = render(
+      <MeasureDefinitionRow
+        name="MeasureReference"
+        description={testDescription}
+        id={measureDefinitionRowId}
+        type="reference"
+      />
+    );
+    const name = getByText("MeasureReference");
+    expect(name).toBeInTheDocument();
+
+    const richTextReadOnlyDescription = screen.getByTestId(
+      `measure-reference-${measureDefinitionRowId}-description`
+    );
+    expect(richTextReadOnlyDescription).toBeInTheDocument();
+    expect(richTextReadOnlyDescription).toHaveAttribute("role", "document");
+    expect(richTextReadOnlyDescription.innerHTML).toEqual(testDescription);
+  });
+
+  it("Measure MetaData rows renders Measure Reference with description (with html in description) if EnhancedTextFormatting flag is true", async () => {
+    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
+      EnhancedTextFormatting: true,
+    }));
+
+    const { getByText } = render(
+      <MeasureDefinitionRow
+        name="MeasureReference"
+        description={testDescriptionWithHtml}
+        id={measureDefinitionRowId}
+        type="reference"
+      />
+    );
+    const name = getByText("MeasureReference");
+    expect(name).toBeInTheDocument();
+
+    const richTextReadOnlyDescription = screen.getByTestId(
+      `measure-reference-${measureDefinitionRowId}-description`
+    );
+    expect(richTextReadOnlyDescription).toBeInTheDocument();
+    expect(richTextReadOnlyDescription).toHaveAttribute("role", "document");
+    expect(richTextReadOnlyDescription.innerHTML).toEqual(
+      testDescriptionWithHtml
+    );
   });
 
   it("Measure MetaData rows renders MeasureDefinition", async () => {
