@@ -106,11 +106,6 @@ const CodesComponent = ({
               if (!_.isEmpty(oids)) {
                 getCodes(oids);
               }
-            } else {
-              console.warn(
-                `ValueSet [${valueSetUrl}] does not have expansion or compose.include`
-              );
-              setCodes([]);
             }
           })
           .catch((error) => {
@@ -151,7 +146,6 @@ const CodesComponent = ({
         }
         value={value ? value : codeValue}
         renderValue={(value) =>
-          // codes?.find((concept) => concept.code === value)?.display || value
           codes?.find((concept) => concept.code === codeValue)?.display || value
         }
         onChange={(e) => {
