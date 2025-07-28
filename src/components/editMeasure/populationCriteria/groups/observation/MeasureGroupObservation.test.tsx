@@ -38,7 +38,7 @@ describe("Measure Group Observation", () => {
     mockFormikObj.errors = {};
     mockFormikObj.values = {};
     mockFormikObj.isSubmitting = false;
-    mockFormikObj.setFieldValue = undefined;
+    mockFormikObj.setFieldValue = jest.fn();
 
     const mockUuid = require("uuid") as { v4: jest.Mock<string, []> };
     mockUuid.v4.mockImplementationOnce(() => "uuid-1");
@@ -369,6 +369,8 @@ describe("Measure Group Observation", () => {
     // check if this value is already selected
     expect(observationInput.value).toBe("MyFunc1");
 
+    mockSetFieldValue.mockClear();
+
     fireEvent.change(observationInput, {
       target: { value: "MyFuncAB" },
     });
@@ -488,6 +490,8 @@ describe("Measure Group Observation", () => {
         linkMeasureObservationDisplay={true}
       />
     );
+
+    mockSetFieldValue.mockClear();
 
     const removeLink = screen.getByRole("link", { name: "Remove" });
     expect(removeLink).toBeInTheDocument();
