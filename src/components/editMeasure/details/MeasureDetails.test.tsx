@@ -93,10 +93,13 @@ const incompletedIconMeasure = {
   },
 } as unknown as Measure;
 
+const mockUseFeatureFlags = jest.fn(() => ({ EnhancedTextFormatting: false }));
+
 jest.mock("./measureInformation/MeasureInformation");
 jest.mock("./measureMetadata/MeasureMetadata");
 jest.mock("@madie/madie-util", () => ({
   useDocumentTitle: jest.fn(),
+  useFeatureFlags: () => mockUseFeatureFlags(),
   measureStore: {
     updateMeasure: (measure) => measure,
     state: jest.fn().mockImplementation(() => measure),
