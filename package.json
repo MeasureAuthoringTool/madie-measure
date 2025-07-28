@@ -132,7 +132,7 @@
     "sass": "^1.51.0",
     "sass-loader": "^12.6.0",
     "single-spa": "^5.9.3",
-    "single-spa-react": "^4.2.0",
+    "single-spa-react": "^4.6.1",
     "styled-components": "^5.3.7",
     "tailwindcss": "^3.4.10",
     "twin.macro": "^3.4.0",
@@ -164,6 +164,7 @@
     "dset": "3.1.2",
     "loader-utils@<2.0.3": "2.0.4",
     "yaml": "2.2.2",
-    "axios": "^1.7.7"
+    "axios": "^1.7.7",
+    "@types/react-dom": "^17.0.19"
   }
 }
