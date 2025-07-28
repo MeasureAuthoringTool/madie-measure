@@ -3,6 +3,7 @@ import "styled-components/macro";
 import { DisplayPopulationValue, PopulationType } from "@madie/madie-models";
 import _ from "lodash";
 import ExpectActualInput from "./ExpectActualInput";
+/* eslint-disable jsx-a11y/no-interactive-element-to-noninteractive-role */
 
 export interface TestCasePopulationProps {
   population: DisplayPopulationValue;
