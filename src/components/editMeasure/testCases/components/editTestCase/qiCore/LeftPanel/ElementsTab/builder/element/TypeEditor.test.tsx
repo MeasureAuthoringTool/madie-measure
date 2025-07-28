@@ -1491,4 +1491,52 @@ describe("TypeEditor Component", () => {
     expect(filteredChildDef).toBeInTheDocument();
     expect(filteredChildDef.value).toBe("");
   });
+
+  test("Should render PeriodDateTimeComponent when label ends with .period and childDefs contain .start and .end", () => {
+    const mockFormik = {
+      ...jest.requireActual("formik"),
+      touched: {},
+      errors: {},
+      getFieldProps: () => ({
+        label: "ClaimResponse.period",
+        name: "ClaimResponse.period",
+        value: "",
+        onChange: jest.fn(),
+        onBlur: jest.fn(),
+      }),
+      setFieldTouched: jest.fn(),
+      setFieldValue: jest.fn(),
+    };
+
+    const childDefs = [
+      { id: "ClaimResponse.period.start" },
+      { id: "ClaimResponse.period.end" },
+    ];
+
+    jest.spyOn(React, "useMemo").mockImplementationOnce((fn) => fn());
+    jest.mocked = jest.fn();
+
+    render(
+      <FormikProvider value={mockFormik}>
+        <RequiredFieldsProvider requiredFields={{}} formInfo={[]}>
+          <TypeEditor
+            resource={null}
+            structureDefinition={{
+              id: "ClaimResponse.period",
+              path: "ClaimResponse.period",
+              min: 0,
+              max: "1",
+              type: [{ code: "Period" }],
+            }}
+            label={"ClaimResponse.period"}
+            canEdit={true}
+            parentStructureDefinition={null}
+          />
+        </RequiredFieldsProvider>
+      </FormikProvider>
+    );
+
+    expect(screen.getByText("start")).toBeInTheDocument();
+    expect(screen.getByText("End")).toBeInTheDocument();
+  });
 });
