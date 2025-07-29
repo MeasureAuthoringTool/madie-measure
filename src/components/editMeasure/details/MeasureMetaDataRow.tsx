@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import "twin.macro";
 import "styled-components/macro";
-import { Popover } from "@madie/madie-design-system/dist/react";
+import { RichTextEditor } from "@madie/madie-design-system/dist/react";
 import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
 import BorderColorOutlinedIcon from "@mui/icons-material/BorderColorOutlined";
 import { blue, red } from "@mui/material/colors";
@@ -10,7 +10,6 @@ import { Tooltip } from "@mui/material";
 import { useFeatureFlags } from "@madie/madie-util";
 import DOMPurify from "dompurify";
 import "./MeasureMetaDataRow.scss";
-
 interface MeasureMetaDataRowProps {
   name: string;
   description: string;
@@ -31,14 +30,11 @@ const MeasureMetaDataRow = (props: MeasureMetaDataRowProps) => {
 
         {featureFlags.EnhancedTextFormatting ? (
           <td>
-            <div
-              role="document"
-              className="read-only-description"
+            <RichTextEditor
+              id={name}
+              readOnly
+              content={description}
               data-testid={`measure-${type}-${id}-description`}
-              aria-labelledby={`${id}-label`}
-              dangerouslySetInnerHTML={{
-                __html: DOMPurify.sanitize(description),
-              }}
             />
           </td>
         ) : (
