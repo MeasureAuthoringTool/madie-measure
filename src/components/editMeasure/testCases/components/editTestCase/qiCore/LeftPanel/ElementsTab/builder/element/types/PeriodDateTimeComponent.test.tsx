@@ -90,4 +90,52 @@ describe("PeriodDateTimeComponent", () => {
     expect(handleChange).toHaveBeenCalledWith({ start: "2022", end: "" });
     expect(handleChange).toHaveBeenCalledWith({ start: "2022", end: "2023" });
   });
+
+  test("handles input in DATE_TIME_ZONE_FORMAT for start and end date and time", async () => {
+    const handleChange = jest.fn();
+    render(
+      <PeriodDateTimeComponent
+        canEdit={true}
+        label="period"
+        fieldRequired={false}
+        value={{}}
+        onChange={handleChange}
+      />
+    );
+
+    fireEvent.change(
+      screen.getByTestId("date-time-format-selector-input-field-period"),
+      {
+        target: { value: DATE_TIME_ZONE_FORMAT },
+      }
+    );
+
+    const startInput = screen.getByTestId(
+      `start-${DATE_TIME_ZONE_FORMAT}-field-period-input`
+    );
+    const endInput = screen.getByTestId(
+      `end-${DATE_TIME_ZONE_FORMAT}-field-period-input`
+    );
+    fireEvent.change(startInput, { target: { value: "2024-09-26" } });
+    fireEvent.change(endInput, { target: { value: "2024-09-27" } });
+
+    const startTime = screen.getByTestId("start-time");
+    const endTime = screen.getByTestId("end-time");
+    expect(startTime).toBeInTheDocument();
+    expect(endTime).toBeInTheDocument();
+    const startTimeDiv = screen.getByTestId(
+      "start-YYYY-MM-DDTHH:mm:ssZ-field-period"
+    );
+    const endTimeDiv = screen.getByTestId(
+      "end-YYYY-MM-DDTHH:mm:ssZ-field-period"
+    );
+    const startTimeInput = startTimeDiv.querySelector(
+      "input"
+    ) as HTMLInputElement;
+    const endTimeInput = endTimeDiv.querySelector("input") as HTMLInputElement;
+    fireEvent.change(startTimeInput, { target: { value: "12:30:45" } });
+    fireEvent.change(endTimeInput, { target: { value: "14:15:00" } });
+
+    expect(handleChange).toHaveBeenCalled();
+  });
 });
