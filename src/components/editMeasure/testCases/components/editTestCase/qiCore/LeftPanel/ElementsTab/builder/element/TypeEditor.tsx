@@ -523,8 +523,7 @@ const TypeEditor = ({
         return <div>Unsupported Type [{type}]</div>;
     }
   } else if (!_.isEmpty(childDefs)) {
-    const isPeriodParent =
-      label.endsWith(".period") || label.endsWith("[0].period");
+    const isPeriodParent = label.endsWith(".period");
     const hasStart = childDefs.some((def) => def.id.endsWith(".start"));
     const hasEnd = childDefs.some((def) => def.id.endsWith(".end"));
 
