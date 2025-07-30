@@ -17,19 +17,25 @@ import SearchIcon from "@mui/icons-material/Search";
 import ClearIcon from "@mui/icons-material/Clear";
 import { Typography, IconButton, InputAdornment } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
-import { measureStore, checkUserCanEdit } from "@madie/madie-util";
+import {
+  measureStore,
+  checkUserCanEdit,
+  useFeatureFlags,
+} from "@madie/madie-util";
 import { useFormik } from "formik";
 import { MeasureDefinition, Measure } from "@madie/madie-models";
 import useFormikResetOnEvent from "../../../common/useFormikResetOnEvent";
 import MeasureMetaDataRow from "../MeasureMetaDataRow";
 import { MeasureDefinitionValidator } from "./MeasureDefinitionValidator";
 import "../MeasureMetaDataTable.scss";
+import TextEditor from "../../populationCriteria/groups/TextEditor";
 
 interface MeasureDefinitionsProps {
   setErrorMessage: Function;
 }
 
 const MeasureDefinitions = (props: MeasureDefinitionsProps) => {
+  const featureFlags = useFeatureFlags();
   const { setErrorMessage } = props;
   const { search } = useLocation();
   let navigate = useNavigate();
@@ -72,7 +78,7 @@ const MeasureDefinitions = (props: MeasureDefinitionsProps) => {
     onSubmit: async (values: any) => await handleSubmit(values),
   });
 
-  function formikErrorHandler(name: string, isError: boolean) {
+  function formikErrorHandler(name: string) {
     if (formik.touched[name] && formik.errors[name]) {
       return `${formik.errors[name]}`;
     }
@@ -525,27 +531,42 @@ const MeasureDefinitions = (props: MeasureDefinitionsProps) => {
                 "aria-describedby": "measure-definition-term-helper-text",
               }}
               error={formik.touched.term && Boolean(formik.errors.term)}
-              helperText={formikErrorHandler("term", true)}
+              helperText={formikErrorHandler("term")}
               {...formik.getFieldProps("term")}
             />
 
-            <TextArea
-              required
-              readOnly={!canEdit}
-              label="Definition"
-              placeholder="Enter"
-              id="measure-definition"
-              data-testid="measure-definition"
-              inputProps={{
-                "data-testid": "measure-definition-input",
-                "aria-describedby": "measure-definition-helper-text",
-              }}
-              error={
-                formik.touched.definition && Boolean(formik.errors.definition)
-              }
-              helperText={formikErrorHandler("definition", true)}
-              {...formik.getFieldProps("definition")}
-            />
+            {featureFlags.EnhancedTextFormatting ? (
+              <TextEditor
+                label="Definition"
+                required
+                data-testid="measure-definition"
+                setFieldValue={formik.setFieldValue}
+                readOnly={!canEdit}
+                error={
+                  formik.touched.definition && Boolean(formik.errors.definition)
+                }
+                helperText={formikErrorHandler("definition")}
+                {...formik.getFieldProps("definition")}
+              />
+            ) : (
+              <TextArea
+                required
+                readOnly={!canEdit}
+                label="Definition"
+                placeholder="Enter"
+                id="measure-definition"
+                data-testid="measure-definition"
+                inputProps={{
+                  "data-testid": "measure-definition-input",
+                  "aria-describedby": "measure-definition-helper-text",
+                }}
+                error={
+                  formik.touched.definition && Boolean(formik.errors.definition)
+                }
+                helperText={formikErrorHandler("definition")}
+                {...formik.getFieldProps("definition")}
+              />
+            )}
           </div>
         }
       />

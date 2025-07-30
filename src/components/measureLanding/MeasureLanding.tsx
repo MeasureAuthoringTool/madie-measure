@@ -114,6 +114,7 @@ export default function MeasureLanding() {
   const currentSortRef = useRef(currentSort);
   const currentDirectionRef = useRef(currentDirection);
   const curLimitRef = useRef(curLimit);
+  const featureFlagMeasureSearchRef = useRef(featureFlags.MeasureSearch);
   useEffect(() => {
     searchCriteriaRef.current = searchCriteria;
   }, [searchCriteria]);
@@ -126,23 +127,26 @@ export default function MeasureLanding() {
   useEffect(() => {
     curLimitRef.current = curLimit;
   }, [curLimit]);
+  useEffect(() => {
+    featureFlagMeasureSearchRef.current = featureFlags.MeasureSearch;
+  }, [featureFlags.MeasureSearch]);
 
   const setMeasureCounts = useCallback(() => {
-    if (featureFlags.MeasureSearch) {
-      measureServiceApi
-        .getMeasureCounts()
-        .then((data) => {
-          setMyMeasuresCount(data.myMeasures);
-          setAllMeasuresCount(data.allMeasures);
-        })
-        .catch(() => console.error("Unable to retrieve measure counts"));
-    }
-  }, [featureFlags.MeasureSearch, measureServiceApi]);
+    measureServiceApi
+      .getMeasureCounts()
+      .then((data) => {
+        setMyMeasuresCount(data.myMeasures);
+        setAllMeasuresCount(data.allMeasures);
+      })
+      .catch(() => console.error("Unable to retrieve measure counts"));
+  }, [measureServiceApi]);
 
   // Get the count when component mounts or when featureFlag changes
   useEffect(() => {
-    setMeasureCounts();
-  }, [setMeasureCounts]);
+    if (featureFlags.MeasureSearch) {
+      setMeasureCounts();
+    }
+  }, [featureFlags.MeasureSearch, setMeasureCounts]);
 
   const retrieveMeasures = useCallback(
     async (
@@ -175,7 +179,7 @@ export default function MeasureLanding() {
           abortController.current.signal
         );
         setPageProps(data);
-        if (doUpdateMeasureCount) {
+        if (doUpdateMeasureCount && featureFlagMeasureSearchRef.current) {
           setMeasureCounts();
         }
       } catch (error) {

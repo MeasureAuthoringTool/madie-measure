@@ -9,7 +9,7 @@ import {
 } from "../../../../api/ServiceContext";
 import MeasureDefinitions from "./MeasureDefinitions";
 // @ts-ignore
-import { measureStore } from "@madie/madie-util";
+import { measureStore, useFeatureFlags } from "@madie/madie-util";
 import { Measure, MeasureDefinition } from "@madie/madie-models";
 import userEvent from "@testing-library/user-event";
 import useMeasureServiceApi, {
@@ -57,7 +57,11 @@ jest.mock("@madie/madie-util", () => ({
     getAccessToken: () => "test.jwt",
   })),
   checkUserCanEdit: jest.fn().mockImplementation(() => true),
-  useFeatureFlags: () => ({}),
+  useFeatureFlags: jest.fn(() => {
+    return {
+      EnhancedTextFormatting: false,
+    };
+  }),
   measureStore: {
     updateMeasure: jest.fn((measure) => measure),
     state: jest.fn().mockImplementation(() => measure),
@@ -103,6 +107,12 @@ const {
 } = screen;
 
 describe("Measure Definitions Component", () => {
+  beforeEach(() => {
+    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
+      EnhancedTextFormatting: false,
+    }));
+  });
+
   afterEach(() => jest.clearAllMocks());
 
   const expectInputValue = (
@@ -650,5 +660,52 @@ describe("Measure Definitions Component", () => {
     const saveButton = getByTestId("save-button");
     fireEvent.click(saveButton);
     await checkDialogHidden();
+  });
+
+  it("render Definition rich text editor if EnhancedTextFormatting flag is true", async () => {
+    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
+      EnhancedTextFormatting: true,
+    }));
+
+    measureStore.initialState.mockImplementationOnce(
+      () => measureWithNineItems
+    );
+    measureStore.state.mockImplementationOnce(() => measureWithNineItems);
+
+    render(
+      <ApiContextProvider value={serviceConfig}>
+        <MemoryRouter initialEntries={["/"]}>
+          <MeasureDefinitions setErrorMessage={jest.fn()} />
+        </MemoryRouter>
+      </ApiContextProvider>
+    );
+    expect(getByTestId("create-definition-button")).toBeEnabled();
+
+    const createButton = await findByTestId("create-definition-button");
+    expect(createButton).toBeInTheDocument();
+    await checkDialogExists();
+
+    const termInput = getByTestId(
+      "measure-definition-term-input"
+    ) as HTMLInputElement;
+    expect(termInput).toBeInTheDocument();
+    expect(termInput.value).toBe("");
+
+    fireEvent.change(termInput, {
+      target: { value: "term 1" },
+    });
+    expect(termInput.value).toBe("term 1");
+
+    const definitionEditor = within(
+      screen.getByTestId("definition-rich-text-editor")
+    ).getByRole("textbox");
+    expect(definitionEditor).toBeInTheDocument();
+    expect(definitionEditor).toHaveTextContent("");
+
+    fireEvent.input(definitionEditor, {
+      target: { textContent: "definition 1" },
+    });
+
+    expect(definitionEditor).toHaveTextContent("definition 1");
   });
 });

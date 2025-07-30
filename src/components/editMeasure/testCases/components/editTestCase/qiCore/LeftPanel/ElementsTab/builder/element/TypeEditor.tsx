@@ -30,6 +30,7 @@ import CodingComponent from "./types/CodingComponent";
 import { useRequiredFields } from "./RequiredFieldsContext";
 import ElementSection from "../../../../../../common/ElementSection";
 import CodeableConceptComponent from "./types/CodeableConceptComponent";
+import PeriodDateTimeComponent from "./types/PeriodDateTimeComponent";
 import ChoiceType from "./ChoiceType";
 
 // onChange is being deprecated as no updates to the resource are tracked.
@@ -522,8 +523,29 @@ const TypeEditor = ({
         return <div>Unsupported Type [{type}]</div>;
     }
   } else if (!_.isEmpty(childDefs)) {
-    //  If we have childTypeDefs, we need to check to make weather or not there's an index supplied so we can attach it to the label
+    const isPeriodParent = label.endsWith(".period");
+    const hasStart = childDefs.some((def) => def.id.endsWith(".start"));
+    const hasEnd = childDefs.some((def) => def.id.endsWith(".end"));
 
+    if (isPeriodParent && hasStart && hasEnd) {
+      return (
+        <PeriodDateTimeComponent
+          label={label}
+          canEdit={canEdit}
+          helperText={formikErrorHandler(label)}
+          error={getNestedProperty(formik.errors, label)}
+          fieldRequired={required}
+          {...formik.getFieldProps(label)}
+          onChange={(value) => {
+            formik.setFieldTouched(label);
+            formik.setFieldValue(label, value);
+          }}
+          setTouched={() => {
+            formik.setFieldTouched(label);
+          }}
+        />
+      );
+    }
     return (
       <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
         {childDefs?.map((childDef) => {
