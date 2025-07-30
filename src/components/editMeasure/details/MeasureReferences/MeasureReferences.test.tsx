@@ -12,7 +12,7 @@ import useMeasureServiceApi, {
   MeasureServiceApi,
 } from "../../../../api/useMeasureServiceApi";
 // @ts-ignore
-import { measureStore } from "@madie/madie-util";
+import { measureStore, useFeatureFlags } from "@madie/madie-util";
 import { Measure, Model, Reference } from "@madie/madie-models";
 import userEvent from "@testing-library/user-event";
 
@@ -65,7 +65,11 @@ jest.mock("@madie/madie-util", () => ({
     getAccessToken: () => "test.jwt",
   })),
   checkUserCanEdit: jest.fn().mockImplementation(() => true),
-  useFeatureFlags: () => ({}),
+  useFeatureFlags: jest.fn(() => {
+    return {
+      EnhancedTextFormatting: false,
+    };
+  }),
   measureStore: {
     updateMeasure: jest.fn((measure) => measure),
     state: jest.fn().mockImplementation(() => measure),
@@ -117,7 +121,14 @@ const expectInputValue = (
   expect(inputEl.value).toBe(value);
 };
 describe("Measure References Component", () => {
+  beforeEach(() => {
+    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
+      EnhancedTextFormatting: false,
+    }));
+  });
+
   afterEach(() => jest.clearAllMocks());
+
   const expectInputValue = (
     element: HTMLTextAreaElement,
     value: string
@@ -829,5 +840,48 @@ describe("Measure References Component", () => {
     });
     fireEvent.blur(textAreaInput);
     expectInputValue(textAreaInput, "text 10");
+  });
+
+  it("render Reference rich text editor if EnhancedTextFormatting flag is true", async () => {
+    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
+      EnhancedTextFormatting: true,
+    }));
+
+    measureStore.state.mockImplementation(() => measureWithNineItems);
+    measureStore.initialState.mockImplementation(() => measureWithNineItems);
+    render(
+      <ApiContextProvider value={serviceConfig}>
+        <MemoryRouter initialEntries={["/"]}>
+          <MeasureReferences setErrorMessage={jest.fn()} />
+        </MemoryRouter>
+      </ApiContextProvider>
+    );
+
+    const editButton = screen.getByTestId(`edit-measure-reference-id 1`);
+    expect(editButton).toBeInTheDocument();
+
+    const deleteButton = getByTestId(`delete-measure-reference-id 1`);
+    expect(deleteButton).toBeInTheDocument();
+
+    userEvent.click(editButton);
+
+    await waitFor(() => {
+      expect(getByTestId("dialog-form")).toBeInTheDocument();
+    });
+
+    const typeInput = screen.getByTestId(
+      "measure-referenceType-input"
+    ) as HTMLInputElement;
+    expect(typeInput.value).toBe("type 1");
+
+    const referenceEditor = screen.getByRole("textbox");
+    expect(referenceEditor).toBeInTheDocument();
+    expect(referenceEditor).toHaveTextContent("text 1");
+
+    fireEvent.input(referenceEditor, {
+      target: { textContent: "text 2" },
+    });
+
+    expect(referenceEditor).toHaveTextContent("text 2");
   });
 });
