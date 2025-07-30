@@ -488,20 +488,18 @@ const EditTestCase = (props: EditTestCaseProps) => {
       const parsedValue = JSON.parse(editorVal);
       let timezoneUpdated = false;
       dayjs.extend(utc);
-      const regex =
-        /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2}|[+-]\d{4})/;
+      const timeRegex = /\d{4}-\d{2}-\d{2}T\d{2}/;
+      const dateRegex = /\d{4}-\d{2}-\d{2}T/;
       const updatedData = JSON.stringify(parsedValue, (key, value) => {
-        if (typeof value === "string" && regex.test(value)) {
+        if (typeof value === "string" && timeRegex.test(value)) {
           //overwrite timezones
-          const newValue = dayjs(
-            value.replace(/([+-]\d{2}:\d{2}|Z)$/, "+00:00")
-          )
-            .utc()
-            .toISOString();
+          const newValue = dayjs(value).utc(false).format();
           if (value != newValue) {
             timezoneUpdated = true;
           }
           return newValue;
+        } else if (typeof value === "string" && dateRegex.test(value)) {
+          return dayjs(value.split("T")[0]).utc(false).format("YYYY-MM-DD");
         }
         return value;
       });
@@ -656,10 +654,9 @@ const EditTestCase = (props: EditTestCaseProps) => {
                 started running, please continue working in MADiE.
               </h3>
               <ul>
-                MADiE enforces a UTC (offset 0) timestamp format with mandatory
-                millisecond precision. All timestamps with non-zero offsets have
-                been overwritten to UTC, and missing milliseconds have been
-                defaulted to '000'.
+                Timezone offsets have been added when hours are present,
+                otherwise timezone offsets are removed or set to UTC for
+                consistency.
               </ul>
             </div>,
             "warning"
@@ -681,10 +678,9 @@ const EditTestCase = (props: EditTestCaseProps) => {
             <div>
               <h3>Test case {action}d successfully!</h3>
               <ul>
-                MADiE enforces a UTC (offset 0) timestamp format with mandatory
-                millisecond precision. All timestamps with non-zero offsets have
-                been overwritten to UTC, and missing milliseconds have been
-                defaulted to '000'.
+                Timezone offsets have been added when hours are present,
+                otherwise timezone offsets are removed or set to UTC for
+                consistency.
               </ul>
             </div>,
             "warning"
@@ -704,10 +700,9 @@ const EditTestCase = (props: EditTestCaseProps) => {
             </h3>
             {timezoneUpdated && (
               <ul>
-                MADiE enforces a UTC (offset 0) timestamp format with mandatory
-                millisecond precision. All timestamps with non-zero offsets have
-                been overwritten to UTC, and missing milliseconds have been
-                defaulted to '000'.
+                Timezone offsets have been added when hours are present,
+                otherwise timezone offsets are removed or set to UTC for
+                consistency.
               </ul>
             )}
             <ul>{valErrors}</ul>
@@ -721,10 +716,9 @@ const EditTestCase = (props: EditTestCaseProps) => {
             {timezoneUpdated && (
               <ul style={{ listStyle: "inside" }}>
                 <li>
-                  MADiE enforces a UTC (offset 0) timestamp format with
-                  mandatory millisecond precision. All timestamps with non-zero
-                  offsets have been overwritten to UTC, and missing milliseconds
-                  have been defaulted to '000'.
+                  Timezone offsets have been added when hours are present,
+                  otherwise timezone offsets are removed or set to UTC for
+                  consistency.
                 </li>
               </ul>
             )}
