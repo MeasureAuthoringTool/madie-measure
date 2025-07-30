@@ -839,7 +839,7 @@ describe("EditTestCase component", () => {
       const testCaseJson = JSON.stringify({
         resourceType: "Bundle",
         id: "43",
-        date: "2025-10-06T12:00:00+04:00",
+        date: "2025-10-06T12:00:00.000+04:00",
       });
 
       mockedAxios.put.mockResolvedValue({

@@ -492,11 +492,18 @@ const EditTestCase = (props: EditTestCaseProps) => {
       const dateRegex = /\d{4}-\d{2}-\d{2}T/;
       const updatedData = JSON.stringify(parsedValue, (key, value) => {
         if (typeof value === "string" && timeRegex.test(value)) {
-          //overwrite timezones
-          const newValue = dayjs(value).utc(false).format();
-          if (value != newValue) {
+          const milliRegex = /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{1,3}/;
+          // Keep milliseconds if they are already entered
+          const newValue = milliRegex.test(value)
+            ? dayjs(value.replace(/([+-]\d{2}:\d{2}|Z)$/, "+00:00"))
+                .utc(false)
+                .toISOString()
+            : dayjs(value).utc(false).format();
+
+          if (value !== newValue) {
             timezoneUpdated = true;
           }
+
           return newValue;
         } else if (typeof value === "string" && dateRegex.test(value)) {
           return dayjs(value.split("T")[0]).utc(false).format("YYYY-MM-DD");
