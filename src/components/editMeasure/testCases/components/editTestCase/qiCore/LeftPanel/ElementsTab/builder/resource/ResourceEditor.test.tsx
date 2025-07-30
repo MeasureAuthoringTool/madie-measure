@@ -394,7 +394,7 @@ describe.skip("ResourceEditor", () => {
     expect(tabs[0]).toHaveAttribute("aria-selected", "false");
   });
 
-  it("should delete selected attribute and dispatch even to update test case json state", async () => {
+  it("should delete selected attribute and dispatch event to update test case json state", async () => {
     const cleanFormMock = {
       ...mockFormikObj,
       dirty: false,
