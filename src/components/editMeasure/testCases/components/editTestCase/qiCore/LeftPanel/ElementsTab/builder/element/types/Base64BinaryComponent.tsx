@@ -3,6 +3,7 @@ import { FormHelperText } from "@mui/material";
 import { TypeComponentProps } from "./TypeComponentProps";
 import { TextField } from "@madie/madie-design-system/dist/react";
 import _ from "lodash";
+import AddElementButton from "../../../../../../../common/AddElementButton";
 
 const isBase64 = (str) => {
   try {
@@ -20,6 +21,8 @@ const Base64BinaryComponent = ({
   value,
   onChange,
   structureDefinition,
+  showAddAttributeButton,
+  addTitle,
 }: TypeComponentProps) => {
   const [isValid, setValid] = useState<boolean>(value ? isBase64(value) : true);
 
@@ -32,29 +35,34 @@ const Base64BinaryComponent = ({
     }
   };
   return (
-    <TextField
-      label={`${label}`}
-      required={fieldRequired}
-      readOnly={!canEdit}
-      inputProps={{
-        "data-testid": `field-input-${label}`,
-        "aria-describedby": `field-input-helper-text-${label}`,
-        required: fieldRequired,
-        "aria-required": fieldRequired,
-      }}
-      size="small"
-      fullWidth
-      value={value}
-      onChange={(e) => handleChange(e.target.value)}
-      helperText={
-        <FormHelperText
-          data-testid={`field-input-helper-text-${label}`}
-          error={!isValid}
-        >
-          {isValid ? "" : "Please enter a valid Base64Binary"}
-        </FormHelperText>
-      }
-    />
+    <div className="element-editor-add-row">
+      <TextField
+        label={`${label}`}
+        required={fieldRequired}
+        readOnly={!canEdit}
+        inputProps={{
+          "data-testid": `field-input-${label}`,
+          "aria-describedby": `field-input-helper-text-${label}`,
+          required: fieldRequired,
+          "aria-required": fieldRequired,
+        }}
+        size="small"
+        fullWidth
+        value={value}
+        onChange={(e) => handleChange(e.target.value)}
+        helperText={
+          <FormHelperText
+            data-testid={`field-input-helper-text-${label}`}
+            error={!isValid}
+          >
+            {isValid ? "" : "Please enter a valid Base64Binary"}
+          </FormHelperText>
+        }
+      />
+      {showAddAttributeButton && addTitle && (
+        <AddElementButton name={addTitle} />
+      )}
+    </div>
   );
 };
 

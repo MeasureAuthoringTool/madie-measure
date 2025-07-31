@@ -30,6 +30,7 @@ import CodingComponent from "./types/CodingComponent";
 import { useRequiredFields } from "./RequiredFieldsContext";
 import ElementSection from "../../../../../../common/ElementSection";
 import CodeableConceptComponent from "./types/CodeableConceptComponent";
+import PeriodDateTimeComponent from "./types/PeriodDateTimeComponent";
 import ChoiceType from "./ChoiceType";
 
 // onChange is being deprecated as no updates to the resource are tracked.
@@ -46,6 +47,7 @@ const TypeEditor = ({
   const { requiredFields, formInfo } = useRequiredFields();
   let required = getRequired(requiredFields, stripAllIndexes(label));
   const fhirDefinitionsService = useRef(useFhirDefinitionsServiceApi());
+
   if (typeof label !== "string") {
     console.warn("TypeEditor: label is not a string", label);
     throw new Error("TypeEditor: label is not a string");
@@ -135,6 +137,13 @@ const TypeEditor = ({
       return errors;
     }
   };
+
+  const isRoot = structureDefinition?.id?.split?.(".")?.length === 2;
+  const canBeMultipleCardinality = structureDefinition?.max === "*";
+  const addTitle = structureDefinition?.id
+    ? _.startCase(getLastPart(structureDefinition.id))
+    : "";
+  const showAddAttributeButton = Boolean(!isRoot && canBeMultipleCardinality);
   if (isComponentDataType(type)) {
     switch (type) {
       case "string":
@@ -148,6 +157,8 @@ const TypeEditor = ({
               helperText={formikErrorHandler(label)}
               error={getNestedProperty(formik.errors, label)}
               fieldRequired={required}
+              showAddAttributeButton={showAddAttributeButton}
+              addTitle={addTitle}
               {...formik.getFieldProps(label)}
             />
           </Box>
@@ -162,6 +173,8 @@ const TypeEditor = ({
               helperText={formikErrorHandler(label)}
               error={getNestedProperty(formik.errors, label)}
               fieldRequired={required}
+              showAddAttributeButton={showAddAttributeButton}
+              addTitle={addTitle}
               {...formik.getFieldProps(label)}
               onChange={({ target }) => {
                 formik.setFieldTouched(label);
@@ -179,6 +192,8 @@ const TypeEditor = ({
               canEdit={canEdit}
               helperText={formikErrorHandler(label)}
               error={getNestedProperty(formik.errors, label)}
+              showAddAttributeButton={showAddAttributeButton}
+              addTitle={addTitle}
               fieldRequired={required}
               {...formik.getFieldProps(label)}
             />
@@ -190,6 +205,8 @@ const TypeEditor = ({
             label={label}
             canEdit={canEdit}
             structureDefinition={structureDefinition}
+            showAddAttributeButton={showAddAttributeButton}
+            addTitle={addTitle}
             fieldRequired={required}
           />
         );
@@ -202,6 +219,8 @@ const TypeEditor = ({
             helperText={formikErrorHandler(label)}
             error={getNestedProperty(formik.errors, label)}
             fieldRequired={required}
+            showAddAttributeButton={showAddAttributeButton}
+            addTitle={addTitle}
             {...formik.getFieldProps(label)}
             onChange={(value) => {
               formik.setFieldTouched(label);
@@ -222,6 +241,8 @@ const TypeEditor = ({
             label={label}
             helperText={formikErrorHandler(label)}
             error={getNestedProperty(formik.errors, label)}
+            showAddAttributeButton={showAddAttributeButton}
+            addTitle={addTitle}
             {...formik.getFieldProps(label)}
           />
         );
@@ -241,6 +262,8 @@ const TypeEditor = ({
             setTouched={() => {
               formik.setFieldTouched(label);
             }}
+            showAddAttributeButton={showAddAttributeButton}
+            addTitle={addTitle}
             dateTimeValue={formik.getFieldProps(label).value}
             onBlur={() => formik.setFieldTouched(label)}
           />
@@ -262,6 +285,8 @@ const TypeEditor = ({
                 ? IntegerType.UNSIGNED
                 : IntegerType.POSITIVE_INT
             }
+            showAddAttributeButton={showAddAttributeButton}
+            addTitle={addTitle}
             {...formik.getFieldProps(label)}
           />
         );
@@ -275,6 +300,8 @@ const TypeEditor = ({
             label={label}
             helperText={formikErrorHandler(label)}
             error={getNestedProperty(formik.errors, label)}
+            showAddAttributeButton={showAddAttributeButton}
+            addTitle={addTitle}
             {...formik.getFieldProps(label)}
           />
         );
@@ -286,6 +313,8 @@ const TypeEditor = ({
             fieldRequired={required}
             label={label}
             helperText={formikErrorHandler(label)}
+            showAddAttributeButton={showAddAttributeButton}
+            addTitle={addTitle}
             error={getNestedProperty(formik.errors, label)}
             {...formik.getFieldProps(label)}
             onChange={({ target }) => {
@@ -302,6 +331,8 @@ const TypeEditor = ({
             structureDefinition={structureDefinition}
             fieldRequired={required}
             label={label}
+            showAddAttributeButton={showAddAttributeButton}
+            addTitle={addTitle}
             {...formik.getFieldProps(label)}
           />
         );
@@ -313,6 +344,8 @@ const TypeEditor = ({
             helperText={formikErrorHandler(label)}
             error={getNestedProperty(formik.errors, label)}
             fieldRequired={required}
+            showAddAttributeButton={showAddAttributeButton}
+            addTitle={addTitle}
             {...formik.getFieldProps(label)}
             onChange={(value) => {
               formik.setFieldTouched(label);
@@ -332,6 +365,8 @@ const TypeEditor = ({
             label={label}
             resource={resource}
             structureDefinition={structureDefinition}
+            showAddAttributeButton={showAddAttributeButton}
+            addTitle={addTitle}
             {...formik.getFieldProps(label)}
             onChange={(value) => {
               if (label.includes(".value[x")) {
@@ -348,6 +383,8 @@ const TypeEditor = ({
             label={label}
             canEdit={canEdit}
             structureDefinition={structureDefinition}
+            showAddAttributeButton={showAddAttributeButton}
+            addTitle={addTitle}
             {...formik.getFieldProps(label)}
             onChange={(value) => {
               formik.setFieldTouched(label);
@@ -361,6 +398,8 @@ const TypeEditor = ({
             label={label}
             canEdit={canEdit}
             structureDefinition={structureDefinition}
+            showAddAttributeButton={showAddAttributeButton}
+            addTitle={addTitle}
             {...formik.getFieldProps(label)}
             onChange={(value) => {
               formik.setFieldTouched(label);
@@ -507,6 +546,8 @@ const TypeEditor = ({
         ) {
           return (
             <ExtensionComponent
+              showAddAttributeButton={showAddAttributeButton}
+              addTitle={addTitle}
               label={label}
               canEdit={canEdit}
               {...formik.getFieldProps(label)}
@@ -526,8 +567,29 @@ const TypeEditor = ({
         return <div>Unsupported Type [{type}]</div>;
     }
   } else if (!_.isEmpty(childDefs)) {
-    //  If we have childTypeDefs, we need to check to make weather or not there's an index supplied so we can attach it to the label
+    const isPeriodParent = label.endsWith(".period");
+    const hasStart = childDefs.some((def) => def.id.endsWith(".start"));
+    const hasEnd = childDefs.some((def) => def.id.endsWith(".end"));
 
+    if (isPeriodParent && hasStart && hasEnd) {
+      return (
+        <PeriodDateTimeComponent
+          label={label}
+          canEdit={canEdit}
+          helperText={formikErrorHandler(label)}
+          error={getNestedProperty(formik.errors, label)}
+          fieldRequired={required}
+          {...formik.getFieldProps(label)}
+          onChange={(value) => {
+            formik.setFieldTouched(label);
+            formik.setFieldValue(label, value);
+          }}
+          setTouched={() => {
+            formik.setFieldTouched(label);
+          }}
+        />
+      );
+    }
     return (
       <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
         {childDefs?.map((childDef) => {

@@ -39,6 +39,21 @@ export const getOptionLabel = (option: ElementDefinition, basePath: string) => {
   return label;
 };
 
+//helper to get the base label for choice types
+const getChoiceBaseLabel = (option: ElementDefinition, basePath: string) => {
+  const label = option.path?.substring(basePath.length + 1);
+  if (label.endsWith("[x]")) {
+    return label.substring(0, label.length - 3);
+  }
+  // for already selected options, reconstruct base label if possible
+  // e.g., performedRange -> performed
+  const match = label.match(/^(.*?)[A-Z][a-zA-Z0-9]*$/);
+  if (match) {
+    return match[1];
+  }
+  return null;
+};
+
 const ElementSelector = ({
   basePath,
   options,
@@ -83,7 +98,21 @@ const ElementSelector = ({
         onChange={onChange}
         disableCloseOnSelect
         getOptionLabel={(option) => getOptionLabel(option, basePath)}
-        getOptionDisabled={(option) => value.includes(option)}
+        getOptionDisabled={(option) => {
+          if (value.includes(option)) return true;
+          // Disable if another choice type with same base is selected
+          const base = getChoiceBaseLabel(option, basePath);
+          if (base) {
+            // if any other option with same base is selected, and this option is not selected, disable
+            // find if any selected option with same base but different code
+            const isOtherSelected = newValues.some(
+              (value) =>
+                value !== option && getChoiceBaseLabel(value, basePath) === base
+            );
+            if (isOtherSelected) return true;
+          }
+          return false;
+        }}
         ListboxProps={{
           style: { height: "40vh", maxHeight: "700px" },
         }}

@@ -86,10 +86,13 @@ describe("CodeableConceptComponent Tests", () => {
             label="test-label"
             value={value}
             onChange={mockOnChange}
+            addTitle={"Codeable"}
+            showAddAttributeButton={true}
           />
         </ExecutionContextProvider>
       </ApiContextProvider>
     );
+    expect(screen.getByText("Add Codeable")).toBeInTheDocument();
 
     // verify value set
     const valueSetSelect = screen.getByRole("combobox", {

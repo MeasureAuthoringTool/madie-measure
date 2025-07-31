@@ -7,6 +7,7 @@ import * as _ from "lodash";
 import useFhirDefinitionsServiceApi from "../../../../../../../../api/useFhirDefinitionsService";
 import { getValueSetUrl } from "../../../../../../../../api/fhirDefinitionServiceUtilities";
 import useTerminologyServiceApi from "../../../../../../../../api/useTerminologyServiceApi";
+import AddElementButton from "../../../../../../../common/AddElementButton";
 
 const CodesComponent = ({
   canEdit,
@@ -15,6 +16,8 @@ const CodesComponent = ({
   value,
   onChange,
   resource,
+  showAddAttributeButton,
+  addTitle,
 }: TypeComponentProps) => {
   const [codes, setCodes] = useState([]);
   const fhirDefinitionServiceApi = useRef(useFhirDefinitionsServiceApi());
@@ -120,39 +123,45 @@ const CodesComponent = ({
 
   return (
     <Box>
-      <Select
-        label={label}
-        id={`code-selector-${label}`}
-        inputProps={{
-          "data-testid": `code-selector-input-${label}`,
-        }}
-        data-testid={`code-selector-${label}`}
-        SelectDisplayProps={{
-          "aria-required": "true",
-        }}
-        readOnly={!canEdit}
-        options={
-          codes
-            ? codes.map((concept) => (
-                <MenuItem
-                  key={concept.code}
-                  value={concept.code}
-                  data-testid={`code-option-${concept.code}`}
-                >
-                  {concept.display}
-                </MenuItem>
-              ))
-            : []
-        }
-        value={value ? value : codeValue}
-        renderValue={(value) =>
-          codes?.find((concept) => concept.code === codeValue)?.display || value
-        }
-        onChange={(e) => {
-          onChange(e.target.value);
-          setCodeValue(e.target.value);
-        }}
-      />
+      <div className="element-editor-add-row">
+        <Select
+          label={label}
+          id={`code-selector-${label}`}
+          inputProps={{
+            "data-testid": `code-selector-input-${label}`,
+          }}
+          data-testid={`code-selector-${label}`}
+          SelectDisplayProps={{
+            "aria-required": "true",
+          }}
+          readOnly={!canEdit}
+          options={
+            codes
+              ? codes.map((concept) => (
+                  <MenuItem
+                    key={concept.code}
+                    value={concept.code}
+                    data-testid={`code-option-${concept.code}`}
+                  >
+                    {concept.display}
+                  </MenuItem>
+                ))
+              : []
+          }
+          value={value}
+          renderValue={(value) =>
+            codes?.find((concept) => concept.code === codeValue)?.display ||
+            value
+          }
+          onChange={(e) => {
+            onChange(e.target.value);
+            setCodeValue(e.target.value);
+          }}
+        />
+        {showAddAttributeButton && addTitle && (
+          <AddElementButton name={addTitle} />
+        )}
+      </div>
     </Box>
   );
 };

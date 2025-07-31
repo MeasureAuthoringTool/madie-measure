@@ -15,9 +15,11 @@ describe("UuidComponent", () => {
         fieldRequired={false}
         onChange={handleChange}
         structureDefinition={null}
+        addTitle={"UUID"}
+        showAddAttributeButton={true}
       />
     );
-
+    expect(screen.getByText("Add UUID")).toBeInTheDocument();
     const uuidInput = screen.getByTestId(
       "field-input-uuid"
     ) as HTMLInputElement;

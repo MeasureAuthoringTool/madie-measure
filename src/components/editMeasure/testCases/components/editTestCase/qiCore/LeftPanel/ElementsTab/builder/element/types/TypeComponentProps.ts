@@ -13,4 +13,6 @@ export interface TypeComponentProps {
   stringOnly?: boolean;
   name?: string;
   setTouched?: () => void;
+  showAddAttributeButton?: boolean;
+  addTitle?: string;
 }

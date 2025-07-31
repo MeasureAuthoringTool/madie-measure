@@ -839,7 +839,7 @@ describe("EditTestCase component", () => {
       const testCaseJson = JSON.stringify({
         resourceType: "Bundle",
         id: "43",
-        date: "2025-10-06T12:00:00+04:00",
+        date: "2025-10-06T12:00:00.000+04:00",
       });
 
       mockedAxios.put.mockResolvedValue({
@@ -884,7 +884,7 @@ describe("EditTestCase component", () => {
         "Test case updated successfully with errors in JSON"
       );
       expect(debugOutput).toHaveTextContent(
-        "MADiE enforces a UTC (offset 0) timestamp format with mandatory millisecond precision. All timestamps with non-zero offsets have been overwritten to UTC, and missing milliseconds have been defaulted to '000'."
+        "Timezone offsets have been added when hours are present, otherwise timezone offsets are removed or set to UTC for consistency."
       );
     });
 
@@ -1028,7 +1028,7 @@ describe("EditTestCase component", () => {
         "Test case updated successfully! Test case validation has started running, please continue working in MADiE."
       );
       expect(debugOutput).toHaveTextContent(
-        "MADiE enforces a UTC (offset 0) timestamp format with mandatory millisecond precision. All timestamps with non-zero offsets have been overwritten to UTC, and missing milliseconds have been defaulted to '000'."
+        "Timezone offsets have been added when hours are present, otherwise timezone offsets are removed or set to UTC for consistency."
       );
     });
 
@@ -1113,7 +1113,7 @@ describe("EditTestCase component", () => {
         "Test case updated successfully with errors in JSON"
       );
       expect(debugOutput).toHaveTextContent(
-        "MADiE enforces a UTC (offset 0) timestamp format with mandatory millisecond precision. All timestamps with non-zero offsets have been overwritten to UTC, and missing milliseconds have been defaulted to '000'."
+        "Timezone offsets have been added when hours are present, otherwise timezone offsets are removed or set to UTC for consistency."
       );
     });
 
