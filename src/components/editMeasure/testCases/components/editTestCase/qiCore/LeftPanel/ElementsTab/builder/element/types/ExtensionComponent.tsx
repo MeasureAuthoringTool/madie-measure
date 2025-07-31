@@ -10,6 +10,7 @@ import { MenuItem, Typography } from "@mui/material";
 import TypeEditor from "../TypeEditor";
 import { StructureDefinitionDto } from "../../../../../../../../api/models/StructureDefinitionDto";
 import _ from "lodash";
+import AddElementButton from "../../../../../../../common/AddElementButton";
 
 interface ExtensionProps {
   label: string;
@@ -19,6 +20,8 @@ interface ExtensionProps {
   onChange: (value) => void;
   elementDefinition: ElementDefinition;
   parentStructureDefinition: StructureDefinitionDto;
+  showAddAttributeButton?: boolean;
+  addTitle?: string;
 }
 
 //this relies on snapshot.
@@ -50,6 +53,8 @@ const ExtensionComponent = ({
   canEdit,
   elementDefinition,
   parentStructureDefinition,
+  showAddAttributeButton,
+  addTitle,
   ...rest
 }: ExtensionProps) => {
   //@ts-ignore
@@ -80,7 +85,7 @@ const ExtensionComponent = ({
   const idPrefix = elementDefinition?.id?.split("Extension.").pop();
   if (urlElement?.fixedUri) {
     return (
-      <>
+      <div style={{ display: "flex", flexDirection: "column" }}>
         <Typography data-testid={idPrefix} sx={{ fontSize: "14px" }}>
           <span style={{ color: "#1976d2", fontWeight: 700 }}>
             {urlElement?.fixedUri}
@@ -88,28 +93,34 @@ const ExtensionComponent = ({
           <br />
           <span style={{ color: "#333333" }}>{urlElement?.fixedUri}</span>
         </Typography>
-        <Select
-          label="Value[x]"
-          inputProps={{
-            "data-testid": `${idPrefix}-type-selector-input`,
-          }}
-          data-testid={`${idPrefix}-type-selector`}
-          SelectDisplayProps={{
-            "aria-required": "true",
-          }}
-          required={valueElement?.min > 0}
-          options={[
-            <MenuItem
-              key={selectedValueType}
-              value={selectedValueType}
-              data-testid={`type-option-${selectedValueType}`}
-            >
-              {selectedValueType}
-            </MenuItem>,
-          ]}
-          value={selectedValueType}
-          onChange={(e) => setSelectedValueType(e.target.value)}
-        />
+        <div className="element-editor-add-row">
+          <Select
+            label="Value[x]"
+            inputProps={{
+              "data-testid": `${idPrefix}-type-selector-input`,
+            }}
+            data-testid={`${idPrefix}-type-selector`}
+            SelectDisplayProps={{
+              "aria-required": "true",
+            }}
+            readOnly={false}
+            required={valueElement?.min > 0}
+            options={[
+              <MenuItem
+                key={selectedValueType}
+                value={selectedValueType}
+                data-testid={`type-option-${selectedValueType}`}
+              >
+                {selectedValueType}
+              </MenuItem>,
+            ]}
+            value={selectedValueType}
+            onChange={(e) => setSelectedValueType(e.target.value)}
+          />
+          {showAddAttributeButton && addTitle && (
+            <AddElementButton name={addTitle} />
+          )}
+        </div>
         {selectedValueType && valueElement && (
           // handle change will have to be passed here to test for Coding element. Currently does not work because of missed valueSets
           <TypeEditor
@@ -120,19 +131,24 @@ const ExtensionComponent = ({
             parentStructureDefinition={elementDefinition}
           />
         )}
-      </>
+      </div>
     );
   } else
     return (
       <div data-testid={idPrefix}>
-        <UriComponent
-          canEdit={!urlElement?.fixedUri} // disable if this is fixed value
-          fieldRequired={urlElement?.min > 0}
-          label={`${elementDefinition.id}.url`}
-          structureDefinition={null}
-          onChange={(value) => setUrl(value)}
-          //needed for multiple choice types.. Doesn't seem to be found at this time.
-        />
+        <div className="element-editor-add-row">
+          <UriComponent
+            canEdit={!urlElement?.fixedUri} // disable if this is fixed value
+            fieldRequired={urlElement?.min > 0}
+            label={`${elementDefinition.id}.url`}
+            structureDefinition={null}
+            onChange={(value) => setUrl(value)}
+            //needed for multiple choice types.. Doesn't seem to be found at this time.
+          />
+          {showAddAttributeButton && addTitle && (
+            <AddElementButton name={addTitle} />
+          )}
+        </div>
         <Select
           label={`${elementDefinition.id}.value[x]`}
           inputProps={{

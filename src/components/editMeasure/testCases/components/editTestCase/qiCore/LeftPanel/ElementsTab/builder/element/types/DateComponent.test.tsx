@@ -310,8 +310,12 @@ describe("DateComponent", () => {
         fieldRequired={false}
         value="1992-01-01"
         onChange={handleChange}
+        addTitle={"Birthday"}
+        showAddAttributeButton={true}
       />
     );
+    expect(screen.getByText("Add Birthday")).toBeInTheDocument();
+
     const formatSelectorField = getByTestId(
       "date-format-selector-input-field-birthday"
     );

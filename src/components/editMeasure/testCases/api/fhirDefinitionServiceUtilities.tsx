@@ -412,8 +412,8 @@ export function getIndexFromPath(path) {
 
 // gets everything after the last . in a path.
 export function getLastPart(path: string): string {
-  const parts = path.split(".");
-  return parts[parts.length - 1];
+  const parts = path?.split(".");
+  return parts[parts?.length - 1];
 }
 
 // removes all indexes from path
