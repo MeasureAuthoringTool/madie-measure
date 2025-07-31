@@ -58,10 +58,14 @@ const CodesComponent = ({
         if (!_.isEmpty(valueSets)) {
           valueSets.forEach((valueSet) => {
             if (valueSet?.expansion?.contains) {
-              setCodes((prevCodes) => [
-                ...prevCodes,
-                ...valueSet.expansion.contains,
-              ]);
+              setCodes((prevCodes) => {
+                const combined = [...prevCodes, ...valueSet.expansion.contains];
+                // Remove duplicates by 'code'
+                return combined.filter(
+                  (item, index, self) =>
+                    index === self.findIndex((c) => c.code === item.code)
+                );
+              });
             }
           });
         }
