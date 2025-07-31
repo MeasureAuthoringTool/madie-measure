@@ -42,33 +42,67 @@ export const getOptionLabel = (option: ElementDefinition, basePath: string) => {
 //helper to get the base label for choice types
 const getChoiceBaseLabel = (option: ElementDefinition, basePath: string) => {
   const label = option.path?.substring(basePath.length + 1);
-  
+
   // If this is an original choice type definition with [x]
   if (label.endsWith("[x]")) {
     return label.substring(0, label.length - 3);
   }
-  
+
   // Comprehensive list of FHIR datatypes that can appear in choice types
   const fhirDatatypes = [
     // Primitive types
-    "Boolean", "Integer", "String", "Decimal", "Uri", "Url", "Canonical", 
-    "Base64Binary", "Instant", "Date", "DateTime", "Time", "Code", "Oid", 
-    "Id", "Markdown", "UnsignedInt", "PositiveInt", "Uuid",
-    
+    "Boolean",
+    "Integer",
+    "String",
+    "Decimal",
+    "Uri",
+    "Url",
+    "Canonical",
+    "Base64Binary",
+    "Instant",
+    "Date",
+    "DateTime",
+    "Time",
+    "Code",
+    "Oid",
+    "Id",
+    "Markdown",
+    "UnsignedInt",
+    "PositiveInt",
+    "Uuid",
+
     // Complex types
-    "Quantity", "Money", "SimpleQuantity", "Distance", "Duration", "Count",
-    "Age", "Range", "Period", "Ratio", "Reference", "CodeableConcept", 
-    "Coding", "Identifier", "HumanName", "Address", "ContactPoint", 
-    "Timing", "Signature", "Annotation", "SampledData", "Attachment", 
-    "Extension" 
+    "Quantity",
+    "Money",
+    "SimpleQuantity",
+    "Distance",
+    "Duration",
+    "Count",
+    "Age",
+    "Range",
+    "Period",
+    "Ratio",
+    "Reference",
+    "CodeableConcept",
+    "Coding",
+    "Identifier",
+    "HumanName",
+    "Address",
+    "ContactPoint",
+    "Timing",
+    "Signature",
+    "Annotation",
+    "SampledData",
+    "Attachment",
+    "Extension",
   ];
-  
+
   for (const type of fhirDatatypes) {
     if (label.endsWith(type) && label.length > type.length) {
       return label.substring(0, label.length - type.length);
     }
   }
-  
+
   // find last camelCase boundary, in case of new datatype
   const matches = label.match(/([a-z0-9])([A-Z])/g);
   if (matches && matches.length > 0) {
@@ -76,20 +110,20 @@ const getChoiceBaseLabel = (option: ElementDefinition, basePath: string) => {
     const allMatches = [];
     let regex = /([a-z0-9])([A-Z])/g;
     let match;
-    
+
     while ((match = regex.exec(label)) !== null) {
       allMatches.push({
         transition: match[0],
-        index: match.index
+        index: match.index,
       });
     }
-    
+
     // Get the last occurrence
     const lastMatch = allMatches[allMatches.length - 1];
     // Return everything up to and including the lowercase letter
     return label.substring(0, lastMatch.index + 1);
   }
-  
+
   return null;
 };
 
