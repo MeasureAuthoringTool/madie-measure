@@ -140,10 +140,13 @@ describe("CodingComponent Tests", () => {
             label="actuality"
             value={null}
             onChange={mockOnChange}
+            addTitle={"Coding"}
+            showAddAttributeButton={true}
           />
         </ExecutionContextProvider>
       </ApiContextProvider>
     );
+    expect(screen.getByText("Add Coding")).toBeInTheDocument();
 
     const valueSetSelect = screen.getByRole("combobox", {
       name: "Value Set / Direct Reference Code",

@@ -139,9 +139,11 @@ describe("DateTimeComponent", () => {
         fieldRequired={false}
         value={null}
         onChange={handleChange}
+        addTitle={"Birthday"}
+        showAddAttributeButton={true}
       />
     );
-
+    expect(screen.getByText("Add Birthday")).toBeInTheDocument();
     fireEvent.change(
       screen.getByTestId("date-time-format-selector-input-field-birthday"),
       {

@@ -29,8 +29,11 @@ describe("TimeComponent", () => {
         fieldRequired={false}
         onChange={handleChange}
         value={`01:23:45`}
+        addTitle={"Time"}
+        showAddAttributeButton={true}
       />
     );
+    expect(screen.getByText("Add Time")).toBeInTheDocument();
 
     const input = screen.getByPlaceholderText("hh:mm:ss aa");
     userEvent.type(input, "082359AM");

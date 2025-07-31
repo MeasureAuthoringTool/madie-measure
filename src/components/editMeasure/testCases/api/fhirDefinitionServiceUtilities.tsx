@@ -280,6 +280,7 @@ export function getTopLevelElements(resource: any) {
     (e) =>
       e.path.split(".")?.length === 2 &&
       e.id !== "Extension.extension" &&
+      e.id !== "Patient.extension" &&
       e.max !== "0" &&
       // Exclude entries where the path contains".contained",".text",".meta",".language",".implicitRules"
       ![".contained", ".text", ".meta", ".language", ".implicitRules"].some(
@@ -412,8 +413,8 @@ export function getIndexFromPath(path) {
 
 // gets everything after the last . in a path.
 export function getLastPart(path: string): string {
-  const parts = path.split(".");
-  return parts[parts.length - 1];
+  const parts = path?.split(".");
+  return parts[parts?.length - 1];
 }
 
 // removes all indexes from path
@@ -466,7 +467,7 @@ export function mergePathWithIndex(pathWithIndex, pathWithoutIndex) {
 }
 
 export function addCardinalityToElement(nextEntry, elemPath) {
-  if (!nextEntry.resource[elemPath]) {
+  if (!nextEntry?.resource[elemPath]) {
     // make it accessible to avoid a null
     nextEntry.resource[elemPath] = {};
   }
