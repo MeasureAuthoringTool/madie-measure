@@ -213,7 +213,7 @@ const TestCaseTable = (props: TestCaseTableProps) => {
       }
     );
 
-    if (isQICore6) {
+    if (isQICore6 && featureFlags?.stu6TestCaseValidation) {
       columnDefs.push({
         header: "Validation",
         cell: (info) => (
@@ -353,7 +353,11 @@ const TestCaseTable = (props: TestCaseTableProps) => {
         enableSorting: false,
       },
     ];
-  }, [testCases, featureFlags?.EditTestsOnVersionedMeasures]);
+  }, [
+    testCases,
+    featureFlags?.EditTestsOnVersionedMeasures,
+    featureFlags?.stu6TestCaseValidation,
+  ]);
 
   const table = useReactTable({
     data,

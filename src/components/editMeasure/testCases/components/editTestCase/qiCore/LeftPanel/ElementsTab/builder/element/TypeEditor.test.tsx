@@ -1491,4 +1491,99 @@ describe("TypeEditor Component", () => {
     expect(filteredChildDef).toBeInTheDocument();
     expect(filteredChildDef.value).toBe("");
   });
+
+  test("Should render PeriodDateTimeComponent when label ends with .period and childDefs contain .start and .end", () => {
+    const mockFormik = {
+      ...jest.requireActual("formik"),
+      touched: {},
+      errors: {},
+      getFieldProps: () => ({
+        label: "ClaimResponse.period",
+        name: "ClaimResponse.period",
+        value: "",
+        onChange: jest.fn(),
+        onBlur: jest.fn(),
+      }),
+      setFieldTouched: jest.fn(),
+      setFieldValue: jest.fn(),
+    };
+
+    const childDefs = [
+      { id: "ClaimResponse.period.start" },
+      { id: "ClaimResponse.period.end" },
+    ];
+
+    jest.spyOn(React, "useMemo").mockImplementationOnce((fn) => fn());
+    jest.mocked = jest.fn();
+
+    render(
+      <FormikProvider value={mockFormik}>
+        <RequiredFieldsProvider requiredFields={{}} formInfo={[]}>
+          <TypeEditor
+            resource={null}
+            structureDefinition={{
+              id: "ClaimResponse.period",
+              path: "ClaimResponse.period",
+              min: 0,
+              max: "1",
+              type: [{ code: "Period" }],
+            }}
+            label={"ClaimResponse.period"}
+            canEdit={true}
+            parentStructureDefinition={null}
+          />
+        </RequiredFieldsProvider>
+      </FormikProvider>
+    );
+
+    expect(screen.getByText("start")).toBeInTheDocument();
+    expect(screen.getByText("End")).toBeInTheDocument();
+  });
+
+  test("Should render PeriodDateTimeComponent for ClaimResponse.period with time format", () => {
+    const mockFormik = {
+      touched: {},
+      errors: {},
+      getFieldProps: (label: string) => ({
+        label,
+        name: label,
+        value:
+          label === "ClaimResponse.period"
+            ? {
+                start: "2024-09-26T08:00:00+00:00",
+                end: "2024-09-27T14:45:30+00:00",
+              }
+            : "",
+        onChange: jest.fn(),
+        onBlur: jest.fn(),
+      }),
+      setFieldTouched: jest.fn(),
+      setFieldValue: jest.fn(),
+    };
+
+    render(
+      <FormikProvider value={mockFormik}>
+        <RequiredFieldsProvider requiredFields={{}} formInfo={[]}>
+          <TypeEditor
+            resource={null}
+            structureDefinition={{
+              id: "ClaimResponse.period",
+              path: "ClaimResponse.period",
+              min: 0,
+              max: "1",
+              type: [{ code: "Period" }],
+            }}
+            label={"ClaimResponse.period"}
+            canEdit={true}
+            parentStructureDefinition={null}
+          />
+        </RequiredFieldsProvider>
+      </FormikProvider>
+    );
+
+    expect(screen.getByText("start")).toBeInTheDocument();
+    expect(screen.getByText("End")).toBeInTheDocument();
+    const timeInputs = screen.getAllByPlaceholderText("MM/DD/YYYY hh:mm aa");
+    expect(timeInputs.length).toBeGreaterThanOrEqual(2);
+  });
 });

@@ -3,6 +3,8 @@ import "styled-components/macro";
 import { DisplayStratificationValue } from "@madie/madie-models";
 import ExpectActualInput from "../populations/ExpectActualInput";
 
+/* eslint-disable jsx-a11y/no-interactive-element-to-noninteractive-role */
+
 export interface TestCaseStratificationProps {
   strataCode: string;
   stratification: DisplayStratificationValue;
