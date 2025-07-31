@@ -5,7 +5,7 @@
     "type": "collection",
     "entry": [
       {
-        "fullUrl": "https://madie.cms.gov/ClaimResponse/fb0b4321-ccce-45c2-b5ee-bee2517e07cd",
+        "fullUrl": "https://madie.cms.gov/ClaimResponse/6fb9d817-76c5-4b68-ba06-92c7429e6b5c",
         "resource": {
           "id": "6fb9d817-76c5-4b68-ba06-92c7429e6b5c",
           "resourceType": "ClaimResponse",
@@ -15,6 +15,19 @@
               "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-claimresponse"
             ]
           }
+        }
+      },
+      {
+        "fullUrl": "https://madie.cms.gov/AllergyIntolerance/6fb9d817",
+        "resource": {
+          "id": "6fb9d817",
+          "resourceType": "AllergyIntolerance",
+          "meta": {
+            "profile": [
+              "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-allergyintolerance"
+            ]
+          },
+          "onsetDateTime": "2025-07-01T04:00:00+00:00"
         }
       }
     ]
