@@ -114,8 +114,11 @@ describe("UriComponent Component", () => {
         fieldRequired={false}
         onChange={handleChange}
         structureDefinition={null}
+        addTitle={"URI"}
+        showAddAttributeButton={true}
       />
     );
+    expect(screen.getByText("Add URI")).toBeInTheDocument();
     expect(uriFieldInput.value).toBe("urn:oid:2.16.840.1.113883.4.642.3.224");
   });
 });
