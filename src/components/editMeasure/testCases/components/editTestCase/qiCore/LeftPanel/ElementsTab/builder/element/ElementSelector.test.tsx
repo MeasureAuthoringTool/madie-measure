@@ -1,7 +1,7 @@
 import React from "react";
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import ElementSelector from "./ElementSelector";
+import ElementSelector, { getOptionLabel } from "./ElementSelector";
 import { ElementDefinition } from "fhir/r4";
 
 const mockOptions: ElementDefinition[] = [
@@ -163,5 +163,28 @@ describe("ElementSelector", () => {
     expect(
       screen.getByTestId("disabled-element-selector-gender-chip")
     ).toBeInTheDocument();
+  });
+
+  it("getOptionLabel returns the right label when ElementDefinition has slice name", () => {
+    const label = getOptionLabel(mockOptions[2], "Patient");
+    expect(label).toBe("extension:race");
+  });
+
+  it("getOptionLabel returns the right label when path has [x]", () => {
+    const eleDefinition = {
+      path: "Patient.multipleBirth[x]",
+      base: {
+        path: "Patient.multipleBirth[x]",
+        min: 0,
+        max: "1",
+      },
+      type: [
+        {
+          code: "integer",
+        },
+      ],
+    };
+    const label = getOptionLabel(eleDefinition, "Patient");
+    expect(label).toBe("multipleBirthInteger");
   });
 });

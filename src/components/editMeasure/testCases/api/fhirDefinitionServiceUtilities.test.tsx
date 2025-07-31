@@ -27,6 +27,7 @@ import {
   addCardinalityToElement,
   formatChoiceType,
   modifySliceNameForReadability,
+  extractNameWithoutIndex,
 } from "./fhirDefinitionServiceUtilities";
 import _ from "lodash";
 
@@ -713,5 +714,21 @@ describe("addCardinalityToElement", () => {
     expect(r4).toBe("US Vital Signs");
     const r5 = modifySliceNameForReadability("us-core-pediatric-growth");
     expect(r5).toBe("US Core Pediatric Growth");
+  });
+});
+
+describe("extractNameWithoutIndex", () => {
+  const element = {
+    id: "Patient.extension[x]",
+  } as ElementDefinition;
+  it("should extract the name without index", () => {
+    const result = extractNameWithoutIndex(element);
+    expect(result).toBe("Patient.extension");
+  });
+
+  it("should handle empty id", () => {
+    const emptyElement = { id: "" } as ElementDefinition;
+    const result = extractNameWithoutIndex(emptyElement);
+    expect(result).toBe("");
   });
 });
