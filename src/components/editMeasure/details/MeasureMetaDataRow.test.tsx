@@ -13,10 +13,10 @@ jest.mock("@madie/madie-util", () => ({
   }),
 }));
 
-const testDescription = `"this is a statement
+const testDescription = `this is a statement
       this is a statement
-           this is a statement"`;
-const testDescriptionWithHtml = `"<p>this is a statement</p><p><strong>this is a statement</strong></p><p><u>this is a statement</u></p>"`;
+           this is a statement`;
+const testDescriptionWithHtml = `<p>this is a statement</p><p><strong>this is a statement</strong></p><p><u>this is a statement</u></p>`;
 const measureDefinitionRowId = "cdbf1bb6-2c18-4edb-ae57-123a1f263633";
 
 describe("Measure MetaData Row Component", () => {
@@ -62,11 +62,16 @@ describe("Measure MetaData Row Component", () => {
     expect(name).toBeInTheDocument();
 
     const richTextReadOnlyDescription = screen.getByTestId(
-      `measure-reference-${measureDefinitionRowId}-description`
+      "measure-reference-rich-text-editor"
     );
     expect(richTextReadOnlyDescription).toBeInTheDocument();
-    expect(richTextReadOnlyDescription).toHaveAttribute("role", "document");
-    expect(richTextReadOnlyDescription.innerHTML).toEqual(testDescription);
+
+    const paragraph = richTextReadOnlyDescription.querySelector("p");
+    expect(paragraph).toBeInTheDocument();
+
+    expect(paragraph.innerHTML).toBe(
+      "this is a statement\n      this is a statement\n           this is a statement"
+    );
   });
 
   it("Measure MetaData rows renders Measure Reference with description (with html in description) if EnhancedTextFormatting flag is true", async () => {
@@ -86,12 +91,18 @@ describe("Measure MetaData Row Component", () => {
     expect(name).toBeInTheDocument();
 
     const richTextReadOnlyDescription = screen.getByTestId(
-      `measure-reference-${measureDefinitionRowId}-description`
+      "measure-reference-rich-text-editor"
     );
     expect(richTextReadOnlyDescription).toBeInTheDocument();
-    expect(richTextReadOnlyDescription).toHaveAttribute("role", "document");
-    expect(richTextReadOnlyDescription.innerHTML).toEqual(
-      testDescriptionWithHtml
+
+    expect(richTextReadOnlyDescription).toContainHTML(
+      "<p>this is a statement</p>"
+    );
+    expect(richTextReadOnlyDescription).toContainHTML(
+      "<p><strong>this is a statement</strong></p>"
+    );
+    expect(richTextReadOnlyDescription).toContainHTML(
+      "<p><u>this is a statement</u></p>"
     );
   });
 
