@@ -2,6 +2,7 @@ import React from "react";
 import { MenuItem as MuiMenuItem } from "@mui/material";
 import { Select } from "@madie/madie-design-system/dist/react";
 import { TypeComponentProps } from "./TypeComponentProps";
+import AddElementButton from "../../../../../../../common/AddElementButton";
 
 const BooleanComponent = ({
   canEdit,
@@ -9,6 +10,8 @@ const BooleanComponent = ({
   label,
   helperText,
   error,
+  showAddAttributeButton,
+  addTitle,
   ...props
 }: TypeComponentProps) => {
   const { value } = props;
@@ -30,7 +33,7 @@ const BooleanComponent = ({
     </MuiMenuItem>,
   ];
   return (
-    <>
+    <div className="element-editor-add-row">
       <Select
         id={`boolean-selector-${label}`}
         label={label}
@@ -49,7 +52,10 @@ const BooleanComponent = ({
         {...props}
         value={value || ""} // mui thinks undefined is an uncontrolled input. We need to display this otherwise.
       ></Select>
-    </>
+      {showAddAttributeButton && addTitle && (
+        <AddElementButton name={addTitle} />
+      )}
+    </div>
   );
 };
 

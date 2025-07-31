@@ -131,9 +131,12 @@ describe("Codes Component", () => {
           onChange={onChangeMock}
           fieldRequired
           structureDefinition={structureDefinition}
+          addTitle={"Codes"}
+          showAddAttributeButton={true}
         />
       </ApiContextProvider>
     );
+    expect(screen.getByText("Add Codes")).toBeInTheDocument();
     expect(axios.get).toHaveBeenCalledWith(
       "fhirService.com/qicore/resources/value-set-definition?url=" +
         valueSetUrl,

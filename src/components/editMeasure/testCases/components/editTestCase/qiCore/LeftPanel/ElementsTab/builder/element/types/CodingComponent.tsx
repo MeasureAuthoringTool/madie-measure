@@ -13,6 +13,7 @@ import { Coding, Extension, ValueSet } from "fhir/r4";
 import { getValueSetUrl } from "../../../../../../../../api/fhirDefinitionServiceUtilities";
 import useTerminologyServiceApi from "../../../../../../../../api/useTerminologyServiceApi";
 import { getOidFromString } from "@madie/madie-util";
+import AddElementButton from "../../../../../../../common/AddElementButton";
 
 const placeHolder = (label: string) => (
   <span style={{ color: "#717171" }}>{label}</span>
@@ -36,6 +37,8 @@ const CodingComponent = ({
   label,
   value,
   onChange,
+  showAddAttributeButton,
+  addTitle,
 }) => {
   const [allValueSets, setAllValueSets] = useState<ValueSet[]>();
   const [selectedValueSet, setSelectedValueSet] = useState<ValueSet>();
@@ -270,28 +273,32 @@ const CodingComponent = ({
         }) || []
     );
   };
-
   return (
-    <>
-      <Select
-        label="Value Set / Direct Reference Code"
-        id={`value-set-selector-${label}`}
-        required="true"
-        inputProps={{
-          "data-testid": `value-set-selector-input-${label}`,
-        }}
-        data-testid={`value-set-${label}`}
-        readOnly={!canEdit}
-        options={getValueSetMenuOptions()}
-        value={selectedValueSet ? selectedValueSet?.name : ""}
-        renderValue={(value) => {
-          if (value === "") {
-            return placeHolder("- Select -");
-          }
-          return selectedValueSet?.title;
-        }}
-        onChange={(e) => handleValueSetChange(e.target.value)}
-      />
+    <div style={{ display: "flex", flexDirection: "column" }}>
+      <div className="element-editor-add-row">
+        <Select
+          label="Value Set / Direct Reference Code"
+          id={`value-set-selector-${label}`}
+          required="true"
+          inputProps={{
+            "data-testid": `value-set-selector-input-${label}`,
+          }}
+          data-testid={`value-set-${label}`}
+          readOnly={!canEdit}
+          options={getValueSetMenuOptions()}
+          value={selectedValueSet ? selectedValueSet?.name : ""}
+          renderValue={(value) => {
+            if (value === "") {
+              return placeHolder("- Select -");
+            }
+            return selectedValueSet?.title;
+          }}
+          onChange={(e) => handleValueSetChange(e.target.value)}
+        />
+        {showAddAttributeButton && addTitle && (
+          <AddElementButton name={addTitle} />
+        )}
+      </div>
       {selectedValueSet && (
         <div tw="flex mt-3">
           {selectedValueSet.title == "Custom Code" ? (
@@ -413,7 +420,7 @@ const CodingComponent = ({
           </div>
         </>
       )}
-    </>
+    </div>
   );
 };
 

@@ -1,0 +1,2030 @@
+[
+  [
+    {
+      "resourceType": "ValueSet",
+      "id": "2.16.840.1.113762.1.4.1095.34",
+      "meta": {
+        "versionId": "17",
+        "lastUpdated": "2024-01-17T01:08:53.000-05:00",
+        "profile": [
+          "http://hl7.org/fhir/StructureDefinition/shareablevalueset",
+          "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/computable-valueset-cqfm",
+          "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/publishable-valueset-cqfm"
+        ]
+      },
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/valueset-effectiveDate",
+          "valueDate": "2024-01-17"
+        }
+      ],
+      "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1095.34",
+      "identifier": [
+        {
+          "system": "urn:ietf:rfc:3986",
+          "value": "urn:oid:2.16.840.1.113762.1.4.1095.34"
+        }
+      ],
+      "version": "20240117",
+      "name": "MalnutritionScreeningFindingOfNotAtRiskResult",
+      "title": "Malnutrition Screening Finding of Not At Risk Result",
+      "status": "active",
+      "date": "2024-01-17T01:08:53-05:00",
+      "publisher": "AND Steward",
+      "expansion": {
+        "identifier": "urn:uuid:a88da2a9-fc9d-4241-ba67-b7b120fdebba",
+        "timestamp": "2025-07-29T14:51:59-04:00",
+        "total": 1,
+        "offset": 0,
+        "parameter": [
+          {
+            "name": "count",
+            "valueInteger": 1000
+          },
+          {
+            "name": "offset",
+            "valueInteger": 0
+          }
+        ],
+        "contains": [
+          {
+            "system": "http://loinc.org",
+            "inactive": false,
+            "version": "2.80",
+            "code": "LA33699-2",
+            "display": "Not at risk for malnutrition"
+          }
+        ]
+      }
+    },
+    {
+      "resourceType": "ValueSet",
+      "id": "2.16.840.1.113883.3.117.1.7.1.292",
+      "meta": {
+        "versionId": "34",
+        "lastUpdated": "2023-12-21T17:43:03.000-05:00",
+        "profile": [
+          "http://hl7.org/fhir/StructureDefinition/shareablevalueset",
+          "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/computable-valueset-cqfm",
+          "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/publishable-valueset-cqfm"
+        ]
+      },
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/valueset-effectiveDate",
+          "valueDate": "2021-06-11"
+        }
+      ],
+      "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.117.1.7.1.292",
+      "identifier": [
+        {
+          "system": "urn:ietf:rfc:3986",
+          "value": "urn:oid:2.16.840.1.113883.3.117.1.7.1.292"
+        }
+      ],
+      "version": "20210611",
+      "name": "EmergencyDepartmentVisit",
+      "title": "Emergency Department Visit",
+      "status": "active",
+      "experimental": false,
+      "date": "2021-06-11T01:02:23-04:00",
+      "publisher": "TJC EH Steward",
+      "expansion": {
+        "identifier": "urn:uuid:d68c821f-c295-466f-95bc-27814e8dda9f",
+        "timestamp": "2025-07-29T14:51:59-04:00",
+        "total": 1,
+        "offset": 0,
+        "parameter": [
+          {
+            "name": "count",
+            "valueInteger": 1000
+          },
+          {
+            "name": "offset",
+            "valueInteger": 0
+          }
+        ],
+        "contains": [
+          {
+            "system": "http://snomed.info/sct",
+            "inactive": false,
+            "version": "http://snomed.info/sct/731000124108/version/20250301",
+            "code": "4525004",
+            "display": "Emergency department patient visit (procedure)"
+          }
+        ]
+      }
+    },
+    {
+      "resourceType": "ValueSet",
+      "id": "2.16.840.1.113883.3.666.5.307",
+      "meta": {
+        "versionId": "33",
+        "lastUpdated": "2023-12-21T17:43:03.000-05:00",
+        "profile": [
+          "http://hl7.org/fhir/StructureDefinition/shareablevalueset",
+          "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/computable-valueset-cqfm",
+          "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/publishable-valueset-cqfm"
+        ]
+      },
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/valueset-effectiveDate",
+          "valueDate": "2020-03-07"
+        }
+      ],
+      "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.666.5.307",
+      "identifier": [
+        {
+          "system": "urn:ietf:rfc:3986",
+          "value": "urn:oid:2.16.840.1.113883.3.666.5.307"
+        }
+      ],
+      "version": "20200307",
+      "name": "EncounterInpatient",
+      "title": "Encounter Inpatient",
+      "status": "active",
+      "experimental": false,
+      "date": "2020-03-07T01:00:21-05:00",
+      "publisher": "Lantana EH Steward",
+      "expansion": {
+        "identifier": "urn:uuid:d926ecbf-16c3-4891-b50d-32f780d6118a",
+        "timestamp": "2025-07-29T14:51:59-04:00",
+        "total": 3,
+        "offset": 0,
+        "parameter": [
+          {
+            "name": "count",
+            "valueInteger": 1000
+          },
+          {
+            "name": "offset",
+            "valueInteger": 0
+          }
+        ],
+        "contains": [
+          {
+            "system": "http://snomed.info/sct",
+            "inactive": false,
+            "version": "http://snomed.info/sct/731000124108/version/20250301",
+            "code": "183452005",
+            "display": "Emergency hospital admission (procedure)"
+          },
+          {
+            "system": "http://snomed.info/sct",
+            "inactive": false,
+            "version": "http://snomed.info/sct/731000124108/version/20250301",
+            "code": "32485007",
+            "display": "Hospital admission (procedure)"
+          },
+          {
+            "system": "http://snomed.info/sct",
+            "inactive": false,
+            "version": "http://snomed.info/sct/731000124108/version/20250301",
+            "code": "8715000",
+            "display": "Hospital admission, elective (procedure)"
+          }
+        ]
+      }
+    },
+    {
+      "resourceType": "ValueSet",
+      "id": "2.16.840.1.113762.1.4.1110.38",
+      "meta": {
+        "versionId": "8",
+        "lastUpdated": "2023-12-21T17:43:03.000-05:00",
+        "profile": [
+          "http://hl7.org/fhir/StructureDefinition/shareablevalueset",
+          "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/computable-valueset-cqfm",
+          "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/publishable-valueset-cqfm"
+        ]
+      },
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/valueset-effectiveDate",
+          "valueDate": "2019-04-26"
+        }
+      ],
+      "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1110.38",
+      "identifier": [
+        {
+          "system": "urn:ietf:rfc:3986",
+          "value": "urn:oid:2.16.840.1.113762.1.4.1110.38"
+        }
+      ],
+      "version": "20190426",
+      "name": "OutpatientSurgeryService",
+      "title": "Outpatient Surgery Service",
+      "status": "active",
+      "experimental": false,
+      "date": "2019-04-26T01:01:00-04:00",
+      "publisher": "TJC EH Steward",
+      "expansion": {
+        "identifier": "urn:uuid:b3d208fb-cab7-4da3-a080-ebb485959d4a",
+        "timestamp": "2025-07-29T14:51:59-04:00",
+        "total": 3,
+        "offset": 0,
+        "parameter": [
+          {
+            "name": "count",
+            "valueInteger": 1000
+          },
+          {
+            "name": "offset",
+            "valueInteger": 0
+          }
+        ],
+        "contains": [
+          {
+            "system": "http://snomed.info/sct",
+            "inactive": false,
+            "version": "http://snomed.info/sct/731000124108/version/20250301",
+            "code": "110468005",
+            "display": "Ambulatory surgery (procedure)"
+          },
+          {
+            "system": "http://snomed.info/sct",
+            "inactive": false,
+            "version": "http://snomed.info/sct/731000124108/version/20250301",
+            "code": "709063003",
+            "display": "Admission to same day surgery center (procedure)"
+          },
+          {
+            "system": "http://snomed.info/sct",
+            "inactive": false,
+            "version": "http://snomed.info/sct/731000124108/version/20250301",
+            "code": "711580002",
+            "display": "Minor ambulatory surgery (procedure)"
+          }
+        ]
+      }
+    },
+    {
+      "resourceType": "ValueSet",
+      "id": "2.16.840.1.113762.1.4.1095.89",
+      "meta": {
+        "versionId": "12",
+        "lastUpdated": "2024-01-17T01:08:53.000-05:00",
+        "profile": [
+          "http://hl7.org/fhir/StructureDefinition/shareablevalueset",
+          "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/computable-valueset-cqfm",
+          "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/publishable-valueset-cqfm"
+        ]
+      },
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/valueset-effectiveDate",
+          "valueDate": "2024-01-17"
+        }
+      ],
+      "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1095.89",
+      "identifier": [
+        {
+          "system": "urn:ietf:rfc:3986",
+          "value": "urn:oid:2.16.840.1.113762.1.4.1095.89"
+        }
+      ],
+      "version": "20240117",
+      "name": "MalnutritionScreeningFindingOfAtRiskResult",
+      "title": "Malnutrition Screening Finding of At Risk Result",
+      "status": "active",
+      "date": "2024-01-17T01:08:53-05:00",
+      "publisher": "AND Steward",
+      "expansion": {
+        "identifier": "urn:uuid:54f5e17a-47e9-4b86-9f5d-f0d837011486",
+        "timestamp": "2025-07-29T14:51:59-04:00",
+        "total": 5,
+        "offset": 0,
+        "parameter": [
+          {
+            "name": "count",
+            "valueInteger": 1000
+          },
+          {
+            "name": "offset",
+            "valueInteger": 0
+          }
+        ],
+        "contains": [
+          {
+            "system": "http://snomed.info/sct",
+            "inactive": false,
+            "version": "http://snomed.info/sct/731000124108/version/20250301",
+            "code": "129689002",
+            "display": "At increased risk for nutritional problem (finding)"
+          },
+          {
+            "system": "http://snomed.info/sct",
+            "inactive": false,
+            "version": "http://snomed.info/sct/731000124108/version/20250301",
+            "code": "129845004",
+            "display": "At increased risk for imbalanced nutrition, less than body requirements (finding)"
+          },
+          {
+            "system": "http://snomed.info/sct",
+            "inactive": false,
+            "version": "http://snomed.info/sct/731000124108/version/20250301",
+            "code": "700361001",
+            "display": "Predicted inadequate nutrient intake (finding)"
+          },
+          {
+            "system": "http://snomed.info/sct",
+            "inactive": false,
+            "version": "http://snomed.info/sct/731000124108/version/20250301",
+            "code": "704361005",
+            "display": "At increased risk of deficient food intake (finding)"
+          },
+          {
+            "system": "http://loinc.org",
+            "inactive": false,
+            "version": "2.80",
+            "code": "LA27538-0",
+            "display": "At risk for malnutrition"
+          }
+        ]
+      }
+    },
+    {
+      "resourceType": "ValueSet",
+      "id": "2.16.840.1.113762.1.4.1095.96",
+      "meta": {
+        "versionId": "8",
+        "lastUpdated": "2024-01-17T01:08:53.000-05:00",
+        "profile": [
+          "http://hl7.org/fhir/StructureDefinition/shareablevalueset",
+          "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/computable-valueset-cqfm",
+          "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/publishable-valueset-cqfm"
+        ]
+      },
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/valueset-effectiveDate",
+          "valueDate": "2024-01-17"
+        }
+      ],
+      "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1095.96",
+      "identifier": [
+        {
+          "system": "urn:ietf:rfc:3986",
+          "value": "urn:oid:2.16.840.1.113762.1.4.1095.96"
+        }
+      ],
+      "version": "20240117",
+      "name": "NutritionAssessmentStatusFindingOfWellNourishedOrNotMalnourishedOrMildlyMalnourished",
+      "title": "Nutrition Assessment Status Finding of Well Nourished or Not Malnourished or Mildly Malnourished",
+      "status": "active",
+      "date": "2024-01-17T01:08:53-05:00",
+      "publisher": "AND Steward",
+      "expansion": {
+        "identifier": "urn:uuid:8dc1c4d6-4002-483d-906e-81b88c5c7fd9",
+        "timestamp": "2025-07-29T14:51:59-04:00",
+        "total": 4,
+        "offset": 0,
+        "parameter": [
+          {
+            "name": "count",
+            "valueInteger": 1000
+          },
+          {
+            "name": "offset",
+            "valueInteger": 0
+          }
+        ],
+        "contains": [
+          {
+            "system": "http://snomed.info/sct",
+            "inactive": false,
+            "version": "http://snomed.info/sct/731000124108/version/20250301",
+            "code": "248324001",
+            "display": "Well nourished (finding)"
+          },
+          {
+            "system": "http://loinc.org",
+            "inactive": false,
+            "version": "2.80",
+            "code": "LA33701-6",
+            "display": "Well nourished"
+          },
+          {
+            "system": "http://loinc.org",
+            "inactive": false,
+            "version": "2.80",
+            "code": "LA33702-4",
+            "display": "Not malnourished"
+          },
+          {
+            "system": "http://loinc.org",
+            "inactive": false,
+            "version": "2.80",
+            "code": "LA33703-2",
+            "display": "Mildly malnourished"
+          }
+        ]
+      }
+    },
+    {
+      "resourceType": "ValueSet",
+      "id": "2.16.840.1.113762.1.4.1111.143",
+      "meta": {
+        "versionId": "26",
+        "lastUpdated": "2023-12-21T17:43:03.000-05:00",
+        "profile": [
+          "http://hl7.org/fhir/StructureDefinition/shareablevalueset",
+          "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/computable-valueset-cqfm",
+          "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/publishable-valueset-cqfm"
+        ]
+      },
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/valueset-effectiveDate",
+          "valueDate": "2021-06-11"
+        }
+      ],
+      "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1111.143",
+      "identifier": [
+        {
+          "system": "urn:ietf:rfc:3986",
+          "value": "urn:oid:2.16.840.1.113762.1.4.1111.143"
+        }
+      ],
+      "version": "20210611",
+      "name": "ObservationServices",
+      "title": "Observation Services",
+      "status": "active",
+      "experimental": false,
+      "date": "2021-06-11T01:02:23-04:00",
+      "publisher": "TJC EH Steward",
+      "expansion": {
+        "identifier": "urn:uuid:592cbf08-81f8-4ab5-b204-1ec739380149",
+        "timestamp": "2025-07-29T14:51:59-04:00",
+        "total": 1,
+        "offset": 0,
+        "parameter": [
+          {
+            "name": "count",
+            "valueInteger": 1000
+          },
+          {
+            "name": "offset",
+            "valueInteger": 0
+          }
+        ],
+        "contains": [
+          {
+            "system": "http://snomed.info/sct",
+            "inactive": false,
+            "version": "http://snomed.info/sct/731000124108/version/20250301",
+            "code": "448951000124107",
+            "display": "Admission to observation unit (procedure)"
+          }
+        ]
+      }
+    },
+    {
+      "resourceType": "ValueSet",
+      "id": "2.16.840.1.113762.1.4.1095.43",
+      "meta": {
+        "versionId": "20",
+        "lastUpdated": "2024-01-17T01:08:53.000-05:00",
+        "profile": [
+          "http://hl7.org/fhir/StructureDefinition/shareablevalueset",
+          "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/computable-valueset-cqfm",
+          "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/publishable-valueset-cqfm"
+        ]
+      },
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/valueset-effectiveDate",
+          "valueDate": "2024-01-17"
+        }
+      ],
+      "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1095.43",
+      "identifier": [
+        {
+          "system": "urn:ietf:rfc:3986",
+          "value": "urn:oid:2.16.840.1.113762.1.4.1095.43"
+        }
+      ],
+      "version": "20240117",
+      "name": "NutritionAssessmentStatusFindingOfSeverelyMalnourished",
+      "title": "Nutrition Assessment Status Finding of Severely Malnourished",
+      "status": "active",
+      "date": "2024-01-17T01:08:53-05:00",
+      "publisher": "AND Steward",
+      "expansion": {
+        "identifier": "urn:uuid:4db506c9-12e5-4629-8a77-b0632a0317b7",
+        "timestamp": "2025-07-29T14:51:59-04:00",
+        "total": 19,
+        "offset": 0,
+        "parameter": [
+          {
+            "name": "count",
+            "valueInteger": 1000
+          },
+          {
+            "name": "offset",
+            "valueInteger": 0
+          }
+        ],
+        "contains": [
+          {
+            "system": "http://snomed.info/sct",
+            "inactive": false,
+            "version": "http://snomed.info/sct/731000124108/version/20250301",
+            "code": "102635008",
+            "display": "Acute nutritional deficiency (finding)"
+          },
+          {
+            "system": "http://snomed.info/sct",
+            "inactive": false,
+            "version": "http://snomed.info/sct/731000124108/version/20250301",
+            "code": "129588001",
+            "display": "Adult failure to thrive syndrome (disorder)"
+          },
+          {
+            "system": "http://snomed.info/sct",
+            "inactive": false,
+            "version": "http://snomed.info/sct/731000124108/version/20250301",
+            "code": "238108007",
+            "display": "Cachexia (finding)"
+          },
+          {
+            "system": "http://snomed.info/sct",
+            "inactive": false,
+            "version": "http://snomed.info/sct/731000124108/version/20250301",
+            "code": "272588001",
+            "display": "Malnutrition (calorie) (disorder)"
+          },
+          {
+            "system": "http://snomed.info/sct",
+            "inactive": false,
+            "version": "http://snomed.info/sct/731000124108/version/20250301",
+            "code": "281583001",
+            "display": "Nutritional wasting (disorder)"
+          },
+          {
+            "system": "http://snomed.info/sct",
+            "inactive": false,
+            "version": "http://snomed.info/sct/731000124108/version/20250301",
+            "code": "288517002",
+            "display": "Wasting disease (disorder)"
+          },
+          {
+            "system": "http://snomed.info/sct",
+            "inactive": false,
+            "version": "http://snomed.info/sct/731000124108/version/20250301",
+            "code": "371597004",
+            "display": "Emaciated (finding)"
+          },
+          {
+            "system": "http://snomed.info/sct",
+            "inactive": false,
+            "version": "http://snomed.info/sct/731000124108/version/20250301",
+            "code": "432788009",
+            "display": "Pediatric failure to thrive (disorder)"
+          },
+          {
+            "system": "http://snomed.info/sct",
+            "inactive": false,
+            "version": "http://snomed.info/sct/731000124108/version/20250301",
+            "code": "441951000124102",
+            "display": "Starvation-related malnutrition (disorder)"
+          },
+          {
+            "system": "http://snomed.info/sct",
+            "inactive": false,
+            "version": "http://snomed.info/sct/731000124108/version/20250301",
+            "code": "54840006",
+            "display": "Failure to thrive (disorder)"
+          },
+          {
+            "system": "http://snomed.info/sct",
+            "inactive": false,
+            "version": "http://snomed.info/sct/731000124108/version/20250301",
+            "code": "56882008",
+            "display": "Anorexia nervosa (disorder)"
+          },
+          {
+            "system": "http://snomed.info/sct",
+            "inactive": false,
+            "version": "http://snomed.info/sct/731000124108/version/20250301",
+            "code": "722959000",
+            "display": "Anorexia nervosa co-occurrent with dangerously low body weight (disorder)"
+          },
+          {
+            "system": "http://snomed.info/sct",
+            "inactive": false,
+            "version": "http://snomed.info/sct/731000124108/version/20250301",
+            "code": "722960005",
+            "display": "Anorexia nervosa co-occurrent with significantly low body weight (disorder)"
+          },
+          {
+            "system": "http://snomed.info/sct",
+            "inactive": false,
+            "version": "http://snomed.info/sct/731000124108/version/20250301",
+            "code": "723917005",
+            "display": "Dangerously low body weight co-occurrent and due to anorexia nervosa of restricting type (disorder)"
+          },
+          {
+            "system": "http://snomed.info/sct",
+            "inactive": false,
+            "version": "http://snomed.info/sct/731000124108/version/20250301",
+            "code": "723919008",
+            "display": "Significantly low body weight co-occurrent and due to anorexia nervosa of restricting type (disorder)"
+          },
+          {
+            "system": "http://snomed.info/sct",
+            "inactive": false,
+            "version": "http://snomed.info/sct/731000124108/version/20250301",
+            "code": "772791006",
+            "display": "Sarcopenia (disorder)"
+          },
+          {
+            "system": "http://snomed.info/sct",
+            "inactive": false,
+            "version": "http://snomed.info/sct/731000124108/version/20250301",
+            "code": "77675002",
+            "display": "Anorexia nervosa, restricting type (disorder)"
+          },
+          {
+            "system": "http://snomed.info/sct",
+            "inactive": false,
+            "version": "http://snomed.info/sct/731000124108/version/20250301",
+            "code": "788876001",
+            "display": "Cachexia due to malignant neoplastic disease (finding)"
+          },
+          {
+            "system": "http://loinc.org",
+            "inactive": false,
+            "version": "2.80",
+            "code": "LA33705-7",
+            "display": "Severely malnourished"
+          }
+        ]
+      }
+    },
+    {
+      "resourceType": "ValueSet",
+      "id": "2.16.840.1.113762.1.4.1095.47",
+      "meta": {
+        "versionId": "16",
+        "lastUpdated": "2024-01-17T01:08:53.000-05:00",
+        "profile": [
+          "http://hl7.org/fhir/StructureDefinition/shareablevalueset",
+          "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/computable-valueset-cqfm",
+          "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/publishable-valueset-cqfm"
+        ]
+      },
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/valueset-effectiveDate",
+          "valueDate": "2024-01-17"
+        }
+      ],
+      "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1095.47",
+      "identifier": [
+        {
+          "system": "urn:ietf:rfc:3986",
+          "value": "urn:oid:2.16.840.1.113762.1.4.1095.47"
+        }
+      ],
+      "version": "20240117",
+      "name": "NutritionAssessmentStatusFindingOfModeratelyMalnourished",
+      "title": "Nutrition Assessment Status Finding of Moderately Malnourished",
+      "status": "active",
+      "date": "2024-01-17T01:08:53-05:00",
+      "publisher": "AND Steward",
+      "expansion": {
+        "identifier": "urn:uuid:7b37a25d-5436-40a3-98f4-fae461ce083e",
+        "timestamp": "2025-07-29T14:51:59-04:00",
+        "total": 12,
+        "offset": 0,
+        "parameter": [
+          {
+            "name": "count",
+            "valueInteger": 1000
+          },
+          {
+            "name": "offset",
+            "valueInteger": 0
+          }
+        ],
+        "contains": [
+          {
+            "system": "http://snomed.info/sct",
+            "inactive": false,
+            "version": "http://snomed.info/sct/731000124108/version/20250301",
+            "code": "102636009",
+            "display": "Chronic nutritional deficiency (finding)"
+          },
+          {
+            "system": "http://snomed.info/sct",
+            "inactive": false,
+            "version": "http://snomed.info/sct/731000124108/version/20250301",
+            "code": "190606006",
+            "display": "Moderate protein energy malnutrition (disorder)"
+          },
+          {
+            "system": "http://snomed.info/sct",
+            "inactive": false,
+            "version": "http://snomed.info/sct/731000124108/version/20250301",
+            "code": "238107002",
+            "display": "Deficiency of macronutrients (disorder)"
+          },
+          {
+            "system": "http://snomed.info/sct",
+            "inactive": false,
+            "version": "http://snomed.info/sct/731000124108/version/20250301",
+            "code": "238111008",
+            "display": "Deficiency of micronutrients (disorder)"
+          },
+          {
+            "system": "http://snomed.info/sct",
+            "inactive": false,
+            "version": "http://snomed.info/sct/731000124108/version/20250301",
+            "code": "2492009",
+            "display": "Nutritional disorder (disorder)"
+          },
+          {
+            "system": "http://snomed.info/sct",
+            "inactive": false,
+            "version": "http://snomed.info/sct/731000124108/version/20250301",
+            "code": "285588004",
+            "display": "Nutrition deficiency due to insufficient food (disorder)"
+          },
+          {
+            "system": "http://snomed.info/sct",
+            "inactive": false,
+            "version": "http://snomed.info/sct/731000124108/version/20250301",
+            "code": "441961000124100",
+            "display": "Acute disease or injury-related malnutrition (disorder)"
+          },
+          {
+            "system": "http://snomed.info/sct",
+            "inactive": false,
+            "version": "http://snomed.info/sct/731000124108/version/20250301",
+            "code": "441971000124107",
+            "display": "Chronic disease-related malnutrition (disorder)"
+          },
+          {
+            "system": "http://snomed.info/sct",
+            "inactive": false,
+            "version": "http://snomed.info/sct/731000124108/version/20250301",
+            "code": "448765001",
+            "display": "Unintentional weight loss (finding)"
+          },
+          {
+            "system": "http://snomed.info/sct",
+            "inactive": false,
+            "version": "http://snomed.info/sct/731000124108/version/20250301",
+            "code": "65404009",
+            "display": "Undernutrition (disorder)"
+          },
+          {
+            "system": "http://snomed.info/sct",
+            "inactive": false,
+            "version": "http://snomed.info/sct/731000124108/version/20250301",
+            "code": "70241007",
+            "display": "Nutritional deficiency disorder (disorder)"
+          },
+          {
+            "system": "http://loinc.org",
+            "inactive": false,
+            "version": "2.80",
+            "code": "LA33704-0",
+            "display": "Moderately malnourished"
+          }
+        ]
+      }
+    },
+    {
+      "resourceType": "ValueSet",
+      "id": "2.16.840.1.113762.1.4.1029.206",
+      "meta": {
+        "versionId": "12",
+        "lastUpdated": "2023-12-21T17:43:03.000-05:00",
+        "profile": [
+          "http://hl7.org/fhir/StructureDefinition/shareablevalueset",
+          "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/computable-valueset-cqfm",
+          "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/publishable-valueset-cqfm"
+        ]
+      },
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/valueset-effectiveDate",
+          "valueDate": "2021-02-20"
+        }
+      ],
+      "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1029.206",
+      "identifier": [
+        {
+          "system": "urn:ietf:rfc:3986",
+          "value": "urn:oid:2.16.840.1.113762.1.4.1029.206"
+        }
+      ],
+      "version": "20210220",
+      "name": "IntensiveCareUnit",
+      "title": "Intensive Care Unit",
+      "status": "active",
+      "experimental": false,
+      "date": "2021-02-20T01:02:00-05:00",
+      "publisher": "TJC EH Steward",
+      "expansion": {
+        "identifier": "urn:uuid:da32e947-b063-4283-87d5-3253c984dd0e",
+        "timestamp": "2025-07-29T14:51:59-04:00",
+        "total": 36,
+        "offset": 0,
+        "parameter": [
+          {
+            "name": "count",
+            "valueInteger": 1000
+          },
+          {
+            "name": "offset",
+            "valueInteger": 0
+          }
+        ],
+        "contains": [
+          {
+            "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+            "inactive": false,
+            "version": "2022",
+            "code": "1025-6",
+            "display": "Trauma Critical Care"
+          },
+          {
+            "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+            "inactive": false,
+            "version": "2022",
+            "code": "1026-4",
+            "display": "Burn Critical Care"
+          },
+          {
+            "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+            "inactive": false,
+            "version": "2022",
+            "code": "1027-2",
+            "display": "Medical Critical Care"
+          },
+          {
+            "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+            "inactive": false,
+            "version": "2022",
+            "code": "1028-0",
+            "display": "Medical Cardiac Critical Care"
+          },
+          {
+            "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+            "inactive": false,
+            "version": "2022",
+            "code": "1029-8",
+            "display": "Medical-Surgical Critical Care"
+          },
+          {
+            "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+            "inactive": false,
+            "version": "2022",
+            "code": "1030-6",
+            "display": "Surgical Critical Care"
+          },
+          {
+            "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+            "inactive": false,
+            "version": "2022",
+            "code": "1031-4",
+            "display": "Neurosurgical Critical Care"
+          },
+          {
+            "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+            "inactive": false,
+            "version": "2022",
+            "code": "1032-2",
+            "display": "Surgical Cardiothoracic Critical Care"
+          },
+          {
+            "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+            "inactive": false,
+            "version": "2022",
+            "code": "1033-0",
+            "display": "Respiratory Critical Care"
+          },
+          {
+            "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+            "inactive": false,
+            "version": "2022",
+            "code": "1034-8",
+            "display": "Prenatal Critical Care"
+          },
+          {
+            "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+            "inactive": false,
+            "version": "2022",
+            "code": "1035-5",
+            "display": "Neurologic Critical Care"
+          },
+          {
+            "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+            "inactive": false,
+            "version": "2022",
+            "code": "1042-1",
+            "display": "Pediatric Burn Critical Care"
+          },
+          {
+            "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+            "inactive": false,
+            "version": "2022",
+            "code": "1043-9",
+            "display": "Pediatric Surgical Cardiothoracic Critical Care"
+          },
+          {
+            "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+            "inactive": false,
+            "version": "2022",
+            "code": "1044-7",
+            "display": "Pediatric Medical Critical Care"
+          },
+          {
+            "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+            "inactive": false,
+            "version": "2022",
+            "code": "1045-4",
+            "display": "Pediatric Medical-Surgical Critical Care"
+          },
+          {
+            "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+            "inactive": false,
+            "version": "2022",
+            "code": "1046-2",
+            "display": "Pediatric Neurosurgical Critical Care"
+          },
+          {
+            "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+            "inactive": false,
+            "version": "2022",
+            "code": "1047-0",
+            "display": "Pediatric Respiratory Critical Care"
+          },
+          {
+            "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+            "inactive": false,
+            "version": "2022",
+            "code": "1048-8",
+            "display": "Pediatric Surgical Critical Care"
+          },
+          {
+            "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+            "inactive": false,
+            "version": "2022",
+            "code": "1049-6",
+            "display": "Pediatric Trauma Critical Care"
+          },
+          {
+            "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+            "inactive": false,
+            "version": "2022",
+            "code": "1220-3",
+            "display": "Long Term Acute Care Intensive Care Unit"
+          },
+          {
+            "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+            "inactive": false,
+            "version": "2022",
+            "code": "1222-9",
+            "display": "Long Term Acute Care Pediatric Intensive Care Unit"
+          },
+          {
+            "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+            "inactive": false,
+            "version": "2022",
+            "code": "1223-7",
+            "display": "Oncology Medical Critical Care"
+          },
+          {
+            "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+            "inactive": false,
+            "version": "2022",
+            "code": "1224-5",
+            "display": "Oncology Surgical Critical Care"
+          },
+          {
+            "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+            "inactive": false,
+            "version": "2022",
+            "code": "1225-2",
+            "display": "Oncology Medical-Surgical Critical Care"
+          },
+          {
+            "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+            "inactive": false,
+            "version": "2022",
+            "code": "1233-6",
+            "display": "Oncology Pediatric Critical Care"
+          },
+          {
+            "system": "http://snomed.info/sct",
+            "inactive": false,
+            "version": "http://snomed.info/sct/731000124108/version/20250301",
+            "code": "309904001",
+            "display": "Intensive care unit (environment)"
+          },
+          {
+            "system": "http://snomed.info/sct",
+            "inactive": false,
+            "version": "http://snomed.info/sct/731000124108/version/20250301",
+            "code": "309905000",
+            "display": "Adult intensive care unit (environment)"
+          },
+          {
+            "system": "http://snomed.info/sct",
+            "inactive": false,
+            "version": "http://snomed.info/sct/731000124108/version/20250301",
+            "code": "309907008",
+            "display": "Cardiac intensive care unit (environment)"
+          },
+          {
+            "system": "http://snomed.info/sct",
+            "inactive": false,
+            "version": "http://snomed.info/sct/731000124108/version/20250301",
+            "code": "309908003",
+            "display": "Metabolic intensive care unit (environment)"
+          },
+          {
+            "system": "http://snomed.info/sct",
+            "inactive": false,
+            "version": "http://snomed.info/sct/731000124108/version/20250301",
+            "code": "309909006",
+            "display": "Neurological intensive care unit (environment)"
+          },
+          {
+            "system": "http://snomed.info/sct",
+            "inactive": false,
+            "version": "http://snomed.info/sct/731000124108/version/20250301",
+            "code": "309910001",
+            "display": "Pediatric intensive care unit (environment)"
+          },
+          {
+            "system": "http://snomed.info/sct",
+            "inactive": false,
+            "version": "http://snomed.info/sct/731000124108/version/20250301",
+            "code": "309911002",
+            "display": "Respiratory intensive care unit (environment)"
+          },
+          {
+            "system": "http://snomed.info/sct",
+            "inactive": false,
+            "version": "http://snomed.info/sct/731000124108/version/20250301",
+            "code": "418433008",
+            "display": "Surgical intensive care unit (environment)"
+          },
+          {
+            "system": "http://snomed.info/sct",
+            "inactive": false,
+            "version": "http://snomed.info/sct/731000124108/version/20250301",
+            "code": "426439001",
+            "display": "Burns intensive care unit (environment)"
+          },
+          {
+            "system": "http://snomed.info/sct",
+            "inactive": false,
+            "version": "http://snomed.info/sct/731000124108/version/20250301",
+            "code": "441994008",
+            "display": "Medical intensive care unit (environment)"
+          },
+          {
+            "system": "http://snomed.info/sct",
+            "inactive": false,
+            "version": "http://snomed.info/sct/731000124108/version/20250301",
+            "code": "448391000124102",
+            "display": "Trauma intensive care unit (environment)"
+          }
+        ]
+      }
+    },
+    {
+      "resourceType": "ValueSet",
+      "id": "2.16.840.1.114222.4.11.3591",
+      "meta": {
+        "versionId": "32",
+        "lastUpdated": "2025-04-19T06:02:35.000-04:00",
+        "profile": [
+          "http://hl7.org/fhir/StructureDefinition/shareablevalueset",
+          "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/computable-valueset-cqfm",
+          "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/publishable-valueset-cqfm"
+        ]
+      },
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/valueset-effectiveDate",
+          "valueDate": "2025-04-19"
+        }
+      ],
+      "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.114222.4.11.3591",
+      "identifier": [
+        {
+          "system": "urn:ietf:rfc:3986",
+          "value": "urn:oid:2.16.840.1.114222.4.11.3591"
+        }
+      ],
+      "version": "20250419",
+      "name": "PayerType",
+      "title": "Payer Type",
+      "status": "active",
+      "date": "2025-04-19T06:02:35-04:00",
+      "publisher": "HL7 US Realm Program Management Steward",
+      "expansion": {
+        "identifier": "urn:uuid:dc28fbc7-21d0-484e-91bd-57e744c016dc",
+        "timestamp": "2025-07-29T14:51:59-04:00",
+        "total": 125,
+        "offset": 0,
+        "parameter": [
+          {
+            "name": "count",
+            "valueInteger": 1000
+          },
+          {
+            "name": "offset",
+            "valueInteger": 0
+          }
+        ],
+        "contains": [
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "1",
+            "display": "MEDICARE"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "11",
+            "display": "Medicare Managed Care (Includes Medicare Advantage Plans)"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "1111",
+            "display": "Medicare Chronic Condition Special Needs Plan (C-SNP)"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "112",
+            "display": "Medicare PPO"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "113",
+            "display": "Medicare POS"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "119",
+            "display": "Medicare Managed Care Other"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "12",
+            "display": "Medicare (Non-managed Care)"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "121",
+            "display": "Medicare FFS"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "122",
+            "display": "Medicare Drug Benefit"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "123",
+            "display": "Medicare Medical Savings Account (MSA)"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "129",
+            "display": "Medicare Non-managed Care Other"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "13",
+            "display": "Medicare Hospice"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "14",
+            "display": "Dual Eligibility Medicare/Medicaid Organization"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "141",
+            "display": "Dual Eligible Special Needs Plan (D-SNP)"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "142",
+            "display": "Fully Integrated Dual Eligible Special Needs Plan (FIDE-SNP)"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "19",
+            "display": "Medicare Other"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "191",
+            "display": "Medicare Pharmacy Benefit Manager"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "2",
+            "display": "MEDICAID"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "21",
+            "display": "Medicaid (Managed Care)"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "211",
+            "display": "Medicaid HMO"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "212",
+            "display": "Medicaid PPO"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "213",
+            "display": "Medicaid PCCM (Primary Care Case Management)"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "219",
+            "display": "Medicaid Managed Care Other"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "22",
+            "display": "Medicaid (Non-managed Care Plan)"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "23",
+            "display": "Medicaid/SCHIP"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "25",
+            "display": "Medicaid - Out of State"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "26",
+            "display": "Medicaid - Long Term Care"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "29",
+            "display": "Medicaid Other"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "291",
+            "display": "Medicaid Pharmacy Benefit Manager"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "299",
+            "display": "Medicaid - Dental"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "3",
+            "display": "OTHER GOVERNMENT (Federal/State/Local) (excluding Department of Corrections)"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "31",
+            "display": "Department of Defense"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "311",
+            "display": "TRICARE (CHAMPUS)"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "3113",
+            "display": "TRICARE Standard - Fee For Service"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "312",
+            "display": "Military Treatment Facility"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "3123",
+            "display": "TRICARE For Life (TFL)"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "313",
+            "display": "Dental --Stand Alone"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "32",
+            "display": "Department of Veterans Affairs"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "321",
+            "display": "Veteran care-Care provided to Veterans"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "322",
+            "display": "Non-veteran care"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "3221",
+            "display": "Civilian Health and Medical Program for the VA (CHAMPVA)"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "33",
+            "display": "Indian Health Service or Tribe"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "331",
+            "display": "Indian Health Service - Regular"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "332",
+            "display": "Indian Health Service - Contract"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "333",
+            "display": "Indian Health Service - Managed Care"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "334",
+            "display": "Indian Tribe - Sponsored Coverage"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "34",
+            "display": "HRSA Program"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "341",
+            "display": "Title V (MCH Block Grant)"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "342",
+            "display": "Migrant Health Program"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "343",
+            "display": "Ryan White Act"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "344",
+            "display": "Disaster-related (includes Covid-19)"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "349",
+            "display": "Other"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "35",
+            "display": "Black Lung"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "36",
+            "display": "State Government"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "361",
+            "display": "State SCHIP program (codes for individual states)"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "362",
+            "display": "Specific state programs (list/ local code)"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "369",
+            "display": "State, not otherwise specified (other state)"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "37",
+            "display": "Local Government"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "371",
+            "display": "Local - Managed care"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "372",
+            "display": "FFS/Indemnity"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "379",
+            "display": "Local, not otherwise specified (other local, county)"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "38",
+            "display": "Other Government (Federal, State, Local not specified)"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "381",
+            "display": "Federal, State, Local not specified managed care"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "382",
+            "display": "Federal, State, Local not specified - FFS"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "389",
+            "display": "Federal, State, Local not specified - Other"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "39",
+            "display": "Other Federal"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "391",
+            "display": "Federal Employee Health Plan - Use when known"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "4",
+            "display": "DEPARTMENTS OF CORRECTIONS"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "41",
+            "display": "Corrections Federal"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "42",
+            "display": "Corrections State"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "43",
+            "display": "Corrections Local"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "44",
+            "display": "Corrections Unknown Level"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "5",
+            "display": "PRIVATE HEALTH INSURANCE"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "51",
+            "display": "Managed Care (Private)"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "511",
+            "display": "Commercial Managed Care - HMO"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "512",
+            "display": "Commercial Managed Care - PPO"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "513",
+            "display": "Commercial Managed Care - POS"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "514",
+            "display": "Exclusive Provider Organization"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "515",
+            "display": "Gatekeeper PPO (GPPO)"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "516",
+            "display": "Commercial Managed Care - Pharmacy Benefit Manager"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "517",
+            "display": "Commercial Managed Care - Dental"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "519",
+            "display": "Managed Care, Other (non HMO)"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "52",
+            "display": "Private Health Insurance - Indemnity"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "521",
+            "display": "Commercial Indemnity"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "522",
+            "display": "Self-insured (ERISA) Administrative Services Only (ASO) plan"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "523",
+            "display": "Medicare supplemental policy (as second payer)"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "524",
+            "display": "Indemnity Insurance - Dental"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "529",
+            "display": "Private health insurance--other commercial Indemnity"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "53",
+            "display": "Managed Care (private) or private health insurance (indemnity), not otherwise specified"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "54",
+            "display": "Organized Delivery System"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "55",
+            "display": "Small Employer Purchasing Group"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "56",
+            "display": "Specialized Stand-Alone Plan"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "561",
+            "display": "Dental"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "562",
+            "display": "Vision"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "59",
+            "display": "Other Private Insurance"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "7",
+            "display": "MANAGED CARE, UNSPECIFIED (to be used only if one can't distinguish public from private)"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "71",
+            "display": "HMO"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "72",
+            "display": "PPO"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "73",
+            "display": "POS"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "79",
+            "display": "Other Managed Care"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "8",
+            "display": "NO PAYMENT from an Organization/Agency/Program/Private Payer Listed"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "81",
+            "display": "Self-pay (Includes applicants for insurance and Medicaid applicants)"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "82",
+            "display": "No Charge"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "821",
+            "display": "Charity"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "822",
+            "display": "Professional Courtesy"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "823",
+            "display": "Research/Clinical Trial"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "83",
+            "display": "Refusal to Pay/Bad Debt"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "84",
+            "display": "Hill Burton Free Care"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "85",
+            "display": "Research/Donor"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "89",
+            "display": "No Payment, Other"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "9",
+            "display": "MISCELLANEOUS/OTHER"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "91",
+            "display": "Foreign National"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "92",
+            "display": "Other (Non-government)"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "93",
+            "display": "Disability Insurance"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "94",
+            "display": "Long-term Care Insurance"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "95",
+            "display": "Worker's Compensation"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "951",
+            "display": "Worker's Comp HMO"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "953",
+            "display": "Worker's Comp Fee-for-Service"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "954",
+            "display": "Worker's Comp Other Managed Care"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "959",
+            "display": "Worker's Comp, Other unspecified"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "96",
+            "display": "Auto Insurance (includes no fault)"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "97",
+            "display": "Legal Liability / Liability Insurance"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "98",
+            "display": "Other specified but not otherwise classifiable (includes Hospice - Unspecified plan)"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "99",
+            "display": "No Typology Code available for payment source"
+          },
+          {
+            "system": "https://nahdo.org/sopt",
+            "inactive": false,
+            "version": "9.2",
+            "code": "9999",
+            "display": "Unavailable / No Payer Specified / Blank"
+          }
+        ]
+      }
+    }
+  ],
+  null
+]

@@ -3,6 +3,7 @@ import { Instant } from "@madie/madie-design-system/dist/react";
 
 import dayjs from "dayjs";
 import { INSTANT_REGEX } from "../typesValidations/fhirR4Validations";
+import AddElementButton from "../../../../../../../common/AddElementButton";
 
 const isValidInstant = (instantString: string) => {
   if (!INSTANT_REGEX.test(instantString)) return false;
@@ -19,6 +20,8 @@ const InstantComponent = ({
   helperText,
   onBlur,
   setTouched,
+  showAddAttributeButton,
+  addTitle,
 }) => {
   const [dateTime, setDateTime] = useState();
   const [isValid, setValid] = useState(false);
@@ -39,19 +42,24 @@ const InstantComponent = ({
   }, [dateTimeValue]);
 
   return (
-    <Instant
-      disabled={false}
-      id={`${label}_instant`}
-      placeholder={isValid ? "MM/DD/YYYY" : "Invalid"}
-      name={name}
-      label={label}
-      required={required}
-      handleDateTimeChange={handleDateTimeChange}
-      dateTimeValue={dateTime}
-      error={error}
-      helperText={helperText}
-      onBlur={onBlur}
-    />
+    <div className="element-editor-add-row">
+      <Instant
+        disabled={false}
+        id={`${label}_instant`}
+        placeholder={isValid ? "MM/DD/YYYY" : "Invalid"}
+        name={name}
+        label={label}
+        required={required}
+        handleDateTimeChange={handleDateTimeChange}
+        dateTimeValue={dateTime}
+        error={error}
+        helperText={helperText}
+        onBlur={onBlur}
+      />
+      {showAddAttributeButton && addTitle && (
+        <AddElementButton name={addTitle} />
+      )}
+    </div>
   );
 };
 
