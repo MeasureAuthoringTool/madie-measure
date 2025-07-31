@@ -92,8 +92,11 @@ describe("StringComponent", () => {
         fieldRequired={false}
         onChange={handleChange}
         structureDefinition={null}
+        addTitle={"String"}
+        showAddAttributeButton={true}
       />
     );
+    expect(screen.getByText("Add String")).toBeInTheDocument();
 
     const stringFieldInput = screen.getByTestId(
       "string-field-input-AdverseEvent.id"

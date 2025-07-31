@@ -16,6 +16,7 @@ import {
   YEAR_MONTH_FORMAT,
   YEAR_MONTH_DAY_FORMAT,
 } from "./DateTimeComponent";
+import AddElementButton from "../../../../../../../common/AddElementButton";
 dayjs.extend(utc);
 dayjs.extend(timezone);
 dayjs.extend(advancedFormat);
@@ -62,6 +63,8 @@ const DateTimeComponent = ({
   error,
   helperText,
   setTouched,
+  showAddAttributeButton,
+  addTitle,
 }: TypeComponentProps) => {
   const [format, setFormat] = useState<string>(null);
   const [date, setDate] = useState<any>(null);
@@ -82,76 +85,82 @@ const DateTimeComponent = ({
       setDate(null);
     }
   }, [value]);
+
   return (
-    <Box sx={{ display: "flex", flexDirection: "column" }}>
-      <InputLabel required={fieldRequired}>{label}</InputLabel>
-      <LocalizationProvider dateAdapter={AdapterDayjs}>
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "row",
-            flexGrow: 1,
-            columnGap: "32px",
-            minWidth: "200px",
-            alignItems: "flex-end",
-          }}
-          data-testid="date-div"
-        >
-          {/* select a format and render a picker */}
-          <Select
-            style={{ height: "38.125px", marginBottim: "2px" }}
-            required={fieldRequired}
-            id={`date-format-selector-${label}`}
-            label={`Format`}
-            inputProps={{
-              "data-testid": `date-format-selector-input-field-${label}`,
-              "aria-describedby": `date-format-selector-input-field-helper-text-${label}`,
+    <div className="element-editor-add-row">
+      <Box sx={{ display: "flex", flexDirection: "column" }}>
+        <InputLabel required={fieldRequired}>{label}</InputLabel>
+        <LocalizationProvider dateAdapter={AdapterDayjs}>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "row",
+              flexGrow: 1,
+              columnGap: "32px",
+              minWidth: "200px",
+              alignItems: "flex-end",
             }}
-            data-testid={`date-format-selector-field-${label}`}
-            readOnly={!canEdit}
-            SelectDisplayProps={{
-              "aria-required": "true",
-            }}
-            options={renderFormats(formatOptions1)}
-            onChange={(event) => {
-              const { value } = event.target;
-              if (format) {
-                // if we're going to a less complex format, we want to trigger an onChange instead
-                if (isFormatLessComplex(value, format)) {
-                  if (date) {
-                    onChange(date.format(value));
+            data-testid="date-div"
+          >
+            {/* select a format and render a picker */}
+            <Select
+              style={{ height: "38.125px", marginBottim: "2px" }}
+              required={fieldRequired}
+              id={`date-format-selector-${label}`}
+              label={`Format`}
+              inputProps={{
+                "data-testid": `date-format-selector-input-field-${label}`,
+                "aria-describedby": `date-format-selector-input-field-helper-text-${label}`,
+              }}
+              data-testid={`date-format-selector-field-${label}`}
+              readOnly={!canEdit}
+              SelectDisplayProps={{
+                "aria-required": "true",
+              }}
+              options={renderFormats(formatOptions1)}
+              onChange={(event) => {
+                const { value } = event.target;
+                if (format) {
+                  // if we're going to a less complex format, we want to trigger an onChange instead
+                  if (isFormatLessComplex(value, format)) {
+                    if (date) {
+                      onChange(date.format(value));
+                    }
+                  } else {
+                    setDate(null); // blank the date if we're going to a more complex format since we cant make up values
                   }
-                } else {
-                  setDate(null); // blank the date if we're going to a more complex format since we cant make up values
                 }
-              }
-              setFormat(event.target.value);
-            }}
-            placeHolder={{ name: "Select Format", value: "" }}
-            value={format ? format : ""}
-          ></Select>
-          <DateField
-            label="Date Field"
-            helperText={helperText}
-            placeholder={format}
-            required={fieldRequired}
-            error={error}
-            value={date ? dayjs(date) : null}
-            views={format ? formatMap[format] : ["year"]}
-            disabled={!canEdit || !format || format === "Invalid Format"}
-            id={`${format || "year"}-field-${label}`}
-            onChange={(date) => {
-              if (date) {
-                if (date.format(format) !== "Invalid Date") {
-                  onChange(date.format(format));
+                setFormat(event.target.value);
+              }}
+              placeHolder={{ name: "Select Format", value: "" }}
+              value={format ? format : ""}
+            ></Select>
+            <DateField
+              label="Date Field"
+              helperText={helperText}
+              placeholder={format}
+              required={fieldRequired}
+              error={error}
+              value={date ? dayjs(date) : null}
+              views={format ? formatMap[format] : ["year"]}
+              disabled={!canEdit || !format || format === "Invalid Format"}
+              id={`${format || "year"}-field-${label}`}
+              onChange={(date) => {
+                if (date) {
+                  if (date.format(format) !== "Invalid Date") {
+                    onChange(date.format(format));
+                  }
                 }
-              }
-            }}
-            onBlur={() => {}}
-          />
-        </div>
-      </LocalizationProvider>
-    </Box>
+              }}
+              onBlur={() => {}}
+            />
+          </div>
+        </LocalizationProvider>
+      </Box>
+      {showAddAttributeButton && addTitle && (
+        <AddElementButton name={addTitle} />
+      )}
+    </div>
   );
 };
 

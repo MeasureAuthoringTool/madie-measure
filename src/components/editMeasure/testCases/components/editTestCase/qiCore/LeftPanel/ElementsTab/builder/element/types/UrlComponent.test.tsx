@@ -58,8 +58,11 @@ describe("Url Component", () => {
         fieldRequired={false}
         onChange={handleChange}
         structureDefinition={null}
+        addTitle={"URL"}
+        showAddAttributeButton={true}
       />
     );
+    expect(screen.getByText("Add URL")).toBeInTheDocument();
     expect(urlFieldInput.value).toBe(
       "http://hl7.org/fhir/us/core/StructureDefinition/uscdi-updatedrequirements"
     );

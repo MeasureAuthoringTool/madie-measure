@@ -58,4 +58,21 @@ describe("BooleanComponent Component", () => {
     );
     expect(booleanFieldInput.value).toBe("True");
   });
+
+  test("Should render an add button", () => {
+    const handleChange = jest.fn();
+    render(
+      <BooleanComponent
+        value={`True`}
+        canEdit={true}
+        fieldRequired={false}
+        onChange={handleChange}
+        label="MyBoolean"
+        structureDefinition={null}
+        addTitle="Active"
+        showAddAttributeButton={true}
+      />
+    );
+    expect(screen.getByText("Add Active")).toBeInTheDocument();
+  });
 });

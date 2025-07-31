@@ -57,4 +57,20 @@ describe("Base64BinaryComponent", () => {
       screen.getByTestId("field-input-helper-text-Base64BinaryComponent")
     ).toHaveTextContent("Please enter a valid Base64Binary");
   });
+
+  test("Should render an add button", () => {
+    const handleChange = jest.fn();
+    render(
+      <Base64BinaryComponent
+        value={null}
+        label="Base64BinaryComponent"
+        canEdit={true}
+        fieldRequired={false}
+        onChange={handleChange}
+        addTitle="Binary"
+        showAddAttributeButton={true}
+      />
+    );
+    expect(screen.getByText("Add Binary")).toBeInTheDocument();
+  });
 });
