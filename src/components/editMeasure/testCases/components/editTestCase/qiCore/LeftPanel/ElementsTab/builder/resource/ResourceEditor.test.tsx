@@ -10,9 +10,25 @@ import {
 import mockSelectedResourceTree from "./mockSelectedResourceTree.json";
 import mockSelectedPatientTree from "./mockSelectedPatientTree.json";
 import mockResourceState from "./mockResourceState.json";
+import mockValueSetsState from "./mockValueSetsState.json";
+import _ from "lodash";
 
 import userEvent from "@testing-library/user-event";
 import { useFormikContext } from "formik";
+import {
+  ApiContextProvider,
+  ServiceConfig,
+} from "../../../../../../../../../../api/ServiceContext";
+import { ExecutionContextProvider } from "../../../../../../routes/qiCore/ExecutionContext";
+
+const mockConfig = {
+  fhirService: {
+    baseUrl: "fhirService.com",
+  },
+  terminologyService: {
+    baseUrl: "terminologyService.com",
+  },
+} as unknown as ServiceConfig;
 
 jest.mock("formik", () => ({
   useFormikContext: jest.fn(),
@@ -30,12 +46,88 @@ jest.mock("../../../../../../../api/useFhirDefinitionsService", () => {
   });
 });
 
-describe.skip("ResourceEditor", () => {
+describe("ResourceEditor", () => {
   const formikValues = {
-    ClaimResponse: {
-      id: "test2",
-      disposition: "test3",
-      widget: ["test4", "test5"],
+    Patient: {
+      resourceType: "Patient",
+      id: "446b20b5-dd46-415e-9b9f-9eba6b260743",
+      meta: {
+        profile: [
+          "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient",
+        ],
+      },
+      extension: [
+        {
+          url: "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race",
+          extension: [
+            {
+              url: "ombCategory",
+              valueCoding: {
+                code: "1002-5",
+                system: "urn:oid:2.16.840.1.113883.6.238",
+                display: "American Indian or Alaska Native",
+                userSelected: true,
+              },
+            },
+            {
+              url: "text",
+              valueString: "American Indian or Alaska Native",
+            },
+          ],
+        },
+        {
+          url: "http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethnicity",
+          extension: [
+            {
+              url: "ombCategory",
+              valueCoding: {
+                code: "2135-2",
+                system: "urn:oid:2.16.840.1.113883.6.238",
+                display: "Hispanic or Latino",
+                userSelected: true,
+              },
+            },
+            {
+              url: "text",
+              valueString: "Hispanic or Latino",
+            },
+          ],
+        },
+        {
+          url: "http://hl7.org/fhir/us/core/StructureDefinition/us-core-birthsex",
+          valueCode: "M",
+        },
+      ],
+      identifier: [
+        {
+          type: {
+            coding: [
+              {
+                code: "MR",
+                system: "http://terminology.hl7.org/CodeSystem/v2-0203",
+              },
+            ],
+          },
+          system: "https://madie.cms.gov/",
+          value: "NotscreRefAsseNotmNodxNocp",
+        },
+      ],
+      active: true,
+      name: [
+        {
+          use: "usual",
+          text: "NotscreRefAsseNotmNodxNocp",
+          family: "denompass2",
+          given: ["NotscreRefAsseNotmNodxNocpdenompass2"],
+        },
+      ],
+      gender: "male",
+      birthDate: "1952-01-01",
+      address: [
+        {
+          text: "NotscreRefAsseNotmNodxNocp, Screened Not at risk Assessed Severely Malnourished Diagnosed Care Plan, ID=NotscreRefAsseNotmNodxNocp, DOB: 01 Jan 1952",
+        },
+      ],
     },
   };
 
@@ -43,6 +135,10 @@ describe.skip("ResourceEditor", () => {
     if (label === "ClaimResource.id") {
       return {
         value: "6fb9d817-76c5-4b68-ba06-92c7429e6b5c",
+      };
+    } else if (label === "id") {
+      return {
+        value: "446b20b5-dd46-415e-9b9f-9eba6b260743",
       };
     } else {
       return {
@@ -61,22 +157,87 @@ describe.skip("ResourceEditor", () => {
     getFieldProps: getProps,
     dirty: true,
     resetForm,
+    setFieldTouched: jest.fn(),
   };
 
   const mockOnCancel = jest.fn();
   const mockSetValidationSchema = jest.fn();
   const mockSetInitialFormikValuesStu6 = jest.fn();
 
+  let localMockResourceState;
+  let localMockckValueSetsState;
+  let localMockFormikObj;
   beforeEach(() => {
     jest.resetAllMocks();
+    localMockResourceState = _.cloneDeep(mockResourceState);
+    localMockckValueSetsState = _.cloneDeep(mockValueSetsState);
+    localMockFormikObj = _.cloneDeep(mockFormikObj);
   });
 
-  it("renders the ResourceEditor correctly, can hit dirty check", async () => {
+  it("should render the ResourceEditor correctly", async () => {
+    // Mocked formik obj return dirty false
+    const dirtyFormMock = {
+      ...localMockFormikObj,
+      dirty: false,
+    };
+    (useFormikContext as jest.Mock).mockReturnValue(dirtyFormMock);
+
+    render(
+      <ExecutionContextProvider
+        value={{
+          valueSetsState: localMockckValueSetsState,
+          executionContextReady: true,
+        }}
+      >
+        <ApiContextProvider value={mockConfig}>
+          <QiCoreResourceContext.Provider
+            value={{ state: localMockResourceState, dispatch: jest.fn() }}
+          >
+            <ResourceEditor
+              selectedResourceID="446b20b5-dd46-415e-9b9f-9eba6b260743"
+              setValidationSchema={mockSetValidationSchema}
+              setInitialFormikValuesStu6={mockSetInitialFormikValuesStu6}
+              onCancel={mockOnCancel}
+              canEdit={true}
+            />
+          </QiCoreResourceContext.Provider>
+        </ApiContextProvider>
+      </ExecutionContextProvider>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText("ID:")).toBeInTheDocument();
+      // or check for the resource id
+      expect(
+        screen.getByText("446b20b5-dd46-415e-9b9f-9eba6b260743")
+      ).toBeInTheDocument();
+      expect(
+        screen.getByTestId("close-resource-editor-button")
+      ).toBeInTheDocument();
+
+      expect(
+        screen.getByTestId("add-attribute-dialog-button")
+      ).toBeInTheDocument();
+      expect(screen.getByText("*identifier")).toBeInTheDocument();
+      expect(screen.getByText("*name")).toBeInTheDocument();
+      expect(screen.getByText("*gender")).toBeInTheDocument();
+      expect(screen.getByText("id")).toBeInTheDocument();
+      expect(screen.getByText("active")).toBeInTheDocument();
+      expect(screen.getByText("birthDate")).toBeInTheDocument();
+      expect(screen.getByText("address")).toBeInTheDocument();
+
+      // const idBtn = screen.getByTestId("id");
+      // expect(idBtn).toBeInTheDocument();
+      // userEvent.click(idBtn);
+    });
+  });
+
+  it.skip("renders the ResourceEditor correctly, can hit dirty check", async () => {
     // Mocked formik obj return dirty true
-    (useFormikContext as jest.Mock).mockReturnValue(mockFormikObj);
+    (useFormikContext as jest.Mock).mockReturnValue(localMockFormikObj);
     render(
       <QiCoreResourceContext.Provider
-        value={{ state: mockResourceState, dispatch: jest.fn() }}
+        value={{ state: localMockResourceState, dispatch: jest.fn() }}
       >
         <ResourceEditor
           selectedResourceID="6fb9d817-76c5-4b68-ba06-92c7429e6b5c"
@@ -129,12 +290,12 @@ describe.skip("ResourceEditor", () => {
     });
   });
 
-  it("renders the action center for a 0-1 cardinality element, opens when clicked", async () => {
-    (useFormikContext as jest.Mock).mockReturnValue(mockFormikObj);
+  it.skip("renders the action center for a 0-1 cardinality element, opens when clicked", async () => {
+    (useFormikContext as jest.Mock).mockReturnValue(localMockFormikObj);
 
     render(
       <QiCoreResourceContext.Provider
-        value={{ state: mockResourceState, dispatch: jest.fn() }}
+        value={{ state: localMockResourceState, dispatch: jest.fn() }}
       >
         <ResourceEditor
           selectedResourceID="6fb9d817-76c5-4b68-ba06-92c7429e6b5c"
@@ -177,11 +338,11 @@ describe.skip("ResourceEditor", () => {
     expect(screen.getByTestId("elements-delete")).not.toBeInTheDocument;
   });
 
-  it("renders the action center for a 0-* cardinality element, opens when clicked", async () => {
-    (useFormikContext as jest.Mock).mockReturnValue(mockFormikObj);
+  it.skip("renders the action center for a 0-* cardinality element, opens when clicked", async () => {
+    (useFormikContext as jest.Mock).mockReturnValue(localMockFormikObj);
     render(
       <QiCoreResourceContext.Provider
-        value={{ state: mockResourceState, dispatch: jest.fn() }}
+        value={{ state: localMockResourceState, dispatch: jest.fn() }}
       >
         <ResourceEditor
           selectedResourceID="6fb9d817-76c5-4b68-ba06-92c7429e6b5c"
@@ -217,22 +378,32 @@ describe.skip("ResourceEditor", () => {
     });
   });
 
-  it("opens AddElementDialog, interacts with it, and can close it", async () => {
-    (useFormikContext as jest.Mock).mockReturnValue(mockFormikObj);
+  // temp skip
+  it.skip("opens AddElementDialog, interacts with it, and can close it", async () => {
+    (useFormikContext as jest.Mock).mockReturnValue(localMockFormikObj);
     const mockDispatch = jest.fn();
 
     render(
-      <QiCoreResourceContext.Provider
-        value={{ state: mockResourceState, dispatch: mockDispatch }}
+      <ExecutionContextProvider
+        value={{
+          valueSetsState: localMockckValueSetsState,
+          executionContextReady: true,
+        }}
       >
-        <ResourceEditor
-          selectedResourceID="6fb9d817-76c5-4b68-ba06-92c7429e6b5c"
-          setValidationSchema={mockSetValidationSchema}
-          setInitialFormikValuesStu6={mockSetInitialFormikValuesStu6}
-          onCancel={mockOnCancel}
-          canEdit={true}
-        />
-      </QiCoreResourceContext.Provider>
+        <ApiContextProvider value={mockConfig}>
+          <QiCoreResourceContext.Provider
+            value={{ state: localMockResourceState, dispatch: mockDispatch }}
+          >
+            <ResourceEditor
+              selectedResourceID="446b20b5-dd46-415e-9b9f-9eba6b260743"
+              setValidationSchema={mockSetValidationSchema}
+              setInitialFormikValuesStu6={mockSetInitialFormikValuesStu6}
+              onCancel={mockOnCancel}
+              canEdit={true}
+            />
+          </QiCoreResourceContext.Provider>
+        </ApiContextProvider>
+      </ExecutionContextProvider>
     );
 
     // Click the "Add Attribute(s)" button to open dialog
@@ -283,11 +454,11 @@ describe.skip("ResourceEditor", () => {
   });
 
   it("handles invalid selectedResource - this will never happen", () => {
-    (useFormikContext as jest.Mock).mockReturnValue(mockFormikObj);
+    (useFormikContext as jest.Mock).mockReturnValue(localMockFormikObj);
 
     render(
       <QiCoreResourceContext.Provider
-        value={{ state: mockResourceState, dispatch: jest.fn() }}
+        value={{ state: localMockResourceState, dispatch: jest.fn() }}
       >
         <ResourceEditor
           selectedResourceID="invalid-resource-id"
@@ -303,17 +474,17 @@ describe.skip("ResourceEditor", () => {
     expect(screen.queryByRole("tab")).not.toBeInTheDocument();
   });
 
-  it("handles changing tab without dirty form", async () => {
+  it.skip("handles changing tab without dirty form", async () => {
     // Mock clean form state
     const cleanFormMock = {
-      ...mockFormikObj,
+      ...localMockFormikObj,
       dirty: false,
     };
     (useFormikContext as jest.Mock).mockReturnValue(cleanFormMock);
 
     render(
       <QiCoreResourceContext.Provider
-        value={{ state: mockResourceState, dispatch: jest.fn() }}
+        value={{ state: localMockResourceState, dispatch: jest.fn() }}
       >
         <ResourceEditor
           selectedResourceID="6fb9d817-76c5-4b68-ba06-92c7429e6b5c"
@@ -338,20 +509,29 @@ describe.skip("ResourceEditor", () => {
   });
 
   it("handles onCancel button click", async () => {
-    (useFormikContext as jest.Mock).mockReturnValue(mockFormikObj);
+    (useFormikContext as jest.Mock).mockReturnValue(localMockFormikObj);
 
     render(
-      <QiCoreResourceContext.Provider
-        value={{ state: mockResourceState, dispatch: jest.fn() }}
+      <ExecutionContextProvider
+        value={{
+          valueSetsState: localMockckValueSetsState,
+          executionContextReady: true,
+        }}
       >
-        <ResourceEditor
-          selectedResourceID="6fb9d817-76c5-4b68-ba06-92c7429e6b5c"
-          setValidationSchema={mockSetValidationSchema}
-          setInitialFormikValuesStu6={mockSetInitialFormikValuesStu6}
-          onCancel={mockOnCancel}
-          canEdit={true}
-        />
-      </QiCoreResourceContext.Provider>
+        <ApiContextProvider value={mockConfig}>
+          <QiCoreResourceContext.Provider
+            value={{ state: localMockResourceState, dispatch: jest.fn() }}
+          >
+            <ResourceEditor
+              selectedResourceID="446b20b5-dd46-415e-9b9f-9eba6b260743"
+              setValidationSchema={mockSetValidationSchema}
+              setInitialFormikValuesStu6={mockSetInitialFormikValuesStu6}
+              onCancel={mockOnCancel}
+              canEdit={true}
+            />
+          </QiCoreResourceContext.Provider>
+        </ApiContextProvider>
+      </ExecutionContextProvider>
     );
 
     const closeButton = await screen.findByTestId(
@@ -361,25 +541,35 @@ describe.skip("ResourceEditor", () => {
     expect(mockOnCancel).toHaveBeenCalledTimes(1);
   });
 
-  it("changes active tab when form is not dirty", async () => {
+  //NOTE: this test runs successfully by itself but fails when running the test suite
+  it.skip("changes active tab when form is not dirty", async () => {
     const cleanFormMock = {
-      ...mockFormikObj,
+      ...localMockFormikObj,
       dirty: false,
     };
     (useFormikContext as jest.Mock).mockReturnValue(cleanFormMock);
 
     render(
-      <QiCoreResourceContext.Provider
-        value={{ state: mockResourceState, dispatch: jest.fn() }}
+      <ExecutionContextProvider
+        value={{
+          valueSetsState: localMockckValueSetsState,
+          executionContextReady: true,
+        }}
       >
-        <ResourceEditor
-          selectedResourceID="6fb9d817-76c5-4b68-ba06-92c7429e6b5c"
-          setValidationSchema={mockSetValidationSchema}
-          setInitialFormikValuesStu6={mockSetInitialFormikValuesStu6}
-          onCancel={mockOnCancel}
-          canEdit={true}
-        />
-      </QiCoreResourceContext.Provider>
+        <ApiContextProvider value={mockConfig}>
+          <QiCoreResourceContext.Provider
+            value={{ state: localMockResourceState, dispatch: jest.fn() }}
+          >
+            <ResourceEditor
+              selectedResourceID="446b20b5-dd46-415e-9b9f-9eba6b260743"
+              setValidationSchema={mockSetValidationSchema}
+              setInitialFormikValuesStu6={mockSetInitialFormikValuesStu6}
+              onCancel={mockOnCancel}
+              canEdit={true}
+            />
+          </QiCoreResourceContext.Provider>
+        </ApiContextProvider>
+      </ExecutionContextProvider>
     );
 
     // Find all tabs
@@ -394,9 +584,9 @@ describe.skip("ResourceEditor", () => {
     expect(tabs[0]).toHaveAttribute("aria-selected", "false");
   });
 
-  it("should delete selected attribute and dispatch even to update test case json state", async () => {
+  it.skip("should delete selected attribute and dispatch even to update test case json state", async () => {
     const cleanFormMock = {
-      ...mockFormikObj,
+      ...localMockFormikObj,
       dirty: false,
     };
     (useFormikContext as jest.Mock).mockReturnValue(cleanFormMock);
@@ -405,9 +595,9 @@ describe.skip("ResourceEditor", () => {
     // We are testing to see if "Id" attribute is deleted accurately
     const expectedPayload = {
       payload: {
-        ...mockResourceState.bundle.entry[0],
+        ...localMockResourceState.bundle.entry[0],
         resource: {
-          ...mockResourceState.bundle.entry[0].resource,
+          ...localMockResourceState.bundle.entry[0].resource,
         },
       },
       type: "ModifyBundleEntry",
@@ -417,7 +607,7 @@ describe.skip("ResourceEditor", () => {
 
     render(
       <QiCoreResourceContext.Provider
-        value={{ state: mockResourceState, dispatch: mockDispatch }}
+        value={{ state: localMockResourceState, dispatch: mockDispatch }}
       >
         <ResourceEditor
           selectedResourceID="6fb9d817-76c5-4b68-ba06-92c7429e6b5c"
@@ -457,6 +647,16 @@ describe.skip("ResourceEditor", () => {
 describe("Test the ResourceEditor deleteMultipleElements functionality", () => {
   it("Should call dispatch with correct payload when deleting multiple elements", async () => {
     const mockDispatch = jest.fn();
+
+    const mockSelectedPatientTree = {
+      bundleEntry: [
+        {
+          resource: {
+            /* ... */
+          },
+        },
+      ],
+    };
 
     deleteMultipleCardinalityElement(
       " *name 1",
