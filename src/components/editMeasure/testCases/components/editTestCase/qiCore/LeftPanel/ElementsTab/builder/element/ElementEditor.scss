@@ -18,4 +18,27 @@
       margin-left: 24px;
     }
   }
+
+  .element-editor-add-row {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    width: 100%;
+
+    > div:first-child {
+      flex: 3;
+    }
+
+    > .element-add-container {
+      display: flex;
+      flex: 1;
+      justify-content: flex-start;
+      margin-top: 24px;
+
+      > button {
+        flex: 1;
+        justify-content: flex-start;
+      }
+    }
+  }
 }

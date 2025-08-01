@@ -5,56 +5,64 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import Box from "@mui/material/Box";
 import { DateTimeField } from "@mui/x-date-pickers";
 import { InputLabel } from "@mui/material";
+import AddElementButton from "../../../../../../../common/AddElementButton";
 
 const PeriodComponent = ({
   label,
   value,
   onChange,
   fieldRequired,
+  showAddAttributeButton,
+  addTitle,
 }: TypeComponentProps) => {
   return (
-    <Box sx={{ display: "flex", flexDirection: "column" }}>
-      <InputLabel>{label}</InputLabel>
-      <LocalizationProvider dateAdapter={AdapterDayjs}>
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "row",
-            alignItems: "start",
-            gap: 2,
-          }}
-        >
+    <div className="element-editor-add-row">
+      <Box sx={{ display: "flex", flexDirection: "column" }}>
+        <InputLabel>{label}</InputLabel>
+        <LocalizationProvider dateAdapter={AdapterDayjs}>
           <Box
             sx={{
               display: "flex",
-              flexDirection: "column",
+              flexDirection: "row",
               alignItems: "start",
+              gap: 2,
             }}
           >
-            <InputLabel>Start</InputLabel>
-            <DateTimeField
-              label="start"
-              variant="filled"
-              sx={{ width: "220px" }}
-            />
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "start",
+              }}
+            >
+              <InputLabel>Start</InputLabel>
+              <DateTimeField
+                label="start"
+                variant="filled"
+                sx={{ width: "220px" }}
+              />
+            </Box>
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "start",
+              }}
+            >
+              <InputLabel>End</InputLabel>
+              <DateTimeField
+                label="end"
+                variant="filled"
+                sx={{ width: "220px" }}
+              />
+            </Box>
           </Box>
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "start",
-            }}
-          >
-            <InputLabel>End</InputLabel>
-            <DateTimeField
-              label="end"
-              variant="filled"
-              sx={{ width: "220px" }}
-            />
-          </Box>
-        </Box>
-      </LocalizationProvider>
-    </Box>
+        </LocalizationProvider>
+      </Box>
+      {showAddAttributeButton && addTitle && (
+        <AddElementButton name={addTitle} />
+      )}
+    </div>
   );
 };
 

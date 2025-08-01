@@ -14,6 +14,7 @@ import {
   InputLabel,
 } from "@madie/madie-design-system/dist/react";
 import DateField from "./DateField";
+import AddElementButton from "../../../../../../../common/AddElementButton";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -92,6 +93,8 @@ const DateTimeComponent = ({
   error,
   helperText,
   setTouched,
+  showAddAttributeButton,
+  addTitle,
 }: TypeComponentProps) => {
   const [format, setFormat] = useState<string>(null);
   const [date, setDate] = useState<any>(null); // dayjs obj
@@ -124,107 +127,114 @@ const DateTimeComponent = ({
   }, [value]);
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "column" }}>
-      <InputLabel required={fieldRequired}>{label}</InputLabel>
-      <LocalizationProvider dateAdapter={AdapterDayjs}>
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "row",
-            flexGrow: 1,
-            columnGap: "32px",
-            minWidth: "200px",
-            alignItems: "flex-end",
-          }}
-          data-testid="date-div"
-        >
-          {/* select a format and render a picker */}
-          <div>
-            <Select
-              style={{ height: "38.125px", marginBottom: "2px" }}
-              required={fieldRequired}
-              id={`date-time-format-selector-${label}`}
-              label={`Format`}
-              inputProps={{
-                "data-testid": `date-time-format-selector-input-field-${label}`,
-                "aria-describedby": `date-time-format-selector-input-field-helper-text-${label}`,
-              }}
-              data-testid={`date-time-format-selector-field-${label}`}
-              readOnly={!canEdit}
-              SelectDisplayProps={{
-                "aria-required": "true",
-              }}
-              options={renderFormats(formatOptions1)}
-              onChange={(event) => {
-                const { value } = event.target;
-                if (format) {
-                  // if we're going to a less complex format, we want to trigger an onChange instead
-                  if (isFormatLessComplex(value, format)) {
-                    if (date) {
-                      onChange(date.format(value));
-                    }
-                  } else {
-                    setDate(null); // blank the date if we're going to a more complex format since we cant make up values
-                  }
-                }
-                setFormat(event.target.value);
-              }}
-              placeHolder={{ name: "Select Format", value: "" }}
-              value={format ? format : ""}
-            ></Select>
-          </div>
-
-          <DateField
-            label="Date Field"
-            required={fieldRequired}
-            error={error}
-            helperText={helperText}
-            value={date}
-            views={format ? formatMap[format] : ["year"]}
-            disabled={!canEdit || !format || format === "Invalid Format"}
-            placeholder={format || ""}
-            id={`${format || "year"}-field-${label}`}
-            onChange={(newDate) => {
-              if (!newDate) return;
-              const dateUTC = dayjs.utc(newDate);
-              if (
-                format === DATE_TIME_ZONE_FORMAT &&
-                isValidFormattedDate(dateUTC.format(format))
-              ) {
-                onChange(dateUTC.format(format));
-              } else if (dateUTC.format(format) !== "Invalid Date") {
-                onChange(dateUTC.format(format));
-              }
-              setDate(dateUTC);
+    <div className="element-editor-add-row">
+      <Box sx={{ display: "flex", flexDirection: "column" }}>
+        <InputLabel required={fieldRequired}>{label}</InputLabel>
+        <LocalizationProvider dateAdapter={AdapterDayjs}>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "row",
+              flexGrow: 1,
+              columnGap: "32px",
+              minWidth: "200px",
+              alignItems: "flex-end",
             }}
-            onBlur={() => {}}
-          />
-          {format === DATE_TIME_ZONE_FORMAT && (
+            data-testid="date-div"
+          >
+            {/* select a format and render a picker */}
             <div>
-              <TimeField
-                disabled={!canEdit || !date}
+              <Select
+                style={{ height: "38.125px", marginBottom: "2px" }}
                 required={fieldRequired}
-                label="Time Field"
-                id={`time-field-${label}`}
-                seconds
-                views={["hours", "minutes", "seconds"]}
-                data-testid="time-input"
-                handleTimeChange={(time) => {
-                  const utcTime = dayjs.utc(time);
-                  if (
-                    isValidFormattedDate(utcTime.format(DATE_TIME_ZONE_FORMAT))
-                  ) {
-                    onChange(utcTime.format(DATE_TIME_ZONE_FORMAT));
-                  }
-                  setDate(utcTime);
+                id={`date-time-format-selector-${label}`}
+                label={`Format`}
+                inputProps={{
+                  "data-testid": `date-time-format-selector-input-field-${label}`,
+                  "aria-describedby": `date-time-format-selector-input-field-helper-text-${label}`,
                 }}
-                value={date}
-              />
+                data-testid={`date-time-format-selector-field-${label}`}
+                readOnly={!canEdit}
+                SelectDisplayProps={{
+                  "aria-required": "true",
+                }}
+                options={renderFormats(formatOptions1)}
+                onChange={(event) => {
+                  const { value } = event.target;
+                  if (format) {
+                    // if we're going to a less complex format, we want to trigger an onChange instead
+                    if (isFormatLessComplex(value, format)) {
+                      if (date) {
+                        onChange(date.format(value));
+                      }
+                    } else {
+                      setDate(null); // blank the date if we're going to a more complex format since we cant make up values
+                    }
+                  }
+                  setFormat(event.target.value);
+                }}
+                placeHolder={{ name: "Select Format", value: "" }}
+                value={format ? format : ""}
+              ></Select>
             </div>
-          )}
-        </div>
-      </LocalizationProvider>
-    </Box>
+
+            <DateField
+              label="Date Field"
+              required={fieldRequired}
+              error={error}
+              helperText={helperText}
+              value={date}
+              views={format ? formatMap[format] : ["year"]}
+              disabled={!canEdit || !format || format === "Invalid Format"}
+              placeholder={format || ""}
+              id={`${format || "year"}-field-${label}`}
+              onChange={(newDate) => {
+                if (!newDate) return;
+                const dateUTC = dayjs.utc(newDate);
+                if (
+                  format === DATE_TIME_ZONE_FORMAT &&
+                  isValidFormattedDate(dateUTC.format(format))
+                ) {
+                  onChange(dateUTC.format(format));
+                } else if (dateUTC.format(format) !== "Invalid Date") {
+                  onChange(dateUTC.format(format));
+                }
+                setDate(dateUTC);
+              }}
+              onBlur={() => {}}
+            />
+            {format === DATE_TIME_ZONE_FORMAT && (
+              <div>
+                <TimeField
+                  disabled={!canEdit || !date}
+                  required={fieldRequired}
+                  label="Time Field"
+                  id={`time-field-${label}`}
+                  seconds
+                  views={["hours", "minutes", "seconds"]}
+                  data-testid="time-input"
+                  handleTimeChange={(time) => {
+                    const utcTime = dayjs.utc(time);
+                    if (
+                      isValidFormattedDate(
+                        utcTime.format(DATE_TIME_ZONE_FORMAT)
+                      )
+                    ) {
+                      onChange(utcTime.format(DATE_TIME_ZONE_FORMAT));
+                    }
+                    setDate(utcTime);
+                  }}
+                  value={date}
+                />
+              </div>
+            )}
+          </div>
+        </LocalizationProvider>
+      </Box>
+      {showAddAttributeButton && addTitle && (
+        <AddElementButton name={addTitle} />
+      )}
+    </div>
   );
 };
 

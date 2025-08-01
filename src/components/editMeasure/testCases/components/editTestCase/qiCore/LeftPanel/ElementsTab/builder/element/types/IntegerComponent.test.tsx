@@ -399,8 +399,11 @@ describe("IntegerComponent", () => {
           canEdit={true}
           fieldRequired={false}
           integerType={IntegerType.SIGNED}
+          addTitle={"Integer"}
+          showAddAttributeButton={true}
         />
       );
+      expect(screen.getByText("Add Integer")).toBeInTheDocument();
       const integerField = screen.getByTestId("integer-field-Integer");
       expect(integerField).toBeInTheDocument();
       const integerFieldInput = screen.getByTestId(
