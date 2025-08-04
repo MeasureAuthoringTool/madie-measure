@@ -292,11 +292,14 @@ const EditTestCase = (props: EditTestCaseProps) => {
     onUpdate: (updatedTc: TestCase) => {
       const nextTc = _.cloneDeep(updatedTc);
       handleHapiOutcome(nextTc?.hapiOperationOutcome);
+      setTestCase(nextTc);
+      setEditorVal(nextTc.json ? nextTc.json : "");
     },
     validateTest: !isQiCoreV6,
     onError: (error) => {
       showToast(error, "danger");
     },
+    setShouldPoll,
   });
 
   //needs to be added to feature flag config once the feature flags are moved to Util
@@ -399,7 +402,6 @@ const EditTestCase = (props: EditTestCaseProps) => {
           nextTc.groupPopulations = [];
         }
         resetForm({ values: _.cloneDeep(nextTc) });
-        handleHapiOutcome(nextTc?.hapiOperationOutcome);
         if (
           [ValidationStatus.PENDING, ValidationStatus.VALIDATING].includes(
             tc.validationStatus
@@ -408,6 +410,7 @@ const EditTestCase = (props: EditTestCaseProps) => {
           setShouldPoll(true);
         } else {
           setShouldPoll(false);
+          handleHapiOutcome(nextTc?.hapiOperationOutcome);
         }
       })
       .catch((error) => {
@@ -460,6 +463,7 @@ const EditTestCase = (props: EditTestCaseProps) => {
     testCase.title = sanitizeUserInput(testCase.title);
     testCase.description = sanitizeUserInput(testCase.description);
     testCase.series = sanitizeUserInput(testCase.series);
+    setValidationErrors([]);
 
     if (id) {
       return await updateTestCase(testCase);
@@ -1292,6 +1296,10 @@ const EditTestCase = (props: EditTestCaseProps) => {
                       <ValidationPanel
                         testCase={testCase}
                         validationErrors={validationErrors}
+                        isQiCoreV6={isQICore6}
+                        stu6TestCaseValidationFeatureFlag={
+                          featureFlags?.stu6TestCaseValidation
+                        }
                       />
                     </div>
                   </>
