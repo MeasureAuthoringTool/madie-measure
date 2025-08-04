@@ -152,4 +152,124 @@ describe("ValidationPanel component", () => {
 
     expect(getByTestId("validation-card-0")).toBeInTheDocument();
   });
+
+  it("should render meta validation error with correct styling and text", () => {
+    const testCase = {
+      ...testcase,
+      validationStatus: ValidationStatus.INVALID,
+    };
+    const metaError = [
+      {
+        severity: "error",
+        code: "processing",
+        diagnostics: "Meta.profile: Profile validation failed.",
+        location: ["location 1"],
+        key: 2,
+      },
+    ];
+    const { getByTestId } = render(
+      <ValidationPanel testCase={testCase} validationErrors={metaError} />
+    );
+    const card = getByTestId("validation-card-2");
+    expect(card).toBeInTheDocument();
+    expect(card).toHaveTextContent("Meta.profile: Profile validation failed.");
+  });
+
+  it("should not render informational errors", () => {
+    const testCase = {
+      ...testcase,
+      validationStatus: ValidationStatus.INVALID,
+    };
+    const errors = [
+      {
+        severity: "information",
+        code: "informational",
+        diagnostics: "This is informational.",
+        location: ["location 1"],
+        key: 3,
+      },
+      {
+        severity: "error",
+        code: "processing",
+        diagnostics: "Validation failed.",
+        location: ["location 2"],
+        key: 4,
+      },
+    ];
+    const { queryByTestId } = render(
+      <ValidationPanel testCase={testCase} validationErrors={errors} />
+    );
+    expect(queryByTestId("validation-card-3")).not.toBeInTheDocument();
+    expect(queryByTestId("validation-card-4")).toBeInTheDocument();
+  });
+
+  it("should render warning validation error with correct styling and text", () => {
+    const testCase = {
+      ...testcase,
+      validationStatus: ValidationStatus.INVALID,
+    };
+    const warningError = [
+      {
+        severity: "warning",
+        code: "warning",
+        diagnostics: "This is a warning.",
+        location: ["location 1"],
+        key: 5,
+      },
+    ];
+    const { getByTestId } = render(
+      <ValidationPanel testCase={testCase} validationErrors={warningError} />
+    );
+    const card = getByTestId("validation-card-5");
+    expect(card).toBeInTheDocument();
+    expect(card).toHaveTextContent("Warning: This is a warning.");
+  });
+
+  it("should render no errors present text when no errors and feature flag is true for valid status and isQiCoreV6", () => {
+    const validTestCase = {
+      ...testcase,
+      validationStatus: ValidationStatus.VALID,
+    };
+    const { getByText } = render(
+      <ValidationPanel
+        testCase={validTestCase}
+        validationErrors={[]}
+        isQiCoreV6={true}
+        stu6TestCaseValidationFeatureFlag={true}
+      />
+    );
+    expect(getByText("Nothing to see here!")).toBeInTheDocument();
+  });
+
+  it("should render no errors present text when no errors and feature flag is true for valid status and not isQiCoreV6", () => {
+    const validTestCase = {
+      ...testcase,
+      validationStatus: ValidationStatus.VALID,
+    };
+    const { getByText } = render(
+      <ValidationPanel
+        testCase={validTestCase}
+        validationErrors={[]}
+        isQiCoreV6={false}
+        stu6TestCaseValidationFeatureFlag={true}
+      />
+    );
+    expect(getByText("Nothing to see here!")).toBeInTheDocument();
+  });
+
+  it("should render no errors present text when no errors and feature flag is false", () => {
+    const validTestCase = {
+      ...testcase,
+      validationStatus: ValidationStatus.VALID,
+    };
+    const { getByText } = render(
+      <ValidationPanel
+        testCase={validTestCase}
+        validationErrors={[]}
+        isQiCoreV6={true}
+        stu6TestCaseValidationFeatureFlag={false}
+      />
+    );
+    expect(getByText("Nothing to see here!")).toBeInTheDocument();
+  });
 });
