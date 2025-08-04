@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen, within } from "@testing-library/react";
+import { render, screen, within, cleanup } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import ElementSelector, { getOptionLabel } from "./ElementSelector";
 import { ElementDefinition } from "fhir/r4";
@@ -186,5 +186,113 @@ describe("ElementSelector", () => {
     };
     const label = getOptionLabel(eleDefinition, "Patient");
     expect(label).toBe("multipleBirthInteger");
+  });
+
+  it("disables related choice types using FHIR datatype matching", () => {
+    const choiceOptions: ElementDefinition[] = [
+      { path: "Patient.deceasedBoolean", min: 0, max: "1" },
+      { path: "Patient.deceasedDateTime", min: 0, max: "1" },
+      { path: "Patient.multipleBirthBoolean", min: 0, max: "1" },
+      { path: "Patient.multipleBirthInteger", min: 0, max: "1" },
+      { path: "Patient.valueString", min: 0, max: "1" },
+      { path: "Patient.valueQuantity", min: 0, max: "1" },
+    ];
+
+    const props = {
+      ...defaultProps,
+      options: choiceOptions,
+      newValues: [choiceOptions[0]],
+    };
+
+    render(<ElementSelector {...props} />);
+
+    const input = screen.getByPlaceholderText("Attributes");
+    userEvent.click(input);
+
+    const deceasedDateTimeOption = screen.getByText("deceasedDateTime");
+    expect(deceasedDateTimeOption.closest("li")).toHaveAttribute(
+      "aria-disabled",
+      "true"
+    );
+
+    const multipleBirthBooleanOption = screen.getByText("multipleBirthBoolean");
+    expect(multipleBirthBooleanOption.closest("li")).not.toHaveAttribute(
+      "aria-disabled",
+      "true"
+    );
+
+    cleanup();
+
+    const propsWithMultipleBirth = {
+      ...defaultProps,
+      options: choiceOptions,
+      newValues: [choiceOptions[2]],
+    };
+
+    render(<ElementSelector {...propsWithMultipleBirth} />);
+
+    const inputMultipleBirth = screen.getByPlaceholderText("Attributes");
+    userEvent.click(inputMultipleBirth);
+
+    const multipleBirthIntegerOption = screen.getByText("multipleBirthInteger");
+    expect(multipleBirthIntegerOption.closest("li")).toHaveAttribute(
+      "aria-disabled",
+      "true"
+    );
+
+    const deceasedBooleanOption = screen.getByText("deceasedBoolean");
+    expect(deceasedBooleanOption.closest("li")).not.toHaveAttribute(
+      "aria-disabled",
+      "true"
+    );
+  });
+
+  it("correctly extracts choice base types from datatype ending elements", () => {
+    const testChoiceDisabling = (
+      selectedPath,
+      relatedPath,
+      shouldBeDisabled
+    ) => {
+      const choiceOptions: ElementDefinition[] = [
+        { path: selectedPath, min: 0, max: "1" },
+        { path: relatedPath, min: 0, max: "1" },
+      ];
+
+      const props = {
+        ...defaultProps,
+        options: choiceOptions,
+        newValues: [choiceOptions[0]],
+      };
+
+      render(<ElementSelector {...props} />);
+      userEvent.click(screen.getByPlaceholderText("Attributes"));
+      const options = screen.getAllByRole("option");
+
+      if (shouldBeDisabled) {
+        expect(options[1]).toHaveAttribute("aria-disabled", "true");
+      } else {
+        expect(options[1]).not.toHaveAttribute("aria-disabled", "true");
+      }
+
+      cleanup();
+    };
+
+    testChoiceDisabling(
+      "Patient.valueString",
+      "Patient.valueCodeableConcept",
+      true
+    );
+    testChoiceDisabling("Patient.onsetAge", "Patient.onsetPeriod", true);
+    testChoiceDisabling(
+      "Patient.effectiveDateTime",
+      "Patient.effectivePeriod",
+      true
+    );
+    testChoiceDisabling(
+      "Patient.performedDateTime",
+      "Patient.performedPeriod",
+      true
+    );
+    testChoiceDisabling("Patient.valueString", "Patient.onsetAge", false);
   });
 });
