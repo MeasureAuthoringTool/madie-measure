@@ -39,19 +39,6 @@ const useQdmElmTranslationServiceApiMock =
 const useFhirElmTranslationServiceApiMock =
   useFhirElmTranslationServiceApi as jest.Mock<FhirElmTranslationServiceApi>;
 
-const qdmElmTranslationServiceApiMock = {
-  fetchTranslatorVersion: jest.fn().mockResolvedValue("3.1.0"),
-} as unknown as QdmElmTranslationServiceApi;
-const fhirElmTranslationServiceApiMock = {
-  fetchTranslatorVersion: jest.fn().mockResolvedValue("3.2.0"),
-} as unknown as FhirElmTranslationServiceApi;
-
-useQdmElmTranslationServiceApiMock.mockImplementation(() => {
-  return qdmElmTranslationServiceApiMock;
-});
-useFhirElmTranslationServiceApiMock.mockImplementation(() => {
-  return fhirElmTranslationServiceApiMock;
-});
 const setErrorMessage = jest.fn();
 const testUser = "john doe";
 
@@ -154,6 +141,20 @@ let serviceApiMock: MeasureServiceApi;
 
 describe("MeasureInformation component", () => {
   beforeEach(() => {
+    const qdmElmTranslationServiceApiMock = {
+      fetchTranslatorVersion: jest.fn().mockResolvedValue("3.1.0"),
+    } as unknown as QdmElmTranslationServiceApi;
+    const fhirElmTranslationServiceApiMock = {
+      fetchTranslatorVersion: jest.fn().mockResolvedValue("3.2.0"),
+    } as unknown as FhirElmTranslationServiceApi;
+
+    useQdmElmTranslationServiceApiMock.mockImplementation(() => {
+      return qdmElmTranslationServiceApiMock;
+    });
+    useFhirElmTranslationServiceApiMock.mockImplementation(() => {
+      return fhirElmTranslationServiceApiMock;
+    });
+
     serviceApiMock = {
       getAllEndorsers: jest.fn().mockResolvedValue(endorserList),
       createCmsId: jest.fn().mockResolvedValue(2),
@@ -1105,20 +1106,29 @@ describe("MeasureInformation component", () => {
       expect(translatorVersion).toHaveValue("3.2.0");
     });
   });
-  it("QDM: When no elmJson is present, we're able to get the current version from the translator", async () => {
+  it("QDM: When no elmJson is present, we handle the 400 BAD Request from the translator", async () => {
     const testMeasure = {
       ...measure,
       model: Model.QDM_5_6,
     } as unknown as Measure;
     measureStore.state.mockImplementationOnce(() => testMeasure);
     checkUserCanEdit.mockImplementationOnce(() => true);
+    useQdmElmTranslationServiceApiMock.mockImplementationOnce(() => {
+      return {
+        fetchTranslatorVersion: jest.fn().mockRejectedValueOnce({
+          status: 400,
+          data: "Non-draft version is no longer supported.",
+          error: { message: "error" },
+        }),
+      } as unknown as QdmElmTranslationServiceApi;
+    });
+
     render(<MeasureInformation setErrorMessage={setErrorMessage} />);
     await waitFor(async () => {
-      const translatorVersion = await findByTestId(
-        "translator-version-text-field"
+      const translatorVersionText = await findByText(
+        "Unable to determine translator version."
       );
-      expect(translatorVersion).toBeInTheDocument();
-      expect(translatorVersion).toHaveValue("3.1.0");
+      expect(translatorVersionText).toBeInTheDocument();
     });
   });
 
@@ -1139,6 +1149,34 @@ describe("MeasureInformation component", () => {
       expect(translatorVersion).toHaveValue("1.5.0");
     });
   });
+
+  it("Fhir: When no elmJson is present, we handle the 400 BAD Request from the translator", async () => {
+    const testMeasure = {
+      ...measure,
+      model: Model.QICORE,
+      measureMetaData: measureMetaDataNotDraft,
+    } as unknown as Measure;
+    measureStore.state.mockImplementationOnce(() => testMeasure);
+    checkUserCanEdit.mockImplementationOnce(() => true);
+    useFhirElmTranslationServiceApiMock.mockImplementationOnce(() => {
+      return {
+        fetchTranslatorVersion: jest.fn().mockRejectedValueOnce({
+          status: 400,
+          data: "Non-draft version is no longer supported.",
+          error: { message: "error" },
+        }),
+      } as unknown as QdmElmTranslationServiceApi;
+    });
+
+    render(<MeasureInformation setErrorMessage={setErrorMessage} />);
+    await waitFor(async () => {
+      const translatorVersionText = await findByText(
+        "Unable to determine translator version."
+      );
+      expect(translatorVersionText).toBeInTheDocument();
+    });
+  });
+
   it("QDM: When elmJson is present, we're able to get the current version from the translator", async () => {
     const testMeasure = {
       ...measure,
@@ -1174,6 +1212,53 @@ describe("MeasureInformation component", () => {
       expect(translatorVersionText).toBeInTheDocument();
     });
   });
+
+  it("Translator Version: When set to draft we have specific verbage display", async () => {
+    const testMeasure = {
+      ...measure,
+      model: Model.QDM_5_6,
+      elmJson: testQDMElmJson,
+      measureMetaData: measureMetaDataDraft,
+    } as unknown as Measure;
+    measureStore.state.mockImplementationOnce(() => testMeasure);
+    checkUserCanEdit.mockImplementationOnce(() => true);
+    await act(async () => {
+      render(<MeasureInformation setErrorMessage={setErrorMessage} />);
+      const translatorVersionText = await findByText(
+        "Currently using CQL to ELM Translator Version"
+      );
+      expect(translatorVersionText).toBeInTheDocument();
+    });
+  });
+
+  it("Translator Version: When set to it handles an error while fetching translator version", async () => {
+    const testMeasure = {
+      ...measure,
+      model: Model.QDM_5_6,
+      elmJson: testQDMElmJson,
+      measureMetaData: measureMetaDataDraft,
+    } as unknown as Measure;
+    measureStore.state.mockImplementationOnce(() => testMeasure);
+    checkUserCanEdit.mockImplementationOnce(() => true);
+    useQdmElmTranslationServiceApiMock.mockImplementationOnce(() => {
+      return {
+        fetchTranslatorVersion: jest.fn().mockRejectedValueOnce({
+          status: 424,
+          data: "Unable to determine translator version.",
+          error: { message: "error" },
+        }),
+      } as unknown as QdmElmTranslationServiceApi;
+    });
+
+    await act(async () => {
+      render(<MeasureInformation setErrorMessage={setErrorMessage} />);
+      const translatorVersionText = await findByText(
+        "Unable to determine translator version."
+      );
+      expect(translatorVersionText).toBeInTheDocument();
+    });
+  });
+
   it("Translator Version: When set to not draft, we have specific verbage display", async () => {
     const testMeasure = {
       ...measure,
