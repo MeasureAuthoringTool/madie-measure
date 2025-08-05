@@ -318,7 +318,7 @@ describe("CodingComponent Tests", () => {
     userEvent.click(valueSetSelect);
 
     await waitFor(async () => {
-      expect(screen.getAllByRole("option")).toHaveLength(3);
+      expect(screen.getAllByRole("option")).toHaveLength(2);
     });
 
     expect(screen.getAllByRole("option")[0]).toHaveTextContent("Custom Code");
@@ -666,5 +666,115 @@ describe("CodingComponent Tests", () => {
     expect(codeOptions[0]).toHaveTextContent(
       mockExpandedValueSets[0].expansion?.contains[0].code
     );
+  });
+
+  it("test CodingComponent includePrev set to false", () => {
+    mockStructureDefinition = {
+      binding: {
+        strength: "example",
+        valueSet: "http://hl7.org/fhir/us/core/ValueSet/omb-ethnicity-category",
+      },
+    } as ElementDefinition;
+
+    const mockBindingValueSet = {
+      resourceType: "ValueSet",
+      id: "omb-ethnicity-category",
+      name: "OmbEthnicityCategories",
+      title: "OMB Ethnicity Categories",
+      url: "http://hl7.org/fhir/us/core/ValueSet/omb-ethnicity-category",
+      expansion: {
+        contains: [
+          {
+            system:
+              "http://hl7.org/fhir/us/core/ValueSet/omb-ethnicity-category",
+          },
+        ],
+      },
+    };
+
+    const expandedValueSet = {
+      resourceType: "ValueSet",
+      id: "2.16.840.1.114222.4.11.837",
+      url: "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.114222.4.11.837",
+      name: "Ethnicity",
+      title: "Ethnicity",
+      status: "active",
+      compose: {
+        include: [
+          {
+            valueSet: [
+              "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.114222.4.11.837",
+            ],
+          },
+          {
+            valueSet: [
+              "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1021.102",
+            ],
+          },
+        ],
+      },
+    };
+
+    const finalValueSet = [
+      {
+        resourceType: "ValueSet",
+        id: "2.16.840.1.114222.4.11.837",
+        url: "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.114222.4.11.837",
+        name: "Ethnicity",
+        title: "Ethnicity",
+        status: "active",
+        expansion: {
+          contains: [
+            {
+              code: "2135-2",
+              display: "Hispanic or Latino",
+            },
+            {
+              code: "2186-5",
+              display: "Not Hispanic or Latino",
+            },
+          ],
+        },
+      },
+    ];
+    mockedAxios.get.mockResolvedValue({
+      data: mockBindingValueSet,
+    });
+    mockedAxios.get.mockResolvedValue({
+      data: expandedValueSet,
+    });
+    mockedAxios.put.mockResolvedValue({
+      data: finalValueSet,
+    });
+
+    render(
+      <ApiContextProvider value={mockConfig}>
+        <ExecutionContextProvider
+          value={{
+            measureState: [null, jest.fn()],
+            bundleState: [null, jest.fn()],
+            valueSetsState: [null, jest.fn()],
+            executionContextReady: true,
+            executing: false,
+            setExecuting: jest.fn(),
+            contextFailure: false,
+          }}
+        >
+          <CodingComponent
+            canEdit={true}
+            structureDefinition={mockStructureDefinition}
+            label="test-label"
+            value={null}
+            onChange={mockOnChange}
+            includePrev={false}
+          />
+        </ExecutionContextProvider>
+      </ApiContextProvider>
+    );
+
+    const valueSetSelector = screen.getByRole("combobox", {
+      name: "Value Set / Direct Reference Code",
+    });
+    expect(valueSetSelector).toHaveTextContent("- Select -");
   });
 });

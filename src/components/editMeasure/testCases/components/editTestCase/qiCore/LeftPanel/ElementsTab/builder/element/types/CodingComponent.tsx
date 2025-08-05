@@ -23,9 +23,13 @@ const getValueSetComposeIncludeOids = (valueSet: ValueSet) => {
   return valueSet.compose.include
     .map((include) => include.valueSet)
     .reduce((acc, curr) => {
-      const oid = getOidFromString(curr[0], "FHIR");
+      const oid = getOidFromString(curr?.[0], "FHIR");
       if (oid) {
-        return [...acc, oid];
+        const combined = [...acc, oid];
+        // Remove duplicates
+        return combined.filter(
+          (item, index, self) => index === self.findIndex((vs) => vs === item)
+        );
       }
       return acc;
     }, []);
@@ -39,6 +43,7 @@ const CodingComponent = ({
   onChange,
   showAddAttributeButton,
   addTitle,
+  includePrev = true,
 }) => {
   const [allValueSets, setAllValueSets] = useState<ValueSet[]>();
   const [selectedValueSet, setSelectedValueSet] = useState<ValueSet>();
@@ -114,12 +119,16 @@ const CodingComponent = ({
                     contains: concepts,
                     timestamp: new Date().toISOString(),
                   };
-                  setAllValueSets((prev) => {
-                    if (prev) {
-                      return [...prev, valueSet];
-                    }
-                    return [valueSet];
-                  });
+                  if (includePrev) {
+                    setAllValueSets((prev) => {
+                      if (prev) {
+                        return [...prev, valueSet];
+                      }
+                      return [valueSet];
+                    });
+                  } else {
+                    setAllValueSets([valueSet]);
+                  }
                 });
             }
           })
