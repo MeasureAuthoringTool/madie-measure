@@ -1251,7 +1251,7 @@ define function MeasureObservation(e Encounter):
     const { MeasureServiceApi } = actualModule;
     // Spy on the hook
     const useMeasureServiceApi = jest.spyOn(actualModule, "default");
-    const realInstance = new MeasureServiceApi("asodifm", () => "asodifm"); // gitleaks:allow
+    const realInstance = new MeasureServiceApi("asodifm", () => "asodifm"); // #nosec
     realInstance.updateMeasureLock = jest.fn().mockResolvedValue({
       isLocked: true,
       lockedBy: "testuser@example.com",
@@ -1282,7 +1282,7 @@ define function MeasureObservation(e Encounter):
     );
     const { MeasureServiceApi } = actualModule;
     const useMeasureServiceApi = jest.spyOn(actualModule, "default");
-    const realInstance = new MeasureServiceApi("asodifm", () => "asodifm"); // gitleaks:allow
+    const realInstance = new MeasureServiceApi("asodifm", () => "asodifm"); // #nosec
     realInstance.updateMeasureLock = jest.fn().mockRejectedValue({
       isLocked: true,
       lockedBy: "testuser@example.com",
