@@ -363,11 +363,15 @@ const TypeEditor = ({
             canEdit={canEdit}
             fieldRequired={required}
             label={label}
+            resource={resource}
             structureDefinition={structureDefinition}
             showAddAttributeButton={showAddAttributeButton}
             addTitle={addTitle}
             {...formik.getFieldProps(label)}
             onChange={(value) => {
+              if (label.includes(".value[x")) {
+                label = label.replace(".value[x]", ".valueCode");
+              }
               formik.setFieldTouched(label);
               formik.setFieldValue(label, value);
             }}
