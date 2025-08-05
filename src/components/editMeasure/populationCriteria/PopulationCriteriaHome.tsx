@@ -32,14 +32,10 @@ export function PopulationCriteriaHome() {
     if (featureFlags?.Locking) {
       measureServiceApi
         .updateMeasureLock(measureId)
-        .then((res) => {
-          // eslint-disable-next-line no-console
-          console.log("updateMeasureLock", res); // Preserve lock info
-        })
-        .catch((err) => {
-          if (err.response?.data) {
-            // eslint-disable-next-line no-console
-            console.log("catch response.data", err);
+        .then(() => {})
+        .catch((e) => {
+          if (e) {
+            console.error("Error locking Measure:", e);
           }
         });
     }

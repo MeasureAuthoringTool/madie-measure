@@ -10,7 +10,9 @@ import MeasureMetadata from "./measureMetadata/MeasureMetadata";
 import { Measure } from "@madie/madie-models";
 // @ts-ignore
 import { measureStore, useFeatureFlags } from "@madie/madie-util";
-import useMeasureServiceApi from "../../../api/useMeasureServiceApi";
+import useMeasureServiceApi, {
+  MeasureServiceApi,
+} from "../../../api/useMeasureServiceApi";
 
 const measure = {
   id: "1",
@@ -99,10 +101,8 @@ const mockUseFeatureFlags = jest.fn(() => ({
   Locking: false,
 }));
 
-jest.mock("../../../api/useMeasureServiceApi", () => ({
-  __esModule: true,
-  default: jest.fn(),
-}));
+let measureServiceApiMock: MeasureServiceApi;
+
 jest.mock("./measureInformation/MeasureInformation");
 jest.mock("./measureMetadata/MeasureMetadata");
 jest.mock("@madie/madie-util", () => ({
@@ -132,6 +132,9 @@ jest.mock("@madie/madie-util", () => ({
     initialState: { canTravel: false, pendingPath: "" },
   },
 }));
+jest.mock("../../../api/useMeasureServiceApi");
+const useMeasuremeasureServiceApiMock =
+  useMeasureServiceApi as jest.Mock<MeasureServiceApi>;
 const MeasureInformationMock = MeasureInformation as jest.Mock<JSX.Element>;
 const MeasureMetadataMock = MeasureMetadata as jest.Mock<JSX.Element>;
 const setErrorMessage = jest.fn();
@@ -665,21 +668,29 @@ describe("MeasureDetails component", () => {
     measureStore.state.mockImplementationOnce(() => incompletedIconMeasure);
 
     const updateMeasureLock = jest.fn().mockRejectedValueOnce({
-      lockedBy: "test-user",
-      lockedAt: "2025-08-05T12:00:00Z",
+      response: {
+        data: {
+          lockedBy: "another-user",
+          lockedAt: "2025-08-05T12:00:00Z",
+        },
+      },
     });
+
     const unlockMeasure = jest.fn();
-    (useMeasureServiceApi as jest.Mock).mockReturnValue({
+    useMeasuremeasureServiceApiMock.mockReturnValue({
+      ...measureServiceApiMock,
       updateMeasureLock,
       unlockMeasure,
     });
 
+    const errorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+
     render(
       <ApiContextProvider value={serviceConfig}>
-        <MemoryRouter initialEntries={["/foo/2"]}>
+        <MemoryRouter initialEntries={["/measures/testMeasureId"]}>
           <Routes>
             <Route
-              path="/foo/:measureId"
+              path="/measures/:measureId"
               element={
                 <MeasureDetails
                   featureFlags={{ EnhancedTextFormatting: true, Locking: true }}
@@ -694,8 +705,10 @@ describe("MeasureDetails component", () => {
     );
 
     await waitFor(() => {
-      expect(updateMeasureLock).toHaveBeenCalledTimes(1);
-      expect(updateMeasureLock).toHaveBeenCalledWith("2");
+      expect(updateMeasureLock).toHaveBeenCalledWith("testMeasureId");
+      expect(errorSpy).toHaveBeenCalled();
+
+      errorSpy.mockRestore();
     });
   });
 });

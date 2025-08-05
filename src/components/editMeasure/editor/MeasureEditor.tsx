@@ -136,20 +136,6 @@ const MeasureEditor = () => {
   useEffect(() => {
     const subscription = measureStore.subscribe((measure: Measure) => {
       setMeasure(measure);
-      if (featureFlags?.Locking) {
-        measureServiceApi
-          .updateMeasureLock(measureId)
-          .then((res) => {
-            // eslint-disable-next-line no-console
-            console.log("updateMeasureLock", res); // Preserve lock info
-          })
-          .catch((err) => {
-            if (err.response?.data) {
-              // eslint-disable-next-line no-console
-              console.log("catch response.data", err);
-            }
-          });
-      }
       if (
         measure?.errors?.length > 0 &&
         measure.errors.includes(
@@ -176,6 +162,16 @@ const MeasureEditor = () => {
         );
       }
     });
+    if (featureFlags?.Locking) {
+      measureServiceApi
+        .updateMeasureLock(measureId)
+        .then(() => {})
+        .catch((e) => {
+          if (e) {
+            console.error("Error locking Measure:", e);
+          }
+        });
+    }
     return () => {
       subscription.unsubscribe();
       if (featureFlags?.Locking) {

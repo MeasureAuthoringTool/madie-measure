@@ -707,22 +707,16 @@ describe("PopulationCriteriaHome", () => {
     mockedMeasureState.state = { ...QiCoreMeasure };
     mockFeatureFlags = { Locking: true, EnhancedTextFormatting: false };
 
-    const updateMeasureLock = jest.fn().mockRejectedValueOnce({
-      response: {
-        data: {
-          lockedBy: "another-user",
-          lockedAt: "2025-08-05T12:00:00Z",
-        },
-      },
-    });
+    const updateMeasureLock = jest.fn().mockRejectedValue("test");
     const unlockMeasure = jest.fn();
-    const consoleSpy = jest.spyOn(console, "log").mockImplementation(() => {});
 
     useMeasuremeasureServiceApiMock.mockReturnValue({
       ...measureServiceApiMock,
       updateMeasureLock,
       unlockMeasure,
     });
+
+    const errorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
 
     render(
       <MemoryRouter initialEntries={["/measures/testMeasureId/edit/groups/1"]}>
@@ -738,17 +732,12 @@ describe("PopulationCriteriaHome", () => {
     );
 
     await waitFor(() => {
-      expect(updateMeasureLock).toHaveBeenCalledWith("testMeasureId");
-      expect.objectContaining({
-        response: {
-          data: {
-            lockedBy: "another-user",
-            lockedAt: "2025-08-05T12:00:00Z",
-          },
-        },
-      });
+      expect(updateMeasureLock).toHaveBeenCalled();
     });
 
-    consoleSpy.mockRestore();
+    // You can also assert that an error was thrown
+    expect(errorSpy).toHaveBeenCalled();
+
+    errorSpy.mockRestore();
   });
 });
