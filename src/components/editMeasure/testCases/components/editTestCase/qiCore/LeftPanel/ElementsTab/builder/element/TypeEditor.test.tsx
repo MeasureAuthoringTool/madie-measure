@@ -1,5 +1,11 @@
 import * as React from "react";
-import { fireEvent, render, screen, act } from "@testing-library/react";
+import {
+  fireEvent,
+  render,
+  screen,
+  act,
+  waitFor,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import TypeEditor from "./TypeEditor";
@@ -95,12 +101,123 @@ const codingTopLevelElements = [
     path: "ClaimResponse.Coding.userSelected",
   },
 ];
+
+const mockValueSetDefinitionBirthSex = {
+  resourceType: "ValueSet",
+  id: "birthsex",
+  url: "http://hl7.org/fhir/us/core/ValueSet/birthsex",
+  name: "BirthSex",
+  title: "Birth Sex",
+  status: "active",
+  experimental: false,
+  compose: {
+    include: [
+      {
+        valueSet: [
+          "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1",
+        ],
+      },
+      {
+        valueSet: [
+          "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1021.103",
+        ],
+      },
+    ],
+  },
+};
+const valueSetExpansionBirthSex = [
+  {
+    resourceType: "ValueSet",
+    id: "2.16.840.1.113762.1.4.1",
+    name: "ONCAdministrativeSex",
+    title: "ONC Administrative Sex",
+    status: "active",
+    expansion: {
+      contains: [
+        {
+          system:
+            "http://terminology.hl7.org/CodeSystem/v3-AdministrativeGender",
+          inactive: true,
+          version: "2023-02-01",
+          code: "F",
+          display: "Female",
+        },
+        {
+          system:
+            "http://terminology.hl7.org/CodeSystem/v3-AdministrativeGender",
+          inactive: true,
+          version: "2023-02-01",
+          code: "M",
+          display: "Male",
+        },
+      ],
+    },
+  },
+  {
+    resourceType: "ValueSet",
+    id: "2.16.840.1.113762.1.4.1021.103",
+    name: "OtherOrUnknownOrRefusedToAnswer",
+    title: "Other or unknown or refused to answer",
+    status: "active",
+    expansion: {
+      contains: [
+        {
+          code: "ASKU",
+          display: "asked but unknown",
+        },
+        {
+          code: "OTH",
+          display: "other",
+        },
+        {
+          code: "UNK",
+          display: "unknown",
+        },
+      ],
+    },
+  },
+];
+
+const structureDefinitionForExtensionValue = {
+  id: "Extension.value[x]",
+  path: "Extension.value[x]",
+  short: "Value of extension",
+  type: [
+    {
+      code: "code",
+    },
+  ],
+  binding: {
+    strength: "required",
+    description: "Code for sex assigned at birth",
+    valueSet: "http://hl7.org/fhir/us/core/ValueSet/birthsex",
+  },
+};
+
+const parentStructureDefinition = {
+  resourceName: null,
+  category: null,
+  primaryCodePath: null,
+  definition: {
+    resourceType: "StructureDefinition",
+    id: "us-core-birthsex",
+    url: "http://hl7.org/fhir/us/core/StructureDefinition/us-core-birthsex",
+    name: "USCoreBirthSexExtension",
+    title: "US Core Birth Sex Extension",
+    type: "Extension",
+  },
+};
+
 jest.mock("../../../../../../../api/useFhirDefinitionsService");
 const useFhirDefinitionsServiceApiMock =
   useFhirDefinitionsServiceApi as jest.Mock<FhirDefinitionsServiceApi>;
 const fhirDefinitionsServiceApiMock = {
   getResourceTree: jest.fn().mockResolvedValue(codingDef),
 } as unknown as FhirDefinitionsServiceApi;
+useFhirDefinitionsServiceApiMock.mockImplementation(
+  () => fhirDefinitionsServiceApiMock
+);
+
 jest.mock("../../../../../../../api/fhirDefinitionServiceUtilities", () => {
   return {
     ...jest.requireActual(
@@ -112,9 +229,6 @@ jest.mock("../../../../../../../api/fhirDefinitionServiceUtilities", () => {
     updateChildrenPaths: jest.fn().mockReturnValue(codingTopLevelElements),
   };
 });
-useFhirDefinitionsServiceApiMock.mockImplementation(
-  () => fhirDefinitionsServiceApiMock
-);
 
 jest.mock("../../../../../../../api/useTerminologyServiceApi");
 const useTerminologyServiceApiMock =
@@ -1383,6 +1497,101 @@ describe("TypeEditor Component", () => {
       name: "Value Set / Direct Reference Code",
     });
     expect(valueSetSelector).toHaveTextContent("- Select -");
+  });
+
+  test("Should render Coding component for <Patient.extension[2].value[x]> and handle onChange properly", async () => {
+    const fhirDefinitionsServiceApiMock = {
+      getResourceTree: jest.fn().mockResolvedValue([{}]),
+      getValueSetDefinition: jest
+        .fn()
+        .mockResolvedValue(mockValueSetDefinitionBirthSex),
+    } as unknown as FhirDefinitionsServiceApi;
+    useFhirDefinitionsServiceApiMock.mockImplementation(
+      () => fhirDefinitionsServiceApiMock
+    );
+
+    const terminologyServiceApiMock = {
+      getValueSetsExpansionForOids: jest
+        .fn()
+        .mockResolvedValue(valueSetExpansionBirthSex),
+    } as unknown as TerminologyServiceApi;
+    useTerminologyServiceApiMock.mockImplementation(
+      () => terminologyServiceApiMock
+    );
+
+    const onChange = jest.fn();
+    const setFieldTouched = jest.fn();
+    const setFieldValue = jest.fn();
+    const mockFormik = {
+      setFieldTouched: setFieldTouched,
+      setFieldValue: onChange,
+      getFieldProps: () => ({
+        label: "Patient.extension[2].value[x]",
+        name: "Patient.extension[2].value[x]",
+        value: "M",
+        setFieldTouched: setFieldTouched,
+        setFieldValue: setFieldValue,
+      }),
+    } as unknown as FormikProps<any>;
+
+    render(
+      <ExecutionContextProvider
+        value={{
+          measureState: [null, jest.fn()],
+          bundleState: [null, jest.fn()],
+          valueSetsState: [null, jest.fn()],
+          executionContextReady: true,
+          executing: false,
+          setExecuting: jest.fn(),
+          contextFailure: false,
+        }}
+      >
+        <FormikProvider value={mockFormik}>
+          <RequiredFieldsProvider
+            requiredFields={{ "Patient.extension[2].value[x]": true }}
+            formInfo={[
+              "Patient.extension[2].value[x]",
+              {
+                id: "Patient.extension[2].value[x]",
+                required: true,
+                canBeMultipleCardinality: false,
+              },
+            ]}
+          >
+            <TypeEditor
+              structureDefinition={structureDefinitionForExtensionValue}
+              resource={null}
+              label="Patient.extension[2].value[x]"
+              canEdit={true}
+              parentStructureDefinition={parentStructureDefinition}
+            />
+          </RequiredFieldsProvider>
+        </FormikProvider>
+      </ExecutionContextProvider>
+    );
+
+    const codeSelects = screen.getByRole("combobox", {
+      name: "Patient.extension[2].value[x]",
+    });
+    expect(codeSelects).toBeInTheDocument();
+    expect(codeSelects).toHaveTextContent("M");
+
+    userEvent.click(codeSelects);
+    const options = await screen.findAllByRole("option");
+    expect(options).toHaveLength(5);
+
+    userEvent.click(options[0]);
+
+    await waitFor(() => {
+      expect(codeSelects).toHaveTextContent("F");
+      expect(onChange).toHaveBeenCalledWith(
+        "Patient.extension[2].valueCode",
+        "F"
+      );
+      expect(setFieldTouched).toHaveBeenCalledWith(
+        "Patient.extension[2].valueCode"
+      );
+    });
   });
 
   test("Should render CodeableConcept component", async () => {
