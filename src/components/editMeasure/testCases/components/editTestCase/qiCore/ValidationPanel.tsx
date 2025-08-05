@@ -36,69 +36,88 @@ const ValidationAlertCard = styled.p<AlertProps>(({ status = "default" }) => [
 interface ValidationPanelProps {
   testCase: TestCase;
   validationErrors: any[];
+  isQiCoreV6: boolean;
+  stu6TestCaseValidationFeatureFlag: boolean;
 }
 
 const ValidationPanel = ({
   testCase,
   validationErrors,
+  isQiCoreV6,
+  stu6TestCaseValidationFeatureFlag,
 }: ValidationPanelProps) => {
+  const renderSkeleton = () => (
+    <Box
+      data-testid="validation-skeleton-box"
+      aria-label="Validation loading skeletons"
+      sx={{
+        width: 480,
+        height: 50,
+        backgroundColor: "#f5f5f5",
+        borderRadius: 1,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        marginLeft: "10px",
+      }}
+    >
+      <Skeleton
+        data-testid="validation-skeleton"
+        aria-label="Validation loading skeleton"
+        width={300}
+        height={30}
+        animation="wave"
+        sx={{ marginLeft: "-160px" }}
+      />
+    </Box>
+  );
+
+  const renderValidationErrors = () =>
+    validationErrors
+      .filter((error) => !/^information/.test(error?.severity))
+      .map((error) => (
+        <ValidationAlertCard
+          key={error.key}
+          data-testid={`validation-card-${error.key}`}
+          aria-describedby={`validation-card-description-${error.key}`}
+          status={
+            error.diagnostics.includes("Meta.profile")
+              ? "meta"
+              : error.severity || "error"
+          }
+        >
+          {error.diagnostics.includes("Meta.profile")
+            ? "Meta.profile: "
+            : error.severity
+            ? error.severity.charAt(0).toUpperCase() +
+              error.severity.slice(1) +
+              ": "
+            : ""}
+          {error.diagnostics}
+        </ValidationAlertCard>
+      ));
+
+  const renderNoErrors = () => (
+    <span aria-describedby="validation-no-errors">Nothing to see here!</span>
+  );
+
+  const isLoading = [
+    ValidationStatus.PENDING,
+    ValidationStatus.VALIDATING,
+  ].includes(testCase?.validationStatus);
+  const hasErrors = validationErrors && validationErrors.length > 0;
+  const showNoErrors = stu6TestCaseValidationFeatureFlag
+    ? (testCase?.validationStatus === ValidationStatus.VALID && isQiCoreV6) ||
+      !isQiCoreV6
+    : true;
+
   return (
     <>
-      {[ValidationStatus.PENDING, ValidationStatus.VALIDATING].includes(
-        testCase?.validationStatus
-      ) ? (
-        <Box
-          data-testid="validation-skeleton-box"
-          aria-label="Validation loading skeletons"
-          sx={{
-            width: 480,
-            height: 50,
-            backgroundColor: "#f5f5f5",
-            borderRadius: 1,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            marginLeft: "10px",
-          }}
-        >
-          <Skeleton
-            data-testid="validation-skeleton"
-            aria-label="Validation loading skeleton"
-            width={300}
-            height={30}
-            animation="wave"
-            sx={{ marginLeft: "-160px" }}
-          />
-        </Box>
-      ) : validationErrors && validationErrors.length > 0 ? (
-        validationErrors
-          .filter((error) => !/^information/.test(error?.severity))
-          .map((error) => (
-            <ValidationAlertCard
-              key={error.key}
-              data-testid={`validation-card-${error.key}`}
-              aria-describedby={`validation-card-description-${error.key}`}
-              status={
-                error.diagnostics.includes("Meta.profile")
-                  ? "meta"
-                  : error.severity || "error"
-              }
-            >
-              {error.diagnostics.includes("Meta.profile")
-                ? "Meta.profile: "
-                : error.severity
-                ? error.severity.charAt(0).toUpperCase() +
-                  error.severity.slice(1) +
-                  ": "
-                : ""}
-              {error.diagnostics}
-            </ValidationAlertCard>
-          ))
-      ) : (
-        <span aria-describedby="validation-no-errors-description">
-          Nothing to see here!
-        </span>
-      )}
+      {isLoading
+        ? renderSkeleton()
+        : hasErrors
+        ? renderValidationErrors()
+        : showNoErrors && renderNoErrors()}
     </>
   );
 };
