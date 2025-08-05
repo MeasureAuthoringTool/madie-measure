@@ -140,12 +140,12 @@ const MeasureEditor = () => {
         measureServiceApi
           .updateMeasureLock(measureId)
           .then((res) => {
-            //@ts-ignore
+            // eslint-disable-next-line no-console
             console.log("updateMeasureLock", res); // Preserve lock info
           })
           .catch((err) => {
             if (err.response?.data) {
-              //@ts-ignore
+              // eslint-disable-next-line no-console
               console.log("catch response.data", err);
             }
           });

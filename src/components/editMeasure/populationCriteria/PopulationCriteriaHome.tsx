@@ -3,12 +3,15 @@ import "twin.macro";
 import "styled-components/macro";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import PopulationCriteriaSideNav from "./populationCriteriaSideNav/PopulationCriteriaSideNav";
-import { checkUserCanEdit, measureStore } from "@madie/madie-util";
+import {
+  checkUserCanEdit,
+  measureStore,
+  useFeatureFlags,
+} from "@madie/madie-util";
 import { Measure } from "@madie/madie-models";
 import BaseConfiguration from "./baseConfiguration/BaseConfiguration";
 import QDMReporting from "./QDMReporting/QDMReporting";
 import MeasureGroupAlerts from "./groups/MeasureGroupAlerts";
-import { useFeatureFlags } from "@madie/madie-util";
 import useMeasureServiceApi from "../../../api/useMeasureServiceApi";
 
 export const COMPLETE = "complete";
@@ -30,12 +33,12 @@ export function PopulationCriteriaHome() {
       measureServiceApi
         .updateMeasureLock(measureId)
         .then((res) => {
-          //@ts-ignore
+          // eslint-disable-next-line no-console
           console.log("updateMeasureLock", res); // Preserve lock info
         })
         .catch((err) => {
           if (err.response?.data) {
-            //@ts-ignore
+            // eslint-disable-next-line no-console
             console.log("catch response.data", err);
           }
         });
