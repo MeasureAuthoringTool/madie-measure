@@ -1253,7 +1253,7 @@ define function MeasureObservation(e Encounter):
     const useMeasureServiceApi = jest.spyOn(actualModule, "default");
 
     // Create a real instance and override only desired methods
-    const realInstance = new MeasureServiceApi("asodifm", () => "fake-token");
+    const realInstance = new MeasureServiceApi("asodifm", () => "asodifm");
     realInstance.updateMeasureLock = jest.fn().mockResolvedValue({
       isLocked: true,
       lockedBy: "testuser@example.com",
@@ -1284,7 +1284,7 @@ define function MeasureObservation(e Encounter):
     );
     const { MeasureServiceApi } = actualModule;
     const useMeasureServiceApi = jest.spyOn(actualModule, "default");
-    const realInstance = new MeasureServiceApi("asodifm", () => "fake-token");
+    const realInstance = new MeasureServiceApi("asodifm", () => "asodifm");
     realInstance.updateMeasureLock = jest.fn().mockRejectedValue({
       isLocked: true,
       lockedBy: "testuser@example.com",
