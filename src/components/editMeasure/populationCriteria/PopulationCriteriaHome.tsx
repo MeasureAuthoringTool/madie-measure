@@ -1,4 +1,4 @@
-import React, { lazy, useEffect, useMemo, useState } from "react";
+import React, { lazy, useEffect, useMemo, useRef, useState } from "react";
 import "twin.macro";
 import "styled-components/macro";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
@@ -8,6 +8,8 @@ import { Measure } from "@madie/madie-models";
 import BaseConfiguration from "./baseConfiguration/BaseConfiguration";
 import QDMReporting from "./QDMReporting/QDMReporting";
 import MeasureGroupAlerts from "./groups/MeasureGroupAlerts";
+import { useFeatureFlags } from "@madie/madie-util";
+import useMeasureServiceApi from "../../../api/useMeasureServiceApi";
 
 export const COMPLETE = "complete";
 export const INCOMPLETE = "incomplete";
@@ -15,14 +17,38 @@ export const NONE = "none";
 
 export function PopulationCriteriaHome() {
   const { pathname } = useLocation();
-  const { groupNumber } = useParams();
+  const { groupNumber, measureId } = useParams();
+  const measureServiceApi = useRef(useMeasureServiceApi()).current;
   const [measure, setMeasure] = useState<Measure>(measureStore.state);
+  const featureFlags = useFeatureFlags();
+
   useEffect(() => {
+    // Subscribe to store
     const subscription = measureStore.subscribe(setMeasure);
+    // Lock the measure if the Locking feature is enabled
+    if (featureFlags?.Locking) {
+      measureServiceApi
+        .updateMeasureLock(measureId)
+        .then((res) => {
+          //@ts-ignore
+          console.log("updateMeasureLock", res); // Preserve lock info
+        })
+        .catch((err) => {
+          if (err.response?.data) {
+            //@ts-ignore
+            console.log("catch response.data", err);
+          }
+        });
+    }
+
+    // Cleanup on unmount
     return () => {
       subscription.unsubscribe();
+      if (featureFlags?.Locking) {
+        measureServiceApi.unlockMeasure(measureId);
+      }
     };
-  }, []);
+  }, [measureServiceApi, measureId, featureFlags?.Locking]);
 
   let navigate = useNavigate();
   const canEdit: boolean = checkUserCanEdit(

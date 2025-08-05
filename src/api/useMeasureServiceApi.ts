@@ -661,6 +661,39 @@ export class MeasureServiceApi {
       throw error;
     }
   }
+
+  async updateMeasureLock(measureId: string): Promise<any> {
+    try {
+      const response = await axios.put<String>(
+        `${this.baseUrl}/measures/${measureId}/measure-lock`,
+        null,
+        {
+          headers: {
+            Authorization: `Bearer ${this.getAccessToken()}`,
+          },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      throw new Error(error);
+    }
+  }
+
+  async unlockMeasure(measureId: string): Promise<any> {
+    try {
+      const response = await axios.delete<String>(
+        `${this.baseUrl}/measures/${measureId}/measure-lock`,
+        {
+          headers: {
+            Authorization: `Bearer ${this.getAccessToken()}`,
+          },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      throw new Error(error);
+    }
+  }
 }
 
 export default function useMeasureServiceApi(): MeasureServiceApi {

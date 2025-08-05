@@ -22,6 +22,7 @@ declare module "@madie/madie-util" {
     EditTestsOnVersionedMeasures: boolean;
     MinimizeAlerts: boolean;
     EnhancedTextFormatting: boolean;
+    Locking: boolean;
     qiCore7: boolean;
     TransferMeasure: boolean;
   }

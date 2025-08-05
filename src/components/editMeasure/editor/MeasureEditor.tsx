@@ -48,6 +48,7 @@ import {
   useDocumentTitle,
   routeHandlerStore,
   checkUserCanEdit,
+  useFeatureFlags,
 } from "@madie/madie-util";
 import StatusHandler from "./StatusHandler";
 import "./StatusHandler.scss";
@@ -69,6 +70,7 @@ import applyCQLFunction, {
   deleteCQLFunction,
   editCQLFunction,
 } from "./cqlFunctionApplier";
+import { useParams } from "react-router";
 
 export const mapErrorsToAceAnnotations = (
   errors: ElmTranslationError[]
@@ -126,13 +128,28 @@ const MeasureEditor = () => {
   const [codeMap, setCodeMap] = useState<Map<string, Code>>(
     new Map<string, Code>()
   );
+  const measureServiceApi = useMeasureServiceApi();
   const { updateMeasure } = measureStore;
+  const { measureId } = useParams();
   const [processing, setProcessing] = useState<boolean>(true);
-
+  const featureFlags = useFeatureFlags();
   useEffect(() => {
     const subscription = measureStore.subscribe((measure: Measure) => {
       setMeasure(measure);
-
+      if (featureFlags?.Locking) {
+        measureServiceApi
+          .updateMeasureLock(measureId)
+          .then((res) => {
+            //@ts-ignore
+            console.log("updateMeasureLock", res); // Preserve lock info
+          })
+          .catch((err) => {
+            if (err.response?.data) {
+              //@ts-ignore
+              console.log("catch response.data", err);
+            }
+          });
+      }
       if (
         measure?.errors?.length > 0 &&
         measure.errors.includes(
@@ -161,8 +178,12 @@ const MeasureEditor = () => {
     });
     return () => {
       subscription.unsubscribe();
+      if (featureFlags?.Locking) {
+        measureServiceApi.unlockMeasure(measureId);
+      }
     };
-  }, []);
+  }, [measureServiceApi, measureId, featureFlags?.Locking]);
+
   const [discardDialogOpen, setDiscardDialogOpen]: [
     boolean,
     Dispatch<SetStateAction<boolean>>
@@ -186,7 +207,6 @@ const MeasureEditor = () => {
     });
   }, [isCQLUnchanged, updateRouteHandlerState]);
 
-  const measureServiceApi = useMeasureServiceApi();
   // set success message
   const [success, setSuccess] = useState({
     status: undefined,
