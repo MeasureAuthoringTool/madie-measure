@@ -38,10 +38,11 @@ const TextEditor = (props: Props) => {
   const [localText, setLocalText] = useState(value);
   const featureFlags = useFeatureFlags();
   // debounce the callback to update state
-  const debounced = useDebouncedCallback(
-    (field, value) => setFieldValue(field, value),
-    250
-  );
+  const debounced = useDebouncedCallback((field, value) => {
+    const normalized =
+      value === "<p></p>" || value === "<p><br></p>" ? "" : value;
+    setFieldValue(field, normalized);
+  }, 250);
   // every 250 ms after an udpate to our local text, we update the formik value
   useEffect(() => {
     debounced(name, localText);

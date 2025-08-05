@@ -72,13 +72,23 @@ export default function MeasureInformation(props: MeasureInformationProps) {
 
   const getTranslatorVersion = async (model, draft) => {
     if (model.includes("QDM")) {
-      qdmElmTranslationService.fetchTranslatorVersion(draft).then((data) => {
-        setTranslatorVersion(data);
-      });
+      qdmElmTranslationService
+        .fetchTranslatorVersion(draft)
+        .then((data) => {
+          setTranslatorVersion(data);
+        })
+        .catch(() => {
+          setTranslatorVersion("Unable to determine translator version.");
+        });
     } else {
-      fhirElmTranslationService.fetchTranslatorVersion(draft).then((data) => {
-        setTranslatorVersion(data);
-      });
+      fhirElmTranslationService
+        .fetchTranslatorVersion(draft)
+        .then((data) => {
+          setTranslatorVersion(data);
+        })
+        .catch(() => {
+          setTranslatorVersion("Unable to determine translator version.");
+        });
     }
   };
   useEffect(() => {

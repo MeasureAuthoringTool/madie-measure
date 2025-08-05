@@ -3,14 +3,12 @@ import { act, render, screen, waitFor } from "@testing-library/react";
 import ResourceEditor, {
   deleteMultipleCardinalityElement,
 } from "./ResourceEditor";
-import {
-  QiCoreResourceContext,
-  ResourceActionType,
-} from "../../../../../../../util/QiCorePatientProvider";
-import mockSelectedResourceTree from "./mockSelectedResourceTree.json";
+import { QiCoreResourceContext } from "../../../../../../../util/QiCorePatientProvider";
+import mockClaimResponseStructuredDef from "./mockSelectedResourceTree.json";
 import mockSelectedPatientTree from "./mockSelectedPatientTree.json";
 import mockResourceState from "./mockResourceState.json";
 import mockValueSetsState from "./mockValueSetsState.json";
+import mockAllergyIntoleranceStructuredDef from "./mockAllergyIntoleranceStructuredDefinition.json";
 import _ from "lodash";
 
 import userEvent from "@testing-library/user-event";
@@ -20,6 +18,9 @@ import {
   ServiceConfig,
 } from "../../../../../../../../../../api/ServiceContext";
 import { ExecutionContextProvider } from "../../../../../../routes/qiCore/ExecutionContext";
+import useFhirDefinitionsServiceApi, {
+  FhirDefinitionsServiceApi,
+} from "../../../../../../../api/useFhirDefinitionsService";
 
 const mockConfig = {
   fhirService: {
@@ -36,15 +37,9 @@ jest.mock("formik", () => ({
     context[fieldName],
 }));
 
-jest.mock("../../../../../../../api/useFhirDefinitionsService", () => {
-  return () => ({
-    getResourceTree: jest
-      .fn()
-      //.mockResolvedValueOnce(mockSelectedResourceTree)
-      .mockResolvedValueOnce(mockSelectedPatientTree)
-      .mockResolvedValueOnce(mockSelectedPatientTree),
-  });
-});
+jest.mock("../../../../../../../api/useFhirDefinitionsService");
+const useFhirDefinitionsServiceApiMock =
+  useFhirDefinitionsServiceApi as jest.Mock<FhirDefinitionsServiceApi>;
 
 describe("ResourceEditor", () => {
   const formikValues = {
@@ -140,6 +135,14 @@ describe("ResourceEditor", () => {
       return {
         value: "446b20b5-dd46-415e-9b9f-9eba6b260743",
       };
+    } else if (label === "AllergyIntolerance.id") {
+      return {
+        value: "6fb9d817",
+      };
+    } else if (label === "AllergyIntolerance.onsetDateTime") {
+      return {
+        value: "2025-07-01T04:00:00+00:00",
+      };
     } else {
       return {
         value: "test1",
@@ -153,7 +156,7 @@ describe("ResourceEditor", () => {
     errors: {},
     values: formikValues,
     isSubmitting: false,
-    setFieldValue: undefined,
+    setFieldValue: jest.fn(),
     getFieldProps: getProps,
     dirty: true,
     resetForm,
@@ -172,6 +175,12 @@ describe("ResourceEditor", () => {
     localMockResourceState = _.cloneDeep(mockResourceState);
     localMockckValueSetsState = _.cloneDeep(mockValueSetsState);
     localMockFormikObj = _.cloneDeep(mockFormikObj);
+    const fhirDefinitionsServiceApiMock = {
+      getResourceTree: jest.fn().mockResolvedValue(mockSelectedPatientTree),
+    } as unknown as FhirDefinitionsServiceApi;
+    useFhirDefinitionsServiceApiMock.mockImplementation(
+      () => fhirDefinitionsServiceApiMock
+    );
   });
 
   it("should render the ResourceEditor correctly", async () => {
@@ -541,11 +550,24 @@ describe("ResourceEditor", () => {
     expect(mockOnCancel).toHaveBeenCalledTimes(1);
   });
 
-  //NOTE: this test runs successfully by itself but fails when running the test suite
-  it.skip("changes active tab when form is not dirty", async () => {
+  it("changes active tab when form is not dirty", async () => {
+    // Override the mock for this specific test to use AllergyIntolerance
+    const fhirDefinitionsServiceApiMock = {
+      getResourceTree: jest
+        .fn()
+        .mockResolvedValue(mockClaimResponseStructuredDef),
+    } as unknown as FhirDefinitionsServiceApi;
+    useFhirDefinitionsServiceApiMock.mockImplementation(
+      () => fhirDefinitionsServiceApiMock
+    );
     const cleanFormMock = {
       ...localMockFormikObj,
       dirty: false,
+      ClaimResponse: {
+        id: "test2",
+        disposition: "test3",
+        widget: ["test4", "test5"],
+      },
     };
     (useFormikContext as jest.Mock).mockReturnValue(cleanFormMock);
 
@@ -561,7 +583,7 @@ describe("ResourceEditor", () => {
             value={{ state: localMockResourceState, dispatch: jest.fn() }}
           >
             <ResourceEditor
-              selectedResourceID="446b20b5-dd46-415e-9b9f-9eba6b260743"
+              selectedResourceID="6fb9d817-76c5-4b68-ba06-92c7429e6b5c"
               setValidationSchema={mockSetValidationSchema}
               setInitialFormikValuesStu6={mockSetInitialFormikValuesStu6}
               onCancel={mockOnCancel}
@@ -584,10 +606,24 @@ describe("ResourceEditor", () => {
     expect(tabs[0]).toHaveAttribute("aria-selected", "false");
   });
 
-  it.skip("should delete selected attribute and dispatch even to update test case json state", async () => {
+  it("should delete selected attribute and dispatch even to update test case json state", async () => {
+    // Override the mock for this specific test to use AllergyIntolerance
+    const fhirDefinitionsServiceApiMock = {
+      getResourceTree: jest
+        .fn()
+        .mockResolvedValue(mockClaimResponseStructuredDef),
+    } as unknown as FhirDefinitionsServiceApi;
+    useFhirDefinitionsServiceApiMock.mockImplementation(
+      () => fhirDefinitionsServiceApiMock
+    );
     const cleanFormMock = {
       ...localMockFormikObj,
       dirty: false,
+      ClaimResponse: {
+        id: "test2",
+        disposition: "test3",
+        widget: ["test4", "test5"],
+      },
     };
     (useFormikContext as jest.Mock).mockReturnValue(cleanFormMock);
     const mockDispatch = jest.fn();
@@ -595,9 +631,9 @@ describe("ResourceEditor", () => {
     // We are testing to see if "Id" attribute is deleted accurately
     const expectedPayload = {
       payload: {
-        ...localMockResourceState.bundle.entry[0],
+        ...localMockResourceState.bundle.entry[1],
         resource: {
-          ...localMockResourceState.bundle.entry[0].resource,
+          ...localMockResourceState.bundle.entry[1].resource,
         },
       },
       type: "ModifyBundleEntry",
@@ -622,6 +658,90 @@ describe("ResourceEditor", () => {
     const actionCenter = await screen.findByTestId(
       "elements-action-center-actual-icon"
     );
+    userEvent.click(actionCenter);
+
+    const deleteButton = await screen.findByRole("menuitem", {
+      name: "Delete",
+    });
+    userEvent.click(deleteButton);
+
+    const deleteDialog = await screen.findByRole("dialog", {
+      name: "Delete Element",
+    });
+    expect(deleteDialog).toBeInTheDocument();
+    const deleteConfirmationButton = await screen.findByRole("button", {
+      name: "Yes, Delete",
+    });
+    expect(deleteConfirmationButton).toBeEnabled();
+
+    userEvent.click(deleteConfirmationButton);
+
+    expect(mockDispatch).toHaveBeenCalledTimes(1);
+    expect(mockDispatch).toHaveBeenCalledWith(expectedPayload);
+  });
+
+  it("should delete choice type attribute", async () => {
+    // Override the mock for this specific test to use AllergyIntolerance
+    const fhirDefinitionsServiceApiMock = {
+      getResourceTree: jest
+        .fn()
+        .mockResolvedValue(mockAllergyIntoleranceStructuredDef),
+    } as unknown as FhirDefinitionsServiceApi;
+    useFhirDefinitionsServiceApiMock.mockImplementation(
+      () => fhirDefinitionsServiceApiMock
+    );
+
+    const cleanFormMock = {
+      ...mockFormikObj,
+      dirty: false,
+      values: {
+        AllergyIntolerance: {
+          id: "6fb9d817",
+          onsetDateTime: "2020-01-01T00:00:00Z",
+        },
+      },
+    };
+    (useFormikContext as jest.Mock).mockReturnValue(cleanFormMock);
+    const mockDispatch = jest.fn();
+
+    // We are testing to see if AllergyIntolerance.onsetDateTime choice type attribute is deleted accurately
+    const expectedPayload = {
+      payload: {
+        ...mockResourceState.bundle.entry[2],
+        resource: {
+          ...mockResourceState.bundle.entry[2].resource,
+        },
+      },
+      type: "ModifyBundleEntry",
+    };
+
+    // Remove the onsetDateTime field that should be deleted
+    delete expectedPayload?.payload?.resource?.onsetDateTime;
+
+    render(
+      <QiCoreResourceContext.Provider
+        value={{ state: mockResourceState, dispatch: mockDispatch }}
+      >
+        <ResourceEditor
+          selectedResourceID="6fb9d817"
+          setValidationSchema={mockSetValidationSchema}
+          setInitialFormikValuesStu6={mockSetInitialFormikValuesStu6}
+          onCancel={mockOnCancel}
+          canEdit={true}
+        />
+      </QiCoreResourceContext.Provider>
+    );
+
+    // Wait for the AllergyIntolerance resource to load and find the onsetDateTime tab
+    const onsetDateTimeTab = await screen.findByTestId("onsetDateTime");
+    expect(onsetDateTimeTab).toHaveTextContent("onsetDateTime");
+    expect(onsetDateTimeTab).toHaveAttribute("aria-selected", "true");
+    // userEvent.click(onsetDateTimeTab);
+
+    const actionCenter = await screen.findByTestId(
+      "elements-action-center-actual-icon"
+    );
+    expect(actionCenter).toBeInTheDocument();
     userEvent.click(actionCenter);
 
     const deleteButton = await screen.findByRole("menuitem", {
