@@ -411,6 +411,9 @@ const ResourceEditor = ({
 
                   if (_.has(nextEntry.resource, strippedPath)) {
                     _.unset(nextEntry.resource, strippedPath);
+                  } else if (_.has(nextEntry.resource, elementName)) {
+                    // choice types need to be removed by name
+                    _.unset(nextEntry.resource, elementName);
                   } else {
                     console.error(`Path not found: ${path}`);
                   }
