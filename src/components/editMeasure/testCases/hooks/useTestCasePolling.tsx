@@ -9,6 +9,7 @@ type UseTestCasePollingParams = {
   onUpdate: (updated: TestCase) => void;
   validateTest: boolean;
   onError?: (error: unknown) => void;
+  setShouldPoll: (shouldPoll: boolean) => void;
 };
 
 export function useTestCasePolling({
@@ -18,6 +19,7 @@ export function useTestCasePolling({
   onUpdate,
   validateTest,
   onError,
+  setShouldPoll,
 }: UseTestCasePollingParams) {
   const testCaseService = useRef(useTestCaseServiceApi());
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -57,6 +59,7 @@ export function useTestCasePolling({
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
         intervalRef.current = null;
+        setShouldPoll(false);
       }
     };
 

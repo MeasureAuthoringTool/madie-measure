@@ -90,218 +90,29 @@
         }
       },
       {
-        "fullUrl": "https://madie.cms.gov/Encounter/NotscreRefAsseNotmNodxNocp-01",
+        "fullUrl": "https://madie.cms.gov/ClaimResponse/6fb9d817-76c5-4b68-ba06-92c7429e6b5c",
         "resource": {
-          "resourceType": "Encounter",
-          "id": "NotscreRefAsseNotmNodxNocp-01",
+          "id": "6fb9d817-76c5-4b68-ba06-92c7429e6b5c",
+          "resourceType": "ClaimResponse",
+          "disposition": "Claim response disposition",
           "meta": {
             "profile": [
-              "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-encounter"
-            ]
-          },
-          "status": "finished",
-          "class": {
-            "code": "IMP",
-            "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
-            "display": "inpatient encounter"
-          },
-          "type": [
-            {
-              "coding": [
-                {
-                  "code": "183452005",
-                  "system": "http://snomed.info/sct"
-                }
-              ]
-            }
-          ],
-          "subject": {
-            "reference": "Patient/446b20b5-dd46-415e-9b9f-9eba6b260743"
-          },
-          "period": {
-            "start": "2026-11-21T08:00:00.000Z",
-            "end": "2026-11-24T08:15:00.000Z"
-          }
-        }
-      },
-      {
-        "fullUrl": "https://madie.cms.gov/Observation/NotscreRefAsseNotmNodxNocp-19",
-        "resource": {
-          "resourceType": "Observation",
-          "id": "NotscreRefAsseNotmNodxNocp-19",
-          "meta": {
-            "profile": [
-              "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-observation-screening-assessment"
-            ]
-          },
-          "status": "final",
-          "category": [
-            {
-              "coding": [
-                {
-                  "code": "survey",
-                  "system": "http://terminology.hl7.org/CodeSystem/observation-category",
-                  "display": "Survey"
-                }
-              ]
-            }
-          ],
-          "code": {
-            "coding": [
-              {
-                "code": "75303-8",
-                "system": "http://loinc.org",
-                "display": "Nutrition assessment narrative",
-                "userSelected": true
-              }
-            ]
-          },
-          "subject": {
-            "reference": "Patient/446b20b5-dd46-415e-9b9f-9eba6b260743"
-          },
-          "effectiveDateTime": "2026-11-21T10:00:00.000Z",
-          "valueCodeableConcept": {
-            "coding": [
-              {
-                "code": "LA33702-4",
-                "system": "http://loinc.org",
-                "display": "Not malnourished",
-                "userSelected": true
-              }
+              "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-claimresponse"
             ]
           }
         }
       },
       {
-        "fullUrl": "https://madie.cms.gov/Procedure/NotscreRefAsseNotmNodxNocp-12",
+        "fullUrl": "https://madie.cms.gov/AllergyIntolerance/6fb9d817",
         "resource": {
-          "resourceType": "Procedure",
-          "id": "NotscreRefAsseNotmNodxNocp-12",
+          "id": "6fb9d817",
+          "resourceType": "AllergyIntolerance",
           "meta": {
             "profile": [
-              "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-procedure"
+              "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-allergyintolerance"
             ]
           },
-          "extension": [
-            {
-              "url": "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-recorded",
-              "valueDateTime": "2026-02-01T11:30:00.000Z"
-            }
-          ],
-          "status": "completed",
-          "code": {
-            "coding": [
-              {
-                "code": "306165000",
-                "system": "http://snomed.info/sct",
-                "display": "Referral to hospital-based dietetics service (procedure)"
-              }
-            ],
-            "text": "Referral to hospital-based dietetics service (procedure)"
-          },
-          "subject": {
-            "reference": "Patient/446b20b5-dd46-415e-9b9f-9eba6b260743"
-          },
-          "encounter": {
-            "reference": "Encounter/NotscreRefAsseNotmNodxNocp-01"
-          },
-          "performedPeriod": {
-            "start": "2026-11-23T11:30:00.000Z",
-            "end": "2026-11-24T08:15:00.000Z"
-          }
-        }
-      },
-      {
-        "fullUrl": "https://madie.cms.gov/Coverage/NotscreRefAsseNotmNodxNocp-61",
-        "resource": {
-          "resourceType": "Coverage",
-          "id": "NotscreRefAsseNotmNodxNocp-61",
-          "meta": {
-            "profile": [
-              "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-coverage"
-            ]
-          },
-          "status": "active",
-          "type": {
-            "coding": [
-              {
-                "version": "9.2",
-                "code": "11",
-                "system": "https://nahdo.org/sopt",
-                "display": "Medicare Managed Care (Includes Medicare Advantage Plans)"
-              }
-            ]
-          },
-          "beneficiary": {
-            "reference": "Patient/446b20b5-dd46-415e-9b9f-9eba6b260743"
-          },
-          "period": {
-            "start": "2026-10-01T00:00:00.000Z"
-          },
-          "payor": [
-            {
-              "reference": "Organization/NotscreRefAsseNotmNodxNocp-98"
-            }
-          ],
-          "subscriberId": "97531",
-          "dependent": "0",
-          "relationship": {
-            "coding": [
-              {
-                "code": "self",
-                "system": "http://terminology.hl7.org/CodeSystem/subscriber-relationship"
-              }
-            ]
-          }
-        }
-      },
-      {
-        "fullUrl": "https://madie.cms.gov/Organization/NotscreRefAsseNotmNodxNocp-98",
-        "resource": {
-          "resourceType": "Organization",
-          "id": "NotscreRefAsseNotmNodxNocp-98",
-          "meta": {
-            "profile": [
-              "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-organization"
-            ]
-          },
-          "identifier": [
-            {
-              "use": "temp",
-              "system": "urn:oid:2.16.840.1.113883.4.4",
-              "value": "21-3259825"
-            }
-          ],
-          "active": true,
-          "type": [
-            {
-              "coding": [
-                {
-                  "code": "pay",
-                  "system": "http://terminology.hl7.org/CodeSystem/organization-type",
-                  "display": "Payer"
-                }
-              ]
-            }
-          ],
-          "name": "Blue Cross Blue Shield of Texas",
-          "telecom": [
-            {
-              "system": "phone",
-              "value": "(+1) 972-766-6900"
-            }
-          ],
-          "address": [
-            {
-              "use": "billing",
-              "type": "postal",
-              "line": ["P.O. Box 660044"],
-              "city": "Dallas",
-              "state": "TX",
-              "postalCode": "75266-0044",
-              "country": "USA"
-            }
-          ]
+          "onsetDateTime": "2025-07-01T04:00:00+00:00"
         }
       }
     ]

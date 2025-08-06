@@ -9,6 +9,7 @@ const mockedAxios = axios as jest.Mocked<typeof axios>;
 
 const mockedOnUpdate = jest.fn();
 const mockOnError = jest.fn();
+const setShouldPoll = jest.fn();
 const WrapperComponent = ({ shouldStart }: { shouldStart: boolean }) => {
   useTestCasePolling({
     testCaseId: "123",
@@ -17,6 +18,7 @@ const WrapperComponent = ({ shouldStart }: { shouldStart: boolean }) => {
     onUpdate: mockedOnUpdate,
     validateTest: false,
     onError: mockOnError,
+    setShouldPoll,
   });
   return <div>Polling...</div>;
 };
