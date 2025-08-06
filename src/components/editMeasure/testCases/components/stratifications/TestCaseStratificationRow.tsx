@@ -45,7 +45,9 @@ const TestCaseStratificationRow = ({
       data-testid={`strat-row-population-id-${stratification.name}`}
       role="row"
     >
-      <td>&nbsp;</td>
+      <td role="cell">
+        <span style={{ visibility: "hidden" }}>-</span>
+      </td>
       <td role="cell">{label}</td>
       <td role="cell">
         <ExpectActualInput
@@ -100,9 +102,6 @@ const TestCaseStratificationRow = ({
           </pre>
         )}
       </td>
-      <td>&nbsp;</td>
-      <td>&nbsp;</td>
-      <td>&nbsp;</td>
     </tr>
   );
 };
