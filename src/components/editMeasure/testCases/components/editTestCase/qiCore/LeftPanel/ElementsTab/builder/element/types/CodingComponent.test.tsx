@@ -1,6 +1,8 @@
 import * as React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
-import CodingComponent from "./CodingComponent";
+import CodingComponent, {
+  getValueSetComposeIncludeOids,
+} from "./CodingComponent";
 import { ElementDefinition, ValueSet } from "fhir/r4";
 import userEvent from "@testing-library/user-event";
 import { ExecutionContextProvider } from "../../../../../../../routes/qiCore/ExecutionContext";
@@ -9,6 +11,7 @@ import {
   ApiContextProvider,
   ServiceConfig,
 } from "../../../../../../../../../../../api/ServiceContext";
+import { getOidFromString } from "@madie/madie-util";
 
 jest.mock("../../../../../../../../../../../api/axios-instance");
 const mockedAxios = axios as jest.Mocked<typeof axios>;
@@ -776,5 +779,47 @@ describe("CodingComponent Tests", () => {
       name: "Value Set / Direct Reference Code",
     });
     expect(valueSetSelector).toHaveTextContent("- Select -");
+  });
+
+  describe("getValueSetComposeIncludeOids", () => {
+    const valueSet = {
+      resourceType: "ValueSet",
+      name: "Measure ValueSet",
+      title: "Measure ValueSet",
+      compose: {
+        include: [
+          { valueSet: ["ValueSet/" + mockOid] },
+          { valueSet: ["ValueSet/" + mockOid] },
+        ],
+      },
+    } as ValueSet;
+
+    it("test getValueSetComposeIncludeOids has oid", () => {
+      const valueSetNoOId = {
+        ...valueSet,
+        compose: {
+          include: [{ valueSet: ["ValueSet"] }, { valueSet: ["ValueSet"] }],
+        },
+      };
+
+      (getOidFromString as jest.Mock).mockClear().mockImplementation(() => ({
+        getOidFromString: jest.fn(() => {
+          return ["1.2.3.4", "5.6.7.8"];
+        }),
+      }));
+      const result = getValueSetComposeIncludeOids(valueSetNoOId);
+      expect(result?.length).toBe(2);
+    });
+
+    it("test no compose include", () => {
+      const valueSetNoOInclude = {
+        ...valueSet,
+        compose: {
+          include: [],
+        },
+      };
+      const result = getValueSetComposeIncludeOids(valueSetNoOInclude);
+      expect(result?.length).toBe(0);
+    });
   });
 });

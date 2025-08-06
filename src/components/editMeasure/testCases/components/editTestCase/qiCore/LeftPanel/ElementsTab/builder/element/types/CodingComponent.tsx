@@ -19,17 +19,13 @@ const placeHolder = (label: string) => (
   <span style={{ color: "#717171" }}>{label}</span>
 );
 
-const getValueSetComposeIncludeOids = (valueSet: ValueSet) => {
+export const getValueSetComposeIncludeOids = (valueSet: ValueSet) => {
   return valueSet.compose.include
     .map((include) => include.valueSet)
     .reduce((acc, curr) => {
       const oid = getOidFromString(curr?.[0], "FHIR");
       if (oid) {
-        const combined = [...acc, oid];
-        // Remove duplicates
-        return combined.filter(
-          (item, index, self) => index === self.findIndex((vs) => vs === item)
-        );
+        return [...acc, oid];
       }
       return acc;
     }, []);
