@@ -167,9 +167,7 @@ const MeasureEditor = () => {
         .updateMeasureLock(measureId)
         .then(() => {})
         .catch((e) => {
-          if (e) {
-            console.error("Error locking Measure:", e);
-          }
+          console.error("Error locking Measure:", e);
         });
     }
     return () => {
