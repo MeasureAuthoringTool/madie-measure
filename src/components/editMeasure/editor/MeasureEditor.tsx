@@ -125,6 +125,11 @@ export interface CustomCqlCode extends Omit<CqlCode, "codeSystem"> {
 const MeasureEditor = () => {
   useDocumentTitle("MADiE Edit Measure CQL");
   const [measure, setMeasure] = useState<Measure>(measureStore.state);
+  const canEdit = checkUserCanEdit(
+    measure?.measureSet?.owner,
+    measure?.measureSet?.acls,
+    measure?.measureMetaData?.draft
+  );
   const [codeMap, setCodeMap] = useState<Map<string, Code>>(
     new Map<string, Code>()
   );
@@ -134,6 +139,9 @@ const MeasureEditor = () => {
   const [processing, setProcessing] = useState<boolean>(true);
   const featureFlags = useFeatureFlags();
   useEffect(() => {
+    const handleUnload = () => {
+      measureServiceApi.unlockMeasure(measureId);
+    };
     const subscription = measureStore.subscribe((measure: Measure) => {
       setMeasure(measure);
       if (
@@ -162,7 +170,8 @@ const MeasureEditor = () => {
         );
       }
     });
-    if (featureFlags?.Locking) {
+    if (featureFlags?.Locking && canEdit) {
+      window.addEventListener("beforeunload", handleUnload);
       measureServiceApi
         .updateMeasureLock(measureId)
         .then(() => {})
@@ -172,11 +181,12 @@ const MeasureEditor = () => {
     }
     return () => {
       subscription.unsubscribe();
-      if (featureFlags?.Locking) {
+      if (featureFlags?.Locking && canEdit) {
+        window.removeEventListener("beforeunload", handleUnload);
         measureServiceApi.unlockMeasure(measureId);
       }
     };
-  }, [measureServiceApi, measureId, featureFlags?.Locking]);
+  }, [measureServiceApi, measureId, featureFlags?.Locking, canEdit]);
 
   const [discardDialogOpen, setDiscardDialogOpen]: [
     boolean,
@@ -214,11 +224,6 @@ const MeasureEditor = () => {
   const [elmAnnotations, setElmAnnotations] = useState<EditorAnnotation[]>([]);
   // error markers control the error underlining in the editor.
   const [errorMarkers, setErrorMarkers] = useState<EditorErrorMarker[]>([]);
-  const canEdit = checkUserCanEdit(
-    measure?.measureSet?.owner,
-    measure?.measureSet?.acls,
-    measure?.measureMetaData?.draft
-  );
 
   const [valuesetMsg, setValuesetMsg] = useState(null);
   const [errorMessage, setErrorMessage] = useState<string>(null);

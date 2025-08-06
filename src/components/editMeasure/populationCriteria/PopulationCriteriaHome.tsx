@@ -24,12 +24,20 @@ export function PopulationCriteriaHome() {
   const measureServiceApi = useRef(useMeasureServiceApi()).current;
   const [measure, setMeasure] = useState<Measure>(measureStore.state);
   const featureFlags = useFeatureFlags();
-
+  const canEdit: boolean = checkUserCanEdit(
+    measure?.measureSet?.owner,
+    measure?.measureSet?.acls,
+    measure?.measureMetaData?.draft
+  );
   useEffect(() => {
     // Subscribe to store
     const subscription = measureStore.subscribe(setMeasure);
+    const handleUnload = () => {
+      measureServiceApi.unlockMeasure(measureId);
+    };
     // Lock the measure if the Locking feature is enabled
-    if (featureFlags?.Locking) {
+    if (featureFlags?.Locking && canEdit) {
+      window.addEventListener("beforeunload", handleUnload);
       measureServiceApi
         .updateMeasureLock(measureId)
         .then(() => {})
@@ -41,18 +49,15 @@ export function PopulationCriteriaHome() {
     // Cleanup on unmount
     return () => {
       subscription.unsubscribe();
-      if (featureFlags?.Locking) {
+      if (featureFlags?.Locking && canEdit) {
+        window.removeEventListener("beforeunload", handleUnload);
         measureServiceApi.unlockMeasure(measureId);
       }
     };
-  }, [measureServiceApi, measureId, featureFlags?.Locking]);
+  }, [measureServiceApi, measureId, featureFlags?.Locking, canEdit]);
 
   let navigate = useNavigate();
-  const canEdit: boolean = checkUserCanEdit(
-    measure?.measureSet?.owner,
-    measure?.measureSet?.acls,
-    measure?.measureMetaData?.draft
-  );
+
   const [measureGroupNumber, setMeasureGroupNumber] = useState<number>(null);
   const [sideNavLinks, setSideNavLinks] = useState<Array<any>>();
   const [isFormDirty, setIsFormDirty] = useState<boolean>(false);
