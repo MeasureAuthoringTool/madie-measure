@@ -87,7 +87,6 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
     // Lock the measure if the Locking feature is enabled
     if (featureFlags?.Locking && canEdit) {
       window.addEventListener("beforeunload", handleUnload);
-      console.log("measureId", measureId);
       measureServiceApi
         .updateMeasureLock(measureId)
         .then(() => {})
