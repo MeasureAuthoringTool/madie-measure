@@ -46,7 +46,9 @@ const TestCaseStratification = ({
         role="row"
       >
         <td role="cell">
-          <span style={{ visibility: "hidden" }}>-</span>
+          <span style={{ visibility: "hidden" }} aria-hidden="true">
+            -
+          </span>
         </td>
         <td role="cell">{label}</td>
         <td role="cell">

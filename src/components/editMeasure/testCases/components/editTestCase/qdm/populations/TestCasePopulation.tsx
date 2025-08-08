@@ -3,6 +3,7 @@ import "styled-components/macro";
 import { DisplayPopulationValue, PopulationType } from "@madie/madie-models";
 import _ from "lodash";
 import ExpectActualInput from "./ExpectActualInput";
+import { ariaHidden } from "@mui/material/Modal/ModalManager";
 /* eslint-disable jsx-a11y/no-interactive-element-to-noninteractive-role */
 
 export interface TestCasePopulationProps {
@@ -94,7 +95,9 @@ const TestCasePopulation = ({
         role="row"
       >
         <td role="cell">
-          <span style={{ visibility: "hidden" }}>-</span>
+          <span style={{ visibility: "hidden" }} aria-hidden="true">
+            -
+          </span>
         </td>
         <td role="cell">{label}</td>
         <td role="cell">
@@ -151,7 +154,9 @@ const TestCasePopulation = ({
       {error?.expected && (
         <tr tw="border-b">
           <td>
-            <span style={{ visibility: "hidden" }}>-</span>
+            <span style={{ visibility: "hidden" }} aria-hidden="true">
+              -
+            </span>
           </td>
           <td colSpan={5}>
             <span
