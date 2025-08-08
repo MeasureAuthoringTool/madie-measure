@@ -35,14 +35,16 @@ import ClearIcon from "@mui/icons-material/Clear";
 
 import "../MeasureMetaDataTable.scss";
 import TextEditor from "../../populationCriteria/groups/TextEditor";
+import { ensureParagraphTags } from "../measureMetadata/MeasureMetadataHelper";
 
 interface MeasureReferencesProps {
   setErrorMessage: Function;
+  isEnhancedTextFormatting?: boolean;
 }
 
 const MeasureReferences = (props: MeasureReferencesProps) => {
   const featureFlags = useFeatureFlags();
-  const { setErrorMessage } = props;
+  const { setErrorMessage, isEnhancedTextFormatting } = props;
   const { search } = useLocation();
   let navigate = useNavigate();
   const measureServiceApi = useMeasureServiceApi();
@@ -104,7 +106,10 @@ const MeasureReferences = (props: MeasureReferencesProps) => {
       selectedReference?.referenceType !== "Documentation"
         ? selectedReference?.referenceType
         : "",
-    referenceText: selectedReference?.referenceText,
+    referenceText: ensureParagraphTags(
+      selectedReference?.referenceText,
+      isEnhancedTextFormatting
+    ),
   } as Reference;
   const [measureReferences, setMeasureReferences] = useState<Reference[]>(
     measure?.measureMetaData?.references || []

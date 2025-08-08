@@ -10,17 +10,20 @@ import {
   measureStore,
   routeHandlerStore,
   checkUserCanEdit,
+  useFeatureFlags,
 } from "@madie/madie-util";
 import { useFormik } from "formik";
 import useFormikResetOnEvent from "../../../common/useFormikResetOnEvent";
 import TextEditor from "../../populationCriteria/groups/TextEditor";
+import { ensureParagraphTags } from "../measureMetadata/MeasureMetadataHelper";
 
 interface TransmissionFormatProps {
   setErrorMessage: Function;
+  isEnhancedTextFormatting: boolean;
 }
 
 const TransmissionFormat = (props: TransmissionFormatProps) => {
-  const { setErrorMessage } = props;
+  const { setErrorMessage, isEnhancedTextFormatting } = props;
   const measureServiceApi = useMeasureServiceApi();
   const { updateMeasure } = measureStore;
   const [measure, setMeasure] = useState<any>(measureStore.state);
@@ -51,7 +54,10 @@ const TransmissionFormat = (props: TransmissionFormatProps) => {
     measure?.measureMetaData?.draft
   );
   const INITIAL_VALUES = {
-    transmissionFormat: measure?.measureMetaData?.transmissionFormat || "",
+    transmissionFormat: ensureParagraphTags(
+      measure?.measureMetaData?.transmissionFormat || "",
+      isEnhancedTextFormatting
+    ),
   };
   const handleSubmit = ({ transmissionFormat }) => {
     const copiedMetaData = { ...measure?.measureMetaData };

@@ -8,6 +8,7 @@ import {
   measureStore,
   routeHandlerStore,
   checkUserCanEdit,
+  useFeatureFlags,
 } from "@madie/madie-util";
 import {
   Button,
@@ -31,6 +32,7 @@ export default function MeasureMetadata(props: MeasureMetadataProps) {
   const typeLower = _.kebabCase(measureMetadataType.toLowerCase());
   const { updateMeasure } = measureStore;
   const [measure, setMeasure] = useState<any>(measureStore.state);
+  const featureFlags = useFeatureFlags();
   useEffect(() => {
     const subscription = measureStore.subscribe(setMeasure);
     return () => {
@@ -62,7 +64,13 @@ export default function MeasureMetadata(props: MeasureMetadataProps) {
   );
   const formik = useFormik({
     enableReinitialize: true,
-    initialValues: { genericField: getInitialValues(measure, typeLower) },
+    initialValues: {
+      genericField: getInitialValues(
+        measure,
+        typeLower,
+        featureFlags?.EnhancedTextFormatting
+      ),
+    },
     onSubmit: (values) => {
       submitForm(values.genericField.trim());
     },
@@ -78,16 +86,25 @@ export default function MeasureMetadata(props: MeasureMetadataProps) {
 
   const { updateRouteHandlerState } = routeHandlerStore;
   const [discardDialogOpen, setDiscardDialogOpen] = useState(false);
+  const isDirty =
+  normalizeForComparison(formik.initialValues.genericField) !==
+  normalizeForComparison(formik.values.genericField);
 
   useEffect(() => {
     updateRouteHandlerState({
-      canTravel: !formik.dirty,
+      canTravel: !isDirty,
       pendingRoute: "",
     });
-  }, [formik.dirty]);
+  }, [isDirty]);
 
   useEffect(() => {
-    if (!getInitialValues(measure, typeLower)) {
+    if (
+      !getInitialValues(
+        measure,
+        typeLower,
+        featureFlags?.EnhancedTextFormatting
+      )
+    ) {
       formik.setFieldValue("genericField", "");
     }
   }, [measureMetadataType]);
@@ -112,6 +129,40 @@ export default function MeasureMetadata(props: MeasureMetadataProps) {
         setErrorMessage(message);
       });
   };
+
+  function decodeHtmlEntities(str: string): string {
+  if (!str) return "";
+  return str
+    .replace(/&amp;/g, "&")
+    .replace(/&gt;/g, ">")
+    .replace(/&lt;/g, "<")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&nbsp;/g, " ");
+}
+
+
+
+  function normalizeForComparison(text: string): string {
+  if (!text) return "";
+  // Replace <br> with newlines
+  let normalized = text.replace(/<br\s*\/?>/gi, "\n");
+  // Replace <p>...</p> with the inner text + newline
+  normalized = normalized.replace(/<p>(.*?)<\/p>/gis, (_, inner) => inner + "\n");
+  // Remove any remaining HTML tags
+  normalized = normalized.replace(/<[^>]+>/g, "");
+  // Decode HTML entities
+  normalized = decodeHtmlEntities(normalized);
+  // Collapse multiple newlines and trim
+  normalized = normalized.replace(/\n{2,}/g, "\n").trim();
+  return normalized;
+}
+
+console.log("Initial:", normalizeForComparison(formik.initialValues.genericField));
+console.log("Current:", normalizeForComparison(formik.values.genericField));
+console.log("isDirty:", isDirty);
+
+
 
   return (
     <form
@@ -152,7 +203,7 @@ export default function MeasureMetadata(props: MeasureMetadataProps) {
         <div className="form-actions">
           <Button
             variant="outline"
-            disabled={!formik.dirty}
+            disabled={!isDirty}
             data-testid="discard-button"
             onClick={() => setDiscardDialogOpen(true)}
             style={{ marginTop: 20, float: "right", marginRight: 32 }}
@@ -160,7 +211,7 @@ export default function MeasureMetadata(props: MeasureMetadataProps) {
             Discard Changes
           </Button>
           <Button
-            disabled={!(formik.isValid && formik.dirty)}
+            disabled={!(formik.isValid && isDirty)}
             type="submit"
             variant="cyan"
             data-testid={`measure-${_.kebabCase(measureMetadataType)}-save`}

@@ -5,35 +5,87 @@ export function mappingMeasureMetaDataType(lowerCaseMeasureMetaData: string) {
     ? "clinicalRecommendation"
     : lowerCaseMeasureMetaData;
 }
-export default function getInitialValues(measure: Measure, typeLower: string) {
+
+export function ensureParagraphTags(
+  text: string,
+  isEnhancedTextFormatting: boolean
+): string {
+  console.log(text);
+  if (!isEnhancedTextFormatting) return text;
+  if (!text) return "";
+  // If text contains any HTML tags, return as is
+  // if (/<[a-z][\s\S]*>/i.test(text)) {
+  if(text.match(/^<p>(.*)<\/p>$/)){
+    console.log("Text already contains HTML tags, returning as is:", text);
+    return text;
+  }
+  // Otherwise, wrap plain text in <p>...</p>
+  console.log("Wrapping text in paragraph tags:", `<p>${text}</p>`);
+  return `<p>${text}</p>`;
+}
+
+
+
+export default function getInitialValues(
+  measure: Measure,
+  typeLower: string,
+  isEnhancedTextFormatting: boolean
+) {
   switch (mappingMeasureMetaDataType(typeLower)) {
     case "description":
       const description = measure?.measureMetaData?.description;
-      return !!description ? description : "";
+      return ensureParagraphTags(
+        !!description ? description : "",
+        isEnhancedTextFormatting
+      );
     case "copyright":
       const copyright = measure?.measureMetaData?.copyright;
-      return !!copyright ? copyright : "";
+      return ensureParagraphTags(
+        !!copyright ? copyright : "",
+        isEnhancedTextFormatting
+      );
     case "disclaimer":
       const diclaimer = measure?.measureMetaData?.disclaimer;
-      return !!diclaimer ? diclaimer : "";
+      return ensureParagraphTags(
+        !!diclaimer ? diclaimer : "",
+        isEnhancedTextFormatting
+      );
     case "rationale":
       const rationale = measure?.measureMetaData?.rationale;
-      return !!rationale ? rationale : "";
+      return ensureParagraphTags(
+        !!rationale ? rationale : "",
+        isEnhancedTextFormatting
+      );
     case "purpose":
       const purpose = measure?.measureMetaData?.purpose;
-      return !!purpose ? purpose : "";
+      return ensureParagraphTags(
+        !!purpose ? purpose : "",
+        isEnhancedTextFormatting
+      );
     case "guidance-usage":
       const guidance = measure?.measureMetaData?.guidance;
-      return !!guidance ? guidance : "";
+      return ensureParagraphTags(
+        !!guidance ? guidance : "",
+        isEnhancedTextFormatting
+      );
     case "clinicalRecommendation":
       const clinical = measure?.measureMetaData?.clinicalRecommendation;
-      return !!clinical ? clinical : "";
+      return ensureParagraphTags(
+        !!clinical ? clinical : "",
+        isEnhancedTextFormatting
+      );
     case "definition":
       const definition = measure?.measureMetaData?.definition;
-      return !!definition ? definition : "";
+      return ensureParagraphTags(
+        !!definition ? definition : "",
+        isEnhancedTextFormatting
+      );
     case "measure-set":
       const measureSetTitle = measure?.measureMetaData?.measureSetTitle;
-      return !!measureSetTitle ? measureSetTitle : "";
+      return ensureParagraphTags(
+        !!measureSetTitle ? measureSetTitle : "",
+        isEnhancedTextFormatting
+      );
     default:
       return "";
   }

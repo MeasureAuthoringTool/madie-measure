@@ -29,6 +29,7 @@ import MeasureMetaDataRow from "../MeasureMetaDataRow";
 import { MeasureDefinitionValidator } from "./MeasureDefinitionValidator";
 import "../MeasureMetaDataTable.scss";
 import TextEditor from "../../populationCriteria/groups/TextEditor";
+import { ensureParagraphTags } from "../measureMetadata/MeasureMetadataHelper";
 
 interface MeasureDefinitionsProps {
   setErrorMessage: Function;
@@ -62,7 +63,10 @@ const MeasureDefinitions = (props: MeasureDefinitionsProps) => {
   const INITIAL_VALUES = {
     id: selectedDefinition?.id,
     term: selectedDefinition?.term,
-    definition: selectedDefinition?.definition,
+    definition: ensureParagraphTags(
+      selectedDefinition?.definition,
+      featureFlags?.EnhancedTextFormatting
+    ),
   } as MeasureDefinition;
   const [measureDefinitions, setMeasureDefinitions] = useState<
     MeasureDefinition[]

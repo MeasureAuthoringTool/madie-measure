@@ -338,7 +338,12 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
               <Route
                 path={transmissionFormat}
                 element={
-                  <TransmissionFormat setErrorMessage={setErrorMessage} />
+                  <TransmissionFormat
+                    setErrorMessage={setErrorMessage}
+                    isEnhancedTextFormatting={
+                      featureFlags?.EnhancedTextFormatting
+                    }
+                  />
                 }
               />
               <Route
@@ -355,7 +360,12 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
               <Route
                 path={referencesLink}
                 element={
-                  <MeasureReferences setErrorMessage={setErrorMessage} />
+                  <MeasureReferences
+                    setErrorMessage={setErrorMessage}
+                    isEnhancedTextFormatting={
+                      featureFlags?.EnhancedTextFormatting
+                    }
+                  />
                 }
               />
 
@@ -387,7 +397,12 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
               <Route
                 path={measureReferencesLink}
                 element={
-                  <MeasureReferences setErrorMessage={setErrorMessage} />
+                  <MeasureReferences
+                    setErrorMessage={setErrorMessage}
+                    isEnhancedTextFormatting={
+                      featureFlags?.EnhancedTextFormatting
+                    }
+                  />
                 }
               />
             </>

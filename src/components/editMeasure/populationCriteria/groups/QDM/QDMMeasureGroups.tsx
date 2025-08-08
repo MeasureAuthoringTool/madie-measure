@@ -38,6 +38,7 @@ import {
   routeHandlerStore,
   useDocumentTitle,
   checkUserCanEdit,
+  useFeatureFlags,
 } from "@madie/madie-util";
 import MeasureGroupsWarningDialog from "../MeasureGroupWarningDialog";
 import { getPopulationsForScoring } from "../../PopulationHelper";
@@ -59,6 +60,7 @@ import {
   MenuItemContainer,
 } from "../../../../../styles/editMeasure/populationCriteria/groups/index";
 import CompletionIndicator from "../CompletionIndicator";
+import { ensureParagraphTags } from "../../../details/measureMetadata/MeasureMetadataHelper";
 
 interface ColSpanPopulationsType {
   isExclusionPop?: boolean;
@@ -203,6 +205,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
       open: false,
       measureGroupNumber: undefined,
     });
+  const featureFlags = useFeatureFlags();
 
   const [visibleStrats, setVisibleStrats] = useState<number>(2);
   useEffect(() => {
@@ -303,16 +306,47 @@ const MeasureGroups = (props: MeasureGroupProps) => {
       id: group?.id || null,
       scoring: measure?.scoring || "",
       populations: group?.populations
-        ? group.populations
-        : getPopulationsForScoring(measure?.scoring),
+        ? group.populations.map((p) => ({
+            ...p,
+            description: ensureParagraphTags(
+              p.description || "",
+              featureFlags?.EnhancedTextFormatting
+            ),
+          }))
+        : getPopulationsForScoring(measure?.scoring).map((p) => ({
+            ...p,
+            id: uuidv4(),
+            description: ensureParagraphTags(
+              "",
+              featureFlags?.EnhancedTextFormatting
+            ),
+          })),
       measureObservations: group?.measureObservations || memoizedObservation,
       rateAggregation: group?.rateAggregation || "",
       improvementNotation: group?.improvementNotation || "",
-      groupDescription: group?.groupDescription || "",
-      stratifications: group?.stratifications || getFirstTwoStrats,
+      groupDescription: ensureParagraphTags(
+        group?.groupDescription || "",
+        featureFlags?.EnhancedTextFormatting
+      ),
+      stratifications: group?.stratifications
+        ? group.stratifications.map((s) => ({
+            ...s,
+            description: ensureParagraphTags(
+              s.description || "",
+              featureFlags?.EnhancedTextFormatting
+            ),
+          }))
+        : getFirstTwoStrats.map((s) => ({
+            ...s,
+            description: ensureParagraphTags(
+              "",
+              featureFlags?.EnhancedTextFormatting
+            ),
+          })),
       populationBasis: String(measure?.patientBasis) || "true",
-      scoringUnit: group?.scoringUnit || "", // autocomplete can init with string
+      scoringUnit: group?.scoringUnit || "",
     } as Group,
+    // ...rest of your formik config
     enableReinitialize: true,
     validationSchema: qdmMeasureGroupSchemaValidator(
       cqlDefinitionDataTypes,
