@@ -183,14 +183,14 @@ const Builder = ({
                   ];
 
                   requiredElements.forEach((element) => {
-                    if (
-                      element.min === 1 &&
-                      element.max === "1" &&
-                      element.patternCodeableConcept
-                    ) {
-                      newEntry.resource[getLastPart(element.path)] = {
-                        ...element.patternCodeableConcept,
-                      };
+                    if (element.min === 1 && element.max === "1") {
+                      if (element.patternCodeableConcept) {
+                        newEntry.resource[getLastPart(element.path)] =
+                          element.patternCodeableConcept;
+                      } else if (element.fixedCode) {
+                        newEntry.resource[getLastPart(element.path)] =
+                          element.fixedCode;
+                      }
                     }
                   });
                 });
