@@ -3,7 +3,6 @@ import "styled-components/macro";
 import { DisplayPopulationValue, PopulationType } from "@madie/madie-models";
 import _ from "lodash";
 import ExpectActualInput from "./ExpectActualInput";
-import { ariaHidden } from "@mui/material/Modal/ModalManager";
 /* eslint-disable jsx-a11y/no-interactive-element-to-noninteractive-role */
 
 export interface TestCasePopulationProps {
