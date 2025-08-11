@@ -1,5 +1,5 @@
 import * as React from "react";
-import { render, cleanup, waitFor, screen } from "@testing-library/react";
+import { render, cleanup, screen } from "@testing-library/react";
 import MeasureDefinitionRow from "./MeasureMetaDataRow";
 import { useFeatureFlags } from "@madie/madie-util";
 
@@ -62,14 +62,11 @@ describe("Measure MetaData Row Component", () => {
     expect(name).toBeInTheDocument();
 
     const richTextReadOnlyDescription = screen.getByTestId(
-      "measure-reference-rich-text-editor"
+      "MeasureReference-value"
     );
     expect(richTextReadOnlyDescription).toBeInTheDocument();
 
-    const paragraph = richTextReadOnlyDescription.querySelector("p");
-    expect(paragraph).toBeInTheDocument();
-
-    expect(paragraph.innerHTML).toBe(
+    expect(richTextReadOnlyDescription.innerHTML).toBe(
       "this is a statement\n      this is a statement\n           this is a statement"
     );
   });
@@ -91,7 +88,7 @@ describe("Measure MetaData Row Component", () => {
     expect(name).toBeInTheDocument();
 
     const richTextReadOnlyDescription = screen.getByTestId(
-      "measure-reference-rich-text-editor"
+      "MeasureReference-value"
     );
     expect(richTextReadOnlyDescription).toBeInTheDocument();
 
