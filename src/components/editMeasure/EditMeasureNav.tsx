@@ -210,8 +210,8 @@ const EditMeasureNav = ({ isQDM }) => {
       >
         start joyride
       </button>
-      {/* @ts-ignore */}
       <Joyride
+        // @ts-ignore
         steps={joyRideState?.steps}
         stepIndex={joyRideState?.stepIndex}
         continuous
