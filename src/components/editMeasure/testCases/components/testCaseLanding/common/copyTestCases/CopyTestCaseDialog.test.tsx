@@ -347,7 +347,7 @@ describe("Copy Test Case Dialog Component", () => {
     );
     expect(searchMeasuresByCriteriaFn).toHaveBeenNthCalledWith(
       2, // Second call
-      true,
+      ["OWNED", "SHARED"],
       5,
       0,
       "lastModifiedAt",
@@ -370,7 +370,7 @@ describe("Copy Test Case Dialog Component", () => {
     );
     expect(searchMeasuresByCriteriaFn).toHaveBeenNthCalledWith(
       3,
-      true,
+      ["OWNED", "SHARED"],
       5,
       0,
       "lastModifiedAt",
@@ -392,7 +392,7 @@ describe("Copy Test Case Dialog Component", () => {
     );
     expect(searchMeasuresByCriteriaFn).toHaveBeenNthCalledWith(
       4,
-      true,
+      ["OWNED", "SHARED"],
       5,
       0,
       "lastModifiedAt",
