@@ -164,8 +164,33 @@ const EditTestCase = () => {
             navigate("/404");
           }
         });
+      const handleUnload = () => {
+        testCaseService.current.unlockTestCase(id);
+      };
+      if (featureFlags?.Locking && canEdit) {
+        window.addEventListener("beforeunload", handleUnload);
+        testCaseService.current
+          .lockTestCase(measureId, id)
+          .then(() => {})
+          .catch((e) => {
+            console.error("Error locking TestCase:", e);
+          });
+      }
+      return () => {
+        if (featureFlags?.Locking && canEdit) {
+          window.removeEventListener("beforeunload", handleUnload);
+          testCaseService.current.unlockTestCase(id);
+        }
+      };
     }
-  }, [measureId, id, measure?.groups, navigate]);
+  }, [
+    measureId,
+    id,
+    measure?.groups,
+    navigate,
+    featureFlags?.Locking,
+    canEdit,
+  ]);
 
   const handleSubmit = async (testCase: TestCase) => {
     testCase.title = sanitizeUserInput(testCase.title);

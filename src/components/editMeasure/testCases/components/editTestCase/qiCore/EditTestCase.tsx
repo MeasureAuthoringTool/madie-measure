@@ -447,6 +447,27 @@ const EditTestCase = (props: EditTestCaseProps) => {
           console.error(error);
         });
     }
+
+    const handleUnload = () => {
+      testCaseService.current.unlockTestCase(id);
+    };
+
+    if (featureFlags?.Locking && canEdit) {
+      window.addEventListener("beforeunload", handleUnload);
+      testCaseService.current
+        .lockTestCase(measureId, id)
+        .then(() => {})
+        .catch((e) => {
+          console.error("Error locking TestCase:", e);
+        });
+    }
+
+    return () => {
+      if (featureFlags?.Locking && canEdit) {
+        window.removeEventListener("beforeunload", handleUnload);
+        testCaseService.current.unlockTestCase(id);
+      }
+    };
   }, [
     id,
     measureId,
@@ -456,6 +477,8 @@ const EditTestCase = (props: EditTestCaseProps) => {
     measure,
     mapMeasureGroups,
     seriesState.loaded,
+    featureFlags?.Locking,
+    canEdit,
   ]);
 
   const handleSubmit = async (testCase: TestCase) => {
