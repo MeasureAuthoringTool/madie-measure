@@ -230,8 +230,6 @@ const TestCasePopulationList = ({
             <th scope="col">Population</th>
             <th scope="col">Expected</th>
             <th scope="col">Actual</th>
-            <th>&nbsp;</th>
-            <th>&nbsp;</th>
           </tr>
         </thead>
         <tbody>
