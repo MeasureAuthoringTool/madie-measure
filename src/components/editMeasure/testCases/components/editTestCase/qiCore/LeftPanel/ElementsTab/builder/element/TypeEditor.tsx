@@ -390,6 +390,7 @@ const TypeEditor = ({
               formik.setFieldTouched(label);
               formik.setFieldValue(label, value);
             }}
+            includePrev={false}
           />
         );
       case "CodeableConcept":
