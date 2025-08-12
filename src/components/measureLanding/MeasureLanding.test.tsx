@@ -60,9 +60,11 @@ jest.mock("react-router-dom", () => ({
 
 const mockMeasureServiceApi = {
   searchMeasuresByCriteria: jest.fn().mockResolvedValue(oneItemResponse),
-  getMeasureCounts: jest
-    .fn()
-    .mockResolvedValue({ allMeasures: 12, myMeasures: 12 }),
+  getMeasureCounts: jest.fn().mockResolvedValue({
+    ownedMeasures: 5,
+    sharedMeasures: 3,
+    allMeasures: 10,
+  }),
 } as unknown as MeasureServiceApi;
 
 jest.mock("../../api/useMeasureServiceApi", () =>
@@ -104,7 +106,7 @@ describe("Measure Page", () => {
     );
   };
 
-  test("shows my measures on page load", async () => {
+  test("shows owned measures on page load", async () => {
     renderRouter(["/measures"]);
     const measure1 = await screen.findByText("TestMeasure1");
     expect(measure1).toBeInTheDocument();
@@ -112,7 +114,7 @@ describe("Measure Page", () => {
       expect(
         mockMeasureServiceApi.searchMeasuresByCriteria
       ).toHaveBeenCalledWith(
-        true,
+        ["OWNED"],
         10,
         0,
         "",
@@ -125,14 +127,52 @@ describe("Measure Page", () => {
       );
     });
 
-    const myMeasuresTab = screen.getByRole("tab", {
-      name: "My Measures (12)",
+    const ownedMeasuresTab = screen.getByRole("tab", {
+      name: "Owned Measures (5)",
+    });
+    const sharedMeasuresTab = screen.getByRole("tab", {
+      name: "Shared Measures (3)",
     });
     const allMeasuresTab = screen.getByRole("tab", {
-      name: "All Measures (12)",
+      name: "All Measures (10)",
     });
+
+    expect(ownedMeasuresTab).toHaveClass("Mui-selected");
+    expect(sharedMeasuresTab).not.toHaveClass("Mui-selected");
     expect(allMeasuresTab).not.toHaveClass("Mui-selected");
-    expect(myMeasuresTab).toHaveClass("Mui-selected");
+  });
+
+  test("shared measure nav click triggers nav", async () => {
+    renderRouter(["/measures"]);
+    const measure1 = await screen.findByText("TestMeasure1");
+    expect(measure1).toBeInTheDocument();
+    await waitFor(() => {
+      expect(
+        mockMeasureServiceApi.searchMeasuresByCriteria
+      ).toHaveBeenCalledWith(
+        ["OWNED"],
+        10,
+        0,
+        "",
+        "",
+        {
+          optionalSearchProperties: [],
+          searchField: "",
+        },
+        abortController.signal
+      );
+    });
+
+    const ownedMeasuresTab = await screen.findByTestId("owned-measures-tab");
+    userEvent.click(ownedMeasuresTab);
+    expect(ownedMeasuresTab).toHaveClass("Mui-selected");
+
+    const sharedMeasuresTab = await screen.findByTestId("shared-measures-tab");
+    userEvent.click(sharedMeasuresTab);
+
+    expect(mockedUsedNavigate).toHaveBeenCalledWith("?tab=1&page=1&limit=10");
+    expect(ownedMeasuresTab).not.toHaveClass("Mui-selected");
+    expect(sharedMeasuresTab).toHaveClass("Mui-selected");
   });
 
   test("all measure nav click triggers nav", async () => {
@@ -143,7 +183,7 @@ describe("Measure Page", () => {
       expect(
         mockMeasureServiceApi.searchMeasuresByCriteria
       ).toHaveBeenCalledWith(
-        true,
+        ["OWNED"],
         10,
         0,
         "",
@@ -156,16 +196,48 @@ describe("Measure Page", () => {
       );
     });
 
-    const myMeasuresTab = await screen.findByTestId("my-measures-tab");
-    userEvent.click(myMeasuresTab);
-    expect(myMeasuresTab).toHaveClass("Mui-selected");
+    const ownedMeasuresTab = await screen.findByTestId("owned-measures-tab");
+    userEvent.click(ownedMeasuresTab);
+    expect(ownedMeasuresTab).toHaveClass("Mui-selected");
 
     const allMeasuresTab = await screen.findByTestId("all-measures-tab");
     userEvent.click(allMeasuresTab);
-    expect(mockedUsedNavigate).toHaveBeenCalledWith("?tab=1&page=1&limit=10");
+
+    expect(mockedUsedNavigate).toHaveBeenCalledWith("?tab=2&page=1&limit=10");
+    expect(ownedMeasuresTab).not.toHaveClass("Mui-selected");
+    expect(allMeasuresTab).toHaveClass("Mui-selected");
   });
-  test("loading in with props for all measures page, triggers a fetch", async () => {
+
+  test("loading in with props for shared measures page, triggers a fetch", async () => {
     renderRouter(["/measures?tab=1&page=1&limit=10"]); // Use 1-based page in the query string
+
+    const sharedMeasuresTab = await screen.findByTestId("shared-measures-tab");
+
+    // Ensure the "Shared Measures" tab is selected
+    await waitFor(() => {
+      expect(sharedMeasuresTab).toHaveClass("Mui-selected");
+    });
+    await waitFor(() => {
+      expect(
+        mockMeasureServiceApi.searchMeasuresByCriteria
+      ).toHaveBeenNthCalledWith(
+        1,
+        ["SHARED"],
+        "10",
+        0,
+        "",
+        "",
+        {
+          optionalSearchProperties: [],
+          searchField: "",
+        },
+        expect.any(AbortSignal)
+      );
+    });
+  });
+
+  test("loading in with props for all measures page, triggers a fetch", async () => {
+    renderRouter(["/measures?tab=2&page=1&limit=10"]); // Use 1-based page in the query string
 
     const allMeasuresTab = await screen.findByTestId("all-measures-tab");
 
@@ -178,7 +250,7 @@ describe("Measure Page", () => {
         mockMeasureServiceApi.searchMeasuresByCriteria
       ).toHaveBeenNthCalledWith(
         1,
-        false,
+        ["ALL"],
         "10",
         0,
         "",
@@ -207,7 +279,7 @@ describe("Measure Page", () => {
       expect(
         mockMeasureServiceApi.searchMeasuresByCriteria
       ).toHaveBeenCalledWith(
-        true,
+        ["OWNED"],
         10,
         0,
         "",
@@ -226,7 +298,7 @@ describe("Measure Page", () => {
       expect(
         mockMeasureServiceApi.searchMeasuresByCriteria
       ).toHaveBeenCalledWith(
-        true,
+        ["OWNED"],
         10,
         0,
         "",
@@ -257,7 +329,7 @@ describe("Measure Page", () => {
       expect(
         mockMeasureServiceApi.searchMeasuresByCriteria
       ).toHaveBeenCalledWith(
-        true,
+        ["OWNED"],
         10,
         0,
         "",
@@ -392,7 +464,7 @@ describe("Measure Page", () => {
       expect(
         mockMeasureServiceApi.searchMeasuresByCriteria
       ).toHaveBeenCalledWith(
-        true,
+        ["OWNED"],
         10,
         0,
         "",
@@ -407,13 +479,20 @@ describe("Measure Page", () => {
     await waitFor(() => {
       expect(mockMeasureServiceApi.getMeasureCounts).toHaveBeenCalled();
     });
-    const myMeasuresTab = screen.getByRole("tab", {
-      name: "My Measures (12)",
+    const ownedMeasuresTab = screen.getByRole("tab", {
+      name: "Owned Measures (5)",
     });
-    expect(myMeasuresTab).toBeInTheDocument();
-    expect(myMeasuresTab).toHaveClass("Mui-selected");
+    expect(ownedMeasuresTab).toBeInTheDocument();
+    expect(ownedMeasuresTab).toHaveClass("Mui-selected");
+
+    const sharedMeasuresTab = screen.getByRole("tab", {
+      name: "Shared Measures (3)",
+    });
+    expect(sharedMeasuresTab).toBeInTheDocument();
+    expect(sharedMeasuresTab).not.toHaveClass("Mui-selected");
+
     const allMeasuresTab = screen.getByRole("tab", {
-      name: "All Measures (12)",
+      name: "All Measures (10)",
     });
     expect(allMeasuresTab).toBeInTheDocument();
     expect(allMeasuresTab).not.toHaveClass("Mui-selected");
