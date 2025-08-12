@@ -84,7 +84,11 @@ const TestCasePopulation = ({
         data-testid={`test-row-population-id-${population.name}`}
         role="row"
       >
-        <td>&nbsp;</td>
+        <td role="cell">
+          <span style={{ visibility: "hidden" }} aria-hidden="true">
+            -
+          </span>
+        </td>
         <td role="cell">{label}</td>
         <td role="cell">
           <ExpectActualInput
@@ -122,13 +126,14 @@ const TestCasePopulation = ({
             </pre>
           )}
         </td>
-        <td>&nbsp;</td>
-        <td>&nbsp;</td>
-        <td>&nbsp;</td>
       </tr>
       {error?.expected && (
         <tr tw="border-b">
-          <td>&nbsp;</td>
+          <td>
+            <span style={{ visibility: "hidden" }} aria-hidden="true">
+              -
+            </span>
+          </td>
           <td colSpan={5}>
             <span
               data-testid={`${population.name}-error-helper-text`}
