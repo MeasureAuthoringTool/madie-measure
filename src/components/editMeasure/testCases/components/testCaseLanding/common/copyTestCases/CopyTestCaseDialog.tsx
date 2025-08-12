@@ -34,7 +34,12 @@ import {
   CollapseIcon,
 } from "../../../../../../../icons/MeasureListTableRightArrowIcons";
 import { customSort } from "../Hooks/UseTestCases";
-import { Measure, TestCase, ValidationStatus } from "@madie/madie-models";
+import {
+  Measure,
+  OwnershipType,
+  TestCase,
+  ValidationStatus,
+} from "@madie/madie-models";
 import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
@@ -148,7 +153,7 @@ const CopyTestCaseDialog = ({ open, onClose, measure, selectedTestCases }) => {
     }
     measureSearchApi.current
       .searchMeasuresByCriteria(
-        true,
+        [OwnershipType.OWNED, OwnershipType.SHARED],
         limit,
         page,
         "lastModifiedAt",
