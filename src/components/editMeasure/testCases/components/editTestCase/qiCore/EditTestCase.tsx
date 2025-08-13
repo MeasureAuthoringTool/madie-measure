@@ -499,18 +499,43 @@ const EditTestCase = (props: EditTestCaseProps) => {
           const milliRegex = /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{1,3}/;
           // Keep milliseconds if they are already entered
           const newValue = milliRegex.test(value)
-            ? dayjs(value.replace(/([+-]\d{2}:\d{2}|Z)$/, "+00:00"))
+            ? dayjs(
+                value
+                  .replace(/([+-]\d{2}:\d{2})$/, "Z")
+                  .replace(/[a-zA-Z]$/, "Z")
+                  .replace(/Z$/, "Z")
+              )
                 .utc(false)
                 .toISOString()
-            : dayjs(value).utc(false).format();
+            : dayjs(
+                value
+                  .replace(/([+-]\d{2}:\d{2})$/, "Z")
+                  .replace(/[a-zA-Z]$/, "Z")
+                  .replace(/Z$/, "Z")
+              )
+                .utc(false)
+                .format();
 
           if (value !== newValue) {
             timezoneUpdated = true;
           }
 
-          return newValue;
+          // Overlay the original date and time onto the new value
+          // in case dayjs tries to change the date due to timezone conversion
+          const overlayedValue = newValue.replace(
+            /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/,
+            value.substring(0, 16)
+          );
+
+          return overlayedValue;
         } else if (typeof value === "string" && dateRegex.test(value)) {
-          return dayjs(value.split("T")[0]).utc(false).format("YYYY-MM-DD");
+          const newValue = dayjs(value.split("T")[0])
+            .utc(false)
+            .format("YYYY-MM-DD");
+          if (value !== newValue) {
+            timezoneUpdated = true;
+          }
+          return newValue;
         }
         return value;
       });
