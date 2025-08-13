@@ -67,10 +67,10 @@ describe("Measures Pagination", () => {
     );
   };
 
-  test("On Page load, 10 measures are displayed by default for My Measures tab", async () => {
-    // Set local storage for My Measures tab
+  test("On Page load, 10 measures are displayed by default for Owned Measures tab", async () => {
+    // Set local storage for Owned Measures tab
     localStorage.setItem(
-      "myMeasurePageOptions",
+      "ownedMeasuresPageOptions",
       JSON.stringify({ page: 1, limit: 10 })
     );
 
@@ -88,17 +88,38 @@ describe("Measures Pagination", () => {
     expect(rowItems).toHaveLength(10);
   });
 
-  test("On Page load, 25 measures are displayed by default for All Measures tab", async () => {
-    // Set local storage for All Measures tab
+  test("On Page load, 10 measures are displayed by default for Shared Measures tab", async () => {
+    // Set local storage for Owned Measures tab
     localStorage.setItem(
-      "allMeasurePageOptions",
-      JSON.stringify({ page: 1, limit: 25 })
+      "sharedMeasuresPageOptions",
+      JSON.stringify({ page: 1, limit: 10 })
     );
 
     renderRouter([
       {
         pathname: "/measures",
         search: "?tab=1",
+        hash: "",
+        state: undefined,
+        key: "1fewtg",
+      },
+    ]);
+
+    const rowItems = await findAllByTestId("row-item");
+    expect(rowItems).toHaveLength(10);
+  });
+
+  test("On Page load, 25 measures are displayed by default for All Measures tab", async () => {
+    // Set local storage for All Measures tab
+    localStorage.setItem(
+      "allMeasuresPageOptions",
+      JSON.stringify({ page: 1, limit: 25 })
+    );
+
+    renderRouter([
+      {
+        pathname: "/measures",
+        search: "?tab=2",
         hash: "",
         state: undefined,
         key: "1fewtg",
@@ -190,7 +211,7 @@ describe("Measures Pagination", () => {
 
     await waitFor(() => {
       const updatedStorage = JSON.parse(
-        localStorage.getItem("myMeasurePageOptions")
+        localStorage.getItem("ownedMeasuresPageOptions")
       );
       expect(updatedStorage).toEqual({ page: 1, limit: "10" });
     });

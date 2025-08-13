@@ -710,8 +710,9 @@ describe("MeasureServiceApi Tests", () => {
 
   it("test getMeasureCounts success", async () => {
     const data = {
+      ownedMeasures: 5,
+      sharedMeasures: 3,
       allMeasures: 500,
-      myMeasures: 5,
     };
 
     const resp: any = { status: 200, data };

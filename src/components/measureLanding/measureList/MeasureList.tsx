@@ -49,6 +49,7 @@ import { exportMeasure as downloadMeasureExport } from "../../../utils/exportUti
 import { MeasureSearchCriteria } from "../MeasureLanding";
 import Search from "./measureSearch/Search";
 import queryString from "query-string";
+import { getTabStorageKey } from "../measureLandingUtils";
 
 export default function MeasureList(props: {
   retrieveMeasures?: (
@@ -744,8 +745,7 @@ export default function MeasureList(props: {
   };
 
   const doUpdateList = (doUpdateMeasureCount = false) => {
-    const tabStorageKey =
-      props.activeTab === 0 ? "myMeasurePageOptions" : "allMeasurePageOptions";
+    const tabStorageKey = getTabStorageKey(props.activeTab);
     const tabPageOptions = JSON.parse(localStorage.getItem(tabStorageKey)) || {
       page: 1,
       limit: 10,
