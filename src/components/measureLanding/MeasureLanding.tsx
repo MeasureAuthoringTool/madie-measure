@@ -10,7 +10,7 @@ import queryString from "query-string";
 import "twin.macro";
 import "styled-components/macro";
 import MeasureList from "./measureList/MeasureList";
-import { Measure } from "@madie/madie-models";
+import { Measure, OwnershipType } from "@madie/madie-models";
 
 import useMeasureServiceApi from "../../api/useMeasureServiceApi";
 import {
@@ -24,6 +24,7 @@ import "./MeasureLanding.scss";
 import { useDocumentTitle, useFeatureFlags } from "@madie/madie-util";
 import StatusHandler from "../editMeasure/editor/StatusHandler";
 import _ from "lodash";
+import { getTabStorageKey } from "./measureLandingUtils";
 
 export interface MeasureSearchCriteria {
   searchField?: string;
@@ -32,13 +33,24 @@ export interface MeasureSearchCriteria {
   draft?: boolean;
   excludeByMeasureIds?: string[];
 }
+
+// Maps tab indices to OwnershipType enums
+const ownershipTypeMap: Record<number, OwnershipType> = {
+  0: OwnershipType.OWNED,
+  1: OwnershipType.SHARED,
+  2: OwnershipType.ALL,
+};
+
 export default function MeasureLanding() {
   useDocumentTitle("MADiE Measures");
   const { search } = useLocation();
   let navigate = useNavigate();
   const measureServiceApi = useRef(useMeasureServiceApi()).current;
   const [measureList, setMeasureList] = useState<Measure[]>([]);
-  const [myMeasuresCount, setMyMeasuresCount] = useState<number>(0);
+
+  // Fetches total count of Owned Libraries, Shared Libraries, and All Libraries
+  const [ownedMeasuresCount, setOwnedMeasuresCount] = useState<number>(0);
+  const [sharedMeasuresCount, setSharedMeasuresCount] = useState<number>(0);
   const [allMeasuresCount, setAllMeasuresCount] = useState<number>(0);
 
   // utilities for pagination
@@ -73,11 +85,8 @@ export default function MeasureLanding() {
     setToastOpen(false);
   };
 
-  const getStorageKey = (tab) =>
-    tab === 0 ? "myMeasurePageOptions" : "allMeasurePageOptions";
-
   const measurePageOptions = JSON.parse(
-    window.localStorage.getItem(getStorageKey(activeTab))
+    window.localStorage.getItem(getTabStorageKey(activeTab))
   );
 
   const curLimit = measurePageOptions?.limit
@@ -135,7 +144,8 @@ export default function MeasureLanding() {
     measureServiceApi
       .getMeasureCounts()
       .then((data) => {
-        setMyMeasuresCount(data.myMeasures);
+        setOwnedMeasuresCount(data.ownedMeasures);
+        setSharedMeasuresCount(data.sharedMeasures);
         setAllMeasuresCount(data.allMeasures);
       })
       .catch(() => console.error("Unable to retrieve measure counts"));
@@ -170,7 +180,7 @@ export default function MeasureLanding() {
             firstParam && firstParam !== "-" ? [_.camelCase(firstParam)] : [],
         };
         const data = await measureServiceApi.searchMeasuresByCriteria(
-          tab === 0,
+          ownershipTypeMap[tab] ? [ownershipTypeMap[tab]] : [OwnershipType.ALL],
           limit,
           page,
           sort,
@@ -216,8 +226,7 @@ export default function MeasureLanding() {
       localStorage.setItem("measurePageTab", tabFromUrl.toString());
     }
 
-    const tabStorageKey =
-      tabFromUrl === 0 ? "myMeasurePageOptions" : "allMeasurePageOptions";
+    const tabStorageKey = getTabStorageKey(tabFromUrl);
     const tabPageOptions = JSON.parse(localStorage.getItem(tabStorageKey)) || {
       page: 1,
       limit: 10,
@@ -293,8 +302,7 @@ export default function MeasureLanding() {
     abortController.current.abort();
     setMeasureList(null);
 
-    const tabStorageKey =
-      nextTab === 0 ? "myMeasurePageOptions" : "allMeasurePageOptions";
+    const tabStorageKey = getTabStorageKey(nextTab);
     const tabPageOptions = JSON.parse(localStorage.getItem(tabStorageKey)) || {
       page: 1,
       limit: 10,
@@ -342,10 +350,22 @@ export default function MeasureLanding() {
                 type="B"
                 label={
                   featureFlags?.MeasureSearch
-                    ? "My Measures (" + myMeasuresCount + ")"
-                    : "My Measures"
+                    ? "Owned Measures (" + ownedMeasuresCount + ")"
+                    : "Owned Measures"
                 }
-                data-testid="my-measures-tab"
+                data-testid="owned-measures-tab"
+                onClick={() => {
+                  setCurrentPage(0);
+                }}
+              />
+              <Tab
+                type="B"
+                label={
+                  featureFlags?.MeasureSearch
+                    ? "Shared Measures (" + sharedMeasuresCount + ")"
+                    : "Shared Measures"
+                }
+                data-testid="shared-measures-tab"
                 onClick={() => {
                   setCurrentPage(0);
                 }}

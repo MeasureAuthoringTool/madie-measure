@@ -50,6 +50,7 @@ import { MeasureSearchCriteria } from "../MeasureLanding";
 import Search from "./measureSearch/Search";
 import queryString from "query-string";
 import _ from "lodash";
+import { getTabStorageKey } from "../measureLandingUtils";
 
 export default function MeasureList(props: {
   retrieveMeasures?: (
@@ -754,8 +755,7 @@ export default function MeasureList(props: {
   };
 
   const doUpdateList = (doUpdateMeasureCount = false) => {
-    const tabStorageKey =
-      props.activeTab === 0 ? "myMeasurePageOptions" : "allMeasurePageOptions";
+    const tabStorageKey = getTabStorageKey(props.activeTab);
     const tabPageOptions = JSON.parse(localStorage.getItem(tabStorageKey)) || {
       page: 1,
       limit: 10,

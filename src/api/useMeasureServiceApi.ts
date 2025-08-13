@@ -7,10 +7,12 @@ import {
   Organization,
   EndorsementOrganization,
   MeasureSet,
+  OwnershipType,
 } from "@madie/madie-models";
 import { useOktaTokens } from "@madie/madie-util";
 import _ from "lodash";
 import { MeasureSearchCriteria } from "../components/measureLanding/MeasureLanding";
+import qs from "qs";
 
 export class MeasureServiceApi {
   constructor(private baseUrl: string, private getAccessToken: () => string) {}
@@ -107,7 +109,7 @@ export class MeasureServiceApi {
   }
 
   async fetchMeasures(
-    filterByCurrentUser: boolean,
+    ownershipType: OwnershipType,
     limit: string | number = 25,
     page: number = 0,
     sort: string = "lastModifiedAt",
@@ -121,7 +123,7 @@ export class MeasureServiceApi {
           Authorization: `Bearer ${this.getAccessToken()}`,
         },
         params: {
-          currentUser: filterByCurrentUser,
+          ownershipType,
           limit,
           page,
           sort,
@@ -432,7 +434,7 @@ export class MeasureServiceApi {
   }
 
   async searchMeasuresByCriteria(
-    filterByCurrentUser: boolean,
+    ownershipTypes: OwnershipType[],
     limit: string | number = 25,
     page: number = 0,
     sort: string = "lastModifiedAt",
@@ -453,13 +455,17 @@ export class MeasureServiceApi {
             "Content-Type": "application/json",
           },
           params: {
-            currentUser: filterByCurrentUser,
+            ownershipTypes,
             limit,
             page,
             sort,
             direction,
             invocationSource,
           },
+          // Serialize ownershipTypes array as repeated params (?ownershipTypes=OWNED&ownershipTypes=SHARED)
+          // By default, qs.stringify adds brackets (?ownershipTypes[]=OWNED&ownershipTypes[]=SHARED), which Spring does not parse.
+          paramsSerializer: (params) =>
+            qs.stringify(params, { arrayFormat: "repeat" }),
           signal: abortController.signal,
         }
       );
