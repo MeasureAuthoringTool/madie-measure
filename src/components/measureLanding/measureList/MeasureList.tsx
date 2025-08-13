@@ -1002,6 +1002,7 @@ export default function MeasureList(props: {
             setShareDialog={setShareDialog}
             deleteMeasure={deleteMeasure}
             setViewHumanReadableModal={setViewHumanReadableModal}
+            activeTab={props.activeTab}
           />
         </div>
       </div>
