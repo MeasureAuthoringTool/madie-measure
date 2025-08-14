@@ -271,4 +271,90 @@ describe("DemographicsSection", () => {
     });
     expect(genderInput.value).toBe("Male (finding)");
   });
+
+  it("should clear Race selection when selecting dash option (no selection)", () => {
+    const qdmPatient = new QDMPatient();
+    const raceElement = new PatientCharacteristicRace();
+    const newCode: DataElementCode = {
+      code: "1002-5",
+      display: "American Indian or Alaska Native",
+      version: undefined,
+      system: "2.16.840.1.113883.6.238",
+    };
+    raceElement.dataElementCodes = [newCode];
+    qdmPatient.dataElements.push(raceElement);
+    (useQdmPatient as jest.Mock).mockImplementation(() => ({
+      state: { patient: qdmPatient },
+      dispatch: mockUseQdmPatientDispatch,
+    }));
+    renderDemographicsSection();
+
+    const raceInput = screen.getByTestId(
+      "demographics-race-input"
+    ) as HTMLInputElement;
+    expect(raceInput.value).toBe("American Indian or Alaska Native");
+
+    fireEvent.change(raceInput, { target: { value: "" } });
+
+    expect(raceInput.value).toBe("");
+    expect(mockUseQdmPatientDispatch).toHaveBeenCalledWith(
+      expect.objectContaining({ type: PatientActionType.REMOVE_DATA_ELEMENT })
+    );
+  });
+
+  it("should clear Gender selection when selecting dash option (no selection)", () => {
+    const qdmPatient = new QDMPatient();
+    const genderElement = new PatientCharacteristicSex();
+    genderElement.dataElementCodes = [
+      { code: "F", display: "Female", system: "2.16.840.1.113883.5.1" },
+    ];
+    qdmPatient.dataElements.push(genderElement);
+    (useQdmPatient as jest.Mock).mockImplementation(() => ({
+      state: { patient: qdmPatient },
+      dispatch: mockUseQdmPatientDispatch,
+    }));
+    renderDemographicsSection();
+
+    const genderInput = screen.getByTestId(
+      "demographics-gender-input"
+    ) as HTMLInputElement;
+    expect(genderInput.value).toBe("Female");
+
+    fireEvent.change(genderInput, { target: { value: "" } });
+
+    expect(genderInput.value).toBe("");
+    expect(mockUseQdmPatientDispatch).toHaveBeenCalledWith(
+      expect.objectContaining({ type: PatientActionType.REMOVE_DATA_ELEMENT })
+    );
+  });
+
+  it("should clear Ethnicity selection when selecting dash option (no selection)", () => {
+    const qdmPatient = new QDMPatient();
+    const ethnicityElement = new PatientCharacteristicEthnicity();
+    ethnicityElement.dataElementCodes = [
+      {
+        code: "2135-2",
+        display: "Hispanic or Latino",
+        system: "2.16.840.1.113883.6.238",
+      },
+    ];
+    qdmPatient.dataElements.push(ethnicityElement);
+    (useQdmPatient as jest.Mock).mockImplementation(() => ({
+      state: { patient: qdmPatient },
+      dispatch: mockUseQdmPatientDispatch,
+    }));
+    renderDemographicsSection();
+
+    const ethnicityInput = screen.getByTestId(
+      "demographics-ethnicity-input"
+    ) as HTMLInputElement;
+    expect(ethnicityInput.value).toBe("Hispanic or Latino");
+
+    fireEvent.change(ethnicityInput, { target: { value: "" } });
+
+    expect(ethnicityInput.value).toBe("");
+    expect(mockUseQdmPatientDispatch).toHaveBeenCalledWith(
+      expect.objectContaining({ type: PatientActionType.REMOVE_DATA_ELEMENT })
+    );
+  });
 });
