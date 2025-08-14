@@ -49,7 +49,7 @@ const DemographicsSection = ({ canEdit }) => {
   const raceValueSet = getValueSetForDemographic(cqmMeasure, "race");
   const ethnicityValueSet = getValueSetForDemographic(cqmMeasure, "ethnicity");
 
-  const selectOptions = (options) => {
+  const selectOptions = (options, includeDash = false) => {
     // loading skeleton
     if (!executionContextReady && !options) {
       return [<MenuItem value="">Loading...</MenuItem>];
@@ -60,7 +60,19 @@ const DemographicsSection = ({ canEdit }) => {
     }
 
     return [
-      options
+      ...(includeDash
+        ? [
+            <MenuItem
+              key="-"
+              value=""
+              aria-label="No selection"
+              data-testid="dash-option"
+            >
+              -
+            </MenuItem>,
+          ]
+        : []),
+      ...options
         .sort((a, b) =>
           a.display && b.display
             ? a.display.localeCompare(b.display)
@@ -115,9 +127,20 @@ const DemographicsSection = ({ canEdit }) => {
     }
   }, [patient]);
 
-  // gender race change
   const handleRaceChange = (event) => {
     const existingElement = getDataElementByStatus("race", patient);
+
+    if (event.target.value === "") {
+      setRaceDataElement(undefined);
+      if (existingElement) {
+        dispatch({
+          type: PatientActionType.REMOVE_DATA_ELEMENT,
+          payload: existingElement,
+        });
+      }
+      return;
+    }
+
     const newRaceDataElement: DataElement = getRaceDataElement(
       event.target.value,
       raceValueSet,
@@ -133,10 +156,19 @@ const DemographicsSection = ({ canEdit }) => {
   };
 
   const handleGenderChange = (event) => {
-    if (!event.target.value) {
+    const existingElement = getDataElementByStatus("gender", patient);
+
+    if (event.target.value === "") {
+      setGenderDataElement(undefined);
+      if (existingElement) {
+        dispatch({
+          type: PatientActionType.REMOVE_DATA_ELEMENT,
+          payload: existingElement,
+        });
+      }
       return;
     }
-    const existingElement = getDataElementByStatus("gender", patient);
+
     const newGenderDataElement: DataElement = getGenderDataElement(
       event.target.value,
       genderValueSet,
@@ -153,6 +185,18 @@ const DemographicsSection = ({ canEdit }) => {
 
   const handleEthnicityChange = (event) => {
     const existingElement = getDataElementByStatus("ethnicity", patient);
+
+    if (event.target.value === "") {
+      setEthnicityDataElement(undefined);
+      if (existingElement) {
+        dispatch({
+          type: PatientActionType.REMOVE_DATA_ELEMENT,
+          payload: existingElement,
+        });
+      }
+      return;
+    }
+
     const newEthnicityDataElement: DataElement = getEthnicityDataElement(
       event.target.value,
       ethnicityValueSet,
@@ -291,7 +335,7 @@ const DemographicsSection = ({ canEdit }) => {
                   value={raceDataElement?.dataElementCodes?.[0].display ?? ""}
                   placeHolder={{ name: "Select a Race", value: "" }}
                   onChange={handleRaceChange}
-                  options={selectOptions(raceValueSet?.concepts)}
+                  options={selectOptions(raceValueSet?.concepts, true)}
                 ></Select>
               </FormControl>
               <FormControl>
@@ -306,7 +350,7 @@ const DemographicsSection = ({ canEdit }) => {
                   value={genderDataElement?.dataElementCodes?.[0].display ?? ""}
                   placeHolder={{ name: "Select a Gender", value: "" }}
                   onChange={handleGenderChange}
-                  options={selectOptions(genderValueSet?.concepts)}
+                  options={selectOptions(genderValueSet?.concepts, true)}
                 ></Select>
               </FormControl>
             </div>
@@ -326,7 +370,7 @@ const DemographicsSection = ({ canEdit }) => {
                   }
                   placeHolder={{ name: "Select an Ethnicity", value: "" }}
                   onChange={handleEthnicityChange}
-                  options={selectOptions(ethnicityValueSet?.concepts)}
+                  options={selectOptions(ethnicityValueSet?.concepts, true)}
                 ></Select>
               </FormControl>
             </div>
