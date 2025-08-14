@@ -23,6 +23,7 @@ declare module "@madie/madie-util" {
     MinimizeAlerts: boolean;
     EnhancedTextFormatting: boolean;
     qiCore7: boolean;
+    TransferMeasure: boolean;
   }
 
   export interface ServiceConfig {

@@ -52,17 +52,10 @@ const TypeEditor = ({
     console.warn("TypeEditor: label is not a string", label);
     throw new Error("TypeEditor: label is not a string");
   }
-  //if isComponentDataType, we need to render the component based on the label, otherwise, use type from the StructureDefinition.type[0].code
-  //let type:string = isComponentDataType(label) ? label : structureDefinition?.type?.[0]?.code;
 
-  //Iterate Types and determine which one is the correct one to use based on the label (which is a concatenation of the path and the type)
-  const idWithoutChoice = structureDefinition?.id?.replace(
-    /\[[x,0..9]\]/gi,
-    ""
-  );
-  let type: string = structureDefinition?.type?.find((t) => {
-    return _.toLower(t.code) === _.toLower(label.replace(idWithoutChoice, ""));
-  })?.code;
+  let type: string = structureDefinition?.type?.find((t) =>
+    _.toLower(label).includes(_.toLower(t.code))
+  )?.code;
   if (!type) {
     type = structureDefinition?.type?.[0]?.code;
   }
@@ -70,7 +63,7 @@ const TypeEditor = ({
   if (structureDefinition?.max === "*") {
     // is it not already terminated with an index?
     if (!getIndexFromPath(label)) {
-      // we Just going to add a zero for now. could be smarter later
+      // we are just going to add a zero for now. could be smarter later
       // TO DO: We will eventually need to map inner elements of multiple cardinality based on how many elements are in the form
       // something like Array.From(numOfElementsInForm, _index) =>) had a previous rendition of this guy working in 8500 pr commits
       // https://github.com/MeasureAuthoringTool/madie-measure/pull/901
@@ -631,7 +624,6 @@ const TypeEditor = ({
               <ChoiceType
                 childDef={filteredChildDef}
                 resource={resource}
-                structureDefinition={structureDefinition}
                 parentStructureDefinition={parentStructureDefinition}
                 canEdit={canEdit}
                 label={label}
