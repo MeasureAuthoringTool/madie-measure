@@ -12,6 +12,7 @@ import {
   checkUserCanDelete,
 } from "@madie/madie-util";
 import ShareAction from "./shareAction/ShareAction";
+import TransferAction from "./transferAction/TransferAction";
 
 interface PropTypes {
   measures: Measure[];
@@ -24,6 +25,7 @@ interface PropTypes {
   setShareDialog: any;
   deleteMeasure: () => void;
   setViewHumanReadableModal: any;
+  activeTab: number;
 }
 export default function ActionCenter(props: PropTypes) {
   const [canEdit, setCanEdit] = useState<boolean>(false);
@@ -62,6 +64,10 @@ export default function ActionCenter(props: PropTypes) {
       });
     }
   }, [props.measures, props.setDraftMeasureDialog, props.updateTargetMeasure]);
+
+  const transferMeasure = useCallback(() => {
+    //to be impleted
+  }, [props.measures, props.updateTargetMeasure]);
 
   const exportMeasure = useCallback(
     (exportType: string) => {
@@ -153,6 +159,13 @@ export default function ActionCenter(props: PropTypes) {
         canEdit={canEdit}
       />
       <ViewHRAction measures={props.measures} onClick={viewHumanReadable} />
+      {featureFlags?.TransferMeasure && (
+        <TransferAction
+          measures={props.measures}
+          onClick={transferMeasure}
+          activeTab={props?.activeTab}
+        />
+      )}
     </div>
   );
 }
