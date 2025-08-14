@@ -102,6 +102,37 @@ describe("StatusHandler Component", () => {
     expect(screen.getByText("~title")).toBeInTheDocument();
   });
 
+  test("Should display shiftTestCaseDatesWarning message with correct configuration", () => {
+    render(
+      <StatusHandler
+        warning={true}
+        shiftTestCaseDatesWarning={["test warning"]}
+        testDataId="test_data_id"
+      />
+    );
+
+    expect(screen.getByTestId("madie-alert-mock")).toBeInTheDocument();
+    expect(screen.getByTestId("alert-0")).toHaveAttribute(
+      "data-type",
+      "warning"
+    );
+    expect(screen.getByTestId("warn-title")).toBeInTheDocument();
+
+    expect(MadieAlert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        alerts: expect.arrayContaining([
+          expect.objectContaining({
+            type: "warning",
+            copyButton: true,
+            canClose: false,
+          }),
+        ]),
+        minimizeAlerts: false,
+      }),
+      expect.anything()
+    );
+  });
+
   test("Should display warning message with correct configuration", () => {
     render(
       <StatusHandler

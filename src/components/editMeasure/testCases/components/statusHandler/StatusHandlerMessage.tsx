@@ -3,7 +3,7 @@ import { TestCaseImportOutcome } from "@madie/madie-models";
 import "twin.macro";
 import "styled-components/macro";
 
-export function createWarningMessage(
+export function createShiftTestCaseDatesWarningMessage(
   withoutDuplicates: string[],
   testDataId: string
 ) {
@@ -20,6 +20,33 @@ export function createWarningMessage(
               <li key={index}>{tc}</li>
             ))}
           </ul>
+        </div>
+      </div>
+    ),
+    canClose: false,
+    alertProps: { "data-testid": testDataId },
+  };
+}
+
+export function createWarningMessage(
+  withoutDuplicates: string[],
+  testDataId: string
+) {
+  return {
+    type: "warning",
+    copyButton: true,
+    content: (
+      <div aria-live="polite" role="alert" data-testid={testDataId}>
+        <div data-testid="warn-title">
+          {withoutDuplicates.length === 1 ? (
+            withoutDuplicates[0]
+          ) : (
+            <ul>
+              {withoutDuplicates.map((tc, index) => (
+                <li key={index}>{tc}</li>
+              ))}
+            </ul>
+          )}
         </div>
       </div>
     ),

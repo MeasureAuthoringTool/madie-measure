@@ -11,12 +11,14 @@ import { DataElement } from "cqm-models";
 const LeftPanel = (props: {
   canEdit: boolean;
   handleTestCaseErrors: Function;
+  handleTestCaseWarnings: Function;
   selectedDataElement: DataElement;
   setSelectedDataElement: Function;
 }) => {
   const {
     canEdit,
     handleTestCaseErrors,
+    handleTestCaseWarnings,
     selectedDataElement,
     setSelectedDataElement,
   } = props;
@@ -34,6 +36,7 @@ const LeftPanel = (props: {
             <ElementsTab
               canEdit={canEdit}
               handleTestCaseErrors={handleTestCaseErrors}
+              handleTestCaseWarnings={handleTestCaseWarnings}
               selectedDataElement={selectedDataElement}
               setSelectedDataElement={setSelectedDataElement}
             />

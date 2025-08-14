@@ -195,7 +195,7 @@ const TestCaseRoutes = () => {
       {warnings?.length > 0 && (
         <StatusHandler
           warning={true}
-          warningMessages={warnings}
+          shiftTestCaseDatesWarning={warnings}
           testDataId="execution_context_loading_warning"
         />
       )}
