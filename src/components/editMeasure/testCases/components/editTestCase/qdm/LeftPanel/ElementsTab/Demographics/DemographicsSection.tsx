@@ -89,6 +89,7 @@ const DemographicsSection = ({ handleTestCaseWarnings, canEdit }) => {
         ]
       : [];
 
+    // loading skeleton
     if (!executionContextReady && !options) {
       return [
         <MenuItem value="" disabled>
