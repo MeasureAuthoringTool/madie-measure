@@ -1,47 +1,26 @@
-import React from "react";
-import {
-  render,
-  fireEvent,
-  screen,
-  waitFor,
-  within,
-  act,
-} from "@testing-library/react";
+import * as React from "react";
+import { render, screen, within, act } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Formik } from "formik";
 import ChoiceType from "./ChoiceType";
-//import { extractNameWithoutIndex } from "../../../../../../../api/fhirDefinitionServiceUtilities";
+import { upperFirst } from "lodash";
 
 // Mock dependencies
 jest.mock("./TypeEditor", () => (props: any) => (
-  <div data-testid="type-editor">Widget {props.label}</div>
+  <div data-testid="type-editor">TypeEditor {props.label}</div>
 ));
 
-// Minimal mock type for ElementDefinition
-type ElementDefinition = { id?: string };
-const mockExtract = jest.fn();
-
-jest.mock("../../../../../../../api/fhirDefinitionServiceUtilities", () => ({
-  extractNameWithoutIndex: jest.fn((childDef, _a, _b) => {
-    mockExtract();
-    // Simulate extracting the name without index
-    if (childDef && childDef.id) {
-      return childDef.id.replace(/\[x\]$/, "");
-    }
-    return "";
-  }),
-}));
-
 const getChildDef = (overrides = {}) => ({
-  id: "Patient.deceased[x]",
-  type: [{ code: "boolean" }, { code: "dateTime" }, { code: "string" }],
+  id: "Observation.component[0].value[x]",
+  path: "Observation.component[0].value[x]",
+  min: 0,
+  max: "1",
+  type: [{ code: "string" }, { code: "boolean" }, { code: "integer" }],
   ...overrides,
 });
 
-const getFormikValues = (value: any = undefined) => ({
-  Patient: {
-    deceasedBoolean: value,
-  },
+const getFormikValues = (type: string = "boolean", value: any = undefined) => ({
+  Observation: { component: [{ [`value${upperFirst(type)}`]: value }] },
 });
 
 const renderWithFormik = (props: any, formikValues: any = {}) =>
@@ -52,58 +31,109 @@ const renderWithFormik = (props: any, formikValues: any = {}) =>
   );
 
 describe("ChoiceType", () => {
-  it("renders label and select with options", async () => {
+  beforeAll(() => {
+    // Suppress Material-UI warnings in test output
+    jest.spyOn(console, "error").mockImplementation(() => {});
+  });
+
+  afterAll(() => {
+    jest.restoreAllMocks();
+  });
+
+  it("renders select with choice type options", async () => {
     renderWithFormik(
       {
         childDef: getChildDef(),
-        label: "Patient.deceased[x]",
+        label: "Observation.component[0]",
         canEdit: true,
       },
       getFormikValues()
     );
-    expect(screen.getByText("Patient.deceased[x]")).toBeInTheDocument();
-    const choiceTypeSelect = screen.getByTestId("choice-type");
-    expect(choiceTypeSelect).toBeInTheDocument();
-    fireEvent.mouseDown(choiceTypeSelect);
 
-    const booleanSelection = screen.getByText("Boolean");
-    userEvent.click(booleanSelection);
-    const booleanOption = await screen.getByTestId("boolean-option");
-    const stringOption = await screen.getByTestId("string-option");
-    expect(booleanOption).toBeInTheDocument();
-    expect(stringOption).toBeInTheDocument();
-    act(() => {
-      fireEvent.click(booleanOption);
-      fireEvent.click(stringOption);
+    const select = screen.getByRole("combobox");
+    await act(async () => {
+      await userEvent.click(select);
     });
 
-    expect(mockExtract).toHaveBeenCalledTimes(1);
+    const listbox = screen.getByRole("listbox");
+    expect(within(listbox).getByText("String")).toBeInTheDocument();
+    expect(within(listbox).getByText("Boolean")).toBeInTheDocument();
+    expect(within(listbox).getByText("Integer")).toBeInTheDocument();
   });
 
-  it("selects the correct type based on formik values", () => {
+  it("initializes with first type when no value exists", () => {
     renderWithFormik(
       {
         childDef: getChildDef(),
-        label: "Patient.deceased[x]",
+        label: "Observation.component[0]",
         canEdit: true,
       },
-      {
-        Patient: {
-          deceasedBoolean: true,
-        },
-      }
+      {}
+    );
+
+    expect(screen.getByRole("combobox")).toHaveTextContent("String");
+    expect(screen.getByTestId("type-editor")).toHaveTextContent(
+      "TypeEditor Observation.component[0].valueString"
     );
   });
 
-  it("does not render TypeEditor if no type is selected", () => {
+  it("selects correct type based on existing formik value", async () => {
+    await act(async () => {
+      renderWithFormik(
+        {
+          childDef: getChildDef(),
+          label: "Observation.component[0]",
+          canEdit: true,
+        },
+        getFormikValues("boolean", true)
+      );
+    });
+
+    expect(screen.getByRole("combobox")).toHaveTextContent("Boolean");
+    expect(screen.getByTestId("type-editor")).toHaveTextContent(
+      "TypeEditor Observation.component[0].valueBoolean"
+    );
+  });
+
+  it("changes type and updates formik values accordingly", async () => {
     renderWithFormik(
       {
-        childDef: getChildDef({ type: [] }),
-        label: "Patient.deceased[x]",
+        childDef: getChildDef(),
+        label: "Observation.component[0]",
         canEdit: true,
+      },
+      getFormikValues("boolean", true)
+    );
+
+    const select = screen.getByRole("combobox");
+    await act(async () => {
+      await userEvent.click(select);
+    });
+
+    const listbox = screen.getByRole("listbox");
+    const stringType = within(listbox).getByText("String");
+    await act(async () => {
+      await userEvent.click(stringType);
+    });
+
+    expect(screen.getByRole("combobox")).toHaveTextContent("String");
+    expect(screen.getByTestId("type-editor")).toHaveTextContent(
+      "TypeEditor Observation.component[0].valueString"
+    );
+  });
+
+  it("disables select when canEdit is false", () => {
+    renderWithFormik(
+      {
+        childDef: getChildDef(),
+        label: "Observation.component[0]",
+        canEdit: false,
       },
       getFormikValues()
     );
-    expect(screen.queryByTestId("type-editor")).not.toBeInTheDocument();
+
+    // When canEdit is false, the select is rendered as a readonly textarea
+    const select = screen.getByTestId("choice-type-Observation.component[0]");
+    expect(select).toHaveAttribute("readonly");
   });
 });

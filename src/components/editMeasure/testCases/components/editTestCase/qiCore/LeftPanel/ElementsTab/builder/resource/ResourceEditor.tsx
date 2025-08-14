@@ -236,7 +236,11 @@ const ResourceEditor = ({
 
       if (_.isNil(currentValue)) {
         if (!elemPath.includes("extension:")) {
-          _.set(nextEntry.resource, elemPath, "");
+          if (element.max == "*" || Number(element.max) > 1) {
+            _.set(nextEntry.resource, elemPath, []);
+          } else {
+            _.set(nextEntry.resource, elemPath, "");
+          }
         } else {
           const filtered = allElements.filter((ele) =>
             ele.id.includes(elemPath)
