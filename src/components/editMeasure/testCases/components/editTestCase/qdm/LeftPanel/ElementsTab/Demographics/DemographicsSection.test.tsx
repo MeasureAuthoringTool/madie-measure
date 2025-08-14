@@ -1,6 +1,8 @@
 import * as React from "react";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import DemographicsSection from "./DemographicsSection";
+import DemographicsSection, {
+  DEMOGRAPHICS_WARNING_MESSAGE,
+} from "./DemographicsSection";
 import { FormikProvider, FormikContextType } from "formik";
 import {
   PatientActionType,
@@ -41,6 +43,8 @@ const mockFormik: FormikContextType<any> = {
   setFieldValue: jest.fn(),
 };
 const mockUseQdmPatientDispatch = jest.fn();
+const handleWarnings = jest.fn();
+
 const cqmMeasure = {
   source_data_criteria: [
     { qdmStatus: "race", codeListId: "2.16.840.1.114222.4.11.836" },
@@ -53,6 +57,8 @@ const cqmMeasure = {
 describe("DemographicsSection", () => {
   beforeEach(() => {
     mockUseQdmPatientDispatch.mockClear();
+    handleWarnings.mockClear();
+
     (useQdmPatient as jest.Mock).mockImplementation(() => ({
       state: { patient: emptyPatient },
       dispatch: mockUseQdmPatientDispatch,
@@ -73,7 +79,10 @@ describe("DemographicsSection", () => {
         }}
       >
         <FormikProvider value={mockFormik}>
-          <DemographicsSection canEdit={true} />
+          <DemographicsSection
+            handleTestCaseWarnings={handleWarnings}
+            canEdit={true}
+          />
         </FormikProvider>
       </QdmExecutionContextProvider>
     );
@@ -356,5 +365,150 @@ describe("DemographicsSection", () => {
     expect(mockUseQdmPatientDispatch).toHaveBeenCalledWith(
       expect.objectContaining({ type: PatientActionType.REMOVE_DATA_ELEMENT })
     );
+  });
+
+  it("calls handleTestCaseWarnings with warning for invalid Race", async () => {
+    const qdmPatient = new QDMPatient();
+    const raceElement = new PatientCharacteristicRace();
+    raceElement.dataElementCodes = [
+      {
+        code: "9999-9",
+        display: "Invalid Race",
+        system: "2.16.840.1.113883.6.238",
+      },
+    ];
+    qdmPatient.dataElements.push(raceElement);
+
+    (useQdmPatient as jest.Mock).mockImplementation(() => ({
+      state: { patient: qdmPatient },
+      dispatch: mockUseQdmPatientDispatch,
+    }));
+
+    renderDemographicsSection();
+
+    await waitFor(() => {
+      expect(handleWarnings).toHaveBeenCalledWith(DEMOGRAPHICS_WARNING_MESSAGE);
+    });
+  });
+
+  it("calls handleTestCaseWarnings with null for valid Race", async () => {
+    const qdmPatient = new QDMPatient();
+    const raceElement = new PatientCharacteristicRace();
+    raceElement.dataElementCodes = [
+      {
+        code: "1002-5",
+        display: "American Indian or Alaska Native",
+        system: "2.16.840.1.113883.6.238",
+      },
+    ];
+    qdmPatient.dataElements.push(raceElement);
+
+    (useQdmPatient as jest.Mock).mockImplementation(() => ({
+      state: { patient: qdmPatient },
+      dispatch: mockUseQdmPatientDispatch,
+    }));
+
+    renderDemographicsSection();
+
+    await waitFor(() => {
+      expect(handleWarnings).toHaveBeenCalledWith(null);
+    });
+  });
+
+  it("calls handleTestCaseWarnings with warning for invalid Gender", async () => {
+    const qdmPatient = new QDMPatient();
+    const genderElement = new PatientCharacteristicSex();
+    genderElement.dataElementCodes = [
+      {
+        code: "999",
+        display: "Invalid Gender",
+        system: "2.16.840.1.113883.6.96",
+      },
+    ];
+    qdmPatient.dataElements.push(genderElement);
+
+    (useQdmPatient as jest.Mock).mockImplementation(() => ({
+      state: { patient: qdmPatient },
+      dispatch: mockUseQdmPatientDispatch,
+    }));
+
+    renderDemographicsSection();
+
+    await waitFor(() => {
+      expect(handleWarnings).toHaveBeenCalledWith(DEMOGRAPHICS_WARNING_MESSAGE);
+    });
+  });
+
+  it("calls handleTestCaseWarnings with null for valid Gender", async () => {
+    const qdmPatient = new QDMPatient();
+    const genderElement = new PatientCharacteristicSex();
+    genderElement.dataElementCodes = [
+      {
+        code: "248152002",
+        display: "Female (finding)",
+        system: "2.16.840.1.113883.6.96",
+        version: "2024-09",
+      },
+    ];
+    qdmPatient.dataElements.push(genderElement);
+
+    (useQdmPatient as jest.Mock).mockImplementation(() => ({
+      state: { patient: qdmPatient },
+      dispatch: mockUseQdmPatientDispatch,
+    }));
+
+    renderDemographicsSection();
+
+    await waitFor(() => {
+      expect(handleWarnings).toHaveBeenCalledWith(null);
+    });
+  });
+
+  it("calls handleTestCaseWarnings with warning for invalid Ethnicity", async () => {
+    const qdmPatient = new QDMPatient();
+    const ethnicityElement = new PatientCharacteristicEthnicity();
+    ethnicityElement.dataElementCodes = [
+      {
+        code: "9999-9",
+        display: "Invalid Ethnicity",
+        system: "2.16.840.1.113883.6.238",
+      },
+    ];
+    qdmPatient.dataElements.push(ethnicityElement);
+
+    (useQdmPatient as jest.Mock).mockImplementation(() => ({
+      state: { patient: qdmPatient },
+      dispatch: mockUseQdmPatientDispatch,
+    }));
+
+    renderDemographicsSection();
+
+    await waitFor(() => {
+      expect(handleWarnings).toHaveBeenCalledWith(DEMOGRAPHICS_WARNING_MESSAGE);
+    });
+  });
+
+  it("calls handleTestCaseWarnings with null for valid Ethnicity", async () => {
+    const qdmPatient = new QDMPatient();
+    const ethnicityElement = new PatientCharacteristicEthnicity();
+    ethnicityElement.dataElementCodes = [
+      {
+        code: "2135-2",
+        display: "Hispanic or Latino",
+        system: "2.16.840.1.113883.6.238",
+      },
+    ];
+    qdmPatient.dataElements.push(ethnicityElement);
+
+    (useQdmPatient as jest.Mock).mockImplementation(() => ({
+      state: { patient: qdmPatient },
+      dispatch: mockUseQdmPatientDispatch,
+    }));
+
+    renderDemographicsSection();
+
+    await waitFor(() => {
+      expect(handleWarnings).toHaveBeenCalledWith(null);
+    });
   });
 });

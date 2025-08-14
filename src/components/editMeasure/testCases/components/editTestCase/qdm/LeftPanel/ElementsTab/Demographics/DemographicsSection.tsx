@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import ElementSection from "../../../../../common/ElementSection";
 import { Select } from "@madie/madie-design-system/dist/react";
 import FormControl from "@mui/material/FormControl";
-import { DataElement } from "cqm-models";
+import { DataElement, ValueSet } from "cqm-models";
 import DateTimeInput from "../../../../../common/dateTimeInput/DateTimeInput";
 import dayjs from "dayjs";
 import "./DemographicsSection.scss";
@@ -28,7 +28,32 @@ import {
 } from "../../../../../../util/QdmPatientContext";
 import { useQdmExecutionContext } from "../../../../../routes/qdm/QdmExecutionContext";
 
-const DemographicsSection = ({ canEdit }) => {
+export const DEMOGRAPHICS_WARNING_MESSAGE =
+  "Your measure's Race, Sex, or Ethnicity value set has changed. The value in this test case is no longer valid. Please update the value to successfully match your measure.";
+
+// Check if a DataElement's code exist in the corresponding ValueSet
+const checkMismatch = (
+  dataElement: DataElement,
+  valueSet: ValueSet
+): boolean => {
+  // There is only one code if set
+  const dataCode = dataElement?.dataElementCodes?.[0];
+  const concepts = valueSet?.concepts;
+
+  // If no code or no concepts, it a mismatch
+  if (!dataCode || !concepts?.length) return true;
+
+  // Check if the dataCode matches any concept in the valueSet
+  return !concepts.some(
+    (concept) =>
+      concept.code === dataCode.code &&
+      concept.display === dataCode.display &&
+      concept.system === dataCode.system &&
+      concept.version === dataCode.version
+  );
+};
+
+const DemographicsSection = ({ handleTestCaseWarnings, canEdit }) => {
   dayjs.extend(utc);
   dayjs.utc().format(); // utc format
   const { state, dispatch } = useQdmPatient();
@@ -50,28 +75,35 @@ const DemographicsSection = ({ canEdit }) => {
   const ethnicityValueSet = getValueSetForDemographic(cqmMeasure, "ethnicity");
 
   const selectOptions = (options, includeDash = false) => {
+    // Always render a single dash MenuItem if includeDash is true
+    const dash = includeDash
+      ? [
+          <MenuItem
+            key="-"
+            value=""
+            aria-label="No selection"
+            data-testid="dash-option"
+          >
+            -
+          </MenuItem>,
+        ]
+      : [];
+
     // loading skeleton
     if (!executionContextReady && !options) {
-      return [<MenuItem value="">Loading...</MenuItem>];
+      return [
+        <MenuItem value="" disabled>
+          Loading...
+        </MenuItem>,
+      ];
     }
 
     if (!options) {
-      return [];
+      return dash;
     }
 
     return [
-      ...(includeDash
-        ? [
-            <MenuItem
-              key="-"
-              value=""
-              aria-label="No selection"
-              data-testid="dash-option"
-            >
-              -
-            </MenuItem>,
-          ]
-        : []),
+      ...dash,
       ...options
         .sort((a, b) =>
           a.display && b.display
@@ -126,6 +158,39 @@ const DemographicsSection = ({ canEdit }) => {
       }
     }
   }, [patient]);
+
+  useEffect(() => {
+    const hasRaceMismatch =
+      raceDataElement &&
+      raceValueSet?.concepts?.length &&
+      (raceDataElement.codeListId !== raceValueSet.oid ||
+        checkMismatch(raceDataElement, raceValueSet));
+
+    const hasGenderMismatch =
+      genderDataElement &&
+      genderValueSet?.concepts?.length &&
+      (genderDataElement.codeListId !== genderValueSet.oid ||
+        checkMismatch(genderDataElement, genderValueSet));
+
+    const hasEthnicityMismatch =
+      ethnicityDataElement &&
+      ethnicityValueSet?.concepts?.length &&
+      (ethnicityDataElement.codeListId !== ethnicityValueSet.oid ||
+        checkMismatch(ethnicityDataElement, ethnicityValueSet));
+
+    if (hasRaceMismatch || hasGenderMismatch || hasEthnicityMismatch) {
+      handleTestCaseWarnings(DEMOGRAPHICS_WARNING_MESSAGE);
+    } else {
+      handleTestCaseWarnings(null);
+    }
+  }, [
+    raceDataElement,
+    genderDataElement,
+    ethnicityDataElement,
+    raceValueSet,
+    genderValueSet,
+    ethnicityValueSet,
+  ]);
 
   const handleRaceChange = (event) => {
     const existingElement = getDataElementByStatus("race", patient);
