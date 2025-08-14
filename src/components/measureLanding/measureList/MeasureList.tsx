@@ -280,7 +280,6 @@ export default function MeasureList(props: {
         <Button
           variant="outline-filled"
           data-testid={`measure-action-${info.row.original.id}`}
-          aria-live="polite"
           aria-label={`${
             checkUserCanEdit(
               info.row.original.actions?.measureSet?.owner,
@@ -417,7 +416,6 @@ export default function MeasureList(props: {
         <Button
           variant="outline-filled"
           data-testid={`measure-action-${info.row.original.id}`}
-          aria-live="polite"
           aria-label={`${
             checkUserCanEdit(
               info.row.original.actions?.measureSet?.owner,

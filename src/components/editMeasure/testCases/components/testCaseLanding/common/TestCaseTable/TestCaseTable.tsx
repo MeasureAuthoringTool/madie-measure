@@ -317,7 +317,6 @@ const TestCaseTable = (props: TestCaseTableProps) => {
           <Button
             variant="outline-filled"
             data-testid={`view-edit-test-case-button-${info.row.original.id}`}
-            aria-live="polite"
             aria-label={`${
               checkUserCanEdit(
                 measure.measureSet?.owner,

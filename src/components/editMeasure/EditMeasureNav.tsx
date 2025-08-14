@@ -57,6 +57,14 @@ const EditMeasureNav = ({ isQDM }) => {
       }
     }
   }, [measureId, measure?.testCases, measure?.testCases?.length]);
+
+  // hitting spacebar here will scroll down the page. We're going to prevent the default event and simulate a click.
+  const handleSpaceSelect = (event) => {
+    if (event.key === " " || event.key === "Spacebar") {
+      event.preventDefault();
+      event.currentTarget.click();
+    }
+  };
   return (
     <div>
       <div style={{ marginLeft: "32px" }} id="edit-measure-nav-a">
@@ -69,6 +77,7 @@ const EditMeasureNav = ({ isQDM }) => {
             size="standard"
             label="Details"
             component={NavLink}
+            onKeyDown={handleSpaceSelect}
           />
           <Tab
             value="cql-editor"
@@ -78,6 +87,7 @@ const EditMeasureNav = ({ isQDM }) => {
             size="standard"
             label="CQL Editor"
             component={NavLink}
+            onKeyDown={handleSpaceSelect}
           />
           <Tab
             value={isQDM ? `base-configuration` : `groups`}
@@ -87,6 +97,7 @@ const EditMeasureNav = ({ isQDM }) => {
             size="standard"
             label="Population Criteria"
             component={NavLink}
+            onKeyDown={handleSpaceSelect}
           />
           <Tab
             value={`test-cases`}
@@ -96,6 +107,7 @@ const EditMeasureNav = ({ isQDM }) => {
             size="standard"
             label={testCaseLabel}
             component={NavLink}
+            onKeyDown={handleSpaceSelect}
           />
         </Tabs>
       </div>
