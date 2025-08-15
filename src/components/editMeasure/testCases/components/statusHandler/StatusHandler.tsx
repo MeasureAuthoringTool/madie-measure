@@ -8,6 +8,7 @@ import "styled-components/macro";
 import { EXPORT_ERROR_CHARACTERS_MESSAGE } from "../../util/checkSpecialCharacters";
 import {
   createImportMessage,
+  createShiftTestCaseDatesWarningMessage,
   createWarningMessage,
 } from "./StatusHandlerMessage";
 import { useFeatureFlags } from "@madie/madie-util";
@@ -19,6 +20,7 @@ interface StatusHandlerProps {
   warningMessages?: Array<string>;
   testDataId?: string;
   importWarnings?: TestCaseImportOutcome[];
+  shiftTestCaseDatesWarning?: Array<string>;
 }
 
 const StatusHandler = ({
@@ -28,6 +30,7 @@ const StatusHandler = ({
   warningMessages,
   testDataId,
   importWarnings,
+  shiftTestCaseDatesWarning,
 }: StatusHandlerProps) => {
   const featureFlags = useFeatureFlags();
   const alerts = [];
@@ -90,6 +93,15 @@ const StatusHandler = ({
         ),
         canClose: false,
       });
+    }
+  }
+
+  if (warning && shiftTestCaseDatesWarning) {
+    const withoutDuplicates = [...new Set(shiftTestCaseDatesWarning)];
+    if (withoutDuplicates.length > 0) {
+      alerts.push(
+        createShiftTestCaseDatesWarningMessage(withoutDuplicates, testDataId)
+      );
     }
   }
 

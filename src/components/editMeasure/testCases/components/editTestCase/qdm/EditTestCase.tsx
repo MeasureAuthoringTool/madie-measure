@@ -274,10 +274,16 @@ const EditTestCase = () => {
   };
 
   const [testCaseErrors, setTestCaseErrors] = useState(null);
+  const [testCaseWarnings, setTestCaseWarnings] = useState(null);
 
   const handleTestCaseErrors = (value) => {
     setTestCaseErrors(value);
   };
+
+  const handleTestCaseWarnings = (value) => {
+    setTestCaseWarnings(value);
+  };
+
   return (
     <>
       {qdmExecutionErrors && qdmExecutionErrors.length > 0 && (
@@ -292,6 +298,13 @@ const EditTestCase = () => {
           error={true}
           errorMessages={[testCaseErrors]}
           testDataId="test_case_execution_errors"
+        />
+      )}
+      {!_.isNull(testCaseWarnings) && (
+        <StatusHandler
+          warning={true}
+          warningMessages={[testCaseWarnings]}
+          testDataId="test_case_execution_warnings"
         />
       )}
       <FormikProvider value={formik}>
@@ -311,6 +324,7 @@ const EditTestCase = () => {
                 <LeftPanel
                   canEdit={canEdit}
                   handleTestCaseErrors={handleTestCaseErrors}
+                  handleTestCaseWarnings={handleTestCaseWarnings}
                   selectedDataElement={selectedDataElement}
                   setSelectedDataElement={setSelectedDataElement}
                 />
