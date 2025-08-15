@@ -14,8 +14,8 @@ export default function getInitialValues(measure: Measure, typeLower: string) {
       const copyright = measure?.measureMetaData?.copyright;
       return !!copyright ? copyright : "";
     case "disclaimer":
-      const diclaimer = measure?.measureMetaData?.disclaimer;
-      return !!diclaimer ? diclaimer : "";
+      const disclaimer = measure?.measureMetaData?.disclaimer;
+      return !!disclaimer ? disclaimer : "";
     case "rationale":
       const rationale = measure?.measureMetaData?.rationale;
       return !!rationale ? rationale : "";

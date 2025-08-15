@@ -1,9 +1,19 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import tw from "twin.macro";
-import { Routes, Route, useLocation, Navigate } from "react-router-dom";
+import {
+  Routes,
+  Route,
+  useLocation,
+  Navigate,
+  useParams,
+} from "react-router-dom";
 import MeasureInformation from "./measureInformation/MeasureInformation";
 import MeasureMetadata from "./measureMetadata/MeasureMetadata";
-import { measureStore, useDocumentTitle } from "@madie/madie-util";
+import {
+  checkUserCanEdit,
+  measureStore,
+  useDocumentTitle,
+} from "@madie/madie-util";
 import StewardAndDevelopers from "./stewardAndDevelopers/StewardAndDevelopers";
 import ModelAndMeasurementPeriod from "./modelAndMeasurementPeriod/ModelAndMeasurementPeriod";
 import "./MeasureDetails.scss";
@@ -11,6 +21,7 @@ import EditMeasureDetailsSideNav from "./EditMeasureDetailsSideNav";
 import MeasureReferences from "./MeasureReferences/MeasureReferences";
 import TransmissionFormat from "./TransmissionFormat/TransmissionFormat";
 import MeasureDefinitions from "./MeasureDefinitions/MeasureDefinitions";
+import useMeasureServiceApi from "../../../api/useMeasureServiceApi";
 const Grid = tw.div`grid grid-cols-6 auto-cols-max gap-4 mx-8 shadow-lg rounded-md border border-slate overflow-hidden bg-white`;
 export interface RouteHandlerState {
   canTravel: boolean;
@@ -39,6 +50,8 @@ export interface Link {
 
 export default function MeasureDetails(props: MeasureDetailsProps) {
   const { setErrorMessage, isQDM, featureFlags } = props;
+  const { measureId } = useParams();
+  const measureServiceApi = useRef(useMeasureServiceApi()).current;
   useDocumentTitle("MADiE Edit Measure Details");
   const location = useLocation();
   const { pathname } = location;
@@ -60,13 +73,36 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
   const measureReferencesLink = "measure-references";
 
   const [measure, setMeasure] = useState<any>(measureStore.state);
-
+  const canEdit: boolean = checkUserCanEdit(
+    measure?.measureSet?.owner,
+    measure?.measureSet?.acls,
+    measure?.measureMetaData?.draft
+  );
   useEffect(() => {
+    // Subscribe to store
     const subscription = measureStore.subscribe(setMeasure);
+    const handleUnload = () => {
+      measureServiceApi.unlockMeasure(measureId);
+    };
+    // Lock the measure if the Locking feature is enabled
+    if (featureFlags?.Locking && canEdit) {
+      window.addEventListener("beforeunload", handleUnload);
+      measureServiceApi
+        .updateMeasureLock(measureId)
+        .then(() => {})
+        .catch((e) => {
+          console.error("Error locking Measure:", e);
+        });
+    }
+    // Cleanup on unmount
     return () => {
       subscription.unsubscribe();
+      if (featureFlags?.Locking && canEdit) {
+        window.removeEventListener("beforeunload", handleUnload);
+        measureServiceApi.unlockMeasure(measureId);
+      }
     };
-  }, []);
+  }, [measureServiceApi, measureId, featureFlags?.Locking, canEdit]);
 
   const links = [
     // General Information
