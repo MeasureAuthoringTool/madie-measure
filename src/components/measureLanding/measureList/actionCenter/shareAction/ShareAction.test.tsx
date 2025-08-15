@@ -1,11 +1,12 @@
 import * as React from "react";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { Measure, MeasureSet, Model } from "@madie/madie-models";
 import ShareAction, {
   INVALID_SHARE_MEASURE,
   NOTHING_SELECTED,
   VALID_SHARE_MEASURE,
 } from "./ShareAction";
+import userEvent from "@testing-library/user-event";
 
 const mockUser = "test user";
 jest.mock("@madie/madie-util", () => ({
@@ -139,5 +140,68 @@ describe("ShareAction", () => {
 
     fireEvent.click(screen.getByRole("menuitem", { name: "Unshare" }));
     expect(onClick).toHaveBeenCalledWith("Unshare");
+  });
+});
+
+describe("508, keyboard and clickaway behavior", () => {
+  it("closes on Tab and prevents default + stops propagation", async () => {
+    const onClick = jest.fn();
+    render(
+      <ShareAction
+        measures={[qiCoreMeasure]}
+        onClick={onClick}
+        isOwner={true}
+      />
+    );
+    userEvent.click(screen.getByTestId("share-action-btn"));
+
+    const menuList = await screen.findByRole("menu", { name: "" });
+
+    fireEvent.keyDown(menuList, {
+      key: "Tab",
+      code: "Tab",
+    });
+
+    await waitFor(() => expect(screen.queryByRole("menu")).toBeNull());
+  });
+
+  it("closes on Escape and stops propagation", async () => {
+    const onClick = jest.fn();
+    render(
+      <ShareAction
+        measures={[qiCoreMeasure]}
+        onClick={onClick}
+        isOwner={true}
+      />
+    );
+    userEvent.click(screen.getByTestId("share-action-btn"));
+
+    const menuList = await screen.findByRole("menu", { name: "" });
+
+    fireEvent.keyDown(menuList, {
+      key: "Escape", // #nosec
+      code: "Escape",
+    });
+
+    await waitFor(() => expect(screen.queryByRole("menu")).toBeNull());
+  });
+
+  it("closes when clicking away", async () => {
+    const onClick = jest.fn();
+    render(
+      <ShareAction
+        measures={[qiCoreMeasure]}
+        onClick={onClick}
+        isOwner={true}
+      />
+    );
+    userEvent.click(screen.getByTestId("share-action-btn"));
+
+    await screen.findByRole("menu");
+
+    fireEvent.mouseDown(document.body);
+    fireEvent.click(document.body);
+
+    await waitFor(() => expect(screen.queryByRole("menu")).toBeNull());
   });
 });
