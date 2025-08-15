@@ -1,13 +1,18 @@
-import React, { lazy, useEffect, useMemo, useState } from "react";
+import React, { lazy, useEffect, useMemo, useRef, useState } from "react";
 import "twin.macro";
 import "styled-components/macro";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import PopulationCriteriaSideNav from "./populationCriteriaSideNav/PopulationCriteriaSideNav";
-import { checkUserCanEdit, measureStore } from "@madie/madie-util";
+import {
+  checkUserCanEdit,
+  measureStore,
+  useFeatureFlags,
+} from "@madie/madie-util";
 import { Measure } from "@madie/madie-models";
 import BaseConfiguration from "./baseConfiguration/BaseConfiguration";
 import QDMReporting from "./QDMReporting/QDMReporting";
 import MeasureGroupAlerts from "./groups/MeasureGroupAlerts";
+import useMeasureServiceApi from "../../../api/useMeasureServiceApi";
 
 export const COMPLETE = "complete";
 export const INCOMPLETE = "incomplete";
@@ -15,21 +20,44 @@ export const NONE = "none";
 
 export function PopulationCriteriaHome() {
   const { pathname } = useLocation();
-  const { groupNumber } = useParams();
+  const { groupNumber, measureId } = useParams();
+  const measureServiceApi = useRef(useMeasureServiceApi()).current;
   const [measure, setMeasure] = useState<Measure>(measureStore.state);
-  useEffect(() => {
-    const subscription = measureStore.subscribe(setMeasure);
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, []);
-
-  let navigate = useNavigate();
+  const featureFlags = useFeatureFlags();
   const canEdit: boolean = checkUserCanEdit(
     measure?.measureSet?.owner,
     measure?.measureSet?.acls,
     measure?.measureMetaData?.draft
   );
+  useEffect(() => {
+    // Subscribe to store
+    const subscription = measureStore.subscribe(setMeasure);
+    const handleUnload = () => {
+      measureServiceApi.unlockMeasure(measureId);
+    };
+    // Lock the measure if the Locking feature is enabled
+    if (featureFlags?.Locking && canEdit) {
+      window.addEventListener("beforeunload", handleUnload);
+      measureServiceApi
+        .updateMeasureLock(measureId)
+        .then(() => {})
+        .catch((e) => {
+          console.error("Error locking Measure:", e);
+        });
+    }
+
+    // Cleanup on unmount
+    return () => {
+      subscription.unsubscribe();
+      if (featureFlags?.Locking && canEdit) {
+        window.removeEventListener("beforeunload", handleUnload);
+        measureServiceApi.unlockMeasure(measureId);
+      }
+    };
+  }, [measureServiceApi, measureId, featureFlags?.Locking, canEdit]);
+
+  let navigate = useNavigate();
+
   const [measureGroupNumber, setMeasureGroupNumber] = useState<number>(null);
   const [sideNavLinks, setSideNavLinks] = useState<Array<any>>();
   const [isFormDirty, setIsFormDirty] = useState<boolean>(false);

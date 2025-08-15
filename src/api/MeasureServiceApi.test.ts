@@ -734,4 +734,59 @@ describe("MeasureServiceApi Tests", () => {
       errorMessage
     );
   });
+  //measure locking
+  it("test updateMeasureLock pass", async () => {
+    const lockResponse = {
+      harpId: "testHarpId",
+      measureId: "testMeasureId",
+      createdAt: "2025-08-05T12:00:00Z",
+    };
+
+    const resp: any = { status: 200, data: lockResponse };
+    mockedAxios.put.mockResolvedValueOnce(resp);
+
+    const result = await measureServiceApi.updateMeasureLock("testMeasureId");
+    expect(mockedAxios.put).toBeCalledTimes(1);
+    expect(mockedAxios.put).toBeCalledWith(
+      "madie.com/measures/testMeasureId/measure-lock",
+      null,
+      expect.any(Object) // headers
+    );
+    expect(result).toEqual(lockResponse);
+  });
+  it("test updateMeasureLock fail", async () => {
+    const errorMessage = "Lock failed";
+    mockedAxios.put.mockImplementationOnce(() =>
+      Promise.reject(new Error(errorMessage))
+    );
+
+    await expect(
+      measureServiceApi.updateMeasureLock("testMeasureId")
+    ).rejects.toThrow(errorMessage);
+  });
+
+  it("test unlockMeasure pass", async () => {
+    const unlockResponse = { success: true };
+
+    const resp: any = { status: 200, data: unlockResponse };
+    mockedAxios.delete.mockResolvedValueOnce(resp);
+
+    const result = await measureServiceApi.unlockMeasure("testMeasureId");
+    expect(mockedAxios.delete).toBeCalledTimes(1);
+    expect(mockedAxios.delete).toBeCalledWith(
+      "madie.com/measures/testMeasureId/measure-lock",
+      expect.any(Object) // headers
+    );
+    expect(result).toEqual(unlockResponse);
+  });
+  it("test unlockMeasure fail", async () => {
+    const errorMessage = "Unlock failed";
+    mockedAxios.delete.mockImplementationOnce(() =>
+      Promise.reject(new Error(errorMessage))
+    );
+
+    await expect(
+      measureServiceApi.unlockMeasure("testMeasureId")
+    ).rejects.toThrow(errorMessage);
+  });
 });

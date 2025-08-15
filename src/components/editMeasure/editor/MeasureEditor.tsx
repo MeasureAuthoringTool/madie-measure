@@ -48,6 +48,7 @@ import {
   useDocumentTitle,
   routeHandlerStore,
   checkUserCanEdit,
+  useFeatureFlags,
 } from "@madie/madie-util";
 import StatusHandler from "./StatusHandler";
 import "./StatusHandler.scss";
@@ -69,6 +70,7 @@ import applyCQLFunction, {
   deleteCQLFunction,
   editCQLFunction,
 } from "./cqlFunctionApplier";
+import { useParams } from "react-router";
 
 export const mapErrorsToAceAnnotations = (
   errors: ElmTranslationError[]
@@ -123,16 +125,25 @@ export interface CustomCqlCode extends Omit<CqlCode, "codeSystem"> {
 const MeasureEditor = () => {
   useDocumentTitle("MADiE Edit Measure CQL");
   const [measure, setMeasure] = useState<Measure>(measureStore.state);
+  const canEdit = checkUserCanEdit(
+    measure?.measureSet?.owner,
+    measure?.measureSet?.acls,
+    measure?.measureMetaData?.draft
+  );
   const [codeMap, setCodeMap] = useState<Map<string, Code>>(
     new Map<string, Code>()
   );
+  const measureServiceApi = useMeasureServiceApi();
   const { updateMeasure } = measureStore;
+  const { measureId } = useParams();
   const [processing, setProcessing] = useState<boolean>(true);
-
+  const featureFlags = useFeatureFlags();
   useEffect(() => {
+    const handleUnload = () => {
+      measureServiceApi.unlockMeasure(measureId);
+    };
     const subscription = measureStore.subscribe((measure: Measure) => {
       setMeasure(measure);
-
       if (
         measure?.errors?.length > 0 &&
         measure.errors.includes(
@@ -159,10 +170,24 @@ const MeasureEditor = () => {
         );
       }
     });
+    if (featureFlags?.Locking && canEdit) {
+      window.addEventListener("beforeunload", handleUnload);
+      measureServiceApi
+        .updateMeasureLock(measureId)
+        .then(() => {})
+        .catch((e) => {
+          console.error("Error locking Measure:", e);
+        });
+    }
     return () => {
       subscription.unsubscribe();
+      if (featureFlags?.Locking && canEdit) {
+        window.removeEventListener("beforeunload", handleUnload);
+        measureServiceApi.unlockMeasure(measureId);
+      }
     };
-  }, []);
+  }, [measureServiceApi, measureId, featureFlags?.Locking, canEdit]);
+
   const [discardDialogOpen, setDiscardDialogOpen]: [
     boolean,
     Dispatch<SetStateAction<boolean>>
@@ -186,7 +211,6 @@ const MeasureEditor = () => {
     });
   }, [isCQLUnchanged, updateRouteHandlerState]);
 
-  const measureServiceApi = useMeasureServiceApi();
   // set success message
   const [success, setSuccess] = useState({
     status: undefined,
@@ -200,11 +224,6 @@ const MeasureEditor = () => {
   const [elmAnnotations, setElmAnnotations] = useState<EditorAnnotation[]>([]);
   // error markers control the error underlining in the editor.
   const [errorMarkers, setErrorMarkers] = useState<EditorErrorMarker[]>([]);
-  const canEdit = checkUserCanEdit(
-    measure?.measureSet?.owner,
-    measure?.measureSet?.acls,
-    measure?.measureMetaData?.draft
-  );
 
   const [valuesetMsg, setValuesetMsg] = useState(null);
   const [errorMessage, setErrorMessage] = useState<string>(null);
