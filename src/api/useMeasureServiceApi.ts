@@ -57,11 +57,13 @@ export class MeasureServiceApi {
 
   async getMeasuresByMeasureSetId(
     measureSetId: string,
-    sortByLatestVersion?: boolean
+    sortByLatestVersion?: boolean,
+    searchCriteria?: MeasureSearchCriteria
   ): Promise<any> {
     try {
-      const response = await axios.get(
+      const response = await axios.put(
         `${this.baseUrl}/measures/byMeasureSetId`,
+        searchCriteria,
         {
           headers: {
             Authorization: `Bearer ${this.getAccessToken()}`,
