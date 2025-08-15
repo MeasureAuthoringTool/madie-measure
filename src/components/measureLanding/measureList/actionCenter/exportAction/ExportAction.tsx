@@ -62,7 +62,8 @@ export default function ExportAction(props: PropTypes) {
     if (event.key === "Tab") {
       event.preventDefault();
       setOpen(false);
-    } else if (event.key === "Escape") {
+    }
+    if (event.key === "Escape") {
       setOpen(false);
     }
   }
