@@ -60,7 +60,7 @@ const EditMeasureNav = ({ isQDM }) => {
 
   // hitting spacebar here will scroll down the page. We're going to prevent the default event and simulate a click.
   const handleSpaceSelect = (event) => {
-    if (event.key === " " || event.key === "Spacebar") {
+    if (event.key === " ") {
       event.preventDefault();
       event.currentTarget.click();
     }
