@@ -68,7 +68,7 @@ describe("ExportAction", () => {
     const exportIcon = screen.getByTestId("export-action-btn");
     userEvent.click(exportIcon);
 
-    const exportForPublishingButton = await screen.findByRole("button", {
+    const exportForPublishingButton = await screen.findByRole("menuitem", {
       name: "Export for Publishing",
     });
     userEvent.click(exportForPublishingButton);
@@ -83,7 +83,7 @@ describe("ExportAction", () => {
     const exportIcon = screen.getByTestId("export-action-btn");
     userEvent.click(exportIcon);
 
-    const exportForPublishingButton = await screen.findByRole("button", {
+    const exportForPublishingButton = await screen.findByRole("menuitem", {
       name: "Export",
     });
     userEvent.click(exportForPublishingButton);
