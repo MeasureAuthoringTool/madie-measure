@@ -204,4 +204,23 @@ describe("508, keyboard and clickaway behavior", () => {
 
     await waitFor(() => expect(screen.queryByRole("menu")).toBeNull());
   });
+  it("closes when hitting escape", async () => {
+    const onClick = jest.fn();
+    render(
+      <ShareAction
+        measures={[qiCoreMeasure]}
+        onClick={onClick}
+        isOwner={true}
+      />
+    );
+    userEvent.click(screen.getByTestId("share-action-btn"));
+    const menuList = await screen.findByRole("menu");
+
+    fireEvent.keyDown(menuList, {
+      key: "Escape",
+      code: "Escape",
+      bubbles: true,
+    });
+    await waitFor(() => expect(screen.queryByRole("menu")).toBeNull());
+  });
 });

@@ -129,10 +129,22 @@ describe("508, keyboard and clickaway behavior", () => {
     userEvent.click(screen.getByTestId("export-action-btn"));
 
     await screen.findByRole("menu");
-
     fireEvent.mouseDown(document.body);
     fireEvent.click(document.body);
 
+    await waitFor(() => expect(screen.queryByRole("menu")).toBeNull());
+  });
+  it("closes when hitting escape", async () => {
+    const handleClick = jest.fn();
+    render(<ExportAction measures={[qiCoreMeasure]} onClick={handleClick} />);
+    userEvent.click(screen.getByTestId("export-action-btn"));
+
+    const menuList = await screen.findByRole("menu");
+    fireEvent.keyDown(menuList, {
+      key: "Escape",
+      code: "Escape",
+      bubbles: true,
+    });
     await waitFor(() => expect(screen.queryByRole("menu")).toBeNull());
   });
 });
