@@ -591,7 +591,7 @@ describe("MeasureServiceApi Tests", () => {
         ccccc: false,
       },
     };
-    mockedAxios.get.mockResolvedValueOnce(resp);
+    mockedAxios.put.mockResolvedValueOnce(resp);
     try {
       const measures = await measureServiceApi.getMeasuresByMeasureSetId(
         "test"
@@ -603,7 +603,7 @@ describe("MeasureServiceApi Tests", () => {
   });
   it("Throws Error For for getMeasuresByMeasureSetId", async () => {
     const errorMessage = "Unable to fetch measures by measureSetId";
-    mockedAxios.get.mockImplementationOnce(() =>
+    mockedAxios.put.mockImplementationOnce(() =>
       Promise.reject(new Error(errorMessage))
     );
     await expect(
