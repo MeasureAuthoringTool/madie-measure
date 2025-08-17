@@ -4,6 +4,10 @@ import { TextField, Select } from "@madie/madie-design-system/dist/react/";
 import "twin.macro";
 import "styled-components/macro";
 import { MenuItem as MuiMenuItem } from "@mui/material";
+import {
+  ValidationResult,
+  validate,
+} from "../../../../../../../common/quantityInput/validate";
 
 const comparatorOptions = [
   {
@@ -56,28 +60,13 @@ const QuantityInput = ({ canEdit, label, onChange }) => {
   };
 
   const handleQuantityUnitChange = (unit: string) => {
+    const validationResult: ValidationResult = validate(unit);
     const newQuantity = { ...quantity, unit };
     setQuantity(newQuantity);
-    // UCUM validation logic
-    const parseResp = ucum.UcumLhcUtils.getInstance().validateUnitString(
-      unit,
-      true
-    );
-    if (!unit || (unit && parseResp.status === "valid")) {
-      setHelperText("");
-      setError(false);
-    } else if (parseResp?.suggestions) {
-      let errorMsg = parseResp.suggestions[0]?.msg + ": ";
-      parseResp.suggestions[0].units.forEach((value) => {
-        errorMsg += value[0] + ", ";
-      });
-      setHelperText(errorMsg);
-      setError(true);
-    } else {
-      setHelperText(parseResp.msg[0]);
-      setError(true);
-    }
     onChange(newQuantity);
+
+    setHelperText(validationResult.helperText);
+    setError(validationResult.error);
   };
 
   return (
