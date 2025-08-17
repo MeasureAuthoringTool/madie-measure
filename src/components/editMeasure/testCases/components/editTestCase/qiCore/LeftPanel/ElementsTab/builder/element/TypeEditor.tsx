@@ -32,6 +32,7 @@ import ElementSection from "../../../../../../common/ElementSection";
 import CodeableConceptComponent from "./types/CodeableConceptComponent";
 import PeriodDateTimeComponent from "./types/PeriodDateTimeComponent";
 import ChoiceType from "./ChoiceType";
+import QuantityInput from "./types/QuantityInput";
 
 // onChange is being deprecated as no updates to the resource are tracked.
 // Changes directly to the json should be done with a dispatch, this propagates downstream changes in formik.
@@ -198,6 +199,16 @@ const TypeEditor = ({
               {...formik.getFieldProps(label)}
             />
           </Box>
+        );
+      case "Quantity":
+        return (
+          <QuantityInput
+            canEdit={canEdit}
+            label={"Quantity"}
+            onChange={(quantity) => {
+              formik.setFieldValue(label, quantity);
+            }}
+          />
         );
       case "Period":
         return (
@@ -614,6 +625,7 @@ const TypeEditor = ({
               "ContactPoint",
               "ContactDetail",
               "DataRequirement",
+              "Quantity",
             ];
 
             const filteredChildDef = {
