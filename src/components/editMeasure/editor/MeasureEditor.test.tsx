@@ -18,6 +18,9 @@ import {
 } from "@madie/madie-editor";
 import { checkUserCanEdit, measureStore } from "@madie/madie-util";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
+import useMeasureServiceApi, {
+  MeasureServiceApi,
+} from "../../../api/useMeasureServiceApi";
 
 const measure = {
   id: "abcd-pqrs-xyz",
@@ -163,9 +166,15 @@ const renderEditor = (measure) => {
   measureStore.state.mockImplementationOnce(() => measure);
   return render(
     <ApiContextProvider value={serviceConfig}>
-      <MemoryRouter initialEntries={[{ pathname: "/cql-editor" }]}>
+      <MemoryRouter
+        initialEntries={[{ pathname: `/measures/${measure.id}/cql-editor` }]}
+      >
         <Routes>
-          <Route path="/cql-editor" element={<MeasureEditor />} />
+          <Route
+            // path="/cql-editor"
+            path="/measures/:measureId/cql-editor"
+            element={<MeasureEditor />}
+          />
         </Routes>
       </MemoryRouter>
     </ApiContextProvider>
@@ -1228,5 +1237,72 @@ define function MeasureObservation(e Encounter):
     expect(screen.getByTestId("measure-editor-toast")).toHaveTextContent(
       "Code 204504 and code system RXNORM has been successfully removed from the CQL"
     );
+  });
+
+  it("Should successfully lock", async () => {
+    mockUseFeatureFlags.mockReturnValue({
+      MinimizeAlerts: false,
+      Locking: true,
+    });
+
+    const actualModule = jest.requireActual(
+      "../../../api/useMeasureServiceApi"
+    );
+    const { MeasureServiceApi } = actualModule;
+    // Spy on the hook
+    const useMeasureServiceApi = jest.spyOn(actualModule, "default");
+    const realInstance = new MeasureServiceApi("asodifm", () => "asodifm"); // #nosec
+    realInstance.updateMeasureLock = jest.fn().mockResolvedValue({
+      isLocked: true,
+      lockedBy: "testuser@example.com",
+    });
+    realInstance.unlockMeasure = jest.fn().mockResolvedValue({
+      isLocked: false,
+      lockedBy: "testuser@example.com",
+    });
+
+    useMeasureServiceApi.mockReturnValue(realInstance);
+    renderEditor(measure);
+
+    await waitFor(() => {
+      expect(realInstance.updateMeasureLock).toHaveBeenCalled();
+    });
+
+    useMeasureServiceApi.mockRestore();
+  });
+
+  it("Should fail lock", async () => {
+    mockUseFeatureFlags.mockReturnValue({
+      MinimizeAlerts: false,
+      Locking: true,
+    });
+
+    const actualModule = jest.requireActual(
+      "../../../api/useMeasureServiceApi"
+    );
+    const { MeasureServiceApi } = actualModule;
+    const useMeasureServiceApi = jest.spyOn(actualModule, "default");
+    const realInstance = new MeasureServiceApi("asodifm", () => "asodifm"); // #nosec
+    realInstance.updateMeasureLock = jest.fn().mockRejectedValue({
+      isLocked: true,
+      lockedBy: "testuser@example.com",
+    });
+    realInstance.unlockMeasure = jest.fn().mockResolvedValue({
+      isLocked: false,
+      lockedBy: "testuser@example.com",
+    });
+    const errorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+
+    useMeasureServiceApi.mockReturnValue(realInstance);
+    renderEditor(measure);
+
+    await waitFor(() => {
+      expect(realInstance.updateMeasureLock).toHaveBeenCalled();
+    });
+
+    // You can also assert that an error was thrown
+    expect(errorSpy).toHaveBeenCalled();
+
+    errorSpy.mockRestore();
   });
 });
