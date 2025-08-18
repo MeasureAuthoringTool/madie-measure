@@ -12,12 +12,14 @@ import { QDMPatient, DataElement } from "cqm-models";
 const ElementsTab = (props: {
   canEdit: boolean;
   handleTestCaseErrors: Function;
+  handleTestCaseWarnings: Function;
   selectedDataElement: DataElement;
   setSelectedDataElement: Function;
 }) => {
   const {
     canEdit,
     handleTestCaseErrors,
+    handleTestCaseWarnings,
     selectedDataElement,
     setSelectedDataElement,
   } = props;
@@ -50,7 +52,10 @@ const ElementsTab = (props: {
 
   return (
     <>
-      <DemographicsSection canEdit={canEdit} />
+      <DemographicsSection
+        handleTestCaseWarnings={handleTestCaseWarnings}
+        canEdit={canEdit}
+      />
       <ElementsSection
         handleTestCaseErrors={handleTestCaseErrors}
         canEdit={canEdit}

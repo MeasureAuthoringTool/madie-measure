@@ -49,6 +49,8 @@ import { exportMeasure as downloadMeasureExport } from "../../../utils/exportUti
 import { MeasureSearchCriteria } from "../MeasureLanding";
 import Search from "./measureSearch/Search";
 import queryString from "query-string";
+import _ from "lodash";
+import { getTabStorageKey } from "../measureLandingUtils";
 
 export default function MeasureList(props: {
   retrieveMeasures?: (
@@ -278,7 +280,6 @@ export default function MeasureList(props: {
         <Button
           variant="outline-filled"
           data-testid={`measure-action-${info.row.original.id}`}
-          aria-live="polite"
           aria-label={`${
             checkUserCanEdit(
               info.row.original.actions?.measureSet?.owner,
@@ -415,7 +416,6 @@ export default function MeasureList(props: {
         <Button
           variant="outline-filled"
           data-testid={`measure-action-${info.row.original.id}`}
-          aria-live="polite"
           aria-label={`${
             checkUserCanEdit(
               info.row.original.actions?.measureSet?.owner,
@@ -572,9 +572,18 @@ export default function MeasureList(props: {
   const handleRowClick = async (actions) => {
     if (!isRowExpanded || selectedIdForExpansion !== actions?.measureSetId) {
       setSelectedIdForExpansion(actions?.measureSetId);
+      const optionalParams = searchCriteria?.optionalSearchProperties ?? [];
+      const firstParam = _.trim(optionalParams[0]);
+
+      const modifiedSearchCriteria = {
+        ...searchCriteria,
+        optionalSearchProperties:
+          firstParam && firstParam !== "-" ? [_.camelCase(firstParam)] : [],
+      };
       const results = await measureServiceApi.getMeasuresByMeasureSetId(
         actions?.measureSetId,
-        true
+        true,
+        modifiedSearchCriteria
       );
       const filteredResults = results.filter(
         (result) => result.id !== actions?.id
@@ -744,8 +753,7 @@ export default function MeasureList(props: {
   };
 
   const doUpdateList = (doUpdateMeasureCount = false) => {
-    const tabStorageKey =
-      props.activeTab === 0 ? "myMeasurePageOptions" : "allMeasurePageOptions";
+    const tabStorageKey = getTabStorageKey(props.activeTab);
     const tabPageOptions = JSON.parse(localStorage.getItem(tabStorageKey)) || {
       page: 1,
       limit: 10,
@@ -1002,6 +1010,7 @@ export default function MeasureList(props: {
             setShareDialog={setShareDialog}
             deleteMeasure={deleteMeasure}
             setViewHumanReadableModal={setViewHumanReadableModal}
+            activeTab={props.activeTab}
           />
         </div>
       </div>
@@ -1082,6 +1091,16 @@ export default function MeasureList(props: {
           ))}
         </thead>
         <tbody className="table-body measures-list" style={{ padding: 20 }}>
+          {table.getRowModel().rows.length === 0 && (
+            <tr>
+              <td
+                colSpan={table.getAllColumns().length}
+                style={{ padding: "40px 0", textAlign: "center" }}
+              >
+                <span>No results were found</span>
+              </td>
+            </tr>
+          )}
           {table.getRowModel().rows.map((row) => (
             <React.Fragment key={row.id}>
               <tr

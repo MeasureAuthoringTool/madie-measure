@@ -1,5 +1,5 @@
 import * as React from "react";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import ExportAction, { EXPORT_MEASURE, NOTHING_SELECTED } from "./ExportAction";
 import { Measure, MeasureSet, Model } from "@madie/madie-models";
 import userEvent from "@testing-library/user-event";
@@ -68,7 +68,7 @@ describe("ExportAction", () => {
     const exportIcon = screen.getByTestId("export-action-btn");
     userEvent.click(exportIcon);
 
-    const exportForPublishingButton = await screen.findByRole("button", {
+    const exportForPublishingButton = await screen.findByRole("menuitem", {
       name: "Export for Publishing",
     });
     userEvent.click(exportForPublishingButton);
@@ -83,11 +83,68 @@ describe("ExportAction", () => {
     const exportIcon = screen.getByTestId("export-action-btn");
     userEvent.click(exportIcon);
 
-    const exportForPublishingButton = await screen.findByRole("button", {
+    const exportForPublishingButton = await screen.findByRole("menuitem", {
       name: "Export",
     });
     userEvent.click(exportForPublishingButton);
     expect(handleClick).toHaveBeenCalledTimes(1);
     expect(handleClick).toHaveBeenCalledWith("Export");
+  });
+});
+
+describe("508, keyboard and clickaway behavior", () => {
+  it("closes on Tab and prevents default + stops propagation", async () => {
+    const handleClick = jest.fn();
+    render(<ExportAction measures={[qiCoreMeasure]} onClick={handleClick} />);
+    userEvent.click(screen.getByTestId("export-action-btn"));
+
+    const menuList = await screen.findByRole("menu", { name: "" });
+
+    fireEvent.keyDown(menuList, {
+      key: "Tab",
+      code: "Tab",
+    });
+
+    await waitFor(() => expect(screen.queryByRole("menu")).toBeNull());
+  });
+
+  it("closes on Escape and stops propagation", async () => {
+    const handleClick = jest.fn();
+    render(<ExportAction measures={[qiCoreMeasure]} onClick={handleClick} />);
+    userEvent.click(screen.getByTestId("export-action-btn"));
+
+    const menuList = await screen.findByRole("menu", { name: "" });
+
+    fireEvent.keyDown(menuList, {
+      key: "Escape", // #nosec
+      code: "Escape",
+    });
+
+    await waitFor(() => expect(screen.queryByRole("menu")).toBeNull());
+  });
+
+  it("closes when clicking away", async () => {
+    const handleClick = jest.fn();
+    render(<ExportAction measures={[qiCoreMeasure]} onClick={handleClick} />);
+    userEvent.click(screen.getByTestId("export-action-btn"));
+
+    await screen.findByRole("menu");
+    fireEvent.mouseDown(document.body);
+    fireEvent.click(document.body);
+
+    await waitFor(() => expect(screen.queryByRole("menu")).toBeNull());
+  });
+  it("closes when hitting escape", async () => {
+    const handleClick = jest.fn();
+    render(<ExportAction measures={[qiCoreMeasure]} onClick={handleClick} />);
+    userEvent.click(screen.getByTestId("export-action-btn"));
+
+    const menuList = await screen.findByRole("menu");
+    fireEvent.keyDown(menuList, {
+      key: "Escape",
+      code: "Escape",
+      bubbles: true,
+    });
+    await waitFor(() => expect(screen.queryByRole("menu")).toBeNull());
   });
 });

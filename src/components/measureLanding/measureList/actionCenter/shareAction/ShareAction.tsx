@@ -1,5 +1,13 @@
-import React, { useCallback, useEffect, useState } from "react";
-import { IconButton, Menu, MenuItem } from "@mui/material";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import {
+  IconButton,
+  MenuList,
+  MenuItem,
+  Popper,
+  Grow,
+  ClickAwayListener,
+  Paper,
+} from "@mui/material";
 import Tooltip from "@mui/material/Tooltip";
 import { Measure } from "@madie/madie-models";
 import ShareIcon from "../../../../common/ShareIcon";
@@ -21,8 +29,9 @@ export default function ShareAction(props: PropTypes) {
   const { measures, isOwner } = props;
   const [disableShareBtn, setDisableShareBtn] = useState(true);
   const [tooltipMessage, setTooltipMessage] = useState(NOTHING_SELECTED);
-  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
-  const open = Boolean(anchorEl);
+  const [open, setOpen] = useState(false);
+  // move anchorElement to a stable reference that does not change across renders.
+  const anchorRef = useRef<HTMLButtonElement>(null);
 
   const validateShareActionState = useCallback(() => {
     setDisableShareBtn(true);
@@ -42,19 +51,28 @@ export default function ShareAction(props: PropTypes) {
   }, [measures, validateShareActionState]);
 
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
     setTooltipMessage(null);
+    setOpen(true);
   };
 
   const handleClose = () => {
-    setAnchorEl(null);
+    setOpen(false);
   };
 
   const handleMenuItemClick = (option: string) => {
     handleClose();
-
     props.onClick(option);
   };
+
+  function handleListKeyDown(event: React.KeyboardEvent) {
+    if (event.key === "Tab") {
+      event.preventDefault();
+      setOpen(false);
+    }
+    if (event.key === "Escape") {
+      setOpen(false);
+    }
+  }
 
   return (
     <Tooltip
@@ -69,26 +87,47 @@ export default function ShareAction(props: PropTypes) {
           onClick={handleClick}
           disabled={disableShareBtn}
           data-testid="share-action-btn"
+          ref={anchorRef}
         >
           <ShareIcon />
         </IconButton>
-
-        <Menu
-          anchorEl={anchorEl}
+        <Popper
           open={open}
-          onClose={handleClose}
-          data-testid="share-menu"
+          anchorEl={anchorRef.current}
+          role={undefined}
+          placement="bottom-start"
+          transition
+          disablePortal
         >
-          {options.map((option) => (
-            <MenuItem
-              data-testid={`${option}-option`}
-              key={option}
-              onClick={() => handleMenuItemClick(option)}
+          {({ TransitionProps, placement }) => (
+            <Grow
+              {...TransitionProps}
+              style={{
+                transformOrigin: "left top",
+              }}
             >
-              {option}
-            </MenuItem>
-          ))}
-        </Menu>
+              <Paper>
+                <ClickAwayListener onClickAway={handleClose}>
+                  <MenuList
+                    autoFocusItem={open}
+                    id="share-menu"
+                    onKeyDown={handleListKeyDown}
+                  >
+                    {options.map((option, i) => (
+                      <MenuItem
+                        data-testid={`${option}-option`}
+                        key={option}
+                        onClick={() => handleMenuItemClick(option)}
+                      >
+                        {option}
+                      </MenuItem>
+                    ))}
+                  </MenuList>
+                </ClickAwayListener>
+              </Paper>
+            </Grow>
+          )}
+        </Popper>
       </span>
     </Tooltip>
   );

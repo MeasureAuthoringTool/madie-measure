@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import ElementSection from "../../../../../common/ElementSection";
 import { Select } from "@madie/madie-design-system/dist/react";
 import FormControl from "@mui/material/FormControl";
-import { DataElement } from "cqm-models";
+import { DataElement, ValueSet } from "cqm-models";
 import DateTimeInput from "../../../../../common/dateTimeInput/DateTimeInput";
 import dayjs from "dayjs";
 import "./DemographicsSection.scss";
@@ -28,7 +28,32 @@ import {
 } from "../../../../../../util/QdmPatientContext";
 import { useQdmExecutionContext } from "../../../../../routes/qdm/QdmExecutionContext";
 
-const DemographicsSection = ({ canEdit }) => {
+export const DEMOGRAPHICS_WARNING_MESSAGE =
+  "Your measure's Race, Sex, or Ethnicity value set has changed. The value in this test case is no longer valid. Please update the value to successfully match your measure.";
+
+// Check if a DataElement's code exist in the corresponding ValueSet
+const checkMismatch = (
+  dataElement: DataElement,
+  valueSet: ValueSet
+): boolean => {
+  // There is only one code if set
+  const dataCode = dataElement?.dataElementCodes?.[0];
+  const concepts = valueSet?.concepts;
+
+  // If no code or no concepts, it a mismatch
+  if (!dataCode || !concepts?.length) return true;
+
+  // Check if the dataCode matches any concept in the valueSet
+  return !concepts.some(
+    (concept) =>
+      concept.code === dataCode.code &&
+      concept.display === dataCode.display &&
+      concept.system === dataCode.system &&
+      concept.version === dataCode.version
+  );
+};
+
+const DemographicsSection = ({ handleTestCaseWarnings, canEdit }) => {
   dayjs.extend(utc);
   dayjs.utc().format(); // utc format
   const { state, dispatch } = useQdmPatient();
@@ -49,18 +74,37 @@ const DemographicsSection = ({ canEdit }) => {
   const raceValueSet = getValueSetForDemographic(cqmMeasure, "race");
   const ethnicityValueSet = getValueSetForDemographic(cqmMeasure, "ethnicity");
 
-  const selectOptions = (options) => {
+  const selectOptions = (options, includeDash = false) => {
+    // Always render a single dash MenuItem if includeDash is true
+    const dash = includeDash
+      ? [
+          <MenuItem
+            key="-"
+            value=""
+            aria-label="No selection"
+            data-testid="dash-option"
+          >
+            -
+          </MenuItem>,
+        ]
+      : [];
+
     // loading skeleton
     if (!executionContextReady && !options) {
-      return [<MenuItem value="">Loading...</MenuItem>];
+      return [
+        <MenuItem value="" disabled>
+          Loading...
+        </MenuItem>,
+      ];
     }
 
     if (!options) {
-      return [];
+      return dash;
     }
 
     return [
-      options
+      ...dash,
+      ...options
         .sort((a, b) =>
           a.display && b.display
             ? a.display.localeCompare(b.display)
@@ -115,9 +159,53 @@ const DemographicsSection = ({ canEdit }) => {
     }
   }, [patient]);
 
-  // gender race change
+  useEffect(() => {
+    const hasRaceMismatch =
+      raceDataElement &&
+      raceValueSet?.concepts?.length &&
+      (raceDataElement.codeListId !== raceValueSet.oid ||
+        checkMismatch(raceDataElement, raceValueSet));
+
+    const hasGenderMismatch =
+      genderDataElement &&
+      genderValueSet?.concepts?.length &&
+      (genderDataElement.codeListId !== genderValueSet.oid ||
+        checkMismatch(genderDataElement, genderValueSet));
+
+    const hasEthnicityMismatch =
+      ethnicityDataElement &&
+      ethnicityValueSet?.concepts?.length &&
+      (ethnicityDataElement.codeListId !== ethnicityValueSet.oid ||
+        checkMismatch(ethnicityDataElement, ethnicityValueSet));
+
+    if (hasRaceMismatch || hasGenderMismatch || hasEthnicityMismatch) {
+      handleTestCaseWarnings(DEMOGRAPHICS_WARNING_MESSAGE);
+    } else {
+      handleTestCaseWarnings(null);
+    }
+  }, [
+    raceDataElement,
+    genderDataElement,
+    ethnicityDataElement,
+    raceValueSet,
+    genderValueSet,
+    ethnicityValueSet,
+  ]);
+
   const handleRaceChange = (event) => {
     const existingElement = getDataElementByStatus("race", patient);
+
+    if (event.target.value === "") {
+      setRaceDataElement(undefined);
+      if (existingElement) {
+        dispatch({
+          type: PatientActionType.REMOVE_DATA_ELEMENT,
+          payload: existingElement,
+        });
+      }
+      return;
+    }
+
     const newRaceDataElement: DataElement = getRaceDataElement(
       event.target.value,
       raceValueSet,
@@ -133,10 +221,19 @@ const DemographicsSection = ({ canEdit }) => {
   };
 
   const handleGenderChange = (event) => {
-    if (!event.target.value) {
+    const existingElement = getDataElementByStatus("gender", patient);
+
+    if (event.target.value === "") {
+      setGenderDataElement(undefined);
+      if (existingElement) {
+        dispatch({
+          type: PatientActionType.REMOVE_DATA_ELEMENT,
+          payload: existingElement,
+        });
+      }
       return;
     }
-    const existingElement = getDataElementByStatus("gender", patient);
+
     const newGenderDataElement: DataElement = getGenderDataElement(
       event.target.value,
       genderValueSet,
@@ -153,6 +250,18 @@ const DemographicsSection = ({ canEdit }) => {
 
   const handleEthnicityChange = (event) => {
     const existingElement = getDataElementByStatus("ethnicity", patient);
+
+    if (event.target.value === "") {
+      setEthnicityDataElement(undefined);
+      if (existingElement) {
+        dispatch({
+          type: PatientActionType.REMOVE_DATA_ELEMENT,
+          payload: existingElement,
+        });
+      }
+      return;
+    }
+
     const newEthnicityDataElement: DataElement = getEthnicityDataElement(
       event.target.value,
       ethnicityValueSet,
@@ -291,7 +400,7 @@ const DemographicsSection = ({ canEdit }) => {
                   value={raceDataElement?.dataElementCodes?.[0].display ?? ""}
                   placeHolder={{ name: "Select a Race", value: "" }}
                   onChange={handleRaceChange}
-                  options={selectOptions(raceValueSet?.concepts)}
+                  options={selectOptions(raceValueSet?.concepts, true)}
                 ></Select>
               </FormControl>
               <FormControl>
@@ -306,7 +415,7 @@ const DemographicsSection = ({ canEdit }) => {
                   value={genderDataElement?.dataElementCodes?.[0].display ?? ""}
                   placeHolder={{ name: "Select a Gender", value: "" }}
                   onChange={handleGenderChange}
-                  options={selectOptions(genderValueSet?.concepts)}
+                  options={selectOptions(genderValueSet?.concepts, true)}
                 ></Select>
               </FormControl>
             </div>
@@ -326,7 +435,7 @@ const DemographicsSection = ({ canEdit }) => {
                   }
                   placeHolder={{ name: "Select an Ethnicity", value: "" }}
                   onChange={handleEthnicityChange}
-                  options={selectOptions(ethnicityValueSet?.concepts)}
+                  options={selectOptions(ethnicityValueSet?.concepts, true)}
                 ></Select>
               </FormControl>
             </div>

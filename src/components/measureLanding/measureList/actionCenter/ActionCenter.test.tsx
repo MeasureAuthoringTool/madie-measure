@@ -56,6 +56,9 @@ describe("ActionCenter", () => {
     (checkUserCanDelete as jest.Mock).mockImplementation(
       mockCheckUserCanDelete
     );
+    (useFeatureFlags as jest.Mock).mockImplementation(() => ({
+      TransferMeasure: true,
+    }));
   });
 
   it("should render all action components", () => {
@@ -73,6 +76,7 @@ describe("ActionCenter", () => {
         setShareDialog={jest.fn}
         deleteMeasure={jest.fn()}
         setViewHumanReadableModal={jest.fn()}
+        activeTab={0}
       />
     );
 
@@ -86,6 +90,7 @@ describe("ActionCenter", () => {
       screen.getByTestId("associate-cms-id-action-btn")
     ).toBeInTheDocument();
     expect(screen.getByTestId("view-hr-action-btn")).toBeInTheDocument();
+    expect(screen.getByTestId("transfer-action-btn")).toBeInTheDocument();
   });
 
   it("should call updateTargetMeasure and setCreateVersionDialog when version action is triggered", () => {
@@ -104,6 +109,7 @@ describe("ActionCenter", () => {
         setShareDialog={jest.fn}
         deleteMeasure={jest.fn()}
         setViewHumanReadableModal={jest.fn()}
+        activeTab={1}
       />
     );
 
@@ -139,6 +145,7 @@ describe("ActionCenter", () => {
         setShareDialog={jest.fn}
         deleteMeasure={jest.fn()}
         setViewHumanReadableModal={jest.fn()}
+        activeTab={2}
       />
     );
 
@@ -170,6 +177,7 @@ describe("ActionCenter", () => {
         setShareDialog={jest.fn}
         deleteMeasure={deleteMeasure}
         setViewHumanReadableModal={jest.fn()}
+        activeTab={0}
       />
     );
 
@@ -197,12 +205,13 @@ describe("ActionCenter", () => {
         setShareDialog={jest.fn}
         deleteMeasure={jest.fn()}
         setViewHumanReadableModal={jest.fn()}
+        activeTab={0}
       />
     );
 
     userEvent.click(await screen.findByTestId("export-action-btn"));
 
-    const exportForPublishingButton = await screen.findByRole("button", {
+    const exportForPublishingButton = await screen.findByRole("menuitem", {
       name: "Export for Publishing",
     });
     userEvent.click(exportForPublishingButton);
@@ -227,12 +236,13 @@ describe("ActionCenter", () => {
         setShareDialog={jest.fn}
         deleteMeasure={jest.fn()}
         setViewHumanReadableModal={jest.fn()}
+        activeTab={0}
       />
     );
 
     userEvent.click(await screen.findByTestId("export-action-btn"));
 
-    const exportForPublishingButton = await screen.findByRole("button", {
+    const exportForPublishingButton = await screen.findByRole("menuitem", {
       name: "Export",
     });
     userEvent.click(exportForPublishingButton);
@@ -256,6 +266,7 @@ describe("ActionCenter", () => {
         setShareDialog={jest.fn}
         deleteMeasure={jest.fn()}
         setViewHumanReadableModal={jest.fn()}
+        activeTab={0}
       />
     );
 
@@ -280,6 +291,7 @@ describe("ActionCenter", () => {
         setShareDialog={jest.fn}
         deleteMeasure={jest.fn()}
         setViewHumanReadableModal={setViewHumanReadableModal}
+        activeTab={0}
       />
     );
 
@@ -314,6 +326,7 @@ describe("ActionCenter", () => {
         setShareDialog={setShareDialog}
         deleteMeasure={jest.fn()}
         setViewHumanReadableModal={jest.fn()}
+        activeTab={0}
       />
     );
 
@@ -345,6 +358,7 @@ describe("ActionCenter", () => {
         setShareDialog={setShareDialog}
         deleteMeasure={jest.fn()}
         setViewHumanReadableModal={jest.fn()}
+        activeTab={0}
       />
     );
 
@@ -352,5 +366,40 @@ describe("ActionCenter", () => {
     expect(shareButton).toBeDisabled();
 
     expect(setShareDialog).not.toHaveBeenCalledWith(true);
+  });
+
+  it("should not render transfer action if feature flag is not on", () => {
+    mockCheckUserCanEdit.mockReturnValue(true);
+    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
+      TransferMeasure: false,
+    }));
+
+    render(
+      <ActionCenter
+        measures={[qdmMeasure]}
+        associateCmsId={jest.fn()}
+        exportMeasure={jest.fn()}
+        updateTargetMeasure={jest.fn()}
+        setCreateVersionDialog={jest.fn()}
+        setDraftMeasureDialog={jest.fn()}
+        setDeleteMeasureDialog={jest.fn()}
+        setShareDialog={jest.fn}
+        deleteMeasure={jest.fn()}
+        setViewHumanReadableModal={jest.fn()}
+        activeTab={0}
+      />
+    );
+
+    expect(screen.getByTestId("action-center")).toBeInTheDocument();
+    expect(screen.getByTestId("delete-action-btn")).toBeInTheDocument();
+    expect(screen.getByTestId("share-action-btn")).toBeInTheDocument();
+    expect(screen.getByTestId("export-action-btn")).toBeInTheDocument();
+    expect(screen.getByTestId("draft-action-btn")).toBeInTheDocument();
+    expect(screen.getByTestId("version-action-btn")).toBeInTheDocument();
+    expect(
+      screen.getByTestId("associate-cms-id-action-btn")
+    ).toBeInTheDocument();
+    expect(screen.getByTestId("view-hr-action-btn")).toBeInTheDocument();
+    expect(screen.queryByTestId("transfer-action-btn")).not.toBeInTheDocument();
   });
 });

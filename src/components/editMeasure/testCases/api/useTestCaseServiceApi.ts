@@ -462,7 +462,7 @@ export class TestCaseServiceApi {
   async lockTestCase(measureId: string, testCaseId: string): Promise<any> {
     try {
       const response = await axios.post<String>(
-        `${this.baseUrl}/measures/${measureId}/test-cases/${testCaseId}/testcase-lock`,
+        `${this.baseUrl}/measures/${measureId}/test-cases/${testCaseId}/lock`,
         null,
         {
           headers: {

@@ -22,8 +22,10 @@ declare module "@madie/madie-util" {
     EditTestsOnVersionedMeasures: boolean;
     MinimizeAlerts: boolean;
     EnhancedTextFormatting: boolean;
+    Locking: boolean;
     qiCore7: boolean;
     Locking: boolean;
+    TransferMeasure: boolean;
   }
 
   export interface ServiceConfig {
