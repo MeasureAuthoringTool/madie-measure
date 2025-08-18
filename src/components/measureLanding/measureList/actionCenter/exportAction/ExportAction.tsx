@@ -1,10 +1,16 @@
-import React, { useCallback, useEffect, useState } from "react";
-import { IconButton } from "@mui/material";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import {
+  ClickAwayListener,
+  Grow,
+  IconButton,
+  MenuItem,
+  MenuList,
+  Paper,
+  Popper,
+} from "@mui/material";
 import Tooltip from "@mui/material/Tooltip";
-import { Measure, Model } from "@madie/madie-models";
-import { Popover } from "@madie/madie-design-system/dist/react";
+import { Measure } from "@madie/madie-models";
 import FileUploadOutlinedIcon from "@mui/icons-material/FileUploadOutlined";
-import { grey, blue } from "@mui/material/colors";
 
 interface PropTypes {
   measures: Measure[];
@@ -19,7 +25,9 @@ export default function ExportAction(props: PropTypes) {
 
   const [disableExportBtn, setDisableExportBtn] = useState(true);
   const [tooltipMessage, setTooltipMessage] = useState(NOTHING_SELECTED);
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [open, setOpen] = useState(false);
+  // move anchorElement to a stable reference that does not change across renders.
+  const anchorRef = useRef<HTMLButtonElement>(null);
 
   const validateExportActionState = useCallback(() => {
     // set button state to disabled by default
@@ -37,12 +45,12 @@ export default function ExportAction(props: PropTypes) {
 
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
     if (!disableExportBtn) {
-      setAnchorEl(event.currentTarget);
+      setOpen(true);
     }
   };
 
   const handleClose = () => {
-    setAnchorEl(null);
+    setOpen(false);
   };
 
   const handleOptionClick = (option: "Export" | "Export for Publishing") => {
@@ -50,7 +58,15 @@ export default function ExportAction(props: PropTypes) {
     handleClose();
   };
 
-  const open = Boolean(anchorEl);
+  function handleListKeyDown(event: React.KeyboardEvent) {
+    if (event.key === "Tab") {
+      event.preventDefault();
+      setOpen(false);
+    }
+    if (event.key === "Escape") {
+      setOpen(false);
+    }
+  }
 
   return (
     <>
@@ -65,30 +81,57 @@ export default function ExportAction(props: PropTypes) {
             onClick={handleClick}
             disabled={disableExportBtn}
             data-testid="export-action-btn"
+            ref={anchorRef}
           >
             <FileUploadOutlinedIcon />
           </IconButton>
         </span>
       </Tooltip>
-      <Popover
-        optionsOpen={open}
-        anchorEl={anchorEl}
-        handleClose={handleClose}
-        canEdit={!disableExportBtn}
-        additionalSelectOptionProps={[
-          {
-            label: "Export",
-            dataTestId: "export-option",
-            toImplementFunction: () => handleOptionClick("Export"),
-          },
-          {
-            label: "Export for Publishing",
-            dataTestId: "export-publishing-option",
-            toImplementFunction: () =>
-              handleOptionClick("Export for Publishing"),
-          },
-        ]}
-      />
+
+      <Popper
+        open={open}
+        anchorEl={anchorRef.current}
+        role={undefined}
+        placement="bottom-start"
+        transition
+        disablePortal
+      >
+        {({ TransitionProps, placement }) => (
+          <Grow
+            {...TransitionProps}
+            style={{
+              transformOrigin: "left top",
+            }}
+          >
+            <Paper>
+              <ClickAwayListener onClickAway={handleClose}>
+                <MenuList
+                  autoFocusItem={open}
+                  id="share-menu"
+                  onKeyDown={handleListKeyDown}
+                >
+                  <MenuItem
+                    data-testId="export-option"
+                    onClick={(e) => {
+                      handleOptionClick("Export");
+                    }}
+                  >
+                    Export
+                  </MenuItem>
+                  <MenuItem
+                    data-testId="export-publishing-option"
+                    onClick={(e) => {
+                      handleOptionClick("Export for Publishing");
+                    }}
+                  >
+                    Export for Publishing
+                  </MenuItem>
+                </MenuList>
+              </ClickAwayListener>
+            </Paper>
+          </Grow>
+        )}
+      </Popper>
     </>
   );
 }
