@@ -75,6 +75,7 @@ const TextEditor = (props: Props) => {
           label={label}
           inputProps={{
             "data-testid": `${_.kebabCase(name)}-text`,
+            "aria-required": required,
           }}
           placeholder="-"
           name={name}

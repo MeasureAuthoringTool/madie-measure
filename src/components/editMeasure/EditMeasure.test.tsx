@@ -501,4 +501,16 @@ describe("EditMeasure Component", () => {
     fireEvent.click(cancelButton);
     expect(queryByTestId("transfer-dialog")).toBeVisible();
   });
+
+  it("pressing Space on a tab prevents default and triggers click", async () => {
+    renderRouter([{ pathname: "/measures/fakeid/edit/details/" }]);
+
+    const editorTab = await findByText("CQL Editor");
+    const clickSpy = jest.spyOn(editorTab, "click");
+    const preventDefault = jest.fn();
+
+    fireEvent.keyDown(editorTab, { key: " ", preventDefault });
+
+    expect(clickSpy).toHaveBeenCalledTimes(1);
+  });
 });
