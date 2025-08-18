@@ -1,15 +1,15 @@
 import * as React from "react";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { within } from "@testing-library/dom";
-import { Measure, MeasureMetadata } from "@madie/madie-models";
+import { Measure, Model } from "@madie/madie-models";
 import TransferDialog from "./TransferDialog";
-// import { MemoryRouter } from "react-router";
 import userEvent from "@testing-library/user-event";
 
 const testUser = "test user";
 const mockMeasure1 = {
   id: "TestMeasureId1",
   measureName: "The Measure for Testing 1",
+  model: Model.QICORE,
   createdBy: testUser,
   measureSetId: "MeasureSetId",
 } as Measure;
@@ -17,6 +17,7 @@ const mockMeasure1 = {
 const mockMeasure2 = {
   id: "TestMeasureId2",
   measureName: "The Measure for Testing 2",
+  model: Model.QICORE_6_0_0,
   createdBy: testUser,
   measureSetId: "MeasureSetId",
 } as Measure;
@@ -24,13 +25,15 @@ const mockMeasure2 = {
 const mockMeasure3 = {
   id: "TestMeasureId3",
   measureName: "The Measure for Testing 3",
+  model: Model.QDM_5_6,
   createdBy: testUser,
   measureSetId: "MeasureSetId",
 } as Measure;
 
 const mockMeasure4 = {
-  id: "TestMeasureId1",
+  id: "TestMeasureId4",
   measureName: "The Measure for Testing 4",
+  model: Model.QICORE,
   createdBy: testUser,
   measureSetId: "MeasureSetId",
 } as Measure;
@@ -38,19 +41,21 @@ const mockMeasure4 = {
 const mockMeasure5 = {
   id: "TestMeasureId5",
   measureName: "The Measure for Testing 5",
+  model: Model.QICORE,
   createdBy: testUser,
   measureSetId: "MeasureSetId",
 } as Measure;
 
 const mockMeasure6 = {
-  id: "TestMeasureId1",
+  id: "TestMeasureId6",
   measureName: "The Measure for Testing 6",
+  model: Model.QDM_5_6,
   createdBy: testUser,
   measureSetId: "MeasureSetId",
 } as Measure;
 
 describe("Transfer Measures Dialog component", () => {
-  const { getByTestId, findAllByTestId } = screen;
+  const { getByTestId } = screen;
 
   beforeEach(() => {
     jest.resetModules();

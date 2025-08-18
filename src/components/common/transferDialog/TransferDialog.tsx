@@ -104,7 +104,6 @@ const TransferredMeasures = ({ measures }: { measures: Measure[] }) => {
       {
         accessorKey: "measureName",
         header: "Measure",
-        // cell: (info) => info.getValue(),
         cell: (info) => (
           <TruncateText
             text={info.row.original.measureName}
@@ -116,24 +115,15 @@ const TransferredMeasures = ({ measures }: { measures: Measure[] }) => {
       {
         accessorKey: "model",
         header: "Model",
-        cell: (info) => (
-          <TruncateText
-            text={info.row.original.model}
-            maxLength={20}
-            dataTestId={`model-${info.row.original.model}`}
-          />
-        ),
+        cell: (info) => info.getValue(),
       },
       {
         accessorKey: "cmsId",
         header: "CMS ID",
-        cell: (info) => (
-          <TruncateText
-            text={_.toString(info.getValue())}
-            maxLength={20}
-            dataTestId={`measure-cmsId-${info.getValue()}`}
-          />
-        ),
+        cell: (info) =>
+          _.toString(info.getValue()).concat(
+            info.row.original.model.startsWith("QI-Core") ? "FHIR" : ""
+          ),
       },
     ],
     []
