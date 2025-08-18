@@ -53,6 +53,8 @@ import _ from "lodash";
 import { getTabStorageKey } from "../measureLandingUtils";
 import TransferDialog from "../../common/transferDialog/TransferDialog";
 
+const TH = tw.th`p-3 text-left text-sm font-bold capitalize`;
+
 export default function MeasureList(props: {
   retrieveMeasures?: (
     tab: number,
@@ -141,7 +143,6 @@ export default function MeasureList(props: {
     option: "",
   });
 
-  const TH = tw.th`p-3 text-left text-sm font-bold capitalize`;
   const transFormData = (measureList): TCRow[] => {
     return measureList.map((measure) => ({
       id: measure?.id,
