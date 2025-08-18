@@ -183,6 +183,7 @@ const CreateVersionDialog = ({
               id="confirm-version"
               inputProps={{
                 "data-testid": "confirm-version-input",
+                "aria-required": "true",
               }}
               {...formik.getFieldProps("confirmedVersion")}
             />
