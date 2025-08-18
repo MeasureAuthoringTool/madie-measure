@@ -1,8 +1,9 @@
 import * as React from "react";
-import { render, screen } from "@testing-library/react";
+import { render } from "@testing-library/react";
 import {
   createImportMessage,
   createWarningMessage,
+  createShiftTestCaseDatesWarningMessage,
 } from "./StatusHandlerMessage";
 import { TestCaseImportOutcome } from "@madie/madie-models";
 
@@ -45,7 +46,7 @@ describe("StatusHandler Messages", () => {
     expect(getByTestId("success-imports-with-warnings")).toBeInTheDocument();
   });
 
-  it("Creates a warning message configuration object", () => {
+  it("Creates a warning message configuration object with multiple items", () => {
     const warningMessages = ["Warning 1", "Warning 2"];
     const config = createWarningMessage(warningMessages, "warning-test-id");
     expect(config.type).toBe("warning");
@@ -60,5 +61,73 @@ describe("StatusHandler Messages", () => {
     expect(listItems.length).toBe(2);
     expect(listItems[0]).toHaveTextContent("Warning 1");
     expect(listItems[1]).toHaveTextContent("Warning 2");
+  });
+
+  it("Creates a warning message configuration object with a single item", () => {
+    const warnings = ["Warning 1"];
+    const config = createWarningMessage(
+      warnings,
+      "shift-single-warning-test-id"
+    );
+
+    expect(config.type).toBe("warning");
+    expect(config.copyButton).toBe(true);
+    expect(config.canClose).toBe(false);
+    expect(config.alertProps).toEqual({
+      "data-testid": "shift-single-warning-test-id",
+    });
+
+    const { getByTestId } = render(<div>{config.content}</div>);
+    const warnTitle = getByTestId("warn-title");
+
+    expect(warnTitle).toBeInTheDocument();
+    expect(warnTitle).toHaveTextContent("Warning 1");
+  });
+
+  it("Creates a shift test case dates message configuration object with multiple items", () => {
+    const warningMessages = ["Warning 1", "Warning 2"];
+    const config = createShiftTestCaseDatesWarningMessage(
+      warningMessages,
+      "shift-warning-test-id"
+    );
+
+    expect(config.type).toBe("warning");
+    expect(config.copyButton).toBe(true);
+    expect(config.canClose).toBe(false);
+    expect(config.alertProps).toEqual({
+      "data-testid": "shift-warning-test-id",
+    });
+
+    const { getByTestId } = render(<div>{config.content}</div>);
+    expect(getByTestId("shift-warning-test-id")).toBeInTheDocument();
+    expect(getByTestId("warn-title")).toBeInTheDocument();
+
+    const listItems = getByTestId("warn-title").querySelectorAll("li");
+    expect(listItems.length).toBe(2);
+    expect(listItems[0]).toHaveTextContent("Warning 1");
+    expect(listItems[1]).toHaveTextContent("Warning 2");
+  });
+
+  it("Creates a shift test case dates message configuration object with a single item", () => {
+    const warningMessages = ["Warning 1"];
+    const config = createShiftTestCaseDatesWarningMessage(
+      warningMessages,
+      "shift-single-warning-test-id"
+    );
+
+    expect(config.type).toBe("warning");
+    expect(config.copyButton).toBe(true);
+    expect(config.canClose).toBe(false);
+    expect(config.alertProps).toEqual({
+      "data-testid": "shift-single-warning-test-id",
+    });
+
+    const { getByTestId } = render(<div>{config.content}</div>);
+    const warnTitle = getByTestId("warn-title");
+
+    expect(warnTitle).toBeInTheDocument();
+    const listItems = warnTitle.querySelectorAll("li");
+    expect(listItems.length).toBe(1);
+    expect(listItems[0]).toHaveTextContent("Warning 1");
   });
 });

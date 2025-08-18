@@ -482,4 +482,23 @@ describe("EditMeasure Component", () => {
     fireEvent.click(cancelButton);
     expect(queryByTestId("share-dialog")).toBeVisible();
   });
+
+  it("should display transfer dialog when the event is triggered and close dialog when cancel button is clicked", async () => {
+    renderRouter();
+
+    const result = await findByTestId("editMeasure");
+    expect(result).toBeInTheDocument();
+
+    act(() => {
+      window.dispatchEvent(new Event("transfer-measure"));
+    });
+
+    await waitFor(async () => {
+      expect(getByTestId("transfer-dialog")).toBeInTheDocument();
+    });
+
+    const cancelButton = getByTestId("transfer-cancel-button");
+    fireEvent.click(cancelButton);
+    expect(queryByTestId("transfer-dialog")).toBeVisible();
+  });
 });

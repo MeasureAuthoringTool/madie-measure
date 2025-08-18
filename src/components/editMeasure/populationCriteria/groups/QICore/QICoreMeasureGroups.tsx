@@ -303,6 +303,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
     return pops.map((population) => {
       return {
         ...population,
+        description: population.description ? population.description : "",
         displayId: (
           population.name.replace(" ", "") +
           "_" +
@@ -341,6 +342,11 @@ const MeasureGroups = (props: MeasureGroupProps) => {
             measure?.groups[measureGroupNumber].measureObservations || null,
           improvementNotation:
             measure?.groups[measureGroupNumber].improvementNotation || "",
+          improvementNotationDescription:
+            measure?.groups[measureGroupNumber]
+              .improvementNotationDescription || "",
+          rateAggregation:
+            measure?.groups[measureGroupNumber].rateAggregation || "",
         },
       });
       setVisibleStrats(
@@ -361,6 +367,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
             stratifications: [getEmptyStrat(), getEmptyStrat()],
             rateAggregation: "",
             improvementNotation: "",
+            improvementNotationDescription: "",
             measureGroupTypes: [],
             populationBasis: defaultPopulationBasis,
             scoringUnit: "",

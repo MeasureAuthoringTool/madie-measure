@@ -45,6 +45,7 @@ import TestCases from "./testCases/TestCases";
 import { AxiosResponse } from "axios";
 import ViewHRModal from "../common/viewHumanReadableModal/ViewHRModal";
 import ShareDialog from "../common/shareDialog/ShareDialog";
+import TransferDialog from "../common/transferDialog/TransferDialog";
 
 const OBJECT_ID_REGEX = /\/[a-f0-9]{24}/g;
 
@@ -133,6 +134,10 @@ export default function EditMeasure() {
     open: false,
     measureId: "",
   });
+  const [transferDialog, setTransferDialog] = useState({
+    open: false,
+    measures: [],
+  });
   const [versionHelperText, setVersionHelperText] = useState("");
   const [invalidTestCaseOpen, setInvalidTestCaseOpen] =
     useState<boolean>(false);
@@ -210,6 +215,19 @@ export default function EditMeasure() {
     window.addEventListener("draft-measure", draftListener, false);
     return () => {
       window.removeEventListener("draft-measure", draftListener, false);
+    };
+  }, []);
+
+  useEffect(() => {
+    const transferListener = () => {
+      setTransferDialog({
+        open: true,
+        measures: [measure],
+      });
+    };
+    window.addEventListener("transfer-measure", transferListener, false);
+    return () => {
+      window.removeEventListener("transfer-measure", transferListener, false);
     };
   }, []);
 
@@ -326,6 +344,10 @@ export default function EditMeasure() {
     setViewHumanReadableModal({
       open: false,
       measureId: "",
+    });
+    setTransferDialog({
+      open: false,
+      measures: [],
     });
   };
 
@@ -639,6 +661,11 @@ export default function EditMeasure() {
             onClose={handleDialogClose}
             exportMeasure={handleHumanReadableDialog}
             open={viewHumanReadableModal.open}
+          />
+          <TransferDialog
+            measures={[measure]}
+            open={transferDialog.open}
+            onClose={handleDialogClose}
           />
           <Toast
             toastKey="measure-information-toast"

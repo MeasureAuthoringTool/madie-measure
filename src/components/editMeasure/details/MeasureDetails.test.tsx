@@ -1,6 +1,6 @@
 import "@testing-library/jest-dom";
 import * as React from "react";
-import { screen, render } from "@testing-library/react";
+import { screen, render, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router";
 import { Route, Routes } from "react-router-dom";
 import MeasureDetails from "./MeasureDetails";
@@ -10,6 +10,9 @@ import MeasureMetadata from "./measureMetadata/MeasureMetadata";
 import { Measure } from "@madie/madie-models";
 // @ts-ignore
 import { measureStore, useFeatureFlags } from "@madie/madie-util";
+import useMeasureServiceApi, {
+  MeasureServiceApi,
+} from "../../../api/useMeasureServiceApi";
 
 const measure = {
   id: "1",
@@ -93,13 +96,18 @@ const incompletedIconMeasure = {
   },
 } as unknown as Measure;
 
-const mockUseFeatureFlags = jest.fn(() => ({ EnhancedTextFormatting: false }));
+const mockUseFeatureFlags = jest.fn(() => ({
+  EnhancedTextFormatting: false,
+  Locking: false,
+}));
+
+let measureServiceApiMock: MeasureServiceApi;
 
 jest.mock("./measureInformation/MeasureInformation");
 jest.mock("./measureMetadata/MeasureMetadata");
 jest.mock("@madie/madie-util", () => ({
   useDocumentTitle: jest.fn(),
-  useFeatureFlags: () => mockUseFeatureFlags(),
+  useFeatureFlags: jest.fn(() => mockUseFeatureFlags()),
   measureStore: {
     updateMeasure: (measure) => measure,
     state: jest.fn().mockImplementation(() => measure),
@@ -124,6 +132,9 @@ jest.mock("@madie/madie-util", () => ({
     initialState: { canTravel: false, pendingPath: "" },
   },
 }));
+jest.mock("../../../api/useMeasureServiceApi");
+const useMeasuremeasureServiceApiMock =
+  useMeasureServiceApi as jest.Mock<MeasureServiceApi>;
 const MeasureInformationMock = MeasureInformation as jest.Mock<JSX.Element>;
 const MeasureMetadataMock = MeasureMetadata as jest.Mock<JSX.Element>;
 const setErrorMessage = jest.fn();
@@ -613,5 +624,91 @@ describe("MeasureDetails component", () => {
     expect(
       getByTestId("measure-details-incompleted-icon-sideNavMeasureDescription")
     ).toBeInTheDocument();
+  });
+
+  it("should trigger a call to lock the measure", async () => {
+    measureStore.state.mockImplementationOnce(() => incompletedIconMeasure);
+
+    const updateMeasureLock = jest.fn().mockResolvedValueOnce({
+      lockedBy: "test-user",
+      lockedAt: "2025-08-05T12:00:00Z",
+    });
+    const unlockMeasure = jest.fn();
+    (useMeasureServiceApi as jest.Mock).mockReturnValue({
+      updateMeasureLock,
+      unlockMeasure,
+    });
+
+    render(
+      <ApiContextProvider value={serviceConfig}>
+        <MemoryRouter initialEntries={["/foo/2"]}>
+          <Routes>
+            <Route
+              path="/foo/:measureId"
+              element={
+                <MeasureDetails
+                  featureFlags={{ EnhancedTextFormatting: true, Locking: true }}
+                  setErrorMessage={setErrorMessage}
+                  isQDM={true}
+                />
+              }
+            />
+          </Routes>
+        </MemoryRouter>
+      </ApiContextProvider>
+    );
+
+    await waitFor(() => {
+      expect(updateMeasureLock).toHaveBeenCalledTimes(1);
+      expect(updateMeasureLock).toHaveBeenCalledWith("2");
+    });
+  });
+
+  it("should trigger a fail call to lock the measure", async () => {
+    measureStore.state.mockImplementationOnce(() => incompletedIconMeasure);
+
+    const updateMeasureLock = jest.fn().mockRejectedValueOnce({
+      response: {
+        data: {
+          lockedBy: "another-user",
+          lockedAt: "2025-08-05T12:00:00Z",
+        },
+      },
+    });
+
+    const unlockMeasure = jest.fn();
+    useMeasuremeasureServiceApiMock.mockReturnValue({
+      ...measureServiceApiMock,
+      updateMeasureLock,
+      unlockMeasure,
+    });
+
+    const errorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+
+    render(
+      <ApiContextProvider value={serviceConfig}>
+        <MemoryRouter initialEntries={["/measures/testMeasureId"]}>
+          <Routes>
+            <Route
+              path="/measures/:measureId"
+              element={
+                <MeasureDetails
+                  featureFlags={{ EnhancedTextFormatting: true, Locking: true }}
+                  setErrorMessage={setErrorMessage}
+                  isQDM={true}
+                />
+              }
+            />
+          </Routes>
+        </MemoryRouter>
+      </ApiContextProvider>
+    );
+
+    await waitFor(() => {
+      expect(updateMeasureLock).toHaveBeenCalledWith("testMeasureId");
+      expect(errorSpy).toHaveBeenCalled();
+
+      errorSpy.mockRestore();
+    });
   });
 });

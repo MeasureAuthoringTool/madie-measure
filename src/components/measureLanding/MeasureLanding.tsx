@@ -275,6 +275,13 @@ export default function MeasureLanding() {
   // Should only render once, hence no deps, but the values need to make API call has to be the most latest
   useEffect(() => {
     const createListener = () => {
+      // When a new measure is created, remove the searchCriteria
+      const newCriteria = {
+        searchField: "",
+        optionalSearchProperties: [],
+      };
+      setSearchCriteria(newCriteria);
+      searchCriteriaRef.current = newCriteria;
       retrieveMeasures(
         0,
         curLimitRef.current ?? 10,

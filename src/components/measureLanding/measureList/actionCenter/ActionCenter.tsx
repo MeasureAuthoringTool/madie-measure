@@ -26,6 +26,7 @@ interface PropTypes {
   deleteMeasure: () => void;
   setViewHumanReadableModal: any;
   activeTab: number;
+  setTransferDialog: any;
 }
 export default function ActionCenter(props: PropTypes) {
   const [canEdit, setCanEdit] = useState<boolean>(false);
@@ -67,6 +68,11 @@ export default function ActionCenter(props: PropTypes) {
 
   const transferMeasure = useCallback(() => {
     //to be impleted
+    if (props.measures?.length > 0) {
+      props.setTransferDialog({
+        open: true,
+      });
+    }
   }, [props.measures, props.updateTargetMeasure]);
 
   const exportMeasure = useCallback(

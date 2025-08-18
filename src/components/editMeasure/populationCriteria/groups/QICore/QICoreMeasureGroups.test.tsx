@@ -728,6 +728,7 @@ describe("Measure Groups Page", () => {
           associationType: undefined,
         },
       ],
+      rateAggregation: "",
       measureObservations: null,
       scoring: "Cohort",
       groupDescription: "",
@@ -736,6 +737,7 @@ describe("Measure Groups Page", () => {
       scoringUnit: "testScoringUnit",
       scoringPrecision: "2",
       improvementNotation: "Increased score indicates improvement",
+      improvementNotationDescription: "",
     };
 
     userEvent.click(screen.getByTestId("reporting-tab"));
@@ -956,6 +958,7 @@ describe("Measure Groups Page", () => {
       measureGroupTypes: ["Patient Reported Outcome"],
       rateAggregation: "",
       improvementNotation: "Increased score indicates improvement",
+      improvementNotationDescription: "",
       stratifications: [],
       populationBasis: populationBasis,
     };
