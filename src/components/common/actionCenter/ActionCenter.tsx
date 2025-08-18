@@ -18,7 +18,6 @@ const ActionCenter = ({ actions, testId, target }: PropTypes) => {
   const [open, setOpen] = useState(false);
   const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
   const [deleteAction, setDeleteAction] = useState<ActionItemDef>();
-
   return (
     <div data-testid={`action-center-${testId}`} id={`action-center-${testId}`}>
       <SpeedDial

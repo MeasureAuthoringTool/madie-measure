@@ -2,7 +2,7 @@ import React from "react";
 import { SvgIcon } from "@mui/material";
 const ShareIcon = () => {
   return (
-    <SvgIcon>
+    <SvgIcon style={{ marginBottom: "-3px" }}>
       <path
         fill-rule="evenodd"
         clip-rule="evenodd"

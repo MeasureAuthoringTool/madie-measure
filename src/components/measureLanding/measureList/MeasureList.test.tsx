@@ -1696,7 +1696,7 @@ describe("Measure List component", () => {
     expect(exportButton).toBeInTheDocument();
     userEvent.click(exportButton);
 
-    const exportForPublishingButton = await screen.findByRole("button", {
+    const exportForPublishingButton = await screen.findByRole("menuitem", {
       name: "Export for Publishing",
     });
     userEvent.click(exportForPublishingButton);
@@ -1762,7 +1762,7 @@ describe("Measure List component", () => {
     expect(exportButton).toBeInTheDocument();
     userEvent.click(exportButton);
 
-    const exportForPublishingButton = await screen.findByRole("button", {
+    const exportForPublishingButton = await screen.findByRole("menuitem", {
       name: "Export for Publishing",
     });
     userEvent.click(exportForPublishingButton);
@@ -1884,7 +1884,7 @@ describe("Measure List component", () => {
     expect(exportButton).toBeInTheDocument();
     userEvent.click(exportButton);
 
-    const exportForPublishingButton = await screen.findByRole("button", {
+    const exportForPublishingButton = await screen.findByRole("menuitem", {
       name: "Export for Publishing",
     });
     userEvent.click(exportForPublishingButton);
@@ -1950,7 +1950,7 @@ describe("Measure List component", () => {
     expect(exportButton).toBeInTheDocument();
     userEvent.click(exportButton);
 
-    const exportForPublishingButton = await screen.findByRole("button", {
+    const exportForPublishingButton = await screen.findByRole("menuitem", {
       name: "Export for Publishing",
     });
     userEvent.click(exportForPublishingButton);
@@ -2013,7 +2013,7 @@ describe("Measure List component", () => {
     expect(exportButton).toBeInTheDocument();
     userEvent.click(exportButton);
 
-    const exportForPublishingButton = await screen.findByRole("button", {
+    const exportForPublishingButton = await screen.findByRole("menuitem", {
       name: "Export for Publishing",
     });
     userEvent.click(exportForPublishingButton);
@@ -2076,7 +2076,7 @@ describe("Measure List component", () => {
     expect(exportButton).toBeInTheDocument();
     userEvent.click(exportButton);
 
-    const exportForPublishingButton = await screen.findByRole("button", {
+    const exportForPublishingButton = await screen.findByRole("menuitem", {
       name: "Export for Publishing",
     });
     userEvent.click(exportForPublishingButton);
@@ -2139,7 +2139,7 @@ describe("Measure List component", () => {
     expect(exportButton).toBeInTheDocument();
     userEvent.click(exportButton);
 
-    const exportForPublishingButton = await screen.findByRole("button", {
+    const exportForPublishingButton = await screen.findByRole("menuitem", {
       name: "Export for Publishing",
     });
     userEvent.click(exportForPublishingButton);
@@ -2215,7 +2215,7 @@ describe("Measure List component", () => {
     expect(exportButton).toBeInTheDocument();
     userEvent.click(exportButton);
 
-    const exportForPublishingButton = await screen.findByRole("button", {
+    const exportForPublishingButton = await screen.findByRole("menuitem", {
       name: "Export for Publishing",
     });
     userEvent.click(exportForPublishingButton);
@@ -2278,7 +2278,7 @@ describe("Measure List component", () => {
     expect(exportButton).toBeInTheDocument();
     userEvent.click(exportButton);
 
-    const exportForPublishingButton = await screen.findByRole("button", {
+    const exportForPublishingButton = await screen.findByRole("menuitem", {
       name: "Export for Publishing",
     });
     userEvent.click(exportForPublishingButton);
@@ -2359,7 +2359,7 @@ describe("Measure List component", () => {
     expect(exportButton).toBeInTheDocument();
     userEvent.click(exportButton);
 
-    const exportForPublishingButton = await screen.findByRole("button", {
+    const exportForPublishingButton = await screen.findByRole("menuitem", {
       name: "Export for Publishing",
     });
     userEvent.click(exportForPublishingButton);
@@ -2425,7 +2425,7 @@ describe("Measure List component", () => {
     expect(exportButton).toBeInTheDocument();
     userEvent.click(exportButton);
 
-    const exportForPublishingButton = await screen.findByRole("button", {
+    const exportForPublishingButton = await screen.findByRole("menuitem", {
       name: "Export for Publishing",
     });
     userEvent.click(exportForPublishingButton);
@@ -2489,7 +2489,7 @@ describe("Measure List component", () => {
     expect(exportButton).toBeInTheDocument();
     userEvent.click(exportButton);
 
-    const exportForPublishingButton = await screen.findByRole("button", {
+    const exportForPublishingButton = await screen.findByRole("menuitem", {
       name: "Export for Publishing",
     });
     userEvent.click(exportForPublishingButton);
@@ -2569,7 +2569,7 @@ describe("Measure List component", () => {
     expect(exportButton).toBeInTheDocument();
     userEvent.click(exportButton);
 
-    const exportForPublishingButton = await screen.findByRole("button", {
+    const exportForPublishingButton = await screen.findByRole("menuitem", {
       name: "Export for Publishing",
     });
     userEvent.click(exportForPublishingButton);

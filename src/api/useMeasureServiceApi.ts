@@ -57,11 +57,13 @@ export class MeasureServiceApi {
 
   async getMeasuresByMeasureSetId(
     measureSetId: string,
-    sortByLatestVersion?: boolean
+    sortByLatestVersion?: boolean,
+    searchCriteria?: MeasureSearchCriteria
   ): Promise<any> {
     try {
-      const response = await axios.get(
+      const response = await axios.put(
         `${this.baseUrl}/measures/byMeasureSetId`,
+        searchCriteria,
         {
           headers: {
             Authorization: `Bearer ${this.getAccessToken()}`,
@@ -659,6 +661,39 @@ export class MeasureServiceApi {
       const message = `Unable to get measure counts`;
       console.error(message, error);
       throw error;
+    }
+  }
+
+  async updateMeasureLock(measureId: string): Promise<any> {
+    try {
+      const response = await axios.put<String>(
+        `${this.baseUrl}/measures/${measureId}/measure-lock`,
+        null,
+        {
+          headers: {
+            Authorization: `Bearer ${this.getAccessToken()}`,
+          },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      throw new Error(error);
+    }
+  }
+
+  async unlockMeasure(measureId: string): Promise<any> {
+    try {
+      const response = await axios.delete<String>(
+        `${this.baseUrl}/measures/${measureId}/measure-lock`,
+        {
+          headers: {
+            Authorization: `Bearer ${this.getAccessToken()}`,
+          },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      throw new Error(error);
     }
   }
 }

@@ -14,12 +14,7 @@ import PopulationCriteriaWrapper from "./PopulationCriteriaWrapper";
 // @ts-ignore
 import { measureStore } from "@madie/madie-util";
 import { QdmMeasureCQL } from "../../common/QdmMeasureCQL";
-import {
-  Measure,
-  MeasureErrorType,
-  Model,
-  PopulationType,
-} from "@madie/madie-models";
+import { Measure, MeasureErrorType } from "@madie/madie-models";
 import { ELM_JSON, MeasureCQL } from "../../common/MeasureCQL";
 import useMeasureServiceApi, {
   MeasureServiceApi,
@@ -107,6 +102,7 @@ const QiCoreMeasure = {
     },
   ],
 } as Measure;
+let mockFeatureFlags = { Locking: false, EnhancedTextFormatting: false };
 
 jest.mock("@madie/madie-util", () => ({
   useDocumentTitle: jest.fn(),
@@ -132,7 +128,7 @@ jest.mock("@madie/madie-util", () => ({
     state: { canTravel: false, pendingPath: "" },
     initialState: { canTravel: false, pendingPath: "" },
   },
-  useFeatureFlags: () => ({}),
+  useFeatureFlags: () => mockFeatureFlags,
 }));
 
 jest.mock("../../../api/useMeasureServiceApi");
@@ -668,5 +664,80 @@ describe("PopulationCriteriaHome", () => {
 
     expect(screen.getByText("Rate Aggregation")).toBeInTheDocument();
     expect(reportingTab).toHaveAttribute("aria-selected", "true");
+  });
+
+  it("should trigger lock, success", async () => {
+    const mockedMeasureState = measureStore as jest.Mocked<{ state }>;
+    mockFeatureFlags = { Locking: true, EnhancedTextFormatting: false };
+    mockedMeasureState.state = { ...QiCoreMeasure };
+
+    const updateMeasureLock = jest.fn().mockResolvedValueOnce({
+      harpId: "test-user",
+      measureId: "testMeasureId",
+      createdAt: "2025-08-05T12:00:00Z",
+    });
+    const unlockMeasure = jest.fn();
+
+    useMeasuremeasureServiceApiMock.mockReturnValue({
+      ...measureServiceApiMock,
+      updateMeasureLock,
+      unlockMeasure,
+    });
+
+    render(
+      <MemoryRouter initialEntries={["/measures/testMeasureId/edit/groups/1"]}>
+        <ApiContextProvider value={serviceConfig}>
+          <Routes>
+            <Route
+              path="/measures/:measureId/edit/groups/:groupNumber"
+              element={<PopulationCriteriaWrapper />}
+            />
+          </Routes>
+        </ApiContextProvider>
+      </MemoryRouter>
+    );
+
+    await waitFor(() => {
+      expect(updateMeasureLock).toHaveBeenCalledWith("testMeasureId");
+    });
+  });
+
+  it("should trigger lock, fail", async () => {
+    const mockedMeasureState = measureStore as jest.Mocked<{ state }>;
+    mockedMeasureState.state = { ...QiCoreMeasure };
+    mockFeatureFlags = { Locking: true, EnhancedTextFormatting: false };
+
+    const updateMeasureLock = jest.fn().mockRejectedValue("test");
+    const unlockMeasure = jest.fn();
+
+    useMeasuremeasureServiceApiMock.mockReturnValue({
+      ...measureServiceApiMock,
+      updateMeasureLock,
+      unlockMeasure,
+    });
+
+    const errorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+
+    render(
+      <MemoryRouter initialEntries={["/measures/testMeasureId/edit/groups/1"]}>
+        <ApiContextProvider value={serviceConfig}>
+          <Routes>
+            <Route
+              path="/measures/:measureId/edit/groups/:groupNumber"
+              element={<PopulationCriteriaWrapper />}
+            />
+          </Routes>
+        </ApiContextProvider>
+      </MemoryRouter>
+    );
+
+    await waitFor(() => {
+      expect(updateMeasureLock).toHaveBeenCalled();
+    });
+
+    // You can also assert that an error was thrown
+    expect(errorSpy).toHaveBeenCalled();
+
+    errorSpy.mockRestore();
   });
 });

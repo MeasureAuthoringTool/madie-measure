@@ -43,7 +43,7 @@ const TextEditor = (props: Props) => {
       value === "<p></p>" || value === "<p><br></p>" ? "" : value;
     setFieldValue(field, normalized);
   }, 250);
-  // every 250 ms after an udpate to our local text, we update the formik value
+  // every 250 ms after an update to our local text, we update the formik value
   useEffect(() => {
     debounced(name, localText);
   }, [localText]);
@@ -75,6 +75,7 @@ const TextEditor = (props: Props) => {
           label={label}
           inputProps={{
             "data-testid": `${_.kebabCase(name)}-text`,
+            "aria-required": required,
           }}
           placeholder="-"
           name={name}
