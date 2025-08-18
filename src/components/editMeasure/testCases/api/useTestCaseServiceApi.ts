@@ -479,7 +479,7 @@ export class TestCaseServiceApi {
   async unlockTestCase(testCaseId: string): Promise<any> {
     try {
       const response = await axios.delete<String>(
-        `${this.baseUrl}/test-cases/${testCaseId}/testcase-unlock`,
+        `${this.baseUrl}/test-cases/${testCaseId}/unlock`,
         {
           headers: {
             Authorization: `Bearer ${this.getAccessToken()}`,

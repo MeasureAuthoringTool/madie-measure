@@ -350,7 +350,7 @@ describe("EditTestCase component", () => {
       }
     });
     mockedAxios.post.mockImplementation((args) => {
-      if (args && args.endsWith("testcase-lock")) {
+      if (args && args.endsWith("lock")) {
         return Promise.resolve({
           data: {
             isLocked: false,
@@ -360,7 +360,7 @@ describe("EditTestCase component", () => {
       }
     });
     mockedAxios.delete.mockImplementation((args) => {
-      if (args && args.endsWith("testcase-unlock")) {
+      if (args && args.endsWith("unlock")) {
         return Promise.resolve({
           data: {
             isLocked: false,
@@ -3815,7 +3815,7 @@ describe("EditTestCase component", () => {
 
     it("locking test case fails", () => {
       mockedAxios.post.mockImplementation((args) => {
-        if (args && args.endsWith("testcase-lock")) {
+        if (args && args.endsWith("lock")) {
           return Promise.reject({
             data: [
               {
