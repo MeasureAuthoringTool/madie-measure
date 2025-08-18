@@ -512,6 +512,7 @@ export function isComponentDataType(datatype) {
     case "codeableconcept":
     case "extension":
     case "reference":
+    case "quantity":
       return true;
     default:
       return false;
