@@ -337,7 +337,11 @@ const MeasureGroups = (props: MeasureGroupProps) => {
           scoringUnit: measure?.groups[measureGroupNumber].scoringUnit || "",
           measureGroupTypes:
             measure?.groups[measureGroupNumber].measureGroupTypes || [],
-          populations: measure?.groups[measureGroupNumber].populations || [],
+          populations: measure?.groups[measureGroupNumber].populations
+            ? getPopulationsWithDisplayId(
+                measure.groups[measureGroupNumber].populations
+              )
+            : [],
           measureObservations:
             measure?.groups[measureGroupNumber].measureObservations || null,
           improvementNotation:
