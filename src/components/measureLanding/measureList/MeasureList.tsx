@@ -140,7 +140,7 @@ export default function MeasureList(props: {
   const featureFlags = useFeatureFlags();
   const [transferDialog, setTransferDialog] = useState({
     open: false,
-    option: "",
+    measures: [],
   });
 
   const transFormData = (measureList): TCRow[] => {
@@ -667,6 +667,10 @@ export default function MeasureList(props: {
     setIsRowExpanded(false);
     setSelectedIdForExpansion(null);
     setSelectedExpandedMeasuresIds([]);
+    setTransferDialog({
+      open: false,
+      measures: [],
+    });
   };
 
   const handleShareDialogClose = ({
@@ -709,11 +713,12 @@ export default function MeasureList(props: {
     props.handlePageChange(null, 1);
   };
 
-  const handleTransferDialogClose = () => {
+  const transferMeasures = (newOwner: string, retainShareAccess: boolean) => {
     setTransferDialog({
       open: false,
-      option: "",
+      measures: [],
     });
+    // to be implemented
   };
 
   const updateTargetMeasure = (newValue) => {
@@ -1218,7 +1223,8 @@ export default function MeasureList(props: {
       <TransferDialog
         measures={selectedMeasures}
         open={transferDialog.open}
-        onClose={handleTransferDialogClose}
+        onClose={handleDialogClose}
+        onSubmit={transferMeasures}
       />
     </div>
   );

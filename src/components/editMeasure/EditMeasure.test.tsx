@@ -445,7 +445,7 @@ describe("EditMeasure Component", () => {
     await waitFor(() =>
       setTimeout(() => {
         expect(queryByTestId("view-hr-modal")).toBeInTheDocument();
-      }, 500)
+      }, 1000)
     );
 
     setTimeout(async () => {
@@ -499,7 +499,43 @@ describe("EditMeasure Component", () => {
 
     const cancelButton = getByTestId("transfer-cancel-button");
     fireEvent.click(cancelButton);
-    expect(queryByTestId("transfer-dialog")).toBeVisible();
+    await waitFor(async () => {
+      expect(queryByTestId("transfer-dialog")).not.toBeInTheDocument();
+    });
+  });
+
+  it("should display transfer dialog when the event is triggered and close dialog when continue button is clicked", async () => {
+    renderRouter();
+
+    const result = await findByTestId("editMeasure");
+    expect(result).toBeInTheDocument();
+
+    act(() => {
+      window.dispatchEvent(new Event("transfer-measure"));
+    });
+
+    await waitFor(async () => {
+      expect(getByTestId("transfer-dialog")).toBeInTheDocument();
+    });
+
+    const newHarpIdInput = getByTestId("harp-id-input");
+    expect(newHarpIdInput).toBeInTheDocument();
+    expect(newHarpIdInput.value).toBe("");
+    const transferBtn = getByTestId("transfer-save-button");
+    expect(transferBtn).toBeInTheDocument();
+    expect(transferBtn).toBeDisabled();
+
+    fireEvent.change(newHarpIdInput, {
+      target: { value: "newUser" },
+    });
+    expect(newHarpIdInput.value).toBe("newUser");
+    expect(transferBtn).toBeEnabled();
+
+    fireEvent.click(transferBtn);
+
+    await waitFor(async () => {
+      expect(queryByTestId("transfer-dialog")).not.toBeInTheDocument();
+    });
   });
 
   it("pressing Space on a tab prevents default and triggers click", async () => {

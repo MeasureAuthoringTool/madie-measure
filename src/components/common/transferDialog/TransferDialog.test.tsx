@@ -76,6 +76,7 @@ describe("Transfer Measures Dialog component", () => {
         measures={[mockMeasure1]}
         open={true}
         onClose={jest.fn()}
+        onSubmit={jest.fn()}
       />
     );
 
@@ -97,6 +98,7 @@ describe("Transfer Measures Dialog component", () => {
         ]}
         open={true}
         onClose={jest.fn()}
+        onSubmit={jest.fn()}
       />
     );
 
@@ -127,6 +129,7 @@ describe("Transfer Measures Dialog component", () => {
         ]}
         open={true}
         onClose={jest.fn()}
+        onSubmit={jest.fn()}
       />
     );
     expect(getByTestId("transfer-measure-tbl")).toBeInTheDocument();
@@ -143,11 +146,13 @@ describe("Transfer Measures Dialog component", () => {
   });
 
   it("test handle submit", async () => {
+    const submit = jest.fn();
     render(
       <TransferDialog
         measures={[mockMeasure1]}
         open={true}
         onClose={jest.fn()}
+        onSubmit={submit}
       />
     );
     await checkDataRows(1);
@@ -166,5 +171,9 @@ describe("Transfer Measures Dialog component", () => {
     expect(transferBtn).toBeEnabled();
 
     userEvent.click(transferBtn);
+
+    await waitFor(() => {
+      expect(submit).toHaveBeenCalled();
+    });
   });
 });

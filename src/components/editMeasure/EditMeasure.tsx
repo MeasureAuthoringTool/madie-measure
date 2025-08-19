@@ -498,6 +498,10 @@ export default function EditMeasure() {
       }
     }
   };
+  const transferMeasure = (newOwner: string, retainShareAccess: boolean) => {
+    // to be implemented
+    handleDialogClose();
+  };
   const onToastClose = () => {
     setToastType("danger");
     setToastMessage("");
@@ -666,6 +670,7 @@ export default function EditMeasure() {
             measures={[measure]}
             open={transferDialog.open}
             onClose={handleDialogClose}
+            onSubmit={transferMeasure}
           />
           <Toast
             toastKey="measure-information-toast"

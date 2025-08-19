@@ -200,13 +200,15 @@ interface TransferDialogProps {
   measures: Measure[];
   open: boolean;
   onClose: Function;
+  onSubmit: Function;
 }
 
-const TransferDialog = ({ measures, open, onClose }: TransferDialogProps) => {
-  const handleTransfer = () => {
-    // to be implemented
-  };
-
+const TransferDialog = ({
+  measures,
+  open,
+  onClose,
+  onSubmit,
+}: TransferDialogProps) => {
   const formik = useFormik({
     initialValues: {
       currentUser: measures?.[0]?.measureSet?.owner,
@@ -214,11 +216,13 @@ const TransferDialog = ({ measures, open, onClose }: TransferDialogProps) => {
       retainShareAccess: false,
     },
     enableReinitialize: true,
-    //validationSchema: TransferMeasuresValidator,
     validationSchema: Yup.object().shape({
       harpId: Yup.string().required("New Measure Owner is required."),
     }),
-    onSubmit: handleTransfer,
+    onSubmit: async ({ harpId, retainShareAccess }) => {
+      formik.resetForm();
+      return onSubmit(harpId, retainShareAccess);
+    },
   });
 
   return (
@@ -229,9 +233,7 @@ const TransferDialog = ({ measures, open, onClose }: TransferDialogProps) => {
         dialogProps={{
           onClose,
           open,
-          onSubmit: () => {
-            formik.handleSubmit();
-          },
+          onSubmit: formik.handleSubmit,
           maxWidth: "lg",
           "data-testid": "transfer-dialog",
         }}

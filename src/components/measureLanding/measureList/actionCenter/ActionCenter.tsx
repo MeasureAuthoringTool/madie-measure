@@ -67,13 +67,13 @@ export default function ActionCenter(props: PropTypes) {
   }, [props.measures, props.setDraftMeasureDialog, props.updateTargetMeasure]);
 
   const transferMeasure = useCallback(() => {
-    //to be impleted
+    //to be implemented
     if (props.measures?.length > 0) {
       props.setTransferDialog({
         open: true,
       });
     }
-  }, [props.measures, props.updateTargetMeasure]);
+  }, [props.measures, props.setTransferDialog]);
 
   const exportMeasure = useCallback(
     (exportType: string) => {
