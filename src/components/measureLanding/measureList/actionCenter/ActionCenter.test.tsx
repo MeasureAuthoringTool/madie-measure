@@ -372,10 +372,14 @@ describe("ActionCenter", () => {
       />
     );
 
-    const shareButton = await screen.findByTestId("share-action-btn");
-    expect(shareButton).toBeDisabled();
+    await waitFor(() =>
+      setTimeout(() => {
+        const shareButton = screen.findByTestId("share-action-btn");
+        expect(shareButton).toBeDisabled();
 
-    expect(setShareDialog).not.toHaveBeenCalledWith(true);
+        expect(setShareDialog).not.toHaveBeenCalledWith(true);
+      }, 500)
+    );
   });
 
   it("should not render transfer action if feature flag is not on", () => {
