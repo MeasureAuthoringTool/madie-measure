@@ -22,7 +22,7 @@ import {
 } from "@madie/madie-models";
 import MeasureEditor from "./editor/MeasureEditor";
 // @ts-ignore
-import { measureStore } from "@madie/madie-util";
+import { measureStore, useFeatureFlags } from "@madie/madie-util";
 import { oneItemResponse } from "../__mocks__/mockMeasureResponses";
 
 jest.mock("./details/MeasureDetails");
@@ -183,7 +183,9 @@ jest.mock("@madie/madie-util", () => ({
     getAccessToken: () => "test.jwt",
   })),
   checkUserCanEdit: jest.fn(),
-  useFeatureFlags: () => ({}),
+  useFeatureFlags: jest.fn(() => ({
+    TransferMeasure: true,
+  })),
   measureStore: {
     updateMeasure: jest.fn((measure) => measure),
     state: jest.fn().mockImplementation(() => null),
