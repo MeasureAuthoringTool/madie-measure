@@ -303,7 +303,10 @@ const MeasureGroups = (props: MeasureGroupProps) => {
       id: group?.id || null,
       scoring: measure?.scoring || "",
       populations: group?.populations
-        ? group.populations
+        ? group.populations.map((population) => ({
+            ...population,
+            description: population.description ?? "",
+          }))
         : getPopulationsForScoring(measure?.scoring),
       measureObservations: group?.measureObservations || memoizedObservation,
       rateAggregation: group?.rateAggregation || "",
@@ -346,11 +349,11 @@ const MeasureGroups = (props: MeasureGroupProps) => {
   });
   useFormikResetOnEvent(formik);
   const { resetForm, validateForm } = formik;
-  useEffect(() => {
-    if (measure?.groups && measure?.groups[measureGroupNumber]) {
-      validateForm();
-    }
-  }, [formik.values.populations, validateForm]);
+  // useEffect(() => {
+  //   if (measure?.groups && measure?.groups[measureGroupNumber]) {
+  //     validateForm();
+  //   }
+  // }, [formik.values.populations, validateForm]);
 
   useEffect(() => {
     const subscription = measureStore.subscribe((measure: Measure) => {
