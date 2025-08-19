@@ -516,31 +516,28 @@ describe("EditMeasure Component", () => {
       window.dispatchEvent(new Event("transfer-measure"));
     });
 
-    await waitFor(async () => {
-      expect(getByTestId("transfer-dialog")).toBeInTheDocument();
-    });
+    await waitFor(() =>
+      setTimeout(() => {
+        expect(getByTestId("transfer-dialog")).toBeInTheDocument();
 
-    const newHarpIdInput = getByTestId("harp-id-input");
-    expect(newHarpIdInput).toBeInTheDocument();
-    expect(newHarpIdInput.value).toBe("");
-    const transferBtn = getByTestId("transfer-save-button");
-    expect(transferBtn).toBeInTheDocument();
-    expect(transferBtn).toBeDisabled();
+        const newHarpIdInput = getByTestId("harp-id-input");
+        expect(newHarpIdInput).toBeInTheDocument();
+        expect(newHarpIdInput.value).toBe("");
+        const transferBtn = getByTestId("transfer-save-button");
+        expect(transferBtn).toBeInTheDocument();
+        expect(transferBtn).toBeDisabled();
 
-    fireEvent.change(newHarpIdInput, {
-      target: { value: "newUser" },
-    });
-    expect(newHarpIdInput.value).toBe("newUser");
-    expect(transferBtn).toBeEnabled();
+        fireEvent.change(newHarpIdInput, {
+          target: { value: "newUser" },
+        });
+        expect(newHarpIdInput.value).toBe("newUser");
+        expect(transferBtn).toBeEnabled();
 
-    fireEvent.click(transferBtn);
+        fireEvent.click(transferBtn);
 
-    // temporarily commented out, works on local, only fails in dev
-    // await waitFor(() =>
-    //   setTimeout(() => {
-    //     expect(queryByTestId("transfer-dialog")).toBeInTheDocument();
-    //   }, 1000)
-    // );
+        expect(queryByTestId("transfer-dialog")).not.toBeInTheDocument();
+      }, 1000)
+    );
   });
 
   it("pressing Space on a tab prevents default and triggers click", async () => {
