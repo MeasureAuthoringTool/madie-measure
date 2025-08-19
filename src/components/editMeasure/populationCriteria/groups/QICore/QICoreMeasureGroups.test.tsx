@@ -725,6 +725,7 @@ describe("Measure Groups Page", () => {
           definition:
             "VTE Prophylaxis by Medication Administered or Device Applied",
           description: "",
+          displayId: "InitialPopulation_1",
           associationType: undefined,
         },
       ],
