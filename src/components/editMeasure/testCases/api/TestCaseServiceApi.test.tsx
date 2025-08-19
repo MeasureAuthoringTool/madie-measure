@@ -500,4 +500,70 @@ describe("TestCaseServiceApi Tests", () => {
       expect(err).toEqual(new Error("Unable to shift test case dates"));
     }
   });
+
+  it("should lockTestCase successfully", async () => {
+    const response = {
+      locked: false,
+      lockedBy: "test.user",
+      lockedId: "testCaseId",
+    };
+    axios.post = jest.fn().mockResolvedValueOnce({ data: response });
+
+    const result = await testCaseService.lockTestCase(
+      "testMeasureId",
+      "testCaseId"
+    );
+    expect(axios.post).toBeCalledTimes(1);
+    expect(result).toBe(response);
+  });
+
+  it("should handle lockTestCase failure", async () => {
+    const response = {
+      status: 400,
+      error: "Bad Request",
+      message: "Error",
+    };
+
+    axios.post = jest.fn().mockRejectedValueOnce({ error: response });
+
+    try {
+      const result = await testCaseService.lockTestCase(
+        "testMeasureId",
+        "testCaseId"
+      );
+      expect(axios.post).toBeCalledTimes(1);
+      expect(result).not.toBe(response);
+    } catch (err) {
+      expect(err).not.toBeNull();
+    }
+  });
+
+  it("should unlockTestCase successfully", async () => {
+    const response = {
+      locked: false,
+    };
+    axios.delete = jest.fn().mockResolvedValueOnce({ data: response });
+
+    const result = await testCaseService.unlockTestCase("testCaseId");
+    expect(axios.delete).toBeCalledTimes(1);
+    expect(result).toBe(response);
+  });
+
+  it("should handle lockTestCase failure", async () => {
+    const response = {
+      status: 400,
+      error: "Bad Request",
+      message: "Error",
+    };
+
+    axios.delete = jest.fn().mockRejectedValueOnce({ error: response });
+
+    try {
+      const result = await testCaseService.unlockTestCase("testCaseId");
+      expect(axios.delete).toBeCalledTimes(1);
+      expect(result).not.toBe(response);
+    } catch (err) {
+      expect(err).not.toBeNull();
+    }
+  });
 });
