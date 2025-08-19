@@ -114,6 +114,7 @@ jest.mock("@madie/madie-util", () => {
       return {
         applyDefaults: mockApplyDefaults,
         qiCoreElementsTab: true,
+        Locking: true,
       };
     },
     measureStore: {
@@ -345,6 +346,26 @@ describe("EditTestCase component", () => {
               name: "Statin Allergen",
             },
           ],
+        });
+      }
+    });
+    mockedAxios.post.mockImplementation((args) => {
+      if (args && args.endsWith("lock")) {
+        return Promise.resolve({
+          data: {
+            isLocked: false,
+            locedBy: MEASURE_CREATEDBY,
+          },
+        });
+      }
+    });
+    mockedAxios.delete.mockImplementation((args) => {
+      if (args && args.endsWith("unlock")) {
+        return Promise.resolve({
+          data: {
+            isLocked: false,
+            locedBy: null,
+          },
         });
       }
     });
@@ -3759,6 +3780,78 @@ describe("EditTestCase component", () => {
         name: "Run Test Case",
       });
       expect(runButton).toBeDisabled();
+    });
+  });
+
+  describe("locking test case", () => {
+    it("locking test case successfully", () => {
+      const testCase = {
+        id: "1234",
+        description: "Test IPP",
+        series: "SeriesA",
+        createdBy: MEASURE_CREATEDBY,
+        createdAt: "",
+        lastModifiedAt: "",
+        lastModifiedBy: "null",
+        title: "TestIPP",
+        name: "TestIPP",
+        executionStatus: "false",
+        json: null,
+        validationStatus: ValidationStatus.INVALID,
+      } as unknown as TestCase;
+      const measure = {
+        ...defaultMeasure,
+        model: Model.QICORE_6_0_0,
+        testCases: [testCase],
+      };
+      renderWithRouter(
+        ["/measures/623cacebe74613783378c17b/edit/test-cases/1234"],
+        "/measures/:measureId/edit/test-cases/:id",
+        measure
+      );
+
+      expect(mockedAxios.post).toBeCalled();
+    });
+
+    it("locking test case fails", () => {
+      mockedAxios.post.mockImplementation((args) => {
+        if (args && args.endsWith("lock")) {
+          return Promise.reject({
+            data: [
+              {
+                isLocked: false,
+                locedBy: null,
+              },
+            ],
+          });
+        }
+      });
+      const testCase = {
+        id: "1234",
+        description: "Test IPP",
+        series: "SeriesA",
+        createdBy: MEASURE_CREATEDBY,
+        createdAt: "",
+        lastModifiedAt: "",
+        lastModifiedBy: "null",
+        title: "TestIPP",
+        name: "TestIPP",
+        executionStatus: "false",
+        json: null,
+        validationStatus: ValidationStatus.INVALID,
+      } as unknown as TestCase;
+      const measure = {
+        ...defaultMeasure,
+        model: Model.QICORE_6_0_0,
+        testCases: [testCase],
+      };
+      renderWithRouter(
+        ["/measures/623cacebe74613783378c17b/edit/test-cases/1234"],
+        "/measures/:measureId/edit/test-cases/:id",
+        measure
+      );
+
+      expect(mockedAxios.post).toBeCalled();
     });
   });
 });
