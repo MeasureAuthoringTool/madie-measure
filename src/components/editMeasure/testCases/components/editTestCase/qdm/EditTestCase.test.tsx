@@ -136,6 +136,11 @@ const testTitle = async (title: string, clear = false) => {
   });
 };
 
+const lockInfo = {
+  isLocked: false,
+  locedBy: null,
+};
+
 jest.mock("../../../../../../api/axios-instance");
 const mockedAxios = axios as jest.Mocked<typeof axios>;
 
@@ -184,10 +189,13 @@ const useTestCaseServiceMockResolved = {
     .fn()
     .mockResolvedValue(["Series 1", "Series 2"]),
   updateTestCase: jest.fn().mockResolvedValue(testCase),
+  lockTestCase: jest.fn().mockResolvedValue(lockInfo),
+  unLockTestCase: jest.fn().mockResolvedValue(lockInfo),
 } as unknown as TestCaseServiceApi;
 
 const useTestCaseServiceMockRejectedGetTestCase = {
   getTestCase: jest.fn().mockRejectedValue("404"),
+  lockTestCase: jest.fn().mockRejectedValue(lockInfo),
 } as unknown as TestCaseServiceApi;
 
 const useTestCaseServiceMockRejected = {
@@ -200,6 +208,8 @@ const useTestCaseServiceMockRejected = {
       error: "error",
     },
   }),
+  lockTestCase: jest.fn().mockRejectedValueOnce(lockInfo),
+  unLockTestCase: jest.fn().mockRejectedValueOnce(lockInfo),
 } as unknown as TestCaseServiceApi;
 const nonUniqNameData: MadieError = new MadieError("Error Msg");
 
@@ -209,6 +219,7 @@ const useTestCaseServiceMockRejectedNonUniqueName = {
     .fn()
     .mockResolvedValue(["Series 1", "Series 2"]),
   updateTestCase: jest.fn().mockRejectedValueOnce(nonUniqNameData),
+  lockTestCase: jest.fn().mockResolvedValueOnce(lockInfo),
 } as unknown as TestCaseServiceApi;
 let mockApplyDefaults = false;
 global.ResizeObserver = jest.fn().mockImplementation(() => ({
@@ -275,6 +286,7 @@ jest.mock("@madie/madie-util", () => ({
     return {
       applyDefaults: mockApplyDefaults,
       qdmHideJson: false,
+      Locking: true,
     };
   }),
   measureStore: {
@@ -439,6 +451,7 @@ describe("EditTestCase QDM Component", () => {
     (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => {
       return {
         applyDefaults: mockApplyDefaults,
+        Locking: false,
       };
     });
   });

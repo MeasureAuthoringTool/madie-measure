@@ -458,6 +458,39 @@ export class TestCaseServiceApi {
       throw new Error(message);
     }
   }
+
+  async lockTestCase(measureId: string, testCaseId: string): Promise<any> {
+    try {
+      const response = await axios.post<String>(
+        `${this.baseUrl}/measures/${measureId}/test-cases/${testCaseId}/lock`,
+        null,
+        {
+          headers: {
+            Authorization: `Bearer ${this.getAccessToken()}`,
+          },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      throw new Error(error);
+    }
+  }
+
+  async unlockTestCase(testCaseId: string): Promise<any> {
+    try {
+      const response = await axios.delete<String>(
+        `${this.baseUrl}/test-cases/${testCaseId}/unlock`,
+        {
+          headers: {
+            Authorization: `Bearer ${this.getAccessToken()}`,
+          },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      throw new Error(error);
+    }
+  }
 }
 
 const useTestCaseServiceApi = (): TestCaseServiceApi => {
