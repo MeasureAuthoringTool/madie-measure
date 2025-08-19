@@ -122,7 +122,9 @@ const TransferredMeasures = ({ measures }: { measures: Measure[] }) => {
         header: "CMS ID",
         cell: (info) =>
           _.toString(info.getValue()).concat(
-            info.row.original.model.startsWith("QI-Core") ? "FHIR" : ""
+            info.row.original.model.startsWith("QI-Core") && info.getValue()
+              ? "FHIR"
+              : ""
           ),
       },
     ],

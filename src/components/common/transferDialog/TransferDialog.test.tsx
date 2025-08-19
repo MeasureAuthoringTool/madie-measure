@@ -12,6 +12,10 @@ const mockMeasure1 = {
   model: Model.QICORE,
   createdBy: testUser,
   measureSetId: "MeasureSetId",
+  measureSet: {
+    measureSetId: "MeasureSetId",
+    cmsId: 1,
+  },
 } as Measure;
 
 const mockMeasure2 = {
