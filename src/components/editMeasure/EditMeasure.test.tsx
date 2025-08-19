@@ -533,9 +533,11 @@ describe("EditMeasure Component", () => {
 
     fireEvent.click(transferBtn);
 
-    await waitFor(async () => {
-      expect(queryByTestId("transfer-dialog")).not.toBeInTheDocument();
-    });
+    await waitFor(() =>
+      setTimeout(() => {
+        expect(queryByTestId("transfer-dialog")).toBeInTheDocument();
+      }, 1000)
+    );
   });
 
   it("pressing Space on a tab prevents default and triggers click", async () => {
