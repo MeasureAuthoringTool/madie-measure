@@ -1315,7 +1315,6 @@ const EditTestCase = (props: EditTestCaseProps) => {
                           <ValidationStatusIcon
                             validationStatus={testCase?.validationStatus}
                           />
-
                           <span className="ml-2">
                             Validations ({validationErrors?.length || 0})
                           </span>
@@ -1343,7 +1342,9 @@ const EditTestCase = (props: EditTestCaseProps) => {
                     >
                       <ValidationPanel
                         testCase={testCase}
-                        validationErrors={validationErrors}
+                        validationErrors={validationErrors.sort((a, b) =>
+                          a.severity < b.severity ? -1 : 1
+                        )}
                         isQiCoreV6={isQICore6}
                         stu6TestCaseValidationFeatureFlag={
                           featureFlags?.stu6TestCaseValidation
