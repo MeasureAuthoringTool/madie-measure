@@ -33,6 +33,22 @@ const hapiOperationOutcome: HapiOperationOutcome[] = [
   },
 ];
 const validationErrors = [
+  ,
+  {
+    severity: "warning",
+    code: "processing",
+    details: {
+      coding: [
+        {
+          system: "http://hl7.org/fhir/java-core-messageId",
+          code: "Terminology_TX_NoValid_16",
+        },
+      ],
+    },
+    diagnostics: "Validation warning.",
+    location: ["location 1"],
+    key: 1,
+  },
   {
     severity: "error",
     code: "processing",
@@ -44,8 +60,8 @@ const validationErrors = [
         },
       ],
     },
-    diagnostics: "Validation failed.",
-    location: ["location 1"],
+    diagnostics: "Validation error.",
+    location: ["location 2"],
     key: 0,
   },
 ];
@@ -151,6 +167,11 @@ describe("ValidationPanel component", () => {
     );
 
     expect(getByTestId("validation-card-0")).toBeInTheDocument();
+    expect(getByTestId("validation-card-0")).toHaveTextContent("Error");
+    expect(getByTestId("validation-card-1")).toBeInTheDocument();
+    expect(getByTestId("validation-card-1")).toHaveTextContent(
+      "Warning: Validation warning"
+    );
   });
 
   it("should render meta validation error with correct styling and text", () => {
