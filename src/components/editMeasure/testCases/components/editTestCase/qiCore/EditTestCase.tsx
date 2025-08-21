@@ -1342,9 +1342,7 @@ const EditTestCase = (props: EditTestCaseProps) => {
                     >
                       <ValidationPanel
                         testCase={testCase}
-                        validationErrors={validationErrors.sort((a, b) =>
-                          a.severity < b.severity ? -1 : 1
-                        )}
+                        validationErrors={validationErrors}
                         isQiCoreV6={isQICore6}
                         stu6TestCaseValidationFeatureFlag={
                           featureFlags?.stu6TestCaseValidation
