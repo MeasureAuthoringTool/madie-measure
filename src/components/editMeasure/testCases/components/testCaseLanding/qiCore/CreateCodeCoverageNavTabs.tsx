@@ -30,7 +30,6 @@ export interface NavTabProps {
   measure: Measure;
   createNewTestCase: (value: string) => void;
   executeTestCases: () => void;
-  onImportTestCasesFromBonnie?: () => void;
   onImportTestCases?: () => void;
   testCasePassFailStats: TestCasesPassingDetailsProps;
   coveragePercentage: number;
@@ -64,7 +63,6 @@ export default function CreateCodeCoverageNavTabs(props: NavTabProps) {
     createNewTestCase,
     measure,
     executeTestCases,
-    onImportTestCasesFromBonnie,
     onImportTestCases,
     testCasePassFailStats,
     coveragePercentage,
@@ -205,23 +203,7 @@ export default function CreateCodeCoverageNavTabs(props: NavTabProps) {
               />
               MADiE Import
             </Button>
-            {featureFlags?.qiCoreBonnieTestCases && (
-              <Button
-                onClick={() => {
-                  if (onImportTestCasesFromBonnie) {
-                    onImportTestCasesFromBonnie();
-                  }
-                }}
-                disabled={!canEdit}
-                data-testid="import-test-cases-from-bonnie-button"
-              >
-                <FileUploadIcon
-                  style={{ margin: "0 5px 0 -2px" }}
-                  fontSize="small"
-                />
-                Bonnie Import
-              </Button>
-            )}
+
             <Button
               disabled={!canEdit}
               onClick={createNewTestCase}
