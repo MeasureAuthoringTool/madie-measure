@@ -167,8 +167,9 @@ export default function ActionCenter(props: PropTypes) {
           activeTab={props?.activeTab}
         />
       )}
-
-      <HistoryAction measures={props.measures} onClick={() => {}} />
+      {featureFlags.MeasureHistory && (
+        <HistoryAction measures={props.measures} onClick={() => {}} />
+      )}
     </div>
   );
 }
