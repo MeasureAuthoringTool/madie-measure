@@ -47,7 +47,6 @@ import { TestCaseValidator } from "../../../validators/TestCaseValidator";
 // @ts-ignore
 import { checkUserCanEdit } from "@madie/madie-util";
 import { PopulationType as FqmPopulationType } from "fqm-execution/build/types/Enums";
-import { addValues } from "../../../util/DefaultValueProcessor";
 import { ResourceIdentifier } from "../../../api/models/ResourceIdentifier";
 
 //temporary solution (after jest updated to version 27) for error: thrown: "Exceeded timeout of 5000 ms for a test.
@@ -428,32 +427,6 @@ describe("EditTestCase component", () => {
       );
       const importButton = screen.queryByRole("button", { name: "Import" });
       expect(importButton).toBeInTheDocument();
-    });
-
-    it("should import test case file successfully", async () => {
-      mockApplyDefaults = true;
-      const file = new File([JSON.stringify(testcaseBundle)], "testcase.json", {
-        type: "application/json",
-      });
-      mockedAxios.post.mockResolvedValue({
-        data: {
-          fileName: "testcase.json",
-          valid: true,
-          error: null,
-        },
-      });
-
-      importTestCase(file);
-      await waitFor(() => {
-        expect(screen.getByTestId("success-toast")).toHaveTextContent(
-          "Test Case JSON copied into editor. QI-Core Defaults have been added. Please review and save your Test Case."
-        );
-      });
-      // make sure editor state updated to have imported bundle contents
-      const editor = screen.getByTestId(
-        "test-case-json-editor"
-      ) as HTMLInputElement;
-      expect(JSON.parse(editor.value)).toEqual(addValues(testcaseBundle));
     });
 
     it("should display isQICore6 validation running message in toast when test case is created and isQICore6 is true", async () => {

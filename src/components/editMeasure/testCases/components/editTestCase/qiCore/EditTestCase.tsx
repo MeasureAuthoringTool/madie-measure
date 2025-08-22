@@ -69,9 +69,6 @@ import {
   Toast,
   TextArea,
 } from "@madie/madie-design-system/dist/react";
-import FileUploader from "../../fileUploader/FileUploader";
-import { ScanValidationDto } from "../../../api/models/ScanValidationDto";
-import { Bundle } from "fhir/r4";
 import { Allotment } from "allotment";
 import ElementsTab from "./LeftPanel/ElementsTab/ElementsTab";
 import { QiCoreResourceProvider } from "../../../util/QiCorePatientProvider";
@@ -923,35 +920,6 @@ const EditTestCase = (props: EditTestCaseProps) => {
     return "info";
   };
 
-  const readTestFileCb = (testCaseBundle: Bundle, errorMessage: string) => {
-    if (errorMessage) {
-      showToast(errorMessage, "danger");
-    } else {
-      setEditorVal(JSON.stringify(testCaseBundle, null, "\t"));
-      showToast(
-        "Test Case JSON copied into editor. QI-Core Defaults have been added. Please review and save your Test Case.",
-        "success"
-      );
-    }
-  };
-  const updateTestCaseJson = (file) => {
-    testCaseService.current
-      .scanImportFile(file)
-      .then((response: ScanValidationDto) => {
-        if (response.valid) {
-          testCaseService.current.readTestCaseFile(file, readTestFileCb);
-        } else {
-          showToast(response.error.defaultMessage, "danger");
-        }
-      })
-      .catch((errors) => {
-        showToast(
-          "An error occurred while importing the test case, please try again. If the error persists, please contact the help desk.",
-          "danger"
-        );
-      });
-  };
-
   const allotmentRef = useRef(null);
   // we need to know which stratification rows to render
   const stratificationsMap = useMemo(() => {
@@ -1382,62 +1350,56 @@ const EditTestCase = (props: EditTestCaseProps) => {
 
           {/* button wrap in context */}
           <div tw="bg-gray-75 w-full sticky bottom-0 left-0 z-40">
-            <div tw="flex items-center">
-              <div tw="w-1/2 flex items-center px-2">
-                {canEdit && <FileUploader onFileImport={updateTestCaseJson} />}
-              </div>
-              <div
-                tw="w-1/2 flex justify-end items-center px-10 py-6"
-                style={{ alignItems: "end" }}
-              >
-                <FormikProvider value={formikStu6Context}>
-                  <Button
-                    tw="m-2"
-                    variant="outline"
-                    onClick={() => setDiscardDialogOpen(true)}
-                    data-testid="edit-test-case-discard-button"
-                    disabled={!isModified()}
-                  >
-                    Discard Changes
-                  </Button>
-                  <Button
-                    tw="m-2"
-                    type="button"
-                    onClick={calculate}
-                    disabled={
-                      !!measure?.cqlErrors ||
-                      measure?.errors?.includes(
-                        MeasureErrorType.MISMATCH_CQL_POPULATION_RETURN_TYPES
-                      ) ||
-                      _.isNil(measure?.groups) ||
-                      measure?.groups.length === 0 ||
-                      (!isJsonModified() &&
-                        hasErrorSeverity(validationErrors)) ||
-                      isEmptyTestCaseJsonString(editorVal) ||
-                      !executionContextReady ||
-                      executing
-                    }
-                    /*
+            <div
+              tw="w-1/2 flex justify-end py-6 float-right"
+              style={{ alignItems: "end" }}
+            >
+              <FormikProvider value={formikStu6Context}>
+                <Button
+                  tw="m-2"
+                  variant="outline"
+                  onClick={() => setDiscardDialogOpen(true)}
+                  data-testid="edit-test-case-discard-button"
+                  disabled={!isModified()}
+                >
+                  Discard Changes
+                </Button>
+                <Button
+                  tw="m-2"
+                  type="button"
+                  onClick={calculate}
+                  disabled={
+                    !!measure?.cqlErrors ||
+                    measure?.errors?.includes(
+                      MeasureErrorType.MISMATCH_CQL_POPULATION_RETURN_TYPES
+                    ) ||
+                    _.isNil(measure?.groups) ||
+                    measure?.groups.length === 0 ||
+                    (!isJsonModified() && hasErrorSeverity(validationErrors)) ||
+                    isEmptyTestCaseJsonString(editorVal) ||
+                    !executionContextReady ||
+                    executing
+                  }
+                  /*
                   if new test case
                     enable run button if json modified, regardless of errors
                  */
-                    data-testid="run-test-case-button"
+                  data-testid="run-test-case-button"
+                >
+                  Run Test Case
+                </Button>
+                {canEdit && (
+                  <Button
+                    tw="m-2"
+                    variant="cyan"
+                    type="submit"
+                    data-testid="edit-test-case-save-button"
+                    disabled={!isModified()}
                   >
-                    Run Test Case
+                    Save
                   </Button>
-                  {canEdit && (
-                    <Button
-                      tw="m-2"
-                      variant="cyan"
-                      type="submit"
-                      data-testid="edit-test-case-save-button"
-                      disabled={!isModified()}
-                    >
-                      Save
-                    </Button>
-                  )}
-                </FormikProvider>
-              </div>
+                )}
+              </FormikProvider>
             </div>
           </div>
         </div>
