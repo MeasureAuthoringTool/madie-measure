@@ -361,17 +361,22 @@ export default function MeasureList(props: {
       sortingFn: (rowA, rowB) =>
         customSort(rowA.original.model, rowB.original.model),
     },
-    {
-      header: "Shared",
-      cell: (info) => (
-        <div>
-          {info.row.original.actions?.measureSet?.acls?.length > 0 && (
-            <CheckCircleOutlineIcon sx={{ color: "#4CAF50" }} />
-          )}
-        </div>
-      ),
-      accessorKey: "measureSet.acls",
-    },
+    // Do not display Shared column in Shared Measures tab
+    ...(props.activeTab !== 1
+      ? [
+          {
+            header: "Shared",
+            cell: (info) => (
+              <div>
+                {info.row.original.actions?.measureSet?.acls?.length > 0 && (
+                  <CheckCircleOutlineIcon sx={{ color: "#4CAF50" }} />
+                )}
+              </div>
+            ),
+            accessorKey: "measureSet.acls",
+          },
+        ]
+      : []),
     {
       header: "CMS ID",
       cell: (info) => (
