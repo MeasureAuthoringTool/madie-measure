@@ -98,32 +98,41 @@ const PeriodDateTimeComponent = ({
   const [endTime, setEndTime] = useState<any>(null);
 
   useEffect(() => {
+    const start = value?.start;
+    const end = value?.end;
+
+    // Only set format from value if the user has NOT manually selected a format
     if (!userSelectedFormat) {
-      if (value?.start) {
-        const fmt = getCurrentFormat(value.start);
-        setFormat(fmt === "Invalid Format" ? null : fmt);
-        setStartDate(fmt === "Invalid Format" ? null : dayjs.utc(value.start));
-        if (fmt === DATE_TIME_ZONE_FORMAT) {
-          setStartTime(dayjs.utc(value.start));
-        }
-      } else {
-        setStartDate(null);
-        setStartTime(null);
-      }
-      if (value?.end) {
-        const fmt = getCurrentFormat(value.end);
-        setFormat(fmt === "Invalid Format" ? null : fmt);
-        setEndDate(fmt === "Invalid Format" ? null : dayjs.utc(value.end));
-        if (fmt === DATE_TIME_ZONE_FORMAT) {
-          setEndTime(dayjs.utc(value.end));
-        }
-      } else {
-        setEndDate(null);
-        setEndTime(null);
-      }
-      if (!value?.start && !value?.end) setFormat(null);
+      const fmt = start
+        ? getCurrentFormat(start)
+        : end
+        ? getCurrentFormat(end)
+        : null;
+      setFormat(fmt === "Invalid Format" ? null : fmt);
     }
-  }, [value, userSelectedFormat]);
+
+    setStartDate(
+      start && getCurrentFormat(start) !== "Invalid Format"
+        ? dayjs.utc(start)
+        : null
+    );
+    setEndDate(
+      end && getCurrentFormat(end) !== "Invalid Format" ? dayjs.utc(end) : null
+    );
+
+    setStartTime(
+      start && getCurrentFormat(start) === DATE_TIME_ZONE_FORMAT
+        ? dayjs.utc(start)
+        : null
+    );
+    setEndTime(
+      end && getCurrentFormat(end) === DATE_TIME_ZONE_FORMAT
+        ? dayjs.utc(end)
+        : null
+    );
+
+    setUserSelectedFormat(false);
+  }, [value]);
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
