@@ -33,6 +33,7 @@ import CodeableConceptComponent from "./types/CodeableConceptComponent";
 import PeriodDateTimeComponent from "./types/PeriodDateTimeComponent";
 import ChoiceType from "./ChoiceType";
 import QuantityInput from "./types/QuantityInput";
+import IdentifierComponent from "./types/IdentifierComponent";
 
 // onChange is being deprecated as no updates to the resource are tracked.
 // Changes directly to the json should be done with a dispatch, this propagates downstream changes in formik.
@@ -292,6 +293,18 @@ const TypeEditor = ({
             showAddAttributeButton={showAddAttributeButton}
             addTitle={addTitle}
             {...formik.getFieldProps(label)}
+          />
+        );
+      case "Identifier":
+        return (
+          <IdentifierComponent
+            label={label}
+            canEdit={canEdit}
+            resource={resource}
+            structureDefinition={structureDefinition}
+            fieldRequired={false}
+            error={getNestedProperty(formik.errors, label)}
+            helperText={formikErrorHandler(label)}
           />
         );
       case "http://hl7.org/fhirpath/System.Boolean":
