@@ -22,7 +22,7 @@ import {
 } from "@madie/madie-models";
 import MeasureEditor from "./editor/MeasureEditor";
 // @ts-ignore
-import { measureStore } from "@madie/madie-util";
+import { measureStore, useFeatureFlags } from "@madie/madie-util";
 import { oneItemResponse } from "../__mocks__/mockMeasureResponses";
 
 jest.mock("./details/MeasureDetails");
@@ -183,7 +183,9 @@ jest.mock("@madie/madie-util", () => ({
     getAccessToken: () => "test.jwt",
   })),
   checkUserCanEdit: jest.fn(),
-  useFeatureFlags: () => ({}),
+  useFeatureFlags: jest.fn(() => ({
+    TransferMeasure: true,
+  })),
   measureStore: {
     updateMeasure: jest.fn((measure) => measure),
     state: jest.fn().mockImplementation(() => null),
@@ -445,7 +447,7 @@ describe("EditMeasure Component", () => {
     await waitFor(() =>
       setTimeout(() => {
         expect(queryByTestId("view-hr-modal")).toBeInTheDocument();
-      }, 500)
+      }, 1000)
     );
 
     setTimeout(async () => {
@@ -481,5 +483,72 @@ describe("EditMeasure Component", () => {
     const cancelButton = getByTestId("share-cancel-button");
     fireEvent.click(cancelButton);
     expect(queryByTestId("share-dialog")).toBeVisible();
+  });
+
+  it("should display transfer dialog when the event is triggered and close dialog when cancel button is clicked", async () => {
+    renderRouter();
+
+    const result = await findByTestId("editMeasure");
+    expect(result).toBeInTheDocument();
+
+    act(() => {
+      window.dispatchEvent(new Event("transfer-measure"));
+    });
+
+    await waitFor(async () => {
+      expect(getByTestId("transfer-dialog")).toBeInTheDocument();
+    });
+
+    const cancelButton = getByTestId("transfer-cancel-button");
+    fireEvent.click(cancelButton);
+    await waitFor(async () => {
+      expect(queryByTestId("transfer-dialog")).not.toBeInTheDocument();
+    });
+  });
+
+  it("should display transfer dialog when the event is triggered and close dialog when continue button is clicked", async () => {
+    renderRouter();
+
+    const result = await findByTestId("editMeasure");
+    expect(result).toBeInTheDocument();
+
+    act(() => {
+      window.dispatchEvent(new Event("transfer-measure"));
+    });
+
+    await waitFor(() =>
+      setTimeout(() => {
+        expect(getByTestId("transfer-dialog")).toBeInTheDocument();
+
+        const newHarpIdInput = getByTestId("harp-id-input");
+        expect(newHarpIdInput).toBeInTheDocument();
+        expect(newHarpIdInput.value).toBe("");
+        const transferBtn = getByTestId("transfer-save-button");
+        expect(transferBtn).toBeInTheDocument();
+        expect(transferBtn).toBeDisabled();
+
+        fireEvent.change(newHarpIdInput, {
+          target: { value: "newUser" },
+        });
+        expect(newHarpIdInput.value).toBe("newUser");
+        expect(transferBtn).toBeEnabled();
+
+        fireEvent.click(transferBtn);
+
+        expect(queryByTestId("transfer-dialog")).not.toBeInTheDocument();
+      }, 1000)
+    );
+  });
+
+  it("pressing Space on a tab prevents default and triggers click", async () => {
+    renderRouter([{ pathname: "/measures/fakeid/edit/details/" }]);
+
+    const editorTab = await findByText("CQL Editor");
+    const clickSpy = jest.spyOn(editorTab, "click");
+    const preventDefault = jest.fn();
+
+    fireEvent.keyDown(editorTab, { key: " ", preventDefault });
+
+    expect(clickSpy).toHaveBeenCalledTimes(1);
   });
 });

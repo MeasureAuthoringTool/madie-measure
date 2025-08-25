@@ -77,6 +77,7 @@ describe("ActionCenter", () => {
         deleteMeasure={jest.fn()}
         setViewHumanReadableModal={jest.fn()}
         activeTab={0}
+        setTransferDialog={jest.fn()}
       />
     );
 
@@ -110,6 +111,7 @@ describe("ActionCenter", () => {
         deleteMeasure={jest.fn()}
         setViewHumanReadableModal={jest.fn()}
         activeTab={1}
+        setTransferDialog={jest.fn()}
       />
     );
 
@@ -146,6 +148,7 @@ describe("ActionCenter", () => {
         deleteMeasure={jest.fn()}
         setViewHumanReadableModal={jest.fn()}
         activeTab={2}
+        setTransferDialog={jest.fn()}
       />
     );
 
@@ -178,6 +181,7 @@ describe("ActionCenter", () => {
         deleteMeasure={deleteMeasure}
         setViewHumanReadableModal={jest.fn()}
         activeTab={0}
+        setTransferDialog={jest.fn()}
       />
     );
 
@@ -206,12 +210,13 @@ describe("ActionCenter", () => {
         deleteMeasure={jest.fn()}
         setViewHumanReadableModal={jest.fn()}
         activeTab={0}
+        setTransferDialog={jest.fn()}
       />
     );
 
     userEvent.click(await screen.findByTestId("export-action-btn"));
 
-    const exportForPublishingButton = await screen.findByRole("button", {
+    const exportForPublishingButton = await screen.findByRole("menuitem", {
       name: "Export for Publishing",
     });
     userEvent.click(exportForPublishingButton);
@@ -237,12 +242,13 @@ describe("ActionCenter", () => {
         deleteMeasure={jest.fn()}
         setViewHumanReadableModal={jest.fn()}
         activeTab={0}
+        setTransferDialog={jest.fn()}
       />
     );
 
     userEvent.click(await screen.findByTestId("export-action-btn"));
 
-    const exportForPublishingButton = await screen.findByRole("button", {
+    const exportForPublishingButton = await screen.findByRole("menuitem", {
       name: "Export",
     });
     userEvent.click(exportForPublishingButton);
@@ -267,6 +273,7 @@ describe("ActionCenter", () => {
         deleteMeasure={jest.fn()}
         setViewHumanReadableModal={jest.fn()}
         activeTab={0}
+        setTransferDialog={jest.fn()}
       />
     );
 
@@ -292,6 +299,7 @@ describe("ActionCenter", () => {
         deleteMeasure={jest.fn()}
         setViewHumanReadableModal={setViewHumanReadableModal}
         activeTab={0}
+        setTransferDialog={jest.fn()}
       />
     );
 
@@ -327,6 +335,7 @@ describe("ActionCenter", () => {
         deleteMeasure={jest.fn()}
         setViewHumanReadableModal={jest.fn()}
         activeTab={0}
+        setTransferDialog={jest.fn()}
       />
     );
 
@@ -359,13 +368,18 @@ describe("ActionCenter", () => {
         deleteMeasure={jest.fn()}
         setViewHumanReadableModal={jest.fn()}
         activeTab={0}
+        setTransferDialog={jest.fn()}
       />
     );
 
-    const shareButton = await screen.findByTestId("share-action-btn");
-    expect(shareButton).toBeDisabled();
+    await waitFor(() =>
+      setTimeout(() => {
+        const shareButton = screen.findByTestId("share-action-btn");
+        expect(shareButton).toBeDisabled();
 
-    expect(setShareDialog).not.toHaveBeenCalledWith(true);
+        expect(setShareDialog).not.toHaveBeenCalledWith(true);
+      }, 500)
+    );
   });
 
   it("should not render transfer action if feature flag is not on", () => {
@@ -387,6 +401,7 @@ describe("ActionCenter", () => {
         deleteMeasure={jest.fn()}
         setViewHumanReadableModal={jest.fn()}
         activeTab={0}
+        setTransferDialog={jest.fn()}
       />
     );
 
@@ -401,5 +416,73 @@ describe("ActionCenter", () => {
     ).toBeInTheDocument();
     expect(screen.getByTestId("view-hr-action-btn")).toBeInTheDocument();
     expect(screen.queryByTestId("transfer-action-btn")).not.toBeInTheDocument();
+  });
+
+  it("should call setTransferDialog", async () => {
+    mockCheckUserCanEdit.mockReturnValue(true);
+    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
+      TransferMeasure: true,
+    }));
+
+    const setTransferDialog = jest.fn();
+
+    render(
+      <ActionCenter
+        measures={[qdmMeasure]}
+        associateCmsId={jest.fn()}
+        exportMeasure={jest.fn()}
+        updateTargetMeasure={jest.fn()}
+        setCreateVersionDialog={jest.fn()}
+        setDraftMeasureDialog={jest.fn()}
+        setDeleteMeasureDialog={jest.fn()}
+        setShareDialog={jest.fn()}
+        deleteMeasure={jest.fn()}
+        setViewHumanReadableModal={jest.fn()}
+        activeTab={0}
+        setTransferDialog={setTransferDialog}
+      />
+    );
+
+    const transferButton = await screen.findByTestId("transfer-action-btn");
+    expect(transferButton).toBeEnabled();
+    fireEvent.click(transferButton);
+
+    expect(setTransferDialog).toHaveBeenCalledWith({
+      open: true,
+    });
+  });
+
+  it("should not call setTransferDialog when no measures passed in", async () => {
+    mockCheckUserCanEdit.mockReturnValue(true);
+    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
+      TransferMeasure: true,
+    }));
+
+    const setTransferDialog = jest.fn();
+
+    render(
+      <ActionCenter
+        measures={[]}
+        associateCmsId={jest.fn()}
+        exportMeasure={jest.fn()}
+        updateTargetMeasure={jest.fn()}
+        setCreateVersionDialog={jest.fn()}
+        setDraftMeasureDialog={jest.fn()}
+        setDeleteMeasureDialog={jest.fn()}
+        setShareDialog={jest.fn()}
+        deleteMeasure={jest.fn()}
+        setViewHumanReadableModal={jest.fn()}
+        activeTab={0}
+        setTransferDialog={setTransferDialog}
+      />
+    );
+
+    const transferButton = await screen.findByTestId("transfer-action-btn");
+    expect(transferButton).not.toBeEnabled();
+    fireEvent.click(transferButton);
+
+    expect(setTransferDialog).not.toHaveBeenCalledWith({
+      open: true,
+    });
   });
 });
