@@ -68,8 +68,13 @@ export default function CmsIdentifier({
             }}
           >
             <div style={{ display: "flex", alignItems: "center" }}>
-              <GenerateCmsID />
-              <span style={{ marginLeft: "3px", color: "#0073C8" }}>
+              <GenerateCmsID disabled={!canEdit} />
+              <span
+                style={{
+                  marginLeft: "3px",
+                  color: canEdit ? "#0073C8" : "#666666",
+                }}
+              >
                 Generate ID
               </span>
             </div>
