@@ -3083,7 +3083,7 @@ describe("Measure List with MeasureSearch enabled", () => {
     jest.clearAllMocks();
   });
 
-  it("should display all columns when MeasureSearch is enabled", async () => {
+  it("should display all columns when MeasureSearch is enabled on Owned Measures tab", async () => {
     const { getByText } = render(
       <ServiceContext.Provider value={serviceConfig}>
         <MeasureList
@@ -3095,6 +3095,86 @@ describe("Measure List with MeasureSearch enabled", () => {
           setOffset={setOffsetMock}
           setLoading={setLoadingMock}
           activeTab={0}
+          searchCriteria={null}
+          setSearchCriteria={setSearchCriteriaMock}
+          currentLimit={10}
+          currentPage={0}
+          setErrMsg={setErrMsgMock}
+          // Toast props
+          toastOpen={false}
+          toastMessage=""
+          toastType="danger"
+          setToastOpen={setToastOpenMock}
+          setToastMessage={setToastMessageMock}
+          setToastType={setToastTypeMock}
+          onToastClose={onToastCloseMock}
+          handleToast={handleToastMock}
+        />
+      </ServiceContext.Provider>
+    );
+
+    // Verify all columns are present
+    expect(getByText("Measure")).toBeInTheDocument();
+    expect(getByText("Version")).toBeInTheDocument();
+    expect(getByText("Status")).toBeInTheDocument();
+    expect(getByText("Model")).toBeInTheDocument();
+    expect(getByText("Shared")).toBeInTheDocument();
+    expect(getByText("CMS ID")).toBeInTheDocument();
+    expect(getByText("Updated")).toBeInTheDocument();
+  });
+
+  it("should display all columns (except Shared column) when MeasureSearch is enabled on Shared Measures tab", async () => {
+    const { getByText, queryByText } = render(
+      <ServiceContext.Provider value={serviceConfig}>
+        <MeasureList
+          measureList={measures}
+          setMeasureList={setMeasureListMock}
+          setTotalPages={setTotalPagesMock}
+          setTotalItems={setTotalItemsMock}
+          setVisibleItems={setVisibleItemsMock}
+          setOffset={setOffsetMock}
+          setLoading={setLoadingMock}
+          activeTab={1}
+          searchCriteria={null}
+          setSearchCriteria={setSearchCriteriaMock}
+          currentLimit={10}
+          currentPage={0}
+          setErrMsg={setErrMsgMock}
+          // Toast props
+          toastOpen={false}
+          toastMessage=""
+          toastType="danger"
+          setToastOpen={setToastOpenMock}
+          setToastMessage={setToastMessageMock}
+          setToastType={setToastTypeMock}
+          onToastClose={onToastCloseMock}
+          handleToast={handleToastMock}
+        />
+      </ServiceContext.Provider>
+    );
+
+    // Verify all columns are present (expect Shared column)
+    expect(getByText("Measure")).toBeInTheDocument();
+    expect(getByText("Version")).toBeInTheDocument();
+    expect(getByText("Status")).toBeInTheDocument();
+    expect(getByText("Model")).toBeInTheDocument();
+    expect(queryByText("Shared")).not.toBeInTheDocument();
+    expect(getByText("CMS ID")).toBeInTheDocument();
+    expect(getByText("Updated")).toBeInTheDocument();
+  });
+
+  it("should display all columns when MeasureSearch is enabled on All Measures tab", async () => {
+    const { getByText } = render(
+      <ServiceContext.Provider value={serviceConfig}>
+        <MeasureList
+          measureList={measures}
+          setMeasureList={setMeasureListMock}
+          setTotalPages={setTotalPagesMock}
+          setTotalItems={setTotalItemsMock}
+          setVisibleItems={setVisibleItemsMock}
+          setOffset={setOffsetMock}
+          setLoading={setLoadingMock}
+          activeTab={2}
           searchCriteria={null}
           setSearchCriteria={setSearchCriteriaMock}
           currentLimit={10}
