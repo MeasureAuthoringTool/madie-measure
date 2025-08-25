@@ -138,15 +138,4 @@ describe("QuantityIntervalInput Component", () => {
 
     expect(onQuantityIntervalChange).toHaveBeenCalledWith(expect.any(Object));
   });
-  //   render(
-  //     <QuantityIntervalInput
-  //       label="Interval<Quantity>"
-  //       quantityInterval={{ low: null, high: highQuantity }}
-  //       onQuantityIntervalChange={onQuantityIntervalChange}
-  //       canEdit={true}
-  //     />
-  //   );
-
-  //   expect(onQuantityIntervalChange).toHaveBeenCalledWith(null);
-  // });
 });
