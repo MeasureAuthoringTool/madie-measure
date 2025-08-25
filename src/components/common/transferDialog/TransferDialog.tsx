@@ -255,7 +255,7 @@ const TransferDialog = ({
         <div className="transfer-dialog-info-text">
           <div>
             You are about to Transfer the following measure(s). All versions and
-            drafts will be transferred, so only the most recnet measure name
+            drafts will be transferred, so only the most recent measure name
             appears here.
           </div>
           <div className="warning-message">
