@@ -188,6 +188,39 @@ describe("PeriodDateTimeComponent useEffect", () => {
     expect(endInput).toBeInTheDocument();
   });
 
+  test("sets startTime and endTime in useEffect for DATE_TIME_ZONE_FORMAT", async () => {
+    render(
+      <PeriodDateTimeComponent
+        canEdit
+        label="period"
+        value={{
+          start: "2024-09-26T12:00:00+00:00",
+          end: "2024-09-27T14:00:00+00:00",
+        }}
+        onChange={jest.fn()}
+        fieldRequired={false}
+      />
+    );
+
+    const formatSelector = await screen.findByTestId(
+      "date-time-format-selector-input-field-period"
+    );
+    expect((formatSelector as HTMLSelectElement).value).toBe(
+      "YYYY-MM-DDTHH:mm:ssZ"
+    );
+
+    // Grab the TimeField inputs by placeholder
+    const timeInputs = screen.getAllByPlaceholderText("hh:mm:ss aa");
+    const startTimeInput = timeInputs[0];
+    const endTimeInput = timeInputs[1];
+
+    // Assert the merged times are correctly displayed
+    expect(startTimeInput).toBeInTheDocument();
+    expect(endTimeInput).toBeInTheDocument();
+    expect((startTimeInput as HTMLInputElement).value).toBe("12:00:00 PM");
+    expect((endTimeInput as HTMLInputElement).value).toBe("02:00:00 PM");
+  });
+
   test("does not override format when user has manually selected a format", async () => {
     const { rerender } = render(
       <PeriodDateTimeComponent
