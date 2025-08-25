@@ -13,6 +13,7 @@ import {
 } from "@madie/madie-util";
 import ShareAction from "./shareAction/ShareAction";
 import TransferAction from "./transferAction/TransferAction";
+import HistoryAction from "./historyAction/HistoryAction";
 
 interface PropTypes {
   measures: Measure[];
@@ -171,6 +172,9 @@ export default function ActionCenter(props: PropTypes) {
           onClick={transferMeasure}
           activeTab={props?.activeTab}
         />
+      )}
+      {featureFlags?.MeasureHistory && (
+        <HistoryAction measures={props.measures} onClick={() => {}} />
       )}
     </div>
   );
