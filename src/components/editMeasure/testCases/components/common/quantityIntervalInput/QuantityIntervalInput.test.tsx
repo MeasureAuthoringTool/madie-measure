@@ -36,6 +36,10 @@ const quantityInterval: CQL.Interval = {
 const onQuantityIntervalChange = jest.fn();
 
 describe("QuantityIntervalInput Component", () => {
+  beforeEach(() => {
+    onQuantityIntervalChange.mockClear();
+  });
+
   it("Should render Quantity Interval component with appropriate data", async () => {
     render(
       <QuantityIntervalInput
@@ -108,4 +112,41 @@ describe("QuantityIntervalInput Component", () => {
     );
     expect(screen.getByText("Interval<Quantity>")).toBeInTheDocument();
   });
+
+  it("calls onQuantityIntervalChange with updated interval when low and high are changed", async () => {
+    render(
+      <QuantityIntervalInput
+        label="Interval<Quantity>"
+        quantityInterval={quantityInterval}
+        onQuantityIntervalChange={onQuantityIntervalChange}
+        canEdit={true}
+      />
+    );
+
+    const inputLow = screen.getByTestId(
+      "quantity-value-input-low"
+    ) as HTMLInputElement;
+    const inputHigh = screen.getByTestId(
+      "quantity-value-input-high"
+    ) as HTMLInputElement;
+
+    fireEvent.change(inputLow, { target: { value: "5" } });
+    fireEvent.blur(inputLow);
+
+    fireEvent.change(inputHigh, { target: { value: "50" } });
+    fireEvent.blur(inputHigh);
+
+    expect(onQuantityIntervalChange).toHaveBeenCalledWith(expect.any(Object));
+  });
+  //   render(
+  //     <QuantityIntervalInput
+  //       label="Interval<Quantity>"
+  //       quantityInterval={{ low: null, high: highQuantity }}
+  //       onQuantityIntervalChange={onQuantityIntervalChange}
+  //       canEdit={true}
+  //     />
+  //   );
+
+  //   expect(onQuantityIntervalChange).toHaveBeenCalledWith(null);
+  // });
 });
