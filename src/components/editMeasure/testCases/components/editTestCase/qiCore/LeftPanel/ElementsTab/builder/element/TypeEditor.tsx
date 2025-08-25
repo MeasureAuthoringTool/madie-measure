@@ -602,9 +602,6 @@ const TypeEditor = ({
             formik.setFieldTouched(label);
             formik.setFieldValue(label, value);
           }}
-          setTouched={() => {
-            formik.setFieldTouched(label);
-          }}
         />
       );
     }

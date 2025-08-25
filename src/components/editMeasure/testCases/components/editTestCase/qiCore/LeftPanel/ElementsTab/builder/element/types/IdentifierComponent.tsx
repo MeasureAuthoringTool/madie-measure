@@ -88,9 +88,6 @@ const IdentifierComponent = ({
           formik.setFieldTouched(`${label}.period`);
           formik.setFieldValue(`${label}.period`, value);
         }}
-        setTouched={() => {
-          formik.setFieldTouched(`${label}.period`);
-        }}
         helperText={helperText}
         error={error}
       />

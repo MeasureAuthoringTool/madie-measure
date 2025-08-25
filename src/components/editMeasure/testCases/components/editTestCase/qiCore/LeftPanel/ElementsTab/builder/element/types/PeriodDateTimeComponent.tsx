@@ -88,7 +88,6 @@ const PeriodDateTimeComponent = ({
   label = "DateTime",
   error = {},
   helperText = {},
-  setTouched,
 }: TypeComponentProps) => {
   const [format, setFormat] = useState<string>(null);
   const [startDate, setStartDate] = useState<any>(null);
