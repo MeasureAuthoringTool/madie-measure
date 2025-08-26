@@ -1857,4 +1857,43 @@ describe("TypeEditor Component", () => {
     expect(await screen.findByLabelText("End Date")).toBeInTheDocument();
     expect(await screen.findByLabelText("Assigner")).toBeInTheDocument();
   });
+
+  test("Should render Range component (QuantityIntervalInput) and handle onQuantityIntervalChange", () => {
+    const setFieldTouched = jest.fn();
+    const setFieldValue = jest.fn();
+    const mockFormik = {
+      setFieldTouched,
+      setFieldValue,
+      getFieldProps: () => ({
+        label: "Observation.range",
+        name: "Observation.range",
+        value: { low: { value: "1" }, high: { value: "10" } },
+        onChange: jest.fn(),
+        onBlur: jest.fn(),
+      }),
+    } as any;
+
+    render(
+      <FormikProvider value={mockFormik}>
+        <RequiredFieldsProvider requiredFields={{}} formInfo={[]}>
+          <TypeEditor
+            resource={null}
+            structureDefinition={{
+              id: "Observation.range",
+              path: "Observation.range",
+              min: 0,
+              max: "1",
+              type: [{ code: "Range" }],
+            }}
+            label="Observation.range"
+            canEdit={true}
+            parentStructureDefinition={null}
+          />
+        </RequiredFieldsProvider>
+      </FormikProvider>
+    );
+
+    expect(screen.getByText("Low")).toBeInTheDocument();
+    expect(screen.getByText("High")).toBeInTheDocument();
+  });
 });

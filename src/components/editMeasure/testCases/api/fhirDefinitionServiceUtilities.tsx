@@ -259,7 +259,7 @@ export function removeUndefinedAndEmptyObjects(obj) {
       } else if (typeof value === "object") {
         // Recursively remove undefined values and empty objects
         removeUndefinedAndEmptyObjects(value);
-        if (Object.keys(value).length === 0) {
+        if (Object.keys(value)?.length === 0) {
           delete obj[key];
         }
       }
@@ -514,6 +514,7 @@ export function isComponentDataType(datatype) {
     case "extension":
     case "reference":
     case "quantity":
+    case "range":
       return true;
     default:
       return false;
