@@ -1,7 +1,10 @@
 import * as React from "react";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router";
-import UseFetchTestCases, { sortFilteredTestCases } from "./UseTestCases";
+import UseFetchTestCases, {
+  buildTestCaseUrl,
+  sortFilteredTestCases,
+} from "./UseTestCases";
 import useTestCaseServiceApi, {
   TestCaseServiceApi,
 } from "../../../../api/useTestCaseServiceApi";
@@ -350,5 +353,51 @@ describe("UseFetchTestCases", () => {
     expect(mockNavigate).toHaveBeenCalledWith(
       "?filter=Case%20%23&search=Testing%20Case%20%23%20%2F%20Encoding%20Value%3F&page=1&limit=50"
     );
+  });
+});
+
+describe("buildTestCaseUrl", () => {
+  it("should build URL with string filter/search and numeric page/limit", () => {
+    const url = buildTestCaseUrl({
+      filter: "Title",
+      search: "Test Case",
+      page: 2,
+      limit: 50,
+    });
+    expect(url).toBe("?filter=Title&search=Test%20Case&page=2&limit=50");
+  });
+
+  it("should handle array inputs and pick the first element", () => {
+    const url = buildTestCaseUrl({
+      filter: ["Title", "Group"],
+      search: ["searchTerm1", "searchTerm2"],
+      limit: ["10", "50"],
+    });
+    expect(url).toBe("?filter=Title&search=searchTerm1&page=1&limit=10");
+  });
+
+  it("should use default values when inputs are undefined", () => {
+    const url = buildTestCaseUrl({});
+    expect(url).toBe("?filter=&search=&page=1&limit=10");
+  });
+
+  it("should encode special characters in filter and search", () => {
+    const url = buildTestCaseUrl({
+      filter: "Case #",
+      search: "Test / ? &",
+    });
+    expect(url).toBe(
+      "?filter=Case%20%23&search=Test%20%2F%20%3F%20%26&page=1&limit=10"
+    );
+  });
+
+  it("should handle mixed array and single value inputs", () => {
+    const url = buildTestCaseUrl({
+      filter: ["Title"],
+      search: "searchTerm1",
+      page: 5,
+      limit: ["All"],
+    });
+    expect(url).toBe("?filter=Title&search=searchTerm1&page=5&limit=All");
   });
 });

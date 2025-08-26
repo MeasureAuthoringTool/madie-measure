@@ -44,6 +44,29 @@ export const sortFilteredTestCases = (
   return testCaseCopy;
 };
 
+export const buildTestCaseUrl = ({
+  filter,
+  search,
+  page,
+  limit,
+}: {
+  filter?: string | string[];
+  search?: string | string[];
+  page?: number;
+  limit?: string | string[] | number;
+}) => {
+  const filterStr = Array.isArray(filter) ? filter[0] : filter ?? "";
+  const searchStr = Array.isArray(search) ? search[0] : search ?? "";
+  const pageValue = page ?? 1;
+  const limitValue = Array.isArray(limit) ? limit[0] : limit ?? 10;
+
+  return (
+    `?filter=${encodeURIComponent(filterStr)}` +
+    `&search=${encodeURIComponent(searchStr)}` +
+    `&page=${pageValue}&limit=${limitValue}`
+  );
+};
+
 function UseFetchTestCases({ measureId, setErrors }) {
   const { search } = useLocation();
   const values = queryString.parse(search);
@@ -57,29 +80,6 @@ function UseFetchTestCases({ measureId, setErrors }) {
   });
   // preserve sort order for react table display
   const [sorting, setSorting] = useState<SortingState>([]);
-
-  const buildTestCaseUrl = ({
-    filter,
-    search,
-    page,
-    limit,
-  }: {
-    filter?: string | string[];
-    search?: string | string[];
-    page?: number;
-    limit?: string | string[] | number;
-  }) => {
-    const filterStr = Array.isArray(filter) ? filter[0] : filter ?? "";
-    const searchStr = Array.isArray(search) ? search[0] : search ?? "";
-    const pageValue = page ?? 1;
-    const limitValue = Array.isArray(limit) ? limit[0] : limit ?? 10;
-
-    return (
-      `?filter=${encodeURIComponent(filterStr)}` +
-      `&search=${encodeURIComponent(searchStr)}` +
-      `&page=${pageValue}&limit=${limitValue}`
-    );
-  };
 
   const handlePageChange = (e, v) => {
     navigate(
