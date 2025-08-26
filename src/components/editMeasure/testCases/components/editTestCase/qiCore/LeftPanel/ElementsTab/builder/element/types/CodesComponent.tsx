@@ -78,6 +78,11 @@ const CodesComponent = ({
       });
   };
 
+  // Update local state whenever Formik value changes
+  useEffect(() => {
+    setCodeValue(value);
+  }, [value]);
+
   useEffect(() => {
     if (structureDefinition) {
       getAndSetCodeValueFromResource();
@@ -153,9 +158,8 @@ const CodesComponent = ({
               : []
           }
           value={value}
-          renderValue={(value) =>
-            codes?.find((concept) => concept.code === codeValue)?.display ||
-            value
+          renderValue={() =>
+            codes?.find((concept) => concept.code === codeValue)?.display
           }
           onChange={(e) => {
             onChange(e.target.value);
