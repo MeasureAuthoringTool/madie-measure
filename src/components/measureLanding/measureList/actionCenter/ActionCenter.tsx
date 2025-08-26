@@ -13,6 +13,7 @@ import {
 } from "@madie/madie-util";
 import ShareAction from "./shareAction/ShareAction";
 import TransferAction from "./transferAction/TransferAction";
+import HistoryAction from "./historyAction/HistoryAction";
 
 interface PropTypes {
   measures: Measure[];
@@ -26,6 +27,7 @@ interface PropTypes {
   deleteMeasure: () => void;
   setViewHumanReadableModal: any;
   activeTab: number;
+  setTransferDialog: any;
 }
 export default function ActionCenter(props: PropTypes) {
   const [canEdit, setCanEdit] = useState<boolean>(false);
@@ -66,8 +68,13 @@ export default function ActionCenter(props: PropTypes) {
   }, [props.measures, props.setDraftMeasureDialog, props.updateTargetMeasure]);
 
   const transferMeasure = useCallback(() => {
-    //to be impleted
-  }, [props.measures, props.updateTargetMeasure]);
+    //to be implemented
+    if (props.measures?.length > 0) {
+      props.setTransferDialog({
+        open: true,
+      });
+    }
+  }, [props.measures, props.setTransferDialog]);
 
   const exportMeasure = useCallback(
     (exportType: string) => {
@@ -165,6 +172,9 @@ export default function ActionCenter(props: PropTypes) {
           onClick={transferMeasure}
           activeTab={props?.activeTab}
         />
+      )}
+      {featureFlags?.MeasureHistory && (
+        <HistoryAction measures={props.measures} onClick={() => {}} />
       )}
     </div>
   );

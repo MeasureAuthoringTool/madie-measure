@@ -52,6 +52,7 @@ jest.mock("@madie/madie-util", () => ({
   checkUserCanDelete: jest.fn().mockImplementation(() => true),
   useFeatureFlags: jest.fn(() => ({
     enableQdmRepeatTransfer: false,
+    TransferMeasure: false,
   })),
   measureStore: {
     updateMeasure: jest.fn((measure) => measure),
@@ -2984,6 +2985,8 @@ describe("Action Center Tests", () => {
         />
       </ServiceContext.Provider>
     );
+
+    screen.debug(undefined, 8000000);
     const checkBoxes = await screen.findAllByRole("checkbox");
     expect(checkBoxes.length).toBe(6);
     userEvent.click(checkBoxes[1]);
@@ -3002,6 +3005,71 @@ describe("Action Center Tests", () => {
 
     unmount();
   });
+
+  it("should display transfer dialog on clicking transfer action button, and submit the form values", async () => {
+    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
+      TransferMeasure: true,
+    }));
+    const { unmount } = render(
+      <ServiceContext.Provider value={serviceConfig}>
+        <MeasureList
+          measureList={measures}
+          setMeasureList={setMeasureListMock}
+          setTotalPages={setTotalPagesMock}
+          setTotalItems={setTotalItemsMock}
+          setVisibleItems={setVisibleItemsMock}
+          setOffset={setOffsetMock}
+          setLoading={setLoadingMock}
+          activeTab={0}
+          searchCriteria={null}
+          setSearchCriteria={setSearchCriteriaMock}
+          currentLimit={10}
+          currentPage={0}
+          setErrMsg={setErrMsgMock}
+          // Toast props
+          toastOpen={false}
+          toastMessage=""
+          toastType="danger"
+          setToastOpen={setToastOpenMock}
+          setToastMessage={setToastMessageMock}
+          setToastType={setToastTypeMock}
+          onToastClose={onToastCloseMock}
+          handleToast={handleToastMock}
+        />
+      </ServiceContext.Provider>
+    );
+    const checkBoxes = await screen.findAllByRole("checkbox");
+    expect(checkBoxes.length).toBe(6);
+    userEvent.click(checkBoxes[1]);
+    const transferButton = screen.getByTestId("transfer-action-btn");
+    expect(transferButton).toBeInTheDocument();
+    userEvent.click(transferButton);
+
+    await waitFor(async () => {
+      expect(screen.getByTestId("transfer-dialog")).toBeInTheDocument();
+    });
+
+    const newHarpIdInput = screen.getByTestId("harp-id-input");
+    expect(newHarpIdInput).toBeInTheDocument();
+    expect(newHarpIdInput.value).toBe("");
+    const transferBtn = screen.getByTestId("transfer-save-button");
+    expect(transferBtn).toBeInTheDocument();
+    expect(transferBtn).toBeDisabled();
+
+    fireEvent.change(newHarpIdInput, {
+      target: { value: "newUser" },
+    });
+    expect(newHarpIdInput.value).toBe("newUser");
+    expect(transferBtn).toBeEnabled();
+
+    fireEvent.click(transferBtn);
+
+    await waitFor(async () => {
+      expect(screen.queryByTestId("transfer-dialog")).not.toBeInTheDocument();
+    });
+
+    unmount();
+  });
 });
 
 describe("Measure List with MeasureSearch enabled", () => {
@@ -3015,7 +3083,7 @@ describe("Measure List with MeasureSearch enabled", () => {
     jest.clearAllMocks();
   });
 
-  it("should display all columns when MeasureSearch is enabled", async () => {
+  it("should display all columns when MeasureSearch is enabled on Owned Measures tab", async () => {
     const { getByText } = render(
       <ServiceContext.Provider value={serviceConfig}>
         <MeasureList
@@ -3027,6 +3095,86 @@ describe("Measure List with MeasureSearch enabled", () => {
           setOffset={setOffsetMock}
           setLoading={setLoadingMock}
           activeTab={0}
+          searchCriteria={null}
+          setSearchCriteria={setSearchCriteriaMock}
+          currentLimit={10}
+          currentPage={0}
+          setErrMsg={setErrMsgMock}
+          // Toast props
+          toastOpen={false}
+          toastMessage=""
+          toastType="danger"
+          setToastOpen={setToastOpenMock}
+          setToastMessage={setToastMessageMock}
+          setToastType={setToastTypeMock}
+          onToastClose={onToastCloseMock}
+          handleToast={handleToastMock}
+        />
+      </ServiceContext.Provider>
+    );
+
+    // Verify all columns are present
+    expect(getByText("Measure")).toBeInTheDocument();
+    expect(getByText("Version")).toBeInTheDocument();
+    expect(getByText("Status")).toBeInTheDocument();
+    expect(getByText("Model")).toBeInTheDocument();
+    expect(getByText("Shared")).toBeInTheDocument();
+    expect(getByText("CMS ID")).toBeInTheDocument();
+    expect(getByText("Updated")).toBeInTheDocument();
+  });
+
+  it("should display all columns (except Shared column) when MeasureSearch is enabled on Shared Measures tab", async () => {
+    const { getByText, queryByText } = render(
+      <ServiceContext.Provider value={serviceConfig}>
+        <MeasureList
+          measureList={measures}
+          setMeasureList={setMeasureListMock}
+          setTotalPages={setTotalPagesMock}
+          setTotalItems={setTotalItemsMock}
+          setVisibleItems={setVisibleItemsMock}
+          setOffset={setOffsetMock}
+          setLoading={setLoadingMock}
+          activeTab={1}
+          searchCriteria={null}
+          setSearchCriteria={setSearchCriteriaMock}
+          currentLimit={10}
+          currentPage={0}
+          setErrMsg={setErrMsgMock}
+          // Toast props
+          toastOpen={false}
+          toastMessage=""
+          toastType="danger"
+          setToastOpen={setToastOpenMock}
+          setToastMessage={setToastMessageMock}
+          setToastType={setToastTypeMock}
+          onToastClose={onToastCloseMock}
+          handleToast={handleToastMock}
+        />
+      </ServiceContext.Provider>
+    );
+
+    // Verify all columns are present (expect Shared column)
+    expect(getByText("Measure")).toBeInTheDocument();
+    expect(getByText("Version")).toBeInTheDocument();
+    expect(getByText("Status")).toBeInTheDocument();
+    expect(getByText("Model")).toBeInTheDocument();
+    expect(queryByText("Shared")).not.toBeInTheDocument();
+    expect(getByText("CMS ID")).toBeInTheDocument();
+    expect(getByText("Updated")).toBeInTheDocument();
+  });
+
+  it("should display all columns when MeasureSearch is enabled on All Measures tab", async () => {
+    const { getByText } = render(
+      <ServiceContext.Provider value={serviceConfig}>
+        <MeasureList
+          measureList={measures}
+          setMeasureList={setMeasureListMock}
+          setTotalPages={setTotalPagesMock}
+          setTotalItems={setTotalItemsMock}
+          setVisibleItems={setVisibleItemsMock}
+          setOffset={setOffsetMock}
+          setLoading={setLoadingMock}
+          activeTab={2}
           searchCriteria={null}
           setSearchCriteria={setSearchCriteriaMock}
           currentLimit={10}
