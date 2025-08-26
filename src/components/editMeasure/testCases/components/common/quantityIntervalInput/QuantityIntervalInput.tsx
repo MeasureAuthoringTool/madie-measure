@@ -28,7 +28,11 @@ const QuantityIntervalInput = ({
   };
 
   useEffect(() => {
-    if (currentInterval?.high && currentInterval?.low) {
+    const lowValid = currentInterval?.low && currentInterval.low.value != null;
+    const highValid =
+      currentInterval?.high && currentInterval.high.value != null;
+
+    if (lowValid || highValid) {
       onQuantityIntervalChange(currentInterval);
     } else {
       onQuantityIntervalChange(null);
@@ -37,7 +41,7 @@ const QuantityIntervalInput = ({
 
   return (
     <>
-      <h5 tw="text-blue-800 mb-2">{label}</h5>
+      <h5 tw="text-blue-800 mb-2 mt-4">{label}</h5>
       <div tw="flex flex-row flex-wrap gap-4">
         <div tw="flex flex-col w-80">
           <Quantity
@@ -47,6 +51,8 @@ const QuantityIntervalInput = ({
             label="Low"
           />
         </div>
+
+        <div tw="mt-6">:</div>
 
         <div tw="flex flex-col w-80">
           <Quantity
