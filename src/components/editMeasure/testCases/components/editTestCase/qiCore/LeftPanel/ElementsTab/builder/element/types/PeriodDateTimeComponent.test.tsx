@@ -1,5 +1,5 @@
 import * as React from "react";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import PeriodDateTimeComponent, {
   YEAR_FORMAT,
@@ -137,5 +137,133 @@ describe("PeriodDateTimeComponent", () => {
     fireEvent.change(endTimeInput, { target: { value: "14:15:00" } });
 
     expect(handleChange).toHaveBeenCalled();
+  });
+});
+
+describe("PeriodDateTimeComponent useEffect", () => {
+  test("sets format based on start date when user has not selected format", async () => {
+    render(
+      <PeriodDateTimeComponent
+        canEdit
+        value={{ start: "2024-09-26" }}
+        onChange={jest.fn()}
+        fieldRequired={false}
+      />
+    );
+
+    const startInput = await screen.findByTestId(
+      "start-YYYY-MM-DD-field-DateTime"
+    );
+    expect(startInput).toBeInTheDocument();
+  });
+
+  test("sets format based on end date when start is undefined", async () => {
+    render(
+      <PeriodDateTimeComponent
+        canEdit
+        value={{ end: "2024-12-31" }}
+        onChange={jest.fn()}
+        fieldRequired={false}
+      />
+    );
+
+    const endInput = await screen.findByTestId("end-YYYY-MM-DD-field-DateTime");
+    expect(endInput).toBeInTheDocument();
+  });
+
+  test("handles invalid start and end dates", async () => {
+    render(
+      <PeriodDateTimeComponent
+        canEdit
+        value={{ start: "invalid", end: "also-invalid" }}
+        onChange={jest.fn()}
+        fieldRequired={false}
+      />
+    );
+
+    const startInput = await screen.findByTestId("start-year-field-DateTime");
+    const endInput = await screen.findByTestId("end-year-field-DateTime");
+
+    expect(startInput).toBeInTheDocument();
+    expect(endInput).toBeInTheDocument();
+  });
+
+  test("sets startTime and endTime in useEffect for DATE_TIME_ZONE_FORMAT", async () => {
+    render(
+      <PeriodDateTimeComponent
+        canEdit
+        label="period"
+        value={{
+          start: "2024-09-26T12:00:00+00:00",
+          end: "2024-09-27T14:00:00+00:00",
+        }}
+        onChange={jest.fn()}
+        fieldRequired={false}
+      />
+    );
+
+    const formatSelector = await screen.findByTestId(
+      "date-time-format-selector-input-field-period"
+    );
+    expect((formatSelector as HTMLSelectElement).value).toBe(
+      "YYYY-MM-DDTHH:mm:ssZ"
+    );
+
+    // Grab the TimeField inputs by placeholder
+    const timeInputs = screen.getAllByPlaceholderText("hh:mm:ss aa");
+    const startTimeInput = timeInputs[0];
+    const endTimeInput = timeInputs[1];
+
+    // Assert the merged times are correctly displayed
+    expect(startTimeInput).toBeInTheDocument();
+    expect(endTimeInput).toBeInTheDocument();
+    expect((startTimeInput as HTMLInputElement).value).toBe("12:00:00 PM");
+    expect((endTimeInput as HTMLInputElement).value).toBe("02:00:00 PM");
+  });
+
+  test("does not override format when user has manually selected a format", async () => {
+    const { rerender } = render(
+      <PeriodDateTimeComponent
+        canEdit
+        value={{ start: "2024-09-26" }}
+        onChange={jest.fn()}
+        fieldRequired={false}
+      />
+    );
+
+    const selector = await screen.findByTestId(
+      "date-time-format-selector-input-field-DateTime"
+    );
+
+    // Simulate user manually selecting "YYYY"
+    fireEvent.change(selector, { target: { value: "YYYY" } });
+
+    // Rerender with new value to simulate prop change
+    rerender(
+      <PeriodDateTimeComponent
+        canEdit
+        value={{ start: "2025-01-01" }}
+        onChange={jest.fn()}
+        fieldRequired={false}
+      />
+    );
+
+    expect((selector as HTMLSelectElement).value).toBe("YYYY");
+  });
+
+  test("resets userSelectedFormat to false after effect runs", async () => {
+    render(
+      <PeriodDateTimeComponent
+        canEdit
+        value={{ start: "2024-09-26" }}
+        onChange={jest.fn()}
+        fieldRequired={false}
+      />
+    );
+
+    const selector = await screen.findByTestId(
+      "date-time-format-selector-input-field-DateTime"
+    );
+    expect((selector as HTMLSelectElement).value).toBe("YYYY-MM-DD");
   });
 });

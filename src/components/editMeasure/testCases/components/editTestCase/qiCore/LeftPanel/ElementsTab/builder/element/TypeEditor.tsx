@@ -33,6 +33,7 @@ import CodeableConceptComponent from "./types/CodeableConceptComponent";
 import PeriodDateTimeComponent from "./types/PeriodDateTimeComponent";
 import ChoiceType from "./ChoiceType";
 import QuantityInput from "./types/QuantityInput";
+import IdentifierComponent from "./types/IdentifierComponent";
 import QuantityIntervalInput from "../../../../../../common/quantityIntervalInput/QuantityIntervalInput";
 
 // onChange is being deprecated as no updates to the resource are tracked.
@@ -297,6 +298,18 @@ const TypeEditor = ({
             showAddAttributeButton={showAddAttributeButton}
             addTitle={addTitle}
             {...formik.getFieldProps(label)}
+          />
+        );
+      case "Identifier":
+        return (
+          <IdentifierComponent
+            label={label}
+            canEdit={canEdit}
+            resource={resource}
+            structureDefinition={structureDefinition}
+            fieldRequired={false}
+            error={getNestedProperty(formik.errors, label)}
+            helperText={formikErrorHandler(label)}
           />
         );
       case "http://hl7.org/fhirpath/System.Boolean":
@@ -605,9 +618,6 @@ const TypeEditor = ({
           onChange={(value) => {
             formik.setFieldTouched(label);
             formik.setFieldValue(label, value);
-          }}
-          setTouched={() => {
-            formik.setFieldTouched(label);
           }}
         />
       );
