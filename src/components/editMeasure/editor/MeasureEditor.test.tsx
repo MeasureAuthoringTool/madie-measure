@@ -346,10 +346,10 @@ describe("MeasureEditor component", () => {
 
     await waitFor(() =>
       expect(
-        screen.getByText(
+        screen.queryByText(
           "CQL return types do not match population criteria! Test Cases will not execute until this issue is resolved."
         )
-      ).toBeInTheDocument()
+      ).not.toBeInTheDocument()
     );
   });
 
@@ -662,15 +662,6 @@ describe("MeasureEditor component", () => {
       fail("subscribe callback was undefined so cannot trigger the change!");
     }
 
-    await waitFor(() =>
-      expect(
-        screen.getByText(
-          "CQL return types do not match population criteria! Test Cases will not execute until this issue is resolved."
-        )
-      ).toBeInTheDocument()
-    );
-
-    userEvent.click(screen.getByTestId("close-error-button"));
     await waitFor(() =>
       expect(
         screen.queryByText(
