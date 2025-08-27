@@ -150,7 +150,6 @@ jest.mock("@madie/madie-util", () => ({
   checkUserCanEdit: jest.fn().mockImplementation(() => true),
   useFeatureFlags: jest.fn().mockImplementation(() => ({
     applyDefaults: false,
-    qiCoreBonnieTestCases: false,
   })),
   routeHandlerStore: {
     subscribe: (set) => {
@@ -167,30 +166,6 @@ global.ResizeObserver = jest.fn().mockImplementation(() => ({
   disconnect: jest.fn(),
 }));
 let importingTestCases = [];
-jest.mock(
-  "../common/import/TestCaseImportFromBonnieDialog",
-  () =>
-    ({ openDialog, handleClose, onImport }) => {
-      return openDialog ? (
-        <div data-testid="test-case-import-dialog">
-          <button
-            data-testid="test-case-import-cancel-btn"
-            onClick={handleClose}
-          >
-            Cancel
-          </button>
-          <button
-            onClick={() => onImport(importingTestCases)}
-            data-testid="test-case-import-import-btn"
-          >
-            Import
-          </button>
-        </div>
-      ) : (
-        <></>
-      );
-    }
-);
 
 // output from calculationService
 const executionResults = {
@@ -572,7 +547,6 @@ describe("TestCaseList component", () => {
     (checkUserCanEdit as jest.Mock).mockClear().mockImplementation(() => true);
     (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
       applyDefaults: false,
-      qiCoreBonnieTestCases: false,
     }));
     setError.mockClear();
 
@@ -1164,155 +1138,6 @@ describe("TestCaseList component", () => {
     expect(screen.getByTestId("sr-div")).toBeInTheDocument();
   });
 
-  it("should hide the button for import test cases from bonnie when feature is disabled", async () => {
-    (checkUserCanEdit as jest.Mock).mockClear().mockImplementation(() => true);
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-      qiCoreBonnieTestCases: false,
-    }));
-
-    renderTestCaseListComponent();
-    const importBtn = await screen.queryByRole("button", {
-      name: /Bonnie Import/i,
-    });
-    expect(importBtn).not.toBeInTheDocument();
-  });
-
-  it("should not show import test cases from bonnie when feature is enabled but user cannot edit", async () => {
-    (checkUserCanEdit as jest.Mock).mockClear().mockImplementation(() => false);
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-      qiCoreBonnieTestCases: true,
-    }));
-
-    renderTestCaseListComponent();
-    const importBtn = screen.queryByRole("button", {
-      name: /Bonnie Import/i,
-    });
-    expect(importBtn).not.toBeInTheDocument();
-  });
-
-  it("should have a enabled button for import test cases when feature is enabled and user can edit", async () => {
-    (checkUserCanEdit as jest.Mock).mockClear().mockImplementation(() => true);
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-      qiCoreBonnieTestCases: true,
-    }));
-
-    renderTestCaseListComponent();
-    const importBtn = await screen.findByRole("button", {
-      name: /Bonnie Import/i,
-    });
-    expect(importBtn).toBeInTheDocument();
-    await waitFor(() => expect(importBtn).not.toBeDisabled());
-  });
-
-  it("should display import dialog when import button is clicked", async () => {
-    (checkUserCanEdit as jest.Mock).mockClear().mockImplementation(() => true);
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-      qiCoreBonnieTestCases: true,
-    }));
-
-    let nextState;
-    setError.mockImplementation((callback) => {
-      nextState = callback([IMPORT_ERROR]);
-    });
-
-    renderTestCaseListComponent();
-    const showImportBtn = await screen.findByRole("button", {
-      name: /Bonnie Import/i,
-    });
-    expect(showImportBtn).toBeInTheDocument();
-    await waitFor(() => expect(showImportBtn).not.toBeDisabled());
-    userEvent.click(showImportBtn);
-    const importDialog = await screen.findByTestId("test-case-import-dialog");
-    expect(importDialog).toBeInTheDocument();
-    const importBtn = within(importDialog).getByRole("button", {
-      name: "Import",
-    });
-    expect(importBtn).toBeInTheDocument();
-    userEvent.click(importBtn);
-    await waitFor(() => {
-      const removedImportDialog = screen.queryByTestId(
-        "test-case-import-dialog"
-      );
-      expect(removedImportDialog).not.toBeInTheDocument();
-      expect(nextState).toEqual([]);
-    });
-  });
-
-  it("should display import error when createTestCases call fails", async () => {
-    (checkUserCanEdit as jest.Mock).mockClear().mockImplementation(() => true);
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-      qiCoreBonnieTestCases: true,
-    }));
-
-    const useTestCaseServiceMockRejected = {
-      getTestCasesByMeasureId: jest.fn().mockResolvedValue(testCases),
-      getTestCaseSeriesForMeasure: jest
-        .fn()
-        .mockResolvedValue(["Series 1", "Series 2"]),
-      createTestCases: jest.fn().mockRejectedValueOnce(new Error("BAD THINGS")),
-    } as unknown as TestCaseServiceApi;
-
-    useTestCaseServiceMock.mockImplementation(() => {
-      return useTestCaseServiceMockRejected;
-    });
-
-    let nextState;
-    setError.mockImplementation((callback) => {
-      nextState = callback([]);
-    });
-
-    renderTestCaseListComponent();
-    const showImportBtn = await screen.findByRole("button", {
-      name: /Bonnie Import/i,
-    });
-    await waitFor(() => expect(showImportBtn).not.toBeDisabled());
-    userEvent.click(showImportBtn);
-    const importDialog = await screen.findByTestId("test-case-import-dialog");
-    expect(importDialog).toBeInTheDocument();
-    const importBtn = within(importDialog).getByRole("button", {
-      name: "Import",
-    });
-    userEvent.click(importBtn);
-    const removedImportDialog = await screen.queryByTestId(
-      "test-case-import-dialog"
-    );
-    expect(removedImportDialog).not.toBeInTheDocument();
-    await waitFor(() => expect(setError).toHaveBeenCalledTimes(2));
-    expect(nextState).toEqual([IMPORT_ERROR]);
-  });
-
-  it("should close import dialog when cancel button is clicked", async () => {
-    (checkUserCanEdit as jest.Mock).mockClear().mockImplementation(() => true);
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-      qiCoreBonnieTestCases: true,
-    }));
-
-    let nextState;
-    setError.mockImplementation((callback) => {
-      nextState = callback([]);
-    });
-    renderTestCaseListComponent([IMPORT_ERROR]);
-    const showImportBtn = await screen.findByRole("button", {
-      name: /Bonnie Import/i,
-    });
-    expect(showImportBtn).toBeInTheDocument();
-    await waitFor(() => expect(showImportBtn).not.toBeDisabled());
-    userEvent.click(showImportBtn);
-    const importDialog = await screen.findByTestId("test-case-import-dialog");
-    expect(importDialog).toBeInTheDocument();
-    const cancelBtn = within(importDialog).getByRole("button", {
-      name: "Cancel",
-    });
-    expect(cancelBtn).toBeInTheDocument();
-    userEvent.click(cancelBtn);
-    const removedImportDialog = await screen.queryByTestId(
-      "test-case-import-dialog"
-    );
-    expect(removedImportDialog).not.toBeInTheDocument();
-    expect(setError).toHaveBeenCalled();
-    expect(nextState).toEqual([]);
-  });
-
   it("should disable execute button if CQL Return type mismatch error exists on measure", async () => {
     mockMeasure.createdBy = MEASURE_CREATEDBY;
     mockMeasure.errors = [
@@ -1855,7 +1680,6 @@ describe("TestCaseList component", () => {
   it("Should display test case copy dialog when at least one test case is selected", async () => {
     (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
       applyDefaults: false,
-      qiCoreBonnieTestCases: false,
     }));
     renderTestCaseListComponent();
 

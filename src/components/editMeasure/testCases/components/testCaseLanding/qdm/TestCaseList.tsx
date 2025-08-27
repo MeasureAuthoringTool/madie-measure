@@ -9,8 +9,6 @@ import {
   PopulationDto,
   TestCase,
   TestCaseExcelExportDto,
-  TestCaseImportOutcome,
-  TestCaseImportRequest,
   OverlappingCodeDto,
 } from "@madie/madie-models";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
@@ -37,7 +35,6 @@ import { useQdmExecutionContext } from "../../routes/qdm/QdmExecutionContext";
 import qdmCalculationService, {
   CqmExecutionResultsByPatient,
 } from "../../../api/QdmCalculationService";
-import TestCaseImportFromBonnieDialogQDM from "../common/import/TestCaseImportFromBonnieDialogQDM";
 import TestCaseCoverage from "./TestCaseCoverage/TestCaseCoverage";
 import { QDMPatient } from "cqm-models";
 import { cloneTestCase } from "../../../util/QdmTestCaseHelper";
@@ -528,61 +525,6 @@ const TestCaseList = (props: TestCaseListProps) => {
       });
   };
 
-  const onTestCaseImport = async (testCases: TestCaseImportRequest[]) => {
-    setWarnings(null);
-    setImportDialogState({ ...importDialogState, open: false });
-    setLoadingState(() => ({
-      loading: true,
-      message: "Importing Test Cases...",
-    }));
-
-    try {
-      testCases = testCases?.map((testCase) => {
-        if (testCase?.json) {
-          const json = JSON.parse(testCase.json);
-          if (json.qdmPatient) {
-            json.qdmPatient = new QDMPatient(json.qdmPatient);
-            testCase.json = JSON.stringify(json);
-          }
-        }
-        return testCase;
-      });
-      const res = await testCaseService.current.importTestCasesQDM(
-        measureId,
-        testCases
-      );
-      const testCaseImportOutcome: TestCaseImportOutcome[] = res.data;
-      const failedImports = testCaseImportOutcome.filter((outcome) => {
-        if (outcome.message) return outcome;
-      });
-      if (failedImports && failedImports.length > 0) {
-        setImportWarnings(testCaseImportOutcome);
-      } else {
-        const successfulImports =
-          testCaseImportOutcome.length - failedImports.length;
-        setToastOpen(true);
-        setToastType("success");
-        setToastMessage(
-          `(${successfulImports}) Test cases imported successfully`
-        );
-      }
-    } catch (error) {
-      setToastOpen(true);
-      setToastType("danger");
-      setToastMessage(IMPORT_ERROR);
-    } finally {
-      setLoadingState({ loading: false, message: "" });
-      const newPath = `/measures/${measureId}/edit/test-cases/list-page/${
-        !_.isEmpty(measure?.groups) && measure?.groups[0].id
-      }?filter=${values.filter ? values.filter : ""}&search=${
-        values.search ? values.search : ""
-      }&page=1&limit=${values.limit ? values.limit : 10}`;
-      navigate(newPath);
-      // always trigger refresh
-      retrieveTestCases();
-    }
-  };
-
   const exportExcel = async () => {
     if (measure?.cql) {
       setExportExecuting(true);
@@ -804,12 +746,6 @@ const TestCaseList = (props: TestCaseListProps) => {
                 onGenerateOverlappingCodesReport={
                   handleGenerateOverlappingCodesReport
                 }
-                onImportTestCases={() => {
-                  setImportErrors((prevState) => [
-                    ...prevState?.filter((e) => e !== IMPORT_ERROR),
-                  ]);
-                  setImportDialogState({ ...importDialogState, open: true });
-                }}
                 testCasePassFailStats={testCasePassFailStats}
                 coveragePercentage={coveragePercentage}
                 validTestCases={testCases?.filter((tc) => tc.validResource)}
@@ -969,13 +905,7 @@ const TestCaseList = (props: TestCaseListProps) => {
         onClose={onCopyTestCaseClose}
         measure={measure}
       />
-      <TestCaseImportFromBonnieDialogQDM
-        openDialog={importDialogState.open}
-        onImport={onTestCaseImport}
-        handleClose={() =>
-          setImportDialogState({ ...importDialogState, open: false })
-        }
-      />
+
       <OverlappingCodesDialog
         openDialog={openOverlappingCodesDialog}
         setOpenDialog={setOpenOverlappingCodesDialog}
