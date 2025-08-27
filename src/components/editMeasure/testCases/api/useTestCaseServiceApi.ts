@@ -12,7 +12,6 @@ import {
 } from "@madie/madie-models";
 import { useOktaTokens } from "@madie/madie-util";
 import { ScanValidationDto } from "./models/ScanValidationDto";
-import { addValues } from "../util/DefaultValueProcessor";
 import { MadieError } from "../util/Utils";
 
 export interface QrdaTestCaseDTO {
@@ -255,25 +254,6 @@ export class TestCaseServiceApi {
     }
   }
 
-  async importTestCasesQDM(
-    measureId: string,
-    testCasesImportRequest: TestCaseImportRequest[]
-  ): Promise<AxiosResponse> {
-    try {
-      return await axios.put(
-        `${this.baseUrl}/measures/${measureId}/test-cases/imports/qdm`,
-        testCasesImportRequest,
-        {
-          headers: {
-            Authorization: `Bearer ${this.getAccessToken()}`,
-          },
-        }
-      );
-    } catch (err) {
-      throw new Error(`Unable to create new test cases`);
-    }
-  }
-
   async scanImportFile(file: any): Promise<ScanValidationDto> {
     try {
       const formData = new FormData();
@@ -294,34 +274,6 @@ export class TestCaseServiceApi {
         "Unable to scan the import file. Please try again later."
       );
     }
-  }
-
-  // TODO: Refactor to dedup with FhirImportHelper::readImportFile
-  readTestCaseFile(file: File, onReadCallback): void {
-    const fileReader = new FileReader();
-    fileReader.onload = (e) => {
-      const content: string = e.target.result as string;
-      let testCaseBundle = null,
-        errorMessage = null;
-      try {
-        testCaseBundle = JSON.parse(content);
-        if (
-          testCaseBundle.resourceType !== "Bundle" ||
-          !testCaseBundle.entry ||
-          testCaseBundle.entry.length === 0
-        ) {
-          errorMessage = "No test case resources were found in imported file.";
-        } else {
-          // Apply Default Values
-          testCaseBundle = addValues(testCaseBundle);
-        }
-      } catch (error) {
-        errorMessage =
-          "An error occurred while reading the file. Please make sure the test case file is valid.";
-      }
-      onReadCallback(testCaseBundle, errorMessage);
-    };
-    fileReader.readAsText(file);
   }
 
   async exportQRDA(
