@@ -1,7 +1,10 @@
 import * as React from "react";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router";
-import UseFetchTestCases, { sortFilteredTestCases } from "./UseTestCases";
+import UseFetchTestCases, {
+  buildTestCaseUrl,
+  sortFilteredTestCases,
+} from "./UseTestCases";
 import useTestCaseServiceApi, {
   TestCaseServiceApi,
 } from "../../../../api/useTestCaseServiceApi";
@@ -20,7 +23,7 @@ jest.mock("@madie/madie-util", () => ({
 jest.mock("react-router-dom", () => ({
   ...jest.requireActual("react-router-dom"),
   useNavigate: () => mockNavigate,
-  useLocation: () => ({ search: "" }),
+  useLocation: jest.fn(() => ({ search: "" })),
 }));
 
 const MockComponent = ({ measureId, setErrors }) => {
@@ -307,5 +310,94 @@ describe("UseFetchTestCases", () => {
 
     const sortedCases = sortFilteredTestCases([], testCaseList);
     expect(sortedCases).toEqual(testCaseList);
+  });
+
+  it("should preserve and encode filter and search values when page or limit changes", async () => {
+    const useLocation = require("react-router-dom").useLocation;
+
+    // Unencoded value is "Testing Case # / Encoding Value?"
+    useLocation.mockReturnValue({
+      search:
+        "?filter=Case%20%23&search=Testing%20Case%20%23%20%2F%20Encoding%20Value?&page=1&limit=10",
+    });
+
+    const testCaseList = [
+      { title: "Test Case 1", validResource: true, lastModifiedAt: new Date() },
+      {
+        title: "Test Case 2",
+        validResource: false,
+        lastModifiedAt: new Date(),
+      },
+    ];
+    mockGetTestCasesByMeasureId.mockResolvedValue(testCaseList);
+
+    const { result } = renderHook(() =>
+      UseFetchTestCases({ measureId: "123", setErrors: mockSetErrors })
+    );
+
+    // Simulate page change
+    act(() => {
+      result.current.testCasePage.handlePageChange(null, 2);
+    });
+
+    // Special characters like '#' and '/' are encoded as '%23' and '%2F', and '?' in the search is encoded as '%3F'
+    expect(mockNavigate).toHaveBeenCalledWith(
+      "?filter=Case%20%23&search=Testing%20Case%20%23%20%2F%20Encoding%20Value%3F&page=2&limit=10"
+    );
+
+    // Simulate limit change
+    act(() => {
+      result.current.testCasePage.handleLimitChange({ target: { value: 50 } });
+    });
+
+    expect(mockNavigate).toHaveBeenCalledWith(
+      "?filter=Case%20%23&search=Testing%20Case%20%23%20%2F%20Encoding%20Value%3F&page=1&limit=50"
+    );
+  });
+});
+
+describe("buildTestCaseUrl", () => {
+  it("should build URL with string filter/search and numeric page/limit", () => {
+    const url = buildTestCaseUrl({
+      filter: "Title",
+      search: "Test Case",
+      page: 2,
+      limit: 50,
+    });
+    expect(url).toBe("?filter=Title&search=Test%20Case&page=2&limit=50");
+  });
+
+  it("should handle array inputs and pick the first element", () => {
+    const url = buildTestCaseUrl({
+      filter: ["Title", "Group"],
+      search: ["searchTerm1", "searchTerm2"],
+      limit: ["10", "50"],
+    });
+    expect(url).toBe("?filter=Title&search=searchTerm1&page=1&limit=10");
+  });
+
+  it("should use default values when inputs are undefined", () => {
+    const url = buildTestCaseUrl({});
+    expect(url).toBe("?filter=&search=&page=1&limit=10");
+  });
+
+  it("should encode special characters in filter and search", () => {
+    const url = buildTestCaseUrl({
+      filter: "Case #",
+      search: "Test / ? &",
+    });
+    expect(url).toBe(
+      "?filter=Case%20%23&search=Test%20%2F%20%3F%20%26&page=1&limit=10"
+    );
+  });
+
+  it("should handle mixed array and single value inputs", () => {
+    const url = buildTestCaseUrl({
+      filter: ["Title"],
+      search: "searchTerm1",
+      page: 5,
+      limit: ["All"],
+    });
+    expect(url).toBe("?filter=Title&search=searchTerm1&page=5&limit=All");
   });
 });

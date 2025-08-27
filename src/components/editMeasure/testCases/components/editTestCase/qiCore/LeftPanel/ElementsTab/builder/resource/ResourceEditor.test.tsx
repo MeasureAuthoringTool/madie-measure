@@ -177,6 +177,7 @@ describe("ResourceEditor", () => {
     localMockFormikObj = _.cloneDeep(mockFormikObj);
     const fhirDefinitionsServiceApiMock = {
       getResourceTree: jest.fn().mockResolvedValue(mockSelectedPatientTree),
+      getValueSetDefinition: jest.fn().mockResolvedValue(mockValueSetsState),
     } as unknown as FhirDefinitionsServiceApi;
     useFhirDefinitionsServiceApiMock.mockImplementation(
       () => fhirDefinitionsServiceApiMock
