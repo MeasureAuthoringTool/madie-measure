@@ -148,7 +148,7 @@ const QuantityInput = ({
     <div tw="flex flex-row">
       <div tw="w-28">
         <TextField
-          value={currentQuantity.value}
+          value={currentQuantity?.value}
           readOnly={!canEdit}
           placeholder="value"
           label={label}
