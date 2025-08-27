@@ -94,7 +94,7 @@ const CodingComponent = ({
           .then((valueSet) => {
             if (valueSet.expansion) {
               setAllValueSets((prev) => {
-                if (prev) {
+                if (prev && includePrev) {
                   return [...prev, valueSet];
                 }
                 return [valueSet];
