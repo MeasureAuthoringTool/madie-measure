@@ -161,7 +161,8 @@ const MeasureEditor = () => {
   const [codeMap, setCodeMap] = useState<Map<string, Code>>(
     new Map<string, Code>()
   );
-  const measureServiceApi = useMeasureServiceApi();
+  const measureServiceApi = useRef(useMeasureServiceApi()).current;
+  //const measureServiceApi = useMeasureServiceApi();
   const { updateMeasure } = measureStore;
   const { measureId } = useParams();
   const [processing, setProcessing] = useState<boolean>(true);
@@ -172,6 +173,7 @@ const MeasureEditor = () => {
     };
     const subscription = measureStore.subscribe((measure: Measure) => {
       setMeasure(measure);
+      validateCql(measure, setToastOpen, setToastMessage);
     });
     if (featureFlags?.Locking && canEdit) {
       window.addEventListener("beforeunload", handleUnload);
@@ -241,7 +243,7 @@ const MeasureEditor = () => {
 
   // on load fetch elm translations results to display errors on editor not just on load..
   useEffect(() => {
-    validateCql(measure, setToastOpen, setToastMessage);
+    //validateCql(measure, setToastOpen, setToastMessage);
     updateElmAnnotations(measure?.cql).catch((err) => {
       console.error("An error occurred while translating CQL to ELM", err);
       // setElmTranslationError("Unable to translate CQL to ELM!");
