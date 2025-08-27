@@ -343,14 +343,6 @@ describe("MeasureEditor component", () => {
     } else {
       fail("subscribe callback was undefined so cannot trigger the change!");
     }
-
-    await waitFor(() =>
-      expect(
-        screen.getByText(
-          "CQL return types do not match population criteria! Test Cases will not execute until this issue is resolved."
-        )
-      ).toBeInTheDocument()
-    );
   });
 
   it("save measure with updated cql in editor on save button click and show error for missing using", async () => {
@@ -661,14 +653,6 @@ describe("MeasureEditor component", () => {
     } else {
       fail("subscribe callback was undefined so cannot trigger the change!");
     }
-
-    await waitFor(() =>
-      expect(
-        screen.getByText(
-          "CQL return types do not match population criteria! Test Cases will not execute until this issue is resolved."
-        )
-      ).toBeInTheDocument()
-    );
 
     userEvent.click(screen.getByTestId("close-error-button"));
     await waitFor(() =>

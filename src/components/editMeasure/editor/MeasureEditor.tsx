@@ -122,6 +122,34 @@ export interface CustomCqlCode extends Omit<CqlCode, "codeSystem"> {
   errorMessage?: string;
 }
 
+const validateCql = (
+  measure: Measure,
+  setToastOpen: React.Dispatch<React.SetStateAction<boolean>>,
+  setToastMessage: React.Dispatch<React.SetStateAction<string>>
+) => {
+  if (
+    measure?.errors?.length > 0 &&
+    measure.errors.includes(
+      MeasureErrorType.MISMATCH_CQL_POPULATION_RETURN_TYPES
+    )
+  ) {
+    setToastOpen(true);
+    setToastMessage(
+      "A population criteria! Test Cases will not execute until this issue is resolved."
+    );
+  }
+  if (
+    measure?.errors?.length > 0 &&
+    (measure.errors.includes(MeasureErrorType.MISMATCH_CQL_SUPPLEMENTAL_DATA) ||
+      measure.errors.includes(MeasureErrorType.MISMATCH_CQL_RISK_ADJUSTMENT))
+  ) {
+    setToastOpen(true);
+    setToastMessage(
+      "Supplemental Data Elements or Risk Adjustment Variables in the Population Criteria section are invalid. Please check and update these values. Test cases will not execute until this issue is resolved."
+    );
+  }
+};
+
 const MeasureEditor = () => {
   useDocumentTitle("MADiE Edit Measure CQL");
   const [measure, setMeasure] = useState<Measure>(measureStore.state);
@@ -133,7 +161,8 @@ const MeasureEditor = () => {
   const [codeMap, setCodeMap] = useState<Map<string, Code>>(
     new Map<string, Code>()
   );
-  const measureServiceApi = useMeasureServiceApi();
+  const measureServiceApi = useRef(useMeasureServiceApi()).current;
+  //const measureServiceApi = useMeasureServiceApi();
   const { updateMeasure } = measureStore;
   const { measureId } = useParams();
   const [processing, setProcessing] = useState<boolean>(true);
@@ -144,31 +173,7 @@ const MeasureEditor = () => {
     };
     const subscription = measureStore.subscribe((measure: Measure) => {
       setMeasure(measure);
-      if (
-        measure?.errors?.length > 0 &&
-        measure.errors.includes(
-          MeasureErrorType.MISMATCH_CQL_POPULATION_RETURN_TYPES
-        )
-      ) {
-        setToastOpen(true);
-        setToastMessage(
-          "CQL return types do not match population criteria! Test Cases will not execute until this issue is resolved."
-        );
-      }
-      if (
-        measure?.errors?.length > 0 &&
-        (measure.errors.includes(
-          MeasureErrorType.MISMATCH_CQL_SUPPLEMENTAL_DATA
-        ) ||
-          measure.errors.includes(
-            MeasureErrorType.MISMATCH_CQL_RISK_ADJUSTMENT
-          ))
-      ) {
-        setToastOpen(true);
-        setToastMessage(
-          "Supplemental Data Elements or Risk Adjustment Variables in the Population Criteria section are invalid. Please check and update these values. Test cases will not execute until this issue is resolved."
-        );
-      }
+      validateCql(measure, setToastOpen, setToastMessage);
     });
     if (featureFlags?.Locking && canEdit) {
       window.addEventListener("beforeunload", handleUnload);
@@ -238,6 +243,7 @@ const MeasureEditor = () => {
 
   // on load fetch elm translations results to display errors on editor not just on load..
   useEffect(() => {
+    //validateCql(measure, setToastOpen, setToastMessage);
     updateElmAnnotations(measure?.cql).catch((err) => {
       console.error("An error occurred while translating CQL to ELM", err);
       // setElmTranslationError("Unable to translate CQL to ELM!");
@@ -809,6 +815,7 @@ const MeasureEditor = () => {
       window.removeEventListener("resetAllForms", resetCql);
     };
   }, [resetCql]); // need access to resetCQl or it will not track what cql is and will set to ""
+
   const handleApplyDefinition = (defValues: Definition) => {
     handleMadieEditorValue(applyDefinition(defValues, editorVal));
     setToastType("success");
@@ -940,7 +947,7 @@ const MeasureEditor = () => {
         message={toastMessage}
         onClose={() => {
           setToastType("danger");
-          setToastMessage("");
+          setToastMessage("This is a message...");
           setToastOpen(false);
         }}
         autoHideDuration={10000}
