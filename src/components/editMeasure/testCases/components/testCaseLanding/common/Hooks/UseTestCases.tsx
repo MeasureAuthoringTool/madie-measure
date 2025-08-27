@@ -44,6 +44,29 @@ export const sortFilteredTestCases = (
   return testCaseCopy;
 };
 
+export const buildTestCaseUrl = ({
+  filter,
+  search,
+  page,
+  limit,
+}: {
+  filter?: string | string[];
+  search?: string | string[];
+  page?: number;
+  limit?: string | string[] | number;
+}) => {
+  const filterStr = Array.isArray(filter) ? filter[0] : filter ?? "";
+  const searchStr = Array.isArray(search) ? search[0] : search ?? "";
+  const pageValue = page ?? 1;
+  const limitValue = Array.isArray(limit) ? limit[0] : limit ?? 10;
+
+  return (
+    `?filter=${encodeURIComponent(filterStr)}` +
+    `&search=${encodeURIComponent(searchStr)}` +
+    `&page=${pageValue}&limit=${limitValue}`
+  );
+};
+
 function UseFetchTestCases({ measureId, setErrors }) {
   const { search } = useLocation();
   const values = queryString.parse(search);
@@ -55,8 +78,30 @@ function UseFetchTestCases({ measureId, setErrors }) {
     loading: true,
     message: "",
   });
-  const [sorting, setSorting] = useState<SortingState>([]);
   // preserve sort order for react table display
+  const [sorting, setSorting] = useState<SortingState>([]);
+
+  const handlePageChange = (e, v) => {
+    navigate(
+      buildTestCaseUrl({
+        filter: values.filter,
+        search: values.search,
+        page: v,
+        limit: values.limit,
+      })
+    );
+  };
+
+  const handleLimitChange = (e) => {
+    navigate(
+      buildTestCaseUrl({
+        filter: values.filter,
+        search: values.search,
+        page: 1,
+        limit: e.target.value,
+      })
+    );
+  };
 
   // Save local storage variable for page, filter, search, clear when navigating to different measure
   const testCasePageOptions = JSON.parse(
@@ -70,9 +115,7 @@ function UseFetchTestCases({ measureId, setErrors }) {
         Object.keys(testCasePageOptions).length
       ) {
         const { filter, limit, search, page } = testCasePageOptions;
-        navigate(
-          `?filter=${filter}&search=${search}&page=${page}&limit=${limit}`
-        );
+        navigate(buildTestCaseUrl({ filter, search, page, limit }));
       }
     }
   }, [testCasePageOptions, values]);
@@ -86,20 +129,8 @@ function UseFetchTestCases({ measureId, setErrors }) {
     currentSlice: [],
     canGoNext: false,
     canGoPrev: false,
-    handlePageChange: (e, v) => {
-      navigate(
-        `?filter=${values.filter ? values.filter : ""}&search=${
-          values.search ? values.search : ""
-        }&page=${v}&limit=${values.limit ? values.limit : 10}`
-      );
-    },
-    handleLimitChange: (e) => {
-      navigate(
-        `?filter=${values.filter ? values.filter : ""}&search=${
-          values.search ? values.search : ""
-        }&page=${1}&limit=${e.target.value}`
-      );
-    },
+    handlePageChange,
+    handleLimitChange,
   });
   const { updateTestCases } = measureStore;
   const filter: string = values?.filter ? values.filter.toString() : "";
@@ -143,20 +174,6 @@ function UseFetchTestCases({ measureId, setErrors }) {
       );
       const canGoPrev = Number(values?.page) > 1;
 
-      const handlePageChange = (e, v) => {
-        navigate(
-          `?filter=${values.filter ? values.filter : ""}&search=${
-            values.search ? values.search : ""
-          }&page=${v}&limit=${values.limit ? values.limit : 10}`
-        );
-      };
-      const handleLimitChange = (e) => {
-        navigate(
-          `?filter=${values.filter ? values.filter : ""}&search=${
-            values.search ? values.search : ""
-          }&page=${1}&limit=${e.target.value}`
-        );
-      };
       // with filter specify filter key, without filter, check status, group, title, description
       if (searchQuery) {
         let filteredTestCases = [...testCases];
