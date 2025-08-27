@@ -1283,7 +1283,6 @@ const EditTestCase = (props: EditTestCaseProps) => {
                           <ValidationStatusIcon
                             validationStatus={testCase?.validationStatus}
                           />
-
                           <span className="ml-2">
                             Validations ({validationErrors?.length || 0})
                           </span>

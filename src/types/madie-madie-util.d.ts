@@ -25,6 +25,7 @@ declare module "@madie/madie-util" {
     qiCore7: boolean;
     Locking: boolean;
     TransferMeasure: boolean;
+    MeasureHistory: boolean;
   }
 
   export interface ServiceConfig {

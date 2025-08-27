@@ -51,6 +51,9 @@ import Search from "./measureSearch/Search";
 import queryString from "query-string";
 import _ from "lodash";
 import { getTabStorageKey } from "../measureLandingUtils";
+import TransferDialog from "../../common/transferDialog/TransferDialog";
+
+const TH = tw.th`p-3 text-left text-sm font-bold capitalize`;
 
 export default function MeasureList(props: {
   retrieveMeasures?: (
@@ -135,8 +138,11 @@ export default function MeasureList(props: {
   const [selectedExpandedMeasuresIds, setSelectedExpandedMeasuresIds] =
     useState([]);
   const featureFlags = useFeatureFlags();
+  const [transferDialog, setTransferDialog] = useState({
+    open: false,
+    measures: [],
+  });
 
-  const TH = tw.th`p-3 text-left text-sm font-bold capitalize`;
   const transFormData = (measureList): TCRow[] => {
     return measureList.map((measure) => ({
       id: measure?.id,
@@ -666,6 +672,10 @@ export default function MeasureList(props: {
     setIsRowExpanded(false);
     setSelectedIdForExpansion(null);
     setSelectedExpandedMeasuresIds([]);
+    setTransferDialog({
+      open: false,
+      measures: [],
+    });
   };
 
   const handleShareDialogClose = ({
@@ -706,6 +716,14 @@ export default function MeasureList(props: {
     props.setCurrentSort(sortChange);
     props.setCurrentDirection(directionChange);
     props.handlePageChange(null, 1);
+  };
+
+  const transferMeasures = (newOwner: string, retainShareAccess: boolean) => {
+    setTransferDialog({
+      open: false,
+      measures: [],
+    });
+    // to be implemented
   };
 
   const updateTargetMeasure = (newValue) => {
@@ -1016,6 +1034,7 @@ export default function MeasureList(props: {
             deleteMeasure={deleteMeasure}
             setViewHumanReadableModal={setViewHumanReadableModal}
             activeTab={props.activeTab}
+            setTransferDialog={setTransferDialog}
           />
         </div>
       </div>
@@ -1205,6 +1224,12 @@ export default function MeasureList(props: {
         onClose={handleDialogClose}
         measureId={targetMeasure?.current?.id}
         exportMeasure={exportMeasure}
+      />
+      <TransferDialog
+        measures={selectedMeasures}
+        open={transferDialog.open}
+        onClose={handleDialogClose}
+        onSubmit={transferMeasures}
       />
     </div>
   );

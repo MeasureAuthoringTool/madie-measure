@@ -74,6 +74,7 @@ const ValidationPanel = ({
 
   const renderValidationErrors = () =>
     validationErrors
+      .sort((a, b) => (a.severity < b.severity ? -1 : 1))
       .filter((error) => !/^information/.test(error?.severity))
       .map((error) => (
         <ValidationAlertCard

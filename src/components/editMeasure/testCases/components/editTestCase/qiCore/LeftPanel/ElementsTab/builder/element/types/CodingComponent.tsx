@@ -284,7 +284,6 @@ const CodingComponent = ({
         <Select
           label="Value Set / Direct Reference Code"
           id={`value-set-selector-${label}`}
-          required="true"
           inputProps={{
             "data-testid": `value-set-selector-input-${label}`,
           }}
