@@ -58,8 +58,7 @@ export class MeasureServiceApi {
   async getMeasuresByMeasureSetId(
     measureSetId: string,
     sortByLatestVersion?: boolean,
-    searchCriteria?: MeasureSearchCriteria,
-    signal?: AbortSignal
+    searchCriteria?: MeasureSearchCriteria
   ): Promise<any> {
     try {
       const response = await axios.put(
@@ -73,16 +72,12 @@ export class MeasureServiceApi {
             measureSetId: measureSetId,
             sortByLatestVersion: sortByLatestVersion,
           },
-          signal,
         }
       );
       if (response.data) {
         return response.data;
       }
     } catch (err) {
-      if (err.message === "canceled") {
-        throw new Error(err.message);
-      }
       console.error("Failed to get measures by measure set id ", err);
       throw err;
     }

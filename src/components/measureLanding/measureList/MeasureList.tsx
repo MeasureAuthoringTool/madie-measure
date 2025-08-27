@@ -582,16 +582,6 @@ export default function MeasureList(props: {
 
   const handleRowClick = async (actions) => {
     if (!isRowExpanded || selectedIdForExpansion !== actions?.measureSetId) {
-      // Abort any existing expand row request
-      if (expandRowAbortController.current) {
-        expandRowAbortController.current.abort();
-      }
-      expandRowAbortController.current = new AbortController();
-
-      // Track this specific expand request
-      expandRequestIdRef.current += 1;
-      const currentRequestId = expandRequestIdRef.current;
-
       setSelectedIdForExpansion(actions?.measureSetId);
       const optionalParams = searchCriteria?.optionalSearchProperties ?? [];
       const firstParam = _.trim(optionalParams[0]);
@@ -601,36 +591,17 @@ export default function MeasureList(props: {
         optionalSearchProperties:
           firstParam && firstParam !== "-" ? [_.camelCase(firstParam)] : [],
       };
-
-      try {
-        const results = await measureServiceApi.getMeasuresByMeasureSetId(
-          actions?.measureSetId,
-          true,
-          modifiedSearchCriteria,
-          expandRowAbortController.current.signal
-        );
-
-        // Only set results if this is still the latest expand request
-        if (currentRequestId === expandRequestIdRef.current) {
-          const filteredResults = results.filter(
-            (result) => result.id !== actions?.id
-          );
-          setIsRowExpanded(true);
-          setExpandedSectionData(transFormData(filteredResults));
-        }
-      } catch (error) {
-        if (
-          error.message !== "canceled" &&
-          currentRequestId === expandRequestIdRef.current
-        ) {
-          console.error("Error expanding measure row:", error);
-        }
-      }
+      const results = await measureServiceApi.getMeasuresByMeasureSetId(
+        actions?.measureSetId,
+        true,
+        modifiedSearchCriteria
+      );
+      const filteredResults = results.filter(
+        (result) => result.id !== actions?.id
+      );
+      setIsRowExpanded(true);
+      setExpandedSectionData(transFormData(filteredResults));
     } else {
-      // Abort any existing expand row request when collapsing
-      if (expandRowAbortController.current) {
-        expandRowAbortController.current.abort();
-      }
       setIsRowExpanded(false);
       setExpandedSectionData(null);
       setSelectedIdForExpansion(null);
@@ -658,18 +629,6 @@ export default function MeasureList(props: {
     table.toggleAllRowsSelected(false);
   }, [props.currentLimit, props.currentPage]);
 
-  // Cleanup effect to abort any pending requests when component unmounts
-  useEffect(() => {
-    return () => {
-      if (abortController.current) {
-        abortController.current.abort();
-      }
-      if (expandRowAbortController.current) {
-        expandRowAbortController.current.abort();
-      }
-    };
-  }, []);
-
   const parentMeasures =
     props.measureList?.filter((measure) => {
       return table
@@ -693,14 +652,6 @@ export default function MeasureList(props: {
         ];
 
   const handleDialogClose = () => {
-    // Abort any pending requests when closing dialogs
-    if (expandRowAbortController.current) {
-      expandRowAbortController.current.abort();
-    }
-    if (abortController.current) {
-      abortController.current.abort();
-    }
-
     setInvalidLibraryDialogOpen(false);
     setInvalidTestCaseOpen(false);
     setCreateVersionDialog({
@@ -747,10 +698,6 @@ export default function MeasureList(props: {
 
   const handleSort = async (sort: string) => {
     props.setLoading(true);
-    // Abort any existing request before starting a new sort request
-    if (abortController.current) {
-      abortController.current.abort();
-    }
     abortController.current = new AbortController();
     let sortChange = "lastModifiedAt";
     let directionChange = "DESC";
@@ -793,8 +740,6 @@ export default function MeasureList(props: {
   const [failureMessage, setFailureMessage] = useState(null); // message to pass to dialog
   // Ref required or value will be lost on all state changes.
   const abortController = useRef(null);
-  const expandRowAbortController = useRef(null);
-  const expandRequestIdRef = useRef(0);
 
   const exportMeasure = async (elmErrorSeverity: string) => {
     setViewHumanReadableModal({
