@@ -37,7 +37,7 @@ describe("TestCaseSummaryGrid", () => {
   it("should render the table with correct headers and data from the bundle", () => {
     render(
       <TestCaseSummaryGrid
-        bundle={mockBundle.entry}
+        entry={mockBundle.entry}
         onRowEdit={mockOnRowEdit}
         onRowDelete={mockOnRowDelete}
       />
@@ -70,7 +70,7 @@ describe("TestCaseSummaryGrid", () => {
   it("should render ActionCenter with correct actions", async () => {
     render(
       <TestCaseSummaryGrid
-        bundle={mockBundle.entry}
+        entry={mockBundle.entry}
         onRowEdit={mockOnRowEdit}
         onRowDelete={mockOnRowDelete}
       />
@@ -91,7 +91,7 @@ describe("TestCaseSummaryGrid", () => {
   it("should call onRowEdit when Edit action is clicked", async () => {
     render(
       <TestCaseSummaryGrid
-        bundle={mockBundle.entry}
+        entry={mockBundle.entry}
         onRowEdit={mockOnRowEdit}
         onRowDelete={mockOnRowDelete}
       />
@@ -110,7 +110,7 @@ describe("TestCaseSummaryGrid", () => {
   it("should call onRowDelete when Delete action is clicked", async () => {
     render(
       <TestCaseSummaryGrid
-        bundle={mockBundle.entry}
+        entry={mockBundle.entry}
         onRowEdit={mockOnRowEdit}
         onRowDelete={mockOnRowDelete}
       />
