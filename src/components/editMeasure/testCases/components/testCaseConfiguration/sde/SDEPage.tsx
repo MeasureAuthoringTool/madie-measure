@@ -78,7 +78,10 @@ const SDEPage = ({ setExecutionContextReady }) => {
     };
 
     measureServiceApi
-      .updateMeasure(newMeasure)
+      .updateMeasureTestCaseConfiguration(
+        newMeasure?.testCaseConfiguration,
+        newMeasure.id
+      )
       .then(() => {
         handleToast(
           "success",
