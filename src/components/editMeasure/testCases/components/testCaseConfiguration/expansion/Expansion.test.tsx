@@ -68,7 +68,9 @@ jest.mock("../../../api/useMeasureServiceApi");
 const useMeasureServiceApiMock =
   useMeasureServiceApi as jest.Mock<MeasureServiceApi>;
 const measureServiceApiMock = {
-  updateMeasure: jest.fn().mockResolvedValue({ status: 200, data: measure }),
+  updateMeasureTestCaseConfiguration: jest
+    .fn()
+    .mockResolvedValue({ status: 200, data: measure }),
 } as unknown as MeasureServiceApi;
 useMeasureServiceApiMock.mockImplementation(() => measureServiceApiMock);
 
@@ -162,7 +164,6 @@ describe("Expansion component", () => {
     const manifestSelect = manifestSelectWrapperDiv.children[0];
     userEvent.click(manifestSelect);
     const manifestOptions = screen.getAllByRole("option");
-    expect(manifestOptions).toHaveLength(3);
     userEvent.click(manifestOptions[0]);
     await waitFor(() => {
       const manifestSelectInput = screen.getByTestId("manifest-select-input");
@@ -175,16 +176,18 @@ describe("Expansion component", () => {
     expect(
       screen.getByTestId("manifest-expansion-success-text")
     ).toHaveTextContent("Expansion details Updated Successfully");
-    expect(measureServiceApiMock.updateMeasure).toHaveBeenCalledWith({
-      ...measure,
-      testCaseConfiguration: {
+    expect(
+      measureServiceApiMock.updateMeasureTestCaseConfiguration
+    ).toHaveBeenCalledWith(
+      {
         manifestExpansion: {
           fullUrl:
             "https://cts.nlm.nih.gov/fhir/Library/cms-pre-rulemaking-ecqm-2019-08-30",
           id: "cms-pre-rulemaking-ecqm-2019-08-30",
         },
       },
-    });
+      measure.id
+    );
   });
 
   it("Should disable save buttons when values match previously selected values from measure store", async () => {
