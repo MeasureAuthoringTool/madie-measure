@@ -71,4 +71,28 @@ describe("MeasureServiceApi", () => {
     );
     expect(mockedAxios.get).toHaveBeenCalled();
   });
+
+  it("should return the axios response for updateMeasureTestCaseConfiguration", async () => {
+    const response = { data: "updated" };
+    (axios.put as jest.Mock).mockResolvedValue(response);
+
+    const result = await measureServiceApi.updateMeasureTestCaseConfiguration(
+      measure.testCaseConfiguration,
+      measure.id
+    );
+
+    expect(result).toBe(response);
+  });
+
+  it("should propagate errors from axios.put for updateMeasureTestCaseConfiguration", async () => {
+    const error = new Error("Network error");
+    (axios.put as jest.Mock).mockRejectedValue(error);
+
+    await expect(
+      measureServiceApi.updateMeasureTestCaseConfiguration(
+        measure.testCaseConfiguration,
+        measure.id
+      )
+    ).rejects.toThrow("Network error");
+  });
 });

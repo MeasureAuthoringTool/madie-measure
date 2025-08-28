@@ -78,7 +78,10 @@ const RAVPage = ({ setExecutionContextReady }) => {
     };
 
     measureServiceApi
-      .updateMeasure(newMeasure)
+      .updateMeasureTestCaseConfiguration(
+        newMeasure?.testCaseConfiguration,
+        newMeasure.id
+      )
       .then(() => {
         handleToast(
           "success",
