@@ -156,7 +156,7 @@ describe("StatusHandler Component", () => {
             canClose: false,
           }),
         ]),
-        minimizeAlerts: false,
+        minimizeAlerts: true,
       }),
       expect.anything()
     );

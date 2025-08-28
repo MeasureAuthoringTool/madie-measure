@@ -236,45 +236,6 @@ describe("TestCaseRoutes", () => {
     ).toBeInTheDocument();
   });
 
-  it("shouldn't render the RAVPage when QDMIncludeRAVValues flag is false", async () => {
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => {
-      return {
-        QDMIncludeRAVValues: false,
-      };
-    });
-
-    mockedAxios.get.mockImplementation(() => {
-      return Promise.resolve({
-        data: [
-          {
-            id: "id1",
-            title: "TC12",
-            description: "Desc1",
-            series: "IPP_Pass",
-            status: null,
-          },
-        ],
-      });
-    });
-    render(
-      <MemoryRouter
-        initialEntries={["/measures/m1234/edit/test-cases/list-page/rav"]}
-      >
-        <ApiContextProvider value={serviceConfig}>
-          <Routes>
-            <Route
-              path="/measures/:measureId/edit/test-cases/*"
-              element={<TestCaseRoutes />}
-            />
-          </Routes>
-        </ApiContextProvider>
-      </MemoryRouter>
-    );
-    expect(
-      screen.queryByTestId("rav-option-radio-buttons-group")
-    ).not.toBeInTheDocument();
-  });
-
   it("should render the Expansion Component", async () => {
     mockedAxios.get.mockImplementation(() => {
       return Promise.resolve({

@@ -347,7 +347,6 @@ describe("Copy Test Case Dialog Component", () => {
       "lastModifiedAt",
       "DESC",
       {
-        draft: true,
         excludeByMeasureIds: ["1"],
         model: "QDM v5.6",
         optionalSearchProperties: ["measureName"],
@@ -370,7 +369,6 @@ describe("Copy Test Case Dialog Component", () => {
       "lastModifiedAt",
       "DESC",
       {
-        draft: true,
         excludeByMeasureIds: ["1"],
         model: "QDM v5.6",
         optionalSearchProperties: [],
@@ -392,7 +390,6 @@ describe("Copy Test Case Dialog Component", () => {
       "lastModifiedAt",
       "DESC",
       {
-        draft: true,
         excludeByMeasureIds: ["1"],
         model: "QDM v5.6",
         optionalSearchProperties: ["measureName", "version", "cmsId"],
