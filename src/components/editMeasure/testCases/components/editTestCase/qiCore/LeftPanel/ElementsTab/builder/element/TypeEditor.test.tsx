@@ -20,6 +20,7 @@ import { RequiredFieldsProvider } from "./RequiredFieldsContext";
 import mockRequiredFields from "./mockRequiredFields";
 import mockFormInfo from "./mockFormInfo";
 import { ExecutionContextProvider } from "../../../../../../routes/qiCore/ExecutionContext";
+import IdentifierComponent from "./types/IdentifierComponent";
 const getNestedProperty = (obj, path) => {
   return path.split(".").reduce((current, key) => current && current[key], obj);
 };
@@ -213,6 +214,9 @@ const useFhirDefinitionsServiceApiMock =
   useFhirDefinitionsServiceApi as jest.Mock<FhirDefinitionsServiceApi>;
 const fhirDefinitionsServiceApiMock = {
   getResourceTree: jest.fn().mockResolvedValue(codingDef),
+  getValueSetDefinition: jest
+    .fn()
+    .mockResolvedValue(mockValueSetDefinitionBirthSex),
 } as unknown as FhirDefinitionsServiceApi;
 useFhirDefinitionsServiceApiMock.mockImplementation(
   () => fhirDefinitionsServiceApiMock
@@ -1574,7 +1578,7 @@ describe("TypeEditor Component", () => {
       name: "Patient.extension[2].value[x]",
     });
     expect(codeSelects).toBeInTheDocument();
-    expect(codeSelects).toHaveTextContent("M");
+    expect(screen.getByDisplayValue("M")).toBeInTheDocument();
 
     userEvent.click(codeSelects);
     const options = await screen.findAllByRole("option");
@@ -1794,6 +1798,64 @@ describe("TypeEditor Component", () => {
     expect(screen.getByText("End")).toBeInTheDocument();
     const timeInputs = screen.getAllByPlaceholderText("MM/DD/YYYY hh:mm aa");
     expect(timeInputs.length).toBeGreaterThanOrEqual(2);
+  });
+
+  test("renders IdentifierComponent fields", async () => {
+    const mockFormik = {
+      values: {},
+      touched: {},
+      errors: {},
+      setFieldValue: jest.fn(),
+      setFieldTouched: jest.fn(),
+      getFieldProps: jest.fn().mockReturnValue({
+        value: "",
+        onChange: jest.fn(),
+        onBlur: jest.fn(),
+        name: "MedicationRequest.identifier[0]",
+      }),
+    };
+
+    render(
+      <ExecutionContextProvider
+        value={{
+          measureState: [null, jest.fn()],
+          bundleState: [null, jest.fn()],
+          valueSetsState: [null, jest.fn()],
+          executionContextReady: true,
+          executing: false,
+          setExecuting: jest.fn(),
+          contextFailure: false,
+        }}
+      >
+        <FormikProvider value={mockFormik}>
+          <RequiredFieldsProvider requiredFields={{}} formInfo={{}}>
+            <IdentifierComponent
+              label="MedicationRequest.identifier[0]"
+              canEdit={true}
+              resource={{}}
+              structureDefinition={{
+                id: "MedicationRequest.identifier",
+                path: "MedicationRequest.identifier",
+                type: [{ code: "Identifier" }],
+                min: 0,
+                max: "*",
+              }}
+              fieldRequired={false}
+            />
+          </RequiredFieldsProvider>
+        </FormikProvider>
+      </ExecutionContextProvider>
+    );
+
+    expect(await screen.findByLabelText("Use")).toBeInTheDocument();
+    expect(
+      await screen.findByLabelText("Value Set / Direct Reference Code")
+    ).toBeInTheDocument();
+    expect(await screen.findByLabelText("System")).toBeInTheDocument();
+    expect(await screen.findByLabelText("Value")).toBeInTheDocument();
+    expect(await screen.findByLabelText("Start Date")).toBeInTheDocument();
+    expect(await screen.findByLabelText("End Date")).toBeInTheDocument();
+    expect(await screen.findByLabelText("Assigner")).toBeInTheDocument();
   });
 
   test("Should render Range component (QuantityIntervalInput) and handle onQuantityIntervalChange", () => {

@@ -35,7 +35,6 @@ import {
   Toast,
 } from "@madie/madie-design-system/dist/react";
 import Typography from "@mui/material/Typography";
-import TestCaseImportFromBonnieDialog from "../common/import/TestCaseImportFromBonnieDialog";
 import {
   TestCasesPassingDetailsProps,
   TestCaseListProps,
@@ -160,10 +159,7 @@ const TestCaseList = (props: TestCaseListProps) => {
   const [measureBundle] = bundleState;
   const [valueSets] = valueSetsState;
   const [selectedPopCriteria, setSelectedPopCriteria] = useState<Group>();
-  const [importFromBonnieDialogState, setImportFromBonnieDialogState] =
-    useState<any>({
-      open: false,
-    });
+
   const [openImportDialog, setOpenImportDialog] = useState<boolean>(false);
   const [openDeleteAllTestCasesDialog, setOpenDeleteAllTestCasesDialog] =
     useState<boolean>(false);
@@ -499,25 +495,7 @@ const TestCaseList = (props: TestCaseListProps) => {
   };
   const readerString = generateSRString(testCases);
   const executionResultLength = Object.keys(executionResults).length;
-  const onTestCaseImportFromBonnie = async (testCases: TestCase[]) => {
-    setImportFromBonnieDialogState({
-      ...importFromBonnieDialogState,
-      open: false,
-    });
-    setLoadingState(() => ({
-      loading: true,
-      message: "Importing Test Cases...",
-    }));
 
-    try {
-      await testCaseService.current.createTestCases(measureId, testCases);
-      retrieveTestCases();
-    } catch (error) {
-      setErrors((prevState) => [...prevState, IMPORT_ERROR]);
-    } finally {
-      setLoadingState({ loading: false, message: "" });
-    }
-  };
   const onTestCaseImport = async (
     testCaseImportRequest: TestCaseImportRequest[]
   ) => {
@@ -655,15 +633,6 @@ const TestCaseList = (props: TestCaseListProps) => {
                 onGenerateOverlappingCodesReport={
                   handleGenerateOverlappingCodesReport
                 }
-                onImportTestCasesFromBonnie={() => {
-                  setErrors((prevState) => [
-                    ...prevState?.filter((e) => e !== IMPORT_ERROR),
-                  ]);
-                  setImportFromBonnieDialogState({
-                    ...importFromBonnieDialogState,
-                    open: true,
-                  });
-                }}
                 onImportTestCases={() => {
                   setErrors((prevState) => [
                     ...prevState?.filter((e) => e !== IMPORT_ERROR),
@@ -817,16 +786,7 @@ const TestCaseList = (props: TestCaseListProps) => {
           handleClose={() => setOpenImportDialog(false)}
         />
       )}
-      <TestCaseImportFromBonnieDialog
-        openDialog={importFromBonnieDialogState.open}
-        onImport={onTestCaseImportFromBonnie}
-        handleClose={() =>
-          setImportFromBonnieDialogState({
-            ...importFromBonnieDialogState,
-            open: false,
-          })
-        }
-      />
+
       <OverlappingCodesDialog
         openDialog={openOverlappingCodesDialog}
         setOpenDialog={setOpenOverlappingCodesDialog}

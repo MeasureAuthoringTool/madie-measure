@@ -4,10 +4,9 @@ import {
   Tabs,
   Tab,
   Popover,
-  MadieSpinner,
 } from "@madie/madie-design-system/dist/react";
 import AddIcon from "@mui/icons-material/Add";
-import FileUploadIcon from "@mui/icons-material/FileUpload";
+
 import * as _ from "lodash";
 import {
   Measure,
@@ -20,8 +19,7 @@ import { useFeatureFlags } from "@madie/madie-util";
 import { useQdmExecutionContext } from "../../routes/qdm/QdmExecutionContext";
 import LoadingButtonWithMenu from "../common/loadingButton/LoadingButtonWithMenu";
 import LoadingButton from "../common/loadingButton/LoadingButton";
-import KeyboardArrowRightIcon from "@mui/icons-material/KeyboardArrowRight";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+
 import classNames from "classnames";
 import "./CreateCodeCoverageNavTabs.scss";
 
@@ -33,7 +31,6 @@ export interface NavTabProps {
   measure: Measure;
   createNewTestCase: (value: string) => void;
   executeTestCases: () => void;
-  onImportTestCases?: () => void;
   testCasePassFailStats: TestCasesPassingDetailsProps;
   coveragePercentage: string;
   validTestCases: TestCase[];
@@ -72,7 +69,6 @@ export default function CreateCodeCoverageNavTabs(props: NavTabProps) {
     createNewTestCase,
     measure,
     executeTestCases,
-    onImportTestCases,
     testCasePassFailStats,
     coveragePercentage,
     validTestCases,
@@ -215,23 +211,6 @@ export default function CreateCodeCoverageNavTabs(props: NavTabProps) {
 
           {canEdit && (
             <>
-              <Button
-                onClick={() => {
-                  if (onImportTestCases) {
-                    onImportTestCases();
-                  }
-                }}
-                variant="outline"
-                disabled={!canEdit}
-                data-testid="show-import-test-cases-button"
-              >
-                <FileUploadIcon
-                  style={{ margin: "0 5px 0 -2px" }}
-                  fontSize="small"
-                />
-                Bonnie Import
-              </Button>
-
               <Button
                 disabled={!canEdit}
                 onClick={createNewTestCase}

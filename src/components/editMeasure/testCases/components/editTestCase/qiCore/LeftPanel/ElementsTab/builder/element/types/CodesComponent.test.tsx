@@ -280,8 +280,10 @@ describe("Codes Component", () => {
       { headers: { Authorization: "Bearer test.jwt" } }
     );
 
+    const codeSelectInput = screen.getByTestId("code-selector-input-Gender");
+    expect(codeSelectInput).toHaveValue("female");
+
     const codeSelect = screen.getByRole("combobox", { name: "Gender" });
-    expect(codeSelect).toHaveTextContent("female");
 
     userEvent.click(codeSelect);
 
@@ -314,9 +316,10 @@ describe("Codes Component", () => {
       { headers: { Authorization: "Bearer test.jwt" } }
     );
 
-    const codeSelect = screen.getByRole("combobox", { name: "Gender" });
-    expect(codeSelect).toHaveTextContent("female");
+    const codeSelectInput = screen.getByTestId("code-selector-input-Gender");
+    expect(codeSelectInput).toHaveValue("female");
 
+    const codeSelect = screen.getByRole("combobox", { name: "Gender" });
     userEvent.click(codeSelect);
 
     await waitFor(() => {
@@ -418,10 +421,10 @@ describe("Codes Component", () => {
         </ApiContextProvider>
       );
 
-      const codeSelect = screen.getByRole("combobox", {
-        name: "Patient.extension[2].value[x]",
-      });
-      expect(codeSelect).toHaveTextContent("M");
+      const codeSelectInput = screen.getByTestId(
+        "code-selector-input-Patient.extension[2].value[x]"
+      );
+      expect(codeSelectInput).toHaveValue("M");
     });
 
     it("test get value set definition does not have expansion or compose.include", async () => {
