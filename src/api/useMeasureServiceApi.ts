@@ -696,6 +696,32 @@ export class MeasureServiceApi {
       throw new Error(error);
     }
   }
+
+  async transferMeasures(
+    measureIds: Array<string>,
+    harpId: string,
+    retainShareAccess: boolean
+  ): Promise<any> {
+    try {
+      const response = await axios.put(
+        `${this.baseUrl}/measures/transfer`,
+        measureIds,
+        {
+          headers: {
+            Authorization: `Bearer ${this.getAccessToken()}`,
+            harpId: `${harpId}`,
+          },
+          params: {
+            retainShareAccess,
+          },
+        }
+      );
+      return response.data;
+    } catch (err) {
+      console.error("Failed to transfer measures", err);
+      throw err;
+    }
+  }
 }
 
 export default function useMeasureServiceApi(): MeasureServiceApi {

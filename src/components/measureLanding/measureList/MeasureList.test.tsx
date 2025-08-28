@@ -7,6 +7,7 @@ import {
   screen,
   waitFor,
   waitForElementToBeRemoved,
+  act,
 } from "@testing-library/react";
 import { within } from "@testing-library/dom";
 import {
@@ -89,11 +90,16 @@ const mockMeasureServiceApi = {
   getMeasuresByMeasureSetId: jest
     .fn()
     .mockResolvedValue([{ model: Model.QICORE }, { model: Model.QICORE }]),
+  transferMeasures: jest.fn().mockResolvedValue({
+    data: true,
+  }),
 } as unknown as MeasureServiceApi;
 
 jest.mock("../../../api/useMeasureServiceApi", () =>
   jest.fn(() => mockMeasureServiceApi)
 );
+
+const retrieveMeasuresMock = jest.fn();
 
 const MEASURE_CREATEDBY = "testuser@example.com"; //#nosec
 const testGroup = [
@@ -3013,6 +3019,7 @@ describe("Action Center Tests", () => {
     const { unmount } = render(
       <ServiceContext.Provider value={serviceConfig}>
         <MeasureList
+          retrieveMeasures={retrieveMeasuresMock}
           measureList={measures}
           setMeasureList={setMeasureListMock}
           setTotalPages={setTotalPagesMock}
@@ -3062,7 +3069,87 @@ describe("Action Center Tests", () => {
     expect(newHarpIdInput.value).toBe("newUser");
     expect(transferBtn).toBeEnabled();
 
-    fireEvent.click(transferBtn);
+    act(() => {
+      fireEvent.click(transferBtn);
+    });
+
+    await waitFor(async () => {
+      expect(retrieveMeasuresMock).toHaveBeenCalled();
+      expect(screen.queryByTestId("transfer-dialog")).not.toBeInTheDocument();
+    });
+
+    unmount();
+  });
+
+  it("should display transfer dialog but not update list if there is error transferring measures", async () => {
+    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
+      TransferMeasure: true,
+    }));
+    const useMeasureServiceMockRejected = {
+      transferMeasures: jest
+        .fn()
+        .mockRejectedValue(new Error("Transfer failed")),
+    } as unknown as MeasureServiceApi;
+
+    useMeasureServiceMock.mockImplementation(() => {
+      return useMeasureServiceMockRejected;
+    });
+    const { unmount } = render(
+      <ServiceContext.Provider value={serviceConfig}>
+        <MeasureList
+          retrieveMeasures={retrieveMeasuresMock}
+          measureList={measures}
+          setMeasureList={setMeasureListMock}
+          setTotalPages={setTotalPagesMock}
+          setTotalItems={setTotalItemsMock}
+          setVisibleItems={setVisibleItemsMock}
+          setOffset={setOffsetMock}
+          setLoading={setLoadingMock}
+          activeTab={0}
+          searchCriteria={null}
+          setSearchCriteria={setSearchCriteriaMock}
+          currentLimit={10}
+          currentPage={0}
+          setErrMsg={setErrMsgMock}
+          // Toast props
+          toastOpen={false}
+          toastMessage=""
+          toastType="danger"
+          setToastOpen={setToastOpenMock}
+          setToastMessage={setToastMessageMock}
+          setToastType={setToastTypeMock}
+          onToastClose={onToastCloseMock}
+          handleToast={handleToastMock}
+        />
+      </ServiceContext.Provider>
+    );
+    const checkBoxes = await screen.findAllByRole("checkbox");
+    expect(checkBoxes.length).toBe(6);
+    userEvent.click(checkBoxes[1]);
+    const transferButton = screen.getByTestId("transfer-action-btn");
+    expect(transferButton).toBeInTheDocument();
+    userEvent.click(transferButton);
+
+    await waitFor(async () => {
+      expect(screen.getByTestId("transfer-dialog")).toBeInTheDocument();
+    });
+
+    const newHarpIdInput = screen.getByTestId("harp-id-input");
+    expect(newHarpIdInput).toBeInTheDocument();
+    expect(newHarpIdInput.value).toBe("");
+    const transferBtn = screen.getByTestId("transfer-save-button");
+    expect(transferBtn).toBeInTheDocument();
+    expect(transferBtn).toBeDisabled();
+
+    fireEvent.change(newHarpIdInput, {
+      target: { value: "newUser" },
+    });
+    expect(newHarpIdInput.value).toBe("newUser");
+    expect(transferBtn).toBeEnabled();
+
+    act(() => {
+      fireEvent.click(transferBtn);
+    });
 
     await waitFor(async () => {
       expect(screen.queryByTestId("transfer-dialog")).not.toBeInTheDocument();

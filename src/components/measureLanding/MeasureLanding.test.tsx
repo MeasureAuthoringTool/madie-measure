@@ -1,7 +1,13 @@
 import "@testing-library/jest-dom";
 // NOTE: jest-dom adds handy assertions to Jest and is recommended, but not required
 import * as React from "react";
-import { render, screen, waitFor, fireEvent } from "@testing-library/react";
+import {
+  render,
+  screen,
+  waitFor,
+  fireEvent,
+  act,
+} from "@testing-library/react";
 import {
   createMemoryRouter,
   RouterProvider,
@@ -65,6 +71,9 @@ const mockMeasureServiceApi = {
     sharedMeasures: 3,
     allMeasures: 10,
   }),
+  transferMeasures: jest.fn().mockResolvedValue({
+    data: true,
+  }),
 } as unknown as MeasureServiceApi;
 
 jest.mock("../../api/useMeasureServiceApi", () =>
@@ -91,6 +100,7 @@ describe("Measure Page", () => {
   beforeEach(() => {
     (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
       MeasureSearch: true,
+      TransferMeasure: true,
     }));
     localStorage.clear();
   });
@@ -496,5 +506,147 @@ describe("Measure Page", () => {
     });
     expect(allMeasuresTab).toBeInTheDocument();
     expect(allMeasuresTab).not.toHaveClass("Mui-selected");
+  });
+
+  test("should display transfer dialog and display success toast", async () => {
+    renderRouter(["/measures"]);
+    const measure1 = await screen.findByText("TestMeasure1");
+    expect(measure1).toBeInTheDocument();
+    await waitFor(() => {
+      expect(
+        mockMeasureServiceApi.searchMeasuresByCriteria
+      ).toHaveBeenCalledWith(
+        ["OWNED"],
+        10,
+        0,
+        "",
+        "",
+        {
+          optionalSearchProperties: [],
+          searchField: "",
+        },
+        abortController.signal
+      );
+    });
+
+    const ownedMeasuresTab = screen.getByRole("tab", {
+      name: "Owned Measures (5)",
+    });
+    const sharedMeasuresTab = screen.getByRole("tab", {
+      name: "Shared Measures (3)",
+    });
+    const allMeasuresTab = screen.getByRole("tab", {
+      name: "All Measures (10)",
+    });
+
+    expect(ownedMeasuresTab).toHaveClass("Mui-selected");
+    expect(sharedMeasuresTab).not.toHaveClass("Mui-selected");
+    expect(allMeasuresTab).not.toHaveClass("Mui-selected");
+
+    const checkbox = await screen.findByTestId("checkbox-select-all-checkbox");
+    expect(checkbox).toBeInTheDocument();
+    act(() => {
+      userEvent.click(checkbox);
+    });
+
+    const transferActionBtn = await screen.findByTestId("transfer-action-btn");
+    expect(transferActionBtn).toBeInTheDocument();
+    act(() => {
+      userEvent.click(transferActionBtn);
+    });
+
+    expect(screen.getByTestId("transfer-dialog")).toBeInTheDocument();
+
+    const newHarpIdInput = screen.getByTestId("harp-id-input");
+    expect(newHarpIdInput).toBeInTheDocument();
+    expect(newHarpIdInput.value).toBe("");
+    const transferBtn = screen.getByTestId("transfer-save-button");
+    expect(transferBtn).toBeInTheDocument();
+    expect(transferBtn).toBeDisabled();
+
+    fireEvent.change(newHarpIdInput, {
+      target: { value: "newUser" },
+    });
+    expect(newHarpIdInput.value).toBe("newUser");
+    expect(transferBtn).toBeEnabled();
+
+    act(() => {
+      fireEvent.click(transferBtn);
+    });
+
+    expect(await screen.findByTestId("toast-success")).toHaveTextContent(
+      "The measure(s) were successfully transferred."
+    );
+    expect(screen.queryByTestId("transfer-dialog")).not.toBeInTheDocument();
+  });
+
+  test("should display transfer dialog and failure toast", async () => {
+    (mockMeasureServiceApi.transferMeasures as jest.Mock)
+      .mockClear()
+      .mockRejectedValueOnce(new Error("Unable to transfer measures."));
+
+    renderRouter(["/measures"]);
+    const measure1 = await screen.findByText("TestMeasure1");
+    expect(measure1).toBeInTheDocument();
+    await waitFor(() => {
+      expect(
+        mockMeasureServiceApi.searchMeasuresByCriteria
+      ).toHaveBeenCalledWith(
+        ["OWNED"],
+        10,
+        0,
+        "",
+        "",
+        {
+          optionalSearchProperties: [],
+          searchField: "",
+        },
+        abortController.signal
+      );
+    });
+
+    const checkbox = await screen.findByTestId("checkbox-select-all-checkbox");
+    expect(checkbox).toBeInTheDocument();
+    act(() => {
+      userEvent.click(checkbox);
+    });
+
+    const transferActionBtn = await screen.findByTestId("transfer-action-btn");
+    expect(transferActionBtn).toBeInTheDocument();
+    act(() => {
+      userEvent.click(transferActionBtn);
+    });
+
+    expect(screen.getByTestId("transfer-dialog")).toBeInTheDocument();
+
+    const newHarpIdInput = screen.getByTestId("harp-id-input");
+    expect(newHarpIdInput).toBeInTheDocument();
+    expect(newHarpIdInput.value).toBe("");
+    const transferBtn = screen.getByTestId("transfer-save-button");
+    expect(transferBtn).toBeInTheDocument();
+    expect(transferBtn).toBeDisabled();
+
+    fireEvent.change(newHarpIdInput, {
+      target: { value: "newUser" },
+    });
+    expect(newHarpIdInput.value).toBe("newUser");
+    expect(transferBtn).toBeEnabled();
+
+    act(() => {
+      fireEvent.click(transferBtn);
+    });
+
+    expect(await screen.findByTestId("toast-danger")).toHaveTextContent(
+      "Unable to transfer the selected measure(s) to the harpId. If the error persists, please contact the help desk."
+    );
+    const closeToast = screen.getByTestId("close-toast-button");
+    expect(closeToast).toBeInTheDocument();
+    act(() => {
+      userEvent.click(closeToast);
+    });
+
+    setTimeout(() => {
+      expect(screen.queryByTestId("toast-danger")).not.toBeInTheDocument();
+    }, 500);
   });
 });
