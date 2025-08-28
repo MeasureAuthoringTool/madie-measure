@@ -22,6 +22,10 @@ import { within } from "@testing-library/dom";
 // @ts-ignore
 import { useFeatureFlags } from "@madie/madie-util";
 import MeasureLanding from "./MeasureLanding";
+import {
+  TRANSFER_MEASURE_SUCCESS,
+  TRANSFER_MEASURE_FAILURE,
+} from "../common/transferDialog/TransferDialog";
 
 const serviceConfig = {
   fhirElmTranslationService: { baseUrl: "fhir/services" },
@@ -575,7 +579,7 @@ describe("Measure Page", () => {
     });
 
     expect(await screen.findByTestId("toast-success")).toHaveTextContent(
-      "The measure(s) were successfully transferred."
+      TRANSFER_MEASURE_SUCCESS
     );
     expect(screen.queryByTestId("transfer-dialog")).not.toBeInTheDocument();
   });
@@ -637,7 +641,7 @@ describe("Measure Page", () => {
     });
 
     expect(await screen.findByTestId("toast-danger")).toHaveTextContent(
-      "Unable to transfer the selected measure(s) to the harpId. If the error persists, please contact the help desk."
+      TRANSFER_MEASURE_FAILURE
     );
     const closeToast = screen.getByTestId("close-toast-button");
     expect(closeToast).toBeInTheDocument();

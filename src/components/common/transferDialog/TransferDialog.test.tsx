@@ -8,7 +8,10 @@ import {
 } from "@testing-library/react";
 import { within } from "@testing-library/dom";
 import { Measure, Model } from "@madie/madie-models";
-import TransferDialog from "./TransferDialog";
+import TransferDialog, {
+  TRANSFER_MEASURE_SUCCESS,
+  TRANSFER_MEASURE_FAILURE,
+} from "./TransferDialog";
 import userEvent from "@testing-library/user-event";
 import useMeasureServiceApi, {
   MeasureServiceApi,
@@ -206,17 +209,17 @@ describe("Transfer Measures Dialog component", () => {
       );
       expect(submitMock).toHaveBeenCalledWith({
         toastType: "success",
-        toastMessage: "The measure(s) were successfully transferred.",
+        toastMessage: TRANSFER_MEASURE_SUCCESS,
         toastOpen: true,
       });
     });
   });
 
   it("test handle submit failure", async () => {
-    const error =
-      "Unable to transfer the selected measure(s) to the harpId. If the error persists, please contact the help desk.";
     const mockMeasureServiceApiRejected = {
-      transferMeasures: jest.fn().mockRejectedValue(new Error(error)),
+      transferMeasures: jest
+        .fn()
+        .mockRejectedValue(new Error(TRANSFER_MEASURE_FAILURE)),
     } as unknown as MeasureServiceApi;
     useMeasureServiceMock.mockImplementation(() => {
       return mockMeasureServiceApiRejected;
@@ -257,7 +260,7 @@ describe("Transfer Measures Dialog component", () => {
       );
       expect(submitMock).toHaveBeenCalledWith({
         toastType: "danger",
-        toastMessage: error,
+        toastMessage: TRANSFER_MEASURE_FAILURE,
         toastOpen: true,
       });
     });

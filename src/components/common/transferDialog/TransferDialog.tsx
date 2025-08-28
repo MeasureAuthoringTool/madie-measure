@@ -30,6 +30,11 @@ import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 import * as Yup from "yup";
 import useMeasureServiceApi from "../../../api/useMeasureServiceApi";
 
+export const TRANSFER_MEASURE_SUCCESS =
+  "The measure(s) were successfully transferred. If you chose to retain share access, you will still be able to edit the measures.";
+export const TRANSFER_MEASURE_FAILURE =
+  "Unable to transfer the selected measure(s) to the harpId. If the error persists, please contact the help desk.";
+
 // Define the data type for rows
 interface RowData {
   measureName: string;
@@ -224,15 +229,14 @@ const TransferDialog = ({ measures, open, onClose }: TransferDialogProps) => {
       );
       onClose({
         toastType: "success",
-        toastMessage: "The measure(s) were successfully transferred.",
+        toastMessage: TRANSFER_MEASURE_SUCCESS,
         toastOpen: true,
       });
     } catch (error) {
       console.error("TransferDialog: handleSave: error = ", error);
       onClose({
         toastType: "danger",
-        toastMessage:
-          "Unable to transfer the selected measure(s) to the harpId. If the error persists, please contact the help desk.",
+        toastMessage: TRANSFER_MEASURE_FAILURE,
         toastOpen: true,
       });
     }
