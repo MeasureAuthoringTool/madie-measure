@@ -1,7 +1,7 @@
 import axios from "../../../../api/axios-instance";
 import useServiceConfig from "../../../../api/useServiceConfig";
 import { ServiceConfig } from "../../../../api/ServiceContext";
-import { Measure } from "@madie/madie-models";
+import { Measure, TestCaseConfiguration } from "@madie/madie-models";
 import { useOktaTokens } from "@madie/madie-util";
 import { Bundle } from "fhir/r4";
 
@@ -24,6 +24,21 @@ export class MeasureServiceApi {
         "An error occurred, please try again. If the error persists, please contact the help desk."
       );
     }
+  }
+
+  async updateMeasureTestCaseConfiguration(
+    testCaseConfig: TestCaseConfiguration,
+    measureId: String
+  ): Promise<Response> {
+    return await axios.put(
+      `${this.baseUrl}/measures/${measureId}/test-case-config`,
+      testCaseConfig,
+      {
+        headers: {
+          Authorization: `Bearer ${this.getAccessToken()}`,
+        },
+      }
+    );
   }
 
   async updateMeasure(measure: Measure): Promise<Response> {
