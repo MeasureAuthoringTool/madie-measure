@@ -17,7 +17,6 @@ declare module "@madie/madie-util" {
     QDMIncludeRAVValues: boolean;
     QICoreIncludeRAVValues: boolean;
     MeasureSearch: boolean;
-    EditTestsOnVersionedMeasures: boolean;
     MinimizeAlerts: boolean;
     EnhancedTextFormatting: boolean;
     Locking: boolean;
@@ -93,7 +92,6 @@ declare module "@madie/madie-util" {
     createdBy: string,
     acls: Array<Acl>,
     draft?: boolean,
-    editTestsOnVersionedMeasures?: boolean
   ): boolean;
 
   export function checkUserCanDelete(
