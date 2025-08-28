@@ -63,7 +63,9 @@ describe("RAVPage component", () => {
 
   test("Changes to Test Case Configuration enables Save button and saving successfully displays success toast", async () => {
     serviceApiMock = {
-      updateMeasure: jest.fn().mockResolvedValueOnce({ status: 200 }),
+      updateMeasureTestCaseConfiguration: jest
+        .fn()
+        .mockResolvedValueOnce({ status: 200 }),
     } as unknown as MeasureServiceApi;
     useMeasureServiceApiMock.mockImplementation(() => serviceApiMock);
 
@@ -84,12 +86,10 @@ describe("RAVPage component", () => {
     await waitFor(() => expect(saveButton).toBeEnabled());
     userEvent.click(saveButton);
     await waitFor(() =>
-      expect(serviceApiMock.updateMeasure).toBeCalledWith({
-        ...measure,
-        testCaseConfiguration: {
-          ravIncluded: true,
-        },
-      })
+      expect(serviceApiMock.updateMeasureTestCaseConfiguration).toBeCalledWith(
+        { ravIncluded: true },
+        measure.id
+      )
     );
 
     const successToast = getByTestId("edit-rav-success-text");
@@ -107,7 +107,7 @@ describe("RAVPage component", () => {
 
   test("Changes to Test Case Configuration enables Save button but fails to save successfully and displays error toast", async () => {
     serviceApiMock = {
-      updateMeasure: jest.fn().mockRejectedValueOnce({
+      updateMeasureTestCaseConfiguration: jest.fn().mockRejectedValueOnce({
         status: 500,
         response: { data: { message: "failed to update measure" } },
       }),
@@ -131,12 +131,10 @@ describe("RAVPage component", () => {
     await waitFor(() => expect(saveButton).toBeEnabled());
     userEvent.click(saveButton);
     await waitFor(() =>
-      expect(serviceApiMock.updateMeasure).toBeCalledWith({
-        ...measure,
-        testCaseConfiguration: {
-          ravIncluded: true,
-        },
-      })
+      expect(serviceApiMock.updateMeasureTestCaseConfiguration).toBeCalledWith(
+        { ravIncluded: true },
+        measure.id
+      )
     );
 
     const errorToast = getByTestId("edit-rav-generic-error-text");
