@@ -11,7 +11,6 @@ import {
   createShiftTestCaseDatesWarningMessage,
   createWarningMessage,
 } from "./StatusHandlerMessage";
-import { useFeatureFlags } from "@madie/madie-util";
 
 interface StatusHandlerProps {
   error?: boolean;
@@ -32,7 +31,6 @@ const StatusHandler = ({
   importWarnings,
   shiftTestCaseDatesWarning,
 }: StatusHandlerProps) => {
-  const featureFlags = useFeatureFlags();
   const alerts = [];
 
   if (error && errorMessages) {
@@ -141,7 +139,7 @@ const StatusHandler = ({
     <div id="status-handler">
       <MadieAlert
         alerts={alerts}
-        minimizeAlerts={featureFlags?.MinimizeAlerts}
+        minimizeAlerts={true}
       />
     </div>
   );

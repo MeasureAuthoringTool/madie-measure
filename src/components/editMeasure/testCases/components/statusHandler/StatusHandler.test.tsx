@@ -26,7 +26,7 @@ jest.mock("@madie/madie-util", () => ({
 describe("StatusHandler Component", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseFeatureFlags.mockReturnValue({ MinimizeAlerts: false });
+    mockUseFeatureFlags.mockReturnValue({});
     MadieAlert.mockClear();
   });
 
@@ -80,7 +80,7 @@ describe("StatusHandler Component", () => {
             canClose: false,
           }),
         ]),
-        minimizeAlerts: false,
+        minimizeAlerts: true,
       }),
       expect.anything()
     );
@@ -127,7 +127,7 @@ describe("StatusHandler Component", () => {
             canClose: false,
           }),
         ]),
-        minimizeAlerts: false,
+        minimizeAlerts: true,
       }),
       expect.anything()
     );
@@ -158,7 +158,7 @@ describe("StatusHandler Component", () => {
             canClose: false,
           }),
         ]),
-        minimizeAlerts: false,
+        minimizeAlerts: true,
       }),
       expect.anything()
     );
@@ -204,7 +204,7 @@ describe("StatusHandler Component", () => {
           expect.objectContaining({ type: "error" }),
           expect.objectContaining({ type: "warning" }),
         ]),
-        minimizeAlerts: false,
+        minimizeAlerts: true,
       }),
       expect.anything()
     );
