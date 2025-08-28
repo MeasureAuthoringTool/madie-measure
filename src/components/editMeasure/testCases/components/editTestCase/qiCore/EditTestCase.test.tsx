@@ -3669,6 +3669,11 @@ describe("EditTestCase component", () => {
 
   describe("locking test case", () => {
     it("locking test case successfully", () => {
+      (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => {
+        return {
+          Locking: true,
+        };
+      });
       const testCase = {
         id: "1234",
         description: "Test IPP",
@@ -3698,6 +3703,11 @@ describe("EditTestCase component", () => {
     });
 
     it("locking test case fails", () => {
+      (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => {
+        return {
+          Locking: true,
+        };
+      });
       mockedAxios.post.mockImplementation((args) => {
         if (args && args.endsWith("lock")) {
           return Promise.reject({
