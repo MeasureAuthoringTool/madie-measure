@@ -14,7 +14,7 @@ import {
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import queryString from "query-string";
 import calculationService from "../../../api/CalculationService";
-import { checkUserCanEdit, useFeatureFlags } from "@madie/madie-util";
+import { checkUserCanEdit } from "@madie/madie-util";
 import CreateCodeCoverageNavTabs from "./CreateCodeCoverageNavTabs";
 import CreateNewTestCaseDialog from "../../createTestCase/CreateNewTestCaseDialog";
 import {
@@ -165,7 +165,6 @@ const TestCaseList = (props: TestCaseListProps) => {
   const [selectedTestCases, setSelectedTestCases] = useState<any>();
   const [exportExecuting, setExportExecuting] = useState(false);
   const [optionsOpen, setOptionsOpen] = useState<boolean>(false);
-  const featureFlags = useFeatureFlags();
   const qdmCqlParsingService = useRef(useQdmCqlParsingService());
   const [exportOptionsOpen, setExportOptionsOpen] = useState<boolean>(false);
   const [openCopyTestCaseDialog, setOpenCopyTestCaseDialog] =
@@ -237,7 +236,7 @@ const TestCaseList = (props: TestCaseListProps) => {
         measure?.measureSet?.owner,
         measure?.measureSet?.acls,
         measure?.measureMetaData?.draft,
-        featureFlags?.EditTestsOnVersionedMeasures
+        true
       )
     );
   }, [measure]);

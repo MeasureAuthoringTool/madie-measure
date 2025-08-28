@@ -22,7 +22,6 @@ import { ObjectId } from "bson";
 import {
   checkUserCanEdit,
   measureStore,
-  useFeatureFlags,
 } from "@madie/madie-util";
 import useExecutionContext from "../../routes/qiCore/useExecutionContext";
 import CreateCodeCoverageNavTabs from "./CreateCodeCoverageNavTabs";
@@ -170,7 +169,6 @@ const TestCaseList = (props: TestCaseListProps) => {
   const [shiftDatesDialogModalOpen, setShiftDatesDialogModalOpen] =
     useState<boolean>(false);
   const [exportOptionsOpen, setExportOptionsOpen] = useState<boolean>(false);
-  const featureFlags = useFeatureFlags();
 
   const [overlappingCodes, setOverlappingCodes] = useState<
     OverlappingCodeDto[]
@@ -234,7 +232,7 @@ const TestCaseList = (props: TestCaseListProps) => {
         measure?.measureSet?.owner,
         measure?.measureSet?.acls,
         measure?.measureMetaData?.draft,
-        featureFlags?.EditTestsOnVersionedMeasures
+        true
       )
     );
   }, [measure]);

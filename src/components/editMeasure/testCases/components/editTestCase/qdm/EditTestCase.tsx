@@ -68,7 +68,7 @@ const EditTestCase = () => {
     measure?.measureSet?.owner,
     measure?.measureSet?.acls,
     measure?.measureMetaData?.draft,
-    featureFlags?.EditTestsOnVersionedMeasures
+    true
   );
 
   // Toast utilities

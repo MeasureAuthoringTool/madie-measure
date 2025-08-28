@@ -284,8 +284,7 @@ const TestCaseTable = (props: TestCaseTableProps) => {
                 alignItems: "center",
               }}
             >
-              {featureFlags?.EditTestsOnVersionedMeasures &&
-              !measure.measureMetaData?.draft &&
+              {!measure.measureMetaData?.draft &&
               isCreatedOrModifiedAfterVersioning(
                 info.row.original.lastSaved,
                 measure?.lastModifiedAt
@@ -321,10 +320,7 @@ const TestCaseTable = (props: TestCaseTableProps) => {
               checkUserCanEdit(
                 measure.measureSet?.owner,
                 measure.measureSet?.acls
-              ) &&
-              (!featureFlags?.EditTestsOnVersionedMeasures
-                ? measure.measureMetaData?.draft
-                : true)
+              )
                 ? "Edit"
                 : "View"
             } Test Case ${info.row.original.group} ${info.row.original.title}`}
@@ -340,10 +336,7 @@ const TestCaseTable = (props: TestCaseTableProps) => {
             {checkUserCanEdit(
               measure.measureSet?.owner,
               measure.measureSet?.acls
-            ) &&
-            (!featureFlags?.EditTestsOnVersionedMeasures
-              ? measure.measureMetaData?.draft
-              : true)
+            )
               ? "Edit"
               : "View"}
           </Button>
@@ -354,7 +347,6 @@ const TestCaseTable = (props: TestCaseTableProps) => {
     ];
   }, [
     testCases,
-    featureFlags?.EditTestsOnVersionedMeasures,
     featureFlags?.stu6TestCaseValidation,
   ]);
 

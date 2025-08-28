@@ -148,9 +148,7 @@ const CopyTestCaseDialog = ({ open, onClose, measure, selectedTestCases }) => {
       optionalSearchProperties,
     };
 
-    if (!featureFlags?.EditTestsOnVersionedMeasures) {
-      searchCriteria.draft = true;
-    }
+    // Always allow searching all measures (including versioned ones)
     measureSearchApi.current
       .searchMeasuresByCriteria(
         [OwnershipType.OWNED, OwnershipType.SHARED],
@@ -351,10 +349,10 @@ const CopyTestCaseDialog = ({ open, onClose, measure, selectedTestCases }) => {
       },
     ];
 
-    if (featureFlags?.EditTestsOnVersionedMeasures) {
-      updatedColumns.push({
-        header: "",
-        cell: (info) => {
+    // Always show the expand column for versioned measures
+    updatedColumns.push({
+      header: "",
+      cell: (info) => {
           if (info.row.original?.hasAssociatedMeasures) {
             const handleKeyDown = (e) => {
               if (e.key === "Enter" || e.key === " ") {
@@ -391,12 +389,10 @@ const CopyTestCaseDialog = ({ open, onClose, measure, selectedTestCases }) => {
         accessorKey: "expandArrow",
         enableSorting: false,
       });
-    }
 
     return updatedColumns;
   }, [
     selectedRowId,
-    featureFlags?.EditTestsOnVersionedMeasures,
     selectedIdForExpansion,
     isRowExpanded,
     expandedSectionData,
@@ -703,8 +699,7 @@ const CopyTestCaseDialog = ({ open, onClose, measure, selectedTestCases }) => {
                             </td>
                           ))}
                         </tr>
-                        {featureFlags?.EditTestsOnVersionedMeasures &&
-                          selectedIdForExpansion ===
+                        {selectedIdForExpansion ===
                             row.original.measureSetId &&
                           expandedSectionData?.map((subRow) => (
                             <tr key={subRow.id} className="expanded-row">

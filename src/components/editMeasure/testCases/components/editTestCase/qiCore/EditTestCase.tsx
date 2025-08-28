@@ -252,7 +252,7 @@ const EditTestCase = (props: EditTestCaseProps) => {
     measure?.measureSet?.owner,
     measure?.measureSet?.acls,
     measure?.measureMetaData?.draft,
-    featureFlags?.EditTestsOnVersionedMeasures
+    true
   );
 
   const formik = useFormik({

@@ -23,7 +23,7 @@ const MEASURE_OWNER = "test.user";
 
 jest.mock("@madie/madie-util", () => ({
   useFeatureFlags: jest.fn().mockReturnValue({
-    EditTestsOnVersionedMeasures: false,
+    EditTestsOnVersionedMeasures: true,
   }),
 }));
 
