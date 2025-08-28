@@ -107,7 +107,6 @@ const RAVPage = ({ setExecutionContextReady }) => {
       className="test-case-config-form"
       onSubmit={formik.handleSubmit}
     >
-      {console.log(formik.values.ravIncluded)}
       <div className="form-title">
         <h2>RAV</h2>
         <Typography>
