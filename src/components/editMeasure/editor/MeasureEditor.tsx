@@ -135,7 +135,7 @@ const validateCql = (
   ) {
     setToastOpen(true);
     setToastMessage(
-      "A population criteria! Test Cases will not execute until this issue is resolved."
+      "CQL return types do not match! Test Cases will not execute until this issue is resolved."
     );
   }
   if (
