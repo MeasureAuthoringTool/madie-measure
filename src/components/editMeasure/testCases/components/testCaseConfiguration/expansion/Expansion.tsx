@@ -106,7 +106,10 @@ const Expansion = () => {
       };
     }
     measureServiceApi
-      .updateMeasure(updatedMeasure)
+      .updateMeasureTestCaseConfiguration(
+        updatedMeasure?.testCaseConfiguration,
+        updatedMeasure.id
+      )
       .then(() => {
         handleToast("success", "Expansion details Updated Successfully", true);
         // updating measure will propagate update state site wide.
