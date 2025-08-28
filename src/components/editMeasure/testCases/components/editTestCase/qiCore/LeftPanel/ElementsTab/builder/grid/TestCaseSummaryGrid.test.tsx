@@ -67,6 +67,21 @@ describe("TestCaseSummaryGrid", () => {
     ).toBeInTheDocument();
   });
 
+  it("should render the table with no data", () => {
+    render(
+      <TestCaseSummaryGrid
+        entry={[]}
+        onRowEdit={mockOnRowEdit}
+        onRowDelete={mockOnRowDelete}
+      />
+    );
+
+    const columnHeaders = screen.getAllByRole("columnheader");
+    expect(
+      within(columnHeaders[0]).getByText("Resource & Value Set")
+    ).toBeInTheDocument();
+  });
+
   it("should render ActionCenter with correct actions", async () => {
     render(
       <TestCaseSummaryGrid
