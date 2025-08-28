@@ -586,18 +586,20 @@ describe("Copy Test Case Dialog Component", () => {
     });
 
     const table = await findByTestId("measure-list-tbl");
-    const expandButtons = table.querySelectorAll('[role="button"][tabindex="0"]');
-    
+    const expandButtons = table.querySelectorAll(
+      '[role="button"][tabindex="0"]'
+    );
+
     expect(expandButtons.length).toBeGreaterThan(0);
-    
+
     fireEvent.keyDown(expandButtons[0], { key: "Enter" });
-    
+
     await waitFor(() => {
       expect(getMeasuresByMeasureSetIdMock).toHaveBeenCalledTimes(1);
     });
 
     fireEvent.keyDown(expandButtons[0], { key: " " });
-    expect(getMeasuresByMeasureSetIdMock).toHaveBeenCalledTimes(1); 
+    expect(getMeasuresByMeasureSetIdMock).toHaveBeenCalledTimes(1);
   });
 
   it("should handle expand/collapse via click interaction", async () => {
@@ -631,12 +633,14 @@ describe("Copy Test Case Dialog Component", () => {
     });
 
     const table = await findByTestId("measure-list-tbl");
-    const expandButtons = table.querySelectorAll('[role="button"][tabindex="0"]');
-    
+    const expandButtons = table.querySelectorAll(
+      '[role="button"][tabindex="0"]'
+    );
+
     expect(expandButtons.length).toBeGreaterThan(0);
-    
+
     fireEvent.click(expandButtons[0]);
-    
+
     await waitFor(() => {
       expect(getMeasuresByMeasureSetIdMock).toHaveBeenCalledTimes(1);
     });
