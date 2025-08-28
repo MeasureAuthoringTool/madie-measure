@@ -257,16 +257,16 @@ const TestCaseRoutes = () => {
           <Route
             path="/list-page/rav"
             element={
-                <TestCaseLandingWrapper
-                  qdm
-                  children={
-                    <RAVPage
-                      setExecutionContextReady={setExecutionContextReady}
-                    />
-                  }
-                />
-              }
-            />
+              <TestCaseLandingWrapper
+                qdm
+                children={
+                  <RAVPage
+                    setExecutionContextReady={setExecutionContextReady}
+                  />
+                }
+              />
+            }
+          />
           <Route
             path="/list-page/expansion"
             element={<TestCaseLandingWrapper qdm children={<Expansion />} />}

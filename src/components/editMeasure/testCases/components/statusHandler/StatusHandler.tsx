@@ -137,10 +137,7 @@ const StatusHandler = ({
 
   return (
     <div id="status-handler">
-      <MadieAlert
-        alerts={alerts}
-        minimizeAlerts={true}
-      />
+      <MadieAlert alerts={alerts} minimizeAlerts={true} />
     </div>
   );
 };

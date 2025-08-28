@@ -159,9 +159,7 @@ const StatusHandler = ({
     return <></>;
   }
 
-  return (
-    <MadieAlert alerts={alerts} minimizeAlerts={true} />
-  );
+  return <MadieAlert alerts={alerts} minimizeAlerts={true} />;
 };
 
 export default StatusHandler;

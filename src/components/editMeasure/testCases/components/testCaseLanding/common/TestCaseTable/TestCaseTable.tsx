@@ -345,10 +345,7 @@ const TestCaseTable = (props: TestCaseTableProps) => {
         enableSorting: false,
       },
     ];
-  }, [
-    testCases,
-    featureFlags?.stu6TestCaseValidation,
-  ]);
+  }, [testCases, featureFlags?.stu6TestCaseValidation]);
 
   const table = useReactTable({
     data,

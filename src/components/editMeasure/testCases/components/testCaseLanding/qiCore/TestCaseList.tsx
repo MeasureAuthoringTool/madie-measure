@@ -19,10 +19,7 @@ import {
   DetailedPopulationGroupResult,
 } from "fqm-execution/build/types/Calculator";
 import { ObjectId } from "bson";
-import {
-  checkUserCanEdit,
-  measureStore,
-} from "@madie/madie-util";
+import { checkUserCanEdit, measureStore } from "@madie/madie-util";
 import useExecutionContext from "../../routes/qiCore/useExecutionContext";
 import CreateCodeCoverageNavTabs from "./CreateCodeCoverageNavTabs";
 import CodeCoverageHighlighting from "../common/CodeCoverageHighlighting";
@@ -231,7 +228,7 @@ const TestCaseList = (props: TestCaseListProps) => {
       checkUserCanEdit(
         measure?.measureSet?.owner,
         measure?.measureSet?.acls,
-        measure?.measureMetaData?.draft,
+        measure?.measureMetaData?.draft
       )
     );
   }, [measure]);

@@ -191,12 +191,12 @@ const TestCaseListSideBarNav = ({
                   />
                   <Tab
                     label="RAV"
-                      value="rav"
-                      data-testid="nav-link-rav"
-                      type="C"
-                      orientation="vertical"
-                      onChange={handleChange}
-                    />
+                    value="rav"
+                    data-testid="nav-link-rav"
+                    type="C"
+                    orientation="vertical"
+                    onChange={handleChange}
+                  />
                   <Tab
                     label="Expansion"
                     value="expansion"

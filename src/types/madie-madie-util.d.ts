@@ -88,7 +88,7 @@ declare module "@madie/madie-util" {
   export function checkUserCanEdit(
     createdBy: string,
     acls: Array<Acl>,
-    draft?: boolean,
+    draft?: boolean
   ): boolean;
 
   export function checkUserCanDelete(
