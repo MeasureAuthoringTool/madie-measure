@@ -17,7 +17,6 @@ declare module "@madie/madie-util" {
     QDMIncludeRAVValues: boolean;
     QICoreIncludeRAVValues: boolean;
     MeasureSearch: boolean;
-    OverlappingValueSets: boolean;
     EditTestsOnVersionedMeasures: boolean;
     MinimizeAlerts: boolean;
     EnhancedTextFormatting: boolean;
