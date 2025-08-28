@@ -252,7 +252,6 @@ const EditTestCase = (props: EditTestCaseProps) => {
     measure?.measureSet?.owner,
     measure?.measureSet?.acls,
     measure?.measureMetaData?.draft,
-    true
   );
 
   const formik = useFormik({

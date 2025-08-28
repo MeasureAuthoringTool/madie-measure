@@ -210,8 +210,8 @@ describe("StatusHandler Component", () => {
     );
   });
 
-  test("Should pass minimizeAlerts flag from feature flags", () => {
-    mockUseFeatureFlags.mockReturnValue({ MinimizeAlerts: true });
+  test("Should pass minimizeAlerts flag as true (always enabled)", () => {
+    mockUseFeatureFlags.mockReturnValue({});
 
     render(
       <StatusHandler

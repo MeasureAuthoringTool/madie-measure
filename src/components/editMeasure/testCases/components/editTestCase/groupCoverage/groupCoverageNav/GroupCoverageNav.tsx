@@ -1,7 +1,6 @@
 import React from "react";
 import { Tabs, Tab } from "@madie/madie-design-system/dist/react";
 import { PopulationType } from "@madie/madie-models";
-import { useFeatureFlags } from "@madie/madie-util";
 
 export interface Population {
   abbreviation: string;
@@ -35,14 +34,8 @@ const GroupCoverageNav = ({
   includeRAV,
   model,
 }: Props) => {
-  const featureFlags = useFeatureFlags();
-
   // TODO Remove parameter when either of these flags are removed, or when both feature flags are removed
-  const showRAVTab =
-    includeRAV &&
-    (model === "qiCore"
-      ? featureFlags?.QICoreIncludeRAVValues
-      : featureFlags?.QDMIncludeRAVValues);
+  const showRAVTab = includeRAV;
 
   return (
     <>

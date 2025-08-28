@@ -22,9 +22,7 @@ const { getByTestId, getByRole, findByTestId, findByRole } = screen;
 const MEASURE_OWNER = "test.user";
 
 jest.mock("@madie/madie-util", () => ({
-  useFeatureFlags: jest.fn().mockReturnValue({
-    EditTestsOnVersionedMeasures: true,
-  }),
+  useFeatureFlags: jest.fn().mockReturnValue({}),
 }));
 
 const testCases = [
@@ -230,9 +228,7 @@ describe("Copy Test Case Dialog Component", () => {
         getTestCasesByMeasureId: getAllTestCasesFn,
       } as unknown as TestCaseServiceApi;
     });
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-      EditTestsOnVersionedMeasures: true,
-    }));
+    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({}));
     render(
       <CopyTestCaseDialog
         open={true}
@@ -279,9 +275,7 @@ describe("Copy Test Case Dialog Component", () => {
   });
 
   it("Filter and Search, changes, fire, clear", async () => {
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-      EditTestsOnVersionedMeasures: false,
-    }));
+    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({}));
     const useMeasureServiceMockResolvedMultiple = {
       searchMeasuresByCriteria: searchMeasuresByCriteriaFn,
     } as unknown as MeasureServiceApi;

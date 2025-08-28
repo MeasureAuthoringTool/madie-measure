@@ -208,7 +208,6 @@ let mockApplyDefaults = false;
 jest.mock("@madie/madie-util", () => ({
   useFeatureFlags: jest.fn().mockImplementation(() => ({
     applyDefaults: mockApplyDefaults,
-    EditTestsOnVersionedMeasures: true,
   })),
   checkUserCanEdit: jest.fn().mockImplementation(() => true),
 }));

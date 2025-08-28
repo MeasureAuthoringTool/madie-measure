@@ -14,10 +14,7 @@ declare module "@madie/madie-util" {
     qiCoreElementsTab: boolean;
     qdmHideJson: boolean;
     stu6TestCaseValidation: boolean;
-    QDMIncludeRAVValues: boolean;
-    QICoreIncludeRAVValues: boolean;
     MeasureSearch: boolean;
-    MinimizeAlerts: boolean;
     EnhancedTextFormatting: boolean;
     Locking: boolean;
     qiCore7: boolean;

@@ -201,10 +201,9 @@ const TestCaseRoutes = () => {
               />
             }
           />
-          {featureFlags?.QICoreIncludeRAVValues && (
-            <Route
-              path="/list-page/rav"
-              element={
+          <Route
+            path="/list-page/rav"
+            element={
                 <TestCaseLandingWrapper
                   qdm={false}
                   children={
@@ -215,7 +214,6 @@ const TestCaseRoutes = () => {
                 />
               }
             />
-          )}
 
           <Route
             path="/list-page/expansion"

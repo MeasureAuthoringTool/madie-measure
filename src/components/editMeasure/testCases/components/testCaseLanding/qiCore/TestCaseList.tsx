@@ -232,7 +232,6 @@ const TestCaseList = (props: TestCaseListProps) => {
         measure?.measureSet?.owner,
         measure?.measureSet?.acls,
         measure?.measureMetaData?.draft,
-        true
       )
     );
   }, [measure]);
