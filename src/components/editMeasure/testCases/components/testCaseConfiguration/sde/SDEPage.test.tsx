@@ -59,32 +59,33 @@ describe("SDEPage component", () => {
 
   test("Changes to Test Case Configuration enables Save button and saving successfully displays success message", async () => {
     serviceApiMock = {
-      updateMeasure: jest.fn().mockResolvedValueOnce({ status: 200 }),
+      updateMeasureTestCaseConfiguration: jest
+        .fn()
+        .mockResolvedValueOnce({ status: 200 }),
     } as unknown as MeasureServiceApi;
     useMeasureServiceApiMock.mockImplementation(() => serviceApiMock);
 
     renderSdePageComponent();
 
-    userEvent.click(getByLabelText("Yes"));
+    userEvent.click(screen.getByLabelText("Yes"));
 
-    const saveButton = getByTestId("sde-save");
+    const saveButton = screen.getByTestId("sde-save");
     expect(saveButton).toBeInTheDocument();
     await waitFor(() => expect(saveButton).toBeEnabled());
     userEvent.click(saveButton);
+
     await waitFor(() =>
-      expect(serviceApiMock.updateMeasure).toBeCalledWith({
-        ...measure,
-        testCaseConfiguration: {
-          sdeIncluded: true,
-        },
-      })
+      expect(serviceApiMock.updateMeasureTestCaseConfiguration).toBeCalledWith(
+        { sdeIncluded: true },
+        measure.id
+      )
     );
 
     expect(
-      getByText("Test Case Configuration Updated Successfully")
+      screen.getByText("Test Case Configuration Updated Successfully")
     ).toBeInTheDocument();
 
-    const toastCloseButton = await findByTestId("close-error-button");
+    const toastCloseButton = await screen.findByTestId("close-error-button");
     expect(toastCloseButton).toBeInTheDocument();
     userEvent.click(toastCloseButton);
     await waitFor(() => {
