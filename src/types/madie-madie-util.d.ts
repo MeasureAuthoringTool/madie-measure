@@ -26,6 +26,7 @@ declare module "@madie/madie-util" {
     Locking: boolean;
     TransferMeasure: boolean;
     MeasureHistory: boolean;
+    Calculator: boolean;
   }
 
   export interface ServiceConfig {
