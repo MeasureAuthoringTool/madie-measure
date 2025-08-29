@@ -3157,6 +3157,20 @@ describe("Action Center Tests", () => {
 
     unmount();
   });
+
+  it("should default toastType, toastMessage, and toastOpen on initial render", () => {
+    render(
+      <MeasureList
+        {...baseProps}
+        toastType={undefined}
+        toastMessage={undefined}
+        toastOpen={undefined}
+      />
+    );
+    expect(baseProps.toastType).toBe("danger");
+    expect(baseProps.toastMessage).toBe("");
+    expect(baseProps.toastOpen).toBe(false);
+  });
 });
 
 describe("Measure List with MeasureSearch enabled", () => {
