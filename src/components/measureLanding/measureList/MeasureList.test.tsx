@@ -3158,7 +3158,7 @@ describe("Action Center Tests", () => {
     unmount();
   });
 
-  it("should default toastType, toastMessage, and toastOpen on initial render", () => {
+  it("should default toastType, toastMessage, and toastOpen on initial render", async () => {
     render(
       <MeasureList
         {...baseProps}
@@ -3170,6 +3170,61 @@ describe("Action Center Tests", () => {
     expect(baseProps.toastType).toBe("danger");
     expect(baseProps.toastMessage).toBe("");
     expect(baseProps.toastOpen).toBe(false);
+  });
+
+  it("should display transfer dialog on clicking transfer action button and default toast values on cancel", async () => {
+    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
+      TransferMeasure: true,
+    }));
+
+    const { unmount } = render(
+      <ServiceContext.Provider value={serviceConfig}>
+        <MeasureList
+          retrieveMeasures={retrieveMeasuresMock}
+          measureList={measures}
+          setMeasureList={setMeasureListMock}
+          setTotalPages={setTotalPagesMock}
+          setTotalItems={setTotalItemsMock}
+          setVisibleItems={setVisibleItemsMock}
+          setOffset={setOffsetMock}
+          setLoading={setLoadingMock}
+          activeTab={0}
+          searchCriteria={null}
+          setSearchCriteria={setSearchCriteriaMock}
+          currentLimit={10}
+          currentPage={0}
+          setErrMsg={setErrMsgMock}
+          // Toast props
+          toastOpen={false}
+          toastMessage=""
+          toastType="danger"
+          setToastOpen={setToastOpenMock}
+          setToastMessage={setToastMessageMock}
+          setToastType={setToastTypeMock}
+          onToastClose={onToastCloseMock}
+          handleToast={handleToastMock}
+        />
+      </ServiceContext.Provider>
+    );
+    const checkBoxes = await screen.findAllByRole("checkbox");
+    expect(checkBoxes.length).toBe(6);
+    userEvent.click(checkBoxes[1]);
+    const transferButton = screen.getByTestId("transfer-action-btn");
+    expect(transferButton).toBeInTheDocument();
+    userEvent.click(transferButton);
+
+    await waitFor(async () => {
+      expect(screen.getByTestId("transfer-dialog")).toBeInTheDocument();
+    });
+
+    const cancelButton = screen.getByTestId("transfer-cancel-button");
+    fireEvent.click(cancelButton);
+
+    expect(setToastTypeMock).toHaveBeenCalledWith("danger");
+    expect(setToastMessageMock).toHaveBeenCalledWith("");
+    expect(setToastOpenMock).toHaveBeenCalledWith(false);
+
+    unmount();
   });
 });
 
