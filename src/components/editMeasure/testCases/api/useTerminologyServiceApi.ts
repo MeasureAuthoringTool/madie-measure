@@ -5,7 +5,7 @@ import { getOidFromString, useOktaTokens } from "@madie/madie-util";
 import { Bundle, Library, ValueSet } from "fhir/r4";
 import { CqmMeasure, CQL, ValueSet as QdmValueSet } from "cqm-models";
 import * as _ from "lodash";
-import sha256 from "sha256";
+import md5 from "blueimp-md5";
 import { ManifestExpansion } from "@madie/madie-models";
 
 export type ValueSetSearchParams = {
@@ -234,7 +234,7 @@ export class TerminologyServiceApi {
         const valueSet = {
           oid:
             drcOid ??
-            `drc-${sha256(cqlCode.system + cqlCode.code + cqlCode.version)}`,
+            `drc-${md5(cqlCode.system + cqlCode.code + cqlCode.version)}`,
           version: cqlCode.version,
           concepts: [
             {
