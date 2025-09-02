@@ -65,6 +65,7 @@ export default function AssociateCmsIdAction(props: PropTypes) {
       }
     } else {
       setTooltipMessage(SELECT_TWO_MEASURES);
+      setDisableAssociateCmsIdBtn(true);
     }
   }, [measures, userName]);
 
