@@ -7,6 +7,8 @@ import { QdmPatientProvider } from "../../../../util/QdmPatientContext";
 import { useFormikContext } from "formik";
 import Editor from "../../../editor/Editor";
 import { DataElement } from "cqm-models";
+import EditorCalculator from "../../calculator/EditorCalculator";
+import { useFeatureFlags } from "@madie/madie-util";
 
 const LeftPanel = (props: {
   canEdit: boolean;
@@ -24,11 +26,15 @@ const LeftPanel = (props: {
   } = props;
   const [activeTab, setActiveTab] = useState<string>("elements");
   const formik: any = useFormikContext();
+  const featureFlags = useFeatureFlags();
 
   return (
     <div className="left-panel">
       <div className="tab-container">
         <LeftPanelNavTabs activeTab={activeTab} setActiveTab={setActiveTab} />
+        <div tw="ml-auto mr-2">
+          {featureFlags?.Calculator && <EditorCalculator />}
+        </div>
       </div>
       <div className="panel-content">
         <QdmPatientProvider>
