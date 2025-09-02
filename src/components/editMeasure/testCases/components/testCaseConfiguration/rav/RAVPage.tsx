@@ -36,8 +36,7 @@ const RAVPage = ({ setExecutionContextReady }) => {
 
   const canEdit = checkUserCanEdit(
     measure?.measureSet?.owner,
-    measure?.measureSet?.acls,
-    measure?.measureMetaData?.draft
+    measure?.measureSet?.acls
   );
 
   const formik = useFormik({
