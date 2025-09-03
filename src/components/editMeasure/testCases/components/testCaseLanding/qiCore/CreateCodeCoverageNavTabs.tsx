@@ -199,7 +199,7 @@ export default function CreateCodeCoverageNavTabs(props: NavTabProps) {
                 style={{ margin: "0 5px 0 -2px" }}
                 fontSize="small"
               />
-              MADiE Import
+              Import
             </Button>
 
             <Button

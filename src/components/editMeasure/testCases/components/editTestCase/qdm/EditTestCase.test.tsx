@@ -287,6 +287,7 @@ jest.mock("@madie/madie-util", () => ({
       applyDefaults: mockApplyDefaults,
       qdmHideJson: false,
       Locking: true,
+      Calculator: true,
     };
   }),
   measureStore: {
@@ -430,6 +431,44 @@ test("LeftPanel navigation works as expected.", async () => {
   await waitFor(() => {
     expect(device).toHaveAttribute("aria-selected", "true");
   });
+});
+
+test("Calculator button is found when flag is on", async () => {
+  CQMConversionMock.mockImplementation(() => {
+    return useCqmConversionServiceMockResolved;
+  });
+  useCqlParsingServiceMock.mockImplementation(() => {
+    return useCqlParsingServiceMockResolved;
+  });
+  (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => {
+    return {
+      applyDefaults: mockApplyDefaults,
+      Locking: false,
+      Calculator: true,
+    };
+  });
+  await waitFor(() => renderEditTestCaseComponent());
+  expect(screen.queryByTestId("editor-calculator-button")).toBeInTheDocument();
+});
+
+test("Calculator button is not found when flag is off", async () => {
+  CQMConversionMock.mockImplementation(() => {
+    return useCqmConversionServiceMockResolved;
+  });
+  useCqlParsingServiceMock.mockImplementation(() => {
+    return useCqlParsingServiceMockResolved;
+  });
+  (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => {
+    return {
+      applyDefaults: mockApplyDefaults,
+      Locking: false,
+      Calculator: false,
+    };
+  });
+  await waitFor(() => renderEditTestCaseComponent());
+  expect(
+    screen.queryByTestId("editor-calculator-button")
+  ).not.toBeInTheDocument();
 });
 
 describe("EditTestCase QDM Component", () => {
