@@ -87,6 +87,7 @@ import { useTestCasePolling } from "../../../hooks/useTestCasePolling";
 import KeyboardTabIcon from "@mui/icons-material/KeyboardTab";
 import ValidationPanel from "./ValidationPanel";
 import ValidationStatusIcon from "./ValidationStatusIcon";
+import EditorCalculator from "../calculator/EditorCalculator";
 
 const TestCaseForm = tw.form`m-3`;
 
@@ -987,6 +988,9 @@ const EditTestCase = (props: EditTestCaseProps) => {
                         isQICore6={isQICore6}
                         dirty={formikStu6Context.dirty}
                       />
+                      <div tw="ml-auto mr-8 flex">
+                        {featureFlags?.Calculator && <EditorCalculator />}
+                      </div>
                     </div>
                     <QiCoreResourceProvider>
                       {leftPanelActiveTab === "elements" &&
@@ -1051,6 +1055,7 @@ const EditTestCase = (props: EditTestCaseProps) => {
                 ) : (
                   <>
                     <div tw="float-right mr-4">
+                      {featureFlags?.Calculator && <EditorCalculator />}
                       <EditorSearch />
                     </div>
                     <Editor
