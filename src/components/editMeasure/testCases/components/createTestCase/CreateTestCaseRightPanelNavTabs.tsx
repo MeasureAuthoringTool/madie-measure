@@ -19,9 +19,9 @@ export default function CreateTestCaseRightPanelNavTabs(props: NavTabProps) {
     >
       <Tab
         tabIndex={0}
-        aria-label="Measure CQL View Only tab panel"
+        aria-label="CQL View Only tab panel"
         type="B"
-        label={`Measure CQL (View Only)`}
+        label={`CQL`}
         data-testid="measurecql-tab"
         value="measurecql"
       />

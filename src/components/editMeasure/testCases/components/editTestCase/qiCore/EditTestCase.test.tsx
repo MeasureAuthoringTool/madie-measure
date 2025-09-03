@@ -3193,6 +3193,7 @@ describe("EditTestCase component", () => {
       });
       expect(runTestButton).not.toBeDisabled();
       userEvent.click(runTestButton);
+      expect(screen.getByText("CQL")).toBeInTheDocument();
 
       userEvent.click(screen.getByTestId("highlighting-tab"));
       const debugOutput = await screen.findByText(
