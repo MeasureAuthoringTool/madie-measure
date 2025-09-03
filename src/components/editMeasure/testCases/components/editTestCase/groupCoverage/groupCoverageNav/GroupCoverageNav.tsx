@@ -34,9 +34,6 @@ const GroupCoverageNav = ({
   includeRAV,
   model,
 }: Props) => {
-  // TODO Remove parameter when either of these flags are removed, or when both feature flags are removed
-  const showRAVTab = includeRAV;
-
   return (
     <>
       <Tabs
@@ -73,7 +70,7 @@ const GroupCoverageNav = ({
             }}
           />
         )}
-        {showRAVTab && (
+        {includeRAV && (
           <Tab
             type="C"
             label="RAV"
