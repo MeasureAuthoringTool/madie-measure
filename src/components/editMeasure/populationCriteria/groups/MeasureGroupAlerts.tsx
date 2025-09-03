@@ -22,7 +22,6 @@ const MeasureGroupAlerts = (props: MeasureGroupAlertsTypes) => {
           }
           canClose={props.canClose}
           copyButton={true}
-          minimizeAlerts={true}
         />
       )}
     </div>
