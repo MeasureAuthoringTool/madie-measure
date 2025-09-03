@@ -454,6 +454,12 @@ test("Calculator button is found when flag is on", async () => {
   userEvent.click(calculatorButton);
 
   expect(screen.queryByTestId("calculation-dialog")).toBeInTheDocument();
+
+  const closeButton = screen.getByTestId("calculation-close-button");
+  userEvent.click(closeButton);
+  await waitFor(() =>
+    expect(screen.queryByTestId("calculation-dialog")).not.toBeInTheDocument()
+  );
 });
 
 test("Calculator button is not found when flag is off", async () => {

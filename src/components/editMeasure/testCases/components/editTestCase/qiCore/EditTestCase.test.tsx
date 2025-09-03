@@ -3651,6 +3651,14 @@ describe("EditTestCase component", () => {
       userEvent.click(calculatorButton);
 
       expect(screen.queryByTestId("calculation-dialog")).toBeInTheDocument();
+
+      const closeButton = screen.getByTestId("calculation-close-button");
+      userEvent.click(closeButton);
+      await waitFor(() =>
+        expect(
+          screen.queryByTestId("calculation-dialog")
+        ).not.toBeInTheDocument()
+      );
     });
 
     it("should not render calculator button when Calculator flag is false", async () => {
