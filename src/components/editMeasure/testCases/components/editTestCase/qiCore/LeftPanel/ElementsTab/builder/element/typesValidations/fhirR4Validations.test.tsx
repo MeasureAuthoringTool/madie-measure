@@ -247,7 +247,7 @@ describe("Validation Functions", () => {
 
   it("should return validation schema for Instant type", () => {
     // if Instant is invalid
-    let schema = getInstantValidator(true);
+    const schema = getInstantValidator(true);
     expect(schema).toBeInstanceOf(Yup.MixedSchema);
     expect(schema.validate("2025-02")).rejects.toThrow(
       "Invalid instant format"

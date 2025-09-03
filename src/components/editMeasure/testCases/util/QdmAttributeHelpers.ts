@@ -137,7 +137,7 @@ export const generateAttributesToDisplay = (
         dataElement[path].forEach((elem) => {
           if (path == "relatedTo") {
             const display = getDisplayFromId(dataElements, elem);
-            let value = `${stringifyValue(elem, true, codeSystemMap)}`;
+            const value = `${stringifyValue(elem, true, codeSystemMap)}`;
 
             multipleDataTypes.push({
               name: _.replace(elem._type, "QDM::", ""),
@@ -199,8 +199,8 @@ export const stringifyValue = (value, topLevel = false, codeSystemMap = {}) => {
   } else if (value.unit == "%") {
     return `${value.value} ${value.unit}`;
   } else if (value instanceof CQL.Interval) {
-    let lowString = value.low ? stringifyValue(value.low) : "N/A";
-    let highString = value.high ? stringifyValue(value.high) : "N/A";
+    const lowString = value.low ? stringifyValue(value.low) : "N/A";
+    const highString = value.high ? stringifyValue(value.high) : "N/A";
     return `${lowString} - ${highString}`;
   } else if (isNaN(value) && !isNaN(Date.parse(value))) {
     //Value might be a string, so let's see if the string is a number.
@@ -219,13 +219,13 @@ export const stringifyValue = (value, topLevel = false, codeSystemMap = {}) => {
     const month = resultDate.getUTCMonth()
       ? resultDate.getUTCMonth() + 1
       : null;
-    let day = resultDate.getUTCDay() ? resultDate.getUTCDay() + 1 : null; // this works only for utc.. bug point.
+    const day = resultDate.getUTCDay() ? resultDate.getUTCDay() + 1 : null; // this works only for utc.. bug point.
     const hours = resultDate.getUTCHours() || null;
     const minutes = resultDate.getUTCMinutes() || null;
     const seconds = resultDate.getUTCSeconds() || null;
     const ms = resultDate.getUTCMilliseconds() || null;
     // if we decide to convert it based off of locale to user.
-    let timeZoneOffset = resultDate.getTimezoneOffset()
+    const timeZoneOffset = resultDate.getTimezoneOffset()
       ? resultDate.getTimezoneOffset() / 60
       : null;
 
@@ -257,7 +257,7 @@ export const stringifyValue = (value, topLevel = false, codeSystemMap = {}) => {
   // this block is currently unused but should be uncommented when the dataTypes are tested
   else if (value?.[0]?.schema || value.schema) {
     // typeof number parses to a date. Check to make sure it's not a number.
-    let attrStrings = [];
+    const attrStrings = [];
     let attrString = "";
     const schema = value?.[0]?.schema ? value?.[0]?.schema : value.schema; // catches diagnoses, facilityLocations != Participant
     schema.eachPath((path) => {

@@ -4,7 +4,7 @@ import tw from "twin.macro";
 const GoHomeLink = tw.button`text-blue-500 hover:text-blue-900`;
 
 const NotFound = () => {
-  let navigate = useNavigate();
+  const navigate = useNavigate();
 
   function handleClick() {
     navigate("/measures");

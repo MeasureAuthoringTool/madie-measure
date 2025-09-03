@@ -141,8 +141,8 @@ export const getDecimalValidator = (required) => {
 };
 
 export const getUriValidator = (required) => {
-  const uriRegex: RegExp = /\S*/;
-  const urnRegex: RegExp = /^urn:oid:[0-2](\.(0|[1-9][0-9]*))+$/;
+  const uriRegex = /\S*/;
+  const urnRegex = /^urn:oid:[0-2](\.(0|[1-9][0-9]*))+$/;
   const baseValidator = Yup.string()
     .test(
       "urn-specific-test",

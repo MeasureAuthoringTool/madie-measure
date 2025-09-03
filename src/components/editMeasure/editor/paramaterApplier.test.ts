@@ -77,7 +77,7 @@ describe("applyCode test cases", () => {
   });
 
   it("Should insert parameter if editor is blank", () => {
-    let result = applyParameter("", mockParameter);
+    const result = applyParameter("", mockParameter);
     expect(result.message).toContain(
       `Parameter ${mockParameter.parameterName} has been successfully added to the CQL.`
     );
@@ -87,7 +87,7 @@ describe("applyCode test cases", () => {
 
   it("Should insert Parameter if CQL has only library statement", () => {
     const libraryStatement = "library ABC version '0.0.000'";
-    let result = applyParameter(libraryStatement, mockParameter);
+    const result = applyParameter(libraryStatement, mockParameter);
     const cqlArray = result.cql.split("\n");
     expect(cqlArray[0]).toEqual(libraryStatement);
     expect(cqlArray[1]).toEqual('parameter "testName" testExpression');
@@ -97,7 +97,7 @@ describe("applyCode test cases", () => {
     const usingStatement = "using QDM version '5.6'";
     const libraryStatement = "library ABC version '0.0.000'";
     const cql = `${libraryStatement}\n${usingStatement}`;
-    let result = applyParameter(cql, mockParameter);
+    const result = applyParameter(cql, mockParameter);
     const cqlArray = result.cql.split("\n");
     expect(cqlArray[0]).toEqual(libraryStatement);
     expect(cqlArray[1]).toEqual(usingStatement);
@@ -110,7 +110,7 @@ describe("applyCode test cases", () => {
     const codeSystemStatement =
       "codesystem \"CPT\": 'urn:oid:2.16.840.1.113883.6.12'";
     const cql = `${libraryStatement}\n${usingStatement}\n${codeSystemStatement}`;
-    let result = applyParameter(cql, mockParameter);
+    const result = applyParameter(cql, mockParameter);
     const cqlArray = result.cql.split("\n");
     expect(cqlArray[0]).toEqual(libraryStatement);
     expect(cqlArray[1]).toEqual(usingStatement);

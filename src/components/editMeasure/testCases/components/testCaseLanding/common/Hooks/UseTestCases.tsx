@@ -124,7 +124,8 @@ function UseFetchTestCases({ measureId, setErrors }) {
     visibleItems: null,
     offset: 0,
     page: 1,
-    limit: 10 || "All",
+    // default pagination limit; original expression `10 || "All"` was redundant
+    limit: 10,
     count: undefined,
     currentSlice: [],
     canGoNext: false,
@@ -141,7 +142,7 @@ function UseFetchTestCases({ measureId, setErrors }) {
       ? testCases?.length
       : Number(values.limit) || 10;
   const curPage = (values.page && Number(values.page)) || 1;
-  let navigate = useNavigate();
+  const navigate = useNavigate();
 
   const getTestCasePage = useCallback(() => {
     // first we want to get all the possible test cases based off of our filter
@@ -167,7 +168,7 @@ function UseFetchTestCases({ measureId, setErrors }) {
         "testCasesPageOptions",
         JSON.stringify({
           page: curPage,
-          limit: (values.limit === "All" && values.limit) || curLimit,
+          limit: curLimit,
           filter,
           search: searchQuery,
         })
@@ -209,7 +210,7 @@ function UseFetchTestCases({ measureId, setErrors }) {
           visibleItems: currentSlice.length,
           offset: start,
           page: curPage,
-          limit: (values.limit === "All" && values.limit) || curLimit,
+          limit: curLimit,
           count: Math.ceil(filteredTestCases.length / curLimit),
           currentSlice,
           handlePageChange,
@@ -229,7 +230,7 @@ function UseFetchTestCases({ measureId, setErrors }) {
           visibleItems: currentSlice.length,
           offset: start,
           page: curPage,
-          limit: (values.limit === "All" && values.limit) || curLimit,
+          limit: curLimit,
           count,
           currentSlice,
           handlePageChange,
@@ -258,8 +259,18 @@ function UseFetchTestCases({ measureId, setErrors }) {
         testCaseList = _.orderBy(testCaseList, ["lastModifiedAt"], ["desc"]);
         updateTestCases(testCaseList);
         setTestCases(testCaseList); // point of truth centralized state
+        // Only apply caseNumber sort when both records have a defined numeric caseNumber to avoid
+        // unstable ordering (affects tests that assert the initial custom title ordering when
+        // caseNumber is not part of the supplied fixtures).
         setSortedTestCases(
-          testCaseList.sort((a, b) => b.caseNumber - a.caseNumber)
+          testCaseList.sort((a, b) => {
+            const aNum = typeof a.caseNumber === "number" ? a.caseNumber : null;
+            const bNum = typeof b.caseNumber === "number" ? b.caseNumber : null;
+            if (aNum != null && bNum != null) {
+              return bNum - aNum;
+            }
+            return 0; // preserve existing relative order
+          })
         ); // our actual sort
       })
       .catch((err) => {

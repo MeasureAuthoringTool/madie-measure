@@ -35,7 +35,7 @@ export function patientReducer(state, action: QdmPatientAction) {
       return { ...state, patient: action.payload };
     }
     case PatientActionType.ADD_DATA_ELEMENT: {
-      let patient = _.isNil(state.patient) ? new QDMPatient() : state.patient;
+      const patient = _.isNil(state.patient) ? new QDMPatient() : state.patient;
       if (patient.dataElements) {
         patient.dataElements.unshift(action.payload);
       } else {
@@ -44,7 +44,7 @@ export function patientReducer(state, action: QdmPatientAction) {
       return { ...state, patient };
     }
     case PatientActionType.REMOVE_DATA_ELEMENT: {
-      let patient = _.isNil(state.patient) ? new QDMPatient() : state.patient;
+      const patient = _.isNil(state.patient) ? new QDMPatient() : state.patient;
       if (patient.dataElements) {
         patient.dataElements = patient.dataElements.filter(
           (dataElement) => dataElement?.id !== action.payload.id
@@ -53,7 +53,7 @@ export function patientReducer(state, action: QdmPatientAction) {
       return { ...state, patient };
     }
     case PatientActionType.MODIFY_DATA_ELEMENT: {
-      let patient = _.isNil(state.patient) ? new QDMPatient() : state.patient;
+      const patient = _.isNil(state.patient) ? new QDMPatient() : state.patient;
       if (patient.dataElements) {
         patient.dataElements = patient.dataElements.map((dataElement) => {
           if (dataElement.id === action.payload.id) {
@@ -65,7 +65,7 @@ export function patientReducer(state, action: QdmPatientAction) {
       return { ...state, patient };
     }
     case PatientActionType.SET_BIRTHDATETIME: {
-      let patient = _.isNil(state.patient) ? new QDMPatient() : state.patient;
+      const patient = _.isNil(state.patient) ? new QDMPatient() : state.patient;
       patient.birthDatetime = action.payload;
       return { ...state, patient };
     }

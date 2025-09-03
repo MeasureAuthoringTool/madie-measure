@@ -91,7 +91,7 @@ export const getCoverageValueFromHtml = (
 };
 
 const TestCaseList = (props: TestCaseListProps) => {
-  let navigate = useNavigate();
+  const navigate = useNavigate();
   const { search } = useLocation();
   const values = queryString.parse(search);
   const { setErrors, setImportErrors, setWarnings, setImportWarnings } = props;
@@ -542,7 +542,7 @@ const TestCaseList = (props: TestCaseListProps) => {
             .generateExcel(testCaseDtos)
             .then((response: AxiosResponse) => {
               const excelData: Blob = response.data;
-              var exportBlob = new Blob([excelData], {
+              const exportBlob = new Blob([excelData], {
                 type: "application/vnd.ms-excel",
               });
               const url = window.URL.createObjectURL(exportBlob);
@@ -621,7 +621,7 @@ const TestCaseList = (props: TestCaseListProps) => {
             }
           );
 
-          let stratNumber = 1;
+          const stratNumber = 1;
           const populationDtos: PopulationDto[] =
             populatePopulationDtos(groupPopulation);
           const groupedStratDtos: GroupedStratificationDto[] =

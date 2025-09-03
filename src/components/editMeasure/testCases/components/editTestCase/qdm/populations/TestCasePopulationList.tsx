@@ -66,11 +66,11 @@ const TestCasePopulationList = ({
   errors,
   groupIndex,
 }: TestCasePopulationListProps) => {
-  let measureObservations = [];
-  let numeratorObservations = [];
-  let denominatorObservations = [];
-  let initialPopulations = [];
-  let contentId = content?.toLocaleLowerCase().replace(/(\W)+/g, "-");
+  const measureObservations = [];
+  const numeratorObservations = [];
+  const denominatorObservations = [];
+  const initialPopulations = [];
+  const contentId = content?.toLocaleLowerCase().replace(/(\W)+/g, "-");
 
   const getPopulationCount = (
     populations: DisplayPopulationValue[],

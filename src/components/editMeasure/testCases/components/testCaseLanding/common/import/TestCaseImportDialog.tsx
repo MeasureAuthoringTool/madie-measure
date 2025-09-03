@@ -86,7 +86,7 @@ const TestCaseImportDialog = ({ dialogOpen, handleClose, onImport }) => {
       let fileNames = [];
       let madieFileMetaData: TestCaseExportMetaData[];
       let madieFilePresent = true;
-      let separator: string = "/";
+      let separator = "/";
       const parentFolderName = acceptedFiles[0].name
         .replace(".zip", "")
         .split(" ")[0];
@@ -144,7 +144,7 @@ const TestCaseImportDialog = ({ dialogOpen, handleClose, onImport }) => {
             }
 
             // check for an existing file in the directory
-            var existingFile = filesMap.filter((file) => {
+            const existingFile = filesMap.filter((file) => {
               if (file.patientId === patientId) {
                 return true;
               }

@@ -312,7 +312,7 @@ const OverlappingCodesDialog = ({
       );
 
       const excelData: Blob = response.data;
-      var exportBlob = new Blob([excelData], {
+      const exportBlob = new Blob([excelData], {
         type: "application/vnd.ms-excel",
       });
       const url = window.URL.createObjectURL(exportBlob);

@@ -78,7 +78,7 @@ export function mergeCalcResults(calcResults1, calcResults2) {
 export function updateAllGroupResults(calculationOutput) {
   const updatedGroupResults = [];
 
-  for (let patientId in calculationOutput) {
+  for (const patientId in calculationOutput) {
     const patientResult = calculationOutput[patientId];
     for (const groupId in patientResult) {
       const groupResult = patientResult[groupId];

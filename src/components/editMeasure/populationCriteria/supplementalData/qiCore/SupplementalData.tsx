@@ -27,7 +27,7 @@ import * as _ from "lodash";
 import TextEditor from "../../groups/TextEditor";
 
 const measureReportTypeOptions = [];
-for (let t in MeasureReportType) {
+for (const t in MeasureReportType) {
   measureReportTypeOptions.push(MeasureReportType[t]);
 }
 

@@ -19,7 +19,7 @@ const TestCaseCoverage = ({
 
   useEffect(() => {
     if (testCases) {
-      let allTestCaseGroups = [];
+      const allTestCaseGroups = [];
       // if the teset case isn't present in our return array, add all values
       testCases
         ?.filter((tc) => tc.validResource)

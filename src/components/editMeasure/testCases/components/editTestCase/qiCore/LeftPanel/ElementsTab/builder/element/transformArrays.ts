@@ -27,7 +27,7 @@ const testData = [
 export const transformArrays = (list, depth) => {
   depth = depth - 1;
   // returns an array of arrays by branches, or a single array of one array
-  let branchNames = [];
+  const branchNames = [];
   let numberOfBranchesAtDepth = 0;
   const result = [];
   list.forEach((item) => {

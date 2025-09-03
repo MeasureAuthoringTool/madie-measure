@@ -9,7 +9,7 @@ import {
 } from "../../../../api/ServiceContext";
 import MeasureDefinitions from "./MeasureDefinitions";
 // @ts-ignore
-import { measureStore, useFeatureFlags } from "@madie/madie-util";
+import { measureStore } from "@madie/madie-util";
 import { Measure, MeasureDefinition } from "@madie/madie-models";
 import userEvent from "@testing-library/user-event";
 import useMeasureServiceApi, {
@@ -57,11 +57,7 @@ jest.mock("@madie/madie-util", () => ({
     getAccessToken: () => "test.jwt",
   })),
   checkUserCanEdit: jest.fn().mockImplementation(() => true),
-  useFeatureFlags: jest.fn(() => {
-    return {
-      EnhancedTextFormatting: false,
-    };
-  }),
+  useFeatureFlags: jest.fn(() => ({})),
   measureStore: {
     updateMeasure: jest.fn((measure) => measure),
     state: jest.fn().mockImplementation(() => measure),
@@ -106,22 +102,12 @@ const {
   queryByTestId,
 } = screen;
 
-describe("Measure Definitions Component", () => {
-  beforeEach(() => {
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-      EnhancedTextFormatting: false,
-    }));
-  });
-
+describe("Measure Definitions Component (Rich Text Always)", () => {
   afterEach(() => jest.clearAllMocks());
 
-  const expectInputValue = (
-    element: HTMLTextAreaElement,
-    value: string
-  ): void => {
-    expect(element).toBeInstanceOf(HTMLTextAreaElement);
-    const inputEl = element as HTMLTextAreaElement;
-    expect(inputEl.value).toBe(value);
+  const expectEditorContent = (element: HTMLElement, value: string): void => {
+    expect(element).toBeInTheDocument();
+    expect(element).toHaveTextContent(value);
   };
 
   const checkDialogExists = async () => {
@@ -322,10 +308,9 @@ describe("Measure Definitions Component", () => {
       "measure-definition-term-input"
     ) as HTMLInputElement;
     expect(termInput.value).toBe("term 1");
-    const definitionInput = getByTestId(
-      "measure-definition"
-    ) as HTMLTextAreaElement;
-    expect(definitionInput.value).toBe("definition 1");
+    // definition rich text editor wrapper (data-testid on TextEditor)
+    const definitionEditor = await findByTestId("definition-rich-text-editor");
+    expect(definitionEditor).toHaveTextContent("definition 1");
 
     fireEvent.change(termInput, {
       target: { value: "term 111" },
@@ -333,12 +318,11 @@ describe("Measure Definitions Component", () => {
     expect(termInput.value).toBe("term 111");
 
     act(() => {
-      fireEvent.change(definitionInput, {
-        target: { value: "definition 111" },
+      fireEvent.input(definitionEditor, {
+        target: { innerHTML: "definition 111" },
       });
     });
-    fireEvent.blur(definitionInput);
-    expectInputValue(definitionInput, "definition 111");
+    expectEditorContent(definitionEditor as HTMLElement, "definition 111");
     const submitButton = getByTestId("save-button");
     expect(submitButton).toHaveProperty("disabled", false);
     fireEvent.click(submitButton);
@@ -472,17 +456,17 @@ describe("Measure Definitions Component", () => {
     });
     expect(termInput.value).toBe("term 1");
 
-    const definitionInput = getByTestId(
-      "measure-definition"
-    ) as HTMLTextAreaElement;
-    expectInputValue(definitionInput, "");
+    const definitionEditor = await findByTestId("definition-rich-text-editor");
+    const editable1 = definitionEditor.querySelector(
+      '[contenteditable="true"]'
+    ) as HTMLElement;
+    expect(editable1).toBeInTheDocument();
     act(() => {
-      fireEvent.change(definitionInput, {
-        target: { value: "definition 1" },
+      fireEvent.input(editable1, {
+        target: { innerHTML: "definition 1" },
       });
     });
-    fireEvent.blur(definitionInput);
-    expectInputValue(definitionInput, "definition 1");
+    expect(editable1).toHaveTextContent("definition 1");
     const cancelButton = getByTestId("cancel-button");
     expect(cancelButton).toHaveProperty("disabled", false);
     fireEvent.click(cancelButton);
@@ -523,19 +507,19 @@ describe("Measure Definitions Component", () => {
     });
     expect(termInput.value).toBe("term 1");
 
-    const definitionInput = getByTestId(
-      "measure-definition"
-    ) as HTMLTextAreaElement;
-    expectInputValue(definitionInput, "");
+    const definitionEditor = await findByTestId("definition-rich-text-editor");
+    const editable2 = definitionEditor.querySelector(
+      '[contenteditable="true"]'
+    ) as HTMLElement;
+    expect(editable2).toBeInTheDocument();
     act(() => {
-      fireEvent.change(definitionInput, {
-        target: { value: "definition 11" },
+      fireEvent.input(editable2, {
+        target: { innerHTML: "definition 11" },
       });
     });
-    fireEvent.blur(definitionInput);
-    expectInputValue(definitionInput, "definition 11");
+    expect(editable2).toHaveTextContent("definition 11");
     const submitButton = getByTestId("save-button");
-    expect(submitButton).toHaveProperty("disabled", false);
+    await waitFor(() => expect(submitButton).toHaveProperty("disabled", false));
     fireEvent.click(submitButton);
 
     expect(await findByTestId("measure-definitions-error")).toHaveTextContent(
@@ -583,19 +567,19 @@ describe("Measure Definitions Component", () => {
     });
     expect(termInput.value).toBe("term 1");
 
-    const definitionInput = getByTestId(
-      "measure-definition"
-    ) as HTMLTextAreaElement;
-    expectInputValue(definitionInput, "");
+    const definitionEditor = await findByTestId("definition-rich-text-editor");
+    const editable3 = definitionEditor.querySelector(
+      '[contenteditable="true"]'
+    ) as HTMLElement;
+    expect(editable3).toBeInTheDocument();
     act(() => {
-      fireEvent.change(definitionInput, {
-        target: { value: "definition 1" },
+      fireEvent.input(editable3, {
+        target: { innerHTML: "definition 1" },
       });
     });
-    fireEvent.blur(definitionInput);
-    expectInputValue(definitionInput, "definition 1");
+    expect(editable3).toHaveTextContent("definition 1");
     const submitButton = getByTestId("save-button");
-    expect(submitButton).toHaveProperty("disabled", false);
+    await waitFor(() => expect(submitButton).toHaveProperty("disabled", false));
     fireEvent.click(submitButton);
 
     expect(await findByTestId("measure-definitions-error")).toHaveTextContent(
@@ -644,68 +628,25 @@ describe("Measure Definitions Component", () => {
     });
     expect(termInput.value).toBe("term 1");
 
-    const definitionInput = getByTestId(
-      "measure-definition"
-    ) as HTMLTextAreaElement;
-    expectInputValue(definitionInput, "");
+    const definitionEditor = await findByTestId("definition-rich-text-editor");
+    const editable4 = definitionEditor.querySelector(
+      '[contenteditable="true"]'
+    ) as HTMLElement;
+    expect(editable4).toBeInTheDocument();
     act(() => {
-      fireEvent.change(definitionInput, {
-        target: { value: "definition 1" },
+      fireEvent.input(editable4, {
+        target: { innerHTML: "definition 1" },
       });
     });
-    fireEvent.blur(definitionInput);
-    expectInputValue(definitionInput, "definition 1");
+    expect(editable4).toHaveTextContent("definition 1");
     const cancelButton = getByTestId("cancel-button");
     expect(cancelButton).toHaveProperty("disabled", false);
     const saveButton = getByTestId("save-button");
+    // wait for formik to register both term and definition to enable save
+    await waitFor(() => expect(saveButton).toHaveProperty("disabled", false));
     fireEvent.click(saveButton);
     await checkDialogHidden();
   });
 
-  it("render Definition rich text editor if EnhancedTextFormatting flag is true", async () => {
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-      EnhancedTextFormatting: true,
-    }));
-
-    measureStore.initialState.mockImplementationOnce(
-      () => measureWithNineItems
-    );
-    measureStore.state.mockImplementationOnce(() => measureWithNineItems);
-
-    render(
-      <ApiContextProvider value={serviceConfig}>
-        <MemoryRouter initialEntries={["/"]}>
-          <MeasureDefinitions setErrorMessage={jest.fn()} />
-        </MemoryRouter>
-      </ApiContextProvider>
-    );
-    expect(getByTestId("create-definition-button")).toBeEnabled();
-
-    const createButton = await findByTestId("create-definition-button");
-    expect(createButton).toBeInTheDocument();
-    await checkDialogExists();
-
-    const termInput = getByTestId(
-      "measure-definition-term-input"
-    ) as HTMLInputElement;
-    expect(termInput).toBeInTheDocument();
-    expect(termInput.value).toBe("");
-
-    fireEvent.change(termInput, {
-      target: { value: "term 1" },
-    });
-    expect(termInput.value).toBe("term 1");
-
-    const definitionEditor = within(
-      screen.getByTestId("definition-rich-text-editor")
-    ).getByRole("textbox");
-    expect(definitionEditor).toBeInTheDocument();
-    expect(definitionEditor).toHaveTextContent("");
-
-    fireEvent.input(definitionEditor, {
-      target: { textContent: "definition 1" },
-    });
-
-    expect(definitionEditor).toHaveTextContent("definition 1");
-  });
+  // Removed feature flag specific test; rich text editor is always rendered now.
 });

@@ -25,7 +25,7 @@ const EditMeasureNav = ({ isQDM }) => {
   const testCaseLabel =
     testCaseLength === null ? `Test Cases` : `Test Cases (${testCaseLength})`;
   const { pathname } = useLocation();
-  let navigate = useNavigate();
+  const navigate = useNavigate();
   const { measureId } = useParams<{
     measureId: string;
   }>();

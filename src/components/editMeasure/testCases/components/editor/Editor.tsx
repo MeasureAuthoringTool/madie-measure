@@ -14,11 +14,11 @@ export interface EditorPropsType {
 
 let originalCommands;
 const setCommandEnabled = (editor, name, enabled) => {
-  let command = editor.commands.byName[name];
+  const command = editor.commands.byName[name];
   if (!originalCommands) {
     originalCommands = JSON.parse(JSON.stringify(editor.commands));
   }
-  let bindKeyOriginal = originalCommands.byName[name].bindKey;
+  const bindKeyOriginal = originalCommands.byName[name].bindKey;
   command.bindKey = enabled ? bindKeyOriginal : null;
   editor.commands.addCommand(command);
 };

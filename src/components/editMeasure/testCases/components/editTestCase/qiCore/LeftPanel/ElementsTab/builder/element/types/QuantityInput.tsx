@@ -39,7 +39,7 @@ const QuantityInput = ({ canEdit, label, onChange }) => {
     unit: "",
   });
   const [error, setError] = useState<boolean>();
-  const [helperText, setHelperText] = useState<String>();
+  const [helperText, setHelperText] = useState<string>();
 
   const handleComparatorChange = (e) => {
     const selected = comparatorOptions.find(

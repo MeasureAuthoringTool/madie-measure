@@ -48,7 +48,7 @@ const TypeEditor = ({
 }) => {
   const formik = useFormikContext();
   const { requiredFields, formInfo } = useRequiredFields();
-  let required = getRequired(requiredFields, stripAllIndexes(label));
+  const required = getRequired(requiredFields, stripAllIndexes(label));
   const fhirDefinitionsService = useRef(useFhirDefinitionsServiceApi());
   const currentQuantityRatio = {
     low: {},
@@ -451,13 +451,13 @@ const TypeEditor = ({
 
           //@ts-ignore
           const { definition } = extensionProfileDef;
-          let foundIndex = formik?.values?.[
+          const foundIndex = formik?.values?.[
             resource?.resourceType
           ]?.extension?.findIndex((el) => {
             return el.url === definition.url;
           });
           // This is our root label ex: Patient.extension[0]
-          let updatedLabel = `${resource?.resourceType}.extension[${foundIndex}]`;
+          const updatedLabel = `${resource?.resourceType}.extension[${foundIndex}]`;
           // couldn't find it, need to change it
 
           // This work is commented out as it may need to be used later. This is for handling when an extension is not present.
@@ -496,7 +496,7 @@ const TypeEditor = ({
                   if (foundValue) {
                     if (elementDefinition.sliceName) {
                       // This is like.. extension::ethnicity. sliceName is ethnicity
-                      let foundIndex = foundValue?.extension?.findIndex(
+                      const foundIndex = foundValue?.extension?.findIndex(
                         (el) => {
                           return el.url === elementDefinition.sliceName;
                         }

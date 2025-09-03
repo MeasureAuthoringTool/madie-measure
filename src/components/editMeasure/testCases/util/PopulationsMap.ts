@@ -31,7 +31,7 @@ export function triggerPopChanges(
   changedTarget: DisplayPopulationValue,
   measureGroups
 ): GroupPopulation[] {
-  let returnPops: GroupPopulation[] = [...groupPopulations];
+  const returnPops: GroupPopulation[] = [...groupPopulations];
 
   // Find the modified Group/Population Criteria
   const targetGroup = returnPops.find(
@@ -49,8 +49,8 @@ export function triggerPopChanges(
     (population) => population.name === changedPopulationName
   )?.expected;
 
-  let stratMap = buildStratificationMap(targetGroup, changedTarget);
-  let popMap = buildPopulationMap(targetGroup);
+  const stratMap = buildStratificationMap(targetGroup, changedTarget);
+  const popMap = buildPopulationMap(targetGroup);
   const targetPopulationValues = targetGroup.populationValues;
 
   targetGroup.populationValues = addRemoveObservationsForPopulationCriteria(
@@ -175,7 +175,7 @@ const buildStratificationMap = (
   populationCritiera: GroupPopulation,
   changedStratification: DisplayStratificationValue
 ) => {
-  let stratificationMap = {};
+  const stratificationMap = {};
   populationCritiera.stratificationValues?.forEach(
     (value: StratificationExpectedValue) => {
       stratificationMap[value.id] = value;
@@ -191,7 +191,7 @@ const buildStratificationMap = (
 };
 
 const buildPopulationMap = (populationCritiera: GroupPopulation) => {
-  let popMap = {};
+  const popMap = {};
   populationCritiera.populationValues.forEach(
     (value: PopulationExpectedValue) => {
       popMap[value.name] = value;
@@ -215,7 +215,7 @@ export function addRemoveObservationsForPopulationCriteria(
     changedPopulationName === PopulationType.MEASURE_POPULATION_EXCLUSION
   ) {
     //for denom add observations 1 * expectedValue
-    let expectedPopType = defineExpectedPopulationType(changedPopulationName);
+    const expectedPopType = defineExpectedPopulationType(changedPopulationName);
     const expectedObservationsPerPop = countObservationsPerType(
       populationValues,
       measureGroups,
@@ -223,7 +223,7 @@ export function addRemoveObservationsForPopulationCriteria(
       expectedPopType
     );
 
-    let populationBucket: PopulationExpectedValue[] = populationValues.filter(
+    const populationBucket: PopulationExpectedValue[] = populationValues.filter(
       (value) => value.name != PopulationType.MEASURE_OBSERVATION
     );
 
@@ -313,7 +313,7 @@ function addObservations(
   //so observationBucket has original observations that came from a Population ist
   // and tempPopBucket is just non-observation populations
   populationBucket.forEach((value) => {
-    let obvType: PopulationType = <PopulationType>(
+    const obvType: PopulationType = <PopulationType>(
       String(popType).concat("Observation")
     );
     if (value.name === popType) {
@@ -364,7 +364,7 @@ function modifyBucket(
 ): PopulationExpectedValue[] {
   const existingObvLen: number = observationBucket.length;
   if (expectedObservationsPerPop > existingObvLen) {
-    let addObservations = expectedObservationsPerPop - existingObvLen;
+    const addObservations = expectedObservationsPerPop - existingObvLen;
     for (let i = 0; i < addObservations; i++) {
       observationBucket.push({
         name: obvType,
@@ -375,7 +375,7 @@ function modifyBucket(
     }
     //or remove observations
   } else if (expectedObservationsPerPop < existingObvLen) {
-    let removeObservations = existingObvLen - expectedObservationsPerPop;
+    const removeObservations = existingObvLen - expectedObservationsPerPop;
     for (let i = 0; i < removeObservations; i++) {
       observationBucket.pop();
     }
@@ -422,7 +422,7 @@ function countObservationsPerType(
     }
   )?.expected;
 
-  let exclusionNbr: number = getValueFromBoolOrNum(exclusions);
+  const exclusionNbr: number = getValueFromBoolOrNum(exclusions);
 
   countNbr = countNbr - exclusionNbr;
   countNbr = countNbr < 0 ? 0 : countNbr;

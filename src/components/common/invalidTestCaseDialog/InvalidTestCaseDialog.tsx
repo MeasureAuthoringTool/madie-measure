@@ -10,7 +10,7 @@ interface InvalidTestCaseDialogProps {
   open: boolean;
   onClose: Function;
   onContinue: Function;
-  versionType: String;
+  versionType: string;
   loading: boolean;
 }
 

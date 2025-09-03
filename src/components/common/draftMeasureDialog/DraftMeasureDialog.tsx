@@ -32,7 +32,7 @@ const useStyles = makeStyles({
 });
 
 const DraftMeasureDialog = ({ open, onClose, onSubmit, measure, loading }) => {
-  let modelOptions = Object.keys(Model);
+  const modelOptions = Object.keys(Model);
   const classes = useStyles();
   const featureFlags = useFeatureFlags();
 

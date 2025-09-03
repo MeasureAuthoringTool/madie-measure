@@ -26,7 +26,7 @@ describe("Test Case Editor component", () => {
 
     await act(async () => {
       const result = render(<Editor {...outputProps} />);
-      let aceEditor: any = await result.container.querySelector(
+      const aceEditor: any = await result.container.querySelector(
         "#ace-editor-wrapper textarea"
       );
       userEvent.paste(aceEditor, typedValue);

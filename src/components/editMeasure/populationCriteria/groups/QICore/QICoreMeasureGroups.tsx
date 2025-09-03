@@ -210,7 +210,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
     measure?.measureMetaData?.draft
   );
   const measureServiceApi = useMeasureServiceApi();
-  let location = useLocation();
+  const location = useLocation();
   const { pathname } = location;
 
   const row = {
@@ -245,7 +245,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
   };
 
   const groupsBaseUrl = "/measures/" + props.measureId + "/edit/groups";
-  let navigate = useNavigate();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<string>("populations");
   const measureGroupNumber =
     props.measureGroupNumber - 1 < 0 ? 0 : props.measureGroupNumber;

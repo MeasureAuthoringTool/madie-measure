@@ -170,7 +170,7 @@ const serviceConfig: ServiceConfig = {
     baseUrl: "something.com",
   },
 };
-let mockApplyDefaults = false;
+const mockApplyDefaults = false;
 jest.mock("@madie/madie-util", () => {
   return {
     useDocumentTitle: jest.fn(),

@@ -113,7 +113,7 @@ export class TerminologyServiceApi {
       ),
     };
 
-    let path = "/terminology/value-sets/expansion/qdm";
+    const path = "/terminology/value-sets/expansion/qdm";
 
     if (_.isEmpty(searchCriteria.valueSetParams)) {
       return [];

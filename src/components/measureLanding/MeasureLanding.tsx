@@ -44,7 +44,7 @@ const ownershipTypeMap: Record<number, OwnershipType> = {
 export default function MeasureLanding() {
   useDocumentTitle("MADiE Measures");
   const { search } = useLocation();
-  let navigate = useNavigate();
+  const navigate = useNavigate();
   const measureServiceApi = useRef(useMeasureServiceApi()).current;
   const [measureList, setMeasureList] = useState<Measure[]>([]);
 

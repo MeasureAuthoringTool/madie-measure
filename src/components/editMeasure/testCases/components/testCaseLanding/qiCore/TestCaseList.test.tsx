@@ -165,7 +165,7 @@ global.ResizeObserver = jest.fn().mockImplementation(() => ({
   unobserve: jest.fn(),
   disconnect: jest.fn(),
 }));
-let importingTestCases = [];
+const importingTestCases = [];
 
 // output from calculationService
 const executionResults = {

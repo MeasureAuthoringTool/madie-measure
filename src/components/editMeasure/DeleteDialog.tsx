@@ -6,7 +6,7 @@ import { Dialog, IconButton, DialogActions, Divider } from "@mui/material";
 export interface DeleteDialogProps {
   open: boolean;
   onClose: any;
-  measureName: String;
+  measureName: string;
   deleteMeasure: Function;
 }
 

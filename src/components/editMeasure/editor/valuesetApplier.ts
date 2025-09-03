@@ -156,8 +156,8 @@ const applyValueset = (
   const parseResults: CqlResult = new CqlAntlr(cql).parse();
   let valuesetChangeStatus: "success" | "info" | "danger" = "danger";
   let message: string;
-  let vsExactExists: boolean = false;
-  let vsSameTitleExist: boolean = false;
+  let vsExactExists = false;
+  let vsSameTitleExist = false;
 
   // are there value sets at all?
   if (parseResults?.valueSets?.length > 0) {

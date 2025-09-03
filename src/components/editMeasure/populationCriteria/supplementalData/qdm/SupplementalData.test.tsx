@@ -79,13 +79,28 @@ jest.mock("@madie/madie-util", () => ({
     initialState: { canTravel: false, pendingPath: "" },
   },
   useFeatureFlags: jest.fn(() => {
-    return {
-      EnhancedTextFormatting: false,
-    };
+    return {};
   }),
 }));
 
 jest.mock("../../../../../api/useMeasureServiceApi");
+// Mock the rich TextEditor to a simple synchronous textarea so formik dirty state updates immediately in tests.
+jest.mock("../../groups/TextEditor", () => (props) => {
+  const {
+    value,
+    readOnly,
+    setFieldValue,
+    name = "supplementalDataDescription",
+  } = props;
+  return (
+    <textarea
+      data-testid="supplemental-data-description-rich-text-editor"
+      value={value}
+      readOnly={readOnly}
+      onChange={(e) => setFieldValue(name, e.target.value)}
+    />
+  );
+});
 const useMeasureServiceApiMock =
   useMeasureServiceApi as jest.Mock<MeasureServiceApi>;
 let measureServiceApi: MeasureServiceApi;
@@ -110,7 +125,7 @@ describe("SupplementalData Component QDM", () => {
     ).toBeInTheDocument();
 
     const description = screen.getByTestId(
-      "supplemental-data-description-text"
+      "supplemental-data-description-rich-text-editor"
     );
     expect(description).toHaveTextContent("test description");
   });
@@ -123,7 +138,9 @@ describe("SupplementalData Component QDM", () => {
     });
     expect(supplementalElements).toHaveTextContent("Initial Population");
 
-    const description = screen.getByRole("textbox", { name: "Description" });
+    const description = screen.getByTestId(
+      "supplemental-data-description-rich-text-editor"
+    );
     expect(description).toHaveTextContent("test description");
 
     const allFormFields = screen.getAllByRole("textbox");
@@ -182,7 +199,7 @@ describe("SupplementalData Component QDM", () => {
 
     // Verifies if SD description already loads values from store and able to update
     const description = screen.getByTestId(
-      "supplemental-data-description-text"
+      "supplemental-data-description-rich-text-editor"
     );
     expect(description).toHaveTextContent("test description");
     fireEvent.change(description, {
@@ -224,7 +241,7 @@ describe("SupplementalData Component QDM", () => {
 
     // Verifies if SD description already loads values from store and able to update
     const description = screen.getByTestId(
-      "supplemental-data-description-text"
+      "supplemental-data-description-rich-text-editor"
     );
     expect(description).toHaveTextContent("test description");
     fireEvent.change(description, {
@@ -282,7 +299,7 @@ describe("SupplementalData Component QDM", () => {
 
     // Verifies if SD description already loads values from store and able to update
     const description = screen.getByTestId(
-      "supplemental-data-description-text"
+      "supplemental-data-description-rich-text-editor"
     );
     expect(description).toHaveTextContent("test description");
     fireEvent.change(description, {
@@ -340,7 +357,7 @@ describe("SupplementalData Component QDM", () => {
 
     // Verifies if SD description already loads values from store and able to update
     const description = screen.getByTestId(
-      "supplemental-data-description-text"
+      "supplemental-data-description-rich-text-editor"
     );
     expect(description).toHaveTextContent("test description");
     fireEvent.change(description, {

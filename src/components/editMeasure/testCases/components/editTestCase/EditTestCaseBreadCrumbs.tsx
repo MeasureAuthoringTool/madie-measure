@@ -33,8 +33,8 @@ const EditTestCaseBreadCrumbs = (props: EditTestCaseBreadCrumbsProps) => {
     return testCaseString;
   }, []);
 
-  let testCaseString = generateTestCaseString(testCase);
-  let navigate = useNavigate();
+  const testCaseString = generateTestCaseString(testCase);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const subscription = measureStore.subscribe(setMeasure);

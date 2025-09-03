@@ -40,7 +40,7 @@ export function resourceReducer(state, action: QiCoreResourceAction) {
       return { ...state, bundle: action.payload };
     }
     case ResourceActionType.ADD_BUNDLE_ENTRY: {
-      let bundle = _.isNil(state.bundle)
+      const bundle = _.isNil(state.bundle)
         ? { id: uuidv4(), ...INITIAL_BUNDLE }
         : state.bundle;
       if (_.isEmpty(bundle.entry)) {
@@ -51,7 +51,7 @@ export function resourceReducer(state, action: QiCoreResourceAction) {
       return { ...state, bundle };
     }
     case ResourceActionType.REMOVE_BUNDLE_ENTRY: {
-      let bundle = _.isNil(state.bundle)
+      const bundle = _.isNil(state.bundle)
         ? { id: uuidv4(), ...INITIAL_BUNDLE }
         : state.bundle;
       if (bundle.entry) {
@@ -62,7 +62,7 @@ export function resourceReducer(state, action: QiCoreResourceAction) {
       return { ...state, bundle };
     }
     case ResourceActionType.MODIFY_BUNDLE_ENTRY: {
-      let bundle = _.isNil(state.bundle)
+      const bundle = _.isNil(state.bundle)
         ? { id: uuidv4(), ...INITIAL_BUNDLE }
         : state.bundle;
       if (bundle.entry) {

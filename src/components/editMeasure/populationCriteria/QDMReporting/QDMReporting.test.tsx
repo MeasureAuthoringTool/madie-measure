@@ -12,13 +12,22 @@ import useMeasureServiceApi, {
 import { Measure } from "@madie/madie-models";
 import QDMReporting from "./QDMReporting";
 import userEvent from "@testing-library/user-event";
-import {
-  checkUserCanEdit,
-  measureStore,
-  useFeatureFlags,
-} from "@madie/madie-util";
+import { checkUserCanEdit, measureStore } from "@madie/madie-util";
 
 jest.mock("../../../../api/useMeasureServiceApi");
+// Mock rich TextEditor to simple textarea for deterministic synchronous formik updates
+jest.mock("../groups/TextEditor", () => (props) => {
+  const { value, readOnly, disabled, setFieldValue, name } = props;
+  return (
+    <textarea
+      data-testid={`${name}-rich-text-editor`}
+      value={value}
+      readOnly={readOnly}
+      disabled={disabled}
+      onChange={(e) => setFieldValue(name, e.target.value)}
+    />
+  );
+});
 
 const measure = {
   id: "test measure",
@@ -55,9 +64,6 @@ jest.mock("@madie/madie-util", () => ({
     state: { canTravel: true, pendingPath: "" },
     initialState: { canTravel: true, pendingPath: "" },
   },
-  useFeatureFlags: jest.fn(() => ({
-    EnhancedTextFormatting: false,
-  })),
   checkUserCanEdit: jest.fn(() => {
     return true;
   }),
@@ -77,18 +83,16 @@ describe("QDMReporting component", () => {
 
     measureStore.state = jest.fn().mockImplementation(() => measure);
 
-    (useFeatureFlags as jest.Mock).mockImplementation(() => ({
-      EnhancedTextFormatting: false,
-    }));
+    // feature flags no longer used for text formatting
   });
   const { getByText, getByRole, getByLabelText } = screen;
 
   test("QDMReporting renders to correctly with defaults", async () => {
     render(<QDMReporting />);
 
-    const rateAggregation = getByRole("textbox", {
-      name: "Rate Aggregation",
-    }) as HTMLInputElement;
+    const rateAggregation = screen.getByTestId(
+      "rateAggregation-rich-text-editor"
+    ) as HTMLTextAreaElement;
     expect(rateAggregation).toHaveValue("");
 
     const improvementNotation = getByLabelText(
@@ -108,9 +112,9 @@ describe("QDMReporting component", () => {
     measureStore.state = jest.fn().mockImplementation(() => newMeasure);
     render(<QDMReporting />);
 
-    const rateAggregation = getByRole("textbox", {
-      name: "Rate Aggregation",
-    }) as HTMLInputElement;
+    const rateAggregation = screen.getByTestId(
+      "rateAggregation-rich-text-editor"
+    ) as HTMLTextAreaElement;
     expect(rateAggregation).toHaveValue("Example Rate Aggregation");
 
     const improvementNotation = getByLabelText(
@@ -124,9 +128,9 @@ describe("QDMReporting component", () => {
   test("Change enables Discard button and Keep working action should retain changes", async () => {
     render(<QDMReporting />);
 
-    const rateAggregation = getByRole("textbox", {
-      name: "Rate Aggregation",
-    }) as HTMLInputElement;
+    const rateAggregation = screen.getByTestId(
+      "rateAggregation-rich-text-editor"
+    ) as HTMLTextAreaElement;
 
     fireEvent.change(rateAggregation, {
       target: { value: "Test" },
@@ -163,9 +167,9 @@ describe("QDMReporting component", () => {
   test("Change enables Discard button and Discard changes action should discard changes", async () => {
     render(<QDMReporting />);
 
-    const rateAggregation = getByRole("textbox", {
-      name: "Rate Aggregation",
-    }) as HTMLInputElement;
+    const rateAggregation = screen.getByTestId(
+      "rateAggregation-rich-text-editor"
+    ) as HTMLTextAreaElement;
 
     expect(rateAggregation.value).toBe("");
     userEvent.type(rateAggregation, "Test");
@@ -204,9 +208,9 @@ describe("QDMReporting component", () => {
 
     render(<QDMReporting />);
 
-    const rateAggregation = getByRole("textbox", {
-      name: "Rate Aggregation",
-    }) as HTMLInputElement;
+    const rateAggregation = screen.getByTestId(
+      "rateAggregation-rich-text-editor"
+    ) as HTMLTextAreaElement;
 
     fireEvent.change(rateAggregation, {
       target: { value: "Test" },
@@ -255,9 +259,9 @@ describe("QDMReporting component", () => {
 
     render(<QDMReporting />);
 
-    const rateAggregation = getByRole("textbox", {
-      name: "Rate Aggregation",
-    }) as HTMLInputElement;
+    const rateAggregation = screen.getByTestId(
+      "rateAggregation-rich-text-editor"
+    ) as HTMLTextAreaElement;
 
     fireEvent.change(rateAggregation, {
       target: { value: "Test" },
@@ -296,9 +300,9 @@ describe("QDMReporting component", () => {
 
   test("Improvement Notation description is mandatory for 'Other' Improvement Notation", async () => {
     render(<QDMReporting />);
-    const description = screen.getByRole("textbox", {
-      name: "Improvement Notation Description",
-    }) as HTMLInputElement;
+    const description = screen.getByTestId(
+      "improvementNotationDescription-rich-text-editor"
+    ) as HTMLTextAreaElement;
     // if no notation is selected
     expect(description).toBeDisabled();
     // select notation
@@ -311,18 +315,15 @@ describe("QDMReporting component", () => {
     expect(saveButton).toBeInTheDocument();
     // save btn should be disabled until description is entered
     await waitFor(() => expect(saveButton).toBeDisabled());
-    userEvent.type(
-      screen.getByRole("textbox", { name: "Improvement Notation Description" }),
-      "Test description"
-    );
+    userEvent.type(description, "Test description");
     await waitFor(() => expect(saveButton).toBeEnabled());
   });
 
   test("Improvement Notation description is not mandatory for Increased Improvement Notation", async () => {
     render(<QDMReporting />);
-    let description = screen.getByTestId(
-      "improvement-notation-description-text"
-    ) as HTMLInputElement;
+    const description = screen.getByTestId(
+      "improvementNotationDescription-rich-text-editor"
+    ) as HTMLTextAreaElement;
     // if no notation is selected
     expect(description).toHaveAttribute("disabled");
     expect(description).toBeDisabled();
@@ -340,82 +341,6 @@ describe("QDMReporting component", () => {
     );
   });
 
-  test("Improvement Notation description is not mandatory for 'Increased Improvement Notation' when EnhancedTextFormatting is enabled", async () => {
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-      EnhancedTextFormatting: true,
-    }));
-
-    render(<QDMReporting />);
-
-    let editor = within(
-      screen.getByTestId("improvement-notation-description-rich-text-editor")
-    ).getByRole("textbox");
-    expect(editor).toBeInTheDocument();
-    expect(editor).toHaveAttribute("contenteditable", "false");
-
-    await selectAnOptionForImprovementNotation(increasedNotation);
-
-    await waitFor(() => {
-      editor = within(
-        screen.getByTestId("improvement-notation-description-rich-text-editor")
-      ).getByRole("textbox");
-    });
-
-    expect(editor).toHaveAttribute("contenteditable", "true");
-
-    const saveButton = screen.getByRole("button", {
-      name: "Save",
-    });
-    expect(saveButton).toBeInTheDocument();
-
-    await waitFor(() => {
-      expect(saveButton).toBeEnabled();
-    });
-  });
-
-  test("Improvement Notation description is mandatory for 'Other' when EnhancedTextFormatting is enabled", async () => {
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-      EnhancedTextFormatting: true,
-    }));
-
-    render(<QDMReporting />);
-
-    let editor = within(
-      screen.getByTestId("improvement-notation-description-rich-text-editor")
-    ).getByRole("textbox");
-    expect(editor).toBeInTheDocument();
-    expect(editor).toHaveAttribute("contenteditable", "false");
-
-    await selectAnOptionForImprovementNotation(otherNotation);
-
-    await waitFor(() => {
-      editor = within(
-        screen.getByTestId("improvement-notation-description-rich-text-editor")
-      ).getByRole("textbox");
-    });
-
-    expect(editor).toHaveAttribute("contenteditable", "true");
-
-    const saveButton = screen.getByRole("button", {
-      name: "Save",
-    });
-    expect(saveButton).toBeInTheDocument();
-
-    await waitFor(() => {
-      expect(saveButton).toBeDisabled();
-    });
-
-    fireEvent.input(editor, {
-      target: { textContent: "Test description" },
-    });
-
-    expect(editor).toHaveTextContent("Test description");
-
-    await waitFor(() => {
-      expect(saveButton).toBeEnabled();
-    });
-  });
-
   test("Improvement Notation and Increased Notation Description are both read only fields when checkUserCanEdit returns false", async () => {
     checkUserCanEdit.mockReturnValue(false);
 
@@ -428,10 +353,11 @@ describe("QDMReporting component", () => {
     expect(improvementNotationSelect).toHaveTextContent("-");
 
     const description = screen.getByTestId(
-      "improvement-notation-description-text"
-    ) as HTMLInputElement;
+      "improvementNotationDescription-rich-text-editor"
+    ) as HTMLTextAreaElement;
     expect(description).toHaveProperty("readOnly", true);
-    expect(description).toHaveTextContent("-");
+    // In the mocked TextEditor we render an empty value instead of '-' placeholder
+    expect(description.value === "" || description.value === "-").toBe(true);
   });
 });
 

@@ -624,7 +624,7 @@ const EditTestCase = (props: EditTestCaseProps) => {
       return;
     }
     setValidationErrors(() => []);
-    let modifiedTestCase = { ...testCase };
+    const modifiedTestCase = { ...testCase };
     if (isJsonModified()) {
       modifiedTestCase.json = editorVal;
       try {

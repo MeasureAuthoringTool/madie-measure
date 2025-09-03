@@ -287,7 +287,7 @@ export class CqmConversionService {
   private buildSourceDataCriteria(
     dataCriteria: DataCriteria
   ): Array<DataElement> {
-    let sourceDataCriteria = CqmModelFactory.instantiateModel(
+    const sourceDataCriteria = CqmModelFactory.instantiateModel(
       dataCriteria.type
     );
     if (dataCriteria.drc) {

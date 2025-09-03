@@ -28,7 +28,7 @@ export class MeasureServiceApi {
 
   async updateMeasureTestCaseConfiguration(
     testCaseConfig: TestCaseConfiguration,
-    measureId: String
+    measureId: string
   ): Promise<Response> {
     return await axios.put(
       `${this.baseUrl}/measures/${measureId}/test-case-config`,
@@ -50,7 +50,7 @@ export class MeasureServiceApi {
   }
 
   async getCqmMeasure(
-    measureId: String,
+    measureId: string,
     abortController: AbortController
   ): Promise<Response> {
     try {

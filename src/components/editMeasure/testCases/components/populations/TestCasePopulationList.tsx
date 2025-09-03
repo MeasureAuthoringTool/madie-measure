@@ -123,11 +123,11 @@ const TestCasePopulationList = ({
   groupsStratificationAssociationMap,
   group,
 }: TestCasePopulationListProps) => {
-  let measureObservations = [];
-  let numeratorObservations = [];
-  let denominatorObservations = [];
-  let initialPopulations = [];
-  let contentId = content?.toLocaleLowerCase().replace(/(\W)+/g, "-");
+  const measureObservations = [];
+  const numeratorObservations = [];
+  const denominatorObservations = [];
+  const initialPopulations = [];
+  const contentId = content?.toLocaleLowerCase().replace(/(\W)+/g, "-");
   const getPopulationCount = (populations, type: PopulationType): number => {
     return populations.filter((res) => res.name === type).length;
   };

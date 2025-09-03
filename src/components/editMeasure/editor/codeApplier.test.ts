@@ -86,7 +86,7 @@ describe("applyCode test cases", () => {
     expect(cql).not.toContain("281302008");
 
     const code = JSON.parse(codeJson);
-    let result: CqlApplyActionResult = applyCode(cql, code, Model.QDM_5_6);
+    const result: CqlApplyActionResult = applyCode(cql, code, Model.QDM_5_6);
 
     expect(result.cql).toContain(
       `codesystem "SNOMEDCT": 'urn:oid:2.16.840.1.113883.6.96'`
@@ -109,7 +109,7 @@ describe("applyCode test cases", () => {
       `codesystem "SNOMEDCT": 'urn:oid:2.16.840.1.113883.6.96'`
     );
     expect(cql).not.toContain("281302008");
-    let result = applyCode(cql, mockCode, Model.QDM_5_6);
+    const result = applyCode(cql, mockCode, Model.QDM_5_6);
     expect(result.cql).toContain(
       `codesystem "${mockCode.codeSystem}:${mockCode.svsVersion}": 'urn:oid:${mockCode.codeSystemOid}' version 'urn:hl7:version:${mockCode.svsVersion}'`
     );
@@ -123,7 +123,7 @@ describe("applyCode test cases", () => {
   });
 
   it("Should insert code if editor is blank", () => {
-    let result = applyCode("", mockCode, Model.QDM_5_6);
+    const result = applyCode("", mockCode, Model.QDM_5_6);
     expect(result.message).toContain(
       `Code ${mockCode.name} has been successfully added to the CQL.`
     );
@@ -139,7 +139,7 @@ describe("applyCode test cases", () => {
 
   it("Should insert code if CQL has only library statement", () => {
     const libraryStatement = "library ABC version '0.0.000'";
-    let result = applyCode(libraryStatement, mockCode, Model.QDM_5_6);
+    const result = applyCode(libraryStatement, mockCode, Model.QDM_5_6);
     const cqlArray = result.cql.split("\n");
     expect(cqlArray[0]).toEqual(libraryStatement);
     expect(cqlArray[1]).toEqual(
@@ -154,7 +154,7 @@ describe("applyCode test cases", () => {
     const usingStatement = "using QDM version '5.6'";
     const libraryStatement = "library ABC version '0.0.000'";
     const cql = `${libraryStatement}\n${usingStatement}`;
-    let result = applyCode(cql, mockCode, Model.QDM_5_6);
+    const result = applyCode(cql, mockCode, Model.QDM_5_6);
     const cqlArray = result.cql.split("\n");
     expect(cqlArray[0]).toEqual(libraryStatement);
     expect(cqlArray[1]).toEqual(usingStatement);
@@ -172,7 +172,7 @@ describe("applyCode test cases", () => {
     const codeSystemStatement =
       "codesystem \"CPT\": 'urn:oid:2.16.840.1.113883.6.12'";
     const cql = `${libraryStatement}\n${usingStatement}\n${codeSystemStatement}`;
-    let result = applyCode(cql, mockCode, Model.QDM_5_6);
+    const result = applyCode(cql, mockCode, Model.QDM_5_6);
     const cqlArray = result.cql.split("\n");
     expect(cqlArray[0]).toEqual(libraryStatement);
     expect(cqlArray[1]).toEqual(usingStatement);
@@ -235,7 +235,7 @@ describe("applyCode test cases", () => {
         "codesystem \"LOINC\": 'http://loinc.org'\n" +
         "code \"Glucose tolerance 2 hours gestational panel - Urine and Serum or Plasma\": '24353-5' from \"LOINC:2.78\" display 'Glucose tolerance 2 hours gestational panel - Urine and Serum or Plasma'";
 
-      let result: CqlApplyActionResult = applyCode(
+      const result: CqlApplyActionResult = applyCode(
         cql,
         code,
         Model.QICORE_6_0_0
@@ -252,7 +252,7 @@ describe("applyCode test cases", () => {
         "codesystem \"LOINC\": 'http://loinc.org'\n" +
         "code \"Glucose tolerance 2 hours gestational panel - Urine and Serum or Plasma\": '24353-5' from \"LOINC\" display 'Glucose tolerance 2 hours gestational panel - Urine and Serum or Plasma'";
 
-      let result: CqlApplyActionResult = applyCode(
+      const result: CqlApplyActionResult = applyCode(
         cql,
         { ...code, versionIncluded: true },
         Model.QICORE_6_0_0

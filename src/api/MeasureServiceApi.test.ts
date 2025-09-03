@@ -198,7 +198,7 @@ describe("MeasureServiceApi Tests", () => {
   });
 
   it("get return types for all cql definitions", () => {
-    let returnTypes =
+    const returnTypes =
       measureServiceApi.getReturnTypesForAllCqlDefinitions(libraryElm);
     expect(returnTypes["initialPopulation"]).toEqual("Boolean");
 

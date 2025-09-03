@@ -34,7 +34,7 @@ const applyParameter = (
   let message: string;
   //  it's not defined
   if (!existingParameter) {
-    let newParameter = createParameterDeclaration(parameter);
+    const newParameter = createParameterDeclaration(parameter);
     cqlArr.splice(findParameterInsertPoint(parseResults), 0, newParameter);
     status = "success";
     message = `Parameter ${parameter.parameterName} has been successfully added to the CQL.`;
@@ -100,7 +100,7 @@ export const editParameter = (
   parameterToApply: Parameter
 ): string => {
   const parseResults: CqlResult = new CqlAntlr(cql).parse();
-  let cqlLineArr: string[] = cql?.split("\n");
+  const cqlLineArr: string[] = cql?.split("\n");
   const existingParameter = findExistingParameter(
     parameter,
     parseResults.parameters

@@ -51,7 +51,7 @@ const localStorageMock = (function () {
   };
 })();
 
-let actualCalculationResults = {
+const actualCalculationResults = {
   IPP: 1,
   DENOM: 1,
   DENEX: 0,

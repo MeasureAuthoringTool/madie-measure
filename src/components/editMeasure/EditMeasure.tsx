@@ -58,7 +58,7 @@ export default function EditMeasure() {
   const measureServiceApi = useMeasureServiceApi();
   const { updateMeasure } = measureStore;
   const [loading, setLoading] = useState<boolean>(true);
-  let navigate = useNavigate();
+  const navigate = useNavigate();
   const location = useLocation();
   const [currentMeasureId, setCurrentMeasureId] = useState<string>(measureId);
   const featureFlags = useFeatureFlags();

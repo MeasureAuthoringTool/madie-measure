@@ -51,9 +51,9 @@ useMeasureServiceApiMock.mockImplementation(() => measureServiceApiMock);
 
 describe("CqmConversionService", () => {
   const getAccessToken = jest.fn();
-  let cqmConversionService = new CqmConversionService("url", getAccessToken);
+  const cqmConversionService = new CqmConversionService("url", getAccessToken);
   let dataCriteria: Array<DataCriteria>;
-  let elms: Array<String>;
+  let elms: Array<string>;
   let translatedLibraries: Array<TranslatedLibrary>;
   let population_sets: Array<PopulationSet>;
   let group: Group;

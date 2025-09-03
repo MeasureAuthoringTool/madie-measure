@@ -249,7 +249,7 @@ const ResourceEditor = ({
             url: filtered?.[0]?.type?.[0]?.profile?.[0],
             extension: [],
           };
-          let extensions = nextEntry.resource.extension
+          const extensions = nextEntry.resource.extension
             ? nextEntry.resource.extension
             : [];
           extensions.push(extension);

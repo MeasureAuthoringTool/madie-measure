@@ -81,7 +81,7 @@ export default function ActionCenter(props: ActionCenterProps) {
   }, [selectedTestCases, canEdit, isQDM]);
 
   const { search } = useLocation();
-  let navigate = useNavigate();
+  const navigate = useNavigate();
   const featureFlags = useFeatureFlags();
   const values = queryString.parse(search);
 

@@ -119,7 +119,7 @@ const applyCode = (
   );
   // Add code system to CQL if it does not exist
   if (!previousCodeSystem) {
-    let newCodeSystem = createCodeSystemDeclaration(code, measureModel);
+    const newCodeSystem = createCodeSystemDeclaration(code, measureModel);
     cqlArr.splice(findCodeSystemInsertPoint(parseResults), 0, newCodeSystem);
   }
 

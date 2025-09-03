@@ -51,7 +51,7 @@ const cqmMeasure = {
   ],
 };
 
-let selectedDataElement = {
+const selectedDataElement = {
   codeListId: "2.16.840.1.113883.3.666.5.307",
 };
 

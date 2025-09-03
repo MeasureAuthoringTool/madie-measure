@@ -111,9 +111,9 @@ export class MeasureServiceApi {
   async fetchMeasures(
     ownershipType: OwnershipType,
     limit: string | number = 25,
-    page: number = 0,
-    sort: string = "lastModifiedAt",
-    direction: string = "DESC",
+    page = 0,
+    sort = "lastModifiedAt",
+    direction = "DESC",
     signal
   ): Promise<any> {
     try {
@@ -436,9 +436,9 @@ export class MeasureServiceApi {
   async searchMeasuresByCriteria(
     ownershipTypes: OwnershipType[],
     limit: string | number = 25,
-    page: number = 0,
-    sort: string = "lastModifiedAt",
-    direction: string = "DESC",
+    page = 0,
+    sort = "lastModifiedAt",
+    direction = "DESC",
     searchCriteria: MeasureSearchCriteria,
     abortController: AbortController,
     // TODO Remove parameter when either measureSearch or EditTestsOnVersionedMeasure is removed.
@@ -630,7 +630,7 @@ export class MeasureServiceApi {
 
   async fetchHumanReadable(id: string): Promise<any> {
     try {
-      const response = await axios.get<String>(
+      const response = await axios.get<string>(
         `${this.baseUrl}/humanreadable/${id}`,
         {
           headers: {
@@ -648,7 +648,7 @@ export class MeasureServiceApi {
 
   async getMeasureCounts(): Promise<any> {
     try {
-      const response = await axios.get<String>(
+      const response = await axios.get<string>(
         `${this.baseUrl}/measures/count`,
         {
           headers: {
@@ -666,7 +666,7 @@ export class MeasureServiceApi {
 
   async updateMeasureLock(measureId: string): Promise<any> {
     try {
-      const response = await axios.put<String>(
+      const response = await axios.put<string>(
         `${this.baseUrl}/measures/${measureId}/measure-lock`,
         null,
         {
@@ -683,7 +683,7 @@ export class MeasureServiceApi {
 
   async unlockMeasure(measureId: string): Promise<any> {
     try {
-      const response = await axios.delete<String>(
+      const response = await axios.delete<string>(
         `${this.baseUrl}/measures/${measureId}/measure-lock`,
         {
           headers: {

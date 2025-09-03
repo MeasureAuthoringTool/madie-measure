@@ -124,7 +124,7 @@ const TestCaseList = (props: TestCaseListProps) => {
     setToastType,
     onToastClose,
   } = UseToast();
-  let navigate = useNavigate();
+  const navigate = useNavigate();
   const { search } = useLocation();
   const values = queryString.parse(search);
   const [executionResults, setExecutionResults] = useState<{

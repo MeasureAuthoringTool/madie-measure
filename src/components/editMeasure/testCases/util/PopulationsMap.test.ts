@@ -14,7 +14,7 @@ import {
   mapExistingTestCasePopulations,
 } from "./PopulationsMap";
 
-let measureGroup = [
+const measureGroup = [
   {
     id: "shrug",
     measureName: "the measure for testing",
@@ -37,7 +37,7 @@ let measureGroup = [
     populationBasis: "boolean",
   },
 ];
-let measureGroup2 = [
+const measureGroup2 = [
   {
     id: "shrug",
     measureName: "the measure for testing",
@@ -195,7 +195,7 @@ it("For ratio measures, updating a population like denominator will also update 
     },
   ];
   // @ts-ignore
-  let ratioMeasureGroup = [
+  const ratioMeasureGroup = [
     {
       id: "shrug",
       measureName: "the measure for testing",
@@ -404,7 +404,7 @@ it("shall remove an observation if denominator_exclusion is added, and an observ
   };
 
   const groupPopulations: GroupPopulation[] = [groupPop1];
-  let myMeasureGroup = [
+  const myMeasureGroup = [
     {
       id: "shrug",
       measureName: "the measure for testing",
@@ -1578,7 +1578,7 @@ it("CV Bool  MsrPop = true; MsrPopEx; true; 1 Measure Observation: should result
   const groupPopulations: GroupPopulation[] = [];
   groupPopulations.push(group1);
 
-  let measureGroup4 = [
+  const measureGroup4 = [
     {
       id: "shrug",
       measureName: "the measure for testing",
@@ -1669,7 +1669,7 @@ it("CV Bool  MsrPop = true; MsrPopEx; true; 0 Measure Observation: Change MsrPop
   const groupPopulations: GroupPopulation[] = [];
   groupPopulations.push(group1);
 
-  let measureGroup4 = [
+  const measureGroup4 = [
     {
       id: "shrug",
       measureName: "the measure for testing",
@@ -1785,7 +1785,7 @@ it("CV Bool  MsrPop = true; MsrPopEx; false; 1 Measure Observation: Change MsrPo
   const groupPopulations: GroupPopulation[] = [];
   groupPopulations.push(group1);
 
-  let measureGroup4 = [
+  const measureGroup4 = [
     {
       id: "shrug",
       measureName: "the measure for testing",
@@ -1879,7 +1879,7 @@ it("Ratio Non Bool: Removing the observations on clicking the numerator exclusio
     criteriaReference: "",
   };
 
-  let denomExclu: DisplayPopulationValue = {
+  const denomExclu: DisplayPopulationValue = {
     name: PopulationType.DENOMINATOR_EXCLUSION,
     expected: 0,
     actual: false,
@@ -1933,7 +1933,7 @@ it("Ratio Non Bool: Removing the observations on clicking the numerator exclusio
   const groupPopulations: GroupPopulation[] = [];
   groupPopulations.push(group1);
 
-  let measureGroup4 = [
+  const measureGroup4 = [
     {
       id: "shrug",
       measureName: "the measure for testing",
@@ -2095,7 +2095,7 @@ it("Ratio Bool: Adding the observations on clicking the numerator exclusion and 
   const groupPopulations: GroupPopulation[] = [];
   groupPopulations.push(group1);
 
-  let measureGroup1 = [
+  const measureGroup1 = [
     {
       id: "shrug",
       measureName: "the measure for testing",
@@ -2405,7 +2405,7 @@ it("CV NonBool MsrPop = 2; MsrPopEx; 0; 1 Measure Observation; should result in 
   const groupPopulations: GroupPopulation[] = [];
   groupPopulations.push(group1);
   groupPopulations[0].populationValues[2].expected = 0;
-  let measureGroup4 = [
+  const measureGroup4 = [
     {
       id: "shrug",
       measureName: "the measure for testing",
@@ -2476,7 +2476,7 @@ it("CV NonBool MsrPop = 2; MsrPopEx; 0; 1 Measure Observation; should result in 
 
 function parsingTheExpectedResult(
   popVals: DisplayPopulationValue[],
-  name: String,
+  name: string,
   scoring: string
 ): any {
   let returnVal: boolean | number | DisplayPopulationValue = false;

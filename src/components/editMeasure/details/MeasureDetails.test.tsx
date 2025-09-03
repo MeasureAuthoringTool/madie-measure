@@ -97,7 +97,6 @@ const incompletedIconMeasure = {
 } as unknown as Measure;
 
 const mockUseFeatureFlags = jest.fn(() => ({
-  EnhancedTextFormatting: false,
   Locking: false,
 }));
 
@@ -171,6 +170,7 @@ describe("MeasureDetails component", () => {
               path="/foo"
               element={
                 <MeasureDetails
+                  featureFlags={{ Locking: false }}
                   setErrorMessage={setErrorMessage}
                   isQDM={false}
                 />
@@ -194,6 +194,7 @@ describe("MeasureDetails component", () => {
               path="/foo/*"
               element={
                 <MeasureDetails
+                  featureFlags={{ Locking: false }}
                   setErrorMessage={setErrorMessage}
                   isQDM={false}
                 />
@@ -217,6 +218,7 @@ describe("MeasureDetails component", () => {
               path="/foo/*"
               element={
                 <MeasureDetails
+                  featureFlags={{ Locking: false }}
                   setErrorMessage={setErrorMessage}
                   isQDM={false}
                 />
@@ -248,6 +250,7 @@ describe("MeasureDetails component", () => {
               path="/foo/*"
               element={
                 <MeasureDetails
+                  featureFlags={{ Locking: false }}
                   setErrorMessage={setErrorMessage}
                   isQDM={false}
                 />
@@ -281,6 +284,7 @@ describe("MeasureDetails component", () => {
               path="/foo/*"
               element={
                 <MeasureDetails
+                  featureFlags={{ Locking: false }}
                   setErrorMessage={setErrorMessage}
                   isQDM={false}
                 />
@@ -312,6 +316,7 @@ describe("MeasureDetails component", () => {
               path="/foo/*"
               element={
                 <MeasureDetails
+                  featureFlags={{ Locking: false }}
                   setErrorMessage={setErrorMessage}
                   isQDM={false}
                 />
@@ -410,6 +415,7 @@ describe("MeasureDetails component", () => {
               path="/foo/*"
               element={
                 <MeasureDetails
+                  featureFlags={{ Locking: false }}
                   setErrorMessage={setErrorMessage}
                   isQDM={true}
                 />
@@ -434,6 +440,7 @@ describe("MeasureDetails component", () => {
               path="/foo/*"
               element={
                 <MeasureDetails
+                  featureFlags={{ Locking: false }}
                   setErrorMessage={setErrorMessage}
                   isQDM={true}
                 />
@@ -458,6 +465,7 @@ describe("MeasureDetails component", () => {
               path="/foo/*"
               element={
                 <MeasureDetails
+                  featureFlags={{ Locking: false }}
                   setErrorMessage={setErrorMessage}
                   isQDM={true}
                 />
@@ -486,6 +494,7 @@ describe("MeasureDetails component", () => {
               path="/foo/*"
               element={
                 <MeasureDetails
+                  featureFlags={{ Locking: false }}
                   setErrorMessage={setErrorMessage}
                   isQDM={true}
                 />
@@ -537,6 +546,7 @@ describe("MeasureDetails component", () => {
               path="/foo"
               element={
                 <MeasureDetails
+                  featureFlags={{ Locking: false }}
                   setErrorMessage={setErrorMessage}
                   isQDM={true}
                 />
@@ -600,6 +610,7 @@ describe("MeasureDetails component", () => {
               path="/foo"
               element={
                 <MeasureDetails
+                  featureFlags={{ Locking: false }}
                   setErrorMessage={setErrorMessage}
                   isQDM={true}
                 />
@@ -637,7 +648,7 @@ describe("MeasureDetails component", () => {
     (useMeasureServiceApi as jest.Mock).mockReturnValue({
       updateMeasureLock,
       unlockMeasure,
-    });
+    } as unknown as MeasureServiceApi);
 
     render(
       <ApiContextProvider value={serviceConfig}>
@@ -647,7 +658,7 @@ describe("MeasureDetails component", () => {
               path="/foo/:measureId"
               element={
                 <MeasureDetails
-                  featureFlags={{ EnhancedTextFormatting: true, Locking: true }}
+                  featureFlags={{ Locking: true }}
                   setErrorMessage={setErrorMessage}
                   isQDM={true}
                 />
@@ -678,10 +689,9 @@ describe("MeasureDetails component", () => {
 
     const unlockMeasure = jest.fn();
     useMeasuremeasureServiceApiMock.mockReturnValue({
-      ...measureServiceApiMock,
       updateMeasureLock,
       unlockMeasure,
-    });
+    } as unknown as MeasureServiceApi);
 
     const errorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
 
@@ -693,7 +703,7 @@ describe("MeasureDetails component", () => {
               path="/measures/:measureId"
               element={
                 <MeasureDetails
-                  featureFlags={{ EnhancedTextFormatting: true, Locking: true }}
+                  featureFlags={{ Locking: true }}
                   setErrorMessage={setErrorMessage}
                   isQDM={true}
                 />

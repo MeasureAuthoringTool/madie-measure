@@ -26,7 +26,7 @@ import {
 import { QdmCalculationService } from "../api/QdmCalculationService";
 
 export const convertToNumber = (value: number | boolean | string) => {
-  let convertedNumber: number = 0;
+  let convertedNumber = 0;
   if (typeof value === "string") {
     convertedNumber = Number(value);
   } else if (typeof value === "number") {
@@ -90,7 +90,7 @@ export const populateStratificationDtos = (
   testCaseId: string
 ): GroupedStratificationDto[] => {
   let stratificationDtos: StratificationDto[] = [];
-  let groupedStratsDtos: GroupedStratificationDto[] = [];
+  const groupedStratsDtos: GroupedStratificationDto[] = [];
   groupPopulation?.stratificationValues?.forEach((strat) => {
     stratificationDtos = convertToStratDto(strat);
     const groupedStratsDto = {
@@ -143,7 +143,7 @@ export const createExcelExportDtosForAllTestCases = (
       );
 
       let groupedStratDtos: GroupedStratificationDto[] = [];
-      let stratNumber = 1;
+      const stratNumber = 1;
       const populationDtos: PopulationDto[] =
         populatePopulationDtos(groupPopulation);
       groupedStratDtos = populateStratificationDtos(
@@ -215,7 +215,7 @@ export const buildTestCaseExecutionResult = (
 };
 
 export function getReformattedDob(dob: string) {
-  let formattedDob: string = "";
+  let formattedDob = "";
   if (dob) {
     const dateObj = new Date(dob);
     const year = dateObj.getUTCFullYear().toString();
@@ -244,7 +244,7 @@ export function getTestCaseExecutionDefinitionsInfo(
   groupCoverageResult,
   callstack: CqlDefinitionCallstack
 ): DefinitionDto[] {
-  let definitions = [];
+  const definitions = [];
   let result: StatementCoverageResult[];
   const statementResults =
     groupCoverageResult[testCase?.groupPopulations?.[0]?.groupId];
@@ -271,7 +271,7 @@ export function getTestCaseExecutionFunctionsInfo(
   groupCoverageResult,
   callstack: CqlDefinitionCallstack
 ): FunctionDto[] {
-  let functions = [];
+  const functions = [];
   let result: StatementCoverageResult[];
   const statementResults =
     groupCoverageResult[testCase?.groupPopulations?.[0]?.groupId];

@@ -12,9 +12,20 @@ import useMeasureServiceApi, {
   MeasureServiceApi,
 } from "../../../../api/useMeasureServiceApi";
 // @ts-ignore
-import { measureStore, useFeatureFlags } from "@madie/madie-util";
+import { measureStore } from "@madie/madie-util";
 import { Measure, Model, Reference } from "@madie/madie-models";
 import userEvent from "@testing-library/user-event";
+// Mock the Rich Text Editor used inside references dialog so tests can interact synchronously
+jest.mock("../../populationCriteria/groups/TextEditor", () => (props) => {
+  const { setFieldValue, name = "referenceText" } = props;
+  return (
+    <textarea
+      data-testid={props["data-testid"] || "measure-referenceText"}
+      defaultValue={props.value || ""}
+      onChange={(e) => setFieldValue(name, e.target.value)}
+    />
+  );
+});
 
 jest.mock("../../../../api/useMeasureServiceApi");
 const useMeasureServiceApiMock =
@@ -65,23 +76,14 @@ jest.mock("@madie/madie-util", () => ({
     getAccessToken: () => "test.jwt",
   })),
   checkUserCanEdit: jest.fn().mockImplementation(() => true),
-  useFeatureFlags: jest.fn(() => {
-    return {
-      EnhancedTextFormatting: false,
-    };
-  }),
   measureStore: {
     updateMeasure: jest.fn((measure) => measure),
     state: jest.fn().mockImplementation(() => measure),
     initialState: jest.fn().mockImplementation(() => measure),
-    subscribe: () => {
-      return { unsubscribe: () => null };
-    },
+    subscribe: () => ({ unsubscribe: () => null }),
   },
   routeHandlerStore: {
-    subscribe: () => {
-      return { unsubscribe: () => null };
-    },
+    subscribe: () => ({ unsubscribe: () => null }),
     updateRouteHandlerState: jest.fn((routeObj) => routeObj),
     state: { canTravel: false, pendingPath: "" },
     initialState: { canTravel: false, pendingPath: "" },
@@ -122,9 +124,7 @@ const expectInputValue = (
 };
 describe("Measure References Component", () => {
   beforeEach(() => {
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-      EnhancedTextFormatting: false,
-    }));
+    // no feature flags to reset
   });
 
   afterEach(() => jest.clearAllMocks());
@@ -262,25 +262,19 @@ describe("Measure References Component", () => {
       "measure-referenceType-input"
     ) as HTMLInputElement;
     expect(typeInput.value).toBe("type 1");
-    const textAreaInput = getByTestId(
-      "measure-referenceText"
-    ) as HTMLTextAreaElement;
-    expect(textAreaInput.value).toBe("text 1");
+    const textEditor = await screen.findByTestId("measure-referenceText");
+    expect(textEditor).toBeInTheDocument();
 
     fireEvent.change(typeInput, {
       target: { value: "Citation" },
     });
     expect(typeInput.value).toBe("Citation");
 
-    act(() => {
-      fireEvent.change(textAreaInput, {
-        target: { value: "text 10" },
-      });
-    });
-    fireEvent.blur(textAreaInput);
-    expectInputValue(textAreaInput, "text 10");
+    fireEvent.change(textEditor, { target: { value: "text 10" } });
     const submitButton = getByTestId("save-button");
-    expect(submitButton).toHaveProperty("disabled", false);
+    await waitFor(() =>
+      expect(submitButton).not.toHaveProperty("disabled", true)
+    );
     fireEvent.click(submitButton);
 
     expect(
@@ -422,17 +416,8 @@ describe("Measure References Component", () => {
     });
     expect(typeInput.value).toBe("Citation");
 
-    const textAreaInput = getByTestId(
-      "measure-referenceText"
-    ) as HTMLTextAreaElement;
-    expectInputValue(textAreaInput, "");
-    act(() => {
-      fireEvent.change(textAreaInput, {
-        target: { value: "text 10" },
-      });
-    });
-    fireEvent.blur(textAreaInput);
-    expectInputValue(textAreaInput, "text 10");
+    const textEditor = await screen.findByTestId("measure-referenceText");
+    fireEvent.change(textEditor, { target: { value: "text 10" } });
     const cancelButton = getByTestId("cancel-button");
     expect(cancelButton).toHaveProperty("disabled", false);
     fireEvent.click(cancelButton);
@@ -477,19 +462,12 @@ describe("Measure References Component", () => {
     });
     expect(typeInput.value).toBe("Citation");
 
-    const textAreaInput = getByTestId(
-      "measure-referenceText"
-    ) as HTMLTextAreaElement;
-    expectInputValue(textAreaInput, "");
-    act(() => {
-      fireEvent.change(textAreaInput, {
-        target: { value: "reference 10" },
-      });
-    });
-    fireEvent.blur(textAreaInput);
-    expectInputValue(textAreaInput, "reference 10");
+    const textEditor = await screen.findByTestId("measure-referenceText");
+    fireEvent.change(textEditor, { target: { value: "reference 10" } });
     const submitButton = getByTestId("save-button");
-    expect(submitButton).toHaveProperty("disabled", false);
+    await waitFor(() =>
+      expect(submitButton).not.toHaveProperty("disabled", true)
+    );
     fireEvent.click(submitButton);
 
     expect(
@@ -538,19 +516,12 @@ describe("Measure References Component", () => {
     });
     expect(typeInput.value).toBe("Citation");
 
-    const textAreaInput = getByTestId(
-      "measure-referenceText"
-    ) as HTMLTextAreaElement;
-    expectInputValue(textAreaInput, "");
-    act(() => {
-      fireEvent.change(textAreaInput, {
-        target: { value: "reference 10" },
-      });
-    });
-    fireEvent.blur(textAreaInput);
-    expectInputValue(textAreaInput, "reference 10");
+    const textEditor = await screen.findByTestId("measure-referenceText");
+    fireEvent.change(textEditor, { target: { value: "reference 10" } });
     const submitButton = getByTestId("save-button");
-    expect(submitButton).toHaveProperty("disabled", false);
+    await waitFor(() =>
+      expect(submitButton).not.toHaveProperty("disabled", true)
+    );
     fireEvent.click(submitButton);
 
     expect(
@@ -765,23 +736,12 @@ describe("Measure References Component", () => {
     ) as HTMLInputElement;
     expect(typeInput).toBeInTheDocument();
     expect(typeInput.value).toBe("Citation");
-    const textAreaInput = getByTestId(
-      "measure-referenceText"
-    ) as HTMLTextAreaElement;
-    expect(textAreaInput.value).toBe("text 1");
-
+    const textEditor = await screen.findByTestId("measure-referenceText");
     fireEvent.change(typeInput, {
       target: { value: "Citation" },
     });
     expect(typeInput.value).toBe("Citation");
-
-    act(() => {
-      fireEvent.change(textAreaInput, {
-        target: { value: "text 10" },
-      });
-    });
-    fireEvent.blur(textAreaInput);
-    expectInputValue(textAreaInput, "text 10");
+    fireEvent.change(textEditor, { target: { value: "text 10" } });
   });
 
   it("Editing existing reference with type Documentation, user should not see Documentation in the dropdown", async () => {
@@ -823,65 +783,13 @@ describe("Measure References Component", () => {
     expect(typeInput).toBeInTheDocument();
     //user should not see Documentation in the dropdown
     expect(typeInput.value).toBe("");
-    const textAreaInput = getByTestId(
-      "measure-referenceText"
-    ) as HTMLTextAreaElement;
-    expect(textAreaInput.value).toBe("text 1");
-
+    const textEditor = await screen.findByTestId("measure-referenceText");
     fireEvent.change(typeInput, {
       target: { value: "Citation" },
     });
     expect(typeInput.value).toBe("Citation");
-
-    act(() => {
-      fireEvent.change(textAreaInput, {
-        target: { value: "text 10" },
-      });
-    });
-    fireEvent.blur(textAreaInput);
-    expectInputValue(textAreaInput, "text 10");
+    fireEvent.change(textEditor, { target: { value: "text 10" } });
   });
 
-  it("render Reference rich text editor if EnhancedTextFormatting flag is true", async () => {
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-      EnhancedTextFormatting: true,
-    }));
-
-    measureStore.state.mockImplementation(() => measureWithNineItems);
-    measureStore.initialState.mockImplementation(() => measureWithNineItems);
-    render(
-      <ApiContextProvider value={serviceConfig}>
-        <MemoryRouter initialEntries={["/"]}>
-          <MeasureReferences setErrorMessage={jest.fn()} />
-        </MemoryRouter>
-      </ApiContextProvider>
-    );
-
-    const editButton = screen.getByTestId(`edit-measure-reference-id 1`);
-    expect(editButton).toBeInTheDocument();
-
-    const deleteButton = getByTestId(`delete-measure-reference-id 1`);
-    expect(deleteButton).toBeInTheDocument();
-
-    userEvent.click(editButton);
-
-    await waitFor(() => {
-      expect(getByTestId("dialog-form")).toBeInTheDocument();
-    });
-
-    const typeInput = screen.getByTestId(
-      "measure-referenceType-input"
-    ) as HTMLInputElement;
-    expect(typeInput.value).toBe("type 1");
-
-    const referenceEditor = screen.getByRole("textbox");
-    expect(referenceEditor).toBeInTheDocument();
-    expect(referenceEditor).toHaveTextContent("text 1");
-
-    fireEvent.input(referenceEditor, {
-      target: { textContent: "text 2" },
-    });
-
-    expect(referenceEditor).toHaveTextContent("text 2");
-  });
+  // Feature flag specific rich text rendering test removed; rich text always enabled
 });

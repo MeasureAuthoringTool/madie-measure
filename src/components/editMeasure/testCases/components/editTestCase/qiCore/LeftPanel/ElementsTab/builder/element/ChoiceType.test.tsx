@@ -19,7 +19,7 @@ const getChildDef = (overrides = {}) => ({
   ...overrides,
 });
 
-const getFormikValues = (type: string = "boolean", value: any = undefined) => ({
+const getFormikValues = (type = "boolean", value: any = undefined) => ({
   Observation: { component: [{ [`value${upperFirst(type)}`]: value }] },
 });
 

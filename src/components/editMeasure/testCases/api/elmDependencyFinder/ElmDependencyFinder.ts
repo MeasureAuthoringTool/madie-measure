@@ -3,8 +3,8 @@ export class ElmDependencyFinder {
     cqlLibraryElms: Array<string>,
     mainCqlLibraryName: string
   ) {
-    let neededElmDepsMap = {};
-    let allElmsDepMap = {};
+    const neededElmDepsMap = {};
+    const allElmsDepMap = {};
     cqlLibraryElms.forEach((elm) => {
       const elmJson = JSON.parse(elm);
       const elmId: string = elmJson.library?.identifier?.id;

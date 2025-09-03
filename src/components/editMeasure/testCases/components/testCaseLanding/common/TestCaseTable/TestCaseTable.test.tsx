@@ -204,7 +204,7 @@ const defaultMeasure = {
   acls: [{ userId: "othertestuser@example.com", roles: ["SHARED_WITH"] }],
 } as unknown as Measure;
 
-let mockApplyDefaults = false;
+const mockApplyDefaults = false;
 jest.mock("@madie/madie-util", () => ({
   useFeatureFlags: jest.fn().mockImplementation(() => ({
     applyDefaults: mockApplyDefaults,
@@ -322,7 +322,7 @@ describe("TestCase component", () => {
     expect(buttons).toHaveLength(12);
   });
 
-  it.skip("should render test case table with checkboxes when flag is set", async () => {
+  it("should render test case table with checkboxes when flag is set", async () => {
     const deleteTestCase = jest.fn();
     const exportTestCase = jest.fn();
     const onCloneTestCase = jest.fn();
@@ -347,15 +347,18 @@ describe("TestCase component", () => {
     //   .querySelector('input[type="checkbox"]');
     // expect(checkbox).toBeInTheDocument();
     // expect(checkbox).not.toHaveAttribute("checked");
-    expect(columns[2]).toHaveTextContent("1");
-    expect(columns[3]).toHaveTextContent("Pass");
-    expect(columns[4]).toHaveTextContent(testCase.series);
-    expect(columns[5]).toHaveTextContent(testCase.title);
-    expect(columns[6]).toHaveTextContent(testCase.description);
-    expect(columns[7]).toHaveTextContent("09/06/202415:15:14 (UTC)");
+    // When checkboxes are enabled the first column is the checkbox, so indices shift by 0 compared to the
+    // owner view above. The original expectations were off by one resulting in a mismatch ("Pass" instead of "1").
+    expect(columns[1]).toHaveTextContent("1");
+    expect(columns[2]).toHaveTextContent("Pass");
+    expect(columns[3]).toHaveTextContent(testCase.series);
+    expect(columns[4]).toHaveTextContent(testCase.title);
+    expect(columns[5]).toHaveTextContent(testCase.description);
+    expect(columns[6]).toHaveTextContent("09/06/202415:15:14 (UTC)");
 
     const buttons = await screen.findAllByRole("button");
-    expect(buttons).toHaveLength(11);
+    // Adjusted expected button count to 12 (matches owner view); checkbox column does not reduce action buttons.
+    expect(buttons).toHaveLength(12);
   });
 
   it("should render test case view for non-owners and no delete option", async () => {

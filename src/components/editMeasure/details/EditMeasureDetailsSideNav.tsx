@@ -20,7 +20,7 @@ export default function EditMeasureDetailsSideNav(
   const { measureId } = useParams<{
     measureId: string;
   }>();
-  let navigate = useNavigate();
+  const navigate = useNavigate();
   const handleChange = (e, v) => {
     const newPath = `/measures/${measureId}/edit/details/${v}`;
     navigate(newPath);

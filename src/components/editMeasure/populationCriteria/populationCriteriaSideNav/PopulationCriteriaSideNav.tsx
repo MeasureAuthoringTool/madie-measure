@@ -16,7 +16,7 @@ import ErrorIcon from "@mui/icons-material/Error";
 const InnerWrapper = tw.div`flex flex-grow flex-col`;
 
 export interface PopulationCriteriaSideNavProp {
-  canEdit?: Boolean;
+  canEdit?: boolean;
   sideNavLinks: Array<any>;
   setSideNavLinks: (value: Array<any>) => void;
   measureGroupNumber?: number;
@@ -48,7 +48,7 @@ export default function PopulationCriteriaSideNav(
   const { pathname } = useLocation();
   const [showPopulationCriteriaTabs, setShowPopulationCriteriaTabs] =
     useState<boolean>(true);
-  let navigate = useNavigate();
+  const navigate = useNavigate();
   const groupsBaseUrl = "/measures/" + measureId + "/edit/groups";
   const QdmReportingBaseUrl = "/measures/" + measureId + "/edit/reporting";
 
@@ -73,7 +73,7 @@ export default function PopulationCriteriaSideNav(
   };
 
   const addNewBlankMeasureGroup = () => {
-    var measureGroups = sideNavLinks.find((link) => link.groups);
+    const measureGroups = sideNavLinks.find((link) => link.groups);
     const index = sideNavLinks.indexOf(measureGroups);
     const newMeasureGroupNumber = measureGroups.groups.length + 1;
     const newMeasureGroupLink = {

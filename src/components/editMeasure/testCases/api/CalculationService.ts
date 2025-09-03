@@ -358,7 +358,7 @@ export class CalculationService {
       }
       // verify stratification & stratified populations passing if they exist
       if (groupPopulation.stratificationValues) {
-        let validStratPopValues = [];
+        const validStratPopValues = [];
         groupPopulation.stratificationValues.forEach(
           (stratValues: StratificationExpectedValue) => {
             stratValues.id = findMeasureGroupPopulationDisplayId(
@@ -397,7 +397,7 @@ export class CalculationService {
     stratId: string,
     popValue: PopulationExpectedValue
   ): PopulationExpectedValue[] {
-    let valiePopValue = [];
+    const valiePopValue = [];
     measureGroup?.stratifications?.forEach((strat) => {
       if (strat.id === stratId) {
         strat.associations?.forEach((association) => {
@@ -419,7 +419,7 @@ export class CalculationService {
       return testCase;
     }
 
-    let updatedpopulationGroupResults = populationGroupResults;
+    const updatedpopulationGroupResults = populationGroupResults;
     if (!populationGroupResults[0].groupId?.includes("Group_")) {
       this.replaceWithDisplayId(updatedpopulationGroupResults, measureGroups);
     }
@@ -465,7 +465,7 @@ export class CalculationService {
                 )
               ]?.observations?.[0];
           } else {
-            let currentTCObserv = tcPopTypeCount[tcPopVal.name] ?? 0;
+            const currentTCObserv = tcPopTypeCount[tcPopVal.name] ?? 0;
             const allObsResults =
               processedResults?.observations[
                 findMeasureObservationDisplayIdByReferenceId(
@@ -534,7 +534,7 @@ export class CalculationService {
             const population = episode.populationResults.find(
               (p) => p.populationId === stratifiedPopulation.id
             );
-            let stratification = episode.stratifierResults.find(
+            const stratification = episode.stratifierResults.find(
               (strata) =>
                 // TODO: workaround because fqm execution doesn't provide IDs for all cases
                 strata.strataCode &&

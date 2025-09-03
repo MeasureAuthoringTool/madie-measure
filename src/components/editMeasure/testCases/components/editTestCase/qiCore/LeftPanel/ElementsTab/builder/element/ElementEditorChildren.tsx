@@ -32,7 +32,7 @@ const ElementEditorChildren = ({
   currentDepth = currentDepth + 1;
   const elemPath = stripResourcePath(resourcePath, rootDefinition.path);
   const { values } = useFormikContext();
-  let elementValue = _.get(resource, elemPath);
+  const elementValue = _.get(resource, elemPath);
   const { dispatch, state } = useQiCoreResource();
   const addElementOfMultipleCardinality = () => {
     const nextEntry = _.cloneDeep(

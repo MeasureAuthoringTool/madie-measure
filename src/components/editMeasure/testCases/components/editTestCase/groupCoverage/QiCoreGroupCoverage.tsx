@@ -228,7 +228,7 @@ const QiCoreGroupCoverage = ({
 
         filteredDefinitions = Object.keys(unusedDefinitions).reduce(
           (result, statementName) => {
-            let statementDefinitionName =
+            const statementDefinitionName =
               getStatementDefinitionName(statementName);
             if (statementDefinitionName !== "Patient") {
               result[statementName] = {

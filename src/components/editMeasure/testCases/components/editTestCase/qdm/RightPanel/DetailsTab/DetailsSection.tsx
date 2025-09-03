@@ -14,7 +14,7 @@ import "./DetailsSection.scss";
 import { InputLabelStyle, seriesStyles } from "./DetailsSectionStyles";
 
 interface DetailsSectionProps {
-  canEdit: Boolean;
+  canEdit: boolean;
   measureName: string;
   // to do, hook up alert/error if needed
   // setErrors: Function;

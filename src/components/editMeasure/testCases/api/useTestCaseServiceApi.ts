@@ -413,7 +413,7 @@ export class TestCaseServiceApi {
 
   async lockTestCase(measureId: string, testCaseId: string): Promise<any> {
     try {
-      const response = await axios.post<String>(
+      const response = await axios.post<string>(
         `${this.baseUrl}/measures/${measureId}/test-cases/${testCaseId}/lock`,
         null,
         {
@@ -430,7 +430,7 @@ export class TestCaseServiceApi {
 
   async unlockTestCase(testCaseId: string): Promise<any> {
     try {
-      const response = await axios.delete<String>(
+      const response = await axios.delete<string>(
         `${this.baseUrl}/test-cases/${testCaseId}/unlock`,
         {
           headers: {

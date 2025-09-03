@@ -239,7 +239,7 @@ export class QdmCalculationService {
       }
 
       const results = populationGroupResults[groupId];
-      let populationMap = new Map<String, number>();
+      const populationMap = new Map<string, number>();
 
       Object.entries(CqmPopulationType).forEach((value, key) => {
         //value is one of IPP, DENOM, NUMER, etc...
@@ -249,7 +249,7 @@ export class QdmCalculationService {
 
       updatedTestCase.groupPopulations.forEach((tcGroupPop, gpIndex) => {
         let obsCount = 0;
-        let obsTracker = {};
+        const obsTracker = {};
         if (tcGroupPop.groupId === groupId) {
           tcGroupPop.populationValues.forEach((population) => {
             if (isTestCasePopulationObservation(population)) {
@@ -284,12 +284,12 @@ export class QdmCalculationService {
           });
           // so we can reference them by the two sets of indeces
           tcGroupPop.stratificationValues?.forEach((strat, stratIndex) => {
-            let stratId = `PopulationSet_${gpIndex + 1}_Stratification_${
+            const stratId = `PopulationSet_${gpIndex + 1}_Stratification_${
               stratIndex + 1
             }`;
             const value = populationGroupResults[stratId]?.STRAT;
             strat.actual = measure.patientBasis ? !!value : value;
-            let stratPopulationMap = new Map<String, number>();
+            const stratPopulationMap = new Map<string, number>();
             Object.entries(CqmPopulationType).forEach((value, key) => {
               stratPopulationMap.set(
                 value[1],
@@ -334,7 +334,7 @@ export class QdmCalculationService {
     stratId
   ) {
     let obsCount = 0;
-    let obsTracker = {};
+    const obsTracker = {};
     strat.populationValues?.forEach((population) => {
       if (isTestCasePopulationObservation(population)) {
         if (patientBased) {

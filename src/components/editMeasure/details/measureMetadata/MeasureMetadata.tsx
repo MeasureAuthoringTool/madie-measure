@@ -38,7 +38,7 @@ export default function MeasureMetadata(props: MeasureMetadataProps) {
     };
   }, []);
 
-  let measureMetaData = measure?.measureMetaData || {};
+  const measureMetaData = measure?.measureMetaData || {};
   const measureServiceApi = useMeasureServiceApi();
   // toast utilities
   const [toastOpen, setToastOpen] = useState<boolean>(false);

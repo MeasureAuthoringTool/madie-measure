@@ -79,12 +79,27 @@ jest.mock("@madie/madie-util", () => ({
     state: { canTravel: false, pendingPath: "" },
     initialState: { canTravel: false, pendingPath: "" },
   },
-  useFeatureFlags: jest.fn(() => ({
-    EnhancedTextFormatting: false,
-  })),
+  useFeatureFlags: jest.fn(() => ({})),
 }));
 
 jest.mock("../../../../../api/useMeasureServiceApi");
+// Mock TextEditor to simple textarea for deterministic synchronous updates.
+jest.mock("../../groups/TextEditor", () => (props) => {
+  const {
+    value,
+    readOnly,
+    setFieldValue,
+    name = "riskAdjustmentDescription",
+  } = props;
+  return (
+    <textarea
+      data-testid="risk-adjustment-description-rich-text-editor"
+      value={value}
+      readOnly={readOnly}
+      onChange={(e) => setFieldValue(name, e.target.value)}
+    />
+  );
+});
 const useMeasureServiceApiMock =
   useMeasureServiceApi as jest.Mock<MeasureServiceApi>;
 let measureServiceApi: MeasureServiceApi;
@@ -109,7 +124,9 @@ describe("QiCore RiskAdjustment Component", () => {
       screen.getByRole("button", { name: "Initial Population" })
     ).toBeInTheDocument();
 
-    const description = screen.getByTestId("risk-adjustment-description-text");
+    const description = screen.getByTestId(
+      "risk-adjustment-description-rich-text-editor"
+    );
     expect(description).toHaveTextContent("test description");
   });
 
@@ -121,7 +138,9 @@ describe("QiCore RiskAdjustment Component", () => {
     });
     expect(riskAdjustments).toHaveTextContent("Initial Population");
 
-    const description = screen.getByRole("textbox", { name: "Description" });
+    const description = screen.getByTestId(
+      "risk-adjustment-description-rich-text-editor"
+    );
     expect(description).toHaveTextContent("test description");
 
     const allFormFields = screen.getAllByRole("textbox");
@@ -215,7 +234,9 @@ describe("QiCore RiskAdjustment Component", () => {
     ).toBeInTheDocument();
 
     // Verifies if RA description already loads values from store and able to update
-    const description = screen.getByTestId("risk-adjustment-description-text");
+    const description = screen.getByTestId(
+      "risk-adjustment-description-rich-text-editor"
+    );
     expect(description).toHaveTextContent("test description");
     fireEvent.change(description, {
       target: { value: "Updated test description" },
@@ -296,7 +317,9 @@ describe("QiCore RiskAdjustment Component", () => {
     ).toBeInTheDocument();
 
     // Verifies if RA description already loads values from store and able to update
-    const description = screen.getByTestId("risk-adjustment-description-text");
+    const description = screen.getByTestId(
+      "risk-adjustment-description-rich-text-editor"
+    );
     expect(description).toHaveTextContent("test description");
     fireEvent.change(description, {
       target: { value: "Updated test description" },
@@ -334,7 +357,9 @@ describe("QiCore RiskAdjustment Component", () => {
     RenderRiskAdjustment();
 
     // Verifies if RA description already loads values from store and able to update
-    const description = screen.getByTestId("risk-adjustment-description-text");
+    const description = screen.getByTestId(
+      "risk-adjustment-description-rich-text-editor"
+    );
     expect(description).toHaveTextContent("test description");
     fireEvent.change(description, {
       target: { value: "Updated test description" },
@@ -387,7 +412,9 @@ describe("QiCore RiskAdjustment Component", () => {
     ).toBeInTheDocument();
 
     // Verifies if RA description already loads values from store and able to update
-    const description = screen.getByTestId("risk-adjustment-description-text");
+    const description = screen.getByTestId(
+      "risk-adjustment-description-rich-text-editor"
+    );
     expect(description).toHaveTextContent("test description");
     fireEvent.change(description, {
       target: { value: "Updated test description" },
@@ -440,7 +467,9 @@ describe("QiCore RiskAdjustment Component", () => {
     ).toBeInTheDocument();
 
     // Verifies if RA description already loads values from store and able to update
-    const description = screen.getByTestId("risk-adjustment-description-text");
+    const description = screen.getByTestId(
+      "risk-adjustment-description-rich-text-editor"
+    );
     expect(description).toHaveTextContent("test description");
     fireEvent.change(description, {
       target: { value: "Updated test description" },

@@ -7,7 +7,7 @@ import {
 } from "../../../../../../../icons";
 
 export interface NavTabProps {
-  negationRationale: Boolean;
+  negationRationale: boolean;
   activeTab: string;
   setActiveTab: (value: string) => void;
 }

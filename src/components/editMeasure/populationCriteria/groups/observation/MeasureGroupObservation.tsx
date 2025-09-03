@@ -25,7 +25,7 @@ const MeasureGroupObservation = ({
   let observationName = "";
   let label = `Observation`;
   let criteriaReference = null;
-  let style = {};
+  const style = {};
   let measureObservation = null;
   let required = false;
   let ratio = false;
@@ -59,7 +59,7 @@ const MeasureGroupObservation = ({
     return null;
   }
 
-  let index = formik.values.measureObservations?.indexOf(measureObservation);
+  const index = formik.values.measureObservations?.indexOf(measureObservation);
   const error = index >= 0 ? formik.errors?.measureObservations?.[index] : null;
   // we either return measureObservation, or the means to create one at the moment.
   // We want three cases, MO, add, none

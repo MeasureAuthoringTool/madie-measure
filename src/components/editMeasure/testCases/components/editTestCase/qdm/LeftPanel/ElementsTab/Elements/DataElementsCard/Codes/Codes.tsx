@@ -22,9 +22,9 @@ import { makeStyles } from "@mui/styles";
 import { routeHandlerStore } from "@madie/madie-util";
 
 interface Chip {
-  title: String;
-  name?: String;
-  value?: String;
+  title: string;
+  name?: string;
+  value?: string;
 }
 
 interface CodesProps {

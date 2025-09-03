@@ -1,8 +1,8 @@
 import React from "react";
 
 interface timingProps {
-  abbr: String;
-  val: String;
+  abbr: string;
+  val: string;
 }
 const TimingRow = ({ abbr, val }: timingProps) => {
   return (

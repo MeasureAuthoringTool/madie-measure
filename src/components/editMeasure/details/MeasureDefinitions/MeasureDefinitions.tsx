@@ -17,11 +17,7 @@ import SearchIcon from "@mui/icons-material/Search";
 import ClearIcon from "@mui/icons-material/Clear";
 import { Typography, IconButton, InputAdornment } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
-import {
-  measureStore,
-  checkUserCanEdit,
-  useFeatureFlags,
-} from "@madie/madie-util";
+import { measureStore, checkUserCanEdit } from "@madie/madie-util";
 import { useFormik } from "formik";
 import { MeasureDefinition, Measure } from "@madie/madie-models";
 import useFormikResetOnEvent from "../../../common/useFormikResetOnEvent";
@@ -35,10 +31,9 @@ interface MeasureDefinitionsProps {
 }
 
 const MeasureDefinitions = (props: MeasureDefinitionsProps) => {
-  const featureFlags = useFeatureFlags();
   const { setErrorMessage } = props;
   const { search } = useLocation();
-  let navigate = useNavigate();
+  const navigate = useNavigate();
   const measureServiceApi = useMeasureServiceApi();
   const { updateMeasure } = measureStore;
   const [measure, setMeasure] = useState<any>(measureStore.state);
@@ -61,8 +56,9 @@ const MeasureDefinitions = (props: MeasureDefinitionsProps) => {
   const values = queryString.parse(search);
   const INITIAL_VALUES = {
     id: selectedDefinition?.id,
-    term: selectedDefinition?.term,
-    definition: selectedDefinition?.definition,
+    // Provide defaults to avoid uncontrolled -> controlled warnings in tests
+    term: selectedDefinition?.term || "",
+    definition: selectedDefinition?.definition || "",
   } as MeasureDefinition;
   const [measureDefinitions, setMeasureDefinitions] = useState<
     MeasureDefinition[]
@@ -179,13 +175,13 @@ const MeasureDefinitions = (props: MeasureDefinitionsProps) => {
           toggleOpen();
           formik.resetForm();
         } else {
-          let message = `Error updating measure ${measure.measureName}`;
+          const message = `Error updating measure ${measure.measureName}`;
           handleToast("danger", message, true);
           setErrorMessage(message);
         }
       })
       .catch((reason) => {
-        let message = `Error updating measure "${measure.measureName}"`;
+        const message = `Error updating measure "${measure.measureName}"`;
         handleToast("danger", message, true);
         setErrorMessage(message);
       });
@@ -535,38 +531,18 @@ const MeasureDefinitions = (props: MeasureDefinitionsProps) => {
               {...formik.getFieldProps("term")}
             />
 
-            {featureFlags.EnhancedTextFormatting ? (
-              <TextEditor
-                label="Definition"
-                required
-                data-testid="measure-definition"
-                setFieldValue={formik.setFieldValue}
-                readOnly={!canEdit}
-                error={
-                  formik.touched.definition && Boolean(formik.errors.definition)
-                }
-                helperText={formikErrorHandler("definition")}
-                {...formik.getFieldProps("definition")}
-              />
-            ) : (
-              <TextArea
-                required
-                readOnly={!canEdit}
-                label="Definition"
-                placeholder="Enter"
-                id="measure-definition"
-                data-testid="measure-definition"
-                inputProps={{
-                  "data-testid": "measure-definition-input",
-                  "aria-describedby": "measure-definition-helper-text",
-                }}
-                error={
-                  formik.touched.definition && Boolean(formik.errors.definition)
-                }
-                helperText={formikErrorHandler("definition")}
-                {...formik.getFieldProps("definition")}
-              />
-            )}
+            <TextEditor
+              label="Definition"
+              required
+              setFieldValue={formik.setFieldValue}
+              readOnly={!canEdit}
+              error={
+                formik.touched.definition && Boolean(formik.errors.definition)
+              }
+              helperText={formikErrorHandler("definition")}
+              disableDebounce
+              {...formik.getFieldProps("definition")}
+            />
           </div>
         }
       />

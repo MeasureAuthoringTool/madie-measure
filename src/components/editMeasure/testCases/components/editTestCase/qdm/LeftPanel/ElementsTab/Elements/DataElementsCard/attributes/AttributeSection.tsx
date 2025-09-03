@@ -14,9 +14,9 @@ import { routeHandlerStore } from "@madie/madie-util";
 import useFormikResetOnEvent from "../../../../../../../../../../common/useFormikResetOnEvent";
 
 export interface Chip {
-  title?: String;
-  name?: String;
-  value?: String;
+  title?: string;
+  name?: string;
+  value?: string;
   additionalElements?: Array<Chip>;
   isMultiple?: boolean;
   id?: string;
@@ -115,7 +115,7 @@ const AttributeSection = ({
   };
 
   // v is attribute saved in local state in child.
-  const onInputAdd = (v: String) => {
+  const onInputAdd = (v: string) => {
     const { displayName } = formik.values.attribute;
     onAddClicked(displayName, formik.values.type, v);
     formik.resetForm();

@@ -15,8 +15,8 @@ import * as _ from "lodash";
  */
 export const formatChoiceType = (
   element: ElementDefinition,
-  basePath: string = "",
-  required: string = ""
+  basePath = "",
+  required = ""
 ) => {
   if (_.includes(element.id, "[x]")) {
     return `${extractNameWithoutIndex(
@@ -98,8 +98,8 @@ const removeArrayIndexes = (path) => {
 
 export function extractNameWithoutIndex(
   element: ElementDefinition,
-  requiredIndicator: string = "",
-  basePath: string = ""
+  requiredIndicator = "",
+  basePath = ""
 ) {
   if (basePath) {
     return `${requiredIndicator}${stripAllIndexes(
@@ -206,7 +206,7 @@ export function buildSchemaRecursive(formInfo, path) {
 }
 
 // we want to build out every end of the tree before making yup object shapes since they're immutable.
-export function buildFullValidationSchema(formInfo, rootPath: string = "") {
+export function buildFullValidationSchema(formInfo, rootPath = "") {
   const validationSchemaObject = buildSchemaRecursive(formInfo, rootPath);
   return Yup.object().shape({
     [rootPath]: validationSchemaObject,
@@ -249,7 +249,7 @@ export function removeUndefinedAndEmptyObjects(obj) {
     return obj;
   }
 
-  for (let key in obj) {
+  for (const key in obj) {
     if (obj.hasOwnProperty(key) && key !== "x") {
       const value = obj[key];
 

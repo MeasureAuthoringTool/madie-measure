@@ -14,7 +14,7 @@ const InnerWrapper = tw.div`flex flex-grow flex-col`;
 
 export interface TestCaseListSideBarNavProps {
   allPopulationCriteria: Group[];
-  qdm?: Boolean;
+  qdm?: boolean;
   isCollapsed: boolean;
   setIsCollapsed: Function;
 }
@@ -25,13 +25,13 @@ const TestCaseListSideBarNav = ({
   isCollapsed,
   setIsCollapsed,
 }: TestCaseListSideBarNavProps) => {
-  let navigate = useNavigate();
+  const navigate = useNavigate();
   const { measureId, criteriaId } = useParams<{
     measureId: string;
     criteriaId: string;
   }>();
 
-  let location = useLocation();
+  const location = useLocation();
   const { pathname } = location;
   const featureFlags = useFeatureFlags();
 

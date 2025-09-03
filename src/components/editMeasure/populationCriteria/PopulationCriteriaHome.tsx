@@ -56,7 +56,7 @@ export function PopulationCriteriaHome() {
     };
   }, [measureServiceApi, measureId, featureFlags?.Locking, canEdit]);
 
-  let navigate = useNavigate();
+  const navigate = useNavigate();
 
   const [measureGroupNumber, setMeasureGroupNumber] = useState<number>(null);
   const [sideNavLinks, setSideNavLinks] = useState<Array<any>>();

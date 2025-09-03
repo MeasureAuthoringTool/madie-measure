@@ -138,10 +138,10 @@ const applyCQLFunction = (
   );
 
   let status = "";
-  let message: string = "";
+  let message = "";
   //  it's not defined
   if (!existingFunction) {
-    let newFunctionDeclaration = createCQLFunctionDeclaration(cqlFunction);
+    const newFunctionDeclaration = createCQLFunctionDeclaration(cqlFunction);
     cqlArr.splice(
       findCQLFunctionInsertPoint(parseResults),
       0,
@@ -230,7 +230,7 @@ export const deleteCQLFunction = (
   });
 
   let status = "";
-  let message: string = "";
+  let message = "";
   if (existingFunction) {
     cqlArr.splice(
       existingFunction.start.line - 1,
@@ -271,7 +271,7 @@ export const editCQLFunction = (
   });
 
   let status = "";
-  let message: string = "";
+  let message = "";
   if (existingFunction) {
     cqlArr.splice(
       existingFunction.start.line - 1,

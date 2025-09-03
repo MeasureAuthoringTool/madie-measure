@@ -155,7 +155,7 @@ export const qdmMeasureGroupSchemaValidator = (
 
     scoringUnit: Yup.object().shape({
       value: Yup.object().test("test-compare a few values", function (value) {
-        var parseResp = ucum.UcumLhcUtils.getInstance().validateUnitString(
+        const parseResp = ucum.UcumLhcUtils.getInstance().validateUnitString(
           value?.code,
           true
         );

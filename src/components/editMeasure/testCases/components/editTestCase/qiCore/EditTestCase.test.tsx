@@ -105,7 +105,7 @@ const serviceConfig: ServiceConfig = {
   },
 };
 const MEASURE_CREATEDBY = "testuser";
-let mockApplyDefaults = false;
+const mockApplyDefaults = false;
 jest.mock("@madie/madie-util", () => {
   return {
     useDocumentTitle: jest.fn(),

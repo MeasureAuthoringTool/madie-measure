@@ -27,9 +27,7 @@ jest.mock("formik", () => ({
 }));
 
 jest.mock("@madie/madie-util", () => ({
-  useFeatureFlags: jest.fn(() => ({
-    EnhancedTextFormatting: false,
-  })),
+  useFeatureFlags: jest.fn(() => ({})),
 }));
 
 describe("Measure Group Observation", () => {
@@ -42,9 +40,7 @@ describe("Measure Group Observation", () => {
 
     const mockUuid = require("uuid") as { v4: jest.Mock<string, []> };
     mockUuid.v4.mockImplementationOnce(() => "uuid-1");
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-      EnhancedTextFormatting: true,
-    }));
+    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({}));
   });
 
   afterEach(() => {

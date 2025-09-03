@@ -83,7 +83,11 @@ it("Should add valuset, priotiy location usings array", () => {
     "valueset \"Ethnicity\": 'urn:oid:2.16.840.1.114222.4.11.837'"
   );
   const valuset = JSON.parse(valusetJson);
-  let result: CqlApplyActionResult = applyValueset(cql, Model.QDM_5_6, valuset);
+  const result: CqlApplyActionResult = applyValueset(
+    cql,
+    Model.QDM_5_6,
+    valuset
+  );
   expect(result.cql).toContain(
     "valueset \"Ethnicity\": 'urn:oid:2.16.840.1.114222.4.11.837'"
   );
@@ -104,7 +108,11 @@ it("Should add valuset, priotiy location includes array", () => {
   );
 
   const valuset = JSON.parse(valusetJson);
-  let result: CqlApplyActionResult = applyValueset(cql, Model.QDM_5_6, valuset);
+  const result: CqlApplyActionResult = applyValueset(
+    cql,
+    Model.QDM_5_6,
+    valuset
+  );
   expect(cql).not.toContain(
     "valueset \"Ethnicity\": 'urn:oid:2.16.840.1.114222.4.11.837'"
   );
@@ -131,7 +139,11 @@ it("Should add valuset, priotiy location valuset array", () => {
   expect(cql).not.toContain(
     "valueset \"Ethnicity\": 'urn:oid:2.16.840.1.114222.4.11.837'"
   );
-  let result: CqlApplyActionResult = applyValueset(cql, Model.QDM_5_6, valuset);
+  const result: CqlApplyActionResult = applyValueset(
+    cql,
+    Model.QDM_5_6,
+    valuset
+  );
   expect(result.cql).toContain(
     "valueset \"Ethnicity\": 'urn:oid:2.16.840.1.114222.4.11.837'"
   );

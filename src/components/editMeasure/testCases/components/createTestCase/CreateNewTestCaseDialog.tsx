@@ -73,7 +73,7 @@ const CreateNewTestCaseDialog = ({
   onClose,
   measure,
 }: createNewTestCaseDialogProps) => {
-  let navigate = useNavigate();
+  const navigate = useNavigate();
   const { search } = useLocation();
   const values = queryString.parse(search);
 

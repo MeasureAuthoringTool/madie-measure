@@ -14,7 +14,7 @@ export const editDefinition = (
   editorVal: string
 ) => {
   const cqlComponents = new CqlAntlr(editorVal).parse();
-  let cqlLineArr: string[] = editorVal?.split("\n");
+  const cqlLineArr: string[] = editorVal?.split("\n");
   cqlComponents.expressionDefinitions.forEach((definition) => {
     const definitionName = definition.name.replace(/['"]+/g, "");
     if (definitionName === selectedDefinition?.definitionName) {

@@ -8,23 +8,50 @@ import {
 } from "@madie/madie-models";
 import MeasureObservationDetails from "./MeasureObservationDetails";
 
+// Mock rich text editor to a simple textarea for deterministic behavior
+jest.mock("@madie/madie-design-system/dist/react", () => {
+  const actual = jest.requireActual("@madie/madie-design-system/dist/react");
+  return {
+    ...actual,
+    RichTextEditor: (props) => {
+      const { id, content, onChange, readOnly, required } = props;
+      return (
+        <textarea
+          data-testid={`${id}-rich-text-editor`}
+          id={id}
+          readOnly={readOnly}
+          required={required}
+          value={content}
+          onChange={(e) => onChange && onChange(e.target.value)}
+        />
+      );
+    },
+  };
+});
+
 jest.mock("@madie/madie-util", () => ({
-  useFeatureFlags: jest.fn(() => ({
-    EnhancedTextFormatting: false,
-  })),
+  useFeatureFlags: jest.fn(() => ({})),
 }));
 
 const AGGREGATE_FUNCTIONS = Array.from(AGGREGATE_FUNCTION_KEYS.keys()).sort();
 
 describe("Measure Observation Details", () => {
+  const emptyObservation: MeasureObservation = {
+    id: undefined as any,
+    definition: undefined,
+    description: undefined,
+    aggregateMethod: undefined,
+  } as any;
   it("should render with no observation or elmJson input", () => {
     render(
       <MeasureObservationDetails
         name={"obs1"}
         required={false}
-        elmJson={null}
-        measureObservation={null}
+        elmJson={""}
+        measureObservation={emptyObservation}
         canEdit
+        ratio={false}
+        errors={{}}
       />
     );
 
@@ -45,8 +72,10 @@ describe("Measure Observation Details", () => {
         name={"obs1"}
         required={false}
         elmJson={elmJson}
-        measureObservation={null}
+        measureObservation={emptyObservation}
         canEdit
+        ratio={false}
+        errors={{}}
       />
     );
 
@@ -69,8 +98,10 @@ describe("Measure Observation Details", () => {
         name={"obs1"}
         required={false}
         elmJson={elmJson}
-        measureObservation={null}
+        measureObservation={emptyObservation}
         canEdit
+        ratio={false}
+        errors={{}}
       />
     );
 
@@ -95,8 +126,10 @@ describe("Measure Observation Details", () => {
         name={"obs1"}
         required={false}
         elmJson={elmJson}
-        measureObservation={null}
+        measureObservation={emptyObservation}
         canEdit
+        ratio={false}
+        errors={{}}
       />
     );
 
@@ -122,7 +155,9 @@ describe("Measure Observation Details", () => {
         required={false}
         elmJson={elmJson}
         canEdit
-        measureObservation={null}
+        measureObservation={emptyObservation}
+        ratio={false}
+        errors={{}}
       />
     );
 
@@ -149,7 +184,9 @@ describe("Measure Observation Details", () => {
         label="MyLabel"
         elmJson={elmJson}
         canEdit
-        measureObservation={null}
+        measureObservation={emptyObservation}
+        ratio={false}
+        errors={{}}
       />
     );
 
@@ -182,7 +219,9 @@ describe("Measure Observation Details", () => {
         required={false}
         canEdit
         elmJson={elmJson}
-        measureObservation={null}
+        measureObservation={emptyObservation}
+        ratio={false}
+        errors={{}}
       />
     );
 
@@ -224,8 +263,10 @@ describe("Measure Observation Details", () => {
         name={"obs1"}
         required={false}
         elmJson={elmJson}
-        measureObservation={null}
+        measureObservation={emptyObservation}
         canEdit
+        ratio={false}
+        errors={{}}
       />
     );
 
@@ -245,10 +286,12 @@ describe("Measure Observation Details", () => {
     render(
       <MeasureObservationDetails
         name={"obs1"}
-        elmJson={null}
-        measureObservation={null}
+        elmJson={""}
+        measureObservation={emptyObservation}
         canEdit
         required={false}
+        ratio={false}
+        errors={{}}
       />
     );
 
@@ -273,9 +316,11 @@ describe("Measure Observation Details", () => {
       <MeasureObservationDetails
         name={"obs1"}
         required={false}
-        elmJson={null}
-        measureObservation={null}
+        elmJson={""}
+        measureObservation={emptyObservation}
         canEdit
+        ratio={false}
+        errors={{}}
       />
     );
 
@@ -306,8 +351,8 @@ describe("Measure Observation Details", () => {
     });
     const measureObservation: MeasureObservation = {
       id: "1234",
-      definition: null,
-    };
+      definition: undefined,
+    } as any;
     const handleChange = jest.fn();
     render(
       <MeasureObservationDetails
@@ -317,6 +362,8 @@ describe("Measure Observation Details", () => {
         measureObservation={measureObservation}
         onChange={handleChange}
         canEdit
+        ratio={false}
+        errors={{}}
       />
     );
 
@@ -359,9 +406,9 @@ describe("Measure Observation Details", () => {
 
     const measureObservation: MeasureObservation = {
       id: "1234",
-      definition: null,
-      description: null,
-    };
+      definition: undefined,
+      description: undefined,
+    } as any;
     const handleChange = jest.fn();
     render(
       <MeasureObservationDetails
@@ -371,11 +418,13 @@ describe("Measure Observation Details", () => {
         measureObservation={measureObservation}
         onChange={handleChange}
         canEdit
+        ratio={false}
+        errors={{}}
       />
     );
 
     const observationDescription = screen.getByTestId(
-      "denominator-observation-description"
+      "denominator-observation-description-rich-text-editor"
     );
     expect(observationDescription).toBeInTheDocument();
 
@@ -406,8 +455,8 @@ describe("Measure Observation Details", () => {
     });
     const measureObservation: MeasureObservation = {
       id: "1234",
-      definition: null,
-    };
+      definition: undefined,
+    } as any;
     render(
       <MeasureObservationDetails
         name={"obs1"}
@@ -415,6 +464,8 @@ describe("Measure Observation Details", () => {
         elmJson={elmJson}
         measureObservation={measureObservation}
         canEdit
+        ratio={false}
+        errors={{}}
       />
     );
 
@@ -447,7 +498,7 @@ describe("Measure Observation Details", () => {
     const measureObservation: MeasureObservation = {
       id: "1234",
       definition: "MyFunc1",
-    };
+    } as any;
     const handleChange = jest.fn();
     render(
       <MeasureObservationDetails
@@ -457,6 +508,8 @@ describe("Measure Observation Details", () => {
         measureObservation={measureObservation}
         onChange={handleChange}
         canEdit
+        ratio={false}
+        errors={{}}
       />
     );
 
@@ -490,8 +543,8 @@ describe("Measure Observation Details", () => {
     });
     const measureObservation: MeasureObservation = {
       id: "1234",
-      definition: null,
-    };
+      definition: undefined,
+    } as any;
     render(
       <MeasureObservationDetails
         name={"obs1"}
@@ -499,6 +552,8 @@ describe("Measure Observation Details", () => {
         elmJson={elmJson}
         measureObservation={measureObservation}
         canEdit
+        ratio={false}
+        errors={{}}
       />
     );
     const aggregateInput = screen.getByTestId(
@@ -526,7 +581,7 @@ describe("Measure Observation Details", () => {
       id: "1234",
       definition: "MyFunc1",
       aggregateMethod: AggregateFunctionType.SUM,
-    };
+    } as any;
     const handleRemove = jest.fn();
     render(
       <MeasureObservationDetails
@@ -535,9 +590,10 @@ describe("Measure Observation Details", () => {
         name={"obs1"}
         elmJson={elmJson}
         measureObservation={measureObservation}
-        onChange={null}
+        onChange={undefined}
         onRemove={handleRemove}
         canEdit
+        errors={{}}
       />
     );
 
@@ -590,9 +646,9 @@ describe("Measure Observation Details", () => {
     expect(observationSelect).toHaveValue(measureObservation.definition);
     expect(observationSelect).toHaveAttribute("readonly");
 
-    const observationDescription = screen.getByRole("textbox", {
-      name: "Numerator Observation Description",
-    });
+    const observationDescription = screen.getByTestId(
+      "numerator-observation-description-rich-text-editor"
+    );
     expect(observationDescription).toHaveValue(measureObservation.description);
     expect(observationDescription).toHaveAttribute("readonly");
   });

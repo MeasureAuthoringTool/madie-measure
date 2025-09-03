@@ -108,7 +108,7 @@ const getChoiceBaseLabel = (option: ElementDefinition, basePath: string) => {
   if (matches && matches.length > 0) {
     // find all humps
     const allMatches = [];
-    let regex = /([a-z0-9])([A-Z])/g;
+    const regex = /([a-z0-9])([A-Z])/g;
     let match;
 
     while ((match = regex.exec(label)) !== null) {

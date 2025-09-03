@@ -105,7 +105,7 @@ describe("TerminologyServiceApi Tests", () => {
   });
 
   it("throws an error when VSAC returns a NON-OK response when trying to fetch FHIR expansions with manifest", async () => {
-    let message =
+    const message =
       "An error occurred, please try again. If the error persists, please contact the help desk. (003)";
 
     const response = {
@@ -329,7 +329,7 @@ describe("TerminologyServiceApi Tests", () => {
   });
 
   it("throws an error when VSAC returns a NON-OK response when trying to fetch QDM expansions with manifest", async () => {
-    let message =
+    const message =
       "An error occurred, please try again. If the error persists, please contact the help desk. (004)";
 
     const response = {

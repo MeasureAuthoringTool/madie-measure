@@ -15,10 +15,8 @@ declare module "@madie/madie-util" {
     qdmHideJson: boolean;
     stu6TestCaseValidation: boolean;
     MeasureSearch: boolean;
-    EnhancedTextFormatting: boolean;
     Locking: boolean;
     qiCore7: boolean;
-    Locking: boolean;
     TransferMeasure: boolean;
     MeasureHistory: boolean;
   }
@@ -75,7 +73,7 @@ declare module "@madie/madie-util" {
 
   export class TerminologyServiceApi {
     constructor(baseUrl: string, getAccessToken: () => string);
-    checkLogin(): Promise<Boolean>;
+    checkLogin(): Promise<boolean>;
     loginUMLS(apiKey: string): Promise<string>;
   }
   export function useTerminologyServiceApi(): TerminologyServiceApi;

@@ -77,7 +77,7 @@ const setCqmMeasure = jest.fn;
 const getAccessToken = jest.fn();
 let selectedDataElement: DataElement = null;
 const setSelectedDataElement = jest.fn();
-let cqmConversionService = new CqmConversionService("url", getAccessToken);
+const cqmConversionService = new CqmConversionService("url", getAccessToken);
 const cqmMeasure = cqmConversionService.convertToCqmMeasure(mockMeasure, null);
 jest.mock("../../../../../../api/CqmModelConversionService");
 const CQMConversionMock =
@@ -338,7 +338,7 @@ const renderElementsSectionComponent = (render, selectedDataElement) => {
 const useCqmConversionServiceMockResolved = {
   fetchRelevantDataElements: jest.fn().mockResolvedValue(testDataElements),
 } as unknown as TestCaseServiceApi;
-let mockApplyDefaults = false;
+const mockApplyDefaults = false;
 
 jest.mock("@madie/madie-util", () => ({
   useDocumentTitle: jest.fn(),

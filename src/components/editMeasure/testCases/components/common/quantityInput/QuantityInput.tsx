@@ -72,8 +72,8 @@ const QuantityInput = ({
     useState<CQL.Quantity>(quantity);
   const [currentUnit, setCurrentUnit] = useState<UcumOption>(null);
   const [error, setError] = useState<boolean>();
-  const [helperText, setHelperText] = useState<String>();
-  const [unitText, setUnitText] = useState<String>(valueFn(currentUnit?.value));
+  const [helperText, setHelperText] = useState<string>();
+  const [unitText, setUnitText] = useState<string>(valueFn(currentUnit?.value));
 
   useEffect(() => {
     if (

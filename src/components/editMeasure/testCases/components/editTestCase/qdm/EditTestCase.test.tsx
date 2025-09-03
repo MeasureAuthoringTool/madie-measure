@@ -221,7 +221,7 @@ const useTestCaseServiceMockRejectedNonUniqueName = {
   updateTestCase: jest.fn().mockRejectedValueOnce(nonUniqNameData),
   lockTestCase: jest.fn().mockResolvedValueOnce(lockInfo),
 } as unknown as TestCaseServiceApi;
-let mockApplyDefaults = false;
+const mockApplyDefaults = false;
 global.ResizeObserver = jest.fn().mockImplementation(() => ({
   observe: jest.fn(),
   unobserve: jest.fn(),

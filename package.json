@@ -52,6 +52,8 @@
     "dompurify": "^3.2.4",
     "enzyme": "^3.11.0",
     "eslint": "^7.29.0",
+    "@typescript-eslint/eslint-plugin": "^5.62.0",
+    "@typescript-eslint/parser": "^5.62.0",
     "eslint-config-prettier": "^8.3.0",
     "eslint-config-ts-react-important-stuff": "^3.0.0",
     "eslint-plugin-jsx-a11y": "^6.6.1",
