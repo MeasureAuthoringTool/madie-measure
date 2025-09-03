@@ -3646,6 +3646,11 @@ describe("EditTestCase component", () => {
       expect(
         screen.queryByTestId("editor-calculator-button")
       ).toBeInTheDocument();
+
+      const calculatorButton = screen.getByTestId("editor-calculator-button");
+      userEvent.click(calculatorButton);
+
+      expect(screen.queryByTestId("calculation-dialog")).toBeInTheDocument();
     });
 
     it("should not render calculator button when Calculator flag is false", async () => {

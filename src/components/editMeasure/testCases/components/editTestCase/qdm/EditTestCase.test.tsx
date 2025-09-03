@@ -449,6 +449,11 @@ test("Calculator button is found when flag is on", async () => {
   });
   await waitFor(() => renderEditTestCaseComponent());
   expect(screen.queryByTestId("editor-calculator-button")).toBeInTheDocument();
+
+  const calculatorButton = screen.getByTestId("editor-calculator-button");
+  userEvent.click(calculatorButton);
+
+  expect(screen.queryByTestId("calculation-dialog")).toBeInTheDocument();
 });
 
 test("Calculator button is not found when flag is off", async () => {
