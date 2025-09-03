@@ -9,6 +9,7 @@ import Editor from "../../../editor/Editor";
 import { DataElement } from "cqm-models";
 import EditorCalculator from "../../calculator/EditorCalculator";
 import { useFeatureFlags } from "@madie/madie-util";
+import CalculatorDialog from "../../calculator/CalculatorDialog";
 
 const LeftPanel = (props: {
   canEdit: boolean;
@@ -25,6 +26,7 @@ const LeftPanel = (props: {
     setSelectedDataElement,
   } = props;
   const [activeTab, setActiveTab] = useState<string>("elements");
+  const [calculationDialogOpen, setCalculationDialogOpen] = useState(false);
   const formik: any = useFormikContext();
   const featureFlags = useFeatureFlags();
 
@@ -33,7 +35,9 @@ const LeftPanel = (props: {
       <div className="tab-container">
         <LeftPanelNavTabs activeTab={activeTab} setActiveTab={setActiveTab} />
         <div tw="ml-auto mr-2">
-          {featureFlags?.Calculator && <EditorCalculator />}
+          {featureFlags?.Calculator && (
+            <EditorCalculator onClick={() => setCalculationDialogOpen(true)} />
+          )}
         </div>
       </div>
       <div className="panel-content">
@@ -60,6 +64,10 @@ const LeftPanel = (props: {
           )}
         </QdmPatientProvider>
       </div>
+      <CalculatorDialog
+        open={calculationDialogOpen}
+        onClose={() => setCalculationDialogOpen(false)}
+      />
     </div>
   );
 };

@@ -7,7 +7,7 @@ describe("Test EditorCalculator component", () => {
   it("should register the calculator event on clicking calculator button", async () => {
     const eventListenerSpy = jest.fn();
     window.addEventListener("toggleEditorCalculatorBox", eventListenerSpy);
-    render(<EditorCalculator />);
+    render(<EditorCalculator onClick={eventListenerSpy} />);
     const searchButton = screen.getByRole("button");
     userEvent.click(searchButton);
     expect(eventListenerSpy).toHaveBeenCalled();
