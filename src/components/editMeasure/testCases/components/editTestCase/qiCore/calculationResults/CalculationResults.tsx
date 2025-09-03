@@ -10,7 +10,6 @@ import {
   Group,
   RiskAdjustment,
 } from "@madie/madie-models";
-import { useFeatureFlags } from "@madie/madie-util";
 import { Relevance } from "fqm-execution";
 import QiCoreGroupCoverage, {
   CqlDefinitionCallstack,
@@ -133,7 +132,6 @@ const CalculationResults = ({
   const originalGroupName = (name) => {
     return `<h2>Population Group: ${name}</h2>`;
   };
-  const featureFlags = useFeatureFlags();
   // We wanted to have our own group name. This is the template for group name
   const updatedGroupName = (name) => {
     return `<br/><h4>Population Criteria ${name}</h4>`;

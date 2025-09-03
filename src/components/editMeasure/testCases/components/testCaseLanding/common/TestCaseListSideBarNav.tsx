@@ -8,7 +8,6 @@ import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import ExpansionIcon from "@mui/icons-material/KeyboardTabOutlined";
 import IconButton from "@mui/material/IconButton";
 import "../../../../../../styles/VerticalSideBarNav.scss";
-import { useFeatureFlags } from "@madie/madie-util";
 
 const InnerWrapper = tw.div`flex flex-grow flex-col`;
 
@@ -33,7 +32,6 @@ const TestCaseListSideBarNav = ({
 
   let location = useLocation();
   const { pathname } = location;
-  const featureFlags = useFeatureFlags();
 
   const [showConfigTabs, setShowConfigTabs] = useState<boolean>(true);
   const [showPopulationCriteriaTabs, setShowPopulationCriteriaTabs] =
@@ -189,17 +187,14 @@ const TestCaseListSideBarNav = ({
                     orientation="vertical"
                     onChange={handleChange}
                   />
-                  {((featureFlags?.QDMIncludeRAVValues && qdm) ||
-                    (featureFlags?.QICoreIncludeRAVValues && !qdm)) && (
-                    <Tab
-                      label="RAV"
-                      value="rav"
-                      data-testid="nav-link-rav"
-                      type="C"
-                      orientation="vertical"
-                      onChange={handleChange}
-                    />
-                  )}
+                  <Tab
+                    label="RAV"
+                    value="rav"
+                    data-testid="nav-link-rav"
+                    type="C"
+                    orientation="vertical"
+                    onChange={handleChange}
+                  />
                   <Tab
                     label="Expansion"
                     value="expansion"

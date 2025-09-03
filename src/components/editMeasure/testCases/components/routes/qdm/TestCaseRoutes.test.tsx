@@ -12,7 +12,6 @@ import useCqmConversionService, {
   CqmConversionService,
 } from "../../../api/CqmModelConversionService";
 // @ts-ignore
-import { useFeatureFlags } from "@madie/madie-util";
 
 jest.mock("../../../../../../api/axios-instance");
 global.ResizeObserver = jest.fn().mockImplementation(() => ({
@@ -86,10 +85,7 @@ jest.mock("@madie/madie-util", () => ({
     },
     unsubscribe: () => null,
   },
-  useFeatureFlags: jest.fn(() => ({
-    applyDefaults: false,
-    QDMIncludeRAVValues: true,
-  })),
+  useFeatureFlags: () => ({}),
   useOktaTokens: () => ({
     getAccessToken: () => "test.jwt",
     getUserName: () => MEASURE_CREATEDBY,
@@ -156,15 +152,15 @@ describe("TestCaseRoutes", () => {
     const testCaseListTable = (await screen.findByTestId(
       "test-case-tbl"
     )) as HTMLTableElement;
-    const tBody = testCaseListTable.tBodies.item(0);
-    expect(tBody.rows.length).toBe(1);
-    expect(tBody.rows.item(0).cells[2]).toHaveTextContent("Invalid");
-    expect(tBody.rows.item(0).cells[3]).toHaveTextContent("IPP_Pass");
-    expect(tBody.rows.item(0).cells[4]).toHaveTextContent("TC12");
-    expect(tBody.rows.item(0).cells[5]).toHaveTextContent("Desc1");
-    expect(tBody.rows.item(0).cells[6]).toHaveTextContent("09/10/2024");
+    const tBody = testCaseListTable.tBodies.item(0)!; // non-null assertion for test
+    expect(tBody?.rows.length).toBe(1);
+    expect(tBody?.rows.item(0)!.cells[2]).toHaveTextContent("Invalid");
+    expect(tBody?.rows.item(0)!.cells[3]).toHaveTextContent("IPP_Pass");
+    expect(tBody?.rows.item(0)!.cells[4]).toHaveTextContent("TC12");
+    expect(tBody?.rows.item(0)!.cells[5]).toHaveTextContent("Desc1");
+    expect(tBody?.rows.item(0)!.cells[6]).toHaveTextContent("09/10/2024");
     expect(
-      within(tBody.rows.item(0).cells[7]).getByTestId(
+      within(tBody?.rows.item(0)!.cells[7]).getByTestId(
         "view-edit-test-case-button-id1"
       )
     ).toBeInTheDocument();
@@ -203,7 +199,7 @@ describe("TestCaseRoutes", () => {
     ).toBeInTheDocument();
   });
 
-  it("should render the RAVPage when QDMIncludeRAVValues flag is true", async () => {
+  it("should render the RAVPage (feature flags removed)", async () => {
     mockedAxios.get.mockImplementation(() => {
       return Promise.resolve({
         data: [
@@ -236,44 +232,7 @@ describe("TestCaseRoutes", () => {
     ).toBeInTheDocument();
   });
 
-  it("shouldn't render the RAVPage when QDMIncludeRAVValues flag is false", async () => {
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => {
-      return {
-        QDMIncludeRAVValues: false,
-      };
-    });
-
-    mockedAxios.get.mockImplementation(() => {
-      return Promise.resolve({
-        data: [
-          {
-            id: "id1",
-            title: "TC12",
-            description: "Desc1",
-            series: "IPP_Pass",
-            status: null,
-          },
-        ],
-      });
-    });
-    render(
-      <MemoryRouter
-        initialEntries={["/measures/m1234/edit/test-cases/list-page/rav"]}
-      >
-        <ApiContextProvider value={serviceConfig}>
-          <Routes>
-            <Route
-              path="/measures/:measureId/edit/test-cases/*"
-              element={<TestCaseRoutes />}
-            />
-          </Routes>
-        </ApiContextProvider>
-      </MemoryRouter>
-    );
-    expect(
-      screen.queryByTestId("rav-option-radio-buttons-group")
-    ).not.toBeInTheDocument();
-  });
+  // negative gating test removed because feature flag removed
 
   it("should render the Expansion Component", async () => {
     mockedAxios.get.mockImplementation(() => {

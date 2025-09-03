@@ -3,7 +3,7 @@ import { Route, Routes } from "react-router-dom";
 import TestCaseLanding from "../../testCaseLanding/qiCore/TestCaseLanding";
 import EditTestCase from "../../editTestCase/qiCore/EditTestCase";
 import NotFound from "../../notfound/NotFound";
-import { measureStore, useFeatureFlags } from "@madie/madie-util";
+import { measureStore } from "@madie/madie-util";
 import { Bundle, ValueSet } from "fhir/r4";
 import useTerminologyServiceApi from "../../../api/useTerminologyServiceApi";
 import { ExecutionContextProvider } from "./ExecutionContext";
@@ -39,7 +39,6 @@ const TestCaseRoutes = () => {
 
   const terminologyService = useRef(useTerminologyServiceApi());
   const measureService = useRef(useMeasureServiceApi());
-  const featureFlags = useFeatureFlags();
 
   const [measure, setMeasure] = useState<Measure>();
   useEffect(() => {
@@ -201,21 +200,17 @@ const TestCaseRoutes = () => {
               />
             }
           />
-          {featureFlags?.QICoreIncludeRAVValues && (
-            <Route
-              path="/list-page/rav"
-              element={
-                <TestCaseLandingWrapper
-                  qdm={false}
-                  children={
-                    <RAVPage
-                      setExecutionContextReady={setExecutionContextReady}
-                    />
-                  }
-                />
-              }
-            />
-          )}
+          <Route
+            path="/list-page/rav"
+            element={
+              <TestCaseLandingWrapper
+                qdm={false}
+                children={
+                  <RAVPage setExecutionContextReady={setExecutionContextReady} />
+                }
+              />
+            }
+          />
 
           <Route
             path="/list-page/expansion"

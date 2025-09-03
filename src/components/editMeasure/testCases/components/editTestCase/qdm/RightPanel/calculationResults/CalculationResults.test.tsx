@@ -9,7 +9,6 @@ import useQdmCqlParsingService, {
 } from "../../../../../api/cqlElmTranslationService/useQdmCqlParsingService";
 import { qdmCallStack } from "../../../groupCoverage/_mocks_/QdmCallStack";
 // @ts-ignore
-import { useFeatureFlags } from "@madie/madie-util";
 
 jest.mock(
   "../../../../../api/cqlElmTranslationService/useQdmCqlParsingService"
@@ -22,11 +21,7 @@ const useCqlParsingServiceMockResolved = {
 } as unknown as QdmCqlParsingService;
 import { calculationResults } from "../../../groupCoverage/_mocks_/QdmCalculationResults";
 
-jest.mock("@madie/madie-util", () => ({
-  useFeatureFlags: jest.fn(() => ({
-    QDMIncludeRAVValues: true,
-  })),
-}));
+jest.mock("@madie/madie-util", () => ({}));
 
 const groups = [
   {
@@ -418,7 +413,7 @@ describe("CalculationResults with new tabbed highlighting layout on", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("should render RAV tab if QDMIncludeRAVValues feature flag is true and includeRAV is true", async () => {
+  it("should render RAV tab when includeRAV is true", async () => {
     renderCoverageComponent();
     // Ensure we're on the Initial Population tab
     await assertPopulationTabs();
@@ -460,32 +455,5 @@ describe("CalculationResults with new tabbed highlighting layout on", () => {
     );
   });
 
-  it("should not render RAV tab if QDMIncludeRAVValues feature flag is false and includeRAV is true", async () => {
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-      QDMIncludeRAVValues: false,
-    }));
-
-    renderCoverageComponent();
-    // Ensures we're on the Initial Population tab
-    await assertPopulationTabs();
-
-    // Check for 'Results' button on IP population tab
-    const results = await screen.findByRole("button", { name: "Results" });
-    await waitFor(() => {
-      expect(results).toBeInTheDocument();
-    });
-
-    // Move to Definitions tab
-    const definitions = await getTab("Definitions");
-    userEvent.click(definitions);
-
-    // Check how many 'Results' are present
-    const definitionResults = await screen.findAllByRole("button", {
-      name: "Results",
-    });
-    expect(definitionResults).toHaveLength(5);
-
-    const rav = screen.queryByTestId("rav-tab");
-    expect(rav).toBeNull();
-  });
+  // negative feature flag scenario removed
 });

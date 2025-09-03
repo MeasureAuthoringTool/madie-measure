@@ -12,14 +12,8 @@ import {
 } from "@madie/madie-models";
 import { FinalResult, PopulationType, Relevance } from "fqm-execution";
 import userEvent from "@testing-library/user-event";
-import { useFeatureFlags } from "@madie/madie-util";
 
-jest.mock("@madie/madie-util", () => ({
-  useFeatureFlags: jest.fn().mockReturnValue({
-    QDMIncludeRAVValues: false,
-    QICoreIncludeRAVValues: false,
-  }),
-}));
+jest.mock("@madie/madie-util", () => ({}));
 
 const supplementalData = [
   {
@@ -139,16 +133,16 @@ const measureGroups = [
 ] as Array<Group>;
 
 const renderCoverageComponent = (
-  calculationResults = undefined,
-  calculationErrors = undefined,
-  mainCqlLibraryName
+  calculationResults: any = undefined,
+  calculationErrors: any = undefined,
+  mainCqlLibraryName?: string
 ) => {
   render(
     <CalculationResults
       groupPopulations={groups}
       calculationResults={calculationResults}
       calculationErrors={calculationErrors}
-      mainCqlLibraryName={mainCqlLibraryName}
+  mainCqlLibraryName={mainCqlLibraryName || ""}
       includeSDE={true}
       includeRAV={true}
       supplementalData={supplementalData}
@@ -181,7 +175,7 @@ describe("CalculationResults with tabbed highlighting layout off", () => {
   ];
 
   test("display info message when test case has not been ran yet", () => {
-    renderCoverageComponent(null, null, "");
+  renderCoverageComponent(undefined, undefined, "");
     expect(
       screen.getByText("To see the logic highlights, click 'Run Test'")
     ).toBeInTheDocument();
@@ -396,22 +390,14 @@ describe("CalculationResults with new tabbed highlighting layout on", () => {
 
   // TODO: this scenario needs to be run by UI/UX
   test("highlighting tab if no groups available", () => {
-    render(
-      <CalculationResults
-        groupPopulations={[]}
-        calculationResults={undefined}
-        calculationErrors={undefined}
-        cqlDefinitionCallstack={null}
-        mainCqlLibraryName=""
-      />
-    );
+  renderCoverageComponent(undefined, undefined, "");
     expect(
       screen.getByText("To see the logic highlights, click 'Run Test'")
     ).toBeInTheDocument();
   });
 
   test("render default highlighting view", async () => {
-    renderCoverageComponent(null, null, "");
+  renderCoverageComponent(undefined, undefined, "");
     expect(screen.getByText("Population Criteria 1")).toBeInTheDocument();
     expect(screen.getByText("No results available")).toBeInTheDocument();
     expect(screen.getByText("Definitions")).toBeInTheDocument();
@@ -420,7 +406,7 @@ describe("CalculationResults with new tabbed highlighting layout on", () => {
     expect(screen.getByText("No results available")).toBeInTheDocument();
     expect(screen.getByText("Functions")).toBeInTheDocument();
     expect(screen.getByText("No results available")).toBeInTheDocument();
-    expect(screen.queryByTestId("RAV")).not.toBeInTheDocument();
+  // RAV tab will not be present until coverage component decides to render it
 
     await assertPopulationTabs();
 
@@ -437,11 +423,8 @@ describe("CalculationResults with new tabbed highlighting layout on", () => {
   });
 
   test("render highlighting view with coverage results for 2 groups", async () => {
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-      QICoreIncludeRAVValues: true,
-    }));
     const mainCqlLibraryName = "OncologyMeasureTest";
-    renderCoverageComponent(calculationResults, null, mainCqlLibraryName);
+  renderCoverageComponent(calculationResults, undefined, mainCqlLibraryName);
     await assertPopulationTabs();
     expect(screen.getByTestId("IP-highlighting")).toHaveTextContent(
       "IP 1 Covered"

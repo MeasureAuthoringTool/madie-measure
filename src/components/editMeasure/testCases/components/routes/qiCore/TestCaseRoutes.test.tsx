@@ -20,7 +20,6 @@ import { Bundle } from "fhir/r4";
 import { act } from "react-dom/test-utils";
 import NotFound from "../../notfound/NotFound";
 // @ts-ignore
-import { useFeatureFlags } from "@madie/madie-util";
 
 // mock the editor cause we don't care for this test and it gets rid of errors
 jest.mock("../../editor/Editor", () => () => <div>editor contents</div>);
@@ -91,10 +90,7 @@ jest.mock("@madie/madie-util", () => ({
     },
     unsubscribe: () => null,
   },
-  useFeatureFlags: jest.fn().mockImplementation(() => ({
-    applyDefaults: false,
-    QICoreIncludeRAVValues: true,
-  })),
+  useFeatureFlags: () => ({}),
   useOktaTokens: () => ({
     getAccessToken: () => "test.jwt",
     getUserName: () => MEASURE_CREATEDBY,
@@ -115,12 +111,12 @@ jest.mock("@madie/madie-util", () => ({
 describe("TestCaseRoutes", () => {
   afterEach(() => {
     jest.clearAllMocks();
-    mockMeasure.errors = [];
-    measureBundle.entry = undefined;
+    (mockMeasure as any).errors = [];
+    (measureBundle as any).entry = undefined;
   });
 
   it("should render the landing component first", async () => {
-    mockedAxios.get.mockImplementation((args) => {
+  (mockedAxios.get as any).mockImplementation((args: string) => {
       return Promise.resolve({
         data: [
           {
@@ -161,7 +157,7 @@ describe("TestCaseRoutes", () => {
     mockMeasure.errors = [
       MeasureErrorType.MISMATCH_CQL_POPULATION_RETURN_TYPES,
     ];
-    mockedAxios.get.mockImplementation((args) => {
+  (mockedAxios.get as any).mockImplementation((args: string) => {
       return Promise.resolve({
         data: [
           {
@@ -198,7 +194,7 @@ describe("TestCaseRoutes", () => {
   });
 
   it("should allow navigation to create test case dialog from landing page ", async () => {
-    mockedAxios.get.mockImplementation((args) => {
+  (mockedAxios.get as any).mockImplementation((args: string) => {
       if (args && args.endsWith("series")) {
         return Promise.resolve({ data: ["SeriesA"] });
       } else if (
@@ -854,7 +850,7 @@ describe("TestCaseRoutes", () => {
     });
   });
 
-  it("should render the RAVPage when QICoreIncludeRAVValues flag is true", async () => {
+  it("should render the RAVPage", async () => {
     mockedAxios.get.mockImplementation(() => {
       return Promise.resolve({
         data: [
@@ -887,42 +883,5 @@ describe("TestCaseRoutes", () => {
     ).toBeInTheDocument();
   });
 
-  it("shouldn't render the RAVPage when QICoreIncludeRAVValues flag is false", async () => {
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => {
-      return {
-        QICoreIncludeRAVValues: false,
-      };
-    });
-
-    mockedAxios.get.mockImplementation(() => {
-      return Promise.resolve({
-        data: [
-          {
-            id: "id1",
-            title: "TC12",
-            description: "Desc1",
-            series: "IPP_Pass",
-            status: null,
-          },
-        ],
-      });
-    });
-    render(
-      <MemoryRouter
-        initialEntries={["/measures/m1234/edit/test-cases/list-page/rav"]}
-      >
-        <ApiContextProvider value={serviceConfig}>
-          <Routes>
-            <Route
-              path="/measures/:measureId/edit/test-cases/*"
-              element={<TestCaseRoutes />}
-            />
-          </Routes>
-        </ApiContextProvider>
-      </MemoryRouter>
-    );
-    expect(
-      screen.queryByTestId("rav-option-radio-buttons-group")
-    ).not.toBeInTheDocument();
-  });
+  // negative feature-flag gating test removed because flag removed
 });

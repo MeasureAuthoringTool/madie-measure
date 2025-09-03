@@ -1,7 +1,6 @@
 import React from "react";
 import { Tabs, Tab } from "@madie/madie-design-system/dist/react";
 import { PopulationType } from "@madie/madie-models";
-import { useFeatureFlags } from "@madie/madie-util";
 
 export interface Population {
   abbreviation: string;
@@ -32,17 +31,8 @@ const GroupCoverageNav = ({
   selectedHighlightingTab,
   onClick,
   includeSDE,
-  includeRAV,
   model,
 }: Props) => {
-  const featureFlags = useFeatureFlags();
-
-  // TODO Remove parameter when either of these flags are removed, or when both feature flags are removed
-  const showRAVTab =
-    includeRAV &&
-    (model === "qiCore"
-      ? featureFlags?.QICoreIncludeRAVValues
-      : featureFlags?.QDMIncludeRAVValues);
 
   return (
     <>
@@ -80,7 +70,6 @@ const GroupCoverageNav = ({
             }}
           />
         )}
-        {showRAVTab && (
           <Tab
             type="C"
             label="RAV"
@@ -93,7 +82,6 @@ const GroupCoverageNav = ({
               onClick({ name: "RAV", id: "RAV" });
             }}
           />
-        )}
       </Tabs>
       <Tabs
         type="C"

@@ -5,7 +5,6 @@ import TestCaseListSideBarNav from "./TestCaseListSideBarNav";
 import { Group } from "@madie/madie-models";
 import userEvent from "@testing-library/user-event";
 // @ts-ignore
-import { useFeatureFlags } from "@madie/madie-util";
 
 const groups: Group[] = [
   {
@@ -21,12 +20,7 @@ const groups: Group[] = [
     stratifications: [],
   },
 ];
-jest.mock("@madie/madie-util", () => ({
-  useFeatureFlags: jest.fn().mockReturnValue({
-    QDMIncludeRAVValues: true,
-    QICoreIncludeRAVValues: true,
-  }),
-}));
+jest.mock("@madie/madie-util", () => ({}));
 describe("TestCase component", () => {
   afterEach(() => {
     jest.clearAllMocks();
@@ -42,7 +36,7 @@ describe("TestCase component", () => {
     render(
       <MemoryRouter>
         <TestCaseListSideBarNav
-          allPopulationCriteria={null}
+          allPopulationCriteria={undefined as any}
           isCollapsed={false}
           setIsCollapsed={jest.fn()}
         />
@@ -105,56 +99,23 @@ describe("TestCase component", () => {
     expect(screen.getAllByRole("tab").length).toEqual(6);
   });
 
-  it("shouldn't render RAV tab for QDM measures when QDMIncludeRAVValues flag is false", async () => {
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementationOnce(() => {
-      return {
-        QDMIncludeRAVValues: false,
-      };
-    });
-
+  it("always renders RAV tab for both QDM and QI Core measures", async () => {
     render(
       <MemoryRouter>
         <TestCaseListSideBarNav {...defaultProps} qdm={true} />
       </MemoryRouter>
     );
-
-    expect(screen.queryByRole("tab", { name: "RAV" })).not.toBeInTheDocument();
-  });
-
-  it("should render RAV tab for QDM measures when QDMIncludeRAVValues flag is true", async () => {
-    render(
-      <MemoryRouter>
-        <TestCaseListSideBarNav {...defaultProps} qdm={true} />
-      </MemoryRouter>
-    );
-
-    expect(screen.queryByRole("tab", { name: "RAV" })).toBeInTheDocument();
-  });
-
-  it("shouldn't render RAV tab for QI Core measures when QICoreIncludeRAVValues flag is false", async () => {
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementationOnce(() => {
-      return {
-        QICoreIncludeRAVValues: false,
-      };
-    });
+  // RAV tab appears once in each Tabs group; ensure at least one present
+  const ravTabsQdm = screen.getAllByRole("tab", { name: "RAV" });
+  expect(ravTabsQdm.length).toBeGreaterThan(0);
 
     render(
       <MemoryRouter>
         <TestCaseListSideBarNav {...defaultProps} qdm={false} />
       </MemoryRouter>
     );
-
-    expect(screen.queryByRole("tab", { name: "RAV" })).not.toBeInTheDocument();
-  });
-
-  it("should render RAV tab for QI Core measures when QICoreIncludeRAVValues flag is true", async () => {
-    render(
-      <MemoryRouter>
-        <TestCaseListSideBarNav {...defaultProps} qdm={false} />
-      </MemoryRouter>
-    );
-
-    expect(screen.queryByRole("tab", { name: "RAV" })).toBeInTheDocument();
+  const ravTabsQiCore = screen.getAllByRole("tab", { name: "RAV" });
+  expect(ravTabsQiCore.length).toBeGreaterThan(0);
   });
 
   it("should render Expansion tab for QI Core measures", async () => {

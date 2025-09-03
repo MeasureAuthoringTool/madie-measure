@@ -310,7 +310,6 @@ const QdmGroupCoverage = ({
             selectedHighlightingTab={selectedTab}
             onClick={onHighlightingNavTabClick}
             includeSDE={includeSDE}
-            includeRAV={includeRAV}
           />
         </div>
         <div

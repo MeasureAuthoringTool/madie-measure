@@ -404,7 +404,6 @@ const QiCoreGroupCoverage = ({
             selectedHighlightingTab={selectedHighlightingTab}
             onClick={onHighlightingNavTabClick}
             includeSDE={includeSDE}
-            includeRAV={includeRAV}
             model={"qiCore"}
           />
         </div>
