@@ -1,4 +1,4 @@
-import React from "react";
+import * as React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
 import StringComponent from "./StringComponent";
 
@@ -18,7 +18,9 @@ describe("StringComponent", () => {
 
     const stringField = screen.getByTestId("string-field-String");
     expect(stringField).toBeInTheDocument();
-    const stringFieldInput = screen.getByTestId("string-field-input-String");
+    const stringFieldInput = screen.getByTestId(
+      "string-field-input-String"
+    ) as HTMLInputElement;
     expect(stringFieldInput).toBeInTheDocument();
     expect(stringFieldInput.value).toBe("This is a string component");
   });
@@ -38,7 +40,9 @@ describe("StringComponent", () => {
 
     const stringField = screen.getByTestId("string-field-String");
     expect(stringField).toBeInTheDocument();
-    const stringFieldInput = screen.getByTestId("string-field-input-String");
+    const stringFieldInput = screen.getByTestId(
+      "string-field-input-String"
+    ) as HTMLInputElement;
     expect(stringFieldInput).not.toHaveAttribute("readOnly");
     expect(stringFieldInput).toBeInTheDocument();
     expect(stringFieldInput.value).toBe("This is a string component");
@@ -73,7 +77,9 @@ describe("StringComponent", () => {
 
     const stringField = screen.getByTestId("string-field-VALUE");
     expect(stringField).toBeInTheDocument();
-    const stringFieldInput = screen.getByTestId("string-field-input-VALUE");
+    const stringFieldInput = screen.getByTestId(
+      "string-field-input-VALUE"
+    ) as HTMLInputElement;
     expect(stringFieldInput).toBeInTheDocument();
     expect(stringFieldInput.value).toBe("This is a string component");
 

@@ -394,28 +394,30 @@ describe("TypeEditor Component", () => {
 
   test("Should render Period component", () => {
     render(
-      <RequiredFieldsProvider
-        requiredFields={mockRequiredFields}
-        formInfo={mockFormInfo}
-      >
-        <TypeEditor
-          resource={null}
-          structureDefinition={{
-            id: "ClaimResponse.instantiatesCanonical",
-            path: "ClaimResponse.instantiatesCanonical",
-            min: 0,
-            max: "1",
-            type: [
-              {
-                code: "Period",
-              },
-            ],
-          }}
-          canEdit={true}
-          label="instantiatesCanonical"
-          parentStructureDefinition={null}
-        />
-      </RequiredFieldsProvider>
+      <FormikProvider value={mockFormik}>
+        <RequiredFieldsProvider
+          requiredFields={mockRequiredFields}
+          formInfo={mockFormInfo}
+        >
+          <TypeEditor
+            resource={null}
+            structureDefinition={{
+              id: "ClaimResponse.instantiatesCanonical",
+              path: "ClaimResponse.instantiatesCanonical",
+              min: 0,
+              max: "1",
+              type: [
+                {
+                  code: "Period",
+                },
+              ],
+            }}
+            canEdit={true}
+            label="instantiatesCanonical"
+            parentStructureDefinition={null}
+          />
+        </RequiredFieldsProvider>
+      </FormikProvider>
     );
 
     expect(screen.getByText("start")).toBeInTheDocument();
@@ -1298,22 +1300,24 @@ describe("TypeEditor Component", () => {
     const handleChange = jest.fn();
 
     render(
-      <RequiredFieldsProvider
-        requiredFields={mockRequiredFields}
-        formInfo={mockFormInfo}
-      >
-        <TypeEditor
-          type={`test`}
-          resource={null}
-          required={false}
-          value={`test`}
-          onChange={handleChange}
-          structureDefinition={null}
-          parentStructureDefinition={null}
-          canEdit={true}
-          label={"test-label"}
-        />
-      </RequiredFieldsProvider>
+      <FormikProvider value={mockFormik}>
+        <RequiredFieldsProvider
+          requiredFields={mockRequiredFields}
+          formInfo={mockFormInfo}
+        >
+          <TypeEditor
+            type="test"
+            resource={null}
+            required={false}
+            value="test"
+            onChange={handleChange}
+            structureDefinition={null}
+            parentStructureDefinition={null}
+            canEdit={true}
+            label="test-label"
+          />
+        </RequiredFieldsProvider>
+      </FormikProvider>
     );
     expect(
       screen.queryByText(`Unsupported Type [test]`)
@@ -1329,24 +1333,26 @@ describe("TypeEditor Component", () => {
     );
 
     render(
-      <RequiredFieldsProvider
-        requiredFields={mockRequiredFields}
-        formInfo={mockFormInfo}
-      >
-        <TypeEditor
-          resource={null}
-          structureDefinition={{
-            type: [
-              {
-                code: "Meta",
-              },
-            ],
-          }}
-          parentStructureDefinition={{}}
-          canEdit={true}
-          label={"ClaimResponse.meta"}
-        />
-      </RequiredFieldsProvider>
+      <FormikProvider value={mockFormik}>
+        <RequiredFieldsProvider
+          requiredFields={mockRequiredFields}
+          formInfo={mockFormInfo}
+        >
+          <TypeEditor
+            resource={null}
+            structureDefinition={{
+              type: [
+                {
+                  code: "Meta",
+                },
+              ],
+            }}
+            parentStructureDefinition={{}}
+            canEdit={true}
+            label={"ClaimResponse.meta"}
+          />
+        </RequiredFieldsProvider>
+      </FormikProvider>
     );
     expect(
       screen.queryByText(`Unsupported Type [test]`)
@@ -1895,5 +1901,360 @@ describe("TypeEditor Component", () => {
 
     expect(screen.getByText("Low")).toBeInTheDocument();
     expect(screen.getByText("High")).toBeInTheDocument();
+  });
+
+  // ========== NEW TESTS FOR ARRAY RENDERING AND CARDINALITY ==========
+
+  describe("Array rendering and multiple cardinality", () => {
+    const formik = {
+      handleChange: jest.fn(),
+      setFieldValue: jest.fn(),
+      setFieldTouched: jest.fn(),
+    };
+    test("Should render multiple string components when values is an array with multiple cardinality", () => {
+      const arrayFormik = {
+        ...formik,
+        values: {
+          Patient: {
+            name: [
+              {
+                family: "Doe",
+                given: ["John", "Johnny", "Jonathan"],
+              },
+            ],
+          },
+        },
+        getFieldProps: (label: string) => {
+          const match = label.match(/given\[(\d+)]/);
+          if (match) {
+            const index = parseInt(match[1]);
+            return {
+              value: ["John", "Johnny", "Jonathan"][index],
+              name: label,
+              onChange: jest.fn(),
+              onBlur: jest.fn(),
+            };
+          }
+        },
+      };
+
+      render(
+        <FormikProvider value={arrayFormik}>
+          <RequiredFieldsProvider
+            requiredFields={mockRequiredFields}
+            formInfo={mockFormInfo}
+          >
+            <TypeEditor
+              resource={null}
+              structureDefinition={{
+                id: "Patient.name.given",
+                path: "Patient.name.given",
+                min: 0,
+                max: "*",
+                type: [
+                  {
+                    code: "string",
+                  },
+                ],
+              }}
+              label="Patient.name[0].given"
+              canEdit={true}
+              parentStructureDefinition={null}
+            />
+          </RequiredFieldsProvider>
+        </FormikProvider>
+      );
+
+      // Check values
+      expect(
+        (
+          screen.getByTestId(
+            "string-field-input-Patient.name[0].given[0]"
+          ) as HTMLInputElement
+        ).value
+      ).toBe("John");
+      expect(
+        (
+          screen.getByTestId(
+            "string-field-input-Patient.name[0].given[1]"
+          ) as HTMLInputElement
+        ).value
+      ).toBe("Johnny");
+      expect(
+        (
+          screen.getByTestId(
+            "string-field-input-Patient.name[0].given[2]"
+          ) as HTMLInputElement
+        ).value
+      ).toBe("Jonathan");
+
+      // Add button should only appear on the last element
+      const addButtons = screen.getAllByText("Add Given");
+      expect(addButtons).toHaveLength(1);
+      // click the add button
+      fireEvent.click(addButtons[0]);
+
+      // Should call setFieldValue
+      expect(formik.setFieldValue).toHaveBeenCalled();
+    });
+
+    test("Should render DateTime components as array when multiple cardinality", () => {
+      const dateTimeArrayFormik = {
+        ...formik,
+        values: {
+          MedicationRequest: {
+            dosageInstruction: [
+              {
+                timing: {
+                  event: ["2024-01-01", "2024-02-01"],
+                },
+              },
+            ],
+          },
+        },
+        getFieldProps: (label) => {
+          const match = label.match(/event\[(\d+)]/);
+          if (match) {
+            const index = parseInt(match[1]);
+            return {
+              value: ["2024-01-01", "2024-02-01"][index],
+              name: label,
+              onChange: jest.fn(),
+              onBlur: jest.fn(),
+            };
+          }
+        },
+      };
+
+      render(
+        <FormikProvider value={dateTimeArrayFormik}>
+          <RequiredFieldsProvider
+            requiredFields={mockRequiredFields}
+            formInfo={mockFormInfo}
+          >
+            <TypeEditor
+              resource={null}
+              structureDefinition={{
+                id: "MedicationRequest.dosageInstruction.timing.event",
+                path: "MedicationRequest.dosageInstruction.timing.event",
+                min: 0,
+                max: "*",
+                type: [
+                  {
+                    code: "dateTime",
+                  },
+                ],
+              }}
+              label="MedicationRequest.dosageInstruction[0].timing.event"
+              canEdit={true}
+              parentStructureDefinition={null}
+            />
+          </RequiredFieldsProvider>
+        </FormikProvider>
+      );
+
+      // Should render 2 DateTime components
+      expect(
+        screen.getByTestId(
+          "YYYY-MM-DD-field-MedicationRequest.dosageInstruction[0].timing.event[0]"
+        )
+      ).toBeInTheDocument();
+      expect(
+        screen.getByTestId(
+          "YYYY-MM-DD-field-MedicationRequest.dosageInstruction[0].timing.event[1]"
+        )
+      ).toBeInTheDocument();
+    });
+
+    test("Should render Time components as array when multiple cardinality", () => {
+      const timeArrayFormik = {
+        ...formik,
+        values: {
+          MedicationRequest: {
+            dosageInstruction: [
+              {
+                timing: {
+                  timeOfDay: ["10:30:10", "11:30:10"],
+                },
+              },
+            ],
+          },
+        },
+        getFieldProps: (label) => {
+          const match = label.match(/timeOfDay\[(\d+)]/);
+          if (match) {
+            const index = parseInt(match[1]);
+            return {
+              value: ["10:30:10", "11:30:10"][index],
+              name: label,
+              onChange: jest.fn(),
+              onBlur: jest.fn(),
+            };
+          }
+        },
+      };
+
+      render(
+        <FormikProvider value={timeArrayFormik}>
+          <RequiredFieldsProvider
+            requiredFields={mockRequiredFields}
+            formInfo={mockFormInfo}
+          >
+            <TypeEditor
+              resource={null}
+              structureDefinition={{
+                id: "MedicationRequest.dosageInstruction.timing.timeOfDay",
+                path: "MedicationRequest.dosageInstruction.timing.timeOfDay",
+                min: 0,
+                max: "*",
+                type: [
+                  {
+                    code: "time",
+                  },
+                ],
+              }}
+              label="MedicationRequest.dosageInstruction[0].timing.timeOfDay"
+              canEdit={true}
+              parentStructureDefinition={null}
+            />
+          </RequiredFieldsProvider>
+        </FormikProvider>
+      );
+
+      expect(
+        screen.getByTestId(
+          "medication-request-dosage-instruction-0-timing-time-of-day-0"
+        )
+      ).toBeInTheDocument();
+      expect(
+        screen.getByTestId(
+          "medication-request-dosage-instruction-0-timing-time-of-day-1"
+        )
+      ).toBeInTheDocument();
+    });
+
+    test("Should render Code components as array when multiple cardinality", () => {
+      const codeArrayFormik = {
+        ...formik,
+        values: {
+          MedicationRequest: {
+            dosageInstruction: [
+              {
+                timing: {
+                  dayOfWeek: ["mon", "tue"],
+                },
+              },
+            ],
+          },
+        },
+        getFieldProps: (label) => {
+          const match = label.match(/dayOfWeek\[(\d+)]/);
+          if (match) {
+            const index = parseInt(match[1]);
+            return {
+              value: ["mon", "tue"][index],
+              name: label,
+              onChange: jest.fn(),
+              onBlur: jest.fn(),
+            };
+          }
+        },
+      };
+
+      render(
+        <FormikProvider value={codeArrayFormik}>
+          <RequiredFieldsProvider
+            requiredFields={mockRequiredFields}
+            formInfo={mockFormInfo}
+          >
+            <TypeEditor
+              resource={null}
+              structureDefinition={{
+                id: "MedicationRequest.dosageInstruction.timing.dayOfWeek",
+                path: "MedicationRequest.dosageInstruction.timing.dayOfWeek",
+                min: 0,
+                max: "*",
+                type: [
+                  {
+                    code: "code",
+                  },
+                ],
+              }}
+              label="MedicationRequest.dosageInstruction[0].timing.dayOfWeek"
+              canEdit={true}
+              parentStructureDefinition={null}
+            />
+          </RequiredFieldsProvider>
+        </FormikProvider>
+      );
+
+      // Should render 2 Code components
+      const codeInput1 = screen.getByTestId(
+        "code-selector-input-MedicationRequest.dosageInstruction[0].timing.dayOfWeek[0]"
+      ) as HTMLInputElement;
+      expect(codeInput1.value).toEqual("mon");
+      const codeInput2 = screen.getByTestId(
+        "code-selector-input-MedicationRequest.dosageInstruction[0].timing.dayOfWeek[1]"
+      ) as HTMLInputElement;
+      expect(codeInput2.value).toEqual("tue");
+    });
+
+    test("Should not show add button for root level elements", () => {
+      const rootFormik = {
+        ...mockFormik,
+        values: {
+          ClaimResponse: {
+            id: ["id1", "id2"],
+          },
+        },
+        getFieldProps: (label) => {
+          if (label.includes("[")) {
+            return {
+              value: label.includes("[0]") ? "id1" : "id2",
+              name: label,
+              onChange: jest.fn(),
+              onBlur: jest.fn(),
+            };
+          }
+          return {
+            value: ["id1", "id2"],
+            name: label,
+            onChange: jest.fn(),
+            onBlur: jest.fn(),
+          };
+        },
+      };
+
+      render(
+        <FormikProvider value={rootFormik}>
+          <RequiredFieldsProvider
+            requiredFields={mockRequiredFields}
+            formInfo={mockFormInfo}
+          >
+            <TypeEditor
+              resource={null}
+              structureDefinition={{
+                id: "ClaimResponse.id",
+                path: "ClaimResponse.id",
+                min: 0,
+                max: "*",
+                type: [
+                  {
+                    code: "string",
+                  },
+                ],
+              }}
+              label="ClaimResponse.id"
+              canEdit={true}
+              parentStructureDefinition={null}
+            />
+          </RequiredFieldsProvider>
+        </FormikProvider>
+      );
+
+      // Should not show add button for root level elements (id is root level)
+      const addButtons = screen.queryAllByText("Id");
+      expect(addButtons).toHaveLength(0);
+    });
   });
 });

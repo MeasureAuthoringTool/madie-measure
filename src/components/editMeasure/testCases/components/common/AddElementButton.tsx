@@ -2,7 +2,12 @@ import React from "react";
 import { IconButton } from "@mui/material";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 
-const AddElementButton = ({ name, ...props }) => {
+interface PropTypes {
+  name: string;
+  onClick?: () => void;
+}
+
+const AddElementButton = ({ name, onClick }: PropTypes) => {
   return (
     <div
       className="element-add-container"
@@ -22,6 +27,7 @@ const AddElementButton = ({ name, ...props }) => {
           color: "#3171C2",
         }}
         data-testid={`add-element-${name}`}
+        onClick={onClick}
       >
         <AddCircleOutlineIcon sx={{ marginRight: 1 }} />
         <span>Add {name}</span>

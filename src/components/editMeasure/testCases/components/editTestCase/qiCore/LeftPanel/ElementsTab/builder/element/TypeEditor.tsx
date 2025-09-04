@@ -66,10 +66,11 @@ const TypeEditor = ({
   if (!type) {
     type = structureDefinition?.type?.[0]?.code;
   }
+  const values = _.get(formik.values, label);
   // is multiple cardinality?
   if (structureDefinition?.max === "*") {
     // is it not already terminated with an index?
-    if (!getIndexFromPath(label)) {
+    if (!getIndexFromPath(label) && !values) {
       // we are just going to add a zero for now. could be smarter later
       // TO DO: We will eventually need to map inner elements of multiple cardinality based on how many elements are in the form
       // something like Array.From(numOfElementsInForm, _index) =>) had a previous rendition of this guy working in 8500 pr commits
@@ -130,6 +131,14 @@ const TypeEditor = ({
     fetchProfiles();
   }, [structureDefinition?.type?.[0], label, fhirDefinitionsService]);
 
+  // add new default value to existing value array
+  const handleAddElement = () => {
+    formik.setFieldValue(structureDefinition.id, [
+      ..._.get(formik.values, structureDefinition.id, [""]),
+      "",
+    ]);
+  };
+
   const formikErrorHandler = (name: string) => {
     const touched = getNestedProperty(formik.touched, name);
     const errors = getNestedProperty(formik.errors, name);
@@ -150,17 +159,38 @@ const TypeEditor = ({
       case "http://hl7.org/fhirpath/System.String":
         return (
           <Box sx={{ display: "flex", flexDirection: "column", width: "100%" }}>
-            <StringComponent
-              stringOnly={label?.split(".").pop() === "id" ? false : true}
-              label={label}
-              canEdit={canEdit}
-              helperText={formikErrorHandler(label)}
-              error={getNestedProperty(formik.errors, label)}
-              fieldRequired={required}
-              showAddAttributeButton={showAddAttributeButton}
-              addTitle={addTitle}
-              {...formik.getFieldProps(label)}
-            />
+            {showAddAttributeButton && values ? (
+              values.map((el, index) => (
+                <StringComponent
+                  key={index}
+                  stringOnly={label?.split(".").pop() !== "id"}
+                  label={`${label}[${index}]`}
+                  canEdit={canEdit}
+                  helperText={formikErrorHandler(`${label}[${index}]`)}
+                  error={getNestedProperty(formik.errors, `${label}[${index}]`)}
+                  fieldRequired={required}
+                  showAddAttributeButton={
+                    showAddAttributeButton && index === values.length - 1
+                  }
+                  addTitle={addTitle}
+                  handleAddElement={handleAddElement}
+                  {...formik.getFieldProps(`${label}[${index}]`)}
+                />
+              ))
+            ) : (
+              <StringComponent
+                stringOnly={label?.split(".").pop() !== "id"}
+                label={label}
+                canEdit={canEdit}
+                helperText={formikErrorHandler(label)}
+                error={getNestedProperty(formik.errors, label)}
+                fieldRequired={required}
+                showAddAttributeButton={showAddAttributeButton}
+                addTitle={addTitle}
+                handleAddElement={handleAddElement}
+                {...formik.getFieldProps(label)}
+              />
+            )}
           </Box>
         );
       case "base64Binary":
@@ -223,38 +253,96 @@ const TypeEditor = ({
       case "dateTime":
       case "http://hl7.org/fhirpath/System.DateTime":
         return (
-          <DateTimeComponent
-            label={label}
-            canEdit={canEdit}
-            helperText={formikErrorHandler(label)}
-            error={getNestedProperty(formik.errors, label)}
-            fieldRequired={required}
-            showAddAttributeButton={showAddAttributeButton}
-            addTitle={addTitle}
-            {...formik.getFieldProps(label)}
-            onChange={(value) => {
-              formik.setFieldTouched(label);
-              formik.setFieldValue(label, value);
-            }}
-            setTouched={() => {
-              formik.setFieldTouched(label);
-            }}
-          />
+          <>
+            {showAddAttributeButton && values ? (
+              values.map((el, index) => (
+                <DateTimeComponent
+                  key={index}
+                  label={`${label}[${index}]`}
+                  canEdit={canEdit}
+                  helperText={formikErrorHandler(`${label}[${index}]`)}
+                  error={getNestedProperty(formik.errors, `${label}[${index}]`)}
+                  fieldRequired={required}
+                  showAddAttributeButton={
+                    showAddAttributeButton && index === values.length - 1
+                  }
+                  addTitle={addTitle}
+                  handleAddElement={handleAddElement}
+                  {...formik.getFieldProps(`${label}[${index}]`)}
+                  onChange={(value) => {
+                    formik.setFieldTouched(`${label}[${index}]`);
+                    formik.setFieldValue(`${label}[${index}]`, value);
+                  }}
+                  setTouched={() => {
+                    formik.setFieldTouched(`${label}[${index}]`);
+                  }}
+                />
+              ))
+            ) : (
+              <DateTimeComponent
+                label={label}
+                canEdit={canEdit}
+                helperText={formikErrorHandler(label)}
+                error={getNestedProperty(formik.errors, label)}
+                fieldRequired={required}
+                showAddAttributeButton={showAddAttributeButton}
+                addTitle={addTitle}
+                handleAddElement={handleAddElement}
+                {...formik.getFieldProps(label)}
+                onChange={(value) => {
+                  formik.setFieldTouched(label);
+                  formik.setFieldValue(label, value);
+                }}
+                setTouched={() => {
+                  formik.setFieldTouched(label);
+                }}
+              />
+            )}
+          </>
         );
       // I think this is functionally unreachable code. Cant find any evidence of fhir element type = time
       case "time":
       case "http://hl7.org/fhir/R4/datatypes.html#time":
         return (
-          <TimeComponent
-            canEdit={canEdit}
-            fieldRequired={required}
-            label={label}
-            helperText={formikErrorHandler(label)}
-            error={getNestedProperty(formik.errors, label)}
-            showAddAttributeButton={showAddAttributeButton}
-            addTitle={addTitle}
-            {...formik.getFieldProps(label)}
-          />
+          <>
+            {showAddAttributeButton && values ? (
+              values.map((el, index) => (
+                <TimeComponent
+                  canEdit={canEdit}
+                  fieldRequired={required}
+                  label={`${label}[${index}]`}
+                  helperText={formikErrorHandler(`${label}[${index}]`)}
+                  error={getNestedProperty(formik.errors, `${label}[${index}]`)}
+                  showAddAttributeButton={
+                    showAddAttributeButton && index === values.length - 1
+                  }
+                  addTitle={addTitle}
+                  handleAddElement={handleAddElement}
+                  {...formik.getFieldProps(`${label}[${index}]`)}
+                  onChange={(value) => {
+                    formik.setFieldTouched(`${label}[${index}]`);
+                    formik.setFieldValue(`${label}[${index}]`, value);
+                  }}
+                />
+              ))
+            ) : (
+              <TimeComponent
+                canEdit={canEdit}
+                fieldRequired={required}
+                label={label}
+                helperText={formikErrorHandler(label)}
+                error={getNestedProperty(formik.errors, label)}
+                showAddAttributeButton={showAddAttributeButton}
+                addTitle={addTitle}
+                handleAddElement={handleAddElement}
+                {...formik.getFieldProps(label)}
+                onChange={(value) => {
+                  formik.setFieldTouched(label);
+                  formik.setFieldValue(label, value);
+                }}
+              />
+            )}
+          </>
         );
       case "instant":
       case "http://hl7.org/fhir/R4/datatypes.html#instant":
@@ -381,23 +469,48 @@ const TypeEditor = ({
 
       case "code":
         return (
-          <CodesComponent
-            canEdit={canEdit}
-            fieldRequired={required}
-            label={label}
-            resource={resource}
-            structureDefinition={structureDefinition}
-            showAddAttributeButton={showAddAttributeButton}
-            addTitle={addTitle}
-            {...formik.getFieldProps(label)}
-            onChange={(value) => {
-              if (label.includes(".value[x")) {
-                label = label.replace(".value[x]", ".valueCode");
-              }
-              formik.setFieldTouched(label);
-              formik.setFieldValue(label, value);
-            }}
-          />
+          <>
+            {showAddAttributeButton && values ? (
+              values.map((el, index) => (
+                <CodesComponent
+                  canEdit={canEdit}
+                  fieldRequired={required}
+                  label={`${label}[${index}]`}
+                  resource={resource}
+                  structureDefinition={structureDefinition}
+                  showAddAttributeButton={
+                    showAddAttributeButton && index === values.length - 1
+                  }
+                  addTitle={addTitle}
+                  handleAddElement={handleAddElement}
+                  {...formik.getFieldProps(`${label}[${index}]`)}
+                  onChange={(value) => {
+                    formik.setFieldTouched(`${label}[${index}]`);
+                    formik.setFieldValue(`${label}[${index}]`, value);
+                  }}
+                />
+              ))
+            ) : (
+              <CodesComponent
+                canEdit={canEdit}
+                fieldRequired={required}
+                label={label}
+                resource={resource}
+                structureDefinition={structureDefinition}
+                showAddAttributeButton={showAddAttributeButton}
+                addTitle={addTitle}
+                handleAddElement={handleAddElement}
+                {...formik.getFieldProps(label)}
+                onChange={(value) => {
+                  if (label.includes(".value[x")) {
+                    label = label.replace(".value[x]", ".valueCode");
+                  }
+                  formik.setFieldTouched(label);
+                  formik.setFieldValue(label, value);
+                }}
+              />
+            )}
+          </>
         );
       case "Range":
         return (
