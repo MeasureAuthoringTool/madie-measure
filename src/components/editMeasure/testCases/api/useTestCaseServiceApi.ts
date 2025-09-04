@@ -443,6 +443,43 @@ export class TestCaseServiceApi {
       throw new Error(error);
     }
   }
+
+  async lockAllTestCases(
+    measureId: string,
+    testCaseIds: string[]
+  ): Promise<any> {
+    try {
+      const response = await axios.post<String[]>(
+        `${this.baseUrl}/measures/${measureId}/test-cases/lockAll`,
+        testCaseIds,
+        {
+          headers: {
+            Authorization: `Bearer ${this.getAccessToken()}`,
+          },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      throw new Error(error);
+    }
+  }
+
+  async unlockAllTestCases(testCaseIds: string[]): Promise<any> {
+    try {
+      const response = await axios.delete<String[]>(
+        `${this.baseUrl}/test-cases/unlockAll`,
+        {
+          data: [...testCaseIds],
+          headers: {
+            Authorization: `Bearer ${this.getAccessToken()}`,
+          },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      throw new Error(error);
+    }
+  }
 }
 
 const useTestCaseServiceApi = (): TestCaseServiceApi => {

@@ -508,4 +508,60 @@ describe("TestCaseServiceApi Tests", () => {
       expect(err).not.toBeNull();
     }
   });
+
+  it("should lockAllTestCases successfully", async () => {
+    axios.post = jest.fn().mockResolvedValueOnce({ data: true });
+
+    const result = await testCaseService.lockAllTestCases("testMeasureId", [
+      "testCaseId",
+    ]);
+    expect(axios.post).toBeCalledTimes(1);
+    expect(result).toBe(true);
+  });
+
+  it("should handle lockAllTestCases failure", async () => {
+    const response = {
+      status: 400,
+      error: "Bad Request",
+      message: "Error",
+    };
+
+    axios.post = jest.fn().mockRejectedValueOnce({ error: response });
+
+    try {
+      const result = await testCaseService.lockAllTestCases("testMeasureId", [
+        "testCaseId",
+      ]);
+      expect(axios.post).toBeCalledTimes(1);
+      expect(result).not.toBe(response);
+    } catch (err) {
+      expect(err).not.toBeNull();
+    }
+  });
+
+  it("should unlockAllTestCases successfully", async () => {
+    axios.delete = jest.fn().mockResolvedValueOnce({ data: true });
+
+    const result = await testCaseService.unlockAllTestCases(["testCaseId"]);
+    expect(axios.delete).toBeCalledTimes(1);
+    expect(result).toBe(true);
+  });
+
+  it("should handle unlockAllTestCases failure", async () => {
+    const response = {
+      status: 400,
+      error: "Bad Request",
+      message: "Error",
+    };
+
+    axios.delete = jest.fn().mockRejectedValueOnce({ error: response });
+
+    try {
+      const result = await testCaseService.unlockAllTestCases(["testCaseId"]);
+      expect(axios.delete).toBeCalledTimes(1);
+      expect(result).not.toBe(response);
+    } catch (err) {
+      expect(err).not.toBeNull();
+    }
+  });
 });

@@ -11,6 +11,7 @@ import {
   measureStore,
   checkUserCanEdit,
   routeHandlerStore,
+  useFeatureFlags,
 } from "@madie/madie-util";
 import "../testCaseConfiguration.scss";
 import { Typography } from "@mui/material";
@@ -30,6 +31,7 @@ const TestCaseData = (props: TestCaseListProps) => {
   const testCaseService = useRef(useTestCaseServiceApi());
   const [executing, setExecuting] = useState<boolean>(false);
   const { setWarnings } = props;
+  const featureFlags = useFeatureFlags();
 
   useEffect(() => {
     const subscription = measureStore.subscribe(setMeasure);
@@ -78,7 +80,17 @@ const TestCaseData = (props: TestCaseListProps) => {
     setToastOpen(open);
   };
 
-  const handleSubmit = async (values) => {
+  const unlockAllTestCases = () => {
+    const testCaseIds = measure.testCases.map((testCase) => testCase.id);
+    testCaseService.current
+      .unlockAllTestCases(testCaseIds)
+      .then((successResponse) => {})
+      .catch((err) => {
+        setWarnings((prevState) => [...prevState, err]);
+      });
+  };
+
+  const shiftDates = () => {
     //TODO. could we make the APIs return the same structure so we don't need two separate error handlers?
     // sure Greg ...  Tech Debt MAT-8377
     //  OTOH, I think there is ticket for just getting rid of the TestCaseData testShiftCase https://jira.cms.gov/browse/MAT-8379
@@ -119,7 +131,6 @@ const TestCaseData = (props: TestCaseListProps) => {
               `All Test Case dates successfully shifted.`,
               true
             );
-            // setExecuting(false);
           }
         })
         .catch((err) => {
@@ -129,6 +140,36 @@ const TestCaseData = (props: TestCaseListProps) => {
           setExecuting(false);
         });
     }
+  };
+
+  const handleSubmit = async (values) => {
+    if (featureFlags?.Locking) {
+      const testCaseIds = measure.testCases.map((testCase) => testCase.id);
+      //locking all test cases before shifting dates
+      testCaseService.current
+        .lockAllTestCases(measure.id, testCaseIds)
+        .then((successResponse) => {
+          if (!successResponse) {
+            handleToast(
+              "danger",
+              `One or more of the Test Cases are locked by another user. Test Case Dates cannot be shifted.`,
+              true
+            );
+          } else {
+            shiftDates();
+            unlockAllTestCases();
+          }
+        })
+        .catch((err) => {
+          setWarnings((prevState) => [...prevState, err]);
+        })
+        .finally(() => {
+          setExecuting(false);
+        });
+    } else {
+      shiftDates();
+    }
+
     formik.resetForm();
   };
 

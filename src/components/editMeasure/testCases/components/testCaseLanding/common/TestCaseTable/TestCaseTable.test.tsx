@@ -211,6 +211,9 @@ jest.mock("@madie/madie-util", () => ({
     EditTestsOnVersionedMeasures: false,
   })),
   checkUserCanEdit: jest.fn().mockImplementation(() => true),
+  useOktaTokens: () => ({
+    getAccessToken: () => "test.jwt",
+  }),
 }));
 
 const mockPush = jest.fn();
@@ -247,6 +250,7 @@ const renderWithTestCase = (
         selectedTestCases={selectedTestCases}
         deleteDialogModalOpen={deleteDialogModalOpen}
         setDeleteDialogModalOpen={setDeleteDialogModalOpen}
+        setWarnings={jest.fn()}
       />
     </MemoryRouter>
   );
