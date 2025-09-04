@@ -931,7 +931,7 @@ describe("EditTestCase QDM Component", () => {
   it("RightPanel navigation works as expected.", async () => {
     renderEditTestCaseComponent();
     const highlighting = await findByText("Highlighting");
-    const measureCql = await findByText("Measure CQL (View Only)");
+    const measureCql = await findByText("CQL");
     const expectedActual = await findByText("Expected / Actual");
     const details = await findByText("Details");
 
