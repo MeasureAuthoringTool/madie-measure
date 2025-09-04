@@ -646,7 +646,7 @@ export class MeasureServiceApi {
     }
   }
 
-  async getMeasureCounts(): Promise<any> {
+  async getMeasureCounts(signal?: AbortSignal): Promise<any> {
     try {
       const response = await axios.get<String>(
         `${this.baseUrl}/measures/count`,
@@ -654,10 +654,14 @@ export class MeasureServiceApi {
           headers: {
             Authorization: `Bearer ${this.getAccessToken()}`,
           },
+          signal,
         }
       );
       return response.data;
     } catch (error) {
+      if (error.message === "canceled") {
+        throw new Error(error.message);
+      }
       const message = `Unable to get measure counts`;
       console.error(message, error);
       throw error;
