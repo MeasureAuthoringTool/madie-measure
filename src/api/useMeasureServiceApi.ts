@@ -13,6 +13,7 @@ import { useOktaTokens } from "@madie/madie-util";
 import _ from "lodash";
 import { MeasureSearchCriteria } from "../components/measureLanding/MeasureLanding";
 import qs from "qs";
+import { MeasureHistoryActions } from "../components/common/viewMeasureHistoryDialog/ViewMeasureHistoryDialog";
 
 export class MeasureServiceApi {
   constructor(private baseUrl: string, private getAccessToken: () => string) {}
@@ -694,6 +695,26 @@ export class MeasureServiceApi {
       return response.data;
     } catch (error) {
       throw new Error(error);
+    }
+  }
+
+  async getMeasureHistoryLogs(
+    measureId: String
+  ): Promise<MeasureHistoryActions[]> {
+    try {
+      const result = await axios.get(
+        `${this.baseUrl}/measures/measure-history/${measureId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${this.getAccessToken()}`,
+          },
+        }
+      );
+      return result.data;
+    } catch (err) {
+      const message = `Unable to retrieve Measure History Logs`;
+      console.warn(message);
+      throw err;
     }
   }
 }
