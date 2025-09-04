@@ -4,7 +4,7 @@ import StatusHandler, { transformAnnotation } from "./StatusHandler";
 import { MadieAlert } from "@madie/madie-design-system/dist/react";
 
 jest.mock("@madie/madie-design-system/dist/react", () => ({
-  MadieAlert: jest.fn(({ alerts, minimizeAlerts }) => {
+  MadieAlert: jest.fn(({ alerts }) => {
     return (
       <div data-testid="madie-alert-mock">
         {alerts.map((alert, index) => {
@@ -93,23 +93,19 @@ jest.mock("@madie/madie-design-system/dist/react", () => ({
             </div>
           );
         })}
-        <div data-testid="minimize-flag">
-          {minimizeAlerts ? "true" : "false"}
-        </div>
       </div>
     );
   }),
 }));
 
-const mockUseFeatureFlags = jest.fn();
 jest.mock("@madie/madie-util", () => ({
-  useFeatureFlags: () => mockUseFeatureFlags(),
+  // feature flags removed for minimizeAlerts; returning empty object for compatibility
+  useFeatureFlags: () => ({}),
 }));
 
 describe("StatusHandler Component", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseFeatureFlags.mockReturnValue({ MinimizeAlerts: false });
     (MadieAlert as jest.Mock).mockClear();
   });
 
@@ -156,7 +152,6 @@ describe("StatusHandler Component", () => {
             canClose: false,
           }),
         ]),
-        minimizeAlerts: true,
       }),
       expect.anything()
     );
@@ -415,28 +410,6 @@ describe("StatusHandler Component", () => {
             type: "error",
           }),
         ]),
-      }),
-      expect.anything()
-    );
-  });
-
-  it("Should use feature flag to set minimizeAlerts prop", () => {
-    mockUseFeatureFlags.mockReturnValue({ MinimizeAlerts: true });
-
-    render(
-      <StatusHandler
-        success={success}
-        error={false}
-        errorMessage=""
-        outboundAnnotations={annotationsObject}
-        hasSubTitle={false}
-      />
-    );
-
-    expect(screen.getByTestId("minimize-flag")).toHaveTextContent("true");
-    expect(MadieAlert).toHaveBeenCalledWith(
-      expect.objectContaining({
-        minimizeAlerts: true,
       }),
       expect.anything()
     );
