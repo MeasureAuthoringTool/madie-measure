@@ -1326,7 +1326,7 @@ describe("TestCaseList component", () => {
   it("should display import test case button", async () => {
     renderTestCaseListComponent();
     const importButton = await screen.findByRole("button", {
-      name: /MADiE Import/i,
+      name: /Import/i,
     });
     expect(importButton).toBeInTheDocument();
     expect(importButton).toBeEnabled();
@@ -1374,7 +1374,7 @@ describe("TestCaseList component", () => {
     renderTestCaseListComponent();
     // on test case list page
     const importTestCasesButton = await screen.findByRole("button", {
-      name: /MADiE Import/i,
+      name: /Import/i,
     });
     expect(importTestCasesButton).toBeInTheDocument();
     expect(importTestCasesButton).toBeEnabled();
@@ -1416,7 +1416,7 @@ describe("TestCaseList component", () => {
     renderTestCaseListComponent();
     // on test case list page
     const importTestCasesButton = await screen.findByRole("button", {
-      name: /MADiE Import/i,
+      name: /Import/i,
     });
     expect(importTestCasesButton).toBeInTheDocument();
     expect(importTestCasesButton).toBeEnabled();
@@ -1472,7 +1472,7 @@ describe("TestCaseList component", () => {
     renderTestCaseListComponent();
     // on test case list page
     const importTestCasesButton = await screen.findByRole("button", {
-      name: /MADiE Import/i,
+      name: /Import/i,
     });
     expect(importTestCasesButton).toBeInTheDocument();
     expect(importTestCasesButton).toBeEnabled();
