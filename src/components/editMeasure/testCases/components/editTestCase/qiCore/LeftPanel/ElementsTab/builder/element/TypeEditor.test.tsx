@@ -1964,12 +1964,28 @@ describe("TypeEditor Component", () => {
         }}
       >
         <FormikProvider value={mockFormik}>
-          <MoneyComponent
-            label="Claim.total"
-            canEdit={true}
-            resource={claimResource}
-            fieldRequired={false}
-          />
+          <RequiredFieldsProvider
+            requiredFields={mockRequiredFields}
+            formInfo={mockFormInfo}
+          >
+            <TypeEditor
+              resource={null}
+              structureDefinition={{
+                id: "Claim.total",
+                path: "Claim.total",
+                min: 0,
+                max: "1",
+                type: [
+                  {
+                    code: "Money",
+                  },
+                ],
+              }}
+              label="Claim.total"
+              canEdit={true}
+              parentStructureDefinition={null}
+            />
+          </RequiredFieldsProvider>
         </FormikProvider>
       </ExecutionContextProvider>
     );
