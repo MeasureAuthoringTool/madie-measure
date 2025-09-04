@@ -116,7 +116,7 @@ describe("TestCaseRoutes", () => {
   });
 
   it("should render the landing component first", async () => {
-  (mockedAxios.get as any).mockImplementation((args: string) => {
+    (mockedAxios.get as any).mockImplementation((args: string) => {
       return Promise.resolve({
         data: [
           {
@@ -157,7 +157,7 @@ describe("TestCaseRoutes", () => {
     mockMeasure.errors = [
       MeasureErrorType.MISMATCH_CQL_POPULATION_RETURN_TYPES,
     ];
-  (mockedAxios.get as any).mockImplementation((args: string) => {
+    (mockedAxios.get as any).mockImplementation((args: string) => {
       return Promise.resolve({
         data: [
           {
@@ -194,7 +194,7 @@ describe("TestCaseRoutes", () => {
   });
 
   it("should allow navigation to create test case dialog from landing page ", async () => {
-  (mockedAxios.get as any).mockImplementation((args: string) => {
+    (mockedAxios.get as any).mockImplementation((args: string) => {
       if (args && args.endsWith("series")) {
         return Promise.resolve({ data: ["SeriesA"] });
       } else if (

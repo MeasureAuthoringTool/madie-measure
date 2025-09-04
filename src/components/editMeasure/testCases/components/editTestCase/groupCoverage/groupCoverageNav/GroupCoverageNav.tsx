@@ -33,7 +33,6 @@ const GroupCoverageNav = ({
   includeSDE,
   model,
 }: Props) => {
-
   return (
     <>
       <Tabs
@@ -70,18 +69,18 @@ const GroupCoverageNav = ({
             }}
           />
         )}
-          <Tab
-            type="C"
-            label="RAV"
-            key="RAV"
-            value="RAV"
-            aria-label="RAV-tab"
-            orientation="vertical"
-            data-testid="rav-tab"
-            onClick={() => {
-              onClick({ name: "RAV", id: "RAV" });
-            }}
-          />
+        <Tab
+          type="C"
+          label="RAV"
+          key="RAV"
+          value="RAV"
+          aria-label="RAV-tab"
+          orientation="vertical"
+          data-testid="rav-tab"
+          onClick={() => {
+            onClick({ name: "RAV", id: "RAV" });
+          }}
+        />
       </Tabs>
       <Tabs
         type="C"

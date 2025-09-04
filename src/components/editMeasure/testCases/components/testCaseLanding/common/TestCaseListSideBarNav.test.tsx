@@ -105,17 +105,17 @@ describe("TestCase component", () => {
         <TestCaseListSideBarNav {...defaultProps} qdm={true} />
       </MemoryRouter>
     );
-  // RAV tab appears once in each Tabs group; ensure at least one present
-  const ravTabsQdm = screen.getAllByRole("tab", { name: "RAV" });
-  expect(ravTabsQdm.length).toBeGreaterThan(0);
+    // RAV tab appears once in each Tabs group; ensure at least one present
+    const ravTabsQdm = screen.getAllByRole("tab", { name: "RAV" });
+    expect(ravTabsQdm.length).toBeGreaterThan(0);
 
     render(
       <MemoryRouter>
         <TestCaseListSideBarNav {...defaultProps} qdm={false} />
       </MemoryRouter>
     );
-  const ravTabsQiCore = screen.getAllByRole("tab", { name: "RAV" });
-  expect(ravTabsQiCore.length).toBeGreaterThan(0);
+    const ravTabsQiCore = screen.getAllByRole("tab", { name: "RAV" });
+    expect(ravTabsQiCore.length).toBeGreaterThan(0);
   });
 
   it("should render Expansion tab for QI Core measures", async () => {

@@ -260,7 +260,9 @@ const TestCaseRoutes = () => {
               <TestCaseLandingWrapper
                 qdm
                 children={
-                  <RAVPage setExecutionContextReady={setExecutionContextReady} />
+                  <RAVPage
+                    setExecutionContextReady={setExecutionContextReady}
+                  />
                 }
               />
             }
