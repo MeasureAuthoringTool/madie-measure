@@ -21,6 +21,7 @@ import mockRequiredFields from "./mockRequiredFields";
 import mockFormInfo from "./mockFormInfo";
 import { ExecutionContextProvider } from "../../../../../../routes/qiCore/ExecutionContext";
 import IdentifierComponent from "./types/IdentifierComponent";
+import MoneyComponent from "./types/MoneyComponent";
 const getNestedProperty = (obj, path) => {
   return path.split(".").reduce((current, key) => current && current[key], obj);
 };
@@ -1895,5 +1896,113 @@ describe("TypeEditor Component", () => {
 
     expect(screen.getByText("Low")).toBeInTheDocument();
     expect(screen.getByText("High")).toBeInTheDocument();
+  });
+
+  test("updates Formik when MoneyComponent value or currency changes", async () => {
+    useFhirDefinitionsServiceApiMock.mockImplementation(
+      () =>
+        ({
+          getValueSetDefinition: jest.fn().mockResolvedValue({
+            resourceType: "ValueSet",
+            url: "http://hl7.org/fhir/ValueSet/currencies",
+            expansion: {
+              contains: [
+                {
+                  system: "urn:iso:std:iso:4217",
+                  code: "CAD",
+                  display: "Canadian dollar",
+                },
+                {
+                  system: "urn:iso:std:iso:4217",
+                  code: "USD",
+                  display: "United States dollar",
+                },
+                {
+                  system: "urn:iso:std:iso:4217",
+                  code: "USN",
+                  display: "United States dollar (next day) (funds code)",
+                },
+              ],
+            },
+          }),
+        } as unknown as FhirDefinitionsServiceApi)
+    );
+
+    const claimResource = {
+      id: "1",
+      resourceType: "Claim",
+      total: { value: 100, currency: "USD" },
+    };
+
+    const mockFormik: FormikContextType<any> = {
+      values: { Claim: claimResource },
+      touched: {},
+      getFieldProps: (label) => {
+        const value = getNestedProperty(mockFormik.values, label);
+        return {
+          value,
+          name: label,
+          onChange: jest.fn(),
+          onBlur: jest.fn(),
+        };
+      },
+      handleChange: () => {},
+      setFieldValue: jest.fn(),
+      setFieldTouched: jest.fn(),
+    };
+
+    render(
+      <ExecutionContextProvider
+        value={{
+          measureState: [null, jest.fn()],
+          bundleState: [null, jest.fn()],
+          valueSetsState: [[], jest.fn()],
+          executionContextReady: true,
+          executing: false,
+          setExecuting: jest.fn(),
+          contextFailure: false,
+        }}
+      >
+        <FormikProvider value={mockFormik}>
+          <MoneyComponent
+            label="Claim.total"
+            canEdit={true}
+            resource={claimResource}
+            fieldRequired={false}
+          />
+        </FormikProvider>
+      </ExecutionContextProvider>
+    );
+
+    const valueInput = (await screen.findByTestId(
+      "decimal-input-field-Value"
+    )) as HTMLInputElement;
+    expect(valueInput).toBeInTheDocument();
+    expect(valueInput.value).toBe("100");
+
+    await userEvent.clear(valueInput);
+    await userEvent.type(valueInput, "250");
+    expect(mockFormik.setFieldValue).toHaveBeenCalledWith(
+      "Claim.total.value",
+      250
+    );
+
+    const currencySelect = await screen.findByLabelText("Currency");
+    expect(currencySelect).toBeInTheDocument();
+    expect(currencySelect).toHaveTextContent("United States dollar");
+
+    userEvent.click(currencySelect);
+    const cadOption = await screen.findByRole("option", {
+      name: "Canadian dollar",
+    });
+    userEvent.click(cadOption);
+
+    expect(mockFormik.setFieldValue).toHaveBeenCalledWith(
+      "Claim.total.currency",
+      "CAD"
+    );
+    await waitFor(() => {
+      expect(currencySelect).toHaveTextContent("Canadian dollar");
+    });
   });
 });

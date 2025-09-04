@@ -9,6 +9,7 @@ export interface DecimalProps {
   handleChange: Function;
   canEdit: boolean;
   label?: string;
+  containerStyle?: React.CSSProperties;
 }
 
 const DecimalInput = ({
@@ -16,10 +17,11 @@ const DecimalInput = ({
   handleChange,
   canEdit,
   label = "Decimal",
+  containerStyle,
 }: DecimalProps) => {
   return (
     <div tw="flex flex-row">
-      <div tw="w-28">
+      <div tw="w-28" style={containerStyle}>
         <TextField
           value={value}
           readOnly={!canEdit}
