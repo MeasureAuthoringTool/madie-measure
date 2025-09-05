@@ -991,13 +991,6 @@ const EditTestCase = (props: EditTestCaseProps) => {
                         isQICore6={isQICore6}
                         dirty={formikStu6Context.dirty}
                       />
-                      <div tw="ml-auto mr-8 flex">
-                        {featureFlags?.Calculator && (
-                          <EditorCalculator
-                            onClick={() => setCalculationDialogOpen(true)}
-                          />
-                        )}
-                      </div>
                     </div>
                     <QiCoreResourceProvider>
                       {leftPanelActiveTab === "elements" &&
