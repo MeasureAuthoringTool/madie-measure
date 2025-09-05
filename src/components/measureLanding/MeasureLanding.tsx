@@ -144,7 +144,7 @@ export default function MeasureLanding() {
 
   const setMeasureCounts = useCallback(() => {
     measureServiceApi
-      .getMeasureCounts(abortController.current?.signal)
+      .getMeasureCounts()
       .then((data) => {
         setOwnedMeasuresCount(data.ownedMeasures);
         setSharedMeasuresCount(data.sharedMeasures);
