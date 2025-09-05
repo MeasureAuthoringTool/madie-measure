@@ -8,19 +8,29 @@ import "./CreateTestCaseNavTabs.scss";
 import "twin.macro";
 import "styled-components/macro";
 import EditorSearch from "../editTestCase/qiCore/LeftPanel/EditorSearch";
+import EditorCalculator from "../editTestCase/calculator/EditorCalculator";
+import { useFeatureFlags } from "@madie/madie-util";
 
 export interface NavTabProps {
   leftPanelActiveTab: string;
   setLeftPanelActiveTab: (value: string) => void;
   isQICore6: boolean;
   dirty: boolean;
+  setCalculationDialogOpen: any;
 }
 export default function CreateTestCaseNavTabs(props: NavTabProps) {
-  const { leftPanelActiveTab, setLeftPanelActiveTab, dirty } = props;
+  const {
+    leftPanelActiveTab,
+    setLeftPanelActiveTab,
+    dirty,
+    setCalculationDialogOpen,
+  } = props;
+  const featureFlags = useFeatureFlags();
   const [pendingPanel, setPendingPanel] = useState(leftPanelActiveTab);
 
   const isQICore6 = props.isQICore6;
   const [discardDialogOpen, setDiscardDialogOpen] = useState(false);
+
   const onContinue = () => {
     setLeftPanelActiveTab(pendingPanel);
     setDiscardDialogOpen(false);
@@ -61,7 +71,12 @@ export default function CreateTestCaseNavTabs(props: NavTabProps) {
               />
             </Tabs>
           </div>
-          <div tw="mr-auto p-2">
+          <div tw="ml-auto mr-8 flex">
+            {featureFlags?.Calculator && (
+              <EditorCalculator
+                onClick={() => setCalculationDialogOpen(true)}
+              />
+            )}
             {leftPanelActiveTab === "json" && <EditorSearch />}
           </div>
           {isQICore6 && (
