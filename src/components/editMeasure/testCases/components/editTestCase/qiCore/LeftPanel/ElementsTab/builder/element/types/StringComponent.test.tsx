@@ -110,4 +110,34 @@ describe("StringComponent", () => {
     expect(stringFieldInput).toBeInTheDocument();
     expect(stringFieldInput).toHaveAttribute("readOnly");
   });
+
+  test("AddButton works", () => {
+    const handleChange = jest.fn();
+    const handleAddElement = jest.fn();
+    render(
+      <StringComponent
+        value="This is a string component"
+        canEdit={true}
+        label="AdverseEvent.id"
+        fieldRequired={false}
+        onChange={handleChange}
+        structureDefinition={null}
+        addTitle="String"
+        showAddAttributeButton={true}
+        handleAddElement={handleAddElement}
+      />
+    );
+    expect(screen.getByText("Add String")).toBeInTheDocument();
+
+    const stringFieldInput = screen.getByTestId(
+      "string-field-input-AdverseEvent.id"
+    );
+    expect(stringFieldInput).toBeInTheDocument();
+    expect(stringFieldInput).toHaveAttribute("readOnly");
+
+    // Test AddElementButton click
+    const addButton = screen.getByText("Add String");
+    fireEvent.click(addButton);
+    expect(handleAddElement).toHaveBeenCalled();
+  });
 });
