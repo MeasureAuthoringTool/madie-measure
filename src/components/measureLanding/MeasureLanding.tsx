@@ -259,11 +259,11 @@ export default function MeasureLanding() {
     const updatedPage = values.page ? Number(values.page) : tabPageOptions.page;
     const updatedLimit = values.limit || tabPageOptions.limit;
 
-    // If query parameters are missing, update the URL
     if (!values.page || !values.limit) {
       navigate(`?tab=${tabFromUrl}&page=${updatedPage}&limit=${updatedLimit}`, {
         replace: true,
       });
+      return;
     }
 
     localStorage.setItem(
