@@ -72,8 +72,8 @@ export default function MeasureLanding() {
   const [errMsg, setErrMsg] = useState(undefined);
   const [currentSort, setCurrentSort] = useState("");
   const [currentDirection, setCurrentDirection] = useState("");
-  const abortController = useRef(null);
-  const requestIdRef = useRef(0); // Add request ID to track the latest request
+  const abortController = useRef<AbortController | null>(null);
+  // Removed requestId tracking; relying on explicit abort of prior request for correctness
   const featureFlags = useFeatureFlags();
 
   // Toast state and handlers
@@ -179,10 +179,6 @@ export default function MeasureLanding() {
       }
       abortController.current = new AbortController();
 
-      // Increment request ID to track this specific request
-      requestIdRef.current += 1;
-      const currentRequestId = requestIdRef.current;
-
       setLoading(true);
       try {
         const optionalParams = searchCriteria?.optionalSearchProperties ?? [];
@@ -203,25 +199,17 @@ export default function MeasureLanding() {
           abortController.current.signal
         );
 
-        // Only set results if this is still the latest request
-        if (currentRequestId === requestIdRef.current) {
-          setPageProps(data);
-          if (doUpdateMeasureCount && featureFlagMeasureSearchRef.current) {
-            setMeasureCounts();
-          }
+        // Set results; prior in-flight request (if any) has been aborted
+        setPageProps(data);
+        if (doUpdateMeasureCount && featureFlagMeasureSearchRef.current) {
+          setMeasureCounts();
         }
       } catch (error) {
-        if (
-          error.message !== "canceled" &&
-          currentRequestId === requestIdRef.current
-        ) {
+        if (error.message !== "canceled") {
           setErrMsg(error.message);
         }
       } finally {
-        // Only set loading to false if this is still the current request
-        if (currentRequestId === requestIdRef.current) {
-          setLoading(false);
-        }
+        setLoading(false);
       }
     },
     [measureServiceApi, setMeasureCounts]
