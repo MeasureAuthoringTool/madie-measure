@@ -707,7 +707,7 @@ export class MeasureServiceApi {
   ): Promise<MeasureHistoryActions[]> {
     try {
       const result = await axios.get(
-        `${this.baseUrl}/measures/measure-history/${measureId}`,
+        `${this.baseUrl}/measures/${measureId}/history`,
         {
           headers: {
             Authorization: `Bearer ${this.getAccessToken()}`,

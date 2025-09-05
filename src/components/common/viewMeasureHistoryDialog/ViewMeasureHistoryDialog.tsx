@@ -37,7 +37,7 @@ export default function ViewMeasureHistoryDialog(
   const [historyData, setHistoryData] = useState<MeasureHistoryActions[]>([]);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(0);
-  const [limit, setLimit] = useState(5);
+  const [limit, setLimit] = useState(10);
 
   useEffect(() => {
     if (open && measures?.length === 1) {
@@ -74,7 +74,9 @@ export default function ViewMeasureHistoryDialog(
           <TruncateText
             text={
               info.row.original.performedAt
-                ? new Date(info.row.original.performedAt).toLocaleString()
+                ? new Date(info.row.original.performedAt)
+                    .toLocaleString()
+                    .replace(",", "")
                 : ""
             }
             maxLength={120}
@@ -137,29 +139,21 @@ export default function ViewMeasureHistoryDialog(
         onClose,
         open,
       }}
-      cancelButtonProps={{
-        variant: "secondary",
-        cancelText: "Cancel",
-        "data-testid": "measure-history-cancel-button",
-      }}
-      continueButtonProps={{
-        variant: "",
-        type: "submit",
-        "data-testid": "cmeasure-history-continue-button",
-        continueText: "",
-      }}
+      cancelButtonProps={null}
+      continueButtonProps={null}
       maxWidth={"lg"}
     >
       <div style={{ margin: "0 32px 40px 32px" }}>
         <p
           style={{
             fontFamily: "Rubik",
-            fontWeight: 600,
+            fontWeight: 500,
             fontStyle: "normal",
-            fontSize: "16px",
+            fontSize: "17px",
             lineHeight: "24px",
             verticalAlign: "middle",
           }}
+          data-testid="measure-history-measure-name"
         >
           {measures[0]?.measureName || ""}
         </p>
@@ -247,7 +241,7 @@ export default function ViewMeasureHistoryDialog(
           <Pagination
             totalItems={totalItems}
             visibleItems={paginatedData.length}
-            limitOptions={[5, 10, 25, 50]}
+            limitOptions={[10, 25, 50]}
             offset={page * limit}
             page={page + 1}
             limit={limit}
