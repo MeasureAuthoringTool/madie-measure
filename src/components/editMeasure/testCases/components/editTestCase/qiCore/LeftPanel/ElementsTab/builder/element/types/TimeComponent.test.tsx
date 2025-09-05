@@ -1,5 +1,5 @@
 import * as React from "react";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import TimeComponent from "./TimeComponent";
 import userEvent from "@testing-library/user-event";
 
@@ -44,7 +44,7 @@ describe("TimeComponent", () => {
 
     // Test AddElementButton click
     const addButton = screen.getByText("Add Time");
-    fireEvent.click(addButton);
+    userEvent.click(addButton);
     expect(handleAddElement).toHaveBeenCalled();
   });
 
