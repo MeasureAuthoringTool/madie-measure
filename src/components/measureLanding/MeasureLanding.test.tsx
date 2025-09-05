@@ -123,7 +123,7 @@ describe("Measure Page", () => {
           optionalSearchProperties: [],
           searchField: "",
         },
-        abortController.signal
+        expect.any(AbortController)
       );
     });
 
@@ -159,7 +159,7 @@ describe("Measure Page", () => {
           optionalSearchProperties: [],
           searchField: "",
         },
-        abortController.signal
+        expect.any(AbortController)
       );
     });
 
@@ -192,7 +192,7 @@ describe("Measure Page", () => {
           optionalSearchProperties: [],
           searchField: "",
         },
-        abortController.signal
+        expect.any(AbortController)
       );
     });
 
@@ -231,7 +231,7 @@ describe("Measure Page", () => {
           optionalSearchProperties: [],
           searchField: "",
         },
-        expect.any(AbortSignal)
+        expect.any(AbortController)
       );
     });
   });
@@ -259,7 +259,7 @@ describe("Measure Page", () => {
           optionalSearchProperties: [],
           searchField: "",
         },
-        expect.any(AbortSignal)
+        expect.any(AbortController)
       );
     });
   });
@@ -285,7 +285,7 @@ describe("Measure Page", () => {
         "",
         "",
         { searchField: "test", optionalSearchProperties: [] },
-        abortController.signal
+        expect.any(AbortController)
       );
     });
   });
@@ -307,7 +307,7 @@ describe("Measure Page", () => {
           optionalSearchProperties: [],
           searchField: "",
         },
-        abortController.signal
+        expect.any(AbortController)
       );
     });
   });
@@ -338,7 +338,7 @@ describe("Measure Page", () => {
           optionalSearchProperties: [],
           searchField: "",
         },
-        abortController.signal
+        expect.any(AbortController)
       );
     });
 
@@ -473,7 +473,7 @@ describe("Measure Page", () => {
           optionalSearchProperties: [],
           searchField: "",
         },
-        abortController.signal
+        abortController
       );
     });
     await waitFor(() => {
