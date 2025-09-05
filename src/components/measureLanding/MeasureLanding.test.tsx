@@ -115,7 +115,7 @@ describe("Measure Page", () => {
         mockMeasureServiceApi.searchMeasuresByCriteria
       ).toHaveBeenCalledWith(
         ["OWNED"],
-  "10",
+        "10",
         0,
         "",
         "",
@@ -151,7 +151,7 @@ describe("Measure Page", () => {
         mockMeasureServiceApi.searchMeasuresByCriteria
       ).toHaveBeenCalledWith(
         ["OWNED"],
-  "10",
+        "10",
         0,
         "",
         "",
@@ -184,7 +184,7 @@ describe("Measure Page", () => {
         mockMeasureServiceApi.searchMeasuresByCriteria
       ).toHaveBeenCalledWith(
         ["OWNED"],
-  "10",
+        "10",
         0,
         "",
         "",
@@ -223,7 +223,7 @@ describe("Measure Page", () => {
       ).toHaveBeenNthCalledWith(
         1,
         ["SHARED"],
-  "10",
+        "10",
         0,
         "",
         "",
@@ -251,7 +251,7 @@ describe("Measure Page", () => {
       ).toHaveBeenNthCalledWith(
         1,
         ["ALL"],
-  "10",
+        "10",
         0,
         "",
         "",
@@ -280,7 +280,7 @@ describe("Measure Page", () => {
         mockMeasureServiceApi.searchMeasuresByCriteria
       ).toHaveBeenCalledWith(
         ["OWNED"],
-  "10",
+        "10",
         0,
         "",
         "",
@@ -299,7 +299,7 @@ describe("Measure Page", () => {
         mockMeasureServiceApi.searchMeasuresByCriteria
       ).toHaveBeenCalledWith(
         ["OWNED"],
-  "10",
+        "10",
         0,
         "",
         "",
@@ -330,7 +330,7 @@ describe("Measure Page", () => {
         mockMeasureServiceApi.searchMeasuresByCriteria
       ).toHaveBeenCalledWith(
         ["OWNED"],
-  "10",
+        "10",
         0,
         "",
         "",
@@ -465,7 +465,7 @@ describe("Measure Page", () => {
         mockMeasureServiceApi.searchMeasuresByCriteria
       ).toHaveBeenCalledWith(
         ["OWNED"],
-  "10",
+        "10",
         0,
         "",
         "",
@@ -473,7 +473,7 @@ describe("Measure Page", () => {
           optionalSearchProperties: [],
           searchField: "",
         },
-  expect.any(AbortController)
+        expect.any(AbortController)
       );
     });
     await waitFor(() => {
@@ -511,7 +511,7 @@ describe("Measure Page", () => {
     });
 
     test("should cancel previous request when switching tabs", async () => {
-  renderRouter(["/measures?tab=0&page=1&limit=10"]);
+      renderRouter(["/measures?tab=0&page=1&limit=10"]);
 
       // Wait for initial load
       await waitFor(() => {
@@ -538,17 +538,19 @@ describe("Measure Page", () => {
       (mockMeasureServiceApi.searchMeasuresByCriteria as jest.Mock)
         .mockImplementationOnce((...args) => {
           const abortCtrl = args[6];
-            return new Promise((resolve, reject) => {
-              abortCtrl.signal.addEventListener("abort", () => reject(new Error("canceled")));
-              setTimeout(
-                () =>
-                  resolve({
-                    ...oneItemResponse,
-                    content: [{ id: "delayed", measureName: "DelayedMeasure" }],
-                  }),
-                100
-              );
-            });
+          return new Promise((resolve, reject) => {
+            abortCtrl.signal.addEventListener("abort", () =>
+              reject(new Error("canceled"))
+            );
+            setTimeout(
+              () =>
+                resolve({
+                  ...oneItemResponse,
+                  content: [{ id: "delayed", measureName: "DelayedMeasure" }],
+                }),
+              100
+            );
+          });
         })
         // Second call: immediate response (should win)
         .mockResolvedValueOnce({
@@ -556,7 +558,7 @@ describe("Measure Page", () => {
           content: [{ id: "immediate", measureName: "ImmediateMeasure" }],
         });
 
-  renderRouter(["/measures?tab=0&page=1&limit=10"]);
+      renderRouter(["/measures?tab=0&page=1&limit=10"]);
 
       // Wait for initial load to start
       await waitFor(() => {
@@ -573,9 +575,11 @@ describe("Measure Page", () => {
 
       // Wait for both requests to potentially complete
       await waitFor(() => {
-  const calls = (mockMeasureServiceApi.searchMeasuresByCriteria as jest.Mock).mock.calls.length;
-  expect(calls).toBeGreaterThanOrEqual(2);
-  expect(calls).toBeLessThanOrEqual(3);
+        const calls = (
+          mockMeasureServiceApi.searchMeasuresByCriteria as jest.Mock
+        ).mock.calls.length;
+        expect(calls).toBeGreaterThanOrEqual(2);
+        expect(calls).toBeLessThanOrEqual(3);
       });
       // Ensure no generic error displayed (canceled first request ignored)
       expect(
@@ -590,7 +594,7 @@ describe("Measure Page", () => {
         mockMeasureServiceApi.searchMeasuresByCriteria as jest.Mock
       ).mockRejectedValueOnce(cancelledError);
 
-  renderRouter(["/measures?tab=0&page=1&limit=10"]);
+      renderRouter(["/measures?tab=0&page=1&limit=10"]);
 
       // Wait for the cancelled request
       await waitFor(() => {
@@ -606,7 +610,7 @@ describe("Measure Page", () => {
     });
 
     test("should handle multiple rapid tab switches", async () => {
-  renderRouter(["/measures?tab=0&page=1&limit=10"]);
+      renderRouter(["/measures?tab=0&page=1&limit=10"]);
 
       // Wait for initial load
       await waitFor(() => {
@@ -657,7 +661,7 @@ describe("Measure Page", () => {
       expect(originalAbort).toHaveBeenCalled();
     });
 
-  test("should only show loading state for current request", async () => {
+    test("should only show loading state for current request", async () => {
       // Mock delayed responses
       const delayedPromise = new Promise((resolve) => {
         setTimeout(() => resolve(oneItemResponse), 200);
@@ -667,7 +671,7 @@ describe("Measure Page", () => {
         .mockImplementationOnce(() => delayedPromise)
         .mockResolvedValue(oneItemResponse);
 
-  renderRouter(["/measures?tab=0&page=1&limit=10"]);
+      renderRouter(["/measures?tab=0&page=1&limit=10"]);
 
       // Switch tabs quickly
       const sharedMeasuresTab = await screen.findByTestId(
