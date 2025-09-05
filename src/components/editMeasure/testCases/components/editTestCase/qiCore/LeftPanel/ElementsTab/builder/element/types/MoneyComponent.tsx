@@ -23,12 +23,13 @@ const MoneyComponent = ({
       {/* Value field */}
       <DecimalInput
         label="Value"
-        value={getIn(formik.values, valuePath) ?? ""}
+        value={getIn(formik.values, valuePath)}
         handleChange={(val) =>
           formik.setFieldValue(valuePath, val !== "" ? parseFloat(val) : null)
         }
         canEdit={canEdit}
         containerStyle={{ width: MONEY_FIELD_WIDTH }}
+        required={false}
       />
 
       {/* Currency field */}

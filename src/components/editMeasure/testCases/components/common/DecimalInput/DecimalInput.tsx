@@ -10,6 +10,7 @@ export interface DecimalProps {
   canEdit: boolean;
   label?: string;
   containerStyle?: React.CSSProperties;
+  required?: boolean;
 }
 
 const DecimalInput = ({
@@ -18,6 +19,7 @@ const DecimalInput = ({
   canEdit,
   label = "Decimal",
   containerStyle,
+  required = true,
 }: DecimalProps) => {
   return (
     <div tw="flex flex-row">
@@ -34,7 +36,7 @@ const DecimalInput = ({
           inputProps={{
             "data-testid": `decimal-input-field-${label}`,
             "aria-describedby": `decimal-input-field-helper-text-${label}`,
-            required: true,
+            required: required,
           }}
           onWheel={(e) => e.target.blur()}
           onKeyPress={(e) => {
