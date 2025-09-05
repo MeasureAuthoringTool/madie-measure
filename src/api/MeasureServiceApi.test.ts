@@ -795,7 +795,7 @@ describe("MeasureServiceApi Tests", () => {
     mockedAxios.get.mockResolvedValueOnce({ data: mockData });
     const result = await measureServiceApi.getMeasureHistoryLogs("1");
     expect(mockedAxios.get).toHaveBeenCalledWith(
-      "madie.com/measures/measure-history/1",
+      "madie.com/measures/1/history",
       expect.objectContaining({
         headers: expect.objectContaining({
           Authorization: expect.any(String),

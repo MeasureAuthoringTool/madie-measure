@@ -145,7 +145,7 @@ describe("ViewMeasureHistoryDialog", () => {
       />
     );
     await waitFor(() =>
-      expect(screen.getAllByTestId("row-item").length).toBe(5)
+      expect(screen.getAllByTestId("row-item").length).toBe(10)
     );
     // Change limit
     fireEvent.change(screen.getByTestId("limit-select"), {
