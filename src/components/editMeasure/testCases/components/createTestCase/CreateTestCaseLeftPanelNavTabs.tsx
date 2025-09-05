@@ -16,15 +16,21 @@ export interface NavTabProps {
   setLeftPanelActiveTab: (value: string) => void;
   isQICore6: boolean;
   dirty: boolean;
+  setCalculationDialogOpen: any;
 }
 export default function CreateTestCaseNavTabs(props: NavTabProps) {
-  const { leftPanelActiveTab, setLeftPanelActiveTab, dirty } = props;
+  const {
+    leftPanelActiveTab,
+    setLeftPanelActiveTab,
+    dirty,
+    setCalculationDialogOpen,
+  } = props;
   const featureFlags = useFeatureFlags();
   const [pendingPanel, setPendingPanel] = useState(leftPanelActiveTab);
 
   const isQICore6 = props.isQICore6;
   const [discardDialogOpen, setDiscardDialogOpen] = useState(false);
-  const [calculationDialogOpen, setCalculationDialogOpen] = useState(false);
+
   const onContinue = () => {
     setLeftPanelActiveTab(pendingPanel);
     setDiscardDialogOpen(false);

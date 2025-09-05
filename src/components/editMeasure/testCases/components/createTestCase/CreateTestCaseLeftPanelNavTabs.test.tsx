@@ -25,6 +25,7 @@ describe("Create Test Case nav tabs", () => {
         setLeftPanelActiveTab={mocksetLeftPanelActiveTab}
         isQICore6={true}
         dirty={true}
+        setCalculationDialogOpen={jest.fn()}
       />
     );
     //open
@@ -52,17 +53,25 @@ describe("Create Test Case nav tabs", () => {
 
   it("Does show calculator icon when feature flag is on", async () => {
     const mocksetLeftPanelActiveTab = jest.fn();
+    const mocksetCalculationDialogOpen = jest.fn();
     render(
       <CreateTestCaseLeftPanelNavTabs
         leftPanelActiveTab="elements"
         setLeftPanelActiveTab={mocksetLeftPanelActiveTab}
         isQICore6={true}
         dirty={true}
+        setCalculationDialogOpen={mocksetCalculationDialogOpen}
       />
     );
     expect(
       screen.queryByTestId("editor-calculator-button")
     ).toBeInTheDocument();
+
+    const calculatorButton = screen.getByTestId("editor-calculator-button");
+    userEvent.click(calculatorButton);
+
+    expect(mocksetCalculationDialogOpen).toHaveBeenCalledTimes(1);
+    expect(mocksetCalculationDialogOpen).toHaveBeenCalledWith(true);
   });
 
   it("Does not show calculator icon when feature flag is off", async () => {
@@ -78,6 +87,7 @@ describe("Create Test Case nav tabs", () => {
         setLeftPanelActiveTab={mocksetLeftPanelActiveTab}
         isQICore6={true}
         dirty={true}
+        setCalculationDialogOpen={jest.fn()}
       />
     );
     expect(

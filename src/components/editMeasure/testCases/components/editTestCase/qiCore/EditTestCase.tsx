@@ -990,6 +990,7 @@ const EditTestCase = (props: EditTestCaseProps) => {
                         setLeftPanelActiveTab={setLeftPanelActiveTab}
                         isQICore6={isQICore6}
                         dirty={formikStu6Context.dirty}
+                        setCalculationDialogOpen={setCalculationDialogOpen}
                       />
                     </div>
                     <QiCoreResourceProvider>
