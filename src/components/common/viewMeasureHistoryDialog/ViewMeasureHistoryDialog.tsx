@@ -25,7 +25,7 @@ export interface MeasureHistoryActions {
   performedAt: any;
   actionType: string;
   performedBy: string;
-  additionalMessage?: string;
+  additionalActionMessage?: string;
 }
 
 export default function ViewMeasureHistoryDialog(
@@ -108,10 +108,10 @@ export default function ViewMeasureHistoryDialog(
       },
       {
         header: "Additional Info",
-        accessorKey: "additionalMessage",
+        accessorKey: "additionalActionMessage",
         cell: (info) => (
           <TruncateText
-            text={info.row.original.additionalMessage || ""}
+            text={info.row.original.additionalActionMessage || ""}
             maxLength={120}
             dataTestId={`measure-history-additionalInfo_${info.row.index}`}
           />

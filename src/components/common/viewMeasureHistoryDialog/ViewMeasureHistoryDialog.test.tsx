@@ -56,13 +56,13 @@ const historyData: MeasureHistoryActions[] = [
     performedAt: "2024-06-01T12:00:00Z",
     actionType: "CREATE",
     performedBy: "user1",
-    additionalMessage: "Created measure",
+    additionalActionMessage: "Created measure",
   },
   {
     performedAt: "2024-06-02T13:00:00Z",
     actionType: "UPDATE",
     performedBy: "user2",
-    additionalMessage: "Updated measure",
+    additionalActionMessage: "Updated measure",
   },
 ];
 
