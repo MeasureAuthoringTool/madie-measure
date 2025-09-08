@@ -9,6 +9,8 @@ export interface DecimalProps {
   handleChange: Function;
   canEdit: boolean;
   label?: string;
+  containerStyle?: React.CSSProperties;
+  required?: boolean;
 }
 
 const DecimalInput = ({
@@ -16,10 +18,12 @@ const DecimalInput = ({
   handleChange,
   canEdit,
   label = "Decimal",
+  containerStyle,
+  required = true,
 }: DecimalProps) => {
   return (
     <div tw="flex flex-row">
-      <div tw="w-28">
+      <div tw="w-28" style={containerStyle}>
         <TextField
           value={value}
           readOnly={!canEdit}
@@ -32,7 +36,7 @@ const DecimalInput = ({
           inputProps={{
             "data-testid": `decimal-input-field-${label}`,
             "aria-describedby": `decimal-input-field-helper-text-${label}`,
-            required: true,
+            required: required,
           }}
           onWheel={(e) => e.target.blur()}
           onKeyPress={(e) => {
