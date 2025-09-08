@@ -307,13 +307,10 @@ describe("ActionCenter", () => {
     fireEvent.click(viewHRBtn);
 
     await waitFor(() => {
-      setTimeout(() => {
-        expect(screen.queryByTestId("view-hr-modal")).toBeInTheDocument();
-        expect(setViewHumanReadableModal).toHaveBeenCalledWith({
-          open: true,
-          measureId: qdmMeasure.measureSetId,
-        });
-      }, 500);
+      expect(setViewHumanReadableModal).toHaveBeenCalledWith({
+        open: true,
+        measureId: qdmMeasure.measureSetId,
+      });
     });
   });
 
@@ -372,14 +369,14 @@ describe("ActionCenter", () => {
       />
     );
 
-    await waitFor(() =>
-      setTimeout(() => {
-        const shareButton = screen.findByTestId("share-action-btn");
-        expect(shareButton).toBeDisabled();
+    const shareButton = await screen.findByTestId("share-action-btn");
 
-        expect(setShareDialog).not.toHaveBeenCalledWith(true);
-      }, 500)
-    );
+    // Wait for the component's useEffect to complete and button to be properly disabled
+    await waitFor(() => {
+      expect(shareButton).toBeDisabled();
+    });
+
+    expect(setShareDialog).not.toHaveBeenCalledWith(true);
   });
 
   it("should not render transfer action if feature flag is not on", () => {
@@ -478,7 +475,12 @@ describe("ActionCenter", () => {
     );
 
     const transferButton = await screen.findByTestId("transfer-action-btn");
-    expect(transferButton).not.toBeEnabled();
+
+    // Wait for the component's useEffect to complete and button to be properly disabled
+    await waitFor(() => {
+      expect(transferButton).not.toBeEnabled();
+    });
+
     fireEvent.click(transferButton);
 
     expect(setTransferDialog).not.toHaveBeenCalledWith({
