@@ -18,6 +18,7 @@ const CodesComponent = ({
   resource,
   showAddAttributeButton,
   addTitle,
+  containerStyle,
 }: TypeComponentProps) => {
   const [codes, setCodes] = useState([]);
   const fhirDefinitionServiceApi = useRef(useFhirDefinitionsServiceApi());
@@ -131,7 +132,7 @@ const CodesComponent = ({
   }, [structureDefinition]);
 
   return (
-    <Box>
+    <Box style={containerStyle}>
       <div className="element-editor-add-row">
         <Select
           label={label}
