@@ -73,6 +73,8 @@ export default function MeasureLanding() {
   const [currentSort, setCurrentSort] = useState("");
   const [currentDirection, setCurrentDirection] = useState("");
   const abortController = useRef<AbortController | null>(null);
+  // Incrementing id to identify the latest in-flight request; prevents stale requests
+  const requestIdRef = useRef(0);
   const featureFlags = useFeatureFlags();
 
   // Toast state and handlers
@@ -178,7 +180,8 @@ export default function MeasureLanding() {
         abortController.current.abort();
       }
       abortController.current = new AbortController();
-
+      //it seems like doing request ids might be the easiest way for setLoading to work
+      const myRequestId = ++requestIdRef.current;
       setLoading(true);
       try {
         const optionalParams = searchCriteria?.optionalSearchProperties ?? [];
@@ -199,17 +202,22 @@ export default function MeasureLanding() {
           abortController.current as AbortController
         );
 
-        // Set results; prior in-flight request (if any) has been aborted
-        setPageProps(data);
-        if (doUpdateMeasureCount && featureFlagMeasureSearchRef.current) {
-          setMeasureCounts();
+        if (myRequestId === requestIdRef.current) {
+          setPageProps(data);
+          if (doUpdateMeasureCount && featureFlagMeasureSearchRef.current) {
+            setMeasureCounts();
+          }
         }
       } catch (error) {
         if (error.message !== "canceled") {
-          setErrMsg(error.message);
+          if (myRequestId === requestIdRef.current) {
+            setErrMsg(error.message);
+          }
         }
       } finally {
-        setLoading(false);
+        if (myRequestId === requestIdRef.current) {
+          setLoading(false);
+        }
       }
     },
     [measureServiceApi, setMeasureCounts]
@@ -223,7 +231,7 @@ export default function MeasureLanding() {
       setVisibleItems(numberOfElements);
       setMeasureList(content);
       setOffset(pageable.offset);
-      setLoading(false);
+      // loading state handled centrally in retrieveMeasures
     }
   };
 
