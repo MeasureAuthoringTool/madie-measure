@@ -45,7 +45,14 @@ export default function ViewMeasureHistoryDialog(
       measureServiceApi
         .getMeasureHistoryLogs(measures[0]?.id)
         .then((res: MeasureHistoryActions[]) => {
-          const sorted = (res || []).sort(
+          const processed = (res || []).map((item) => ({
+            ...item,
+            additionalActionMessage:
+              item.additionalActionMessage === "[]"
+                ? ""
+                : item.additionalActionMessage,
+          }));
+          const sorted = processed.sort(
             (a, b) =>
               new Date(b.performedAt).getTime() -
               new Date(a.performedAt).getTime()
@@ -64,6 +71,8 @@ export default function ViewMeasureHistoryDialog(
     () => historyData.slice(page * limit, page * limit + limit),
     [historyData, page, limit]
   );
+
+  console.log(historyData);
 
   const columns = useMemo<ColumnDef<MeasureHistoryActions>[]>(
     () => [
@@ -111,7 +120,7 @@ export default function ViewMeasureHistoryDialog(
         accessorKey: "additionalActionMessage",
         cell: (info) => (
           <TruncateText
-            text={info.row.original.additionalActionMessage || ""}
+            text={info.row.original.additionalActionMessage || "-"}
             maxLength={120}
             dataTestId={`measure-history-additionalInfo_${info.row.index}`}
           />
