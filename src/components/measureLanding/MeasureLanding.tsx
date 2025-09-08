@@ -72,7 +72,7 @@ export default function MeasureLanding() {
   const [errMsg, setErrMsg] = useState(undefined);
   const [currentSort, setCurrentSort] = useState("");
   const [currentDirection, setCurrentDirection] = useState("");
-  const abortController = useRef(null);
+  const abortController = useRef<AbortController | null>(null);
   const requestIdRef = useRef(0); // Add request ID to track the latest request
   const featureFlags = useFeatureFlags();
 
@@ -125,6 +125,7 @@ export default function MeasureLanding() {
   const currentDirectionRef = useRef(currentDirection);
   const curLimitRef = useRef(curLimit);
   const featureFlagMeasureSearchRef = useRef(featureFlags.MeasureSearch);
+  // requestIdRef declared earlier; avoid duplicate.
   useEffect(() => {
     searchCriteriaRef.current = searchCriteria;
   }, [searchCriteria]);
@@ -143,7 +144,7 @@ export default function MeasureLanding() {
 
   const setMeasureCounts = useCallback(() => {
     measureServiceApi
-      .getMeasureCounts(abortController.current?.signal)
+      .getMeasureCounts()
       .then((data) => {
         setOwnedMeasuresCount(data.ownedMeasures);
         setSharedMeasuresCount(data.sharedMeasures);
@@ -200,7 +201,7 @@ export default function MeasureLanding() {
           sort,
           direction,
           modifiedSearchCriteria,
-          abortController.current.signal
+          abortController.current as AbortController
         );
 
         // Only set results if this is still the latest request
