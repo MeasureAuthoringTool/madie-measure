@@ -35,6 +35,7 @@ import ChoiceType from "./ChoiceType";
 import QuantityInput from "./types/QuantityInput";
 import IdentifierComponent from "./types/IdentifierComponent";
 import QuantityIntervalInput from "../../../../../../common/quantityIntervalInput/QuantityIntervalInput";
+import MoneyComponent from "./types/MoneyComponent";
 
 // onChange is being deprecated as no updates to the resource are tracked.
 // Changes directly to the json should be done with a dispatch, this propagates downstream changes in formik.
@@ -440,6 +441,15 @@ const TypeEditor = ({
               formik.setFieldTouched(label);
               formik.setFieldValue(label, value);
             }}
+          />
+        );
+      case "Money":
+        return (
+          <MoneyComponent
+            label={label}
+            canEdit={canEdit}
+            resource={resource}
+            fieldRequired={false}
           />
         );
       case "Extension":
