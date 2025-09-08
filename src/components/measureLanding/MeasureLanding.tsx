@@ -72,7 +72,8 @@ export default function MeasureLanding() {
   const [errMsg, setErrMsg] = useState(undefined);
   const [currentSort, setCurrentSort] = useState("");
   const [currentDirection, setCurrentDirection] = useState("");
-  const abortController = useRef(null);
+  const abortController = useRef<AbortController | null>(null);
+  const requestIdRef = useRef(0); // Add request ID to track the latest request
   const featureFlags = useFeatureFlags();
 
   // Toast state and handlers
@@ -124,6 +125,7 @@ export default function MeasureLanding() {
   const currentDirectionRef = useRef(currentDirection);
   const curLimitRef = useRef(curLimit);
   const featureFlagMeasureSearchRef = useRef(featureFlags.MeasureSearch);
+  // requestIdRef declared earlier; avoid duplicate.
   useEffect(() => {
     searchCriteriaRef.current = searchCriteria;
   }, [searchCriteria]);
@@ -148,7 +150,11 @@ export default function MeasureLanding() {
         setSharedMeasuresCount(data.sharedMeasures);
         setAllMeasuresCount(data.allMeasures);
       })
-      .catch(() => console.error("Unable to retrieve measure counts"));
+      .catch((error) => {
+        if (error.message !== "canceled") {
+          console.error("Unable to retrieve measure counts");
+        }
+      });
   }, [measureServiceApi]);
 
   // Get the count when component mounts or when featureFlag changes
@@ -168,7 +174,16 @@ export default function MeasureLanding() {
       direction,
       doUpdateMeasureCount
     ) => {
+      // Abort any existing request before starting a new one
+      if (abortController.current) {
+        abortController.current.abort();
+      }
       abortController.current = new AbortController();
+
+      // Increment request ID to track this specific request
+      requestIdRef.current += 1;
+      const currentRequestId = requestIdRef.current;
+
       setLoading(true);
       try {
         const optionalParams = searchCriteria?.optionalSearchProperties ?? [];
@@ -186,18 +201,28 @@ export default function MeasureLanding() {
           sort,
           direction,
           modifiedSearchCriteria,
-          abortController.current.signal
+          abortController.current as AbortController
         );
-        setPageProps(data);
-        if (doUpdateMeasureCount && featureFlagMeasureSearchRef.current) {
-          setMeasureCounts();
+
+        // Only set results if this is still the latest request
+        if (currentRequestId === requestIdRef.current) {
+          setPageProps(data);
+          if (doUpdateMeasureCount && featureFlagMeasureSearchRef.current) {
+            setMeasureCounts();
+          }
         }
       } catch (error) {
-        if (error.message !== "canceled") {
+        if (
+          error.message !== "canceled" &&
+          currentRequestId === requestIdRef.current
+        ) {
           setErrMsg(error.message);
         }
       } finally {
-        setLoading(false);
+        // Only set loading to false if this is still the current request
+        if (currentRequestId === requestIdRef.current) {
+          setLoading(false);
+        }
       }
     },
     [measureServiceApi, setMeasureCounts]
@@ -299,7 +324,10 @@ export default function MeasureLanding() {
   }, []);
 
   const handleTabChange = (event, nextTab) => {
-    abortController.current.abort();
+    // Abort any pending request before switching tabs
+    if (abortController.current) {
+      abortController.current.abort();
+    }
     setMeasureList(null);
 
     const tabStorageKey = getTabStorageKey(nextTab);
@@ -335,6 +363,15 @@ export default function MeasureLanding() {
   useLayoutEffect(() => {
     const event = new Event("measures-mount");
     window.dispatchEvent(event);
+  }, []);
+
+  // Cleanup effect to abort any pending requests when component unmounts
+  useEffect(() => {
+    return () => {
+      if (abortController.current) {
+        abortController.current.abort();
+      }
+    };
   }, []);
 
   return (

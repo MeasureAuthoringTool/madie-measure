@@ -63,7 +63,9 @@ describe("RAVPage component", () => {
 
   test("Changes to Test Case Configuration enables Save button and saving successfully displays success toast", async () => {
     serviceApiMock = {
-      updateMeasure: jest.fn().mockResolvedValueOnce({ status: 200 }),
+      updateMeasureTestCaseConfiguration: jest
+        .fn()
+        .mockResolvedValueOnce({ status: 200 }),
     } as unknown as MeasureServiceApi;
     useMeasureServiceApiMock.mockImplementation(() => serviceApiMock);
 
@@ -72,11 +74,11 @@ describe("RAVPage component", () => {
     const ravOptionYes = screen.getByRole("radio", { name: "Yes" });
     const ravOptionNo = screen.getByRole("radio", { name: "No" });
 
-    userEvent.click(getByLabelText("Yes"));
+    userEvent.click(getByLabelText("No"));
 
     await waitFor(() => {
-      expect(ravOptionYes).toBeChecked();
-      expect(ravOptionNo).not.toBeChecked();
+      expect(ravOptionYes).not.toBeChecked();
+      expect(ravOptionNo).toBeChecked();
     });
 
     const saveButton = getByTestId("rav-save");
@@ -84,12 +86,10 @@ describe("RAVPage component", () => {
     await waitFor(() => expect(saveButton).toBeEnabled());
     userEvent.click(saveButton);
     await waitFor(() =>
-      expect(serviceApiMock.updateMeasure).toBeCalledWith({
-        ...measure,
-        testCaseConfiguration: {
-          ravIncluded: true,
-        },
-      })
+      expect(serviceApiMock.updateMeasureTestCaseConfiguration).toBeCalledWith(
+        { ravIncluded: false },
+        measure.id
+      )
     );
 
     const successToast = getByTestId("edit-rav-success-text");
@@ -107,7 +107,7 @@ describe("RAVPage component", () => {
 
   test("Changes to Test Case Configuration enables Save button but fails to save successfully and displays error toast", async () => {
     serviceApiMock = {
-      updateMeasure: jest.fn().mockRejectedValueOnce({
+      updateMeasureTestCaseConfiguration: jest.fn().mockRejectedValueOnce({
         status: 500,
         response: { data: { message: "failed to update measure" } },
       }),
@@ -119,11 +119,11 @@ describe("RAVPage component", () => {
     const ravOptionYes = screen.getByRole("radio", { name: "Yes" });
     const ravOptionNo = screen.getByRole("radio", { name: "No" });
 
-    userEvent.click(getByLabelText("Yes"));
+    userEvent.click(getByLabelText("No"));
 
     await waitFor(() => {
-      expect(ravOptionYes).toBeChecked();
-      expect(ravOptionNo).not.toBeChecked();
+      expect(ravOptionYes).not.toBeChecked();
+      expect(ravOptionNo).toBeChecked();
     });
 
     const saveButton = getByTestId("rav-save");
@@ -131,12 +131,10 @@ describe("RAVPage component", () => {
     await waitFor(() => expect(saveButton).toBeEnabled());
     userEvent.click(saveButton);
     await waitFor(() =>
-      expect(serviceApiMock.updateMeasure).toBeCalledWith({
-        ...measure,
-        testCaseConfiguration: {
-          ravIncluded: true,
-        },
-      })
+      expect(serviceApiMock.updateMeasureTestCaseConfiguration).toBeCalledWith(
+        { ravIncluded: false },
+        measure.id
+      )
     );
 
     const errorToast = getByTestId("edit-rav-generic-error-text");
@@ -157,11 +155,11 @@ describe("RAVPage component", () => {
 
     const ravOptionYes = screen.getByRole("radio", { name: "Yes" });
     const ravOptionNo = screen.getByRole("radio", { name: "No" });
-    userEvent.click(getByLabelText("Yes"));
+    userEvent.click(getByLabelText("No"));
 
     await waitFor(() => {
-      expect(ravOptionYes).toBeChecked();
-      expect(ravOptionNo).not.toBeChecked();
+      expect(ravOptionYes).not.toBeChecked();
+      expect(ravOptionNo).toBeChecked();
     });
 
     const cancelButton = getByTestId("cancel-button");
@@ -177,8 +175,8 @@ describe("RAVPage component", () => {
     expect(continueButton).toBeInTheDocument();
     userEvent.click(continueButton);
     await waitFor(() => {
-      expect(ravOptionYes).not.toBeChecked();
-      expect(ravOptionNo).toBeChecked();
+      expect(ravOptionYes).toBeChecked();
+      expect(ravOptionNo).not.toBeChecked();
     });
   });
 
@@ -187,11 +185,11 @@ describe("RAVPage component", () => {
 
     const ravOptionYes = screen.getByRole("radio", { name: "Yes" });
     const ravOptionNo = screen.getByRole("radio", { name: "No" });
-    userEvent.click(getByLabelText("Yes"));
+    userEvent.click(getByLabelText("No"));
 
     await waitFor(() => {
-      expect(ravOptionYes).toBeChecked();
-      expect(ravOptionNo).not.toBeChecked();
+      expect(ravOptionYes).not.toBeChecked();
+      expect(ravOptionNo).toBeChecked();
     });
 
     const cancelButton = getByTestId("cancel-button");
@@ -205,8 +203,8 @@ describe("RAVPage component", () => {
     expect(discardCancelButton).toBeInTheDocument();
     userEvent.click(discardCancelButton);
     await waitFor(() => {
-      expect(ravOptionYes).toBeChecked();
-      expect(ravOptionNo).not.toBeChecked();
+      expect(ravOptionYes).not.toBeChecked();
+      expect(ravOptionNo).toBeChecked();
     });
   });
 });

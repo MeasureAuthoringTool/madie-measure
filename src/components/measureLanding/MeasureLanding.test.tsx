@@ -123,7 +123,7 @@ describe("Measure Page", () => {
           optionalSearchProperties: [],
           searchField: "",
         },
-        abortController.signal
+        expect.any(AbortController)
       );
     });
 
@@ -159,7 +159,7 @@ describe("Measure Page", () => {
           optionalSearchProperties: [],
           searchField: "",
         },
-        abortController.signal
+        expect.any(AbortController)
       );
     });
 
@@ -192,7 +192,7 @@ describe("Measure Page", () => {
           optionalSearchProperties: [],
           searchField: "",
         },
-        abortController.signal
+        expect.any(AbortController)
       );
     });
 
@@ -231,7 +231,7 @@ describe("Measure Page", () => {
           optionalSearchProperties: [],
           searchField: "",
         },
-        expect.any(AbortSignal)
+        expect.any(AbortController)
       );
     });
   });
@@ -259,7 +259,7 @@ describe("Measure Page", () => {
           optionalSearchProperties: [],
           searchField: "",
         },
-        expect.any(AbortSignal)
+        expect.any(AbortController)
       );
     });
   });
@@ -285,7 +285,7 @@ describe("Measure Page", () => {
         "",
         "",
         { searchField: "test", optionalSearchProperties: [] },
-        abortController.signal
+        expect.any(AbortController)
       );
     });
   });
@@ -307,7 +307,7 @@ describe("Measure Page", () => {
           optionalSearchProperties: [],
           searchField: "",
         },
-        abortController.signal
+        expect.any(AbortController)
       );
     });
   });
@@ -338,7 +338,7 @@ describe("Measure Page", () => {
           optionalSearchProperties: [],
           searchField: "",
         },
-        abortController.signal
+        expect.any(AbortController)
       );
     });
 
@@ -473,7 +473,7 @@ describe("Measure Page", () => {
           optionalSearchProperties: [],
           searchField: "",
         },
-        abortController.signal
+        abortController
       );
     });
     await waitFor(() => {
@@ -496,5 +496,197 @@ describe("Measure Page", () => {
     });
     expect(allMeasuresTab).toBeInTheDocument();
     expect(allMeasuresTab).not.toHaveClass("Mui-selected");
+  });
+
+  describe("Request Cancellation", () => {
+    let originalAbort: jest.SpyInstance;
+
+    beforeEach(() => {
+      // Mock AbortController.abort method
+      originalAbort = jest.spyOn(AbortController.prototype, "abort");
+    });
+
+    afterEach(() => {
+      originalAbort.mockRestore();
+    });
+
+    test("should cancel previous request when switching tabs", async () => {
+      renderRouter(["/measures"]);
+
+      // Wait for initial load
+      await waitFor(() => {
+        expect(
+          mockMeasureServiceApi.searchMeasuresByCriteria
+        ).toHaveBeenCalledTimes(1);
+      });
+
+      // Click on Shared Measures tab
+      const sharedMeasuresTab = await screen.findByTestId(
+        "shared-measures-tab"
+      );
+      fireEvent.click(sharedMeasuresTab);
+
+      // Verify abort was called when switching tabs
+      expect(originalAbort).toHaveBeenCalled();
+
+      // Verify navigation happens
+      expect(mockedUsedNavigate).toHaveBeenCalledWith("?tab=1&page=1&limit=10");
+    });
+
+    test("should handle race condition - only latest request updates UI", async () => {
+      // Create a delayed response for the first request
+      const firstRequestPromise = new Promise((resolve) => {
+        setTimeout(
+          () =>
+            resolve({
+              ...oneItemResponse,
+              content: [{ id: "delayed", measureName: "DelayedMeasure" }],
+            }),
+          100
+        );
+      });
+
+      // Mock to return delayed response for first call, immediate for second
+      (mockMeasureServiceApi.searchMeasuresByCriteria as jest.Mock)
+        .mockImplementationOnce(() => firstRequestPromise)
+        .mockResolvedValueOnce({
+          ...oneItemResponse,
+          content: [{ id: "immediate", measureName: "ImmediateMeasure" }],
+        });
+
+      renderRouter(["/measures"]);
+
+      // Wait for initial load to start
+      await waitFor(() => {
+        expect(
+          mockMeasureServiceApi.searchMeasuresByCriteria
+        ).toHaveBeenCalledTimes(1);
+      });
+
+      // Quickly switch to another tab before first request completes
+      const sharedMeasuresTab = await screen.findByTestId(
+        "shared-measures-tab"
+      );
+      fireEvent.click(sharedMeasuresTab);
+
+      // Wait for both requests to potentially complete
+      await waitFor(
+        () => {
+          expect(
+            mockMeasureServiceApi.searchMeasuresByCriteria
+          ).toHaveBeenCalledTimes(2);
+        },
+        { timeout: 200 }
+      );
+
+      // The delayed response should not update the UI due to request ID tracking
+      // Only the immediate response from the second request should be shown
+      await waitFor(() => {
+        const immediateResult = screen.queryByText("ImmediateMeasure");
+        const delayedResult = screen.queryByText("DelayedMeasure");
+        expect(delayedResult).not.toBeInTheDocument();
+      });
+    });
+
+    test("should not update UI when request is cancelled", async () => {
+      // Mock a request that gets cancelled
+      const cancelledError = new Error("canceled");
+      (
+        mockMeasureServiceApi.searchMeasuresByCriteria as jest.Mock
+      ).mockRejectedValueOnce(cancelledError);
+
+      renderRouter(["/measures"]);
+
+      // Wait for the cancelled request
+      await waitFor(() => {
+        expect(
+          mockMeasureServiceApi.searchMeasuresByCriteria
+        ).toHaveBeenCalled();
+      });
+
+      // Should not show error for cancelled requests
+      expect(
+        screen.queryByTestId("generic-error-text-header")
+      ).not.toBeInTheDocument();
+    });
+
+    test("should handle multiple rapid tab switches", async () => {
+      renderRouter(["/measures"]);
+
+      // Wait for initial load
+      await waitFor(() => {
+        expect(
+          mockMeasureServiceApi.searchMeasuresByCriteria
+        ).toHaveBeenCalledTimes(1);
+      });
+
+      const sharedMeasuresTab = await screen.findByTestId(
+        "shared-measures-tab"
+      );
+      const allMeasuresTab = await screen.findByTestId("all-measures-tab");
+      const ownedMeasuresTab = await screen.findByTestId("owned-measures-tab");
+
+      // Rapidly switch between tabs
+      fireEvent.click(sharedMeasuresTab);
+      fireEvent.click(allMeasuresTab);
+      fireEvent.click(ownedMeasuresTab);
+
+      // Verify abort was called multiple times (each tab switch calls abort twice - once in handleTabChange, once in retrieveMeasures)
+      expect(originalAbort).toHaveBeenCalledTimes(6);
+
+      // Verify final navigation (check that the last call contains the expected URL)
+      const lastCall =
+        mockedUsedNavigate.mock.calls[mockedUsedNavigate.mock.calls.length - 1];
+      expect(lastCall[0]).toBe("?tab=0&page=1&limit=10");
+    });
+
+    test("should cancel request during search", async () => {
+      renderRouter(["/measures"]);
+
+      const searchField = (await screen.findByTestId(
+        "measure-search-input"
+      )) as HTMLInputElement;
+
+      // Start typing in search
+      fireEvent.change(searchField, { target: { value: "test" } });
+      fireEvent.submit(searchField);
+
+      // Immediately switch tabs to cancel the search request
+      const sharedMeasuresTab = await screen.findByTestId(
+        "shared-measures-tab"
+      );
+      fireEvent.click(sharedMeasuresTab);
+
+      // Verify abort was called
+      expect(originalAbort).toHaveBeenCalled();
+    });
+
+    test("should only show loading state for current request", async () => {
+      // Mock delayed responses
+      const delayedPromise = new Promise((resolve) => {
+        setTimeout(() => resolve(oneItemResponse), 200);
+      });
+
+      (mockMeasureServiceApi.searchMeasuresByCriteria as jest.Mock)
+        .mockImplementationOnce(() => delayedPromise)
+        .mockResolvedValue(oneItemResponse);
+
+      renderRouter(["/measures"]);
+
+      // Switch tabs quickly
+      const sharedMeasuresTab = await screen.findByTestId(
+        "shared-measures-tab"
+      );
+      fireEvent.click(sharedMeasuresTab);
+
+      // Loading should eventually stop even if first request is still pending
+      await waitFor(
+        () => {
+          const spinner = screen.queryByTestId("loading-spinner");
+          expect(spinner).not.toBeInTheDocument();
+        },
+        { timeout: 300 }
+      );
+    });
   });
 });

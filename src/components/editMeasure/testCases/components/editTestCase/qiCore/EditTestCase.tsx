@@ -87,6 +87,8 @@ import { useTestCasePolling } from "../../../hooks/useTestCasePolling";
 import KeyboardTabIcon from "@mui/icons-material/KeyboardTab";
 import ValidationPanel from "./ValidationPanel";
 import ValidationStatusIcon from "./ValidationStatusIcon";
+import EditorCalculator from "../calculator/EditorCalculator";
+import CalculatorDialog from "../calculator/CalculatorDialog";
 
 const TestCaseForm = tw.form`m-3`;
 
@@ -246,6 +248,7 @@ const EditTestCase = (props: EditTestCaseProps) => {
   const [measureBundle] = bundleState;
   const [valueSets] = valueSetsState;
   const [discardDialogOpen, setDiscardDialogOpen] = useState(false);
+  const [calculationDialogOpen, setCalculationDialogOpen] = useState(false);
   const { updateMeasure } = measureStore;
 
   const canEdit = checkUserCanEdit(
@@ -987,6 +990,7 @@ const EditTestCase = (props: EditTestCaseProps) => {
                         setLeftPanelActiveTab={setLeftPanelActiveTab}
                         isQICore6={isQICore6}
                         dirty={formikStu6Context.dirty}
+                        setCalculationDialogOpen={setCalculationDialogOpen}
                       />
                     </div>
                     <QiCoreResourceProvider>
@@ -1052,6 +1056,11 @@ const EditTestCase = (props: EditTestCaseProps) => {
                 ) : (
                   <>
                     <div tw="float-right mr-4">
+                      {featureFlags?.Calculator && (
+                        <EditorCalculator
+                          onClick={() => setCalculationDialogOpen(true)}
+                        />
+                      )}
                       <EditorSearch />
                     </div>
                     <Editor
@@ -1406,6 +1415,10 @@ const EditTestCase = (props: EditTestCaseProps) => {
           open={discardDialogOpen}
           onClose={() => setDiscardDialogOpen(false)}
           onContinue={discardChanges}
+        />
+        <CalculatorDialog
+          open={calculationDialogOpen}
+          onClose={() => setCalculationDialogOpen(false)}
         />
         <Toast
           toastKey="edit-action-toast"

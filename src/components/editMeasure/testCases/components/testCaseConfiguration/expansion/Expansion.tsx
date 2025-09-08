@@ -46,8 +46,7 @@ const Expansion = () => {
 
   const canEdit = checkUserCanEdit(
     measure?.measureSet?.owner,
-    measure?.measureSet?.acls,
-    measure?.measureMetaData?.draft
+    measure?.measureSet?.acls
   );
 
   const onToastClose = () => {
@@ -106,7 +105,10 @@ const Expansion = () => {
       };
     }
     measureServiceApi
-      .updateMeasure(updatedMeasure)
+      .updateMeasureTestCaseConfiguration(
+        updatedMeasure?.testCaseConfiguration,
+        updatedMeasure.id
+      )
       .then(() => {
         handleToast("success", "Expansion details Updated Successfully", true);
         // updating measure will propagate update state site wide.

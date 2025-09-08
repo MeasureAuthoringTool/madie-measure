@@ -36,13 +36,12 @@ const RAVPage = ({ setExecutionContextReady }) => {
 
   const canEdit = checkUserCanEdit(
     measure?.measureSet?.owner,
-    measure?.measureSet?.acls,
-    measure?.measureMetaData?.draft
+    measure?.measureSet?.acls
   );
 
   const formik = useFormik({
     initialValues: {
-      ravIncluded: measure?.testCaseConfiguration?.ravIncluded || false,
+      ravIncluded: measure?.testCaseConfiguration?.ravIncluded || true,
     },
     enableReinitialize: true,
     onSubmit: async () => await handleSubmit(),
@@ -78,7 +77,10 @@ const RAVPage = ({ setExecutionContextReady }) => {
     };
 
     measureServiceApi
-      .updateMeasure(newMeasure)
+      .updateMeasureTestCaseConfiguration(
+        newMeasure?.testCaseConfiguration,
+        newMeasure.id
+      )
       .then(() => {
         handleToast(
           "success",

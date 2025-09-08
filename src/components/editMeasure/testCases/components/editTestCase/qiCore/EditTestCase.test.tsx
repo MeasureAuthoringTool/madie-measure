@@ -45,7 +45,7 @@ import { multiGroupMeasureFixture } from "../../createTestCase/__mocks__/multiGr
 import { nonBoolTestCaseFixture } from "../../createTestCase/__mocks__/nonBoolTestCaseFixture";
 import { TestCaseValidator } from "../../../validators/TestCaseValidator";
 // @ts-ignore
-import { checkUserCanEdit } from "@madie/madie-util";
+import { checkUserCanEdit, useFeatureFlags } from "@madie/madie-util";
 import { PopulationType as FqmPopulationType } from "fqm-execution/build/types/Enums";
 import { ResourceIdentifier } from "../../../api/models/ResourceIdentifier";
 
@@ -109,13 +109,14 @@ let mockApplyDefaults = false;
 jest.mock("@madie/madie-util", () => {
   return {
     useDocumentTitle: jest.fn(),
-    useFeatureFlags: () => {
+    useFeatureFlags: jest.fn(() => {
       return {
         applyDefaults: mockApplyDefaults,
         qiCoreElementsTab: true,
         Locking: true,
+        Calculator: true,
       };
-    },
+    }),
     measureStore: {
       updateMeasure: jest.fn((measure) => measure),
       state: null,
@@ -3192,6 +3193,7 @@ describe("EditTestCase component", () => {
       });
       expect(runTestButton).not.toBeDisabled();
       userEvent.click(runTestButton);
+      expect(screen.getByText("CQL")).toBeInTheDocument();
 
       userEvent.click(screen.getByTestId("highlighting-tab"));
       const debugOutput = await screen.findByText(
@@ -3633,10 +3635,59 @@ describe("EditTestCase component", () => {
       });
       expect(runButton).toBeDisabled();
     });
+
+    it("should render calculator button when Calculator flag is true", async () => {
+      renderWithRouter(
+        ["/measures/m1234/edit/test-cases"],
+        "/measures/:measureId/edit/test-cases"
+      );
+
+      expect(screen.getByTestId("test-case-json-editor")).toBeInTheDocument();
+      expect(screen.getByTestId("test-case-cql-editor")).toBeInTheDocument();
+      expect(
+        screen.queryByTestId("editor-calculator-button")
+      ).toBeInTheDocument();
+
+      const calculatorButton = screen.getByTestId("editor-calculator-button");
+      userEvent.click(calculatorButton);
+
+      expect(screen.queryByTestId("calculation-dialog")).toBeInTheDocument();
+
+      const closeButton = screen.getByTestId("calculation-close-button");
+      userEvent.click(closeButton);
+      await waitFor(() =>
+        expect(
+          screen.queryByTestId("calculation-dialog")
+        ).not.toBeInTheDocument()
+      );
+    });
+
+    it("should not render calculator button when Calculator flag is false", async () => {
+      (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => {
+        return {
+          Calculator: false,
+        };
+      });
+      renderWithRouter(
+        ["/measures/m1234/edit/test-cases"],
+        "/measures/:measureId/edit/test-cases"
+      );
+
+      expect(screen.getByTestId("test-case-json-editor")).toBeInTheDocument();
+      expect(screen.getByTestId("test-case-cql-editor")).toBeInTheDocument();
+      expect(
+        screen.queryByTestId("editor-calculator-button")
+      ).not.toBeInTheDocument();
+    });
   });
 
   describe("locking test case", () => {
     it("locking test case successfully", () => {
+      (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => {
+        return {
+          Locking: true,
+        };
+      });
       const testCase = {
         id: "1234",
         description: "Test IPP",
@@ -3666,6 +3717,11 @@ describe("EditTestCase component", () => {
     });
 
     it("locking test case fails", () => {
+      (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => {
+        return {
+          Locking: true,
+        };
+      });
       mockedAxios.post.mockImplementation((args) => {
         if (args && args.endsWith("lock")) {
           return Promise.reject({
