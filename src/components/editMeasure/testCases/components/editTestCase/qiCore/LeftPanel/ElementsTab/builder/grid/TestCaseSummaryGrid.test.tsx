@@ -37,7 +37,7 @@ describe("TestCaseSummaryGrid", () => {
   it("should render the table with correct headers and data from the bundle", () => {
     render(
       <TestCaseSummaryGrid
-        bundle={mockBundle}
+        entry={mockBundle.entry}
         onRowEdit={mockOnRowEdit}
         onRowDelete={mockOnRowDelete}
       />
@@ -67,10 +67,40 @@ describe("TestCaseSummaryGrid", () => {
     ).toBeInTheDocument();
   });
 
+  it("should render the table with no data", () => {
+    render(
+      <TestCaseSummaryGrid
+        entry={[]}
+        onRowEdit={mockOnRowEdit}
+        onRowDelete={mockOnRowDelete}
+      />
+    );
+
+    const columnHeaders = screen.getAllByRole("columnheader");
+    expect(
+      within(columnHeaders[0]).getByText("Resource & Value Set")
+    ).toBeInTheDocument();
+  });
+
+  it("should render the table with undefined, no data", () => {
+    render(
+      <TestCaseSummaryGrid
+        entry={undefined}
+        onRowEdit={mockOnRowEdit}
+        onRowDelete={mockOnRowDelete}
+      />
+    );
+
+    const columnHeaders = screen.getAllByRole("columnheader");
+    expect(
+      within(columnHeaders[0]).getByText("Resource & Value Set")
+    ).toBeInTheDocument();
+  });
+
   it("should render ActionCenter with correct actions", async () => {
     render(
       <TestCaseSummaryGrid
-        bundle={mockBundle}
+        entry={mockBundle.entry}
         onRowEdit={mockOnRowEdit}
         onRowDelete={mockOnRowDelete}
       />
@@ -91,7 +121,7 @@ describe("TestCaseSummaryGrid", () => {
   it("should call onRowEdit when Edit action is clicked", async () => {
     render(
       <TestCaseSummaryGrid
-        bundle={mockBundle}
+        entry={mockBundle.entry}
         onRowEdit={mockOnRowEdit}
         onRowDelete={mockOnRowDelete}
       />
@@ -110,7 +140,7 @@ describe("TestCaseSummaryGrid", () => {
   it("should call onRowDelete when Delete action is clicked", async () => {
     render(
       <TestCaseSummaryGrid
-        bundle={mockBundle}
+        entry={mockBundle.entry}
         onRowEdit={mockOnRowEdit}
         onRowDelete={mockOnRowDelete}
       />
