@@ -72,8 +72,6 @@ export default function ViewMeasureHistoryDialog(
     [historyData, page, limit]
   );
 
-  console.log(historyData);
-
   const columns = useMemo<ColumnDef<MeasureHistoryActions>[]>(
     () => [
       {
