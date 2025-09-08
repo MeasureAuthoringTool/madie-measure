@@ -3,12 +3,11 @@ import Calculate from "./calculator-icon.svg";
 import { IconButton } from "@mui/material";
 import Tooltip from "@mui/material/Tooltip";
 
-const EditorCalculator = () => {
-  const toggleCalculator = () => {
-    const event = new CustomEvent("toggleEditorCalculatorBox");
-    window.dispatchEvent(event);
-  };
+interface CalcProps {
+  onClick: () => void;
+}
 
+const EditorCalculator = (props: CalcProps) => {
   return (
     <Tooltip title="Calculate Age/Birth Date/Period of Time">
       <IconButton
@@ -17,7 +16,7 @@ const EditorCalculator = () => {
         style={{
           color: "#0073c8",
         }}
-        onClick={toggleCalculator}
+        onClick={props.onClick}
       >
         <img alt="calculator" src={Calculate} />
       </IconButton>
