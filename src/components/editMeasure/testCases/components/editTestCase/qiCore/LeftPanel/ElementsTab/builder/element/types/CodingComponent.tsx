@@ -14,6 +14,7 @@ import { getValueSetUrl } from "../../../../../../../../api/fhirDefinitionServic
 import useTerminologyServiceApi from "../../../../../../../../api/useTerminologyServiceApi";
 import { getOidFromString } from "@madie/madie-util";
 import AddElementButton from "../../../../../../../common/AddElementButton";
+import { CatchingPokemonSharp } from "@mui/icons-material";
 
 const placeHolder = (label: string) => (
   <span style={{ color: "#717171" }}>{label}</span>
@@ -94,8 +95,14 @@ const CodingComponent = ({
           .then((valueSet) => {
             if (valueSet.expansion) {
               setAllValueSets((prev) => {
-                if (prev) {
-                  return [...prev, valueSet];
+                if (prev && includePrev) {
+                  const combined = [...prev, valueSet];
+                  // remove duplicates
+                  const unique = combined.filter(
+                    (vs, index, self) =>
+                      index === self.findIndex((t) => t.title === vs.title)
+                  );
+                  return unique;
                 }
                 return [valueSet];
               });
