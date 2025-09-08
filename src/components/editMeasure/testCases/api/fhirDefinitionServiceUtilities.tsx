@@ -498,6 +498,7 @@ export function isComponentDataType(datatype) {
     case "instant":
     case "integer":
     case "integer64":
+    case "money":
     case "positiveint":
     case "time":
     case "unsignedint":
