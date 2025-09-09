@@ -1,0 +1,54 @@
+.duration-tab-container {
+  display: grid;
+  gap: 12px;
+}
+
+.duration-tab-row {
+  display: flex;
+  flex-direction: row;
+  flex-grow: 1;
+  column-gap: 32px;
+
+  textarea {
+    background: none;
+  }
+
+  button {
+    font-size: 16px;
+    color: #0073c8;
+    padding: 0;
+    border: 0;
+    background-color: unset;
+    font-weight: normal;
+
+    &:hover,
+    &:focus,
+    &:active {
+      font-size: 16px;
+      color: #0073c8;
+      padding: 0;
+      border: 0;
+      background-color: unset;
+      font-weight: normal;
+    }
+  }
+}
+
+.precision-select {
+  width: 160px;
+}
+
+.duration-tab-results-container {
+  background: #f3f3f3;
+  padding: 16px;
+  border-radius: 4px;
+}
+
+.end-date-inclusive-label {
+  color: #515151;
+  font-weight: 400;
+  font-size: 16px;
+  font-family: Rubik, sans-serif;
+  padding-bottom: 17px;
+  text-transform: none;
+}
