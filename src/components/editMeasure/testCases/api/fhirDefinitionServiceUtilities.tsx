@@ -264,7 +264,6 @@ export function removeUndefinedAndEmptyObjects(obj) {
     if (obj.hasOwnProperty(key) && key !== "x") {
       const value = obj[key];
       const cleanedValue = removeUndefinedAndEmptyObjects(value);
-      // Remove null/undefined/empty values
       if (
         _.isNil(cleanedValue) ||
         (typeof cleanedValue === "object" && _.isEmpty(cleanedValue))
