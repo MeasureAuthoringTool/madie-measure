@@ -18,6 +18,7 @@ const CodesComponent = ({
   resource,
   showAddAttributeButton,
   addTitle,
+  containerStyle,
   handleAddElement,
 }: TypeComponentProps) => {
   const [codes, setCodes] = useState([]);
@@ -132,7 +133,7 @@ const CodesComponent = ({
   }, [structureDefinition]);
 
   return (
-    <Box>
+    <Box style={containerStyle}>
       <div className="element-editor-add-row">
         <Select
           label={label}

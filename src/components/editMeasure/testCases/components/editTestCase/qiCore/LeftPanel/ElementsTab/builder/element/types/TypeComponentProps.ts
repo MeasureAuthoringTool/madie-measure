@@ -16,4 +16,5 @@ export interface TypeComponentProps {
   showAddAttributeButton?: boolean;
   addTitle?: string;
   handleAddElement?: () => void;
+  containerStyle?: React.CSSProperties;
 }
