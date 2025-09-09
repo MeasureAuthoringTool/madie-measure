@@ -352,24 +352,27 @@ export class TestCaseServiceApi {
   }
 
   async shiftAllQdmTestCaseDates(measureId: string, shifted: number) {
-    const response = await axios.get(
-      `${this.baseUrl}/measures/${measureId}/test-cases/qdm/shift-all-dates`,
-      {
-        params: { shifted: shifted },
-        headers: {
-          Authorization: `Bearer ${this.getAccessToken()}`,
-        },
-      }
-    );
-    if (!response || !response.data) {
-      throw new Error(`Unable to shift test case dates`);
-    }
-    if (response.status === 409) {
-      throw new Error(
-        `One or more of the Test Cases are locked by another user. Test Case Dates cannot be shifted.`
+    try {
+      const response = await axios.get(
+        `${this.baseUrl}/measures/${measureId}/test-cases/qdm/shift-all-dates`,
+        {
+          params: { shifted: shifted },
+          headers: {
+            Authorization: `Bearer ${this.getAccessToken()}`,
+          },
+        }
       );
+      if (!response || !response.data) {
+        throw new Error(`Unable to shift test case dates`);
+      }
+      return response.data;
+    } catch (err) {
+      const message =
+        err.response?.status === 409
+          ? `One or more of the Test Cases are locked by another user. Test Case Dates cannot be shifted.`
+          : `Unable to shift test case dates`;
+      throw new Error(message);
     }
-    return response.data;
   }
 
   async shiftAllQiCoreTestCaseDates(

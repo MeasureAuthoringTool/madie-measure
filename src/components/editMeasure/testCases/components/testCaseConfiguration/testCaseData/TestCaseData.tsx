@@ -85,7 +85,7 @@ const TestCaseData = (props: TestCaseListProps) => {
     // sure Greg ...  Tech Debt MAT-8377
     //  OTOH, I think there is ticket for just getting rid of the TestCaseData testShiftCase https://jira.cms.gov/browse/MAT-8379
     if (isQdm) {
-      testCaseService.current
+      await testCaseService.current
         .shiftAllQdmTestCaseDates(
           measure.id,
           parseInt(formik.values.shiftTestCaseDates)
@@ -98,10 +98,7 @@ const TestCaseData = (props: TestCaseListProps) => {
           );
         })
         .catch((err) => {
-          if (
-            featureFlags?.Locking &&
-            err?.Error?.includes("locked by another user")
-          ) {
+          if (featureFlags?.Locking) {
             handleToast(
               "danger",
               `One or more of the Test Cases are locked by another user. Test Case Dates cannot be shifted.`,
