@@ -99,7 +99,7 @@ const TestCaseData = (props: TestCaseListProps) => {
         })
         .catch((err) => {
           if (featureFlags?.Locking) {
-            handleToast("danger", `${err}`, true);
+            handleToast("danger", err.message, true);
           } else {
             setWarnings((prevState) => [
               ...prevState,
@@ -125,7 +125,7 @@ const TestCaseData = (props: TestCaseListProps) => {
           }
         })
         .catch((err) => {
-          handleToast("danger", `${err}`, true);
+          handleToast("danger", err.message, true);
         });
     }
     setExecuting(false);

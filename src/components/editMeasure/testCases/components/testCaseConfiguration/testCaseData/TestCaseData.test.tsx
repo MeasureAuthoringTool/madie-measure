@@ -16,6 +16,7 @@ import {
 import userEvent from "@testing-library/user-event";
 import useTestCaseServiceApi, {
   TestCaseServiceApi,
+  SHIFT_TEST_CASE_DATES_ERROR,
   SHIFT_TEST_CASE_DATES_ERROR_TEST_CASE_LOCKED,
 } from "../../../api/useTestCaseServiceApi";
 import { act } from "react-dom/test-utils";
@@ -449,7 +450,7 @@ describe("TestCaseData", () => {
     measureStore.state.mockImplementationOnce(() => qiCoreMeasure);
     const shiftAllTestCaseDatesApiMock = jest
       .fn()
-      .mockRejectedValueOnce("something went wrong");
+      .mockRejectedValueOnce(new Error(SHIFT_TEST_CASE_DATES_ERROR));
     useTestCaseServiceMock.mockImplementationOnce(() => {
       return {
         shiftAllQiCoreTestCaseDates: shiftAllTestCaseDatesApiMock,
@@ -480,7 +481,7 @@ describe("TestCaseData", () => {
     await waitFor(() =>
       expect(
         screen.getByTestId("shift-all-test-case-dates-generic-error-text")
-      ).toHaveTextContent("something went wrong")
+      ).toHaveTextContent(SHIFT_TEST_CASE_DATES_ERROR)
     );
   });
 
