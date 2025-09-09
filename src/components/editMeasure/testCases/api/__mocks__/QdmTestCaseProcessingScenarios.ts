@@ -35,6 +35,7 @@ export const CV_PATIENT_WITH_OBS_RESULTS: QdmTestCaseProcessingScenario = {
     patientId: "c519b55c-489f-43e9-b734-1089006badd2",
     hapiOperationOutcome: null,
     validationStatus: null,
+    createdBeforeVersioning: true,
     groupPopulations: [
       {
         groupId: "6598592b4fc1aa5fa9481b6c",
@@ -371,6 +372,7 @@ export const CV_EPISODE_WITH_STRAT_OBS_RESULTS: QdmTestCaseProcessingScenario =
       patientId: "9725b9af-6f64-472f-ab52-9805c7c26394",
       hapiOperationOutcome: null,
       validationStatus: null,
+      createdBeforeVersioning: true,
       groupPopulations: [
         {
           groupId: "659c25644fc1aa5fa9481b70",
@@ -862,6 +864,7 @@ export const RATIO_PATIENTBASED_WITH_OBS_RESULTS: QdmTestCaseProcessingScenario 
       patientId: "dc788bd3-f02b-4b3c-89a2-104c0b6e753e",
       hapiOperationOutcome: null,
       validationStatus: null,
+      createdBeforeVersioning: true,
       groupPopulations: [
         {
           groupId: "Group1",
@@ -1135,6 +1138,7 @@ export const RATIO_EPISODEBASED_WITH_OBS_RESULTS: QdmTestCaseProcessingScenario 
       patientId: "fdbb6404-872b-4d42-92fa-9c9f952da64a",
       hapiOperationOutcome: null,
       validationStatus: null,
+      createdBeforeVersioning: true,
       groupPopulations: [
         {
           groupId: "6540ef82854d323018920e01",
