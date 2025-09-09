@@ -1,7 +1,9 @@
 import React, { useState } from "react";
-import { MadieDialog, Tab, Tabs } from "@madie/madie-design-system/dist/react";
+import { MadieDialog } from "@madie/madie-design-system/dist/react";
 import "styled-components/macro";
-import { Box } from "@mui/system";
+import CalculatorNavTabs from "./CalculatorNavTabs";
+import DurationTab from "./durationTab/DurationTab";
+import { Divider } from "@mui/material";
 
 interface CalculatorDialogProps {
   open: boolean;
@@ -29,31 +31,11 @@ const CalculatorDialog = ({ open, onClose }: CalculatorDialogProps) => {
           "data-testid": "calculation-close-button",
         }}
       >
-        <Tabs
-          type="B"
-          id="calculation-tool-navs"
-          value={activeTab}
-          onChange={(e, v) => {
-            setActiveTab(v);
-          }}
-        >
-          <Tab
-            tabIndex={0}
-            aria-label="Duration/Difference tab panel"
-            type="B"
-            label="Duration/Difference"
-            data-testid="duration-difference-tab"
-            value="duration-difference"
-          />
-          <Tab
-            tabIndex={0}
-            aria-label="Computed Date tab panel"
-            type="B"
-            label="Computed Date"
-            data-testid="computed-date-tab"
-            value="computed-date"
-          />
-        </Tabs>
+        <CalculatorNavTabs activeTab={activeTab} setActiveTab={setActiveTab} />
+        <Divider sx={{ borderColor: "#8c8c8c" }} />
+        <div className="panel-content">
+          <DurationTab />
+        </div>
       </MadieDialog>
     </>
   );
