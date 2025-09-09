@@ -198,7 +198,7 @@ export default function MeasureLanding() {
           sort,
           direction,
           modifiedSearchCriteria,
-          abortController.current.signal
+          abortController.current as AbortController
         );
 
         if (currentRequestId === requestIdRef.current) {
