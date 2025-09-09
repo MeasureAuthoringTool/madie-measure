@@ -13,18 +13,20 @@ import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 dayjs.extend(utc);
 dayjs.utc();
+const OPTIONS = ["years", "months", "weeks", "days"];
+const PRECISION_OPTIONS = OPTIONS.map((ref, i) => (
+  <MenuItem key={`${ref}-${i}`} data-testid={`${ref}-option`} value={ref}>
+    {_.startCase(ref)}
+  </MenuItem>
+));
+
 const DurationTab = () => {
   const [startDate, setStartDate] = React.useState<string | null>(null);
   const [endDate, setEndDate] = React.useState<string | null>(null);
   const [endDateInclusive, setEndDateInclusive] =
     React.useState<boolean>(false);
   const [precision, setPrecision] = React.useState<string>("years");
-  const OPTIONS = ["years", "months", "weeks", "days"];
-  const PRECISION_OPTIONS = OPTIONS.map((ref, i) => (
-    <MenuItem key={`${ref}-${i}`} data-testid={`${ref}-option`} value={ref}>
-      {_.startCase(ref)}
-    </MenuItem>
-  ));
+
   return (
     <div className="duration-tab-container">
       <div className="duration-tab-instructions">
@@ -37,8 +39,6 @@ const DurationTab = () => {
             id="start-date"
             label="Start Date"
             handleDateChange={setStartDate}
-            // error={null}
-            // helperText={null}
             value={startDate}
             textFieldSx={{ width: "160px" }}
             onBlur={() => {}}
@@ -56,8 +56,6 @@ const DurationTab = () => {
             id="end-date"
             label="End Date"
             handleDateChange={setEndDate}
-            // error={null}
-            // helperText={null}
             value={endDate}
             textFieldSx={{ width: "160px" }}
             onBlur={() => {}}
