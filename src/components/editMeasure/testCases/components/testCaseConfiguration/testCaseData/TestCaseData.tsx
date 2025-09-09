@@ -99,11 +99,7 @@ const TestCaseData = (props: TestCaseListProps) => {
         })
         .catch((err) => {
           if (featureFlags?.Locking) {
-            handleToast(
-              "danger",
-              `One or more of the Test Cases are locked by another user. Test Case Dates cannot be shifted.`,
-              true
-            );
+            handleToast("danger", `${err}`, true);
           } else {
             setWarnings((prevState) => [
               ...prevState,
@@ -129,18 +125,7 @@ const TestCaseData = (props: TestCaseListProps) => {
           }
         })
         .catch((err) => {
-          if (
-            featureFlags?.Locking &&
-            err?.Error?.includes("locked by another user")
-          ) {
-            handleToast(
-              "danger",
-              `One or more of the Test Cases are locked by another user. Test Case Dates cannot be shifted.`,
-              true
-            );
-          } else {
-            handleToast("danger", `${err}`, true);
-          }
+          handleToast("danger", `${err}`, true);
         });
     }
     setExecuting(false);

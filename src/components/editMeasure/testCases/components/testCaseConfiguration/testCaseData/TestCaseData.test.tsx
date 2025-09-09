@@ -573,10 +573,13 @@ describe("TestCaseData", () => {
     (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
       Locking: true,
     }));
-    const shiftAllTestCaseDatesApiMock = jest.fn().mockRejectedValueOnce({
-      Error:
-        "One or more of the Test Cases are locked by another user. Test Case Dates cannot be shifted.",
-    });
+    const shiftAllTestCaseDatesApiMock = jest
+      .fn()
+      .mockRejectedValueOnce(
+        new Error(
+          "One or more of the Test Cases are locked by another user. Test Case Dates cannot be shifted."
+        )
+      );
     useTestCaseServiceMock.mockImplementationOnce(() => {
       return {
         shiftAllQdmTestCaseDates: shiftAllTestCaseDatesApiMock,
@@ -622,10 +625,13 @@ describe("TestCaseData", () => {
     }));
     measureStore.state.mockImplementationOnce(() => qiCoreMeasure);
 
-    const shiftAllTestCaseDatesApiMock = jest.fn().mockRejectedValueOnce({
-      Error:
-        "One or more of the Test Cases are locked by another user. Test Case Dates cannot be shifted.",
-    });
+    const shiftAllTestCaseDatesApiMock = jest
+      .fn()
+      .mockRejectedValueOnce(
+        new Error(
+          "One or more of the Test Cases are locked by another user. Test Case Dates cannot be shifted."
+        )
+      );
     useTestCaseServiceMock.mockImplementationOnce(() => {
       return {
         shiftAllQiCoreTestCaseDates: shiftAllTestCaseDatesApiMock,
