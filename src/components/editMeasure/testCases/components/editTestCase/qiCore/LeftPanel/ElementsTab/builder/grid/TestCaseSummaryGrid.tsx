@@ -17,15 +17,15 @@ import { getAttributes, getMaxAttributes } from "./TestCaseSummaryGridUtils";
 interface TestCaseSummaryGridProps {
   onRowEdit: (row: any) => void;
   onRowDelete: (row: any) => void;
-  bundle: any;
+  entry: any;
 }
 
 const TestCaseSummaryGrid = ({
-  bundle,
+  entry,
   onRowEdit,
   onRowDelete,
 }: TestCaseSummaryGridProps) => {
-  const data = React.useMemo(() => bundle?.entry ?? [], [bundle]);
+  const data = React.useMemo(() => entry ?? [], [entry]);
   const maxAttributes = getMaxAttributes(data);
   const attributeColumns: ColumnDef<any>[] = Array.from(
     { length: maxAttributes },
