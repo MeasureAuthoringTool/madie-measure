@@ -8,8 +8,9 @@ import { TestCase, Measure } from "@madie/madie-models";
 import { useFeatureFlags } from "@madie/madie-util";
 import useTestCaseServiceApi, {
   TestCaseServiceApi,
+  SHIFT_TEST_CASE_DATES_ERROR,
+  SHIFT_TEST_CASE_DATES_ERROR_TEST_CASE_LOCKED,
 } from "../../../../api/useTestCaseServiceApi";
-import { HttpStatusCode } from "axios";
 
 jest.mock("@madie/madie-util", () => ({
   useOktaTokens: () => ({
@@ -204,7 +205,9 @@ describe("Shift Test Case Dates Dialog", () => {
   });
 
   test("Should not shift dates for qdm measure and shows error", async () => {
-    const shiftQdmTestCaseDates = jest.fn().mockRejectedValueOnce("error");
+    const shiftQdmTestCaseDates = jest
+      .fn()
+      .mockRejectedValueOnce(new Error(SHIFT_TEST_CASE_DATES_ERROR));
     useTestCaseServiceMock.mockImplementationOnce(() => {
       return {
         shiftQdmTestCaseDates: shiftQdmTestCaseDates,
@@ -252,9 +255,7 @@ describe("Shift Test Case Dates Dialog", () => {
         expect(setToastType).toBeCalledTimes(1);
         expect(setToastType).toBeCalledWith("danger");
         expect(setToastMessage).toBeCalledTimes(1);
-        expect(setToastMessage).toBeCalledWith(
-          `Unable to shift test Case dates. Please try again. If the issue continues, please contact helpdesk.`
-        );
+        expect(setToastMessage).toBeCalledWith(SHIFT_TEST_CASE_DATES_ERROR);
         expect(setWarnings).not.toBeCalledTimes(1);
       });
     });
@@ -381,7 +382,9 @@ describe("Shift Test Case Dates Dialog", () => {
   });
 
   test("Should not shift dates for qicore measure and show error toast", async () => {
-    const shiftQiCoreTestCaseDates = jest.fn().mockRejectedValueOnce("error");
+    const shiftQiCoreTestCaseDates = jest
+      .fn()
+      .mockRejectedValueOnce(new Error(SHIFT_TEST_CASE_DATES_ERROR));
     useTestCaseServiceMock.mockImplementationOnce(() => {
       return {
         shiftQiCoreTestCaseDates: shiftQiCoreTestCaseDates,
@@ -429,9 +432,7 @@ describe("Shift Test Case Dates Dialog", () => {
         expect(setToastType).toBeCalledTimes(1);
         expect(setToastType).toBeCalledWith("danger");
         expect(setToastMessage).toBeCalledTimes(1);
-        expect(setToastMessage).toBeCalledWith(
-          `Unable to shift test Case dates. Please try again. If the issue continues, please contact helpdesk.`
-        );
+        expect(setToastMessage).toBeCalledWith(SHIFT_TEST_CASE_DATES_ERROR);
         expect(setWarnings).not.toBeCalledTimes(1);
       });
     });
@@ -501,10 +502,11 @@ describe("Shift Test Case Dates Dialog", () => {
     (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
       Locking: true,
     }));
-    const shiftTestCaseDatesApiMock = jest.fn().mockRejectedValueOnce({
-      Error:
-        "One or more of the Test Cases are locked by another user. Test Case Dates cannot be shifted.",
-    });
+    const shiftTestCaseDatesApiMock = jest
+      .fn()
+      .mockRejectedValueOnce(
+        new Error(SHIFT_TEST_CASE_DATES_ERROR_TEST_CASE_LOCKED)
+      );
     useTestCaseServiceMock.mockImplementationOnce(() => {
       return {
         shiftQdmTestCaseDates: shiftTestCaseDatesApiMock,
@@ -553,7 +555,7 @@ describe("Shift Test Case Dates Dialog", () => {
         expect(setToastType).toBeCalledWith("danger");
         expect(setToastMessage).toBeCalledTimes(1);
         expect(setToastMessage).toBeCalledWith(
-          `One or more of the Test Cases are locked by another user. Test Case Dates cannot be shifted.`
+          SHIFT_TEST_CASE_DATES_ERROR_TEST_CASE_LOCKED
         );
         expect(setWarnings).not.toBeCalledTimes(1);
       });
@@ -564,10 +566,11 @@ describe("Shift Test Case Dates Dialog", () => {
     (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
       Locking: true,
     }));
-    const shiftQiCoreTestCaseDates = jest.fn().mockRejectedValueOnce({
-      Error:
-        "One or more of the Test Cases are locked by another user. Test Case Dates cannot be shifted.",
-    });
+    const shiftQiCoreTestCaseDates = jest
+      .fn()
+      .mockRejectedValueOnce(
+        new Error(SHIFT_TEST_CASE_DATES_ERROR_TEST_CASE_LOCKED)
+      );
     useTestCaseServiceMock.mockImplementationOnce(() => {
       return {
         shiftQiCoreTestCaseDates: shiftQiCoreTestCaseDates,
@@ -616,7 +619,7 @@ describe("Shift Test Case Dates Dialog", () => {
         expect(setToastType).toBeCalledWith("danger");
         expect(setToastMessage).toBeCalledTimes(1);
         expect(setToastMessage).toBeCalledWith(
-          `One or more of the Test Cases are locked by another user. Test Case Dates cannot be shifted.`
+          SHIFT_TEST_CASE_DATES_ERROR_TEST_CASE_LOCKED
         );
         expect(setWarnings).not.toBeCalledTimes(1);
       });

@@ -66,18 +66,7 @@ const ShiftDatesDialog = ({
         .catch((err) => {
           setToastOpen(true);
           setToastType("danger");
-          if (
-            featureFlags?.Locking &&
-            err?.Error?.includes("locked by another user")
-          ) {
-            setToastMessage(
-              `One or more of the Test Cases are locked by another user. Test Case Dates cannot be shifted.`
-            );
-          } else {
-            setToastMessage(
-              `Unable to shift test Case dates. Please try again. If the issue continues, please contact helpdesk.`
-            );
-          }
+          setToastMessage(err?.message);
         });
     } else {
       testCaseService.current
@@ -98,18 +87,7 @@ const ShiftDatesDialog = ({
         .catch((err) => {
           setToastOpen(true);
           setToastType("danger");
-          if (
-            featureFlags?.Locking &&
-            err?.Error?.includes("locked by another user")
-          ) {
-            setToastMessage(
-              `One or more of the Test Cases are locked by another user. Test Case Dates cannot be shifted.`
-            );
-          } else {
-            setToastMessage(
-              `Unable to shift test Case dates. Please try again. If the issue continues, please contact helpdesk.`
-            );
-          }
+          setToastMessage(err?.message);
         });
     }
     formik.resetForm();

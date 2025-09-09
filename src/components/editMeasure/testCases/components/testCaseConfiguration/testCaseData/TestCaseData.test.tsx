@@ -16,9 +16,9 @@ import {
 import userEvent from "@testing-library/user-event";
 import useTestCaseServiceApi, {
   TestCaseServiceApi,
+  SHIFT_TEST_CASE_DATES_ERROR_TEST_CASE_LOCKED,
 } from "../../../api/useTestCaseServiceApi";
 import { act } from "react-dom/test-utils";
-import { HttpStatusCode } from "axios";
 
 const mockServiceConfig = {
   measureService: { baseUrl: "measure.url" },
@@ -576,9 +576,7 @@ describe("TestCaseData", () => {
     const shiftAllTestCaseDatesApiMock = jest
       .fn()
       .mockRejectedValueOnce(
-        new Error(
-          "One or more of the Test Cases are locked by another user. Test Case Dates cannot be shifted."
-        )
+        new Error(SHIFT_TEST_CASE_DATES_ERROR_TEST_CASE_LOCKED)
       );
     useTestCaseServiceMock.mockImplementationOnce(() => {
       return {
@@ -613,9 +611,7 @@ describe("TestCaseData", () => {
     await waitFor(() =>
       expect(
         screen.getByTestId("shift-all-test-case-dates-generic-error-text")
-      ).toHaveTextContent(
-        "One or more of the Test Cases are locked by another user. Test Case Dates cannot be shifted."
-      )
+      ).toHaveTextContent(SHIFT_TEST_CASE_DATES_ERROR_TEST_CASE_LOCKED)
     );
   });
 
@@ -628,9 +624,7 @@ describe("TestCaseData", () => {
     const shiftAllTestCaseDatesApiMock = jest
       .fn()
       .mockRejectedValueOnce(
-        new Error(
-          "One or more of the Test Cases are locked by another user. Test Case Dates cannot be shifted."
-        )
+        new Error(SHIFT_TEST_CASE_DATES_ERROR_TEST_CASE_LOCKED)
       );
     useTestCaseServiceMock.mockImplementationOnce(() => {
       return {
@@ -665,9 +659,7 @@ describe("TestCaseData", () => {
     await waitFor(() =>
       expect(
         screen.getByTestId("shift-all-test-case-dates-generic-error-text")
-      ).toHaveTextContent(
-        "One or more of the Test Cases are locked by another user. Test Case Dates cannot be shifted."
-      )
+      ).toHaveTextContent(SHIFT_TEST_CASE_DATES_ERROR_TEST_CASE_LOCKED)
     );
   });
 });

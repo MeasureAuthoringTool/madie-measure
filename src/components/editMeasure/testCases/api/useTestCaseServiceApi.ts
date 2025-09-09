@@ -39,6 +39,11 @@ export interface CopyResult {
   didClearExpectedValues: boolean;
 }
 
+export const SHIFT_TEST_CASE_DATES_ERROR =
+  "Unable to shift Test Case Dates. Please try again. If the issue continues, please contact helpdesk.";
+export const SHIFT_TEST_CASE_DATES_ERROR_TEST_CASE_LOCKED =
+  "One or more of the Test Cases are locked by another user. Test Case Dates cannot be shifted.";
+
 export class TestCaseServiceApi {
   constructor(private baseUrl: string, private getAccessToken: () => string) {}
 
@@ -310,14 +315,14 @@ export class TestCaseServiceApi {
         }
       );
       if (!response || !response.data) {
-        throw new Error(`Unable to shift test case dates`);
+        throw new Error(SHIFT_TEST_CASE_DATES_ERROR);
       }
       return response.data;
     } catch (err) {
       const message =
         err.response?.status === 409
-          ? `One or more of the Test Cases are locked by another user. Test Case Dates cannot be shifted.`
-          : `Unable to shift test case dates`;
+          ? SHIFT_TEST_CASE_DATES_ERROR_TEST_CASE_LOCKED
+          : SHIFT_TEST_CASE_DATES_ERROR;
       throw new Error(message);
     }
   }
@@ -339,14 +344,14 @@ export class TestCaseServiceApi {
         }
       );
       if (!response || !response.data) {
-        throw new Error(`Unable to shift test case dates`);
+        throw new Error(SHIFT_TEST_CASE_DATES_ERROR);
       }
       return response.data;
     } catch (err) {
       const message =
         err.response?.status === 409
-          ? `One or more of the Test Cases are locked by another user. Test Case Dates cannot be shifted.`
-          : `Unable to shift test case dates`;
+          ? SHIFT_TEST_CASE_DATES_ERROR_TEST_CASE_LOCKED
+          : SHIFT_TEST_CASE_DATES_ERROR;
       throw new Error(message);
     }
   }
@@ -363,14 +368,14 @@ export class TestCaseServiceApi {
         }
       );
       if (!response || !response.data) {
-        throw new Error(`Unable to shift test case dates`);
+        throw new Error(SHIFT_TEST_CASE_DATES_ERROR);
       }
       return response.data;
     } catch (err) {
       const message =
         err.response?.status === 409
-          ? `One or more of the Test Cases are locked by another user. Test Case Dates cannot be shifted.`
-          : `Unable to shift test case dates`;
+          ? SHIFT_TEST_CASE_DATES_ERROR_TEST_CASE_LOCKED
+          : SHIFT_TEST_CASE_DATES_ERROR;
       throw new Error(message);
     }
   }
@@ -391,14 +396,14 @@ export class TestCaseServiceApi {
         }
       );
       if (!response || !response.data) {
-        throw new Error(`Unable to shift test case dates`);
+        throw new Error(SHIFT_TEST_CASE_DATES_ERROR);
       }
       return response.data;
     } catch (err) {
       const message =
         err.response?.status === 409
-          ? `One or more of the Test Cases are locked by another user. Test Case Dates cannot be shifted.`
-          : `Unable to shift test case dates`;
+          ? SHIFT_TEST_CASE_DATES_ERROR_TEST_CASE_LOCKED
+          : SHIFT_TEST_CASE_DATES_ERROR;
       throw new Error(message);
     }
   }
