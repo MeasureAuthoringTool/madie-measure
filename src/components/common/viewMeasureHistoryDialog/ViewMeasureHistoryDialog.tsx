@@ -146,7 +146,11 @@ export default function ViewMeasureHistoryDialog(
         onClose,
         open,
       }}
-      cancelButtonProps={null}
+      cancelButtonProps={{
+        variant: "outline",
+        cancelText: "Close",
+        "data-testid": "measure-history-close-button",
+      }}
       continueButtonProps={null}
       maxWidth={"lg"}
     >
