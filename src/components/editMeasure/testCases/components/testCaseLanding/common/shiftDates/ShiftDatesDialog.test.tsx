@@ -9,6 +9,7 @@ import { useFeatureFlags } from "@madie/madie-util";
 import useTestCaseServiceApi, {
   TestCaseServiceApi,
 } from "../../../../api/useTestCaseServiceApi";
+import { HttpStatusCode } from "axios";
 
 jest.mock("@madie/madie-util", () => ({
   useOktaTokens: () => ({
@@ -441,13 +442,9 @@ describe("Shift Test Case Dates Dialog", () => {
       Locking: true,
     }));
     const shiftTestCaseDatesApiMock = jest.fn().mockResolvedValueOnce([]);
-    const lockAllTestCasesApiMock = jest.fn().mockResolvedValueOnce(true);
-    const unlockAllTestCasesApiMock = jest.fn().mockResolvedValueOnce(true);
     useTestCaseServiceMock.mockImplementationOnce(() => {
       return {
         shiftQdmTestCaseDates: shiftTestCaseDatesApiMock,
-        lockAllTestCases: lockAllTestCasesApiMock,
-        unlockAllTestCases: unlockAllTestCasesApiMock,
       } as unknown as TestCaseServiceApi;
     });
 
@@ -488,8 +485,6 @@ describe("Shift Test Case Dates Dialog", () => {
 
       await waitFor(() => {
         expect(shiftTestCaseDatesApiMock).toBeCalledTimes(1);
-        expect(lockAllTestCasesApiMock).toBeCalledTimes(1);
-        expect(unlockAllTestCasesApiMock).toBeCalledTimes(1);
         expect(setToastOpen).toBeCalledTimes(1);
         expect(setToastType).toBeCalledTimes(1);
         expect(setToastType).toBeCalledWith("success");
@@ -502,16 +497,17 @@ describe("Shift Test Case Dates Dialog", () => {
     });
   });
 
-  it("should not shift test case dates when locking returns false", async () => {
+  it("should not shift test case dates when locking failed", async () => {
     (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
       Locking: true,
     }));
-    const shiftTestCaseDatesApiMock = jest.fn().mockResolvedValueOnce([]);
-    const lockAllTestCasesApiMock = jest.fn().mockResolvedValueOnce(false);
+    const shiftTestCaseDatesApiMock = jest.fn().mockRejectedValueOnce({
+      Error:
+        "One or more of the Test Cases are locked by another user. Test Case Dates cannot be shifted.",
+    });
     useTestCaseServiceMock.mockImplementationOnce(() => {
       return {
         shiftQdmTestCaseDates: shiftTestCaseDatesApiMock,
-        lockAllTestCases: lockAllTestCasesApiMock,
       } as unknown as TestCaseServiceApi;
     });
 
@@ -551,8 +547,7 @@ describe("Shift Test Case Dates Dialog", () => {
       userEvent.click(saveBtn);
 
       await waitFor(() => {
-        expect(shiftTestCaseDatesApiMock).not.toBeCalledTimes(1);
-        expect(lockAllTestCasesApiMock).toBeCalledTimes(1);
+        expect(shiftTestCaseDatesApiMock).toBeCalledTimes(1);
         expect(setToastOpen).toBeCalledTimes(1);
         expect(setToastType).toBeCalledTimes(1);
         expect(setToastType).toBeCalledWith("danger");
@@ -565,16 +560,17 @@ describe("Shift Test Case Dates Dialog", () => {
     });
   });
 
-  it("should not shift test case dates when locking fails", async () => {
+  it("should display locking error for qicore", async () => {
     (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
       Locking: true,
     }));
-    const shiftTestCaseDatesApiMock = jest.fn().mockResolvedValueOnce([]);
-    const lockAllTestCasesApiMock = jest.fn().mockRejectedValueOnce("error");
+    const shiftQiCoreTestCaseDates = jest.fn().mockRejectedValueOnce({
+      Error:
+        "One or more of the Test Cases are locked by another user. Test Case Dates cannot be shifted.",
+    });
     useTestCaseServiceMock.mockImplementationOnce(() => {
       return {
-        shiftQdmTestCaseDates: shiftTestCaseDatesApiMock,
-        lockAllTestCases: lockAllTestCasesApiMock,
+        shiftQiCoreTestCaseDates: shiftQiCoreTestCaseDates,
       } as unknown as TestCaseServiceApi;
     });
 
@@ -590,7 +586,7 @@ describe("Shift Test Case Dates Dialog", () => {
           onClose={onClose}
           canEdit={true}
           testCases={testCases}
-          measure={measure}
+          measure={qiCoreMeasure}
           setWarnings={setWarnings}
           setToastOpen={setToastOpen}
           setToastType={setToastType}
@@ -614,78 +610,15 @@ describe("Shift Test Case Dates Dialog", () => {
       userEvent.click(saveBtn);
 
       await waitFor(() => {
-        expect(shiftTestCaseDatesApiMock).not.toBeCalledTimes(1);
-        expect(lockAllTestCasesApiMock).toBeCalledTimes(1);
-        expect(setToastOpen).not.toBeCalledTimes(1);
-        expect(setToastType).not.toBeCalledTimes(1);
-        expect(setToastMessage).not.toBeCalledTimes(1);
-        expect(setWarnings).toBeCalledTimes(1);
-      });
-    });
-  });
-
-  it("should handle unlocking failure", async () => {
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-      Locking: true,
-    }));
-    const shiftTestCaseDatesApiMock = jest.fn().mockResolvedValueOnce([]);
-    const lockAllTestCasesApiMock = jest.fn().mockResolvedValueOnce(true);
-    const unlockAllTestCasesApiMock = jest.fn().mockRejectedValueOnce("error");
-    useTestCaseServiceMock.mockImplementationOnce(() => {
-      return {
-        shiftQdmTestCaseDates: shiftTestCaseDatesApiMock,
-        lockAllTestCases: lockAllTestCasesApiMock,
-        unlockAllTestCases: unlockAllTestCasesApiMock,
-      } as unknown as TestCaseServiceApi;
-    });
-
-    const onClose = jest.fn();
-    const setToastOpen = jest.fn();
-    const setToastType = jest.fn();
-    const setToastMessage = jest.fn();
-    const setWarnings = jest.fn();
-    await act(async () => {
-      const { findByTestId } = render(
-        <ShiftDatesDialog
-          open={true}
-          onClose={onClose}
-          canEdit={true}
-          testCases={testCases}
-          measure={measure}
-          setWarnings={setWarnings}
-          setToastOpen={setToastOpen}
-          setToastType={setToastType}
-          setToastMessage={setToastMessage}
-        />
-      );
-
-      const shiftDatesInput = (await findByTestId(
-        "shift-dates-input"
-      )) as HTMLInputElement;
-      expect(shiftDatesInput).toBeInTheDocument();
-
-      const saveBtn = await findByTestId("shift-dates-save-button");
-      expect(saveBtn).toBeInTheDocument();
-      expect(saveBtn).not.toBeEnabled();
-
-      userEvent.type(shiftDatesInput, "1");
-      expect(shiftDatesInput.value).toBe("1");
-      expect(saveBtn).toBeEnabled();
-
-      userEvent.click(saveBtn);
-
-      await waitFor(() => {
-        expect(shiftTestCaseDatesApiMock).toBeCalledTimes(1);
-        expect(lockAllTestCasesApiMock).toBeCalledTimes(1);
-        expect(unlockAllTestCasesApiMock).toBeCalledTimes(1);
+        expect(shiftQiCoreTestCaseDates).toBeCalledTimes(1);
         expect(setToastOpen).toBeCalledTimes(1);
         expect(setToastType).toBeCalledTimes(1);
-        expect(setToastType).toBeCalledWith("success");
+        expect(setToastType).toBeCalledWith("danger");
         expect(setToastMessage).toBeCalledTimes(1);
         expect(setToastMessage).toBeCalledWith(
-          `All Test Case dates successfully shifted.`
+          `One or more of the Test Cases are locked by another user. Test Case Dates cannot be shifted.`
         );
-        expect(setWarnings).not.toBeCalledTimes(2);
+        expect(setWarnings).not.toBeCalledTimes(1);
       });
     });
   });

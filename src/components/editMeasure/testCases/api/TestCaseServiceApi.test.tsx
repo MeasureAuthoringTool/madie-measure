@@ -326,6 +326,39 @@ describe("TestCaseServiceApi Tests", () => {
     }
   });
 
+  it("should handle shiftQdmTestCaseDates failure with lock exception 409", async () => {
+    const responseDto = {
+      response: {
+        status: 409,
+        error: "LockNotAcquired",
+        message: "Error",
+      },
+    };
+
+    axios.put = jest.fn().mockRejectedValueOnce(responseDto);
+
+    const testCase: TestCase = {
+      id: "1234",
+      json: "date1",
+    } as TestCase;
+
+    try {
+      const result = await testCaseService.shiftQdmTestCaseDates(
+        "testMeasureId",
+        [testCase.id],
+        1
+      );
+      expect(axios.put).toBeCalledTimes(1);
+      expect(result).not.toEqual(testCase);
+    } catch (err) {
+      expect(err).toEqual(
+        new Error(
+          "One or more of the Test Cases are locked by another user. Test Case Dates cannot be shifted."
+        )
+      );
+    }
+  });
+
   it("should shiftAllQdmTestCaseDates successfully", async () => {
     const responseDto: TestCase[] = [
       {
@@ -397,8 +430,73 @@ describe("TestCaseServiceApi Tests", () => {
     }
   });
 
+  it("should handle shiftQiCoreTestCaseDates failure with lock exception 409", async () => {
+    const responseDto = {
+      response: {
+        status: 409,
+        error: "LockNotAcquired",
+        message: "Error",
+      },
+    };
+
+    axios.put = jest.fn().mockRejectedValueOnce(responseDto);
+
+    const testCases: TestCase[] = [
+      {
+        id: "1234",
+        json: "date1",
+      },
+    ] as TestCase[];
+
+    try {
+      const result = await testCaseService.shiftQiCoreTestCaseDates(
+        "testMeasureId",
+        ["testCaseId1"],
+        1
+      );
+      expect(axios.get).toBeCalledTimes(1);
+      expect(result[0]).not.toEqual(testCases[0]);
+    } catch (err) {
+      expect(err).toEqual(
+        new Error(
+          "One or more of the Test Cases are locked by another user. Test Case Dates cannot be shifted."
+        )
+      );
+    }
+  });
+
   it("should handle shiftAllQdmTestCaseDates failure with no response", async () => {
     axios.put = jest.fn().mockResolvedValueOnce(null);
+
+    const testCases: TestCase[] = [
+      {
+        id: "1234",
+        json: "date1",
+      },
+    ] as TestCase[];
+
+    try {
+      const result = await testCaseService.shiftAllQdmTestCaseDates(
+        "testMeasureId",
+        1
+      );
+      expect(axios.get).toBeCalledTimes(1);
+      expect(result[0]).not.toEqual(testCases[0]);
+    } catch (err) {
+      expect(err).toEqual(new Error("Unable to shift test case dates"));
+    }
+  });
+
+  it("should handle shiftAllQdmTestCaseDates failure with 409", async () => {
+    const responseDto = {
+      response: {
+        status: 409,
+        error: "LockNotAcquired",
+        message: "Error",
+      },
+    };
+
+    axios.put = jest.fn().mockRejectedValueOnce(responseDto);
 
     const testCases: TestCase[] = [
       {
@@ -440,6 +538,40 @@ describe("TestCaseServiceApi Tests", () => {
       expect(result[0]).not.toEqual(testCases[0]);
     } catch (err) {
       expect(err).toEqual(new Error("Unable to shift test case dates"));
+    }
+  });
+
+  it("should handle shiftAllQiCoreTestCaseDates failure with 409", async () => {
+    const responseDto = {
+      response: {
+        status: 409,
+        error: "LockNotAcquired",
+        message: "Error",
+      },
+    };
+
+    axios.put = jest.fn().mockRejectedValueOnce(responseDto);
+
+    const testCases: TestCase[] = [
+      {
+        id: "1234",
+        json: "date1",
+      },
+    ] as TestCase[];
+
+    try {
+      const result = await testCaseService.shiftAllQiCoreTestCaseDates(
+        "testMeasureId",
+        1
+      );
+      expect(axios.get).toBeCalledTimes(1);
+      expect(result[0]).not.toEqual(testCases[0]);
+    } catch (err) {
+      expect(err).toEqual(
+        new Error(
+          "One or more of the Test Cases are locked by another user. Test Case Dates cannot be shifted."
+        )
+      );
     }
   });
 
@@ -502,62 +634,6 @@ describe("TestCaseServiceApi Tests", () => {
 
     try {
       const result = await testCaseService.unlockTestCase("testCaseId");
-      expect(axios.delete).toBeCalledTimes(1);
-      expect(result).not.toBe(response);
-    } catch (err) {
-      expect(err).not.toBeNull();
-    }
-  });
-
-  it("should lockAllTestCases successfully", async () => {
-    axios.post = jest.fn().mockResolvedValueOnce({ data: true });
-
-    const result = await testCaseService.lockAllTestCases("testMeasureId", [
-      "testCaseId",
-    ]);
-    expect(axios.post).toBeCalledTimes(1);
-    expect(result).toBe(true);
-  });
-
-  it("should handle lockAllTestCases failure", async () => {
-    const response = {
-      status: 400,
-      error: "Bad Request",
-      message: "Error",
-    };
-
-    axios.post = jest.fn().mockRejectedValueOnce({ error: response });
-
-    try {
-      const result = await testCaseService.lockAllTestCases("testMeasureId", [
-        "testCaseId",
-      ]);
-      expect(axios.post).toBeCalledTimes(1);
-      expect(result).not.toBe(response);
-    } catch (err) {
-      expect(err).not.toBeNull();
-    }
-  });
-
-  it("should unlockAllTestCases successfully", async () => {
-    axios.delete = jest.fn().mockResolvedValueOnce({ data: true });
-
-    const result = await testCaseService.unlockAllTestCases(["testCaseId"]);
-    expect(axios.delete).toBeCalledTimes(1);
-    expect(result).toBe(true);
-  });
-
-  it("should handle unlockAllTestCases failure", async () => {
-    const response = {
-      status: 400,
-      error: "Bad Request",
-      message: "Error",
-    };
-
-    axios.delete = jest.fn().mockRejectedValueOnce({ error: response });
-
-    try {
-      const result = await testCaseService.unlockAllTestCases(["testCaseId"]);
       expect(axios.delete).toBeCalledTimes(1);
       expect(result).not.toBe(response);
     } catch (err) {

@@ -18,6 +18,7 @@ import useTestCaseServiceApi, {
   TestCaseServiceApi,
 } from "../../../api/useTestCaseServiceApi";
 import { act } from "react-dom/test-utils";
+import { HttpStatusCode } from "axios";
 
 const mockServiceConfig = {
   measureService: { baseUrl: "measure.url" },
@@ -493,8 +494,6 @@ describe("TestCaseData", () => {
     useTestCaseServiceMock.mockImplementationOnce(() => {
       return {
         shiftAllQdmTestCaseDates: shiftAllTestCaseDatesApiMock,
-        lockAllTestCases: jest.fn().mockResolvedValueOnce(true),
-        unlockAllTestCases: jest.fn().mockResolvedValueOnce(true),
       } as unknown as TestCaseServiceApi;
     });
 
@@ -542,8 +541,6 @@ describe("TestCaseData", () => {
     useTestCaseServiceMock.mockImplementationOnce(() => {
       return {
         shiftAllQiCoreTestCaseDates: shiftAllTestCaseDatesApiMock,
-        lockAllTestCases: jest.fn().mockResolvedValueOnce(true),
-        unlockAllTestCases: jest.fn().mockResolvedValueOnce(true),
       } as unknown as TestCaseServiceApi;
     });
 
@@ -577,17 +574,12 @@ describe("TestCaseData", () => {
       Locking: true,
     }));
     const shiftAllTestCaseDatesApiMock = jest.fn().mockRejectedValueOnce({
-      response: {
-        data: {
-          message: "something went wrong",
-        },
-      },
+      Error:
+        "One or more of the Test Cases are locked by another user. Test Case Dates cannot be shifted.",
     });
     useTestCaseServiceMock.mockImplementationOnce(() => {
       return {
         shiftAllQdmTestCaseDates: shiftAllTestCaseDatesApiMock,
-        lockAllTestCases: jest.fn().mockResolvedValueOnce(true),
-        unlockAllTestCases: jest.fn().mockRejectedValueOnce("error"),
       } as unknown as TestCaseServiceApi;
     });
 
@@ -612,40 +604,9 @@ describe("TestCaseData", () => {
     act(() => {
       fireEvent.click(saveButton);
     });
-    await waitFor(() => expect(mockWarning.mock.calls).toHaveLength(2));
-  });
 
-  it("should not shift dates and display an error message when unable to lock test cases", async () => {
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-      Locking: true,
-    }));
-    useTestCaseServiceMock.mockImplementationOnce(() => {
-      return {
-        lockAllTestCases: jest.fn().mockResolvedValueOnce(false),
-      } as unknown as TestCaseServiceApi;
-    });
+    await waitFor(() => expect(mockWarning.mock.calls).toHaveLength(0));
 
-    renderTestCaseDataComponent();
-    const shiftTestCaseDatesInput = screen.getByRole("spinbutton", {
-      name: "Shift Test Case Dates",
-    }) as HTMLInputElement;
-    const saveButton = screen.getByRole("button", { name: "Save" });
-    const discardButton = screen.getByRole("button", {
-      name: "Discard Changes",
-    });
-    expect(shiftTestCaseDatesInput).not.toBeDisabled();
-    expect(saveButton).toBeDisabled();
-    expect(discardButton).toBeDisabled();
-
-    userEvent.type(shiftTestCaseDatesInput, "5");
-
-    expect(shiftTestCaseDatesInput.value).toBe("5");
-    expect(saveButton).toBeEnabled();
-    expect(discardButton).toBeEnabled();
-
-    act(() => {
-      fireEvent.click(saveButton);
-    });
     await waitFor(() =>
       expect(
         screen.getByTestId("shift-all-test-case-dates-generic-error-text")
@@ -655,15 +616,19 @@ describe("TestCaseData", () => {
     );
   });
 
-  it("should not shift dates and display an error message when locking test cases throws exception", async () => {
+  it("should display an error message when unable to shift all test case dates due to locking for qicore", async () => {
     (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
       Locking: true,
     }));
+    measureStore.state.mockImplementationOnce(() => qiCoreMeasure);
+
+    const shiftAllTestCaseDatesApiMock = jest.fn().mockRejectedValueOnce({
+      Error:
+        "One or more of the Test Cases are locked by another user. Test Case Dates cannot be shifted.",
+    });
     useTestCaseServiceMock.mockImplementationOnce(() => {
       return {
-        lockAllTestCases: jest
-          .fn()
-          .mockRejectedValueOnce("something went wrong"),
+        shiftAllQiCoreTestCaseDates: shiftAllTestCaseDatesApiMock,
       } as unknown as TestCaseServiceApi;
     });
 
@@ -688,6 +653,15 @@ describe("TestCaseData", () => {
     act(() => {
       fireEvent.click(saveButton);
     });
-    await waitFor(() => expect(mockWarning.mock.calls).toHaveLength(1));
+
+    await waitFor(() => expect(mockWarning.mock.calls).toHaveLength(0));
+
+    await waitFor(() =>
+      expect(
+        screen.getByTestId("shift-all-test-case-dates-generic-error-text")
+      ).toHaveTextContent(
+        "One or more of the Test Cases are locked by another user. Test Case Dates cannot be shifted."
+      )
+    );
   });
 });

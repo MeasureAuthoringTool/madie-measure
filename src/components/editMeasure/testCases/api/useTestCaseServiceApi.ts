@@ -314,7 +314,10 @@ export class TestCaseServiceApi {
       }
       return response.data;
     } catch (err) {
-      const message = `Unable to shift test case dates`;
+      const message =
+        err.response?.status === 409
+          ? `One or more of the Test Cases are locked by another user. Test Case Dates cannot be shifted.`
+          : `Unable to shift test case dates`;
       throw new Error(message);
     }
   }
@@ -340,7 +343,10 @@ export class TestCaseServiceApi {
       }
       return response.data;
     } catch (err) {
-      const message = `Unable to shift test case dates`;
+      const message =
+        err.response?.status === 409
+          ? `One or more of the Test Cases are locked by another user. Test Case Dates cannot be shifted.`
+          : `Unable to shift test case dates`;
       throw new Error(message);
     }
   }
@@ -357,6 +363,11 @@ export class TestCaseServiceApi {
     );
     if (!response || !response.data) {
       throw new Error(`Unable to shift test case dates`);
+    }
+    if (response.status === 409) {
+      throw new Error(
+        `One or more of the Test Cases are locked by another user. Test Case Dates cannot be shifted.`
+      );
     }
     return response.data;
   }
@@ -381,7 +392,10 @@ export class TestCaseServiceApi {
       }
       return response.data;
     } catch (err) {
-      const message = `Unable to shift test case dates`;
+      const message =
+        err.response?.status === 409
+          ? `One or more of the Test Cases are locked by another user. Test Case Dates cannot be shifted.`
+          : `Unable to shift test case dates`;
       throw new Error(message);
     }
   }
@@ -433,43 +447,6 @@ export class TestCaseServiceApi {
       const response = await axios.delete<String>(
         `${this.baseUrl}/test-cases/${testCaseId}/unlock`,
         {
-          headers: {
-            Authorization: `Bearer ${this.getAccessToken()}`,
-          },
-        }
-      );
-      return response.data;
-    } catch (error) {
-      throw new Error(error);
-    }
-  }
-
-  async lockAllTestCases(
-    measureId: string,
-    testCaseIds: string[]
-  ): Promise<any> {
-    try {
-      const response = await axios.post<String[]>(
-        `${this.baseUrl}/measures/${measureId}/test-cases/lockAll`,
-        testCaseIds,
-        {
-          headers: {
-            Authorization: `Bearer ${this.getAccessToken()}`,
-          },
-        }
-      );
-      return response.data;
-    } catch (error) {
-      throw new Error(error);
-    }
-  }
-
-  async unlockAllTestCases(testCaseIds: string[]): Promise<any> {
-    try {
-      const response = await axios.delete<String[]>(
-        `${this.baseUrl}/test-cases/unlockAll`,
-        {
-          data: [...testCaseIds],
           headers: {
             Authorization: `Bearer ${this.getAccessToken()}`,
           },

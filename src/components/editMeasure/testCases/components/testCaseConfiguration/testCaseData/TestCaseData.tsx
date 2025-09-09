@@ -80,17 +80,7 @@ const TestCaseData = (props: TestCaseListProps) => {
     setToastOpen(open);
   };
 
-  const unlockAllTestCases = () => {
-    const testCaseIds = measure.testCases.map((testCase) => testCase.id);
-    testCaseService.current
-      .unlockAllTestCases(testCaseIds)
-      .then((successResponse) => {})
-      .catch((err) => {
-        setWarnings((prevState) => [...prevState, err]);
-      });
-  };
-
-  const shiftDates = () => {
+  const handleSubmit = async (values) => {
     //TODO. could we make the APIs return the same structure so we don't need two separate error handlers?
     // sure Greg ...  Tech Debt MAT-8377
     //  OTOH, I think there is ticket for just getting rid of the TestCaseData testShiftCase https://jira.cms.gov/browse/MAT-8379
@@ -108,13 +98,21 @@ const TestCaseData = (props: TestCaseListProps) => {
           );
         })
         .catch((err) => {
-          setWarnings((prevState) => [
-            ...prevState,
-            err?.response?.data?.message,
-          ]);
-        })
-        .finally(() => {
-          setExecuting(false);
+          if (
+            featureFlags?.Locking &&
+            err?.Error?.includes("locked by another user")
+          ) {
+            handleToast(
+              "danger",
+              `One or more of the Test Cases are locked by another user. Test Case Dates cannot be shifted.`,
+              true
+            );
+          } else {
+            setWarnings((prevState) => [
+              ...prevState,
+              err?.response?.data?.message,
+            ]);
+          }
         });
     } else {
       testCaseService.current
@@ -134,42 +132,21 @@ const TestCaseData = (props: TestCaseListProps) => {
           }
         })
         .catch((err) => {
-          handleToast("danger", `${err}`, true);
-        })
-        .finally(() => {
-          setExecuting(false);
-        });
-    }
-  };
-
-  const handleSubmit = async (values) => {
-    if (featureFlags?.Locking) {
-      const testCaseIds = measure.testCases.map((testCase) => testCase.id);
-      //locking all test cases before shifting dates
-      testCaseService.current
-        .lockAllTestCases(measure.id, testCaseIds)
-        .then((successResponse) => {
-          if (!successResponse) {
+          if (
+            featureFlags?.Locking &&
+            err?.Error?.includes("locked by another user")
+          ) {
             handleToast(
               "danger",
               `One or more of the Test Cases are locked by another user. Test Case Dates cannot be shifted.`,
               true
             );
           } else {
-            shiftDates();
-            unlockAllTestCases();
+            handleToast("danger", `${err}`, true);
           }
-        })
-        .catch((err) => {
-          setWarnings((prevState) => [...prevState, err]);
-        })
-        .finally(() => {
-          setExecuting(false);
         });
-    } else {
-      shiftDates();
     }
-
+    setExecuting(false);
     formik.resetForm();
   };
 

@@ -46,13 +46,13 @@ const ShiftDatesDialog = ({
     },
   });
 
-  const shiftDates = (testCases: TestCase[], shifted: number) => {
+  const handleSubmit = async (value) => {
     if (isQdm) {
       testCaseService.current
         .shiftQdmTestCaseDates(
           measure.id,
           testCases.map((testCase) => testCase.id),
-          shifted
+          value.shiftDatesInput
         )
         .then((response) => {
           if (response.length === 0) {
@@ -66,16 +66,25 @@ const ShiftDatesDialog = ({
         .catch((err) => {
           setToastOpen(true);
           setToastType("danger");
-          setToastMessage(
-            `Unable to shift test Case dates. Please try again. If the issue continues, please contact helpdesk.`
-          );
+          if (
+            featureFlags?.Locking &&
+            err?.Error?.includes("locked by another user")
+          ) {
+            setToastMessage(
+              `One or more of the Test Cases are locked by another user. Test Case Dates cannot be shifted.`
+            );
+          } else {
+            setToastMessage(
+              `Unable to shift test Case dates. Please try again. If the issue continues, please contact helpdesk.`
+            );
+          }
         });
     } else {
       testCaseService.current
         .shiftQiCoreTestCaseDates(
           measure.id,
           testCases.map((testCase) => testCase.id),
-          shifted
+          value.shiftDatesInput
         )
         .then((response) => {
           if (response.length === 0) {
@@ -89,47 +98,21 @@ const ShiftDatesDialog = ({
         .catch((err) => {
           setToastOpen(true);
           setToastType("danger");
-          setToastMessage(
-            `Unable to shift test Case dates. Please try again. If the issue continues, please contact helpdesk.`
-          );
-        });
-    }
-  };
-
-  const unlockAllTestCases = () => {
-    const testCaseIds = testCases.map((testCase) => testCase.id);
-    testCaseService.current
-      .unlockAllTestCases(testCaseIds)
-      .then((successResponse) => {})
-      .catch((err) => {
-        setWarnings((prevState) => [...prevState, err]);
-      });
-  };
-
-  const handleSubmit = async (value) => {
-    if (featureFlags?.Locking) {
-      const testCaseIds = testCases.map((testCase) => testCase.id);
-      testCaseService.current
-        .lockAllTestCases(measure.id, testCaseIds)
-        .then((successResponse) => {
-          //locking all test cases before shifting dates
-          if (!successResponse) {
-            setToastOpen(true);
-            setToastType("danger");
+          if (
+            featureFlags?.Locking &&
+            err?.Error?.includes("locked by another user")
+          ) {
             setToastMessage(
               `One or more of the Test Cases are locked by another user. Test Case Dates cannot be shifted.`
             );
           } else {
-            shiftDates(testCases, value.shiftDatesInput);
-            unlockAllTestCases();
+            setToastMessage(
+              `Unable to shift test Case dates. Please try again. If the issue continues, please contact helpdesk.`
+            );
           }
-        })
-        .catch((err) => {
-          setWarnings((prevState) => [...prevState, err]);
         });
-    } else {
-      shiftDates(testCases, value.shiftDatesInput);
     }
+    formik.resetForm();
   };
 
   return (
