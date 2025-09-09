@@ -22,7 +22,7 @@ const testCase = {
   lastModifiedAt: "2024-09-06T15:15:14.382Z",
   executionStatus: "pass",
   caseNumber: 1,
-  action: { createdBeforeVersioning: true },
+  createdBeforeVersioning: true,
   validationStatus: "Valid",
 } as unknown as TestCase;
 
@@ -67,7 +67,7 @@ const testCaseValidating = {
   lastModifiedAt: "2024-09-06T15:15:14.382Z",
   executionStatus: "pass",
   caseNumber: 1,
-  action: { createdBeforeVersioning: true },
+  createdBeforeVersioning: true,
   validationStatus: "Validating",
 } as unknown as TestCase;
 
@@ -761,5 +761,93 @@ describe("TestCase component", () => {
     expect(buttons.every((button) => button.textContent !== "Validation")).toBe(
       true
     );
+  });
+
+  it("should render DeleteForeverIcon when canEdit=true, draft=false, and createdBeforeVersioning=true", async () => {
+    const deleteTestCase = jest.fn();
+    const exportTestCase = jest.fn();
+    const setSelectedTestCasesMock = jest.fn();
+
+    renderWithTestCase(
+      [testCase],
+      true,
+      deleteTestCase,
+      exportTestCase,
+      undefined,
+      { ...measures[1], measureMetaData: { draft: false } },
+      setSelectedTestCasesMock
+    );
+
+    await waitFor(() => {
+      expect(
+        screen.getByTestId(`test-case-no-delete-icon-${testCase.id}`)
+      ).toBeInTheDocument();
+    });
+  });
+
+  it("should NOT render DeleteForeverIcon when canEdit=false", async () => {
+    const deleteTestCase = jest.fn();
+    const exportTestCase = jest.fn();
+    const setSelectedTestCasesMock = jest.fn();
+
+    renderWithTestCase(
+      [testCase],
+      false,
+      deleteTestCase,
+      exportTestCase,
+      undefined,
+      { ...measures[1], measureMetaData: { draft: false } },
+      setSelectedTestCasesMock
+    );
+
+    await waitFor(() => {
+      expect(
+        screen.queryByTestId(`test-case-no-delete-icon-${testCase.id}`)
+      ).not.toBeInTheDocument();
+    });
+  });
+
+  it("should NOT render DeleteForeverIcon when draft=true", async () => {
+    const deleteTestCase = jest.fn();
+    const exportTestCase = jest.fn();
+    const setSelectedTestCasesMock = jest.fn();
+
+    renderWithTestCase(
+      [testCase],
+      true,
+      deleteTestCase,
+      exportTestCase,
+      undefined,
+      { ...measures[1], measureMetaData: { draft: true } },
+      setSelectedTestCasesMock
+    );
+
+    await waitFor(() => {
+      expect(
+        screen.queryByTestId(`test-case-no-delete-icon-${testCase.id}`)
+      ).not.toBeInTheDocument();
+    });
+  });
+
+  it("should NOT render DeleteForeverIcon when createdBeforeVersioning=false", async () => {
+    const deleteTestCase = jest.fn();
+    const exportTestCase = jest.fn();
+    const setSelectedTestCasesMock = jest.fn();
+
+    renderWithTestCase(
+      [{ ...testCase, createdBeforeVersioning: false }],
+      true,
+      deleteTestCase,
+      exportTestCase,
+      undefined,
+      { ...measures[1], measureMetaData: { draft: false } },
+      setSelectedTestCasesMock
+    );
+
+    await waitFor(() => {
+      expect(
+        screen.queryByTestId(`test-case-no-delete-icon-${testCase.id}`)
+      ).not.toBeInTheDocument();
+    });
   });
 });

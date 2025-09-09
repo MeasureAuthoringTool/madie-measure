@@ -30,6 +30,7 @@ import ShiftDatesDialog from "../shiftDates/ShiftDatesDialog";
 import { checkUserCanEdit, useFeatureFlags } from "@madie/madie-util";
 import _ from "lodash";
 import { useNavigate } from "react-router-dom";
+import DeleteDisabledIcon from "../../../../../../common/DeleteDisabledIcon";
 
 interface TestCaseTableProps {
   testCases: TestCase[];
@@ -54,6 +55,12 @@ const fiberManualRecordStyles = {
   color: "#003366",
   width: 8,
   height: 8,
+};
+
+const DeleteDisabledIconStyles = {
+  color: "#8C8C8C",
+  width: 24,
+  height: 24,
 };
 
 export const convertDate = (date: string) => {
@@ -142,6 +149,7 @@ const TestCaseTable = (props: TestCaseTableProps) => {
       lastSaved: tc.lastModifiedAt,
       action: tc,
       caseNumber: tc.caseNumber,
+      createdBeforeVersioning: tc.createdBeforeVersioning,
     }));
   };
 
@@ -155,6 +163,7 @@ const TestCaseTable = (props: TestCaseTableProps) => {
     action: any;
     id: string;
     caseNumber: number;
+    createdBeforeVersioning: boolean;
   };
 
   const [data, setData] = useState<TCRow[]>([]);
@@ -178,14 +187,34 @@ const TestCaseTable = (props: TestCaseTableProps) => {
           tabIndex={0}
         />
       ),
-      cell: ({ row }) => (
-        <div className="px-1">
-          <IndeterminateCheckbox
-            checked={row.getIsSelected()}
-            disabled={!row.getCanSelect()}
-            indeterminate={row.getIsSomeSelected()}
-            onChange={row.getToggleSelectedHandler()}
-          />
+      cell: (info) => (
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "row",
+            gap: 3,
+          }}
+        >
+          <div className="px-1">
+            <IndeterminateCheckbox
+              checked={info.row.getIsSelected()}
+              disabled={!info.row.getCanSelect()}
+              indeterminate={info.row.getIsSomeSelected()}
+              onChange={info.row.getToggleSelectedHandler()}
+            />
+          </div>
+
+          {canEdit &&
+          !measure.measureMetaData?.draft &&
+          info.row.original.createdBeforeVersioning ? (
+            <div>
+              <DeleteDisabledIcon
+                sx={DeleteDisabledIconStyles}
+                aria-label={`Test case "${info.row.original.title}" in group "${info.row.original.group}" cannot be deleted because it was created before the measure was versioned`}
+                data-testid={`test-case-no-delete-icon-${info.row.original.id}`}
+              />
+            </div>
+          ) : null}
         </div>
       ),
     });
