@@ -407,6 +407,23 @@ describe("TestCaseServiceApi Tests", () => {
     }
   });
 
+  it("should handle shiftQiCoreTestCaseDates success", async () => {
+    const testCases: TestCase[] = [
+      {
+        id: "1234",
+        json: "date1",
+      },
+    ] as TestCase[];
+    axios.put = jest.fn().mockResolvedValueOnce({ data: testCases });
+
+    const result = await testCaseService.shiftQiCoreTestCaseDates(
+      "testMeasureId",
+      ["testCaseId1"],
+      1
+    );
+    expect(axios.put).toBeCalledTimes(1);
+  });
+
   it("should handle shiftQiCoreTestCaseDates failure with no response", async () => {
     axios.put = jest.fn().mockResolvedValueOnce(null);
 
