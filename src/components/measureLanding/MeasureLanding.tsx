@@ -180,7 +180,7 @@ export default function MeasureLanding() {
       }
       abortController.current = new AbortController();
       //it seems like doing request ids might be the easiest way for setLoading to work
-      const myRequestId = ++requestIdRef.current;
+      const currentRequestId = ++requestIdRef.current;
       setLoading(true);
       try {
         const optionalParams = searchCriteria?.optionalSearchProperties ?? [];
@@ -201,7 +201,7 @@ export default function MeasureLanding() {
           abortController.current.signal
         );
 
-        if (myRequestId === requestIdRef.current) {
+        if (currentRequestId === requestIdRef.current) {
           setPageProps(data);
           if (doUpdateMeasureCount && featureFlagMeasureSearchRef.current) {
             setMeasureCounts();
@@ -209,12 +209,12 @@ export default function MeasureLanding() {
         }
       } catch (error) {
         if (error.message !== "canceled") {
-          if (myRequestId === requestIdRef.current) {
+          if (currentRequestId === requestIdRef.current) {
             setErrMsg(error.message);
           }
         }
       } finally {
-        if (myRequestId === requestIdRef.current) {
+        if (currentRequestId === requestIdRef.current) {
           setLoading(false);
         }
       }
