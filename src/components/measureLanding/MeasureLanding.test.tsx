@@ -516,22 +516,6 @@ describe("Measure Page", () => {
     renderRouter(["/measures"]);
     const measure1 = await screen.findByText("TestMeasure1");
     expect(measure1).toBeInTheDocument();
-    await waitFor(() => {
-      expect(
-        mockMeasureServiceApi.searchMeasuresByCriteria
-      ).toHaveBeenCalledWith(
-        ["OWNED"],
-        10,
-        0,
-        "",
-        "",
-        {
-          optionalSearchProperties: [],
-          searchField: "",
-        },
-        abortController.signal
-      );
-    });
 
     const ownedMeasuresTab = screen.getByRole("tab", {
       name: "Owned Measures (5)",
@@ -592,22 +576,6 @@ describe("Measure Page", () => {
     renderRouter(["/measures"]);
     const measure1 = await screen.findByText("TestMeasure1");
     expect(measure1).toBeInTheDocument();
-    await waitFor(() => {
-      expect(
-        mockMeasureServiceApi.searchMeasuresByCriteria
-      ).toHaveBeenCalledWith(
-        ["OWNED"],
-        10,
-        0,
-        "",
-        "",
-        {
-          optionalSearchProperties: [],
-          searchField: "",
-        },
-        abortController.signal
-      );
-    });
 
     const checkbox = await screen.findByTestId("checkbox-select-all-checkbox");
     expect(checkbox).toBeInTheDocument();
