@@ -41,7 +41,7 @@ const RAVPage = ({ setExecutionContextReady }) => {
 
   const formik = useFormik({
     initialValues: {
-      ravIncluded: measure?.testCaseConfiguration?.ravIncluded || true,
+      ravIncluded: measure?.testCaseConfiguration?.ravIncluded ?? true,
     },
     enableReinitialize: true,
     onSubmit: async () => await handleSubmit(),
