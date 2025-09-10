@@ -1,5 +1,5 @@
-import React from "react";
-import { TestCase } from "@madie/madie-models";
+import React, { useRef } from "react";
+import { TestCase, Measure } from "@madie/madie-models";
 import {
   MadieDialog,
   NumberInput,
@@ -7,13 +7,19 @@ import {
 import { useFormik } from "formik";
 import * as _ from "lodash";
 import "./ShiftDatesDialog.scss";
+import { useFeatureFlags } from "@madie/madie-util";
+import useTestCaseServiceApi from "../../../../api/useTestCaseServiceApi";
 
 interface shiftDatesDialogProps {
   open: boolean;
   onClose: Function;
   canEdit?: boolean;
   testCases?: TestCase[];
-  onTestCaseShiftDates?: (testCases: TestCase[], shifted: number) => void;
+  measure: Measure;
+  setWarnings: Function;
+  setToastOpen: Function;
+  setToastType: Function;
+  setToastMessage: Function;
 }
 
 const ShiftDatesDialog = ({
@@ -21,8 +27,15 @@ const ShiftDatesDialog = ({
   onClose,
   canEdit,
   testCases,
-  onTestCaseShiftDates,
+  measure,
+  setWarnings,
+  setToastOpen,
+  setToastType,
+  setToastMessage,
 }: shiftDatesDialogProps) => {
+  const featureFlags = useFeatureFlags();
+  const testCaseService = useRef(useTestCaseServiceApi());
+  const isQdm = measure?.model?.includes("QDM");
   const formik = useFormik({
     initialValues: {
       shiftDatesInput: "",
@@ -34,7 +47,50 @@ const ShiftDatesDialog = ({
   });
 
   const handleSubmit = async (value) => {
-    onTestCaseShiftDates(testCases, value.shiftDatesInput);
+    if (isQdm) {
+      testCaseService.current
+        .shiftQdmTestCaseDates(
+          measure.id,
+          testCases.map((testCase) => testCase.id),
+          value.shiftDatesInput
+        )
+        .then((response) => {
+          if (response.length === 0) {
+            setToastOpen(true);
+            setToastType("success");
+            setToastMessage(`All Test Case dates successfully shifted.`);
+          } else {
+            setWarnings((prevState) => [...prevState, ...response]);
+          }
+        })
+        .catch((err) => {
+          setToastOpen(true);
+          setToastType("danger");
+          setToastMessage(err?.message);
+        });
+    } else {
+      testCaseService.current
+        .shiftQiCoreTestCaseDates(
+          measure.id,
+          testCases.map((testCase) => testCase.id),
+          value.shiftDatesInput
+        )
+        .then((response) => {
+          if (response.length === 0) {
+            setToastOpen(true);
+            setToastType("success");
+            setToastMessage(`All Test Case dates successfully shifted.`);
+          } else {
+            setWarnings((prevState) => [...prevState, ...response]);
+          }
+        })
+        .catch((err) => {
+          setToastOpen(true);
+          setToastType("danger");
+          setToastMessage(err?.message);
+        });
+    }
+    formik.resetForm();
   };
 
   return (
