@@ -1,4 +1,10 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   useReactTable,
   getCoreRowModel,
@@ -22,6 +28,12 @@ import { Checkbox, Divider } from "@mui/material";
 import "./TransferDialog.scss";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 import * as Yup from "yup";
+import useMeasureServiceApi from "../../../api/useMeasureServiceApi";
+
+export const TRANSFER_MEASURE_SUCCESS =
+  "The measure(s) were successfully transferred. If you chose to retain share access, you will still be able to edit the measures.";
+export const TRANSFER_MEASURE_FAILURE =
+  "Unable to transfer the selected measure(s) to the harpId. If the error persists, please contact the help desk.";
 
 // Define the data type for rows
 interface RowData {
@@ -202,15 +214,34 @@ interface TransferDialogProps {
   measures: Measure[];
   open: boolean;
   onClose: Function;
-  onSubmit: Function;
 }
 
-const TransferDialog = ({
-  measures,
-  open,
-  onClose,
-  onSubmit,
-}: TransferDialogProps) => {
+const TransferDialog = ({ measures, open, onClose }: TransferDialogProps) => {
+  const measureServiceApi = useRef(useMeasureServiceApi()).current;
+
+  const handleSave = async () => {
+    const measureIds = measures.map((m) => m.id);
+    try {
+      await measureServiceApi.transferMeasures(
+        measureIds,
+        formik.values.harpId,
+        formik.values.retainShareAccess
+      );
+      onClose({
+        toastType: "success",
+        toastMessage: TRANSFER_MEASURE_SUCCESS,
+        toastOpen: true,
+      });
+    } catch (error) {
+      console.error("TransferDialog: handleSave: error = ", error);
+      onClose({
+        toastType: "danger",
+        toastMessage: TRANSFER_MEASURE_FAILURE,
+        toastOpen: true,
+      });
+    }
+  };
+
   const formik = useFormik({
     initialValues: {
       currentUser: measures?.[0]?.measureSet?.owner,
@@ -221,10 +252,7 @@ const TransferDialog = ({
     validationSchema: Yup.object().shape({
       harpId: Yup.string().required("New Measure Owner is required."),
     }),
-    onSubmit: async ({ harpId, retainShareAccess }) => {
-      formik.resetForm();
-      return onSubmit(harpId, retainShareAccess);
-    },
+    onSubmit: handleSave,
   });
 
   return (
