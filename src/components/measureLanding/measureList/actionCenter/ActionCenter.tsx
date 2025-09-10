@@ -23,6 +23,7 @@ interface PropTypes {
   setCreateVersionDialog: any;
   setDraftMeasureDialog: any;
   setDeleteMeasureDialog: any;
+  setViewMeasureHistoryDialog: any;
   setShareDialog: any;
   deleteMeasure: () => void;
   setViewHumanReadableModal: any;
@@ -104,6 +105,12 @@ export default function ActionCenter(props: PropTypes) {
     [props.setShareDialog]
   );
 
+  const viewMeasureHistory = useCallback(() => {
+    if (props.measures?.length === 1) {
+      props.setViewMeasureHistoryDialog(true);
+    }
+  }, [props.setViewMeasureHistoryDialog, props.measures]);
+
   const isSelectedMeasureEditable = (measures) => {
     return (
       measures &&
@@ -174,7 +181,7 @@ export default function ActionCenter(props: PropTypes) {
         />
       )}
       {featureFlags?.MeasureHistory && (
-        <HistoryAction measures={props.measures} onClick={() => {}} />
+        <HistoryAction measures={props.measures} onClick={viewMeasureHistory} />
       )}
     </div>
   );

@@ -73,7 +73,8 @@ export default function MeasureLanding() {
   const [currentSort, setCurrentSort] = useState("");
   const [currentDirection, setCurrentDirection] = useState("");
   const abortController = useRef<AbortController | null>(null);
-  const requestIdRef = useRef(0); // Add request ID to track the latest request
+  // Incrementing id to identify the latest in-flight request; prevents stale requests
+  const requestIdRef = useRef(0);
   const featureFlags = useFeatureFlags();
 
   // Toast state and handlers
@@ -179,11 +180,8 @@ export default function MeasureLanding() {
         abortController.current.abort();
       }
       abortController.current = new AbortController();
-
-      // Increment request ID to track this specific request
-      requestIdRef.current += 1;
-      const currentRequestId = requestIdRef.current;
-
+      //it seems like doing request ids might be the easiest way for setLoading to work
+      const currentRequestId = ++requestIdRef.current;
       setLoading(true);
       try {
         const optionalParams = searchCriteria?.optionalSearchProperties ?? [];
@@ -204,7 +202,6 @@ export default function MeasureLanding() {
           abortController.current as AbortController
         );
 
-        // Only set results if this is still the latest request
         if (currentRequestId === requestIdRef.current) {
           setPageProps(data);
           if (doUpdateMeasureCount && featureFlagMeasureSearchRef.current) {
@@ -212,14 +209,12 @@ export default function MeasureLanding() {
           }
         }
       } catch (error) {
-        if (
-          error.message !== "canceled" &&
-          currentRequestId === requestIdRef.current
-        ) {
-          setErrMsg(error.message);
+        if (error.message !== "canceled") {
+          if (currentRequestId === requestIdRef.current) {
+            setErrMsg(error.message);
+          }
         }
       } finally {
-        // Only set loading to false if this is still the current request
         if (currentRequestId === requestIdRef.current) {
           setLoading(false);
         }
@@ -236,7 +231,7 @@ export default function MeasureLanding() {
       setVisibleItems(numberOfElements);
       setMeasureList(content);
       setOffset(pageable.offset);
-      setLoading(false);
+      // loading state handled centrally in retrieveMeasures
     }
   };
 
@@ -260,11 +255,11 @@ export default function MeasureLanding() {
     const updatedPage = values.page ? Number(values.page) : tabPageOptions.page;
     const updatedLimit = values.limit || tabPageOptions.limit;
 
-    // If query parameters are missing, update the URL
     if (!values.page || !values.limit) {
       navigate(`?tab=${tabFromUrl}&page=${updatedPage}&limit=${updatedLimit}`, {
         replace: true,
       });
+      return;
     }
 
     localStorage.setItem(

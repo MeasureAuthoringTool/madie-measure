@@ -39,6 +39,7 @@ import AssociateCmsIdDialog from "./associateCmsIdDialog/AssociateCmsIdDialog";
 import ActionCenter from "./actionCenter/ActionCenter";
 import DeleteDialog from "../../editMeasure/DeleteDialog";
 import ViewHRModal from "../../common/viewHumanReadableModal/ViewHRModal";
+import ViewMeasureHistoryDialog from "../../common/viewMeasureHistoryDialog/ViewMeasureHistoryDialog";
 import ShareDialog from "../../common/shareDialog/ShareDialog";
 import {
   ExpandIcon,
@@ -121,6 +122,9 @@ export default function MeasureList(props: {
     open: false,
     measureId: "",
   });
+
+  const [viewMeasureHistoryDialog, setViewMeasureHistoryDialog] =
+    useState(false);
 
   const [versionHelperText, setVersionHelperText] = useState("");
   const [deleteMeasureDialog, setDeleteMeasureDialog] =
@@ -676,6 +680,7 @@ export default function MeasureList(props: {
       open: false,
       measures: [],
     });
+    setViewMeasureHistoryDialog(false);
   };
 
   const handleShareDialogClose = ({
@@ -1033,6 +1038,7 @@ export default function MeasureList(props: {
             setShareDialog={setShareDialog}
             deleteMeasure={deleteMeasure}
             setViewHumanReadableModal={setViewHumanReadableModal}
+            setViewMeasureHistoryDialog={setViewMeasureHistoryDialog}
             activeTab={props.activeTab}
             setTransferDialog={setTransferDialog}
           />
@@ -1230,6 +1236,11 @@ export default function MeasureList(props: {
         open={transferDialog.open}
         onClose={handleDialogClose}
         onSubmit={transferMeasures}
+      />
+      <ViewMeasureHistoryDialog
+        measures={selectedMeasures}
+        open={viewMeasureHistoryDialog}
+        onClose={handleDialogClose}
       />
     </div>
   );

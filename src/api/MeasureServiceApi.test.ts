@@ -789,4 +789,31 @@ describe("MeasureServiceApi Tests", () => {
       measureServiceApi.unlockMeasure("testMeasureId")
     ).rejects.toThrow(errorMessage);
   });
+
+  it("should succeed getMeasureHistoryLogs", async () => {
+    const mockData = [{ action: "VIEW", timestamp: "2024-01-01T00:00:00Z" }];
+    mockedAxios.get.mockResolvedValueOnce({ data: mockData });
+    const result = await measureServiceApi.getMeasureHistoryLogs("1");
+    expect(mockedAxios.get).toHaveBeenCalledWith(
+      "madie.com/measures/1/history",
+      expect.objectContaining({
+        headers: expect.objectContaining({
+          Authorization: expect.any(String),
+        }),
+      })
+    );
+    expect(result).toEqual(mockData);
+  });
+
+  it("should fail getMeasureHistoryLogs and log warning", async () => {
+    mockedAxios.get.mockRejectedValueOnce(new Error("failure"));
+    const consoleWarnMock = jest.spyOn(console, "warn").mockImplementation();
+    await expect(measureServiceApi.getMeasureHistoryLogs("1")).rejects.toThrow(
+      "failure"
+    );
+    expect(consoleWarnMock).toHaveBeenCalledWith(
+      "Unable to retrieve Measure History Logs"
+    );
+    consoleWarnMock.mockRestore();
+  });
 });
