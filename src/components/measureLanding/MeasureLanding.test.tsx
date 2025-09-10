@@ -1,7 +1,13 @@
 import "@testing-library/jest-dom";
 // NOTE: jest-dom adds handy assertions to Jest and is recommended, but not required
 import * as React from "react";
-import { render, screen, waitFor, fireEvent } from "@testing-library/react";
+import {
+  render,
+  screen,
+  waitFor,
+  fireEvent,
+  act,
+} from "@testing-library/react";
 import {
   createMemoryRouter,
   RouterProvider,
@@ -16,6 +22,10 @@ import { within } from "@testing-library/dom";
 // @ts-ignore
 import { useFeatureFlags } from "@madie/madie-util";
 import MeasureLanding from "./MeasureLanding";
+import {
+  TRANSFER_MEASURE_SUCCESS,
+  TRANSFER_MEASURE_FAILURE,
+} from "../common/transferDialog/TransferDialog";
 
 const serviceConfig = {
   fhirElmTranslationService: { baseUrl: "fhir/services" },
@@ -65,6 +75,9 @@ const mockMeasureServiceApi = {
     sharedMeasures: 3,
     allMeasures: 10,
   }),
+  transferMeasures: jest.fn().mockResolvedValue({
+    data: true,
+  }),
 } as unknown as MeasureServiceApi;
 
 jest.mock("../../api/useMeasureServiceApi", () =>
@@ -91,6 +104,7 @@ describe("Measure Page", () => {
   beforeEach(() => {
     (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
       MeasureSearch: true,
+      TransferMeasure: true,
     }));
     localStorage.clear();
   });
