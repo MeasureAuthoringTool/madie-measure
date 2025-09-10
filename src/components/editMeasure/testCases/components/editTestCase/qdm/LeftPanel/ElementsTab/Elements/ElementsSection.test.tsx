@@ -22,7 +22,7 @@ import {
 import { QdmExecutionContextProvider } from "../../../../../routes/qdm/QdmExecutionContext";
 import { FormikProvider, FormikContextType } from "formik";
 import { testCaseJson } from "../../../../../../mockdata/qdm/testcase";
-import { QdmPatientProvider } from "../../../../../../util/QdmPatientContext";
+import { useQdmPatient } from "../../../../../../util/QdmPatientContext";
 import { DataElement } from "cqm-models";
 
 const serviceConfig: ServiceConfig = {
@@ -82,6 +82,14 @@ const cqmMeasure = cqmConversionService.convertToCqmMeasure(mockMeasure, null);
 jest.mock("../../../../../../api/CqmModelConversionService");
 const CQMConversionMock =
   useCqmConversionService as jest.Mock<CqmConversionService>;
+
+jest.mock("../../../../../../util/QdmPatientContext", () => ({
+  useQdmPatient: jest.fn(),
+  PatientActionType: jest.requireActual(
+    "../../../../../../util/QdmPatientContext"
+  ).PatientActionType,
+}));
+
 const testDataElements = [
   {
     dataElementCodes: [],
@@ -297,6 +305,38 @@ const testDataElements = [
   },
 ];
 
+const missingDataElements = [
+  {
+    dataElementCodes: [],
+    _id: "609d95acb789028849ab7bd2",
+    prescriber: [],
+    relatedTo: [],
+    qdmTitle: "Medication, Order",
+    hqmfOid: "2.16.840.1.113883.10.20.28.4.51",
+    qdmCategory: "medication",
+    qdmStatus: "order",
+    qdmVersion: "5.6",
+    _type: "QDM::MedicationOrder",
+    description: "Medication, Order: Warfarin",
+    codeListId: "2.16.840.1.113883.3.117.1.7.1.232",
+    id: "609d95acb789028849ab7bd2",
+  },
+  {
+    dataElementCodes: [],
+    _id: "609d95acb789028849ab7be2",
+    requester: [],
+    qdmTitle: "Device, Order",
+    hqmfOid: "2.16.840.1.113883.10.20.28.4.15",
+    qdmCategory: "device",
+    qdmStatus: "order",
+    qdmVersion: "5.6",
+    _type: "QDM::DeviceOrder",
+    description: "Device, Order: Intermittentpneumaticcompressiondevices(IPC)",
+    codeListId: "2.16.840.1.113883.3.117.1.7.1.214",
+    id: "609d95acb789028849ab7be2",
+  },
+];
+
 //@ts-ignore
 const mockFormik: FormikContextType<any> = {
   values: {
@@ -304,8 +344,14 @@ const mockFormik: FormikContextType<any> = {
   },
 };
 
-const renderElementsSectionComponent = (render, selectedDataElement) => {
-  return render(
+const renderElementsSectionComponent = (
+  renderFn,
+  selectedDataElement: DataElement | null = null,
+  handleMissingDataElements?: jest.Mock
+) => {
+  handleMissingDataElements = handleMissingDataElements || jest.fn();
+
+  const rendered = renderFn(
     <MemoryRouter>
       <ApiContextProvider value={serviceConfig}>
         <FormikProvider value={mockFormik}>
@@ -320,19 +366,19 @@ const renderElementsSectionComponent = (render, selectedDataElement) => {
               contextFailure: false,
             }}
           >
-            <QdmPatientProvider>
-              <ElementsSection
-                canEdit={true}
-                handleTestCaseErrors={jest.fn()}
-                selectedDataElement={selectedDataElement}
-                setSelectedDataElement={setSelectedDataElement}
-              />
-            </QdmPatientProvider>
+            <ElementsSection
+              canEdit={true}
+              handleMissingDataElements={handleMissingDataElements}
+              selectedDataElement={selectedDataElement}
+              setSelectedDataElement={setSelectedDataElement}
+            />
           </QdmExecutionContextProvider>
         </FormikProvider>
       </ApiContextProvider>
     </MemoryRouter>
   );
+
+  return { ...rendered, handleMissingDataElements };
 };
 
 const useCqmConversionServiceMockResolved = {
@@ -376,6 +422,15 @@ describe("ElementsSection allows card opening and closing", () => {
   });
   beforeEach(() => {
     selectedDataElement = undefined;
+
+    (useQdmPatient as jest.Mock).mockReturnValue({
+      state: {
+        patient: {
+          dataElements: testDataElements,
+        },
+      },
+      dispatch: jest.fn(),
+    });
   });
 
   afterEach(() => {
@@ -479,6 +534,122 @@ describe("ElementsSection allows card opening and closing", () => {
     renderElementsSectionComponent(rerender, testDataElements[14]);
     await waitFor(() => {
       expect(queryByText("Negation Rationale")).toBeInTheDocument();
+    });
+  });
+});
+
+/*
+  Tests <ElementsSection> behavior when patient data elements are missing/irrelevant.
+  
+  "Missing" elements are any patient data elements that exist in the patient’s record
+  but are NOT included in the allowed types defined by the CQL/source data criteria.
+
+  Test cases:
+  - Calls handleMissingDataElements with null if all patient elements are allowed.
+  - Reports missing element titles when some patient elements are not allowed.
+  - Handles multiple missing elements, passing all missing titles to the callback.
+*/
+describe("ElementsSection missing data elements handling", () => {
+  CQMConversionMock.mockImplementation(() => {
+    return useCqmConversionServiceMockResolved;
+  });
+
+  let handleMissingDataElements: jest.Mock;
+  let mockDispatch: jest.Mock;
+
+  beforeEach(() => {
+    handleMissingDataElements = jest.fn();
+    mockDispatch = jest.fn();
+    selectedDataElement = null;
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test("calls handleMissingDataElements with null when all elements are allowed", async () => {
+    // Patient has only allowed elements
+    (useQdmPatient as jest.Mock).mockReturnValue({
+      state: {
+        patient: {
+          dataElements: [
+            testDataElements[0], // Ethnicity
+            testDataElements[2], // Sex
+            testDataElements[12], // Race
+          ],
+        },
+      },
+      dispatch: mockDispatch,
+    });
+
+    // fetchRelevantDataElements returns the same allowed elements
+    useCqmConversionServiceMockResolved.fetchRelevantDataElements.mockResolvedValue(
+      [testDataElements[0], testDataElements[2], testDataElements[12]]
+    );
+
+    renderElementsSectionComponent(render, null, handleMissingDataElements);
+
+    await waitFor(() => {
+      expect(handleMissingDataElements).toHaveBeenCalledWith(null);
+    });
+  });
+
+  test("calls handleMissingDataElements with missing element titles when some elements are irrelevant", async () => {
+    // Patient data contains allowed + missing element
+    (useQdmPatient as jest.Mock).mockReturnValue({
+      state: {
+        patient: {
+          dataElements: [testDataElements[0], missingDataElements[0]],
+        },
+      },
+      dispatch: mockDispatch,
+    });
+
+    // Only the allowed element is returned by fetchRelevantDataElements
+    useCqmConversionServiceMockResolved.fetchRelevantDataElements.mockResolvedValue(
+      [
+        testDataElements[0], // Ethnicity
+      ]
+    );
+
+    renderElementsSectionComponent(render, null, handleMissingDataElements);
+
+    await waitFor(() => {
+      expect(handleMissingDataElements).toHaveBeenCalledWith([
+        "Medication, Order",
+      ]);
+    });
+  });
+
+  test("calls handleMissingDataElements with multiple missing element titles", async () => {
+    // Patient data contains allowed element + multiple missing elements
+    (useQdmPatient as jest.Mock).mockReturnValue({
+      state: {
+        patient: {
+          dataElements: [
+            testDataElements[0],
+            missingDataElements[0],
+            missingDataElements[1],
+          ],
+        },
+      },
+      dispatch: mockDispatch,
+    });
+
+    // Only the allowed element is returned by fetchRelevantDataElements
+    useCqmConversionServiceMockResolved.fetchRelevantDataElements.mockResolvedValue(
+      [
+        testDataElements[0], // Ethnicity
+      ]
+    );
+
+    renderElementsSectionComponent(render, null, handleMissingDataElements);
+
+    await waitFor(() => {
+      expect(handleMissingDataElements).toHaveBeenCalledWith([
+        "Medication, Order",
+        "Device, Order",
+      ]);
     });
   });
 });

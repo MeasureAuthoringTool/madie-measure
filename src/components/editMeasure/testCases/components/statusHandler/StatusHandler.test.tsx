@@ -341,4 +341,52 @@ describe("StatusHandler Component", () => {
     const name1 = await screen.findByText("test.patientId2");
     expect(name1).toBeInTheDocument();
   });
+
+  it("Should display missing data elements alert with correct configuration", () => {
+    const missingDataElements = ["Element 1", "Element 2", "Element 3"];
+
+    render(
+      <StatusHandler
+        warning={true}
+        missingDataElements={missingDataElements}
+        testDataId="test_case_missing_data_elements"
+      />
+    );
+
+    // Ensure the MadieAlert mock is rendered
+    expect(screen.getByTestId("madie-alert-mock")).toBeInTheDocument();
+
+    // There should be one alert (the missing data elements warning)
+    expect(screen.getByTestId("alert-0")).toHaveAttribute(
+      "data-type",
+      "warning"
+    );
+
+    // Check the content of the alert
+    const alertContent = screen.getByTestId("alert-content-0");
+    expect(alertContent).toHaveTextContent(
+      "The following data elements in this test case are no longer relevant to the measure. These data elements are not editable and can only be deleted from the Elements table."
+    );
+
+    // Check that each missing element is listed
+    const listItems = alertContent.querySelectorAll("li");
+    expect(listItems.length).toBe(3);
+    expect(listItems[0]).toHaveTextContent("Element 1");
+    expect(listItems[1]).toHaveTextContent("Element 2");
+    expect(listItems[2]).toHaveTextContent("Element 3");
+
+    // Verify MadieAlert was called with the expected alert object
+    expect(MadieAlert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        alerts: expect.arrayContaining([
+          expect.objectContaining({
+            type: "warning",
+            copyButton: true,
+            canClose: false,
+          }),
+        ]),
+      }),
+      expect.anything()
+    );
+  });
 });
