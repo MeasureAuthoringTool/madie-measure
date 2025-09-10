@@ -676,31 +676,6 @@ const TestCaseList = (props: TestCaseListProps) => {
     setShowReportOptions(false);
   };
 
-  const onTestCaseShiftDates = (testCases: TestCase[], shifted: number) => {
-    testCaseService.current
-      .shiftQdmTestCaseDates(
-        measureId,
-        testCases.map((testCase) => testCase.id),
-        shifted
-      )
-      .then((response) => {
-        if (response.length === 0) {
-          setToastOpen(true);
-          setToastType("success");
-          setToastMessage(`All Test Case dates successfully shifted.`);
-        } else {
-          setWarnings((prevState) => [...prevState, ...response]);
-        }
-      })
-      .catch((err) => {
-        setToastOpen(true);
-        setToastType("danger");
-        setToastMessage(
-          `Unable to shift test Case dates. Please try again. If the issue continues, please contact helpdesk.`
-        );
-      });
-  };
-
   const onCopyTestCaseClose = (msg?: string, toastType?: string) => {
     setOpenCopyTestCaseDialog(false);
     if (toastType) {
@@ -818,7 +793,6 @@ const TestCaseList = (props: TestCaseListProps) => {
                         exportTestCase={null}
                         onCloneTestCase={handleCloneTestCase}
                         measure={measure}
-                        onTestCaseShiftDates={onTestCaseShiftDates}
                         setSelectedTestCases={setSelectedTestCases}
                         deleteDialogModalOpen={deleteDialogModalOpen}
                         selectedTestCases={selectedTestCases}
@@ -827,6 +801,7 @@ const TestCaseList = (props: TestCaseListProps) => {
                         setShiftDatesDialogModalOpen={
                           setShiftDatesDialogModalOpen
                         }
+                        setWarnings={setWarnings}
                       />
                       <Pagination
                         totalItems={totalItems}

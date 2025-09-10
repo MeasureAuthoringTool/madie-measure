@@ -11,6 +11,7 @@ import {
   measureStore,
   checkUserCanEdit,
   routeHandlerStore,
+  useFeatureFlags,
 } from "@madie/madie-util";
 import "../testCaseConfiguration.scss";
 import { Typography } from "@mui/material";
@@ -30,6 +31,7 @@ const TestCaseData = (props: TestCaseListProps) => {
   const testCaseService = useRef(useTestCaseServiceApi());
   const [executing, setExecuting] = useState<boolean>(false);
   const { setWarnings } = props;
+  const featureFlags = useFeatureFlags();
 
   useEffect(() => {
     const subscription = measureStore.subscribe(setMeasure);
@@ -83,7 +85,7 @@ const TestCaseData = (props: TestCaseListProps) => {
     // sure Greg ...  Tech Debt MAT-8377
     //  OTOH, I think there is ticket for just getting rid of the TestCaseData testShiftCase https://jira.cms.gov/browse/MAT-8379
     if (isQdm) {
-      testCaseService.current
+      await testCaseService.current
         .shiftAllQdmTestCaseDates(
           measure.id,
           parseInt(formik.values.shiftTestCaseDates)
@@ -96,13 +98,14 @@ const TestCaseData = (props: TestCaseListProps) => {
           );
         })
         .catch((err) => {
-          setWarnings((prevState) => [
-            ...prevState,
-            err?.response?.data?.message,
-          ]);
-        })
-        .finally(() => {
-          setExecuting(false);
+          if (featureFlags?.Locking) {
+            handleToast("danger", err.message, true);
+          } else {
+            setWarnings((prevState) => [
+              ...prevState,
+              err?.response?.data?.message,
+            ]);
+          }
         });
     } else {
       testCaseService.current
@@ -119,16 +122,13 @@ const TestCaseData = (props: TestCaseListProps) => {
               `All Test Case dates successfully shifted.`,
               true
             );
-            // setExecuting(false);
           }
         })
         .catch((err) => {
-          handleToast("danger", `${err}`, true);
-        })
-        .finally(() => {
-          setExecuting(false);
+          handleToast("danger", err.message, true);
         });
     }
+    setExecuting(false);
     formik.resetForm();
   };
 
