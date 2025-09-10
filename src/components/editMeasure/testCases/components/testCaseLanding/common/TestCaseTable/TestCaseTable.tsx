@@ -39,7 +39,6 @@ interface TestCaseTableProps {
   exportTestCase: Function;
   onCloneTestCase?: (testCase: TestCase) => void;
   measure: any;
-  onTestCaseShiftDates?: (testCases: TestCase[], shifted: number) => void;
   handleQiCloneTestCase?: (testCase: TestCase) => void;
   sorting: any;
   setSorting: any;
@@ -49,6 +48,7 @@ interface TestCaseTableProps {
   setDeleteDialogModalOpen: any;
   shiftDatesDialogModalOpen: any;
   setShiftDatesDialogModalOpen: any;
+  setWarnings: any;
 }
 
 const fiberManualRecordStyles = {
@@ -111,7 +111,6 @@ const TestCaseTable = (props: TestCaseTableProps) => {
     exportTestCase,
     onCloneTestCase,
     measure,
-    onTestCaseShiftDates,
     handleQiCloneTestCase,
     sorting,
     setSorting,
@@ -121,6 +120,7 @@ const TestCaseTable = (props: TestCaseTableProps) => {
     setDeleteDialogModalOpen,
     shiftDatesDialogModalOpen,
     setShiftDatesDialogModalOpen,
+    setWarnings,
   } = props;
   const viewOrEdit = canEdit ? "edit" : "view";
   const [toastOpen, setToastOpen] = useState<boolean>(false);
@@ -530,7 +530,11 @@ const TestCaseTable = (props: TestCaseTableProps) => {
           }}
           canEdit={canEdit}
           testCases={selectedTestCases ? selectedTestCases : []}
-          onTestCaseShiftDates={onTestCaseShiftDates}
+          measure={measure}
+          setWarnings={setWarnings}
+          setToastOpen={setToastOpen}
+          setToastType={setToastType}
+          setToastMessage={setToastMessage}
         />
       </table>
     </div>
