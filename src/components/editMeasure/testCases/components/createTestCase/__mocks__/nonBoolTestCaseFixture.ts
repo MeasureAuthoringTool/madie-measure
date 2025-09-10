@@ -36,6 +36,7 @@ export const nonBoolTestCaseFixture: TestCase = {
     },
   },
   validationStatus: ValidationStatus.VALID,
+  createdBeforeVersioning: true,
   groupPopulations: [
     {
       groupId: "6329ce9d1368254f5c078c11",
