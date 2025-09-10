@@ -17,10 +17,7 @@ jest.mock("@madie/madie-util", () => ({
       return { unsubscribe: () => null };
     },
   },
-  useFeatureFlags: jest.fn().mockReturnValue({
-    QDMIncludeRAVValues: true,
-    QICoreIncludeRAVValues: true,
-  }),
+  useFeatureFlags: jest.fn().mockReturnValue({}),
 }));
 
 describe("TestCaseLandingWrapper", () => {

@@ -23,9 +23,7 @@ const useCqlParsingServiceMockResolved = {
 import { calculationResults } from "../../../groupCoverage/_mocks_/QdmCalculationResults";
 
 jest.mock("@madie/madie-util", () => ({
-  useFeatureFlags: jest.fn(() => ({
-    QDMIncludeRAVValues: true,
-  })),
+  useFeatureFlags: jest.fn(() => ({})),
 }));
 
 const groups = [
@@ -418,7 +416,7 @@ describe("CalculationResults with new tabbed highlighting layout on", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("should render RAV tab if QDMIncludeRAVValues feature flag is true and includeRAV is true", async () => {
+  it("should render RAV tab if includeRAV is true", async () => {
     renderCoverageComponent();
     // Ensure we're on the Initial Population tab
     await assertPopulationTabs();

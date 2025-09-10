@@ -88,7 +88,6 @@ jest.mock("@madie/madie-util", () => ({
   },
   useFeatureFlags: jest.fn(() => ({
     applyDefaults: false,
-    QDMIncludeRAVValues: true,
   })),
   useOktaTokens: () => ({
     getAccessToken: () => "test.jwt",
@@ -203,7 +202,7 @@ describe("TestCaseRoutes", () => {
     ).toBeInTheDocument();
   });
 
-  it("should render the RAVPage when QDMIncludeRAVValues flag is true", async () => {
+  it("should render the RAVPage", async () => {
     mockedAxios.get.mockImplementation(() => {
       return Promise.resolve({
         data: [

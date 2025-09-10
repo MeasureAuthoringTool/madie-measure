@@ -15,10 +15,7 @@ import userEvent from "@testing-library/user-event";
 import { useFeatureFlags } from "@madie/madie-util";
 
 jest.mock("@madie/madie-util", () => ({
-  useFeatureFlags: jest.fn().mockReturnValue({
-    QDMIncludeRAVValues: false,
-    QICoreIncludeRAVValues: false,
-  }),
+  useFeatureFlags: jest.fn().mockReturnValue({}),
 }));
 
 const supplementalData = [
@@ -437,9 +434,7 @@ describe("CalculationResults with new tabbed highlighting layout on", () => {
   });
 
   test("render highlighting view with coverage results for 2 groups", async () => {
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-      QICoreIncludeRAVValues: true,
-    }));
+    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({}));
     const mainCqlLibraryName = "OncologyMeasureTest";
     renderCoverageComponent(calculationResults, null, mainCqlLibraryName);
     await assertPopulationTabs();

@@ -22,10 +22,7 @@ const groups: Group[] = [
   },
 ];
 jest.mock("@madie/madie-util", () => ({
-  useFeatureFlags: jest.fn().mockReturnValue({
-    QDMIncludeRAVValues: true,
-    QICoreIncludeRAVValues: true,
-  }),
+  useFeatureFlags: jest.fn().mockReturnValue({}),
 }));
 describe("TestCase component", () => {
   afterEach(() => {
