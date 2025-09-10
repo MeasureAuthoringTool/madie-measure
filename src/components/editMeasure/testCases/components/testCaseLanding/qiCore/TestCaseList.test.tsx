@@ -1525,60 +1525,6 @@ describe("TestCaseList component", () => {
     await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
   });
 
-  it("should attempt to shift the dates in test case when the Save button within the shift test case dates dialogue is clicked and display a success message", async () => {
-    const responseData: string[] = [];
-
-    const shiftQiCoreTestCaseDates = jest
-      .fn()
-      .mockResolvedValueOnce(responseData);
-
-    useTestCaseServiceMock.mockImplementationOnce(() => {
-      return {
-        getTestCasesByMeasureId: jest.fn().mockResolvedValue(testCases),
-        shiftQiCoreTestCaseDates: shiftQiCoreTestCaseDates,
-      } as unknown as TestCaseServiceApi;
-    });
-
-    renderTestCaseListComponent();
-
-    const checkboxes = await screen.findAllByRole("checkbox");
-
-    const shiftTestCaseButton = await screen.findByTestId(
-      "shift-test-case-dates-action-btn"
-    );
-    expect(shiftTestCaseButton).toBeDisabled();
-
-    userEvent.click(checkboxes[1]);
-    expect(shiftTestCaseButton).not.toBeDisabled();
-
-    userEvent.click(shiftTestCaseButton);
-    expect(await screen.findByRole("dialog")).toBeInTheDocument();
-
-    expect(screen.getByTestId("shift-dates-dialog")).toBeInTheDocument();
-    expect(screen.getByTestId("shift-dates-cancel-button")).toBeInTheDocument();
-
-    const saveBtn = await screen.findByTestId("shift-dates-save-button");
-    expect(saveBtn).toBeInTheDocument();
-    expect(saveBtn).not.toBeEnabled();
-
-    const shiftDatesInput = (await screen.findByTestId(
-      "shift-dates-input"
-    )) as HTMLInputElement;
-    expect(shiftDatesInput).toBeInTheDocument();
-
-    userEvent.type(shiftDatesInput, "1");
-    expect(shiftDatesInput.value).toBe("1");
-    expect(saveBtn).toBeEnabled();
-
-    userEvent.click(saveBtn);
-
-    await waitFor(() => {
-      expect(screen.getByTestId("test-case-list-success")).toHaveTextContent(
-        "All Test Case dates successfully shifted."
-      );
-    });
-  });
-
   it("should attempt to shift the dates in test case when the Save button within the shift test case dates dialogue is clicked and display an error message", async () => {
     const responseData: string[] = ["testId1", "testId2"];
 
@@ -1625,56 +1571,6 @@ describe("TestCaseList component", () => {
     expect(saveBtn).toBeEnabled();
 
     userEvent.click(saveBtn);
-  });
-
-  it("should attempt to shift the dates in test case when the Save button within the shift test case dates dialogue is clicked and display an error message when the endpoint throws an error", async () => {
-    useTestCaseServiceMock.mockImplementationOnce(() => {
-      return {
-        getTestCasesByMeasureId: jest.fn().mockResolvedValue(testCases),
-        shiftQiCoreTestCaseDates: jest
-          .fn()
-          .mockRejectedValue(new Error("ERROR")),
-      } as unknown as TestCaseServiceApi;
-    });
-
-    renderTestCaseListComponent();
-
-    const checkboxes = await screen.findAllByRole("checkbox");
-
-    const shiftTestCaseButton = await screen.findByTestId(
-      "shift-test-case-dates-action-btn"
-    );
-    expect(shiftTestCaseButton).toBeDisabled();
-
-    userEvent.click(checkboxes[1]);
-    expect(shiftTestCaseButton).not.toBeDisabled();
-
-    userEvent.click(shiftTestCaseButton);
-    expect(await screen.findByRole("dialog")).toBeInTheDocument();
-
-    expect(screen.getByTestId("shift-dates-dialog")).toBeInTheDocument();
-    expect(screen.getByTestId("shift-dates-cancel-button")).toBeInTheDocument();
-
-    const saveBtn = await screen.findByTestId("shift-dates-save-button");
-    expect(saveBtn).toBeInTheDocument();
-    expect(saveBtn).not.toBeEnabled();
-
-    const shiftDatesInput = (await screen.findByTestId(
-      "shift-dates-input"
-    )) as HTMLInputElement;
-    expect(shiftDatesInput).toBeInTheDocument();
-
-    userEvent.type(shiftDatesInput, "1");
-    expect(shiftDatesInput.value).toBe("1");
-    expect(saveBtn).toBeEnabled();
-
-    userEvent.click(saveBtn);
-
-    await waitFor(() => {
-      expect(screen.getByTestId("test-case-list-error")).toHaveTextContent(
-        "Unable to shift test Case dates. Please try again. If the issue continues, please contact helpdesk."
-      );
-    });
   });
 
   it("Should display test case copy dialog when at least one test case is selected", async () => {

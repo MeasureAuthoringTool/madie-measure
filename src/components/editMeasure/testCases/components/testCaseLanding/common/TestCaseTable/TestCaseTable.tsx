@@ -30,6 +30,7 @@ import ShiftDatesDialog from "../shiftDates/ShiftDatesDialog";
 import { checkUserCanEdit, useFeatureFlags } from "@madie/madie-util";
 import _ from "lodash";
 import { useNavigate } from "react-router-dom";
+import DeleteDisabledIcon from "../../../../../../common/DeleteDisabledIcon";
 
 interface TestCaseTableProps {
   testCases: TestCase[];
@@ -38,7 +39,6 @@ interface TestCaseTableProps {
   exportTestCase: Function;
   onCloneTestCase?: (testCase: TestCase) => void;
   measure: any;
-  onTestCaseShiftDates?: (testCases: TestCase[], shifted: number) => void;
   handleQiCloneTestCase?: (testCase: TestCase) => void;
   sorting: any;
   setSorting: any;
@@ -48,12 +48,19 @@ interface TestCaseTableProps {
   setDeleteDialogModalOpen: any;
   shiftDatesDialogModalOpen: any;
   setShiftDatesDialogModalOpen: any;
+  setWarnings: any;
 }
 
 const fiberManualRecordStyles = {
   color: "#003366",
   width: 8,
   height: 8,
+};
+
+const DeleteDisabledIconStyles = {
+  color: "#8C8C8C",
+  width: 24,
+  height: 24,
 };
 
 export const convertDate = (date: string) => {
@@ -104,7 +111,6 @@ const TestCaseTable = (props: TestCaseTableProps) => {
     exportTestCase,
     onCloneTestCase,
     measure,
-    onTestCaseShiftDates,
     handleQiCloneTestCase,
     sorting,
     setSorting,
@@ -114,6 +120,7 @@ const TestCaseTable = (props: TestCaseTableProps) => {
     setDeleteDialogModalOpen,
     shiftDatesDialogModalOpen,
     setShiftDatesDialogModalOpen,
+    setWarnings,
   } = props;
   const viewOrEdit = canEdit ? "edit" : "view";
   const [toastOpen, setToastOpen] = useState<boolean>(false);
@@ -142,6 +149,7 @@ const TestCaseTable = (props: TestCaseTableProps) => {
       lastSaved: tc.lastModifiedAt,
       action: tc,
       caseNumber: tc.caseNumber,
+      createdBeforeVersioning: tc.createdBeforeVersioning,
     }));
   };
 
@@ -155,6 +163,7 @@ const TestCaseTable = (props: TestCaseTableProps) => {
     action: any;
     id: string;
     caseNumber: number;
+    createdBeforeVersioning: boolean;
   };
 
   const [data, setData] = useState<TCRow[]>([]);
@@ -178,14 +187,34 @@ const TestCaseTable = (props: TestCaseTableProps) => {
           tabIndex={0}
         />
       ),
-      cell: ({ row }) => (
-        <div className="px-1">
-          <IndeterminateCheckbox
-            checked={row.getIsSelected()}
-            disabled={!row.getCanSelect()}
-            indeterminate={row.getIsSomeSelected()}
-            onChange={row.getToggleSelectedHandler()}
-          />
+      cell: (info) => (
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "row",
+            gap: 3,
+          }}
+        >
+          <div className="px-1">
+            <IndeterminateCheckbox
+              checked={info.row.getIsSelected()}
+              disabled={!info.row.getCanSelect()}
+              indeterminate={info.row.getIsSomeSelected()}
+              onChange={info.row.getToggleSelectedHandler()}
+            />
+          </div>
+
+          {canEdit &&
+          !measure.measureMetaData?.draft &&
+          info.row.original.createdBeforeVersioning ? (
+            <div>
+              <DeleteDisabledIcon
+                sx={DeleteDisabledIconStyles}
+                aria-label={`Test case "${info.row.original.title}" in group "${info.row.original.group}" cannot be deleted because it was created before the measure was versioned`}
+                data-testid={`test-case-no-delete-icon-${info.row.original.id}`}
+              />
+            </div>
+          ) : null}
         </div>
       ),
     });
@@ -501,7 +530,11 @@ const TestCaseTable = (props: TestCaseTableProps) => {
           }}
           canEdit={canEdit}
           testCases={selectedTestCases ? selectedTestCases : []}
-          onTestCaseShiftDates={onTestCaseShiftDates}
+          measure={measure}
+          setWarnings={setWarnings}
+          setToastOpen={setToastOpen}
+          setToastType={setToastType}
+          setToastMessage={setToastMessage}
         />
       </table>
     </div>
