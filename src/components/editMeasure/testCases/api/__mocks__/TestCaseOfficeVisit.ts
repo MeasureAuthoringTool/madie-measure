@@ -26,6 +26,7 @@ export const testCaseOfficeVisit: TestCase = {
     outcomeResponse: null,
   },
   validationStatus: ValidationStatus.VALID,
+  createdBeforeVersioning: true,
   groupPopulations: [
     {
       groupId: "1",
