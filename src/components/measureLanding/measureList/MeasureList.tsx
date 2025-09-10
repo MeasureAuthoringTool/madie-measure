@@ -210,6 +210,7 @@ export default function MeasureList(props: {
       <input
         type="checkbox"
         ref={ref}
+        data-testid={`checkbox-${id}`}
         className={className + " cursor-pointer"}
         onChange={onChange}
         {...rest}
@@ -466,6 +467,7 @@ export default function MeasureList(props: {
           checked={table.getIsAllRowsSelected()}
           indeterminate={table.getIsSomePageRowsSelected()}
           onChange={table.getToggleAllPageRowsSelectedHandler()}
+          id={`select-all-checkbox`}
         />
       );
     } else {
@@ -723,12 +725,20 @@ export default function MeasureList(props: {
     props.handlePageChange(null, 1);
   };
 
-  const transferMeasures = (newOwner: string, retainShareAccess: boolean) => {
-    setTransferDialog({
-      open: false,
-      measures: [],
-    });
-    // to be implemented
+  const handleTransferDialogClose = ({
+    toastType = "danger",
+    toastMessage = "",
+    toastOpen = false,
+  } = {}) => {
+    if (toastType === "success") {
+      doUpdateList();
+    }
+
+    handleDialogClose();
+
+    props.setToastType(toastType);
+    props.setToastMessage(toastMessage);
+    props.setToastOpen(toastOpen);
   };
 
   const updateTargetMeasure = (newValue) => {
@@ -1234,8 +1244,7 @@ export default function MeasureList(props: {
       <TransferDialog
         measures={selectedMeasures}
         open={transferDialog.open}
-        onClose={handleDialogClose}
-        onSubmit={transferMeasures}
+        onClose={handleTransferDialogClose}
       />
       <ViewMeasureHistoryDialog
         measures={selectedMeasures}
