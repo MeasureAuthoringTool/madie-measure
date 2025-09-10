@@ -2986,7 +2986,6 @@ describe("Action Center Tests", () => {
       </ServiceContext.Provider>
     );
 
-    screen.debug(undefined, 8000000);
     const checkBoxes = await screen.findAllByRole("checkbox");
     expect(checkBoxes.length).toBe(6);
     userEvent.click(checkBoxes[1]);

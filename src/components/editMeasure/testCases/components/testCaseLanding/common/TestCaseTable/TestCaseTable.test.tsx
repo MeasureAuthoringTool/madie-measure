@@ -210,6 +210,9 @@ jest.mock("@madie/madie-util", () => ({
     applyDefaults: mockApplyDefaults,
   })),
   checkUserCanEdit: jest.fn().mockImplementation(() => true),
+  useOktaTokens: () => ({
+    getAccessToken: () => "test.jwt",
+  }),
 }));
 
 const mockPush = jest.fn();
@@ -250,6 +253,7 @@ const renderWithTestCase = (
         setDeleteDialogModalOpen={setDeleteDialogModalOpen}
         shiftDatesDialogModalOpen={shiftDatesDialogModalOpen}
         setShiftDatesDialogModalOpen={setShiftDatesDialogModalOpen}
+        setWarnings={jest.fn()}
       />
     </MemoryRouter>
   );
