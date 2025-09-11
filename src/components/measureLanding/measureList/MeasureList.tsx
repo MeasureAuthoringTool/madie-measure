@@ -1030,13 +1030,21 @@ export default function MeasureList(props: {
 
   return (
     <div style={{ overflow: "auto" }}>
-      <div tw="grid grid-cols-4 gap-4 m-4">
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "row",
+          justifyContent: "space-between",
+          margin: 16,
+          alignItems: "end",
+        }}
+      >
         <Search
           searchCriteria={searchCriteria}
           setSearchCriteria={setSearchCriteria}
           handlePageChange={props.handlePageChange}
         />
-        <div tw="col-start-4 justify-self-end p-3">
+        <div>
           <ActionCenter
             updateTargetMeasure={updateTargetMeasure}
             exportMeasure={exportMeasure}
