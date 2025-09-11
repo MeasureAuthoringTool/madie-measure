@@ -687,13 +687,13 @@ describe("TestCaseServiceApi Tests", () => {
       lockedBy: "test.user",
       lockedId: "testCaseId",
     };
-    axios.put = jest.fn().mockResolvedValueOnce({ data: response });
+    axios.post = jest.fn().mockResolvedValueOnce({ data: response });
 
     const result = await testCaseService.lockTestCase(
       "testMeasureId",
       "testCaseId"
     );
-    expect(axios.put).toBeCalledTimes(1);
+    expect(axios.post).toBeCalledTimes(1);
     expect(result).toBe(response);
   });
 
@@ -704,14 +704,14 @@ describe("TestCaseServiceApi Tests", () => {
       message: "Error",
     };
 
-    axios.put = jest.fn().mockRejectedValueOnce({ error: response });
+    axios.post = jest.fn().mockRejectedValueOnce({ error: response });
 
     try {
       const result = await testCaseService.lockTestCase(
         "testMeasureId",
         "testCaseId"
       );
-      expect(axios.put).toBeCalledTimes(1);
+      expect(axios.post).toBeCalledTimes(1);
       expect(result).not.toBe(response);
     } catch (err) {
       expect(err).not.toBeNull();

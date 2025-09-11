@@ -435,7 +435,7 @@ export class TestCaseServiceApi {
 
   async lockTestCase(measureId: string, testCaseId: string): Promise<any> {
     try {
-      const response = await axios.put<String>(
+      const response = await axios.post<String>(
         `${this.baseUrl}/measures/${measureId}/test-cases/${testCaseId}/lock`,
         null,
         {
@@ -446,7 +446,7 @@ export class TestCaseServiceApi {
       );
       return response.data;
     } catch (error) {
-      throw new Error(error);
+      throw new Error("Error locking test case");
     }
   }
 
@@ -462,7 +462,7 @@ export class TestCaseServiceApi {
       );
       return response.data;
     } catch (error) {
-      throw new Error(error);
+      throw new Error("Error unlocking test case");
     }
   }
 }
