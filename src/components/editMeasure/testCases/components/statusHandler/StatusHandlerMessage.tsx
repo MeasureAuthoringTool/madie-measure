@@ -66,8 +66,7 @@ export function createMissingDataElementMessage(
       <div aria-live="polite" role="alert" data-testid={testDataId}>
         <div>
           The following data elements in this test case are no longer relevant
-          to the measure. These data elements are not editable and can only be
-          deleted from the Elements table.
+          to the measure.
           <ul tw="ml-5">
             {missingDataElements.map((el, index) => (
               <li key={index}>{el}</li>

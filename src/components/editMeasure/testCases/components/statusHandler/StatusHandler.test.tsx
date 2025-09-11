@@ -365,7 +365,7 @@ describe("StatusHandler Component", () => {
     // Check the content of the alert
     const alertContent = screen.getByTestId("alert-content-0");
     expect(alertContent).toHaveTextContent(
-      "The following data elements in this test case are no longer relevant to the measure. These data elements are not editable and can only be deleted from the Elements table."
+      "The following data elements in this test case are no longer relevant to the measure."
     );
 
     // Check that each missing element is listed

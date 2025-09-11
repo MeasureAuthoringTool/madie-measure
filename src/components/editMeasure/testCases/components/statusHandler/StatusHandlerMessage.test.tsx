@@ -144,7 +144,7 @@ describe("StatusHandler Messages", () => {
 
     const container = getByTestId("test_case_missing_data_elements");
     expect(container).toHaveTextContent(
-      "The following data elements in this test case are no longer relevant to the measure. These data elements are not editable and can only be deleted from the Elements table."
+      "The following data elements in this test case are no longer relevant to the measure."
     );
 
     const singleListItems = container.querySelectorAll("li");
@@ -166,7 +166,7 @@ describe("StatusHandler Messages", () => {
 
     const multipleContainer = getByTestId("test_case_missing_data_elements");
     expect(multipleContainer).toHaveTextContent(
-      "The following data elements in this test case are no longer relevant to the measure. These data elements are not editable and can only be deleted from the Elements table."
+      "The following data elements in this test case are no longer relevant to the measure."
     );
 
     const multipleListItems = multipleContainer.querySelectorAll("li");
