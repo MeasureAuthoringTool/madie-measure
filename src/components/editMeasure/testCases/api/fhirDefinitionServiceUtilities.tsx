@@ -249,19 +249,28 @@ export function removeUndefinedAndEmptyObjects(obj) {
     return obj;
   }
 
+  if (Array.isArray(obj)) {
+    // Clean each item in the array recursively
+    const cleanedArray = obj
+      .map((item) => removeUndefinedAndEmptyObjects(item))
+      .filter((item) => {
+        // Remove null, undefined, empty values
+        return !(_.isNil(item) || _.isEmpty(item));
+      });
+    return cleanedArray.length > 0 ? cleanedArray : undefined;
+  }
+
   for (let key in obj) {
     if (obj.hasOwnProperty(key) && key !== "x") {
       const value = obj[key];
-
-      // Remove the key if the value is undefined
-      if (value === undefined) {
+      const cleanedValue = removeUndefinedAndEmptyObjects(value);
+      if (
+        _.isNil(cleanedValue) ||
+        (typeof cleanedValue === "object" && _.isEmpty(cleanedValue))
+      ) {
         delete obj[key];
-      } else if (typeof value === "object") {
-        // Recursively remove undefined values and empty objects
-        removeUndefinedAndEmptyObjects(value);
-        if (Object.keys(value)?.length === 0) {
-          delete obj[key];
-        }
+      } else {
+        obj[key] = cleanedValue;
       }
     }
   }

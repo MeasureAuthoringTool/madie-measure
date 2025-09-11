@@ -15,5 +15,6 @@ export interface TypeComponentProps {
   setTouched?: () => void;
   showAddAttributeButton?: boolean;
   addTitle?: string;
+  handleAddElement?: () => void;
   containerStyle?: React.CSSProperties;
 }

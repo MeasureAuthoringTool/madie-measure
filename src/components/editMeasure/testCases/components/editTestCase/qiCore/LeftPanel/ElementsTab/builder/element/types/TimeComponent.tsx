@@ -15,6 +15,7 @@ const TimeComponent = ({
   label = "Time",
   showAddAttributeButton,
   addTitle,
+  handleAddElement,
 }: TypeComponentProps) => {
   const TIME_FORMAT = "HH:mm:ss";
   const [time, setTime] = React.useState(
@@ -32,14 +33,14 @@ const TimeComponent = ({
         views={["hours", "minutes", "seconds"]}
         data-testid={`time-field-${label}`}
         handleTimeChange={(time) => {
-          const formatted = time.format(TIME_FORMAT);
+          const formatted = time?.format(TIME_FORMAT);
           setTime(time);
           onChange(formatted);
         }}
         value={time}
       />
       {showAddAttributeButton && addTitle && (
-        <AddElementButton name={addTitle} />
+        <AddElementButton name={addTitle} onClick={handleAddElement} />
       )}{" "}
     </div>
   );

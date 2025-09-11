@@ -157,4 +157,74 @@ describe("DateTimeComponent", () => {
     userEvent.type(input, "01/01/2025");
     expect(handleChange).toBeCalledWith("2025-01-01");
   });
+
+  test("AddElementButton functionality works", async () => {
+    const handleChange = jest.fn();
+    const handleAddElement = jest.fn();
+    render(
+      <DateTimeComponent
+        canEdit={true}
+        label="birthday"
+        fieldRequired={false}
+        value={null}
+        onChange={handleChange}
+        addTitle={"Birthday"}
+        showAddAttributeButton={true}
+        handleAddElement={handleAddElement}
+      />
+    );
+
+    expect(screen.getByText("Add Birthday")).toBeInTheDocument();
+
+    fireEvent.change(
+      screen.getByTestId("date-time-format-selector-input-field-birthday"),
+      {
+        target: { value: YEAR_MONTH_DAY_FORMAT },
+      }
+    );
+
+    const input = screen.getByTestId(
+      `${YEAR_MONTH_DAY_FORMAT}-field-birthday-input`
+    );
+    userEvent.type(input, "01/01/2025");
+    expect(handleChange).toBeCalledWith("2025-01-01");
+
+    // Test AddElementButton click
+    const addButton = screen.getByText("Add Birthday");
+    fireEvent.click(addButton);
+    expect(handleAddElement).toHaveBeenCalled();
+  });
+
+  test("AddElementButton is not rendered when showAddAttributeButton is false", () => {
+    const handleChange = jest.fn();
+    render(
+      <DateTimeComponent
+        canEdit={true}
+        label="birthday"
+        fieldRequired={false}
+        value={null}
+        onChange={handleChange}
+        addTitle={"Birthday"}
+        showAddAttributeButton={false}
+      />
+    );
+
+    expect(screen.queryByText("Add Birthday")).not.toBeInTheDocument();
+  });
+
+  test("AddElementButton is not rendered when addTitle is not provided", () => {
+    const handleChange = jest.fn();
+    render(
+      <DateTimeComponent
+        canEdit={true}
+        label="birthday"
+        fieldRequired={false}
+        value={null}
+        onChange={handleChange}
+        showAddAttributeButton={true}
+      />
+    );
+
+    expect(screen.queryByText(/Add/)).not.toBeInTheDocument();
+  });
 });
