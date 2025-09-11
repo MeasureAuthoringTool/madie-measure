@@ -19,6 +19,7 @@ const CodesComponent = ({
   showAddAttributeButton,
   addTitle,
   containerStyle,
+  handleAddElement,
 }: TypeComponentProps) => {
   const [codes, setCodes] = useState([]);
   const fhirDefinitionServiceApi = useRef(useFhirDefinitionsServiceApi());
@@ -168,7 +169,7 @@ const CodesComponent = ({
           }}
         />
         {showAddAttributeButton && addTitle && (
-          <AddElementButton name={addTitle} />
+          <AddElementButton name={addTitle} onClick={handleAddElement} />
         )}
       </div>
     </Box>

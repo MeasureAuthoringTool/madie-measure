@@ -1,5 +1,6 @@
 import * as Yup from "yup";
 import { ElementDefinition } from "fhir/r4";
+import * as _ from "lodash";
 import {
   getBasePath,
   getTopLevelElements,
@@ -29,7 +30,6 @@ import {
   modifySliceNameForReadability,
   extractNameWithoutIndex,
 } from "./fhirDefinitionServiceUtilities";
-import _ from "lodash";
 
 describe("FhirDefinitionServiceUtilities", () => {
   const mockResource = {
@@ -202,6 +202,7 @@ describe("FhirDefinitionServiceUtilities", () => {
       expect(getDisplayedElementsTree(elements)).toEqual({ a: { b: true } });
     });
   });
+
   describe("removeUndefinedAndEmptyObjects", () => {
     it("should remove undefined values from an object", () => {
       const obj = { a: 1, b: undefined, c: 3 };
@@ -230,6 +231,18 @@ describe("FhirDefinitionServiceUtilities", () => {
       expect(removeUndefinedAndEmptyObjects(null)).toBe(null);
       expect(removeUndefinedAndEmptyObjects(12)).toBe(12);
       expect(removeUndefinedAndEmptyObjects("test")).toBe("test");
+    });
+
+    it("should return array by removing empty/null/undefined values", () => {
+      expect(
+        removeUndefinedAndEmptyObjects([
+          "2024",
+          "",
+          undefined,
+          null,
+          "08/09/2025",
+        ])
+      ).toEqual(["2024", "08/09/2025"]);
     });
   });
 });

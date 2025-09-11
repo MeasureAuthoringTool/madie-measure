@@ -18,6 +18,7 @@ const StringComponent = ({
   stringOnly = true,
   showAddAttributeButton = false,
   addTitle,
+  handleAddElement,
   ...props
 }: TypeComponentProps) => {
   function isRootLabel(label) {
@@ -58,7 +59,7 @@ const StringComponent = ({
         value={value || ""}
       />
       {showAddAttributeButton && addTitle && (
-        <AddElementButton name={addTitle} />
+        <AddElementButton name={addTitle} onClick={handleAddElement} />
       )}
     </div>
   );
