@@ -94,6 +94,7 @@ const DateTimeComponent = ({
   helperText,
   setTouched,
   showAddAttributeButton,
+  handleAddElement,
   addTitle,
 }: TypeComponentProps) => {
   const [format, setFormat] = useState<string>(null);
@@ -232,7 +233,7 @@ const DateTimeComponent = ({
         </LocalizationProvider>
       </Box>
       {showAddAttributeButton && addTitle && (
-        <AddElementButton name={addTitle} />
+        <AddElementButton name={addTitle} onClick={handleAddElement} />
       )}
     </div>
   );

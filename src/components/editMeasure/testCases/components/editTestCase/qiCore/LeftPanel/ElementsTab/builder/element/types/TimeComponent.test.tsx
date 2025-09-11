@@ -1,4 +1,4 @@
-import React from "react";
+import * as React from "react";
 import { render, screen } from "@testing-library/react";
 import TimeComponent from "./TimeComponent";
 import userEvent from "@testing-library/user-event";
@@ -20,8 +20,9 @@ describe("TimeComponent", () => {
     expect(inputTime).toBeInTheDocument();
   });
 
-  test("Should handle change", () => {
+  test("Should handle change and AddElementButton functionality", () => {
     const handleChange = jest.fn();
+    const handleAddElement = jest.fn();
     render(
       <TimeComponent
         canEdit={true}
@@ -31,6 +32,7 @@ describe("TimeComponent", () => {
         value={`01:23:45`}
         addTitle={"Time"}
         showAddAttributeButton={true}
+        handleAddElement={handleAddElement}
       />
     );
     expect(screen.getByText("Add Time")).toBeInTheDocument();
@@ -39,5 +41,43 @@ describe("TimeComponent", () => {
     userEvent.type(input, "082359AM");
     expect(input).toHaveValue("08:23:59 AM");
     expect(handleChange).toHaveBeenCalledWith("08:23:59");
+
+    // Test AddElementButton click
+    const addButton = screen.getByText("Add Time");
+    userEvent.click(addButton);
+    expect(handleAddElement).toHaveBeenCalled();
+  });
+
+  test("AddElementButton is not rendered when showAddAttributeButton is false", () => {
+    const handleChange = jest.fn();
+    render(
+      <TimeComponent
+        canEdit={true}
+        structureDefinition={null}
+        fieldRequired={false}
+        onChange={handleChange}
+        value={`01:23:45`}
+        addTitle={"Time"}
+        showAddAttributeButton={false}
+      />
+    );
+
+    expect(screen.queryByText("Add Time")).not.toBeInTheDocument();
+  });
+
+  test("AddElementButton is not rendered when addTitle is not provided", () => {
+    const handleChange = jest.fn();
+    render(
+      <TimeComponent
+        canEdit={true}
+        structureDefinition={null}
+        fieldRequired={false}
+        onChange={handleChange}
+        value={`01:23:45`}
+        showAddAttributeButton={true}
+      />
+    );
+
+    expect(screen.queryByText(/Add/)).not.toBeInTheDocument();
   });
 });
