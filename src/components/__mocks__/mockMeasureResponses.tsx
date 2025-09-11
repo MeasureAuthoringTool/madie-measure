@@ -16,7 +16,7 @@ const singleMeasure = [
     lastModifiedAt: null,
     lastModifiedBy: "TestUser1",
     model: Model.QICORE,
-    measureMetaData: null,
+    measureMetaData: { draft: true },
   },
 ];
 

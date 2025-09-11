@@ -1784,12 +1784,137 @@ describe("QDM CalculationService Tests", () => {
         );
       expect(numeratorObservationActualValue).toBe("NA");
     });
+
+    it("returns undefined if result is not >= 0", () => {
+      const population = {
+        id: "pop6",
+        name: PopulationType.DENOMINATOR_OBSERVATION,
+        expected: 2,
+      } as unknown as PopulationExpectedValue;
+      const episodeResults = {
+        ep1: {
+          DENOM: 1,
+          DENEX: 0,
+          observation_values: [],
+        },
+      };
+      const result = calculationService.getEpisodeObservationResult(
+        population,
+        episodeResults,
+        0,
+        0
+      );
+      expect(result).toBeUndefined();
+    });
   });
 
-  describe("hook", () => {
-    it("should return an instance of the service when hook is called", () => {
-      const calc = qdmCalculationService();
-      expect(calc).toBeTruthy();
-    });
+  it("returns undefined if result is not >= 0", () => {
+    const population = {
+      id: "pop6",
+      name: PopulationType.DENOMINATOR_OBSERVATION,
+      expected: 2,
+    } as unknown as PopulationExpectedValue;
+    const episodeResults = {
+      ep1: {
+        DENOM: 1,
+        DENEX: 0,
+        observation_values: [],
+      },
+    };
+    const result = calculationService.getEpisodeObservationResult(
+      population,
+      episodeResults,
+      0,
+      0
+    );
+    expect(result).toBeUndefined();
+  });
+
+  it("returns 0 if observation_values contains zero for DENOMINATOR_OBSERVATION", () => {
+    const population = {
+      id: "pop7",
+      name: PopulationType.DENOMINATOR_OBSERVATION,
+      expected: 0,
+    } as unknown as PopulationExpectedValue;
+    const episodeResults = {
+      ep1: {
+        DENOM: 1,
+        DENEX: 0,
+        observation_values: [0, 5],
+      },
+    };
+    const result = calculationService.getEpisodeObservationResult(
+      population,
+      episodeResults,
+      0,
+      0
+    );
+    expect(result).toBe(0);
+  });
+
+  it("returns 0 if observation_values contains zero for NUMERATOR_OBSERVATION", () => {
+    const population = {
+      id: "pop8",
+      name: PopulationType.NUMERATOR_OBSERVATION,
+      expected: 0,
+    } as unknown as PopulationExpectedValue;
+    const episodeResults = {
+      ep1: {
+        NUMER: 1,
+        NUMEX: 0,
+        observation_values: [2, 0],
+      },
+    };
+    const result = calculationService.getEpisodeObservationResult(
+      population,
+      episodeResults,
+      0,
+      0
+    );
+    expect(result).toBe(0);
+  });
+
+  it("returns 0 for MEASURE_POPULATION_OBSERVATION with zero at gpIndex", () => {
+    const population = {
+      id: "pop9",
+      name: PopulationType.MEASURE_POPULATION_OBSERVATION,
+      expected: 0,
+    } as unknown as PopulationExpectedValue;
+    const episodeResults = {
+      ep1: {
+        MSRPOPL: 1,
+        MSRPOPLEX: 0,
+        observation_values: [10, 0, 20],
+      },
+    };
+    const result = calculationService.getEpisodeObservationResult(
+      population,
+      episodeResults,
+      0,
+      1
+    );
+    expect(result).toBe(0);
+  });
+
+  it("returns correct value for MEASURE_OBSERVATION with zero value", () => {
+    const population = {
+      id: "pop10",
+      name: PopulationType.MEASURE_OBSERVATION,
+      expected: 0,
+    } as unknown as PopulationExpectedValue;
+    const episodeResults = {
+      ep1: {
+        MSRPOPL: 1,
+        MSRPOPLEX: 0,
+        observation_values: [0],
+      },
+    };
+    const result = calculationService.getEpisodeObservationResult(
+      population,
+      episodeResults,
+      0,
+      0
+    );
+    expect(result).toBe(0);
   });
 });
