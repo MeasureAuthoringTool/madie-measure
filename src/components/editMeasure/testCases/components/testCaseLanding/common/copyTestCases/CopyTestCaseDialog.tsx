@@ -148,9 +148,7 @@ const CopyTestCaseDialog = ({ open, onClose, measure, selectedTestCases }) => {
       optionalSearchProperties,
     };
 
-    if (!featureFlags?.EditTestsOnVersionedMeasures) {
-      searchCriteria.draft = true;
-    }
+    // Always allow searching all measures (including versioned ones)
     measureSearchApi.current
       .searchMeasuresByCriteria(
         [OwnershipType.OWNED, OwnershipType.SHARED],
@@ -351,52 +349,50 @@ const CopyTestCaseDialog = ({ open, onClose, measure, selectedTestCases }) => {
       },
     ];
 
-    if (featureFlags?.EditTestsOnVersionedMeasures) {
-      updatedColumns.push({
-        header: "",
-        cell: (info) => {
-          if (info.row.original?.hasAssociatedMeasures) {
-            const handleKeyDown = (e) => {
-              if (e.key === "Enter" || e.key === " ") {
+    // Always show the expand column for versioned measures
+    updatedColumns.push({
+      header: "",
+      cell: (info) => {
+        if (info.row.original?.hasAssociatedMeasures) {
+          const handleKeyDown = (e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              handleRowClick(info.row.original);
+            }
+          };
+          return (
+            <span
+              role="button"
+              tabIndex={0}
+              onClick={() => {
                 handleRowClick(info.row.original);
-              }
-            };
-            return (
-              <span
-                role="button"
-                tabIndex={0}
-                onClick={() => {
-                  handleRowClick(info.row.original);
-                }}
-                onKeyDown={handleKeyDown}
-                style={{
-                  cursor: "pointer",
-                  display: "inline-flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                {isRowExpanded &&
-                selectedIdForExpansion === info.row.original.measureSetId ? (
-                  <CollapseIcon />
-                ) : (
-                  <ExpandIcon />
-                )}
-              </span>
-            );
-          } else {
-            return <></>;
-          }
-        },
-        accessorKey: "expandArrow",
-        enableSorting: false,
-      });
-    }
+              }}
+              onKeyDown={handleKeyDown}
+              style={{
+                cursor: "pointer",
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              {isRowExpanded &&
+              selectedIdForExpansion === info.row.original.measureSetId ? (
+                <CollapseIcon />
+              ) : (
+                <ExpandIcon />
+              )}
+            </span>
+          );
+        } else {
+          return <></>;
+        }
+      },
+      accessorKey: "expandArrow",
+      enableSorting: false,
+    });
 
     return updatedColumns;
   }, [
     selectedRowId,
-    featureFlags?.EditTestsOnVersionedMeasures,
     selectedIdForExpansion,
     isRowExpanded,
     expandedSectionData,
@@ -703,9 +699,7 @@ const CopyTestCaseDialog = ({ open, onClose, measure, selectedTestCases }) => {
                             </td>
                           ))}
                         </tr>
-                        {featureFlags?.EditTestsOnVersionedMeasures &&
-                          selectedIdForExpansion ===
-                            row.original.measureSetId &&
+                        {selectedIdForExpansion === row.original.measureSetId &&
                           expandedSectionData?.map((subRow) => (
                             <tr key={subRow.id} className="expanded-row">
                               {expandedColumns.map((column: any) => (
