@@ -46,6 +46,7 @@ import { AxiosResponse } from "axios";
 import ViewHRModal from "../common/viewHumanReadableModal/ViewHRModal";
 import ShareDialog from "../common/shareDialog/ShareDialog";
 import TransferDialog from "../common/transferDialog/TransferDialog";
+import ViewMeasureHistoryDialog from "../common/viewMeasureHistoryDialog/ViewMeasureHistoryDialog";
 
 const OBJECT_ID_REGEX = /\/[a-f0-9]{24}/g;
 
@@ -138,6 +139,9 @@ export default function EditMeasure() {
     open: false,
     measures: [],
   });
+  const [viewMeasureHistoryDialog, setViewMeasureHistoryDialog] =
+    useState(false);
+
   const [versionHelperText, setVersionHelperText] = useState("");
   const [invalidTestCaseOpen, setInvalidTestCaseOpen] =
     useState<boolean>(false);
@@ -291,6 +295,25 @@ export default function EditMeasure() {
     };
   }, []);
 
+  useEffect(() => {
+    const viewMeasureHistoryListener = () => {
+      setViewMeasureHistoryDialog(true);
+    };
+    window.addEventListener(
+      "view-measure-history",
+      viewMeasureHistoryListener,
+      {
+        passive: true,
+      }
+    );
+    return () => {
+      window.removeEventListener(
+        "view-measure-history",
+        viewMeasureHistoryListener
+      );
+    };
+  }, []);
+
   // whenever measureID changes we need to update all pagination items except for limit which should be retained as a user preference
   useEffect(() => {
     return () => {
@@ -349,6 +372,7 @@ export default function EditMeasure() {
       open: false,
       measures: [],
     });
+    setViewMeasureHistoryDialog(false);
   };
 
   const handleShareDialogClose = ({
@@ -671,6 +695,11 @@ export default function EditMeasure() {
             open={transferDialog.open}
             onClose={handleDialogClose}
             onSubmit={transferMeasure}
+          />
+          <ViewMeasureHistoryDialog
+            measures={[measure]}
+            open={viewMeasureHistoryDialog}
+            onClose={handleDialogClose}
           />
           <Toast
             toastKey="measure-information-toast"
