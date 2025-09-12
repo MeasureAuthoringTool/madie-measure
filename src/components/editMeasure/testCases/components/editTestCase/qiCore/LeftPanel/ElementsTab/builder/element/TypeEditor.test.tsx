@@ -1101,6 +1101,9 @@ describe("TypeEditor Component", () => {
       "hh:mm:ss aa"
     ) as HTMLInputElement;
     expect(inputTime.value).toBe("01:23:45 AM");
+    // Change the value of the first time component to trigger change event
+    userEvent.type(inputTime, "082359AM");
+    expect(inputTime).toHaveValue("08:23:59 AM");
   });
 
   test("Should render PositiveInt component", () => {
@@ -2117,7 +2120,7 @@ describe("TypeEditor Component", () => {
       const addButtons = screen.getAllByText("Add Given");
       expect(addButtons).toHaveLength(1);
       // click the add button
-      fireEvent.click(addButtons[0]);
+      userEvent.click(addButtons[0]);
 
       // Should call setFieldValue
       expect(formik.setFieldValue).toHaveBeenCalled();
@@ -2178,17 +2181,21 @@ describe("TypeEditor Component", () => {
         </FormikProvider>
       );
 
+      const datetime1 = screen.getByTestId(
+        "YYYY-MM-DD-field-MedicationRequest.dosageInstruction[0].timing.event[0]-input"
+      ) as HTMLInputElement;
+      const datetime2 = screen.getByTestId(
+        "YYYY-MM-DD-field-MedicationRequest.dosageInstruction[0].timing.event[1]"
+      );
       // Should render 2 DateTime components
-      expect(
-        screen.getByTestId(
-          "YYYY-MM-DD-field-MedicationRequest.dosageInstruction[0].timing.event[0]"
-        )
-      ).toBeInTheDocument();
-      expect(
-        screen.getByTestId(
-          "YYYY-MM-DD-field-MedicationRequest.dosageInstruction[0].timing.event[1]"
-        )
-      ).toBeInTheDocument();
+      expect(datetime1).toBeInTheDocument();
+      expect(datetime2).toBeInTheDocument();
+
+      // let's change the value of the first datetime component to trigger change event
+      userEvent.type(datetime1, "09/02/2025");
+      expect(datetime1.value).toEqual("09/02/2025");
+      expect(formik.setFieldValue).toHaveBeenCalled();
+      expect(formik.setFieldTouched).toHaveBeenCalled();
     });
 
     test("Should render Time components as array when multiple cardinality", () => {
@@ -2245,17 +2252,12 @@ describe("TypeEditor Component", () => {
           </RequiredFieldsProvider>
         </FormikProvider>
       );
-
-      expect(
-        screen.getByTestId(
-          "medication-request-dosage-instruction-0-timing-time-of-day-0"
-        )
-      ).toBeInTheDocument();
-      expect(
-        screen.getByTestId(
-          "medication-request-dosage-instruction-0-timing-time-of-day-1"
-        )
-      ).toBeInTheDocument();
+      const times = screen.getAllByPlaceholderText("hh:mm:ss aa");
+      expect(times.length).toEqual(2);
+      // Change the value of the first time component to trigger change event
+      userEvent.type(times[0], "082359AM");
+      expect(times[0]).toHaveValue("08:23:59 AM");
+      expect(formik.setFieldTouched).toHaveBeenCalled();
     });
 
     test("Should render Code components as array when multiple cardinality", () => {
