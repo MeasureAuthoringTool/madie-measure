@@ -15,7 +15,6 @@ import {
   Group,
 } from "@madie/madie-models";
 import { TestCasesPassingDetailsProps } from "../common/interfaces";
-import { useFeatureFlags } from "@madie/madie-util";
 import { useQdmExecutionContext } from "../../routes/qdm/QdmExecutionContext";
 import LoadingButtonWithMenu from "../common/loadingButton/LoadingButtonWithMenu";
 import LoadingButton from "../common/loadingButton/LoadingButton";
@@ -86,7 +85,6 @@ export default function CreateCodeCoverageNavTabs(props: NavTabProps) {
     // hide the tooltip if all testcases have been run
     hidden: !activeTip || executeAllTestCases,
   });
-  const featureFlags = useFeatureFlags();
   const [anchorEl, setAnchorEl] = useState(null);
 
   const executionResultsDisplayTemplate = (label) => {
@@ -191,23 +189,21 @@ export default function CreateCodeCoverageNavTabs(props: NavTabProps) {
           />
         </Tabs>
         <div style={{ margin: "6px 0 0 auto", display: "flex", gap: "10px" }}>
-          {featureFlags.OverlappingValueSets && (
-            <LoadingButtonWithMenu
-              hasErrors={hasErrors}
-              isExecutionContextReady={executionContextReady}
-              dataTestId="reports-button"
-              label="Reports"
-              menuItems={[
-                {
-                  label: "Overlapping Codes",
-                  dataTestId: "overlapping-codes",
-                  toImplementFunction: onGenerateOverlappingCodesReport,
-                },
-              ]}
-              showOptions={props.showReportOptions}
-              setShowOptions={props.setShowReportOptions}
-            />
-          )}
+          <LoadingButtonWithMenu
+            hasErrors={hasErrors}
+            isExecutionContextReady={executionContextReady}
+            dataTestId="reports-button"
+            label="Reports"
+            menuItems={[
+              {
+                label: "Overlapping Codes",
+                dataTestId: "overlapping-codes",
+                toImplementFunction: onGenerateOverlappingCodesReport,
+              },
+            ]}
+            showOptions={props.showReportOptions}
+            setShowOptions={props.setShowReportOptions}
+          />
 
           {canEdit && (
             <>

@@ -219,7 +219,7 @@ const Builder = ({
               />
             )}
             <TestCaseSummaryGrid
-              bundle={state?.bundle}
+              entry={state?.bundle?.entry}
               onRowEdit={(row) =>
                 handleRowEdit(row, setSelectedResourceId, setSavedGridID)
               }

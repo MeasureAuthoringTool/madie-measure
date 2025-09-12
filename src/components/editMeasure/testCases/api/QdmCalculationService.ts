@@ -200,9 +200,9 @@ export class QdmCalculationService {
             : episode?.observation_values?.[0];
       }
 
-      if (result && counter === targetIndex) {
+      if (result >= 0 && counter === targetIndex) {
         return result;
-      } else if (result) {
+      } else if (result >= 0) {
         counter++;
       }
     }

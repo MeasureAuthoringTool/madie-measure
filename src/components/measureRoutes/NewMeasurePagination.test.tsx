@@ -77,7 +77,7 @@ describe("Measures Pagination", () => {
     renderRouter([
       {
         pathname: "/measures",
-        search: "?tab=0",
+        search: "?tab=0&page=1&limit=10",
         hash: "",
         state: undefined,
         key: "1fewtg",
@@ -98,7 +98,7 @@ describe("Measures Pagination", () => {
     renderRouter([
       {
         pathname: "/measures",
-        search: "?tab=1",
+        search: "?tab=1&page=1&limit=10",
         hash: "",
         state: undefined,
         key: "1fewtg",
@@ -109,7 +109,7 @@ describe("Measures Pagination", () => {
     expect(rowItems).toHaveLength(10);
   });
 
-  test("On Page load, 25 measures are displayed by default for All Measures tab", async () => {
+  test("On Page load, 25 measures are displayed by default for All Measures tab (respecting stored limit)", async () => {
     // Set local storage for All Measures tab
     localStorage.setItem(
       "allMeasuresPageOptions",
@@ -119,7 +119,7 @@ describe("Measures Pagination", () => {
     renderRouter([
       {
         pathname: "/measures",
-        search: "?tab=2",
+        search: "?tab=2&page=1&limit=25",
         hash: "",
         state: undefined,
         key: "1fewtg",

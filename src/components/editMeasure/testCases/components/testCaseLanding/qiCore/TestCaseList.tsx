@@ -19,11 +19,7 @@ import {
   DetailedPopulationGroupResult,
 } from "fqm-execution/build/types/Calculator";
 import { ObjectId } from "bson";
-import {
-  checkUserCanEdit,
-  measureStore,
-  useFeatureFlags,
-} from "@madie/madie-util";
+import { checkUserCanEdit, measureStore } from "@madie/madie-util";
 import useExecutionContext from "../../routes/qiCore/useExecutionContext";
 import CreateCodeCoverageNavTabs from "./CreateCodeCoverageNavTabs";
 import CodeCoverageHighlighting from "../common/CodeCoverageHighlighting";
@@ -170,7 +166,6 @@ const TestCaseList = (props: TestCaseListProps) => {
   const [shiftDatesDialogModalOpen, setShiftDatesDialogModalOpen] =
     useState<boolean>(false);
   const [exportOptionsOpen, setExportOptionsOpen] = useState<boolean>(false);
-  const featureFlags = useFeatureFlags();
 
   const [overlappingCodes, setOverlappingCodes] = useState<
     OverlappingCodeDto[]
@@ -233,8 +228,7 @@ const TestCaseList = (props: TestCaseListProps) => {
       checkUserCanEdit(
         measure?.measureSet?.owner,
         measure?.measureSet?.acls,
-        measure?.measureMetaData?.draft,
-        featureFlags?.EditTestsOnVersionedMeasures
+        measure?.measureMetaData?.draft
       )
     );
   }, [measure]);
@@ -539,31 +533,6 @@ const TestCaseList = (props: TestCaseListProps) => {
     }
   };
 
-  const onTestCaseShiftDates = (testCases: TestCase[], shifted: number) => {
-    testCaseService.current
-      .shiftQiCoreTestCaseDates(
-        measureId,
-        testCases.map((testCase) => testCase.id),
-        shifted
-      )
-      .then((response) => {
-        if (response.length === 0) {
-          setToastOpen(true);
-          setToastType("success");
-          setToastMessage(`All Test Case dates successfully shifted.`);
-        } else {
-          setWarnings((prevState) => [...prevState, ...response]);
-        }
-      })
-      .catch((err) => {
-        setToastOpen(true);
-        setToastType("danger");
-        setToastMessage(
-          `Unable to shift test Case dates. Please try again. If the issue continues, please contact helpdesk.`
-        );
-      });
-  };
-
   const handleQiCloneTestCase = async (testCase: TestCase) => {
     const clonedTestCase = testCase;
     clonedTestCase.title =
@@ -699,7 +668,6 @@ const TestCaseList = (props: TestCaseListProps) => {
                         deleteTestCase={deleteMultipleTestCases}
                         exportTestCase={exportTestCase}
                         measure={measure}
-                        onTestCaseShiftDates={onTestCaseShiftDates}
                         handleQiCloneTestCase={handleQiCloneTestCase}
                         setSelectedTestCases={setSelectedTestCases}
                         selectedTestCases={selectedTestCases}
@@ -709,6 +677,7 @@ const TestCaseList = (props: TestCaseListProps) => {
                         setShiftDatesDialogModalOpen={
                           setShiftDatesDialogModalOpen
                         }
+                        setWarnings={setWarnings}
                       />
                       {currentSlice?.length > 0 && (
                         <Pagination

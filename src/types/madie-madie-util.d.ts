@@ -14,16 +14,10 @@ declare module "@madie/madie-util" {
     qiCoreElementsTab: boolean;
     qdmHideJson: boolean;
     stu6TestCaseValidation: boolean;
-    QDMIncludeRAVValues: boolean;
-    QICoreIncludeRAVValues: boolean;
     MeasureSearch: boolean;
-    OverlappingValueSets: boolean;
-    EditTestsOnVersionedMeasures: boolean;
-    MinimizeAlerts: boolean;
     EnhancedTextFormatting: boolean;
     Locking: boolean;
     qiCore7: boolean;
-    Locking: boolean;
     TransferMeasure: boolean;
     MeasureHistory: boolean;
     Calculator: boolean;
@@ -94,8 +88,7 @@ declare module "@madie/madie-util" {
   export function checkUserCanEdit(
     createdBy: string,
     acls: Array<Acl>,
-    draft?: boolean,
-    editTestsOnVersionedMeasures?: boolean
+    draft?: boolean
   ): boolean;
 
   export function checkUserCanDelete(

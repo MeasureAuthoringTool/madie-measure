@@ -790,6 +790,42 @@ describe("MeasureServiceApi Tests", () => {
     ).rejects.toThrow(errorMessage);
   });
 
+  it("test transferMeasures pass", async () => {
+    const resp: any = { status: 200, data: true };
+    mockedAxios.put.mockResolvedValueOnce(resp);
+
+    const result = await measureServiceApi.transferMeasures(
+      ["measureId1", "measureId2"],
+      "harpId",
+      true
+    );
+    expect(mockedAxios.put).toBeCalledTimes(1);
+    expect(mockedAxios.put).toBeCalledWith(
+      "madie.com/measures/transfer",
+      ["measureId1", "measureId2"],
+      {
+        headers: { Authorization: "Bearer undefined", harpId: "harpId" },
+        params: { retainShareAccess: true },
+      }
+    );
+    expect(result).toEqual(true);
+  });
+
+  it("test transferMeasures fail", async () => {
+    const errorMessage = "Transfer failed";
+    mockedAxios.put.mockImplementationOnce(() =>
+      Promise.reject(new Error(errorMessage))
+    );
+
+    await expect(
+      measureServiceApi.transferMeasures(
+        ["measureId1", "measureId2"],
+        "harpId",
+        true
+      )
+    ).rejects.toThrow(errorMessage);
+  });
+
   it("should succeed getMeasureHistoryLogs", async () => {
     const mockData = [{ action: "VIEW", timestamp: "2024-01-01T00:00:00Z" }];
     mockedAxios.get.mockResolvedValueOnce({ data: mockData });

@@ -14,7 +14,7 @@ import {
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import queryString from "query-string";
 import calculationService from "../../../api/CalculationService";
-import { checkUserCanEdit, useFeatureFlags } from "@madie/madie-util";
+import { checkUserCanEdit } from "@madie/madie-util";
 import CreateCodeCoverageNavTabs from "./CreateCodeCoverageNavTabs";
 import CreateNewTestCaseDialog from "../../createTestCase/CreateNewTestCaseDialog";
 import {
@@ -165,7 +165,6 @@ const TestCaseList = (props: TestCaseListProps) => {
   const [selectedTestCases, setSelectedTestCases] = useState<any>();
   const [exportExecuting, setExportExecuting] = useState(false);
   const [optionsOpen, setOptionsOpen] = useState<boolean>(false);
-  const featureFlags = useFeatureFlags();
   const qdmCqlParsingService = useRef(useQdmCqlParsingService());
   const [exportOptionsOpen, setExportOptionsOpen] = useState<boolean>(false);
   const [openCopyTestCaseDialog, setOpenCopyTestCaseDialog] =
@@ -233,12 +232,7 @@ const TestCaseList = (props: TestCaseListProps) => {
 
   useEffect(() => {
     setCanEdit(
-      checkUserCanEdit(
-        measure?.measureSet?.owner,
-        measure?.measureSet?.acls,
-        measure?.measureMetaData?.draft,
-        featureFlags?.EditTestsOnVersionedMeasures
-      )
+      checkUserCanEdit(measure?.measureSet?.owner, measure?.measureSet?.acls)
     );
   }, [measure]);
 
@@ -678,31 +672,6 @@ const TestCaseList = (props: TestCaseListProps) => {
     setShowReportOptions(false);
   };
 
-  const onTestCaseShiftDates = (testCases: TestCase[], shifted: number) => {
-    testCaseService.current
-      .shiftQdmTestCaseDates(
-        measureId,
-        testCases.map((testCase) => testCase.id),
-        shifted
-      )
-      .then((response) => {
-        if (response.length === 0) {
-          setToastOpen(true);
-          setToastType("success");
-          setToastMessage(`All Test Case dates successfully shifted.`);
-        } else {
-          setWarnings((prevState) => [...prevState, ...response]);
-        }
-      })
-      .catch((err) => {
-        setToastOpen(true);
-        setToastType("danger");
-        setToastMessage(
-          `Unable to shift test Case dates. Please try again. If the issue continues, please contact helpdesk.`
-        );
-      });
-  };
-
   const onCopyTestCaseClose = (msg?: string, toastType?: string) => {
     setOpenCopyTestCaseDialog(false);
     if (toastType) {
@@ -820,7 +789,6 @@ const TestCaseList = (props: TestCaseListProps) => {
                         exportTestCase={null}
                         onCloneTestCase={handleCloneTestCase}
                         measure={measure}
-                        onTestCaseShiftDates={onTestCaseShiftDates}
                         setSelectedTestCases={setSelectedTestCases}
                         deleteDialogModalOpen={deleteDialogModalOpen}
                         selectedTestCases={selectedTestCases}
@@ -829,6 +797,7 @@ const TestCaseList = (props: TestCaseListProps) => {
                         setShiftDatesDialogModalOpen={
                           setShiftDatesDialogModalOpen
                         }
+                        setWarnings={setWarnings}
                       />
                       <Pagination
                         totalItems={totalItems}

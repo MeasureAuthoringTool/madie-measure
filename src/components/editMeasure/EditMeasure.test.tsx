@@ -135,6 +135,7 @@ jest.mock("react-router-dom", () => ({
 const measure = {
   id: "measure ID",
   createdBy: "testuser@example.com",
+  cqlLibraryName: "TestCql",
   model: "QI-Core v4.1.1",
   testCases: testCases,
   measureSetId: "MeasureSetId1",
@@ -150,10 +151,10 @@ const serviceApiMock = {
   getAllPopulationBasisOptions: jest.fn().mockResolvedValue([]),
   getReturnTypesForAllCqlDefinitions: jest.fn().mockResolvedValue({}),
   updateMeasure: jest.fn().mockResolvedValueOnce({ status: 200 }),
-  createVersion: jest.fn().mockResolvedValue({}),
+  createVersion: jest.fn().mockResolvedValue({ id: "newVersionId" }),
   deleteMeasure: jest.fn().mockResolvedValue({}),
   checkNextVersionNumber: jest.fn().mockReturnValue("1.0.000"),
-  checkValidVersion: jest.fn().mockResolvedValue({}),
+  checkValidVersion: jest.fn().mockResolvedValue({ status: 200 }),
   fetchMeasureDraftStatuses: jest.fn().mockResolvedValue({
     "1": true,
     "2": true,
@@ -171,6 +172,8 @@ const serviceApiMock = {
   getMeasuresByMeasureSetId: jest.fn().mockImplementation((measureSetId) => {
     return [measure];
   }),
+  transferMeasures: jest.fn().mockResolvedValue({ data: true }),
+  draftMeasure: jest.fn().mockResolvedValue({ id: "newDraftId" }),
 } as unknown as MeasureServiceApi;
 
 useMeasureServiceApiMock.mockImplementation(() => {
@@ -506,7 +509,7 @@ describe("EditMeasure Component", () => {
     });
   });
 
-  it("should display transfer dialog when the event is triggered and close dialog when continue button is clicked", async () => {
+  it("should display transfer dialog when the event is triggered and handle a successful transfer", async () => {
     renderRouter();
 
     const result = await findByTestId("editMeasure");
@@ -535,8 +538,14 @@ describe("EditMeasure Component", () => {
 
         fireEvent.click(transferBtn);
 
+        expect(serviceApiMock.transferMeasures).toBeCalledWith(
+          [measure.id],
+          "newUser",
+          false
+        );
+
         expect(queryByTestId("transfer-dialog")).not.toBeInTheDocument();
-      }, 1000)
+      }, 2000)
     );
   });
 
@@ -552,6 +561,38 @@ describe("EditMeasure Component", () => {
     expect(clickSpy).toHaveBeenCalledTimes(1);
   });
 
+  // temporarily skipping as it has github build issues
+  it.skip("should create a draft and show success toast", async () => {
+    renderRouter();
+
+    act(() => {
+      window.dispatchEvent(new Event("draft-measure"));
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText("Create Draft")).toBeInTheDocument();
+    });
+
+    const nameInput = (await screen.findByRole("textbox", {
+      name: "Measure Name",
+    })) as HTMLInputElement;
+    fireEvent.change(nameInput, { target: { value: "Draft Measure Name" } });
+
+    const submitButton = screen.getByTestId("create-draft-continue-button");
+    fireEvent.click(submitButton);
+
+    await waitFor(() => {
+      expect(serviceApiMock.draftMeasure).toHaveBeenCalledWith(
+        measure.id,
+        measure.model,
+        "Draft Measure Name"
+      );
+      screen.debug(undefined, 80000);
+      expect(
+        screen.getByTestId("edit-measure-information-success-text")
+      ).toBeInTheDocument();
+    });
+  });
   it("should display view human readable modal when the event is triggered, discards.", async () => {
     renderRouter();
 

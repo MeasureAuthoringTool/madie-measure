@@ -1,5 +1,6 @@
 import * as React from "react";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import ActionCenter from "./ActionCenter";
 import { Measure, MeasureSet, Model } from "@madie/madie-models";
 import {
@@ -9,7 +10,6 @@ import {
   checkUserCanDelete,
 } from "@madie/madie-util";
 import useMeasureServiceApi from "../../../../api/useMeasureServiceApi";
-import userEvent from "@testing-library/user-event";
 
 jest.mock("@madie/madie-util", () => ({
   checkUserCanEdit: jest.fn(),
@@ -94,7 +94,7 @@ describe("ActionCenter", () => {
     expect(screen.getByTestId("transfer-action-btn")).toBeInTheDocument();
   });
 
-  it("should call updateTargetMeasure and setCreateVersionDialog when version action is triggered", () => {
+  it("should call updateTargetMeasure and setCreateVersionDialog when version action is triggered", async () => {
     const updateTargetMeasure = jest.fn();
     const setCreateVersionDialog = jest.fn();
 
@@ -115,7 +115,7 @@ describe("ActionCenter", () => {
       />
     );
 
-    fireEvent.click(screen.getByTestId("version-action-btn"));
+    await userEvent.click(screen.getByTestId("version-action-btn"));
 
     expect(updateTargetMeasure).toHaveBeenCalledWith(qdmMeasure);
     expect(setCreateVersionDialog).toHaveBeenCalledWith({
@@ -154,7 +154,7 @@ describe("ActionCenter", () => {
 
     const draftButton = await screen.findByTestId("draft-action-btn");
     expect(draftButton).toBeEnabled();
-    fireEvent.click(draftButton);
+    await userEvent.click(draftButton);
 
     expect(updateTargetMeasure).toHaveBeenCalledWith(qdmMeasureVersion);
     expect(setDraftMeasureDialog).toHaveBeenCalledWith({
@@ -187,7 +187,7 @@ describe("ActionCenter", () => {
 
     const deleteButton = await screen.findByTestId("delete-action-btn");
     expect(deleteButton).toBeEnabled();
-    fireEvent.click(deleteButton);
+    await userEvent.click(deleteButton);
 
     expect(updateTargetMeasure).toHaveBeenCalledWith(qdmMeasure);
     expect(setDeleteMeasureDialog).toHaveBeenCalledWith(true);
@@ -304,7 +304,7 @@ describe("ActionCenter", () => {
     );
 
     const viewHRBtn = screen.getByTestId("view-hr-action-btn");
-    fireEvent.click(viewHRBtn);
+    await userEvent.click(viewHRBtn);
 
     await waitFor(() => {
       expect(setViewHumanReadableModal).toHaveBeenCalledWith({
@@ -338,8 +338,8 @@ describe("ActionCenter", () => {
 
     const shareButton = await screen.findByTestId("share-action-btn");
     expect(shareButton).toBeEnabled();
-    fireEvent.click(shareButton);
-    fireEvent.click(screen.getByRole("menuitem", { name: "Share With" }));
+    await userEvent.click(shareButton);
+    await userEvent.click(screen.getByRole("menuitem", { name: "Share With" }));
 
     expect(setShareDialog).toHaveBeenCalledWith({
       open: true,
@@ -442,7 +442,7 @@ describe("ActionCenter", () => {
 
     const transferButton = await screen.findByTestId("transfer-action-btn");
     expect(transferButton).toBeEnabled();
-    fireEvent.click(transferButton);
+    await userEvent.click(transferButton);
 
     expect(setTransferDialog).toHaveBeenCalledWith({
       open: true,
@@ -475,13 +475,8 @@ describe("ActionCenter", () => {
     );
 
     const transferButton = await screen.findByTestId("transfer-action-btn");
-
-    // Wait for the component's useEffect to complete and button to be properly disabled
-    await waitFor(() => {
-      expect(transferButton).not.toBeEnabled();
-    });
-
-    fireEvent.click(transferButton);
+    expect(transferButton).not.toBeEnabled();
+    await fireEvent.click(transferButton); // userEvent.click does not work on disabled button
 
     expect(setTransferDialog).not.toHaveBeenCalledWith({
       open: true,

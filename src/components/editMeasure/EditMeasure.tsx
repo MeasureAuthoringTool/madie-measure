@@ -522,10 +522,16 @@ export default function EditMeasure() {
       }
     }
   };
-  const transferMeasure = (newOwner: string, retainShareAccess: boolean) => {
-    // to be implemented
+
+  const handleTransferDialogClose = ({
+    toastType = "danger",
+    toastMessage = "",
+    toastOpen = false,
+  } = {}) => {
     handleDialogClose();
+    handleToast(toastType, toastMessage, toastOpen);
   };
+
   const onToastClose = () => {
     setToastType("danger");
     setToastMessage("");
@@ -590,7 +596,6 @@ export default function EditMeasure() {
                   }
                   canClose={false}
                   copyButton={true}
-                  minimizeAlerts={featureFlags?.MinimizeAlerts}
                 />
               )}
             </div>
@@ -693,8 +698,7 @@ export default function EditMeasure() {
           <TransferDialog
             measures={[measure]}
             open={transferDialog.open}
-            onClose={handleDialogClose}
-            onSubmit={transferMeasure}
+            onClose={handleTransferDialogClose}
           />
           <ViewMeasureHistoryDialog
             measures={[measure]}
