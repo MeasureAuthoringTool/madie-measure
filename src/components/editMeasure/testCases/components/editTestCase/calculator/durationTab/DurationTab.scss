@@ -3,6 +3,15 @@
   gap: 12px;
 }
 
+.duration-tab-instructions {
+  color: #515151;
+  font-weight: 400;
+  font-size: 16px;
+  font-family: Rubik, sans-serif;
+  padding-top: 17px;
+  padding-bottom: 10px;
+}
+
 .duration-tab-row {
   display: flex;
   flex-direction: row;
@@ -51,4 +60,22 @@
   font-family: Rubik, sans-serif;
   padding-bottom: 17px;
   text-transform: none;
+}
+
+.computed-date-precision-select {
+  width: 190px;
+}
+
+.add-subtract-option {
+  > div {
+    > div {
+      > label {
+        text-transform: none;
+        font-family: Rubik, sans-serif;
+        color: #333;
+        padding-top: 3px;
+        margin-bottom: 25px;
+      }
+    }
+  }
 }
