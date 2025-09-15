@@ -187,6 +187,10 @@ export default function StewardAndDevelopers(props: StewardAndDevelopersProps) {
             </Box>
             <Box>
               <MultipleSelectDropDown
+                textFieldInputProps={{
+                  "aria-label":
+                    "Measure Developers multiple measure developers can be selected",
+                }}
                 formControl={formik.getFieldProps("measureGroupTypes")}
                 id="developers"
                 label="Developers"
