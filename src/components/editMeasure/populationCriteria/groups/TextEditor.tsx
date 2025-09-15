@@ -52,7 +52,7 @@ const TextEditor = (props: Props) => {
   }, [value]);
   return (
     <>
-      {!featureFlags.EnhancedTextFormatting ? (
+      {featureFlags.EnhancedTextFormatting ? (
         <RichTextEditor
           id={name}
           name={name}
