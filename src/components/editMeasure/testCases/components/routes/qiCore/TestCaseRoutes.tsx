@@ -201,21 +201,19 @@ const TestCaseRoutes = () => {
               />
             }
           />
-          {featureFlags?.QICoreIncludeRAVValues && (
-            <Route
-              path="/list-page/rav"
-              element={
-                <TestCaseLandingWrapper
-                  qdm={false}
-                  children={
-                    <RAVPage
-                      setExecutionContextReady={setExecutionContextReady}
-                    />
-                  }
-                />
-              }
-            />
-          )}
+          <Route
+            path="/list-page/rav"
+            element={
+              <TestCaseLandingWrapper
+                qdm={false}
+                children={
+                  <RAVPage
+                    setExecutionContextReady={setExecutionContextReady}
+                  />
+                }
+              />
+            }
+          />
 
           <Route
             path="/list-page/expansion"

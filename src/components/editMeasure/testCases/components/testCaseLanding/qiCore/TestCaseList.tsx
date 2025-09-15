@@ -19,11 +19,7 @@ import {
   DetailedPopulationGroupResult,
 } from "fqm-execution/build/types/Calculator";
 import { ObjectId } from "bson";
-import {
-  checkUserCanEdit,
-  measureStore,
-  useFeatureFlags,
-} from "@madie/madie-util";
+import { checkUserCanEdit, measureStore } from "@madie/madie-util";
 import useExecutionContext from "../../routes/qiCore/useExecutionContext";
 import CreateCodeCoverageNavTabs from "./CreateCodeCoverageNavTabs";
 import CodeCoverageHighlighting from "../common/CodeCoverageHighlighting";
@@ -170,7 +166,6 @@ const TestCaseList = (props: TestCaseListProps) => {
   const [shiftDatesDialogModalOpen, setShiftDatesDialogModalOpen] =
     useState<boolean>(false);
   const [exportOptionsOpen, setExportOptionsOpen] = useState<boolean>(false);
-  const featureFlags = useFeatureFlags();
 
   const [overlappingCodes, setOverlappingCodes] = useState<
     OverlappingCodeDto[]
@@ -233,8 +228,7 @@ const TestCaseList = (props: TestCaseListProps) => {
       checkUserCanEdit(
         measure?.measureSet?.owner,
         measure?.measureSet?.acls,
-        measure?.measureMetaData?.draft,
-        featureFlags?.EditTestsOnVersionedMeasures
+        measure?.measureMetaData?.draft
       )
     );
   }, [measure]);

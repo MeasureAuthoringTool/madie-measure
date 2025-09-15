@@ -189,17 +189,14 @@ const TestCaseListSideBarNav = ({
                     orientation="vertical"
                     onChange={handleChange}
                   />
-                  {((featureFlags?.QDMIncludeRAVValues && qdm) ||
-                    (featureFlags?.QICoreIncludeRAVValues && !qdm)) && (
-                    <Tab
-                      label="RAV"
-                      value="rav"
-                      data-testid="nav-link-rav"
-                      type="C"
-                      orientation="vertical"
-                      onChange={handleChange}
-                    />
-                  )}
+                  <Tab
+                    label="RAV"
+                    value="rav"
+                    data-testid="nav-link-rav"
+                    type="C"
+                    orientation="vertical"
+                    onChange={handleChange}
+                  />
                   <Tab
                     label="Expansion"
                     value="expansion"
