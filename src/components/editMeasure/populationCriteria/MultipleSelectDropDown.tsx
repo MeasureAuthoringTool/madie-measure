@@ -157,7 +157,6 @@ const MultipleSelectDropDown = ({
           inputProps["aria-label"] =
             textFieldInputProps?.["aria-label"] ??
             "Measure types multiple measure types can be selected";
-
           return (
             <TextField
               label={labelReadable}

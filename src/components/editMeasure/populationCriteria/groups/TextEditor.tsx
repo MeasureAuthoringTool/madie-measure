@@ -50,10 +50,9 @@ const TextEditor = (props: Props) => {
   useEffect(() => {
     setLocalText(value);
   }, [value]);
-
   return (
     <>
-      {featureFlags.EnhancedTextFormatting ? (
+      {!featureFlags.EnhancedTextFormatting ? (
         <RichTextEditor
           id={name}
           name={name}
