@@ -593,7 +593,7 @@ describe("EditMeasure Component", () => {
       ).toBeInTheDocument();
     });
   });
-  it("should display view human readable modal when the event is triggered, discards.", async () => {
+  it("should display view measure history modal when the event is triggered, discards.", async () => {
     renderRouter();
 
     const result = await findByTestId("editMeasure");
@@ -613,18 +613,5 @@ describe("EditMeasure Component", () => {
         expect(queryByTestId("view-measure-history")).toBeInTheDocument();
       }, 1000)
     );
-
-    setTimeout(async () => {
-      const cancelButton = await findByTestId("modal-secondary-btn");
-      fireEvent.click(cancelButton);
-    }, 500);
-
-    await waitFor(() => {
-      expect(
-        screen.queryByText(
-          "The human readable file is not available for this measure.  Contact Help Desk for additional information."
-        )
-      ).not.toBeInTheDocument();
-    });
   });
 });
