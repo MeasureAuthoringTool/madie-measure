@@ -66,9 +66,7 @@ const EditTestCase = () => {
 
   const canEdit = checkUserCanEdit(
     measure?.measureSet?.owner,
-    measure?.measureSet?.acls,
-    measure?.measureMetaData?.draft,
-    featureFlags?.EditTestsOnVersionedMeasures
+    measure?.measureSet?.acls
   );
 
   // Toast utilities

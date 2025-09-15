@@ -13,7 +13,7 @@ const mockTarget = { id: "test-target" };
 const testId = "test-component";
 
 describe("ActionCenter", () => {
-  it("renders the action center icon and displays icons if available", () => {
+  it("renders the action center icon and displays icons if available", async () => {
     render(
       <ActionCenter actions={mockActions} testId={testId} target={mockTarget} />
     );
@@ -25,47 +25,49 @@ describe("ActionCenter", () => {
       ).toBeNull();
     });
 
-    const button = screen.getByTestId(`action-center-button-${testId}`);
-    userEvent.click(button);
-    mockActions.forEach((action) => {
-      const actionButton = screen.getByTestId(
+    const button = await screen.findByTestId(`action-center-button-${testId}`);
+    await userEvent.click(button);
+    for (const action of mockActions) {
+      const actionButton = await screen.findByTestId(
         `action-center-${testId}_${action.name.replace(/\s/g, "")}`
       );
       expect(actionButton).toBeInTheDocument();
       expect(actionButton).toHaveAttribute("aria-label", action.name);
-    });
+    }
   });
 
-  it("calls the correct onClick handler with the target and closes the menu when an action is clicked", () => {
+  it("calls the correct onClick handler with the target and closes the menu when an action is clicked", async () => {
     render(
       <ActionCenter actions={mockActions} testId={testId} target={mockTarget} />
     );
-    const button = screen.getByTestId(`action-center-button-${testId}`);
-    userEvent.click(button);
+    const button = await screen.findByTestId(`action-center-button-${testId}`);
+    await userEvent.click(button);
 
-    mockActions.forEach((action) => {
-      const actionButton = screen.getByTestId(
+    for (const action of mockActions) {
+      const actionButton = await screen.findByTestId(
         `action-center-${testId}_${action.name.replace(/\s/g, "")}`
       );
-      userEvent.click(actionButton);
+      await userEvent.click(actionButton);
       if (action.name !== "Delete") {
         expect(action.onClick).toHaveBeenCalledWith(mockTarget);
       }
-    });
+    }
   });
 
-  it("MadieDeleteDialog opens when delect action is clicked", async () => {
+  it("MadieDeleteDialog opens when delete action is clicked", async () => {
     render(
       <ActionCenter actions={mockActions} testId={testId} target={mockTarget} />
     );
-    const button = screen.getByTestId(`action-center-button-${testId}`);
-    userEvent.click(button);
+    const button = await screen.findByTestId(`action-center-button-${testId}`);
+    await userEvent.click(button);
 
-    const deleteBtn = screen.getByTestId("action-center-test-component_Delete");
+    const deleteBtn = await screen.findByTestId(
+      "action-center-test-component_Delete"
+    );
     expect(deleteBtn).toBeInTheDocument();
-    userEvent.click(deleteBtn);
+    await userEvent.click(deleteBtn);
 
-    const deleteDialog = screen.getByTestId("delete-dialog");
+    const deleteDialog = await screen.findByTestId("delete-dialog");
     expect(deleteDialog).toBeInTheDocument();
     expect(screen.getByText("Delete Element")).toBeInTheDocument();
 
@@ -78,7 +80,7 @@ describe("ActionCenter", () => {
       screen.getByTestId("delete-dialog-continue-button")
     ).toBeInTheDocument();
 
-    userEvent.click(closeBtn);
+    await userEvent.click(closeBtn);
     await waitFor(() => {
       expect(deleteDialog).not.toBeInTheDocument();
       expect(mockActions[1].onClick).not.toHaveBeenCalledWith(mockTarget);
@@ -89,14 +91,16 @@ describe("ActionCenter", () => {
     render(
       <ActionCenter actions={mockActions} testId={testId} target={mockTarget} />
     );
-    const button = screen.getByTestId(`action-center-button-${testId}`);
-    userEvent.click(button);
+    const button = await screen.findByTestId(`action-center-button-${testId}`);
+    await userEvent.click(button);
 
-    const deleteBtn = screen.getByTestId("action-center-test-component_Delete");
+    const deleteBtn = await screen.findByTestId(
+      "action-center-test-component_Delete"
+    );
     expect(deleteBtn).toBeInTheDocument();
-    userEvent.click(deleteBtn);
+    await userEvent.click(deleteBtn);
 
-    const deleteDialog = screen.getByTestId("delete-dialog");
+    const deleteDialog = await screen.findByTestId("delete-dialog");
     expect(deleteDialog).toBeInTheDocument();
     expect(screen.getByText("Delete Element")).toBeInTheDocument();
 
@@ -107,7 +111,7 @@ describe("ActionCenter", () => {
       screen.getByTestId("delete-dialog-continue-button")
     ).toBeInTheDocument();
 
-    userEvent.click(cancelBtn);
+    await userEvent.click(cancelBtn);
     await waitFor(() => {
       expect(deleteDialog).not.toBeInTheDocument();
       expect(mockActions[1].onClick).not.toHaveBeenCalledWith(mockTarget);
@@ -118,14 +122,16 @@ describe("ActionCenter", () => {
     render(
       <ActionCenter actions={mockActions} testId={testId} target={mockTarget} />
     );
-    const button = screen.getByTestId(`action-center-button-${testId}`);
-    userEvent.click(button);
+    const button = await screen.findByTestId(`action-center-button-${testId}`);
+    await userEvent.click(button);
 
-    const deleteBtn = screen.getByTestId("action-center-test-component_Delete");
+    const deleteBtn = await screen.findByTestId(
+      "action-center-test-component_Delete"
+    );
     expect(deleteBtn).toBeInTheDocument();
-    userEvent.click(deleteBtn);
+    await userEvent.click(deleteBtn);
 
-    const deleteDialog = screen.getByTestId("delete-dialog");
+    const deleteDialog = await screen.findByTestId("delete-dialog");
     expect(deleteDialog).toBeInTheDocument();
     expect(screen.getByText("Delete Element")).toBeInTheDocument();
 
@@ -137,7 +143,7 @@ describe("ActionCenter", () => {
     const continueBtn = screen.getByTestId("delete-dialog-continue-button");
     expect(continueBtn).toBeInTheDocument();
 
-    userEvent.click(continueBtn);
+    await userEvent.click(continueBtn);
     await waitFor(() => {
       expect(deleteDialog).not.toBeInTheDocument();
       expect(mockActions[1].onClick).toHaveBeenCalledWith(mockTarget);

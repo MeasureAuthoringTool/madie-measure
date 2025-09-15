@@ -6,27 +6,24 @@ import { TestCaseImportOutcome } from "@madie/madie-models";
 import { MadieAlert } from "@madie/madie-design-system/dist/react";
 
 jest.mock("@madie/madie-design-system/dist/react", () => ({
-  MadieAlert: jest.fn(({ alerts, minimizeAlerts }) => (
+  MadieAlert: jest.fn(({ alerts }) => (
     <div data-testid="madie-alert-mock">
       {alerts.map((alert, index) => (
         <div key={index} data-testid={`alert-${index}`} data-type={alert.type}>
           <div data-testid={`alert-content-${index}`}>{alert.content}</div>
         </div>
       ))}
-      <div data-testid="minimize-flag">{minimizeAlerts ? "true" : "false"}</div>
     </div>
   )),
 }));
 
-const mockUseFeatureFlags = jest.fn();
 jest.mock("@madie/madie-util", () => ({
-  useFeatureFlags: () => mockUseFeatureFlags(),
+  useFeatureFlags: () => ({}),
 }));
 
 describe("StatusHandler Component", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseFeatureFlags.mockReturnValue({ MinimizeAlerts: false });
     MadieAlert.mockClear();
   });
 
@@ -80,7 +77,6 @@ describe("StatusHandler Component", () => {
             canClose: false,
           }),
         ]),
-        minimizeAlerts: false,
       }),
       expect.anything()
     );
@@ -127,7 +123,6 @@ describe("StatusHandler Component", () => {
             canClose: false,
           }),
         ]),
-        minimizeAlerts: false,
       }),
       expect.anything()
     );
@@ -158,7 +153,6 @@ describe("StatusHandler Component", () => {
             canClose: false,
           }),
         ]),
-        minimizeAlerts: false,
       }),
       expect.anything()
     );
@@ -204,27 +198,6 @@ describe("StatusHandler Component", () => {
           expect.objectContaining({ type: "error" }),
           expect.objectContaining({ type: "warning" }),
         ]),
-        minimizeAlerts: false,
-      }),
-      expect.anything()
-    );
-  });
-
-  test("Should pass minimizeAlerts flag from feature flags", () => {
-    mockUseFeatureFlags.mockReturnValue({ MinimizeAlerts: true });
-
-    render(
-      <StatusHandler
-        error={true}
-        errorMessages={["test error"]}
-        testDataId="test_data_id"
-      />
-    );
-
-    expect(screen.getByTestId("minimize-flag")).toHaveTextContent("true");
-    expect(MadieAlert).toHaveBeenCalledWith(
-      expect.objectContaining({
-        minimizeAlerts: true,
       }),
       expect.anything()
     );

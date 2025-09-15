@@ -360,7 +360,7 @@ describe("EditTestCase component", () => {
       }
     });
     mockedAxios.delete.mockImplementation((args) => {
-      if (args && args.endsWith("unlock")) {
+      if (args && args.endsWith("lock")) {
         return Promise.resolve({
           data: {
             isLocked: false,

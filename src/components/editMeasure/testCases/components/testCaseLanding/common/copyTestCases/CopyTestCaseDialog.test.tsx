@@ -22,9 +22,7 @@ const { getByTestId, getByRole, findByTestId, findByRole } = screen;
 const MEASURE_OWNER = "test.user";
 
 jest.mock("@madie/madie-util", () => ({
-  useFeatureFlags: jest.fn().mockReturnValue({
-    EditTestsOnVersionedMeasures: false,
-  }),
+  useFeatureFlags: jest.fn().mockReturnValue({}),
 }));
 
 const testCases = [
@@ -230,9 +228,7 @@ describe("Copy Test Case Dialog Component", () => {
         getTestCasesByMeasureId: getAllTestCasesFn,
       } as unknown as TestCaseServiceApi;
     });
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-      EditTestsOnVersionedMeasures: true,
-    }));
+    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({}));
     render(
       <CopyTestCaseDialog
         open={true}
@@ -279,9 +275,7 @@ describe("Copy Test Case Dialog Component", () => {
   });
 
   it("Filter and Search, changes, fire, clear", async () => {
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-      EditTestsOnVersionedMeasures: false,
-    }));
+    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({}));
     const useMeasureServiceMockResolvedMultiple = {
       searchMeasuresByCriteria: searchMeasuresByCriteriaFn,
     } as unknown as MeasureServiceApi;
@@ -353,7 +347,6 @@ describe("Copy Test Case Dialog Component", () => {
       "lastModifiedAt",
       "DESC",
       {
-        draft: true,
         excludeByMeasureIds: ["1"],
         model: "QDM v5.6",
         optionalSearchProperties: ["measureName"],
@@ -376,7 +369,6 @@ describe("Copy Test Case Dialog Component", () => {
       "lastModifiedAt",
       "DESC",
       {
-        draft: true,
         excludeByMeasureIds: ["1"],
         model: "QDM v5.6",
         optionalSearchProperties: [],
@@ -398,7 +390,6 @@ describe("Copy Test Case Dialog Component", () => {
       "lastModifiedAt",
       "DESC",
       {
-        draft: true,
         excludeByMeasureIds: ["1"],
         model: "QDM v5.6",
         optionalSearchProperties: ["measureName", "version", "cmsId"],
@@ -562,6 +553,97 @@ describe("Copy Test Case Dialog Component", () => {
     expect(
       screen.queryByTestId("copy-test-cases-cannot-copy-message")
     ).not.toBeInTheDocument();
+  });
+
+  it("should handle expand/collapse via keyboard interaction", async () => {
+    const getMeasuresByMeasureSetIdMock = jest.fn().mockResolvedValue([]);
+    const useMeasureServiceMockResolvedMultiple = {
+      searchMeasuresByCriteria: searchMeasuresByCriteriaFn,
+      getMeasuresByMeasureSetId: getMeasuresByMeasureSetIdMock,
+    } as unknown as MeasureServiceApi;
+
+    useMeasureServiceMock.mockImplementation(() => {
+      return useMeasureServiceMockResolvedMultiple;
+    });
+
+    useTestCaseServiceMock.mockImplementation(() => {
+      return {
+        getTestCasesByMeasureId: getAllTestCasesFn,
+      } as unknown as TestCaseServiceApi;
+    });
+
+    render(
+      <CopyTestCaseDialog
+        open={true}
+        onClose={closeFn}
+        measure={mockCurrentMeasure}
+        selectedTestCases={testCases.map((tc) => tc.id)}
+      />
+    );
+
+    await waitFor(() => {
+      expect(searchMeasuresByCriteriaFn).toHaveBeenCalledTimes(1);
+    });
+
+    const table = await findByTestId("measure-list-tbl");
+    const expandButtons = table.querySelectorAll(
+      '[role="button"][tabindex="0"]'
+    );
+
+    expect(expandButtons.length).toBeGreaterThan(0);
+
+    fireEvent.keyDown(expandButtons[0], { key: "Enter" });
+
+    await waitFor(() => {
+      expect(getMeasuresByMeasureSetIdMock).toHaveBeenCalledTimes(1);
+    });
+
+    fireEvent.keyDown(expandButtons[0], { key: " " });
+    expect(getMeasuresByMeasureSetIdMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("should handle expand/collapse via click interaction", async () => {
+    const getMeasuresByMeasureSetIdMock = jest.fn().mockResolvedValue([]);
+    const useMeasureServiceMockResolvedMultiple = {
+      searchMeasuresByCriteria: searchMeasuresByCriteriaFn,
+      getMeasuresByMeasureSetId: getMeasuresByMeasureSetIdMock,
+    } as unknown as MeasureServiceApi;
+
+    useMeasureServiceMock.mockImplementation(() => {
+      return useMeasureServiceMockResolvedMultiple;
+    });
+
+    useTestCaseServiceMock.mockImplementation(() => {
+      return {
+        getTestCasesByMeasureId: getAllTestCasesFn,
+      } as unknown as TestCaseServiceApi;
+    });
+
+    render(
+      <CopyTestCaseDialog
+        open={true}
+        onClose={closeFn}
+        measure={mockCurrentMeasure}
+        selectedTestCases={testCases.map((tc) => tc.id)}
+      />
+    );
+
+    await waitFor(() => {
+      expect(searchMeasuresByCriteriaFn).toHaveBeenCalledTimes(1);
+    });
+
+    const table = await findByTestId("measure-list-tbl");
+    const expandButtons = table.querySelectorAll(
+      '[role="button"][tabindex="0"]'
+    );
+
+    expect(expandButtons.length).toBeGreaterThan(0);
+
+    fireEvent.click(expandButtons[0]);
+
+    await waitFor(() => {
+      expect(getMeasuresByMeasureSetIdMock).toHaveBeenCalledTimes(1);
+    });
   });
 });
 
