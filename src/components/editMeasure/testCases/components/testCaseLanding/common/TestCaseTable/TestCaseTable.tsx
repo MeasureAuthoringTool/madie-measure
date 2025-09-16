@@ -178,15 +178,32 @@ const TestCaseTable = (props: TestCaseTableProps) => {
     const columnDefs = [];
     columnDefs.push({
       id: "select",
-      header: ({ table }) => (
-        <IndeterminateCheckbox
-          checked={table.getIsAllRowsSelected()}
-          indeterminate={table.getIsSomePageRowsSelected()}
-          onChange={table.getToggleAllPageRowsSelectedHandler()}
-          aria-label="Test Case Selection"
-          tabIndex={0}
-        />
-      ),
+      header: ({ table }) => {
+        const visibleRows = table.getRowModel().rows;
+
+        const allVisibleSelected = visibleRows.every((row) =>
+          row.getIsSelected()
+        );
+        const someVisibleSelected = visibleRows.some((row) =>
+          row.getIsSelected()
+        );
+
+        const toggleVisibleRows = () => {
+          const shouldSelectAll = !allVisibleSelected;
+          visibleRows.forEach((row) => row.toggleSelected(shouldSelectAll));
+        };
+
+        return (
+          <IndeterminateCheckbox
+            checked={allVisibleSelected}
+            indeterminate={!allVisibleSelected && someVisibleSelected}
+            onChange={toggleVisibleRows}
+            aria-label="Test Case Selection"
+            tabIndex={0}
+          />
+        );
+      },
+
       cell: (info) => (
         <div
           style={{
