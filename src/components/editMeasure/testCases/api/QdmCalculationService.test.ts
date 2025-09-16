@@ -76,12 +76,12 @@ describe("QDM CalculationService Tests", () => {
       await calculationService.calculateQdmTestCases(cqmMeasure, [patientJson]);
     expect(qdmCalculationResults).toBeTruthy();
     expect(Object.keys(qdmCalculationResults).length).toBe(1);
-    expect(qdmCalculationResults["68c072143f03945ce1c9d42e"]).toBeTruthy();
+    expect(qdmCalculationResults["68c989bccdba9a536e17547d"]).toBeTruthy();
     expect(
-      Object.keys(qdmCalculationResults["68c072143f03945ce1c9d42e"]).length
+      Object.keys(qdmCalculationResults["68c989bccdba9a536e17547d"]).length
     ).toBe(1);
     expect(
-      qdmCalculationResults["68c072143f03945ce1c9d42e"]["PopulationSet_1"]
+      qdmCalculationResults["68c989bccdba9a536e17547d"]["PopulationSet_1"]
     ).toBeTruthy();
   });
 
