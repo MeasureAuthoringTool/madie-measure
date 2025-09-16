@@ -1,8 +1,8 @@
 // @ts-ignore
-import cqmMeasure from "../mockdata/qdm/CMS108/cqm_measure.json";
+import cqmMeasure from "../mockdata/qdm/cohort/cqm_measure.json";
 // @ts-ignore
-import patientJson from "../mockdata/qdm/testCasePatient.json";
-import qdmCalculationService, {
+import patientJson from "../mockdata/qdm/cohort/testCasePatient.json";
+import {
   CqmExecutionPatientResultsByPopulationSet,
   QdmCalculationService,
 } from "./QdmCalculationService";
@@ -76,12 +76,12 @@ describe("QDM CalculationService Tests", () => {
       await calculationService.calculateQdmTestCases(cqmMeasure, [patientJson]);
     expect(qdmCalculationResults).toBeTruthy();
     expect(Object.keys(qdmCalculationResults).length).toBe(1);
-    expect(qdmCalculationResults["648c6a89f48905000012a680"]).toBeTruthy();
+    expect(qdmCalculationResults["68c072143f03945ce1c9d42e"]).toBeTruthy();
     expect(
-      Object.keys(qdmCalculationResults["648c6a89f48905000012a680"]).length
+      Object.keys(qdmCalculationResults["68c072143f03945ce1c9d42e"]).length
     ).toBe(1);
     expect(
-      qdmCalculationResults["648c6a89f48905000012a680"]["PopulationSet_1"]
+      qdmCalculationResults["68c072143f03945ce1c9d42e"]["PopulationSet_1"]
     ).toBeTruthy();
   });
 

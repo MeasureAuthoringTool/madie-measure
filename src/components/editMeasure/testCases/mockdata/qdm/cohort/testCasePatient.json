@@ -1,0 +1,26 @@
+{
+  "qdmVersion": "5.6",
+  "dataElements": [
+    {
+      "dataElementCodes": [
+        {
+          "code": "248152002",
+          "system": "2.16.840.1.113883.6.96",
+          "version": null,
+          "display": "Female (finding)"
+        }
+      ],
+      "description": "Patient Characteristic Sex: FederalAdministrativeSex",
+      "codeListId": "2.16.840.1.113762.1.4.1021.121",
+      "id": "68c073107eca36b5ab49ba4a",
+      "_id": "68c073107eca36b5ab49ba4a",
+      "qdmTitle": "Patient Characteristic Sex",
+      "hqmfOid": "2.16.840.1.113883.10.20.28.4.55",
+      "qdmCategory": "patient_characteristic",
+      "qdmStatus": "gender",
+      "qdmVersion": "5.6",
+      "_type": "QDM::PatientCharacteristicSex"
+    }
+  ],
+  "_id": "68c072143f03945ce1c9d42e"
+}
