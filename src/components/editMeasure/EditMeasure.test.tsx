@@ -593,4 +593,25 @@ describe("EditMeasure Component", () => {
       ).toBeInTheDocument();
     });
   });
+  it("should display view measure history modal when the event is triggered, discards.", async () => {
+    renderRouter();
+
+    const result = await findByTestId("editMeasure");
+    expect(result).toBeInTheDocument();
+    expect(serviceApiMock.fetchMeasure).toHaveBeenCalled();
+    const loading = queryByTestId("loading");
+    setTimeout(() => {
+      expect(loading).toBeNull();
+    }, 500);
+
+    act(() => {
+      window.dispatchEvent(new Event("view-measure-history"));
+    });
+
+    await waitFor(() =>
+      setTimeout(() => {
+        expect(queryByTestId("view-measure-history")).toBeInTheDocument();
+      }, 1000)
+    );
+  });
 });

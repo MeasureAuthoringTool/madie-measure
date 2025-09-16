@@ -1,7 +1,6 @@
 import React from "react";
 import { MadieAlert } from "@madie/madie-design-system/dist/react";
 import * as _ from "lodash";
-import { useFeatureFlags } from "@madie/madie-util";
 
 const generateAlertConfig = (
   type,
@@ -65,7 +64,6 @@ const StatusHandler = ({
   outboundAnnotations,
   hasSubTitle,
 }) => {
-  const featureFlags = useFeatureFlags();
   const alerts = [];
   if (success?.status === "success") {
     if (outboundAnnotations?.length > 0) {
@@ -161,9 +159,7 @@ const StatusHandler = ({
     return <></>;
   }
 
-  return (
-    <MadieAlert alerts={alerts} minimizeAlerts={featureFlags?.MinimizeAlerts} />
-  );
+  return <MadieAlert alerts={alerts} />;
 };
 
 export default StatusHandler;

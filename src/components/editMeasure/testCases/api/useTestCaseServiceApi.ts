@@ -446,14 +446,14 @@ export class TestCaseServiceApi {
       );
       return response.data;
     } catch (error) {
-      throw new Error(error);
+      throw new Error("Error locking test case");
     }
   }
 
   async unlockTestCase(testCaseId: string): Promise<any> {
     try {
       const response = await axios.delete<String>(
-        `${this.baseUrl}/test-cases/${testCaseId}/unlock`,
+        `${this.baseUrl}/test-cases/${testCaseId}/lock`,
         {
           headers: {
             Authorization: `Bearer ${this.getAccessToken()}`,
@@ -462,7 +462,7 @@ export class TestCaseServiceApi {
       );
       return response.data;
     } catch (error) {
-      throw new Error(error);
+      throw new Error("Error unlocking test case");
     }
   }
 }

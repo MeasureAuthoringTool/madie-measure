@@ -42,7 +42,8 @@ const measure = {
   acls: [{ userId: "othertestuser@example.com", roles: ["SHARED_WITH"] }],
 } as unknown as Measure;
 
-const mockUseFeatureFlags = jest.fn(() => ({ MinimizeAlerts: false }));
+// MinimizeAlerts flag removed; keep stub returning empty object for tests
+const mockUseFeatureFlags = jest.fn(() => ({}));
 
 jest.mock("@madie/madie-util", () => ({
   useDocumentTitle: jest.fn(),
@@ -184,7 +185,7 @@ const renderEditor = (measure) => {
 describe("MeasureEditor component", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseFeatureFlags.mockReturnValue({ MinimizeAlerts: false });
+    mockUseFeatureFlags.mockReturnValue({});
   });
 
   it("should mount measure editor component with measure cql", async () => {
@@ -1239,10 +1240,7 @@ define function MeasureObservation(e Encounter):
   });
 
   it("Should successfully lock", async () => {
-    mockUseFeatureFlags.mockReturnValue({
-      MinimizeAlerts: false,
-      Locking: true,
-    });
+    mockUseFeatureFlags.mockReturnValue({ Locking: true });
 
     const actualModule = jest.requireActual(
       "../../../api/useMeasureServiceApi"
@@ -1271,10 +1269,7 @@ define function MeasureObservation(e Encounter):
   });
 
   it("Should fail lock", async () => {
-    mockUseFeatureFlags.mockReturnValue({
-      MinimizeAlerts: false,
-      Locking: true,
-    });
+    mockUseFeatureFlags.mockReturnValue({ Locking: true });
 
     const actualModule = jest.requireActual(
       "../../../api/useMeasureServiceApi"

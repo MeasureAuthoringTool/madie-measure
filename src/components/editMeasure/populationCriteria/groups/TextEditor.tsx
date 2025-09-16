@@ -50,7 +50,6 @@ const TextEditor = (props: Props) => {
   useEffect(() => {
     setLocalText(value);
   }, [value]);
-
   return (
     <>
       {featureFlags.EnhancedTextFormatting ? (

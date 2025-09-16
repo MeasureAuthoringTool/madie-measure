@@ -23,9 +23,7 @@ const useCqlParsingServiceMockResolved = {
 import { calculationResults } from "../../../groupCoverage/_mocks_/QdmCalculationResults";
 
 jest.mock("@madie/madie-util", () => ({
-  useFeatureFlags: jest.fn(() => ({
-    QDMIncludeRAVValues: true,
-  })),
+  useFeatureFlags: jest.fn(() => ({})),
 }));
 
 const groups = [
@@ -418,7 +416,7 @@ describe("CalculationResults with new tabbed highlighting layout on", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("should render RAV tab if QDMIncludeRAVValues feature flag is true and includeRAV is true", async () => {
+  it("should render RAV tab if includeRAV is true", async () => {
     renderCoverageComponent();
     // Ensure we're on the Initial Population tab
     await assertPopulationTabs();
@@ -458,34 +456,5 @@ describe("CalculationResults with new tabbed highlighting layout on", () => {
     expect(screen.getByTestId("cql-highlighting")).toHaveTextContent(
       `define "Denominator": "Initial Population" Results[Encounter, Performed: Encounter Inpatient START: 01/09/2020 12:00 AM STOP: 01/10/2020 12:00 AM CODE: SNOMEDCT 183452005]`
     );
-  });
-
-  it("should not render RAV tab if QDMIncludeRAVValues feature flag is false and includeRAV is true", async () => {
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-      QDMIncludeRAVValues: false,
-    }));
-
-    renderCoverageComponent();
-    // Ensures we're on the Initial Population tab
-    await assertPopulationTabs();
-
-    // Check for 'Results' button on IP population tab
-    const results = await screen.findByRole("button", { name: "Results" });
-    await waitFor(() => {
-      expect(results).toBeInTheDocument();
-    });
-
-    // Move to Definitions tab
-    const definitions = await getTab("Definitions");
-    userEvent.click(definitions);
-
-    // Check how many 'Results' are present
-    const definitionResults = await screen.findAllByRole("button", {
-      name: "Results",
-    });
-    expect(definitionResults).toHaveLength(5);
-
-    const rav = screen.queryByTestId("rav-tab");
-    expect(rav).toBeNull();
   });
 });

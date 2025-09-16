@@ -32,7 +32,6 @@ export default function ShareAction(props: PropTypes) {
   const [open, setOpen] = useState(false);
   // move anchorElement to a stable reference that does not change across renders.
   const anchorRef = useRef<HTMLButtonElement>(null);
-
   const validateShareActionState = useCallback(() => {
     setDisableShareBtn(true);
 

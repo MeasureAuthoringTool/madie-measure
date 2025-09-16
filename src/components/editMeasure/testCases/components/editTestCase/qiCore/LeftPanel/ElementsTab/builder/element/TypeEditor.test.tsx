@@ -1,11 +1,5 @@
 import * as React from "react";
-import {
-  fireEvent,
-  render,
-  screen,
-  act,
-  waitFor,
-} from "@testing-library/react";
+import { render, screen, act, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import TypeEditor from "./TypeEditor";
@@ -343,7 +337,7 @@ describe("TypeEditor Component", () => {
     expect(inputField).toBeInTheDocument();
     expect(inputField.value).toBe("1234-abcd-ABCD");
 
-    fireEvent.change(inputField, { target: { value: "1234-abcd-ABCD-5678" } });
+    userEvent.type(inputField, "1234-abcd-ABCD-5678");
     expect(onChange).toHaveBeenCalled();
   });
 
@@ -505,7 +499,7 @@ describe("TypeEditor Component", () => {
       `YYYY-MM-DDTHH:mm:ssZ-field-ClaimResponse.date-input`
     ) as HTMLInputElement;
 
-    fireEvent.change(dateInput, { target: { value: "09/26/2024" } });
+    userEvent.type(dateInput, "09/26/2024");
 
     expect(onChange).toHaveBeenCalledWith(
       "ClaimResponse.date",
@@ -513,7 +507,7 @@ describe("TypeEditor Component", () => {
     );
 
     const timeInput = screen.getByPlaceholderText("hh:mm:ss aa");
-    fireEvent.change(timeInput, { target: { value: "02:45:30 PM" } });
+    userEvent.type(timeInput, "02:45:30 PM");
 
     expect(onChange).toHaveBeenCalledWith(
       "ClaimResponse.date",
@@ -617,13 +611,12 @@ describe("TypeEditor Component", () => {
     ) as HTMLInputElement;
     expect(dateFieldInput.value).toBe("01/01/2019");
 
-    const formatSelectorField = screen.getByTestId(
-      "date-format-selector-input-field-ClaimResponse.date"
-    );
-    expect(formatSelectorField).toBeInTheDocument();
-    fireEvent.change(formatSelectorField, {
-      target: { value: "YYYY" },
+    const formatSelectorField = screen.getByRole("combobox", {
+      name: "Format",
     });
+    expect(formatSelectorField).toBeInTheDocument();
+    userEvent.click(formatSelectorField);
+    userEvent.click(screen.getByRole("option", { name: "YYYY" }));
     expect(onChange).toHaveBeenCalledWith("ClaimResponse.date", "2019");
   });
 
@@ -1101,6 +1094,9 @@ describe("TypeEditor Component", () => {
       "hh:mm:ss aa"
     ) as HTMLInputElement;
     expect(inputTime.value).toBe("01:23:45 AM");
+    // Change the value of the first time component to trigger change event
+    userEvent.type(inputTime, "082359AM");
+    expect(inputTime).toHaveValue("08:23:59 AM");
   });
 
   test("Should render PositiveInt component", () => {
@@ -2117,7 +2113,7 @@ describe("TypeEditor Component", () => {
       const addButtons = screen.getAllByText("Add Given");
       expect(addButtons).toHaveLength(1);
       // click the add button
-      fireEvent.click(addButtons[0]);
+      userEvent.click(addButtons[0]);
 
       // Should call setFieldValue
       expect(formik.setFieldValue).toHaveBeenCalled();
@@ -2178,17 +2174,21 @@ describe("TypeEditor Component", () => {
         </FormikProvider>
       );
 
+      const datetime1 = screen.getByTestId(
+        "YYYY-MM-DD-field-MedicationRequest.dosageInstruction[0].timing.event[0]-input"
+      ) as HTMLInputElement;
+      const datetime2 = screen.getByTestId(
+        "YYYY-MM-DD-field-MedicationRequest.dosageInstruction[0].timing.event[1]"
+      );
       // Should render 2 DateTime components
-      expect(
-        screen.getByTestId(
-          "YYYY-MM-DD-field-MedicationRequest.dosageInstruction[0].timing.event[0]"
-        )
-      ).toBeInTheDocument();
-      expect(
-        screen.getByTestId(
-          "YYYY-MM-DD-field-MedicationRequest.dosageInstruction[0].timing.event[1]"
-        )
-      ).toBeInTheDocument();
+      expect(datetime1).toBeInTheDocument();
+      expect(datetime2).toBeInTheDocument();
+
+      // let's change the value of the first datetime component to trigger change event
+      userEvent.type(datetime1, "09/02/2025");
+      expect(datetime1.value).toEqual("09/02/2025");
+      expect(formik.setFieldValue).toHaveBeenCalled();
+      expect(formik.setFieldTouched).toHaveBeenCalled();
     });
 
     test("Should render Time components as array when multiple cardinality", () => {
@@ -2245,17 +2245,12 @@ describe("TypeEditor Component", () => {
           </RequiredFieldsProvider>
         </FormikProvider>
       );
-
-      expect(
-        screen.getByTestId(
-          "medication-request-dosage-instruction-0-timing-time-of-day-0"
-        )
-      ).toBeInTheDocument();
-      expect(
-        screen.getByTestId(
-          "medication-request-dosage-instruction-0-timing-time-of-day-1"
-        )
-      ).toBeInTheDocument();
+      const times = screen.getAllByPlaceholderText("hh:mm:ss aa");
+      expect(times.length).toEqual(2);
+      // Change the value of the first time component to trigger change event
+      userEvent.type(times[0], "082359AM");
+      expect(times[0]).toHaveValue("08:23:59 AM");
+      expect(formik.setFieldTouched).toHaveBeenCalled();
     });
 
     test("Should render Code components as array when multiple cardinality", () => {
