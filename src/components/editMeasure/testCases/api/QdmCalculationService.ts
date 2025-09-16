@@ -39,7 +39,6 @@ export class QdmCalculationService {
     cqmMeasure: CqmMeasure,
     patients: any[]
   ): Promise<CqmExecutionResultsByPatient> {
-    debugger
     // Example options; includes directive to produce pretty statement results.
     const options = {
       doPretty: true,
