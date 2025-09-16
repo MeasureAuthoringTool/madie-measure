@@ -33,10 +33,7 @@
                 "r": "228",
                 "s": [
                   {
-                    "value": [
-                      "",
-                      "library DemographicsTest version '0.0.000'"
-                    ]
+                    "value": ["", "library DemographicsTest version '0.0.000'"]
                   }
                 ]
               },
@@ -61,24 +58,17 @@
                       "r": "206",
                       "s": [
                         {
-                          "value": [
-                            "",
-                            "using "
-                          ]
+                          "value": ["", "using "]
                         },
                         {
                           "s": [
                             {
-                              "value": [
-                                "QDM"
-                              ]
+                              "value": ["QDM"]
                             }
                           ]
                         },
                         {
-                          "value": [
-                            " version '5.6'"
-                          ]
+                          "value": [" version '5.6'"]
                         }
                       ]
                     },
@@ -192,20 +182,13 @@
                       "r": "228",
                       "s": [
                         {
-                          "value": [
-                            "",
-                            "define ",
-                            "\"SDE Sex\"",
-                            ":\n  "
-                          ]
+                          "value": ["", "define ", "\"SDE Sex\"", ":\n  "]
                         },
                         {
                           "r": "229",
                           "s": [
                             {
-                              "value": [
-                                "exists "
-                              ]
+                              "value": ["exists "]
                             },
                             {
                               "r": "232",
@@ -227,9 +210,7 @@
                                   ]
                                 },
                                 {
-                                  "value": [
-                                    "]"
-                                  ]
+                                  "value": ["]"]
                                 }
                               ]
                             }
@@ -319,24 +300,18 @@
                           "r": "211",
                           "s": [
                             {
-                              "value": [
-                                "Interval<"
-                              ]
+                              "value": ["Interval<"]
                             },
                             {
                               "r": "212",
                               "s": [
                                 {
-                                  "value": [
-                                    "DateTime"
-                                  ]
+                                  "value": ["DateTime"]
                                 }
                               ]
                             },
                             {
-                              "value": [
-                                ">"
-                              ]
+                              "value": [">"]
                             }
                           ]
                         }
