@@ -259,6 +259,24 @@ const renderWithTestCase = (
   );
 };
 
+const generateTestCases = (number: number) => {
+  const cases: TestCase[] = [];
+  for (let i = 1; i <= number; i++) {
+    cases.push({
+      id: `ID${i}`,
+      title: `TEST IPP${i}`,
+      description: `TEST DESCRIPTION${i}`,
+      series: `TEST SERIES${i}`,
+      lastModifiedAt: "2024-09-06T15:15:14.382Z",
+      executionStatus: "pass",
+      caseNumber: i,
+      createdBeforeVersioning: true,
+      validationStatus: "Valid",
+    } as unknown as TestCase);
+  }
+  return cases;
+};
+
 describe("TestCase component", () => {
   afterEach(() => {
     jest.clearAllMocks();
@@ -692,6 +710,39 @@ describe("TestCase component", () => {
       expect(
         screen.queryByTestId(`test-case-no-delete-icon-${testCase.id}`)
       ).not.toBeInTheDocument();
+    });
+  });
+
+  it("Should be able to select all and unselect all", async () => {
+    const deleteTestCase = jest.fn();
+    const exportTestCase = jest.fn();
+    const setSelectedTestCasesMock = jest.fn();
+    const cases = generateTestCases(16);
+
+    renderWithTestCase(
+      [{ cases, createdBeforeVersioning: false }],
+      true,
+      deleteTestCase,
+      exportTestCase,
+      undefined,
+      { ...measures[1], measureMetaData: { draft: false } },
+      setSelectedTestCasesMock
+    );
+    // find the indeterminate checkBox that has an aria-label of "Test Case Selection"
+    const selectAllCheckbox = await screen.findByLabelText(
+      "Test Case Selection"
+    );
+    expect(selectAllCheckbox).toBeInTheDocument();
+    // click the checkbox
+    fireEvent.click(selectAllCheckbox);
+    await waitFor(() => {
+      expect(setSelectedTestCasesMock).toHaveBeenCalled();
+    });
+    // click again to unselect all
+    fireEvent.click(selectAllCheckbox);
+    await waitFor(() => {
+      expect(setSelectedTestCasesMock).toHaveBeenCalledTimes(2);
+      expect(setSelectedTestCasesMock).toHaveBeenLastCalledWith([]);
     });
   });
 });
