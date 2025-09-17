@@ -2925,6 +2925,46 @@ describe("Action Center Tests", () => {
     expect(mockPush).toHaveBeenCalledWith("/measures/IDIDID1/edit/details/");
   });
 
+  it("should trigger navigate when featureFlags?.MeasureSearch is true", async () => {
+    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
+      MeasureSearch: true,
+    }));
+    render(
+      <ServiceContext.Provider value={serviceConfig}>
+        <MeasureList
+          measureList={measures}
+          setMeasureList={setMeasureListMock}
+          setTotalPages={setTotalPagesMock}
+          setTotalItems={setTotalItemsMock}
+          setVisibleItems={setVisibleItemsMock}
+          setOffset={setOffsetMock}
+          setLoading={setLoadingMock}
+          activeTab={0}
+          searchCriteria={null}
+          setSearchCriteria={setSearchCriteriaMock}
+          currentLimit={10}
+          currentPage={0}
+          setErrMsg={setErrMsgMock}
+          // Toast props
+          toastOpen={false}
+          toastMessage=""
+          toastType="danger"
+          setToastOpen={setToastOpenMock}
+          setToastMessage={setToastMessageMock}
+          setToastType={setToastTypeMock}
+          onToastClose={onToastCloseMock}
+          handleToast={handleToastMock}
+        />
+      </ServiceContext.Provider>
+    );
+    const actionButtonEdit = screen.getByTestId(
+      `measure-action-${measures[0].id}`
+    );
+    expect(actionButtonEdit).toBeInTheDocument();
+    userEvent.click(actionButtonEdit);
+    expect(mockPush).toHaveBeenCalledWith("/measures/IDIDID1/edit/details/");
+  });
+
   it("should display View button for non-editable measures", async () => {
     checkUserCanEdit.mockImplementationOnce(() => false);
     render(
