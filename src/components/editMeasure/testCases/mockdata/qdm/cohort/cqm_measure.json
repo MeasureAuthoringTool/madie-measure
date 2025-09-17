@@ -1,0 +1,457 @@
+{
+  "id": "68c0713331a66a0a74f0fd40",
+  "hqmf_id": null,
+  "hqmf_set_id": "3504b45c-6684-4683-a16a-9db78c455966",
+  "hqmf_version_number": "93d58577-84ea-4ae0-a460-e0541600c363",
+  "cms_id": null,
+  "title": "DemographicsTest",
+  "description": null,
+  "composite": false,
+  "component": false,
+  "component_hqmf_set_ids": null,
+  "composite_hqmf_set_id": null,
+  "measure_scoring": "COHORT",
+  "calculation_method": "PATIENT",
+  "calculate_sdes": true,
+  "calculate_ravs": false,
+  "cql_libraries": [
+    {
+      "library_name": "DemographicsTest",
+      "library_version": "0.0.000",
+      "cql": null,
+      "elm": {
+        "library": {
+          "annotation": [
+            {
+              "translatorVersion": "3.27.0",
+              "signatureLevel": "Overloads",
+              "type": "CqlToElmInfo",
+              "translatorOptions": "EnableAnnotations,EnableLocators,EnableResultTypes,EnableDetailedErrors,DisableListDemotion,DisableListPromotion"
+            },
+            {
+              "s": {
+                "r": "228",
+                "s": [
+                  {
+                    "value": ["", "library DemographicsTest version '0.0.000'"]
+                  }
+                ]
+              },
+              "type": "Annotation"
+            }
+          ],
+          "identifier": {
+            "id": "DemographicsTest",
+            "version": "0.0.000"
+          },
+          "usings": {
+            "def": [
+              {
+                "localIdentifier": "System",
+                "localId": "1",
+                "uri": "urn:hl7-org:elm-types:r1"
+              },
+              {
+                "annotation": [
+                  {
+                    "s": {
+                      "r": "206",
+                      "s": [
+                        {
+                          "value": ["", "using "]
+                        },
+                        {
+                          "s": [
+                            {
+                              "value": ["QDM"]
+                            }
+                          ]
+                        },
+                        {
+                          "value": [" version '5.6'"]
+                        }
+                      ]
+                    },
+                    "type": "Annotation"
+                  }
+                ],
+                "localIdentifier": "QDM",
+                "localId": "206",
+                "locator": "3:1-3:23",
+                "uri": "urn:healthit-gov:qdm:v5_6",
+                "version": "5.6"
+              }
+            ]
+          },
+          "valueSets": {
+            "def": [
+              {
+                "annotation": [
+                  {
+                    "s": {
+                      "r": "208",
+                      "s": [
+                        {
+                          "value": [
+                            "",
+                            "valueset ",
+                            "\"Federal Administrative Sex\"",
+                            ": ",
+                            "'urn:oid:2.16.840.1.113762.1.4.1021.121'"
+                          ]
+                        }
+                      ]
+                    },
+                    "type": "Annotation"
+                  }
+                ],
+                "codeSystem": [],
+                "accessLevel": "Public",
+                "name": "Federal Administrative Sex",
+                "id": "2.16.840.1.113762.1.4.1021.121",
+                "resultTypeName": "{urn:hl7-org:elm-types:r1}ValueSet",
+                "localId": "208",
+                "locator": "5:1-5:79"
+              }
+            ]
+          },
+          "statements": {
+            "def": [
+              {
+                "expression": {
+                  "signature": [],
+                  "type": "SingletonFrom",
+                  "localId": "220",
+                  "operand": {
+                    "otherFilter": [],
+                    "include": [],
+                    "dataType": "{urn:healthit-gov:qdm:v5_6}Patient",
+                    "templateId": "Patient",
+                    "type": "Retrieve",
+                    "localId": "218",
+                    "locator": "9:1-9:15",
+                    "codeFilter": [],
+                    "dateFilter": []
+                  }
+                },
+                "name": "Patient",
+                "context": "Patient",
+                "localId": "219",
+                "locator": "9:1-9:15"
+              },
+              {
+                "annotation": [
+                  {
+                    "s": {
+                      "r": "224",
+                      "s": [
+                        {
+                          "r": "225",
+                          "value": [
+                            "",
+                            "define ",
+                            "\"Initial Population\"",
+                            ":\n   ",
+                            "true"
+                          ]
+                        }
+                      ]
+                    },
+                    "type": "Annotation"
+                  }
+                ],
+                "expression": {
+                  "valueType": "{urn:hl7-org:elm-types:r1}Boolean",
+                  "resultTypeName": "{urn:hl7-org:elm-types:r1}Boolean",
+                  "type": "Literal",
+                  "localId": "225",
+                  "locator": "12:4-12:7",
+                  "value": "true"
+                },
+                "accessLevel": "Public",
+                "name": "Initial Population",
+                "context": "Patient",
+                "resultTypeName": "{urn:hl7-org:elm-types:r1}Boolean",
+                "localId": "224",
+                "locator": "11:1-12:7"
+              },
+              {
+                "annotation": [
+                  {
+                    "s": {
+                      "r": "228",
+                      "s": [
+                        {
+                          "value": ["", "define ", "\"SDE Sex\"", ":\n  "]
+                        },
+                        {
+                          "r": "229",
+                          "s": [
+                            {
+                              "value": ["exists "]
+                            },
+                            {
+                              "r": "232",
+                              "s": [
+                                {
+                                  "value": [
+                                    "[",
+                                    "\"Patient Characteristic Sex\"",
+                                    ": "
+                                  ]
+                                },
+                                {
+                                  "s": [
+                                    {
+                                      "value": [
+                                        "\"Federal Administrative Sex\""
+                                      ]
+                                    }
+                                  ]
+                                },
+                                {
+                                  "value": ["]"]
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    "type": "Annotation"
+                  }
+                ],
+                "expression": {
+                  "signature": [],
+                  "resultTypeName": "{urn:hl7-org:elm-types:r1}Boolean",
+                  "type": "Exists",
+                  "localId": "229",
+                  "locator": "15:3-15:69",
+                  "operand": {
+                    "otherFilter": [],
+                    "codes": {
+                      "name": "Federal Administrative Sex",
+                      "preserve": true,
+                      "resultTypeName": "{urn:hl7-org:elm-types:r1}ValueSet",
+                      "type": "ValueSetRef",
+                      "localId": "231",
+                      "locator": "15:41-15:68"
+                    },
+                    "include": [],
+                    "resultTypeSpecifier": {
+                      "type": "ListTypeSpecifier",
+                      "localId": "235",
+                      "elementType": {
+                        "name": "{urn:healthit-gov:qdm:v5_6}PatientCharacteristicSex",
+                        "type": "NamedTypeSpecifier",
+                        "localId": "236"
+                      }
+                    },
+                    "codeProperty": "code",
+                    "dataType": "{urn:healthit-gov:qdm:v5_6}PatientCharacteristicSex",
+                    "type": "Retrieve",
+                    "localId": "232",
+                    "locator": "15:10-15:69",
+                    "codeComparator": "in",
+                    "codeFilter": [],
+                    "dateFilter": []
+                  }
+                },
+                "accessLevel": "Public",
+                "name": "SDE Sex",
+                "context": "Patient",
+                "resultTypeName": "{urn:hl7-org:elm-types:r1}Boolean",
+                "localId": "228",
+                "locator": "14:1-15:69"
+              }
+            ]
+          },
+          "schemaIdentifier": {
+            "id": "urn:hl7-org:elm",
+            "version": "r1"
+          },
+          "contexts": {
+            "def": [
+              {
+                "name": "Patient",
+                "localId": "221",
+                "locator": "9:1-9:15"
+              }
+            ]
+          },
+          "localId": "0",
+          "parameters": {
+            "def": [
+              {
+                "annotation": [
+                  {
+                    "s": {
+                      "r": "210",
+                      "s": [
+                        {
+                          "value": [
+                            "",
+                            "parameter ",
+                            "\"Measurement Period\"",
+                            " "
+                          ]
+                        },
+                        {
+                          "r": "211",
+                          "s": [
+                            {
+                              "value": ["Interval<"]
+                            },
+                            {
+                              "r": "212",
+                              "s": [
+                                {
+                                  "value": ["DateTime"]
+                                }
+                              ]
+                            },
+                            {
+                              "value": [">"]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    "type": "Annotation"
+                  }
+                ],
+                "resultTypeSpecifier": {
+                  "pointType": {
+                    "name": "{urn:hl7-org:elm-types:r1}DateTime",
+                    "type": "NamedTypeSpecifier",
+                    "localId": "217"
+                  },
+                  "type": "IntervalTypeSpecifier",
+                  "localId": "216"
+                },
+                "accessLevel": "Public",
+                "name": "Measurement Period",
+                "parameterTypeSpecifier": {
+                  "resultTypeSpecifier": {
+                    "pointType": {
+                      "name": "{urn:hl7-org:elm-types:r1}DateTime",
+                      "type": "NamedTypeSpecifier",
+                      "localId": "214"
+                    },
+                    "type": "IntervalTypeSpecifier",
+                    "localId": "213"
+                  },
+                  "pointType": {
+                    "name": "{urn:hl7-org:elm-types:r1}DateTime",
+                    "resultTypeName": "{urn:hl7-org:elm-types:r1}DateTime",
+                    "type": "NamedTypeSpecifier",
+                    "localId": "212",
+                    "locator": "7:41-7:48"
+                  },
+                  "type": "IntervalTypeSpecifier",
+                  "localId": "211",
+                  "locator": "7:32-7:49"
+                },
+                "localId": "210",
+                "locator": "7:1-7:49"
+              }
+            ]
+          }
+        }
+      },
+      "elm_annotations": null,
+      "statement_dependencies": [
+        {
+          "statement_name": "Patient",
+          "statement_references": []
+        },
+        {
+          "statement_name": "Initial Population",
+          "statement_references": []
+        },
+        {
+          "statement_name": "SDE Sex",
+          "statement_references": []
+        }
+      ],
+      "is_main_library": true,
+      "is_top_level": true
+    }
+  ],
+  "main_cql_library": "DemographicsTest",
+  "measure_period": {
+    "low": {
+      "value": "20200101000000"
+    },
+    "high": {
+      "value": "20201231235959"
+    }
+  },
+  "source_data_criteria": [
+    {
+      "dataElementCodes": null,
+      "description": "Patient Characteristic Sex: Federal Administrative Sex",
+      "codeListId": "2.16.840.1.113762.1.4.1021.121",
+      "desc": "2.16.840.1.113762.1.4.1021.121",
+      "codeId": null,
+      "_id": null,
+      "qdmTitle": "Patient Characteristic Sex",
+      "hqmfOid": "2.16.840.1.113883.10.20.28.4.55",
+      "qdmCategory": "patient_characteristic",
+      "qdmStatus": "gender",
+      "qdmVersion": "5.6",
+      "_type": "QDM::PatientCharacteristicSex"
+    }
+  ],
+  "population_sets": [
+    {
+      "id": "68c071fa31a66a0a74f0fd42",
+      "title": "Population Criteria Section",
+      "population_set_id": "PopulationSet_1",
+      "populations": {
+        "@class": "gov.cms.madie.models.cqm.CohortPopulationMap",
+        "IPP": {
+          "id": "d86594f3-8557-49ca-bc1f-12fb899be5db",
+          "library_name": "DemographicsTest",
+          "statement_name": "Initial Population",
+          "hqmf_id": null
+        }
+      },
+      "stratifications": [],
+      "supplemental_data_elements": [
+        {
+          "id": "2722b24d-af49-43ac-b493-5aceef59042b",
+          "library_name": "DemographicsTest",
+          "statement_name": "SDE Sex",
+          "hqmf_id": null
+        }
+      ],
+      "risk_adjustment_variables": [],
+      "observations": []
+    }
+  ],
+  "value_sets": [
+    {
+      "oid": "2.16.840.1.113762.1.4.1021.121",
+      "display_name": "FederalAdministrativeSex",
+      "version": "20250228",
+      "concepts": [
+        {
+          "code": "248152002",
+          "code_system_oid": "2.16.840.1.113883.6.96",
+          "code_system_name": "SNOMEDCT",
+          "code_system_version": null,
+          "display_name": "Female (finding)"
+        },
+        {
+          "code": "248153007",
+          "code_system_oid": "2.16.840.1.113883.6.96",
+          "code_system_name": "SNOMEDCT",
+          "code_system_version": null,
+          "display_name": "Male (finding)"
+        }
+      ]
+    }
+  ],
+  "_id": "68c98afa8f4835d9856ad0d2"
+}
