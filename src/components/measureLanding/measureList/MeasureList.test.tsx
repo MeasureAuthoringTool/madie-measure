@@ -383,7 +383,7 @@ describe("Measure List component", () => {
     expect(editButton).toBeInTheDocument();
     expect(window.location.href).toBe("http://localhost/");
     userEvent.click(editButton);
-    expect(mockPush).toHaveBeenCalledWith("/measures/IDIDID2/edit/details");
+    expect(mockPush).toHaveBeenCalledWith("/measures/IDIDID2/edit/details/");
     unmount();
   });
 
@@ -422,7 +422,7 @@ describe("Measure List component", () => {
     const viewButton = await screen.findByTestId("measure-action-IDIDID3");
     expect(viewButton).toBeInTheDocument();
     userEvent.click(viewButton);
-    expect(mockPush).toHaveBeenCalledWith("/measures/IDIDID3/edit/details");
+    expect(mockPush).toHaveBeenCalledWith("/measures/IDIDID3/edit/details/");
     unmount();
   });
 
@@ -2885,7 +2885,7 @@ describe("Action Center Tests", () => {
     expect(actionButton).toBeInTheDocument();
 
     userEvent.click(actionButton);
-    expect(mockPush).toHaveBeenCalledWith("/measures/IDIDID3/edit/details");
+    expect(mockPush).toHaveBeenCalledWith("/measures/IDIDID3/edit/details/");
   });
 
   it("should display Edit button for draft and editable measures", async () => {
@@ -2922,7 +2922,7 @@ describe("Action Center Tests", () => {
     );
     expect(actionButtonEdit).toBeInTheDocument();
     userEvent.click(actionButtonEdit);
-    expect(mockPush).toHaveBeenCalledWith("/measures/IDIDID1/edit/details");
+    expect(mockPush).toHaveBeenCalledWith("/measures/IDIDID1/edit/details/");
   });
 
   it("should display View button for non-editable measures", async () => {
@@ -2959,7 +2959,7 @@ describe("Action Center Tests", () => {
 
     expect(actionButton).toBeInTheDocument();
     userEvent.click(actionButton);
-    expect(mockPush).toHaveBeenCalledWith("/measures/IDIDID4/edit/details");
+    expect(mockPush).toHaveBeenCalledWith("/measures/IDIDID4/edit/details/");
   });
 
   it("should display share dialog on clicking share action button", async () => {
