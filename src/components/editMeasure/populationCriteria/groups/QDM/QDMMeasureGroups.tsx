@@ -794,6 +794,9 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                         type="B"
                         aria-label="Populations tab panel"
                         tabIndex={0}
+                        onClick={() => {
+                          setActiveTab("populations");
+                        }}
                         label={
                           <CompletionIndicator
                             label="Populations"
