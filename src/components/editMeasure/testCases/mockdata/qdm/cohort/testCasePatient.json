@@ -1,0 +1,86 @@
+{
+  "birthDatetime": "2009-12-22T00:00:00.000+00:00",
+  "qdmVersion": "5.6",
+  "dataElements": [
+    {
+      "dataElementCodes": [
+        {
+          "code": "21112-8",
+          "system": "2.16.840.1.113883.6.1",
+          "version": null,
+          "display": "Birth date"
+        }
+      ],
+      "id": "68c98a041b1ef3ab6263986f",
+      "_id": "68c98a041b1ef3ab6263986f",
+      "birthDatetime": "2009-12-22T00:00:00.000+00:00",
+      "qdmTitle": "Patient Characteristic Birthdate",
+      "hqmfOid": "2.16.840.1.113883.10.20.28.4.54",
+      "qdmCategory": "patient_characteristic",
+      "qdmStatus": "birthdate",
+      "qdmVersion": "5.6",
+      "_type": "QDM::PatientCharacteristicBirthdate"
+    },
+    {
+      "dataElementCodes": [
+        {
+          "code": "2028-9",
+          "system": "2.16.840.1.113883.6.238",
+          "version": "1.2",
+          "display": "Asian"
+        }
+      ],
+      "description": "Patient Characteristic Race: Race",
+      "codeListId": "2.16.840.1.114222.4.11.836",
+      "id": "68c989f31b1ef3ab6263986d",
+      "_id": "68c989f31b1ef3ab6263986d",
+      "qdmTitle": "Patient Characteristic Race",
+      "hqmfOid": "2.16.840.1.113883.10.20.28.4.59",
+      "qdmCategory": "patient_characteristic",
+      "qdmStatus": "race",
+      "qdmVersion": "5.6",
+      "_type": "QDM::PatientCharacteristicRace"
+    },
+    {
+      "dataElementCodes": [
+        {
+          "code": "2135-2",
+          "system": "2.16.840.1.113883.6.238",
+          "version": "1.2",
+          "display": "Hispanic or Latino"
+        }
+      ],
+      "description": "Patient Characteristic Ethnicity: Ethnicity",
+      "codeListId": "2.16.840.1.114222.4.11.837",
+      "id": "68c989e21b1ef3ab6263986a",
+      "_id": "68c989e21b1ef3ab6263986a",
+      "qdmTitle": "Patient Characteristic Ethnicity",
+      "hqmfOid": "2.16.840.1.113883.10.20.28.4.56",
+      "qdmCategory": "patient_characteristic",
+      "qdmStatus": "ethnicity",
+      "qdmVersion": "5.6",
+      "_type": "QDM::PatientCharacteristicEthnicity"
+    },
+    {
+      "dataElementCodes": [
+        {
+          "code": "248153007",
+          "system": "2.16.840.1.113883.6.96",
+          "version": "2024-09",
+          "display": "Male (finding)"
+        }
+      ],
+      "description": "Patient Characteristic Sex: FederalAdministrativeSex",
+      "codeListId": "2.16.840.1.113762.1.4.1021.121",
+      "id": "68c989d91b1ef3ab62639868",
+      "_id": "68c989d91b1ef3ab62639868",
+      "qdmTitle": "Patient Characteristic Sex",
+      "hqmfOid": "2.16.840.1.113883.10.20.28.4.55",
+      "qdmCategory": "patient_characteristic",
+      "qdmStatus": "gender",
+      "qdmVersion": "5.6",
+      "_type": "QDM::PatientCharacteristicSex"
+    }
+  ],
+  "_id": "68c989bccdba9a536e17547d"
+}
