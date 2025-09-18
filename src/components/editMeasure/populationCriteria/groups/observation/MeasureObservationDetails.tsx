@@ -96,45 +96,22 @@ const MeasureObservationDetails = ({
               )),
             ]}
           />
-          {featureFlags.EnhancedTextFormatting ? (
-            <RichTextEditor
-              label={
-                label ? `${camelCaseConverter(label)} Description` : undefined
-              }
-              required={required}
-              id={`${name}-observation-description`}
-              readOnly={!canEdit}
-              content={measureObservation?.description || ""}
-              onChange={(value: string) => {
-                onChange({
-                  ...measureObservation,
-                  description: value,
-                });
-              }}
-            />
-          ) : (
-            <TextArea
-              id={`${name}-observation-description`}
-              data-testid={`${name}-observation-description`}
-              name={`${name}ObservationDescription`}
-              label={
-                label ? `${camelCaseConverter(label)} Description` : undefined
-              }
-              placeholder="-"
-              // to do: input following props
-              value={measureObservation?.description || ""}
-              readOnly={!canEdit}
-              onChange={(e) => {
-                if (onChange) {
-                  onChange({
-                    ...measureObservation,
-                    description: e.target.value,
-                  });
-                }
-              }}
-              inputProps={{ "data-testid": `${name}-description` }}
-            />
-          )}
+
+          <RichTextEditor
+            label={
+              label ? `${camelCaseConverter(label)} Description` : undefined
+            }
+            required={required}
+            id={`${name}-observation-description`}
+            readOnly={!canEdit}
+            content={measureObservation?.description || ""}
+            onChange={(value: string) => {
+              onChange({
+                ...measureObservation,
+                description: value,
+              });
+            }}
+          />
         </div>
       </div>
       <div className="second" style={{ width: 300 }}>
