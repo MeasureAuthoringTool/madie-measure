@@ -43,7 +43,7 @@ import useQdmCqlParsingService, {
 } from "../../../api/cqlElmTranslationService/useQdmCqlParsingService";
 import { qdmCallStack } from "../groupCoverage/_mocks_/QdmCallStack";
 // @ts-ignore
-import testCaseJson from "../../../mockdata/qdm/testCasePatient.json";
+import testCaseJson from "../../../mockdata/qdm/cohort/testCasePatient.json";
 import { demographicValueSets } from "../../../__mocks__/demographicValueSets";
 
 const serviceConfig = {
