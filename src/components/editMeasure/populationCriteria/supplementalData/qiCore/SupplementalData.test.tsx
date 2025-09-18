@@ -6,6 +6,7 @@ import {
   waitFor,
   fireEvent,
   within,
+  act,
 } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Measure } from "@madie/madie-models";
@@ -78,9 +79,6 @@ jest.mock("@madie/madie-util", () => ({
     state: { canTravel: false, pendingPath: "" },
     initialState: { canTravel: false, pendingPath: "" },
   },
-  useFeatureFlags: jest.fn(() => ({
-    EnhancedTextFormatting: false,
-  })),
 }));
 
 jest.mock("../../../../../api/useMeasureServiceApi");
@@ -99,6 +97,7 @@ const RenderSupplementalElements = () => {
 describe("SupplementalData Component QI-Core", () => {
   it("Should render Supplemental Data component with the values saved in DB", async () => {
     RenderSupplementalElements();
+
     const suppolementalElementsSelect = screen.getByTestId(
       "supplemental-data-dropdown"
     );
@@ -107,23 +106,37 @@ describe("SupplementalData Component QI-Core", () => {
       screen.getByRole("button", { name: "Initial Population" })
     ).toBeInTheDocument();
 
-    const description = screen.getByTestId(
-      "supplemental-data-description-text"
+    const descriptionEditor = screen.getByTestId(
+      "supplemental-data-description-rich-text-editor"
     );
-    expect(description).toHaveTextContent("test description");
+    expect(descriptionEditor).toBeInTheDocument();
+
+    const content = within(descriptionEditor).getByTestId(
+      "rich-text-editor-content"
+    );
+    expect(content).toHaveTextContent("test description");
   });
 
   it("Should render disabled components if the user doesn't have permissions", async () => {
     checkUserCanEdit.mockReturnValue(false);
     RenderSupplementalElements();
+
     const supplementalElements = screen.getByRole("textbox", {
       name: "Definition",
     });
     expect(supplementalElements).toHaveTextContent("Initial Population");
 
-    const description = screen.getByRole("textbox", { name: "Description" });
-    expect(description).toHaveTextContent("test description");
+    const descriptionEditor = screen.getByTestId(
+      "supplemental-data-description-rich-text-editor"
+    );
+    expect(descriptionEditor).toBeInTheDocument();
 
+    const content = within(descriptionEditor).getByTestId(
+      "supplementalDataDescription-value"
+    );
+    expect(content).toHaveTextContent("test description");
+
+    // All textboxes should be readonly
     const allFormFields = screen.getAllByRole("textbox");
     for (const formField of allFormFields) {
       expect(formField).toHaveAttribute("readonly");
@@ -150,7 +163,7 @@ describe("SupplementalData Component QI-Core", () => {
         ],
       },
     ];
-    const newSupplementalDataDescription = "Updated test description";
+    const newSupplementalDataDescription = "test description";
     const updatedMeasure = {
       ...mockTestMeasure,
       supplementalData: newSupplementalData,
@@ -249,13 +262,19 @@ describe("SupplementalData Component QI-Core", () => {
     userEvent.click(sdeEthnicityDropdown);
 
     // Verifies if SD description already loads values from store and able to update
-    const description = screen.getByTestId(
-      "supplemental-data-description-text"
+    const descriptionEditor = screen.getByTestId(
+      "supplemental-data-description-rich-text-editor"
     );
-    expect(description).toHaveTextContent("test description");
-    fireEvent.change(description, {
-      target: { value: "Updated test description" },
+    expect(descriptionEditor).toBeInTheDocument();
+
+    const content = within(descriptionEditor).getByTestId(
+      "rich-text-editor-content"
+    );
+    expect(content).toHaveTextContent("test description");
+    fireEvent.input(descriptionEditor, {
+      target: { textContent: "test description" },
     });
+    fireEvent.blur(descriptionEditor);
 
     // save button
     const saveButton = screen.getByRole("button", { name: "Save" });
@@ -287,50 +306,88 @@ describe("SupplementalData Component QI-Core", () => {
   });
 
   it("Should fail an update to supplemental data values because of unexpected internal server issues", async () => {
+    checkUserCanEdit.mockReturnValue(true);
+
+    // Mock API to simulate server error
+    const failureMessage = "Internal Server Error";
     measureServiceApi = {
-      updateMeasure: jest.fn().mockRejectedValue({ status: 500, data: null }),
+      updateMeasure: jest.fn().mockRejectedValueOnce(failureMessage),
     } as unknown as MeasureServiceApi;
     useMeasureServiceApiMock.mockImplementation(() => measureServiceApi);
 
     RenderSupplementalElements();
 
-    // Verifies if SD description already loads values from store and able to update
-    const description = screen.getByTestId(
-      "supplemental-data-description-text"
+    // Add a new supplemental data element
+    const supplementalDataDropdown = screen.getByTestId(
+      "supplemental-data-dropdown"
     );
-    expect(description).toHaveTextContent("test description");
-    fireEvent.change(description, {
-      target: { value: "Updated test description" },
+    expect(supplementalDataDropdown).toBeInTheDocument();
+    const openButton = within(supplementalDataDropdown).getByTitle("Open");
+    userEvent.click(openButton);
+
+    const ethnicityOption = screen.getByText("SDE Ethnicity");
+    expect(ethnicityOption).toBeInTheDocument();
+    userEvent.click(ethnicityOption);
+
+    // Update description using RichTextEditor
+    const descriptionEditor = screen.getByTestId(
+      "supplemental-data-description-rich-text-editor"
+    );
+    expect(descriptionEditor).toBeInTheDocument();
+    const content = within(descriptionEditor).getByTestId(
+      "rich-text-editor-content"
+    );
+
+    await act(async () => {
+      fireEvent.input(content, {
+        target: { textContent: "test description" },
+      });
+      fireEvent.blur(content);
     });
 
-    // save button
-    const saveButton = screen.getByRole("button", { name: "Save" });
-    expect(saveButton).toBeEnabled();
-    userEvent.click(saveButton);
-
-    // Should call service with updated data
-    await waitFor(() =>
-      expect(measureServiceApi.updateMeasure).toBeCalledWith({
-        ...mockTestMeasure,
-        supplementalDataDescription: "Updated test description",
-      })
-    );
-
-    // verifies if error toast message is displayed because of service failure
-    await waitFor(
-      () =>
-        expect(
-          screen.getByTestId("supplemental-data-error")
-        ).toBeInTheDocument(),
-      {
-        timeout: 5000,
-      }
-    );
-    const toastCloseButton = await screen.findByTestId("close-error-button");
-    expect(toastCloseButton).toBeInTheDocument();
-    fireEvent.click(toastCloseButton);
+    // Wait for debounced update to take effect
     await waitFor(() => {
-      expect(toastCloseButton).not.toBeInTheDocument();
+      const saveButton = screen.getByRole("button", { name: "Save" });
+      expect(saveButton).toBeEnabled();
+    });
+
+    // Save changes
+    const saveButton = screen.getByRole("button", { name: "Save" });
+    await act(async () => {
+      userEvent.click(saveButton);
+    });
+
+    // Verify error toast appears
+    await waitFor(() => {
+      const errorToast = screen.getByTestId("supplemental-data-error");
+      expect(errorToast).toBeInTheDocument();
+      expect(errorToast).toHaveTextContent(
+        `Error updating measure "the measure for testing": ${failureMessage}`
+      );
+    });
+
+    // Verify API call was made with correct data
+    await waitFor(() => {
+      expect(measureServiceApi.updateMeasure).toHaveBeenCalledWith({
+        ...mockTestMeasure,
+        supplementalData: [
+          {
+            definition: "Initial Population",
+            description: "",
+          },
+          {
+            definition: "SDE Ethnicity",
+            description: "",
+            includeInReportType: [
+              "Individual",
+              "Subject List",
+              "Summary",
+              "Data Collection",
+            ],
+          },
+        ],
+        supplementalDataDescription: "test description",
+      });
     });
   });
 
@@ -359,14 +416,22 @@ describe("SupplementalData Component QI-Core", () => {
     ).toBeInTheDocument();
 
     // Verifies if SD description already loads values from store and able to update
-    const description = screen.getByTestId(
-      "supplemental-data-description-text"
+    const descriptionEditor = screen.getByTestId(
+      "supplemental-data-description-rich-text-editor"
     );
-    expect(description).toHaveTextContent("test description");
-    fireEvent.change(description, {
-      target: { value: "Updated test description" },
+    expect(descriptionEditor).toBeInTheDocument();
+    const content = within(descriptionEditor).getByTestId(
+      "rich-text-editor-content"
+    );
+
+    await act(async () => {
+      fireEvent.input(content, {
+        target: { textContent: "Updated test description" },
+      });
+      fireEvent.blur(content);
     });
-    expect(description).toHaveTextContent("Updated test description");
+
+    expect(content).toHaveTextContent("Updated test description");
 
     // verifies if discard button is enabled and on click triggers discard model
     const discardButton = screen.getByRole("button", {
@@ -388,7 +453,7 @@ describe("SupplementalData Component QI-Core", () => {
     });
 
     //Verifies if the form values are not discarded
-    expect(description).toHaveTextContent("Updated test description");
+    expect(content).toHaveTextContent("Updated test description");
     expect(screen.getByText("+1")).toBeInTheDocument(); // We are limiting the selected options displayed
     const includeInReportTypeContainer = screen.getByTestId(
       "SDE Ethnicity-include-in-report-type-dropdown",
@@ -430,14 +495,20 @@ describe("SupplementalData Component QI-Core", () => {
     ).toBeInTheDocument();
 
     // Verifies if SD description already loads values from store and able to update
-    const description = screen.getByTestId(
-      "supplemental-data-description-text"
+    const descriptionEditor = screen.getByTestId(
+      "supplemental-data-description-rich-text-editor"
     );
-    expect(description).toHaveTextContent("test description");
-    fireEvent.change(description, {
-      target: { value: "Updated test description" },
+    expect(descriptionEditor).toBeInTheDocument();
+    const content = within(descriptionEditor).getByTestId(
+      "rich-text-editor-content"
+    );
+
+    await act(async () => {
+      fireEvent.input(content, {
+        target: { textContent: "test description" },
+      });
+      fireEvent.blur(content);
     });
-    expect(description).toHaveTextContent("Updated test description");
 
     // verifies if discard button is enabled and on click triggers discard model
     const discardButton = screen.getByRole("button", {
@@ -459,7 +530,7 @@ describe("SupplementalData Component QI-Core", () => {
         screen.queryByText("You have unsaved changes.")
       ).not.toBeInTheDocument();
       // Verifies if the updated form values are discarded
-      expect(description).toHaveTextContent("test description");
+      expect(descriptionEditor).toHaveTextContent("test description");
       expect(
         screen.getByRole("button", { name: "Initial Population" })
       ).toBeInTheDocument();

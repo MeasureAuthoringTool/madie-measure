@@ -479,7 +479,7 @@ describe("Measure Definitions Component", () => {
     await checkDialogHidden();
   });
 
-  it("render Definition rich text editor if EnhancedTextFormatting flag is true", async () => {
+  it("render Definition rich text editor", async () => {
     measureStore.initialState.mockImplementationOnce(
       () => measureWithNineItems
     );

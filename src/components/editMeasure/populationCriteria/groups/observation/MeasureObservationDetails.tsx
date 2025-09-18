@@ -13,7 +13,6 @@ import {
   RichTextEditor,
 } from "@madie/madie-design-system/dist/react";
 import camelCaseConverter from "../../../../../utils/camelCaseConverter";
-import { useFeatureFlags } from "@madie/madie-util";
 
 const AGGREGATE_FUNCTIONS = Array.from(AGGREGATE_FUNCTION_KEYS.keys()).sort();
 
@@ -43,7 +42,6 @@ const MeasureObservationDetails = ({
   errors,
 }: MeasureObservationProps) => {
   const [cqlFunctionNames, setCqlFunctionNames] = useState([]);
-  const featureFlags = useFeatureFlags();
   useEffect(() => {
     if (elmJson) {
       const elm = JSON.parse(elmJson);
