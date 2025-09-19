@@ -175,7 +175,7 @@ describe("QdmRiskAdjustment Component", () => {
 
     await act(async () => {
       fireEvent.focus(editableContent);
-      editableContent.innerHTML = "Updated test description<";
+      editableContent.innerHTML = "Updated test description";
       fireEvent.input(editableContent, {
         target: { innerHTML: "Updated test description" },
       });

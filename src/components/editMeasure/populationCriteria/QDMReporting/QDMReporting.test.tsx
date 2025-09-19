@@ -56,9 +56,6 @@ jest.mock("@madie/madie-util", () => ({
     state: { canTravel: true, pendingPath: "" },
     initialState: { canTravel: true, pendingPath: "" },
   },
-  useFeatureFlags: jest.fn(() => ({
-    EnhancedTextFormatting: false,
-  })),
   checkUserCanEdit: jest.fn(() => {
     return true;
   }),
@@ -413,7 +410,7 @@ describe("QDMReporting component", () => {
     );
   });
 
-  test("Improvement Notation description is not mandatory for 'Increased Improvement Notation' when EnhancedTextFormatting is enabled", async () => {
+  test("Improvement Notation description is not mandatory for 'Increased Improvement Notation'", async () => {
     render(<QDMReporting />);
 
     let editor = within(
@@ -442,7 +439,7 @@ describe("QDMReporting component", () => {
     });
   });
 
-  test("Improvement Notation description is mandatory for 'Other' when EnhancedTextFormatting is enabled", async () => {
+  test("Improvement Notation description is mandatory for 'Other'", async () => {
     render(<QDMReporting />);
 
     let editor = within(
