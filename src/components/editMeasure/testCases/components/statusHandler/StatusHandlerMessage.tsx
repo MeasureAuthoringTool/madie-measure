@@ -55,6 +55,31 @@ export function createWarningMessage(
   };
 }
 
+export function createMissingDataElementMessage(
+  missingDataElements: string[],
+  testDataId: string
+) {
+  return {
+    type: "warning",
+    copyButton: true,
+    content: (
+      <div aria-live="polite" role="alert" data-testid={testDataId}>
+        <div>
+          The following data elements in this test case are no longer relevant
+          to the measure.
+          <ul tw="ml-5">
+            {missingDataElements.map((el, index) => (
+              <li key={index}>{el}</li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    ),
+    canClose: false,
+    alertProps: { "data-testid": testDataId },
+  };
+}
+
 export function createImportMessage(
   failedImports: TestCaseImportOutcome[],
   successfulImports: number,
