@@ -153,7 +153,7 @@ describe("SupplementalData Component QDM", () => {
         description: "",
       },
     ];
-    const newSupplementalDataDescription = "test description";
+    const newSupplementalDataDescription = "<p>Updated test description</p>";
     const updatedMeasure = {
       ...mockTestMeasure,
       supplementalData: newSupplementalData,
@@ -198,10 +198,34 @@ describe("SupplementalData Component QDM", () => {
       "rich-text-editor-content"
     );
     expect(content).toHaveTextContent("test description");
-    fireEvent.input(descriptionEditor, {
-      target: { textContent: "test description" },
+
+    const editableContent = within(content).getByRole("textbox");
+    expect(editableContent).toHaveAttribute("contenteditable", "true");
+
+    await act(async () => {
+      fireEvent.focus(editableContent);
+      editableContent.innerHTML = "Updated test description<";
+      fireEvent.input(editableContent, {
+        target: { innerHTML: "Updated test description" },
+      });
+      fireEvent.blur(editableContent);
     });
-    fireEvent.blur(descriptionEditor);
+
+    // Wait for debounced update to take effect (250ms delay from TextEditor component)
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 350));
+    });
+
+    // Wait for save button to be enabled
+    await waitFor(
+      () => {
+        const saveButton = screen.getByRole("button", { name: "Save" });
+        expect(saveButton).toBeEnabled();
+      },
+      { timeout: 1000 }
+    );
+
+    expect(content).toHaveTextContent("Updated test description");
 
     // save button
     const saveButton = screen.getByRole("button", { name: "Save" });
