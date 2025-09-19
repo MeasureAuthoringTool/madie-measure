@@ -8,6 +8,7 @@ import "styled-components/macro";
 import { EXPORT_ERROR_CHARACTERS_MESSAGE } from "../../util/checkSpecialCharacters";
 import {
   createImportMessage,
+  createMissingDataElementMessage,
   createShiftTestCaseDatesWarningMessage,
   createWarningMessage,
 } from "./StatusHandlerMessage";
@@ -20,6 +21,7 @@ interface StatusHandlerProps {
   testDataId?: string;
   importWarnings?: TestCaseImportOutcome[];
   shiftTestCaseDatesWarning?: Array<string>;
+  missingDataElements?: Array<string>;
 }
 
 const StatusHandler = ({
@@ -30,6 +32,7 @@ const StatusHandler = ({
   testDataId,
   importWarnings,
   shiftTestCaseDatesWarning,
+  missingDataElements,
 }: StatusHandlerProps) => {
   const alerts = [];
 
@@ -127,6 +130,12 @@ const StatusHandler = ({
         successfulImportsWithWarnings,
         testDataId
       )
+    );
+  }
+
+  if (warning && missingDataElements?.length) {
+    alerts.push(
+      createMissingDataElementMessage(missingDataElements, testDataId)
     );
   }
 

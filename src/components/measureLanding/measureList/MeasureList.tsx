@@ -301,9 +301,9 @@ export default function MeasureList(props: {
           } Measure ${info.row.original.measureName} ${
             info.row.original.version
           }${info.row.original.actions.measureMetaData?.draft ? " Draft" : ""}`}
-          onClick={() =>
-            navigate(`/measures/${info.row.original.id}/edit/details`)
-          }
+          onClick={() => {
+            navigate(`/measures/${info.row.original.id}/edit/details/`);
+          }}
           role="button"
           tabIndex={0}
         >
@@ -442,9 +442,9 @@ export default function MeasureList(props: {
           } Measure ${info.row.original.measureName} ${
             info.row.original.version
           }${info.row.original.actions.measureMetaData?.draft ? " Draft" : ""}`}
-          onClick={() =>
-            navigate(`/measures/${info.row.original.id}/edit/details`)
-          }
+          onClick={() => {
+            navigate(`/measures/${info.row.original.id}/edit/details/`);
+          }}
           tabIndex={0}
           role="button"
         >
