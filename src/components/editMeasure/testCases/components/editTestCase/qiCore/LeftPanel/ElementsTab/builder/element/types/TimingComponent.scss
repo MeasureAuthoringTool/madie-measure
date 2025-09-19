@@ -1,0 +1,25 @@
+.timing-component {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+
+  .repeat-count,
+  .repeat-count-max,
+  .repeat-duration,
+  .repeat-duration-max,
+  .repeat-frequency,
+  .repeat-frequency-max,
+  .repeat-period,
+  .repeat-period-max,
+  .repeat-duration-unit .codes-select-container,
+  .repeat-period-unit .codes-select-container {
+    width: 160px;
+  }
+
+  .repeat-bounds,
+  .repeat-offset,
+  .codes-select-container,
+  .time-field-container {
+    width: 296px;
+  }
+}

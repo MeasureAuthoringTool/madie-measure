@@ -36,6 +36,7 @@ import QuantityInput from "./types/QuantityInput";
 import IdentifierComponent from "./types/IdentifierComponent";
 import QuantityIntervalInput from "../../../../../../common/quantityIntervalInput/QuantityIntervalInput";
 import MoneyComponent from "./types/MoneyComponent";
+import TimingComponent from "./types/TimingComponent";
 
 // onChange is being deprecated as no updates to the resource are tracked.
 // Changes directly to the json should be done with a dispatch, this propagates downstream changes in formik.
@@ -562,6 +563,16 @@ const TypeEditor = ({
             label={label}
             canEdit={canEdit}
             resource={resource}
+            fieldRequired={false}
+          />
+        );
+      case "Timing":
+        return (
+          <TimingComponent
+            resource={resource}
+            structureDefinition={structureDefinition}
+            label={label}
+            canEdit={canEdit}
             fieldRequired={false}
           />
         );
