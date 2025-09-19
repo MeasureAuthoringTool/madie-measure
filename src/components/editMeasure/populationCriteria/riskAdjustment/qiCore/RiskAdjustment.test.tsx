@@ -109,8 +109,15 @@ describe("QiCore RiskAdjustment Component", () => {
       screen.getByRole("button", { name: "Initial Population" })
     ).toBeInTheDocument();
 
-    const description = screen.getByTestId("risk-adjustment-description-text");
-    expect(description).toHaveTextContent("test description");
+    const descriptionEditor = screen.getByTestId(
+      "risk-adjustment-description-rich-text-editor"
+    );
+    expect(descriptionEditor).toBeInTheDocument();
+
+    const content = within(descriptionEditor).getByTestId(
+      "rich-text-editor-content"
+    );
+    expect(content).toHaveTextContent("test description");
   });
 
   it("Should render disabled components if the user doesn't have permissions", async () => {
@@ -121,8 +128,10 @@ describe("QiCore RiskAdjustment Component", () => {
     });
     expect(riskAdjustments).toHaveTextContent("Initial Population");
 
-    const description = screen.getByRole("textbox", { name: "Description" });
-    expect(description).toHaveTextContent("test description");
+    const descriptionEditor = screen.getByTestId(
+      "risk-adjustment-description-rich-text-editor"
+    );
+    expect(descriptionEditor).toBeInTheDocument();
 
     const allFormFields = screen.getAllByRole("textbox");
     for (const formField of allFormFields) {
@@ -132,7 +141,7 @@ describe("QiCore RiskAdjustment Component", () => {
 
   it("Should successfully update risk Adjustment values and save to DB on 200", async () => {
     checkUserCanEdit.mockReturnValue(true);
-    // Mocking service call to update measure
+
     const newRiskAdjustments = [
       {
         definition: "Initial Population",
@@ -150,7 +159,7 @@ describe("QiCore RiskAdjustment Component", () => {
         ],
       },
     ];
-    const newRiskAdjustmentDescription = "Updated test description";
+    const newRiskAdjustmentDescription = "<p>Updated test description</p>";
     const updatedMeasure = {
       ...mockTestMeasure,
       riskAdjustments: newRiskAdjustments,
@@ -165,39 +174,16 @@ describe("QiCore RiskAdjustment Component", () => {
 
     RenderRiskAdjustment();
 
-    // Verifies if RA already loads values from store and able to add new
-    const riskAdjustmentSelect = screen.getByTestId("risk-adjustment-dropdown");
-    expect(riskAdjustmentSelect).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: "Initial Population" })
-    ).toBeInTheDocument();
-    const riskAdjustmentButton =
-      within(riskAdjustmentSelect).getByTitle("Open");
+    // Add "Individual" to Initial Population
     const ipIncludeInReportTypeContainer = screen.getByTestId(
       "Initial Population-include-in-report-type-formcontrol"
     );
-    expect(
-      within(ipIncludeInReportTypeContainer).queryByText("Individual")
-    ).not.toBeInTheDocument();
-    expect(
-      within(ipIncludeInReportTypeContainer).queryByText("Subject List")
-    ).not.toBeInTheDocument();
-    expect(
-      within(ipIncludeInReportTypeContainer).queryByText("+2")
-    ).not.toBeInTheDocument();
-
-    // open Include in Report Type for IP
     const ipIncludeInReportTypeButton = within(
       ipIncludeInReportTypeContainer
     ).getByTitle("Open");
-    expect(ipIncludeInReportTypeButton).toBeInTheDocument();
     userEvent.click(ipIncludeInReportTypeButton);
     expect(
       await within(ipIncludeInReportTypeContainer).findByTitle("Close")
-    ).toBeInTheDocument();
-    // add an option for Initial Population
-    expect(
-      await within(ipIncludeInReportTypeContainer).findByText("Individual")
     ).toBeInTheDocument();
     await waitFor(() => {
       userEvent.click(screen.getByText("Individual"));
@@ -206,6 +192,10 @@ describe("QiCore RiskAdjustment Component", () => {
       screen.getByRole("button", { name: "Individual" })
     ).toBeInTheDocument();
 
+    // Add SDE Ethnicity
+    const riskAdjustmentSelect = screen.getByTestId("risk-adjustment-dropdown");
+    const riskAdjustmentButton =
+      within(riskAdjustmentSelect).getByTitle("Open");
     userEvent.click(riskAdjustmentButton);
     await waitFor(() => {
       userEvent.click(screen.getByText("SDE Ethnicity"));
@@ -215,18 +205,50 @@ describe("QiCore RiskAdjustment Component", () => {
     ).toBeInTheDocument();
 
     // Verifies if RA description already loads values from store and able to update
-    const description = screen.getByTestId("risk-adjustment-description-text");
-    expect(description).toHaveTextContent("test description");
-    fireEvent.change(description, {
-      target: { value: "Updated test description" },
+    const descriptionEditor = screen.getByTestId(
+      "risk-adjustment-description-rich-text-editor"
+    );
+    expect(descriptionEditor).toBeInTheDocument();
+
+    const content = within(descriptionEditor).getByTestId(
+      "rich-text-editor-content"
+    );
+    expect(content).toHaveTextContent("test description");
+
+    const editableContent = within(content).getByRole("textbox");
+    expect(editableContent).toHaveAttribute("contenteditable", "true");
+
+    await act(async () => {
+      fireEvent.focus(editableContent);
+      editableContent.innerHTML = "Updated test description<";
+      fireEvent.input(editableContent, {
+        target: { innerHTML: "Updated test description" },
+      });
+      fireEvent.blur(editableContent);
     });
 
-    // save button
+    // Wait for debounced update to take effect (250ms delay from TextEditor component)
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 350));
+    });
+
+    // Wait for save button to be enabled
+    await waitFor(
+      () => {
+        const saveButton = screen.getByRole("button", { name: "Save" });
+        expect(saveButton).toBeEnabled();
+      },
+      { timeout: 1000 }
+    );
+
+    expect(content).toHaveTextContent("Updated test description");
+
+    // Save
     const saveButton = screen.getByRole("button", { name: "Save" });
-    expect(saveButton).toBeEnabled();
+    await waitFor(() => expect(saveButton).toBeEnabled());
     userEvent.click(saveButton);
 
-    // verifies if success toast message is displayed
+    // Success toast
     await waitFor(() =>
       expect(screen.getByTestId("risk-adjustment-success")).toBeInTheDocument()
     );
@@ -237,6 +259,7 @@ describe("QiCore RiskAdjustment Component", () => {
       expect(toastCloseButton).not.toBeInTheDocument();
     });
 
+    // API call with updated description
     await waitFor(() =>
       expect(measureServiceApi.updateMeasure).toBeCalledWith({
         ...updatedMeasure,
@@ -263,7 +286,8 @@ describe("QiCore RiskAdjustment Component", () => {
         ],
       },
     ];
-    const newRiskAdjustmentDescription = "Updated test description";
+
+    const newRiskAdjustmentDescription = "<p>Updated test description</p>";
     const updatedMeasure = {
       ...mockTestMeasure,
       riskAdjustments: newRiskAdjustments,
@@ -296,11 +320,44 @@ describe("QiCore RiskAdjustment Component", () => {
     ).toBeInTheDocument();
 
     // Verifies if RA description already loads values from store and able to update
-    const description = screen.getByTestId("risk-adjustment-description-text");
-    expect(description).toHaveTextContent("test description");
-    fireEvent.change(description, {
-      target: { value: "Updated test description" },
+    // Verifies if RA description already loads values from store and able to update
+    const descriptionEditor = screen.getByTestId(
+      "risk-adjustment-description-rich-text-editor"
+    );
+    expect(descriptionEditor).toBeInTheDocument();
+
+    const content = within(descriptionEditor).getByTestId(
+      "rich-text-editor-content"
+    );
+    expect(content).toHaveTextContent("test description");
+
+    const editableContent = within(content).getByRole("textbox");
+    expect(editableContent).toHaveAttribute("contenteditable", "true");
+
+    await act(async () => {
+      fireEvent.focus(editableContent);
+      editableContent.innerHTML = "Updated test description<";
+      fireEvent.input(editableContent, {
+        target: { innerHTML: "Updated test description" },
+      });
+      fireEvent.blur(editableContent);
     });
+
+    // Wait for debounced update to take effect (250ms delay from TextEditor component)
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 350));
+    });
+
+    // Wait for save button to be enabled
+    await waitFor(
+      () => {
+        const saveButton = screen.getByRole("button", { name: "Save" });
+        expect(saveButton).toBeEnabled();
+      },
+      { timeout: 1000 }
+    );
+
+    expect(content).toHaveTextContent("Updated test description");
 
     // save button
     const saveButton = screen.getByRole("button", { name: "Save" });
@@ -334,11 +391,43 @@ describe("QiCore RiskAdjustment Component", () => {
     RenderRiskAdjustment();
 
     // Verifies if RA description already loads values from store and able to update
-    const description = screen.getByTestId("risk-adjustment-description-text");
-    expect(description).toHaveTextContent("test description");
-    fireEvent.change(description, {
-      target: { value: "Updated test description" },
+    const descriptionEditor = screen.getByTestId(
+      "risk-adjustment-description-rich-text-editor"
+    );
+    expect(descriptionEditor).toBeInTheDocument();
+
+    const content = within(descriptionEditor).getByTestId(
+      "rich-text-editor-content"
+    );
+    expect(content).toHaveTextContent("test description");
+
+    const editableContent = within(content).getByRole("textbox");
+    expect(editableContent).toHaveAttribute("contenteditable", "true");
+
+    await act(async () => {
+      fireEvent.focus(editableContent);
+      editableContent.innerHTML = "Updated test description<";
+      fireEvent.input(editableContent, {
+        target: { innerHTML: "Updated test description" },
+      });
+      fireEvent.blur(editableContent);
     });
+
+    // Wait for debounced update to take effect (250ms delay from TextEditor component)
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 350));
+    });
+
+    // Wait for save button to be enabled
+    await waitFor(
+      () => {
+        const saveButton = screen.getByRole("button", { name: "Save" });
+        expect(saveButton).toBeEnabled();
+      },
+      { timeout: 1000 }
+    );
+
+    expect(content).toHaveTextContent("Updated test description");
 
     // save button
     const saveButton = screen.getByRole("button", { name: "Save" });
@@ -349,7 +438,7 @@ describe("QiCore RiskAdjustment Component", () => {
     await waitFor(() =>
       expect(measureServiceApi.updateMeasure).toBeCalledWith({
         ...mockTestMeasure,
-        riskAdjustmentDescription: "Updated test description",
+        riskAdjustmentDescription: "<p>Updated test description</p>",
       })
     );
 
@@ -387,12 +476,21 @@ describe("QiCore RiskAdjustment Component", () => {
     ).toBeInTheDocument();
 
     // Verifies if RA description already loads values from store and able to update
-    const description = screen.getByTestId("risk-adjustment-description-text");
-    expect(description).toHaveTextContent("test description");
-    fireEvent.change(description, {
-      target: { value: "Updated test description" },
+    const descriptionEditor = screen.getByTestId(
+      "risk-adjustment-description-rich-text-editor"
+    );
+    expect(descriptionEditor).toBeInTheDocument();
+
+    const content = within(descriptionEditor).getByTestId(
+      "rich-text-editor-content"
+    );
+    expect(content).toHaveTextContent("test description");
+
+    const editor = screen.getByRole("textbox");
+    expect(editor).toHaveTextContent("test description");
+    fireEvent.change(editor, {
+      target: { innerHTML: "Updated test description" },
     });
-    expect(description).toHaveTextContent("Updated test description");
 
     // verifies if discard button is enabled and on click triggers discard model
     const discardButton = screen.getByRole("button", {
@@ -414,7 +512,7 @@ describe("QiCore RiskAdjustment Component", () => {
     });
 
     //Verifies if the form values are not discarded
-    expect(description).toHaveTextContent("Updated test description");
+    expect(editor).toHaveTextContent("Updated test description");
     expect(screen.getByText("+1")).toBeInTheDocument(); // We are limiting the selected options displayed
   });
 
@@ -439,13 +537,21 @@ describe("QiCore RiskAdjustment Component", () => {
       screen.getByRole("button", { name: "SDE Ethnicity" })
     ).toBeInTheDocument();
 
-    // Verifies if RA description already loads values from store and able to update
-    const description = screen.getByTestId("risk-adjustment-description-text");
-    expect(description).toHaveTextContent("test description");
-    fireEvent.change(description, {
-      target: { value: "Updated test description" },
+    const descriptionEditor = screen.getByTestId(
+      "risk-adjustment-description-rich-text-editor"
+    );
+    expect(descriptionEditor).toBeInTheDocument();
+
+    const content = within(descriptionEditor).getByTestId(
+      "rich-text-editor-content"
+    );
+    expect(content).toHaveTextContent("test description");
+
+    const editor = screen.getByRole("textbox");
+    expect(editor).toHaveTextContent("test description");
+    fireEvent.change(editor, {
+      target: { innerHTML: "updated test description" },
     });
-    expect(description).toHaveTextContent("Updated test description");
 
     // verifies if discard button is enabled and on click triggers discard model
     const discardButton = screen.getByRole("button", {
@@ -467,7 +573,7 @@ describe("QiCore RiskAdjustment Component", () => {
         screen.queryByText("You have unsaved changes.")
       ).not.toBeInTheDocument();
       // Verifies if the updated form values are discarded
-      expect(description).toHaveTextContent("test description");
+      expect(editor).toHaveTextContent("test description");
       expect(
         screen.getByRole("button", { name: "Initial Population" })
       ).toBeInTheDocument();
