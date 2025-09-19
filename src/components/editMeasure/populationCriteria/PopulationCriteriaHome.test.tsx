@@ -102,7 +102,7 @@ const QiCoreMeasure = {
     },
   ],
 } as Measure;
-let mockFeatureFlags = { Locking: false, EnhancedTextFormatting: false };
+let mockFeatureFlags = { Locking: false };
 
 jest.mock("@madie/madie-util", () => ({
   useDocumentTitle: jest.fn(),
@@ -581,7 +581,7 @@ describe("PopulationCriteriaHome", () => {
 
   it("should trigger lock, success", async () => {
     const mockedMeasureState = measureStore as jest.Mocked<{ state }>;
-    mockFeatureFlags = { Locking: true, EnhancedTextFormatting: false };
+    mockFeatureFlags = { Locking: true };
     mockedMeasureState.state = { ...QiCoreMeasure };
 
     const updateMeasureLock = jest.fn().mockResolvedValueOnce({
@@ -618,7 +618,7 @@ describe("PopulationCriteriaHome", () => {
   it("should trigger lock, fail", async () => {
     const mockedMeasureState = measureStore as jest.Mocked<{ state }>;
     mockedMeasureState.state = { ...QiCoreMeasure };
-    mockFeatureFlags = { Locking: true, EnhancedTextFormatting: false };
+    mockFeatureFlags = { Locking: true };
 
     const updateMeasureLock = jest.fn().mockRejectedValue("test");
     const unlockMeasure = jest.fn();
