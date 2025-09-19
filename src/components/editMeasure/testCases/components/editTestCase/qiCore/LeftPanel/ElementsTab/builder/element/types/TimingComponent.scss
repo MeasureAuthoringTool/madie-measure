@@ -3,6 +3,10 @@
   flex-direction: column;
   gap: 1.5rem;
 
+  .codes-select-container {
+    width: 296px;
+  }
+
   .repeat-count,
   .repeat-count-max,
   .repeat-duration,
@@ -18,7 +22,6 @@
 
   .repeat-bounds,
   .repeat-offset,
-  .codes-select-container,
   .time-field-container {
     width: 296px;
   }
