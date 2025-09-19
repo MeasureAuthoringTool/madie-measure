@@ -79,9 +79,6 @@ jest.mock("@madie/madie-util", () => ({
     state: { canTravel: false, pendingPath: "" },
     initialState: { canTravel: false, pendingPath: "" },
   },
-  useFeatureFlags: jest.fn(() => ({
-    EnhancedTextFormatting: false,
-  })),
 }));
 
 jest.mock("../../../../../api/useMeasureServiceApi");
