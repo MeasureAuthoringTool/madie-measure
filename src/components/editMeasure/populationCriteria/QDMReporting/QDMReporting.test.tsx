@@ -80,11 +80,11 @@ describe("QDMReporting component", () => {
   test("QDMReporting renders to correctly with defaults", async () => {
     render(<QDMReporting />);
 
-    const rateAggregation = screen.getByTestId(
+    const rateAggregation = await screen.getByTestId(
       "rate-aggregation-rich-text-editor"
     );
     expect(rateAggregation).toBeInTheDocument();
-    const content = within(rateAggregation).getByTestId(
+    const content = await within(rateAggregation).getByTestId(
       "rich-text-editor-content"
     );
     expect(content).toHaveTextContent("");
