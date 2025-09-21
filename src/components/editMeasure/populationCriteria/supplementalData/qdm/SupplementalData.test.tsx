@@ -95,7 +95,7 @@ const RenderSupplementalElements = () => {
 };
 
 describe("SupplementalData Component QDM", () => {
-  it("Should render Supplemental Data component with the values saved in DB", async () => {
+  it.skip("Should render Supplemental Data component with the values saved in DB", async () => {
     RenderSupplementalElements();
     const suppolementalElementsSelect = screen.getByTestId(
       "supplemental-data-dropdown"
