@@ -201,29 +201,6 @@ describe("Measure Groups Page", () => {
 
       await waitFor(() => renderMeasureGroupComponent());
 
-      const descriptionEditor = screen.getByTestId(
-        "group-description-rich-text-editor"
-      );
-      expect(descriptionEditor).toBeInTheDocument();
-
-      const content = within(descriptionEditor).getByTestId(
-        "rich-text-editor-content"
-      );
-
-      const editableContent = within(content).getByRole("textbox");
-      expect(editableContent).toHaveAttribute("contenteditable", "true");
-
-      await act(async () => {
-        fireEvent.input(editableContent, {
-          target: { innerHTML: "new description" },
-        });
-        fireEvent.blur(editableContent);
-      });
-
-      await act(async () => {
-        await new Promise((resolve) => setTimeout(resolve, 350));
-      });
-
       const definitionToUpdate =
         "VTE Prophylaxis by Medication Administered or Device Applied";
       const groupPopulationInput = screen.getByTestId(
@@ -286,7 +263,7 @@ describe("Measure Groups Page", () => {
         "group-description-rich-text-editor"
       );
       expect(descriptionEditor).toBeInTheDocument();
-      const content = within(descriptionEditor).getByTestId(
+      const content = await within(descriptionEditor).getByTestId(
         "rich-text-editor-content"
       );
       const editableContent = within(content).getByRole("textbox");
