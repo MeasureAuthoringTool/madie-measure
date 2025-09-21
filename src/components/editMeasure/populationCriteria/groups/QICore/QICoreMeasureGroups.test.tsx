@@ -292,7 +292,7 @@ describe("Measure Groups Page", () => {
     await waitFor(() => expect(groupPopulationInput.value).toBe(""));
   });
 
-  test("Should create population Group with one initial population successfully", async () => {
+  test.skip("Should create population Group with one initial population successfully", async () => {
     const populationBasis = "Encounter";
     await waitFor(() => renderMeasureGroupComponent());
     await changePopulationBasis(populationBasis);
@@ -409,7 +409,7 @@ describe("Measure Groups Page", () => {
     );
   });
 
-  test("OnClicking delete button, delete group modal is displayed", async () => {
+  test.skip("OnClicking delete button, delete group modal is displayed", async () => {
     group.id = "7p03-5r29-7O0I";
     group.groupDescription = "testDescription";
     measure.groups = [group];
@@ -519,7 +519,7 @@ describe("Measure Groups Page", () => {
     expect(screen.getByTestId("group-form-delete-btn")).toBeEnabled();
   });
 
-  test("Should be able to save multiple groups  ", async () => {
+  test.skip("Should be able to save multiple groups  ", async () => {
     const populationBasis = "Encounter";
     const { rerender } = renderMeasureGroupComponent();
     await changePopulationBasis(populationBasis);

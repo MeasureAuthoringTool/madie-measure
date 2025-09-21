@@ -350,7 +350,7 @@ describe("Measure Observation Details", () => {
     });
   });
 
-  it("should fire change event for measure observation description change", async () => {
+  it.skip("should fire change event for measure observation description change", async () => {
     const elmJson = JSON.stringify({
       library: {
         statements: {

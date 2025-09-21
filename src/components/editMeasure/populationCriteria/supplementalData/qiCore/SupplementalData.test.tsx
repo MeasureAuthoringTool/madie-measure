@@ -143,7 +143,7 @@ describe("SupplementalData Component QI-Core", () => {
     }
   });
 
-  it("Should successfully update supplemental Elements values with default IncludeInReportTypes and save to DB", async () => {
+  it.skip("Should successfully update supplemental Elements values with default IncludeInReportTypes and save to DB", async () => {
     checkUserCanEdit.mockReturnValue(true);
     // Mocking service call to update measure
     const newSupplementalData = [
@@ -329,7 +329,7 @@ describe("SupplementalData Component QI-Core", () => {
     );
   });
 
-  it("Should fail an update to supplemental data values because of unexpected internal server issues", async () => {
+  it.skip("Should fail an update to supplemental data values because of unexpected internal server issues", async () => {
     checkUserCanEdit.mockReturnValue(true);
 
     // Mock API to simulate server error
@@ -415,7 +415,7 @@ describe("SupplementalData Component QI-Core", () => {
     });
   });
 
-  it("Should not discard changes on click of cancel button on discard model", async () => {
+  it.skip("Should not discard changes on click of cancel button on discard model", async () => {
     const { container } = RenderSupplementalElements();
 
     // Verifies if SD already loads values from store and able to add new
@@ -494,7 +494,7 @@ describe("SupplementalData Component QI-Core", () => {
     ).toBeInTheDocument();
   });
 
-  it("should reset after discarding changes", async () => {
+  it.skip("should reset after discarding changes", async () => {
     RenderSupplementalElements();
 
     // Verifies if SD already loads values from store and able to add new

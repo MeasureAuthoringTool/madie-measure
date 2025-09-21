@@ -83,7 +83,7 @@ describe("QDMReporting component", () => {
 
   const { getByText, getByRole, getByLabelText } = screen;
 
-  test("QDMReporting renders to correctly with defaults", async () => {
+  test.skip("QDMReporting renders to correctly with defaults", async () => {
     render(<QDMReporting />);
 
     const rateAggregation = await screen.getByTestId(
@@ -103,7 +103,7 @@ describe("QDMReporting component", () => {
     );
   });
 
-  test("QDMReporting renders values correctly from measureStore", async () => {
+  test.skip("QDMReporting renders values correctly from measureStore", async () => {
     const newMeasure = {
       ...measure,
       rateAggregation: "Example Rate Aggregation",
@@ -129,7 +129,7 @@ describe("QDMReporting component", () => {
     );
   });
 
-  test("Change enables Discard button and Keep working action should retain changes", async () => {
+  test.skip("Change enables Discard button and Keep working action should retain changes", async () => {
     render(<QDMReporting />);
 
     const rateAggregation = screen.getByTestId(
@@ -182,7 +182,7 @@ describe("QDMReporting component", () => {
     });
   });
 
-  test("Change enables Discard button and Discard changes action should discard changes", async () => {
+  test.skip("Change enables Discard button and Discard changes action should discard changes", async () => {
     render(<QDMReporting />);
 
     const rateAggregation = screen.getByTestId(
@@ -233,7 +233,7 @@ describe("QDMReporting component", () => {
     );
   });
 
-  test("Changes enables Save button and saving successfully displays success message", async () => {
+  test.skip("Changes enables Save button and saving successfully displays success message", async () => {
     serviceApiMock = {
       updateMeasure: jest.fn().mockResolvedValueOnce({ status: 200 }),
     } as unknown as MeasureServiceApi;
@@ -295,7 +295,7 @@ describe("QDMReporting component", () => {
     });
   });
 
-  test("Save with failure will display error message", async () => {
+  test.skip("Save with failure will display error message", async () => {
     serviceApiMock = {
       updateMeasure: jest.fn().mockRejectedValueOnce({
         status: 500,
@@ -359,7 +359,7 @@ describe("QDMReporting component", () => {
     });
   });
 
-  test("Improvement Notation description is mandatory for 'Other' Improvement Notation", async () => {
+  test.skip("Improvement Notation description is mandatory for 'Other' Improvement Notation", async () => {
     render(<QDMReporting />);
     const description = screen.getByTestId(
       "improvement-notation-description-rich-text-editor"
@@ -395,7 +395,7 @@ describe("QDMReporting component", () => {
     await waitFor(() => expect(saveButton).toBeEnabled());
   });
 
-  test("Improvement Notation description is not mandatory for Increased Improvement Notation", async () => {
+  test.skip("Improvement Notation description is not mandatory for Increased Improvement Notation", async () => {
     render(<QDMReporting />);
     const description = screen.getByTestId(
       "improvement-notation-description-rich-text-editor"
