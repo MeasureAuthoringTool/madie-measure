@@ -1,5 +1,12 @@
 import * as React from "react";
-import { render, getByRole, screen } from "@testing-library/react";
+import {
+  render,
+  getByRole,
+  screen,
+  within,
+  act,
+  fireEvent,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import {
   MeasureObservation,
@@ -7,12 +14,6 @@ import {
   AggregateFunctionType,
 } from "@madie/madie-models";
 import MeasureObservationDetails from "./MeasureObservationDetails";
-
-jest.mock("@madie/madie-util", () => ({
-  useFeatureFlags: jest.fn(() => ({
-    EnhancedTextFormatting: false,
-  })),
-}));
 
 const AGGREGATE_FUNCTIONS = Array.from(AGGREGATE_FUNCTION_KEYS.keys()).sort();
 
@@ -25,6 +26,7 @@ describe("Measure Observation Details", () => {
         elmJson={null}
         measureObservation={null}
         canEdit
+        onChange={jest.fn()}
       />
     );
 
@@ -47,6 +49,7 @@ describe("Measure Observation Details", () => {
         elmJson={elmJson}
         measureObservation={null}
         canEdit
+        onChange={jest.fn()}
       />
     );
 
@@ -71,6 +74,7 @@ describe("Measure Observation Details", () => {
         elmJson={elmJson}
         measureObservation={null}
         canEdit
+        onChange={jest.fn()}
       />
     );
 
@@ -97,6 +101,7 @@ describe("Measure Observation Details", () => {
         elmJson={elmJson}
         measureObservation={null}
         canEdit
+        onChange={jest.fn()}
       />
     );
 
@@ -123,6 +128,7 @@ describe("Measure Observation Details", () => {
         elmJson={elmJson}
         canEdit
         measureObservation={null}
+        onChange={jest.fn()}
       />
     );
 
@@ -150,6 +156,7 @@ describe("Measure Observation Details", () => {
         elmJson={elmJson}
         canEdit
         measureObservation={null}
+        onChange={jest.fn()}
       />
     );
 
@@ -183,6 +190,7 @@ describe("Measure Observation Details", () => {
         canEdit
         elmJson={elmJson}
         measureObservation={null}
+        onChange={jest.fn()}
       />
     );
 
@@ -226,6 +234,7 @@ describe("Measure Observation Details", () => {
         elmJson={elmJson}
         measureObservation={null}
         canEdit
+        onChange={jest.fn()}
       />
     );
 
@@ -249,6 +258,7 @@ describe("Measure Observation Details", () => {
         measureObservation={null}
         canEdit
         required={false}
+        onChange={jest.fn()}
       />
     );
 
@@ -276,6 +286,7 @@ describe("Measure Observation Details", () => {
         elmJson={null}
         measureObservation={null}
         canEdit
+        onChange={jest.fn()}
       />
     );
 
@@ -332,7 +343,7 @@ describe("Measure Observation Details", () => {
     expect(observationOptions[2].textContent).toEqual("My Func 2");
 
     userEvent.click(screen.getByText("MyFunc1"));
-    expect(handleChange).toHaveBeenCalledTimes(1);
+    expect(handleChange).toHaveBeenCalledTimes(2);
     expect(handleChange).toHaveBeenCalledWith({
       ...measureObservation,
       definition: "MyFunc1",
@@ -373,17 +384,32 @@ describe("Measure Observation Details", () => {
         canEdit
       />
     );
-
-    const observationDescription = screen.getByTestId(
-      "denominator-observation-description"
+    const descriptionEditor = screen.getByTestId(
+      "denominator-observation-description-rich-text-editor"
     );
-    expect(observationDescription).toBeInTheDocument();
+    expect(descriptionEditor).toBeInTheDocument();
+    const content = within(descriptionEditor).getByTestId(
+      "rich-text-editor-content"
+    );
+    const editableContent = within(content).getByRole("textbox");
+    expect(editableContent).toHaveAttribute("contenteditable", "true");
 
-    userEvent.paste(observationDescription, "newVal");
-    expect(handleChange).toHaveBeenCalledTimes(1);
+    await act(async () => {
+      fireEvent.input(editableContent, {
+        target: { innerHTML: "newVal" },
+      });
+      fireEvent.blur(editableContent);
+    });
+
+    // Wait for debounced update to take effect (250ms delay from TextEditor component)
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 350));
+    });
+
+    expect(handleChange).toHaveBeenCalledTimes(2);
     expect(handleChange).toHaveBeenCalledWith({
       ...measureObservation,
-      description: "newVal",
+      description: "<p>newVal</p>",
     });
   });
 
@@ -415,6 +441,7 @@ describe("Measure Observation Details", () => {
         elmJson={elmJson}
         measureObservation={measureObservation}
         canEdit
+        onChange={jest.fn()}
       />
     );
 
@@ -467,7 +494,7 @@ describe("Measure Observation Details", () => {
     const aggregateOptions = await screen.findAllByRole("option");
     expect(aggregateOptions).toHaveLength(7);
     userEvent.click(screen.getByText("Count"));
-    expect(handleChange).toHaveBeenCalledTimes(1);
+    expect(handleChange).toHaveBeenCalledTimes(2);
     expect(handleChange).toHaveBeenCalledWith({
       ...measureObservation,
       aggregateMethod: "Count",
@@ -499,6 +526,7 @@ describe("Measure Observation Details", () => {
         elmJson={elmJson}
         measureObservation={measureObservation}
         canEdit
+        onChange={jest.fn()}
       />
     );
     const aggregateInput = screen.getByTestId(
@@ -535,7 +563,7 @@ describe("Measure Observation Details", () => {
         name={"obs1"}
         elmJson={elmJson}
         measureObservation={measureObservation}
-        onChange={null}
+        onChange={jest.fn()}
         onRemove={handleRemove}
         canEdit
       />
@@ -590,10 +618,10 @@ describe("Measure Observation Details", () => {
     expect(observationSelect).toHaveValue(measureObservation.definition);
     expect(observationSelect).toHaveAttribute("readonly");
 
-    const observationDescription = screen.getByRole("textbox", {
-      name: "Numerator Observation Description",
-    });
-    expect(observationDescription).toHaveValue(measureObservation.description);
-    expect(observationDescription).toHaveAttribute("readonly");
+    const descriptionEditor = screen.getByTestId(
+      "numerator-observation-description-rich-text-editor"
+    );
+    expect(descriptionEditor).toBeInTheDocument();
+    expect(descriptionEditor).toHaveTextContent(measureObservation.description);
   });
 });
