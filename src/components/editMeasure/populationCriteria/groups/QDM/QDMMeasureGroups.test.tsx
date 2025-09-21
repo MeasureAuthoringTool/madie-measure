@@ -27,10 +27,6 @@ import {
 import useMeasureServiceApi, {
   MeasureServiceApi,
 } from "../../../../../api/useMeasureServiceApi";
-import {
-  waitForRichTextEditor,
-  getRichTextEditorContent,
-} from "../../../../../test-utils/richTextEditorHelpers";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { ELM_JSON, MeasureCQL } from "../../../../common/MeasureCQL";
 import userEvent from "@testing-library/user-event";
@@ -124,6 +120,7 @@ const renderMeasureGroupComponent = () => {
 };
 describe("Measure Groups Page", () => {
   afterEach(() => {
+    jest.clearAllTimers();
     jest.clearAllMocks();
   });
 
@@ -215,10 +212,17 @@ describe("Measure Groups Page", () => {
       });
       expect(groupPopulationInput.value).toBe(definitionToUpdate);
 
-      const { content: content1, editableContent: editableContent1 } =
-        await waitForRichTextEditor(
-          "populations-0-description-rich-text-editor"
-        );
+      const initialPopulationDescription = screen.getByTestId(
+        "populations-0-description-rich-text-editor"
+      );
+      expect(initialPopulationDescription).toBeInTheDocument();
+
+      const content1 = within(initialPopulationDescription).getByTestId(
+        "rich-text-editor-content"
+      );
+      expect(content1).toBeInTheDocument();
+
+      const editableContent1 = within(content1).getByRole("textbox");
       expect(editableContent1).toHaveAttribute("contenteditable", "true");
 
       await act(async () => {
@@ -256,10 +260,14 @@ describe("Measure Groups Page", () => {
 
       await waitFor(() => renderMeasureGroupComponent());
 
-      // Use helper function to wait for rich text editor
-      const { content, editableContent } = await waitForRichTextEditor(
+      const descriptionEditor = screen.getByTestId(
         "group-description-rich-text-editor"
       );
+      expect(descriptionEditor).toBeInTheDocument();
+      const content = await within(descriptionEditor).getByTestId(
+        "rich-text-editor-content"
+      );
+      const editableContent = within(content).getByRole("textbox");
       expect(editableContent).toHaveAttribute("contenteditable", "true");
 
       await act(async () => {
@@ -267,6 +275,10 @@ describe("Measure Groups Page", () => {
           target: { innerHTML: "new description" },
         });
         fireEvent.blur(editableContent);
+      });
+
+      // Wait for debounced update to take effect (250ms delay from TextEditor component)
+      await act(async () => {
         await new Promise((resolve) => setTimeout(resolve, 350));
       });
 
@@ -281,10 +293,17 @@ describe("Measure Groups Page", () => {
       expect(groupPopulationInput.value).toBe(definitionToUpdate);
 
       // Update the definition
-      const { content: content1, editableContent: editableContent1 } =
-        await waitForRichTextEditor(
-          "populations-0-description-rich-text-editor"
-        );
+      const initialPopulationDescription = screen.getByTestId(
+        "populations-0-description-rich-text-editor"
+      );
+      expect(initialPopulationDescription).toBeInTheDocument();
+
+      const content1 = within(initialPopulationDescription).getByTestId(
+        "rich-text-editor-content"
+      );
+      expect(content1).toBeInTheDocument();
+
+      const editableContent1 = within(content1).getByRole("textbox");
       expect(editableContent1).toHaveAttribute("contenteditable", "true");
 
       await act(async () => {
@@ -357,10 +376,14 @@ describe("Measure Groups Page", () => {
       measure.scoring = MeasureScoring.COHORT;
       measure.groups = [];
       await waitFor(() => renderMeasureGroupComponent());
-
-      const { content, editableContent } = await waitForRichTextEditor(
+      const descriptionEditor = screen.getByTestId(
         "group-description-rich-text-editor"
       );
+      expect(descriptionEditor).toBeInTheDocument();
+      const content = within(descriptionEditor).getByTestId(
+        "rich-text-editor-content"
+      );
+      const editableContent = within(content).getByRole("textbox");
       expect(editableContent).toHaveAttribute("contenteditable", "true");
 
       await act(async () => {
@@ -383,11 +406,17 @@ describe("Measure Groups Page", () => {
           target: { value: group.populations[0].definition },
         });
       });
+      const initialPopulationDescription = screen.getByTestId(
+        "populations-0-description-rich-text-editor"
+      );
+      expect(initialPopulationDescription).toBeInTheDocument();
 
-      const { content: content1, editableContent: editableContent1 } =
-        await waitForRichTextEditor(
-          "populations-0-description-rich-text-editor"
-        );
+      const content1 = within(initialPopulationDescription).getByTestId(
+        "rich-text-editor-content"
+      );
+      expect(content1).toBeInTheDocument();
+
+      const editableContent1 = within(content1).getByRole("textbox");
       expect(editableContent1).toHaveAttribute("contenteditable", "true");
 
       await act(async () => {
@@ -441,9 +470,14 @@ describe("Measure Groups Page", () => {
       measure.groups = [];
       await waitFor(() => renderMeasureGroupComponent());
 
-      const { content, editableContent } = await waitForRichTextEditor(
+      const descriptionEditor = screen.getByTestId(
         "group-description-rich-text-editor"
       );
+      expect(descriptionEditor).toBeInTheDocument();
+      const content = within(descriptionEditor).getByTestId(
+        "rich-text-editor-content"
+      );
+      const editableContent = within(content).getByRole("textbox");
       expect(editableContent).toHaveAttribute("contenteditable", "true");
 
       await act(async () => {
@@ -465,10 +499,17 @@ describe("Measure Groups Page", () => {
         target: { value: group.populations[0].definition },
       });
 
-      const { content: content1, editableContent: editableContent1 } =
-        await waitForRichTextEditor(
-          "populations-0-description-rich-text-editor"
-        );
+      const initialPopulationDescription = screen.getByTestId(
+        "populations-0-description-rich-text-editor"
+      );
+      expect(initialPopulationDescription).toBeInTheDocument();
+
+      const content1 = within(initialPopulationDescription).getByTestId(
+        "rich-text-editor-content"
+      );
+      expect(content1).toBeInTheDocument();
+
+      const editableContent1 = within(content1).getByRole("textbox");
       expect(editableContent1).toHaveAttribute("contenteditable", "true");
 
       await act(async () => {
@@ -867,6 +908,7 @@ describe("Measure Groups Page", () => {
 });
 describe("Ratio Population Criteria validations", () => {
   afterEach(() => {
+    jest.clearAllTimers();
     jest.clearAllMocks();
   });
 
@@ -973,6 +1015,7 @@ describe("Ratio Population Criteria validations", () => {
 });
 describe("Cohort Population Criteria validations", () => {
   afterEach(() => {
+    jest.clearAllTimers();
     jest.clearAllMocks();
   });
 
@@ -1330,6 +1373,7 @@ describe("Delete Tests", () => {
   let cohortMeasure: Measure;
   let cohortGroup: Group;
   afterEach(() => {
+    jest.clearAllTimers();
     jest.clearAllMocks();
   });
   beforeEach(() => {
@@ -1426,8 +1470,12 @@ describe("Delete Tests", () => {
       screen.getByTestId("delete-measure-group-modal-cancel-btn")
     );
 
-    const { content } = await getRichTextEditorContent(
+    const descriptionEditor = screen.getByTestId(
       "group-description-rich-text-editor"
+    );
+    expect(descriptionEditor).toBeInTheDocument();
+    const content = within(descriptionEditor).getByTestId(
+      "rich-text-editor-content"
     );
     expect(content).toHaveTextContent("testDescription");
   });
@@ -1480,9 +1528,13 @@ describe("Delete Tests", () => {
     );
 
     renderMeasureGroupComponent();
-    await waitFor(async () => {
-      const { content } = await getRichTextEditorContent(
+    await waitFor(() => {
+      const descriptionEditor = screen.getByTestId(
         "group-description-rich-text-editor"
+      );
+      expect(descriptionEditor).toBeInTheDocument();
+      const content = within(descriptionEditor).getByTestId(
+        "rich-text-editor-content"
       );
       expect(content).toHaveTextContent("");
     });
@@ -1490,12 +1542,13 @@ describe("Delete Tests", () => {
 });
 
 describe("Tests where serviceApi is mocked, instead of Axios", () => {
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
-
   let cohortMeasure: Measure;
   let cohortGroup: Group;
+
+  afterEach(() => {
+    jest.clearAllTimers();
+    jest.clearAllMocks();
+  });
 
   beforeEach(() => {
     cohortMeasure = {
@@ -1593,9 +1646,14 @@ describe("Tests where serviceApi is mocked, instead of Axios", () => {
     cohortMeasure.groups = [cohortGroup];
     await waitFor(() => renderMeasureGroupComponent());
 
-    const { content, editableContent } = await waitForRichTextEditor(
+    const descriptionEditor = screen.getByTestId(
       "group-description-rich-text-editor"
     );
+    expect(descriptionEditor).toBeInTheDocument();
+    const content = within(descriptionEditor).getByTestId(
+      "rich-text-editor-content"
+    );
+    const editableContent = within(content).getByRole("textbox");
     expect(editableContent).toHaveAttribute("contenteditable", "true");
 
     await act(async () => {
@@ -1616,8 +1674,17 @@ describe("Tests where serviceApi is mocked, instead of Axios", () => {
       target: { value: cohortGroup.populations[0].definition },
     });
 
-    const { content: content1, editableContent: editableContent1 } =
-      await waitForRichTextEditor("populations-0-description-rich-text-editor");
+    const initialPopulationDescription = screen.getByTestId(
+      "populations-0-description-rich-text-editor"
+    );
+    expect(initialPopulationDescription).toBeInTheDocument();
+
+    const content1 = within(initialPopulationDescription).getByTestId(
+      "rich-text-editor-content"
+    );
+    expect(content1).toBeInTheDocument();
+
+    const editableContent1 = within(content1).getByRole("textbox");
     expect(editableContent1).toHaveAttribute("contenteditable", "true");
 
     await act(async () => {

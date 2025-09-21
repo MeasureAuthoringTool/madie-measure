@@ -75,6 +75,12 @@ describe("QDMReporting component", () => {
 
     measureStore.state = jest.fn().mockImplementation(() => measure);
   });
+  afterEach(() => {
+    // Clean up after each test
+    jest.clearAllTimers();
+    jest.clearAllMocks();
+  });
+
   const { getByText, getByRole, getByLabelText } = screen;
 
   test("QDMReporting renders to correctly with defaults", async () => {
@@ -84,8 +90,8 @@ describe("QDMReporting component", () => {
       "rate-aggregation-rich-text-editor"
     );
     expect(rateAggregation).toBeInTheDocument();
-    const content = await within(rateAggregation).getByTestId(
-      "rich-text-editor-content"
+    const content = await waitFor(() =>
+      within(rateAggregation).getByTestId("rich-text-editor-content")
     );
     expect(content).toHaveTextContent("");
 
