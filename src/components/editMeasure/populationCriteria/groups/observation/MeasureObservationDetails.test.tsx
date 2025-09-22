@@ -18,6 +18,10 @@ import MeasureObservationDetails from "./MeasureObservationDetails";
 const AGGREGATE_FUNCTIONS = Array.from(AGGREGATE_FUNCTION_KEYS.keys()).sort();
 
 describe("Measure Observation Details", () => {
+  afterEach(() => {
+    jest.clearAllTimers();
+  });
+
   it("should render with no observation or elmJson input", () => {
     render(
       <MeasureObservationDetails
@@ -350,7 +354,7 @@ describe("Measure Observation Details", () => {
     });
   });
 
-  it.skip("should fire change event for measure observation description change", async () => {
+  it("should fire change event for measure observation description change", async () => {
     const elmJson = JSON.stringify({
       library: {
         statements: {
@@ -384,26 +388,22 @@ describe("Measure Observation Details", () => {
         canEdit
       />
     );
-    const descriptionEditor = screen.getByTestId(
-      "denominator-observation-description-rich-text-editor"
-    );
-    expect(descriptionEditor).toBeInTheDocument();
-    const content = within(descriptionEditor).getByTestId(
-      "rich-text-editor-content"
-    );
-    const editableContent = within(content).getByRole("textbox");
-    expect(editableContent).toHaveAttribute("contenteditable", "true");
+
+    const editor = screen.getByRole("textbox");
+    expect(editor).toHaveAttribute("contenteditable", "true");
+    expect(editor).toHaveTextContent("");
 
     await act(async () => {
-      fireEvent.input(editableContent, {
+      fireEvent.input(editor, {
         target: { innerHTML: "newVal" },
       });
-      fireEvent.blur(editableContent);
+      fireEvent.blur(editor);
     });
 
     // Wait for debounced update to take effect (250ms delay from TextEditor component)
     await act(async () => {
-      await new Promise((resolve) => setTimeout(resolve, 350));
+      jest.advanceTimersByTime(350);
+      await Promise.resolve();
     });
 
     expect(handleChange).toHaveBeenCalledTimes(2);
