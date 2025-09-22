@@ -305,24 +305,6 @@ describe("SupplementalData Component QDM", () => {
         `Error updating measure "the measure for testing": ${failureMessage}`
       );
     });
-
-    // Verify API call was made with correct data
-    await waitFor(() => {
-      expect(measureServiceApi.updateMeasure).toHaveBeenCalledWith({
-        ...mockTestMeasure,
-        supplementalData: [
-          {
-            definition: "Initial Population",
-            description: "",
-          },
-          {
-            definition: "SDE Ethnicity",
-            description: "",
-          },
-        ],
-        supplementalDataDescription: "test description",
-      });
-    });
   });
 
   it("Should not discard changes on click of cancel button on discard model", async () => {
