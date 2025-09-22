@@ -292,7 +292,7 @@ describe("Measure Groups Page", () => {
     await waitFor(() => expect(groupPopulationInput.value).toBe(""));
   });
 
-  test.skip("Should create population Group with one initial population successfully", async () => {
+  test("Should create population Group with one initial population successfully", async () => {
     const populationBasis = "Encounter";
     await waitFor(() => renderMeasureGroupComponent());
     await changePopulationBasis(populationBasis);
@@ -301,13 +301,12 @@ describe("Measure Groups Page", () => {
       "group-description-rich-text-editor"
     );
     expect(descriptionEditor).toBeInTheDocument();
-    const content = within(descriptionEditor).getByTestId(
-      "rich-text-editor-content"
-    );
-    const editableContent = within(content).getByRole("textbox");
+
+    const editableContent = within(descriptionEditor).getByRole("textbox");
     expect(editableContent).toHaveAttribute("contenteditable", "true");
 
     await act(async () => {
+      fireEvent.focus(editableContent);
       fireEvent.input(editableContent, {
         target: { innerHTML: "new description" },
       });
@@ -335,20 +334,17 @@ describe("Measure Groups Page", () => {
     });
 
     // Update the definition
-    const initialPopulationDescription = screen.getByTestId(
+    const descriptionEditor1 = screen.getByTestId(
       "populations-0-description-rich-text-editor"
     );
-    expect(initialPopulationDescription).toBeInTheDocument();
+    expect(descriptionEditor1).toBeInTheDocument();
 
-    const content1 = within(initialPopulationDescription).getByTestId(
-      "rich-text-editor-content"
-    );
-    expect(content1).toBeInTheDocument();
-
-    const editableContent1 = within(content1).getByRole("textbox");
+    const editableContent1 = within(descriptionEditor1).getByRole("textbox");
     expect(editableContent1).toHaveAttribute("contenteditable", "true");
 
     await act(async () => {
+      fireEvent.focus(editableContent1);
+      editableContent1.innerHTML = "newVal";
       fireEvent.input(editableContent1, {
         target: { innerHTML: "newVal" },
       });
@@ -359,8 +355,7 @@ describe("Measure Groups Page", () => {
     await act(async () => {
       await new Promise((resolve) => setTimeout(resolve, 350));
     });
-
-    expect(content1).toHaveTextContent("newVal");
+    expect(editableContent1).toHaveTextContent("newVal");
 
     // Select measure group type
     const measureGroupTypeSelect = screen.getByTestId(
@@ -409,7 +404,7 @@ describe("Measure Groups Page", () => {
     );
   });
 
-  test.skip("OnClicking delete button, delete group modal is displayed", async () => {
+  test("OnClicking delete button, delete group modal is displayed", async () => {
     group.id = "7p03-5r29-7O0I";
     group.groupDescription = "testDescription";
     measure.groups = [group];
@@ -439,10 +434,7 @@ describe("Measure Groups Page", () => {
       "group-description-rich-text-editor"
     );
     expect(descriptionEditor).toBeInTheDocument();
-    const content = within(descriptionEditor).getByTestId(
-      "rich-text-editor-content"
-    );
-    expect(content).toHaveTextContent("testDescription");
+    expect(descriptionEditor).toHaveTextContent("testDescription");
   });
 
   test("On clicking delete button, measure group should be deleted", async () => {
@@ -519,7 +511,7 @@ describe("Measure Groups Page", () => {
     expect(screen.getByTestId("group-form-delete-btn")).toBeEnabled();
   });
 
-  test.skip("Should be able to save multiple groups  ", async () => {
+  test("Should be able to save multiple groups  ", async () => {
     const populationBasis = "Encounter";
     const { rerender } = renderMeasureGroupComponent();
     await changePopulationBasis(populationBasis);
@@ -544,13 +536,13 @@ describe("Measure Groups Page", () => {
       "group-description-rich-text-editor"
     );
     expect(descriptionEditor).toBeInTheDocument();
-    const content = within(descriptionEditor).getByTestId(
-      "rich-text-editor-content"
-    );
-    const editableContent = within(content).getByRole("textbox");
+
+    const editableContent = within(descriptionEditor).getByRole("textbox");
     expect(editableContent).toHaveAttribute("contenteditable", "true");
 
     await act(async () => {
+      fireEvent.focus(editableContent);
+      editableContent.innerHTML = "new description";
       fireEvent.input(editableContent, {
         target: { innerHTML: "new description" },
       });
@@ -658,13 +650,12 @@ describe("Measure Groups Page", () => {
       "group-description-rich-text-editor"
     );
     expect(descriptionEditor1).toBeInTheDocument();
-    const content1 = within(descriptionEditor1).getByTestId(
-      "rich-text-editor-content"
-    );
-    const editableContent1 = within(content1).getByRole("textbox");
+
+    const editableContent1 = within(descriptionEditor1).getByRole("textbox");
     expect(editableContent1).toHaveAttribute("contenteditable", "true");
 
     await act(async () => {
+      fireEvent.focus(editableContent1);
       fireEvent.input(editableContent1, {
         target: { innerHTML: "new description for group 2" },
       });

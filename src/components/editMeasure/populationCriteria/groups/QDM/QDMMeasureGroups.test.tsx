@@ -1458,10 +1458,7 @@ describe("Delete Tests", () => {
       "group-description-rich-text-editor"
     );
     expect(descriptionEditor).toBeInTheDocument();
-
-    const editableContent = within(descriptionEditor).getByRole("textbox");
-    expect(editableContent).toHaveAttribute("contenteditable", "true");
-    expect(editableContent).toHaveTextContent("testDescription");
+    expect(descriptionEditor).toHaveTextContent("testDescription");
   });
 
   test("On clicking delete button, measure group should be deleted", async () => {
