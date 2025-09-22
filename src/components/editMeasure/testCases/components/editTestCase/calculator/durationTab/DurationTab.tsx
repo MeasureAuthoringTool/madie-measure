@@ -13,8 +13,8 @@ import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 dayjs.extend(utc);
 dayjs.utc();
-const OPTIONS = ["years", "months", "weeks", "days"];
-const PRECISION_OPTIONS = OPTIONS.map((ref, i) => (
+export const OPTIONS = ["years", "months", "weeks", "days"];
+export const PRECISION_OPTIONS = OPTIONS.map((ref, i) => (
   <MenuItem key={`${ref}-${i}`} data-testid={`${ref}-option`} value={ref}>
     {_.startCase(ref)}
   </MenuItem>
