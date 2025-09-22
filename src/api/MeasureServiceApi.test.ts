@@ -852,4 +852,27 @@ describe("MeasureServiceApi Tests", () => {
     );
     consoleWarnMock.mockRestore();
   });
+
+  it("test checkMeasureLocked pass", async () => {
+    const resp: any = { status: 200, data: "OK to proceed" };
+    mockedAxios.get.mockResolvedValueOnce(resp);
+
+    const result = await measureServiceApi.checkMeasureLocked("testMeasureId");
+    expect(mockedAxios.get).toBeCalledTimes(1);
+    expect(mockedAxios.get).toBeCalledWith(
+      "madie.com/measures/testMeasureId/lock-by-other-user",
+      expect.any(Object) // headers
+    );
+    expect(result).toEqual("OK to proceed");
+  });
+  it("test checkMeasureLocked fail", async () => {
+    const errorMessage = "Unable to retrieve Measure lock info";
+    mockedAxios.get.mockImplementationOnce(() =>
+      Promise.reject(new Error("Unable to retrieve Measure lock info"))
+    );
+
+    await expect(
+      measureServiceApi.checkMeasureLocked("testMeasureId")
+    ).rejects.toThrow(errorMessage);
+  });
 });
