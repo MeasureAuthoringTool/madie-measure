@@ -4,6 +4,7 @@ import "styled-components/macro";
 import CalculatorNavTabs from "./CalculatorNavTabs";
 import DurationTab from "./durationTab/DurationTab";
 import { Divider } from "@mui/material";
+import ComputedDate from "./computedDateTab/ComputedDate";
 
 interface CalculatorDialogProps {
   open: boolean;
@@ -26,16 +27,23 @@ const CalculatorDialog = ({ open, onClose }: CalculatorDialogProps) => {
         }}
         continueButtonProps={""}
         cancelButtonProps={{
-          variant: "outline",
+          variant: "cyan",
           cancelText: "Close",
           "data-testid": "calculation-close-button",
         }}
       >
         <CalculatorNavTabs activeTab={activeTab} setActiveTab={setActiveTab} />
         <Divider sx={{ borderColor: "#8c8c8c" }} />
-        <div className="panel-content">
-          <DurationTab />
-        </div>
+        {activeTab === "duration-difference" && (
+          <div className="panel-content">
+            <DurationTab />
+          </div>
+        )}
+        {activeTab === "computed-date" && (
+          <div className="panel-content">
+            <ComputedDate />
+          </div>
+        )}
       </MadieDialog>
     </>
   );
