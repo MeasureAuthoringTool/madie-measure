@@ -13,6 +13,7 @@ const ElementsTab = (props: {
   canEdit: boolean;
   handleTestCaseErrors: Function;
   handleTestCaseWarnings: Function;
+  handleMissingDataElements: Function;
   selectedDataElement: DataElement;
   setSelectedDataElement: Function;
 }) => {
@@ -20,6 +21,7 @@ const ElementsTab = (props: {
     canEdit,
     handleTestCaseErrors,
     handleTestCaseWarnings,
+    handleMissingDataElements,
     selectedDataElement,
     setSelectedDataElement,
   } = props;
@@ -57,7 +59,7 @@ const ElementsTab = (props: {
         canEdit={canEdit}
       />
       <ElementsSection
-        handleTestCaseErrors={handleTestCaseErrors}
+        handleMissingDataElements={handleMissingDataElements}
         canEdit={canEdit}
         selectedDataElement={selectedDataElement}
         setSelectedDataElement={setSelectedDataElement}

@@ -298,6 +298,7 @@ const EditTestCase = () => {
 
   const [testCaseErrors, setTestCaseErrors] = useState(null);
   const [testCaseWarnings, setTestCaseWarnings] = useState(null);
+  const [missingDataElements, setMissingDataElements] = useState(null);
 
   const handleTestCaseErrors = (value) => {
     setTestCaseErrors(value);
@@ -305,6 +306,10 @@ const EditTestCase = () => {
 
   const handleTestCaseWarnings = (value) => {
     setTestCaseWarnings(value);
+  };
+
+  const handleMissingDataElements = (value) => {
+    setMissingDataElements(value);
   };
 
   return (
@@ -330,6 +335,13 @@ const EditTestCase = () => {
           testDataId="test_case_execution_warnings"
         />
       )}
+      {!_.isNull(missingDataElements) && (
+        <StatusHandler
+          warning={true}
+          missingDataElements={missingDataElements}
+          testDataId="test_case_missing_data_elements"
+        />
+      )}
       <FormikProvider value={formik}>
         <EditTestCaseBreadCrumbs
           testCase={currentTestCase}
@@ -348,6 +360,7 @@ const EditTestCase = () => {
                   canEdit={canEdit}
                   handleTestCaseErrors={handleTestCaseErrors}
                   handleTestCaseWarnings={handleTestCaseWarnings}
+                  handleMissingDataElements={handleMissingDataElements}
                   selectedDataElement={selectedDataElement}
                   setSelectedDataElement={setSelectedDataElement}
                 />
