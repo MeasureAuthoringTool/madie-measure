@@ -48,7 +48,7 @@ const qiCoreMeasure = {
   measureMetaData: { draft: true },
 } as unknown as Measure;
 
-describe.skip("DeleteAction", () => {
+describe("DeleteAction", () => {
   beforeEach(() => {
     jest.resetModules();
     useMeasureServiceMock.mockReset().mockImplementation(() => {
