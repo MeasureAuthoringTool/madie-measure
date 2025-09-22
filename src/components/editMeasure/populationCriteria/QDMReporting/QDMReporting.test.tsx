@@ -83,17 +83,14 @@ describe("QDMReporting component", () => {
 
   const { getByText, getByRole, getByLabelText } = screen;
 
-  test.skip("QDMReporting renders to correctly with defaults", async () => {
+  test("QDMReporting renders to correctly with defaults", async () => {
     render(<QDMReporting />);
 
     const rateAggregation = await screen.getByTestId(
       "rate-aggregation-rich-text-editor"
     );
     expect(rateAggregation).toBeInTheDocument();
-    const content = await waitFor(() =>
-      within(rateAggregation).getByTestId("rich-text-editor-content")
-    );
-    expect(content).toHaveTextContent("");
+    expect(rateAggregation).toHaveTextContent("Rate Aggregation");
 
     const improvementNotation = getByLabelText(
       "Improvement Notation"
@@ -103,7 +100,7 @@ describe("QDMReporting component", () => {
     );
   });
 
-  test.skip("QDMReporting renders values correctly from measureStore", async () => {
+  test("QDMReporting renders values correctly from measureStore", async () => {
     const newMeasure = {
       ...measure,
       rateAggregation: "Example Rate Aggregation",
@@ -112,14 +109,11 @@ describe("QDMReporting component", () => {
     measureStore.state = jest.fn().mockImplementation(() => newMeasure);
     render(<QDMReporting />);
 
-    const rateAggregation = screen.getByTestId(
+    const rateAggregation = await screen.getByTestId(
       "rate-aggregation-rich-text-editor"
     );
     expect(rateAggregation).toBeInTheDocument();
-    const content = within(rateAggregation).getByTestId(
-      "rich-text-editor-content"
-    );
-    expect(content).toHaveTextContent("Example Rate Aggregation");
+    expect(rateAggregation).toHaveTextContent("Example Rate Aggregation");
 
     const improvementNotation = getByLabelText(
       "Improvement Notation"
@@ -129,30 +123,23 @@ describe("QDMReporting component", () => {
     );
   });
 
-  test.skip("Change enables Discard button and Keep working action should retain changes", async () => {
+  test("Change enables Discard button and Keep working action should retain changes", async () => {
     render(<QDMReporting />);
-
-    const rateAggregation = screen.getByTestId(
+    const descriptionEditor = screen.getByTestId(
       "rate-aggregation-rich-text-editor"
     );
-    expect(rateAggregation).toBeInTheDocument();
-    const content = within(rateAggregation).getByTestId(
-      "rich-text-editor-content"
-    );
-    const editableContent = within(content).getByRole("textbox");
+    expect(descriptionEditor).toBeInTheDocument();
+
+    const editableContent = within(descriptionEditor).getByRole("textbox");
     expect(editableContent).toHaveAttribute("contenteditable", "true");
+
     await act(async () => {
       fireEvent.focus(editableContent);
-      editableContent.innerHTML = "test";
+      editableContent.innerHTML = "test description";
       fireEvent.input(editableContent, {
-        target: { innerHTML: "test" },
+        target: { innerHTML: "test description" },
       });
       fireEvent.blur(editableContent);
-    });
-
-    // Wait for debounced update to take effect (250ms delay from TextEditor component)
-    await act(async () => {
-      await new Promise((resolve) => setTimeout(resolve, 350));
     });
 
     await selectAnOptionForImprovementNotation(decreasedNotation);
@@ -175,30 +162,29 @@ describe("QDMReporting component", () => {
     expect(continueButton).toBeInTheDocument();
     fireEvent.click(continueButton);
     await waitFor(() => {
-      expect(content).toHaveTextContent("test");
+      expect(editableContent).toHaveTextContent("test");
       expect(getByLabelText("Improvement Notation")).toHaveTextContent(
         "Decreased score indicates improvement"
       );
     });
   });
 
-  test.skip("Change enables Discard button and Discard changes action should discard changes", async () => {
+  test("Change enables Discard button and Discard changes action should discard changes", async () => {
     render(<QDMReporting />);
 
-    const rateAggregation = screen.getByTestId(
+    const descriptionEditor = screen.getByTestId(
       "rate-aggregation-rich-text-editor"
     );
-    expect(rateAggregation).toBeInTheDocument();
-    const content = within(rateAggregation).getByTestId(
-      "rich-text-editor-content"
-    );
-    const editableContent = within(content).getByRole("textbox");
+    expect(descriptionEditor).toBeInTheDocument();
+
+    const editableContent = within(descriptionEditor).getByRole("textbox");
     expect(editableContent).toHaveAttribute("contenteditable", "true");
+
     await act(async () => {
       fireEvent.focus(editableContent);
-      editableContent.innerHTML = "test";
+      editableContent.innerHTML = "test description";
       fireEvent.input(editableContent, {
-        target: { innerHTML: "test" },
+        target: { innerHTML: "test description" },
       });
       fireEvent.blur(editableContent);
     });
@@ -226,14 +212,14 @@ describe("QDMReporting component", () => {
     });
     fireEvent.click(discardCancelButton);
     await waitFor(() => {
-      expect(content).toHaveTextContent("");
+      expect(editableContent).toHaveTextContent("");
     });
     expect(getByLabelText("Improvement Notation")).toHaveTextContent(
       "Select Improvement Notation"
     );
   });
 
-  test.skip("Changes enables Save button and saving successfully displays success message", async () => {
+  test("Changes enables Save button and saving successfully displays success message", async () => {
     serviceApiMock = {
       updateMeasure: jest.fn().mockResolvedValueOnce({ status: 200 }),
     } as unknown as MeasureServiceApi;
@@ -241,15 +227,14 @@ describe("QDMReporting component", () => {
 
     render(<QDMReporting />);
 
-    const rateAggregation = screen.getByTestId(
+    const descriptionEditor = screen.getByTestId(
       "rate-aggregation-rich-text-editor"
     );
-    expect(rateAggregation).toBeInTheDocument();
-    const content = within(rateAggregation).getByTestId(
-      "rich-text-editor-content"
-    );
-    const editableContent = within(content).getByRole("textbox");
+    expect(descriptionEditor).toBeInTheDocument();
+
+    const editableContent = within(descriptionEditor).getByRole("textbox");
     expect(editableContent).toHaveAttribute("contenteditable", "true");
+
     await act(async () => {
       fireEvent.focus(editableContent);
       editableContent.innerHTML = "Test";
@@ -295,7 +280,7 @@ describe("QDMReporting component", () => {
     });
   });
 
-  test.skip("Save with failure will display error message", async () => {
+  test("Save with failure will display error message", async () => {
     serviceApiMock = {
       updateMeasure: jest.fn().mockRejectedValueOnce({
         status: 500,
@@ -306,15 +291,14 @@ describe("QDMReporting component", () => {
 
     render(<QDMReporting />);
 
-    const rateAggregation = screen.getByTestId(
+    const descriptionEditor = screen.getByTestId(
       "rate-aggregation-rich-text-editor"
     );
-    expect(rateAggregation).toBeInTheDocument();
-    const content = within(rateAggregation).getByTestId(
-      "rich-text-editor-content"
-    );
-    const editableContent = within(content).getByRole("textbox");
+    expect(descriptionEditor).toBeInTheDocument();
+
+    const editableContent = within(descriptionEditor).getByRole("textbox");
     expect(editableContent).toHaveAttribute("contenteditable", "true");
+
     await act(async () => {
       fireEvent.focus(editableContent);
       editableContent.innerHTML = "Test";
@@ -359,24 +343,21 @@ describe("QDMReporting component", () => {
     });
   });
 
-  test.skip("Improvement Notation description is mandatory for 'Other' Improvement Notation", async () => {
+  test("Improvement Notation description is mandatory for 'Other' Improvement Notation", async () => {
     render(<QDMReporting />);
-    const description = screen.getByTestId(
+
+    const descriptionEditor = screen.getByTestId(
       "improvement-notation-description-rich-text-editor"
     );
-    const content = within(description).getByTestId("rich-text-editor-content");
-
-    expect(content).toBeInTheDocument();
+    expect(descriptionEditor).toBeInTheDocument();
     await selectAnOptionForImprovementNotation(otherNotation);
-    expect(description).toBeEnabled();
-    expect(content).toHaveTextContent("");
     const saveButton = getByRole("button", {
       name: "Save",
     });
     expect(saveButton).toBeInTheDocument();
     await waitFor(() => expect(saveButton).toBeDisabled());
 
-    const editableContent = within(content).getByRole("textbox");
+    const editableContent = within(descriptionEditor).getByRole("textbox");
     expect(editableContent).toHaveAttribute("contenteditable", "true");
 
     await act(async () => {
@@ -395,17 +376,13 @@ describe("QDMReporting component", () => {
     await waitFor(() => expect(saveButton).toBeEnabled());
   });
 
-  test.skip("Improvement Notation description is not mandatory for Increased Improvement Notation", async () => {
+  test("Improvement Notation description is not mandatory for Increased Improvement Notation", async () => {
     render(<QDMReporting />);
-    const description = screen.getByTestId(
+    const descriptionEditor = screen.getByTestId(
       "improvement-notation-description-rich-text-editor"
     );
-    const content = within(description).getByTestId("rich-text-editor-content");
-
-    expect(content).toBeInTheDocument();
+    expect(descriptionEditor).toBeInTheDocument();
     await selectAnOptionForImprovementNotation(increasedNotation);
-    expect(description).toBeEnabled();
-    expect(content).toHaveTextContent("");
     // save btn should not be disabled
     await waitFor(() =>
       expect(

@@ -403,22 +403,14 @@ describe("SupplementalData Component QI-Core", () => {
     ).toBeInTheDocument();
 
     // Verifies if SD description already loads values from store and able to update
-    const descriptionEditor = screen.getByTestId(
-      "supplemental-data-description-rich-text-editor"
-    );
-    expect(descriptionEditor).toBeInTheDocument();
-    const content = within(descriptionEditor).getByTestId(
-      "rich-text-editor-content"
-    );
-
-    await act(async () => {
-      fireEvent.input(content, {
-        target: { textContent: "Updated test description" },
-      });
-      fireEvent.blur(content);
+    let editor = within(
+      screen.getByTestId("supplemental-data-description-rich-text-editor")
+    ).getByRole("textbox");
+    expect(editor).toBeInTheDocument();
+    expect(editor).toHaveAttribute("contenteditable", "true");
+    fireEvent.input(editor, {
+      target: { textContent: "Updated test description" },
     });
-
-    expect(content).toHaveTextContent("Updated test description");
 
     // verifies if discard button is enabled and on click triggers discard model
     const discardButton = screen.getByRole("button", {
@@ -440,7 +432,7 @@ describe("SupplementalData Component QI-Core", () => {
     });
 
     //Verifies if the form values are not discarded
-    expect(content).toHaveTextContent("Updated test description");
+    expect(editor).toHaveTextContent("Updated test description");
     expect(screen.getByText("+1")).toBeInTheDocument(); // We are limiting the selected options displayed
     const includeInReportTypeContainer = screen.getByTestId(
       "SDE Ethnicity-include-in-report-type-dropdown",
