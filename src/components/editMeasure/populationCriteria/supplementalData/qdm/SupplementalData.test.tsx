@@ -100,7 +100,7 @@ describe("SupplementalData Component QDM", () => {
     jest.clearAllMocks();
   });
 
-  it.skip("Should render Supplemental Data component with the values saved in DB", async () => {
+  it("Should render Supplemental Data component with the values saved in DB", async () => {
     RenderSupplementalElements();
     const suppolementalElementsSelect = screen.getByTestId(
       "supplemental-data-dropdown"
@@ -114,11 +114,9 @@ describe("SupplementalData Component QDM", () => {
       "supplemental-data-description-rich-text-editor"
     );
     expect(descriptionEditor).toBeInTheDocument();
-
-    const content = within(descriptionEditor).getByTestId(
-      "rich-text-editor-content"
-    );
-    expect(content).toHaveTextContent("test description");
+    const editor = screen.getByRole("textbox");
+    expect(editor).toHaveAttribute("contenteditable", "true");
+    expect(editor).toHaveTextContent("test description");
   });
 
   it("Should render disabled components if the user doesn't have permissions", async () => {
@@ -145,7 +143,7 @@ describe("SupplementalData Component QDM", () => {
     }
   });
 
-  it.skip("Should successfully update supplemental Elements values and save to DB", async () => {
+  it("Should successfully update supplemental Elements values and save to DB", async () => {
     checkUserCanEdit.mockReturnValue(true);
     // Mocking service call to update measure
     const newSupplementalData = [
@@ -199,12 +197,7 @@ describe("SupplementalData Component QDM", () => {
     );
     expect(descriptionEditor).toBeInTheDocument();
 
-    const content = within(descriptionEditor).getByTestId(
-      "rich-text-editor-content"
-    );
-    expect(content).toHaveTextContent("test description");
-
-    const editableContent = within(content).getByRole("textbox");
+    const editableContent = within(descriptionEditor).getByRole("textbox");
     expect(editableContent).toHaveAttribute("contenteditable", "true");
 
     await act(async () => {
@@ -230,7 +223,7 @@ describe("SupplementalData Component QDM", () => {
       { timeout: 1000 }
     );
 
-    expect(content).toHaveTextContent("Updated test description");
+    expect(descriptionEditor).toHaveTextContent("Updated test description");
 
     // save button
     const saveButton = screen.getByRole("button", { name: "Save" });
@@ -257,7 +250,7 @@ describe("SupplementalData Component QDM", () => {
     );
   });
 
-  it.skip("Should fail an update to supplemental data values because of unexpected internal server issues", async () => {
+  it("Should fail an update to supplemental data values because of unexpected internal server issues", async () => {
     checkUserCanEdit.mockReturnValue(true);
 
     // Mock API to simulate server error
@@ -281,28 +274,16 @@ describe("SupplementalData Component QDM", () => {
     expect(ethnicityOption).toBeInTheDocument();
     userEvent.click(ethnicityOption);
 
-    // Update description using RichTextEditor
-    const descriptionEditor = screen.getByTestId(
-      "supplemental-data-description-rich-text-editor"
-    );
-    expect(descriptionEditor).toBeInTheDocument();
-    const content = within(descriptionEditor).getByTestId(
-      "rich-text-editor-content"
-    );
-
-    // Simulate typing in the editor and trigger change
-    await act(async () => {
-      content.innerHTML = "Updated test description";
-      fireEvent.input(content, {
-        target: { innerHTML: "Updated test description" },
-      });
-      fireEvent.blur(content);
+    let editor = within(
+      screen.getByTestId("supplemental-data-description-rich-text-editor")
+    ).getByRole("textbox");
+    expect(editor).toBeInTheDocument();
+    expect(editor).toHaveAttribute("contenteditable", "true");
+    fireEvent.input(editor, {
+      target: { textContent: "Updated test description" },
     });
 
-    // Wait for debounced update to take effect (250ms delay from TextEditor component)
-    await act(async () => {
-      await new Promise((resolve) => setTimeout(resolve, 300));
-    });
+    expect(editor).toHaveTextContent("Updated test description");
 
     // Wait for save button to be enabled
     await waitFor(() => {
@@ -344,7 +325,7 @@ describe("SupplementalData Component QDM", () => {
     });
   });
 
-  it.skip("Should not discard changes on click of cancel button on discard model", async () => {
+  it("Should not discard changes on click of cancel button on discard model", async () => {
     RenderSupplementalElements();
 
     // Verifies if SD already loads values from store and able to add new
@@ -368,23 +349,16 @@ describe("SupplementalData Component QDM", () => {
       screen.getByRole("button", { name: "SDE Ethnicity" })
     ).toBeInTheDocument();
 
-    // Verifies if SD description already loads values from store and able to update
-    const descriptionEditor = screen.getByTestId(
-      "supplemental-data-description-rich-text-editor"
-    );
-    expect(descriptionEditor).toBeInTheDocument();
-    const content = within(descriptionEditor).getByTestId(
-      "rich-text-editor-content"
-    );
-
-    await act(async () => {
-      fireEvent.input(content, {
-        target: { textContent: "Updated test description" },
-      });
-      fireEvent.blur(content);
+    let editor = within(
+      screen.getByTestId("supplemental-data-description-rich-text-editor")
+    ).getByRole("textbox");
+    expect(editor).toBeInTheDocument();
+    expect(editor).toHaveAttribute("contenteditable", "true");
+    fireEvent.input(editor, {
+      target: { textContent: "Updated test description" },
     });
 
-    expect(content).toHaveTextContent("Updated test description");
+    expect(editor).toHaveTextContent("Updated test description");
 
     // verifies if discard button is enabled and on click triggers discard model
     const discardButton = screen.getByRole("button", {
@@ -406,11 +380,11 @@ describe("SupplementalData Component QDM", () => {
     });
 
     //Verifies if the form values are not discarded
-    expect(descriptionEditor).toHaveTextContent("Updated test description");
+    expect(editor).toHaveTextContent("Updated test description");
     expect(screen.getByText("+1")).toBeInTheDocument(); // We are limiting the selected options displayed
   });
 
-  it.skip("should reset after discarding changes", async () => {
+  it("should reset after discarding changes", async () => {
     RenderSupplementalElements();
 
     // Verifies if SD already loads values from store and able to add new
@@ -435,20 +409,16 @@ describe("SupplementalData Component QDM", () => {
     ).toBeInTheDocument();
 
     // Verifies if SD description already loads values from store and able to update
-    const descriptionEditor = screen.getByTestId(
-      "supplemental-data-description-rich-text-editor"
-    );
-    expect(descriptionEditor).toBeInTheDocument();
-    const content = within(descriptionEditor).getByTestId(
-      "rich-text-editor-content"
-    );
-
-    await act(async () => {
-      fireEvent.input(content, {
-        target: { textContent: "test description" },
-      });
-      fireEvent.blur(content);
+    let editor = within(
+      screen.getByTestId("supplemental-data-description-rich-text-editor")
+    ).getByRole("textbox");
+    expect(editor).toBeInTheDocument();
+    expect(editor).toHaveAttribute("contenteditable", "true");
+    fireEvent.input(editor, {
+      target: { textContent: "Updated test description" },
     });
+
+    expect(editor).toHaveTextContent("Updated test description");
 
     // verifies if discard button is enabled and on click triggers discard model
     const discardButton = screen.getByRole("button", {
@@ -470,7 +440,7 @@ describe("SupplementalData Component QDM", () => {
         screen.queryByText("You have unsaved changes.")
       ).not.toBeInTheDocument();
       // Verifies if the updated form values are discarded
-      expect(descriptionEditor).toHaveTextContent("test description");
+      expect(editor).toHaveTextContent("test description");
       expect(
         screen.getByRole("button", { name: "Initial Population" })
       ).toBeInTheDocument();
