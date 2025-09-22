@@ -196,7 +196,7 @@ describe("Measure Groups Page", () => {
   });
 
   describe("Non-categorized tests", () => {
-    test.skip("test update fails with error alert", async () => {
+    test("test update fails with error alert", async () => {
       measure.patientBasis = false;
       measure.scoring = MeasureScoring.COHORT;
 
@@ -212,31 +212,27 @@ describe("Measure Groups Page", () => {
       });
       expect(groupPopulationInput.value).toBe(definitionToUpdate);
 
-      const initialPopulationDescription = screen.getByTestId(
+      const descriptionEditor = screen.getByTestId(
         "populations-0-description-rich-text-editor"
       );
-      expect(initialPopulationDescription).toBeInTheDocument();
+      expect(descriptionEditor).toBeInTheDocument();
 
-      const content1 = within(initialPopulationDescription).getByTestId(
-        "rich-text-editor-content"
-      );
-      expect(content1).toBeInTheDocument();
-
-      const editableContent1 = within(content1).getByRole("textbox");
-      expect(editableContent1).toHaveAttribute("contenteditable", "true");
+      const editableContent = within(descriptionEditor).getByRole("textbox");
+      expect(editableContent).toHaveAttribute("contenteditable", "true");
 
       await act(async () => {
-        fireEvent.input(editableContent1, {
+        fireEvent.focus(editableContent);
+        editableContent.innerHTML = "newVal";
+        fireEvent.input(editableContent, {
           target: { innerHTML: "newVal" },
         });
-        fireEvent.blur(editableContent1);
+        fireEvent.blur(editableContent);
       });
 
+      // Wait for debounced update to take effect (250ms delay from TextEditor component)
       await act(async () => {
         await new Promise((resolve) => setTimeout(resolve, 350));
       });
-
-      expect(content1).toHaveTextContent("newVal");
 
       mockedAxios.put.mockRejectedValueOnce({ data: "Request Rejected" });
 
@@ -254,7 +250,7 @@ describe("Measure Groups Page", () => {
       });
     });
 
-    test.skip("test update fails with fetch measure when doing updateMeasureFromDb", async () => {
+    test("test update fails with fetch measure when doing updateMeasureFromDb", async () => {
       measure.patientBasis = false;
       measure.scoring = MeasureScoring.COHORT;
 
@@ -264,13 +260,13 @@ describe("Measure Groups Page", () => {
         "group-description-rich-text-editor"
       );
       expect(descriptionEditor).toBeInTheDocument();
-      const content = await within(descriptionEditor).getByTestId(
-        "rich-text-editor-content"
-      );
-      const editableContent = within(content).getByRole("textbox");
+
+      const editableContent = within(descriptionEditor).getByRole("textbox");
       expect(editableContent).toHaveAttribute("contenteditable", "true");
 
       await act(async () => {
+        fireEvent.focus(editableContent);
+        editableContent.innerHTML = "new description";
         fireEvent.input(editableContent, {
           target: { innerHTML: "new description" },
         });
@@ -292,21 +288,17 @@ describe("Measure Groups Page", () => {
       });
       expect(groupPopulationInput.value).toBe(definitionToUpdate);
 
-      // Update the definition
-      const initialPopulationDescription = screen.getByTestId(
+      const descriptionEditor1 = screen.getByTestId(
         "populations-0-description-rich-text-editor"
       );
-      expect(initialPopulationDescription).toBeInTheDocument();
+      expect(descriptionEditor1).toBeInTheDocument();
 
-      const content1 = within(initialPopulationDescription).getByTestId(
-        "rich-text-editor-content"
-      );
-      expect(content1).toBeInTheDocument();
-
-      const editableContent1 = within(content1).getByRole("textbox");
+      const editableContent1 = within(descriptionEditor1).getByRole("textbox");
       expect(editableContent1).toHaveAttribute("contenteditable", "true");
 
       await act(async () => {
+        fireEvent.focus(editableContent1);
+        editableContent1.innerHTML = "newVal";
         fireEvent.input(editableContent1, {
           target: { innerHTML: "newVal" },
         });
@@ -317,7 +309,6 @@ describe("Measure Groups Page", () => {
       await act(async () => {
         await new Promise((resolve) => setTimeout(resolve, 350));
       });
-      expect(content1).toHaveTextContent("newVal");
 
       mockedAxios.put.mockResolvedValueOnce({ data: group });
       mockedAxios.get.mockRejectedValueOnce({
@@ -354,7 +345,7 @@ describe("Measure Groups Page", () => {
       });
     });
 
-    test.skip("test create fails", async () => {
+    test("test create fails", async () => {
       const group: Group = {
         id: null,
         scoring: "Cohort",
@@ -380,13 +371,13 @@ describe("Measure Groups Page", () => {
         "group-description-rich-text-editor"
       );
       expect(descriptionEditor).toBeInTheDocument();
-      const content = within(descriptionEditor).getByTestId(
-        "rich-text-editor-content"
-      );
-      const editableContent = within(content).getByRole("textbox");
+
+      const editableContent = within(descriptionEditor).getByRole("textbox");
       expect(editableContent).toHaveAttribute("contenteditable", "true");
 
       await act(async () => {
+        fireEvent.focus(editableContent);
+        editableContent.innerHTML = "new description";
         fireEvent.input(editableContent, {
           target: { innerHTML: "new description" },
         });
@@ -406,20 +397,17 @@ describe("Measure Groups Page", () => {
           target: { value: group.populations[0].definition },
         });
       });
-      const initialPopulationDescription = screen.getByTestId(
+      const descriptionEditor1 = screen.getByTestId(
         "populations-0-description-rich-text-editor"
       );
-      expect(initialPopulationDescription).toBeInTheDocument();
+      expect(descriptionEditor1).toBeInTheDocument();
 
-      const content1 = within(initialPopulationDescription).getByTestId(
-        "rich-text-editor-content"
-      );
-      expect(content1).toBeInTheDocument();
-
-      const editableContent1 = within(content1).getByRole("textbox");
+      const editableContent1 = within(descriptionEditor1).getByRole("textbox");
       expect(editableContent1).toHaveAttribute("contenteditable", "true");
 
       await act(async () => {
+        fireEvent.focus(editableContent1);
+        editableContent1.innerHTML = "newVal";
         fireEvent.input(editableContent1, {
           target: { innerHTML: "newVal" },
         });
@@ -431,7 +419,7 @@ describe("Measure Groups Page", () => {
         await new Promise((resolve) => setTimeout(resolve, 350));
       });
 
-      expect(content1).toHaveTextContent("newVal");
+      expect(editableContent1).toHaveTextContent("newVal");
       mockedAxios.post.mockRejectedValueOnce({ data: "Request Rejected" });
       // saving a  measure..
       await waitFor(() => {
@@ -447,7 +435,7 @@ describe("Measure Groups Page", () => {
       // }, 200);
     });
 
-    test.skip("test create fails with null group id", async () => {
+    test("test create fails with null group id", async () => {
       let group: Group;
       group = {
         id: null,
@@ -474,13 +462,13 @@ describe("Measure Groups Page", () => {
         "group-description-rich-text-editor"
       );
       expect(descriptionEditor).toBeInTheDocument();
-      const content = within(descriptionEditor).getByTestId(
-        "rich-text-editor-content"
-      );
-      const editableContent = within(content).getByRole("textbox");
+
+      const editableContent = within(descriptionEditor).getByRole("textbox");
       expect(editableContent).toHaveAttribute("contenteditable", "true");
 
       await act(async () => {
+        fireEvent.focus(editableContent);
+        editableContent.innerHTML = "new description";
         fireEvent.input(editableContent, {
           target: { innerHTML: "new description" },
         });
@@ -491,7 +479,6 @@ describe("Measure Groups Page", () => {
       await act(async () => {
         await new Promise((resolve) => setTimeout(resolve, 350));
       });
-
       const groupPopulationInput = screen.getByTestId(
         "select-measure-group-population-input"
       ) as HTMLInputElement;
@@ -499,20 +486,17 @@ describe("Measure Groups Page", () => {
         target: { value: group.populations[0].definition },
       });
 
-      const initialPopulationDescription = screen.getByTestId(
+      const descriptionEditor1 = screen.getByTestId(
         "populations-0-description-rich-text-editor"
       );
-      expect(initialPopulationDescription).toBeInTheDocument();
+      expect(descriptionEditor1).toBeInTheDocument();
 
-      const content1 = within(initialPopulationDescription).getByTestId(
-        "rich-text-editor-content"
-      );
-      expect(content1).toBeInTheDocument();
-
-      const editableContent1 = within(content1).getByRole("textbox");
+      const editableContent1 = within(descriptionEditor1).getByRole("textbox");
       expect(editableContent1).toHaveAttribute("contenteditable", "true");
 
       await act(async () => {
+        fireEvent.focus(editableContent1);
+        editableContent1.innerHTML = "newVal";
         fireEvent.input(editableContent1, {
           target: { innerHTML: "newVal" },
         });
@@ -523,7 +507,7 @@ describe("Measure Groups Page", () => {
       await act(async () => {
         await new Promise((resolve) => setTimeout(resolve, 350));
       });
-      expect(content1).toHaveTextContent("newVal");
+      expect(editableContent1).toHaveTextContent("newVal");
 
       mockedAxios.post.mockResolvedValueOnce({ data: group });
 
@@ -1444,7 +1428,7 @@ describe("Delete Tests", () => {
       return serviceApiMock;
     });
   });
-  test.skip("On clicking delete button, delete group modal is displayed", async () => {
+  test("On clicking delete button, delete group modal is displayed", async () => {
     cohortGroup.id = "7p03-5r29-7O0I";
     cohortGroup.groupDescription = "testDescription";
     cohortMeasure.groups = [cohortGroup];
@@ -1474,13 +1458,13 @@ describe("Delete Tests", () => {
       "group-description-rich-text-editor"
     );
     expect(descriptionEditor).toBeInTheDocument();
-    const content = within(descriptionEditor).getByTestId(
-      "rich-text-editor-content"
-    );
-    expect(content).toHaveTextContent("testDescription");
+
+    const editableContent = within(descriptionEditor).getByRole("textbox");
+    expect(editableContent).toHaveAttribute("contenteditable", "true");
+    expect(editableContent).toHaveTextContent("testDescription");
   });
 
-  test.skip("On clicking delete button, measure group should be deleted", async () => {
+  test("On clicking delete button, measure group should be deleted", async () => {
     cohortGroup.id = "7p03-5r29-7O0I";
     cohortGroup.groupDescription = "testDescription";
     cohortMeasure.groups = [cohortGroup];
@@ -1533,10 +1517,10 @@ describe("Delete Tests", () => {
         "group-description-rich-text-editor"
       );
       expect(descriptionEditor).toBeInTheDocument();
-      const content = within(descriptionEditor).getByTestId(
-        "rich-text-editor-content"
-      );
-      expect(content).toHaveTextContent("");
+
+      const editableContent = within(descriptionEditor).getByRole("textbox");
+      expect(editableContent).toHaveAttribute("contenteditable", "true");
+      expect(editableContent).toHaveTextContent("");
     });
   });
 });
@@ -1618,7 +1602,7 @@ describe("Tests where serviceApi is mocked, instead of Axios", () => {
       return serviceApiMock;
     });
   });
-  test.skip("Should create population Group with one initial population successfully", async () => {
+  test("Should create population Group with one initial population successfully", async () => {
     //mocking measureServiceApi before component is rendered
     const serviceApiMock: MeasureServiceApi = {
       getReturnTypesForAllCqlFunctions: jest
@@ -1650,13 +1634,13 @@ describe("Tests where serviceApi is mocked, instead of Axios", () => {
       "group-description-rich-text-editor"
     );
     expect(descriptionEditor).toBeInTheDocument();
-    const content = within(descriptionEditor).getByTestId(
-      "rich-text-editor-content"
-    );
-    const editableContent = within(content).getByRole("textbox");
+
+    const editableContent = within(descriptionEditor).getByRole("textbox");
     expect(editableContent).toHaveAttribute("contenteditable", "true");
 
     await act(async () => {
+      fireEvent.focus(editableContent);
+      editableContent.innerHTML = "test description";
       fireEvent.input(editableContent, {
         target: { innerHTML: "test description" },
       });
@@ -1674,20 +1658,17 @@ describe("Tests where serviceApi is mocked, instead of Axios", () => {
       target: { value: cohortGroup.populations[0].definition },
     });
 
-    const initialPopulationDescription = screen.getByTestId(
+    const descriptionEditor1 = screen.getByTestId(
       "populations-0-description-rich-text-editor"
     );
-    expect(initialPopulationDescription).toBeInTheDocument();
+    expect(descriptionEditor1).toBeInTheDocument();
 
-    const content1 = within(initialPopulationDescription).getByTestId(
-      "rich-text-editor-content"
-    );
-    expect(content1).toBeInTheDocument();
-
-    const editableContent1 = within(content1).getByRole("textbox");
+    const editableContent1 = within(descriptionEditor1).getByRole("textbox");
     expect(editableContent1).toHaveAttribute("contenteditable", "true");
 
     await act(async () => {
+      fireEvent.focus(editableContent1);
+      editableContent1.innerHTML = "newVal";
       fireEvent.input(editableContent1, {
         target: { innerHTML: "newVal" },
       });
