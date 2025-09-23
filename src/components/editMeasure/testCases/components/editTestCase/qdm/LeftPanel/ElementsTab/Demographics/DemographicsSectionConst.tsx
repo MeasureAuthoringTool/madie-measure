@@ -120,32 +120,32 @@ export const getDataElementByStatus = (status: string, patient: QDMPatient) => {
   );
 };
 
-export const getValueSetForDemographic = (
+export const getValueSetsForDemographic = (
   cqmMeasure: Measure,
   demographicType: string
 ) => {
-  const sourceDataCriteria = cqmMeasure?.source_data_criteria?.find(
-    (criteria) => criteria?.qdmStatus === demographicType
-  );
+  const sourceDataCriteria = cqmMeasure?.source_data_criteria
+    ?.filter((criteria) => criteria?.qdmStatus === demographicType)
+    ?.map((criteria) => criteria.codeListId);
   if (!sourceDataCriteria) {
     return null;
   }
-  const valueSet = cqmMeasure?.value_sets?.find(
-    (valueSet) => valueSet.oid === sourceDataCriteria?.codeListId
-  );
-  if (!valueSet) {
+  const valueSets = cqmMeasure?.value_sets
+    ?.filter((valueSet) => sourceDataCriteria.includes(valueSet.oid))
+    .map((valueSet) => ({
+      name: valueSet?.display_name,
+      oid: valueSet?.oid,
+      concepts: valueSet?.concepts.map((concept) => {
+        return {
+          system: concept?.code_system_oid,
+          version: concept?.code_system_version,
+          code: concept?.code,
+          display: concept?.display_name,
+        };
+      }),
+    }));
+  if (!valueSets) {
     return null;
   }
-  return {
-    name: valueSet?.display_name,
-    oid: valueSet?.oid,
-    concepts: valueSet?.concepts.map((concept) => {
-      return {
-        system: concept?.code_system_oid,
-        version: concept?.code_system_version,
-        code: concept?.code,
-        display: concept?.display_name,
-      };
-    }),
-  };
+  return valueSets;
 };
