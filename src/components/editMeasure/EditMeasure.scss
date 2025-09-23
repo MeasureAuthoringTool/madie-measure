@@ -1,6 +1,7 @@
 #edit-measure-nav-a {
   .MuiTabs-flexContainer {
-    > .MuiTab-root:focus, > .MuiTab-root.Mui-focusVisible {
+    > .MuiTab-root:focus,
+    > .MuiTab-root.Mui-focusVisible {
       background: #003366 !important;
       color: #fff !important;
       outline: none !important;
