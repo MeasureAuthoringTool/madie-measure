@@ -97,7 +97,6 @@ const incompletedIconMeasure = {
 } as unknown as Measure;
 
 const mockUseFeatureFlags = jest.fn(() => ({
-  EnhancedTextFormatting: false,
   Locking: false,
 }));
 
@@ -647,7 +646,7 @@ describe("MeasureDetails component", () => {
               path="/foo/:measureId"
               element={
                 <MeasureDetails
-                  featureFlags={{ EnhancedTextFormatting: true, Locking: true }}
+                  featureFlags={{ Locking: true }}
                   setErrorMessage={setErrorMessage}
                   isQDM={true}
                 />
@@ -693,7 +692,7 @@ describe("MeasureDetails component", () => {
               path="/measures/:measureId"
               element={
                 <MeasureDetails
-                  featureFlags={{ EnhancedTextFormatting: true, Locking: true }}
+                  featureFlags={{ Locking: true }}
                   setErrorMessage={setErrorMessage}
                   isQDM={true}
                 />

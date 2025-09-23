@@ -49,7 +49,12 @@ const Search = (props: {
   return (
     <form
       onSubmit={formik.handleSubmit}
-      tw="col-span-3 grid grid-cols-3 gap-4 items-end"
+      // flex-basis here should be aware if there's one or two items here. If two, it should be 60%, if one, it should be 50%. Not really perfect, but looks much better for two items we're shifting for
+      style={{
+        display: "flex",
+        gap: 16,
+        flexBasis: featureFlags?.MeasureSearch ? "60%" : "40%",
+      }}
     >
       {featureFlags?.MeasureSearch && (
         <Select

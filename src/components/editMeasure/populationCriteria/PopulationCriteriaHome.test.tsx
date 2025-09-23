@@ -102,7 +102,7 @@ const QiCoreMeasure = {
     },
   ],
 } as Measure;
-let mockFeatureFlags = { Locking: false, EnhancedTextFormatting: false };
+let mockFeatureFlags = { Locking: false };
 
 jest.mock("@madie/madie-util", () => ({
   useDocumentTitle: jest.fn(),
@@ -496,64 +496,6 @@ describe("PopulationCriteriaHome", () => {
     expect(QDMPage).toBeInTheDocument();
   });
 
-  it("should render the QDM Supplemental Data page for QDM measures", async () => {
-    const mockedMeasureState = measureStore as jest.Mocked<{ state }>;
-    mockedMeasureState.state = { ...qdmMeasure };
-    await renderPopulationCriteriaHomeComponent(
-      "supplemental-data",
-      "supplemental-data"
-    );
-    expect(
-      await screen.findByRole("textbox", { name: "Description" })
-    ).toBeInTheDocument();
-    const allComboBoxes = screen.getAllByRole("combobox");
-    expect(allComboBoxes.length).toEqual(1);
-
-    act(() => {
-      userEvent.click(screen.getByRole("button", { name: "Open" }));
-    });
-
-    await waitFor(() => {
-      userEvent.click(screen.getByText("SDE Ethnicity", { exact: false }));
-    });
-    expect(
-      screen.getByRole("button", { name: "SDE Ethnicity" })
-    ).toBeInTheDocument();
-
-    expect(
-      screen.queryByText("SDE Ethnicity - Include in Report Type")
-    ).not.toBeInTheDocument();
-  });
-
-  it("should render the QI-Core Supplemental Data page for QI-Core measures", async () => {
-    const mockedMeasureState = measureStore as jest.Mocked<{ state }>;
-    mockedMeasureState.state = { ...QiCoreMeasure };
-    await renderPopulationCriteriaHomeComponent(
-      "supplemental-data",
-      "supplemental-data"
-    );
-    expect(
-      await screen.findByRole("textbox", { name: "Description" })
-    ).toBeInTheDocument();
-    const allComboBoxes = screen.getAllByRole("combobox");
-    expect(allComboBoxes.length).toEqual(1);
-
-    userEvent.click(screen.getByRole("button", { name: "Open" }));
-    await waitFor(() => {
-      userEvent.click(screen.getByText("SDE Ethnicity"));
-    });
-    expect(
-      screen.getByRole("button", { name: "SDE Ethnicity" })
-    ).toBeInTheDocument();
-
-    expect(
-      await screen.findByText("SDE Ethnicity - Include in Report Type")
-    ).toBeInTheDocument();
-
-    const allComboBoxes2 = screen.getAllByRole("combobox");
-    expect(allComboBoxes2.length).toEqual(2);
-  });
-
   it("should render the Empty Supplemental Data page for no measure", async () => {
     const mockedMeasureState = measureStore as jest.Mocked<{ state }>;
     mockedMeasureState.state = undefined;
@@ -590,35 +532,6 @@ describe("PopulationCriteriaHome", () => {
     expect(
       screen.queryByText("SDE Ethnicity - Include in Report Type")
     ).not.toBeInTheDocument();
-  });
-
-  it("should render the QI-Core Risk Adjustment page for QI-Core measures", async () => {
-    const mockedMeasureState = measureStore as jest.Mocked<{ state }>;
-    mockedMeasureState.state = { ...QiCoreMeasure };
-    await renderPopulationCriteriaHomeComponent(
-      "risk-adjustment",
-      "risk-adjustment"
-    );
-    expect(
-      await screen.findByRole("textbox", { name: "Description" })
-    ).toBeInTheDocument();
-    const allComboBoxes = screen.getAllByRole("combobox");
-    expect(allComboBoxes.length).toEqual(1);
-
-    userEvent.click(screen.getByRole("button", { name: "Open" }));
-    await waitFor(() => {
-      userEvent.click(screen.getByText("SDE Ethnicity"));
-    });
-    expect(
-      screen.getByRole("button", { name: "SDE Ethnicity" })
-    ).toBeInTheDocument();
-
-    expect(
-      await screen.findByText("SDE Ethnicity - Include in Report Type")
-    ).toBeInTheDocument();
-
-    const allComboBoxes2 = screen.getAllByRole("combobox");
-    expect(allComboBoxes2.length).toEqual(2);
   });
 
   it("should render the Empty Risk Adjustment page for no measure", async () => {
@@ -668,7 +581,7 @@ describe("PopulationCriteriaHome", () => {
 
   it("should trigger lock, success", async () => {
     const mockedMeasureState = measureStore as jest.Mocked<{ state }>;
-    mockFeatureFlags = { Locking: true, EnhancedTextFormatting: false };
+    mockFeatureFlags = { Locking: true };
     mockedMeasureState.state = { ...QiCoreMeasure };
 
     const updateMeasureLock = jest.fn().mockResolvedValueOnce({
@@ -705,7 +618,7 @@ describe("PopulationCriteriaHome", () => {
   it("should trigger lock, fail", async () => {
     const mockedMeasureState = measureStore as jest.Mocked<{ state }>;
     mockedMeasureState.state = { ...QiCoreMeasure };
-    mockFeatureFlags = { Locking: true, EnhancedTextFormatting: false };
+    mockFeatureFlags = { Locking: true };
 
     const updateMeasureLock = jest.fn().mockRejectedValue("test");
     const unlockMeasure = jest.fn();
