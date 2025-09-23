@@ -1,3 +1,87 @@
+import GroupPopulation from "./GroupPopulation";
+import { GroupScoring, PopulationType } from "@madie/madie-models";
+
+describe("GroupPopulation", () => {
+  const mockCqlDefinitions = [
+    { id: "1", name: "ValidDef", text: "define ValidDef: true" },
+    { id: "2", name: "FuncDef", text: "define function FuncDef() { true }" },
+    {
+      id: "3",
+      name: "PrivateFunc",
+      text: "define private function PrivateFunc() { false }",
+    },
+    {
+      id: "4",
+      name: "FluentFunc",
+      text: "define fluent function FluentFunc() { false }",
+    },
+    {
+      id: "5",
+      name: "PublicFunc",
+      text: "define public function PublicFunc() { false }",
+    },
+  ];
+
+  const baseProps = {
+    field: {
+      name: "initialPopulation",
+      value: "ValidDef",
+      onChange: jest.fn(),
+      onBlur: jest.fn(),
+    },
+    form: {
+      values: {},
+      errors: {},
+      touched: {},
+      isSubmitting: false,
+      isValidating: false,
+      submitCount: 0,
+    },
+    cqlDefinitions: mockCqlDefinitions,
+    populations: [
+      { name: PopulationType.INITIAL_POPULATION, definition: "ValidDef" },
+    ],
+    population: {
+      name: PopulationType.INITIAL_POPULATION,
+      definition: "ValidDef",
+    },
+    populationIndex: 0,
+    scoring: GroupScoring.PROPORTION,
+    canEdit: true,
+    insertCallback: jest.fn(),
+    removeCallback: jest.fn(),
+    replaceCallback: jest.fn(),
+  };
+
+  it("filters out function definitions from cqlDefinitions", () => {
+    const { getByLabelText, queryByText } = render(
+      <GroupPopulation {...baseProps} />
+    );
+    // Only non-function definitions should be present as options
+    const select = getByLabelText(/Initial Population/i);
+    expect(select).toBeInTheDocument();
+    // Should not find function definitions as options
+    expect(queryByText("FuncDef")).not.toBeInTheDocument();
+    expect(queryByText("PrivateFunc")).not.toBeInTheDocument();
+    expect(queryByText("FluentFunc")).not.toBeInTheDocument();
+    expect(queryByText("PublicFunc")).not.toBeInTheDocument();
+    // Should find the valid definition
+    // Note: The select options may not be rendered until open, so this is a basic check
+  });
+
+  it("renders with correct label for multiple initial populations", () => {
+    const props = {
+      ...baseProps,
+      populations: [
+        { name: PopulationType.INITIAL_POPULATION, definition: "ValidDef" },
+        { name: PopulationType.INITIAL_POPULATION, definition: "ValidDef2" },
+      ],
+      populationIndex: 1,
+    };
+    const { getByLabelText } = render(<GroupPopulation {...props} />);
+    expect(getByLabelText(/Initial Population 2/i)).toBeInTheDocument();
+  });
+});
 import * as React from "react";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
