@@ -32,7 +32,7 @@ import { ClearIcon } from "@mui/x-date-pickers";
 import "./ResourceList.scss";
 
 export interface ResourceListProps {
-  resourceIdentifiers: ResourceIdentifier[];
+  resourceIdentifiers?: ResourceIdentifier[];
   onClick: (resourceIdentifier: ResourceIdentifier) => void;
 }
 const TH = tw.th`p-3 text-left text-sm font-bold capitalize`;
@@ -40,6 +40,7 @@ const TH = tw.th`p-3 text-left text-sm font-bold capitalize`;
 const ResourceList = ({ resourceIdentifiers, onClick }: ResourceListProps) => {
   const [visibleResources, setVisibleResources] = useState(resourceIdentifiers);
   const [resourceFilter, setResourceFilter] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
   // utilities for pagination
   const [limit, setLimit] = useState(5);
   const [page, setPage] = useState(1);
@@ -51,22 +52,27 @@ const ResourceList = ({ resourceIdentifiers, onClick }: ResourceListProps) => {
   const [visibleItems, setVisibleItems] = useState<number>(0);
   // measures owned or shared for the current user excluding the current measure
   const [offset, setOffset] = useState<number>(0);
+
   const managePagination = useCallback(() => {
-    if (resourceIdentifiers.length < limit) {
+    const filter = resourceFilter?.trim().toLowerCase() || "";
+    const filteredResources = resourceIdentifiers.filter((resource) =>
+      resource.title.toLowerCase().includes(filter)
+    );
+    if (filteredResources.length < limit) {
       setOffset(0);
-      setVisibleResources([...resourceIdentifiers]);
-      setVisibleItems(resourceIdentifiers.length);
-      setTotalItems(resourceIdentifiers.length);
+      setVisibleResources([...filteredResources]);
+      setVisibleItems(filteredResources.length);
+      setTotalItems(filteredResources.length);
       setTotalPages(1);
     } else {
       const start = (page - 1) * limit;
       const end = start + limit;
-      const newVisibleReferences = [...resourceIdentifiers].slice(start, end);
+      const newVisibleReferences = [...filteredResources].slice(start, end);
       setOffset(start);
       setVisibleResources(newVisibleReferences);
       setVisibleItems(newVisibleReferences.length);
-      setTotalItems(resourceIdentifiers.length);
-      setTotalPages(Math.ceil(resourceIdentifiers.length / limit));
+      setTotalItems(filteredResources.length);
+      setTotalPages(Math.ceil(filteredResources.length / limit));
     }
   }, [
     limit,
@@ -77,13 +83,14 @@ const ResourceList = ({ resourceIdentifiers, onClick }: ResourceListProps) => {
     setVisibleItems,
     setTotalItems,
     setTotalPages,
+    resourceFilter,
   ]);
 
   useEffect(() => {
     if (resourceIdentifiers) {
       managePagination();
     }
-  }, [resourceIdentifiers, page, limit]);
+  }, [resourceIdentifiers, page, limit, resourceFilter]);
 
   const columns = useMemo<ColumnDef<ResourceIdentifier>[]>(() => {
     const columnDefs = [];
@@ -168,6 +175,7 @@ const ResourceList = ({ resourceIdentifiers, onClick }: ResourceListProps) => {
   // if there isnt a start adornment and end adornment the field gets really small like 1/4 the height. Going to just leave it in for now
   const handleClearClick = () => {
     setResourceFilter("");
+    setSearchTerm("");
   };
   const searchInputProps = {
     startAdornment: (
@@ -185,12 +193,13 @@ const ResourceList = ({ resourceIdentifiers, onClick }: ResourceListProps) => {
     <div id="qi-core-6-tc-builder">
       <div id="search-container">
         <TextField
-          onChange={(e) => {
-            setResourceFilter(e.target.value);
+          onChange={({ target }) => {
+            setSearchTerm(target.value);
           }}
           onKeyPress={(e) => {
             if (e.key === "Enter") {
               e.preventDefault();
+              setResourceFilter(e.target.value);
             }
           }}
           id="search-elements-input"
@@ -199,8 +208,8 @@ const ResourceList = ({ resourceIdentifiers, onClick }: ResourceListProps) => {
           type="search"
           data-testid="elements-search-input"
           label="Search"
+          value={searchTerm}
           variant="outlined"
-          value={resourceFilter}
           inputProps={{
             "data-testid": "search-elements-input-input",
             "aria-required": "false",
@@ -209,7 +218,8 @@ const ResourceList = ({ resourceIdentifiers, onClick }: ResourceListProps) => {
         />
       </div>
 
-      {visibleResources?.length ? (
+      {/* we want to render the table if visibleResources. We want to render the spinner if no resourceIdentifiers, and an empty div if no results */}
+      {visibleResources?.length > 0 && (
         <div id="measure-landing" data-testid="measure-landing">
           <div className="measure-table no-margin-top">
             <div className="table" style={{ overflow: "auto" }}>
@@ -330,7 +340,8 @@ const ResourceList = ({ resourceIdentifiers, onClick }: ResourceListProps) => {
             />
           </div>
         </div>
-      ) : (
+      )}
+      {!resourceIdentifiers && (
         <div style={{ display: "flex", justifyContent: "center" }}>
           <MadieSpinner
             data-testId="madie-loading-spinner"
