@@ -266,7 +266,7 @@ describe("DemographicsSection", () => {
     renderDemographicsSection();
 
     expect(screen.getByText("Sex")).toBeInTheDocument();
-    const genderSelector = screen.getByRole("combobox")[2];
+    const genderSelector = screen.getAllByRole("combobox")[2];
     expect(genderSelector).toHaveTextContent("Female (finding)");
     // change gender option
     userEvent.click(genderSelector);
