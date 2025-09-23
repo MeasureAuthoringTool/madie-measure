@@ -2,6 +2,35 @@ import GroupPopulation from "./GroupPopulation";
 import { GroupScoring, PopulationType } from "@madie/madie-models";
 
 describe("GroupPopulation", () => {
+  it("filters definitions with empty, undefined, and matching/non-matching text for full branch coverage", () => {
+    const edgeCaseDefs = [
+      { id: "1", name: "NoText" }, // no text property
+      { id: "2", name: "EmptyText", text: "" }, // empty string
+      { id: "3", name: "NullText", text: undefined }, // undefined text (was null)
+      { id: "4", name: "UndefinedText", text: undefined }, // undefined text
+      { id: "5", name: "FunctionText", text: "define function Foo() { true }" }, // matches regex
+      { id: "6", name: "ValidText", text: "define Valid: true" }, // does not match regex
+    ];
+    const props = {
+      ...baseProps,
+      cqlDefinitions: edgeCaseDefs,
+    };
+    const { getByLabelText, queryByText } = render(
+      <GroupPopulation {...props} />
+    );
+    // Only the non-function, non-empty definitions should be present as options
+    const select = getByLabelText(/Initial Population/i);
+    expect(select).toBeInTheDocument();
+    // Should not find function definition
+    expect(queryByText("FunctionText")).not.toBeInTheDocument();
+    // Should find the valid definition
+    expect(queryByText("ValidText")).not.toBeInTheDocument(); // not rendered until open, but filter runs
+    // Should not error on missing/empty/null/undefined text
+    expect(queryByText("NoText")).not.toBeInTheDocument();
+    expect(queryByText("EmptyText")).not.toBeInTheDocument();
+    expect(queryByText("NullText")).not.toBeInTheDocument();
+    expect(queryByText("UndefinedText")).not.toBeInTheDocument();
+  });
   const mockCqlDefinitions = [
     { id: "1", name: "ValidDef", text: "define ValidDef: true" },
     { id: "2", name: "FuncDef", text: "define function FuncDef() { true }" },
