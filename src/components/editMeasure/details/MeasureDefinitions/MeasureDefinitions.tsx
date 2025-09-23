@@ -17,11 +17,7 @@ import SearchIcon from "@mui/icons-material/Search";
 import ClearIcon from "@mui/icons-material/Clear";
 import { Typography, IconButton, InputAdornment } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
-import {
-  measureStore,
-  checkUserCanEdit,
-  useFeatureFlags,
-} from "@madie/madie-util";
+import { measureStore, checkUserCanEdit } from "@madie/madie-util";
 import { useFormik } from "formik";
 import { MeasureDefinition, Measure } from "@madie/madie-models";
 import useFormikResetOnEvent from "../../../common/useFormikResetOnEvent";
@@ -35,7 +31,6 @@ interface MeasureDefinitionsProps {
 }
 
 const MeasureDefinitions = (props: MeasureDefinitionsProps) => {
-  const featureFlags = useFeatureFlags();
   const { setErrorMessage } = props;
   const { search } = useLocation();
   let navigate = useNavigate();
@@ -535,38 +530,18 @@ const MeasureDefinitions = (props: MeasureDefinitionsProps) => {
               {...formik.getFieldProps("term")}
             />
 
-            {featureFlags.EnhancedTextFormatting ? (
-              <TextEditor
-                label="Definition"
-                required
-                data-testid="measure-definition"
-                setFieldValue={formik.setFieldValue}
-                readOnly={!canEdit}
-                error={
-                  formik.touched.definition && Boolean(formik.errors.definition)
-                }
-                helperText={formikErrorHandler("definition")}
-                {...formik.getFieldProps("definition")}
-              />
-            ) : (
-              <TextArea
-                required
-                readOnly={!canEdit}
-                label="Definition"
-                placeholder="Enter"
-                id="measure-definition"
-                data-testid="measure-definition"
-                inputProps={{
-                  "data-testid": "measure-definition-input",
-                  "aria-describedby": "measure-definition-helper-text",
-                }}
-                error={
-                  formik.touched.definition && Boolean(formik.errors.definition)
-                }
-                helperText={formikErrorHandler("definition")}
-                {...formik.getFieldProps("definition")}
-              />
-            )}
+            <TextEditor
+              label="Definition"
+              required
+              data-testid="measure-definition"
+              setFieldValue={formik.setFieldValue}
+              readOnly={!canEdit}
+              error={
+                formik.touched.definition && Boolean(formik.errors.definition)
+              }
+              helperText={formikErrorHandler("definition")}
+              {...formik.getFieldProps("definition")}
+            />
           </div>
         }
       />

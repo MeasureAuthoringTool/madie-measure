@@ -3,7 +3,6 @@ import userEvent from "@testing-library/user-event";
 import { fireEvent, render, screen } from "@testing-library/react";
 import MeasureGroupObservation from "./MeasureGroupObservation";
 import { MeasureScoring, PopulationType } from "@madie/madie-models";
-import { useFeatureFlags } from "@madie/madie-util";
 
 jest.mock("uuid", () => ({
   v4: jest.fn(),
@@ -26,12 +25,6 @@ jest.mock("formik", () => ({
   },
 }));
 
-jest.mock("@madie/madie-util", () => ({
-  useFeatureFlags: jest.fn(() => ({
-    EnhancedTextFormatting: false,
-  })),
-}));
-
 describe("Measure Group Observation", () => {
   beforeEach(() => {
     mockFormikObj.touched = {};
@@ -42,9 +35,6 @@ describe("Measure Group Observation", () => {
 
     const mockUuid = require("uuid") as { v4: jest.Mock<string, []> };
     mockUuid.v4.mockImplementationOnce(() => "uuid-1");
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-      EnhancedTextFormatting: true,
-    }));
   });
 
   afterEach(() => {

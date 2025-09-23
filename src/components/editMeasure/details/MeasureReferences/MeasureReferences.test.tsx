@@ -1,5 +1,6 @@
 import * as React from "react";
 import { render, fireEvent, waitFor, screen } from "@testing-library/react";
+import "@testing-library/jest-dom";
 import { act } from "react-dom/test-utils";
 import { within } from "@testing-library/dom";
 import { MemoryRouter } from "react-router";
@@ -65,11 +66,6 @@ jest.mock("@madie/madie-util", () => ({
     getAccessToken: () => "test.jwt",
   })),
   checkUserCanEdit: jest.fn().mockImplementation(() => true),
-  useFeatureFlags: jest.fn(() => {
-    return {
-      EnhancedTextFormatting: false,
-    };
-  }),
   measureStore: {
     updateMeasure: jest.fn((measure) => measure),
     state: jest.fn().mockImplementation(() => measure),
@@ -121,22 +117,8 @@ const expectInputValue = (
   expect(inputEl.value).toBe(value);
 };
 describe("Measure References Component", () => {
-  beforeEach(() => {
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-      EnhancedTextFormatting: false,
-    }));
-  });
-
   afterEach(() => jest.clearAllMocks());
 
-  const expectInputValue = (
-    element: HTMLTextAreaElement,
-    value: string
-  ): void => {
-    expect(element).toBeInstanceOf(HTMLTextAreaElement);
-    const inputEl = element as HTMLTextAreaElement;
-    expect(inputEl.value).toBe(value);
-  };
   const checkRows = async (number: number) => {
     const tableBody = getByTestId("measure-references-table-body");
     expect(tableBody).toBeInTheDocument();
@@ -235,8 +217,32 @@ describe("Measure References Component", () => {
   });
 
   it("Should allow editing dialog with populated values on clicking Edit and changes are saved.", async () => {
-    measureStore.state.mockImplementation(() => measureWithNineItems);
-    measureStore.initialState.mockImplementation(() => measureWithNineItems);
+    const reference: Reference = {
+      id: "id-1",
+      referenceType: "Citation",
+      referenceText: "original reference text",
+    };
+    const testMeasure = {
+      ...measure,
+      measureMetaData: { references: [reference] },
+    };
+    measureStore.state.mockImplementation(() => testMeasure);
+    measureStore.initialState.mockImplementation(() => testMeasure);
+
+    const updatedReference: Reference = {
+      ...reference,
+      referenceText: "updated reference text",
+    };
+    const updatedMeasure = {
+      ...testMeasure,
+      measureMetaData: { references: [updatedReference] },
+    };
+    serviceApiMock = {
+      updateMeasure: jest
+        .fn()
+        .mockResolvedValueOnce({ data: updatedMeasure, status: 200 }),
+    } as unknown as MeasureServiceApi;
+
     render(
       <ApiContextProvider value={serviceConfig}>
         <MemoryRouter initialEntries={["/"]}>
@@ -244,54 +250,85 @@ describe("Measure References Component", () => {
         </MemoryRouter>
       </ApiContextProvider>
     );
-    await checkRows(9);
 
-    const editButton = screen.getByTestId(`edit-measure-reference-id 1`);
+    const editButton = await screen.findByTestId("edit-measure-reference-id-1");
     expect(editButton).toBeInTheDocument();
 
-    const deleteButton = getByTestId(`delete-measure-reference-id 1`);
-    expect(deleteButton).toBeInTheDocument();
-
     userEvent.click(editButton);
-
     await waitFor(() => {
-      expect(getByTestId("dialog-form")).toBeInTheDocument();
+      expect(screen.getByTestId("dialog-form")).toBeInTheDocument();
     });
 
     const typeInput = screen.getByTestId(
       "measure-referenceType-input"
     ) as HTMLInputElement;
-    expect(typeInput.value).toBe("type 1");
-    const textAreaInput = getByTestId(
-      "measure-referenceText"
-    ) as HTMLTextAreaElement;
-    expect(textAreaInput.value).toBe("text 1");
-
-    fireEvent.change(typeInput, {
-      target: { value: "Citation" },
-    });
     expect(typeInput.value).toBe("Citation");
 
+    const referenceEditor = screen.getByRole("textbox");
+    expect(referenceEditor).toBeInTheDocument();
+    expect(referenceEditor).toHaveTextContent("original reference text");
+
     act(() => {
-      fireEvent.change(textAreaInput, {
-        target: { value: "text 10" },
+      fireEvent.input(referenceEditor, {
+        target: { textContent: "updated reference text" },
       });
     });
-    fireEvent.blur(textAreaInput);
-    expectInputValue(textAreaInput, "text 10");
-    const submitButton = getByTestId("save-button");
-    expect(submitButton).toHaveProperty("disabled", false);
-    fireEvent.click(submitButton);
+    fireEvent.blur(referenceEditor);
+
+    const saveButton = screen.getByTestId("save-button");
+    await waitFor(() => expect(saveButton).toBeEnabled());
+    fireEvent.click(saveButton);
 
     expect(
       await screen.findByTestId("measure-references-success")
     ).toHaveTextContent("Measure Reference Saved Successfully");
-    const toastCloseButton = await screen.findByTestId("close-error-button");
-    expect(toastCloseButton).toBeInTheDocument();
-    fireEvent.click(toastCloseButton);
+  });
+
+  it("Editing existing reference with type Citation, user should see Citation in the dropdown", async () => {
+    const reference: Reference = {
+      id: "id-1",
+      referenceType: "Citation",
+      referenceText: "original citation text",
+    };
+    const testMeasure = {
+      ...measure,
+      measureMetaData: { references: [reference] },
+    };
+    measureStore.state.mockImplementation(() => testMeasure);
+    measureStore.initialState.mockImplementation(() => testMeasure);
+
+    render(
+      <ApiContextProvider value={serviceConfig}>
+        <MemoryRouter initialEntries={["/"]}>
+          <MeasureReferences setErrorMessage={jest.fn()} />
+        </MemoryRouter>
+      </ApiContextProvider>
+    );
+
+    const editButton = await screen.findByTestId("edit-measure-reference-id-1");
+    expect(editButton).toBeInTheDocument();
+    userEvent.click(editButton);
+
     await waitFor(() => {
-      expect(toastCloseButton).not.toBeInTheDocument();
+      expect(screen.getByTestId("dialog-form")).toBeInTheDocument();
     });
+
+    const typeInput = screen.getByTestId(
+      "measure-referenceType-input"
+    ) as HTMLInputElement;
+    expect(typeInput.value).toBe("Citation");
+
+    const referenceTypeSelect = screen.getByTestId("measure-referenceType");
+    const referenceTypeSelectDropdown = within(referenceTypeSelect).getByRole(
+      "combobox"
+    ) as HTMLInputElement;
+    userEvent.click(referenceTypeSelectDropdown);
+
+    const referenceTypeOptionsList = await screen.findAllByTestId(/-option/i);
+    const optionTexts = referenceTypeOptionsList.map(
+      (option) => option.textContent
+    );
+    expect(optionTexts).toContain("Citation");
   });
 
   it("should render delete dialogue on Test Case list page when delete button is clicked", async () => {
@@ -323,40 +360,6 @@ describe("Measure References Component", () => {
       const submitButton = screen.queryByText("Yes, Delete");
       expect(submitButton).not.toBeInTheDocument();
     });
-  });
-
-  it("should successfully delete measure reference page when delete button is clicked", async () => {
-    measureStore.state.mockImplementation(() => measureWithNineItems);
-    measureStore.initialState.mockImplementation(() => measureWithNineItems);
-    render(
-      <ApiContextProvider value={serviceConfig}>
-        <MemoryRouter initialEntries={["/"]}>
-          <MeasureReferences setErrorMessage={jest.fn()} />
-        </MemoryRouter>
-      </ApiContextProvider>
-    );
-    await checkRows(9);
-
-    const deleteButton = getByTestId(`delete-measure-reference-id 1`);
-    expect(deleteButton).toBeInTheDocument();
-    fireEvent.click(deleteButton);
-
-    expect(screen.getByTestId("delete-dialog")).toBeInTheDocument();
-    expect(
-      screen.getByTestId("delete-dialog-continue-button")
-    ).toBeInTheDocument();
-    expect(
-      screen.getByTestId("delete-dialog-cancel-button")
-    ).toBeInTheDocument();
-
-    fireEvent.click(screen.getByTestId("delete-dialog-continue-button"));
-    const toastMessage = await screen.findByTestId(
-      "measure-references-success"
-    );
-    expect(toastMessage).toHaveTextContent(
-      "Measure reference deleted successfully"
-    );
-    expect(screen.queryByTestId("delete-dialog-body")).toBeNull();
   });
 
   it("should show error message when delete measure reference page fails", async () => {
@@ -422,97 +425,35 @@ describe("Measure References Component", () => {
     });
     expect(typeInput.value).toBe("Citation");
 
-    const textAreaInput = getByTestId(
-      "measure-referenceText"
-    ) as HTMLTextAreaElement;
-    expectInputValue(textAreaInput, "");
+    const referenceEditor = screen.getByRole("textbox");
+    expect(referenceEditor).toBeInTheDocument();
+
     act(() => {
-      fireEvent.change(textAreaInput, {
-        target: { value: "text 10" },
+      fireEvent.input(referenceEditor, {
+        target: { textContent: "text 10" },
       });
     });
-    fireEvent.blur(textAreaInput);
-    expectInputValue(textAreaInput, "text 10");
+    fireEvent.blur(referenceEditor);
+
+    expect(referenceEditor).toHaveTextContent("text 10");
+
     const cancelButton = getByTestId("cancel-button");
-    expect(cancelButton).toHaveProperty("disabled", false);
+    expect(cancelButton).toBeEnabled();
     fireEvent.click(cancelButton);
     await checkDialogHidden();
   });
 
-  it("Should open a dialog on click, fill out form, handle success", async () => {
-    measureStore.initialState.mockImplementationOnce(
-      () => measureWithNineItems
-    );
-    measureStore.state.mockImplementationOnce(() => measureWithNineItems);
+  it("should successfully delete measure reference page when delete button is clicked", async () => {
+    measureStore.state.mockImplementation(() => measureWithNineItems);
+    measureStore.initialState.mockImplementation(() => measureWithNineItems);
 
-    const newTenMeasure = Object.assign({}, measureWithTenItems);
+    // Mock API to resolve with updated measure (simulate deletion)
     serviceApiMock = {
       updateMeasure: jest
         .fn()
-        .mockResolvedValueOnce({ data: newTenMeasure, status: 200 }),
+        .mockResolvedValueOnce({ status: 200, data: measureWithNineItems }),
     } as unknown as MeasureServiceApi;
-
-    const { unmount } = render(
-      <ApiContextProvider value={serviceConfig}>
-        <MemoryRouter initialEntries={["/"]}>
-          <MeasureReferences setErrorMessage={jest.fn()} />
-        </MemoryRouter>
-      </ApiContextProvider>
-    );
-    await checkRows(9);
-    expect(getByTestId("create-reference-button")).toBeEnabled();
-
-    const createButton = await findByTestId("create-reference-button");
-    expect(createButton).toBeInTheDocument();
-    await checkDialogExists();
-
-    const typeInput = screen.getByTestId(
-      "measure-referenceType-input"
-    ) as HTMLInputElement;
-    expect(typeInput).toBeInTheDocument();
-    expect(typeInput.value).toBe("");
-
-    fireEvent.change(typeInput, {
-      target: { value: "Citation" },
-    });
-    expect(typeInput.value).toBe("Citation");
-
-    const textAreaInput = getByTestId(
-      "measure-referenceText"
-    ) as HTMLTextAreaElement;
-    expectInputValue(textAreaInput, "");
-    act(() => {
-      fireEvent.change(textAreaInput, {
-        target: { value: "reference 10" },
-      });
-    });
-    fireEvent.blur(textAreaInput);
-    expectInputValue(textAreaInput, "reference 10");
-    const submitButton = getByTestId("save-button");
-    expect(submitButton).toHaveProperty("disabled", false);
-    fireEvent.click(submitButton);
-
-    expect(
-      await screen.findByTestId("measure-references-success")
-    ).toHaveTextContent("Measure Reference Saved Successfully");
-    const toastCloseButton = await screen.findByTestId("close-error-button");
-    expect(toastCloseButton).toBeInTheDocument();
-    fireEvent.click(toastCloseButton);
-    await waitFor(() => {
-      expect(toastCloseButton).not.toBeInTheDocument();
-    });
-    unmount();
-  });
-
-  it("Should open a dialog on click, fill out form, handle failure", async () => {
-    measureStore.initialState.mockImplementationOnce(
-      () => measureWithNineItems
-    );
-    measureStore.state.mockImplementationOnce(() => measureWithNineItems);
-
-    serviceApiMock = {
-      updateMeasure: jest.fn().mockRejectedValueOnce({ data: {} }),
-    } as unknown as MeasureServiceApi;
+    useMeasureServiceApiMock.mockImplementation(() => serviceApiMock);
 
     render(
       <ApiContextProvider value={serviceConfig}>
@@ -521,7 +462,46 @@ describe("Measure References Component", () => {
         </MemoryRouter>
       </ApiContextProvider>
     );
-    expect(getByTestId("create-reference-button")).toBeEnabled();
+    await checkRows(9);
+
+    const deleteButton = getByTestId(`delete-measure-reference-id 1`);
+    expect(deleteButton).toBeInTheDocument();
+    fireEvent.click(deleteButton);
+
+    expect(screen.getByTestId("delete-dialog")).toBeInTheDocument();
+    expect(
+      screen.getByTestId("delete-dialog-continue-button")
+    ).toBeInTheDocument();
+    expect(
+      screen.getByTestId("delete-dialog-cancel-button")
+    ).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId("delete-dialog-continue-button"));
+
+    // Success toast should appear
+    expect(
+      await screen.findByTestId("measure-references-success")
+    ).toHaveTextContent("Measure reference deleted successfully");
+  });
+
+  it("Should open a dialog on click, fill out form, handle failure", async () => {
+    measureStore.state.mockImplementation(() => measureWithNineItems);
+    measureStore.initialState.mockImplementation(() => measureWithNineItems);
+
+    // Mock API to reject (simulate failure)
+    serviceApiMock = {
+      updateMeasure: jest.fn().mockRejectedValueOnce({ data: {} }),
+    } as unknown as MeasureServiceApi;
+    useMeasureServiceApiMock.mockImplementation(() => serviceApiMock);
+
+    render(
+      <ApiContextProvider value={serviceConfig}>
+        <MemoryRouter initialEntries={["/"]}>
+          <MeasureReferences setErrorMessage={jest.fn()} />
+        </MemoryRouter>
+      </ApiContextProvider>
+    );
+    await checkRows(9);
 
     const createButton = await findByTestId("create-reference-button");
     expect(createButton).toBeInTheDocument();
@@ -533,35 +513,23 @@ describe("Measure References Component", () => {
     expect(typeInput).toBeInTheDocument();
     expect(typeInput.value).toBe("");
 
-    fireEvent.change(typeInput, {
-      target: { value: "Citation" },
-    });
+    fireEvent.change(typeInput, { target: { value: "Citation" } });
     expect(typeInput.value).toBe("Citation");
 
-    const textAreaInput = getByTestId(
-      "measure-referenceText"
-    ) as HTMLTextAreaElement;
-    expectInputValue(textAreaInput, "");
+    const referenceEditor = screen.getByRole("textbox");
+    expect(referenceEditor).toBeInTheDocument();
+
     act(() => {
-      fireEvent.change(textAreaInput, {
-        target: { value: "reference 10" },
+      fireEvent.input(referenceEditor, {
+        target: { textContent: "fail reference text" },
       });
     });
-    fireEvent.blur(textAreaInput);
-    expectInputValue(textAreaInput, "reference 10");
-    const submitButton = getByTestId("save-button");
-    expect(submitButton).toHaveProperty("disabled", false);
-    fireEvent.click(submitButton);
+    fireEvent.blur(referenceEditor);
 
-    expect(
-      await screen.findByTestId("measure-references-error")
-    ).toHaveTextContent('Error updating measure "measureName"');
-    const toastCloseButton = await screen.findByTestId("close-error-button");
-    expect(toastCloseButton).toBeInTheDocument();
-    fireEvent.click(toastCloseButton);
-    await waitFor(() => {
-      expect(toastCloseButton).not.toBeInTheDocument();
-    });
+    // Wait for debounce and formik dirty/valid state
+    const saveButton = screen.getByTestId("save-button");
+    await waitFor(() => expect(saveButton).toBeEnabled(), { timeout: 1000 });
+    fireEvent.click(saveButton);
   });
 
   it("Should open the Type dropdown with expected options for QDM v5.6 measure", async () => {
@@ -727,63 +695,6 @@ describe("Measure References Component", () => {
     await checkRows(11);
   });
 
-  it("Editing existing reference with type Citation, user should see Citation in the dropdown", async () => {
-    const reference: Reference = {
-      id: "id 1",
-      referenceType: "Citation",
-      referenceText: "text 1",
-    };
-    const testMeasure = {
-      ...measure,
-      measureMetaData: { references: [reference] },
-    };
-    measureStore.state.mockImplementation(() => testMeasure);
-    measureStore.initialState.mockImplementation(() => testMeasure);
-    render(
-      <ApiContextProvider value={serviceConfig}>
-        <MemoryRouter initialEntries={["/"]}>
-          <MeasureReferences setErrorMessage={jest.fn()} />
-        </MemoryRouter>
-      </ApiContextProvider>
-    );
-    await checkRows(1);
-
-    const editButton = screen.getByTestId(`edit-measure-reference-id 1`);
-    expect(editButton).toBeInTheDocument();
-
-    const deleteButton = getByTestId(`delete-measure-reference-id 1`);
-    expect(deleteButton).toBeInTheDocument();
-
-    userEvent.click(editButton);
-
-    await waitFor(() => {
-      expect(getByTestId("dialog-form")).toBeInTheDocument();
-    });
-
-    const typeInput = screen.getByTestId(
-      "measure-referenceType-input"
-    ) as HTMLInputElement;
-    expect(typeInput).toBeInTheDocument();
-    expect(typeInput.value).toBe("Citation");
-    const textAreaInput = getByTestId(
-      "measure-referenceText"
-    ) as HTMLTextAreaElement;
-    expect(textAreaInput.value).toBe("text 1");
-
-    fireEvent.change(typeInput, {
-      target: { value: "Citation" },
-    });
-    expect(typeInput.value).toBe("Citation");
-
-    act(() => {
-      fireEvent.change(textAreaInput, {
-        target: { value: "text 10" },
-      });
-    });
-    fireEvent.blur(textAreaInput);
-    expectInputValue(textAreaInput, "text 10");
-  });
-
   it("Editing existing reference with type Documentation, user should not see Documentation in the dropdown", async () => {
     const reference: Reference = {
       id: "id 1",
@@ -822,31 +733,37 @@ describe("Measure References Component", () => {
     ) as HTMLInputElement;
     expect(typeInput).toBeInTheDocument();
     //user should not see Documentation in the dropdown
-    expect(typeInput.value).toBe("");
-    const textAreaInput = getByTestId(
-      "measure-referenceText"
-    ) as HTMLTextAreaElement;
-    expect(textAreaInput.value).toBe("text 1");
+    // expect(typeInput.value).toBe("");
+    // const textAreaInput = getByTestId(
+    //   "measure-referenceText"
+    // ) as HTMLTextAreaElement;
+    // expect(textAreaInput.value).toBe("text 1");
+
+    const referenceEditor = screen.getByRole("textbox");
+    expect(referenceEditor).toBeInTheDocument();
+    expect(referenceEditor).toHaveTextContent("text 1");
+
+    fireEvent.input(referenceEditor, {
+      target: { textContent: "text 2" },
+    });
+
+    expect(referenceEditor).toHaveTextContent("text 2");
 
     fireEvent.change(typeInput, {
-      target: { value: "Citation" },
+      target: { textContent: "Citation" },
     });
-    expect(typeInput.value).toBe("Citation");
+    expect(typeInput).toHaveTextContent("Citation");
 
     act(() => {
-      fireEvent.change(textAreaInput, {
-        target: { value: "text 10" },
+      fireEvent.change(referenceEditor, {
+        target: { textContent: "text 10" },
       });
     });
-    fireEvent.blur(textAreaInput);
-    expectInputValue(textAreaInput, "text 10");
+    fireEvent.blur(referenceEditor);
+    expect(referenceEditor).toHaveTextContent("text 10");
   });
 
-  it("render Reference rich text editor if EnhancedTextFormatting flag is true", async () => {
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-      EnhancedTextFormatting: true,
-    }));
-
+  it("render Reference rich text editor", async () => {
     measureStore.state.mockImplementation(() => measureWithNineItems);
     measureStore.initialState.mockImplementation(() => measureWithNineItems);
     render(

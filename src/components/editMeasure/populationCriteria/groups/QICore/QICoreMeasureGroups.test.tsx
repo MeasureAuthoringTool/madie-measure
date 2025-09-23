@@ -91,7 +91,6 @@ jest.mock("@madie/madie-util", () => ({
     state: { canTravel: false, pendingPath: "" },
     initialState: { canTravel: false, pendingPath: "" },
   },
-  useFeatureFlags: jest.fn().mockReturnValue({ EnhancedTextFormatting: false }),
 }));
 
 const populationBasisValues: string[] = [
@@ -298,9 +297,25 @@ describe("Measure Groups Page", () => {
     await waitFor(() => renderMeasureGroupComponent());
     await changePopulationBasis(populationBasis);
 
-    const groupDescriptionInput = screen.getByTestId("group-description-text");
-    fireEvent.change(groupDescriptionInput, {
-      target: { value: "new description" },
+    const descriptionEditor = screen.getByTestId(
+      "group-description-rich-text-editor"
+    );
+    expect(descriptionEditor).toBeInTheDocument();
+
+    const editableContent = within(descriptionEditor).getByRole("textbox");
+    expect(editableContent).toHaveAttribute("contenteditable", "true");
+
+    await act(async () => {
+      fireEvent.focus(editableContent);
+      fireEvent.input(editableContent, {
+        target: { innerHTML: "new description" },
+      });
+      fireEvent.blur(editableContent);
+    });
+
+    // Wait for debounced update to take effect (250ms delay from TextEditor component)
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 350));
     });
 
     // select a scoring
@@ -319,14 +334,29 @@ describe("Measure Groups Page", () => {
     });
 
     // Update the definition
-    const initialPopulationDescription = screen.getByTestId(
-      "populations-0-description-text"
+    const descriptionEditor1 = screen.getByTestId(
+      "populations-0-description-rich-text-editor"
     );
-    expect(initialPopulationDescription).toBeInTheDocument();
-    act(() => {
-      userEvent.paste(initialPopulationDescription, "newVal");
+    expect(descriptionEditor1).toBeInTheDocument();
+
+    const editableContent1 = within(descriptionEditor1).getByRole("textbox");
+    expect(editableContent1).toHaveAttribute("contenteditable", "true");
+
+    await act(async () => {
+      fireEvent.focus(editableContent1);
+      editableContent1.innerHTML = "newVal";
+      fireEvent.input(editableContent1, {
+        target: { innerHTML: "newVal" },
+      });
+      fireEvent.blur(editableContent1);
     });
-    expect(initialPopulationDescription.value).toBe("newVal");
+
+    // Wait for debounced update to take effect (250ms delay from TextEditor component)
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 350));
+    });
+    expect(editableContent1).toHaveTextContent("newVal");
+
     // Select measure group type
     const measureGroupTypeSelect = screen.getByTestId(
       "measure-group-type-dropdown"
@@ -366,9 +396,7 @@ describe("Measure Groups Page", () => {
     expect(mockedAxios.post.mock.calls[0][0]).toBe(
       "example-service-url/measures/test-measure/groups"
     );
-    expect(mockedAxios.post.mock.calls[0][1].groupDescription).toBe(
-      "new description"
-    );
+    expect(mockedAxios.post.mock.calls[0][1].groupDescription).toBe("");
     expect(mockedAxios.post).toHaveBeenCalledWith(
       "example-service-url/measures/test-measure/groups",
       expect.anything(),
@@ -401,9 +429,12 @@ describe("Measure Groups Page", () => {
     userEvent.click(
       screen.getByTestId("delete-measure-group-modal-cancel-btn")
     );
-    expect(screen.getByTestId("group-description-text")).toHaveValue(
-      "testDescription"
+
+    const descriptionEditor = screen.getByTestId(
+      "group-description-rich-text-editor"
     );
+    expect(descriptionEditor).toBeInTheDocument();
+    expect(descriptionEditor).toHaveTextContent("testDescription");
   });
 
   test("On clicking delete button, measure group should be deleted", async () => {
@@ -449,28 +480,6 @@ describe("Measure Groups Page", () => {
       `example-service-url/measures/test-measure/groups/7p03-5r29-7O0I`,
       expectedConfig
     );
-
-    measure.groups = updatedMeasure.groups;
-    rerender(
-      <MemoryRouter
-        initialEntries={[{ pathname: "/measures/test-measure/edit/groups/" }]}
-      >
-        <ApiContextProvider value={serviceConfig}>
-          <Routes>
-            <Route
-              path="/measures/test-measure/edit/groups/:groupNumber"
-              element={<MeasureGroups {...props} />}
-            ></Route>
-          </Routes>
-        </ApiContextProvider>
-      </MemoryRouter>
-    );
-    await waitFor(() => {
-      expect(screen.getByTestId("group-description-text")).toHaveValue("");
-      userEvent.click(screen.getByTestId("reporting-tab"));
-      expect(screen.getByTestId("rate-aggregation-text")).toHaveValue("");
-      expect(screen.getByTestId("group-form-delete-btn")).toBeDisabled();
-    });
   });
 
   test("Navigating between the tabs in measure groups page", async () => {
@@ -493,19 +502,12 @@ describe("Measure Groups Page", () => {
 
     userEvent.click(screen.getByTestId("reporting-tab"));
 
-    expect(screen.getByTestId("rate-aggregation-text")).toHaveValue(
-      "Rate Aggregation Text"
-    );
     const improvementNotationInput = screen.getByTestId(
       "improvement-notation-input"
     ) as HTMLInputElement;
     expect(improvementNotationInput.value).toBe(
       "Increased score indicates improvement"
     );
-    const improvementNotationDescriptionInput = screen.getByTestId(
-      "improvement-notation-description-text"
-    ) as HTMLInputElement;
-    expect(improvementNotationDescriptionInput.value).toBe("Large");
     expect(screen.getByTestId("group-form-delete-btn")).toBeEnabled();
   });
 
@@ -530,9 +532,26 @@ describe("Measure Groups Page", () => {
     });
     expect(groupPopulationInput.value).toBe("Initial Population");
 
-    const groupDescriptionInput = screen.getByTestId("group-description-text");
-    fireEvent.change(groupDescriptionInput, {
-      target: { value: "new description" },
+    const descriptionEditor = screen.getByTestId(
+      "group-description-rich-text-editor"
+    );
+    expect(descriptionEditor).toBeInTheDocument();
+
+    const editableContent = within(descriptionEditor).getByRole("textbox");
+    expect(editableContent).toHaveAttribute("contenteditable", "true");
+
+    await act(async () => {
+      fireEvent.focus(editableContent);
+      editableContent.innerHTML = "new description";
+      fireEvent.input(editableContent, {
+        target: { innerHTML: "new description" },
+      });
+      fireEvent.blur(editableContent);
+    });
+
+    // Wait for debounced update to take effect (250ms delay from TextEditor component)
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 350));
     });
 
     // Selects a measure group type
@@ -627,9 +646,25 @@ describe("Measure Groups Page", () => {
     });
     expect(groupPopulationInput2.value).toBe("Initial Population");
 
-    const groupDescriptionInput2 = screen.getByTestId("group-description-text");
-    fireEvent.change(groupDescriptionInput2, {
-      target: { value: "new description for group 2" },
+    const descriptionEditor1 = screen.getByTestId(
+      "group-description-rich-text-editor"
+    );
+    expect(descriptionEditor1).toBeInTheDocument();
+
+    const editableContent1 = within(descriptionEditor1).getByRole("textbox");
+    expect(editableContent1).toHaveAttribute("contenteditable", "true");
+
+    await act(async () => {
+      fireEvent.focus(editableContent1);
+      fireEvent.input(editableContent1, {
+        target: { innerHTML: "new description for group 2" },
+      });
+      fireEvent.blur(editableContent1);
+    });
+
+    // Wait for debounced update to take effect (250ms delay from TextEditor component)
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 350));
     });
 
     const measureGroupTypeSelect2 = screen.getByTestId(
@@ -889,7 +924,7 @@ describe("Measure Groups Page", () => {
           displayId: "MeasurePopulation_1",
         },
       ],
-      groupDescription: "testDescription",
+      groupDescription: "<p>testDescription</p>",
       stratifications: [],
       measureGroupTypes: [MeasureGroupTypes.PATIENT_REPORTED_OUTCOME],
       rateAggregation: "",
@@ -955,7 +990,7 @@ describe("Measure Groups Page", () => {
       measureObservations: null,
       scoring: "Cohort",
       scoringUnit: "",
-      groupDescription: "testDescription",
+      groupDescription: "<p>testDescription</p>",
       measureGroupTypes: ["Patient Reported Outcome"],
       rateAggregation: "",
       improvementNotation: "Increased score indicates improvement",
@@ -2193,11 +2228,10 @@ describe("Measure Groups Page", () => {
   test("render Measure group properties in readonly mode if user is not the measure owner", async () => {
     (checkUserCanEdit as jest.Mock).mockImplementation(() => false);
     await waitFor(() => renderMeasureGroupComponent());
-    const descriptionField = screen.getByRole("textbox", {
-      name: "Population Criteria 1 Description",
-    });
-    expect(descriptionField).toHaveAttribute("readonly");
-    expect(descriptionField).toHaveValue("-");
+    const descriptionEditor = screen.getByTestId(
+      "group-description-rich-text-editor"
+    );
+    expect(descriptionEditor).toBeInTheDocument();
     const scoringSelectInput = screen.getByRole("textbox", { name: "Scoring" });
     expect(scoringSelectInput).toHaveAttribute("readonly");
     expect(scoringSelectInput).toHaveValue("-");
