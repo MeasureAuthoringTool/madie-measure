@@ -2,14 +2,15 @@
   .MuiTabs-flexContainer {
     > .MuiTab-root:focus,
     > .MuiTab-root.Mui-focusVisible {
-      background: #003366 !important;
+      background: #036 !important;
       color: #fff !important;
       outline: none !important;
       box-shadow: none !important;
     }
+
     > .MuiTab-root.Mui-selected {
       background: #fff !important;
-      color: #003366 !important;
+      color: #036 !important;
     }
     a:focus {
       text-decoration: none !important;
