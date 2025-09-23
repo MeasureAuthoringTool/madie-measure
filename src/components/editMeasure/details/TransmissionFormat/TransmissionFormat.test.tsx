@@ -10,7 +10,7 @@ import TransmissionFormat from "./TransmissionFormat";
 import useMeasureServiceApi, {
   MeasureServiceApi,
 } from "../../../../api/useMeasureServiceApi";
-import { measureStore, useFeatureFlags } from "@madie/madie-util";
+import { measureStore } from "@madie/madie-util";
 import { Measure } from "@madie/madie-models";
 import userEvent from "@testing-library/user-event";
 
@@ -54,11 +54,6 @@ jest.mock("@madie/madie-util", () => ({
     state: { canTravel: false, pendingPath: "" },
     initialState: { canTravel: false, pendingPath: "" },
   },
-  useFeatureFlags: jest.fn(() => {
-    return {
-      EnhancedTextFormatting: false,
-    };
-  }),
 }));
 
 const serviceConfig = {
@@ -81,9 +76,9 @@ const expectInputValue = (
   element: HTMLTextAreaElement,
   value: string
 ): void => {
-  expect(element).toBeInstanceOf(HTMLTextAreaElement);
-  const inputEl = element as HTMLTextAreaElement;
-  expect(inputEl.value).toBe(value);
+  expect(element).toBeInstanceOf(HTMLDivElement);
+  const inputEl = element;
+  expect(inputEl).toBe(value);
 };
 describe("Transmission Format page", () => {
   afterEach(() => jest.clearAllMocks());
@@ -98,24 +93,21 @@ describe("Transmission Format page", () => {
         </MemoryRouter>
       </ApiContextProvider>
     );
-    const textAreaInput = getByTestId(
-      "transmission-format-text"
-    ) as HTMLTextAreaElement;
-    expectInputValue(textAreaInput, "");
-    act(() => {
-      fireEvent.change(textAreaInput, {
-        target: { value: "transmission format example" },
-      });
+    const editor = screen.getByRole("textbox");
+    expect(editor).toHaveTextContent("");
+    fireEvent.change(editor, {
+      target: { innerHTML: "transmission format example" },
     });
-    fireEvent.blur(textAreaInput);
-    expectInputValue(textAreaInput, "transmission format example");
-    const submitButton = getByTestId("save-button");
-    expect(submitButton).toHaveProperty("disabled", false);
+    expect(editor).toHaveTextContent("transmission format example");
+    const submitButton = screen.getByTestId("save-button");
+    await waitFor(() => {
+      expect(submitButton).toBeEnabled();
+    });
     fireEvent.click(submitButton);
     expect(
-      await findByTestId("measure-transmission-format-success")
+      await screen.findByTestId("measure-transmission-format-success")
     ).toHaveTextContent("Measure Transmission Format Saved Successfully");
-    const toastCloseButton = await findByTestId("close-error-button");
+    const toastCloseButton = await screen.findByTestId("close-error-button");
     expect(toastCloseButton).toBeInTheDocument();
     fireEvent.click(toastCloseButton);
     await waitFor(() => {
@@ -133,22 +125,19 @@ describe("Transmission Format page", () => {
         </MemoryRouter>
       </ApiContextProvider>
     );
-    const textAreaInput = getByTestId(
-      "transmission-format-text"
-    ) as HTMLTextAreaElement;
-    expectInputValue(textAreaInput, "");
-    act(() => {
-      fireEvent.change(textAreaInput, {
-        target: { value: "transmission format example" },
-      });
+    const editor = screen.getByRole("textbox");
+    expect(editor).toHaveTextContent("");
+    fireEvent.change(editor, {
+      target: { innerHTML: "transmission format example" },
     });
-    fireEvent.blur(textAreaInput);
-    expectInputValue(textAreaInput, "transmission format example");
-    const submitButton = getByTestId("save-button");
-    expect(submitButton).toHaveProperty("disabled", false);
+    expect(editor).toHaveTextContent("transmission format example");
+    const submitButton = screen.getByTestId("save-button");
+    await waitFor(() => {
+      expect(submitButton).toBeEnabled();
+    });
 
-    const cancelButton = getByTestId("cancel-button");
-    expect(cancelButton).toHaveProperty("disabled", false);
+    const cancelButton = screen.getByTestId("cancel-button");
+    expect(cancelButton).toBeEnabled();
     fireEvent.click(cancelButton);
     const discardDialog = await screen.getByTestId("discard-dialog");
     expect(discardDialog).toBeInTheDocument();
@@ -162,7 +151,7 @@ describe("Transmission Format page", () => {
       expect(queryByText("You have unsaved changes.")).not.toBeVisible();
     });
 
-    expect(cancelButton).toHaveProperty("disabled", false);
+    expect(cancelButton).toBeEnabled();
     fireEvent.click(cancelButton);
     expect(discardDialog).toBeInTheDocument();
     expect(queryByText("You have unsaved changes.")).toBeVisible();
@@ -190,22 +179,21 @@ describe("Transmission Format page", () => {
         </MemoryRouter>
       </ApiContextProvider>
     );
-    const textAreaInput = getByTestId(
-      "transmission-format-text"
-    ) as HTMLTextAreaElement;
-    expectInputValue(textAreaInput, "");
-    fireEvent.change(textAreaInput, {
-      target: { value: "transmission format example" },
+    const editor = screen.getByRole("textbox");
+    expect(editor).toHaveTextContent("");
+    fireEvent.change(editor, {
+      target: { innerHTML: "transmission format example" },
     });
-    fireEvent.blur(textAreaInput);
-    expectInputValue(textAreaInput, "transmission format example");
-    const submitButton = getByTestId("save-button");
-    expect(submitButton).toHaveProperty("disabled", false);
+    expect(editor).toHaveTextContent("transmission format example");
+    const submitButton = screen.getByTestId("save-button");
+    await waitFor(() => {
+      expect(submitButton).toBeEnabled();
+    });
     fireEvent.click(submitButton);
     expect(
-      await findByTestId("measure-transmission-format-error")
+      await screen.findByTestId("measure-transmission-format-error")
     ).toHaveTextContent(`Error updating Transmission Format for "measureName"`);
-    const toastCloseButton = await findByTestId("close-error-button");
+    const toastCloseButton = await screen.findByTestId("close-error-button");
     expect(toastCloseButton).toBeInTheDocument();
     fireEvent.click(toastCloseButton);
     await waitFor(() => {
@@ -214,9 +202,6 @@ describe("Transmission Format page", () => {
   });
 
   it("should handle successful save of transmission format entered in rich text editor", async () => {
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-      EnhancedTextFormatting: true,
-    }));
     let serviceApiMock = {
       updateMeasure: jest
         .fn()

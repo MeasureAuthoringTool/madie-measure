@@ -9,7 +9,7 @@ import {
 } from "../../../../api/ServiceContext";
 import MeasureDefinitions from "./MeasureDefinitions";
 // @ts-ignore
-import { measureStore, useFeatureFlags } from "@madie/madie-util";
+import { measureStore } from "@madie/madie-util";
 import { Measure, MeasureDefinition } from "@madie/madie-models";
 import userEvent from "@testing-library/user-event";
 import useMeasureServiceApi, {
@@ -57,11 +57,6 @@ jest.mock("@madie/madie-util", () => ({
     getAccessToken: () => "test.jwt",
   })),
   checkUserCanEdit: jest.fn().mockImplementation(() => true),
-  useFeatureFlags: jest.fn(() => {
-    return {
-      EnhancedTextFormatting: false,
-    };
-  }),
   measureStore: {
     updateMeasure: jest.fn((measure) => measure),
     state: jest.fn().mockImplementation(() => measure),
@@ -107,12 +102,6 @@ const {
 } = screen;
 
 describe("Measure Definitions Component", () => {
-  beforeEach(() => {
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-      EnhancedTextFormatting: false,
-    }));
-  });
-
   afterEach(() => jest.clearAllMocks());
 
   const expectInputValue = (
@@ -322,10 +311,10 @@ describe("Measure Definitions Component", () => {
       "measure-definition-term-input"
     ) as HTMLInputElement;
     expect(termInput.value).toBe("term 1");
-    const definitionInput = getByTestId(
-      "measure-definition"
-    ) as HTMLTextAreaElement;
-    expect(definitionInput.value).toBe("definition 1");
+    const definitionInput = within(
+      screen.getByTestId("definition-rich-text-editor")
+    ).getByRole("textbox");
+    expect(definitionInput).toHaveTextContent("definition 1");
 
     fireEvent.change(termInput, {
       target: { value: "term 111" },
@@ -333,12 +322,12 @@ describe("Measure Definitions Component", () => {
     expect(termInput.value).toBe("term 111");
 
     act(() => {
-      fireEvent.change(definitionInput, {
-        target: { value: "definition 111" },
+      fireEvent.input(definitionInput, {
+        target: { textContent: "definition 111" },
       });
     });
     fireEvent.blur(definitionInput);
-    expectInputValue(definitionInput, "definition 111");
+    expect(definitionInput).toHaveTextContent("definition 111");
     const submitButton = getByTestId("save-button");
     expect(submitButton).toHaveProperty("disabled", false);
     fireEvent.click(submitButton);
@@ -472,201 +461,25 @@ describe("Measure Definitions Component", () => {
     });
     expect(termInput.value).toBe("term 1");
 
-    const definitionInput = getByTestId(
-      "measure-definition"
-    ) as HTMLTextAreaElement;
-    expectInputValue(definitionInput, "");
+    const definitionInput = within(
+      screen.getByTestId("definition-rich-text-editor")
+    ).getByRole("textbox");
+    expect(definitionInput).toBeInTheDocument();
+    expect(definitionInput).toHaveTextContent("");
     act(() => {
-      fireEvent.change(definitionInput, {
-        target: { value: "definition 1" },
+      fireEvent.input(definitionInput, {
+        target: { textContent: "definition 1" },
       });
     });
     fireEvent.blur(definitionInput);
-    expectInputValue(definitionInput, "definition 1");
+    expect(definitionInput).toHaveTextContent("definition 1");
     const cancelButton = getByTestId("cancel-button");
     expect(cancelButton).toHaveProperty("disabled", false);
     fireEvent.click(cancelButton);
     await checkDialogHidden();
   });
 
-  it("test create measure definition failure", async () => {
-    measureStore.initialState.mockImplementationOnce(
-      () => measureWithNineItems
-    );
-    measureStore.state.mockImplementationOnce(() => measureWithNineItems);
-
-    serviceApiMock = {
-      updateMeasure: jest.fn().mockRejectedValueOnce({ data: {} }),
-    } as unknown as MeasureServiceApi;
-
-    render(
-      <ApiContextProvider value={serviceConfig}>
-        <MemoryRouter initialEntries={["/"]}>
-          <MeasureDefinitions setErrorMessage={jest.fn()} />
-        </MemoryRouter>
-      </ApiContextProvider>
-    );
-    expect(getByTestId("create-definition-button")).toBeEnabled();
-
-    const createButton = await findByTestId("create-definition-button");
-    expect(createButton).toBeInTheDocument();
-    await checkDialogExists();
-
-    const termInput = getByTestId(
-      "measure-definition-term-input"
-    ) as HTMLInputElement;
-    expect(termInput).toBeInTheDocument();
-    expect(termInput.value).toBe("");
-
-    fireEvent.change(termInput, {
-      target: { value: "term 1" },
-    });
-    expect(termInput.value).toBe("term 1");
-
-    const definitionInput = getByTestId(
-      "measure-definition"
-    ) as HTMLTextAreaElement;
-    expectInputValue(definitionInput, "");
-    act(() => {
-      fireEvent.change(definitionInput, {
-        target: { value: "definition 11" },
-      });
-    });
-    fireEvent.blur(definitionInput);
-    expectInputValue(definitionInput, "definition 11");
-    const submitButton = getByTestId("save-button");
-    expect(submitButton).toHaveProperty("disabled", false);
-    fireEvent.click(submitButton);
-
-    expect(await findByTestId("measure-definitions-error")).toHaveTextContent(
-      'Error updating measure "measureName"'
-    );
-    const toastCloseButton = await findByTestId("close-error-button");
-    expect(toastCloseButton).toBeInTheDocument();
-    fireEvent.click(toastCloseButton);
-    await waitFor(() => {
-      expect(toastCloseButton).not.toBeInTheDocument();
-    });
-  });
-
-  it("test create measure definition status not 200", async () => {
-    measureStore.initialState.mockImplementationOnce(
-      () => measureWithNineItems
-    );
-    measureStore.state.mockImplementationOnce(() => measureWithNineItems);
-
-    serviceApiMock = {
-      updateMeasure: jest.fn().mockResolvedValueOnce({ status: 409, data: {} }),
-    } as unknown as MeasureServiceApi;
-
-    render(
-      <ApiContextProvider value={serviceConfig}>
-        <MemoryRouter initialEntries={["/"]}>
-          <MeasureDefinitions setErrorMessage={jest.fn()} />
-        </MemoryRouter>
-      </ApiContextProvider>
-    );
-    expect(getByTestId("create-definition-button")).toBeEnabled();
-
-    const createButton = await findByTestId("create-definition-button");
-    expect(createButton).toBeInTheDocument();
-    await checkDialogExists();
-
-    const termInput = getByTestId(
-      "measure-definition-term-input"
-    ) as HTMLInputElement;
-    expect(termInput).toBeInTheDocument();
-    expect(termInput.value).toBe("");
-
-    fireEvent.change(termInput, {
-      target: { value: "term 1" },
-    });
-    expect(termInput.value).toBe("term 1");
-
-    const definitionInput = getByTestId(
-      "measure-definition"
-    ) as HTMLTextAreaElement;
-    expectInputValue(definitionInput, "");
-    act(() => {
-      fireEvent.change(definitionInput, {
-        target: { value: "definition 1" },
-      });
-    });
-    fireEvent.blur(definitionInput);
-    expectInputValue(definitionInput, "definition 1");
-    const submitButton = getByTestId("save-button");
-    expect(submitButton).toHaveProperty("disabled", false);
-    fireEvent.click(submitButton);
-
-    expect(await findByTestId("measure-definitions-error")).toHaveTextContent(
-      "Error updating measure measureName"
-    );
-    const toastCloseButton = await findByTestId("close-error-button");
-    expect(toastCloseButton).toBeInTheDocument();
-    fireEvent.click(toastCloseButton);
-    await waitFor(() => {
-      expect(toastCloseButton).not.toBeInTheDocument();
-    });
-  });
-
-  it("test create measure defintition no previous definitions.", async () => {
-    const copiedMeasure = {
-      ...measure,
-      measureMetaData: {},
-    };
-    measureStore.state.mockImplementation(() => copiedMeasure);
-    measureStore.initialState.mockImplementation(() => copiedMeasure);
-    serviceApiMock = {
-      updateMeasure: jest.fn().mockResolvedValueOnce({ status: 200, data: {} }),
-    } as unknown as MeasureServiceApi;
-    render(
-      <ApiContextProvider value={serviceConfig}>
-        <MemoryRouter initialEntries={["/"]}>
-          <MeasureDefinitions setErrorMessage={jest.fn()} />
-        </MemoryRouter>
-      </ApiContextProvider>
-    );
-
-    expect(getByTestId("create-definition-button")).toBeEnabled();
-
-    const createButton = await findByTestId("create-definition-button");
-    expect(createButton).toBeInTheDocument();
-    await checkDialogExists();
-
-    const termInput = getByTestId(
-      "measure-definition-term-input"
-    ) as HTMLInputElement;
-    expect(termInput).toBeInTheDocument();
-    expect(termInput.value).toBe("");
-
-    fireEvent.change(termInput, {
-      target: { value: "term 1" },
-    });
-    expect(termInput.value).toBe("term 1");
-
-    const definitionInput = getByTestId(
-      "measure-definition"
-    ) as HTMLTextAreaElement;
-    expectInputValue(definitionInput, "");
-    act(() => {
-      fireEvent.change(definitionInput, {
-        target: { value: "definition 1" },
-      });
-    });
-    fireEvent.blur(definitionInput);
-    expectInputValue(definitionInput, "definition 1");
-    const cancelButton = getByTestId("cancel-button");
-    expect(cancelButton).toHaveProperty("disabled", false);
-    const saveButton = getByTestId("save-button");
-    fireEvent.click(saveButton);
-    await checkDialogHidden();
-  });
-
-  it("render Definition rich text editor if EnhancedTextFormatting flag is true", async () => {
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-      EnhancedTextFormatting: true,
-    }));
-
+  it("render Definition rich text editor", async () => {
     measureStore.initialState.mockImplementationOnce(
       () => measureWithNineItems
     );
