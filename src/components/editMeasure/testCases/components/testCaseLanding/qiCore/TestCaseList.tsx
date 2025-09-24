@@ -674,6 +674,7 @@ const TestCaseList = (props: TestCaseListProps) => {
                           setShiftDatesDialogModalOpen
                         }
                         setWarnings={setWarnings}
+                        page={page}
                       />
                       {currentSlice?.length > 0 && (
                         <Pagination
