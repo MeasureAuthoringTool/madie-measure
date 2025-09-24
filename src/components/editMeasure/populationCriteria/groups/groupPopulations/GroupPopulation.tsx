@@ -42,12 +42,19 @@ const GroupPopulation = ({
   const populationSelectorProperties = (fieldProps: any, scoring: string) => {
     const hidden = fieldProps.hidden?.includes(scoring);
     const required = isPopulationRequired(population.name);
+    // filter out CQL function definitions (including fluent/public/private variants)
+    const functionDefRegex =
+      /^(\s*)define\s+(?:public\s+|private\s+)?(?:fluent\s+)?function\s+/i;
+    const filteredDefinitions = (cqlDefinitions || []).filter((def) => {
+      const txt = def?.text || "";
+      return !functionDefRegex.test(txt);
+    });
     return {
       label: _.startCase(field.name),
       hidden,
       required,
       name: field.name,
-      options: cqlDefinitions,
+      options: filteredDefinitions,
       subTitle: fieldProps.subTitle,
     };
   };
