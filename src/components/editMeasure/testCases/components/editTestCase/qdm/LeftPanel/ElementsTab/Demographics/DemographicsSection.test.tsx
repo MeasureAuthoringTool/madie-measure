@@ -178,8 +178,7 @@ describe("DemographicsSection", () => {
     }));
     renderDemographicsSection();
 
-    expect(screen.getByText("Ethnicity")).toBeInTheDocument();
-    const ethnicitySelect = screen.getAllByRole("combobox")[3];
+    const ethnicitySelect = screen.getByRole("combobox", { name: "Ethnicity" });
     expect(ethnicitySelect).toHaveTextContent("Hispanic or Latino");
     // change the ethnicity option
     userEvent.click(ethnicitySelect);
@@ -236,8 +235,7 @@ describe("DemographicsSection", () => {
     }));
     renderDemographicsSection();
 
-    expect(screen.getByText("Race")).toBeInTheDocument();
-    const raceSelector = screen.getAllByRole("combobox")[1];
+    const raceSelector = screen.getByRole("combobox", { name: "Race" });
     expect(raceSelector).toHaveTextContent("American Indian or Alaska Native");
     // change race option
     userEvent.click(raceSelector);
@@ -265,8 +263,7 @@ describe("DemographicsSection", () => {
     }));
     renderDemographicsSection();
 
-    expect(screen.getByText("Sex")).toBeInTheDocument();
-    const genderSelector = screen.getAllByRole("combobox")[2];
+    const genderSelector = screen.getByRole("combobox", { name: "Sex" });
     expect(genderSelector).toHaveTextContent("Female (finding)");
     // change gender option
     userEvent.click(genderSelector);

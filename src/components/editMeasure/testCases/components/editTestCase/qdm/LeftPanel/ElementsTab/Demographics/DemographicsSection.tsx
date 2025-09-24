@@ -358,8 +358,7 @@ const DemographicsSection = ({ handleTestCaseWarnings, canEdit }) => {
               />
               <FormControl>
                 <Select
-                  labelId="demographics-living-status-select-label"
-                  id="demographics-living-status-select-id"
+                  id="demographics-living-status-selector"
                   defaultValue="Living"
                   label="Living Status"
                   readOnly={!canEdit}
@@ -400,8 +399,7 @@ const DemographicsSection = ({ handleTestCaseWarnings, canEdit }) => {
 
               <FormControl>
                 <Select
-                  labelId="demographics-race-select-label"
-                  id="demographics-race-select-id"
+                  id="demographics-race-selector"
                   label="Race"
                   readOnly={!canEdit}
                   inputProps={{
@@ -415,8 +413,7 @@ const DemographicsSection = ({ handleTestCaseWarnings, canEdit }) => {
               </FormControl>
               <FormControl>
                 <Select
-                  labelId="demographics-gender-select-label"
-                  id="demographics-gender-select-id"
+                  id="demographics-gender-selector"
                   label="Sex"
                   readOnly={!canEdit}
                   inputProps={{
@@ -432,8 +429,7 @@ const DemographicsSection = ({ handleTestCaseWarnings, canEdit }) => {
             <div className="demographics-row">
               <FormControl>
                 <Select
-                  labelId="demographics-ethnicity-select-label"
-                  id="demographics-ethnicity-select-id"
+                  id="demographics-ethnicity-selector"
                   label="Ethnicity"
                   className="demographics-ethnicity"
                   readOnly={!canEdit}
