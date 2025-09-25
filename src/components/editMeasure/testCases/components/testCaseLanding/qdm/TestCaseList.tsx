@@ -387,13 +387,36 @@ const TestCaseList = (props: TestCaseListProps) => {
       })
       .catch((err) => {
         console.error("deleteTestCases: err.message = " + err.message);
-        setToastOpen(true);
-        setToastType("danger");
-        setToastMessage(
-          `Unable to Delete test Case(s) with ID(s) ${testCaseIds.join(
-            ", "
-          )}. Please try again. If the issue continues, please contact helpdesk.`
-        );
+        if (err?.response?.status == 409) {
+          if (
+            testCaseIds.length ===
+            err?.response?.data?.message?.split(",").length
+          ) {
+            setToastMessage(
+              "All the selected test cases are in-use by another user and could not be deleted."
+            );
+            setToastOpen(true);
+            setToastType("warning");
+          } else {
+            retrieveTestCases();
+            setCustomWarningMessages([
+              {
+                message:
+                  "Some of the selected test cases were deleted successfully, but the following test cases are in-use by another user and could not be deleted:",
+                details: err?.response?.data?.message?.split(","),
+                testDataId: "test-cases-in-use-warning",
+              },
+            ]);
+          }
+        } else {
+          setToastOpen(true);
+          setToastType("danger");
+          setToastMessage(
+            `Unable to Delete test Case(s) with ID(s) ${testCaseIds.join(
+              ", "
+            )}. Please try again. If the issue continues, please contact helpdesk.`
+          );
+        }
       });
   };
 

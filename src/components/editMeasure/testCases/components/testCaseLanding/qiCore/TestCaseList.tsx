@@ -308,7 +308,30 @@ const TestCaseList = (props: TestCaseListProps) => {
       })
       .catch((err) => {
         console.error("deleteTestCases: err.message = " + err.message);
-        setErrors((prevState) => [...prevState, err.message]);
+        if (err?.response?.status == 409) {
+          if (
+            testCaseIds.length ===
+            err?.response?.data?.message?.split(",").length
+          ) {
+            setToastMessage(
+              "All the selected test cases are in-use by another user and could not be deleted."
+            );
+            setToastOpen(true);
+            setToastType("warning");
+          } else {
+            retrieveTestCases();
+            setCustomWarningMessages([
+              {
+                message:
+                  "Some of the selected test cases were deleted successfully, but the following test cases are in-use by another user and could not be deleted:",
+                details: err?.response?.data?.message?.split(","),
+                testDataId: "test-cases-in-use-warning",
+              },
+            ]);
+          }
+        } else {
+          setErrors((prevState) => [...prevState, err.message]);
+        }
       });
   };
 
