@@ -234,7 +234,8 @@ const renderWithTestCase = (
   deleteDialogModalOpen = false,
   setDeleteDialogModalOpen = jest.fn(),
   shiftDatesDialogModalOpen = false,
-  setShiftDatesDialogModalOpen = jest.fn()
+  setShiftDatesDialogModalOpen = jest.fn(),
+  page = 1
 ) => {
   return render(
     <MemoryRouter>
@@ -254,6 +255,7 @@ const renderWithTestCase = (
         shiftDatesDialogModalOpen={shiftDatesDialogModalOpen}
         setShiftDatesDialogModalOpen={setShiftDatesDialogModalOpen}
         setWarnings={jest.fn()}
+        page={page}
       />
     </MemoryRouter>
   );
@@ -637,7 +639,14 @@ describe("TestCase component", () => {
       exportTestCase,
       undefined,
       { ...measures[1], measureMetaData: { draft: false } },
-      setSelectedTestCasesMock
+      setSelectedTestCasesMock,
+      undefined,
+      [],
+      false,
+      jest.fn(),
+      false,
+      jest.fn(),
+      1
     );
 
     await waitFor(() => {
@@ -659,7 +668,14 @@ describe("TestCase component", () => {
       exportTestCase,
       undefined,
       { ...measures[1], measureMetaData: { draft: false } },
-      setSelectedTestCasesMock
+      setSelectedTestCasesMock,
+      undefined,
+      [],
+      false,
+      jest.fn(),
+      false,
+      jest.fn(),
+      1
     );
 
     await waitFor(() => {
@@ -681,7 +697,14 @@ describe("TestCase component", () => {
       exportTestCase,
       undefined,
       { ...measures[1], measureMetaData: { draft: true } },
-      setSelectedTestCasesMock
+      setSelectedTestCasesMock,
+      undefined,
+      [],
+      false,
+      jest.fn(),
+      false,
+      jest.fn(),
+      1
     );
 
     await waitFor(() => {
@@ -703,7 +726,14 @@ describe("TestCase component", () => {
       exportTestCase,
       undefined,
       { ...measures[1], measureMetaData: { draft: false } },
-      setSelectedTestCasesMock
+      setSelectedTestCasesMock,
+      undefined,
+      [],
+      false,
+      jest.fn(),
+      false,
+      jest.fn(),
+      1
     );
 
     await waitFor(() => {
@@ -720,13 +750,20 @@ describe("TestCase component", () => {
     const cases = generateTestCases(16);
 
     renderWithTestCase(
-      [{ cases, createdBeforeVersioning: false }],
+      cases,
       true,
       deleteTestCase,
       exportTestCase,
       undefined,
       { ...measures[1], measureMetaData: { draft: false } },
-      setSelectedTestCasesMock
+      setSelectedTestCasesMock,
+      undefined,
+      [],
+      false,
+      jest.fn(),
+      false,
+      jest.fn(),
+      1
     );
     // find the indeterminate checkBox that has an aria-label of "Test Case Selection"
     const selectAllCheckbox = await screen.findByLabelText(
@@ -743,5 +780,73 @@ describe("TestCase component", () => {
     await waitFor(() => {
       expect(setSelectedTestCasesMock).toHaveBeenCalled();
     });
+  });
+
+  it("should clear selected checkboxes when page changes", async () => {
+    const deleteTestCase = jest.fn();
+    const exportTestCase = jest.fn();
+    const setSelectedTestCasesMock = jest.fn();
+    const cases = generateTestCases(5);
+
+    const { rerender } = renderWithTestCase(
+      cases,
+      true,
+      deleteTestCase,
+      exportTestCase,
+      undefined,
+      { ...measures[1], measureMetaData: { draft: false } },
+      setSelectedTestCasesMock,
+      undefined,
+      [],
+      false,
+      jest.fn(),
+      false,
+      jest.fn(),
+      1
+    );
+
+    const selectAllCheckbox = await screen.findByLabelText(
+      "Test Case Selection"
+    );
+    fireEvent.click(selectAllCheckbox);
+    await waitFor(() => {
+      const checkboxes = screen.getAllByRole("checkbox");
+      expect(checkboxes.length).toBeGreaterThan(1);
+      const anyRowChecked = checkboxes
+        .slice(1)
+        .some((cb) => (cb as HTMLInputElement).checked);
+      expect(anyRowChecked).toBe(true);
+    });
+
+    rerender(
+      <MemoryRouter>
+        <TestCaseTable
+          sorting={[]}
+          setSorting={jest.fn()}
+          testCases={cases}
+          canEdit={true}
+          deleteTestCase={deleteTestCase}
+          exportTestCase={exportTestCase}
+          measure={{ ...measures[1], measureMetaData: { draft: false } }}
+          setSelectedTestCases={setSelectedTestCasesMock}
+          selectedTestCases={[]}
+          deleteDialogModalOpen={false}
+          setDeleteDialogModalOpen={jest.fn()}
+          shiftDatesDialogModalOpen={false}
+          setShiftDatesDialogModalOpen={jest.fn()}
+          setWarnings={jest.fn()}
+          page={2}
+        />
+      </MemoryRouter>
+    );
+
+    const selectAllCheckboxAfter = await screen.findByLabelText(
+      "Test Case Selection"
+    );
+    const rowCheckboxesAfter = screen.getAllByRole("checkbox").slice(1);
+    expect(
+      rowCheckboxesAfter.every((cb) => !(cb as HTMLInputElement).checked)
+    ).toBe(true);
+    expect((selectAllCheckboxAfter as HTMLInputElement).checked).toBe(false);
   });
 });
