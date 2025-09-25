@@ -13,11 +13,18 @@ import {
   createWarningMessage,
 } from "./StatusHandlerMessage";
 
+export interface CustomWarningMessage {
+  message: string;
+  details?: string[];
+  testDataId?: string;
+}
+
 interface StatusHandlerProps {
   error?: boolean;
   warning?: boolean;
   errorMessages?: Array<string>;
   warningMessages?: Array<string>;
+  customWarningMessages?: CustomWarningMessage[];
   testDataId?: string;
   importWarnings?: TestCaseImportOutcome[];
   shiftTestCaseDatesWarning?: Array<string>;
@@ -33,6 +40,7 @@ const StatusHandler = ({
   importWarnings,
   shiftTestCaseDatesWarning,
   missingDataElements,
+  customWarningMessages,
 }: StatusHandlerProps) => {
   const alerts = [];
 
@@ -111,6 +119,14 @@ const StatusHandler = ({
     if (withoutDuplicates.length > 0) {
       alerts.push(createWarningMessage(withoutDuplicates, testDataId));
     }
+  }
+
+  if (warning && customWarningMessages) {
+    customWarningMessages.forEach((cwm) => {
+      alerts.push(
+        createWarningMessage([...new Set(cwm.details)], testDataId, cwm.message)
+      );
+    });
   }
 
   if (importWarnings && importWarnings.length > 0) {

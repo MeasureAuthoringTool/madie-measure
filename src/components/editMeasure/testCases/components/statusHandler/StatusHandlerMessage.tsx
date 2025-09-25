@@ -30,7 +30,8 @@ export function createShiftTestCaseDatesWarningMessage(
 
 export function createWarningMessage(
   withoutDuplicates: string[],
-  testDataId: string
+  testDataId: string,
+  message?: string
 ) {
   return {
     type: "warning",
@@ -38,6 +39,7 @@ export function createWarningMessage(
     content: (
       <div aria-live="polite" role="alert" data-testid={testDataId}>
         <div data-testid="warn-title">
+          {message ? message + " " : ""}
           {withoutDuplicates.length === 1 ? (
             withoutDuplicates[0]
           ) : (
