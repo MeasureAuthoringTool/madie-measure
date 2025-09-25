@@ -15,6 +15,7 @@ const LeftPanel = (props: {
   canEdit: boolean;
   handleTestCaseErrors: Function;
   handleTestCaseWarnings: Function;
+  handleMissingDataElements: Function;
   selectedDataElement: DataElement;
   setSelectedDataElement: Function;
 }) => {
@@ -22,6 +23,7 @@ const LeftPanel = (props: {
     canEdit,
     handleTestCaseErrors,
     handleTestCaseWarnings,
+    handleMissingDataElements,
     selectedDataElement,
     setSelectedDataElement,
   } = props;
@@ -47,6 +49,7 @@ const LeftPanel = (props: {
               canEdit={canEdit}
               handleTestCaseErrors={handleTestCaseErrors}
               handleTestCaseWarnings={handleTestCaseWarnings}
+              handleMissingDataElements={handleMissingDataElements}
               selectedDataElement={selectedDataElement}
               setSelectedDataElement={setSelectedDataElement}
             />

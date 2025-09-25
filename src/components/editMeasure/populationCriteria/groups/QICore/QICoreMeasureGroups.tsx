@@ -655,11 +655,15 @@ const MeasureGroups = (props: MeasureGroupProps) => {
 
   // Provides dropdown options for stratification
   // contains a default value along with all available CQL Definitions
+  // Filter out function definitions (public/private/fluent) from dropdown
+  const functionDefRegex =
+    /^(\s*)define\s+(?:public\s+|private\s+)?(?:fluent\s+)?function\s+/i;
   const stratificationOptions = [
     <MuiMenuItem key="-" value={""}>
       -
     </MuiMenuItem>,
     expressionDefinitions
+      .filter((def) => !functionDefRegex.test(def?.text || ""))
       .sort((a, b) => a.name.localeCompare(b.name))
       .map((opt, i) => {
         const sanitizedString = opt.name.replace(/"/g, "");

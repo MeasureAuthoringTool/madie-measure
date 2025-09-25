@@ -19,11 +19,7 @@ import {
   InputAdornment,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
-import {
-  measureStore,
-  checkUserCanEdit,
-  useFeatureFlags,
-} from "@madie/madie-util";
+import { measureStore, checkUserCanEdit } from "@madie/madie-util";
 import { useFormik } from "formik";
 import useFormikResetOnEvent from "../../../common/useFormikResetOnEvent";
 import MeasureMetaDataRow from "../MeasureMetaDataRow";
@@ -41,7 +37,6 @@ interface MeasureReferencesProps {
 }
 
 const MeasureReferences = (props: MeasureReferencesProps) => {
-  const featureFlags = useFeatureFlags();
   const { setErrorMessage } = props;
   const { search } = useLocation();
   let navigate = useNavigate();
@@ -557,40 +552,19 @@ const MeasureReferences = (props: MeasureReferencesProps) => {
               options={REFERENCE_OPTIONS}
             />
 
-            {featureFlags.EnhancedTextFormatting ? (
-              <TextEditor
-                label="Reference"
-                required
-                data-testid="measure-referenceText"
-                setFieldValue={formik.setFieldValue}
-                readOnly={!canEdit}
-                error={
-                  formik.touched.referenceText &&
-                  Boolean(formik.errors.referenceText)
-                }
-                helperText={formikErrorHandler("referenceText")}
-                {...formik.getFieldProps("referenceText")}
-              />
-            ) : (
-              <TextArea
-                required
-                readOnly={!canEdit}
-                label="Reference"
-                placeholder="Enter"
-                id="measure-referenceText"
-                data-testid="measure-referenceText"
-                inputProps={{
-                  "data-testid": "measure-referenceText-input",
-                  "aria-describedby": "measure-referenceText-helper-text",
-                }}
-                error={
-                  formik.touched.referenceText &&
-                  Boolean(formik.errors.referenceText)
-                }
-                helperText={formikErrorHandler("referenceText")}
-                {...formik.getFieldProps("referenceText")}
-              />
-            )}
+            <TextEditor
+              label="Reference"
+              required
+              data-testid="measure-referenceText"
+              setFieldValue={formik.setFieldValue}
+              readOnly={!canEdit}
+              error={
+                formik.touched.referenceText &&
+                Boolean(formik.errors.referenceText)
+              }
+              helperText={formikErrorHandler("referenceText")}
+              {...formik.getFieldProps("referenceText")}
+            />
           </div>
         }
       />

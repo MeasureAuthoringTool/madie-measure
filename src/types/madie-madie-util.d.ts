@@ -15,7 +15,6 @@ declare module "@madie/madie-util" {
     qdmHideJson: boolean;
     stu6TestCaseValidation: boolean;
     MeasureSearch: boolean;
-    EnhancedTextFormatting: boolean;
     Locking: boolean;
     qiCore7: boolean;
     TransferMeasure: boolean;

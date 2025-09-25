@@ -4,6 +4,7 @@ import {
   createImportMessage,
   createWarningMessage,
   createShiftTestCaseDatesWarningMessage,
+  createMissingDataElementMessage,
 } from "./StatusHandlerMessage";
 import { TestCaseImportOutcome } from "@madie/madie-models";
 
@@ -129,5 +130,49 @@ describe("StatusHandler Messages", () => {
     const listItems = warnTitle.querySelectorAll("li");
     expect(listItems.length).toBe(1);
     expect(listItems[0]).toHaveTextContent("Warning 1");
+  });
+
+  it("renders missing data elements correctly for single and multiple items with preamble", () => {
+    // Single item
+    const singleItem = ["Data Element 1"];
+    const singleConfig = createMissingDataElementMessage(
+      singleItem,
+      "test_case_missing_data_elements"
+    );
+
+    const { getByTestId, rerender } = render(<div>{singleConfig.content}</div>);
+
+    const container = getByTestId("test_case_missing_data_elements");
+    expect(container).toHaveTextContent(
+      "The following data elements in this test case are no longer relevant to the measure."
+    );
+
+    const singleListItems = container.querySelectorAll("li");
+    expect(singleListItems.length).toBe(1);
+    expect(singleListItems[0]).toHaveTextContent("Data Element 1");
+
+    // Multiple items
+    const multipleItems = [
+      "Data Element 1",
+      "Data Element 2",
+      "Data Element 3",
+    ];
+    const multipleConfig = createMissingDataElementMessage(
+      multipleItems,
+      "test_case_missing_data_elements"
+    );
+
+    rerender(<div>{multipleConfig.content}</div>);
+
+    const multipleContainer = getByTestId("test_case_missing_data_elements");
+    expect(multipleContainer).toHaveTextContent(
+      "The following data elements in this test case are no longer relevant to the measure."
+    );
+
+    const multipleListItems = multipleContainer.querySelectorAll("li");
+    expect(multipleListItems.length).toBe(3);
+    expect(multipleListItems[0]).toHaveTextContent("Data Element 1");
+    expect(multipleListItems[1]).toHaveTextContent("Data Element 2");
+    expect(multipleListItems[2]).toHaveTextContent("Data Element 3");
   });
 });

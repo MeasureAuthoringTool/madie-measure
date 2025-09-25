@@ -29,9 +29,7 @@ describe("ResourceList component", () => {
   it("should render a spinner", async () => {
     const resourceList = generateResources(0);
     const onClick = jest.fn();
-    render(
-      <ResourceList resourceIdentifiers={resourceList} onClick={onClick} />
-    );
+    render(<ResourceList resourceIdentifiers={undefined} onClick={onClick} />);
     await waitFor(() => {
       expect(getByTestId("madie-loading-spinner")).toBeInTheDocument();
     });
@@ -88,6 +86,7 @@ describe("ResourceList component", () => {
     Simulate.change(searchFieldInput);
     expect(searchFieldInput.value).toBe("test");
     const clearIcon = getByTestId("ClearIcon");
+
     userEvent.click(clearIcon);
     await waitFor(() => {
       expect(searchFieldInput.value).toBe("");

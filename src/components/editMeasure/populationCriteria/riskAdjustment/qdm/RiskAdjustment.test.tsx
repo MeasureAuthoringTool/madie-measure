@@ -79,9 +79,6 @@ jest.mock("@madie/madie-util", () => ({
     state: { canTravel: false, pendingPath: "" },
     initialState: { canTravel: false, pendingPath: "" },
   },
-  useFeatureFlags: jest.fn(() => ({
-    EnhancedTextFormatting: false,
-  })),
 }));
 
 jest.mock("../../../../../api/useMeasureServiceApi");
@@ -106,10 +103,13 @@ describe("QdmRiskAdjustment Component", () => {
       screen.getByRole("button", { name: "Initial Population" })
     ).toBeInTheDocument();
 
-    const description = screen.getByRole("textbox", {
-      name: "Description",
-    });
-    expect(description).toHaveTextContent("test description");
+    const descriptionEditor = screen.getByTestId(
+      "risk-adjustment-description-rich-text-editor"
+    );
+    expect(descriptionEditor).toBeInTheDocument();
+    const editor = screen.getByRole("textbox");
+    expect(editor).toHaveAttribute("contenteditable", "true");
+    expect(editor).toHaveTextContent("test description");
   });
 
   it("Should successfully update risk Adjustment values and save to DB on 200", async () => {
@@ -125,7 +125,7 @@ describe("QdmRiskAdjustment Component", () => {
         description: "",
       },
     ];
-    const newRiskAdjustmentDescription = "Updated test description";
+    const newRiskAdjustmentDescription = "<p>Updated test description</p>";
     const updatedMeasure = {
       ...mockTestMeasure,
       riskAdjustments: newRiskAdjustments,
@@ -158,13 +158,38 @@ describe("QdmRiskAdjustment Component", () => {
     ).toBeInTheDocument();
 
     // Verifies if RA description already loads values from store and able to update
-    const description = screen.getByRole("textbox", {
-      name: "Description",
+    const descriptionEditor = screen.getByTestId(
+      "risk-adjustment-description-rich-text-editor"
+    );
+    expect(descriptionEditor).toBeInTheDocument();
+
+    const editableContent = within(descriptionEditor).getByRole("textbox");
+    expect(editableContent).toHaveAttribute("contenteditable", "true");
+
+    await act(async () => {
+      fireEvent.focus(editableContent);
+      editableContent.innerHTML = "Updated test description";
+      fireEvent.input(editableContent, {
+        target: { innerHTML: "Updated test description" },
+      });
+      fireEvent.blur(editableContent);
     });
-    expect(description).toHaveTextContent("test description");
-    fireEvent.change(description, {
-      target: { value: "Updated test description" },
+
+    // Wait for debounced update to take effect (250ms delay from TextEditor component)
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 350));
     });
+
+    // Wait for save button to be enabled
+    await waitFor(
+      () => {
+        const saveButton = screen.getByRole("button", { name: "Save" });
+        expect(saveButton).toBeEnabled();
+      },
+      { timeout: 1000 }
+    );
+
+    expect(editableContent).toHaveTextContent("Updated test description");
 
     // save button
     const saveButton = screen.getByRole("button", { name: "Save" });
@@ -203,8 +228,10 @@ describe("QdmRiskAdjustment Component", () => {
     });
     expect(riskAdjustments).toHaveTextContent("Initial Population");
 
-    const description = screen.getByRole("textbox", { name: "Description" });
-    expect(description).toHaveTextContent("test description");
+    const descriptionEditor = screen.getByTestId(
+      "risk-adjustment-description-rich-text-editor"
+    );
+    expect(descriptionEditor).toBeInTheDocument();
 
     const allFormFields = screen.getAllByRole("textbox");
     for (const formField of allFormFields) {
@@ -225,7 +252,7 @@ describe("QdmRiskAdjustment Component", () => {
         description: "",
       },
     ];
-    const newRiskAdjustmentDescription = "Updated test description";
+    const newRiskAdjustmentDescription = "<p>Updated test description</p>";
     const updatedMeasure = {
       ...mockTestMeasure,
       riskAdjustments: newRiskAdjustments,
@@ -258,13 +285,38 @@ describe("QdmRiskAdjustment Component", () => {
     ).toBeInTheDocument();
 
     // Verifies if RA description already loads values from store and able to update
-    const description = screen.getByRole("textbox", {
-      name: "Description",
+    const descriptionEditor = screen.getByTestId(
+      "risk-adjustment-description-rich-text-editor"
+    );
+    expect(descriptionEditor).toBeInTheDocument();
+
+    const editableContent = within(descriptionEditor).getByRole("textbox");
+    expect(editableContent).toHaveAttribute("contenteditable", "true");
+
+    await act(async () => {
+      fireEvent.focus(editableContent);
+      editableContent.innerHTML = "Updated test description";
+      fireEvent.input(editableContent, {
+        target: { innerHTML: "Updated test description" },
+      });
+      fireEvent.blur(editableContent);
     });
-    expect(description).toHaveTextContent("test description");
-    fireEvent.change(description, {
-      target: { value: "Updated test description" },
+
+    // Wait for debounced update to take effect (250ms delay from TextEditor component)
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 350));
     });
+
+    // Wait for save button to be enabled
+    await waitFor(
+      () => {
+        const saveButton = screen.getByRole("button", { name: "Save" });
+        expect(saveButton).toBeEnabled();
+      },
+      { timeout: 1000 }
+    );
+
+    expect(editableContent).toHaveTextContent("Updated test description");
 
     // save button
     const saveButton = screen.getByRole("button", { name: "Save" });
@@ -304,13 +356,38 @@ describe("QdmRiskAdjustment Component", () => {
     RenderRiskAdjustment();
 
     // Verifies if RA description already loads values from store and able to update
-    const description = screen.getByRole("textbox", {
-      name: "Description",
+    const descriptionEditor = screen.getByTestId(
+      "risk-adjustment-description-rich-text-editor"
+    );
+    expect(descriptionEditor).toBeInTheDocument();
+
+    const editableContent = within(descriptionEditor).getByRole("textbox");
+    expect(editableContent).toHaveAttribute("contenteditable", "true");
+
+    await act(async () => {
+      fireEvent.focus(editableContent);
+      editableContent.innerHTML = "Updated test description";
+      fireEvent.input(editableContent, {
+        target: { innerHTML: "Updated test description" },
+      });
+      fireEvent.blur(editableContent);
     });
-    expect(description).toHaveTextContent("test description");
-    fireEvent.change(description, {
-      target: { value: "Updated test description" },
+
+    // Wait for debounced update to take effect (250ms delay from TextEditor component)
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 350));
     });
+
+    // Wait for save button to be enabled
+    await waitFor(
+      () => {
+        const saveButton = screen.getByRole("button", { name: "Save" });
+        expect(saveButton).toBeEnabled();
+      },
+      { timeout: 1000 }
+    );
+
+    expect(editableContent).toHaveTextContent("Updated test description");
 
     // save button
     const saveButton = screen.getByRole("button", { name: "Save" });
@@ -321,7 +398,7 @@ describe("QdmRiskAdjustment Component", () => {
     await waitFor(() =>
       expect(measureServiceApi.updateMeasure).toBeCalledWith({
         ...mockTestMeasure,
-        riskAdjustmentDescription: "Updated test description",
+        riskAdjustmentDescription: "<p>Updated test description</p>",
       })
     );
 
@@ -363,14 +440,38 @@ describe("QdmRiskAdjustment Component", () => {
     ).toBeInTheDocument();
 
     // Verifies if RA description already loads values from store and able to update
-    const description = screen.getByRole("textbox", {
-      name: "Description",
+    const descriptionEditor = screen.getByTestId(
+      "risk-adjustment-description-rich-text-editor"
+    );
+    expect(descriptionEditor).toBeInTheDocument();
+
+    const editableContent = within(descriptionEditor).getByRole("textbox");
+    expect(editableContent).toHaveAttribute("contenteditable", "true");
+
+    await act(async () => {
+      fireEvent.focus(editableContent);
+      editableContent.innerHTML = "Updated test description";
+      fireEvent.input(editableContent, {
+        target: { innerHTML: "Updated test description" },
+      });
+      fireEvent.blur(editableContent);
     });
-    expect(description).toHaveTextContent("test description");
-    fireEvent.change(description, {
-      target: { value: "Updated test description" },
+
+    // Wait for debounced update to take effect (250ms delay from TextEditor component)
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 350));
     });
-    expect(description).toHaveTextContent("Updated test description");
+
+    // Wait for save button to be enabled
+    await waitFor(
+      () => {
+        const saveButton = screen.getByRole("button", { name: "Save" });
+        expect(saveButton).toBeEnabled();
+      },
+      { timeout: 1000 }
+    );
+
+    expect(editableContent).toHaveTextContent("Updated test description");
 
     // verifies if discard button is enabled and on click triggers discard model
     const discardButton = screen.getByRole("button", {
@@ -392,7 +493,7 @@ describe("QdmRiskAdjustment Component", () => {
     });
 
     //Verifies if the form values are not discarded
-    expect(description).toHaveTextContent("Updated test description");
+    expect(editableContent).toHaveTextContent("Updated test description");
     expect(screen.getByText("+1")).toBeInTheDocument(); // We are limiting the selected options displayed
   });
 
@@ -418,14 +519,38 @@ describe("QdmRiskAdjustment Component", () => {
     ).toBeInTheDocument();
 
     // Verifies if RA description already loads values from store and able to update
-    const description = screen.getByRole("textbox", {
-      name: "Description",
+    const descriptionEditor = screen.getByTestId(
+      "risk-adjustment-description-rich-text-editor"
+    );
+    expect(descriptionEditor).toBeInTheDocument();
+
+    const editableContent = within(descriptionEditor).getByRole("textbox");
+    expect(editableContent).toHaveAttribute("contenteditable", "true");
+
+    await act(async () => {
+      fireEvent.focus(editableContent);
+      editableContent.innerHTML = "Updated test description";
+      fireEvent.input(editableContent, {
+        target: { innerHTML: "Updated test description" },
+      });
+      fireEvent.blur(editableContent);
     });
-    expect(description).toHaveTextContent("test description");
-    fireEvent.change(description, {
-      target: { value: "Updated test description" },
+
+    // Wait for debounced update to take effect (250ms delay from TextEditor component)
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 350));
     });
-    expect(description).toHaveTextContent("Updated test description");
+
+    // Wait for save button to be enabled
+    await waitFor(
+      () => {
+        const saveButton = screen.getByRole("button", { name: "Save" });
+        expect(saveButton).toBeEnabled();
+      },
+      { timeout: 1000 }
+    );
+
+    expect(editableContent).toHaveTextContent("Updated test description");
 
     // verifies if discard button is enabled and on click triggers discard model
     const discardButton = screen.getByRole("button", {
@@ -447,7 +572,7 @@ describe("QdmRiskAdjustment Component", () => {
         screen.queryByText("You have unsaved changes.")
       ).not.toBeInTheDocument();
       // Verifies if the updated form values are discarded
-      expect(description).toHaveTextContent("test description");
+      expect(editableContent).toHaveTextContent("test description");
       expect(
         screen.getByRole("button", { name: "Initial Population" })
       ).toBeInTheDocument();

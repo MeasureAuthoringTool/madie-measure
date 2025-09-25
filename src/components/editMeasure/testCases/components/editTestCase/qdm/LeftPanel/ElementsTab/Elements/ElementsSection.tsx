@@ -20,13 +20,13 @@ import {
 } from "../../../../../../util/DataElementHelper";
 
 const ElementsSection = (props: {
-  handleTestCaseErrors: Function;
+  handleMissingDataElements: Function;
   canEdit: boolean;
   selectedDataElement: DataElement;
   setSelectedDataElement: Function;
 }) => {
   const {
-    handleTestCaseErrors,
+    handleMissingDataElements,
     canEdit,
     selectedDataElement,
     setSelectedDataElement,
@@ -51,43 +51,43 @@ const ElementsSection = (props: {
   const checkForMissingDataElements = useCallback(() => {
     if (typesFromCql.length > 0) {
       const types = {};
+      const missingDataElements = [];
+
       // skip demographics
       types["QDM::PatientCharacteristicBirthdate"] = true;
       types["QDM::PatientCharacteristicRace"] = true;
       types["QDM::PatientCharacteristicEthnicity"] = true;
       types["QDM::PatientCharacteristicSex"] = true;
       types["QDM::PatientCharacteristicExpired"] = true;
+
       // compile types from typesfromCQL
       typesFromCql.forEach((item) => {
         types[item] = true;
       });
       setAllowedTypes(types);
-      let failedLookupCount = 0;
+
       patient?.dataElements.forEach((el) => {
         if (!types[el._type]) {
-          failedLookupCount++;
+          missingDataElements.push(el.qdmTitle);
         }
       });
-      if (failedLookupCount > 0) {
-        handleTestCaseErrors(
-          "There are data elements in this test case not relevant to the measure.  Those data elements are not editable and can only be deleted from the Elements table."
-        );
+
+      if (missingDataElements.length > 0) {
+        handleMissingDataElements(missingDataElements);
       } else {
-        handleTestCaseErrors(null);
+        handleMissingDataElements(null);
       }
     }
   }, [
     setAllowedTypes,
     typesFromCql,
-    handleTestCaseErrors,
+    handleMissingDataElements,
     dataElements?.length,
     patient?.dataElements?.length,
   ]);
 
   useEffect(() => {
-    if (patient?.dataElements?.length > 0) {
-      checkForMissingDataElements();
-    }
+    checkForMissingDataElements();
   }, [typesFromCql, patient?.dataElements]);
 
   const retrieveCategories = useCallback(() => {

@@ -7,7 +7,6 @@ import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
 import BorderColorOutlinedIcon from "@mui/icons-material/BorderColorOutlined";
 import { blue, red } from "@mui/material/colors";
 import { Tooltip } from "@mui/material";
-import { useFeatureFlags } from "@madie/madie-util";
 import DOMPurify from "dompurify";
 import "./MeasureMetaDataRow.scss";
 interface MeasureMetaDataRowProps {
@@ -21,31 +20,19 @@ interface MeasureMetaDataRowProps {
 
 const MeasureMetaDataRow = (props: MeasureMetaDataRowProps) => {
   const { name, description, id, handleClick, canEdit, type } = props;
-  const featureFlags = useFeatureFlags();
 
   return (
     <>
       <tr>
         <td id={`${id}-label`}>{name}</td>
-
-        {featureFlags.EnhancedTextFormatting ? (
-          <td>
-            <RichTextEditor
-              id={name}
-              readOnly
-              content={description}
-              data-testid={`measure-${type}-${id}-description`}
-            />
-          </td>
-        ) : (
-          <td
-            className="read-only-description"
+        <td>
+          <RichTextEditor
+            id={name}
+            readOnly
+            content={description}
             data-testid={`measure-${type}-${id}-description`}
-            aria-labelledby={`${id}-label`}
-          >
-            {description}
-          </td>
-        )}
+          />
+        </td>
 
         {id && canEdit && (
           <td style={{ width: 160 }}>

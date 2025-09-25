@@ -225,11 +225,7 @@ const TestCaseList = (props: TestCaseListProps) => {
 
   useEffect(() => {
     setCanEdit(
-      checkUserCanEdit(
-        measure?.measureSet?.owner,
-        measure?.measureSet?.acls,
-        measure?.measureMetaData?.draft
-      )
+      checkUserCanEdit(measure?.measureSet?.owner, measure?.measureSet?.acls)
     );
   }, [measure]);
 
@@ -678,6 +674,7 @@ const TestCaseList = (props: TestCaseListProps) => {
                           setShiftDatesDialogModalOpen
                         }
                         setWarnings={setWarnings}
+                        page={page}
                       />
                       {currentSlice?.length > 0 && (
                         <Pagination
