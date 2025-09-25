@@ -4,6 +4,9 @@ import { Measure, MeasureSet, Model } from "@madie/madie-models";
 import ShareAction, {
   INVALID_SHARE_MEASURE,
   NOTHING_SELECTED,
+  SHARED_TAB_INVALID_UNSHARE_MEASURE,
+  SHARED_TAB_NOTHING_SELECTED,
+  SHARED_TAB_UNSHARE,
   VALID_SHARE_MEASURE,
 } from "./ShareAction";
 import userEvent from "@testing-library/user-event";
@@ -34,9 +37,17 @@ const qiCoreMeasure = {
   measureMetaData: { draft: true },
 } as unknown as Measure;
 
-describe("ShareAction", () => {
+describe("ShareAction on Owned/All Measures tab", () => {
   it("Should disable share action btn if no measure selected", () => {
-    render(<ShareAction measures={[]} onClick={() => {}} isOwner={true} />);
+    render(
+      <ShareAction
+        measures={[]}
+        onClick={() => {}}
+        isOwner={true}
+        isSharedWithUser={false}
+        activeTab={0}
+      />
+    );
     expect(screen.getByTestId("share-action-btn")).toBeDisabled();
     expect(screen.getByTestId("share-action-tooltip")).toHaveAttribute(
       "aria-label",
@@ -50,6 +61,8 @@ describe("ShareAction", () => {
         measures={[qiCoreMeasure]}
         onClick={() => {}}
         isOwner={false}
+        isSharedWithUser={false}
+        activeTab={0}
       />
     );
     expect(screen.getByTestId("share-action-btn")).toBeDisabled();
@@ -65,6 +78,8 @@ describe("ShareAction", () => {
         measures={[qiCoreMeasure]}
         onClick={() => {}}
         isOwner={true}
+        isSharedWithUser={false}
+        activeTab={0}
       />
     );
     expect(screen.getByTestId("share-action-btn")).not.toBeDisabled();
@@ -81,6 +96,8 @@ describe("ShareAction", () => {
         measures={[qdmMeasure, measure2]}
         onClick={() => {}}
         isOwner={true}
+        isSharedWithUser={false}
+        activeTab={0}
       />
     );
     expect(screen.getByTestId("share-action-btn")).not.toBeDisabled();
@@ -90,6 +107,40 @@ describe("ShareAction", () => {
     );
   });
 
+  it("Should render both 'Share With' and 'Unshare' options on Owned Measures tab", () => {
+    render(
+      <ShareAction
+        measures={[qiCoreMeasure]}
+        onClick={() => {}}
+        isOwner={true}
+        isSharedWithUser={false}
+        activeTab={0}
+      />
+    );
+    const shareButton = screen.getByTestId("share-action-btn");
+    fireEvent.click(shareButton);
+
+    expect(screen.getByTestId("Share With-option")).toBeInTheDocument();
+    expect(screen.getByTestId("Unshare-option")).toBeInTheDocument();
+  });
+
+  it("Should render both 'Share With' and 'Unshare' options on All Measures tab", () => {
+    render(
+      <ShareAction
+        measures={[qiCoreMeasure]}
+        onClick={() => {}}
+        isOwner={true}
+        isSharedWithUser={false}
+        activeTab={2}
+      />
+    );
+    const shareButton = screen.getByTestId("share-action-btn");
+    fireEvent.click(shareButton);
+
+    expect(screen.getByTestId("Share With-option")).toBeInTheDocument();
+    expect(screen.getByTestId("Unshare-option")).toBeInTheDocument();
+  });
+
   it("Should display menu items when the share action btn is clicked and call associated onClick method when 'Share With' menu item is clicked", () => {
     const onClick = jest.fn();
     render(
@@ -97,6 +148,8 @@ describe("ShareAction", () => {
         measures={[qiCoreMeasure]}
         onClick={onClick}
         isOwner={true}
+        isSharedWithUser={false}
+        activeTab={0}
       />
     );
     const shareButton = screen.getByTestId("share-action-btn");
@@ -123,6 +176,8 @@ describe("ShareAction", () => {
         measures={[qiCoreMeasure]}
         onClick={onClick}
         isOwner={true}
+        isSharedWithUser={false}
+        activeTab={0}
       />
     );
     const shareButton = screen.getByTestId("share-action-btn");
@@ -143,6 +198,123 @@ describe("ShareAction", () => {
   });
 });
 
+describe("ShareAction on Shared Measures tab", () => {
+  it("Should disable share action btn if no measure selected", () => {
+    render(
+      <ShareAction
+        measures={[]}
+        onClick={() => {}}
+        isOwner={false}
+        isSharedWithUser={true}
+        activeTab={1}
+      />
+    );
+    expect(screen.getByTestId("share-action-btn")).toBeDisabled();
+    expect(screen.getByTestId("share-action-tooltip")).toHaveAttribute(
+      "aria-label",
+      SHARED_TAB_NOTHING_SELECTED
+    );
+  });
+
+  it("Should disable share action btn if user selects one measure but isSharedWithUser is false", () => {
+    render(
+      <ShareAction
+        measures={[qiCoreMeasure]}
+        onClick={() => {}}
+        isOwner={false}
+        isSharedWithUser={false}
+        activeTab={1}
+      />
+    );
+    expect(screen.getByTestId("share-action-btn")).toBeDisabled();
+    expect(screen.getByTestId("share-action-tooltip")).toHaveAttribute(
+      "aria-label",
+      SHARED_TAB_INVALID_UNSHARE_MEASURE
+    );
+  });
+
+  it("Should enable share action btn if user selects one measure", () => {
+    render(
+      <ShareAction
+        measures={[qiCoreMeasure]}
+        onClick={() => {}}
+        isOwner={false}
+        isSharedWithUser={true}
+        activeTab={1}
+      />
+    );
+    expect(screen.getByTestId("share-action-btn")).not.toBeDisabled();
+    expect(screen.getByTestId("share-action-tooltip")).toHaveAttribute(
+      "aria-label",
+      SHARED_TAB_UNSHARE
+    );
+  });
+
+  it("Should enable share action btn if user selects two measures", () => {
+    const measure2 = { ...qiCoreMeasure, model: Model.QDM_5_6 };
+    render(
+      <ShareAction
+        measures={[qdmMeasure, measure2]}
+        onClick={() => {}}
+        isOwner={true}
+        isSharedWithUser={true}
+        activeTab={1}
+      />
+    );
+    expect(screen.getByTestId("share-action-btn")).not.toBeDisabled();
+    expect(screen.getByTestId("share-action-tooltip")).toHaveAttribute(
+      "aria-label",
+      SHARED_TAB_UNSHARE
+    );
+  });
+
+  it("Should render only 'Unshare' option on Shared Measures tab", () => {
+    render(
+      <ShareAction
+        measures={[qiCoreMeasure]}
+        onClick={() => {}}
+        isOwner={false}
+        isSharedWithUser={true}
+        activeTab={1}
+      />
+    );
+    const shareButton = screen.getByTestId("share-action-btn");
+    fireEvent.click(shareButton);
+
+    expect(screen.queryByTestId("Share With-option")).toBeNull();
+    expect(screen.getByTestId("Unshare-option")).toBeInTheDocument();
+  });
+
+  it("Should display menu items when the share action btn is clicked and call associated onClick method when 'Unshare' menu item is clicked", () => {
+    const onClick = jest.fn();
+
+    render(
+      <ShareAction
+        measures={[qiCoreMeasure]}
+        onClick={onClick}
+        isOwner={false}
+        isSharedWithUser={true}
+        activeTab={1}
+      />
+    );
+    const shareButton = screen.getByTestId("share-action-btn");
+
+    expect(shareButton).not.toBeDisabled();
+    expect(screen.getByTestId("share-action-tooltip")).toHaveAttribute(
+      "aria-label",
+      SHARED_TAB_UNSHARE
+    );
+
+    fireEvent.click(shareButton);
+
+    const unshareMenuItem = screen.getByTestId("Unshare-option");
+    expect(unshareMenuItem).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("menuitem", { name: "Unshare" }));
+    expect(onClick).toHaveBeenCalledWith("Unshare");
+  });
+});
+
 describe("508, keyboard and clickaway behavior", () => {
   it("closes on Tab and prevents default + stops propagation", async () => {
     const onClick = jest.fn();
@@ -151,6 +323,8 @@ describe("508, keyboard and clickaway behavior", () => {
         measures={[qiCoreMeasure]}
         onClick={onClick}
         isOwner={true}
+        isSharedWithUser={false}
+        activeTab={0}
       />
     );
     userEvent.click(screen.getByTestId("share-action-btn"));
@@ -172,6 +346,8 @@ describe("508, keyboard and clickaway behavior", () => {
         measures={[qiCoreMeasure]}
         onClick={onClick}
         isOwner={true}
+        isSharedWithUser={false}
+        activeTab={0}
       />
     );
     userEvent.click(screen.getByTestId("share-action-btn"));
@@ -193,6 +369,8 @@ describe("508, keyboard and clickaway behavior", () => {
         measures={[qiCoreMeasure]}
         onClick={onClick}
         isOwner={true}
+        isSharedWithUser={false}
+        activeTab={0}
       />
     );
     userEvent.click(screen.getByTestId("share-action-btn"));
@@ -211,6 +389,8 @@ describe("508, keyboard and clickaway behavior", () => {
         measures={[qiCoreMeasure]}
         onClick={onClick}
         isOwner={true}
+        isSharedWithUser={false}
+        activeTab={0}
       />
     );
     userEvent.click(screen.getByTestId("share-action-btn"));

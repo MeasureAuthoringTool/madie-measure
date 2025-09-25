@@ -685,18 +685,23 @@ export default function MeasureList(props: {
     setViewMeasureHistoryDialog(false);
   };
 
-  const handleShareDialogClose = ({
+  const handleShareDialogClose = () => {
+    setShareDialog({
+      open: false,
+      option: "",
+    });
+  };
+
+  const handleShareDialogSave = ({
     toastType = "danger",
     toastMessage = "",
     toastOpen = false,
   } = {}) => {
     if (toastType === "success") {
-      doUpdateList();
+      doUpdateList(true);
     }
-    setShareDialog({
-      open: false,
-      option: "",
-    });
+
+    handleShareDialogClose();
 
     props.setToastType(toastType);
     props.setToastMessage(toastMessage);
@@ -1230,6 +1235,7 @@ export default function MeasureList(props: {
         open={shareDialog.open}
         option={shareDialog.option}
         onClose={handleShareDialogClose}
+        onSave={handleShareDialogSave}
       />
       <DeleteDialog
         open={deleteMeasureDialog}

@@ -184,6 +184,7 @@ jest.mock("@madie/madie-util", () => ({
   useDocumentTitle: jest.fn(),
   useOktaTokens: jest.fn(() => ({
     getAccessToken: () => "test.jwt",
+    getUserName: () => "test user",
   })),
   checkUserCanEdit: jest.fn(),
   useFeatureFlags: jest.fn(() => ({
@@ -486,6 +487,30 @@ describe("EditMeasure Component", () => {
     const cancelButton = getByTestId("share-cancel-button");
     fireEvent.click(cancelButton);
     expect(queryByTestId("share-dialog")).toBeVisible();
+  });
+
+  it("should display an unshare confirmation dialog when the event is triggered and close dialog when cancel button is clicked", async () => {
+    renderRouter();
+
+    const result = await findByTestId("editMeasure");
+    expect(result).toBeInTheDocument();
+
+    act(() => {
+      window.dispatchEvent(new Event("unshare-measure-from-me"));
+    });
+
+    await waitFor(async () => {
+      expect(getByTestId("share-confirmation-dialog")).toBeInTheDocument();
+    });
+
+    const cancelButton = getByTestId("share-confirmation-dialog-cancel-button");
+    fireEvent.click(cancelButton);
+
+    await waitFor(async () => {
+      expect(
+        queryByTestId("share-confirmation-dialog")
+      ).not.toBeInTheDocument();
+    });
   });
 
   it("should display transfer dialog when the event is triggered and close dialog when cancel button is clicked", async () => {
