@@ -538,18 +538,13 @@ describe("EditTestCase QDM Component", () => {
     expect(runTestCaseButton).toBeInTheDocument();
     expect(getByRole("button", { name: "Save" })).toBeDisabled();
     expect(getByRole("button", { name: "Discard Changes" })).toBeDisabled();
-    const raceInput = screen.getByTestId(
-      "demographics-race-input"
-    ) as HTMLInputElement;
-    expect(raceInput).toBeInTheDocument();
-    expect(raceInput.value).not.toBe("White");
-    fireEvent.change(raceInput, {
-      target: { value: "White" },
-    });
-    expect(raceInput.value).toBe("White");
-    await waitFor(() =>
-      expect(getByRole("button", { name: "Save" })).not.toBeDisabled()
-    );
+    const raceSelector = screen.getByRole("combobox", { name: "Race" });
+    userEvent.click(raceSelector);
+    const raceOptions = await screen.findAllByRole("option");
+    expect(raceOptions.length).toBe(4);
+    userEvent.click(raceOptions[2]);
+    expect(raceSelector).toHaveTextContent("Asian");
+    expect(getByRole("button", { name: "Save" })).not.toBeDisabled();
     expect(getByRole("button", { name: "Discard Changes" })).not.toBeDisabled();
     expect(runTestCaseButton).not.toBeDisabled();
     userEvent.click(runTestCaseButton);
@@ -666,82 +661,71 @@ describe("EditTestCase QDM Component", () => {
     expect(livingStatusInput.value).toBe("Living");
   });
 
-  it("discard button resets form", async () => {
+  it("discard button resets form if form changed", async () => {
     testCase.json = "";
     renderEditTestCaseComponent();
-    const raceInput = screen.getByTestId(
-      "demographics-race-input"
-    ) as HTMLInputElement;
-    expect(raceInput).toBeInTheDocument();
-    expect(raceInput.value).toBe("");
 
-    fireEvent.change(raceInput, {
-      target: { value: "White" },
+    // Race dropdown change
+    const raceSelector = screen.getByRole("combobox", { name: "Race" });
+    expect(raceSelector).toHaveTextContent("Select a Race");
+
+    userEvent.click(raceSelector);
+    const raceOptions = await screen.findAllByRole("option");
+    expect(raceOptions.length).toBe(4);
+    userEvent.click(raceOptions[3]);
+    expect(raceSelector).toHaveTextContent("White");
+
+    // Gender dropdown change
+    const genderSelector = screen.getByRole("combobox", { name: "Sex" });
+    expect(genderSelector).toHaveTextContent("Select a Gender");
+
+    userEvent.click(genderSelector);
+    const genderOptions = await screen.findAllByRole("option");
+    expect(genderOptions.length).toBe(3);
+    userEvent.click(genderOptions[2]);
+    expect(genderSelector).toHaveTextContent("Male (finding)");
+
+    // Ethnicity dropdown change
+    const ethnicitySelector = screen.getByRole("combobox", {
+      name: "Ethnicity",
     });
-    expect(raceInput.value).toBe("White");
+    expect(ethnicitySelector).toHaveTextContent("Select an Ethnicity");
 
-    const genderInput = screen.getByTestId(
-      "demographics-gender-input"
-    ) as HTMLInputElement;
-    expect(genderInput).toBeInTheDocument();
-    expect(genderInput.value).toBe("");
+    userEvent.click(ethnicitySelector);
+    const ethnicityOptions = await screen.findAllByRole("option");
+    expect(ethnicityOptions.length).toBe(3);
+    userEvent.click(ethnicityOptions[1]);
+    expect(ethnicitySelector).toHaveTextContent("Hispanic or Latino");
 
-    fireEvent.change(genderInput, {
-      target: { value: "Male (finding)" },
+    // Living Status dropdown change
+    const livingStatusSelector = screen.getByRole("combobox", {
+      name: "Living Status",
     });
-    expect(genderInput.value).toBe("Male (finding)");
+    expect(livingStatusSelector).toHaveTextContent("Living");
+    userEvent.click(livingStatusSelector);
+    const livingStatusOptions = await screen.findAllByRole("option");
+    expect(livingStatusOptions.length).toBe(2);
+    userEvent.click(livingStatusOptions[1]);
+    expect(livingStatusSelector).toHaveTextContent("Expired");
 
+    // Discard button
     const discardButton = screen.getByTestId("ds-btn");
     expect(discardButton).toBeInTheDocument();
     expect(discardButton).not.toBeDisabled();
-    fireEvent.click(discardButton);
+    userEvent.click(discardButton);
 
     const discardConfirm = screen.getByTestId("discard-dialog-continue-button");
     expect(discardConfirm).toBeInTheDocument();
     expect(discardConfirm).not.toBeDisabled();
-    fireEvent.click(discardConfirm);
+    userEvent.click(discardConfirm);
 
-    await waitFor(() => expect(raceInput.value).toBe(""));
-    await waitFor(() => expect(genderInput.value).toBe(""));
-    // expect(raceInput.value).toBe("");
-    // expect(genderInput.value).toBe("");
-  });
-
-  it("test change dropdown values", () => {
-    renderEditTestCaseComponent();
-
-    const raceInput = screen.getByTestId(
-      "demographics-race-input"
-    ) as HTMLInputElement;
-    expect(raceInput).toBeInTheDocument();
-    expect(raceInput.value).toBe("");
-
-    fireEvent.change(raceInput, {
-      target: { value: "White" },
-    });
-    expect(raceInput.value).toBe("White");
-
-    const genderInput = screen.getByTestId(
-      "demographics-gender-input"
-    ) as HTMLInputElement;
-    expect(genderInput).toBeInTheDocument();
-    expect(genderInput.value).toBe("");
-
-    fireEvent.change(genderInput, {
-      target: { value: "Male (finding)" },
-    });
-    expect(genderInput.value).toBe("Male (finding)");
-
-    const livingStatusInput = screen.getByTestId(
-      "demographics-living-status-input"
-    ) as HTMLInputElement;
-    expect(livingStatusInput).toBeInTheDocument();
-    expect(livingStatusInput.value).toBe("Living");
-
-    fireEvent.change(livingStatusInput, {
-      target: { value: "Expired" },
-    });
-    expect(livingStatusInput.value).toBe("Expired");
+    // Verify values reset to initial state
+    await waitFor(() =>
+      expect(raceSelector).toHaveTextContent("Select a Race")
+    );
+    expect(genderSelector).toHaveTextContent("Select a Gender");
+    expect(ethnicitySelector).toHaveTextContent("Select an Ethnicity");
+    expect(livingStatusSelector).toHaveTextContent("Living");
   });
 
   it("test update test case successfully with success toast", async () => {
@@ -752,47 +736,34 @@ describe("EditTestCase QDM Component", () => {
 
     await waitFor(() => renderEditTestCaseComponent());
 
-    const raceInput = screen.getByTestId(
-      "demographics-race-input"
-    ) as HTMLInputElement;
-    expect(raceInput).toBeInTheDocument();
-    await waitFor(() => {
-      expect(raceInput.value).toBe("Asian");
-    });
+    const raceSelector = screen.getByRole("combobox", { name: "Race" });
+    expect(raceSelector).toHaveTextContent("Asian");
+    userEvent.click(raceSelector);
+    const raceOptions = await screen.findAllByRole("option");
+    expect(raceOptions.length).toBe(4);
+    userEvent.click(raceOptions[3]);
+    expect(raceSelector).toHaveTextContent("White");
 
-    act(() => {
-      fireEvent.change(raceInput, {
-        target: { value: "White" },
-      });
-    });
-    await waitFor(() => {
-      expect(raceInput.value).toBe("White");
-    });
-    const genderInput = screen.getByTestId(
-      "demographics-gender-input"
-    ) as HTMLInputElement;
-    expect(genderInput).toBeInTheDocument();
-    fireEvent.change(genderInput, {
-      target: { value: "Male (finding)" },
-    });
-    expect(genderInput.value).toBe("Male (finding)");
+    const genderSelector = screen.getByRole("combobox", { name: "Sex" });
+    expect(genderSelector).toBeInTheDocument();
+    userEvent.click(genderSelector);
+    const genderOptions = await screen.findAllByRole("option");
+    expect(genderOptions.length).toBe(3);
+    userEvent.click(genderOptions[2]);
+    expect(genderSelector).toHaveTextContent("Male (finding)");
 
-    const livingStatusInput = screen.getByTestId(
-      "demographics-living-status-input"
-    ) as HTMLInputElement;
-    expect(livingStatusInput).toBeInTheDocument();
-    expect(livingStatusInput.value).toBe("Living");
-
-    fireEvent.change(livingStatusInput, {
-      target: { value: "Expired" },
+    const livingStatusSelector = screen.getByRole("combobox", {
+      name: "Living Status",
     });
-    expect(livingStatusInput.value).toBe("Expired");
+    expect(livingStatusSelector).toHaveTextContent("Living");
+    userEvent.click(livingStatusSelector);
+    const livingStatusOptions = await screen.findAllByRole("option");
+    userEvent.click(livingStatusOptions[1]);
+    expect(livingStatusSelector).toHaveTextContent("Expired");
 
-    const saveButton = getByRole("button", { name: "Save" });
+    const saveButton = screen.getByRole("button", { name: "Save" });
     expect(saveButton).toBeEnabled();
-    act(() => {
-      fireEvent.click(saveButton);
-    });
+    userEvent.click(saveButton);
 
     await waitFor(() => {
       expect(screen.getByTestId("success-toast")).toHaveTextContent(
@@ -812,49 +783,15 @@ describe("EditTestCase QDM Component", () => {
     });
 
     expect(saveTestCaseButton).toBeInTheDocument();
-    const raceInput = screen.getByTestId(
-      "demographics-race-input"
-    ) as HTMLInputElement;
-    expect(raceInput).toBeInTheDocument();
-    expect(raceInput.value).toBe("");
-
-    act(() => {
-      fireEvent.change(raceInput, {
-        target: { value: "Asian" },
-      });
-    });
-    expect(raceInput.value).toBe("Asian");
-
-    const genderInput = screen.getByTestId(
-      "demographics-gender-input"
-    ) as HTMLInputElement;
-    expect(genderInput).toBeInTheDocument();
-    expect(genderInput.value).toBe("Male (finding)");
-
-    act(() => {
-      fireEvent.change(genderInput, {
-        target: { value: "Female (finding)" },
-      });
-    });
-    expect(genderInput.value).toBe("Female (finding)");
-
-    const livingStatusInput = screen.getByTestId(
-      "demographics-living-status-input"
-    ) as HTMLInputElement;
-    expect(livingStatusInput).toBeInTheDocument();
-    expect(livingStatusInput.value).toBe("Living");
-
-    act(() => {
-      fireEvent.change(livingStatusInput, {
-        target: { value: "Expired" },
-      });
-    });
-    expect(livingStatusInput.value).toBe("Expired");
+    const raceSelector = screen.getByRole("combobox", { name: "Race" });
+    userEvent.click(raceSelector);
+    expect(raceSelector).toHaveTextContent("Asian");
+    const raceOptions = await screen.findAllByRole("option");
+    userEvent.click(raceOptions[3]);
+    expect(raceSelector).toHaveTextContent("White");
 
     expect(saveTestCaseButton).toBeEnabled();
-    act(() => {
-      userEvent.click(saveTestCaseButton);
-    });
+    userEvent.click(saveTestCaseButton);
 
     await waitFor(
       () => {
@@ -882,44 +819,14 @@ describe("EditTestCase QDM Component", () => {
     });
 
     expect(saveTestCaseButton).toBeInTheDocument();
-    const raceInput = screen.getByTestId(
-      "demographics-race-input"
-    ) as HTMLInputElement;
-    expect(raceInput).toBeInTheDocument();
-    expect(raceInput.value).toBe("");
-
-    act(() => {
-      fireEvent.change(raceInput, {
-        target: { value: "Asian" },
-      });
-    });
-    expect(raceInput.value).toBe("Asian");
-
-    const genderInput = screen.getByTestId(
-      "demographics-gender-input"
-    ) as HTMLInputElement;
-    expect(genderInput).toBeInTheDocument();
-    expect(genderInput.value).toBe("Male (finding)");
-
-    act(() => {
-      fireEvent.change(genderInput, {
-        target: { value: "Female (finding)" },
-      });
-    });
-    expect(genderInput.value).toBe("Female (finding)");
-
-    const livingStatusInput = screen.getByTestId(
-      "demographics-living-status-input"
-    ) as HTMLInputElement;
-    expect(livingStatusInput).toBeInTheDocument();
-    expect(livingStatusInput.value).toBe("Living");
-
-    act(() => {
-      fireEvent.change(livingStatusInput, {
-        target: { value: "Expired" },
-      });
-    });
-    expect(livingStatusInput.value).toBe("Expired");
+    const raceSelector = screen.getByRole("combobox", { name: "Race" });
+    expect(raceSelector).toHaveTextContent("Select a Race");
+    // change the race
+    userEvent.click(raceSelector);
+    const raceOptions = await screen.findAllByRole("option");
+    expect(raceOptions.length).toBe(4);
+    userEvent.click(raceOptions[3]);
+    expect(raceSelector).toHaveTextContent("White");
 
     expect(saveTestCaseButton).toBeEnabled();
     userEvent.click(saveTestCaseButton);
