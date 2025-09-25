@@ -368,25 +368,7 @@ const TestCaseList = (props: TestCaseListProps) => {
     setExecuteAllTestCases(false);
   };
 
-  const deleteTestCase = (testCaseId) => {
-    testCaseService.current
-      .deleteTestCaseByTestCaseId(measureId, testCaseId)
-      .then(() => {
-        retrieveTestCases();
-      })
-      .catch((err) => {
-        console.error(
-          "deleteTestCaseByTestCaseId: err.message = " + err.message
-        );
-        setToastOpen(true);
-        setToastType("danger");
-        setToastMessage(
-          `Unable to Delete test Case with ID ${testCaseId}. Please try again. If the issue continues, please contact helpdesk.`
-        );
-      });
-  };
-
-  const deleteMultipleTestCases = () => {
+  const deleteTestCases = () => {
     const testCaseIds = selectedTestCases?.map((testCase) => testCase.id);
     testCaseService.current
       .deleteTestCases(measureId, testCaseIds)
@@ -785,7 +767,7 @@ const TestCaseList = (props: TestCaseListProps) => {
                         setSorting={setSorting}
                         testCases={currentSlice}
                         canEdit={canEdit}
-                        deleteTestCase={deleteMultipleTestCases}
+                        deleteTestCase={deleteTestCases}
                         exportTestCase={null}
                         onCloneTestCase={handleCloneTestCase}
                         measure={measure}

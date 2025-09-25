@@ -290,21 +290,7 @@ const TestCaseList = (props: TestCaseListProps) => {
     setExecuteAllTestCases(false);
   };
 
-  const deleteTestCase = (testCaseId) => {
-    testCaseService.current
-      .deleteTestCaseByTestCaseId(measureId, testCaseId)
-      .then(() => {
-        retrieveTestCases();
-      })
-      .catch((err) => {
-        console.error(
-          "deleteTestCaseByTestCaseId: err.message = " + err.message
-        );
-        setErrors((prevState) => [...prevState, err.message]);
-      });
-  };
-
-  const deleteMultipleTestCases = () => {
+  const deleteTestCases = () => {
     const testCaseIds = selectedTestCases?.map((testCase) => testCase.id);
     testCaseService.current
       .deleteTestCases(measureId, testCaseIds)
@@ -661,7 +647,7 @@ const TestCaseList = (props: TestCaseListProps) => {
                         // test cases doesn't know how to sort by category
                         testCases={currentSlice}
                         canEdit={canEdit}
-                        deleteTestCase={deleteMultipleTestCases}
+                        deleteTestCase={deleteTestCases}
                         exportTestCase={exportTestCase}
                         measure={measure}
                         handleQiCloneTestCase={handleQiCloneTestCase}
