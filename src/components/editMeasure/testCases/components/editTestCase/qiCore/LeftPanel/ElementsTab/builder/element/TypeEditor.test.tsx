@@ -14,8 +14,6 @@ import { RequiredFieldsProvider } from "./RequiredFieldsContext";
 import mockRequiredFields from "./mockRequiredFields";
 import mockFormInfo from "./mockFormInfo";
 import { ExecutionContextProvider } from "../../../../../../routes/qiCore/ExecutionContext";
-import IdentifierComponent from "./types/IdentifierComponent";
-import TimingComponent from "./types/TimingComponent";
 
 const getNestedProperty = (obj, path) => {
   return path.split(".").reduce((current, key) => current && current[key], obj);
@@ -1804,7 +1802,7 @@ describe("TypeEditor Component", () => {
     expect(timeInputs.length).toBeGreaterThanOrEqual(2);
   });
 
-  test("renders IdentifierComponent fields", async () => {
+  test("TypeEditor renders IdentifierComponent fields for Identifier type", async () => {
     const mockFormik = {
       values: {},
       touched: {},
@@ -1833,7 +1831,7 @@ describe("TypeEditor Component", () => {
       >
         <FormikProvider value={mockFormik}>
           <RequiredFieldsProvider requiredFields={{}} formInfo={{}}>
-            <IdentifierComponent
+            <TypeEditor
               label="MedicationRequest.identifier[0]"
               canEdit={true}
               resource={{}}
@@ -1860,6 +1858,85 @@ describe("TypeEditor Component", () => {
     expect(await screen.findByLabelText("Start Date")).toBeInTheDocument();
     expect(await screen.findByLabelText("End Date")).toBeInTheDocument();
     expect(await screen.findByLabelText("Assigner")).toBeInTheDocument();
+  });
+
+  test("TypeEditor renders TimingComponent fields for Timing type", async () => {
+    const mockFormik = {
+      values: {},
+      touched: {},
+      errors: {},
+      setFieldValue: jest.fn(),
+      setFieldTouched: jest.fn(),
+      getFieldProps: jest.fn().mockReturnValue({
+        value: "",
+        onChange: jest.fn(),
+        onBlur: jest.fn(),
+        name: "MedicationRequest.timing",
+      }),
+    };
+
+    render(
+      <ExecutionContextProvider
+        value={{
+          measureState: [null, jest.fn()],
+          bundleState: [null, jest.fn()],
+          valueSetsState: [null, jest.fn()],
+          executionContextReady: true,
+          executing: false,
+          setExecuting: jest.fn(),
+          contextFailure: false,
+        }}
+      >
+        <FormikProvider value={mockFormik}>
+          <RequiredFieldsProvider requiredFields={{}} formInfo={{}}>
+            <TypeEditor
+              label="MedicationRequest.timing"
+              canEdit={true}
+              resource={{}}
+              structureDefinition={{
+                id: "MedicationRequest.timing",
+                path: "MedicationRequest.timing",
+                type: [{ code: "Timing" }],
+                min: 0,
+                max: "*",
+              }}
+              fieldRequired={false}
+            />
+          </RequiredFieldsProvider>
+        </FormikProvider>
+      </ExecutionContextProvider>
+    );
+
+    expect(await screen.findByText("Event[0]")).toBeInTheDocument();
+    expect(await screen.findByLabelText("Repeat.Bounds")).toBeInTheDocument();
+    expect(await screen.findByLabelText("Repeat.Count")).toBeInTheDocument();
+    expect(await screen.findByLabelText("Repeat.CountMax")).toBeInTheDocument();
+    expect(await screen.findByLabelText("Repeat.Duration")).toBeInTheDocument();
+    expect(
+      await screen.findByLabelText("Repeat.DurationMax")
+    ).toBeInTheDocument();
+
+    const repeatUnits = screen.getAllByLabelText("Repeat.Unit(s)");
+    expect(repeatUnits.length).toBe(2);
+
+    expect(
+      await screen.findByLabelText("Repeat.Frequency")
+    ).toBeInTheDocument();
+    expect(
+      await screen.findByLabelText("Repeat.FrequencyMax")
+    ).toBeInTheDocument();
+    expect(await screen.findByLabelText("Repeat.Period")).toBeInTheDocument();
+    expect(
+      await screen.findByLabelText("Repeat.PeriodMax")
+    ).toBeInTheDocument();
+    expect(
+      await screen.findByLabelText("Repeat.Day of Week[0]")
+    ).toBeInTheDocument();
+    expect(
+      await screen.findByText("Repeat.Time of Day[0]")
+    ).toBeInTheDocument();
+    expect(await screen.findByLabelText("Repeat.When[0]")).toBeInTheDocument();
+    expect(await screen.findByLabelText("Repeat.Offset")).toBeInTheDocument();
   });
 
   test("Should render Range component (QuantityIntervalInput) and handle onQuantityIntervalChange", () => {
@@ -2023,83 +2100,6 @@ describe("TypeEditor Component", () => {
     await waitFor(() => {
       expect(currencySelect).toHaveTextContent("Canadian dollar");
     });
-  });
-
-  test("renders TimingComponent fields", async () => {
-    const mockFormik = {
-      values: {},
-      touched: {},
-      errors: {},
-      setFieldValue: jest.fn(),
-      setFieldTouched: jest.fn(),
-      getFieldProps: jest.fn().mockReturnValue({
-        value: "",
-        onChange: jest.fn(),
-        onBlur: jest.fn(),
-        name: "MedicationRequest.timing",
-      }),
-    };
-
-    render(
-      <ExecutionContextProvider
-        value={{
-          measureState: [null, jest.fn()],
-          bundleState: [null, jest.fn()],
-          valueSetsState: [null, jest.fn()],
-          executionContextReady: true,
-          executing: false,
-          setExecuting: jest.fn(),
-          contextFailure: false,
-        }}
-      >
-        <FormikProvider value={mockFormik}>
-          <RequiredFieldsProvider requiredFields={{}} formInfo={{}}>
-            <TimingComponent
-              label="MedicationRequest.timing"
-              canEdit={true}
-              resource={{}}
-              structureDefinition={{
-                id: "MedicationRequest.timing",
-                path: "MedicationRequest.timing",
-                type: [{ code: "Timing" }],
-                min: 0,
-                max: "*",
-              }}
-              fieldRequired={false}
-            />
-          </RequiredFieldsProvider>
-        </FormikProvider>
-      </ExecutionContextProvider>
-    );
-
-    expect(await screen.findByText("Event[0]")).toBeInTheDocument();
-    expect(await screen.findByLabelText("Repeat.Bounds")).toBeInTheDocument();
-    expect(await screen.findByLabelText("Repeat.Count")).toBeInTheDocument();
-    expect(await screen.findByLabelText("Repeat.CountMax")).toBeInTheDocument();
-    expect(await screen.findByLabelText("Repeat.Duration")).toBeInTheDocument();
-    expect(
-      await screen.findByLabelText("Repeat.DurationMax")
-    ).toBeInTheDocument();
-    const repeatUnits = screen.getAllByLabelText("Repeat.Unit(s)");
-    expect(repeatUnits.length).toBe(2);
-    expect(
-      await screen.findByLabelText("Repeat.Frequency")
-    ).toBeInTheDocument();
-    expect(
-      await screen.findByLabelText("Repeat.FrequencyMax")
-    ).toBeInTheDocument();
-    expect(await screen.findByLabelText("Repeat.Period")).toBeInTheDocument();
-    expect(
-      await screen.findByLabelText("Repeat.PeriodMax")
-    ).toBeInTheDocument();
-    expect(
-      await screen.findByLabelText("Repeat.Day of Week[0]")
-    ).toBeInTheDocument();
-    expect(
-      await screen.findByText("Repeat.Time of Day[0]")
-    ).toBeInTheDocument();
-    expect(await screen.findByLabelText("Repeat.When[0]")).toBeInTheDocument();
-    expect(await screen.findByLabelText("Repeat.Offset")).toBeInTheDocument();
   });
 
   // ========== NEW TESTS FOR ARRAY RENDERING AND CARDINALITY ==========
