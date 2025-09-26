@@ -436,35 +436,27 @@ describe("EditMeasure Component", () => {
   it("should display view human readable modal when the event is triggered, discards.", async () => {
     renderRouter();
 
-    const result = await findByTestId("editMeasure");
-    expect(result).toBeInTheDocument();
+    await findByTestId("editMeasure");
     expect(serviceApiMock.fetchMeasure).toHaveBeenCalled();
-    const loading = queryByTestId("loading");
-    setTimeout(() => {
-      expect(loading).toBeNull();
-    }, 500);
+
+    await waitFor(() => {
+      expect(queryByTestId("loading")).toBeNull();
+    });
 
     act(() => {
       window.dispatchEvent(new Event("view-humanreadable"));
     });
 
-    await waitFor(() =>
-      setTimeout(() => {
-        expect(queryByTestId("view-hr-modal")).toBeInTheDocument();
-      }, 1000)
-    );
+    const modal = await findByTestId("view-hr-modal");
+    expect(modal).toBeInTheDocument();
 
-    setTimeout(async () => {
-      const cancelButton = await findByTestId("modal-secondary-btn");
-      fireEvent.click(cancelButton);
-    }, 500);
+    expect(screen.queryByText("test human readable")).toBeInTheDocument();
+
+    const cancelButton = await findByTestId("human-readable-cancel-button");
+    fireEvent.click(cancelButton);
 
     await waitFor(() => {
-      expect(
-        screen.queryByText(
-          "The human readable file is not available for this measure.  Contact Help Desk for additional information."
-        )
-      ).not.toBeInTheDocument();
+      expect(screen.queryByText("test human readable")).not.toBeInTheDocument();
     });
   });
 
@@ -478,7 +470,7 @@ describe("EditMeasure Component", () => {
       window.dispatchEvent(new Event("share-measure"));
     });
 
-    await waitFor(async () => {
+    await waitFor(() => {
       expect(serviceApiMock.fetchMeasure).toHaveBeenCalled();
       expect(getByTestId("share-dialog")).toBeInTheDocument();
     });
@@ -499,14 +491,14 @@ describe("EditMeasure Component", () => {
       window.dispatchEvent(new Event("unshare-measure-from-me"));
     });
 
-    await waitFor(async () => {
+    await waitFor(() => {
       expect(getByTestId("share-confirmation-dialog")).toBeInTheDocument();
     });
 
     const cancelButton = getByTestId("share-confirmation-dialog-cancel-button");
     fireEvent.click(cancelButton);
 
-    await waitFor(async () => {
+    await waitFor(() => {
       expect(
         queryByTestId("share-confirmation-dialog")
       ).not.toBeInTheDocument();
@@ -523,13 +515,13 @@ describe("EditMeasure Component", () => {
       window.dispatchEvent(new Event("transfer-measure"));
     });
 
-    await waitFor(async () => {
+    await waitFor(() => {
       expect(getByTestId("transfer-dialog")).toBeInTheDocument();
     });
 
     const cancelButton = getByTestId("transfer-cancel-button");
     fireEvent.click(cancelButton);
-    await waitFor(async () => {
+    await waitFor(() => {
       expect(queryByTestId("transfer-dialog")).not.toBeInTheDocument();
     });
   });
