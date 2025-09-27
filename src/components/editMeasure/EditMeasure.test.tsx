@@ -174,6 +174,7 @@ const serviceApiMock = {
   }),
   transferMeasures: jest.fn().mockResolvedValue({ data: true }),
   draftMeasure: jest.fn().mockResolvedValue({ id: "newDraftId" }),
+  unshareMeasures: jest.fn().mockResolvedValue({ data: true }),
 } as unknown as MeasureServiceApi;
 
 useMeasureServiceApiMock.mockImplementation(() => {
@@ -481,7 +482,7 @@ describe("EditMeasure Component", () => {
     expect(queryByTestId("share-dialog")).toBeVisible();
   });
 
-  it("should display an unshare confirmation dialog when the event is triggered and close dialog when cancel button is clicked", async () => {
+  it("should display an unshare from me confirmation dialog when the event is triggered and close dialog when cancel button is clicked", async () => {
     renderRouter();
 
     const result = await findByTestId("editMeasure");
@@ -503,6 +504,66 @@ describe("EditMeasure Component", () => {
         queryByTestId("share-confirmation-dialog")
       ).not.toBeInTheDocument();
     });
+  });
+
+  it("should display an unshare from me confirmation dialog when the event is triggered and successfully unshare when accept button is clicked", async () => {
+    renderRouter();
+
+    const result = await findByTestId("editMeasure");
+    expect(result).toBeInTheDocument();
+
+    act(() => {
+      window.dispatchEvent(new Event("unshare-measure-from-me"));
+    });
+
+    await waitFor(() => {
+      expect(getByTestId("share-confirmation-dialog")).toBeInTheDocument();
+    });
+
+    const acceptBtn = await screen.findByTestId(
+      "share-confirmation-dialog-accept-button"
+    );
+    expect(acceptBtn).toBeEnabled();
+
+    fireEvent.click(acceptBtn);
+
+    await waitFor(() => {
+      expect(
+        getByTestId("edit-measure-information-success-text")
+      ).toBeInTheDocument();
+    });
+  });
+
+  it("should display an unshare from me confirmation dialog when the event is triggered and fail to unshare when accept button is clicked", async () => {
+    serviceApiMock.unshareMeasures = jest.fn().mockRejectedValueOnce({
+      status: 500,
+      response: { data: { message: "update failed" } },
+    });
+    renderRouter();
+
+    const result = await findByTestId("editMeasure");
+    expect(result).toBeInTheDocument();
+
+    act(() => {
+      window.dispatchEvent(new Event("unshare-measure-from-me"));
+    });
+
+    await waitFor(() => {
+      expect(getByTestId("share-confirmation-dialog")).toBeInTheDocument();
+    });
+
+    const acceptBtn = await screen.findByTestId(
+      "share-confirmation-dialog-accept-button"
+    );
+    expect(acceptBtn).toBeEnabled();
+
+    fireEvent.click(acceptBtn);
+
+    const errorText = await screen.findByTestId(
+      "edit-measure-information-generic-error-text"
+    );
+    expect(errorText).toBeInTheDocument();
+    expect(errorText).toHaveTextContent("update failed");
   });
 
   it("should display transfer dialog when the event is triggered and close dialog when cancel button is clicked", async () => {

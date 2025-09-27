@@ -196,6 +196,57 @@ describe("ShareAction on Owned/All Measures tab", () => {
     fireEvent.click(screen.getByRole("menuitem", { name: "Unshare" }));
     expect(onClick).toHaveBeenCalledWith("Unshare");
   });
+
+  it("All Measures tab: Should disable share action btn if no measure selected", () => {
+    render(
+      <ShareAction
+        measures={[]}
+        onClick={() => {}}
+        isOwner={true}
+        isSharedWithUser={false}
+        activeTab={2}
+      />
+    );
+    expect(screen.getByTestId("share-action-btn")).toBeDisabled();
+    expect(screen.getByTestId("share-action-tooltip")).toHaveAttribute(
+      "aria-label",
+      NOTHING_SELECTED
+    );
+  });
+
+  it("All Measures tab: Should enable share action btn if user selects one measure and isOwner is true", () => {
+    render(
+      <ShareAction
+        measures={[qiCoreMeasure]}
+        onClick={() => {}}
+        isOwner={true}
+        isSharedWithUser={false}
+        activeTab={2}
+      />
+    );
+    expect(screen.getByTestId("share-action-btn")).not.toBeDisabled();
+    expect(screen.getByTestId("share-action-tooltip")).toHaveAttribute(
+      "aria-label",
+      VALID_SHARE_MEASURE
+    );
+  });
+
+  it("All Measures tab: Should disable share action btn if user selects one measure but isOwner is false", () => {
+    render(
+      <ShareAction
+        measures={[qiCoreMeasure]}
+        onClick={() => {}}
+        isOwner={false}
+        isSharedWithUser={false}
+        activeTab={2}
+      />
+    );
+    expect(screen.getByTestId("share-action-btn")).toBeDisabled();
+    expect(screen.getByTestId("share-action-tooltip")).toHaveAttribute(
+      "aria-label",
+      INVALID_SHARE_MEASURE
+    );
+  });
 });
 
 describe("ShareAction on Shared Measures tab", () => {

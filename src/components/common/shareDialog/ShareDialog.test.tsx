@@ -901,7 +901,53 @@ describe("UnshareFromMe Confirmation Dialog component", () => {
     expect(screen.queryByTestId("share-dialog")).toBeNull();
   });
 
-  it("should close confirmation dialog and call onClose", async () => {
+  it("should close Share dialog and call onClose when option is 'Share With'", async () => {
+    const onCloseMock = jest.fn();
+
+    render(
+      <ShareDialog
+        measures={[mockMeasure1, mockMeasure2]}
+        open={true}
+        option="Share With"
+        onClose={onCloseMock}
+        onSave={jest.fn()}
+      />
+    );
+
+    expect(screen.getByTestId("share-dialog")).toBeInTheDocument();
+    expect(screen.queryByTestId("share-confirmation-dialog")).toBeNull();
+
+    const cancelButton = screen.getByTestId("share-cancel-button");
+    fireEvent.click(cancelButton);
+
+    expect(onCloseMock).toHaveBeenCalled();
+    expect(screen.queryByTestId("share-confirmation-dialog")).toBeNull();
+  });
+
+  it("should close Unshare dialog and call onClose when option is 'Unshare'", async () => {
+    const onCloseMock = jest.fn();
+
+    render(
+      <ShareDialog
+        measures={[mockMeasure1, mockMeasure2]}
+        open={true}
+        option="Unshare"
+        onClose={onCloseMock}
+        onSave={jest.fn()}
+      />
+    );
+
+    expect(screen.getByTestId("share-dialog")).toBeInTheDocument();
+    expect(screen.queryByTestId("share-confirmation-dialog")).toBeNull();
+
+    const cancelButton = screen.getByTestId("share-cancel-button");
+    fireEvent.click(cancelButton);
+
+    expect(onCloseMock).toHaveBeenCalled();
+    expect(screen.queryByTestId("share-confirmation-dialog")).toBeNull();
+  });
+
+  it("should close confirmation dialog and call onClose when option is 'UnshareFromMe'", async () => {
     const onCloseMock = jest.fn();
 
     render(
@@ -915,6 +961,7 @@ describe("UnshareFromMe Confirmation Dialog component", () => {
     );
 
     expect(screen.getByTestId("share-confirmation-dialog")).toBeInTheDocument();
+    expect(screen.queryByTestId("share-dialog")).toBeNull();
 
     const cancelButton = screen.getByTestId(
       "share-confirmation-dialog-cancel-button"
