@@ -18,7 +18,7 @@ import {
   LIVING_STATUS_CODE_OPTIONS,
   PATIENT_CHARACTERISTIC_EXPIRED,
   getPatientCharacteristicExpiredDateElement,
-  getValueSetForDemographic,
+  getValueSetsForDemographic,
   getDataElementByStatus,
 } from "./DemographicsSectionConst";
 import { MenuItem } from "@mui/material";
@@ -34,8 +34,13 @@ export const DEMOGRAPHICS_WARNING_MESSAGE =
 // Check if a DataElement's code exist in the corresponding ValueSet
 const checkMismatch = (
   dataElement: DataElement,
-  valueSet: ValueSet
+  valueSets: Array<ValueSet>
 ): boolean => {
+  if (!dataElement || !valueSets?.length) return false;
+  // check if the dataElement's codeListId matches any valueSet OID
+  const valueSet = valueSets.find((vs) => vs.oid === dataElement.codeListId);
+  if (!valueSet) return true;
+
   // There is only one code if set
   const dataCode = dataElement?.dataElementCodes?.[0];
   const concepts = valueSet?.concepts;
@@ -70,13 +75,16 @@ const DemographicsSection = ({ handleTestCaseWarnings, canEdit }) => {
     useState<DataElement>();
 
   // value sets for Demographics
-  const genderValueSet = getValueSetForDemographic(cqmMeasure, "gender");
-  const raceValueSet = getValueSetForDemographic(cqmMeasure, "race");
-  const ethnicityValueSet = getValueSetForDemographic(cqmMeasure, "ethnicity");
+  const genderValueSets = getValueSetsForDemographic(cqmMeasure, "gender");
+  const raceValueSets = getValueSetsForDemographic(cqmMeasure, "race");
+  const ethnicityValueSets = getValueSetsForDemographic(
+    cqmMeasure,
+    "ethnicity"
+  );
 
-  const selectOptions = (options, includeDash = false) => {
+  const selectOptions = (valueSets, includeDash = false) => {
     // Always render a single dash MenuItem if includeDash is true
-    const dash = includeDash
+    const options = includeDash
       ? [
           <MenuItem
             key="-"
@@ -90,38 +98,44 @@ const DemographicsSection = ({ handleTestCaseWarnings, canEdit }) => {
       : [];
 
     // loading skeleton
-    if (!executionContextReady && !options) {
-      return [
+    if (!executionContextReady) {
+      options.push(
         <MenuItem value="" disabled>
           Loading...
-        </MenuItem>,
-      ];
+        </MenuItem>
+      );
     }
 
-    if (!options) {
-      return dash;
+    if (!valueSets) {
+      return options;
     }
+    for (const valueSet of valueSets) {
+      if (valueSet.concepts?.length) {
+        const conceptOptions = valueSet.concepts
+          .sort((a, b) =>
+            a.display && b.display
+              ? a.display.localeCompare(b.display)
+              : a.localeCompare(b)
+          )
+          .map((opt, i) => {
+            const { display } = opt || {};
+            const sanitizedString = display
+              ? display.replace(/"/g, "")
+              : opt?.replace(/"/g, "");
+            return (
+              <MenuItem
+                key={`${sanitizedString}-${i}`}
+                value={`${sanitizedString}__${valueSet.oid}`} // append oid to identify which value set code belongs to
+              >
+                {sanitizedString}
+              </MenuItem>
+            );
+          });
 
-    return [
-      ...dash,
-      ...options
-        .sort((a, b) =>
-          a.display && b.display
-            ? a.display.localeCompare(b.display)
-            : a.localeCompare(b)
-        )
-        .map((opt, i) => {
-          const { display } = opt || {};
-          const sanitizedString = display
-            ? display.replace(/"/g, "")
-            : opt?.replace(/"/g, "");
-          return (
-            <MenuItem key={`${sanitizedString}-${i}`} value={sanitizedString}>
-              {sanitizedString}
-            </MenuItem>
-          );
-        }),
-    ];
+        options.push(...conceptOptions);
+      }
+    }
+    return options;
   };
 
   // this populates the json making it able to be edited. we should only do this before change
@@ -159,38 +173,23 @@ const DemographicsSection = ({ handleTestCaseWarnings, canEdit }) => {
     }
   }, [patient]);
 
-  useEffect(() => {
-    const hasRaceMismatch =
-      raceDataElement &&
-      raceValueSet?.concepts?.length &&
-      (raceDataElement.codeListId !== raceValueSet.oid ||
-        checkMismatch(raceDataElement, raceValueSet));
+  // Check if demographics selected are from one of the value sets of cqmMeasure
+  if (cqmMeasure && executionContextReady) {
+    const hasRaceMismatch = checkMismatch(raceDataElement, raceValueSets);
 
-    const hasGenderMismatch =
-      genderDataElement &&
-      genderValueSet?.concepts?.length &&
-      (genderDataElement.codeListId !== genderValueSet.oid ||
-        checkMismatch(genderDataElement, genderValueSet));
+    const hasGenderMismatch = checkMismatch(genderDataElement, genderValueSets);
 
-    const hasEthnicityMismatch =
-      ethnicityDataElement &&
-      ethnicityValueSet?.concepts?.length &&
-      (ethnicityDataElement.codeListId !== ethnicityValueSet.oid ||
-        checkMismatch(ethnicityDataElement, ethnicityValueSet));
+    const hasEthnicityMismatch = checkMismatch(
+      ethnicityDataElement,
+      ethnicityValueSets
+    );
 
     if (hasRaceMismatch || hasGenderMismatch || hasEthnicityMismatch) {
       handleTestCaseWarnings(DEMOGRAPHICS_WARNING_MESSAGE);
     } else {
       handleTestCaseWarnings(null);
     }
-  }, [
-    raceDataElement,
-    genderDataElement,
-    ethnicityDataElement,
-    raceValueSet,
-    genderValueSet,
-    ethnicityValueSet,
-  ]);
+  }
 
   const handleRaceChange = (event) => {
     const existingElement = getDataElementByStatus("race", patient);
@@ -206,8 +205,11 @@ const DemographicsSection = ({ handleTestCaseWarnings, canEdit }) => {
       return;
     }
 
+    // Split the value to get code and oid
+    const [code, oid] = event.target.value.split("__");
+    const raceValueSet = raceValueSets.find((vs) => vs.oid === oid);
     const newRaceDataElement: DataElement = getRaceDataElement(
-      event.target.value,
+      code,
       raceValueSet,
       existingElement
     );
@@ -233,9 +235,11 @@ const DemographicsSection = ({ handleTestCaseWarnings, canEdit }) => {
       }
       return;
     }
-
+    // Split the value to get code and oid
+    const [code, oid] = event.target.value.split("__");
+    const genderValueSet = genderValueSets.find((vs) => vs.oid === oid);
     const newGenderDataElement: DataElement = getGenderDataElement(
-      event.target.value,
+      code,
       genderValueSet,
       existingElement
     );
@@ -261,9 +265,11 @@ const DemographicsSection = ({ handleTestCaseWarnings, canEdit }) => {
       }
       return;
     }
-
+    // Split the value to get code and oid
+    const [code, oid] = event.target.value.split("__");
+    const ethnicityValueSet = ethnicityValueSets.find((vs) => vs.oid === oid);
     const newEthnicityDataElement: DataElement = getEthnicityDataElement(
-      event.target.value,
+      code,
       ethnicityValueSet,
       existingElement
     );
@@ -352,8 +358,7 @@ const DemographicsSection = ({ handleTestCaseWarnings, canEdit }) => {
               />
               <FormControl>
                 <Select
-                  labelId="demographics-living-status-select-label"
-                  id="demographics-living-status-select-id"
+                  id="demographics-living-status-selector"
                   defaultValue="Living"
                   label="Living Status"
                   readOnly={!canEdit}
@@ -366,7 +371,11 @@ const DemographicsSection = ({ handleTestCaseWarnings, canEdit }) => {
                       : "Living"
                   }
                   onChange={handleLivingStatusChange}
-                  options={selectOptions(LIVING_STATUS_CODE_OPTIONS)}
+                  options={LIVING_STATUS_CODE_OPTIONS.map((code) => (
+                    <MenuItem key={code} value={code}>
+                      {code}
+                    </MenuItem>
+                  ))}
                 ></Select>
               </FormControl>
 
@@ -390,8 +399,7 @@ const DemographicsSection = ({ handleTestCaseWarnings, canEdit }) => {
 
               <FormControl>
                 <Select
-                  labelId="demographics-race-select-label"
-                  id="demographics-race-select-id"
+                  id="demographics-race-selector"
                   label="Race"
                   readOnly={!canEdit}
                   inputProps={{
@@ -400,13 +408,12 @@ const DemographicsSection = ({ handleTestCaseWarnings, canEdit }) => {
                   value={raceDataElement?.dataElementCodes?.[0].display ?? ""}
                   placeHolder={{ name: "Select a Race", value: "" }}
                   onChange={handleRaceChange}
-                  options={selectOptions(raceValueSet?.concepts, true)}
+                  options={selectOptions(raceValueSets, true)}
                 ></Select>
               </FormControl>
               <FormControl>
                 <Select
-                  labelId="demographics-gender-select-label"
-                  id="demographics-gender-select-id"
+                  id="demographics-gender-selector"
                   label="Sex"
                   readOnly={!canEdit}
                   inputProps={{
@@ -415,15 +422,14 @@ const DemographicsSection = ({ handleTestCaseWarnings, canEdit }) => {
                   value={genderDataElement?.dataElementCodes?.[0].display ?? ""}
                   placeHolder={{ name: "Select a Gender", value: "" }}
                   onChange={handleGenderChange}
-                  options={selectOptions(genderValueSet?.concepts, true)}
+                  options={selectOptions(genderValueSets, true)}
                 ></Select>
               </FormControl>
             </div>
             <div className="demographics-row">
               <FormControl>
                 <Select
-                  labelId="demographics-ethnicity-select-label"
-                  id="demographics-ethnicity-select-id"
+                  id="demographics-ethnicity-selector"
                   label="Ethnicity"
                   className="demographics-ethnicity"
                   readOnly={!canEdit}
@@ -435,7 +441,7 @@ const DemographicsSection = ({ handleTestCaseWarnings, canEdit }) => {
                   }
                   placeHolder={{ name: "Select an Ethnicity", value: "" }}
                   onChange={handleEthnicityChange}
-                  options={selectOptions(ethnicityValueSet?.concepts, true)}
+                  options={selectOptions(ethnicityValueSets, true)}
                 ></Select>
               </FormControl>
             </div>
