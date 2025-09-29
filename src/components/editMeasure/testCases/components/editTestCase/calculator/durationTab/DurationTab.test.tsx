@@ -71,4 +71,113 @@ describe("DurationTab", () => {
     fireEvent.click(checkbox);
     expect(checkbox).toBeChecked();
   });
+
+  it("shows '--' for results if calculate is clicked without both dates", () => {
+    render(<DurationTab />);
+    const calculateButton = screen.getByTestId("calculate-duration");
+    fireEvent.click(calculateButton);
+    expect(screen.getByTestId("duration-result")).toHaveValue("--");
+    expect(screen.getByTestId("difference-result")).toHaveValue("--");
+  });
+
+  it("shows '--' for results if calculate is clicked when either start date or end date is missing", () => {
+    render(<DurationTab />);
+    const startDateInput = screen.getByLabelText("Start Date");
+    fireEvent.change(startDateInput, { target: { value: "01/01/2020" } });
+    const calculateButton = screen.getByTestId("calculate-duration");
+    fireEvent.click(calculateButton);
+    expect(screen.getByTestId("duration-result")).toHaveValue("--");
+    expect(screen.getByTestId("difference-result")).toHaveValue("--");
+  });
+
+  it("calculates duration and difference in years", () => {
+    render(<DurationTab />);
+    const startDateInput = screen.getByLabelText("Start Date");
+    const endDateInput = screen.getByLabelText("End Date");
+    fireEvent.change(startDateInput, { target: { value: "01/01/2020" } });
+    fireEvent.change(endDateInput, { target: { value: "01/01/2023" } });
+    fireEvent.click(screen.getByTestId("calculate-duration"));
+    expect(screen.getByTestId("duration-result")).toHaveValue("3 years");
+    expect(screen.getByTestId("difference-result")).toHaveValue("3 years");
+  });
+
+  it("calculates duration and difference in months", () => {
+    render(<DurationTab />);
+    const startDateInput = screen.getByLabelText("Start Date");
+    const endDateInput = screen.getByLabelText("End Date");
+    fireEvent.change(startDateInput, { target: { value: "01/01/2020" } });
+    fireEvent.change(endDateInput, { target: { value: "04/01/2020" } });
+    // Change precision to months
+    const precisionDropdown = screen.getByRole("combobox");
+    fireEvent.mouseDown(precisionDropdown);
+    const monthsOption = screen.getByRole("option", { name: "Months" });
+    fireEvent.click(monthsOption);
+    fireEvent.click(screen.getByTestId("calculate-duration"));
+    expect(screen.getByTestId("duration-result")).toHaveValue("3 months");
+    expect(screen.getByTestId("difference-result")).toHaveValue("3 months");
+  });
+
+  it("calculates duration and difference in weeks", () => {
+    render(<DurationTab />);
+    const startDateInput = screen.getByLabelText("Start Date");
+    const endDateInput = screen.getByLabelText("End Date");
+    fireEvent.change(startDateInput, { target: { value: "01/01/2020" } });
+    fireEvent.change(endDateInput, { target: { value: "01/22/2020" } });
+    // Change precision to weeks
+    const precisionDropdown = screen.getByRole("combobox");
+    fireEvent.mouseDown(precisionDropdown);
+    const weeksOption = screen.getByRole("option", { name: "Weeks" });
+    fireEvent.click(weeksOption);
+    fireEvent.click(screen.getByTestId("calculate-duration"));
+    expect(screen.getByTestId("duration-result")).toHaveValue("3 weeks");
+    expect(screen.getByTestId("difference-result")).toHaveValue("3 weeks");
+  });
+
+  it("calculates duration and difference in days", () => {
+    render(<DurationTab />);
+    const startDateInput = screen.getByLabelText("Start Date");
+    const endDateInput = screen.getByLabelText("End Date");
+    fireEvent.change(startDateInput, { target: { value: "01/01/2020" } });
+    fireEvent.change(endDateInput, { target: { value: "01/05/2020" } });
+    // Change precision to days
+    const precisionDropdown = screen.getByRole("combobox");
+    fireEvent.mouseDown(precisionDropdown);
+    const daysOption = screen.getByRole("option", { name: "Days" });
+    fireEvent.click(daysOption);
+    fireEvent.click(screen.getByTestId("calculate-duration"));
+    expect(screen.getByTestId("duration-result")).toHaveValue("4 days");
+    expect(screen.getByTestId("difference-result")).toHaveValue("4 days");
+  });
+
+  it("adds 1 day when end date inclusive is checked", () => {
+    render(<DurationTab />);
+    const startDateInput = screen.getByLabelText("Start Date");
+    const endDateInput = screen.getByLabelText("End Date");
+    fireEvent.change(startDateInput, { target: { value: "01/01/2020" } });
+    fireEvent.change(endDateInput, { target: { value: "01/05/2020" } });
+    // Change precision to days
+    const precisionDropdown = screen.getByRole("combobox");
+    fireEvent.mouseDown(precisionDropdown);
+    const daysOption = screen.getByRole("option", { name: "Days" });
+    fireEvent.click(daysOption);
+    // Check the end date inclusive checkbox
+    const checkbox = screen.getByLabelText(
+      "Include end date in calculation (1 day is added)"
+    );
+    fireEvent.click(checkbox);
+    fireEvent.click(screen.getByTestId("calculate-duration"));
+    expect(screen.getByTestId("duration-result")).toHaveValue("5 days");
+    expect(screen.getByTestId("difference-result")).toHaveValue("5 days");
+  });
+
+  it("shows values even if start date is after end date", () => {
+    render(<DurationTab />);
+    const startDateInput = screen.getByLabelText("Start Date");
+    const endDateInput = screen.getByLabelText("End Date");
+    fireEvent.change(startDateInput, { target: { value: "01/10/2020" } });
+    fireEvent.change(endDateInput, { target: { value: "01/05/2020" } });
+    fireEvent.click(screen.getByTestId("calculate-duration"));
+    expect(screen.getByTestId("duration-result")).toHaveValue("-1 years");
+    expect(screen.getByTestId("difference-result")).toHaveValue("1 years");
+  });
 });
