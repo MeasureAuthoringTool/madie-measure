@@ -51,7 +51,7 @@ describe("DurationTab", () => {
     expect(startDateInput).toHaveValue(initialDate);
   });
 
-  it("updates precision when a new option is selected", async () => {
+  it("updates precision when a new option is selected", () => {
     render(<DurationTab />);
     const precisionDropdown = screen.getByRole("combobox");
     userEvent.click(precisionDropdown);
@@ -68,115 +68,115 @@ describe("DurationTab", () => {
       "Include end date in calculation (1 day is added)"
     );
     expect(checkbox).not.toBeChecked();
-    fireEvent.click(checkbox);
+    userEvent.click(checkbox);
     expect(checkbox).toBeChecked();
   });
 
-  it("shows '--' for results if calculate is clicked without both dates", async () => {
+  it("shows '--' for results if calculate is clicked without both dates", () => {
     render(<DurationTab />);
     const calculateButton = screen.getByTestId("calculate-duration");
-    await userEvent.click(calculateButton);
+    userEvent.click(calculateButton);
     expect(screen.getByTestId("duration-result")).toHaveValue("--");
     expect(screen.getByTestId("difference-result")).toHaveValue("--");
   });
 
-  it("shows '--' for results if calculate is clicked when either start date or end date is missing", async () => {
+  it("shows '--' for results if calculate is clicked when either start date or end date is missing", () => {
     render(<DurationTab />);
     const startDateInput = screen.getByLabelText("Start Date");
-    await userEvent.type(startDateInput, "01/01/2020");
+    userEvent.type(startDateInput, "01/01/2020");
     const calculateButton = screen.getByTestId("calculate-duration");
-    await userEvent.click(calculateButton);
+    userEvent.click(calculateButton);
     expect(screen.getByTestId("duration-result")).toHaveValue("--");
     expect(screen.getByTestId("difference-result")).toHaveValue("--");
   });
 
-  it("calculates duration and difference in years", async () => {
+  it("calculates duration and difference in years", () => {
     render(<DurationTab />);
     const startDateInput = screen.getByLabelText("Start Date");
     const endDateInput = screen.getByLabelText("End Date");
-    await userEvent.type(startDateInput, "01/01/2020");
-    await userEvent.type(endDateInput, "01/01/2023");
-    await userEvent.click(screen.getByTestId("calculate-duration"));
+    userEvent.type(startDateInput, "01/01/2020");
+    userEvent.type(endDateInput, "01/01/2023");
+    userEvent.click(screen.getByTestId("calculate-duration"));
     expect(screen.getByTestId("duration-result")).toHaveValue("3 years");
     expect(screen.getByTestId("difference-result")).toHaveValue("3 years");
   });
 
-  it("calculates duration and difference in months", async () => {
+  it("calculates duration and difference in months", () => {
     render(<DurationTab />);
     const startDateInput = screen.getByLabelText("Start Date");
     const endDateInput = screen.getByLabelText("End Date");
-    await userEvent.type(startDateInput, "01/01/2020");
-    await userEvent.type(endDateInput, "04/01/2020");
+    userEvent.type(startDateInput, "01/01/2020");
+    userEvent.type(endDateInput, "04/01/2020");
     // Change precision to months
     const precisionDropdown = screen.getByRole("combobox");
-    await userEvent.click(precisionDropdown);
+    userEvent.click(precisionDropdown);
     const monthsOption = screen.getByRole("option", { name: "Months" });
-    await userEvent.click(monthsOption);
-    await userEvent.click(screen.getByTestId("calculate-duration"));
+    userEvent.click(monthsOption);
+    userEvent.click(screen.getByTestId("calculate-duration"));
     expect(screen.getByTestId("duration-result")).toHaveValue("3 months");
     expect(screen.getByTestId("difference-result")).toHaveValue("3 months");
   });
 
-  it("calculates duration and difference in weeks", async () => {
+  it("calculates duration and difference in weeks", () => {
     render(<DurationTab />);
     const startDateInput = screen.getByLabelText("Start Date");
     const endDateInput = screen.getByLabelText("End Date");
-    await userEvent.type(startDateInput, "01/01/2020");
-    await userEvent.type(endDateInput, "01/22/2020");
+    userEvent.type(startDateInput, "01/01/2020");
+    userEvent.type(endDateInput, "01/22/2020");
     // Change precision to weeks
     const precisionDropdown = screen.getByRole("combobox");
-    await userEvent.click(precisionDropdown);
+    userEvent.click(precisionDropdown);
     const weeksOption = screen.getByRole("option", { name: "Weeks" });
-    await userEvent.click(weeksOption);
-    await userEvent.click(screen.getByTestId("calculate-duration"));
+    userEvent.click(weeksOption);
+    userEvent.click(screen.getByTestId("calculate-duration"));
     expect(screen.getByTestId("duration-result")).toHaveValue("3 weeks");
     expect(screen.getByTestId("difference-result")).toHaveValue("3 weeks");
   });
 
-  it("calculates duration and difference in days", async () => {
+  it("calculates duration and difference in days", () => {
     render(<DurationTab />);
     const startDateInput = screen.getByLabelText("Start Date");
     const endDateInput = screen.getByLabelText("End Date");
-    await userEvent.type(startDateInput, "01/01/2020");
-    await userEvent.type(endDateInput, "01/05/2020");
+    userEvent.type(startDateInput, "01/01/2020");
+    userEvent.type(endDateInput, "01/05/2020");
     // Change precision to days
     const precisionDropdown = screen.getByRole("combobox");
-    await userEvent.click(precisionDropdown);
+    userEvent.click(precisionDropdown);
     const daysOption = screen.getByRole("option", { name: "Days" });
-    await userEvent.click(daysOption);
-    await userEvent.click(screen.getByTestId("calculate-duration"));
+    userEvent.click(daysOption);
+    userEvent.click(screen.getByTestId("calculate-duration"));
     expect(screen.getByTestId("duration-result")).toHaveValue("4 days");
     expect(screen.getByTestId("difference-result")).toHaveValue("4 days");
   });
 
-  it("adds 1 day when end date inclusive is checked", async () => {
+  it("adds 1 day when end date inclusive is checked", () => {
     render(<DurationTab />);
     const startDateInput = screen.getByLabelText("Start Date");
     const endDateInput = screen.getByLabelText("End Date");
-    await userEvent.type(startDateInput, "01/01/2020");
-    await userEvent.type(endDateInput, "01/05/2020");
+    userEvent.type(startDateInput, "01/01/2020");
+    userEvent.type(endDateInput, "01/05/2020");
     // Change precision to days
     const precisionDropdown = screen.getByRole("combobox");
-    await userEvent.click(precisionDropdown);
+    userEvent.click(precisionDropdown);
     const daysOption = screen.getByRole("option", { name: "Days" });
-    await userEvent.click(daysOption);
+    userEvent.click(daysOption);
     // Check the end date inclusive checkbox
     const checkbox = screen.getByLabelText(
       "Include end date in calculation (1 day is added)"
     );
-    await userEvent.click(checkbox);
-    await userEvent.click(screen.getByTestId("calculate-duration"));
+    userEvent.click(checkbox);
+    userEvent.click(screen.getByTestId("calculate-duration"));
     expect(screen.getByTestId("duration-result")).toHaveValue("5 days");
     expect(screen.getByTestId("difference-result")).toHaveValue("5 days");
   });
 
-  it("shows values even if start date is after end date", async () => {
+  it("shows values even if start date is after end date", () => {
     render(<DurationTab />);
     const startDateInput = screen.getByLabelText("Start Date");
     const endDateInput = screen.getByLabelText("End Date");
-    await userEvent.type(startDateInput, "01/10/2020");
-    await userEvent.type(endDateInput, "01/05/2020");
-    await userEvent.click(screen.getByTestId("calculate-duration"));
+    userEvent.type(startDateInput, "01/10/2020");
+    userEvent.type(endDateInput, "01/05/2020");
+    userEvent.click(screen.getByTestId("calculate-duration"));
     expect(screen.getByTestId("duration-result")).toHaveValue("-1 years");
     expect(screen.getByTestId("difference-result")).toHaveValue("1 years");
   });
