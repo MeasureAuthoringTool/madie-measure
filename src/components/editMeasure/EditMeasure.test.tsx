@@ -174,7 +174,7 @@ const serviceApiMock = {
   }),
   transferMeasures: jest.fn().mockResolvedValue({ data: true }),
   draftMeasure: jest.fn().mockResolvedValue({ id: "newDraftId" }),
-  unshareMeasures: jest.fn().mockResolvedValue({ data: true }),
+  unshareMeasures: jest.fn().mockResolvedValue({ measureId1: [] }),
 } as unknown as MeasureServiceApi;
 
 useMeasureServiceApiMock.mockImplementation(() => {
