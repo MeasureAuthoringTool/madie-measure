@@ -1,22 +1,17 @@
-.timing-component {
+#timing-component {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+
+  .decimal-input {
+    width: 160px;
+  }
 
   .codes-select-container {
     width: 296px;
   }
 
-  .repeat-count,
-  .repeat-count-max,
-  .repeat-duration,
-  .repeat-duration-max,
-  .repeat-frequency,
-  .repeat-frequency-max,
-  .repeat-period,
-  .repeat-period-max,
-  .repeat-duration-unit .codes-select-container,
-  .repeat-period-unit .codes-select-container {
+  .repeat-unit .codes-select-container {
     width: 160px;
   }
 

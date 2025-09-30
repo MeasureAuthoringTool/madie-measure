@@ -71,7 +71,7 @@ const TimingComponent = ({
   };
 
   return (
-    <div className="timing-component">
+    <div id="timing-component">
       {/* Event */}
       {eventValues.map((_, index) => (
         <DateTimeComponent
@@ -167,7 +167,7 @@ const TimingComponent = ({
       {/* Count + CountMax row */}
       <div style={{ display: "flex", gap: GROUP_GAP }}>
         <div style={{ display: "flex" }}>
-          <div className="repeat-count">
+          <div className="decimal-input">
             <IntegerComponent
               label="Repeat.Count"
               canEdit={canEdit}
@@ -177,7 +177,7 @@ const TimingComponent = ({
             />
           </div>
 
-          <div className="repeat-count-max">
+          <div className="decimal-input">
             <IntegerComponent
               label="Repeat.CountMax"
               canEdit={canEdit}
@@ -190,7 +190,7 @@ const TimingComponent = ({
 
         {/* Duration + Duration Max + Unit(s) row */}
         <div style={{ display: "flex" }}>
-          <div className="repeat-duration">
+          <div className="decimal-input">
             <DecimalInput
               label="Repeat.Duration"
               value={getIn(formik.values, durationPath)}
@@ -206,7 +206,7 @@ const TimingComponent = ({
             />
           </div>
 
-          <div className="repeat-duration-max">
+          <div className="decimal-input">
             <DecimalInput
               label="Repeat.DurationMax"
               value={getIn(formik.values, durationMaxPath)}
@@ -222,10 +222,7 @@ const TimingComponent = ({
             />
           </div>
 
-          <div
-            className="repeat-duration-unit"
-            data-testid="repeat-duration-unit"
-          >
+          <div className="repeat-unit" data-testid="repeat-duration-unit">
             <CodesComponent
               label="Repeat.Unit(s)"
               resource={resource}
@@ -248,7 +245,7 @@ const TimingComponent = ({
       {/* Frequency + Frequency Max row */}
       <div style={{ display: "flex", gap: GROUP_GAP }}>
         <div style={{ display: "flex" }}>
-          <div className="repeat-frequency">
+          <div className="decimal-input">
             <IntegerComponent
               label="Repeat.Frequency"
               canEdit={canEdit}
@@ -258,7 +255,7 @@ const TimingComponent = ({
             />
           </div>
 
-          <div className="repeat-frequency-max">
+          <div className="decimal-input">
             <IntegerComponent
               label="Repeat.FrequencyMax"
               canEdit={canEdit}
@@ -271,7 +268,7 @@ const TimingComponent = ({
 
         {/* Period + Period Max + Unit(s) row */}
         <div style={{ display: "flex" }}>
-          <div className="repeat-period">
+          <div className="decimal-input">
             <DecimalInput
               label="Repeat.Period"
               value={getIn(formik.values, periodPath)}
@@ -286,7 +283,7 @@ const TimingComponent = ({
               placeholder=""
             />
           </div>
-          <div className="repeat-period-max">
+          <div className="decimal-input">
             <DecimalInput
               label="Repeat.PeriodMax"
               value={getIn(formik.values, periodMaxPath)}
@@ -301,7 +298,7 @@ const TimingComponent = ({
               placeholder=""
             />
           </div>
-          <div className="repeat-period-unit" data-testid="repeat-period-unit">
+          <div className="repeat-unit" data-testid="repeat-period-unit">
             <CodesComponent
               label="Repeat.Unit(s)"
               resource={resource}
