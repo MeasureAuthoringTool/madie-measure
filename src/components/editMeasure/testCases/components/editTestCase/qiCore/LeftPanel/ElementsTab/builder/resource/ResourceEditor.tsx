@@ -38,6 +38,7 @@ import useFhirDefinitionsServiceApi from "../../../../../../../api/useFhirDefini
 import tw from "twin.macro";
 import "../../../../../../../../../../styles/VerticalSideBarNav.scss";
 import "./ResourceEditor.scss";
+import { el } from "date-fns/locale";
 
 const InnerWrapper = tw.div`flex-grow flex flex-col`;
 
@@ -102,8 +103,7 @@ const ResourceEditor = ({
             bundleEntry: selectedEntry,
           };
 
-          const topElements =
-            filterUnusedExtensionsFromElements(selectedResource);
+          const topElements = getTopLevelElements(selectedResource);
           //the topElements from the selectedResource contains elements from resource.definition.snapshot.element
 
           const requiredElements = [...topElements.filter((e) => e.min > 0)];
@@ -182,7 +182,11 @@ const ResourceEditor = ({
           );
           setSelectedResource(selectedResource);
           setAllElements(topElements);
-          setDisplayedElements(elementsModifiedForCardinality);
+          const displayedElements = filterUnusedExtensionsFromElements(
+            selectedResource,
+            elementsModifiedForCardinality
+          );
+          setDisplayedElements(displayedElements);
           setDisplayedElementsTree(getDisplayedElementsTree(uniqueElements));
           // this is not the best way to do this, but I'm unsure of a better way without a lot more overhead.
           const index = _.findLastIndex(

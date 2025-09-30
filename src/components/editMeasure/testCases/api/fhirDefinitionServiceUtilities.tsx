@@ -84,11 +84,13 @@ export function getElementName(
 
 // Given a selected resource, we want to filter out any extensions that are not present on the resource.
 // We do this by comparing the extension urls present at the extension key. This works at top level only.
-export const filterUnusedExtensionsFromElements = (selectedResource) => {
-  const unfilteredTopLevelElements = getTopLevelElements(selectedResource);
+export const filterUnusedExtensionsFromElements = (
+  selectedResource,
+  allDisplayedElements
+) => {
   const extensions = selectedResource?.bundleEntry?.resource?.extension || [];
   // now we can filter out extensions not present on the extensions variable, from the topElements.
-  const filteredElements = unfilteredTopLevelElements?.filter((el) => {
+  const filteredElements = allDisplayedElements?.filter((el) => {
     if (el.id.includes("extension:")) {
       // find the extension in the extensions array that matches el.type[0].profile[0]
       const extUrl = el.type?.[0]?.profile?.[0];
