@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Button,
   ReadOnlyTextField,
@@ -11,8 +11,10 @@ import * as _ from "lodash";
 import "./DurationTab.scss";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
+
 dayjs.extend(utc);
 dayjs.utc();
+
 export const OPTIONS = ["years", "months", "weeks", "days"];
 export const PRECISION_OPTIONS = OPTIONS.map((ref, i) => (
   <MenuItem key={`${ref}-${i}`} data-testid={`${ref}-option`} value={ref}>
@@ -21,11 +23,55 @@ export const PRECISION_OPTIONS = OPTIONS.map((ref, i) => (
 ));
 
 const DurationTab = () => {
-  const [startDate, setStartDate] = React.useState<string | null>(null);
-  const [endDate, setEndDate] = React.useState<string | null>(null);
+  const [startDate, setStartDate] = useState<string | null>(null);
+  const [endDate, setEndDate] = useState<string | null>(null);
   const [endDateInclusive, setEndDateInclusive] =
     React.useState<boolean>(false);
-  const [precision, setPrecision] = React.useState<string>("years");
+  const [precision, setPrecision] = useState<string>("years");
+  const [durationResult, setDurationResult] = useState<string>("--");
+  const [differenceResult, setDifferenceResult] = useState<string>("--");
+
+  const calculateDuration = () => {
+    if (!startDate || !endDate) {
+      setDurationResult("--");
+      setDifferenceResult("--");
+      return;
+    }
+
+    let start = dayjs.utc(startDate).startOf("day");
+    let end = dayjs.utc(endDate).startOf("day");
+    if (endDateInclusive) {
+      end = end.add(1, "day");
+    }
+
+    let diff: number;
+
+    switch (precision) {
+      case "years":
+        diff = end.diff(start, "year", true);
+        setDurationResult(`${Math.floor(diff)} years`);
+        setDifferenceResult(`${Math.ceil(Math.abs(diff))} years`);
+        break;
+      case "months":
+        diff = end.diff(start, "month", true);
+        setDurationResult(`${Math.floor(diff)} months`);
+        setDifferenceResult(`${Math.ceil(Math.abs(diff))} months`);
+        break;
+      case "weeks":
+        diff = end.diff(start, "week", true);
+        setDurationResult(`${Math.floor(diff)} weeks`);
+        setDifferenceResult(`${Math.ceil(Math.abs(diff))} weeks`);
+        break;
+      case "days":
+        diff = end.diff(start, "day", true);
+        setDurationResult(`${Math.floor(diff)} days`);
+        setDifferenceResult(`${Math.ceil(Math.abs(diff))} days`);
+        break;
+      default:
+        setDurationResult("--");
+        setDifferenceResult("--");
+    }
+  };
 
   return (
     <div className="duration-tab-container">
@@ -105,7 +151,7 @@ const DurationTab = () => {
           variant="primary"
           id="calculate-duration"
           data-testid="calculate-duration"
-          onClick={() => {}}
+          onClick={calculateDuration}
           disabled={false}
         >
           Calculate
@@ -119,7 +165,7 @@ const DurationTab = () => {
             placeholder="--"
             id="duration-result"
             data-testid="duration-result"
-            value={"--"}
+            value={durationResult}
             inputProps={{
               "data-testid": "duration-result-input",
             }}
@@ -130,7 +176,7 @@ const DurationTab = () => {
             placeholder="--"
             id="difference-result"
             data-testid="difference-result"
-            value={"--"}
+            value={differenceResult}
             inputProps={{
               "data-testid": "difference-result-input",
             }}
