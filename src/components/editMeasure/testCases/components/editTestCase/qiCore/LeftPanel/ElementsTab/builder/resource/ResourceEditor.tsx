@@ -38,7 +38,6 @@ import useFhirDefinitionsServiceApi from "../../../../../../../api/useFhirDefini
 import tw from "twin.macro";
 import "../../../../../../../../../../styles/VerticalSideBarNav.scss";
 import "./ResourceEditor.scss";
-import { el } from "date-fns/locale";
 
 const InnerWrapper = tw.div`flex-grow flex flex-col`;
 
