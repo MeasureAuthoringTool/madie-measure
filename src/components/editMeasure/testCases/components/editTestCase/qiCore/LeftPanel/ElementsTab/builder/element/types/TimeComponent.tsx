@@ -24,21 +24,23 @@ const TimeComponent = ({
 
   return (
     <div className="element-editor-add-row">
-      <TimeField
-        required={fieldRequired}
-        disabled={!canEdit}
-        id={`time-field-${label}`}
-        label={label}
-        seconds
-        views={["hours", "minutes", "seconds"]}
-        data-testid={`time-field-${label}`}
-        handleTimeChange={(time) => {
-          const formatted = time?.format(TIME_FORMAT);
-          setTime(time);
-          onChange(formatted);
-        }}
-        value={time}
-      />
+      <div className="time-field-container">
+        <TimeField
+          required={fieldRequired}
+          disabled={!canEdit}
+          id={`time-field-${label}`}
+          label={label}
+          seconds
+          views={["hours", "minutes", "seconds"]}
+          data-testid={`time-field-${label}`}
+          handleTimeChange={(time) => {
+            const formatted = time?.format(TIME_FORMAT);
+            setTime(time);
+            onChange(formatted);
+          }}
+          value={time}
+        />
+      </div>
       {showAddAttributeButton && addTitle && (
         <AddElementButton name={addTitle} onClick={handleAddElement} />
       )}{" "}
