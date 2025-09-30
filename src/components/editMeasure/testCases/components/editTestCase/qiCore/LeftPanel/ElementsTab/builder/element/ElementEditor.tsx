@@ -238,6 +238,7 @@ const ElementEditor = ({
       selectedResourceOnBundleEntry
     );
   };
+  // Whenever the displayedElements list changes in volume, we need to rebuild the form.
   useEffect(() => {
     if (
       selectedResourceOnBundleEntry &&

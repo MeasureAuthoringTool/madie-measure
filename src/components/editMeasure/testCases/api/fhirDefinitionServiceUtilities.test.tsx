@@ -29,6 +29,7 @@ import {
   formatChoiceType,
   modifySliceNameForReadability,
   extractNameWithoutIndex,
+  filterUnusedExtensionsFromElements,
 } from "./fhirDefinitionServiceUtilities";
 
 describe("FhirDefinitionServiceUtilities", () => {
@@ -743,5 +744,59 @@ describe("extractNameWithoutIndex", () => {
     const emptyElement = { id: "" } as ElementDefinition;
     const result = extractNameWithoutIndex(emptyElement);
     expect(result).toBe("");
+  });
+});
+
+describe("filterUnusedExtensionsFromElements", () => {
+  it("should filter out unused extensions", () => {
+    const selectedResource = {
+      bundleEntry: {
+        resource: {
+          extension: [
+            {
+              url: "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race",
+              extension: [],
+            },
+            {
+              url: "some-other-extension",
+              extension: [],
+            },
+          ],
+        },
+      },
+      definition: {
+        snapshot: {
+          element: [
+            {
+              id: "Patient.extension:ethnicity",
+              extension: [
+                {
+                  url: "http://hl7.org/fhir/us/core/StructureDefinition/uscdi-requirement",
+                  valueBoolean: true,
+                },
+                {
+                  url: "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-keyelement",
+                  valueBoolean: true,
+                },
+              ],
+              path: "Patient.extension",
+              sliceName: "ethnicity",
+              min: 0,
+              type: [
+                {
+                  code: "Extension",
+                  profile: [
+                    "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race",
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      },
+    };
+    // Result should
+    const result = filterUnusedExtensionsFromElements(selectedResource);
+    expect(result.length).toBe(1);
   });
 });
