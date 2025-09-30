@@ -174,6 +174,7 @@ const serviceApiMock = {
   }),
   transferMeasures: jest.fn().mockResolvedValue({ data: true }),
   draftMeasure: jest.fn().mockResolvedValue({ id: "newDraftId" }),
+  unshareMeasures: jest.fn().mockResolvedValue({ measureId1: [] }),
 } as unknown as MeasureServiceApi;
 
 useMeasureServiceApiMock.mockImplementation(() => {
@@ -184,6 +185,7 @@ jest.mock("@madie/madie-util", () => ({
   useDocumentTitle: jest.fn(),
   useOktaTokens: jest.fn(() => ({
     getAccessToken: () => "test.jwt",
+    getUserName: () => "test user",
   })),
   checkUserCanEdit: jest.fn(),
   useFeatureFlags: jest.fn(() => ({
@@ -435,35 +437,27 @@ describe("EditMeasure Component", () => {
   it("should display view human readable modal when the event is triggered, discards.", async () => {
     renderRouter();
 
-    const result = await findByTestId("editMeasure");
-    expect(result).toBeInTheDocument();
+    await findByTestId("editMeasure");
     expect(serviceApiMock.fetchMeasure).toHaveBeenCalled();
-    const loading = queryByTestId("loading");
-    setTimeout(() => {
-      expect(loading).toBeNull();
-    }, 500);
+
+    await waitFor(() => {
+      expect(queryByTestId("loading")).toBeNull();
+    });
 
     act(() => {
       window.dispatchEvent(new Event("view-humanreadable"));
     });
 
-    await waitFor(() =>
-      setTimeout(() => {
-        expect(queryByTestId("view-hr-modal")).toBeInTheDocument();
-      }, 1000)
-    );
+    const modal = await findByTestId("view-hr-modal");
+    expect(modal).toBeInTheDocument();
 
-    setTimeout(async () => {
-      const cancelButton = await findByTestId("modal-secondary-btn");
-      fireEvent.click(cancelButton);
-    }, 500);
+    expect(screen.queryByText("test human readable")).toBeInTheDocument();
+
+    const cancelButton = await findByTestId("human-readable-cancel-button");
+    fireEvent.click(cancelButton);
 
     await waitFor(() => {
-      expect(
-        screen.queryByText(
-          "The human readable file is not available for this measure.  Contact Help Desk for additional information."
-        )
-      ).not.toBeInTheDocument();
+      expect(screen.queryByText("test human readable")).not.toBeInTheDocument();
     });
   });
 
@@ -477,7 +471,7 @@ describe("EditMeasure Component", () => {
       window.dispatchEvent(new Event("share-measure"));
     });
 
-    await waitFor(async () => {
+    await waitFor(() => {
       expect(serviceApiMock.fetchMeasure).toHaveBeenCalled();
       expect(getByTestId("share-dialog")).toBeInTheDocument();
     });
@@ -486,6 +480,90 @@ describe("EditMeasure Component", () => {
     const cancelButton = getByTestId("share-cancel-button");
     fireEvent.click(cancelButton);
     expect(queryByTestId("share-dialog")).toBeVisible();
+  });
+
+  it("should display an unshare from me confirmation dialog when the event is triggered and close dialog when cancel button is clicked", async () => {
+    renderRouter();
+
+    const result = await findByTestId("editMeasure");
+    expect(result).toBeInTheDocument();
+
+    act(() => {
+      window.dispatchEvent(new Event("unshare-measure-from-me"));
+    });
+
+    await waitFor(() => {
+      expect(getByTestId("share-confirmation-dialog")).toBeInTheDocument();
+    });
+
+    const cancelButton = getByTestId("share-confirmation-dialog-cancel-button");
+    fireEvent.click(cancelButton);
+
+    await waitFor(() => {
+      expect(
+        queryByTestId("share-confirmation-dialog")
+      ).not.toBeInTheDocument();
+    });
+  });
+
+  it("should display an unshare from me confirmation dialog when the event is triggered and successfully unshare when accept button is clicked", async () => {
+    renderRouter();
+
+    const result = await findByTestId("editMeasure");
+    expect(result).toBeInTheDocument();
+
+    act(() => {
+      window.dispatchEvent(new Event("unshare-measure-from-me"));
+    });
+
+    await waitFor(() => {
+      expect(getByTestId("share-confirmation-dialog")).toBeInTheDocument();
+    });
+
+    const acceptBtn = await screen.findByTestId(
+      "share-confirmation-dialog-accept-button"
+    );
+    expect(acceptBtn).toBeEnabled();
+
+    fireEvent.click(acceptBtn);
+
+    await waitFor(() => {
+      expect(
+        getByTestId("edit-measure-information-success-text")
+      ).toBeInTheDocument();
+    });
+  });
+
+  it("should display an unshare from me confirmation dialog when the event is triggered and fail to unshare when accept button is clicked", async () => {
+    serviceApiMock.unshareMeasures = jest.fn().mockRejectedValueOnce({
+      status: 500,
+      response: { data: { message: "update failed" } },
+    });
+    renderRouter();
+
+    const result = await findByTestId("editMeasure");
+    expect(result).toBeInTheDocument();
+
+    act(() => {
+      window.dispatchEvent(new Event("unshare-measure-from-me"));
+    });
+
+    await waitFor(() => {
+      expect(getByTestId("share-confirmation-dialog")).toBeInTheDocument();
+    });
+
+    const acceptBtn = await screen.findByTestId(
+      "share-confirmation-dialog-accept-button"
+    );
+    expect(acceptBtn).toBeEnabled();
+
+    fireEvent.click(acceptBtn);
+
+    const errorText = await screen.findByTestId(
+      "edit-measure-information-generic-error-text"
+    );
+    expect(errorText).toBeInTheDocument();
+    expect(errorText).toHaveTextContent("update failed");
   });
 
   it("should display transfer dialog when the event is triggered and close dialog when cancel button is clicked", async () => {
@@ -498,13 +576,13 @@ describe("EditMeasure Component", () => {
       window.dispatchEvent(new Event("transfer-measure"));
     });
 
-    await waitFor(async () => {
+    await waitFor(() => {
       expect(getByTestId("transfer-dialog")).toBeInTheDocument();
     });
 
     const cancelButton = getByTestId("transfer-cancel-button");
     fireEvent.click(cancelButton);
-    await waitFor(async () => {
+    await waitFor(() => {
       expect(queryByTestId("transfer-dialog")).not.toBeInTheDocument();
     });
   });

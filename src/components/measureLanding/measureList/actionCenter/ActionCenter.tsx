@@ -33,6 +33,7 @@ interface PropTypes {
 export default function ActionCenter(props: PropTypes) {
   const [canEdit, setCanEdit] = useState<boolean>(false);
   const [isOwner, setIsOwner] = useState<boolean>(false);
+  const [isSharedWithUser, setIsSharedWithUser] = useState<boolean>(false);
   const featureFlags = useFeatureFlags();
 
   const versionMeasure = useCallback(() => {
@@ -96,13 +97,15 @@ export default function ActionCenter(props: PropTypes) {
   }, [props.measures, props.updateTargetMeasure, props.setDeleteMeasureDialog]);
 
   const shareMeasure = useCallback(
-    (option: string) => {
-      props.setShareDialog({
-        open: true,
-        option,
-      });
+    (actionType: string) => {
+      const shareOption =
+        actionType === "Unshare" && props.activeTab === 1
+          ? "UnshareFromMe"
+          : actionType;
+
+      props.setShareDialog({ open: true, option: shareOption });
     },
-    [props.setShareDialog]
+    [props.setShareDialog, props.activeTab]
   );
 
   const viewMeasureHistory = useCallback(() => {
@@ -123,7 +126,7 @@ export default function ActionCenter(props: PropTypes) {
     );
   };
 
-  const isOwnerOfSelectedMeasure = (measures) => {
+  const isOwnerOfSelectedMeasures = (measures) => {
     return (
       measures &&
       measures.every((measure) => {
@@ -132,9 +135,19 @@ export default function ActionCenter(props: PropTypes) {
     );
   };
 
+  const isSelectedMeasuresSharedWithUser = (measures) => {
+    return (
+      measures &&
+      measures.every((measure) => {
+        return checkUserCanEdit(null, measure?.measureSet?.acls);
+      })
+    );
+  };
+
   useEffect(() => {
     setCanEdit(isSelectedMeasureEditable(props.measures));
-    setIsOwner(isOwnerOfSelectedMeasure(props.measures));
+    setIsOwner(isOwnerOfSelectedMeasures(props.measures));
+    setIsSharedWithUser(isSelectedMeasuresSharedWithUser(props.measures));
   }, [props.measures]);
 
   return (
@@ -156,6 +169,8 @@ export default function ActionCenter(props: PropTypes) {
         measures={props.measures}
         onClick={shareMeasure}
         isOwner={isOwner}
+        isSharedWithUser={isSharedWithUser}
+        activeTab={props?.activeTab}
       />
 
       <AssociateCmsIdAction
