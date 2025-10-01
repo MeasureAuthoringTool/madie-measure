@@ -3,6 +3,7 @@ import { TestCaseImportOutcome } from "@madie/madie-models";
 import "twin.macro";
 import "styled-components/macro";
 
+// TODO: Remove and use createWarningMessage with custom message instead.
 export function createShiftTestCaseDatesWarningMessage(
   withoutDuplicates: string[],
   testDataId: string

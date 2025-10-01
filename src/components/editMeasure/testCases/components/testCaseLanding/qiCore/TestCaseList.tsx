@@ -81,7 +81,13 @@ export const getCoverageValueFromHtml = (
 };
 
 const TestCaseList = (props: TestCaseListProps) => {
-  const { setErrors, setWarnings, setImportWarnings } = props;
+  const {
+    setErrors,
+    setWarnings,
+    setImportWarnings,
+    setShiftTestCaseDatesWarnings,
+    setCustomWarningMessages,
+  } = props;
   const { measureId, criteriaId } = useParams<{
     measureId: string;
     criteriaId: string;
@@ -661,6 +667,9 @@ const TestCaseList = (props: TestCaseListProps) => {
                         }
                         setWarnings={setWarnings}
                         page={page}
+                        setShiftTestCaseDatesWarnings={
+                          setShiftTestCaseDatesWarnings
+                        }
                       />
                       {currentSlice?.length > 0 && (
                         <Pagination

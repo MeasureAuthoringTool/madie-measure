@@ -105,6 +105,7 @@ const StatusHandler = ({
     }
   }
 
+  // TODO: Replace scenario specific warning path with generic customWarningMessages
   if (warning && shiftTestCaseDatesWarning) {
     const withoutDuplicates = [...new Set(shiftTestCaseDatesWarning)];
     if (withoutDuplicates.length > 0) {

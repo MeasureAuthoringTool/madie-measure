@@ -94,7 +94,14 @@ const TestCaseList = (props: TestCaseListProps) => {
   let navigate = useNavigate();
   const { search } = useLocation();
   const values = queryString.parse(search);
-  const { setErrors, setImportErrors, setWarnings, setImportWarnings } = props;
+  const {
+    setErrors,
+    setImportErrors,
+    setWarnings,
+    setImportWarnings,
+    setCustomWarningMessages,
+    setShiftTestCaseDatesWarnings,
+  } = props;
   const { measureId, criteriaId } = useParams<{
     measureId: string;
     criteriaId: string;
@@ -778,6 +785,9 @@ const TestCaseList = (props: TestCaseListProps) => {
                         shiftDatesDialogModalOpen={shiftDatesDialogModalOpen}
                         setShiftDatesDialogModalOpen={
                           setShiftDatesDialogModalOpen
+                        }
+                        setShiftTestCaseDatesWarnings={
+                          setShiftTestCaseDatesWarnings
                         }
                         setWarnings={setWarnings}
                         page={page}
