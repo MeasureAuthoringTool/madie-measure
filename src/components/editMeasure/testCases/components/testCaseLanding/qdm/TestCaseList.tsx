@@ -18,7 +18,6 @@ import { checkUserCanEdit } from "@madie/madie-util";
 import CreateCodeCoverageNavTabs from "./CreateCodeCoverageNavTabs";
 import CreateNewTestCaseDialog from "../../createTestCase/CreateNewTestCaseDialog";
 import {
-  MadieDeleteDialog,
   MadieSpinner,
   Pagination,
   Toast,
@@ -154,8 +153,6 @@ const TestCaseList = (props: TestCaseListProps) => {
   const [executeAllTestCases, setExecuteAllTestCases] =
     useState<boolean>(false);
   const [coveragePercentage, setCoveragePercentage] = useState<string>("-");
-  const [openDeleteAllTestCasesDialog, setOpenDeleteAllTestCasesDialog] =
-    useState<boolean>(false);
   const [testCasePassFailStats, setTestCasePassFailStats] =
     useState<TestCasesPassingDetailsProps>({
       passPercentage: undefined,
@@ -510,27 +507,6 @@ const TestCaseList = (props: TestCaseListProps) => {
     ? Object.keys(calculationOutput).length
     : 0;
 
-  const deleteAllTestCases = () => {
-    const currentTestCaseIds = _.map(measure.testCases, "id");
-    testCaseService.current
-      .deleteTestCases(measureId, currentTestCaseIds)
-      .then(() => {
-        retrieveTestCases();
-        setOpenDeleteAllTestCasesDialog(false);
-        setToastOpen(true);
-        setToastType("success");
-        setToastMessage("Test cases successfully deleted");
-      })
-      .catch(() => {
-        setOpenDeleteAllTestCasesDialog(false);
-        setToastOpen(true);
-        setToastType("danger");
-        setToastMessage(
-          "Unable to Delete All test Cases. Please try again. If the issue continues, please contact helpdesk."
-        );
-      });
-  };
-
   const exportExcel = async () => {
     if (measure?.cql) {
       setExportExecuting(true);
@@ -731,9 +707,6 @@ const TestCaseList = (props: TestCaseListProps) => {
                 coveragePercentage={coveragePercentage}
                 validTestCases={testCases?.filter((tc) => tc.validResource)}
                 selectedPopCriteria={selectedPopCriteria}
-                onDeleteAllTestCases={() =>
-                  setOpenDeleteAllTestCasesDialog(true)
-                }
                 onExportQRDA={exportQRDA}
                 onExportExcel={exportExcel}
                 exportExecuting={exportExecuting}
@@ -873,17 +846,6 @@ const TestCaseList = (props: TestCaseListProps) => {
           <Typography color="inherit">{loadingState.message}</Typography>
         </div>
       )}
-      <MadieDeleteDialog
-        open={openDeleteAllTestCasesDialog}
-        onContinue={() => {
-          deleteAllTestCases();
-        }}
-        onClose={() => {
-          setOpenDeleteAllTestCasesDialog(false);
-        }}
-        dialogTitle="Delete All Test Cases"
-        name="All Test Cases"
-      />
       <CopyTestCaseDialog
         selectedTestCases={selectedTestCases}
         open={openCopyTestCaseDialog}
