@@ -169,7 +169,7 @@ function renderTimingComponent({
 }
 
 describe("TimingComponent", () => {
-  test("triggers Formik setFieldValue on interactions", async () => {
+  test("updates Formik values correctly for TimingComponent user interactions", async () => {
     renderTimingComponent({});
 
     // Event
@@ -192,69 +192,45 @@ describe("TimingComponent", () => {
     // Duration
     fireEvent.change(boundsInput, { target: { value: "Duration" } });
     await waitFor(() => {
-      expect(setFieldValueMock).toHaveBeenCalledWith(
-        "MedicationRequest.dosageInstruction[0].timing.repeat.bounds[x]",
-        "Duration"
-      );
-      expect(setFieldValueMock).toHaveBeenCalledWith(
-        "MedicationRequest.dosageInstruction[0].timing.repeat.boundsRange",
-        undefined
-      );
       expect(setFieldValueMock).toHaveBeenLastCalledWith(
         "MedicationRequest.dosageInstruction[0].timing.repeat.boundsPeriod",
         undefined
       );
+
+      expect(screen.getByDisplayValue("Not supported")).toBeInTheDocument();
     });
 
     // Range
     fireEvent.change(boundsInput, { target: { value: "Range" } });
     await waitFor(() => {
-      expect(setFieldValueMock).toHaveBeenCalledWith(
-        "MedicationRequest.dosageInstruction[0].timing.repeat.bounds[x]",
-        "Range"
-      );
-      expect(setFieldValueMock).toHaveBeenCalledWith(
-        "MedicationRequest.dosageInstruction[0].timing.repeat.boundsRange",
-        undefined
-      );
       expect(setFieldValueMock).toHaveBeenLastCalledWith(
         "MedicationRequest.dosageInstruction[0].timing.repeat.boundsPeriod",
         undefined
       );
+
+      expect(screen.getByDisplayValue("Not supported")).toBeInTheDocument();
     });
 
     // Period
     fireEvent.change(boundsInput, { target: { value: "Period" } });
     await waitFor(() => {
-      expect(setFieldValueMock).toHaveBeenCalledWith(
-        "MedicationRequest.dosageInstruction[0].timing.repeat.bounds[x]",
-        "Period"
-      );
-      expect(setFieldValueMock).toHaveBeenCalledWith(
-        "MedicationRequest.dosageInstruction[0].timing.repeat.boundsRange",
-        undefined
-      );
       expect(setFieldValueMock).toHaveBeenLastCalledWith(
         "MedicationRequest.dosageInstruction[0].timing.repeat.boundsPeriod",
-        undefined
+        {}
       );
+
+      expect(screen.queryByDisplayValue("Not supported")).toBeNull();
     });
 
     // "-" option to clear the bounds field
     fireEvent.change(boundsInput, { target: { value: "-" } });
     await waitFor(() => {
-      expect(setFieldValueMock).toHaveBeenCalledWith(
-        "MedicationRequest.dosageInstruction[0].timing.repeat.bounds",
-        undefined
-      );
-      expect(setFieldValueMock).toHaveBeenCalledWith(
-        "MedicationRequest.dosageInstruction[0].timing.repeat.boundsRange",
-        undefined
-      );
       expect(setFieldValueMock).toHaveBeenLastCalledWith(
         "MedicationRequest.dosageInstruction[0].timing.repeat.boundsPeriod",
         undefined
       );
+
+      expect(screen.queryByDisplayValue("Not supported")).toBeNull();
     });
 
     // Repeat.Count
@@ -450,7 +426,7 @@ describe("TimingComponent", () => {
     });
   });
 
-  test("TimingComponent calls Formik setFieldValue when QuantityIntervalInput (Range) low/high values change", async () => {
+  test("updates Formik setFieldValue when Period boundsPeriod start/end change", async () => {
     renderTimingComponent({
       initialValues: {
         MedicationRequest: {
@@ -458,63 +434,10 @@ describe("TimingComponent", () => {
             {
               timing: {
                 repeat: {
-                  bounds: { x: "Range" },
-                  boundsRange: {
-                    low: { value: 1, unit: "cm" },
-                    high: { value: 2, unit: "cm" },
+                  boundsPeriod: {
+                    start: "2016",
+                    end: "2017",
                   },
-                },
-              },
-            },
-          ],
-        },
-      },
-    });
-
-    const inputLow = screen.getByTestId(
-      "quantity-value-input-low"
-    ) as HTMLInputElement;
-    expect(inputLow.value).toBe("1");
-
-    const inputHigh = screen.getByTestId(
-      "quantity-value-input-high"
-    ) as HTMLInputElement;
-    expect(inputHigh.value).toBe("2");
-
-    // Change low value
-    fireEvent.change(inputLow, { target: { value: "10" } });
-    fireEvent.blur(inputLow);
-
-    // Change high value
-    fireEvent.change(inputHigh, { target: { value: "20" } });
-    fireEvent.blur(inputHigh);
-
-    await waitFor(() => {
-      expect(setFieldValueMock).toHaveBeenCalledWith(
-        "MedicationRequest.dosageInstruction[0].timing.repeat.boundsRange",
-        {
-          low: {
-            value: 10,
-            unit: "cm",
-          },
-          high: {
-            value: 20,
-            unit: "cm",
-          },
-        }
-      );
-    });
-  });
-
-  test("TimingComponent calls Formik setFieldValue when PeriodDateTimeComponent (Period) start/end values change", async () => {
-    renderTimingComponent({
-      initialValues: {
-        MedicationRequest: {
-          dosageInstruction: [
-            {
-              timing: {
-                repeat: {
-                  bounds: { x: "Period" },
                 },
               },
             },
