@@ -1,12 +1,21 @@
 import * as React from "react";
 import { render, screen } from "@testing-library/react";
-import DeleteAction, { DEL_MEASURE, NOTHING_SELECTED } from "./DeleteAction";
-import { Measure, MeasureSet, Model } from "@madie/madie-models";
+import DeleteAction, {
+  DEL_MEASURE,
+  MEASURE_LOCKED_MESSAGE,
+  NOTHING_SELECTED,
+  TEST_CASES_LOCKED_MESSAGE,
+} from "./DeleteAction";
+import { Measure, MeasureLock, MeasureSet, Model } from "@madie/madie-models";
+import { useFeatureFlags } from "@madie/madie-util";
 
 const mockUser = "test user";
 jest.mock("@madie/madie-util", () => ({
   useOktaTokens: () => ({
     getUserName: () => mockUser,
+  }),
+  useFeatureFlags: jest.fn().mockReturnValue({
+    Locking: false,
   }),
 }));
 
@@ -81,6 +90,54 @@ describe("DeleteAction", () => {
     expect(screen.getByTestId("delete-action-tooltip")).toHaveAttribute(
       "aria-label",
       NOTHING_SELECTED
+    );
+  });
+
+  it("Should disable button if measure is locked", () => {
+    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
+      Locking: true,
+    }));
+    const lockedByUser = "another user";
+    render(
+      <DeleteAction
+        measures={[
+          {
+            ...qiCoreMeasure,
+            measureLock: { lockedBy: lockedByUser } as MeasureLock,
+          },
+        ]}
+        onClick={() => {}}
+        canEdit={true}
+      />
+    );
+    expect(screen.getByTestId("delete-action-btn")).toBeDisabled();
+    expect(screen.getByTestId("delete-action-tooltip")).toHaveAttribute(
+      "aria-label",
+      MEASURE_LOCKED_MESSAGE + " " + lockedByUser
+    );
+  });
+
+  it("Should disable button if measure has test cases that are locked by other users", () => {
+    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
+      Locking: true,
+    }));
+    const lockedByUser = "another user";
+    render(
+      <DeleteAction
+        measures={[
+          {
+            ...qiCoreMeasure,
+            hasLockedTestCases: true,
+          },
+        ]}
+        onClick={() => {}}
+        canEdit={true}
+      />
+    );
+    expect(screen.getByTestId("delete-action-btn")).toBeDisabled();
+    expect(screen.getByTestId("delete-action-tooltip")).toHaveAttribute(
+      "aria-label",
+      TEST_CASES_LOCKED_MESSAGE
     );
   });
 });
