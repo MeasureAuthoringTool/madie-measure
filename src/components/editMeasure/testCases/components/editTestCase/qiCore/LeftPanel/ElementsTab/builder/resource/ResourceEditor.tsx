@@ -160,19 +160,20 @@ const ResourceEditor = ({
                 el.id
               );
               const jsonValuesAtPath = selectedEntry.resource[path];
-              if (
-                jsonValuesAtPath &&
-                Array.isArray(jsonValuesAtPath) &&
-                jsonValuesAtPath.length
-              ) {
+              if (Array.isArray(jsonValuesAtPath) && jsonValuesAtPath.length) {
                 // Return a *new* object for each item, with the id modified to include the index
                 return jsonValuesAtPath.map((_, index) => ({
                   ...el,
                   id: `${el.id}[${index}]`,
                 }));
+              } else if (
+                // Return a single object with id `[0]` to represent the first element
+                Array.isArray(jsonValuesAtPath)
+              ) {
+                return [{ ...el, id: `${el.id}[0]` }];
               } else {
-                //  return the original element
-                return [el];
+                // Return a shallow copy of the original element
+                return [{ ...el }];
               }
             }
           );

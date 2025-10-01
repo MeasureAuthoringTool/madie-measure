@@ -93,6 +93,7 @@ const mockMeasureServiceApi = {
   transferMeasures: jest.fn().mockResolvedValue({
     data: true,
   }),
+  unshareMeasures: jest.fn().mockResolvedValue({ measureId1: [] }),
 } as unknown as MeasureServiceApi;
 
 jest.mock("../../../api/useMeasureServiceApi", () =>
@@ -3046,6 +3047,138 @@ describe("Action Center Tests", () => {
 
     await waitFor(() => {
       expect(shareDialog).not.toBeVisible();
+    });
+
+    unmount();
+  });
+
+  it("should display unshare from me dialog on clicking unshare action button and unshare successfully when Accept button is clicked", async () => {
+    const { unmount } = render(
+      <ServiceContext.Provider value={serviceConfig}>
+        <MeasureList
+          retrieveMeasures={retrieveMeasuresMock}
+          measureList={measures}
+          setMeasureList={setMeasureListMock}
+          setTotalPages={setTotalPagesMock}
+          setTotalItems={setTotalItemsMock}
+          setVisibleItems={setVisibleItemsMock}
+          setOffset={setOffsetMock}
+          setLoading={setLoadingMock}
+          activeTab={1}
+          searchCriteria={null}
+          setSearchCriteria={setSearchCriteriaMock}
+          currentLimit={10}
+          currentPage={0}
+          setErrMsg={setErrMsgMock}
+          // Toast props
+          toastOpen={false}
+          toastMessage=""
+          toastType="danger"
+          setToastOpen={setToastOpenMock}
+          setToastMessage={setToastMessageMock}
+          setToastType={setToastTypeMock}
+          onToastClose={onToastCloseMock}
+          handleToast={handleToastMock}
+        />
+      </ServiceContext.Provider>
+    );
+
+    const checkBoxes = await screen.findAllByRole("checkbox");
+    expect(checkBoxes.length).toBe(5);
+    userEvent.click(checkBoxes[1]);
+    const shareButton = screen.getByTestId("share-action-btn");
+    expect(shareButton).toBeInTheDocument();
+    userEvent.click(shareButton);
+    userEvent.click(screen.getByRole("menuitem", { name: "Unshare" }));
+
+    expect(
+      await screen.findByTestId("share-confirmation-dialog")
+    ).toBeInTheDocument();
+    expect(screen.queryByTestId("share-dialog")).toBeNull();
+
+    const acceptBtn = await screen.findByTestId(
+      "share-confirmation-dialog-accept-button"
+    );
+    expect(acceptBtn).toBeEnabled();
+
+    fireEvent.click(acceptBtn);
+
+    await waitFor(() => {
+      expect(mockMeasureServiceApi.unshareMeasures).toBeCalled();
+
+      expect(setToastOpenMock).toHaveBeenCalledWith(true);
+      expect(setToastTypeMock).toHaveBeenCalledWith("success");
+      expect(setToastMessageMock).toHaveBeenCalledWith(
+        "The measure(s) were successfully unshared."
+      );
+    });
+
+    unmount();
+  });
+
+  it("should display unshare from me dialog on clicking unshare action button and fail to unshare when Accept button is clicked", async () => {
+    mockMeasureServiceApi.unshareMeasures = jest
+      .fn()
+      .mockRejectedValue(new Error("Transfer failed"));
+
+    const { unmount } = render(
+      <ServiceContext.Provider value={serviceConfig}>
+        <MeasureList
+          retrieveMeasures={retrieveMeasuresMock}
+          measureList={measures}
+          setMeasureList={setMeasureListMock}
+          setTotalPages={setTotalPagesMock}
+          setTotalItems={setTotalItemsMock}
+          setVisibleItems={setVisibleItemsMock}
+          setOffset={setOffsetMock}
+          setLoading={setLoadingMock}
+          activeTab={1}
+          searchCriteria={null}
+          setSearchCriteria={setSearchCriteriaMock}
+          currentLimit={10}
+          currentPage={0}
+          setErrMsg={setErrMsgMock}
+          // Toast props
+          toastOpen={false}
+          toastMessage=""
+          toastType="danger"
+          setToastOpen={setToastOpenMock}
+          setToastMessage={setToastMessageMock}
+          setToastType={setToastTypeMock}
+          onToastClose={onToastCloseMock}
+          handleToast={handleToastMock}
+        />
+      </ServiceContext.Provider>
+    );
+
+    const checkBoxes = await screen.findAllByRole("checkbox");
+    expect(checkBoxes.length).toBe(5);
+    userEvent.click(checkBoxes[1]);
+    const shareButton = screen.getByTestId("share-action-btn");
+    expect(shareButton).toBeInTheDocument();
+    userEvent.click(shareButton);
+    userEvent.click(screen.getByRole("menuitem", { name: "Unshare" }));
+
+    expect(
+      await screen.findByTestId("share-confirmation-dialog")
+    ).toBeInTheDocument();
+    expect(screen.queryByTestId("share-dialog")).toBeNull();
+
+    const acceptBtn = await screen.findByTestId(
+      "share-confirmation-dialog-accept-button"
+    );
+    expect(acceptBtn).toBeEnabled();
+
+    fireEvent.click(acceptBtn);
+
+    await waitFor(() => {
+      expect(mockMeasureServiceApi.unshareMeasures).toBeCalled();
+
+      expect(setToastOpenMock).toHaveBeenCalledWith(true);
+      expect(setToastTypeMock).toHaveBeenCalledWith("danger");
+      expect(setToastMessageMock).toHaveBeenCalledWith(
+        "Unable to unshare the selected measure(s) with the users who were unchecked. If the error persists, please contact the help desk."
+      );
     });
 
     unmount();

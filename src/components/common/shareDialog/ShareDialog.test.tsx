@@ -44,6 +44,13 @@ jest.mock("../../../api/useMeasureServiceApi");
 const useMeasureServiceMock =
   useMeasureServiceApi as jest.Mock<MeasureServiceApi>;
 
+jest.mock("@madie/madie-util", () => ({
+  useOktaTokens: jest.fn(() => ({
+    getAccessToken: () => "test.jwt",
+    getUserName: () => "test user",
+  })),
+}));
+
 const mockGetSharedMeasures = jest.fn().mockResolvedValue({
   [mockMeasure1.id]: mockMeasure1.acls
     ? mockMeasure1.acls.map(
@@ -92,7 +99,7 @@ const mockMeasureServiceApi = {
   unshareMeasures: mockUnshareMeasures,
 } as unknown as MeasureServiceApi;
 
-describe("Create Share Dialog component", () => {
+describe("Share/Unshare Dialog component", () => {
   const { getByTestId } = screen;
 
   beforeEach(() => {
@@ -110,6 +117,7 @@ describe("Create Share Dialog component", () => {
         open={true}
         option={"Share With"}
         onClose={jest.fn()}
+        onSave={jest.fn()}
       />
     );
     const table = await screen.findByTestId("share-measure-tbl");
@@ -135,6 +143,7 @@ describe("Create Share Dialog component", () => {
         open={true}
         option={"Share With"}
         onClose={jest.fn()}
+        onSave={jest.fn()}
       />
     );
     expect(await screen.findByTestId("share-dialog")).toBeInTheDocument();
@@ -165,6 +174,7 @@ describe("Create Share Dialog component", () => {
         open={true}
         option={"Share With"}
         onClose={jest.fn()}
+        onSave={jest.fn()}
       />
     );
 
@@ -182,22 +192,33 @@ describe("Create Share Dialog component", () => {
         open={false}
         option={"Share With"}
         onClose={jest.fn()}
+        onSave={jest.fn()}
       />
     );
     expect(screen.queryByTestId("share-dialog")).toBeNull();
   });
 
   it("should render share dialog and show 'Share With' title in dialog", async () => {
+    const mockOnClose = jest.fn();
+
     render(
       <ShareDialog
         measures={[mockMeasure1, mockMeasure2]}
         open={true}
         option={"Share With"}
-        onClose={jest.fn()}
+        onClose={mockOnClose}
+        onSave={jest.fn()}
       />
     );
     expect(await screen.findByTestId("share-dialog")).toBeInTheDocument();
     expect(await screen.findByText("Share With")).toBeInTheDocument();
+
+    const cancelButton = screen.getByTestId("share-cancel-button");
+    expect(cancelButton).toBeEnabled();
+
+    fireEvent.click(cancelButton);
+
+    expect(mockOnClose).toHaveBeenCalled();
   });
 
   it("should render share dialog and show 'Unshare' title in dialog", async () => {
@@ -207,6 +228,7 @@ describe("Create Share Dialog component", () => {
         open={true}
         option={"Unshare"}
         onClose={jest.fn()}
+        onSave={jest.fn()}
       />
     );
     expect(await screen.findByTestId("share-dialog")).toBeInTheDocument();
@@ -220,6 +242,7 @@ describe("Create Share Dialog component", () => {
         open={true}
         option={"Share With"}
         onClose={jest.fn()}
+        onSave={jest.fn()}
       />
     );
     expect(await screen.findByTestId("share-dialog")).toBeInTheDocument();
@@ -237,6 +260,7 @@ describe("Create Share Dialog component", () => {
         open={true}
         option={"Unshare"}
         onClose={jest.fn()}
+        onSave={jest.fn()}
       />
     );
     expect(await screen.findByTestId("share-dialog")).toBeInTheDocument();
@@ -253,6 +277,7 @@ describe("Create Share Dialog component", () => {
         open={true}
         option={"Share With"}
         onClose={jest.fn()}
+        onSave={jest.fn()}
       />
     );
 
@@ -294,6 +319,29 @@ describe("Create Share Dialog component", () => {
     ).toBeNull();
   });
 
+  it("should render share dialog and show 'Unshare' title in dialog", async () => {
+    const mockOnClose = jest.fn();
+
+    render(
+      <ShareDialog
+        measures={[mockMeasure1, mockMeasure2]}
+        open={true}
+        option={"Unshare"}
+        onClose={mockOnClose}
+        onSave={jest.fn()}
+      />
+    );
+    expect(await screen.findByTestId("share-dialog")).toBeInTheDocument();
+    expect(await screen.findByText("Unshare")).toBeInTheDocument();
+
+    const cancelButton = screen.getByTestId("share-cancel-button");
+    expect(cancelButton).toBeEnabled();
+
+    fireEvent.click(cancelButton);
+
+    expect(mockOnClose).toHaveBeenCalled();
+  });
+
   it("should display unshare measure table", async () => {
     render(
       <ShareDialog
@@ -301,6 +349,7 @@ describe("Create Share Dialog component", () => {
         open={true}
         option={"Unshare"}
         onClose={jest.fn()}
+        onSave={jest.fn()}
       />
     );
 
@@ -348,6 +397,7 @@ describe("Create Share Dialog component", () => {
         open={true}
         option={"Share With"}
         onClose={jest.fn()}
+        onSave={jest.fn()}
       />
     );
     expect(await screen.findByTestId("share-dialog")).toBeInTheDocument();
@@ -388,6 +438,7 @@ describe("Create Share Dialog component", () => {
         open={true}
         option={"Share With"}
         onClose={jest.fn()}
+        onSave={jest.fn()}
       />
     );
     expect(await screen.findByTestId("share-dialog")).toBeInTheDocument();
@@ -427,6 +478,7 @@ describe("Create Share Dialog component", () => {
         open={true}
         option={"Share With"}
         onClose={jest.fn()}
+        onSave={jest.fn()}
       />
     );
     expect(await screen.findByTestId("share-dialog")).toBeInTheDocument();
@@ -511,6 +563,7 @@ describe("Create Share Dialog component", () => {
         open={true}
         option={"Share With"}
         onClose={jest.fn()}
+        onSave={jest.fn()}
       />
     );
     expect(await screen.findByTestId("share-dialog")).toBeInTheDocument();
@@ -590,14 +643,15 @@ describe("Create Share Dialog component", () => {
   });
 
   it("should add a user row to the grid for each measure that does not already have that user and save successfully after clicking Save button.", async () => {
-    const mockOnClose = jest.fn();
+    const mockOnSave = jest.fn();
 
     render(
       <ShareDialog
         measures={[mockMeasure1, mockMeasure2]}
         open={true}
         option={"Share With"}
-        onClose={mockOnClose}
+        onClose={jest.fn()}
+        onSave={mockOnSave}
       />
     );
     expect(await screen.findByTestId("share-dialog")).toBeInTheDocument();
@@ -629,7 +683,7 @@ describe("Create Share Dialog component", () => {
 
     await waitFor(async () => {
       expect(mockMeasureServiceApi.shareMeasures).toBeCalled();
-      expect(mockOnClose).toHaveBeenCalledWith({
+      expect(mockOnSave).toHaveBeenCalledWith({
         toastType: "success",
         toastMessage: "The measure(s) were successfully shared.",
         toastOpen: true,
@@ -651,14 +705,15 @@ describe("Create Share Dialog component", () => {
       return mockMeasureServiceApi;
     });
 
-    const mockOnClose = jest.fn();
+    const mockOnSave = jest.fn();
 
     render(
       <ShareDialog
         measures={[mockMeasure1, mockMeasure2]}
         open={true}
         option={"Share With"}
-        onClose={mockOnClose}
+        onClose={jest.fn()}
+        onSave={mockOnSave}
       />
     );
     expect(await screen.findByTestId("share-dialog")).toBeInTheDocument();
@@ -690,7 +745,7 @@ describe("Create Share Dialog component", () => {
 
     await waitFor(async () => {
       expect(mockMeasureServiceApi.shareMeasures).toBeCalled();
-      expect(mockOnClose).toHaveBeenCalledWith({
+      expect(mockOnSave).toHaveBeenCalledWith({
         toastType: "danger",
         toastMessage: errorMessage,
         toastOpen: true,
@@ -699,14 +754,15 @@ describe("Create Share Dialog component", () => {
   });
 
   it("should successfully unshare a user from a measure.", async () => {
-    const mockOnClose = jest.fn();
+    const mockOnSave = jest.fn();
 
     render(
       <ShareDialog
         measures={[mockMeasure1, mockMeasure2]}
         open={true}
         option={"Unshare"}
-        onClose={mockOnClose}
+        onClose={jest.fn()}
+        onSave={mockOnSave}
       />
     );
 
@@ -744,7 +800,7 @@ describe("Create Share Dialog component", () => {
     fireEvent.click(acceptBtn);
     await waitFor(async () => {
       expect(mockMeasureServiceApi.unshareMeasures).toBeCalled();
-      expect(mockOnClose).toHaveBeenCalledWith({
+      expect(mockOnSave).toHaveBeenCalledWith({
         toastType: "success",
         toastMessage: "The measure(s) were successfully unshared.",
         toastOpen: true,
@@ -766,14 +822,15 @@ describe("Create Share Dialog component", () => {
       return mockMeasureServiceApi;
     });
 
-    const mockOnClose = jest.fn();
+    const mockOnSave = jest.fn();
 
     render(
       <ShareDialog
         measures={[mockMeasure1, mockMeasure2]}
         open={true}
         option={"Unshare"}
-        onClose={mockOnClose}
+        onClose={jest.fn()}
+        onSave={mockOnSave}
       />
     );
 
@@ -811,11 +868,212 @@ describe("Create Share Dialog component", () => {
     fireEvent.click(acceptBtn);
     await waitFor(async () => {
       expect(mockMeasureServiceApi.unshareMeasures).toBeCalled();
-      expect(mockOnClose).toHaveBeenCalledWith({
+      expect(mockOnSave).toHaveBeenCalledWith({
         toastType: "danger",
         toastMessage: errorMessage,
         toastOpen: true,
       });
     });
+  });
+});
+
+describe("UnshareFromMe Confirmation Dialog component", () => {
+  beforeEach(() => {
+    jest.resetModules();
+
+    useMeasureServiceMock.mockImplementation(() => {
+      return mockMeasureServiceApi;
+    });
+  });
+
+  it("should render confirmation dialog only", async () => {
+    render(
+      <ShareDialog
+        measures={[mockMeasure1, mockMeasure2]}
+        open={true}
+        option={"UnshareFromMe"}
+        onClose={jest.fn()}
+        onSave={jest.fn()}
+      />
+    );
+
+    expect(screen.getByTestId("share-confirmation-dialog")).toBeInTheDocument();
+    expect(screen.queryByTestId("share-dialog")).toBeNull();
+  });
+
+  it("should close Share dialog and call onClose when option is 'Share With'", async () => {
+    const onCloseMock = jest.fn();
+
+    render(
+      <ShareDialog
+        measures={[mockMeasure1, mockMeasure2]}
+        open={true}
+        option="Share With"
+        onClose={onCloseMock}
+        onSave={jest.fn()}
+      />
+    );
+
+    expect(screen.getByTestId("share-dialog")).toBeInTheDocument();
+    expect(screen.queryByTestId("share-confirmation-dialog")).toBeNull();
+
+    const cancelButton = screen.getByTestId("share-cancel-button");
+    fireEvent.click(cancelButton);
+
+    expect(onCloseMock).toHaveBeenCalled();
+    expect(screen.queryByTestId("share-confirmation-dialog")).toBeNull();
+  });
+
+  it("should close Unshare dialog and call onClose when option is 'Unshare'", async () => {
+    const onCloseMock = jest.fn();
+
+    render(
+      <ShareDialog
+        measures={[mockMeasure1, mockMeasure2]}
+        open={true}
+        option="Unshare"
+        onClose={onCloseMock}
+        onSave={jest.fn()}
+      />
+    );
+
+    expect(screen.getByTestId("share-dialog")).toBeInTheDocument();
+    expect(screen.queryByTestId("share-confirmation-dialog")).toBeNull();
+
+    const cancelButton = screen.getByTestId("share-cancel-button");
+    fireEvent.click(cancelButton);
+
+    expect(onCloseMock).toHaveBeenCalled();
+    expect(screen.queryByTestId("share-confirmation-dialog")).toBeNull();
+  });
+
+  it("should close confirmation dialog and call onClose when option is 'UnshareFromMe'", async () => {
+    const onCloseMock = jest.fn();
+
+    render(
+      <ShareDialog
+        measures={[mockMeasure1, mockMeasure2]}
+        open={true}
+        option="UnshareFromMe"
+        onClose={onCloseMock}
+        onSave={jest.fn()}
+      />
+    );
+
+    expect(screen.getByTestId("share-confirmation-dialog")).toBeInTheDocument();
+    expect(screen.queryByTestId("share-dialog")).toBeNull();
+
+    const cancelButton = screen.getByTestId(
+      "share-confirmation-dialog-cancel-button"
+    );
+    fireEvent.click(cancelButton);
+
+    expect(onCloseMock).toHaveBeenCalled();
+    expect(screen.queryByTestId("share-dialog")).toBeNull();
+  });
+
+  it("should successfully unshare a user from a measure", async () => {
+    const mockOnSave = jest.fn();
+
+    render(
+      <ShareDialog
+        measures={[mockMeasure1, mockMeasure2]}
+        open={true}
+        option="UnshareFromMe"
+        onClose={jest.fn()}
+        onSave={mockOnSave}
+      />
+    );
+
+    // Only the confirmation dialog is rendered
+    expect(
+      await screen.findByTestId("share-confirmation-dialog")
+    ).toBeInTheDocument();
+    expect(screen.queryByTestId("share-dialog")).toBeNull();
+
+    const acceptBtn = await screen.findByTestId(
+      "share-confirmation-dialog-accept-button"
+    );
+    expect(acceptBtn).toBeEnabled();
+
+    fireEvent.click(acceptBtn);
+
+    await waitFor(() => {
+      expect(mockMeasureServiceApi.unshareMeasures).toBeCalled();
+      expect(mockOnSave).toHaveBeenCalledWith({
+        toastType: "success",
+        toastMessage: "The measure(s) were successfully unshared.",
+        toastOpen: true,
+      });
+    });
+  });
+
+  it("should fail to unshare a user from a measure with UnshareFromMe", async () => {
+    const errorMessage =
+      "Unable to unshare the selected measure(s) with the users who were unchecked. If the error persists, please contact the help desk.";
+
+    const mockMeasureServiceApiWithError = {
+      ...mockMeasureServiceApi,
+      unshareMeasures: jest.fn().mockRejectedValue(new Error(errorMessage)),
+    };
+    useMeasureServiceMock.mockReturnValue(mockMeasureServiceApiWithError);
+
+    const mockOnSave = jest.fn();
+
+    render(
+      <ShareDialog
+        measures={[mockMeasure1, mockMeasure2]}
+        open={true}
+        option="UnshareFromMe"
+        onClose={jest.fn()}
+        onSave={mockOnSave}
+      />
+    );
+
+    const acceptBtn = await screen.findByTestId(
+      "share-confirmation-dialog-accept-button"
+    );
+    expect(acceptBtn).toBeEnabled();
+
+    fireEvent.click(acceptBtn);
+
+    await waitFor(() => {
+      expect(mockMeasureServiceApiWithError.unshareMeasures).toBeCalled();
+      expect(mockOnSave).toHaveBeenCalledWith({
+        toastType: "danger",
+        toastMessage: errorMessage,
+        toastOpen: true,
+      });
+    });
+  });
+
+  it("should render warning content with measure names and current user", async () => {
+    render(
+      <ShareDialog
+        measures={[mockMeasure1, mockMeasure2]}
+        open={true}
+        option="UnshareFromMe"
+        onClose={jest.fn()}
+        onSave={jest.fn()}
+      />
+    );
+
+    const confirmationDialog = await screen.findByTestId(
+      "share-confirmation-dialog"
+    );
+    expect(confirmationDialog).toBeInTheDocument();
+
+    // Check the warning text
+    expect(screen.getByText("You are about to unshare")).toBeInTheDocument();
+
+    // Each measure name should appear
+    expect(screen.getByText(mockMeasure1.measureName)).toBeInTheDocument();
+    expect(screen.getByText(mockMeasure2.measureName)).toBeInTheDocument();
+
+    // The current user should appear in the list
+    const userListItems = screen.getAllByRole("listitem");
+    expect(userListItems.length).toBe(2);
+    expect(userListItems[0]).toHaveTextContent("test user");
+    expect(userListItems[1]).toHaveTextContent("test user");
   });
 });
