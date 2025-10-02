@@ -11,7 +11,6 @@ import { MenuItem } from "@mui/material";
 import { Select } from "@madie/madie-design-system/dist/react";
 import StringComponent from "./StringComponent";
 import PeriodDateTimeComponent from "./PeriodDateTimeComponent";
-import QuantityIntervalInput from "../../../../../../../common/quantityIntervalInput/QuantityIntervalInput";
 import "./TimingComponent.scss";
 
 const GROUP_GAP = "1.5rem";
@@ -33,10 +32,12 @@ const TimingComponent = ({
   const eventArrayPath = `${label}.event`;
   const eventValues = getIn(formik.values, eventArrayPath) || [""];
 
-  const boundsPath = `${label}.repeat.bounds[x]`;
-  const boundsValue = getIn(formik.values, boundsPath);
-  const boundsRangePath = `${label}.repeat.boundsRange`;
   const boundsPeriodPath = `${label}.repeat.boundsPeriod`;
+
+  const [selectedBounds, setSelectedBounds] = React.useState(() => {
+    if (getIn(formik.values, boundsPeriodPath)) return "Period";
+    return "-";
+  });
 
   const countPath = `${label}.repeat.count`;
   const countMaxPath = `${label}.repeat.countMax`;
@@ -64,11 +65,6 @@ const TimingComponent = ({
   const offsetPath = `${label}.repeat.offset`;
 
   const codePath = `${label}.code`;
-
-  const currentQuantityRatio = {
-    low: {},
-    high: {},
-  };
 
   return (
     <div id="timing-component">
@@ -102,20 +98,16 @@ const TimingComponent = ({
           data-testid="repeat-bounds"
           readOnly={!canEdit}
           size="small"
-          value={boundsValue}
+          value={selectedBounds}
           onChange={(e) => {
-            const selectedBounds = e.target.value;
+            const value = e.target.value;
+            setSelectedBounds(e.target.value);
 
-            if (selectedBounds === "-") {
-              // Clear the entire bounds object
-              formik.setFieldValue(`${label}.repeat.bounds`, undefined);
-            } else {
-              formik.setFieldValue(boundsPath, selectedBounds);
-            }
-
-            // Reset other bound fields
-            formik.setFieldValue(boundsRangePath, undefined);
-            formik.setFieldValue(boundsPeriodPath, undefined);
+            // Only initialize boundsPeriod for "Period"; clear it when any other option is selected
+            formik.setFieldValue(
+              boundsPeriodPath,
+              value === "Period" ? {} : undefined
+            );
           }}
           options={boundsOptions.map((boundsOption, i) => (
             <MenuItem
@@ -129,38 +121,22 @@ const TimingComponent = ({
         />
       </div>
 
-      {boundsValue === "Duration" && (
-        <StringComponent
-          label="Duration"
-          fieldRequired={fieldRequired}
-          canEdit={false}
-          value="Not supported"
-        />
-      )}
-
-      {boundsValue === "Range" && (
-        <QuantityIntervalInput
-          label={"Range"}
-          quantityInterval={
-            getIn(formik.values, boundsRangePath) || currentQuantityRatio
-          }
-          onQuantityIntervalChange={(val) => {
-            formik.setFieldTouched(boundsRangePath);
-            formik.setFieldValue(boundsRangePath, val);
-          }}
-          canEdit={canEdit}
-        />
-      )}
-
-      {boundsValue === "Period" && (
+      {selectedBounds === "Period" && (
         <PeriodDateTimeComponent
           label="Period"
           fieldRequired={false}
           canEdit={canEdit}
           value={getIn(formik.values, boundsPeriodPath) || {}}
-          onChange={(value) => {
-            formik.setFieldValue(boundsPeriodPath, value);
-          }}
+          onChange={(val) => formik.setFieldValue(boundsPeriodPath, val)}
+        />
+      )}
+
+      {(selectedBounds === "Duration" || selectedBounds === "Range") && (
+        <StringComponent
+          label={selectedBounds}
+          fieldRequired={fieldRequired}
+          canEdit={false}
+          value="Not supported"
         />
       )}
 
