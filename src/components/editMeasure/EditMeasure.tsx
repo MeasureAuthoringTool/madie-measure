@@ -524,7 +524,7 @@ export default function EditMeasure() {
   const deleteMeasure = async () => {
     const deletedMeasure: Measure = { ...measure, active: false };
     try {
-      const result = await measureServiceApi.updateMeasure(deletedMeasure);
+      const result = await measureServiceApi.deleteMeasure(deletedMeasure.id);
       if (result.status === 200) {
         handleToast("success", "Measure successfully deleted", true);
         setTimeout(() => {
@@ -533,12 +533,12 @@ export default function EditMeasure() {
       }
     } catch (e) {
       if (e?.response?.data) {
-        const { error, status, message } = e.response.data;
-        const errorMessage = `${status}: ${error} ${message}`;
-        setErrorMessage(errorMessage);
+        console.error(e);
+        const { message } = e.response.data;
+        handleToast("danger", `${message}`, true);
         setDeleteOpen(false);
       } else {
-        setErrorMessage(e.toString());
+        setErrorMessage(e.message);
         setDeleteOpen(false);
       }
     }
