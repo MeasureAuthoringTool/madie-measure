@@ -538,7 +538,7 @@ export default function EditMeasure() {
         handleToast("danger", `${message}`, true);
         setDeleteOpen(false);
       } else {
-        setErrorMessage(e.message);
+        handleToast("danger", e.toString(), true);
         setDeleteOpen(false);
       }
     }
