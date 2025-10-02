@@ -12,7 +12,7 @@ interface PropTypes {
 }
 
 export const NOTHING_SELECTED = "Select measure to delete";
-export const DEL_MEASURE = "Delete measure";
+export const DELETE_MEASURE = "Delete measure";
 const UNABLE_TO_DELETE = "Unable to delete measure.";
 export const MEASURE_LOCKED_MESSAGE =
   UNABLE_TO_DELETE + " Locked while being edited by";
@@ -45,11 +45,11 @@ export default function DeleteAction(props: PropTypes) {
           setTooltipMessage(TEST_CASES_LOCKED_MESSAGE);
         } else {
           setDisableDeleteBtn(false);
-          setTooltipMessage(DEL_MEASURE);
+          setTooltipMessage(DELETE_MEASURE);
         }
       } else {
         setDisableDeleteBtn(false);
-        setTooltipMessage(DEL_MEASURE);
+        setTooltipMessage(DELETE_MEASURE);
       }
     }
   }, [measures, canEdit]);

@@ -1,7 +1,7 @@
 import * as React from "react";
 import { render, screen } from "@testing-library/react";
 import DeleteAction, {
-  DEL_MEASURE,
+  DELETE_MEASURE,
   MEASURE_LOCKED_MESSAGE,
   NOTHING_SELECTED,
   TEST_CASES_LOCKED_MESSAGE,
@@ -59,7 +59,7 @@ describe("DeleteAction", () => {
     expect(screen.getByTestId("delete-action-btn")).not.toBeDisabled();
     expect(screen.getByTestId("delete-action-tooltip")).toHaveAttribute(
       "aria-label",
-      DEL_MEASURE
+      DELETE_MEASURE
     );
   });
   it("Should disable action btn if user cannot edit ", () => {
@@ -138,6 +138,24 @@ describe("DeleteAction", () => {
     expect(screen.getByTestId("delete-action-tooltip")).toHaveAttribute(
       "aria-label",
       TEST_CASES_LOCKED_MESSAGE
+    );
+  });
+
+  it("Should enable button if measure is not locked and no locked test cases present", () => {
+    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
+      Locking: true,
+    }));
+    render(
+      <DeleteAction
+        measures={[qiCoreMeasure]}
+        onClick={() => {}}
+        canEdit={true}
+      />
+    );
+    expect(screen.getByTestId("delete-action-btn")).toBeEnabled();
+    expect(screen.getByTestId("delete-action-tooltip")).toHaveAttribute(
+      "aria-label",
+      DELETE_MEASURE
     );
   });
 });
