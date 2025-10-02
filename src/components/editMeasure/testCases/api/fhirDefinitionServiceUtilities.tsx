@@ -510,6 +510,7 @@ export function isComponentDataType(datatype) {
     case "money":
     case "positiveint":
     case "time":
+    case "timing":
     case "unsignedint":
     case "uri":
     case "url":

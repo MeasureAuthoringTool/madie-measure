@@ -1,0 +1,10 @@
+.money-component {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+
+  .decimal-input,
+  .currency-input .codes-select-container {
+    width: 148.5px;
+  }
+}

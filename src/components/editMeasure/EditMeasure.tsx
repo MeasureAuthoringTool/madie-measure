@@ -196,6 +196,24 @@ export default function EditMeasure() {
   }, []);
 
   useEffect(() => {
+    const unshareFromMeListener = () => {
+      setShareDialog({
+        open: true,
+        option: "UnshareFromMe",
+      });
+    };
+    window.addEventListener("unshare-measure-from-me", unshareFromMeListener, {
+      passive: true,
+    });
+    return () => {
+      window.removeEventListener(
+        "unshare-measure-from-me",
+        unshareFromMeListener
+      );
+    };
+  }, []);
+
+  useEffect(() => {
     const versionListener = () => {
       setCreateVersionDialog({
         open: true,
@@ -375,16 +393,19 @@ export default function EditMeasure() {
     setViewMeasureHistoryDialog(false);
   };
 
-  const handleShareDialogClose = ({
-    toastType = "danger",
-    toastMessage = "",
-    toastOpen = false,
-  } = {}) => {
+  const handleShareDialogClose = () => {
     setShareDialog({
       open: false,
       option: "",
     });
+  };
 
+  const handleShareDialogSave = ({
+    toastType = "danger",
+    toastMessage = "",
+    toastOpen = false,
+  } = {}) => {
+    handleShareDialogClose();
     handleToast(toastType, toastMessage, toastOpen);
   };
 
@@ -656,6 +677,7 @@ export default function EditMeasure() {
             open={shareDialog.open}
             option={shareDialog.option}
             onClose={handleShareDialogClose}
+            onSave={handleShareDialogSave}
           />
 
           <InvalidTestCaseDialog
