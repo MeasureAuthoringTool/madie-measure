@@ -736,7 +736,7 @@ export default function MeasureList(props: {
     toastOpen = false,
   } = {}) => {
     if (toastType === "success") {
-      doUpdateList();
+      doUpdateList(true);
     }
 
     handleDialogClose();
