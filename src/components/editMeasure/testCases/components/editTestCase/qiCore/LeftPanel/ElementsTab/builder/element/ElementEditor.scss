@@ -22,12 +22,9 @@
   .element-editor-add-row {
     display: flex;
     flex-direction: row;
+    align-items: center;
     gap: 10px;
     width: 100%;
-
-    > div:first-child {
-      flex: 3;
-    }
 
     > .element-add-container {
       display: flex;

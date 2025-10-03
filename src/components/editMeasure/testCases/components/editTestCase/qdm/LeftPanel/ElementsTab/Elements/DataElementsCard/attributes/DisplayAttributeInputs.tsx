@@ -163,7 +163,7 @@ const DisplayAttributeInputs = ({
       case "Decimal":
         return (
           <DecimalInput
-            value={null}
+            value={attributeValue ?? ""}
             handleChange={(val) => {
               setAttributeValue(parseFloat(val));
               if (onChangeForComponentType) {

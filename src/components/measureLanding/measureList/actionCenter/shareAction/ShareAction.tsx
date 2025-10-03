@@ -16,34 +16,57 @@ interface PropTypes {
   measures: Measure[];
   onClick: (option: string) => void;
   isOwner: boolean;
+  isSharedWithUser: boolean;
+  activeTab: number;
 }
 
+// Tooltips that show on My Measures and All Measures tabs
 export const NOTHING_SELECTED = "Select a measure to share/unshare";
 export const INVALID_SHARE_MEASURE =
   "You cannot share/unshare a measure you do not own";
 export const VALID_SHARE_MEASURE = "Share/Unshare";
 
-const options = ["Share With", "Unshare"];
+// Tooltips that show on Shared Measures tabs
+export const SHARED_TAB_NOTHING_SELECTED = "Select a measure to unshare";
+export const SHARED_TAB_INVALID_UNSHARE_MEASURE =
+  "You cannot unshare a measure that you do not have shared access to";
+export const SHARED_TAB_UNSHARE = "Unshare";
 
 export default function ShareAction(props: PropTypes) {
-  const { measures, isOwner } = props;
+  const { measures, isOwner, isSharedWithUser, activeTab, onClick } = props;
   const [disableShareBtn, setDisableShareBtn] = useState(true);
-  const [tooltipMessage, setTooltipMessage] = useState(NOTHING_SELECTED);
+  const [tooltipMessage, setTooltipMessage] = useState(
+    activeTab === 1 ? SHARED_TAB_NOTHING_SELECTED : NOTHING_SELECTED
+  );
   const [open, setOpen] = useState(false);
   // move anchorElement to a stable reference that does not change across renders.
   const anchorRef = useRef<HTMLButtonElement>(null);
+
+  const options = activeTab === 1 ? ["Unshare"] : ["Share With", "Unshare"];
+
   const validateShareActionState = useCallback(() => {
     setDisableShareBtn(true);
 
-    if (measures?.length === 0) {
-      setTooltipMessage(NOTHING_SELECTED);
-    } else if (isOwner) {
-      setDisableShareBtn(false);
-      setTooltipMessage(VALID_SHARE_MEASURE);
-    } else {
-      setTooltipMessage(INVALID_SHARE_MEASURE);
+    if (activeTab === 1) {
+      if (measures?.length === 0) {
+        setTooltipMessage(SHARED_TAB_NOTHING_SELECTED);
+      } else if (isSharedWithUser) {
+        setDisableShareBtn(false);
+        setTooltipMessage(SHARED_TAB_UNSHARE);
+      } else {
+        setTooltipMessage(SHARED_TAB_INVALID_UNSHARE_MEASURE);
+      }
+    } else if (activeTab === 0 || activeTab === 2) {
+      if (measures?.length === 0) {
+        setTooltipMessage(NOTHING_SELECTED);
+      } else if (isOwner) {
+        setDisableShareBtn(false);
+        setTooltipMessage(VALID_SHARE_MEASURE);
+      } else {
+        setTooltipMessage(INVALID_SHARE_MEASURE);
+      }
     }
-  }, [measures, isOwner]);
+  }, [measures, isOwner, isSharedWithUser, activeTab]);
 
   useEffect(() => {
     validateShareActionState();
@@ -60,7 +83,7 @@ export default function ShareAction(props: PropTypes) {
 
   const handleMenuItemClick = (option: string) => {
     handleClose();
-    props.onClick(option);
+    onClick(option);
   };
 
   function handleListKeyDown(event: React.KeyboardEvent) {

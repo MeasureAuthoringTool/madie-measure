@@ -49,6 +49,7 @@ interface TestCaseTableProps {
   shiftDatesDialogModalOpen: any;
   setShiftDatesDialogModalOpen: any;
   setWarnings: any;
+  page: number;
 }
 
 const fiberManualRecordStyles = {
@@ -173,6 +174,12 @@ const TestCaseTable = (props: TestCaseTableProps) => {
       setData(transFormData(testCases));
     }
   }, [testCases]);
+
+  useEffect(() => {
+    if (table && table.toggleAllRowsSelected) {
+      table.toggleAllRowsSelected(false);
+    }
+  }, [props.page]);
 
   const columns = useMemo<ColumnDef<TCRow>[]>(() => {
     const columnDefs = [];

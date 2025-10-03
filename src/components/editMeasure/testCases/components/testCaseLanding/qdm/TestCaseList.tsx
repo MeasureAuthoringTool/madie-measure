@@ -798,6 +798,7 @@ const TestCaseList = (props: TestCaseListProps) => {
                           setShiftDatesDialogModalOpen
                         }
                         setWarnings={setWarnings}
+                        page={page}
                       />
                       <Pagination
                         totalItems={totalItems}
