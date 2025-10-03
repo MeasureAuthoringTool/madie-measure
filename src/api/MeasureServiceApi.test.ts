@@ -852,4 +852,29 @@ describe("MeasureServiceApi Tests", () => {
     );
     consoleWarnMock.mockRestore();
   });
+
+  it("returns true when the API indicates test cases are locked", async () => {
+    mockedAxios.get.mockResolvedValueOnce({ data: true });
+    const result = await measureServiceApi.checkTestCasesLocked("1");
+    expect(result).toBe(true);
+  });
+
+  it("returns false when the API indicates test cases are not locked", async () => {
+    mockedAxios.get.mockResolvedValueOnce({ data: false });
+    const result = await measureServiceApi.checkTestCasesLocked("1");
+    expect(result).toBe(false);
+  });
+
+  it("returns false and logs an error when the API call fails", async () => {
+    const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation();
+    mockedAxios.get.mockRejectedValueOnce(new Error("failure"));
+    const consoleWarnMock = jest.spyOn(console, "warn").mockImplementation();
+    await expect(measureServiceApi.checkTestCasesLocked("1")).rejects.toThrow(
+      "failure"
+    );
+    expect(consoleWarnMock).toHaveBeenCalledWith(
+      "Unable to retrieve Test Cases lock info"
+    );
+    consoleWarnMock.mockRestore();
+  });
 });

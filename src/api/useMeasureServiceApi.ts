@@ -747,6 +747,23 @@ export class MeasureServiceApi {
       throw err;
     }
   }
+  async checkTestCasesLocked(measureId: string): Promise<boolean> {
+    try {
+      const response = await axios.get(
+        `${this.baseUrl}/measures/${measureId}/test-cases/lock-by-other-user`,
+        {
+          headers: {
+            Authorization: `Bearer ${this.getAccessToken()}`,
+          },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      const message = `Unable to retrieve Test Cases lock info`;
+      console.warn(message);
+      throw error;
+    }
+  }
 }
 
 export default function useMeasureServiceApi(): MeasureServiceApi {
