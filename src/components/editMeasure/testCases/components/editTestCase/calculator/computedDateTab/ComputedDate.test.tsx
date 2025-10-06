@@ -46,4 +46,103 @@ describe("ComputedDate", () => {
     fireEvent.change(precisionNumberInput, { target: { value: "5" } });
     expect((precisionNumberInput as HTMLInputElement).value).toBe("5");
   });
+
+  it("computes the correct date when valid inputs are provided (add mode)", async () => {
+    render(<ComputedDate />);
+    const dateInput = screen.getByLabelText("Initial Date");
+    userEvent.clear(dateInput);
+    userEvent.type(dateInput, "01/01/2024");
+
+    const precisionNumberInput = screen.getByLabelText(
+      "Days/Weeks/Months/Years"
+    );
+    userEvent.clear(precisionNumberInput);
+    userEvent.type(precisionNumberInput, "10");
+
+    const precisionDropdown = screen.getByRole("combobox");
+    userEvent.click(precisionDropdown);
+    const daysOption = screen.getByRole("option", { name: "Days" });
+    userEvent.click(daysOption);
+
+    const calculateBtn = screen.getByTestId("calculate-computed-date");
+    userEvent.click(calculateBtn);
+
+    expect(await screen.findByDisplayValue("01/11/2024")).toBeInTheDocument();
+  });
+
+  it("computes the correct date when valid inputs are provided (subtract mode)", async () => {
+    render(<ComputedDate />);
+    const dateInput = screen.getByLabelText("Initial Date");
+    userEvent.clear(dateInput);
+    userEvent.type(dateInput, "01/15/2024");
+
+    const precisionNumberInput = screen.getByLabelText(
+      "Days/Weeks/Months/Years"
+    );
+    userEvent.clear(precisionNumberInput);
+    userEvent.type(precisionNumberInput, "5");
+
+    const precisionDropdown = screen.getByRole("combobox");
+    userEvent.click(precisionDropdown);
+    const daysOption = screen.getByRole("option", { name: "Days" });
+    userEvent.click(daysOption);
+
+    const subtractRadio = screen.getByLabelText("(-) Subtract");
+    userEvent.click(subtractRadio);
+
+    const calculateBtn = screen.getByTestId("calculate-computed-date");
+    userEvent.click(calculateBtn);
+
+    expect(await screen.findByDisplayValue("01/10/2024")).toBeInTheDocument();
+  });
+
+  it("shows placeholder when inputs are missing or invalid", async () => {
+    render(<ComputedDate />);
+
+    const calculateBtn = screen.getByTestId("calculate-computed-date");
+    userEvent.click(calculateBtn);
+    expect(screen.getByDisplayValue("--/--/----")).toBeInTheDocument();
+
+    const dateInput = screen.getByLabelText("Initial Date");
+    userEvent.clear(dateInput);
+    userEvent.type(dateInput, "01/01/2024");
+    userEvent.click(calculateBtn);
+    expect(screen.getByDisplayValue("--/--/----")).toBeInTheDocument();
+  });
+
+  it("copies computed date to clipboard", async () => {
+    // Mock clipboard
+    const writeTextMock = jest.fn().mockResolvedValue(undefined);
+    Object.assign(navigator, {
+      clipboard: {
+        writeText: writeTextMock,
+      },
+    });
+
+    render(<ComputedDate />);
+    const dateInput = screen.getByLabelText("Initial Date");
+    userEvent.clear(dateInput);
+    userEvent.type(dateInput, "01/01/2024");
+
+    const precisionNumberInput = screen.getByLabelText(
+      "Days/Weeks/Months/Years"
+    );
+    userEvent.clear(precisionNumberInput);
+    userEvent.type(precisionNumberInput, "10");
+
+    const precisionDropdown = screen.getByRole("combobox");
+    userEvent.click(precisionDropdown);
+    const daysOption = screen.getByRole("option", { name: "Days" });
+    userEvent.click(daysOption);
+
+    const calculateBtn = screen.getByTestId("calculate-computed-date");
+    userEvent.click(calculateBtn);
+
+    expect(await screen.findByDisplayValue("01/11/2024")).toBeInTheDocument();
+
+    const copyBtn = await screen.findByTestId("copy-computed-date");
+    await userEvent.click(copyBtn);
+
+    expect(writeTextMock).toHaveBeenCalledWith("01/11/2024");
+  });
 });
