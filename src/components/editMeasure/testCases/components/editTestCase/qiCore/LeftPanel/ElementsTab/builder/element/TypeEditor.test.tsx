@@ -1978,6 +1978,219 @@ describe("TypeEditor Component", () => {
     expect(screen.getByText("High")).toBeInTheDocument();
   });
 
+  test("renders QuantityComponent fields correctly", async () => {
+    useFhirDefinitionsServiceApiMock.mockImplementation(
+      () =>
+        ({
+          getValueSetDefinition: jest.fn().mockResolvedValue({
+            resourceType: "ValueSet",
+            url: "http://hl7.org/fhir/ValueSet/quantity-comparator",
+            expansion: {
+              contains: [
+                {
+                  system: "http://hl7.org/fhir/quantity-comparator",
+                  code: "<",
+                  display: "Less than",
+                },
+                {
+                  system: "http://hl7.org/fhir/quantity-comparator",
+                  code: "<=",
+                  display: "Less or Equal to",
+                },
+                {
+                  system: "http://hl7.org/fhir/quantity-comparator",
+                  code: ">=",
+                  display: "Greater or Equal to",
+                },
+                {
+                  system: "http://hl7.org/fhir/quantity-comparator",
+                  code: ">",
+                  display: "Greater than",
+                },
+              ],
+            },
+          }),
+        } as unknown as FhirDefinitionsServiceApi)
+    );
+
+    const mockFormikQuantity: FormikContextType<any> = {
+      values: {
+        "Observation.valueQuantity": {
+          value: 10,
+          unit: "mg",
+          system: "http://unitsofmeasure.org",
+          code: "mg",
+        },
+      },
+      touched: {},
+      getFieldProps: (label) => {
+        const value = getNestedProperty(mockFormikQuantity.values, label);
+        return { value, name: label, onChange: jest.fn(), onBlur: jest.fn() };
+      },
+      handleChange: () => {},
+      setFieldValue: jest.fn(),
+      setFieldTouched: jest.fn(),
+    };
+
+    render(
+      <ExecutionContextProvider
+        value={{
+          measureState: [null, jest.fn()],
+          bundleState: [null, jest.fn()],
+          valueSetsState: [[], jest.fn()],
+          executionContextReady: true,
+          executing: false,
+          setExecuting: jest.fn(),
+          contextFailure: false,
+        }}
+      >
+        <FormikProvider value={mockFormikQuantity}>
+          <RequiredFieldsProvider
+            requiredFields={mockRequiredFields}
+            formInfo={mockFormInfo}
+          >
+            <TypeEditor
+              resource={null}
+              structureDefinition={{
+                id: "Observation.valueQuantity",
+                path: "Observation.valueQuantity",
+                min: 0,
+                max: "1",
+                type: [{ code: "Quantity" }],
+              }}
+              label="Observation.valueQuantity"
+              canEdit={true}
+              parentStructureDefinition={null}
+            />
+          </RequiredFieldsProvider>
+        </FormikProvider>
+      </ExecutionContextProvider>
+    );
+
+    // Comparator
+    const comparator = await screen.findByLabelText("Comparator");
+    expect(comparator).toBeInTheDocument();
+
+    // Value input
+    const valueInput = await screen.findByTestId("decimal-input-field-Value");
+    expect(valueInput).toBeInTheDocument();
+
+    // Unit input
+    const unitInput = await screen.findByTestId("unit-input-input");
+    expect(unitInput).toBeInTheDocument();
+  });
+
+  test("renders SimpleQuantityComponent fields correctly inside TypeEditor", async () => {
+    const fhirDefinitionsServiceApiMock = {
+      getResourceTree: jest.fn().mockResolvedValue(codingDef),
+      getValueSetDefinition: jest.fn().mockResolvedValue({
+        resourceType: "ValueSet",
+        url: "http://hl7.org/fhir/ValueSet/quantity-comparator",
+        expansion: {
+          contains: [
+            {
+              system: "http://hl7.org/fhir/quantity-comparator",
+              code: "<",
+              display: "Less than",
+            },
+            {
+              system: "http://hl7.org/fhir/quantity-comparator",
+              code: "<=",
+              display: "Less or Equal to",
+            },
+            {
+              system: "http://hl7.org/fhir/quantity-comparator",
+              code: ">=",
+              display: "Greater or Equal to",
+            },
+            {
+              system: "http://hl7.org/fhir/quantity-comparator",
+              code: ">",
+              display: "Greater than",
+            },
+          ],
+        },
+      }),
+    } as unknown as FhirDefinitionsServiceApi;
+
+    useFhirDefinitionsServiceApiMock.mockImplementation(
+      () => fhirDefinitionsServiceApiMock
+    );
+
+    const mockFormikSimpleQuantity: FormikContextType<any> = {
+      values: {
+        "Observation.simpleQuantity": {
+          value: 5,
+          unit: "kg",
+          system: "http://unitsofmeasure.org",
+          code: "kg",
+        },
+      },
+      touched: {},
+      getFieldProps: (label) => {
+        const value = getNestedProperty(mockFormikSimpleQuantity.values, label);
+        return { value, name: label, onChange: jest.fn(), onBlur: jest.fn() };
+      },
+      handleChange: () => {},
+      setFieldValue: jest.fn(),
+      setFieldTouched: jest.fn(),
+    };
+
+    render(
+      <ExecutionContextProvider
+        value={{
+          measureState: [null, jest.fn()],
+          bundleState: [null, jest.fn()],
+          valueSetsState: [[], jest.fn()],
+          executionContextReady: true,
+          executing: false,
+          setExecuting: jest.fn(),
+          contextFailure: false,
+        }}
+      >
+        <FormikProvider value={mockFormikSimpleQuantity}>
+          <RequiredFieldsProvider
+            requiredFields={mockRequiredFields}
+            formInfo={mockFormInfo}
+          >
+            <TypeEditor
+              resource={null}
+              structureDefinition={{
+                id: "Observation.simpleQuantity",
+                path: "Observation.simpleQuantity",
+                min: 0,
+                max: "1",
+                type: [
+                  {
+                    code: "Quantity",
+                    profile: [
+                      "http://hl7.org/fhir/StructureDefinition/SimpleQuantity",
+                    ],
+                  },
+                ],
+              }}
+              label="Observation.simpleQuantity"
+              canEdit={true}
+              parentStructureDefinition={null}
+            />
+          </RequiredFieldsProvider>
+        </FormikProvider>
+      </ExecutionContextProvider>
+    );
+
+    // Value input
+    const valueInput = await screen.findByTestId("decimal-input-field-Value");
+    expect(valueInput).toBeInTheDocument();
+
+    // Unit input
+    const unitInput = await screen.findByTestId("unit-input-input");
+    expect(unitInput).toBeInTheDocument();
+
+    // Comparator should NOT exist
+    const comparator = screen.queryByLabelText("Comparator");
+    expect(comparator).not.toBeInTheDocument();
+  });
+
   test("updates Formik when MoneyComponent value or currency changes", async () => {
     useFhirDefinitionsServiceApiMock.mockImplementation(
       () =>

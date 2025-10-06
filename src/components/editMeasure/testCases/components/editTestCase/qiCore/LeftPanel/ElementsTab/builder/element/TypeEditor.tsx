@@ -32,7 +32,7 @@ import ElementSection from "../../../../../../common/ElementSection";
 import CodeableConceptComponent from "./types/CodeableConceptComponent";
 import PeriodDateTimeComponent from "./types/PeriodDateTimeComponent";
 import ChoiceType from "./ChoiceType";
-import QuantityInput from "./types/QuantityInput";
+import QuantityComponent from "./types/QuantityComponent";
 import IdentifierComponent from "./types/IdentifierComponent";
 import QuantityIntervalInput from "../../../../../../common/quantityIntervalInput/QuantityIntervalInput";
 import MoneyComponent from "./types/MoneyComponent";
@@ -233,12 +233,11 @@ const TypeEditor = ({
         );
       case "Quantity":
         return (
-          <QuantityInput
+          <QuantityComponent
             canEdit={canEdit}
-            label={"Quantity"}
-            onChange={(quantity) => {
-              formik.setFieldValue(label, quantity);
-            }}
+            label={label}
+            structureDefinition={structureDefinition}
+            fieldRequired={required}
           />
         );
       case "Period":
