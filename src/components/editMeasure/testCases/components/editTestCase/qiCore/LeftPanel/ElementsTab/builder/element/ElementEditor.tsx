@@ -195,7 +195,6 @@ const ElementEditor = ({
     const formInfo = {};
     const nodeList = [];
     const allNodes = [rootDefinition, ...allChildren];
-
     for (const node of allNodes) {
       nodeList.push(...(await buildNode(node, resourcePath, resource)));
     }

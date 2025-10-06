@@ -26,6 +26,10 @@
     gap: 10px;
     width: 100%;
 
+    &.double-row {
+      margin-bottom: 24px;
+    }
+
     > .element-add-container {
       display: flex;
       flex: 1;
