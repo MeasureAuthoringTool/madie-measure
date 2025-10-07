@@ -47,6 +47,72 @@ describe("StatusHandler Messages", () => {
     expect(getByTestId("success-imports-with-warnings")).toBeInTheDocument();
   });
 
+  it("Creates an import message configuration object with test case locked message", () => {
+    const testOutcomes: TestCaseImportOutcome[] = [
+      {
+        familyName: "Judith",
+        givenNames: [],
+        patientId: "666",
+        message: "The test case is locked by another user: test.user",
+        successful: false,
+      } as unknown as TestCaseImportOutcome,
+    ];
+
+    const successImportsWithWarnings: TestCaseImportOutcome[] = [
+      {
+        familyName: "Smith",
+        givenNames: [],
+        patientId: "123",
+        message: "Some warning message",
+        successful: true,
+      } as unknown as TestCaseImportOutcome,
+    ];
+
+    const config = createImportMessage(
+      testOutcomes,
+      1,
+      successImportsWithWarnings,
+      "test-id"
+    );
+
+    expect(config.type).toBe("warning");
+    expect(config.copyButton).toBe(true);
+    expect(config.canClose).toBe(false);
+
+    const { getByTestId } = render(<div>{config.content}</div>);
+    expect(getByTestId("test-id")).toBeInTheDocument();
+    expect(getByTestId("failed-test-cases")).toBeInTheDocument();
+    expect(getByTestId("success-imports-with-warnings")).toBeInTheDocument();
+  });
+
+  it("Creates an import message configuration object with no failed imports", () => {
+    const successImportsWithWarnings: TestCaseImportOutcome[] = [
+      {
+        familyName: "Smith",
+        givenNames: ["John"],
+        patientId: "123",
+        message: "Some warning message",
+        successful: true,
+      } as unknown as TestCaseImportOutcome,
+    ];
+
+    const config = createImportMessage(
+      [],
+      1,
+      successImportsWithWarnings,
+      "test-id"
+    );
+
+    expect(config.type).toBe("warning");
+    expect(config.copyButton).toBe(true);
+    expect(config.canClose).toBe(false);
+
+    const { getByTestId, queryByTestId } = render(<div>{config.content}</div>);
+    expect(getByTestId("test-id")).toBeInTheDocument();
+    expect(queryByTestId("failed-test-cases")).not.toBeInTheDocument();
+    expect(getByTestId("success-imports-with-warnings")).toBeInTheDocument();
+  });
+
   it("Creates a warning message configuration object with multiple items", () => {
     const warningMessages = ["Warning 1", "Warning 2"];
     const config = createWarningMessage(warningMessages, "warning-test-id");
