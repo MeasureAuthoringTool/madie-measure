@@ -17,6 +17,8 @@ const TestCaseLandingQdm = (props: TestCaseListProps) => {
           setWarnings={props.setWarnings}
           setImportErrors={props.setImportErrors}
           setImportWarnings={props.setImportWarnings}
+          setCustomWarningMessages={props.setCustomWarningMessages}
+          setShiftTestCaseDatesWarnings={props.setShiftTestCaseDatesWarnings}
         />
       </section>
     </div>
