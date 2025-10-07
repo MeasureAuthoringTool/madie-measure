@@ -4,6 +4,7 @@ import { Select } from "@madie/madie-design-system/dist/react";
 import { MenuItem } from "@mui/material";
 import { useQiCoreResource } from "../../../../../../../../util/QiCorePatientProvider";
 import AddElementButton from "../../../../../../../common/AddElementButton";
+import { useFormikContext } from "formik";
 
 export default function ReferenceComponent({
   structureDefinition,
@@ -13,8 +14,11 @@ export default function ReferenceComponent({
   error,
   showAddAttributeButton,
   addTitle,
+  label,
+  value,
 }: any) {
   const { state } = useQiCoreResource();
+  const formikContext = useFormikContext();
   // First dropdown Utilities
   const allResourceProfiles = useContext(ResourceContext); // get all profiles loaded from builder
   const targetProfiles =
@@ -28,9 +32,10 @@ export default function ReferenceComponent({
         label: resourceProfile.title,
         value: resourceProfile.type,
       })) || [];
-  // match the profile url against the resource profiles so we can get human readable info
-  const [selectedReferenceType, setSelectedReferenceType] =
-    useState<string>(""); // will need to default to something if editing existing element
+  // if value is passed, we need to initialize this as value.reference.split('/')[0] or an empty string
+  const [selectedReferenceType, setSelectedReferenceType] = useState<string>(
+    value?.reference?.split("/")[0] || ""
+  ); // will need to default to something if editing existing element
 
   // SecondDropdown Utilities
   const resourcesOfSpecifiedType = state.bundle.entry.filter((entry) => {
@@ -40,14 +45,17 @@ export default function ReferenceComponent({
 
   const emptyOptions = [{ label: "ID Not Present (Add New)", value: "" }]; // If no resources of that type exist, we need to show a message in the dropdown
   const selectableResoureOptions = resourcesOfSpecifiedType.map((res) => ({
-    label: res.resource.id,
-    value: res.resource.id,
+    label: `${selectedReferenceType}/${res.resource.id}`,
+    value: `${selectedReferenceType}/${res.resource.id}`,
   }));
   const finalOptions =
     selectableResoureOptions.length > 0
       ? selectableResoureOptions
       : emptyOptions;
-  const [selectedReferenceId, setSelectedReferenceId] = useState<string>(""); // stateful reference for now or it wont show changing. deprecate this.
+
+  const [selectedReferenceId, setSelectedReferenceId] = useState<string>(
+    value?.reference || ""
+  ); // will need to default to something if editing existing element
 
   return (
     <>
@@ -89,6 +97,7 @@ export default function ReferenceComponent({
         )}
       </div>
       {/* Select a specific resource from the selected reference type, from tc json */}
+      {/* in case of label: AdverseEvent.recorder, this select would be AdverseEvent.recorder.reference */}
       {selectedReferenceType && (
         <div className="element-editor-add-row reference">
           <Select
@@ -101,6 +110,7 @@ export default function ReferenceComponent({
             disabled={!canEdit}
             required={required}
             id={"reference-select"}
+            name={`${label}.reference`}
             data-testid={"reference-select"}
             inputProps={{
               "data-testid": `reference-select-input`,
@@ -121,7 +131,10 @@ export default function ReferenceComponent({
               name: "Select",
               value: "",
             }}
-            onChange={(e) => setSelectedReferenceId(e.target.value)}
+            onChange={(e) => {
+              formikContext.handleChange(e);
+              setSelectedReferenceId(e.target.value);
+            }}
             helperText={helperText}
             error={error}
           />

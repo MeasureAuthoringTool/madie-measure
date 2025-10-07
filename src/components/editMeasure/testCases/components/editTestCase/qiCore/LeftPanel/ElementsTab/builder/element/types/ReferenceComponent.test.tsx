@@ -1,5 +1,11 @@
 import React from "react";
-import { render, screen, fireEvent, within } from "@testing-library/react";
+import {
+  render,
+  screen,
+  fireEvent,
+  within,
+  waitFor,
+} from "@testing-library/react";
 import ReferenceComponent from "./ReferenceComponent";
 import ResourceContext from "../../ResourceContext";
 import { useQiCoreResource } from "../../../../../../../../util/QiCorePatientProvider";
@@ -8,6 +14,27 @@ import userEvent from "@testing-library/user-event";
 // Mock the custom hook
 jest.mock("../../../../../../../../util/QiCorePatientProvider", () => ({
   useQiCoreResource: jest.fn(),
+}));
+jest.mock("uuid", () => ({
+  v4: jest.fn(),
+}));
+
+const mockFormikObj = {
+  touched: {},
+  errors: {},
+  values: {},
+  isSubmitting: false,
+  setFieldValue: undefined,
+  handleChange: jest.fn(),
+};
+
+jest.mock("formik", () => ({
+  useFormikContext: () => {
+    return mockFormikObj;
+  },
+  getIn: (context: Record<string, unknown>, fieldName: string) => {
+    return context[fieldName];
+  },
 }));
 
 const mockResourceProfiles = [
@@ -41,6 +68,14 @@ const mockBundle = {
 
 describe("ReferenceComponent", () => {
   beforeEach(() => {
+    mockFormikObj.touched = {};
+    mockFormikObj.errors = {};
+    mockFormikObj.values = {};
+    mockFormikObj.isSubmitting = false;
+    mockFormikObj.setFieldValue = jest.fn();
+
+    const mockUuid = require("uuid") as { v4: jest.Mock<string, []> };
+    mockUuid.v4.mockImplementationOnce(() => "uuid-1");
     (useQiCoreResource as jest.Mock).mockReturnValue({
       state: { bundle: mockBundle },
     });
@@ -69,7 +104,7 @@ describe("ReferenceComponent", () => {
     expect(screen.getByTestId("Practitioner-option")).toBeInTheDocument();
   });
 
-  it("shows second dropdown when reference type is selected", async () => {
+  it("shows second dropdown when reference type is selected when useFormikContext is defined", async () => {
     render(
       <ResourceContext.Provider value={mockResourceProfiles}>
         <ReferenceComponent
@@ -117,7 +152,10 @@ describe("ReferenceComponent", () => {
     const referenceOptionsList = await screen.findAllByTestId(/-option/i);
     userEvent.click(referenceOptionsList[0]);
     // expect the option to be selected.
-    expect(referenceOptionsList[0]).toHaveAttribute("aria-selected", "true");
+    await waitFor(() => {
+      // expect(referenceSelect).toHaveValue("Patient/patient-1");
+      expect(referenceOptionsList[0]).toHaveAttribute("aria-selected", "true");
+    });
   });
 
   it("shows 'ID Not Present' when no matching resources exist", async () => {
