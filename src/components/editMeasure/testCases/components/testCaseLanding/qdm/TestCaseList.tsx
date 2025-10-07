@@ -384,7 +384,7 @@ const TestCaseList = (props: TestCaseListProps) => {
       })
       .catch((err) => {
         console.error("deleteTestCases: err.message = " + err.message);
-        if (err?.response?.status == 409) {
+        if (err?.response?.status == 423) {
           if (
             testCaseIds.length ===
             err?.response?.data?.message?.split(",").length

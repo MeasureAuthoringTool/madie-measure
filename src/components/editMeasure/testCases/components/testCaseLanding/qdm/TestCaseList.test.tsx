@@ -1547,12 +1547,12 @@ describe("TestCaseList component", () => {
     });
   });
 
-  it("Should handle delete error, when a 409 error is returned from the server", async () => {
+  it("Should handle delete error, when a 423 error is returned from the server", async () => {
     useTestCaseServiceMock.mockImplementation(() => {
       return {
         ...useTestCaseServiceMockResolved,
         deleteTestCases: jest.fn().mockRejectedValue({
-          response: { status: 409, data: { message: "1234,4321" } },
+          response: { status: 423, data: { message: "1234,4321" } },
         }),
       } as unknown as TestCaseServiceApi;
     });
@@ -1593,12 +1593,12 @@ describe("TestCaseList component", () => {
     });
   });
 
-  it("Should handle delete error of 409, when all selected test cases are in use by another user", async () => {
+  it("Should handle delete error of 423, when all selected test cases are in use by another user", async () => {
     useTestCaseServiceMock.mockImplementation(() => {
       return {
         ...useTestCaseServiceMockResolved,
         deleteTestCases: jest.fn().mockRejectedValue({
-          response: { status: 409, data: { message: "4321" } },
+          response: { status: 423, data: { message: "4321" } },
         }),
       } as unknown as TestCaseServiceApi;
     });

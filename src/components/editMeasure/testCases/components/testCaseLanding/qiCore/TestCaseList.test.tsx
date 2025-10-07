@@ -824,7 +824,7 @@ describe("TestCaseList component", () => {
         ...useTestCaseServiceMockResolved,
         deleteTestCases: jest.fn().mockRejectedValue({
           response: {
-            status: 409,
+            status: 423,
             data: {
               message: "ID1,ID2",
             },
@@ -867,7 +867,7 @@ describe("TestCaseList component", () => {
         ...useTestCaseServiceMockResolved,
         deleteTestCases: jest.fn().mockRejectedValue({
           response: {
-            status: 409,
+            status: 423,
             data: {
               message: "ID1",
             },
