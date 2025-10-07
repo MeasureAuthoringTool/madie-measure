@@ -175,4 +175,20 @@ describe("StatusHandler Messages", () => {
     expect(multipleListItems[1]).toHaveTextContent("Data Element 2");
     expect(multipleListItems[2]).toHaveTextContent("Data Element 3");
   });
+  it("Should handle createWarningMessage when message is not provided", () => {
+    const warnings = ["Warning 1", "Warning 2"];
+    const config = createWarningMessage(warnings, "no-message-warning-test-id");
+
+    expect(config.type).toBe("warning");
+    expect(config.copyButton).toBe(true);
+    expect(config.canClose).toBe(false);
+    expect(config.alertProps).toEqual({
+      "data-testid": "no-message-warning-test-id",
+    });
+
+    const { getByTestId } = render(<div>{config.content}</div>);
+    const warnTitle = getByTestId("warn-title");
+
+    expect(warnTitle).toBeInTheDocument();
+  });
 });

@@ -81,7 +81,13 @@ export const getCoverageValueFromHtml = (
 };
 
 const TestCaseList = (props: TestCaseListProps) => {
-  const { setErrors, setWarnings, setImportWarnings } = props;
+  const {
+    setErrors,
+    setWarnings,
+    setImportWarnings,
+    setShiftTestCaseDatesWarnings,
+    setCustomWarningMessages,
+  } = props;
   const { measureId, criteriaId } = useParams<{
     measureId: string;
     criteriaId: string;
@@ -290,21 +296,7 @@ const TestCaseList = (props: TestCaseListProps) => {
     setExecuteAllTestCases(false);
   };
 
-  const deleteTestCase = (testCaseId) => {
-    testCaseService.current
-      .deleteTestCaseByTestCaseId(measureId, testCaseId)
-      .then(() => {
-        retrieveTestCases();
-      })
-      .catch((err) => {
-        console.error(
-          "deleteTestCaseByTestCaseId: err.message = " + err.message
-        );
-        setErrors((prevState) => [...prevState, err.message]);
-      });
-  };
-
-  const deleteMultipleTestCases = () => {
+  const deleteTestCases = () => {
     const testCaseIds = selectedTestCases?.map((testCase) => testCase.id);
     testCaseService.current
       .deleteTestCases(measureId, testCaseIds)
@@ -316,7 +308,30 @@ const TestCaseList = (props: TestCaseListProps) => {
       })
       .catch((err) => {
         console.error("deleteTestCases: err.message = " + err.message);
-        setErrors((prevState) => [...prevState, err.message]);
+        if (err?.response?.status == 423) {
+          if (
+            testCaseIds.length ===
+            err?.response?.data?.message?.split(",").length
+          ) {
+            setToastMessage(
+              "All the selected test cases are in-use by another user and could not be deleted."
+            );
+            setToastOpen(true);
+            setToastType("warning");
+          } else {
+            retrieveTestCases();
+            setCustomWarningMessages([
+              {
+                message:
+                  "Some of the selected test cases were deleted successfully, but the following test cases are in-use by another user and could not be deleted:",
+                details: err?.response?.data?.message?.split(","),
+                testDataId: "test-cases-in-use-warning",
+              },
+            ]);
+          }
+        } else {
+          setErrors((prevState) => [...prevState, err.message]);
+        }
       });
   };
 
@@ -661,7 +676,7 @@ const TestCaseList = (props: TestCaseListProps) => {
                         // test cases doesn't know how to sort by category
                         testCases={currentSlice}
                         canEdit={canEdit}
-                        deleteTestCase={deleteMultipleTestCases}
+                        deleteTestCase={deleteTestCases}
                         exportTestCase={exportTestCase}
                         measure={measure}
                         handleQiCloneTestCase={handleQiCloneTestCase}
@@ -675,6 +690,9 @@ const TestCaseList = (props: TestCaseListProps) => {
                         }
                         setWarnings={setWarnings}
                         page={page}
+                        setShiftTestCaseDatesWarnings={
+                          setShiftTestCaseDatesWarnings
+                        }
                       />
                       {currentSlice?.length > 0 && (
                         <Pagination

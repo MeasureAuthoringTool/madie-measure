@@ -3,7 +3,9 @@ import { Route, Routes } from "react-router-dom";
 import TestCaseLandingQdm from "../../testCaseLanding/qdm/TestCaseLanding";
 import EditTestCase from "../../editTestCase/qdm/EditTestCase";
 import NotFound from "../../notfound/NotFound";
-import StatusHandler from "../../statusHandler/StatusHandler";
+import StatusHandler, {
+  CustomWarningMessage,
+} from "../../statusHandler/StatusHandler";
 import { Measure, TestCaseImportOutcome } from "@madie/madie-models";
 import { measureStore } from "@madie/madie-util";
 import { CqmMeasure, ValueSet } from "cqm-models";
@@ -25,6 +27,12 @@ const TestCaseRoutes = () => {
   const [importWarnings, setImportWarnings] = useState<TestCaseImportOutcome[]>(
     []
   );
+  const [customWarningMessages, setCustomWarningMessages] = useState<
+    CustomWarningMessage[]
+  >([]);
+  const [shiftTestCaseDatesWarnings, setShiftTestCaseDatesWarnings] = useState<
+    Array<string>
+  >([]);
   const [importErrors, setImportErrors] = useState<Array<string>>([]);
   const [executionContextReady, setExecutionContextReady] =
     useState<boolean>(false);
@@ -191,10 +199,11 @@ const TestCaseRoutes = () => {
           testDataId="import-error-messages"
         />
       )}
-      {warnings?.length > 0 && (
+      {(warnings?.length || customWarningMessages?.length > 0) && (
         <StatusHandler
           warning={true}
-          shiftTestCaseDatesWarning={warnings}
+          shiftTestCaseDatesWarning={shiftTestCaseDatesWarnings}
+          customWarningMessages={customWarningMessages}
           testDataId="execution_context_loading_warning"
         />
       )}
@@ -219,6 +228,10 @@ const TestCaseRoutes = () => {
                     setWarnings={setWarnings}
                     setImportWarnings={setImportWarnings}
                     setImportErrors={setImportErrors}
+                    setShiftTestCaseDatesWarnings={
+                      setShiftTestCaseDatesWarnings
+                    }
+                    setCustomWarningMessages={setCustomWarningMessages}
                   />
                 }
               />
@@ -236,6 +249,10 @@ const TestCaseRoutes = () => {
                     setWarnings={setWarnings}
                     setImportWarnings={setImportWarnings}
                     setImportErrors={setImportErrors}
+                    setShiftTestCaseDatesWarnings={
+                      setShiftTestCaseDatesWarnings
+                    }
+                    setCustomWarningMessages={setCustomWarningMessages}
                   />
                 }
               />
@@ -282,6 +299,9 @@ const TestCaseRoutes = () => {
                     warnings={warnings}
                     setErrors={setErrors}
                     setImportWarnings={setImportWarnings}
+                    setShiftTestCaseDatesWarnings={
+                      setShiftTestCaseDatesWarnings
+                    }
                     setWarnings={setWarnings}
                   />
                 }

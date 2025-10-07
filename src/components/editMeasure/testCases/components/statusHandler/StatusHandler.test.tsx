@@ -362,4 +362,51 @@ describe("StatusHandler Component", () => {
       expect.anything()
     );
   });
+
+  test("Should display warning and customWarningMessages with correct configuration", () => {
+    const customWarningMessages = [
+      {
+        message: "Custom Warning 1:",
+        details: ["Detail 1", "Detail 2"],
+      },
+      {
+        message: "Custom Warning 2:",
+        details: ["Detail A"],
+      },
+    ];
+
+    render(
+      <StatusHandler
+        warning={true}
+        customWarningMessages={customWarningMessages}
+        testDataId="test_data_id"
+      />
+    );
+
+    expect(screen.getByTestId("madie-alert-mock")).toBeInTheDocument();
+    expect(screen.getByTestId("alert-0")).toHaveAttribute(
+      "data-type",
+      "warning"
+    );
+    expect(screen.getByTestId("alert-1")).toHaveAttribute(
+      "data-type",
+      "warning"
+    );
+    expect(screen.getByText("Custom Warning 1:")).toBeInTheDocument();
+    expect(screen.getByText("Detail 1")).toBeInTheDocument();
+    expect(screen.getByText("Detail 2")).toBeInTheDocument();
+
+    expect(MadieAlert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        alerts: expect.arrayContaining([
+          expect.objectContaining({
+            type: "warning",
+            copyButton: true,
+            canClose: false,
+          }),
+        ]),
+      }),
+      expect.anything()
+    );
+  });
 });
