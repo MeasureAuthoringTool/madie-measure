@@ -90,10 +90,10 @@ export function createImportMessage(
               ${failedImports.length}) test case(s) could not be imported. Please
               ensure that your formatting is correct and try again.`;
   if (failedImports?.length > 0) {
-    const lockedTestCases = failedImports.filter((fi) =>
+    const lockedTestCases = failedImports.some((fi) =>
       fi.message?.includes("The test case is locked by another user")
     );
-    if (lockedTestCases?.length > 0) {
+    if (lockedTestCases) {
       failedMessage = `Test case import was successful, but the following test cases could not be imported because they are in-use by another user and cannot be overwritten:`;
     }
   }
