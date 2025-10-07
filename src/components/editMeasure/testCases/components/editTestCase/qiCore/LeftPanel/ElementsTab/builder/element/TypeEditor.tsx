@@ -58,11 +58,6 @@ const TypeEditor = ({
     high: {},
   };
 
-  if (typeof label !== "string") {
-    console.warn("TypeEditor: label is not a string", label);
-    throw new Error("TypeEditor: label is not a string");
-  }
-
   let type: string = structureDefinition?.type?.find((t) =>
     _.toLower(label).includes(_.toLower(t.code))
   )?.code;

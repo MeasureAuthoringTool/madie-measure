@@ -18,7 +18,7 @@ export default function ReferenceComponent({
   // First dropdown Utilities
   const allResourceProfiles = useContext(ResourceContext); // get all profiles loaded from builder
   const targetProfiles =
-    structureDefinition?.type?.find(
+    structureDefinition.type?.find(
       (type: { code: string }) => type.code === "Reference"
     )?.targetProfile || []; // get the profiles available in the structure definition
   const resourceProfileOptions =
@@ -125,9 +125,7 @@ export default function ReferenceComponent({
             helperText={helperText}
             error={error}
           />
-          {showAddAttributeButton && addTitle && (
-            <AddElementButton name={addTitle} />
-          )}
+          <div />
         </div>
       )}
     </>

@@ -112,7 +112,12 @@ describe("ReferenceComponent", () => {
     const referenceSelectDropdown = within(referenceSelect).getByRole(
       "combobox"
     ) as HTMLInputElement;
+
     userEvent.click(referenceSelectDropdown);
+    const referenceOptionsList = await screen.findAllByTestId(/-option/i);
+    userEvent.click(referenceOptionsList[0]);
+    // expect the option to be selected.
+    expect(referenceOptionsList[0]).toHaveAttribute("aria-selected", "true");
   });
 
   it("shows 'ID Not Present' when no matching resources exist", async () => {
@@ -171,5 +176,41 @@ describe("ReferenceComponent", () => {
       (option) => option.textContent
     );
     expect(referenceOptionTexts).toContain("ID Not Present (Add New)");
+  });
+  it("Should render with add title button", () => {
+    render(
+      <ResourceContext.Provider value={mockResourceProfiles}>
+        <ReferenceComponent
+          structureDefinition={mockStructureDefinition}
+          canEdit={true}
+          required={false}
+          helperText="Select a reference"
+          error={false}
+          showAddAttributeButton={true}
+          addTitle="Reference"
+        />
+      </ResourceContext.Provider>
+    );
+    expect(screen.getByText("Add Reference")).toBeInTheDocument();
+  });
+
+  it("Renders when structureDefinition.type is undefined", () => {
+    const mockStructureDefinitionNoType = {
+      type: undefined,
+    };
+    render(
+      <ResourceContext.Provider value={mockResourceProfiles}>
+        <ReferenceComponent
+          structureDefinition={mockStructureDefinitionNoType}
+          canEdit={true}
+          required={false}
+          helperText="Select a reference"
+          error={false}
+          showAddAttributeButton={false}
+          addTitle=""
+        />
+      </ResourceContext.Provider>
+    );
+    expect(screen.getByLabelText("Reference Type")).toBeInTheDocument();
   });
 });
