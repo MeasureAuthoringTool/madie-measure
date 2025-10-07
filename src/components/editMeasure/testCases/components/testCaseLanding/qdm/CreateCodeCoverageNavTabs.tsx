@@ -34,7 +34,6 @@ export interface NavTabProps {
   coveragePercentage: string;
   validTestCases: TestCase[];
   selectedPopCriteria: Group;
-  onDeleteAllTestCases: () => void;
   onExportQRDA: () => void;
   onExportExcel: (fileType: string) => void;
   exportExecuting: boolean;
@@ -59,7 +58,6 @@ const defaultStyle = {
 
 export default function CreateCodeCoverageNavTabs(props: NavTabProps) {
   const { executionContextReady, contextFailure } = useQdmExecutionContext();
-  const exportMessage = "Test cases must be executed prior to exporting.";
   const {
     activeTab,
     setActiveTab,
@@ -71,11 +69,8 @@ export default function CreateCodeCoverageNavTabs(props: NavTabProps) {
     testCasePassFailStats,
     coveragePercentage,
     validTestCases,
-    selectedPopCriteria,
-    onDeleteAllTestCases,
     onExportQRDA,
     onExportExcel,
-    exportExecuting,
     optionsOpen,
     setOptionsOpen,
     onGenerateOverlappingCodesReport,
