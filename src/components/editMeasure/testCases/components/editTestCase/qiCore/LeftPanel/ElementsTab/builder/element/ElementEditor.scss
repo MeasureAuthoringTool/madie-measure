@@ -30,6 +30,12 @@
       margin-bottom: 24px;
     }
 
+    &.reference > {
+      div:first-child {
+        max-width: 215px;
+      }
+    }
+
     > .element-add-container {
       display: flex;
       flex: 1;

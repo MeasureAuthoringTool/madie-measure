@@ -52,7 +52,7 @@ export default function ReferenceComponent({
   return (
     <>
       {/* Select a reference type from all available profiles */}
-      <div className="element-editor-add-row double-row">
+      <div className="element-editor-add-row reference double-row">
         <Select
           label={"Reference Type"}
           id={"reference-type-select"}
@@ -90,7 +90,7 @@ export default function ReferenceComponent({
       </div>
       {/* Select a specific resource from the selected reference type, from tc json */}
       {selectedReferenceType && (
-        <div className="element-editor-add-row">
+        <div className="element-editor-add-row reference">
           <Select
             label={`Specify ${
               resourceProfileOptions.find(
