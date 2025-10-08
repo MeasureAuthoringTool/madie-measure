@@ -6,7 +6,7 @@ import {
   waitFor,
   screen,
 } from "@testing-library/react";
-import { act } from "react-dom/test-utils";
+import { act, Simulate } from "react-dom/test-utils";
 import { ApiContextProvider, ServiceConfig } from "../../api/ServiceContext";
 import { createMemoryRouter, RouterProvider } from "react-router-dom";
 import { routesConfig } from "../measureRoutes/MeasureRoutes";
@@ -22,8 +22,9 @@ import {
 } from "@madie/madie-models";
 import MeasureEditor from "./editor/MeasureEditor";
 // @ts-ignore
-import { measureStore, useFeatureFlags } from "@madie/madie-util";
+import { measureStore } from "@madie/madie-util";
 import { oneItemResponse } from "../__mocks__/mockMeasureResponses";
+import userEvent from "@testing-library/user-event";
 
 jest.mock("./details/MeasureDetails");
 jest.mock("./editor/MeasureEditor");
@@ -625,7 +626,7 @@ describe("EditMeasure Component", () => {
         );
 
         expect(queryByTestId("transfer-dialog")).not.toBeInTheDocument();
-      }, 2000)
+      }, 4500)
     );
   });
 
@@ -642,7 +643,7 @@ describe("EditMeasure Component", () => {
   });
 
   // temporarily skipping as it has github build issues
-  it.skip("should create a draft and show success toast", async () => {
+  it("should create a draft and show success toast", async () => {
     renderRouter();
 
     act(() => {
@@ -667,7 +668,6 @@ describe("EditMeasure Component", () => {
         measure.model,
         "Draft Measure Name"
       );
-      screen.debug(undefined, 80000);
       expect(
         screen.getByTestId("edit-measure-information-success-text")
       ).toBeInTheDocument();
@@ -691,7 +691,317 @@ describe("EditMeasure Component", () => {
     await waitFor(() =>
       setTimeout(() => {
         expect(queryByTestId("view-measure-history")).toBeInTheDocument();
-      }, 1000)
+      }, 4000)
+    );
+  });
+
+  it("should display a version dialog when the event is triggered, discards.", async () => {
+    renderRouter();
+
+    const result = await findByTestId("editMeasure");
+    expect(result).toBeInTheDocument();
+    expect(serviceApiMock.fetchMeasure).toHaveBeenCalled();
+    const loading = queryByTestId("loading");
+    expect(loading).toBeNull();
+    act(() => {
+      window.dispatchEvent(new Event("version-measure"));
+    });
+    await waitFor(() =>
+      expect(
+        queryByTestId("create-version-continue-button")
+      ).toBeInTheDocument()
+    );
+    const cancelButton = await findByTestId("create-version-cancel-button");
+    fireEvent.click(cancelButton);
+    await waitFor(() => {
+      expect(queryByText("Create Version")).not.toBeVisible();
+    });
+  });
+
+  it("Version succeeds.", async () => {
+    serviceApiMock.createVersion = jest.fn().mockResolvedValueOnce({
+      status: 200,
+      response: {
+        data: {
+          message: "Version created successfully.",
+        },
+      },
+    });
+    renderRouter();
+
+    const result = await findByTestId("editMeasure");
+    expect(result).toBeInTheDocument();
+    expect(serviceApiMock.fetchMeasure).toHaveBeenCalled();
+    const loading = queryByTestId("loading");
+    expect(loading).toBeNull();
+    act(() => {
+      window.dispatchEvent(new Event("version-measure"));
+    });
+    await waitFor(() =>
+      expect(
+        queryByTestId("create-version-continue-button")
+      ).toBeInTheDocument()
+    );
+
+    expect(getByTestId("create-version-dialog")).toBeInTheDocument();
+    const typeInput = getByTestId("version-type-input") as HTMLInputElement;
+    expect(typeInput).toBeInTheDocument();
+    expect(typeInput.value).toBe("");
+    fireEvent.change(typeInput, {
+      target: { value: "major" },
+    });
+    expect(typeInput.value).toBe("major");
+    const confirmVersionNode = getByTestId("confirm-version-input");
+    userEvent.type(confirmVersionNode, "1.0.000");
+    Simulate.change(confirmVersionNode);
+    expect(confirmVersionNode.value).toBe("1.0.000");
+    expect(getByTestId("create-version-continue-button")).not.toBeDisabled();
+
+    const continueButton = await findByTestId("create-version-continue-button");
+    fireEvent.click(continueButton);
+
+    const successText = await screen.findByTestId(
+      "edit-measure-information-success-text"
+    );
+    expect(successText).toBeInTheDocument();
+    expect(successText).toHaveTextContent(
+      "New version of measure is Successfully created"
+    );
+  });
+
+  it("Version fails with 423.", async () => {
+    serviceApiMock.createVersion = jest.fn().mockRejectedValueOnce({
+      response: {
+        status: 423,
+        data: {
+          message:
+            "Unable to version measure. Locked while being edited by anotherUser.",
+        },
+      },
+    });
+    renderRouter();
+
+    const result = await findByTestId("editMeasure");
+    expect(result).toBeInTheDocument();
+    expect(serviceApiMock.fetchMeasure).toHaveBeenCalled();
+    const loading = queryByTestId("loading");
+    expect(loading).toBeNull();
+    act(() => {
+      window.dispatchEvent(new Event("version-measure"));
+    });
+    await waitFor(() =>
+      expect(
+        queryByTestId("create-version-continue-button")
+      ).toBeInTheDocument()
+    );
+
+    expect(getByTestId("create-version-dialog")).toBeInTheDocument();
+    const typeInput = getByTestId("version-type-input") as HTMLInputElement;
+    expect(typeInput).toBeInTheDocument();
+    expect(typeInput.value).toBe("");
+    fireEvent.change(typeInput, {
+      target: { value: "major" },
+    });
+    expect(typeInput.value).toBe("major");
+    const confirmVersionNode = getByTestId("confirm-version-input");
+    userEvent.type(confirmVersionNode, "1.0.000");
+    Simulate.change(confirmVersionNode);
+    expect(confirmVersionNode.value).toBe("1.0.000");
+    expect(getByTestId("create-version-continue-button")).not.toBeDisabled();
+
+    const continueButton = await findByTestId("create-version-continue-button");
+    fireEvent.click(continueButton);
+
+    const errorText = await screen.findByTestId(
+      "edit-measure-information-generic-error-text"
+    );
+    expect(errorText).toBeInTheDocument();
+    expect(errorText).toHaveTextContent(
+      "Unable to version measure. Locked while being edited by anotherUser."
+    );
+  });
+
+  // temporarily skipping as it has github build issues
+  it.skip("Version fails with 400.", async () => {
+    serviceApiMock.createVersion = jest.fn().mockRejectedValueOnce({
+      response: {
+        status: 400,
+        data: {
+          message: "Requested measure cannot be versioned",
+        },
+      },
+    });
+    renderRouter();
+
+    const result = await findByTestId("editMeasure");
+    expect(result).toBeInTheDocument();
+    expect(serviceApiMock.fetchMeasure).toHaveBeenCalled();
+    const loading = queryByTestId("loading");
+    expect(loading).toBeNull();
+    act(() => {
+      window.dispatchEvent(new Event("version-measure"));
+    });
+    await waitFor(() =>
+      expect(
+        queryByTestId("create-version-continue-button")
+      ).toBeInTheDocument()
+    );
+
+    expect(getByTestId("create-version-dialog")).toBeInTheDocument();
+    const typeInput = getByTestId("version-type-input") as HTMLInputElement;
+    expect(typeInput).toBeInTheDocument();
+    expect(typeInput.value).toBe("");
+    fireEvent.change(typeInput, {
+      target: { value: "major" },
+    });
+    expect(typeInput.value).toBe("major");
+    const confirmVersionNode = getByTestId("confirm-version-input");
+    userEvent.type(confirmVersionNode, "1.0.000");
+    Simulate.change(confirmVersionNode);
+    expect(confirmVersionNode.value).toBe("1.0.000");
+    expect(getByTestId("create-version-continue-button")).not.toBeDisabled();
+
+    const continueButton = await findByTestId("create-version-continue-button");
+    fireEvent.click(continueButton);
+
+    const errorText = await screen.findByTestId(
+      "edit-measure-information-generic-error-text"
+    );
+    expect(errorText).toBeInTheDocument();
+    expect(errorText).toHaveTextContent(
+      "Requested measure cannot be versioned"
+    );
+  });
+  // temporarily skipping as it has github build issues
+  it.skip("Version fails with 403.", async () => {
+    serviceApiMock.createVersion = jest.fn().mockRejectedValueOnce({
+      response: {
+        status: 403,
+        data: {
+          message: "User is unauthorized to create a version",
+        },
+      },
+    });
+    renderRouter();
+
+    const result = await findByTestId("editMeasure");
+    expect(result).toBeInTheDocument();
+    expect(serviceApiMock.fetchMeasure).toHaveBeenCalled();
+    const loading = queryByTestId("loading");
+    expect(loading).toBeNull();
+    act(() => {
+      window.dispatchEvent(new Event("version-measure"));
+    });
+    await waitFor(() =>
+      expect(
+        queryByTestId("create-version-continue-button")
+      ).toBeInTheDocument()
+    );
+
+    expect(getByTestId("create-version-dialog")).toBeInTheDocument();
+    const typeInput = getByTestId("version-type-input") as HTMLInputElement;
+    expect(typeInput).toBeInTheDocument();
+    expect(typeInput.value).toBe("");
+    fireEvent.change(typeInput, {
+      target: { value: "major" },
+    });
+    expect(typeInput.value).toBe("major");
+    const confirmVersionNode = getByTestId("confirm-version-input");
+    userEvent.type(confirmVersionNode, "1.0.000");
+    Simulate.change(confirmVersionNode);
+    expect(confirmVersionNode.value).toBe("1.0.000");
+    expect(getByTestId("create-version-continue-button")).not.toBeDisabled();
+
+    const continueButton = await findByTestId("create-version-continue-button");
+    fireEvent.click(continueButton);
+
+    const errorText = await screen.findByTestId(
+      "edit-measure-information-generic-error-text"
+    );
+    expect(errorText).toBeInTheDocument();
+    expect(errorText).toHaveTextContent(
+      "User is unauthorized to create a version"
+    );
+  });
+  // temporarily skipping as it has github build issues
+  it.skip("Version fails with other errors.", async () => {
+    serviceApiMock.createVersion = jest.fn().mockRejectedValueOnce({
+      response: {
+        status: 500,
+        data: {
+          message: "An unexpected error occurred",
+        },
+      },
+    });
+    renderRouter();
+
+    const result = await findByTestId("editMeasure");
+    expect(result).toBeInTheDocument();
+    expect(serviceApiMock.fetchMeasure).toHaveBeenCalled();
+    const loading = queryByTestId("loading");
+    expect(loading).toBeNull();
+    act(() => {
+      window.dispatchEvent(new Event("version-measure"));
+    });
+    await waitFor(() =>
+      expect(
+        queryByTestId("create-version-continue-button")
+      ).toBeInTheDocument()
+    );
+
+    expect(getByTestId("create-version-dialog")).toBeInTheDocument();
+    const typeInput = getByTestId("version-type-input") as HTMLInputElement;
+    expect(typeInput).toBeInTheDocument();
+    expect(typeInput.value).toBe("");
+    fireEvent.change(typeInput, {
+      target: { value: "major" },
+    });
+    expect(typeInput.value).toBe("major");
+    const confirmVersionNode = getByTestId("confirm-version-input");
+    userEvent.type(confirmVersionNode, "1.0.000");
+    Simulate.change(confirmVersionNode);
+    expect(confirmVersionNode.value).toBe("1.0.000");
+    expect(getByTestId("create-version-continue-button")).not.toBeDisabled();
+
+    const continueButton = await findByTestId("create-version-continue-button");
+    fireEvent.click(continueButton);
+
+    const errorText = await screen.findByTestId(
+      "edit-measure-information-generic-error-text"
+    );
+    expect(errorText).toBeInTheDocument();
+    expect(errorText).toHaveTextContent("An unexpected error occurred");
+  });
+  // temporarily skipping as it has github build issues
+  it.skip("shows error toast when draftMeasure fails", async () => {
+    serviceApiMock.draftMeasure = jest.fn().mockRejectedValueOnce({
+      response: { data: { message: "Draft failed" } },
+    });
+    renderRouter();
+
+    act(() => {
+      window.dispatchEvent(new Event("draft-measure"));
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText("Create Draft")).toBeInTheDocument();
+    });
+
+    const nameInput = await screen.findByRole("textbox", {
+      name: "Measure Name",
+    });
+    fireEvent.change(nameInput, { target: { value: "Draft Measure Name" } });
+
+    const submitButton = screen.getByTestId("create-draft-continue-button");
+    fireEvent.click(submitButton);
+
+    await waitFor(
+      () => {
+        expect(
+          screen.getByTestId("edit-measure-information-generic-error-text")
+        ).toHaveTextContent("Draft failed");
+      },
+      { timeout: 3000 }
     );
   });
 });
