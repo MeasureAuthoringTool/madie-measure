@@ -1,9 +1,5 @@
 import React from "react";
-import {
-  render,
-  screen,
-  act,
-} from "@testing-library/react";
+import { render, screen, act } from "@testing-library/react";
 import {
   QiCoreResourceProvider,
   useQiCoreResource,
@@ -20,7 +16,14 @@ const TestComponent = () => {
 
   return (
     <div>
-      <button onClick={() => handleDispatch(ResourceActionType.LOAD_BUNDLE, { id: "bundle-1", entry: [] })}>
+      <button
+        onClick={() =>
+          handleDispatch(ResourceActionType.LOAD_BUNDLE, {
+            id: "bundle-1",
+            entry: [],
+          })
+        }
+      >
         Load Bundle
       </button>
       <button
@@ -105,5 +108,4 @@ describe("QiCoreResourceContext", () => {
     });
     expect(bundleDisplay.textContent).toContain("res-2");
   });
-
 });

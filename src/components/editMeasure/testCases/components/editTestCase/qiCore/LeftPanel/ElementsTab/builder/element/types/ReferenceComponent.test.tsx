@@ -29,29 +29,27 @@ const mockFormikObj = {
   setFieldValue: jest.fn(),
   setFieldTouched: jest.fn(),
   handleChange: jest.fn(),
-
 };
 
 const mockSetFieldValue = jest.fn();
 
-
 const adverseEventValues = {
   AdverseEvent: {
-    "id": "7887d9e0-b2b6-455c-bd12-1b139390c824",
-    "resourceType": "AdverseEvent",
-    "meta": {
-        "profile": [
-            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-adverseevent"
-        ]
+    id: "7887d9e0-b2b6-455c-bd12-1b139390c824",
+    resourceType: "AdverseEvent",
+    meta: {
+      profile: [
+        "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-adverseevent",
+      ],
     },
-    "actuality": "",
-    "event": "",
-    "subject": "",
-    "recorder": {
-        "reference": "PractitionerRole/edf97cbf-803b-4035-8770-157bcc0cdf74"
-    }
-}
-}
+    actuality: "",
+    event: "",
+    subject: "",
+    recorder: {
+      reference: "PractitionerRole/edf97cbf-803b-4035-8770-157bcc0cdf74",
+    },
+  },
+};
 //@ts-ignore
 const mockFormik: FormikContextType<any> = {
   values: {
@@ -121,15 +119,15 @@ describe("ReferenceComponent", () => {
     render(
       <ResourceContext.Provider value={mockResourceProfiles}>
         <FormikProvider value={mockFormik}>
-        <ReferenceComponent
-          structureDefinition={mockStructureDefinition}
-          canEdit={true}
-          required={false}
-          helperText="Select a reference"
-          error={false}
-          showAddAttributeButton={false}
-          addTitle=""
-        />
+          <ReferenceComponent
+            structureDefinition={mockStructureDefinition}
+            canEdit={true}
+            required={false}
+            helperText="Select a reference"
+            error={false}
+            showAddAttributeButton={false}
+            addTitle=""
+          />
         </FormikProvider>
       </ResourceContext.Provider>
     );
@@ -146,15 +144,15 @@ describe("ReferenceComponent", () => {
     render(
       <ResourceContext.Provider value={mockResourceProfiles}>
         <FormikProvider value={mockFormik}>
-        <ReferenceComponent
-          structureDefinition={mockStructureDefinition}
-          canEdit={true}
-          required={true}
-          helperText="Select a reference"
-          error={false}
-          showAddAttributeButton={false}
-          addTitle=""
-        />
+          <ReferenceComponent
+            structureDefinition={mockStructureDefinition}
+            canEdit={true}
+            required={true}
+            helperText="Select a reference"
+            error={false}
+            showAddAttributeButton={false}
+            addTitle=""
+          />
         </FormikProvider>
       </ResourceContext.Provider>
     );
@@ -209,15 +207,15 @@ describe("ReferenceComponent", () => {
     render(
       <ResourceContext.Provider value={mockResourceProfiles}>
         <FormikProvider value={mockFormik}>
-        <ReferenceComponent
-          structureDefinition={mockStructureDefinition}
-          canEdit={true}
-          required={true}
-          helperText="Select a reference"
-          error={false}
-          showAddAttributeButton={false}
-          addTitle=""
-        />
+          <ReferenceComponent
+            structureDefinition={mockStructureDefinition}
+            canEdit={true}
+            required={true}
+            helperText="Select a reference"
+            error={false}
+            showAddAttributeButton={false}
+            addTitle=""
+          />
         </FormikProvider>
       </ResourceContext.Provider>
     );
@@ -265,15 +263,15 @@ describe("ReferenceComponent", () => {
     render(
       <ResourceContext.Provider value={mockResourceProfiles}>
         <FormikProvider value={mockFormik}>
-        <ReferenceComponent
-          structureDefinition={mockStructureDefinition}
-          canEdit={true}
-          required={false}
-          helperText="Select a reference"
-          error={false}
-          showAddAttributeButton={true}
-          addTitle="Reference"
-        />
+          <ReferenceComponent
+            structureDefinition={mockStructureDefinition}
+            canEdit={true}
+            required={false}
+            helperText="Select a reference"
+            error={false}
+            showAddAttributeButton={true}
+            addTitle="Reference"
+          />
         </FormikProvider>
       </ResourceContext.Provider>
     );
@@ -287,15 +285,15 @@ describe("ReferenceComponent", () => {
     render(
       <ResourceContext.Provider value={mockResourceProfiles}>
         <FormikProvider value={mockFormik}>
-        <ReferenceComponent
-          structureDefinition={mockStructureDefinitionNoType}
-          canEdit={true}
-          required={false}
-          helperText="Select a reference"
-          error={false}
-          showAddAttributeButton={false}
-          addTitle=""
-        />
+          <ReferenceComponent
+            structureDefinition={mockStructureDefinitionNoType}
+            canEdit={true}
+            required={false}
+            helperText="Select a reference"
+            error={false}
+            showAddAttributeButton={false}
+            addTitle=""
+          />
         </FormikProvider>
       </ResourceContext.Provider>
     );
