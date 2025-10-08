@@ -3599,7 +3599,7 @@ describe("Measure List with MeasureSearch enabled", () => {
     expect(updatedButton).toBeEnabled();
   });
 
-  it("should sort in order when column is clicked first", async () => {
+  it("should sort in order - ascending, descending, and clear - when column is clicked", async () => {
     // Reset mock functions to ensure clean state
     setCurrentSortMock.mockReset();
     setCurrentDirectionMock.mockReset();
@@ -3644,128 +3644,32 @@ describe("Measure List with MeasureSearch enabled", () => {
       name: "Version",
     });
     expect(versionButton).toBeEnabled();
+    // sort ascending
+    fireEvent.click(versionButton);
 
+    const tableBody = screen.getByTestId("measure-list-tbl");
+    await waitFor(() => {
+      const firstRow = within(tableBody).getAllByRole("row")[1];
+      const firstCell = within(firstRow).getAllByRole("cell")[1];
+      expect(firstCell).toHaveTextContent("new measure - A");
+    });
+
+    // sort descending
     fireEvent.click(versionButton);
 
     await waitFor(() => {
-      expect(setCurrentSortMock).toHaveBeenCalledWith("version");
-      expect(setCurrentDirectionMock).toHaveBeenCalledWith("ASC");
-      expect(handlePageChangeMock).toHaveBeenCalledWith(null, 1);
+      const firstRow = within(tableBody).getAllByRole("row")[1];
+      const firstCell = within(firstRow).getAllByRole("cell")[1];
+      expect(firstCell).toHaveTextContent("versioned measure - C");
     });
-  });
 
-  it("should sort in order when column is clicked second", async () => {
-    // Reset mock functions to ensure clean state
-    setCurrentSortMock.mockReset();
-    setCurrentDirectionMock.mockReset();
-    handlePageChangeMock.mockReset();
-
-    render(
-      <ServiceContext.Provider value={serviceConfig}>
-        <MeasureList
-          measureList={measures}
-          setMeasureList={setMeasureListMock}
-          setTotalPages={setTotalPagesMock}
-          setTotalItems={setTotalItemsMock}
-          setVisibleItems={setVisibleItemsMock}
-          setOffset={setOffsetMock}
-          setLoading={setLoadingMock}
-          activeTab={0}
-          searchCriteria={null}
-          setSearchCriteria={setSearchCriteriaMock}
-          currentLimit={10}
-          currentPage={0}
-          setErrMsg={setErrMsgMock}
-          // Mock the current sort state as if the column has been clicked once
-          currentSort="version"
-          currentDirection="ASC"
-          setCurrentSort={setCurrentSortMock}
-          setCurrentDirection={setCurrentDirectionMock}
-          handlePageChange={handlePageChangeMock}
-          search=""
-          // Toast props
-          toastOpen={false}
-          toastMessage=""
-          toastType="danger"
-          setToastOpen={setToastOpenMock}
-          setToastMessage={setToastMessageMock}
-          setToastType={setToastTypeMock}
-          onToastClose={onToastCloseMock}
-          handleToast={handleToastMock}
-        />
-      </ServiceContext.Provider>
-    );
-
-    const versionButton = screen.getByRole("button", {
-      name: "Version",
-    });
-    expect(versionButton).toBeEnabled();
-
+    // sort clear
     fireEvent.click(versionButton);
 
     await waitFor(() => {
-      expect(setCurrentSortMock).toHaveBeenCalledWith("version");
-      expect(setCurrentDirectionMock).toHaveBeenCalledWith("DESC");
-      expect(handlePageChangeMock).toHaveBeenCalledWith(null, 1);
-    });
-  });
-
-  it("should sort in order when column is clicked third", async () => {
-    // Reset mock functions to ensure clean state
-    setCurrentSortMock.mockReset();
-    setCurrentDirectionMock.mockReset();
-    handlePageChangeMock.mockReset();
-
-    // Set up the component with currentSort and currentDirection as if the column has been clicked twice
-    render(
-      <ServiceContext.Provider value={serviceConfig}>
-        <MeasureList
-          measureList={measures}
-          setMeasureList={setMeasureListMock}
-          setTotalPages={setTotalPagesMock}
-          setTotalItems={setTotalItemsMock}
-          setVisibleItems={setVisibleItemsMock}
-          setOffset={setOffsetMock}
-          setLoading={setLoadingMock}
-          activeTab={0}
-          searchCriteria={null}
-          setSearchCriteria={setSearchCriteriaMock}
-          currentLimit={10}
-          currentPage={0}
-          setErrMsg={setErrMsgMock}
-          // Mock the current sort state as if the column has been clicked twice
-          currentSort="version"
-          currentDirection="DESC"
-          setCurrentSort={setCurrentSortMock}
-          setCurrentDirection={setCurrentDirectionMock}
-          handlePageChange={handlePageChangeMock}
-          search=""
-          // Toast props
-          toastOpen={false}
-          toastMessage=""
-          toastType="danger"
-          setToastOpen={setToastOpenMock}
-          setToastMessage={setToastMessageMock}
-          setToastType={setToastTypeMock}
-          onToastClose={onToastCloseMock}
-          handleToast={handleToastMock}
-        />
-      </ServiceContext.Provider>
-    );
-
-    const versionButton = screen.getByRole("button", {
-      name: "Version",
-    });
-    expect(versionButton).toBeEnabled();
-
-    // Simulate clicking the already sorted column a third time
-    fireEvent.click(versionButton);
-
-    // Now verify the sort is cleared
-    await waitFor(() => {
-      expect(setCurrentSortMock).toHaveBeenCalledWith("");
-      expect(setCurrentDirectionMock).toHaveBeenCalledWith("");
-      expect(handlePageChangeMock).toHaveBeenCalledWith(null, 1);
+      const firstRow = within(tableBody).getAllByRole("row")[1];
+      const firstCell = within(firstRow).getAllByRole("cell")[1];
+      expect(firstCell).toHaveTextContent("new measure - A");
     });
   });
 });

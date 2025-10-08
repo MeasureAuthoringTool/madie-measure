@@ -25,7 +25,10 @@ import {
   getSortedRowModel,
   SortingState,
 } from "@tanstack/react-table";
-
+import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore";
+import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
+import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import "../../editMeasure/testCases/components/testCaseLanding/common/TestCase.scss";
 import InvalidTestCaseDialog from "../../common/invalidTestCaseDialog/InvalidTestCaseDialog";
 import useMeasureServiceApi from "../../../api/useMeasureServiceApi";
 import { checkUserCanEdit, useFeatureFlags } from "@madie/madie-util";
@@ -358,6 +361,11 @@ export default function MeasureList(props: {
         </>
       ),
       accessorKey: "measureMetaData.draft",
+      sortingFn: (rowA, rowB) =>
+        customSort(
+          rowA.original.measureMetaData?.draft?.toString(),
+          rowB.original.measureMetaData?.draft?.toString()
+        ),
     },
     {
       header: "Model",
@@ -385,6 +393,11 @@ export default function MeasureList(props: {
               </div>
             ),
             accessorKey: "measureSet.acls",
+            sortingFn: (rowA, rowB) =>
+              customSort(
+                rowA.original.measureSet?.acls,
+                rowB.original.measureSet?.acls
+              ),
           },
         ]
       : []),
@@ -406,6 +419,11 @@ export default function MeasureList(props: {
         />
       ),
       accessorKey: "measureSet.cmsId",
+      sortingFn: (rowA, rowB) =>
+        customSort(
+          rowA.original.measureSet?.cmsId?.toString(),
+          rowB.original.measureSet?.cmsId?.toString()
+        ),
     },
     {
       header: "Updated",
@@ -706,28 +724,6 @@ export default function MeasureList(props: {
     props.setToastType(toastType);
     props.setToastMessage(toastMessage);
     props.setToastOpen(toastOpen);
-  };
-
-  const handleSort = async (sort: string) => {
-    props.setLoading(true);
-    abortController.current = new AbortController();
-    let sortChange = "lastModifiedAt";
-    let directionChange = "DESC";
-    if (sort === props.currentSort) {
-      if (props.currentDirection === "ASC") {
-        sortChange = sort;
-        directionChange = "DESC";
-      } else if (props.currentDirection === "DESC") {
-        sortChange = "";
-        directionChange = "";
-      }
-    } else {
-      sortChange = sort;
-      directionChange = "ASC";
-    }
-    props.setCurrentSort(sortChange);
-    props.setCurrentDirection(directionChange);
-    props.handlePageChange(null, 1);
   };
 
   const handleTransferDialogClose = ({
@@ -1070,7 +1066,8 @@ export default function MeasureList(props: {
       <table
         tw="min-w-full"
         data-testid="measure-list-tbl"
-        className="ml-table"
+        className="tcl-table"
+        id="testCaseListTable"
         style={{
           borderTop: "solid 1px #8c8c8c",
           borderSpacing: "0 2em !important",
@@ -1104,7 +1101,7 @@ export default function MeasureList(props: {
                           !featureFlags?.MeasureSearch ||
                           !header.column.getCanSort()
                         }
-                        onClick={() => handleSort(header.id.replace("_", "."))}
+                        onClick={header.column.getToggleSortingHandler()}
                         title={
                           header.column.getCanSort()
                             ? header.column.getNextSortingOrder() === "asc"
@@ -1115,21 +1112,21 @@ export default function MeasureList(props: {
                             : undefined
                         }
                       >
-                        {/*TODO Sorting functionality is disabled as per MAT-7532, Will be enabled in future */}
-                        {/*<span className="arrowDisplay">*/}
-                        {/*  {header.column.getCanSort() &&*/}
-                        {/*    isHovered &&*/}
-                        {/*    !header.column.getIsSorted() && <UnfoldMoreIcon />}*/}
-
-                        {/*  {{*/}
-                        {/*    asc: <KeyboardArrowUpIcon />,*/}
-                        {/*    desc: <KeyboardArrowDownIcon />,*/}
-                        {/*  }[header.column.getIsSorted() as string] ?? null}*/}
-                        {/*</span>*/}
                         {flexRender(
                           header.column.columnDef.header,
                           header.getContext()
                         )}
+                        {/*TODO Sorting functionality is disabled as per MAT-7532, Will be enabled in future: enabled as of MAT-5196 */}
+                        <span className="arrowDisplay">
+                          {header.column.getCanSort() &&
+                            isHovered &&
+                            !header.column.getIsSorted() && <UnfoldMoreIcon />}
+
+                          {{
+                            asc: <KeyboardArrowUpIcon />,
+                            desc: <KeyboardArrowDownIcon />,
+                          }[header.column.getIsSorted() as string] ?? null}
+                        </span>
                       </button>
                     ) : (
                       flexRender(
