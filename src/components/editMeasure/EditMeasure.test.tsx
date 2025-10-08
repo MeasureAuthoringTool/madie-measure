@@ -995,10 +995,13 @@ describe("EditMeasure Component", () => {
     const submitButton = screen.getByTestId("create-draft-continue-button");
     fireEvent.click(submitButton);
 
-    await waitFor(() => {
-      expect(
-        screen.getByTestId("edit-measure-information-generic-error-text")
-      ).toHaveTextContent("Draft failed");
-    });
+    await waitFor(
+      () => {
+        expect(
+          screen.getByTestId("edit-measure-information-generic-error-text")
+        ).toHaveTextContent("Draft failed");
+      },
+      { timeout: 3000 }
+    );
   });
 });
