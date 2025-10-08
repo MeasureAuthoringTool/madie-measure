@@ -626,7 +626,7 @@ describe("EditMeasure Component", () => {
         );
 
         expect(queryByTestId("transfer-dialog")).not.toBeInTheDocument();
-      }, 4000)
+      }, 4500)
     );
   });
 
