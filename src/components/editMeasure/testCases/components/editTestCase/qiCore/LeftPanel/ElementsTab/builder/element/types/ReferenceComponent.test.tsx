@@ -10,6 +10,8 @@ import ReferenceComponent from "./ReferenceComponent";
 import ResourceContext from "../../ResourceContext";
 import { useQiCoreResource } from "../../../../../../../../util/QiCorePatientProvider";
 import userEvent from "@testing-library/user-event";
+import { FormikProvider, FormikContextType } from "formik";
+import { getNestedProperty } from "../../../../../../../../api/fhirDefinitionServiceUtilities";
 
 // Mock the custom hook
 jest.mock("../../../../../../../../util/QiCorePatientProvider", () => ({
@@ -24,18 +26,51 @@ const mockFormikObj = {
   errors: {},
   values: {},
   isSubmitting: false,
-  setFieldValue: undefined,
+  setFieldValue: jest.fn(),
+  setFieldTouched: jest.fn(),
   handleChange: jest.fn(),
+
 };
 
-jest.mock("formik", () => ({
-  useFormikContext: () => {
-    return mockFormikObj;
+const mockSetFieldValue = jest.fn();
+
+
+const adverseEventValues = {
+  AdverseEvent: {
+    "id": "7887d9e0-b2b6-455c-bd12-1b139390c824",
+    "resourceType": "AdverseEvent",
+    "meta": {
+        "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-adverseevent"
+        ]
+    },
+    "actuality": "",
+    "event": "",
+    "subject": "",
+    "recorder": {
+        "reference": "PractitionerRole/edf97cbf-803b-4035-8770-157bcc0cdf74"
+    }
+}
+}
+//@ts-ignore
+const mockFormik: FormikContextType<any> = {
+  values: {
+    adverseEventValues,
   },
-  getIn: (context: Record<string, unknown>, fieldName: string) => {
-    return context[fieldName];
+  touched: {},
+  getFieldProps: (label) => {
+    const name = getNestedProperty(adverseEventValues, label);
+    return {
+      value: name,
+      name,
+      onChange: jest.fn(),
+      onBlur: jest.fn(),
+    };
   },
-}));
+  handleChange: () => {},
+  setFieldValue: mockSetFieldValue,
+  setFieldTouched: jest.fn(),
+};
 
 const mockResourceProfiles = [
   {
@@ -73,6 +108,7 @@ describe("ReferenceComponent", () => {
     mockFormikObj.values = {};
     mockFormikObj.isSubmitting = false;
     mockFormikObj.setFieldValue = jest.fn();
+    mockFormikObj.setFieldValue = jest.fn();
 
     const mockUuid = require("uuid") as { v4: jest.Mock<string, []> };
     mockUuid.v4.mockImplementationOnce(() => "uuid-1");
@@ -84,6 +120,7 @@ describe("ReferenceComponent", () => {
   it("renders reference type dropdown with correct options", () => {
     render(
       <ResourceContext.Provider value={mockResourceProfiles}>
+        <FormikProvider value={mockFormik}>
         <ReferenceComponent
           structureDefinition={mockStructureDefinition}
           canEdit={true}
@@ -93,6 +130,7 @@ describe("ReferenceComponent", () => {
           showAddAttributeButton={false}
           addTitle=""
         />
+        </FormikProvider>
       </ResourceContext.Provider>
     );
 
@@ -107,6 +145,7 @@ describe("ReferenceComponent", () => {
   it("shows second dropdown when reference type is selected when useFormikContext is defined", async () => {
     render(
       <ResourceContext.Provider value={mockResourceProfiles}>
+        <FormikProvider value={mockFormik}>
         <ReferenceComponent
           structureDefinition={mockStructureDefinition}
           canEdit={true}
@@ -116,6 +155,7 @@ describe("ReferenceComponent", () => {
           showAddAttributeButton={false}
           addTitle=""
         />
+        </FormikProvider>
       </ResourceContext.Provider>
     );
 
@@ -153,8 +193,7 @@ describe("ReferenceComponent", () => {
     userEvent.click(referenceOptionsList[0]);
     // expect the option to be selected.
     await waitFor(() => {
-      // expect(referenceSelect).toHaveValue("Patient/patient-1");
-      expect(referenceOptionsList[0]).toHaveAttribute("aria-selected", "true");
+      expect(mockFormik.setFieldValue).toHaveBeenCalled();
     });
   });
 
@@ -169,6 +208,7 @@ describe("ReferenceComponent", () => {
 
     render(
       <ResourceContext.Provider value={mockResourceProfiles}>
+        <FormikProvider value={mockFormik}>
         <ReferenceComponent
           structureDefinition={mockStructureDefinition}
           canEdit={true}
@@ -178,6 +218,7 @@ describe("ReferenceComponent", () => {
           showAddAttributeButton={false}
           addTitle=""
         />
+        </FormikProvider>
       </ResourceContext.Provider>
     );
 
@@ -214,10 +255,16 @@ describe("ReferenceComponent", () => {
       (option) => option.textContent
     );
     expect(referenceOptionTexts).toContain("ID Not Present (Add New)");
+    userEvent.click(referenceOptionsList[0]);
+    // expect the option to be selected.
+    await waitFor(() => {
+      expect(mockFormik.setFieldValue).toHaveBeenCalled();
+    });
   });
   it("Should render with add title button", () => {
     render(
       <ResourceContext.Provider value={mockResourceProfiles}>
+        <FormikProvider value={mockFormik}>
         <ReferenceComponent
           structureDefinition={mockStructureDefinition}
           canEdit={true}
@@ -227,6 +274,7 @@ describe("ReferenceComponent", () => {
           showAddAttributeButton={true}
           addTitle="Reference"
         />
+        </FormikProvider>
       </ResourceContext.Provider>
     );
     expect(screen.getByText("Add Reference")).toBeInTheDocument();
@@ -238,6 +286,7 @@ describe("ReferenceComponent", () => {
     };
     render(
       <ResourceContext.Provider value={mockResourceProfiles}>
+        <FormikProvider value={mockFormik}>
         <ReferenceComponent
           structureDefinition={mockStructureDefinitionNoType}
           canEdit={true}
@@ -247,6 +296,7 @@ describe("ReferenceComponent", () => {
           showAddAttributeButton={false}
           addTitle=""
         />
+        </FormikProvider>
       </ResourceContext.Provider>
     );
     expect(screen.getByLabelText("Reference Type")).toBeInTheDocument();

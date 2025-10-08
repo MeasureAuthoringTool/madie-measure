@@ -31,6 +31,7 @@ import "./Builder.scss";
 import {
   getTopLevelElements,
   getLastPart,
+  buildMadieResourceFromResourceIdentifier,
 } from "../../../../../../api/fhirDefinitionServiceUtilities";
 import { ResourceContextProvider } from "./ResourceContext";
 
@@ -159,19 +160,8 @@ const Builder = ({
           <ResourceList
             resourceIdentifiers={resources}
             onClick={async (resourceIdentifier: ResourceIdentifier) => {
-              const id = uuidv4();
-              const newEntry = {
-                fullUrl: `https://madie.cms.gov/${resourceIdentifier.type}/${id}`,
-                resource: {
-                  id,
-                  resourceType: resourceIdentifier.type,
-                },
-              };
-              if (!_.isEmpty(resourceIdentifier.profile)) {
-                newEntry.resource["meta"] = {
-                  profile: [resourceIdentifier.profile],
-                };
-              }
+              const newEntry =
+                buildMadieResourceFromResourceIdentifier(resourceIdentifier);
               await fhirDefinitionsService.current
                 .getResourceTree(resourceIdentifier.id)
                 .then((resourceTree) => {

@@ -13,6 +13,7 @@ export enum ResourceActionType {
   ADD_BUNDLE_ENTRY = "AddBundleEntry",
   REMOVE_BUNDLE_ENTRY = "RemoveBundleEntry",
   MODIFY_BUNDLE_ENTRY = "ModifyBundleEntry",
+  ADD_RESOURCE_BY_REFERENCE = "ADD_RESOURCE_BY_REFERENCE",
 }
 
 export interface QiCoreResourceAction {
@@ -75,6 +76,25 @@ export function resourceReducer(state, action: QiCoreResourceAction) {
       }
       return { ...state, bundle };
     }
+    // In this case, we want to not only do MODIFY_BUNDLE_ENTRY logic, but also append a new resource to the entrylist.
+    // We do this in the instance that a user wants to add a reference to a resource that doesn't exist yet. So we build it.
+    case ResourceActionType.ADD_RESOURCE_BY_REFERENCE: {
+      const { bundleEntry, add_new_resource } = action.payload;
+      let bundle = _.isNil(state.bundle)
+        ? { id: uuidv4(), ...INITIAL_BUNDLE }
+        : state.bundle;
+      if (bundle.entry) {
+        // we're going to get an action here that has the resource profile
+        bundle.entry = bundle.entry.map((entry) => {
+          if (entry?.resource.id === bundleEntry.resource?.id) {
+            return bundleEntry;
+          }
+          return entry;
+        });
+      }
+      bundle.entry.push(add_new_resource);
+      return { ...state, bundle };
+    }
     default: {
       throw new Error(`Unhandled action type: ${action.type}`);
     }
@@ -86,7 +106,6 @@ function QiCoreResourceProvider({ children }) {
     resource: null,
     bundle: null,
   });
-
   const value = { state, dispatch };
   return (
     <QiCoreResourceContext.Provider value={value}>

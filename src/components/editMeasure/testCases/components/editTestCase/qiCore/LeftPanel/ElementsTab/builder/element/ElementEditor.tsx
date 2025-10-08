@@ -260,10 +260,19 @@ const ElementEditor = ({
       // need type to access formik values, as well as append to to the resource object so it is not lost.
       bundleEntry.resource = formikCleanedValues[type];
       bundleEntry.resource.resourceType = type;
-      dispatch({
-        type: ResourceActionType.MODIFY_BUNDLE_ENTRY,
-        payload: bundleEntry,
-      });
+      // @ts-ignore
+      const { add_new_resource } = formik.values;
+      if (add_new_resource) {
+        dispatch({
+          type: ResourceActionType.ADD_RESOURCE_BY_REFERENCE,
+          payload: { bundleEntry, add_new_resource },
+        });
+      } else {
+        dispatch({
+          type: ResourceActionType.MODIFY_BUNDLE_ENTRY,
+          payload: bundleEntry,
+        });
+      }
       setToastType("success");
       setToastMessage(
         `${type} has successfully been applied to the test case. To save your changes please click 'Save'.`

@@ -5,6 +5,7 @@ import { MenuItem } from "@mui/material";
 import { useQiCoreResource } from "../../../../../../../../util/QiCorePatientProvider";
 import AddElementButton from "../../../../../../../common/AddElementButton";
 import { useFormikContext } from "formik";
+import { buildMadieResourceFromResourceIdentifier } from "../../../../../../../../api/fhirDefinitionServiceUtilities";
 
 export default function ReferenceComponent({
   structureDefinition,
@@ -43,7 +44,9 @@ export default function ReferenceComponent({
     return selectedReferenceType === entry.resource.resourceType;
   });
 
-  const emptyOptions = [{ label: "ID Not Present (Add New)", value: "" }]; // If no resources of that type exist, we need to show a message in the dropdown
+  const emptyOptions = [
+    { label: "ID Not Present (Add New)", value: "add_new_id" },
+  ]; // If no resources of that type exist, we need to show a message in the dropdown
   const selectableResoureOptions = resourcesOfSpecifiedType.map((res) => ({
     label: `${selectedReferenceType}/${res.resource.id}`,
     value: `${selectedReferenceType}/${res.resource.id}`,
@@ -56,7 +59,6 @@ export default function ReferenceComponent({
   const [selectedReferenceId, setSelectedReferenceId] = useState<string>(
     value?.reference || ""
   ); // will need to default to something if editing existing element
-
   return (
     <>
       {/* Select a reference type from all available profiles */}
@@ -106,10 +108,9 @@ export default function ReferenceComponent({
                 (opt) => opt.value === selectedReferenceType
               )?.label
             }`}
-            value={selectedReferenceId}
+            id={"reference-select"}
             disabled={!canEdit}
             required={required}
-            id={"reference-select"}
             name={`${label}.reference`}
             data-testid={"reference-select"}
             inputProps={{
@@ -132,9 +133,38 @@ export default function ReferenceComponent({
               value: "",
             }}
             onChange={(e) => {
-              formikContext.handleChange(e);
-              setSelectedReferenceId(e.target.value);
+              if (e.target.value === "add_new_id") {
+                const selectedResourceIdentifier = allResourceProfiles.find(
+                  (r) => r.type === selectedReferenceType
+                );
+                const newMadieResource =
+                  buildMadieResourceFromResourceIdentifier(
+                    selectedResourceIdentifier
+                  );
+                formikContext.setFieldValue(
+                  "add_new_resource",
+                  newMadieResource
+                );
+                formikContext.setFieldValue(
+                  `${label}.reference`,
+                  `${selectedReferenceType}/${newMadieResource.resource.id}`
+                );
+                setSelectedReferenceId(
+                  `${selectedReferenceType}/${newMadieResource.resource.id}`
+                );
+              } else {
+                formikContext.setFieldValue(label, {
+                  reference: e.target.value,
+                });
+                setSelectedReferenceId(e.target.value);
+              }
             }}
+            renderValue={(selected) => {
+              // Find the corresponding label for the selected value
+              const item = finalOptions.find((item) => item.value === selected);
+              return item?.label || "Select";
+            }}
+            value={selectedReferenceId}
             helperText={helperText}
             error={error}
           />
