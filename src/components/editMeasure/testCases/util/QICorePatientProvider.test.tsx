@@ -145,15 +145,22 @@ describe("QiCoreResourceContext", () => {
     expect(bundleDisplay.textContent).toContain("res-2");
   });
 
-  it("Throws an error.", () => {
+  test("throws error on unhandled action type", () => {
+    const consoleError = jest
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
+
+    render(
+      <QiCoreResourceProvider>
+        <TestComponent />
+      </QiCoreResourceProvider>
+    );
     expect(() => {
-      render(
-        <QiCoreResourceProvider>
-          <TestComponent />
-        </QiCoreResourceProvider>
-      );
-      userEvent.click(screen.getByText("Throw Error"));
-      expect(bundleDisplay.textContent).toContain("res-2");
-    });
+      act(() => {
+        screen.getByText("Throw Error").click();
+      });
+    }).toThrow("Unhandled action type: IDK");
+
+    consoleError.mockRestore();
   });
 });
