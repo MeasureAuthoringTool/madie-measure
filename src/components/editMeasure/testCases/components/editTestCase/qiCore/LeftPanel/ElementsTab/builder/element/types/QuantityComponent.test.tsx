@@ -94,11 +94,14 @@ const simpleQuantityStructureDefinition = {
   ],
 };
 
-const renderWithFormik = (
+const renderWithFormik = ({
   label = "Observation.quantity",
   structureDefinition = quantityStructureDefinition,
-  canEdit = true
-) =>
+  canEdit = true,
+  initialValues = {
+    Observation: { quantity: { value: 10, unit: "mg", comparator: ">" } },
+  },
+} = {}) =>
   render(
     <ExecutionContextProvider
       value={{
@@ -111,12 +114,7 @@ const renderWithFormik = (
         contextFailure: false,
       }}
     >
-      <Formik
-        initialValues={{
-          Observation: { quantity: { value: 10, unit: "mg", comparator: ">" } },
-        }}
-        onSubmit={jest.fn()}
-      >
+      <Formik initialValues={initialValues} onSubmit={jest.fn()}>
         <QuantityComponent
           label={label}
           canEdit={canEdit}
@@ -153,7 +151,10 @@ describe("QuantityComponent", () => {
   });
 
   test("hides comparator field for SimpleQuantity structure definition because SimpleQuantity does not allow a comparator", async () => {
-    renderWithFormik("Observation.quantity", simpleQuantityStructureDefinition);
+    renderWithFormik({
+      label: "Observation.quantity",
+      structureDefinition: simpleQuantityStructureDefinition,
+    });
     expect(screen.queryByLabelText("Comparator")).not.toBeInTheDocument();
   });
 
@@ -161,15 +162,67 @@ describe("QuantityComponent", () => {
     renderWithFormik();
 
     const comparatorField = await screen.findByLabelText("Comparator");
+    const comparatorSelectInput = screen.getByTestId(
+      "code-selector-input-Comparator"
+    );
+
     expect(comparatorField).toBeInTheDocument();
+    expect(comparatorSelectInput).toHaveValue(">");
 
     userEvent.click(comparatorField);
-
     const lessOrEqualOption = await screen.findByText("Less or Equal to");
     userEvent.click(lessOrEqualOption);
 
     await waitFor(() => {
-      expect(comparatorField).toHaveTextContent("Less or Equal to");
+      expect(comparatorSelectInput).toHaveValue("<=");
+    });
+  });
+
+  test("sets comparator when field object is initially empty", async () => {
+    renderWithFormik({ initialValues: { Observation: {} } });
+
+    const comparatorField = await screen.findByLabelText("Comparator");
+    const comparatorSelectInput = screen.getByTestId(
+      "code-selector-input-Comparator"
+    );
+
+    expect(comparatorSelectInput).toHaveValue("");
+
+    userEvent.click(comparatorField);
+    const greaterThanOption = await screen.findByText("Greater than");
+    userEvent.click(greaterThanOption);
+
+    await waitFor(() => {
+      expect(comparatorSelectInput).toHaveValue(">");
+    });
+  });
+
+  test("sets value when field object is initially empty", async () => {
+    renderWithFormik({ initialValues: { Observation: {} } });
+
+    const valueInput = screen.getByTestId(
+      "decimal-input-field-Value"
+    ) as HTMLInputElement;
+    expect(valueInput.value).toBe("");
+    userEvent.clear(valueInput);
+    userEvent.type(valueInput, "42");
+
+    await waitFor(() => {
+      expect(valueInput.value).toBe("42");
+    });
+  });
+
+  test("sets unit when field object is initially empty", async () => {
+    renderWithFormik({ initialValues: { Observation: {} } });
+
+    const unitInput = (await screen.findByTestId(
+      "unit-input-input"
+    )) as HTMLInputElement;
+    expect(unitInput.value).toBe("");
+    fireEvent.change(unitInput, { target: { value: "kg" } });
+
+    await waitFor(() => {
+      expect(unitInput.value).toBe("kg");
     });
   });
 
@@ -204,7 +257,11 @@ describe("QuantityComponent", () => {
   });
 
   test("displays validation error for invalid unit 'z'", async () => {
-    renderWithFormik("Observation.quantity", quantityStructureDefinition, true);
+    renderWithFormik({
+      label: "Observation.quantity",
+      structureDefinition: quantityStructureDefinition,
+      canEdit: true,
+    });
 
     const unitInput = screen.getByTestId("unit-input-input");
     await userEvent.clear(unitInput);
@@ -218,7 +275,11 @@ describe("QuantityComponent", () => {
   });
 
   test("does not display validation error for valid unit 'mg'", async () => {
-    renderWithFormik("Observation.quantity", quantityStructureDefinition, true);
+    renderWithFormik({
+      label: "Observation.quantity",
+      structureDefinition: quantityStructureDefinition,
+      canEdit: true,
+    });
 
     const unitInput = screen.getByTestId("unit-input-input");
     await userEvent.clear(unitInput);
@@ -231,11 +292,11 @@ describe("QuantityComponent", () => {
   });
 
   test("all fields are read-only when canEdit is false", async () => {
-    renderWithFormik(
-      "Observation.quantity",
-      quantityStructureDefinition,
-      false
-    );
+    renderWithFormik({
+      label: "Observation.quantity",
+      structureDefinition: quantityStructureDefinition,
+      canEdit: false,
+    });
 
     const comparatorField = await screen.findByTestId(
       "code-selector-Comparator"
