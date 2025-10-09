@@ -16,10 +16,10 @@ interface shiftDatesDialogProps {
   canEdit?: boolean;
   testCases?: TestCase[];
   measure: Measure;
-  setWarnings: Function;
   setToastOpen: Function;
   setToastType: Function;
   setToastMessage: Function;
+  setShiftTestCaseDatesWarnings: Function;
 }
 
 const ShiftDatesDialog = ({
@@ -28,10 +28,10 @@ const ShiftDatesDialog = ({
   canEdit,
   testCases,
   measure,
-  setWarnings,
   setToastOpen,
   setToastType,
   setToastMessage,
+  setShiftTestCaseDatesWarnings,
 }: shiftDatesDialogProps) => {
   const featureFlags = useFeatureFlags();
   const testCaseService = useRef(useTestCaseServiceApi());
@@ -60,7 +60,10 @@ const ShiftDatesDialog = ({
             setToastType("success");
             setToastMessage(`All Test Case dates successfully shifted.`);
           } else {
-            setWarnings((prevState) => [...prevState, ...response]);
+            setShiftTestCaseDatesWarnings((prevState) => [
+              ...prevState,
+              ...response,
+            ]);
           }
         })
         .catch((err) => {
@@ -81,7 +84,10 @@ const ShiftDatesDialog = ({
             setToastType("success");
             setToastMessage(`All Test Case dates successfully shifted.`);
           } else {
-            setWarnings((prevState) => [...prevState, ...response]);
+            setShiftTestCaseDatesWarnings((prevState) => [
+              ...prevState,
+              ...response,
+            ]);
           }
         })
         .catch((err) => {

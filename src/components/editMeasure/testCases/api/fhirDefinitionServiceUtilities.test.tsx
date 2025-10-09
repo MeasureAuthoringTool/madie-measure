@@ -29,6 +29,7 @@ import {
   formatChoiceType,
   modifySliceNameForReadability,
   extractNameWithoutIndex,
+  filterUnusedExtensionsFromElements,
 } from "./fhirDefinitionServiceUtilities";
 
 describe("FhirDefinitionServiceUtilities", () => {
@@ -743,5 +744,134 @@ describe("extractNameWithoutIndex", () => {
     const emptyElement = { id: "" } as ElementDefinition;
     const result = extractNameWithoutIndex(emptyElement);
     expect(result).toBe("");
+  });
+});
+
+describe("filterUnusedExtensionsFromElements", () => {
+  const allDisplayedElements = [
+    {
+      id: "Patient.extension:race",
+      extension: [
+        {
+          url: "http://hl7.org/fhir/us/core/StructureDefinition/uscdi-requirement",
+          valueBoolean: true,
+        },
+        {
+          url: "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-keyelement",
+          valueBoolean: true,
+        },
+      ],
+      path: "Patient.extension",
+      sliceName: "race",
+      type: [
+        {
+          code: "Extension",
+          profile: [
+            "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race",
+          ],
+        },
+      ],
+    },
+    {
+      id: "Patient.extension:ethnicity",
+      extension: [
+        {
+          url: "http://hl7.org/fhir/us/core/StructureDefinition/uscdi-requirement",
+          valueBoolean: true,
+        },
+        {
+          url: "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-keyelement",
+          valueBoolean: true,
+        },
+      ],
+      path: "Patient.extension",
+      type: [
+        {
+          code: "Extension",
+          profile: [
+            "http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethnicity",
+          ],
+        },
+      ],
+      mustSupport: false,
+      isModifier: false,
+    },
+    {
+      id: "Patient.extension:tribalAffiliation",
+      extension: [
+        {
+          url: "http://hl7.org/fhir/us/core/StructureDefinition/uscdi-requirement",
+          valueBoolean: true,
+        },
+        {
+          url: "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-keyelement",
+          valueBoolean: true,
+        },
+      ],
+      path: "Patient.extension",
+      sliceName: "tribalAffiliation",
+      type: [
+        {
+          code: "Extension",
+          profile: [
+            "http://hl7.org/fhir/us/core/StructureDefinition/us-core-tribal-affiliation",
+          ],
+        },
+      ],
+    },
+  ];
+  it("should filter out unused extensions", () => {
+    const selectedResource = {
+      bundleEntry: {
+        resource: {
+          extension: [
+            {
+              url: "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race",
+              extension: [],
+            },
+            {
+              url: "some-other-extension",
+              extension: [],
+            },
+          ],
+        },
+      },
+      definition: {
+        snapshot: {
+          element: [
+            {
+              id: "Patient.extension:ethnicity",
+              extension: [
+                {
+                  url: "http://hl7.org/fhir/us/core/StructureDefinition/uscdi-requirement",
+                  valueBoolean: true,
+                },
+                {
+                  url: "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-keyelement",
+                  valueBoolean: true,
+                },
+              ],
+              path: "Patient.extension",
+              sliceName: "ethnicity",
+              min: 0,
+              type: [
+                {
+                  code: "Extension",
+                  profile: [
+                    "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race",
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      },
+    };
+    // Result should
+    const result = filterUnusedExtensionsFromElements(
+      selectedResource,
+      allDisplayedElements
+    );
+    expect(result.length).toBe(1);
   });
 });

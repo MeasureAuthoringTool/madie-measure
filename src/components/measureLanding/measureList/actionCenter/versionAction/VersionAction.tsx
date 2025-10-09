@@ -2,21 +2,27 @@ import React, { useCallback, useEffect, useState } from "react";
 import { IconButton } from "@mui/material";
 import Tooltip from "@mui/material/Tooltip";
 import { Measure, Model } from "@madie/madie-models";
-import { useOktaTokens } from "@madie/madie-util";
 import AccountTreeOutlinedIcon from "@mui/icons-material/AccountTreeOutlined";
+import { useFeatureFlags } from "@madie/madie-util";
 
 interface PropTypes {
   measures: Measure[];
   onClick: () => void;
   canEdit: boolean;
 }
-const NOTHING_SELECTED = "Select measure to version";
+export const NOTHING_SELECTED = "Select measure to version";
 export const VERSION_MEASURE = "Version measure";
+const UNABLE_TO_VERSION = "Unable to version measure.";
+export const MEASURE_LOCKED_MESSAGE =
+  UNABLE_TO_VERSION + " Locked while being edited by";
+export const TEST_CASES_LOCKED_MESSAGE =
+  UNABLE_TO_VERSION + " One or more test cases are locked by another user.";
 
 export default function VersionAction(props: PropTypes) {
   const { measures, canEdit, onClick } = props;
   const [disableVersionBtn, setDisableVersionBtn] = useState(true);
   const [tooltipMessage, setTooltipMessage] = useState(NOTHING_SELECTED);
+  const featureFlags = useFeatureFlags();
 
   const validateVersionActionState = useCallback(() => {
     // set button state to disabled by default
@@ -28,8 +34,26 @@ export default function VersionAction(props: PropTypes) {
       canEdit
       /* check if there is not already a Version for that measure set*/
     ) {
-      setDisableVersionBtn(false);
-      setTooltipMessage(VERSION_MEASURE);
+      if (featureFlags.Locking) {
+        if (
+          measures[0].measureLock?.lockedBy &&
+          !measures[0].hasLockedTestCases
+        ) {
+          setDisableVersionBtn(true);
+          setTooltipMessage(
+            `${MEASURE_LOCKED_MESSAGE} ${measures[0].measureLock.lockedBy}`
+          );
+        } else if (measures[0].hasLockedTestCases) {
+          setDisableVersionBtn(true);
+          setTooltipMessage(TEST_CASES_LOCKED_MESSAGE);
+        } else {
+          setDisableVersionBtn(false);
+          setTooltipMessage(VERSION_MEASURE);
+        }
+      } else {
+        setDisableVersionBtn(false);
+        setTooltipMessage(VERSION_MEASURE);
+      }
     }
   }, [measures, canEdit]);
 

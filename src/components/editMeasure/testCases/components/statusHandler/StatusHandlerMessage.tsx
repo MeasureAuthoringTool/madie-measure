@@ -3,6 +3,7 @@ import { TestCaseImportOutcome } from "@madie/madie-models";
 import "twin.macro";
 import "styled-components/macro";
 
+// TODO: Remove and use createWarningMessage with custom message instead.
 export function createShiftTestCaseDatesWarningMessage(
   withoutDuplicates: string[],
   testDataId: string
@@ -30,7 +31,8 @@ export function createShiftTestCaseDatesWarningMessage(
 
 export function createWarningMessage(
   withoutDuplicates: string[],
-  testDataId: string
+  testDataId: string,
+  message?: string
 ) {
   return {
     type: "warning",
@@ -38,6 +40,7 @@ export function createWarningMessage(
     content: (
       <div aria-live="polite" role="alert" data-testid={testDataId}>
         <div data-testid="warn-title">
+          {message ? message + " " : ""}
           {withoutDuplicates.length === 1 ? (
             withoutDuplicates[0]
           ) : (
@@ -86,6 +89,17 @@ export function createImportMessage(
   successfulImportsWithWarnings: TestCaseImportOutcome[],
   testDataId: string
 ) {
+  let failedMessage = `(${successfulImports}) test case(s) were imported. The following (
+              ${failedImports.length}) test case(s) could not be imported. Please
+              ensure that your formatting is correct and try again.`;
+  if (failedImports?.length > 0) {
+    const lockedTestCases = failedImports.some((fi) =>
+      fi.message?.includes("The test case is locked by another user")
+    );
+    if (lockedTestCases) {
+      failedMessage = `Test case import was successful, but the following test cases could not be imported because they are in-use by another user and cannot be overwritten:`;
+    }
+  }
   return {
     type: "warning",
     copyButton: true,
@@ -93,11 +107,7 @@ export function createImportMessage(
       <div aria-live="polite" role="alert" data-testid={testDataId}>
         {failedImports.length > 0 && (
           <div>
-            <div tw="font-medium">
-              ({successfulImports}) test case(s) were imported. The following (
-              {failedImports.length}) test case(s) could not be imported. Please
-              ensure that your formatting is correct and try again.
-            </div>
+            <div tw="font-medium">{failedMessage}</div>
             <ul>
               {failedImports.map((failedImport, index) => {
                 const family = failedImport?.familyName;
