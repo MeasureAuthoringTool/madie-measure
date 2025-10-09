@@ -10,9 +10,7 @@ import { act } from "react-dom/test-utils";
 import { ApiContextProvider, ServiceConfig } from "../../api/ServiceContext";
 import { createMemoryRouter, RouterProvider } from "react-router-dom";
 import { routesConfig } from "../measureRoutes/MeasureRoutes";
-import useMeasureServiceApi, {
-  MeasureServiceApi,
-} from "../../api/useMeasureServiceApi";
+
 import {
   GroupPopulation,
   Measure,
@@ -22,15 +20,16 @@ import {
 } from "@madie/madie-models";
 import MeasureEditor from "./editor/MeasureEditor";
 // @ts-ignore
-import { measureStore, useFeatureFlags } from "@madie/madie-util";
+import {
+  useMeasureServiceApi,
+  MeasureServiceApi,
+  measureStore,
+  useFeatureFlags,
+} from "@madie/madie-util";
 import { oneItemResponse } from "../__mocks__/mockMeasureResponses";
 
 jest.mock("./details/MeasureDetails");
 jest.mock("./editor/MeasureEditor");
-jest.mock("../../api/useMeasureServiceApi");
-
-const useMeasureServiceApiMock =
-  useMeasureServiceApi as jest.Mock<MeasureServiceApi>;
 
 const MeasureEditorMock = MeasureEditor as jest.Mock<JSX.Element>;
 
@@ -141,46 +140,8 @@ const measure = {
   measureSetId: "MeasureSetId1",
 } as Measure;
 
-const serviceApiMock = {
-  searchMeasuresByMeasureNameOrEcqmTitle: jest
-    .fn()
-    .mockResolvedValue(oneItemResponse),
-  fetchMeasures: jest.fn().mockResolvedValue(oneItemResponse),
-  getRecentMeasuresByMeasureSetId: jest.fn().mockResolvedValue([measure]),
-  fetchMeasure: jest.fn().mockResolvedValue(measure),
-  getAllPopulationBasisOptions: jest.fn().mockResolvedValue([]),
-  getReturnTypesForAllCqlDefinitions: jest.fn().mockResolvedValue({}),
-  updateMeasure: jest.fn().mockResolvedValueOnce({ status: 200 }),
-  createVersion: jest.fn().mockResolvedValue({ id: "newVersionId" }),
-  deleteMeasure: jest.fn().mockResolvedValue({}),
-  checkNextVersionNumber: jest.fn().mockReturnValue("1.0.000"),
-  checkValidVersion: jest.fn().mockResolvedValue({ status: 200 }),
-  fetchMeasureDraftStatuses: jest.fn().mockResolvedValue({
-    "1": true,
-    "2": true,
-    "3": true,
-  }),
-  getMeasureExport: jest
-    .fn()
-    .mockResolvedValue({ size: 635581, type: "application/octet-stream" }),
-  getReturnTypesForAllCqlFunctions: jest.fn().mockResolvedValue({}),
-  fetchHumanReadable: jest.fn().mockResolvedValue("test human readable"),
-  getSharedMeasures: jest.fn().mockResolvedValue({
-    measureId1: ["userId1"],
-    measureId2: ["userId1", "userId2"],
-  }),
-  getMeasuresByMeasureSetId: jest.fn().mockImplementation((measureSetId) => {
-    return [measure];
-  }),
-  transferMeasures: jest.fn().mockResolvedValue({ data: true }),
-  draftMeasure: jest.fn().mockResolvedValue({ id: "newDraftId" }),
-} as unknown as MeasureServiceApi;
-
-useMeasureServiceApiMock.mockImplementation(() => {
-  return serviceApiMock;
-});
-
 jest.mock("@madie/madie-util", () => ({
+  useMeasureServiceApi: jest.fn(() => mockMeasureServiceApi),
   useDocumentTitle: jest.fn(),
   useOktaTokens: jest.fn(() => ({
     getAccessToken: () => "test.jwt",
@@ -236,13 +197,47 @@ const renderRouter = (
     </ApiContextProvider>
   );
 };
-afterEach(cleanup);
+const mockMeasureServiceApi = {
+  searchMeasuresByMeasureNameOrEcqmTitle: jest
+    .fn()
+    .mockResolvedValue(oneItemResponse),
+  fetchMeasures: jest.fn().mockResolvedValue(oneItemResponse),
+  getRecentMeasuresByMeasureSetId: jest.fn().mockResolvedValue([measure]),
+  fetchMeasure: jest.fn().mockResolvedValue(measure),
+  getAllPopulationBasisOptions: jest.fn().mockResolvedValue([]),
+  getReturnTypesForAllCqlDefinitions: jest.fn().mockResolvedValue({}),
+  updateMeasure: jest.fn().mockResolvedValueOnce({ status: 200 }),
+  createVersion: jest.fn().mockResolvedValue({ id: "newVersionId" }),
+  deleteMeasure: jest.fn().mockResolvedValue({}),
+  checkNextVersionNumber: jest.fn().mockReturnValue("1.0.000"),
+  checkValidVersion: jest.fn().mockResolvedValue({ status: 200 }),
+  fetchMeasureDraftStatuses: jest.fn().mockResolvedValue({
+    "1": true,
+    "2": true,
+    "3": true,
+  }),
+  getMeasureExport: jest
+    .fn()
+    .mockResolvedValue({ size: 635581, type: "application/octet-stream" }),
+  getReturnTypesForAllCqlFunctions: jest.fn().mockResolvedValue({}),
+  fetchHumanReadable: jest.fn().mockResolvedValue("test human readable"),
+  getSharedMeasures: jest.fn().mockResolvedValue({
+    measureId1: ["userId1"],
+    measureId2: ["userId1", "userId2"],
+  }),
+  getMeasuresByMeasureSetId: jest.fn().mockImplementation((measureSetId) => {
+    return [measure];
+  }),
+  transferMeasures: jest.fn().mockResolvedValue({ data: true }),
+  draftMeasure: jest.fn().mockResolvedValue({ id: "newDraftId" }),
+} as unknown as MeasureServiceApi;
 
 describe("EditMeasure Component", () => {
   beforeEach(() => {
     measureStore.state.mockImplementation(() => measure);
     measure.testCases = testCases;
   });
+  afterEach(cleanup);
   it("should render a loading page if the measure is not yet loaded", async () => {
     renderRouter();
     const result = getByTestId("loading");
@@ -255,7 +250,7 @@ describe("EditMeasure Component", () => {
 
     const result = await findByTestId("editMeasure");
     expect(result).toBeInTheDocument();
-    expect(serviceApiMock.fetchMeasure).toHaveBeenCalled();
+    expect(mockMeasureServiceApi.fetchMeasure).toHaveBeenCalled();
 
     const loading = queryByTestId("loading");
     expect(loading).toBeNull();
@@ -266,7 +261,7 @@ describe("EditMeasure Component", () => {
 
     const result = await findByTestId("editMeasure");
     expect(result).toBeInTheDocument();
-    expect(serviceApiMock.fetchMeasure).toHaveBeenCalled();
+    expect(mockMeasureServiceApi.fetchMeasure).toHaveBeenCalled();
     const loading = queryByTestId("loading");
     expect(loading).toBeNull();
     act(() => {
@@ -342,7 +337,7 @@ describe("EditMeasure Component", () => {
 
     const result = await findByTestId("editMeasure");
     expect(result).toBeInTheDocument();
-    expect(serviceApiMock.fetchMeasure).toHaveBeenCalled();
+    expect(mockMeasureServiceApi.fetchMeasure).toHaveBeenCalled();
     const loading = queryByTestId("loading");
     expect(loading).toBeNull();
     act(() => {
@@ -370,7 +365,7 @@ describe("EditMeasure Component", () => {
   });
 
   it("delete fails", async () => {
-    serviceApiMock.updateMeasure = jest.fn().mockRejectedValueOnce({
+    mockMeasureServiceApi.updateMeasure = jest.fn().mockRejectedValueOnce({
       status: 500,
       response: { data: { message: "update failed" } },
     });
@@ -378,7 +373,7 @@ describe("EditMeasure Component", () => {
 
     const result = await findByTestId("editMeasure");
     expect(result).toBeInTheDocument();
-    expect(serviceApiMock.fetchMeasure).toHaveBeenCalled();
+    expect(mockMeasureServiceApi.fetchMeasure).toHaveBeenCalled();
     const loading = queryByTestId("loading");
     expect(loading).toBeNull();
     act(() => {
@@ -395,14 +390,14 @@ describe("EditMeasure Component", () => {
   });
 
   it("delete fails without an error object", async () => {
-    serviceApiMock.updateMeasure = jest
+    mockMeasureServiceApi.updateMeasure = jest
       .fn()
       .mockRejectedValueOnce("I'm an error");
     renderRouter();
 
     const result = await findByTestId("editMeasure");
     expect(result).toBeInTheDocument();
-    expect(serviceApiMock.fetchMeasure).toHaveBeenCalled();
+    expect(mockMeasureServiceApi.fetchMeasure).toHaveBeenCalled();
     const loading = queryByTestId("loading");
     expect(loading).toBeNull();
     act(() => {
@@ -420,12 +415,8 @@ describe("EditMeasure Component", () => {
   });
 
   it("should redirect to 404", async () => {
-    const serviceApiRejectedMock = {
-      fetchMeasure: jest.fn().mockRejectedValue("404"),
-    } as unknown as MeasureServiceApi;
-    useMeasureServiceApiMock.mockImplementationOnce(() => {
-      return serviceApiRejectedMock;
-    });
+    mockMeasureServiceApi.fetchMeasure = jest.fn().mockRejectedValueOnce("404");
+
     renderRouter();
     await waitFor(() => {
       expect(mockedNavigate).toHaveBeenCalledWith("/404");
@@ -433,11 +424,14 @@ describe("EditMeasure Component", () => {
   });
 
   it("should display view human readable modal when the event is triggered, discards.", async () => {
+    mockMeasureServiceApi.fetchMeasure = jest
+      .fn()
+      .mockResolvedValue(oneItemResponse);
     renderRouter();
 
     const result = await findByTestId("editMeasure");
     expect(result).toBeInTheDocument();
-    expect(serviceApiMock.fetchMeasure).toHaveBeenCalled();
+    expect(mockMeasureServiceApi.fetchMeasure).toHaveBeenCalled();
     const loading = queryByTestId("loading");
     setTimeout(() => {
       expect(loading).toBeNull();
@@ -478,11 +472,13 @@ describe("EditMeasure Component", () => {
     });
 
     await waitFor(async () => {
-      expect(serviceApiMock.fetchMeasure).toHaveBeenCalled();
+      expect(mockMeasureServiceApi.fetchMeasure).toHaveBeenCalled();
       expect(getByTestId("share-dialog")).toBeInTheDocument();
     });
-    expect(serviceApiMock.getSharedMeasures).toHaveBeenCalled();
-    expect(serviceApiMock.getRecentMeasuresByMeasureSetId).toHaveBeenCalled();
+    expect(mockMeasureServiceApi.getSharedMeasures).toHaveBeenCalled();
+    expect(
+      mockMeasureServiceApi.getRecentMeasuresByMeasureSetId
+    ).toHaveBeenCalled();
     const cancelButton = getByTestId("share-cancel-button");
     fireEvent.click(cancelButton);
     expect(queryByTestId("share-dialog")).toBeVisible();
@@ -538,7 +534,7 @@ describe("EditMeasure Component", () => {
 
         fireEvent.click(transferBtn);
 
-        expect(serviceApiMock.transferMeasures).toBeCalledWith(
+        expect(mockMeasureServiceApi.transferMeasures).toBeCalledWith(
           [measure.id],
           "newUser",
           false
@@ -582,7 +578,7 @@ describe("EditMeasure Component", () => {
     fireEvent.click(submitButton);
 
     await waitFor(() => {
-      expect(serviceApiMock.draftMeasure).toHaveBeenCalledWith(
+      expect(mockMeasureServiceApi.draftMeasure).toHaveBeenCalledWith(
         measure.id,
         measure.model,
         "Draft Measure Name"
@@ -598,7 +594,7 @@ describe("EditMeasure Component", () => {
 
     const result = await findByTestId("editMeasure");
     expect(result).toBeInTheDocument();
-    expect(serviceApiMock.fetchMeasure).toHaveBeenCalled();
+    expect(mockMeasureServiceApi.fetchMeasure).toHaveBeenCalled();
     const loading = queryByTestId("loading");
     setTimeout(() => {
       expect(loading).toBeNull();

@@ -1,11 +1,11 @@
 import React, { useEffect, useRef, useState, useMemo } from "react";
-import { Measure } from "@madie/madie-models";
+import { Measure, MeasureHistoryActions } from "@madie/madie-models";
 import {
   MadieDialog,
   Pagination,
   TruncateText,
 } from "@madie/madie-design-system/dist/react";
-import useMeasureServiceApi from "../../../api/useMeasureServiceApi";
+import { useMeasureServiceApi } from "@madie/madie-util";
 import {
   ColumnDef,
   flexRender,
@@ -19,13 +19,6 @@ interface ViewMeasureHistoryDialogProps {
   measures: Measure[];
   open: boolean;
   onClose: Function;
-}
-
-export interface MeasureHistoryActions {
-  performedAt: any;
-  actionType: string;
-  performedBy: string;
-  additionalActionMessage?: string;
 }
 
 export default function ViewMeasureHistoryDialog(

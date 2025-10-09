@@ -6,9 +6,10 @@ import {
   measureStore,
   checkUserCanEdit,
   routeHandlerStore,
+  useMeasureServiceApi,
 } from "@madie/madie-util";
 import MetaDataWrapper from "../../../editMeasure/details/MetaDataWrapper";
-import useMeasureServiceApi from "../../../../api/useMeasureServiceApi";
+
 import {
   Select,
   MadieDiscardDialog,

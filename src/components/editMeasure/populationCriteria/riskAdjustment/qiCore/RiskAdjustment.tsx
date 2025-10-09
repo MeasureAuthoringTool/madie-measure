@@ -3,11 +3,12 @@ import "twin.macro";
 import "styled-components/macro";
 import { useFormik } from "formik";
 import useFormikResetOnEvent from "../../../../common/useFormikResetOnEvent";
-import useMeasureServiceApi from "../../../../../api/useMeasureServiceApi";
+
 import {
   checkUserCanEdit,
   measureStore,
   routeHandlerStore,
+  useMeasureServiceApi,
 } from "@madie/madie-util";
 import { CqlAntlr } from "@madie/cql-antlr-parser/dist/src";
 import MetaDataWrapper from "../../../details/MetaDataWrapper";

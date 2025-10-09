@@ -1,9 +1,7 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import * as React from "react";
 import ShareDialog, { SharedUser, convertDate } from "./ShareDialog";
-import useMeasureServiceApi, {
-  MeasureServiceApi,
-} from "../../../api/useMeasureServiceApi";
+import { MeasureServiceApi } from "@madie/madie-util";
 import { Measure, MeasureMetadata } from "@madie/madie-models";
 
 const testUser = "test user";
@@ -39,32 +37,6 @@ const today = new Date();
 const yesterday = new Date();
 yesterday.setDate(new Date().getDate() - 1);
 
-jest.mock("../../../api/useMeasureServiceApi");
-
-const useMeasureServiceMock =
-  useMeasureServiceApi as jest.Mock<MeasureServiceApi>;
-
-const mockGetSharedMeasures = jest.fn().mockResolvedValue({
-  [mockMeasure1.id]: mockMeasure1.acls
-    ? mockMeasure1.acls.map(
-        (acl) =>
-          ({
-            userId: acl.userId,
-            performedAt: yesterday.toISOString(),
-          } as SharedUser)
-      )
-    : [],
-  [mockMeasure2.id]: mockMeasure2.acls
-    ? mockMeasure2.acls.map(
-        (acl) =>
-          ({
-            userId: acl.userId,
-            performedAt: yesterday.toISOString(),
-          } as SharedUser)
-      )
-    : [],
-});
-
 const mockGetRecentMeasuresByMeasureSetId = jest.fn((measureSetIds) => {
   const measures = [];
   if (measureSetIds.includes("MeasureSetId1")) {
@@ -86,21 +58,41 @@ const mockUnshareMeasures = jest.fn().mockResolvedValue({
 });
 
 const mockMeasureServiceApi = {
-  getSharedMeasures: mockGetSharedMeasures,
+  getSharedMeasures: jest.fn().mockResolvedValue({
+    [mockMeasure1.id]: mockMeasure1.acls
+      ? mockMeasure1.acls.map(
+          (acl) =>
+            ({
+              userId: acl.userId,
+              performedAt: yesterday.toISOString(),
+            } as unknown as SharedUser)
+        )
+      : [],
+    [mockMeasure2.id]: mockMeasure2.acls
+      ? mockMeasure2.acls.map(
+          (acl) =>
+            ({
+              userId: acl.userId,
+              performedAt: yesterday.toISOString(),
+            } as unknown as SharedUser)
+        )
+      : [],
+  }),
   shareMeasures: mockShareMeasures,
   getRecentMeasuresByMeasureSetId: mockGetRecentMeasuresByMeasureSetId,
   unshareMeasures: mockUnshareMeasures,
 } as unknown as MeasureServiceApi;
+
+jest.mock("@madie/madie-util", () => ({
+  useMeasureServiceApi: jest.fn(() => mockMeasureServiceApi),
+}));
 
 describe("Create Share Dialog component", () => {
   const { getByTestId } = screen;
 
   beforeEach(() => {
     jest.resetModules();
-
-    useMeasureServiceMock.mockImplementation(() => {
-      return mockMeasureServiceApi;
-    });
+    jest.clearAllMocks();
   });
 
   it("should render share dialog", async () => {
@@ -120,14 +112,10 @@ describe("Create Share Dialog component", () => {
   });
 
   it("should render share dialog but not call getSharedMeasures if no measure is passed in to share dialog component", async () => {
-    const mockMeasureServiceApi = {
-      getSharedMeasures: jest.fn().mockResolvedValue([]),
-      getRecentMeasuresByMeasureSetId: jest.fn().mockResolvedValue([]),
-    } as unknown as MeasureServiceApi;
-
-    useMeasureServiceMock.mockImplementation(() => {
-      return mockMeasureServiceApi;
-    });
+    mockMeasureServiceApi.getSharedMeasures = jest.fn().mockResolvedValue([]);
+    mockMeasureServiceApi.getRecentMeasuresByMeasureSetId = jest
+      .fn()
+      .mockResolvedValue([]);
 
     render(
       <ShareDialog
@@ -148,16 +136,12 @@ describe("Create Share Dialog component", () => {
     const errorMessage =
       "Unable to retrieve users that the selected measure(s) is shared with. If the error persists, please contact the help desk.";
 
-    const mockMeasureServiceApi = {
-      getSharedMeasures: jest.fn().mockRejectedValue(new Error(errorMessage)),
-      getRecentMeasuresByMeasureSetId: jest
-        .fn()
-        .mockResolvedValue([mockMeasure1, mockMeasure2]),
-    } as unknown as MeasureServiceApi;
-
-    useMeasureServiceMock.mockImplementation(() => {
-      return mockMeasureServiceApi;
-    });
+    mockMeasureServiceApi.getSharedMeasures = jest
+      .fn()
+      .mockRejectedValue(new Error(errorMessage));
+    mockMeasureServiceApi.getRecentMeasuresByMeasureSetId = jest
+      .fn()
+      .mockResolvedValue([mockMeasure1, mockMeasure2]);
 
     render(
       <ShareDialog
@@ -169,7 +153,37 @@ describe("Create Share Dialog component", () => {
     );
 
     expect(await screen.findByTestId("share-dialog")).toBeInTheDocument();
-    const table = await screen.findByTestId("share-measure-tbl");
+    expect(mockMeasureServiceApi.getSharedMeasures).toBeCalled();
+    expect(mockMeasureServiceApi.getRecentMeasuresByMeasureSetId).toBeCalled();
+    expect(await screen.findByText(errorMessage)).toBeVisible();
+  });
+
+  it("should render share dialog and display response.data.message.error if getSharedMeasures call returns an error", async () => {
+    const errorMessage =
+      "Unable to retrieve users that the selected measure(s) is shared with. If the error persists, please contact the help desk.";
+
+    mockMeasureServiceApi.getSharedMeasures = jest.fn().mockRejectedValue({
+      response: {
+        data: {
+          message: errorMessage,
+        },
+      },
+    });
+
+    mockMeasureServiceApi.getRecentMeasuresByMeasureSetId = jest
+      .fn()
+      .mockResolvedValue([mockMeasure1, mockMeasure2]);
+
+    render(
+      <ShareDialog
+        measures={[mockMeasure1, mockMeasure2]}
+        open={true}
+        option={"Share With"}
+        onClose={jest.fn()}
+      />
+    );
+
+    expect(await screen.findByTestId("share-dialog")).toBeInTheDocument();
     expect(mockMeasureServiceApi.getSharedMeasures).toBeCalled();
     expect(mockMeasureServiceApi.getRecentMeasuresByMeasureSetId).toBeCalled();
     expect(await screen.findByText(errorMessage)).toBeVisible();
@@ -247,6 +261,27 @@ describe("Create Share Dialog component", () => {
   });
 
   it("should display share measure table", async () => {
+    mockMeasureServiceApi.getSharedMeasures = jest.fn().mockResolvedValue({
+      [mockMeasure1.id]: mockMeasure1.acls
+        ? mockMeasure1.acls.map(
+            (acl) =>
+              ({
+                userId: acl.userId,
+                performedAt: yesterday.toISOString(),
+              } as unknown as SharedUser)
+          )
+        : [],
+      [mockMeasure2.id]: mockMeasure2.acls
+        ? mockMeasure2.acls.map(
+            (acl) =>
+              ({
+                userId: acl.userId,
+                performedAt: yesterday.toISOString(),
+              } as unknown as SharedUser)
+          )
+        : [],
+    });
+
     render(
       <ShareDialog
         measures={[mockMeasure1, mockMeasure2]}
@@ -284,17 +319,105 @@ describe("Create Share Dialog component", () => {
     //Only display checkboxes in subrows when the Unshare dialog is opened
     expect(
       screen.queryByTestId(
-        `unshare-checkbox-${mockMeasure2.acls[0].userId}_${mockMeasure2.id}`
+        `unshare-checkbox-${mockMeasure2.acls![0].userId}_${mockMeasure2.id}`
       )
     ).toBeNull();
     expect(
       screen.queryByTestId(
-        `unshare-checkbox-${mockMeasure2.acls[1].userId}_${mockMeasure2.id}`
+        `unshare-checkbox-${mockMeasure2.acls![1].userId}_${mockMeasure2.id}`
       )
     ).toBeNull();
   });
 
-  it("should display unshare measure table", async () => {
+  it("should display share measure table", async () => {
+    mockMeasureServiceApi.getSharedMeasures = jest.fn().mockResolvedValue({
+      [mockMeasure1.id]: mockMeasure1.acls
+        ? mockMeasure1.acls.map(
+            (acl) =>
+              ({
+                userId: acl.userId,
+                performedAt: yesterday.toISOString(),
+              } as unknown as SharedUser)
+          )
+        : [],
+      [mockMeasure2.id]: mockMeasure2.acls
+        ? mockMeasure2.acls.map(
+            (acl) =>
+              ({
+                userId: acl.userId,
+                performedAt: yesterday.toISOString(),
+              } as unknown as SharedUser)
+          )
+        : [],
+    });
+
+    render(
+      <ShareDialog
+        measures={[mockMeasure1, mockMeasure2]}
+        open={true}
+        option={"Share With"}
+        onClose={jest.fn()}
+      />
+    );
+
+    expect(await screen.findByTestId("share-dialog")).toBeInTheDocument();
+    expect(mockMeasureServiceApi.getSharedMeasures).toBeCalled();
+    expect(mockMeasureServiceApi.getRecentMeasuresByMeasureSetId).toBeCalled();
+
+    const table = await screen.findByTestId("share-measure-tbl");
+    const tableHeaders = table.querySelectorAll("thead th");
+
+    expect(tableHeaders[0]).toHaveTextContent("Measure");
+    expect(tableHeaders[1]).toHaveTextContent("User");
+    expect(tableHeaders[2]).toHaveTextContent("Date Shared");
+    //Expand row column has no header
+    expect(tableHeaders[3]).toHaveTextContent("");
+
+    const tableRows = table.querySelectorAll("tbody tr");
+
+    expect(tableRows[0]).toHaveTextContent(mockMeasure1.measureName);
+    expect(screen.queryByTestId(`expand-button-${mockMeasure1.id}`)).toBeNull();
+
+    expect(tableRows[1]).toHaveTextContent(mockMeasure2.measureName);
+
+    const expandButton = await screen.findByTestId(
+      `expand-button-${mockMeasure2.id}`
+    );
+    fireEvent.click(expandButton);
+
+    //Only display checkboxes in subrows when the Unshare dialog is opened
+    expect(
+      screen.queryByTestId(
+        `unshare-checkbox-${mockMeasure2.acls![0].userId}_${mockMeasure2.id}`
+      )
+    ).toBeNull();
+    expect(
+      screen.queryByTestId(
+        `unshare-checkbox-${mockMeasure2.acls![1].userId}_${mockMeasure2.id}`
+      )
+    ).toBeNull();
+  });
+
+  it("should display unshare measure table with null dates as '-'", async () => {
+    mockMeasureServiceApi.getSharedMeasures = jest.fn().mockResolvedValue({
+      [mockMeasure1.id]: mockMeasure1.acls
+        ? mockMeasure1.acls.map(
+            (acl) =>
+              ({
+                userId: acl.userId,
+              } as unknown as SharedUser)
+          )
+        : [],
+      [mockMeasure2.id]: mockMeasure2.acls
+        ? mockMeasure2.acls.map(
+            (acl) =>
+              ({
+                userId: acl.userId,
+              } as unknown as SharedUser)
+          )
+        : [],
+    });
+
     render(
       <ShareDialog
         measures={[mockMeasure1, mockMeasure2]}
@@ -331,17 +454,40 @@ describe("Create Share Dialog component", () => {
 
     expect(
       screen.queryByTestId(
-        `unshare-checkbox-${mockMeasure2.acls[0].userId}_${mockMeasure2.id}`
+        `unshare-checkbox-${mockMeasure2.acls![0].userId}_${mockMeasure2.id}`
       )
     ).toBeInTheDocument();
     expect(
       screen.queryByTestId(
-        `unshare-checkbox-${mockMeasure2.acls[1].userId}_${mockMeasure2.id}`
+        `unshare-checkbox-${mockMeasure2.acls![1].userId}_${mockMeasure2.id}`
       )
     ).toBeInTheDocument();
   });
 
   it("should not add any user row to the grid for any measure if all measures already have that user", async () => {
+    mockMeasureServiceApi.getSharedMeasures = jest.fn().mockResolvedValue({
+      [mockMeasure1.id]: mockMeasure1.acls
+        ? mockMeasure1.acls.map(
+            (acl) =>
+              ({
+                userId: acl.userId,
+                performedAt: yesterday.toISOString(),
+              } as unknown as SharedUser)
+          )
+        : [],
+      [mockMeasure2.id]: mockMeasure2.acls
+        ? mockMeasure2.acls.map(
+            (acl) =>
+              ({
+                userId: acl.userId,
+                performedAt: yesterday.toISOString(),
+              } as unknown as SharedUser)
+          )
+        : [],
+    });
+    mockMeasureServiceApi.getRecentMeasuresByMeasureSetId =
+      mockGetRecentMeasuresByMeasureSetId;
+
     render(
       <ShareDialog
         measures={[mockMeasure2]}
@@ -421,6 +567,28 @@ describe("Create Share Dialog component", () => {
   });
 
   it("should add a user row to the grid for each measure that does not already have that user", async () => {
+    mockMeasureServiceApi.getSharedMeasures = jest.fn().mockResolvedValue({
+      [mockMeasure1.id]: mockMeasure1.acls
+        ? mockMeasure1.acls.map(
+            (acl) =>
+              ({
+                userId: acl.userId,
+                performedAt: yesterday.toISOString(),
+              } as unknown as SharedUser)
+          )
+        : [],
+      [mockMeasure2.id]: mockMeasure2.acls
+        ? mockMeasure2.acls.map(
+            (acl) =>
+              ({
+                userId: acl.userId,
+                performedAt: yesterday.toISOString(),
+              } as unknown as SharedUser)
+          )
+        : [],
+    });
+    mockMeasureServiceApi.getRecentMeasuresByMeasureSetId =
+      mockGetRecentMeasuresByMeasureSetId;
     render(
       <ShareDialog
         measures={[mockMeasure1, mockMeasure2]}
@@ -641,15 +809,31 @@ describe("Create Share Dialog component", () => {
     const errorMessage =
       "Unable to share the selected measure(s) with the added users. If the error persists, please contact the help desk.";
 
-    const mockMeasureServiceApi = {
-      getSharedMeasures: mockGetSharedMeasures,
-      getRecentMeasuresByMeasureSetId: mockGetRecentMeasuresByMeasureSetId,
-      shareMeasures: jest.fn().mockRejectedValue(new Error(errorMessage)),
-    } as unknown as MeasureServiceApi;
-
-    useMeasureServiceMock.mockImplementation(() => {
-      return mockMeasureServiceApi;
+    mockMeasureServiceApi.getSharedMeasures = jest.fn().mockResolvedValue({
+      [mockMeasure1.id]: mockMeasure1.acls
+        ? mockMeasure1.acls.map(
+            (acl) =>
+              ({
+                userId: acl.userId,
+                performedAt: yesterday.toISOString(),
+              } as unknown as SharedUser)
+          )
+        : [],
+      [mockMeasure2.id]: mockMeasure2.acls
+        ? mockMeasure2.acls.map(
+            (acl) =>
+              ({
+                userId: acl.userId,
+                performedAt: yesterday.toISOString(),
+              } as unknown as SharedUser)
+          )
+        : [],
     });
+    mockMeasureServiceApi.getRecentMeasuresByMeasureSetId =
+      mockGetRecentMeasuresByMeasureSetId;
+    mockMeasureServiceApi.shareMeasures = jest
+      .fn()
+      .mockRejectedValue(new Error(errorMessage));
 
     const mockOnClose = jest.fn();
 
@@ -756,15 +940,31 @@ describe("Create Share Dialog component", () => {
     const errorMessage =
       "Unable to unshare the selected measure(s) with the users who were unchecked. If the error persists, please contact the help desk.";
 
-    const mockMeasureServiceApi = {
-      getSharedMeasures: mockGetSharedMeasures,
-      getRecentMeasuresByMeasureSetId: mockGetRecentMeasuresByMeasureSetId,
-      unshareMeasures: jest.fn().mockRejectedValue(new Error(errorMessage)),
-    } as unknown as MeasureServiceApi;
-
-    useMeasureServiceMock.mockImplementation(() => {
-      return mockMeasureServiceApi;
+    mockMeasureServiceApi.getSharedMeasures = jest.fn().mockResolvedValue({
+      [mockMeasure1.id]: mockMeasure1.acls
+        ? mockMeasure1.acls.map(
+            (acl) =>
+              ({
+                userId: acl.userId,
+                performedAt: yesterday.toISOString(),
+              } as unknown as SharedUser)
+          )
+        : [],
+      [mockMeasure2.id]: mockMeasure2.acls
+        ? mockMeasure2.acls.map(
+            (acl) =>
+              ({
+                userId: acl.userId,
+                performedAt: yesterday.toISOString(),
+              } as unknown as SharedUser)
+          )
+        : [],
     });
+    mockMeasureServiceApi.getRecentMeasuresByMeasureSetId =
+      mockGetRecentMeasuresByMeasureSetId;
+    mockMeasureServiceApi.unshareMeasures = jest
+      .fn()
+      .mockRejectedValue(new Error(errorMessage));
 
     const mockOnClose = jest.fn();
 

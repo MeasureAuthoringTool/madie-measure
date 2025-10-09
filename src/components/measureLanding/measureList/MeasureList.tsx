@@ -10,6 +10,11 @@ import React, {
 import tw from "twin.macro";
 import "styled-components/macro";
 import { Measure, Model } from "@madie/madie-models";
+import {
+  useMeasureServiceApi,
+  checkUserCanEdit,
+  useFeatureFlags,
+} from "@madie/madie-util";
 import { useNavigate } from "react-router-dom";
 import { Chip } from "@mui/material";
 import {
@@ -27,8 +32,6 @@ import {
 } from "@tanstack/react-table";
 
 import InvalidTestCaseDialog from "../../common/invalidTestCaseDialog/InvalidTestCaseDialog";
-import useMeasureServiceApi from "../../../api/useMeasureServiceApi";
-import { checkUserCanEdit, useFeatureFlags } from "@madie/madie-util";
 import CreatVersionDialog from "../../common/createVersionDialog/CreateVersionDialog";
 import DraftMeasureDialog from "../../common/draftMeasureDialog/DraftMeasureDialog";
 import versionErrorHelper from "../../../utils/versionErrorHelper";
@@ -1001,7 +1004,7 @@ export default function MeasureList(props: {
     copyMetaData: boolean
   ) => {
     measureServiceApi
-      .associateCmdId(qiCoreMeasureId, qdmMeasureId, copyMetaData)
+      .associateCmsId(qiCoreMeasureId, qdmMeasureId, copyMetaData)
       .then((measureSet) => {
         doUpdateList();
 

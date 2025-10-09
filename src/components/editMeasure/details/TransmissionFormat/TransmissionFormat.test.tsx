@@ -7,16 +7,15 @@ import {
   ServiceConfig,
 } from "../../../../api/ServiceContext";
 import TransmissionFormat from "./TransmissionFormat";
-import useMeasureServiceApi, {
+
+import {
+  measureStorem,
+  useMeasureServiceApi,
   MeasureServiceApi,
-} from "../../../../api/useMeasureServiceApi";
-import { measureStore } from "@madie/madie-util";
+} from "@madie/madie-util";
 import { Measure } from "@madie/madie-models";
 import userEvent from "@testing-library/user-event";
 
-jest.mock("../../../../api/useMeasureServiceApi");
-const useMeasureServiceApiMock =
-  useMeasureServiceApi as jest.Mock<MeasureServiceApi>;
 const measure = {
   id: "measure ID",
   measureName: "measureName",
@@ -27,12 +26,12 @@ const measure = {
   },
 } as Measure;
 
-let serviceApiMock = {
+let mockMeasureServiceApi = {
   updateMeasure: jest.fn().mockResolvedValue({ status: 200, data: measure }),
 } as unknown as MeasureServiceApi;
-useMeasureServiceApiMock.mockImplementation(() => serviceApiMock);
 
 jest.mock("@madie/madie-util", () => ({
+  useMeasureServiceApi: jest.fn(() => mockMeasureServiceApi),
   useDocumentTitle: jest.fn(),
   useOktaTokens: jest.fn(() => ({
     getAccessToken: () => "test.jwt",
@@ -84,8 +83,6 @@ describe("Transmission Format page", () => {
   afterEach(() => jest.clearAllMocks());
 
   it("Should handle successful save of transmission format", async () => {
-    measureStore.state.mockImplementation(() => measure);
-    measureStore.initialState.mockImplementation(() => measure);
     render(
       <ApiContextProvider value={serviceConfig}>
         <MemoryRouter initialEntries={["/"]}>
@@ -116,8 +113,6 @@ describe("Transmission Format page", () => {
   });
 
   it("Should handle dirtyCheck and cancel: write, discard, cancel, discard, continue", async () => {
-    measureStore.state.mockImplementation(() => measure);
-    measureStore.initialState.mockImplementation(() => measure);
     render(
       <ApiContextProvider value={serviceConfig}>
         <MemoryRouter initialEntries={["/"]}>
@@ -167,11 +162,10 @@ describe("Transmission Format page", () => {
   });
 
   it("Should handle failure of updating a measure", async () => {
-    measureStore.state.mockImplementation(() => measure);
-    measureStore.initialState.mockImplementation(() => measure);
-    serviceApiMock = {
-      updateMeasure: jest.fn().mockRejectedValueOnce({ data: {} }),
-    } as unknown as MeasureServiceApi;
+    mockMeasureServiceApi.updateMeasure = jest
+      .fn()
+      .mockRejectedValueOnce({ data: {} });
+
     render(
       <ApiContextProvider value={serviceConfig}>
         <MemoryRouter initialEntries={["/"]}>
@@ -202,12 +196,9 @@ describe("Transmission Format page", () => {
   });
 
   it("should handle successful save of transmission format entered in rich text editor", async () => {
-    let serviceApiMock = {
-      updateMeasure: jest
-        .fn()
-        .mockResolvedValue({ status: 200, data: measure }),
-    } as unknown as MeasureServiceApi;
-    useMeasureServiceApiMock.mockImplementation(() => serviceApiMock);
+    mockMeasureServiceApi.updateMeasure = jest
+      .fn()
+      .mockResolvedValue({ status: 200, data: measure });
     render(
       <ApiContextProvider value={serviceConfig}>
         <MemoryRouter initialEntries={["/"]}>

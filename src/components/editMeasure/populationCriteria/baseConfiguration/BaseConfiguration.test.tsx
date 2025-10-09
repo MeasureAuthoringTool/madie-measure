@@ -8,9 +8,7 @@ import {
 } from "@testing-library/react";
 import { act } from "react-dom/test-utils";
 import BaseConfiguration from "./BaseConfiguration";
-import useMeasureServiceApi, {
-  MeasureServiceApi,
-} from "../../../../api/useMeasureServiceApi";
+import { useMeasureServiceApi, MeasureServiceApi } from "@madie/madie-util";
 import { Measure } from "@madie/madie-models";
 import userEvent from "@testing-library/user-event";
 
@@ -20,7 +18,6 @@ jest.mock("react-router-dom", () => ({
   ...(jest.requireActual("react-router-dom") as any),
   useNavigate: () => mockHistoryPush,
 }));
-jest.mock("../../../../api/useMeasureServiceApi");
 const measure = {
   id: "test measure",
   measureName: "the measure for testing",
@@ -42,7 +39,12 @@ jest.mock("@madie/madie-editor", () => ({
   }),
 }));
 
+const mockMeasureServiceApi: MeasureServiceApi = {
+  updateMeasure: jest.fn().mockResolvedValue({ status: 200 }),
+} as unknown as MeasureServiceApi;
+
 jest.mock("@madie/madie-util", () => ({
+  useMeasureServiceApi: jest.fn(() => mockMeasureServiceApi),
   useOktaTokens: jest.fn(() => ({
     getAccessToken: () => "test.jwt",
   })),
@@ -72,8 +74,6 @@ jest.mock("@madie/madie-util", () => ({
 
 const useMeasureServiceApiMock =
   useMeasureServiceApi as jest.Mock<MeasureServiceApi>;
-
-let serviceApiMock: MeasureServiceApi;
 
 describe("Base Configuration component", () => {
   const {
@@ -177,11 +177,6 @@ describe("Base Configuration component", () => {
   });
 
   test("Changes to Base Configuration enables Save button and saving successfully displays success message", async () => {
-    serviceApiMock = {
-      updateMeasure: jest.fn().mockResolvedValueOnce({ status: 200 }),
-    } as unknown as MeasureServiceApi;
-    useMeasureServiceApiMock.mockImplementation(() => serviceApiMock);
-
     render(<BaseConfiguration />);
 
     const scoringSelectInput = getByTestId(
@@ -219,7 +214,7 @@ describe("Base Configuration component", () => {
     await waitFor(() => expect(saveButton).toBeEnabled());
     fireEvent.click(saveButton);
     await waitFor(() =>
-      expect(serviceApiMock.updateMeasure).toBeCalledWith({
+      expect(mockMeasureServiceApi.updateMeasure).toBeCalledWith({
         ...measure,
         scoring: "Cohort",
         baseConfigurationTypes: ["Structure"],
@@ -240,13 +235,11 @@ describe("Base Configuration component", () => {
   });
 
   test("Save measure scoring with failure will display error message", async () => {
-    serviceApiMock = {
-      updateMeasure: jest.fn().mockRejectedValueOnce({
-        status: 500,
-        response: { data: { message: "update failed" } },
-      }),
-    } as unknown as MeasureServiceApi;
-    useMeasureServiceApiMock.mockImplementation(() => serviceApiMock);
+    mockMeasureServiceApi.updateMeasure = jest.fn().mockRejectedValueOnce({
+      status: 500,
+      response: { data: { message: "update failed" } },
+    });
+    useMeasureServiceApiMock.mockImplementation(() => mockMeasureServiceApi);
 
     render(<BaseConfiguration />);
 
@@ -288,7 +281,7 @@ describe("Base Configuration component", () => {
     await waitFor(() => expect(saveButton).toBeEnabled());
     fireEvent.click(saveButton);
     await waitFor(() =>
-      expect(serviceApiMock.updateMeasure).toBeCalledWith({
+      expect(mockMeasureServiceApi.updateMeasure).toBeCalledWith({
         ...measure,
         scoring: "Cohort",
         baseConfigurationTypes: ["Structure"],
@@ -310,10 +303,9 @@ describe("Base Configuration component", () => {
   });
 
   test("change measure scoring will prompt warning dialog", async () => {
-    serviceApiMock = {
-      updateMeasure: jest.fn().mockResolvedValueOnce({ status: 200 }),
-    } as unknown as MeasureServiceApi;
-    useMeasureServiceApiMock.mockImplementation(() => serviceApiMock);
+    mockMeasureServiceApi.updateMeasure = jest
+      .fn()
+      .mockResolvedValue({ status: 200 });
 
     render(<BaseConfiguration />);
 
@@ -351,7 +343,7 @@ describe("Base Configuration component", () => {
     await waitFor(() => expect(saveButton).toBeEnabled());
     fireEvent.click(saveButton);
     await waitFor(() =>
-      expect(serviceApiMock.updateMeasure).toBeCalledWith({
+      expect(mockMeasureServiceApi.updateMeasure).toBeCalledWith({
         ...measure,
         scoring: "Cohort",
         baseConfigurationTypes: ["Structure"],
@@ -399,11 +391,6 @@ describe("Base Configuration component", () => {
   //RangeError: Maximum call stack size exceeded - error only happens with npm test -- --coverage
   //temp skip
   test.skip("click on change scoring warning dialog close button will close the dialog", async () => {
-    serviceApiMock = {
-      updateMeasure: jest.fn().mockResolvedValueOnce({ status: 200 }),
-    } as unknown as MeasureServiceApi;
-    useMeasureServiceApiMock.mockImplementation(() => serviceApiMock);
-
     render(<BaseConfiguration />);
 
     const scoringSelectInput = getByTestId(
@@ -440,7 +427,7 @@ describe("Base Configuration component", () => {
     await waitFor(() => expect(saveButton).toBeEnabled());
     fireEvent.click(saveButton);
     await waitFor(() =>
-      expect(serviceApiMock.updateMeasure).toBeCalledWith({
+      expect(mockMeasureServiceApi.updateMeasure).toBeCalledWith({
         ...measure,
         scoring: "Cohort",
         baseConfigurationTypes: ["Structure"],
@@ -489,28 +476,22 @@ describe("Base Configuration component", () => {
   });
 
   test("change measure patient basis will prompt warning dialog", async () => {
-    serviceApiMock = {
-      updateMeasure: jest.fn().mockResolvedValueOnce({ status: 200 }),
-    } as unknown as MeasureServiceApi;
-    useMeasureServiceApiMock.mockImplementation(() => serviceApiMock);
-
+    mockMeasureServiceApi.updateMeasure = jest
+      .fn()
+      .mockResolvedValue({ status: 200 });
     render(<BaseConfiguration />);
-
     const scoringSelectInput = getByTestId(
       "scoring-select-input"
     ) as HTMLInputElement;
-
     const scoringSelect = getByTestId("scoring-select");
     const scoringSelectDropdown = within(scoringSelect).getByRole(
       "combobox"
     ) as HTMLInputElement;
     userEvent.click(scoringSelectDropdown);
-
     fireEvent.change(scoringSelectInput, {
       target: { value: "Cohort" },
     });
     expect(scoringSelectInput.value).toBe("Cohort");
-
     const baseConfigurationTypesSelect = getByTestId(
       "base-configuration-types-dropdown"
     );
@@ -518,30 +499,27 @@ describe("Base Configuration component", () => {
     const baseConfigurationTypesButton = within(
       baseConfigurationTypesSelect
     ).getByTitle("Open");
-
     userEvent.click(baseConfigurationTypesButton);
     expect(getByText("Structure")).toBeInTheDocument();
     userEvent.click(getByText("Structure"));
-
     userEvent.click(getByLabelText("Yes"));
-
     const saveButton = getByTestId("measure-Base Configuration-save");
     expect(saveButton).toBeInTheDocument();
     await waitFor(() => expect(saveButton).toBeEnabled());
     fireEvent.click(saveButton);
     await waitFor(() =>
-      expect(serviceApiMock.updateMeasure).toBeCalledWith({
+      expect(mockMeasureServiceApi.updateMeasure).toBeCalledWith({
         ...measure,
         scoring: "Cohort",
         baseConfigurationTypes: ["Structure"],
         patientBasis: true,
       })
     );
-
-    expect(
-      await getByText("Measure Base Configuration Updated Successfully")
-    ).toBeInTheDocument();
-
+    await waitFor(async () => {
+      expect(
+        await getByText("Measure Base Configuration Updated Successfully")
+      ).toBeInTheDocument();
+    });
     const toastCloseButton = await findByTestId("close-error-button");
     expect(toastCloseButton).toBeInTheDocument();
     fireEvent.click(toastCloseButton);

@@ -8,12 +8,13 @@ import {
   EndorsementOrganization,
   MeasureSet,
   OwnershipType,
+  MeasureSearchCriteria,
+  MeasureHistoryActions,
 } from "@madie/madie-models";
 import { useOktaTokens } from "@madie/madie-util";
 import _ from "lodash";
-import { MeasureSearchCriteria } from "../components/measureLanding/MeasureLanding";
+
 import qs from "qs";
-import { MeasureHistoryActions } from "../components/common/viewMeasureHistoryDialog/ViewMeasureHistoryDialog";
 
 export class MeasureServiceApi {
   constructor(private baseUrl: string, private getAccessToken: () => string) {}

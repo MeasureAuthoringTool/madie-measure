@@ -12,9 +12,9 @@ import {
   measureStore,
   checkUserCanEdit,
   routeHandlerStore,
+  useMeasureServiceApi,
 } from "@madie/madie-util";
 import "../testCaseConfiguration.scss";
-import useMeasureServiceApi from "../../../api/useMeasureServiceApi";
 import { MenuItem, Typography } from "@mui/material";
 import * as Yup from "yup";
 import useTerminologyServiceApi from "../../../api/useTerminologyServiceApi";

@@ -15,10 +15,7 @@ import {
   ServiceConfig,
   ApiContextProvider,
 } from "../../../../../api/ServiceContext";
-import useMeasureServiceApi, {
-  MeasureServiceApi,
-} from "../../../../../api/useMeasureServiceApi";
-import { checkUserCanEdit } from "@madie/madie-util";
+import { checkUserCanEdit, MeasureServiceApi } from "@madie/madie-util";
 
 const serviceConfig = {
   measureService: {
@@ -55,12 +52,21 @@ const mockTestMeasure = {
   ],
   riskAdjustmentDescription: "test description",
 } as unknown as Measure;
+const mockMeasureServiceApi = {
+  getReturnTypesForAllCqlFunctions: jest.fn(),
+  getReturnTypesForAllCqlDefinitions: jest.fn(),
+  fetchMeasure: jest.fn(),
+  updateMeasure: jest.fn(),
+  updateGroup: jest.fn(),
+  deleteMeasureGroup: jest.fn(),
+} as unknown as MeasureServiceApi;
 
 jest.mock("@madie/madie-util", () => ({
+  useMeasureServiceApi: jest.fn(() => mockMeasureServiceApi),
   checkUserCanEdit: jest.fn().mockImplementation(() => true),
   useKeyPress: jest.fn(() => false),
   measureStore: {
-    updateMeasure: (measure) => measure,
+    updateMeasure: (measure: Measure) => mockTestMeasure,
     state: jest.fn().mockImplementation(() => mockTestMeasure),
     initialState: jest.fn().mockImplementation(() => null),
     subscribe: () => {
@@ -80,11 +86,6 @@ jest.mock("@madie/madie-util", () => ({
     initialState: { canTravel: false, pendingPath: "" },
   },
 }));
-
-jest.mock("../../../../../api/useMeasureServiceApi");
-const useMeasureServiceApiMock =
-  useMeasureServiceApi as jest.Mock<MeasureServiceApi>;
-let measureServiceApi: MeasureServiceApi;
 
 const RenderRiskAdjustment = () => {
   return render(
@@ -131,12 +132,10 @@ describe("QdmRiskAdjustment Component", () => {
       riskAdjustments: newRiskAdjustments,
       riskAdjustmentDescription: newRiskAdjustmentDescription,
     };
-    measureServiceApi = {
-      updateMeasure: jest
-        .fn()
-        .mockResolvedValueOnce({ status: 200, data: updatedMeasure }),
-    } as unknown as MeasureServiceApi;
-    useMeasureServiceApiMock.mockImplementation(() => measureServiceApi);
+    (mockMeasureServiceApi.updateMeasure as jest.Mock).mockResolvedValueOnce({
+      status: 200,
+      data: updatedMeasure,
+    });
 
     RenderRiskAdjustment();
 
@@ -214,7 +213,7 @@ describe("QdmRiskAdjustment Component", () => {
     });
 
     await waitFor(() =>
-      expect(measureServiceApi.updateMeasure).toBeCalledWith({
+      expect(mockMeasureServiceApi.updateMeasure).toBeCalledWith({
         ...updatedMeasure,
       })
     );
@@ -258,12 +257,10 @@ describe("QdmRiskAdjustment Component", () => {
       riskAdjustments: newRiskAdjustments,
       riskAdjustmentDescription: newRiskAdjustmentDescription,
     };
-    measureServiceApi = {
-      updateMeasure: jest
-        .fn()
-        .mockResolvedValueOnce({ status: 201, data: updatedMeasure }),
-    } as unknown as MeasureServiceApi;
-    useMeasureServiceApiMock.mockImplementation(() => measureServiceApi);
+    (mockMeasureServiceApi.updateMeasure as jest.Mock).mockResolvedValueOnce({
+      status: 201,
+      data: updatedMeasure,
+    });
 
     RenderRiskAdjustment();
 
@@ -341,17 +338,17 @@ describe("QdmRiskAdjustment Component", () => {
     });
 
     await waitFor(() =>
-      expect(measureServiceApi.updateMeasure).toBeCalledWith({
+      expect(mockMeasureServiceApi.updateMeasure).toBeCalledWith({
         ...updatedMeasure,
       })
     );
   });
 
   it("Should fail an update to risk adjustment values because of unexpected internal server issues", async () => {
-    measureServiceApi = {
-      updateMeasure: jest.fn().mockRejectedValue({ status: 500, data: null }),
-    } as unknown as MeasureServiceApi;
-    useMeasureServiceApiMock.mockImplementation(() => measureServiceApi);
+    (mockMeasureServiceApi.updateMeasure as jest.Mock).mockRejectedValue({
+      status: 500,
+      data: null,
+    });
 
     RenderRiskAdjustment();
 
@@ -396,7 +393,7 @@ describe("QdmRiskAdjustment Component", () => {
 
     // Should call service with updated data
     await waitFor(() =>
-      expect(measureServiceApi.updateMeasure).toBeCalledWith({
+      expect(mockMeasureServiceApi.updateMeasure).toBeCalledWith({
         ...mockTestMeasure,
         riskAdjustmentDescription: "<p>Updated test description</p>",
       })
@@ -583,7 +580,7 @@ describe("QdmRiskAdjustment Component", () => {
   it("should allow users to add and delete a value using the chip delete icon", async () => {
     checkUserCanEdit.mockReturnValue(true);
     // Mocking service call to update measure
-    useMeasureServiceApiMock.mockImplementation(() => measureServiceApi);
+
     RenderRiskAdjustment();
 
     // Verifies if RA already loads values from store and able to add new

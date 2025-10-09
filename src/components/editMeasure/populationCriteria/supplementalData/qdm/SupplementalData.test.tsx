@@ -13,10 +13,7 @@ import {
   ServiceConfig,
   ApiContextProvider,
 } from "../../../../../api/ServiceContext";
-import useMeasureServiceApi, {
-  MeasureServiceApi,
-} from "../../../../../api/useMeasureServiceApi";
-import { checkUserCanEdit } from "@madie/madie-util";
+import { checkUserCanEdit, MeasureServiceApi } from "@madie/madie-util";
 import SupplementalData from "./SupplementalData";
 import { QdmMeasureCQL } from "../../../../common/QdmMeasureCQL";
 
@@ -57,6 +54,8 @@ const mockTestMeasure = {
 } as unknown as Measure;
 
 jest.mock("@madie/madie-util", () => ({
+  useMeasureServiceApi: jest.fn(() => mockMeasureServiceApi),
+
   checkUserCanEdit: jest.fn().mockImplementation(() => true),
   useKeyPress: jest.fn(() => false),
   measureStore: {
@@ -81,10 +80,14 @@ jest.mock("@madie/madie-util", () => ({
   },
 }));
 
-jest.mock("../../../../../api/useMeasureServiceApi");
-const useMeasureServiceApiMock =
-  useMeasureServiceApi as jest.Mock<MeasureServiceApi>;
-let measureServiceApi: MeasureServiceApi;
+const mockMeasureServiceApi: MeasureServiceApi = {
+  getReturnTypesForAllCqlFunctions: jest.fn(),
+  getReturnTypesForAllCqlDefinitions: jest.fn(),
+  fetchMeasure: jest.fn(),
+  updateMeasure: jest.fn(),
+  updateGroup: jest.fn(),
+  deleteMeasureGroup: jest.fn(),
+} as unknown as MeasureServiceApi;
 
 const RenderSupplementalElements = () => {
   return render(
@@ -162,12 +165,9 @@ describe("SupplementalData Component QDM", () => {
       supplementalData: newSupplementalData,
       supplementalDataDescription: newSupplementalDataDescription,
     };
-    measureServiceApi = {
-      updateMeasure: jest
-        .fn()
-        .mockResolvedValueOnce({ status: 200, data: updatedMeasure }),
-    } as unknown as MeasureServiceApi;
-    useMeasureServiceApiMock.mockImplementation(() => measureServiceApi);
+    mockMeasureServiceApi.updateMeasure = jest
+      .fn()
+      .mockResolvedValueOnce({ status: 200, data: updatedMeasure });
 
     RenderSupplementalElements();
 
@@ -244,7 +244,7 @@ describe("SupplementalData Component QDM", () => {
     });
 
     await waitFor(() =>
-      expect(measureServiceApi.updateMeasure).toBeCalledWith({
+      expect(mockMeasureServiceApi.updateMeasure).toBeCalledWith({
         ...updatedMeasure,
       })
     );
@@ -255,10 +255,9 @@ describe("SupplementalData Component QDM", () => {
 
     // Mock API to simulate server error
     const failureMessage = "Internal Server Error";
-    measureServiceApi = {
-      updateMeasure: jest.fn().mockRejectedValueOnce(failureMessage),
-    } as unknown as MeasureServiceApi;
-    useMeasureServiceApiMock.mockImplementation(() => measureServiceApi);
+    mockMeasureServiceApi.updateMeasure = jest
+      .fn()
+      .mockRejectedValueOnce(failureMessage);
 
     RenderSupplementalElements();
 

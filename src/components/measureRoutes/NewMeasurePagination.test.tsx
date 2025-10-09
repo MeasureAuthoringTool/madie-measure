@@ -3,11 +3,12 @@ import * as React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import { createMemoryRouter, RouterProvider } from "react-router";
 import { routesConfig } from "./MeasureRoutes";
-import { MeasureServiceApi } from "../../api/useMeasureServiceApi";
+import { MeasureServiceApi } from "@madie/madie-util";
 import { ApiContextProvider, ServiceConfig } from "../../api/ServiceContext";
 import { mockPaginationResponses } from "../__mocks__/mockMeasureResponses";
 import { describe, expect, test } from "@jest/globals";
 import userEvent from "@testing-library/user-event";
+import useMeasureServiceApi from "../../api/useMeasureServiceApi";
 
 jest.mock("react-router-dom", () => ({
   ...(jest.requireActual("react-router-dom") as any),
@@ -23,6 +24,7 @@ const serviceConfig = {
 
 const mockUser = "TestUser1";
 jest.mock("@madie/madie-util", () => ({
+  useMeasureServiceApi: jest.fn(() => mockMeasureServiceApi),
   useDocumentTitle: jest.fn(),
   useOktaTokens: () => ({
     getAccessToken: () => "test.jwt",
@@ -45,9 +47,6 @@ const mockMeasureServiceApi = {
   searchMeasuresByCriteria: jest.fn(mockPaginationResponses),
 } as unknown as MeasureServiceApi;
 
-jest.mock("../../api/useMeasureServiceApi", () =>
-  jest.fn(() => mockMeasureServiceApi)
-);
 const { findAllByTestId, findByTestId, queryByTestId } = screen;
 
 describe("Measures Pagination", () => {

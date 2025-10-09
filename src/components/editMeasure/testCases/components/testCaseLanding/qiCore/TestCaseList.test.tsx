@@ -493,6 +493,13 @@ jest.mock("../../../api/useMeasureServiceApi");
 const useMeasureServiceMock =
   useMeasureServiceApi as jest.Mock<MeasureServiceApi>;
 
+jest.mock("../common/copyTestCases/CopyTestCaseDialog", () => ({
+  __esModule: true,
+  default: () => (
+    <div data-testid="copy-test-case-dialog">Copy Test Case Dialog</div>
+  ),
+}));
+
 const measureBundle = buildMeasureBundle(mockMeasure);
 const valueSets = [getExampleValueSet()];
 const setMeasure = jest.fn();
@@ -1598,10 +1605,9 @@ describe("TestCaseList component", () => {
     expect(copyTestCaseButton).not.toBeDisabled();
 
     userEvent.click(copyTestCaseButton);
-    expect(await screen.findByRole("dialog")).toBeInTheDocument();
-
-    userEvent.click(await screen.findByRole("button", { name: "Cancel" }));
-    await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+    expect(
+      await screen.getByTestId("copy-test-case-dialog")
+    ).toBeInTheDocument();
   });
 
   it("Should not display valid test case percentage for QiCore v6 measures when feature flag is off", async () => {

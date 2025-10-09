@@ -31,7 +31,7 @@ import CheckBoxIcon from "@mui/icons-material/CheckBox";
 import "../../measureLanding/MeasureLanding.scss";
 import tw from "twin.macro";
 import "styled-components/macro";
-import useMeasureServiceApi from "../../../api/useMeasureServiceApi";
+import { useMeasureServiceApi } from "@madie/madie-util";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 
@@ -397,6 +397,15 @@ const ShareDialog = ({ measures, open, option, onClose }: ShareDialogProps) => {
       });
     }
 
+    const formattedDateShared = (info) => {
+      const result =
+        info.row.original.dateShared === "-"
+          ? "-"
+          : info.row.original.dateShared
+          ? convertDate(info.row.original.dateShared)
+          : "";
+      return result;
+    };
     columnDefs = [
       ...columnDefs,
       {
@@ -414,13 +423,7 @@ const ShareDialog = ({ measures, open, option, onClose }: ShareDialogProps) => {
         header: "Date Shared",
         cell: (info) => (
           <TruncateText
-            text={
-              info.row.original.dateShared === "-"
-                ? "-"
-                : info.row.original.dateShared
-                ? convertDate(info.row.original.dateShared)
-                : ""
-            }
+            text={formattedDateShared(info)}
             maxLength={120}
             dataTestId={`date-shared-${info.row.original.dateShared}_${info.row.original.measureId}`}
           />
@@ -493,7 +496,13 @@ const ShareDialog = ({ measures, open, option, onClose }: ShareDialogProps) => {
     table.resetExpanded();
     formik.resetForm();
   }, [onClose]);
-
+  const myFunc = (option) => {
+    const result =
+      option === "Share With"
+        ? saveDisabled || !formik.isValid || executing
+        : table.getIsAllRowsSelected() || executing;
+    return result;
+  };
   return (
     <>
       <GlobalStyles />
@@ -522,10 +531,7 @@ const ShareDialog = ({ measures, open, option, onClose }: ShareDialogProps) => {
           type: "submit",
           continueText: "Save",
           "data-testid": "share-save-button",
-          disabled:
-            option === "Share With"
-              ? saveDisabled || !formik.isValid || executing
-              : table.getIsAllRowsSelected() || executing,
+          disabled: myFunc(option),
         }}
       >
         <div id="measure-landing" data-testid="measure-landing">

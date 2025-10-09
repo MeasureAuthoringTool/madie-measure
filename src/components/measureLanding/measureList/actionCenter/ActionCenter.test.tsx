@@ -8,23 +8,47 @@ import {
   useFeatureFlags,
   useOktaTokens,
   checkUserCanDelete,
+  MeasureServiceApi,
+  userMeasureServiceApi,
 } from "@madie/madie-util";
-import useMeasureServiceApi from "../../../../api/useMeasureServiceApi";
+
+const mockMeasureServiceApi = {
+  deleteMeasure: jest.fn().mockResolvedValue({}),
+  checkNextVersionNumber: jest.fn().mockReturnValue("1.0.000"),
+
+  fetchMeasureDraftStatuses: jest.fn().mockResolvedValue({
+    "1": true,
+    "2": true,
+    "3": true,
+  }),
+  getMeasureExport: jest
+    .fn()
+    .mockResolvedValue({ size: 635581, type: "application/octet-stream" }),
+  getSharedMeasures: jest.fn().mockResolvedValue({
+    measureId1: ["userId1"],
+    measureId2: ["userId1", "userId2"],
+  }),
+  getMeasuresByMeasureSetId: jest
+    .fn()
+    .mockResolvedValue([{ model: Model.QICORE }, { model: Model.QICORE }]),
+  transferMeasures: jest.fn().mockResolvedValue({
+    data: true,
+  }),
+} as unknown as MeasureServiceApi;
+
+const mockGetUserName = jest.fn(() => "test user");
+const mockCheckUserCanEdit = jest.fn();
+const setViewHumanReadableModal = jest.fn();
+const mockCheckUserCanDelete = jest.fn();
 
 jest.mock("@madie/madie-util", () => ({
+  useMeasureServiceApi: jest.fn(() => mockMeasureServiceApi),
   checkUserCanEdit: jest.fn(),
   useFeatureFlags: jest.fn(),
   useOktaTokens: jest.fn(),
   fetchMeasureDraftStatuses: jest.fn(),
   checkUserCanDelete: jest.fn(),
 }));
-
-jest.mock("../../../../api/useMeasureServiceApi");
-
-const mockGetUserName = jest.fn(() => "test user");
-const mockCheckUserCanEdit = jest.fn();
-const setViewHumanReadableModal = jest.fn();
-const mockCheckUserCanDelete = jest.fn();
 
 const mockMeasureSet = {
   cmsId: "124",
@@ -130,10 +154,7 @@ describe("ActionCenter", () => {
     const fetchMeasureDraftStatuses = jest.fn().mockResolvedValue({
       "1-2-3-4": true,
     });
-
-    (useMeasureServiceApi as jest.Mock).mockReturnValue({
-      fetchMeasureDraftStatuses,
-    });
+    mockMeasureServiceApi.fetchMeasureDraftStatuses = fetchMeasureDraftStatuses;
 
     render(
       <ActionCenter

@@ -1,14 +1,17 @@
 import React from "react";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import ViewMeasureHistoryDialog, {
-  MeasureHistoryActions,
-} from "./ViewMeasureHistoryDialog";
-import { Measure } from "@madie/madie-models";
+import ViewMeasureHistoryDialog from "./ViewMeasureHistoryDialog";
+import { Measure, MeasureHistoryActions } from "@madie/madie-models";
+import { get } from "lodash";
 
-// Mock dependencies
+// Mock dependencies]
 const mockGetMeasureHistoryLogs = jest.fn();
-jest.mock("../../../api/useMeasureServiceApi", () => () => ({
+const mockMeasureServiceApi = {
   getMeasureHistoryLogs: mockGetMeasureHistoryLogs,
+};
+
+jest.mock("@madie/madie-util", () => ({
+  useMeasureServiceApi: jest.fn(() => mockMeasureServiceApi),
 }));
 jest.mock("@madie/madie-design-system/dist/react", () => ({
   MadieDialog: ({ children, ...props }: any) => (
@@ -72,7 +75,9 @@ describe("ViewMeasureHistoryDialog", () => {
   });
 
   it("renders dialog with measure name", () => {
-    mockGetMeasureHistoryLogs.mockResolvedValue(historyData);
+    mockMeasureServiceApi.getMeasureHistoryLogs = jest
+      .fn()
+      .mockResolvedValue(historyData);
     render(
       <ViewMeasureHistoryDialog
         measures={[measure]}
@@ -84,7 +89,9 @@ describe("ViewMeasureHistoryDialog", () => {
   });
 
   it("shows loading state when fetching history", async () => {
-    mockGetMeasureHistoryLogs.mockReturnValue(new Promise(() => {})); // never resolves
+    mockMeasureServiceApi.getMeasureHistoryLogs = jest
+      .fn()
+      .mockResolvedValue(new Promise(() => {}));
     render(
       <ViewMeasureHistoryDialog
         measures={[measure]}
@@ -96,7 +103,9 @@ describe("ViewMeasureHistoryDialog", () => {
   });
 
   it("shows 'No history found.' when no data", async () => {
-    mockGetMeasureHistoryLogs.mockResolvedValue([]);
+    mockMeasureServiceApi.getMeasureHistoryLogs = jest
+      .fn()
+      .mockResolvedValue([]);
     render(
       <ViewMeasureHistoryDialog
         measures={[measure]}
@@ -110,7 +119,10 @@ describe("ViewMeasureHistoryDialog", () => {
   });
 
   it("renders history rows when data is returned", async () => {
-    mockGetMeasureHistoryLogs.mockResolvedValue(historyData);
+    mockMeasureServiceApi.getMeasureHistoryLogs = jest
+      .fn()
+      .mockResolvedValue(historyData);
+
     render(
       <ViewMeasureHistoryDialog
         measures={[measure]}
@@ -136,7 +148,10 @@ describe("ViewMeasureHistoryDialog", () => {
       performedBy: `user${i + 1}`,
       additionalMessage: `msg${i + 1}`,
     }));
-    mockGetMeasureHistoryLogs.mockResolvedValue(manyHistory);
+    mockMeasureServiceApi.getMeasureHistoryLogs = jest
+      .fn()
+      .mockResolvedValue(manyHistory);
+
     render(
       <ViewMeasureHistoryDialog
         measures={[measure]}
@@ -167,7 +182,9 @@ describe("ViewMeasureHistoryDialog", () => {
   });
 
   it("resets historyData and page when dialog closes", async () => {
-    mockGetMeasureHistoryLogs.mockResolvedValue(historyData);
+    mockMeasureServiceApi.getMeasureHistoryLogs = jest
+      .fn()
+      .mockResolvedValue(historyData);
     const { rerender } = render(
       <ViewMeasureHistoryDialog
         measures={[measure]}
