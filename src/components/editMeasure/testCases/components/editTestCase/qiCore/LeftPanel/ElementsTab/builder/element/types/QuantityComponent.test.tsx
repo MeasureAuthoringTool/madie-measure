@@ -101,6 +101,9 @@ const renderWithFormik = ({
   initialValues = {
     Observation: { quantity: { value: 10, unit: "mg", comparator: ">" } },
   },
+  showAddAttributeButton = false,
+  addTitle = "",
+  handleAddElement = jest.fn(),
 } = {}) =>
   render(
     <ExecutionContextProvider
@@ -120,6 +123,9 @@ const renderWithFormik = ({
           canEdit={canEdit}
           structureDefinition={structureDefinition}
           fieldRequired={false}
+          showAddAttributeButton={showAddAttributeButton}
+          addTitle={addTitle}
+          handleAddElement={handleAddElement}
         />
       </Formik>
     </ExecutionContextProvider>
@@ -312,5 +318,51 @@ describe("QuantityComponent", () => {
       "unit-input"
     )) as HTMLTextAreaElement;
     expect(unitInput).toHaveAttribute("readonly");
+  });
+
+  test("calls handleAddElement when AddElementButton is clicked", async () => {
+    const handleAddElementMock = jest.fn();
+
+    renderWithFormik({
+      handleAddElement: handleAddElementMock,
+      addTitle: "Quantity",
+      showAddAttributeButton: true,
+    });
+
+    const addButton = screen.getByText("Add Quantity");
+    expect(addButton).toBeInTheDocument();
+
+    fireEvent.click(addButton);
+
+    await waitFor(() => {
+      expect(handleAddElementMock).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  test("does not render AddElementButton when showAddAttributeButton is false", () => {
+    renderWithFormik({
+      showAddAttributeButton: false,
+      addTitle: "Quantity",
+    });
+
+    expect(screen.queryByText("Add Quantity")).not.toBeInTheDocument();
+  });
+
+  test("does not render AddElementButton when addTitle is empty", () => {
+    renderWithFormik({
+      showAddAttributeButton: true,
+      addTitle: "",
+    });
+
+    expect(screen.queryByText("Add Quantity")).not.toBeInTheDocument();
+  });
+
+  test("does not render AddElementButton when canEdit is false", () => {
+    renderWithFormik({
+      showAddAttributeButton: true,
+      addTitle: "Quantity",
+      canEdit: false,
+    });
+    expect(screen.queryByText("Add Quantity")).not.toBeInTheDocument();
   });
 });

@@ -233,12 +233,34 @@ const TypeEditor = ({
         );
       case "Quantity":
         return (
-          <QuantityComponent
-            canEdit={canEdit}
-            label={label}
-            structureDefinition={structureDefinition}
-            fieldRequired={required}
-          />
+          <>
+            {showAddAttributeButton && values ? (
+              values.map((el, index) => (
+                <QuantityComponent
+                  key={index}
+                  canEdit={canEdit}
+                  label={`${label}[${index}]`}
+                  structureDefinition={structureDefinition}
+                  fieldRequired={required}
+                  showAddAttributeButton={
+                    showAddAttributeButton && index === values.length - 1
+                  }
+                  addTitle={addTitle}
+                  handleAddElement={handleAddElement}
+                />
+              ))
+            ) : (
+              <QuantityComponent
+                canEdit={canEdit}
+                label={label}
+                structureDefinition={structureDefinition}
+                fieldRequired={required}
+                showAddAttributeButton={showAddAttributeButton}
+                addTitle={addTitle}
+                handleAddElement={handleAddElement}
+              />
+            )}
+          </>
         );
       case "Period":
         return (

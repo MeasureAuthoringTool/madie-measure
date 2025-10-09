@@ -4,9 +4,10 @@
   align-items: flex-start;
 
   .quantity-fields {
+    margin-top: 8px;
     display: flex;
     flex-direction: row;
-    margin-top: 8px;
+    align-items: center;
 
     .comparator-input {
       margin-right: 16px;
@@ -19,6 +20,11 @@
     .value-input,
     .unit-input {
       width: 130px;
+    }
+
+    .element-add-container {
+      margin-left: 16px;
+      margin-top: 16px;
     }
   }
 }
