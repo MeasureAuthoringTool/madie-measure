@@ -1,5 +1,7 @@
 import React from "react";
 import { render, screen, act } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+
 import {
   QiCoreResourceProvider,
   useQiCoreResource,
@@ -63,6 +65,30 @@ const TestComponent = () => {
       >
         Add Resource by Reference
       </button>
+      <button
+        onClick={() =>
+          handleDispatch(ResourceActionType.ADD_RESOURCE_BY_REFERENCE, {
+            bundleEntry: {
+              resource: { id: "res-1", modified: true, modifiedAgain: true },
+            },
+            add_new_resource: { resource: { id: "res-2" } },
+          })
+        }
+      >
+        Add Resource by Reference 2
+      </button>
+      <button
+        onClick={() =>
+          handleDispatch("IDK", {
+            bundleEntry: {
+              resource: { id: "res-1", modified: true, modifiedAgain: true },
+            },
+            add_new_resource: { resource: { id: "res-2" } },
+          })
+        }
+      >
+        Throw Error
+      </button>
       <div data-testid="bundle">{JSON.stringify(state.bundle)}</div>
     </div>
   );
@@ -96,6 +122,16 @@ describe("QiCoreResourceContext", () => {
     });
     expect(bundleDisplay.textContent).toContain("modified");
 
+    // MODIFY_BUNDLE_ENTRY_AGAIN
+    act(() => {
+      screen.getByText("Modify Entry").click();
+    });
+    expect(bundleDisplay.textContent).toContain("modified");
+    act(() => {
+      screen.getByText("Add Resource by Reference").click();
+    });
+    expect(bundleDisplay.textContent).toContain("res-2");
+
     // REMOVE_BUNDLE_ENTRY
     act(() => {
       screen.getByText("Remove Entry").click();
@@ -107,5 +143,17 @@ describe("QiCoreResourceContext", () => {
       screen.getByText("Add Resource by Reference").click();
     });
     expect(bundleDisplay.textContent).toContain("res-2");
+  });
+
+  it("Throws an error.", () => {
+    expect(() => {
+      render(
+        <QiCoreResourceProvider>
+          <TestComponent />
+        </QiCoreResourceProvider>
+      );
+      userEvent.click(screen.getByText("Throw Error"));
+      expect(bundleDisplay.textContent).toContain("res-2");
+    });
   });
 });
