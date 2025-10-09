@@ -18,7 +18,6 @@ import { checkUserCanEdit } from "@madie/madie-util";
 import CreateCodeCoverageNavTabs from "./CreateCodeCoverageNavTabs";
 import CreateNewTestCaseDialog from "../../createTestCase/CreateNewTestCaseDialog";
 import {
-  MadieDeleteDialog,
   MadieSpinner,
   Pagination,
   Toast,
@@ -94,7 +93,14 @@ const TestCaseList = (props: TestCaseListProps) => {
   let navigate = useNavigate();
   const { search } = useLocation();
   const values = queryString.parse(search);
-  const { setErrors, setImportErrors, setWarnings, setImportWarnings } = props;
+  const {
+    setErrors,
+    setImportErrors,
+    setWarnings,
+    setImportWarnings,
+    setCustomWarningMessages,
+    setShiftTestCaseDatesWarnings,
+  } = props;
   const { measureId, criteriaId } = useParams<{
     measureId: string;
     criteriaId: string;
@@ -147,8 +153,6 @@ const TestCaseList = (props: TestCaseListProps) => {
   const [executeAllTestCases, setExecuteAllTestCases] =
     useState<boolean>(false);
   const [coveragePercentage, setCoveragePercentage] = useState<string>("-");
-  const [openDeleteAllTestCasesDialog, setOpenDeleteAllTestCasesDialog] =
-    useState<boolean>(false);
   const [testCasePassFailStats, setTestCasePassFailStats] =
     useState<TestCasesPassingDetailsProps>({
       passPercentage: undefined,
@@ -368,25 +372,7 @@ const TestCaseList = (props: TestCaseListProps) => {
     setExecuteAllTestCases(false);
   };
 
-  const deleteTestCase = (testCaseId) => {
-    testCaseService.current
-      .deleteTestCaseByTestCaseId(measureId, testCaseId)
-      .then(() => {
-        retrieveTestCases();
-      })
-      .catch((err) => {
-        console.error(
-          "deleteTestCaseByTestCaseId: err.message = " + err.message
-        );
-        setToastOpen(true);
-        setToastType("danger");
-        setToastMessage(
-          `Unable to Delete test Case with ID ${testCaseId}. Please try again. If the issue continues, please contact helpdesk.`
-        );
-      });
-  };
-
-  const deleteMultipleTestCases = () => {
+  const deleteTestCases = () => {
     const testCaseIds = selectedTestCases?.map((testCase) => testCase.id);
     testCaseService.current
       .deleteTestCases(measureId, testCaseIds)
@@ -398,13 +384,36 @@ const TestCaseList = (props: TestCaseListProps) => {
       })
       .catch((err) => {
         console.error("deleteTestCases: err.message = " + err.message);
-        setToastOpen(true);
-        setToastType("danger");
-        setToastMessage(
-          `Unable to Delete test Case(s) with ID(s) ${testCaseIds.join(
-            ", "
-          )}. Please try again. If the issue continues, please contact helpdesk.`
-        );
+        if (err?.response?.status == 423) {
+          if (
+            testCaseIds.length ===
+            err?.response?.data?.message?.split(",").length
+          ) {
+            setToastMessage(
+              "All the selected test cases are in-use by another user and could not be deleted."
+            );
+            setToastOpen(true);
+            setToastType("warning");
+          } else {
+            retrieveTestCases();
+            setCustomWarningMessages([
+              {
+                message:
+                  "Some of the selected test cases were deleted successfully, but the following test cases are in-use by another user and could not be deleted:",
+                details: err?.response?.data?.message?.split(","),
+                testDataId: "test-cases-in-use-warning",
+              },
+            ]);
+          }
+        } else {
+          setToastOpen(true);
+          setToastType("danger");
+          setToastMessage(
+            `Unable to Delete test Case(s) with ID(s) ${testCaseIds.join(
+              ", "
+            )}. Please try again. If the issue continues, please contact helpdesk.`
+          );
+        }
       });
   };
 
@@ -497,27 +506,6 @@ const TestCaseList = (props: TestCaseListProps) => {
   const executionResultLength = calculationOutput
     ? Object.keys(calculationOutput).length
     : 0;
-
-  const deleteAllTestCases = () => {
-    const currentTestCaseIds = _.map(measure.testCases, "id");
-    testCaseService.current
-      .deleteTestCases(measureId, currentTestCaseIds)
-      .then(() => {
-        retrieveTestCases();
-        setOpenDeleteAllTestCasesDialog(false);
-        setToastOpen(true);
-        setToastType("success");
-        setToastMessage("Test cases successfully deleted");
-      })
-      .catch(() => {
-        setOpenDeleteAllTestCasesDialog(false);
-        setToastOpen(true);
-        setToastType("danger");
-        setToastMessage(
-          "Unable to Delete All test Cases. Please try again. If the issue continues, please contact helpdesk."
-        );
-      });
-  };
 
   const exportExcel = async () => {
     if (measure?.cql) {
@@ -719,9 +707,6 @@ const TestCaseList = (props: TestCaseListProps) => {
                 coveragePercentage={coveragePercentage}
                 validTestCases={testCases?.filter((tc) => tc.validResource)}
                 selectedPopCriteria={selectedPopCriteria}
-                onDeleteAllTestCases={() =>
-                  setOpenDeleteAllTestCasesDialog(true)
-                }
                 onExportQRDA={exportQRDA}
                 onExportExcel={exportExcel}
                 exportExecuting={exportExecuting}
@@ -785,7 +770,7 @@ const TestCaseList = (props: TestCaseListProps) => {
                         setSorting={setSorting}
                         testCases={currentSlice}
                         canEdit={canEdit}
-                        deleteTestCase={deleteMultipleTestCases}
+                        deleteTestCase={deleteTestCases}
                         exportTestCase={null}
                         onCloneTestCase={handleCloneTestCase}
                         measure={measure}
@@ -796,6 +781,9 @@ const TestCaseList = (props: TestCaseListProps) => {
                         shiftDatesDialogModalOpen={shiftDatesDialogModalOpen}
                         setShiftDatesDialogModalOpen={
                           setShiftDatesDialogModalOpen
+                        }
+                        setShiftTestCaseDatesWarnings={
+                          setShiftTestCaseDatesWarnings
                         }
                         setWarnings={setWarnings}
                         page={page}
@@ -858,17 +846,6 @@ const TestCaseList = (props: TestCaseListProps) => {
           <Typography color="inherit">{loadingState.message}</Typography>
         </div>
       )}
-      <MadieDeleteDialog
-        open={openDeleteAllTestCasesDialog}
-        onContinue={() => {
-          deleteAllTestCases();
-        }}
-        onClose={() => {
-          setOpenDeleteAllTestCasesDialog(false);
-        }}
-        dialogTitle="Delete All Test Cases"
-        name="All Test Cases"
-      />
       <CopyTestCaseDialog
         selectedTestCases={selectedTestCases}
         open={openCopyTestCaseDialog}

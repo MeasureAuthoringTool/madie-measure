@@ -25,6 +25,7 @@ import {
   removeUndefinedAndEmptyObjects,
   getNestedProperty,
   stripAllIndexes,
+  filterUnusedExtensionsFromElements,
 } from "../../../../../../../api/fhirDefinitionServiceUtilities";
 import { useFormikContext } from "formik";
 import {
@@ -72,6 +73,7 @@ const ResourceEditor = ({
   const [allElements, setAllElements] = useState([]); // we don't need this.
   const [selectedResource, setSelectedResource] = useState(null);
   const editingResource = selectedResource?.bundleEntry?.resource;
+  // We need to know what extensions are being displayed. We need to look closely at the urls
   const [displayedElements, setDisplayedElements] = useState<
     ElementDefinition[]
   >([]);
@@ -179,7 +181,11 @@ const ResourceEditor = ({
           );
           setSelectedResource(selectedResource);
           setAllElements(topElements);
-          setDisplayedElements(elementsModifiedForCardinality);
+          const displayedElements = filterUnusedExtensionsFromElements(
+            selectedResource,
+            elementsModifiedForCardinality
+          );
+          setDisplayedElements(displayedElements);
           setDisplayedElementsTree(getDisplayedElementsTree(uniqueElements));
           // this is not the best way to do this, but I'm unsure of a better way without a lot more overhead.
           const index = _.findLastIndex(

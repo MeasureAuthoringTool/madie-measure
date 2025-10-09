@@ -13,7 +13,6 @@ import {
 } from "../../../../../../api/ServiceContext";
 import {
   getCoverageValueFromHtml,
-  IMPORT_ERROR,
   removeHtmlCoverageHeader,
 } from "./TestCaseList";
 import calculationService, {
@@ -500,6 +499,7 @@ const setMeasureBundle = jest.fn();
 const setValueSets = jest.fn();
 const setError = jest.fn();
 const setWarnings = jest.fn();
+const setCustomWarningMessages = jest.fn();
 const setImportWarnings = jest.fn();
 
 // Test Case import related
@@ -612,6 +612,7 @@ describe("TestCaseList component", () => {
                           setErrors={setError}
                           setWarnings={setWarnings}
                           setImportWarnings={setImportWarnings}
+                          setCustomWarningMessages={setCustomWarningMessages}
                         />
                       }
                     />
@@ -815,6 +816,96 @@ describe("TestCaseList component", () => {
     userEvent.click(confirmDeleteBtn);
     await waitFor(() => expect(setError).toHaveBeenCalled());
     expect(nextState).toEqual(["BAD THINGS"]);
+  });
+
+  it("should handle response list of locked test cases on Test Case list page when delete button is clicked", async () => {
+    useTestCaseServiceMock.mockImplementation(() => {
+      return {
+        ...useTestCaseServiceMockResolved,
+        deleteTestCases: jest.fn().mockRejectedValue({
+          response: {
+            status: 423,
+            data: {
+              message: "ID1,ID2",
+            },
+          },
+        }),
+      } as unknown as TestCaseServiceApi;
+    });
+
+    renderTestCaseListComponent();
+    await waitFor(() => {
+      const selectButton = screen.getByTestId(`test-case-title-0_select`);
+      const checkboxButton = within(selectButton).getByRole("checkbox");
+      expect(checkboxButton).toBeInTheDocument();
+      fireEvent.click(checkboxButton);
+      expect(checkboxButton).toBeChecked();
+    });
+
+    const deleteButton = screen.getByTestId("delete-action-icon");
+    expect(deleteButton).toBeEnabled();
+    fireEvent.click(deleteButton);
+
+    await waitFor(() => {
+      expect(screen.getByTestId("delete-dialog")).toBeInTheDocument();
+    });
+    const confirmDeleteBtn = screen.getByTestId(
+      "delete-dialog-continue-button"
+    );
+    expect(confirmDeleteBtn).toBeInTheDocument();
+    expect(
+      screen.getByTestId("delete-dialog-cancel-button")
+    ).toBeInTheDocument();
+
+    userEvent.click(confirmDeleteBtn);
+    await waitFor(() => expect(setCustomWarningMessages).toHaveBeenCalled());
+  });
+
+  it("should handle response list of locked test cases on Test Case list page when delete button is clicked, and length is equal to selected", async () => {
+    useTestCaseServiceMock.mockImplementation(() => {
+      return {
+        ...useTestCaseServiceMockResolved,
+        deleteTestCases: jest.fn().mockRejectedValue({
+          response: {
+            status: 423,
+            data: {
+              message: "ID1",
+            },
+          },
+        }),
+      } as unknown as TestCaseServiceApi;
+    });
+
+    renderTestCaseListComponent();
+    await waitFor(() => {
+      const selectButton = screen.getByTestId(`test-case-title-0_select`);
+      const checkboxButton = within(selectButton).getByRole("checkbox");
+      expect(checkboxButton).toBeInTheDocument();
+      fireEvent.click(checkboxButton);
+      expect(checkboxButton).toBeChecked();
+    });
+
+    const deleteButton = screen.getByTestId("delete-action-icon");
+    expect(deleteButton).toBeEnabled();
+    fireEvent.click(deleteButton);
+
+    await waitFor(() => {
+      expect(screen.getByTestId("delete-dialog")).toBeInTheDocument();
+    });
+    const confirmDeleteBtn = screen.getByTestId(
+      "delete-dialog-continue-button"
+    );
+    expect(confirmDeleteBtn).toBeInTheDocument();
+    expect(
+      screen.getByTestId("delete-dialog-cancel-button")
+    ).toBeInTheDocument();
+
+    userEvent.click(confirmDeleteBtn);
+    await waitFor(() => {
+      expect(screen.getByTestId("test-case-list-success")).toHaveTextContent(
+        `All the selected test cases are in-use by another user and could not be deleted.`
+      );
+    });
   });
 
   it("should execute test cases", async () => {

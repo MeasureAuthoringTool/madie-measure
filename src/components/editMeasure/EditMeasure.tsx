@@ -350,7 +350,7 @@ export default function EditMeasure() {
     };
   }, [currentMeasureId]);
 
-  const handleCreateError = (error) => {
+  const handleCreateVersionError = (error) => {
     const errorData = error?.response;
     const message = errorData?.data?.message;
 
@@ -360,6 +360,8 @@ export default function EditMeasure() {
       setToastMessage("Requested measure cannot be versioned");
     } else if (errorData?.status === 403) {
       setToastMessage("User is unauthorized to create a version");
+    } else if (errorData?.status === 423) {
+      setToastMessage(`${errorData?.data?.message}`);
     } else {
       setToastMessage(
         message ||
@@ -422,7 +424,7 @@ export default function EditMeasure() {
         updateMeasure(response.data);
       })
       .catch((error) => {
-        handleCreateError(error);
+        handleCreateVersionError(error);
       });
   };
   // given a version and target, check if possible
@@ -454,7 +456,7 @@ export default function EditMeasure() {
           }
         })
         .catch((error) => {
-          handleCreateError(error);
+          handleCreateVersionError(error);
           setLoading(false);
         });
     }

@@ -50,6 +50,7 @@ interface TestCaseTableProps {
   setShiftDatesDialogModalOpen: any;
   setWarnings: any;
   page: number;
+  setShiftTestCaseDatesWarnings: any;
 }
 
 const fiberManualRecordStyles = {
@@ -121,7 +122,7 @@ const TestCaseTable = (props: TestCaseTableProps) => {
     setDeleteDialogModalOpen,
     shiftDatesDialogModalOpen,
     setShiftDatesDialogModalOpen,
-    setWarnings,
+    setShiftTestCaseDatesWarnings,
   } = props;
   const viewOrEdit = canEdit ? "edit" : "view";
   const [toastOpen, setToastOpen] = useState<boolean>(false);
@@ -544,7 +545,7 @@ const TestCaseTable = (props: TestCaseTableProps) => {
           canEdit={canEdit}
           testCases={selectedTestCases ? selectedTestCases : []}
           measure={measure}
-          setWarnings={setWarnings}
+          setShiftTestCaseDatesWarnings={setShiftTestCaseDatesWarnings}
           setToastOpen={setToastOpen}
           setToastType={setToastType}
           setToastMessage={setToastMessage}

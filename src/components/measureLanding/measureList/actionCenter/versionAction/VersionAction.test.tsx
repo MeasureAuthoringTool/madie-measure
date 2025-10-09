@@ -3,14 +3,16 @@ import { render, screen } from "@testing-library/react";
 import VersionAction, {
   VERSION_MEASURE,
   NOTHING_SELECTED,
+  MEASURE_LOCKED_MESSAGE,
+  TEST_CASES_LOCKED_MESSAGE,
 } from "./VersionAction";
-import { Measure, MeasureSet, Model } from "@madie/madie-models";
-import userEvent from "@testing-library/user-event";
+import { Measure, MeasureSet, Model, MeasureLock } from "@madie/madie-models";
+import { useFeatureFlags } from "@madie/madie-util";
 
 const mockUser = "test user";
 jest.mock("@madie/madie-util", () => ({
-  useOktaTokens: () => ({
-    getUserName: () => mockUser,
+  useFeatureFlags: jest.fn().mockReturnValue({
+    Locking: false,
   }),
 }));
 
@@ -32,13 +34,13 @@ const qiCoreMeasure = {
   measureSet: { ...mockMeasureSet, cmsId: null },
   measureSetId: "1-2-3-4",
   measureMetaData: { draft: true },
-} as Measure;
+} as unknown as Measure;
 const qiCoreMeasureVersioned = {
   model: Model.QICORE,
   measureSet: { ...mockMeasureSet, cmsId: null },
   measureSetId: "1-2-3-4",
   measureMetaData: { draft: false },
-} as Measure;
+} as unknown as Measure;
 
 describe("VersionAction", () => {
   it("Should disable action btn if no measure selected", () => {
@@ -106,6 +108,79 @@ describe("VersionAction", () => {
     expect(screen.getByTestId("version-action-tooltip")).toHaveAttribute(
       "aria-label",
       NOTHING_SELECTED
+    );
+  });
+
+  it("Should disable button if measure is locked", () => {
+    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
+      Locking: true,
+    }));
+    const lockedByUser = "another user";
+    render(
+      <VersionAction
+        measures={[
+          {
+            ...qiCoreMeasure,
+            measureLock: { lockedBy: lockedByUser } as MeasureLock,
+          },
+        ]}
+        onClick={() => {}}
+        canEdit={true}
+      />
+    );
+    expect(screen.getByTestId("version-action-btn")).toBeDisabled();
+    expect(screen.getByTestId("version-action-tooltip")).toHaveAttribute(
+      "aria-label",
+      MEASURE_LOCKED_MESSAGE + " " + lockedByUser
+    );
+  });
+
+  it("Should disable button if test cases are locked", () => {
+    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
+      Locking: true,
+    }));
+    const lockedByUser = "another user";
+    render(
+      <VersionAction
+        measures={[
+          {
+            ...qiCoreMeasure,
+            hasLockedTestCases: true,
+            measureLock: { lockedBy: lockedByUser } as MeasureLock,
+          },
+        ]}
+        onClick={() => {}}
+        canEdit={true}
+      />
+    );
+    expect(screen.getByTestId("version-action-btn")).toBeDisabled();
+    expect(screen.getByTestId("version-action-tooltip")).toHaveAttribute(
+      "aria-label",
+      TEST_CASES_LOCKED_MESSAGE
+    );
+  });
+
+  it("Should enable button if neither measure nor test cases are locked", () => {
+    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
+      Locking: true,
+    }));
+    render(
+      <VersionAction
+        measures={[
+          {
+            ...qiCoreMeasure,
+            measureLock: { lockedBy: null } as MeasureLock,
+            hasLockedTestCases: false,
+          },
+        ]}
+        onClick={() => {}}
+        canEdit={true}
+      />
+    );
+    expect(screen.getByTestId("version-action-btn")).not.toBeDisabled();
+    expect(screen.getByTestId("version-action-tooltip")).toHaveAttribute(
+      "aria-label",
+      VERSION_MEASURE
     );
   });
 });
