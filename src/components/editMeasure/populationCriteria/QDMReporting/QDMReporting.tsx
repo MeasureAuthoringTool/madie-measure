@@ -125,7 +125,7 @@ const QDMReporting = (props: ReportingProps) => {
   };
 
   const handleSubmit = async (values) => {
-    if (featureFlags.Locking && props.checkTestCasesLockStatus()) {
+    if (featureFlags.Locking && (await props.checkTestCasesLockStatus())) {
       props.setAlertMessage({
         type: "error",
         message:
