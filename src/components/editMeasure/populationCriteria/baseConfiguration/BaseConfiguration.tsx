@@ -144,7 +144,7 @@ const BaseConfiguration = (props: BaseConfigurationProps) => {
       measure.groups = null;
     }
 
-    if (featureFlags.Locking && props.checkTestCasesLockStatus()) {
+    if (featureFlags.Locking && (await props.checkTestCasesLockStatus())) {
       props.setAlertMessage({
         type: "error",
         message:
