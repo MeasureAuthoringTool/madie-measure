@@ -77,8 +77,8 @@ const RiskAdjustment = (props: RiskAdjustmentProps) => {
   useFormikResetOnEvent(formik);
   const { resetForm } = formik;
 
-  const handleSubmit = (values) => {
-    if (featureFlags.Locking && props.checkTestCasesLockStatus()) {
+  const handleSubmit = async (values) => {
+    if (featureFlags.Locking && (await props.checkTestCasesLockStatus())) {
       props.setAlertMessage({
         type: "error",
         message:
