@@ -156,23 +156,6 @@ export class TestCaseServiceApi {
     }
   }
 
-  async deleteTestCaseByTestCaseId(measureId: string, testCaseId: string) {
-    try {
-      const response = await axios.delete(
-        `${this.baseUrl}/measures/${measureId}/test-cases/${testCaseId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${this.getAccessToken()}`,
-          },
-        }
-      );
-      return response.data;
-    } catch (err) {
-      const message = `Unable to delete test case`;
-      throw new Error(message);
-    }
-  }
-
   async deleteTestCases(measureId: string, testCaseIds: string[]) {
     return await axios.delete(
       `${this.baseUrl}/measures/${measureId}/test-cases`,

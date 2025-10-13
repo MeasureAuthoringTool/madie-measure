@@ -38,6 +38,7 @@ import {
   routeHandlerStore,
   useDocumentTitle,
   checkUserCanEdit,
+  useFeatureFlags,
 } from "@madie/madie-util";
 import MeasureGroupsWarningDialog from "../MeasureGroupWarningDialog";
 import { getPopulationsForScoring } from "../../PopulationHelper";
@@ -145,6 +146,8 @@ export interface MeasureGroupProps {
   setIsFormDirty?: (value: boolean) => void;
   measureId: string;
   setAlertMessage: Function;
+  isTestCaseLocked: boolean;
+  checkTestCasesLockStatus: Function;
 }
 
 const INITIAL_ALERT_MESSAGE = {
@@ -162,12 +165,15 @@ const MeasureGroups = (props: MeasureGroupProps) => {
   const { updateMeasure } = measureStore;
   const [measure, setMeasure] = useState<Measure>(measureStore.state);
 
-  const canEdit = checkUserCanEdit(
-    measure?.measureSet?.owner,
-    measure?.measureSet?.acls,
-    measure?.measureMetaData?.draft
-  );
+  const canEdit =
+    !props.isTestCaseLocked &&
+    checkUserCanEdit(
+      measure?.measureSet?.owner,
+      measure?.measureSet?.acls,
+      measure?.measureMetaData?.draft
+    );
   const measureServiceApi = useMeasureServiceApi();
+  const featureFlags = useFeatureFlags();
   let location = useLocation();
   const { pathname } = useLocation();
 
@@ -327,7 +333,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
       cqlDefinitionDataTypes,
       cqlFunctionDataTypes
     ),
-    onSubmit: (group: Group) => {
+    onSubmit: async (group: Group) => {
       window.scrollTo(0, 0);
       if (
         measure?.groups &&
@@ -348,6 +354,16 @@ const MeasureGroups = (props: MeasureGroupProps) => {
           open: true,
           modalType: "popBasis",
         }));
+      } else if (
+        featureFlags.Locking &&
+        (await props.checkTestCasesLockStatus())
+      ) {
+        props.setAlertMessage({
+          type: "error",
+          message:
+            "This measure cannot be saved because changes to the Population Criteria will update test cases and one or more test cases are locked by another user.",
+          canClose: false,
+        });
       } else {
         submitForm(group);
       }

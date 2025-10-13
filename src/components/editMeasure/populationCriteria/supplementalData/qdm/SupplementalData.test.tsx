@@ -16,8 +16,8 @@ import {
 import useMeasureServiceApi, {
   MeasureServiceApi,
 } from "../../../../../api/useMeasureServiceApi";
-import { checkUserCanEdit } from "@madie/madie-util";
-import SupplementalData from "./SupplementalData";
+import { checkUserCanEdit, useFeatureFlags } from "@madie/madie-util";
+import SupplementalData, { SupplementalDataProps } from "./SupplementalData";
 import { QdmMeasureCQL } from "../../../../common/QdmMeasureCQL";
 
 const serviceConfig = {
@@ -70,6 +70,9 @@ jest.mock("@madie/madie-util", () => ({
   useOktaTokens: () => ({
     getAccessToken: () => "test.jwt",
   }),
+  useFeatureFlags: jest.fn(() => ({
+    Locking: false,
+  })),
   routeHandlerStore: {
     subscribe: (set) => {
       set({ canTravel: false, pendingPath: "" });
@@ -86,10 +89,16 @@ const useMeasureServiceApiMock =
   useMeasureServiceApi as jest.Mock<MeasureServiceApi>;
 let measureServiceApi: MeasureServiceApi;
 
-const RenderSupplementalElements = () => {
+const props: SupplementalDataProps = {
+  setAlertMessage: jest.fn,
+  isTestCaseLocked: false,
+  checkTestCasesLockStatus: jest.fn(),
+};
+const RenderSupplementalElements = (customProps = props) => {
+  const mergedProps = { ...props, ...customProps };
   return render(
     <ApiContextProvider value={serviceConfig}>
-      <SupplementalData />
+      <SupplementalData {...mergedProps} />
     </ApiContextProvider>
   );
 };
@@ -427,6 +436,71 @@ describe("SupplementalData Component QDM", () => {
         screen.getByRole("button", { name: "Initial Population" })
       ).toBeInTheDocument();
       expect(screen.queryByText("+1")).not.toBeInTheDocument(); // We are limiting the selected options displayed
+    });
+  });
+
+  it("Renders in read only when testCases are locked", async () => {
+    RenderSupplementalElements({ ...props, isTestCaseLocked: true });
+    const supplementalElements = screen.getByRole("textbox", {
+      name: "Definition",
+    });
+    expect(supplementalElements).toHaveTextContent("Initial Population");
+
+    const descriptionEditor = screen.getByTestId(
+      "supplemental-data-description-rich-text-editor"
+    );
+    expect(descriptionEditor).toBeInTheDocument();
+
+    const allFormFields = screen.getAllByRole("textbox");
+    for (const formField of allFormFields) {
+      expect(formField).toHaveAttribute("readonly");
+    }
+  });
+  it("displays error alert when locking feature is enabled and test cases get locked during edit", async () => {
+    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
+      Locking: true,
+    }));
+    const checkTestCasesLockStatusMock = jest.fn().mockResolvedValue(true);
+    const setAlertMessageMock = jest.fn();
+    RenderSupplementalElements({
+      ...props,
+      checkTestCasesLockStatus: checkTestCasesLockStatusMock,
+      setAlertMessage: setAlertMessageMock,
+    });
+
+    const supplementalDataSelect = screen.getByTestId(
+      "supplemental-data-dropdown"
+    );
+    expect(supplementalDataSelect).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Initial Population" })
+    ).toBeInTheDocument();
+    const supplementalDataButton = within(supplementalDataSelect).getByTitle(
+      "Open"
+    );
+
+    userEvent.click(supplementalDataButton);
+    await waitFor(() => {
+      userEvent.click(screen.getByText("SDE Ethnicity"));
+    });
+    expect(
+      screen.getByRole("button", { name: "SDE Ethnicity" })
+    ).toBeInTheDocument();
+
+    const saveButton = screen.getByRole("button", {
+      name: "Save",
+    });
+    expect(saveButton).toBeInTheDocument();
+    await waitFor(() => expect(saveButton).toBeEnabled());
+    fireEvent.click(saveButton);
+    await waitFor(() => {
+      expect(checkTestCasesLockStatusMock).toHaveBeenCalled();
+      expect(setAlertMessageMock).toHaveBeenCalledWith({
+        type: "error",
+        message:
+          "This measure cannot be saved because changes to the Population Criteria will update test cases and one or more test cases are locked by another user.",
+        canClose: false,
+      });
     });
   });
 });

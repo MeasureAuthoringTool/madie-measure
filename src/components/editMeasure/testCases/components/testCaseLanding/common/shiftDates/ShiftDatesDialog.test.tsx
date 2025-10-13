@@ -159,7 +159,7 @@ describe("Shift Test Case Dates Dialog", () => {
     const setToastOpen = jest.fn();
     const setToastType = jest.fn();
     const setToastMessage = jest.fn();
-    const setWarnings = jest.fn();
+    const setShiftTestCaseDatesWarnings = jest.fn();
     await act(async () => {
       const { findByTestId, queryByTestId } = render(
         <ShiftDatesDialog
@@ -168,7 +168,7 @@ describe("Shift Test Case Dates Dialog", () => {
           canEdit={true}
           testCases={testCases}
           measure={measure}
-          setWarnings={setWarnings}
+          setShiftTestCaseDatesWarnings={setShiftTestCaseDatesWarnings}
           setToastOpen={setToastOpen}
           setToastType={setToastType}
           setToastMessage={setToastMessage}
@@ -199,7 +199,7 @@ describe("Shift Test Case Dates Dialog", () => {
         expect(setToastMessage).not.toBeCalledWith(
           `All Test Case dates successfully shifted.`
         );
-        expect(setWarnings).toBeCalledTimes(1);
+        expect(setShiftTestCaseDatesWarnings).toBeCalledTimes(1);
       });
     });
   });
@@ -336,7 +336,7 @@ describe("Shift Test Case Dates Dialog", () => {
     const setToastOpen = jest.fn();
     const setToastType = jest.fn();
     const setToastMessage = jest.fn();
-    const setWarnings = jest.fn();
+    const setShiftTestCaseDatesWarnings = jest.fn();
     await act(async () => {
       const { findByTestId } = render(
         <ShiftDatesDialog
@@ -345,7 +345,7 @@ describe("Shift Test Case Dates Dialog", () => {
           canEdit={true}
           testCases={testCases}
           measure={qiCoreMeasure}
-          setWarnings={setWarnings}
+          setShiftTestCaseDatesWarnings={setShiftTestCaseDatesWarnings}
           setToastOpen={setToastOpen}
           setToastType={setToastType}
           setToastMessage={setToastMessage}
@@ -376,7 +376,7 @@ describe("Shift Test Case Dates Dialog", () => {
         expect(setToastMessage).not.toBeCalledWith(
           `All Test Case dates successfully shifted.`
         );
-        expect(setWarnings).toBeCalledTimes(1);
+        expect(setShiftTestCaseDatesWarnings).toBeCalledTimes(1);
       });
     });
   });
