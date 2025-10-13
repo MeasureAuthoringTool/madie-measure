@@ -333,7 +333,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
       cqlDefinitionDataTypes,
       cqlFunctionDataTypes
     ),
-    onSubmit: (group: Group) => {
+    onSubmit: async (group: Group) => {
       window.scrollTo(0, 0);
       if (
         measure?.groups &&
@@ -354,7 +354,10 @@ const MeasureGroups = (props: MeasureGroupProps) => {
           open: true,
           modalType: "popBasis",
         }));
-      } else if (featureFlags.Locking && props.checkTestCasesLockStatus()) {
+      } else if (
+        featureFlags.Locking &&
+        (await props.checkTestCasesLockStatus())
+      ) {
         props.setAlertMessage({
           type: "error",
           message:
