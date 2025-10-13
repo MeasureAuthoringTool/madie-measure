@@ -208,7 +208,7 @@ $header-weight: 500;
     }
   }
 
-  // Only apply min-height to QI Core6 measure date elements table
+  // Only for QI Core6 data elements table
   &.test-case-summary-table {
     > tbody > tr > td > div {
       min-height: 150px !important;
