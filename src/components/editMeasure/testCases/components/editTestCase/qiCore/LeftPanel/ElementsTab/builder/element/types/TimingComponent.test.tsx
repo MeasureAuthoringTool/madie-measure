@@ -485,8 +485,8 @@ describe("TimingComponent", () => {
     expect(inputLow.value).toBe("1");
     expect(unitLow.value).toBe("cm");
 
-    userEvent.clear(inputLow);
-    userEvent.type(inputLow, "10");
+    fireEvent.change(inputLow, { target: { value: "10" } });
+
     await waitFor(() => {
       expect(setFieldValueMock).toHaveBeenCalledWith(`${basePath}.low`, {
         value: 10,
@@ -505,8 +505,8 @@ describe("TimingComponent", () => {
     expect(inputHigh.value).toBe("2");
     expect(unitHigh.value).toBe("cm");
 
-    userEvent.clear(inputHigh);
-    userEvent.type(inputHigh, "20");
+    fireEvent.change(inputHigh, { target: { value: "20" } });
+
     await waitFor(() => {
       expect(setFieldValueMock).toHaveBeenCalledWith(`${basePath}.high`, {
         value: 20,

@@ -170,11 +170,8 @@ describe("RangeComponent", () => {
       "decimal-input-field-High"
     ) as HTMLInputElement;
 
-    userEvent.clear(inputLow);
-    userEvent.type(inputLow, "10");
-
-    userEvent.clear(inputHigh);
-    userEvent.type(inputHigh, "20");
+    fireEvent.change(inputLow, { target: { value: "10" } });
+    fireEvent.change(inputHigh, { target: { value: "20" } });
 
     await waitFor(() => {
       expect(inputLow.value).toBe("10");
