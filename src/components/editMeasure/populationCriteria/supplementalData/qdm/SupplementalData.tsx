@@ -10,6 +10,7 @@ import {
   measureStore,
   routeHandlerStore,
   checkUserCanEdit,
+  useFeatureFlags,
 } from "@madie/madie-util";
 import { useFormik } from "formik";
 import useFormikResetOnEvent from "../../../../common/useFormikResetOnEvent";
@@ -20,11 +21,18 @@ import MetaDataWrapper from "../../../details/MetaDataWrapper";
 import MultipleSelectDropDown from "../../MultipleSelectDropDown";
 import TextEditor from "../../groups/TextEditor";
 
-const SupplementalData = () => {
+export interface SupplementalDataProps {
+  isTestCaseLocked: boolean;
+  checkTestCasesLockStatus: Function;
+  setAlertMessage: Function;
+}
+
+const SupplementalData = (props: SupplementalDataProps) => {
   const [measure, setMeasure] = useState<Measure>(measureStore.state);
   const [definitions, setDefinitions] = useState([]);
   const { updateMeasure } = measureStore;
   const measureServiceApi = useMeasureServiceApi();
+  const featureFlags = useFeatureFlags();
 
   useEffect(() => {
     const subscription = measureStore.subscribe(setMeasure);
@@ -33,11 +41,13 @@ const SupplementalData = () => {
     };
   }, []);
 
-  const canEdit = checkUserCanEdit(
-    measure?.measureSet?.owner,
-    measure?.measureSet?.acls,
-    measure?.measureMetaData?.draft
-  );
+  const canEdit =
+    !props.isTestCaseLocked &&
+    checkUserCanEdit(
+      measure?.measureSet?.owner,
+      measure?.measureSet?.acls,
+      measure?.measureMetaData?.draft
+    );
 
   // Fetching definitions from CQL to populate dropdown
   useEffect(() => {
@@ -68,7 +78,16 @@ const SupplementalData = () => {
   useFormikResetOnEvent(formik);
   const { resetForm } = formik;
 
-  const handleSubmit = (values) => {
+  const handleSubmit = async (values) => {
+    if (featureFlags.Locking && (await props.checkTestCasesLockStatus())) {
+      props.setAlertMessage({
+        type: "error",
+        message:
+          "This measure cannot be saved because changes to the Population Criteria will update test cases and one or more test cases are locked by another user.",
+        canClose: false,
+      });
+    }
+
     const modifiedMeasure = {
       ...measure,
       supplementalData: values.supplementalData,
