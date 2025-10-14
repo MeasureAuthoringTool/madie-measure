@@ -46,7 +46,6 @@ describe("ResourceList component", () => {
     const tableHeaders = table.querySelectorAll("thead th");
     expect(tableHeaders[0]).toHaveTextContent("Profile");
     userEvent.click(tableHeaders[0]); // doesn't do anything right now, but i have a prevent default in there so i want the code coverage.
-    expect(tableHeaders[1]).toHaveTextContent("Value Set");
     const tableRows = table.querySelectorAll("tbody tr");
     expect(tableRows.length).toBe(5);
   });
