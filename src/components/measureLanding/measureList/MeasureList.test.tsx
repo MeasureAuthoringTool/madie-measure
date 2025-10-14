@@ -3769,3 +3769,238 @@ describe("Measure List with MeasureSearch enabled", () => {
     });
   });
 });
+
+describe("Measure lock functionality", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (useFeatureFlags as jest.Mock).mockImplementation(() => ({
+      Locking: true,
+    }));
+  });
+
+  it("should display lock icon and 'View' text when measure is locked by another user", async () => {
+    const lockedMeasure = {
+      ...measures[0],
+      measureLock: {
+        lockedBy: "AnotherUser",
+        lockedAt: new Date().toISOString(),
+        expiresAt: new Date(Date.now() + 900000).toISOString(),
+        measureId: measures[0].id,
+      },
+    };
+
+    render(
+      <ServiceContext.Provider value={serviceConfig}>
+        <MeasureList
+          measureList={[lockedMeasure]}
+          setMeasureList={setMeasureListMock}
+          setTotalPages={setTotalPagesMock}
+          setTotalItems={setTotalItemsMock}
+          setVisibleItems={setVisibleItemsMock}
+          setOffset={setOffsetMock}
+          setLoading={setLoadingMock}
+          activeTab={0}
+          searchCriteria={null}
+          setSearchCriteria={setSearchCriteriaMock}
+          currentLimit={10}
+          currentPage={0}
+          setErrMsg={setErrMsgMock}
+          currentSort="lastModifiedAt"
+          currentDirection="DESC"
+          setCurrentSort={setCurrentSortMock}
+          setCurrentDirection={setCurrentDirectionMock}
+          handlePageChange={handlePageChangeMock}
+          search=""
+          toastOpen={false}
+          toastMessage=""
+          toastType="danger"
+          setToastOpen={setToastOpenMock}
+          setToastMessage={setToastMessageMock}
+          setToastType={setToastTypeMock}
+          onToastClose={onToastCloseMock}
+        />
+      </ServiceContext.Provider>
+    );
+
+    const actionButton = await screen.findByTestId(
+      `measure-action-${lockedMeasure.id}`
+    );
+
+    expect(actionButton).toBeInTheDocument();
+    expect(actionButton).toHaveTextContent("View");
+    expect(
+      within(actionButton).getByTestId("LockOutlinedIcon")
+    ).toBeInTheDocument();
+    expect(actionButton).toHaveAttribute(
+      "aria-label",
+      expect.stringContaining("Locked by AnotherUser")
+    );
+  });
+
+  it("should display 'Edit' when user has edit permission and measure is not locked", async () => {
+    const unlockedMeasure = {
+      ...measures[0],
+      measureMetaData: { draft: true },
+      measureSet: {
+        owner: "testUser",
+        acls: [],
+      },
+    };
+
+    render(
+      <ServiceContext.Provider value={serviceConfig}>
+        <MeasureList
+          measureList={[unlockedMeasure]}
+          setMeasureList={setMeasureListMock}
+          setTotalPages={setTotalPagesMock}
+          setTotalItems={setTotalItemsMock}
+          setVisibleItems={setVisibleItemsMock}
+          setOffset={setOffsetMock}
+          setLoading={setLoadingMock}
+          activeTab={0}
+          searchCriteria={null}
+          setSearchCriteria={setSearchCriteriaMock}
+          currentLimit={10}
+          currentPage={0}
+          setErrMsg={setErrMsgMock}
+          currentSort="lastModifiedAt"
+          currentDirection="DESC"
+          setCurrentSort={setCurrentSortMock}
+          setCurrentDirection={setCurrentDirectionMock}
+          handlePageChange={handlePageChangeMock}
+          search=""
+          toastOpen={false}
+          toastMessage=""
+          toastType="danger"
+          setToastOpen={setToastOpenMock}
+          setToastMessage={setToastMessageMock}
+          setToastType={setToastTypeMock}
+          onToastClose={onToastCloseMock}
+        />
+      </ServiceContext.Provider>
+    );
+
+    const actionButton = await screen.findByTestId(
+      `measure-action-${unlockedMeasure.id}`
+    );
+
+    expect(actionButton).toHaveTextContent("Edit");
+    expect(
+      within(actionButton).queryByTestId("LockOutlinedIcon")
+    ).not.toBeInTheDocument();
+  });
+
+  it("should not display lock icon when Locking feature flag is disabled", async () => {
+    (useFeatureFlags as jest.Mock).mockImplementation(() => ({
+      Locking: false,
+    }));
+
+    const lockedMeasure = {
+      ...measures[0],
+      measureLock: {
+        lockedBy: "AnotherUser",
+        lockedAt: new Date().toISOString(),
+        expiresAt: new Date(Date.now() + 900000).toISOString(),
+        measureId: measures[0].id,
+      },
+      measureMetaData: { draft: true },
+      measureSet: {
+        owner: "testUser",
+        acls: [],
+      },
+    };
+
+    render(
+      <ServiceContext.Provider value={serviceConfig}>
+        <MeasureList
+          measureList={[lockedMeasure]}
+          setMeasureList={setMeasureListMock}
+          setTotalPages={setTotalPagesMock}
+          setTotalItems={setTotalItemsMock}
+          setVisibleItems={setVisibleItemsMock}
+          setOffset={setOffsetMock}
+          setLoading={setLoadingMock}
+          activeTab={0}
+          searchCriteria={null}
+          setSearchCriteria={setSearchCriteriaMock}
+          currentLimit={10}
+          currentPage={0}
+          setErrMsg={setErrMsgMock}
+          currentSort="lastModifiedAt"
+          currentDirection="DESC"
+          setCurrentSort={setCurrentSortMock}
+          setCurrentDirection={setCurrentDirectionMock}
+          handlePageChange={handlePageChangeMock}
+          search=""
+          toastOpen={false}
+          toastMessage=""
+          toastType="danger"
+          setToastOpen={setToastOpenMock}
+          setToastMessage={setToastMessageMock}
+          setToastType={setToastTypeMock}
+          onToastClose={onToastCloseMock}
+        />
+      </ServiceContext.Provider>
+    );
+
+    const actionButton = await screen.findByTestId(
+      `measure-action-${lockedMeasure.id}`
+    );
+
+    expect(actionButton).toHaveTextContent("Edit");
+    expect(
+      within(actionButton).queryByTestId("LockOutlinedIcon")
+    ).not.toBeInTheDocument();
+  });
+
+  it("should display 'View' without lock icon when user doesn't have edit permission", async () => {
+    (checkUserCanEdit as jest.Mock).mockImplementationOnce(() => false);
+
+    const measure = {
+      ...measures[0],
+      measureMetaData: { draft: false },
+    };
+
+    render(
+      <ServiceContext.Provider value={serviceConfig}>
+        <MeasureList
+          measureList={[measure]}
+          setMeasureList={setMeasureListMock}
+          setTotalPages={setTotalPagesMock}
+          setTotalItems={setTotalItemsMock}
+          setVisibleItems={setVisibleItemsMock}
+          setOffset={setOffsetMock}
+          setLoading={setLoadingMock}
+          activeTab={0}
+          searchCriteria={null}
+          setSearchCriteria={setSearchCriteriaMock}
+          currentLimit={10}
+          currentPage={0}
+          setErrMsg={setErrMsgMock}
+          currentSort="lastModifiedAt"
+          currentDirection="DESC"
+          setCurrentSort={setCurrentSortMock}
+          setCurrentDirection={setCurrentDirectionMock}
+          handlePageChange={handlePageChangeMock}
+          search=""
+          toastOpen={false}
+          toastMessage=""
+          toastType="danger"
+          setToastOpen={setToastOpenMock}
+          setToastMessage={setToastMessageMock}
+          setToastType={setToastTypeMock}
+          onToastClose={onToastCloseMock}
+        />
+      </ServiceContext.Provider>
+    );
+
+    const actionButton = await screen.findByTestId(
+      `measure-action-${measure.id}`
+    );
+
+    expect(actionButton).toHaveTextContent("View");
+    expect(
+      within(actionButton).queryByTestId("LockOutlinedIcon")
+    ).not.toBeInTheDocument();
+  });
+});
