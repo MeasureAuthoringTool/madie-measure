@@ -25,7 +25,10 @@ import {
   getSortedRowModel,
   SortingState,
 } from "@tanstack/react-table";
-
+import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore";
+import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
+import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import "../../editMeasure/testCases/components/testCaseLanding/common/TestCase.scss";
 import InvalidTestCaseDialog from "../../common/invalidTestCaseDialog/InvalidTestCaseDialog";
 import useMeasureServiceApi from "../../../api/useMeasureServiceApi";
 import { checkUserCanEdit, useFeatureFlags } from "@madie/madie-util";
@@ -1070,7 +1073,8 @@ export default function MeasureList(props: {
       <table
         tw="min-w-full"
         data-testid="measure-list-tbl"
-        className="ml-table"
+        className="tcl-table"
+        id="testCaseListTable"
         style={{
           borderTop: "solid 1px #8c8c8c",
           borderSpacing: "0 2em !important",
@@ -1107,29 +1111,43 @@ export default function MeasureList(props: {
                         onClick={() => handleSort(header.id.replace("_", "."))}
                         title={
                           header.column.getCanSort()
-                            ? header.column.getNextSortingOrder() === "asc"
-                              ? "Sort ascending"
-                              : header.column.getNextSortingOrder() === "desc"
-                              ? "Sort descending"
-                              : "Clear sort"
+                            ? props.currentSort ===
+                              header.column.id.replace("_", ".")
+                              ? props.currentSort &&
+                                props.currentDirection &&
+                                props.currentDirection === "ASC"
+                                ? "Sort descending"
+                                : props.currentDirection === "DESC"
+                                ? "Clear sort"
+                                : "Sort ascending"
+                              : "Sort ascending"
                             : undefined
                         }
                       >
-                        {/*TODO Sorting functionality is disabled as per MAT-7532, Will be enabled in future */}
-                        {/*<span className="arrowDisplay">*/}
-                        {/*  {header.column.getCanSort() &&*/}
-                        {/*    isHovered &&*/}
-                        {/*    !header.column.getIsSorted() && <UnfoldMoreIcon />}*/}
-
-                        {/*  {{*/}
-                        {/*    asc: <KeyboardArrowUpIcon />,*/}
-                        {/*    desc: <KeyboardArrowDownIcon />,*/}
-                        {/*  }[header.column.getIsSorted() as string] ?? null}*/}
-                        {/*</span>*/}
                         {flexRender(
                           header.column.columnDef.header,
                           header.getContext()
                         )}
+                        <span className="arrowDisplay">
+                          {header.column.getCanSort() ? (
+                            props.currentSort ===
+                            header.column.id.replace("_", ".") ? (
+                              props.currentSort &&
+                              props.currentDirection &&
+                              props.currentDirection === "ASC" ? (
+                                <KeyboardArrowUpIcon />
+                              ) : (
+                                <KeyboardArrowDownIcon />
+                              )
+                            ) : isHovered ? (
+                              <UnfoldMoreIcon />
+                            ) : (
+                              ""
+                            )
+                          ) : (
+                            ""
+                          )}
+                        </span>
                       </button>
                     ) : (
                       flexRender(
