@@ -1109,6 +1109,7 @@ export default function MeasureList(props: {
                           !header.column.getCanSort()
                         }
                         onClick={() => handleSort(header.id.replace("_", "."))}
+                        data-testid={`header-${header.id.replace("_", ".")}`}
                         title={
                           header.column.getCanSort()
                             ? props.currentSort ===

@@ -120,7 +120,7 @@ describe("Measure Page", () => {
     );
   };
 
-  test("shows owned measures on page load", async () => {
+  test("shows owned measures on page load, and sorting works", async () => {
     renderRouter(["/measures?tab=0&page=1&limit=10"]);
     const measure1 = await screen.findByText("TestMeasure1");
     expect(measure1).toBeInTheDocument();
@@ -154,6 +154,70 @@ describe("Measure Page", () => {
     expect(ownedMeasuresTab).toHaveClass("Mui-selected");
     expect(sharedMeasuresTab).not.toHaveClass("Mui-selected");
     expect(allMeasuresTab).not.toHaveClass("Mui-selected");
+
+    const measureSortHeader = screen.getByTestId("header-measureName");
+    expect(measureSortHeader).toBeInTheDocument();
+    expect(measureSortHeader.title).toBe("Sort ascending");
+    // sort ascending
+    userEvent.click(measureSortHeader);
+    await waitFor(() => {
+      expect(
+        mockMeasureServiceApi.searchMeasuresByCriteria
+      ).toHaveBeenCalledWith(
+        ["OWNED"],
+        "10",
+        0,
+        "measureName",
+        "ASC",
+        {
+          optionalSearchProperties: [],
+          searchField: "",
+        },
+        expect.any(AbortController)
+      );
+    });
+    // sort descending
+    const updatedHeader = screen.getByTestId("header-measureName");
+    expect(updatedHeader.title).toBe("Sort descending");
+    userEvent.click(updatedHeader);
+    await waitFor(() => {
+      expect(
+        mockMeasureServiceApi.searchMeasuresByCriteria
+      ).toHaveBeenCalledWith(
+        ["OWNED"],
+        "10",
+        0,
+        "measureName",
+        "DESC",
+        {
+          optionalSearchProperties: [],
+          searchField: "",
+        },
+        expect.any(AbortController)
+      );
+    });
+
+    const updatedHeader2 = screen.getByTestId("header-measureName");
+    expect(updatedHeader2.title).toBe("Clear sort");
+    userEvent.click(updatedHeader2);
+    await waitFor(() => {
+      expect(
+        mockMeasureServiceApi.searchMeasuresByCriteria
+      ).toHaveBeenCalledWith(
+        ["OWNED"],
+        "10",
+        0,
+        "",
+        "",
+        {
+          optionalSearchProperties: [],
+          searchField: "",
+        },
+        expect.any(AbortController)
+      );
+    });
+    const updatedHeader3 = screen.getByTestId("header-measureName");
+    expect(updatedHeader3.title).toBe("Sort ascending");
   });
 
   test("shared measure nav click triggers nav", async () => {
