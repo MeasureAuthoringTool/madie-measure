@@ -8,7 +8,11 @@ import {
 } from "@testing-library/react";
 import { act } from "react-dom/test-utils";
 import BaseConfiguration from "./BaseConfiguration";
-import { useMeasureServiceApi, MeasureServiceApi } from "@madie/madie-util";
+import {
+  useMeasureServiceApi,
+  MeasureServiceApi,
+  useFeatureFlags,
+} from "@madie/madie-util";
 import { Measure } from "@madie/madie-models";
 import userEvent from "@testing-library/user-event";
 
@@ -66,7 +70,9 @@ jest.mock("@madie/madie-util", () => ({
     state: { canTravel: true, pendingPath: "" },
     initialState: { canTravel: true, pendingPath: "" },
   },
-
+  useFeatureFlags: jest.fn(() => ({
+    Locking: false,
+  })),
   checkUserCanEdit: jest.fn(() => {
     return true;
   }),
@@ -547,5 +553,95 @@ describe("Base Configuration component", () => {
       );
       expect(changePatientBasisModalSaveButton).toBeInTheDocument();
     });
+  });
+
+  it("displays error alert when locking feature is enabled and test cases get locked during edit", async () => {
+    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
+      Locking: true,
+    }));
+    mockMeasureServiceApi.updateMeasure = jest
+      .fn()
+      .mockResolvedValue({ status: 200 });
+
+    const checkTestCasesLockStatusMock = jest.fn().mockResolvedValue(true);
+    const setAlertMessageMock = jest.fn();
+
+    render(
+      <BaseConfiguration
+        isTestCaseLocked={false}
+        checkTestCasesLockStatus={checkTestCasesLockStatusMock}
+        setAlertMessage={setAlertMessageMock}
+      />
+    );
+
+    const scoringSelectInput = getByTestId(
+      "scoring-select-input"
+    ) as HTMLInputElement;
+
+    const scoringSelect = getByTestId("scoring-select");
+    const scoringSelectDropdown = within(scoringSelect).getByRole(
+      "combobox"
+    ) as HTMLInputElement;
+    userEvent.click(scoringSelectDropdown);
+
+    fireEvent.change(scoringSelectInput, {
+      target: { value: "Cohort" },
+    });
+    expect(scoringSelectInput.value).toBe("Cohort");
+
+    const baseConfigurationTypesSelect = getByTestId(
+      "base-configuration-types-dropdown"
+    );
+    expect(baseConfigurationTypesSelect).toBeInTheDocument();
+    const baseConfigurationTypesButton = within(
+      baseConfigurationTypesSelect
+    ).getByTitle("Open");
+
+    userEvent.click(baseConfigurationTypesButton);
+    expect(getByText("Structure")).toBeInTheDocument();
+    userEvent.click(getByText("Structure"));
+
+    // setting patient basis to true
+    userEvent.click(getByLabelText("Yes"));
+
+    const saveButton = getByTestId("measure-Base Configuration-save");
+    expect(saveButton).toBeInTheDocument();
+    await waitFor(() => expect(saveButton).toBeEnabled());
+    fireEvent.click(saveButton);
+
+    await waitFor(() => {
+      expect(checkTestCasesLockStatusMock).toHaveBeenCalled();
+      expect(setAlertMessageMock).toHaveBeenCalledWith({
+        type: "error",
+        message:
+          "This measure cannot be saved because changes to the Population Criteria will update test cases and one or more test cases are locked by another user.",
+        canClose: false,
+      });
+    });
+  });
+
+  it("renders BaseConfiguration in readonly mode when test cases are locked", () => {
+    render(
+      <BaseConfiguration
+        isTestCaseLocked={true}
+        checkTestCasesLockStatus={jest.fn()}
+        setAlertMessage={jest.fn()}
+      />
+    );
+
+    const scoringSelectInput = screen.getByTestId("scoring-select");
+    expect(scoringSelectInput).toHaveAttribute("readonly");
+    expect(scoringSelectInput).toHaveValue("-");
+
+    const measureType = screen.getByRole("textbox", { name: "Measure Type" });
+    expect(measureType).toHaveAttribute("readonly");
+    expect(measureType).toHaveValue("-");
+
+    const patientBasis = screen.getByRole("textbox", { name: "Patient Basis" });
+    expect(patientBasis).toHaveAttribute("readonly");
+    expect(patientBasis).toHaveValue("-");
+
+    const saveButton = screen.queryByTestId("measure-Base Configuration-save");
+    expect(saveButton).toBeDisabled();
   });
 });

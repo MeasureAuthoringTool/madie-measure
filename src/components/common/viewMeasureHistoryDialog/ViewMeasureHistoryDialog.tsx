@@ -14,6 +14,7 @@ import {
 } from "@tanstack/react-table";
 import tw from "twin.macro";
 import "styled-components/macro";
+import Chip from "@mui/material/Chip";
 
 interface ViewMeasureHistoryDialogProps {
   measures: Measure[];
@@ -148,21 +149,43 @@ export default function ViewMeasureHistoryDialog(
       maxWidth={"lg"}
     >
       <div style={{ margin: "0 32px 40px 32px" }}>
-        <p
+        <div
+          data-testid="measure-history-header"
           style={{
+            display: "flex",
+            alignItems: "center",
+            flexWrap: "wrap",
+            gap: "8px",
             fontFamily: "Rubik",
-            fontWeight: 500,
             fontStyle: "normal",
             fontSize: "17px",
             lineHeight: "24px",
-            verticalAlign: "middle",
           }}
-          data-testid="measure-history-measure-name"
         >
-          {measures[0]?.measureName || ""}
-        </p>
-      </div>
+          <span
+            data-testid="measure-history-measure-name"
+            style={{ fontWeight: 500 }}
+          >
+            {measures?.[0]?.measureName || ""}
+          </span>
 
+          {measures?.[0]?.version && (
+            <span data-testid="measure-history-version">{`(Version ${measures[0].version})`}</span>
+          )}
+
+          {measures?.[0]?.measureMetaData?.draft && (
+            <Chip
+              data-testid="measure-history-draft-chip"
+              label="Draft"
+              sx={{
+                backgroundColor: "#e1f3f8",
+                height: "24px",
+                ml: 1,
+              }}
+            />
+          )}
+        </div>
+      </div>
       <div className="measure-table no-margin-top">
         <div className="table" style={{ overflow: "auto" }}>
           <table

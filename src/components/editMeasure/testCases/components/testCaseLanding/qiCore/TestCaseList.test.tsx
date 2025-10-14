@@ -13,7 +13,6 @@ import {
 } from "../../../../../../api/ServiceContext";
 import {
   getCoverageValueFromHtml,
-  IMPORT_ERROR,
   removeHtmlCoverageHeader,
 } from "./TestCaseList";
 import calculationService, {
@@ -34,9 +33,6 @@ import {
 import useTestCaseServiceApi, {
   TestCaseServiceApi,
 } from "../../../api/useTestCaseServiceApi";
-import useMeasureServiceApi, {
-  MeasureServiceApi,
-} from "../../../api/useMeasureServiceApi";
 import userEvent from "@testing-library/user-event";
 import {
   buildMeasureBundle,
@@ -44,7 +40,12 @@ import {
 } from "../../../util/CalculationTestHelpers";
 import { ExecutionContextProvider } from "../../routes/qiCore/ExecutionContext";
 // @ts-ignore
-import { checkUserCanEdit, useFeatureFlags } from "@madie/madie-util";
+import {
+  checkUserCanEdit,
+  useFeatureFlags,
+  useMeasureServiceApi,
+  MeasureServiceApi,
+} from "@madie/madie-util";
 import { ScanValidationDto } from "../../../api/models/ScanValidationDto";
 // @ts-ignore
 import JSZip from "jszip";
@@ -130,7 +131,14 @@ const mockMeasure = {
   measureMetaData: { draft: true },
   acls: [{ userId: "othertestuser@example.com", roles: ["SHARED_WITH"] }], //#nosec
 } as Measure;
+const mockMeasureServiceApiResolved = {
+  fetchMeasure: jest.fn().mockResolvedValue(mockMeasure),
+  fetchMeasureBundle: jest
+    .fn()
+    .mockResolvedValue(buildMeasureBundle(mockMeasure)),
+} as unknown as MeasureServiceApi;
 jest.mock("@madie/madie-util", () => ({
+  useMeasureServiceApi: jest.fn(() => mockMeasureServiceApiResolved),
   useDocumentTitle: jest.fn(),
   measureStore: {
     updateMeasure: jest.fn((measure) => measure),
@@ -488,11 +496,6 @@ const useTestCaseServiceMockResolved = {
   ),
 } as unknown as TestCaseServiceApi;
 
-// mocking measureService
-jest.mock("../../../api/useMeasureServiceApi");
-const useMeasureServiceMock =
-  useMeasureServiceApi as jest.Mock<MeasureServiceApi>;
-
 jest.mock("../common/copyTestCases/CopyTestCaseDialog", () => ({
   __esModule: true,
   default: () => (
@@ -507,6 +510,7 @@ const setMeasureBundle = jest.fn();
 const setValueSets = jest.fn();
 const setError = jest.fn();
 const setWarnings = jest.fn();
+const setCustomWarningMessages = jest.fn();
 const setImportWarnings = jest.fn();
 
 // Test Case import related
@@ -535,12 +539,6 @@ beforeAll(() => {
 });
 
 describe("TestCaseList component", () => {
-  const useMeasureServiceMockResolved = {
-    fetchMeasure: jest.fn().mockResolvedValue(mockMeasure),
-    fetchMeasureBundle: jest
-      .fn()
-      .mockResolvedValue(buildMeasureBundle(mockMeasure)),
-  } as unknown as MeasureServiceApi;
   beforeEach(() => {
     calculationServiceMock.mockImplementation(() => {
       return calculationServiceMockResolved;
@@ -548,9 +546,7 @@ describe("TestCaseList component", () => {
     useTestCaseServiceMock.mockReset().mockImplementation(() => {
       return useTestCaseServiceMockResolved;
     });
-    useMeasureServiceMock.mockImplementation(() => {
-      return useMeasureServiceMockResolved;
-    });
+
     (checkUserCanEdit as jest.Mock).mockClear().mockImplementation(() => true);
     (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
       applyDefaults: false,
@@ -619,6 +615,7 @@ describe("TestCaseList component", () => {
                           setErrors={setError}
                           setWarnings={setWarnings}
                           setImportWarnings={setImportWarnings}
+                          setCustomWarningMessages={setCustomWarningMessages}
                         />
                       }
                     />
@@ -822,6 +819,96 @@ describe("TestCaseList component", () => {
     userEvent.click(confirmDeleteBtn);
     await waitFor(() => expect(setError).toHaveBeenCalled());
     expect(nextState).toEqual(["BAD THINGS"]);
+  });
+
+  it("should handle response list of locked test cases on Test Case list page when delete button is clicked", async () => {
+    useTestCaseServiceMock.mockImplementation(() => {
+      return {
+        ...useTestCaseServiceMockResolved,
+        deleteTestCases: jest.fn().mockRejectedValue({
+          response: {
+            status: 423,
+            data: {
+              message: "ID1,ID2",
+            },
+          },
+        }),
+      } as unknown as TestCaseServiceApi;
+    });
+
+    renderTestCaseListComponent();
+    await waitFor(() => {
+      const selectButton = screen.getByTestId(`test-case-title-0_select`);
+      const checkboxButton = within(selectButton).getByRole("checkbox");
+      expect(checkboxButton).toBeInTheDocument();
+      fireEvent.click(checkboxButton);
+      expect(checkboxButton).toBeChecked();
+    });
+
+    const deleteButton = screen.getByTestId("delete-action-icon");
+    expect(deleteButton).toBeEnabled();
+    fireEvent.click(deleteButton);
+
+    await waitFor(() => {
+      expect(screen.getByTestId("delete-dialog")).toBeInTheDocument();
+    });
+    const confirmDeleteBtn = screen.getByTestId(
+      "delete-dialog-continue-button"
+    );
+    expect(confirmDeleteBtn).toBeInTheDocument();
+    expect(
+      screen.getByTestId("delete-dialog-cancel-button")
+    ).toBeInTheDocument();
+
+    userEvent.click(confirmDeleteBtn);
+    await waitFor(() => expect(setCustomWarningMessages).toHaveBeenCalled());
+  });
+
+  it("should handle response list of locked test cases on Test Case list page when delete button is clicked, and length is equal to selected", async () => {
+    useTestCaseServiceMock.mockImplementation(() => {
+      return {
+        ...useTestCaseServiceMockResolved,
+        deleteTestCases: jest.fn().mockRejectedValue({
+          response: {
+            status: 423,
+            data: {
+              message: "ID1",
+            },
+          },
+        }),
+      } as unknown as TestCaseServiceApi;
+    });
+
+    renderTestCaseListComponent();
+    await waitFor(() => {
+      const selectButton = screen.getByTestId(`test-case-title-0_select`);
+      const checkboxButton = within(selectButton).getByRole("checkbox");
+      expect(checkboxButton).toBeInTheDocument();
+      fireEvent.click(checkboxButton);
+      expect(checkboxButton).toBeChecked();
+    });
+
+    const deleteButton = screen.getByTestId("delete-action-icon");
+    expect(deleteButton).toBeEnabled();
+    fireEvent.click(deleteButton);
+
+    await waitFor(() => {
+      expect(screen.getByTestId("delete-dialog")).toBeInTheDocument();
+    });
+    const confirmDeleteBtn = screen.getByTestId(
+      "delete-dialog-continue-button"
+    );
+    expect(confirmDeleteBtn).toBeInTheDocument();
+    expect(
+      screen.getByTestId("delete-dialog-cancel-button")
+    ).toBeInTheDocument();
+
+    userEvent.click(confirmDeleteBtn);
+    await waitFor(() => {
+      expect(screen.getByTestId("test-case-list-success")).toHaveTextContent(
+        `All the selected test cases are in-use by another user and could not be deleted.`
+      );
+    });
   });
 
   it("should execute test cases", async () => {

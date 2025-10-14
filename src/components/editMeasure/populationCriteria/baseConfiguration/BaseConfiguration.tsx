@@ -10,6 +10,7 @@ import {
   checkUserCanEdit,
   routeHandlerStore,
   useMeasureServiceApi,
+  useFeatureFlags,
 } from "@madie/madie-util";
 import { MenuItem as MuiMenuItem } from "@mui/material";
 import MetaDataWrapper from "../../../editMeasure/details/MetaDataWrapper";
@@ -32,7 +33,13 @@ interface BaseConfigurationForm {
   patientBasis: string;
 }
 
-const BaseConfiguration = () => {
+export interface BaseConfigurationProps {
+  isTestCaseLocked: boolean;
+  checkTestCasesLockStatus: Function;
+  setAlertMessage: Function;
+}
+
+const BaseConfiguration = (props: BaseConfigurationProps) => {
   const [measure, setMeasure] = useState<Measure>(measureStore.state);
   const [discardDialogOpen, setDiscardDialogOpen] = useState(false);
   const measureServiceApi = useMeasureServiceApi();
@@ -47,6 +54,7 @@ const BaseConfiguration = () => {
   const [warningDialogModalType, setWarningDialogModalType] = useState("");
   const [currentPatientBasis, setCurrentPatientBasis] =
     useState<boolean>(undefined);
+  const featureFlags = useFeatureFlags();
 
   useEffect(() => {
     const subscription = measureStore.subscribe(setMeasure);
@@ -54,11 +62,14 @@ const BaseConfiguration = () => {
       subscription.unsubscribe();
     };
   }, []);
-  const canEdit = checkUserCanEdit(
-    measure?.measureSet?.owner,
-    measure?.measureSet?.acls,
-    measure?.measureMetaData?.draft
-  );
+
+  const canEdit =
+    !props.isTestCaseLocked &&
+    checkUserCanEdit(
+      measure?.measureSet?.owner,
+      measure?.measureSet?.acls,
+      measure?.measureMetaData?.draft
+    );
   useEffect(() => {
     if (measure && measure.scoring) {
       setCurrentScoring(measure.scoring);
@@ -132,6 +143,15 @@ const BaseConfiguration = () => {
       formik.values.patientBasis !== String(measure?.patientBasis)
     ) {
       measure.groups = null;
+    }
+
+    if (featureFlags.Locking && (await props.checkTestCasesLockStatus())) {
+      props.setAlertMessage({
+        type: "error",
+        message:
+          "This measure cannot be saved because changes to the Population Criteria will update test cases and one or more test cases are locked by another user.",
+        canClose: false,
+      });
     }
 
     const newMeasure: Measure = {

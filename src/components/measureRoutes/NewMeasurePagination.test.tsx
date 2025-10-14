@@ -8,7 +8,6 @@ import { ApiContextProvider, ServiceConfig } from "../../api/ServiceContext";
 import { mockPaginationResponses } from "../__mocks__/mockMeasureResponses";
 import { describe, expect, test } from "@jest/globals";
 import userEvent from "@testing-library/user-event";
-import useMeasureServiceApi from "../../api/useMeasureServiceApi";
 
 jest.mock("react-router-dom", () => ({
   ...(jest.requireActual("react-router-dom") as any),

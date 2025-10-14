@@ -49,6 +49,8 @@ interface TestCaseTableProps {
   shiftDatesDialogModalOpen: any;
   setShiftDatesDialogModalOpen: any;
   setWarnings: any;
+  page: number;
+  setShiftTestCaseDatesWarnings: any;
 }
 
 const fiberManualRecordStyles = {
@@ -120,7 +122,7 @@ const TestCaseTable = (props: TestCaseTableProps) => {
     setDeleteDialogModalOpen,
     shiftDatesDialogModalOpen,
     setShiftDatesDialogModalOpen,
-    setWarnings,
+    setShiftTestCaseDatesWarnings,
   } = props;
   const viewOrEdit = canEdit ? "edit" : "view";
   const [toastOpen, setToastOpen] = useState<boolean>(false);
@@ -173,6 +175,12 @@ const TestCaseTable = (props: TestCaseTableProps) => {
       setData(transFormData(testCases));
     }
   }, [testCases]);
+
+  useEffect(() => {
+    if (table && table.toggleAllRowsSelected) {
+      table.toggleAllRowsSelected(false);
+    }
+  }, [props.page]);
 
   const columns = useMemo<ColumnDef<TCRow>[]>(() => {
     const columnDefs = [];
@@ -537,7 +545,7 @@ const TestCaseTable = (props: TestCaseTableProps) => {
           canEdit={canEdit}
           testCases={selectedTestCases ? selectedTestCases : []}
           measure={measure}
-          setWarnings={setWarnings}
+          setShiftTestCaseDatesWarnings={setShiftTestCaseDatesWarnings}
           setToastOpen={setToastOpen}
           setToastType={setToastType}
           setToastMessage={setToastMessage}

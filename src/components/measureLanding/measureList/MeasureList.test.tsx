@@ -309,6 +309,7 @@ const mockUseFeatureFlagsApi = {
   enableQdmRepeatTransfer: jest.fn().mockResolvedValue(false),
   TransferMeasure: jest.fn().mockResolvedValue(false),
 };
+
 const mockMeasureServiceApi = {
   searchMeasuresByCriteria: jest.fn().mockResolvedValue(oneItemResponse),
   fetchMeasures: mockFetchMeasures,
@@ -335,6 +336,7 @@ const mockMeasureServiceApi = {
   transferMeasures: jest.fn().mockResolvedValue({
     data: true,
   }),
+  unshareMeasures: jest.fn().mockResolvedValue({ measureId1: [] }),
 } as unknown as MeasureServiceApi;
 
 describe("Measure List component", () => {
@@ -2499,7 +2501,7 @@ describe("Measure List component", () => {
   });
 });
 
-describe.skip("Measure List with MeasureSearch enabled", () => {
+describe("Measure List with MeasureSearch enabled", () => {
   beforeEach(() => {
     (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
       MeasureSearch: true,

@@ -57,6 +57,8 @@ import useQdmCqlParsingService, {
 } from "../../../api/cqlElmTranslationService/useQdmCqlParsingService";
 import TestCaseLandingWrapper from "../common/TestCaseLandingWrapper";
 import TestCaseLanding from "../qdm/TestCaseLanding";
+import { set } from "lodash";
+import { wait } from "@testing-library/user-event/dist/utils";
 
 const serviceConfig = {
   qdmElmTranslationService: { baseUrl: "translator.url" },
@@ -1279,7 +1281,7 @@ const setCqmMeasure = jest.fn();
 const setError = jest.fn();
 const setWarnings = jest.fn();
 const setImportErrors = jest.fn();
-
+const setCustomWarningMessage = jest.fn();
 window.URL.createObjectURL = jest.fn().mockImplementation(() => "url");
 
 describe("TestCaseList component", () => {
@@ -1317,7 +1319,8 @@ describe("TestCaseList component", () => {
   function renderTestCaseListComponent(
     mockError = setError,
     errors: string[] = [],
-    contextFailure = false
+    contextFailure = false,
+    setCustomWarningMessages = setCustomWarningMessage
   ) {
     return render(
       <MemoryRouter
@@ -1350,6 +1353,7 @@ describe("TestCaseList component", () => {
                           setErrors={mockError}
                           setWarnings={setWarnings}
                           setImportErrors={setImportErrors}
+                          setCustomWarningMessages={setCustomWarningMessages}
                         />
                       }
                     />
@@ -1366,6 +1370,7 @@ describe("TestCaseList component", () => {
                           setErrors={mockError}
                           setWarnings={setWarnings}
                           setImportErrors={setImportErrors}
+                          setCustomWarningMessages={setCustomWarningMessages}
                         />
                       }
                     />
@@ -1539,6 +1544,93 @@ describe("TestCaseList component", () => {
     await waitFor(() => {
       expect(screen.getByTestId("test-case-list-error")).toHaveTextContent(
         `Unable to Delete test Case(s) with ID(s) ${testCases[2].id}. Please try again. If the issue continues, please contact helpdesk.`
+      );
+    });
+  });
+
+  it("Should handle delete error, when a 423 error is returned from the server", async () => {
+    useTestCaseServiceMock.mockImplementation(() => {
+      return {
+        ...useTestCaseServiceMockResolved,
+        deleteTestCases: jest.fn().mockRejectedValue({
+          response: { status: 423, data: { message: "1234,4321" } },
+        }),
+      } as unknown as TestCaseServiceApi;
+    });
+
+    renderTestCaseListComponent();
+    await waitFor(() => {
+      const selectButton = screen.getByTestId(`test-case-title-0_select`);
+      const checkboxButton = within(selectButton).getByRole("checkbox");
+      expect(checkboxButton).toBeInTheDocument();
+      fireEvent.click(checkboxButton);
+      expect(checkboxButton).toBeChecked();
+    });
+
+    const deleteButton = screen.getByTestId("delete-action-icon");
+    expect(deleteButton).toBeEnabled();
+    fireEvent.click(deleteButton);
+
+    await waitFor(() => {
+      expect(screen.getByTestId("delete-dialog")).toBeInTheDocument();
+    });
+    const confirmDeleteBtn = screen.getByRole("button", {
+      name: "Yes, Delete",
+    });
+    expect(
+      screen.getByTestId("delete-dialog-cancel-button")
+    ).toBeInTheDocument();
+
+    userEvent.click(confirmDeleteBtn);
+    await waitFor(() => {
+      expect(setCustomWarningMessage).toHaveBeenCalledWith([
+        {
+          message:
+            "Some of the selected test cases were deleted successfully, but the following test cases are in-use by another user and could not be deleted:",
+          details: ["1234", "4321"],
+          testDataId: "test-cases-in-use-warning",
+        },
+      ]);
+    });
+  });
+
+  it("Should handle delete error of 423, when all selected test cases are in use by another user", async () => {
+    useTestCaseServiceMock.mockImplementation(() => {
+      return {
+        ...useTestCaseServiceMockResolved,
+        deleteTestCases: jest.fn().mockRejectedValue({
+          response: { status: 423, data: { message: "4321" } },
+        }),
+      } as unknown as TestCaseServiceApi;
+    });
+
+    renderTestCaseListComponent();
+    await waitFor(() => {
+      const selectButton = screen.getByTestId(`test-case-title-0_select`);
+      const checkboxButton = within(selectButton).getByRole("checkbox");
+      expect(checkboxButton).toBeInTheDocument();
+      fireEvent.click(checkboxButton);
+      expect(checkboxButton).toBeChecked();
+    });
+
+    const deleteButton = screen.getByTestId("delete-action-icon");
+    expect(deleteButton).toBeEnabled();
+    fireEvent.click(deleteButton);
+
+    await waitFor(() => {
+      expect(screen.getByTestId("delete-dialog")).toBeInTheDocument();
+    });
+    const confirmDeleteBtn = screen.getByRole("button", {
+      name: "Yes, Delete",
+    });
+    expect(
+      screen.getByTestId("delete-dialog-cancel-button")
+    ).toBeInTheDocument();
+
+    userEvent.click(confirmDeleteBtn);
+    await waitFor(() => {
+      expect(screen.getByTestId("test-case-list-success")).toHaveTextContent(
+        `All the selected test cases are in-use by another user and could not be deleted.`
       );
     });
   });
@@ -2753,6 +2845,42 @@ describe("TestCaseList component", () => {
       expect(toastMessage).toHaveTextContent("Test cases successfully deleted");
       expect(screen.queryByTestId("delete-dialog-body")).toBeNull();
     }, 15000);
+  });
+
+  it("Should handle delete all test case error message with Unable to dlete all test cases", async () => {
+    useTestCaseServiceMock.mockImplementation(() => {
+      return {
+        ...useTestCaseServiceMockResolved,
+        deleteTestCases: jest
+          .fn()
+          .mockRejectedValueOnce(new Error("Unable to delete all test cases.")),
+      } as unknown as TestCaseServiceApi;
+    });
+    renderTestCaseListComponent();
+    await waitFor(() => {
+      const table = screen.getByTestId("test-case-tbl");
+    });
+    const checkboxes = screen.getAllByRole("checkbox");
+    userEvent.click(checkboxes[1]);
+    userEvent.click(checkboxes[2]);
+
+    const deleteButton = screen.getByTestId("delete-action-btn");
+    expect(deleteButton).toBeInTheDocument();
+    userEvent.click(deleteButton);
+    const deleteDialog = screen.getByTestId("delete-dialog");
+    expect(deleteDialog).toBeInTheDocument();
+    const confirmDelete = screen.getByTestId("delete-dialog-continue-button");
+    expect(confirmDelete).toBeInTheDocument();
+    expect(
+      screen.getByTestId("delete-dialog-cancel-button")
+    ).toBeInTheDocument();
+    userEvent.click(confirmDelete);
+
+    const toastMessage = await screen.findByTestId("test-case-list-error");
+    expect(toastMessage).toHaveTextContent(
+      "Unable to Delete test Case(s) with ID(s) 3, 2. Please try again. If the issue continues, please contact helpdesk."
+    );
+    expect(screen.queryByTestId("delete-dialog-body")).toBeNull();
   });
 
   it("Should display test case copy dialog when at least one test case is selected", async () => {

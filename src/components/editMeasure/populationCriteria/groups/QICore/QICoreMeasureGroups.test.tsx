@@ -33,6 +33,7 @@ import {
   measureStore,
   checkUserCanEdit,
   MeasureServiceApi,
+  useFeatureFlags,
 } from "@madie/madie-util";
 import { InitialPopulationAssociationType } from "../groupPopulations/GroupPopulation";
 import { addAPIProvider } from "@iconify-icon/react/dist/iconify.mjs";
@@ -132,6 +133,9 @@ jest.mock("@madie/madie-util", () => ({
   checkUserCanEdit: jest.fn(() => {
     return true;
   }),
+  useFeatureFlags: jest.fn(() => ({
+    Locking: false,
+  })),
   routeHandlerStore: {
     subscribe: () => {
       return { unsubscribe: () => null };
@@ -148,6 +152,8 @@ const props: MeasureGroupProps = {
   setIsFormDirty: jest.fn,
   measureId: "testMeasureId",
   setAlertMessage: jest.fn,
+  isTestCaseLocked: false,
+  checkTestCasesLockStatus: jest.fn,
 };
 
 describe("Measure Groups Page", () => {
@@ -199,7 +205,8 @@ describe("Measure Groups Page", () => {
       .mockImplementationOnce(() => "uuid-9");
   });
 
-  const renderMeasureGroupComponent = () => {
+  const renderMeasureGroupComponent = (customProps = props) => {
+    const mergedProps = { ...props, ...customProps };
     return render(
       <MemoryRouter
         initialEntries={[{ pathname: "/measures/test-measure/edit/groups/1" }]}
@@ -208,7 +215,7 @@ describe("Measure Groups Page", () => {
           <Routes>
             <Route
               path="/measures/test-measure/edit/groups/:groupNumber"
-              element={<MeasureGroups {...props} />}
+              element={<MeasureGroups {...mergedProps} />}
             ></Route>
           </Routes>
         </ApiContextProvider>
@@ -629,6 +636,8 @@ describe("Measure Groups Page", () => {
                   measureGroupNumber={1}
                   setMeasureGroupNumber={jest.fn}
                   setAlertMessage={jest.fn}
+                  isTestCaseLocked={false}
+                  checkTestCasesLockStatus={jest.fn}
                 />
               }
             ></Route>
@@ -2346,6 +2355,118 @@ describe("Measure Groups Page", () => {
 
     await waitFor(() => {
       expect(screen.queryByText(errorMessage)).not.toBeInTheDocument();
+    });
+  });
+
+  test("render Measure group properties in readonly mode if a testcase is locked", async () => {
+    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
+      Locking: true,
+    }));
+    const customProps: MeasureGroupProps = {
+      ...props,
+      isTestCaseLocked: true,
+    };
+    renderMeasureGroupComponent(customProps);
+    const descriptionEditor = screen.getByTestId(
+      "group-description-rich-text-editor"
+    );
+    expect(descriptionEditor).toBeInTheDocument();
+    await waitFor(() => {
+      expect(
+        screen.getByRole("textbox", {
+          name: "Scoring",
+        })
+      ).toBeInTheDocument();
+    });
+    const scoringSelectInput = screen.getByRole("textbox", {
+      name: "Scoring",
+    });
+    expect(scoringSelectInput).toHaveAttribute("readonly");
+    expect(scoringSelectInput).toHaveValue("-");
+    const measureType = screen.getByRole("textbox", { name: "Measure Type" });
+    expect(measureType).toHaveAttribute("readonly");
+    expect(measureType).toHaveValue("-");
+    const saveButton = screen.queryByTestId("group-form-submit-btn");
+    expect(saveButton).not.toBeInTheDocument();
+  });
+
+  test("render Measure group properties if a testcase is unlocked", async () => {
+    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
+      Locking: true,
+    }));
+    renderMeasureGroupComponent();
+    const descriptionEditor = screen.getByTestId(
+      "group-description-rich-text-editor"
+    );
+    expect(descriptionEditor).toBeInTheDocument();
+    await waitFor(() => {
+      expect(
+        screen.getByRole("combobox", {
+          name: "Scoring",
+        })
+      ).toBeInTheDocument();
+    });
+    const scoringSelectInput = screen.getByRole("combobox", {
+      name: "Scoring",
+    });
+    expect(scoringSelectInput).not.toHaveAttribute("readonly");
+    const measureType = screen.getByTestId("measure-group-type-input");
+    expect(measureType).not.toHaveAttribute("readonly");
+    const saveButton = screen.queryByTestId("group-form-submit-btn");
+    expect(saveButton).toBeInTheDocument();
+  });
+
+  test("displays error alert when test cases are locked and locking feature is enabled", async () => {
+    (useFeatureFlags as jest.Mock).mockImplementation(() => ({
+      Locking: true,
+    }));
+    const checkTestCasesLockStatusMock = jest.fn().mockResolvedValue(true);
+    const setAlertMessageMock = jest.fn();
+
+    renderMeasureGroupComponent({
+      ...props,
+      checkTestCasesLockStatus: checkTestCasesLockStatusMock,
+      setAlertMessage: setAlertMessageMock,
+    });
+
+    await changePopulationBasis("Encounter");
+
+    // select a scoring
+    const scoringSelect = screen.getByTestId("scoring-select");
+    userEvent.click(getByRole(scoringSelect, "combobox"));
+    await waitFor(() => {
+      userEvent.click(screen.getByText("Cohort"));
+    });
+
+    // Select Initial population from dropdown
+    const groupPopulationInput = screen.getByTestId(
+      "select-measure-group-population-input"
+    ) as HTMLInputElement;
+    fireEvent.change(groupPopulationInput, {
+      target: { value: group.populations[0].definition },
+    });
+
+    // Select measure group type
+    const measureGroupTypeSelect = screen.getByTestId(
+      "measure-group-type-dropdown"
+    );
+    userEvent.click(getByRole(measureGroupTypeSelect, "combobox"));
+    await waitFor(() => {
+      userEvent.click(screen.getByText("Patient Reported Outcome"));
+    });
+
+    // submit the form
+    await expect(screen.getByTestId("group-form-submit-btn")).toBeEnabled();
+    userEvent.click(screen.getByTestId("group-form-submit-btn"));
+
+    await waitFor(() => {
+      expect(checkTestCasesLockStatusMock).toHaveBeenCalled();
+      expect(setAlertMessageMock).toHaveBeenCalledWith({
+        type: "error",
+        message:
+          "This measure cannot be saved because changes to the Population Criteria will update test cases and one or more test cases are locked by another user.",
+        canClose: false,
+      });
     });
   });
 });

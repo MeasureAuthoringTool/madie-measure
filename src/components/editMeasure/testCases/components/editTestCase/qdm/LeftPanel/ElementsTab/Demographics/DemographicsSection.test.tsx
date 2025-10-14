@@ -19,6 +19,7 @@ import {
   PatientCharacteristicSex,
 } from "cqm-models";
 import { Measure } from "@madie/madie-models";
+import userEvent from "@testing-library/user-event";
 
 const emptyPatient = new QDMPatient();
 jest.mock("../../../../../../util/QdmPatientContext", () => ({
@@ -177,17 +178,14 @@ describe("DemographicsSection", () => {
     }));
     renderDemographicsSection();
 
-    expect(screen.getByText("Ethnicity")).toBeInTheDocument();
-    const ethnicityInput = screen.getByTestId(
-      "demographics-ethnicity-input"
-    ) as HTMLInputElement;
-    expect(ethnicityInput).toBeInTheDocument();
-    expect(ethnicityInput.value).toBe("Hispanic or Latino");
-
-    fireEvent.change(ethnicityInput, {
-      target: { value: "Not Hispanic or Latino" },
-    });
-    expect(ethnicityInput.value).toBe("Not Hispanic or Latino");
+    const ethnicitySelect = screen.getByRole("combobox", { name: "Ethnicity" });
+    expect(ethnicitySelect).toHaveTextContent("Hispanic or Latino");
+    // change the ethnicity option
+    userEvent.click(ethnicitySelect);
+    const options = screen.getAllByRole("option");
+    expect(options).toHaveLength(3);
+    userEvent.click(options[2]);
+    expect(ethnicitySelect).toHaveTextContent("Not Hispanic or Latino");
   });
 
   it("should render expired on load", async () => {
@@ -237,17 +235,14 @@ describe("DemographicsSection", () => {
     }));
     renderDemographicsSection();
 
-    expect(screen.getByText("Race")).toBeInTheDocument();
-    const raceInput = screen.getByTestId(
-      "demographics-race-input"
-    ) as HTMLInputElement;
-    expect(raceInput).toBeInTheDocument();
-    expect(raceInput.value).toBe("American Indian or Alaska Native");
-
-    fireEvent.change(raceInput, {
-      target: { value: "Asian" },
-    });
-    expect(raceInput.value).toBe("Asian");
+    const raceSelector = screen.getByRole("combobox", { name: "Race" });
+    expect(raceSelector).toHaveTextContent("American Indian or Alaska Native");
+    // change race option
+    userEvent.click(raceSelector);
+    const options = screen.getAllByRole("option");
+    expect(options).toHaveLength(4);
+    userEvent.click(options[2]);
+    expect(raceSelector).toHaveTextContent("Asian");
   });
 
   it("should handle Gender change", () => {
@@ -268,17 +263,14 @@ describe("DemographicsSection", () => {
     }));
     renderDemographicsSection();
 
-    expect(screen.getByText("Sex")).toBeInTheDocument();
-    const genderInput = screen.getByTestId(
-      "demographics-gender-input"
-    ) as HTMLInputElement;
-    expect(genderInput).toBeInTheDocument();
-    expect(genderInput.value).toBe("Female (finding)");
-
-    fireEvent.change(genderInput, {
-      target: { value: "Male (finding)" },
-    });
-    expect(genderInput.value).toBe("Male (finding)");
+    const genderSelector = screen.getByRole("combobox", { name: "Sex" });
+    expect(genderSelector).toHaveTextContent("Female (finding)");
+    // change gender option
+    userEvent.click(genderSelector);
+    const options = screen.getAllByRole("option");
+    expect(options).toHaveLength(3);
+    userEvent.click(options[2]);
+    expect(genderSelector).toHaveTextContent("Male (finding)");
   });
 
   it("should clear Race selection when selecting dash option (no selection)", () => {

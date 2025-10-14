@@ -7,15 +7,16 @@ import {
   within,
   act,
 } from "@testing-library/react";
-import useMeasureServiceApi, {
-  MeasureServiceApi,
-} from "../../../../api/useMeasureServiceApi";
+
 import { Measure } from "@madie/madie-models";
 import QDMReporting from "./QDMReporting";
 import userEvent from "@testing-library/user-event";
-import { checkUserCanEdit, measureStore } from "@madie/madie-util";
-
-jest.mock("../../../../api/useMeasureServiceApi");
+import {
+  checkUserCanEdit,
+  measureStore,
+  useFeatureFlags,
+  MeasureServiceApi,
+} from "@madie/madie-util";
 
 const measure = {
   id: "test measure",
@@ -68,6 +69,9 @@ jest.mock("@madie/madie-util", () => ({
   checkUserCanEdit: jest.fn(() => {
     return true;
   }),
+  useFeatureFlags: jest.fn(() => ({
+    Locking: false,
+  })),
 }));
 
 const increasedNotation = "Increased score indicates improvement";
@@ -77,7 +81,7 @@ const otherNotation = "Other";
 describe("QDMReporting component", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-
+    checkUserCanEdit.mockReturnValue(true);
     measureStore.state = jest.fn().mockImplementation(() => measure);
   });
   afterEach(() => {
@@ -479,6 +483,61 @@ describe("QDMReporting component", () => {
       "improvement-notation-description-rich-text-editor"
     );
     expect(description).toHaveTextContent("-");
+  });
+
+  test("Renders in read only when testCases are locked", async () => {
+    render(
+      <QDMReporting
+        isTestCaseLocked={true}
+        checkTestCasesLockStatus={jest.fn()}
+        setAlertMessage={jest.fn()}
+      />
+    );
+
+    const improvementNotationSelect = screen.getByTestId(
+      "improvement-notation-select"
+    ) as HTMLInputElement;
+    expect(improvementNotationSelect).toHaveProperty("readOnly", true);
+    expect(improvementNotationSelect).toHaveTextContent("-");
+
+    const description = screen.getByTestId(
+      "improvement-notation-description-rich-text-editor"
+    );
+    expect(description).toHaveTextContent("-");
+  });
+
+  test("displays error alert when locking feature is enabled and test cases get locked during edit", async () => {
+    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
+      Locking: true,
+    }));
+    const checkTestCasesLockStatusMock = jest.fn().mockResolvedValue(true);
+    const setAlertMessageMock = jest.fn();
+
+    render(
+      <QDMReporting
+        isTestCaseLocked={false}
+        checkTestCasesLockStatus={checkTestCasesLockStatusMock}
+        setAlertMessage={setAlertMessageMock}
+      />
+    );
+
+    await selectAnOptionForImprovementNotation(decreasedNotation);
+
+    const saveButton = getByRole("button", {
+      name: "Save",
+    });
+    expect(saveButton).toBeInTheDocument();
+    await waitFor(() => expect(saveButton).toBeEnabled());
+    fireEvent.click(saveButton);
+    await waitFor(() => {
+      expect(checkTestCasesLockStatusMock).toHaveBeenCalled();
+      expect(setAlertMessageMock).toHaveBeenCalledWith({
+        type: "error",
+        message:
+          "This measure cannot be saved because changes to the Population Criteria will update test cases and one or more test cases are locked by another user.",
+        canClose: false,
+      });
+    });
   });
 });
 

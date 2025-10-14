@@ -335,7 +335,7 @@ describe("ActionCenter", () => {
     });
   });
 
-  it("should call setShareDialog when share action button is clicked and a measure is passed into ActionCenter", async () => {
+  it("should call setShareDialog with 'Share With' option when share action button is clicked and a measure is passed into ActionCenter", async () => {
     mockCheckUserCanEdit.mockReturnValue(true);
 
     const setShareDialog = jest.fn();
@@ -365,6 +365,138 @@ describe("ActionCenter", () => {
     expect(setShareDialog).toHaveBeenCalledWith({
       open: true,
       option: "Share With",
+    });
+  });
+
+  it("should call setShareDialog with 'Unshare' option when share action button is clicked and a measure is passed into ActionCenter", async () => {
+    mockCheckUserCanEdit.mockReturnValue(true);
+
+    const setShareDialog = jest.fn();
+
+    render(
+      <ActionCenter
+        measures={[qdmMeasure]}
+        associateCmsId={jest.fn()}
+        exportMeasure={jest.fn()}
+        updateTargetMeasure={jest.fn()}
+        setCreateVersionDialog={jest.fn()}
+        setDraftMeasureDialog={jest.fn()}
+        setDeleteMeasureDialog={jest.fn()}
+        setShareDialog={setShareDialog}
+        deleteMeasure={jest.fn()}
+        setViewHumanReadableModal={jest.fn()}
+        activeTab={0}
+        setTransferDialog={jest.fn()}
+      />
+    );
+
+    const shareButton = await screen.findByTestId("share-action-btn");
+    expect(shareButton).toBeEnabled();
+    await userEvent.click(shareButton);
+    await userEvent.click(screen.getByRole("menuitem", { name: "Unshare" }));
+
+    expect(setShareDialog).toHaveBeenCalledWith({
+      open: true,
+      option: "Unshare",
+    });
+  });
+
+  it("should call setShareDialog with 'Unshare' option when share action button is clicked and activeTab is set to 0 (Owned Measure Tab) and a measure is passed into ActionCenter", async () => {
+    mockCheckUserCanEdit.mockReturnValue(true);
+
+    const setShareDialog = jest.fn();
+
+    render(
+      <ActionCenter
+        measures={[qdmMeasure]}
+        associateCmsId={jest.fn()}
+        exportMeasure={jest.fn()}
+        updateTargetMeasure={jest.fn()}
+        setCreateVersionDialog={jest.fn()}
+        setDraftMeasureDialog={jest.fn()}
+        setDeleteMeasureDialog={jest.fn()}
+        setShareDialog={setShareDialog}
+        deleteMeasure={jest.fn()}
+        setViewHumanReadableModal={jest.fn()}
+        activeTab={0}
+        setTransferDialog={jest.fn()}
+      />
+    );
+
+    const shareButton = await screen.findByTestId("share-action-btn");
+    expect(shareButton).toBeEnabled();
+    await userEvent.click(shareButton);
+    await userEvent.click(screen.getByRole("menuitem", { name: "Unshare" }));
+
+    expect(setShareDialog).toHaveBeenCalledWith({
+      open: true,
+      option: "Unshare",
+    });
+  });
+
+  it("should call setShareDialog with 'Unshare' option when share action button is clicked and activeTab is set to 2 (All Measure Tab) and a measure is passed into ActionCenter", async () => {
+    mockCheckUserCanEdit.mockReturnValue(true);
+
+    const setShareDialog = jest.fn();
+
+    render(
+      <ActionCenter
+        measures={[qdmMeasure]}
+        associateCmsId={jest.fn()}
+        exportMeasure={jest.fn()}
+        updateTargetMeasure={jest.fn()}
+        setCreateVersionDialog={jest.fn()}
+        setDraftMeasureDialog={jest.fn()}
+        setDeleteMeasureDialog={jest.fn()}
+        setShareDialog={setShareDialog}
+        deleteMeasure={jest.fn()}
+        setViewHumanReadableModal={jest.fn()}
+        activeTab={2}
+        setTransferDialog={jest.fn()}
+      />
+    );
+
+    const shareButton = await screen.findByTestId("share-action-btn");
+    expect(shareButton).toBeEnabled();
+    await userEvent.click(shareButton);
+    await userEvent.click(screen.getByRole("menuitem", { name: "Unshare" }));
+
+    expect(setShareDialog).toHaveBeenCalledWith({
+      open: true,
+      option: "Unshare",
+    });
+  });
+
+  it("should call setShareDialog with 'UnshareFromMe' option when share action button is clicked and activeTab is set to 1 (Shared Measure Tab) and a measure is passed into ActionCenter", async () => {
+    mockCheckUserCanEdit.mockReturnValue(true);
+
+    const setShareDialog = jest.fn();
+
+    render(
+      <ActionCenter
+        measures={[qdmMeasure]}
+        associateCmsId={jest.fn()}
+        exportMeasure={jest.fn()}
+        updateTargetMeasure={jest.fn()}
+        setCreateVersionDialog={jest.fn()}
+        setDraftMeasureDialog={jest.fn()}
+        setDeleteMeasureDialog={jest.fn()}
+        setShareDialog={setShareDialog}
+        deleteMeasure={jest.fn()}
+        setViewHumanReadableModal={jest.fn()}
+        activeTab={1}
+        setTransferDialog={jest.fn()}
+      />
+    );
+
+    const shareButton = await screen.findByTestId("share-action-btn");
+    expect(shareButton).toBeEnabled();
+    await userEvent.click(shareButton);
+    await userEvent.click(screen.getByRole("menuitem", { name: "Unshare" }));
+
+    expect(setShareDialog).toHaveBeenCalledWith({
+      open: true,
+      option: "UnshareFromMe",
     });
   });
 

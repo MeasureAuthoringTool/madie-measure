@@ -197,6 +197,24 @@ export default function EditMeasure() {
   }, []);
 
   useEffect(() => {
+    const unshareFromMeListener = () => {
+      setShareDialog({
+        open: true,
+        option: "UnshareFromMe",
+      });
+    };
+    window.addEventListener("unshare-measure-from-me", unshareFromMeListener, {
+      passive: true,
+    });
+    return () => {
+      window.removeEventListener(
+        "unshare-measure-from-me",
+        unshareFromMeListener
+      );
+    };
+  }, []);
+
+  useEffect(() => {
     const versionListener = () => {
       setCreateVersionDialog({
         open: true,
@@ -333,7 +351,7 @@ export default function EditMeasure() {
     };
   }, [currentMeasureId]);
 
-  const handleCreateError = (error) => {
+  const handleCreateVersionError = (error) => {
     const errorData = error?.response;
     const message = errorData?.data?.message;
 
@@ -343,6 +361,8 @@ export default function EditMeasure() {
       setToastMessage("Requested measure cannot be versioned");
     } else if (errorData?.status === 403) {
       setToastMessage("User is unauthorized to create a version");
+    } else if (errorData?.status === 423) {
+      setToastMessage(`${errorData?.data?.message}`);
     } else {
       setToastMessage(
         message ||
@@ -376,16 +396,19 @@ export default function EditMeasure() {
     setViewMeasureHistoryDialog(false);
   };
 
-  const handleShareDialogClose = ({
-    toastType = "danger",
-    toastMessage = "",
-    toastOpen = false,
-  } = {}) => {
+  const handleShareDialogClose = () => {
     setShareDialog({
       open: false,
       option: "",
     });
+  };
 
+  const handleShareDialogSave = ({
+    toastType = "danger",
+    toastMessage = "",
+    toastOpen = false,
+  } = {}) => {
+    handleShareDialogClose();
     handleToast(toastType, toastMessage, toastOpen);
   };
 
@@ -402,7 +425,7 @@ export default function EditMeasure() {
         updateMeasure(response.data);
       })
       .catch((error) => {
-        handleCreateError(error);
+        handleCreateVersionError(error);
       });
   };
   // given a version and target, check if possible
@@ -434,7 +457,7 @@ export default function EditMeasure() {
           }
         })
         .catch((error) => {
-          handleCreateError(error);
+          handleCreateVersionError(error);
           setLoading(false);
         });
     }
@@ -504,7 +527,7 @@ export default function EditMeasure() {
   const deleteMeasure = async () => {
     const deletedMeasure: Measure = { ...measure, active: false };
     try {
-      const result = await measureServiceApi.updateMeasure(deletedMeasure);
+      const result = await measureServiceApi.deleteMeasure(deletedMeasure.id);
       if (result.status === 200) {
         handleToast("success", "Measure successfully deleted", true);
         setTimeout(() => {
@@ -513,12 +536,12 @@ export default function EditMeasure() {
       }
     } catch (e) {
       if (e?.response?.data) {
-        const { error, status, message } = e.response.data;
-        const errorMessage = `${status}: ${error} ${message}`;
-        setErrorMessage(errorMessage);
+        console.error(e);
+        const { message } = e.response.data;
+        handleToast("danger", `${message}`, true);
         setDeleteOpen(false);
       } else {
-        setErrorMessage(e.toString());
+        handleToast("danger", e.toString(), true);
         setDeleteOpen(false);
       }
     }
@@ -657,6 +680,7 @@ export default function EditMeasure() {
             open={shareDialog.open}
             option={shareDialog.option}
             onClose={handleShareDialogClose}
+            onSave={handleShareDialogSave}
           />
 
           <InvalidTestCaseDialog

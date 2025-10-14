@@ -24,11 +24,50 @@ export function PopulationCriteriaHome() {
   const measureServiceApi = useRef(useMeasureServiceApi()).current;
   const [measure, setMeasure] = useState<Measure>(measureStore.state);
   const featureFlags = useFeatureFlags();
-  const canEdit: boolean = checkUserCanEdit(
-    measure?.measureSet?.owner,
-    measure?.measureSet?.acls,
-    measure?.measureMetaData?.draft
-  );
+  const [isTestCaseLocked, setIsTestCaseLocked] = useState<any>(false);
+
+  const canEdit =
+    !isTestCaseLocked &&
+    checkUserCanEdit(
+      measure?.measureSet?.owner,
+      measure?.measureSet?.acls,
+      measure?.measureMetaData?.draft
+    );
+
+  const checkTestCasesLockStatus = async () => {
+    if (featureFlags.Locking) {
+      try {
+        const isLocked = await measureServiceApi.checkTestCasesLocked(
+          measure?.id
+        );
+        setIsTestCaseLocked(isLocked);
+        return isLocked;
+      } catch (err) {
+        setAlertMessage({
+          type: "error",
+          message: err.message,
+          canClose: false,
+        });
+        setIsTestCaseLocked(false);
+        return false;
+      }
+    }
+    return false;
+  };
+
+  useEffect(() => {
+    checkTestCasesLockStatus().then((isLocked) => {
+      if (isLocked) {
+        setAlertMessage({
+          type: "warning",
+          message:
+            "The Population Criteria cannot be edited because changes to the Population Criteria will update test cases and one or more test cases are locked by another user.",
+          canClose: false,
+        });
+      }
+    });
+  }, [measureServiceApi, measureId, featureFlags.Locking]);
+
   useEffect(() => {
     // Subscribe to store
     const subscription = measureStore.subscribe(setMeasure);
@@ -247,7 +286,13 @@ export function PopulationCriteriaHome() {
           riskAdjustmentStatus={checkRiskAdjustment()}
         />
         {/* path can be independent of nav */}
-        {pathname.includes("/base-configuration") && <BaseConfiguration />}
+        {pathname.includes("/base-configuration") && (
+          <BaseConfiguration
+            isTestCaseLocked={isTestCaseLocked}
+            checkTestCasesLockStatus={checkTestCasesLockStatus}
+            setAlertMessage={setAlertMessage}
+          />
+        )}
 
         {/* we will load A measureGroups component*/}
         {pathname.includes("/groups") && (
@@ -257,17 +302,35 @@ export function PopulationCriteriaHome() {
             setMeasureGroupNumber={setMeasureGroupNumber}
             measureId={measure?.id}
             setAlertMessage={setAlertMessage}
+            isTestCaseLocked={isTestCaseLocked}
+            checkTestCasesLockStatus={checkTestCasesLockStatus}
           />
         )}
         {/* what's a better way to say if QDM or QICore?
           To do: Find a more elegant solution for future when we have more than two models to avoid if else if else. */}
-        {pathname.includes("reporting") && <QDMReporting />}
-
-        {pathname.includes("/supplemental-data") && (
-          <SupplementalDataComponent />
+        {pathname.includes("reporting") && (
+          <QDMReporting
+            isTestCaseLocked={isTestCaseLocked}
+            checkTestCasesLockStatus={checkTestCasesLockStatus}
+            setAlertMessage={setAlertMessage}
+          />
         )}
 
-        {pathname.includes("/risk-adjustment") && <RiskAdjustmentComponent />}
+        {pathname.includes("/supplemental-data") && (
+          <SupplementalDataComponent
+            isTestCaseLocked={isTestCaseLocked}
+            checkTestCasesLockStatus={checkTestCasesLockStatus}
+            setAlertMessage={setAlertMessage}
+          />
+        )}
+
+        {pathname.includes("/risk-adjustment") && (
+          <RiskAdjustmentComponent
+            isTestCaseLocked={isTestCaseLocked}
+            checkTestCasesLockStatus={checkTestCasesLockStatus}
+            setAlertMessage={setAlertMessage}
+          />
+        )}
       </div>
     </>
   );

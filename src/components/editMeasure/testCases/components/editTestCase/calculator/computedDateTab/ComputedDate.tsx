@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Button,
   ReadOnlyTextField,
@@ -6,8 +6,8 @@ import {
   Select,
   RadioButton,
   TextField,
+  Toast,
 } from "@madie/madie-design-system/dist/react";
-import { MenuItem } from "@mui/material";
 import InputAdornment from "@mui/material/InputAdornment";
 import { Box } from "@mui/system";
 import * as _ from "lodash";
@@ -17,11 +17,40 @@ import utc from "dayjs/plugin/utc";
 dayjs.extend(utc);
 dayjs.utc();
 import { PRECISION_OPTIONS } from "../durationTab/DurationTab";
+import CopyIcon from "../../../../../../../icons/CopyIcon";
 
 const ComputedDate = () => {
-  const [initialDate, setInitialDate] = React.useState<string | null>(null);
-  const [precision, setPrecision] = React.useState<string>("years");
-  const [precisionNumber, setPrecisionNumber] = React.useState<number>();
+  const [initialDate, setInitialDate] = useState<string | null>(null);
+  const [precision, setPrecision] = useState<string>("years");
+  const [precisionNumber, setPrecisionNumber] = useState<number>();
+  const [computedDate, setComputedDate] = useState<string>("--/--/----");
+  const [addMode, setAddMode] = useState<boolean>(true);
+  const [toastOpen, setToastOpen] = useState(false);
+  const [toastMessage, setToastMessage] = useState<string>("");
+
+  const handleCalculate = () => {
+    if (!initialDate || !precisionNumber || isNaN(Number(precisionNumber))) {
+      setComputedDate("--/--/----");
+      return;
+    }
+    let date = dayjs.utc(initialDate);
+    const num = Number(precisionNumber);
+
+    if (addMode) {
+      date = date.add(num, precision as dayjs.ManipulateType);
+    } else {
+      date = date.subtract(num, precision as dayjs.ManipulateType);
+    }
+    setComputedDate(date.format("MM/DD/YYYY"));
+  };
+
+  const handleCopy = async () => {
+    if (computedDate && computedDate !== "--/--/----") {
+      await navigator.clipboard.writeText(computedDate);
+      setToastOpen(true);
+      setToastMessage("Copied to clipboard!");
+    }
+  };
 
   return (
     <div className="duration-tab-container">
@@ -48,9 +77,14 @@ const ComputedDate = () => {
             label="Add/Subtract"
             aria-labelledby="add-subtract-option"
             options={[
-              { label: "(+) Add", value: true },
-              { label: "(-) Subtract", value: false },
+              { label: "(+) Add", value: "add" },
+              { label: "(-) Subtract", value: "subtract" },
             ]}
+            value={addMode ? "add" : "subtract"}
+            onChange={(event) => {
+              const value = event?.target?.value ?? event;
+              setAddMode(value === "add");
+            }}
           />
         </div>
         <Box className="computed-date-precision-select">
@@ -122,7 +156,7 @@ const ComputedDate = () => {
           variant="primary"
           id="calculate-computed-date"
           data-testid="calculate-computed-date"
-          onClick={() => {}}
+          onClick={handleCalculate}
           disabled={false}
         >
           Calculate
@@ -130,19 +164,83 @@ const ComputedDate = () => {
       </div>
       <Box className="duration-tab-results-container">
         <div className="duration-tab-row">
-          <ReadOnlyTextField
-            readOnly
-            label="Computed Date Result"
-            placeholder="--/--/----"
-            id="computed-date-result"
-            data-testid="computed-date-result"
-            value={"--/--/----"}
-            inputProps={{
-              "data-testid": "computed-date-result-input",
-            }}
-          />
+          <div style={{ maxWidth: "150px" }}>
+            <ReadOnlyTextField
+              readOnly
+              label="Computed Date Result"
+              placeholder="--/--/----"
+              id="computed-date-result"
+              data-testid="computed-date-result"
+              value={computedDate}
+              inputProps={{
+                "data-testid": "computed-date-result-input",
+              }}
+            />
+          </div>
+          {computedDate !== "--/--/----" && (
+            <Button
+              data-testid="copy-computed-date"
+              onClick={handleCopy}
+              style={{
+                outline: "none",
+                boxShadow: "none",
+              }}
+            >
+              <span
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 6,
+                  marginTop: "21px",
+                  marginLeft: "-40px",
+                }}
+              >
+                <CopyIcon />
+                <span>Copy</span>
+              </span>
+            </Button>
+          )}
         </div>
       </Box>
+
+      <Toast
+        toastKey="edit-action-toast"
+        aria-live="polite"
+        toastType={"success"}
+        testId={"success-toast"}
+        closeButtonProps={{
+          "data-testid": "close-toast-button",
+        }}
+        open={toastOpen}
+        message={toastMessage}
+        onClose={() => setToastOpen(false)}
+        autoHideDuration={10000}
+        sx={{
+          overflow: "hidden",
+          "& .MuiPaper-root": {
+            backgroundColor: "#fff",
+            padding: 0,
+          },
+          "& .MuiSnackbar-root": {
+            overflow: "hidden",
+            borderRadius: 4,
+          },
+          "& .MuiSnackbarContent-message": {
+            padding: 0,
+            flexGrow: 1,
+            ".messageCont": {
+              display: "flex",
+              flexDirection: "row",
+              flexGrow: 1,
+              justifyContent: "space-between",
+              div: {
+                display: "flex",
+              },
+            },
+          },
+          ".toast": { minHeight: "80px" },
+        }}
+      />
     </div>
   );
 };

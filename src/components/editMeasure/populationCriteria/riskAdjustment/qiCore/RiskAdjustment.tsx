@@ -9,6 +9,7 @@ import {
   measureStore,
   routeHandlerStore,
   useMeasureServiceApi,
+  useFeatureFlags,
 } from "@madie/madie-util";
 import { CqlAntlr } from "@madie/cql-antlr-parser/dist/src";
 import MetaDataWrapper from "../../../details/MetaDataWrapper";
@@ -44,11 +45,17 @@ const schema = Yup.object().shape({
   riskAdjustmentDescription: Yup.string().optional(),
 });
 
-const RiskAdjustment = () => {
+export interface RiskAdjustmentProps {
+  isTestCaseLocked: boolean;
+  checkTestCasesLockStatus: Function;
+  setAlertMessage: Function;
+}
+const RiskAdjustment = (props: RiskAdjustmentProps) => {
   const [measure, setMeasure] = useState<Measure>(measureStore.state);
   const [definitions, setDefinitions] = useState([]);
   const { updateMeasure } = measureStore;
   const measureServiceApi = useMeasureServiceApi();
+  const featureFlags = useFeatureFlags();
 
   useEffect(() => {
     const subscription = measureStore.subscribe(setMeasure);
@@ -57,11 +64,13 @@ const RiskAdjustment = () => {
     };
   }, []);
 
-  const canEdit = checkUserCanEdit(
-    measure?.measureSet?.owner,
-    measure?.measureSet?.acls,
-    measure?.measureMetaData?.draft
-  );
+  const canEdit =
+    !props.isTestCaseLocked &&
+    checkUserCanEdit(
+      measure?.measureSet?.owner,
+      measure?.measureSet?.acls,
+      measure?.measureMetaData?.draft
+    );
 
   // Fetching definitions from CQL to populate dropdown
   useEffect(() => {
@@ -93,7 +102,16 @@ const RiskAdjustment = () => {
   useFormikResetOnEvent(formik);
   const { resetForm } = formik;
 
-  const handleSubmit = (values) => {
+  const handleSubmit = async (values) => {
+    if (featureFlags.Locking && (await props.checkTestCasesLockStatus())) {
+      props.setAlertMessage({
+        type: "error",
+        message:
+          "This measure cannot be saved because changes to the Population Criteria will update test cases and one or more test cases are locked by another user.",
+        canClose: false,
+      });
+    }
+
     const modifiedMeasure = {
       ...measure,
       riskAdjustments: values.riskAdjustments,

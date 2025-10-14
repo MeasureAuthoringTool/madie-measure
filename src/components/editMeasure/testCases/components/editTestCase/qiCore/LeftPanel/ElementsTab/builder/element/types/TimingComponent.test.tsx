@@ -1,0 +1,554 @@
+import * as React from "react";
+import {
+  render,
+  screen,
+  waitFor,
+  fireEvent,
+  within,
+} from "@testing-library/react";
+import { FormikProvider, FormikContextType } from "formik";
+import { ExecutionContextProvider } from "../../../../../../../routes/qiCore/ExecutionContext";
+import TimingComponent from "./TimingComponent";
+import useFhirDefinitionsServiceApi, {
+  FhirDefinitionsServiceApi,
+} from "../../../../../../../../api/useFhirDefinitionsService";
+import useTerminologyServiceApi, {
+  TerminologyServiceApi,
+} from "../../../../../../../../api/useTerminologyServiceApi";
+import userEvent from "@testing-library/user-event";
+import { YEAR_FORMAT } from "./DateTimeComponent";
+
+jest.mock("../../../../../../../../api/useFhirDefinitionsService");
+jest.mock("../../../../../../../../api/useTerminologyServiceApi");
+
+const useFhirDefinitionsServiceApiMock =
+  useFhirDefinitionsServiceApi as jest.Mock<FhirDefinitionsServiceApi>;
+useFhirDefinitionsServiceApiMock.mockImplementation(
+  () =>
+    ({
+      getValueSetDefinition: jest.fn().mockImplementation((url: string) => {
+        if (url === "http://hl7.org/fhir/ValueSet/units-of-time") {
+          return Promise.resolve({
+            resourceType: "ValueSet",
+            url,
+            expansion: {
+              contains: [
+                { code: "s", display: "second" },
+                { code: "min", display: "minute" },
+                { code: "h", display: "hour" },
+              ],
+            },
+          });
+        }
+
+        if (url === "http://hl7.org/fhir/ValueSet/days-of-week") {
+          return Promise.resolve({
+            resourceType: "ValueSet",
+            url,
+            expansion: {
+              contains: [
+                { code: "mon", display: "Monday" },
+                { code: "tue", display: "Tuesday" },
+                { code: "wed", display: "Wednesday" },
+              ],
+            },
+          });
+        }
+
+        if (url === "http://hl7.org/fhir/ValueSet/event-timing") {
+          return Promise.resolve({
+            resourceType: "ValueSet",
+            url,
+            expansion: {
+              contains: [
+                { code: "morning", display: "Morning" },
+                { code: "afternoon", display: "Afternoon" },
+                { code: "evening", display: "Evening" },
+              ],
+            },
+          });
+        }
+
+        if (url === "http://hl7.org/fhir/ValueSet/timing-abbreviation") {
+          return Promise.resolve({
+            resourceType: "ValueSet",
+            url,
+            expansion: {
+              contains: [
+                { code: "QD", display: "Once a day" },
+                { code: "BID", display: "Twice a day" },
+                { code: "TID", display: "Three times a day" },
+              ],
+            },
+          });
+        }
+        return Promise.resolve({
+          resourceType: "ValueSet",
+          url,
+          expansion: { contains: [] },
+        });
+      }),
+    } as unknown as FhirDefinitionsServiceApi)
+);
+
+const useTerminologyServiceApiMock =
+  useTerminologyServiceApi as jest.Mock<TerminologyServiceApi>;
+useTerminologyServiceApiMock.mockImplementation(() => ({
+  getValueSetsExpansionForOids: jest.fn().mockResolvedValue([]),
+}));
+
+// Formik mocks
+const setFieldValueMock = jest.fn();
+const setFieldTouchedMock = jest.fn();
+
+const mockFormik: FormikContextType<any> = {
+  values: {},
+  touched: {},
+  errors: {},
+  setFieldValue: setFieldValueMock,
+  setFieldTouched: setFieldTouchedMock,
+  getFieldProps: (field) => ({
+    value: "",
+    name: field,
+    onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
+      setFieldValueMock(field, e.target.value);
+    },
+    onBlur: jest.fn(),
+  }),
+} as unknown as FormikContextType<any>;
+
+const mockStructureDefinition = {
+  id: "Timing",
+  path: "Timing",
+  type: [{ code: "Timing" }],
+  min: 0,
+  max: "*",
+};
+
+function renderTimingComponent({
+  initialValues = {},
+  label = "MedicationRequest.dosageInstruction[0].timing",
+  canEdit = true,
+  resource = {},
+  structureDefinition = mockStructureDefinition,
+}: {
+  initialValues?: any;
+  label?: string;
+  canEdit?: boolean;
+  resource?: any;
+  structureDefinition?: any;
+}) {
+  const formikContext: FormikContextType<any> = {
+    ...mockFormik,
+    values: initialValues,
+  };
+
+  return render(
+    <ExecutionContextProvider
+      value={{
+        measureState: [null, jest.fn()],
+        bundleState: [null, jest.fn()],
+        valueSetsState: [[], jest.fn()],
+        executionContextReady: true,
+        executing: false,
+        setExecuting: jest.fn(),
+        contextFailure: false,
+      }}
+    >
+      <FormikProvider value={formikContext}>
+        <TimingComponent
+          label={label}
+          canEdit={canEdit}
+          resource={resource}
+          structureDefinition={structureDefinition}
+          fieldRequired={false}
+        />
+      </FormikProvider>
+    </ExecutionContextProvider>
+  );
+}
+
+describe("TimingComponent", () => {
+  test("triggers Formik setFieldValue on interactions", async () => {
+    renderTimingComponent({});
+
+    // Event
+    const formatSelector = screen.getByTestId(
+      "date-time-format-selector-input-field-Event[0]"
+    );
+    fireEvent.change(formatSelector, { target: { value: "YYYY" } });
+
+    const input = screen.getByTestId(`${YEAR_FORMAT}-field-Event[0]-input`);
+    userEvent.type(input, "2022");
+    expect(setFieldValueMock).toHaveBeenLastCalledWith(
+      "MedicationRequest.dosageInstruction[0].timing.event[0]",
+      "2022"
+    );
+
+    const boundsInput = screen.getByTestId(
+      "repeat-bounds-input"
+    ) as HTMLInputElement;
+
+    // Duration
+    fireEvent.change(boundsInput, { target: { value: "Duration" } });
+    await waitFor(() => {
+      expect(setFieldValueMock).toHaveBeenCalledWith(
+        "MedicationRequest.dosageInstruction[0].timing.repeat.bounds[x]",
+        "Duration"
+      );
+      expect(setFieldValueMock).toHaveBeenCalledWith(
+        "MedicationRequest.dosageInstruction[0].timing.repeat.boundsRange",
+        undefined
+      );
+      expect(setFieldValueMock).toHaveBeenLastCalledWith(
+        "MedicationRequest.dosageInstruction[0].timing.repeat.boundsPeriod",
+        undefined
+      );
+    });
+
+    // Range
+    fireEvent.change(boundsInput, { target: { value: "Range" } });
+    await waitFor(() => {
+      expect(setFieldValueMock).toHaveBeenCalledWith(
+        "MedicationRequest.dosageInstruction[0].timing.repeat.bounds[x]",
+        "Range"
+      );
+      expect(setFieldValueMock).toHaveBeenCalledWith(
+        "MedicationRequest.dosageInstruction[0].timing.repeat.boundsRange",
+        undefined
+      );
+      expect(setFieldValueMock).toHaveBeenLastCalledWith(
+        "MedicationRequest.dosageInstruction[0].timing.repeat.boundsPeriod",
+        undefined
+      );
+    });
+
+    // Period
+    fireEvent.change(boundsInput, { target: { value: "Period" } });
+    await waitFor(() => {
+      expect(setFieldValueMock).toHaveBeenCalledWith(
+        "MedicationRequest.dosageInstruction[0].timing.repeat.bounds[x]",
+        "Period"
+      );
+      expect(setFieldValueMock).toHaveBeenCalledWith(
+        "MedicationRequest.dosageInstruction[0].timing.repeat.boundsRange",
+        undefined
+      );
+      expect(setFieldValueMock).toHaveBeenLastCalledWith(
+        "MedicationRequest.dosageInstruction[0].timing.repeat.boundsPeriod",
+        undefined
+      );
+    });
+
+    // "-" option to clear the bounds field
+    fireEvent.change(boundsInput, { target: { value: "-" } });
+    await waitFor(() => {
+      expect(setFieldValueMock).toHaveBeenCalledWith(
+        "MedicationRequest.dosageInstruction[0].timing.repeat.bounds",
+        undefined
+      );
+      expect(setFieldValueMock).toHaveBeenCalledWith(
+        "MedicationRequest.dosageInstruction[0].timing.repeat.boundsRange",
+        undefined
+      );
+      expect(setFieldValueMock).toHaveBeenLastCalledWith(
+        "MedicationRequest.dosageInstruction[0].timing.repeat.boundsPeriod",
+        undefined
+      );
+    });
+
+    // Repeat.Count
+    const countInput = screen.getByTestId("integer-field-input-Repeat.Count");
+    userEvent.type(countInput, "5");
+    expect(setFieldValueMock).toHaveBeenLastCalledWith(
+      "MedicationRequest.dosageInstruction[0].timing.repeat.count",
+      "5"
+    );
+
+    // Repeat.CountMax
+    const countMaxInput = screen.getByTestId(
+      "integer-field-input-Repeat.CountMax"
+    );
+    userEvent.type(countMaxInput, "8");
+    expect(setFieldValueMock).toHaveBeenLastCalledWith(
+      "MedicationRequest.dosageInstruction[0].timing.repeat.countMax",
+      "8"
+    );
+
+    // Repeat.Duration
+    const durationInput = screen.getByTestId(
+      "decimal-input-field-Repeat.Duration"
+    );
+    expect(durationInput).toBeInTheDocument();
+    await userEvent.type(durationInput, "5");
+    expect(setFieldValueMock).toHaveBeenLastCalledWith(
+      "MedicationRequest.dosageInstruction[0].timing.repeat.duration",
+      5
+    );
+
+    // Repeat.DurationMax
+    const durationMaxInput = screen.getByTestId(
+      "decimal-input-field-Repeat.DurationMax"
+    );
+    userEvent.type(durationMaxInput, "9");
+    expect(setFieldValueMock).toHaveBeenLastCalledWith(
+      "MedicationRequest.dosageInstruction[0].timing.repeat.durationMax",
+      9
+    );
+
+    // Duration Repeat.Unit(s)
+    const durationContainer = screen.getByTestId("repeat-duration-unit");
+    const durationUnit =
+      within(durationContainer).getByLabelText("Repeat.Unit(s)");
+    userEvent.click(durationUnit);
+    const minuteOption = await screen.findByText("minute");
+    userEvent.click(minuteOption);
+    await waitFor(() => {
+      expect(setFieldValueMock).toHaveBeenLastCalledWith(
+        "MedicationRequest.dosageInstruction[0].timing.repeat.durationUnit",
+        "min"
+      );
+    });
+
+    // Repeat.Frequency
+    const frequencyInput = screen.getByTestId(
+      "integer-field-input-Repeat.Frequency"
+    );
+    userEvent.type(frequencyInput, "3");
+    expect(setFieldValueMock).toHaveBeenLastCalledWith(
+      "MedicationRequest.dosageInstruction[0].timing.repeat.frequency",
+      "3"
+    );
+
+    // Repeat.FrequencyMax
+    const frequencyMaxInput = screen.getByTestId(
+      "integer-field-input-Repeat.FrequencyMax"
+    );
+    userEvent.type(frequencyMaxInput, "6");
+    expect(setFieldValueMock).toHaveBeenLastCalledWith(
+      "MedicationRequest.dosageInstruction[0].timing.repeat.frequencyMax",
+      "6"
+    );
+
+    // Repeat.Period
+    const periodInput = screen.getByTestId("decimal-input-field-Repeat.Period");
+    userEvent.type(periodInput, "2");
+    expect(setFieldValueMock).toHaveBeenLastCalledWith(
+      "MedicationRequest.dosageInstruction[0].timing.repeat.period",
+      2
+    );
+
+    // Repeat.PeriodMax
+    const periodMaxInput = screen.getByTestId(
+      "decimal-input-field-Repeat.PeriodMax"
+    );
+    userEvent.type(periodMaxInput, "4");
+    expect(setFieldValueMock).toHaveBeenLastCalledWith(
+      "MedicationRequest.dosageInstruction[0].timing.repeat.periodMax",
+      4
+    );
+
+    // Period Repeat.Unit(s)
+    const periodContainer = screen.getByTestId("repeat-period-unit");
+    const periodUnit = within(periodContainer).getByLabelText("Repeat.Unit(s)");
+    userEvent.click(periodUnit);
+    const hourOption = await screen.findByText("hour");
+    userEvent.click(hourOption);
+    await waitFor(() => {
+      expect(setFieldValueMock).toHaveBeenLastCalledWith(
+        "MedicationRequest.dosageInstruction[0].timing.repeat.periodUnit",
+        "h"
+      );
+    });
+
+    // Repeat.Day of Week
+    const dayOfWeekSelect = screen.getByLabelText("Repeat.Day of Week[0]");
+    userEvent.click(dayOfWeekSelect);
+    const mondayOption = await screen.findByText("Monday");
+    userEvent.click(mondayOption);
+    await waitFor(() => {
+      expect(setFieldValueMock).toHaveBeenLastCalledWith(
+        "MedicationRequest.dosageInstruction[0].timing.repeat.dayOfWeek[0]",
+        "mon"
+      );
+    });
+
+    // Repeat.Time of Day
+    const timeOfDayInput = screen.getByPlaceholderText("hh:mm:ss aa");
+    userEvent.clear(timeOfDayInput);
+    userEvent.type(timeOfDayInput, "082359AM");
+    await waitFor(() => {
+      expect(setFieldValueMock).toHaveBeenLastCalledWith(
+        "MedicationRequest.dosageInstruction[0].timing.repeat.timeOfDay[0]",
+        "08:23:59"
+      );
+    });
+
+    // Repeat.When
+    const when = screen.getByLabelText("Repeat.When[0]");
+    userEvent.click(when);
+    const morningOption = await screen.findByText("Morning");
+    userEvent.click(morningOption);
+    await waitFor(() => {
+      expect(setFieldValueMock).toHaveBeenLastCalledWith(
+        "MedicationRequest.dosageInstruction[0].timing.repeat.when[0]",
+        "morning"
+      );
+    });
+
+    // Repeat.Offset
+    const offsetInput = screen.getByTestId("integer-field-input-Repeat.Offset");
+    userEvent.type(offsetInput, "5");
+    expect(setFieldValueMock).toHaveBeenLastCalledWith(
+      "MedicationRequest.dosageInstruction[0].timing.repeat.offset",
+      "5"
+    );
+
+    // Code
+    const code = screen.getByLabelText("Code");
+    userEvent.click(code);
+    const bidOption = await screen.findByText("Twice a day");
+    userEvent.click(bidOption);
+    await waitFor(() => {
+      expect(setFieldValueMock).toHaveBeenLastCalledWith(
+        "MedicationRequest.dosageInstruction[0].timing.code",
+        "BID"
+      );
+    });
+
+    // Add buttons
+    userEvent.click(screen.getByText("Add Repeat.When"));
+    await waitFor(() => {
+      expect(setFieldValueMock).toHaveBeenLastCalledWith(
+        "MedicationRequest.dosageInstruction[0].timing.repeat.when",
+        ["", ""]
+      );
+    });
+
+    userEvent.click(screen.getByText("Add Event"));
+    await waitFor(() => {
+      expect(setFieldValueMock).toHaveBeenLastCalledWith(
+        "MedicationRequest.dosageInstruction[0].timing.event",
+        ["", ""]
+      );
+    });
+
+    userEvent.click(screen.getByText("Add Repeat.Day of Week"));
+    await waitFor(() => {
+      expect(setFieldValueMock).toHaveBeenLastCalledWith(
+        "MedicationRequest.dosageInstruction[0].timing.repeat.dayOfWeek",
+        ["", ""]
+      );
+    });
+
+    userEvent.click(screen.getByText("Add Repeat.Time of Day"));
+    await waitFor(() => {
+      expect(setFieldValueMock).toHaveBeenLastCalledWith(
+        "MedicationRequest.dosageInstruction[0].timing.repeat.timeOfDay",
+        ["", ""]
+      );
+    });
+  });
+
+  test("TimingComponent calls Formik setFieldValue when QuantityIntervalInput (Range) low/high values change", async () => {
+    renderTimingComponent({
+      initialValues: {
+        MedicationRequest: {
+          dosageInstruction: [
+            {
+              timing: {
+                repeat: {
+                  bounds: { x: "Range" },
+                  boundsRange: {
+                    low: { value: 1, unit: "cm" },
+                    high: { value: 2, unit: "cm" },
+                  },
+                },
+              },
+            },
+          ],
+        },
+      },
+    });
+
+    const inputLow = screen.getByTestId(
+      "quantity-value-input-low"
+    ) as HTMLInputElement;
+    expect(inputLow.value).toBe("1");
+
+    const inputHigh = screen.getByTestId(
+      "quantity-value-input-high"
+    ) as HTMLInputElement;
+    expect(inputHigh.value).toBe("2");
+
+    // Change low value
+    fireEvent.change(inputLow, { target: { value: "10" } });
+    fireEvent.blur(inputLow);
+
+    // Change high value
+    fireEvent.change(inputHigh, { target: { value: "20" } });
+    fireEvent.blur(inputHigh);
+
+    await waitFor(() => {
+      expect(setFieldValueMock).toHaveBeenCalledWith(
+        "MedicationRequest.dosageInstruction[0].timing.repeat.boundsRange",
+        {
+          low: {
+            value: 10,
+            unit: "cm",
+          },
+          high: {
+            value: 20,
+            unit: "cm",
+          },
+        }
+      );
+    });
+  });
+
+  test("TimingComponent calls Formik setFieldValue when PeriodDateTimeComponent (Period) start/end values change", async () => {
+    renderTimingComponent({
+      initialValues: {
+        MedicationRequest: {
+          dosageInstruction: [
+            {
+              timing: {
+                repeat: {
+                  bounds: { x: "Period" },
+                },
+              },
+            },
+          ],
+        },
+      },
+    });
+
+    // Select Period format
+    const formatSelector = screen.getByTestId(
+      "date-time-format-selector-input-field-Period"
+    );
+    fireEvent.change(formatSelector, { target: { value: YEAR_FORMAT } });
+
+    // Get start/end inputs
+    const startInput = screen.getByTestId(
+      `start-${YEAR_FORMAT}-field-Period-input`
+    );
+    const endInput = screen.getByTestId(
+      `end-${YEAR_FORMAT}-field-Period-input`
+    );
+
+    // Change start and end dates
+    userEvent.type(startInput, "2022");
+    userEvent.type(endInput, "2023");
+
+    await waitFor(() => {
+      expect(setFieldValueMock).toHaveBeenCalledWith(
+        "MedicationRequest.dosageInstruction[0].timing.repeat.boundsPeriod",
+        {
+          start: "2022",
+          end: "2023",
+        }
+      );
+    });
+  });
+});

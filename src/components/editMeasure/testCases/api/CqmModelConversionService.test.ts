@@ -9,9 +9,7 @@ import { DataCriteria } from "./models/DataCriteria";
 import { CqmConversionService } from "./CqmModelConversionService";
 import { Measure as CqmMeasure, PopulationSet } from "cqm-models";
 import { TranslatedLibrary } from "./models/TranslatedLibrary";
-import useMeasureServiceApi, {
-  MeasureServiceApi,
-} from "../api/useMeasureServiceApi";
+import { useMeasureServiceApi, MeasureServiceApi } from "@madie/madie-util";
 import * as fs from "fs";
 
 jest.mock("../../../../api/axios-instance");

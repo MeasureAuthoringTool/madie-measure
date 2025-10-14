@@ -183,9 +183,10 @@ export default function MeasureLanding() {
         abortController.current.abort();
       }
       abortController.current = new AbortController();
+      setLoading(true);
       //it seems like doing request ids might be the easiest way for setLoading to work
       const currentRequestId = ++requestIdRef.current;
-      setLoading(true);
+
       try {
         const optionalParams = searchCriteria?.optionalSearchProperties ?? [];
         const firstParam = _.trim(optionalParams[0]);

@@ -82,6 +82,26 @@ export function getElementName(
   return result;
 }
 
+// Given a selected resource, we want to filter out any extensions that are not present on the resource.
+// We do this by comparing the extension urls present at the extension key. This works at top level only.
+export const filterUnusedExtensionsFromElements = (
+  selectedResource,
+  allDisplayedElements
+) => {
+  const extensions = selectedResource?.bundleEntry?.resource?.extension || [];
+  // now we can filter out extensions not present on the extensions variable, from the topElements.
+  const filteredElements = allDisplayedElements?.filter((el) => {
+    if (el.id.includes("extension:")) {
+      // find the extension in the extensions array that matches el.type[0].profile[0]
+      const extUrl = el.type?.[0]?.profile?.[0];
+      return extensions.some((ext) => ext.url === extUrl);
+    }
+    return true;
+  });
+
+  return filteredElements;
+};
+
 // given an object that we want to copy to
 // a path that looks like "Claimresponse.item.something"
 // and a value that can be anything
@@ -510,6 +530,7 @@ export function isComponentDataType(datatype) {
     case "money":
     case "positiveint":
     case "time":
+    case "timing":
     case "unsignedint":
     case "uri":
     case "url":

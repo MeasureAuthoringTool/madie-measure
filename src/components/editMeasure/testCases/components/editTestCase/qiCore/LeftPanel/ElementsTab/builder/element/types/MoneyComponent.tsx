@@ -4,8 +4,7 @@ import { TypeComponentProps } from "./TypeComponentProps";
 import DecimalInput from "../../../../../../../common/DecimalInput/DecimalInput";
 import CodesComponent from "./CodesComponent";
 import Box from "@mui/material/Box";
-
-const MONEY_FIELD_WIDTH = 148.5;
+import "./MoneyComponent.scss";
 
 const MoneyComponent = ({
   label,
@@ -19,36 +18,38 @@ const MoneyComponent = ({
   const currencyPath = `${label}.currency`;
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "row", alignItems: "center" }}>
+    <Box className="money-component">
       {/* Value field */}
-      <DecimalInput
-        label="Value"
-        value={getIn(formik.values, valuePath)}
-        handleChange={(val) =>
-          formik.setFieldValue(valuePath, val !== "" ? parseFloat(val) : null)
-        }
-        canEdit={canEdit}
-        containerStyle={{ width: MONEY_FIELD_WIDTH }}
-        required={false}
-      />
+      <div className="decimal-input">
+        <DecimalInput
+          label="Value"
+          value={getIn(formik.values, valuePath)}
+          handleChange={(val) =>
+            formik.setFieldValue(valuePath, val !== "" ? parseFloat(val) : null)
+          }
+          canEdit={canEdit}
+          required={false}
+        />
+      </div>
 
       {/* Currency field */}
-      <CodesComponent
-        label="Currency"
-        resource={resource}
-        structureDefinition={{
-          path: label,
-          binding: {
-            valueSet: "http://hl7.org/fhir/ValueSet/currencies",
-            strength: "required",
-          },
-        }}
-        value={getIn(formik.values, currencyPath)}
-        onChange={(val) => formik.setFieldValue(currencyPath, val)}
-        canEdit={canEdit}
-        fieldRequired={fieldRequired}
-        containerStyle={{ width: MONEY_FIELD_WIDTH }}
-      />
+      <div className="currency-input">
+        <CodesComponent
+          label="Currency"
+          resource={resource}
+          structureDefinition={{
+            path: label,
+            binding: {
+              valueSet: "http://hl7.org/fhir/ValueSet/currencies",
+              strength: "required",
+            },
+          }}
+          value={getIn(formik.values, currencyPath)}
+          onChange={(val) => formik.setFieldValue(currencyPath, val)}
+          canEdit={canEdit}
+          fieldRequired={fieldRequired}
+        />
+      </div>
     </Box>
   );
 };

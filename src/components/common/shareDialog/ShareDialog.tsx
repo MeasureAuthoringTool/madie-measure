@@ -31,7 +31,7 @@ import CheckBoxIcon from "@mui/icons-material/CheckBox";
 import "../../measureLanding/MeasureLanding.scss";
 import tw from "twin.macro";
 import "styled-components/macro";
-import { useMeasureServiceApi } from "@madie/madie-util";
+import { useMeasureServiceApi, useOktaTokens } from "@madie/madie-util";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 
@@ -40,6 +40,7 @@ interface ShareDialogProps {
   open: boolean;
   option: string;
   onClose: Function;
+  onSave: Function;
 }
 
 interface SharedMeasure {
@@ -97,7 +98,18 @@ const getErrorMessage = (error, baseMessage: string) => {
   return toastMessage;
 };
 
-const ShareDialog = ({ measures, open, option, onClose }: ShareDialogProps) => {
+const ShareDialog = ({
+  measures,
+  open,
+  option,
+  onClose,
+  onSave,
+}: ShareDialogProps) => {
+  const { getUserName } = useOktaTokens();
+  const userName = getUserName();
+
+  const showShareDialog = option === "Share With" || option === "Unshare";
+
   const measureServiceApi = useRef(useMeasureServiceApi()).current;
 
   const [loading, setLoading] = useState<boolean>(false);
@@ -256,6 +268,29 @@ const ShareDialog = ({ measures, open, option, onClose }: ShareDialogProps) => {
     }
   }, [open]);
 
+  // Resets state and closes the Share/Unshare dialog
+  const handleShareDialogClose = () => {
+    setSaveDisabled(true);
+    setShareMeasuresRequest(new Map<string, string[]>());
+    setUnshareMeasuresRequest(new Map<string, string[]>());
+    setInitialRowIdsSelected([]);
+    table.resetRowSelection();
+    table.resetExpanded();
+    formik.resetForm();
+
+    onClose();
+  };
+
+  // Closes the confirmation dialog
+  const handleConfirmationDialogClose = () => {
+    setConfirmationDialogOpen(false);
+
+    // Also close underlying Share/Unshare dialog
+    if (option === "UnshareFromMe") {
+      onClose();
+    }
+  };
+
   const handleSave = async () => {
     setConfirmationDialogOpen(false);
     setExecuting(true);
@@ -264,13 +299,13 @@ const ShareDialog = ({ measures, open, option, onClose }: ShareDialogProps) => {
       try {
         await measureServiceApi.shareMeasures(shareMeasuresRequest);
 
-        onClose({
+        onSave({
           toastType: "success",
           toastMessage: "The measure(s) were successfully shared.",
           toastOpen: true,
         });
       } catch (error) {
-        onClose({
+        onSave({
           toastType: "danger",
           toastMessage: getErrorMessage(
             error,
@@ -281,17 +316,17 @@ const ShareDialog = ({ measures, open, option, onClose }: ShareDialogProps) => {
       } finally {
         setExecuting(false);
       }
-    } else if (option === "Unshare") {
+    } else if (option === "Unshare" || option === "UnshareFromMe") {
       try {
         await measureServiceApi.unshareMeasures(unshareMeasuresRequest);
 
-        onClose({
+        onSave({
           toastType: "success",
           toastMessage: "The measure(s) were successfully unshared.",
           toastOpen: true,
         });
       } catch (error) {
-        onClose({
+        onSave({
           toastType: "danger",
           toastMessage: getErrorMessage(
             error,
@@ -306,6 +341,8 @@ const ShareDialog = ({ measures, open, option, onClose }: ShareDialogProps) => {
   };
 
   const onRowSelectionChange = useCallback(async () => {
+    if (option !== "Unshare") return;
+
     if (initialRowIdsSelected.length) {
       const rowIdsSelected = Object.keys(rowSelection);
 
@@ -320,7 +357,12 @@ const ShareDialog = ({ measures, open, option, onClose }: ShareDialogProps) => {
         updateUnsharedMeasuresRequest(measureId, userId);
       });
     }
-  }, [rowSelection]);
+  }, [
+    option,
+    initialRowIdsSelected,
+    rowSelection,
+    updateUnsharedMeasuresRequest,
+  ]);
 
   const confirmationDialogWarningContent = () => {
     return (
@@ -485,24 +527,23 @@ const ShareDialog = ({ measures, open, option, onClose }: ShareDialogProps) => {
 
   useEffect(() => {
     onRowSelectionChange();
-  }, [table.getState().rowSelection]);
+  }, [rowSelection]);
 
   useEffect(() => {
-    setSaveDisabled(true);
-    setShareMeasuresRequest(new Map<string, string[]>());
-    setUnshareMeasuresRequest(new Map<string, string[]>());
-    setInitialRowIdsSelected([]);
-    table.resetRowSelection();
-    table.resetExpanded();
-    formik.resetForm();
-  }, [onClose]);
-  const myFunc = (option) => {
-    const result =
-      option === "Share With"
-        ? saveDisabled || !formik.isValid || executing
-        : table.getIsAllRowsSelected() || executing;
-    return result;
-  };
+    // Only trigger when dialog is open and the option is UnshareFromMe
+    if (option === "UnshareFromMe" && open) {
+      // Prepare the unshare request
+      const directUnshareRequest = new Map<string, string[]>();
+      measures.forEach((measure) => {
+        directUnshareRequest.set(measure.id, [userName]);
+      });
+      setUnshareMeasuresRequest(directUnshareRequest);
+
+      // Open the confirmation dialog
+      setConfirmationDialogOpen(true);
+    }
+  }, [option, open, measures, userName]);
+
   return (
     <>
       <GlobalStyles />
@@ -510,8 +551,8 @@ const ShareDialog = ({ measures, open, option, onClose }: ShareDialogProps) => {
         form
         title={option}
         dialogProps={{
-          onClose,
-          open,
+          onClose: handleShareDialogClose,
+          open: showShareDialog && open,
           onSubmit: () => {
             option === "Share With"
               ? formik.handleSubmit()
@@ -531,7 +572,10 @@ const ShareDialog = ({ measures, open, option, onClose }: ShareDialogProps) => {
           type: "submit",
           continueText: "Save",
           "data-testid": "share-save-button",
-          disabled: myFunc(option),
+          disabled:
+            option === "Share With"
+              ? saveDisabled || !formik.isValid || executing
+              : table.getIsAllRowsSelected() || executing,
         }}
       >
         <div id="measure-landing" data-testid="measure-landing">
@@ -660,15 +704,11 @@ const ShareDialog = ({ measures, open, option, onClose }: ShareDialogProps) => {
         title="Are you sure?"
         dialogProps={{
           open: confirmationDialogOpen,
-          onClose: () => {
-            setConfirmationDialogOpen(false);
-          },
+          onClose: handleConfirmationDialogClose,
           "data-testid": "share-confirmation-dialog",
         }}
         cancelButtonProps={{
-          onClick: () => {
-            setConfirmationDialogOpen(false);
-          },
+          onClick: handleConfirmationDialogClose,
           cancelText: "Cancel",
           "data-testid": "share-confirmation-dialog-cancel-button",
         }}

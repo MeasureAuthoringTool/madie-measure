@@ -7,6 +7,7 @@ import {
   checkUserCanEdit,
   routeHandlerStore,
   useMeasureServiceApi,
+  useFeatureFlags,
 } from "@madie/madie-util";
 import MetaDataWrapper from "../../../editMeasure/details/MetaDataWrapper";
 
@@ -57,7 +58,13 @@ interface ReportingForm {
   improvementNotationDescription: string;
 }
 
-const QDMReporting = () => {
+export interface ReportingProps {
+  isTestCaseLocked: boolean;
+  checkTestCasesLockStatus: Function;
+  setAlertMessage: Function;
+}
+
+const QDMReporting = (props: ReportingProps) => {
   const [measure, setMeasure] = useState<Measure>(measureStore.state);
   const [discardDialogOpen, setDiscardDialogOpen] = useState(false);
   const measureServiceApi = useMeasureServiceApi();
@@ -67,6 +74,7 @@ const QDMReporting = () => {
   const [toastMessage, setToastMessage] = useState<string>("");
   const [toastType, setToastType] = useState<string>("danger");
   const { updateRouteHandlerState } = routeHandlerStore;
+  const featureFlags = useFeatureFlags();
 
   useEffect(() => {
     const subscription = measureStore.subscribe(setMeasure);
@@ -74,11 +82,13 @@ const QDMReporting = () => {
       subscription.unsubscribe();
     };
   }, []);
-  const canEdit = checkUserCanEdit(
-    measure?.measureSet?.owner,
-    measure?.measureSet?.acls,
-    measure?.measureMetaData?.draft
-  );
+  const canEdit =
+    !props.isTestCaseLocked &&
+    checkUserCanEdit(
+      measure?.measureSet?.owner,
+      measure?.measureSet?.acls,
+      measure?.measureMetaData?.draft
+    );
 
   const formik = useFormik({
     initialValues: {
@@ -116,6 +126,14 @@ const QDMReporting = () => {
   };
 
   const handleSubmit = async (values) => {
+    if (featureFlags.Locking && (await props.checkTestCasesLockStatus())) {
+      props.setAlertMessage({
+        type: "error",
+        message:
+          "This measure cannot be saved because changes to the Population Criteria will update test cases and one or more test cases are locked by another user.",
+        canClose: false,
+      });
+    }
     const newMeasure: Measure = {
       ...measure,
       rateAggregation: values.rateAggregation,

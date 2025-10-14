@@ -32,10 +32,11 @@ import ElementSection from "../../../../../../common/ElementSection";
 import CodeableConceptComponent from "./types/CodeableConceptComponent";
 import PeriodDateTimeComponent from "./types/PeriodDateTimeComponent";
 import ChoiceType from "./ChoiceType";
-import QuantityInput from "./types/QuantityInput";
+import QuantityComponent from "./types/QuantityComponent";
 import IdentifierComponent from "./types/IdentifierComponent";
 import QuantityIntervalInput from "../../../../../../common/quantityIntervalInput/QuantityIntervalInput";
 import MoneyComponent from "./types/MoneyComponent";
+import TimingComponent from "./types/TimingComponent";
 
 // onChange is being deprecated as no updates to the resource are tracked.
 // Changes directly to the json should be done with a dispatch, this propagates downstream changes in formik.
@@ -71,7 +72,7 @@ const TypeEditor = ({
   // is multiple cardinality?
   if (structureDefinition?.max === "*") {
     // is it not already terminated with an index?
-    if (!getIndexFromPath(label) && !values) {
+    if (!getIndexFromPath(label) && !values?.length) {
       // we are just going to add a zero for now. could be smarter later
       // TO DO: We will eventually need to map inner elements of multiple cardinality based on how many elements are in the form
       // something like Array.From(numOfElementsInForm, _index) =>) had a previous rendition of this guy working in 8500 pr commits
@@ -232,13 +233,34 @@ const TypeEditor = ({
         );
       case "Quantity":
         return (
-          <QuantityInput
-            canEdit={canEdit}
-            label={"Quantity"}
-            onChange={(quantity) => {
-              formik.setFieldValue(label, quantity);
-            }}
-          />
+          <>
+            {showAddAttributeButton && values ? (
+              values.map((el, index) => (
+                <QuantityComponent
+                  key={index}
+                  canEdit={canEdit}
+                  label={`${label}[${index}]`}
+                  structureDefinition={structureDefinition}
+                  fieldRequired={required}
+                  showAddAttributeButton={
+                    showAddAttributeButton && index === values.length - 1
+                  }
+                  addTitle={addTitle}
+                  handleAddElement={handleAddElement}
+                />
+              ))
+            ) : (
+              <QuantityComponent
+                canEdit={canEdit}
+                label={label}
+                structureDefinition={structureDefinition}
+                fieldRequired={required}
+                showAddAttributeButton={showAddAttributeButton}
+                addTitle={addTitle}
+                handleAddElement={handleAddElement}
+              />
+            )}
+          </>
         );
       case "Period":
         return (
@@ -562,6 +584,16 @@ const TypeEditor = ({
             label={label}
             canEdit={canEdit}
             resource={resource}
+            fieldRequired={false}
+          />
+        );
+      case "Timing":
+        return (
+          <TimingComponent
+            resource={resource}
+            structureDefinition={structureDefinition}
+            label={label}
+            canEdit={canEdit}
             fieldRequired={false}
           />
         );

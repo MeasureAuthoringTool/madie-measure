@@ -74,18 +74,87 @@ describe("ViewMeasureHistoryDialog", () => {
     jest.clearAllMocks();
   });
 
-  it("renders dialog with measure name", () => {
+  it("renders measure header with name, version, and draft chip", () => {
     mockMeasureServiceApi.getMeasureHistoryLogs = jest
       .fn()
       .mockResolvedValue(historyData);
+
+    const draftMeasure = {
+      ...measure,
+      version: "1.0.000",
+      measureMetaData: { draft: true },
+    } as Measure;
+
     render(
       <ViewMeasureHistoryDialog
-        measures={[measure]}
+        measures={[draftMeasure]}
         open={true}
         onClose={jest.fn()}
       />
     );
-    expect(screen.getByText("Test Measure")).toBeInTheDocument();
+
+    expect(
+      screen.getByTestId("measure-history-measure-name")
+    ).toHaveTextContent("Test Measure");
+    expect(screen.getByTestId("measure-history-version")).toHaveTextContent(
+      "(Version 1.0.000)"
+    );
+    expect(
+      screen.getByTestId("measure-history-draft-chip")
+    ).toBeInTheDocument();
+  });
+
+  it("renders empty measure name if missing", () => {
+    mockGetMeasureHistoryLogs.mockResolvedValue(historyData);
+    const noNameMeasure = { id: "measure-2" } as Measure;
+
+    render(
+      <ViewMeasureHistoryDialog
+        measures={[noNameMeasure]}
+        open={true}
+        onClose={jest.fn()}
+      />
+    );
+    expect(
+      screen.getByTestId("measure-history-measure-name")
+    ).toHaveTextContent("");
+  });
+
+  it("does not render version span if version is missing", () => {
+    mockGetMeasureHistoryLogs.mockResolvedValue(historyData);
+    const noVersionMeasure = {
+      ...measure,
+      version: undefined,
+    } as unknown as Measure;
+
+    render(
+      <ViewMeasureHistoryDialog
+        measures={[noVersionMeasure]}
+        open={true}
+        onClose={jest.fn()}
+      />
+    );
+    expect(
+      screen.queryByTestId("measure-history-version")
+    ).not.toBeInTheDocument();
+  });
+
+  it("does not render draft chip if draft is false or missing", () => {
+    mockGetMeasureHistoryLogs.mockResolvedValue(historyData);
+    const notDraftMeasure = {
+      ...measure,
+      measureMetaData: { draft: false },
+    } as Measure;
+    render(
+      <ViewMeasureHistoryDialog
+        measures={[notDraftMeasure]}
+        open={true}
+        onClose={jest.fn()}
+      />
+    );
+    expect(
+      screen.queryByTestId("measure-history-draft-chip")
+    ).not.toBeInTheDocument();
   });
 
   it("shows loading state when fetching history", async () => {

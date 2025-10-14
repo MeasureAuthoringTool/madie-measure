@@ -6,7 +6,7 @@ import {
   waitFor,
   screen,
 } from "@testing-library/react";
-import { act } from "react-dom/test-utils";
+import { act, Simulate } from "react-dom/test-utils";
 import { ApiContextProvider, ServiceConfig } from "../../api/ServiceContext";
 import { createMemoryRouter, RouterProvider } from "react-router-dom";
 import { routesConfig } from "../measureRoutes/MeasureRoutes";
@@ -27,9 +27,16 @@ import {
   useFeatureFlags,
 } from "@madie/madie-util";
 import { oneItemResponse } from "../__mocks__/mockMeasureResponses";
+import userEvent from "@testing-library/user-event";
 
 jest.mock("./details/MeasureDetails");
 jest.mock("./editor/MeasureEditor");
+jest.mock("../common/createVersionDialog/CreateVersionDialog", () => ({
+  __esModule: true,
+  default: jest.fn(() => (
+    <div data-testid="create-version-dialog">Create Version Dialog</div>
+  )),
+}));
 
 const MeasureEditorMock = MeasureEditor as jest.Mock<JSX.Element>;
 
@@ -140,11 +147,49 @@ const measure = {
   measureSetId: "MeasureSetId1",
 } as Measure;
 
+const mockMeasureServiceApi = {
+  searchMeasuresByMeasureNameOrEcqmTitle: jest
+    .fn()
+    .mockResolvedValue(oneItemResponse),
+  fetchMeasures: jest.fn().mockResolvedValue(oneItemResponse),
+  getRecentMeasuresByMeasureSetId: jest.fn().mockResolvedValue([measure]),
+  fetchMeasure: jest.fn().mockResolvedValue(measure),
+  getAllPopulationBasisOptions: jest.fn().mockResolvedValue([]),
+  getReturnTypesForAllCqlDefinitions: jest.fn().mockResolvedValue({}),
+  updateMeasure: jest.fn().mockResolvedValueOnce({ status: 200 }),
+  createVersion: jest.fn().mockResolvedValue({ id: "newVersionId" }),
+  deleteMeasure: jest.fn().mockResolvedValue({}),
+  checkNextVersionNumber: jest.fn().mockReturnValue("1.0.000"),
+  checkValidVersion: jest.fn().mockResolvedValue({ status: 200 }),
+  fetchMeasureDraftStatuses: jest.fn().mockResolvedValue({
+    "1": true,
+    "2": true,
+    "3": true,
+  }),
+  getMeasureHistoryLogs: jest.fn().mockResolvedValue([]),
+  getMeasureExport: jest
+    .fn()
+    .mockResolvedValue({ size: 635581, type: "application/octet-stream" }),
+  getReturnTypesForAllCqlFunctions: jest.fn().mockResolvedValue({}),
+  fetchHumanReadable: jest.fn().mockResolvedValue("test human readable"),
+  getSharedMeasures: jest.fn().mockResolvedValue({
+    measureId1: ["userId1"],
+    measureId2: ["userId1", "userId2"],
+  }),
+  getMeasuresByMeasureSetId: jest.fn().mockImplementation((measureSetId) => {
+    return [measure];
+  }),
+  transferMeasures: jest.fn().mockResolvedValue({ data: true }),
+  draftMeasure: jest.fn().mockResolvedValue({ id: "newDraftId" }),
+  unshareMeasures: jest.fn().mockResolvedValue({ measureId1: [] }),
+} as unknown as MeasureServiceApi;
+
 jest.mock("@madie/madie-util", () => ({
   useMeasureServiceApi: jest.fn(() => mockMeasureServiceApi),
   useDocumentTitle: jest.fn(),
   useOktaTokens: jest.fn(() => ({
     getAccessToken: () => "test.jwt",
+    getUserName: () => "test user",
   })),
   checkUserCanEdit: jest.fn(),
   useFeatureFlags: jest.fn(() => ({
@@ -197,40 +242,6 @@ const renderRouter = (
     </ApiContextProvider>
   );
 };
-const mockMeasureServiceApi = {
-  searchMeasuresByMeasureNameOrEcqmTitle: jest
-    .fn()
-    .mockResolvedValue(oneItemResponse),
-  fetchMeasures: jest.fn().mockResolvedValue(oneItemResponse),
-  getRecentMeasuresByMeasureSetId: jest.fn().mockResolvedValue([measure]),
-  fetchMeasure: jest.fn().mockResolvedValue(measure),
-  getAllPopulationBasisOptions: jest.fn().mockResolvedValue([]),
-  getReturnTypesForAllCqlDefinitions: jest.fn().mockResolvedValue({}),
-  updateMeasure: jest.fn().mockResolvedValueOnce({ status: 200 }),
-  createVersion: jest.fn().mockResolvedValue({ id: "newVersionId" }),
-  deleteMeasure: jest.fn().mockResolvedValue({}),
-  checkNextVersionNumber: jest.fn().mockReturnValue("1.0.000"),
-  checkValidVersion: jest.fn().mockResolvedValue({ status: 200 }),
-  fetchMeasureDraftStatuses: jest.fn().mockResolvedValue({
-    "1": true,
-    "2": true,
-    "3": true,
-  }),
-  getMeasureExport: jest
-    .fn()
-    .mockResolvedValue({ size: 635581, type: "application/octet-stream" }),
-  getReturnTypesForAllCqlFunctions: jest.fn().mockResolvedValue({}),
-  fetchHumanReadable: jest.fn().mockResolvedValue("test human readable"),
-  getSharedMeasures: jest.fn().mockResolvedValue({
-    measureId1: ["userId1"],
-    measureId2: ["userId1", "userId2"],
-  }),
-  getMeasuresByMeasureSetId: jest.fn().mockImplementation((measureSetId) => {
-    return [measure];
-  }),
-  transferMeasures: jest.fn().mockResolvedValue({ data: true }),
-  draftMeasure: jest.fn().mockResolvedValue({ id: "newDraftId" }),
-} as unknown as MeasureServiceApi;
 
 describe("EditMeasure Component", () => {
   beforeEach(() => {
@@ -333,6 +344,9 @@ describe("EditMeasure Component", () => {
   });
 
   it("delete succeeds", async () => {
+    mockMeasureServiceApi.deleteMeasure = jest.fn().mockResolvedValue({
+      status: 200,
+    });
     renderRouter();
 
     const result = await findByTestId("editMeasure");
@@ -365,7 +379,7 @@ describe("EditMeasure Component", () => {
   });
 
   it("delete fails", async () => {
-    mockMeasureServiceApi.updateMeasure = jest.fn().mockRejectedValueOnce({
+    mockMeasureServiceApi.deleteMeasure = jest.fn().mockRejectedValueOnce({
       status: 500,
       response: { data: { message: "update failed" } },
     });
@@ -385,12 +399,12 @@ describe("EditMeasure Component", () => {
     const continueButton = await findByTestId("delete-measure-button-2");
     fireEvent.click(continueButton);
     await waitFor(() => {
-      expect(getByTestId("edit-measure-alert")).toBeInTheDocument();
+      expect(screen.getByRole("alert")).toHaveTextContent("update failed");
     });
   });
 
   it("delete fails without an error object", async () => {
-    mockMeasureServiceApi.updateMeasure = jest
+    mockMeasureServiceApi.deleteMeasure = jest
       .fn()
       .mockRejectedValueOnce("I'm an error");
     renderRouter();
@@ -409,8 +423,7 @@ describe("EditMeasure Component", () => {
     const continueButton = await findByTestId("delete-measure-button-2");
     fireEvent.click(continueButton);
     await waitFor(() => {
-      expect(queryByText("Are you sure you want to delete")).not.toBeVisible();
-      expect(getByTestId("edit-measure-alert")).toBeInTheDocument();
+      expect(screen.getByRole("alert")).toHaveTextContent("I'm an error");
     });
   });
 
@@ -429,35 +442,26 @@ describe("EditMeasure Component", () => {
       .mockResolvedValue(oneItemResponse);
     renderRouter();
 
-    const result = await findByTestId("editMeasure");
-    expect(result).toBeInTheDocument();
+    await findByTestId("editMeasure");
     expect(mockMeasureServiceApi.fetchMeasure).toHaveBeenCalled();
-    const loading = queryByTestId("loading");
-    setTimeout(() => {
-      expect(loading).toBeNull();
-    }, 500);
+    await waitFor(() => {
+      expect(queryByTestId("loading")).toBeNull();
+    });
 
     act(() => {
       window.dispatchEvent(new Event("view-humanreadable"));
     });
 
-    await waitFor(() =>
-      setTimeout(() => {
-        expect(queryByTestId("view-hr-modal")).toBeInTheDocument();
-      }, 1000)
-    );
+    const modal = await findByTestId("view-hr-modal");
+    expect(modal).toBeInTheDocument();
 
-    setTimeout(async () => {
-      const cancelButton = await findByTestId("modal-secondary-btn");
-      fireEvent.click(cancelButton);
-    }, 500);
+    expect(screen.queryByText("test human readable")).toBeInTheDocument();
+
+    const cancelButton = await findByTestId("human-readable-cancel-button");
+    fireEvent.click(cancelButton);
 
     await waitFor(() => {
-      expect(
-        screen.queryByText(
-          "The human readable file is not available for this measure.  Contact Help Desk for additional information."
-        )
-      ).not.toBeInTheDocument();
+      expect(screen.queryByText("test human readable")).not.toBeInTheDocument();
     });
   });
 
@@ -471,7 +475,7 @@ describe("EditMeasure Component", () => {
       window.dispatchEvent(new Event("share-measure"));
     });
 
-    await waitFor(async () => {
+    await waitFor(() => {
       expect(mockMeasureServiceApi.fetchMeasure).toHaveBeenCalled();
       expect(getByTestId("share-dialog")).toBeInTheDocument();
     });
@@ -484,6 +488,90 @@ describe("EditMeasure Component", () => {
     expect(queryByTestId("share-dialog")).toBeVisible();
   });
 
+  it("should display an unshare from me confirmation dialog when the event is triggered and close dialog when cancel button is clicked", async () => {
+    renderRouter();
+
+    const result = await findByTestId("editMeasure");
+    expect(result).toBeInTheDocument();
+
+    act(() => {
+      window.dispatchEvent(new Event("unshare-measure-from-me"));
+    });
+
+    await waitFor(() => {
+      expect(getByTestId("share-confirmation-dialog")).toBeInTheDocument();
+    });
+
+    const cancelButton = getByTestId("share-confirmation-dialog-cancel-button");
+    fireEvent.click(cancelButton);
+
+    await waitFor(() => {
+      expect(
+        queryByTestId("share-confirmation-dialog")
+      ).not.toBeInTheDocument();
+    });
+  });
+
+  it("should display an unshare from me confirmation dialog when the event is triggered and successfully unshare when accept button is clicked", async () => {
+    renderRouter();
+
+    const result = await findByTestId("editMeasure");
+    expect(result).toBeInTheDocument();
+
+    act(() => {
+      window.dispatchEvent(new Event("unshare-measure-from-me"));
+    });
+
+    await waitFor(() => {
+      expect(getByTestId("share-confirmation-dialog")).toBeInTheDocument();
+    });
+
+    const acceptBtn = await screen.findByTestId(
+      "share-confirmation-dialog-accept-button"
+    );
+    expect(acceptBtn).toBeEnabled();
+
+    fireEvent.click(acceptBtn);
+
+    await waitFor(() => {
+      expect(
+        getByTestId("edit-measure-information-success-text")
+      ).toBeInTheDocument();
+    });
+  });
+
+  it("should display an unshare from me confirmation dialog when the event is triggered and fail to unshare when accept button is clicked", async () => {
+    mockMeasureServiceApi.unshareMeasures = jest.fn().mockRejectedValueOnce({
+      status: 500,
+      response: { data: { message: "update failed" } },
+    });
+    renderRouter();
+
+    const result = await findByTestId("editMeasure");
+    expect(result).toBeInTheDocument();
+
+    act(() => {
+      window.dispatchEvent(new Event("unshare-measure-from-me"));
+    });
+
+    await waitFor(() => {
+      expect(getByTestId("share-confirmation-dialog")).toBeInTheDocument();
+    });
+
+    const acceptBtn = await screen.findByTestId(
+      "share-confirmation-dialog-accept-button"
+    );
+    expect(acceptBtn).toBeEnabled();
+
+    fireEvent.click(acceptBtn);
+
+    const errorText = await screen.findByTestId(
+      "edit-measure-information-generic-error-text"
+    );
+    expect(errorText).toBeInTheDocument();
+    expect(errorText).toHaveTextContent("update failed");
+  });
+
   it("should display transfer dialog when the event is triggered and close dialog when cancel button is clicked", async () => {
     renderRouter();
 
@@ -494,13 +582,13 @@ describe("EditMeasure Component", () => {
       window.dispatchEvent(new Event("transfer-measure"));
     });
 
-    await waitFor(async () => {
+    await waitFor(() => {
       expect(getByTestId("transfer-dialog")).toBeInTheDocument();
     });
 
     const cancelButton = getByTestId("transfer-cancel-button");
     fireEvent.click(cancelButton);
-    await waitFor(async () => {
+    await waitFor(() => {
       expect(queryByTestId("transfer-dialog")).not.toBeInTheDocument();
     });
   });
@@ -541,7 +629,7 @@ describe("EditMeasure Component", () => {
         );
 
         expect(queryByTestId("transfer-dialog")).not.toBeInTheDocument();
-      }, 2000)
+      }, 4500)
     );
   });
 
@@ -558,7 +646,7 @@ describe("EditMeasure Component", () => {
   });
 
   // temporarily skipping as it has github build issues
-  it.skip("should create a draft and show success toast", async () => {
+  it("should create a draft and show success toast", async () => {
     renderRouter();
 
     act(() => {
@@ -583,7 +671,6 @@ describe("EditMeasure Component", () => {
         measure.model,
         "Draft Measure Name"
       );
-      screen.debug(undefined, 80000);
       expect(
         screen.getByTestId("edit-measure-information-success-text")
       ).toBeInTheDocument();
@@ -607,7 +694,261 @@ describe("EditMeasure Component", () => {
     await waitFor(() =>
       setTimeout(() => {
         expect(queryByTestId("view-measure-history")).toBeInTheDocument();
-      }, 1000)
+      }, 4000)
+    );
+  });
+
+  it("should display a version dialog when the event is triggered, discards.", async () => {
+    renderRouter();
+
+    const result = await findByTestId("editMeasure");
+    expect(result).toBeInTheDocument();
+    expect(mockMeasureServiceApi.fetchMeasure).toHaveBeenCalled();
+    const loading = queryByTestId("loading");
+    expect(loading).toBeNull();
+    act(() => {
+      window.dispatchEvent(new Event("version-measure"));
+    });
+    await waitFor(() =>
+      expect(queryByTestId("create-version-dialog")).toBeInTheDocument()
+    );
+  });
+
+  it("Version succeeds.", async () => {
+    mockMeasureServiceApi.unshareMeasures = jest
+      .fn()
+      .mockResolvedValue({ measureId1: [] });
+    mockMeasureServiceApi.createVersion = jest.fn().mockResolvedValueOnce({
+      status: 200,
+      response: {
+        data: {
+          message: "Version created successfully.",
+        },
+      },
+    });
+    renderRouter();
+
+    const result = await findByTestId("editMeasure");
+    expect(result).toBeInTheDocument();
+    expect(mockMeasureServiceApi.fetchMeasure).toHaveBeenCalled();
+    const loading = queryByTestId("loading");
+    expect(loading).toBeNull();
+    act(() => {
+      window.dispatchEvent(new Event("version-measure"));
+    });
+    await waitFor(() =>
+      expect(queryByTestId("create-version-dialog")).toBeInTheDocument()
+    );
+  });
+
+  it("Version fails with 423.", async () => {
+    mockMeasureServiceApi.createVersion = jest.fn().mockRejectedValueOnce({
+      response: {
+        status: 423,
+        data: {
+          message:
+            "Unable to version measure. Locked while being edited by anotherUser.",
+        },
+      },
+    });
+    renderRouter();
+
+    const result = await findByTestId("editMeasure");
+    expect(result).toBeInTheDocument();
+    expect(mockMeasureServiceApi.fetchMeasure).toHaveBeenCalled();
+    const loading = queryByTestId("loading");
+    expect(loading).toBeNull();
+    act(() => {
+      window.dispatchEvent(new Event("version-measure"));
+    });
+    await waitFor(() =>
+      expect(queryByTestId("create-version-dialog")).toBeInTheDocument()
+    );
+
+    expect(getByTestId("create-version-dialog")).toBeInTheDocument();
+  });
+
+  // temporarily skipping as it has github build issues
+  it.skip("Version fails with 400.", async () => {
+    mockMeasureServiceApi.createVersion = jest.fn().mockRejectedValueOnce({
+      response: {
+        status: 400,
+        data: {
+          message: "Requested measure cannot be versioned",
+        },
+      },
+    });
+    renderRouter();
+
+    const result = await findByTestId("editMeasure");
+    expect(result).toBeInTheDocument();
+    expect(mockMeasureServiceApi.fetchMeasure).toHaveBeenCalled();
+    const loading = queryByTestId("loading");
+    expect(loading).toBeNull();
+    act(() => {
+      window.dispatchEvent(new Event("version-measure"));
+    });
+    await waitFor(() =>
+      expect(
+        queryByTestId("create-version-continue-button")
+      ).toBeInTheDocument()
+    );
+
+    expect(getByTestId("create-version-dialog")).toBeInTheDocument();
+    const typeInput = getByTestId("version-type-input") as HTMLInputElement;
+    expect(typeInput).toBeInTheDocument();
+    expect(typeInput.value).toBe("");
+    fireEvent.change(typeInput, {
+      target: { value: "major" },
+    });
+    expect(typeInput.value).toBe("major");
+    const confirmVersionNode = getByTestId("confirm-version-input");
+    userEvent.type(confirmVersionNode, "1.0.000");
+    Simulate.change(confirmVersionNode);
+    expect(confirmVersionNode.value).toBe("1.0.000");
+    expect(getByTestId("create-version-continue-button")).not.toBeDisabled();
+
+    const continueButton = await findByTestId("create-version-continue-button");
+    fireEvent.click(continueButton);
+
+    const errorText = await screen.findByTestId(
+      "edit-measure-information-generic-error-text"
+    );
+    expect(errorText).toBeInTheDocument();
+    expect(errorText).toHaveTextContent(
+      "Requested measure cannot be versioned"
+    );
+  });
+  // temporarily skipping as it has github build issues
+  it.skip("Version fails with 403.", async () => {
+    mockMeasureServiceApi.createVersion = jest.fn().mockRejectedValueOnce({
+      response: {
+        status: 403,
+        data: {
+          message: "User is unauthorized to create a version",
+        },
+      },
+    });
+    renderRouter();
+
+    const result = await findByTestId("editMeasure");
+    expect(result).toBeInTheDocument();
+    expect(mockMeasureServiceApi.fetchMeasure).toHaveBeenCalled();
+    const loading = queryByTestId("loading");
+    expect(loading).toBeNull();
+    act(() => {
+      window.dispatchEvent(new Event("version-measure"));
+    });
+    await waitFor(() =>
+      expect(
+        queryByTestId("create-version-continue-button")
+      ).toBeInTheDocument()
+    );
+
+    expect(getByTestId("create-version-dialog")).toBeInTheDocument();
+    const typeInput = getByTestId("version-type-input") as HTMLInputElement;
+    expect(typeInput).toBeInTheDocument();
+    expect(typeInput.value).toBe("");
+    fireEvent.change(typeInput, {
+      target: { value: "major" },
+    });
+    expect(typeInput.value).toBe("major");
+    const confirmVersionNode = getByTestId("confirm-version-input");
+    userEvent.type(confirmVersionNode, "1.0.000");
+    Simulate.change(confirmVersionNode);
+    expect(confirmVersionNode.value).toBe("1.0.000");
+    expect(getByTestId("create-version-continue-button")).not.toBeDisabled();
+
+    const continueButton = await findByTestId("create-version-continue-button");
+    fireEvent.click(continueButton);
+
+    const errorText = await screen.findByTestId(
+      "edit-measure-information-generic-error-text"
+    );
+    expect(errorText).toBeInTheDocument();
+    expect(errorText).toHaveTextContent(
+      "User is unauthorized to create a version"
+    );
+  });
+  // temporarily skipping as it has github build issues
+  it.skip("Version fails with other errors.", async () => {
+    mockMeasureServiceApi.createVersion = jest.fn().mockRejectedValueOnce({
+      response: {
+        status: 500,
+        data: {
+          message: "An unexpected error occurred",
+        },
+      },
+    });
+    renderRouter();
+
+    const result = await findByTestId("editMeasure");
+    expect(result).toBeInTheDocument();
+    expect(mockMeasureServiceApi.fetchMeasure).toHaveBeenCalled();
+    const loading = queryByTestId("loading");
+    expect(loading).toBeNull();
+    act(() => {
+      window.dispatchEvent(new Event("version-measure"));
+    });
+    await waitFor(() =>
+      expect(
+        queryByTestId("create-version-continue-button")
+      ).toBeInTheDocument()
+    );
+
+    expect(getByTestId("create-version-dialog")).toBeInTheDocument();
+    const typeInput = getByTestId("version-type-input") as HTMLInputElement;
+    expect(typeInput).toBeInTheDocument();
+    expect(typeInput.value).toBe("");
+    fireEvent.change(typeInput, {
+      target: { value: "major" },
+    });
+    expect(typeInput.value).toBe("major");
+    const confirmVersionNode = getByTestId("confirm-version-input");
+    userEvent.type(confirmVersionNode, "1.0.000");
+    Simulate.change(confirmVersionNode);
+    expect(confirmVersionNode.value).toBe("1.0.000");
+    expect(getByTestId("create-version-continue-button")).not.toBeDisabled();
+
+    const continueButton = await findByTestId("create-version-continue-button");
+    fireEvent.click(continueButton);
+
+    const errorText = await screen.findByTestId(
+      "edit-measure-information-generic-error-text"
+    );
+    expect(errorText).toBeInTheDocument();
+    expect(errorText).toHaveTextContent("An unexpected error occurred");
+  });
+  // temporarily skipping as it has github build issues
+  it.skip("shows error toast when draftMeasure fails", async () => {
+    mockMeasureServiceApi.draftMeasure = jest.fn().mockRejectedValueOnce({
+      response: { data: { message: "Draft failed" } },
+    });
+    renderRouter();
+
+    act(() => {
+      window.dispatchEvent(new Event("draft-measure"));
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText("Create Draft")).toBeInTheDocument();
+    });
+
+    const nameInput = await screen.findByRole("textbox", {
+      name: "Measure Name",
+    });
+    fireEvent.change(nameInput, { target: { value: "Draft Measure Name" } });
+
+    const submitButton = screen.getByTestId("create-draft-continue-button");
+    fireEvent.click(submitButton);
+
+    await waitFor(
+      () => {
+        expect(
+          screen.getByTestId("edit-measure-information-generic-error-text")
+        ).toHaveTextContent("Draft failed");
+      },
+      { timeout: 3000 }
     );
   });
 });

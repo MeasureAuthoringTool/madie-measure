@@ -13,7 +13,9 @@ import useTerminologyServiceApi from "../../../api/useTerminologyServiceApi";
 import { ExecutionContextProvider } from "./ExecutionContext";
 
 import * as _ from "lodash";
-import StatusHandler from "../../statusHandler/StatusHandler";
+import StatusHandler, {
+  CustomWarningMessage,
+} from "../../statusHandler/StatusHandler";
 import TestCaseLandingWrapper from "../../testCaseLanding/common/TestCaseLandingWrapper";
 import {
   Measure,
@@ -33,6 +35,12 @@ const TestCaseRoutes = () => {
   const [valueSets, setValueSets] = useState<ValueSet[]>();
   const [errors, setErrors] = useState<Array<string>>([]);
   const [warnings, setWarnings] = useState<Array<string>>([]);
+  const [customWarningMessages, setCustomWarningMessages] = useState<
+    CustomWarningMessage[]
+  >([]);
+  const [shiftTestCaseDatesWarnings, setShiftTestCaseDatesWarnings] = useState<
+    Array<string>
+  >([]);
   const [importWarnings, setImportWarnings] = useState<TestCaseImportOutcome[]>(
     []
   );
@@ -144,11 +152,13 @@ const TestCaseRoutes = () => {
           testDataId="execution_context_loading_errors"
         />
       )}
-      {warnings?.length > 0 && (
+      {(warnings?.length || customWarningMessages?.length > 0) && (
         <>
           <StatusHandler
             warning={true}
-            shiftTestCaseDatesWarning={warnings}
+            warningMessages={warnings}
+            customWarningMessages={customWarningMessages}
+            shiftTestCaseDatesWarning={shiftTestCaseDatesWarnings}
             testDataId="execution_context_loading_warning"
           />
         </>
@@ -170,6 +180,10 @@ const TestCaseRoutes = () => {
                     setErrors={setErrors}
                     setImportWarnings={setImportWarnings}
                     setWarnings={setWarnings}
+                    setShiftTestCaseDatesWarnings={
+                      setShiftTestCaseDatesWarnings
+                    }
+                    setCustomWarningMessages={setCustomWarningMessages}
                   />
                 }
               />
@@ -187,6 +201,10 @@ const TestCaseRoutes = () => {
                     setErrors={setErrors}
                     setImportWarnings={setImportWarnings}
                     setWarnings={setWarnings}
+                    setShiftTestCaseDatesWarnings={
+                      setShiftTestCaseDatesWarnings
+                    }
+                    setCustomWarningMessages={setCustomWarningMessages}
                   />
                 }
               />
@@ -237,6 +255,9 @@ const TestCaseRoutes = () => {
                     warnings={warnings}
                     setErrors={setErrors}
                     setImportWarnings={setImportWarnings}
+                    setShiftTestCaseDatesWarnings={
+                      setShiftTestCaseDatesWarnings
+                    }
                     setWarnings={setWarnings}
                   />
                 }

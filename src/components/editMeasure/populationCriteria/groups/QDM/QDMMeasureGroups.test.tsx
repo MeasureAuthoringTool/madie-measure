@@ -32,11 +32,11 @@ import {
   measureStore,
   checkUserCanEdit,
   MeasureServiceApi,
+  useFeatureFlags,
 } from "@madie/madie-util";
 import { InitialPopulationAssociationType } from "../groupPopulations/GroupPopulation";
 // fix error about window.scrollto
 global.scrollTo = jest.fn();
-
 jest.mock("uuid", () => ({
   v4: jest.fn(),
 }));
@@ -89,6 +89,9 @@ jest.mock("@madie/madie-util", () => ({
   checkUserCanEdit: jest.fn(() => {
     return true;
   }),
+  useFeatureFlags: jest.fn(() => ({
+    Locking: false,
+  })),
   routeHandlerStore: {
     subscribe: () => {
       return { unsubscribe: () => null };
@@ -105,9 +108,12 @@ const props: MeasureGroupProps = {
   setIsFormDirty: jest.fn,
   measureId: "testMeasureId",
   setAlertMessage: jest.fn,
+  isTestCaseLocked: false,
+  checkTestCasesLockStatus: jest.fn(),
 };
 
-const renderMeasureGroupComponent = () => {
+const renderMeasureGroupComponent = (customProps = props) => {
+  const mergedProps = { ...props, ...customProps };
   return render(
     <MemoryRouter
       initialEntries={[{ pathname: "/measures/test-measure/edit/groups/1" }]}
@@ -116,7 +122,7 @@ const renderMeasureGroupComponent = () => {
         <Routes>
           <Route
             path="/measures/test-measure/edit/groups/:groupNumber"
-            element={<MeasureGroups {...props} />}
+            element={<MeasureGroups {...mergedProps} />}
           />
         </Routes>
       </ApiContextProvider>
@@ -877,6 +883,64 @@ describe("Measure Groups Page", () => {
       ).not.toBeInTheDocument();
 
       expect(screen.queryByText("Observation")).not.toBeInTheDocument();
+    });
+  });
+
+  test("render Measure group properties in readonly mode if a testcase is locked", async () => {
+    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
+      Locking: true,
+    }));
+    const customProps: MeasureGroupProps = {
+      ...props,
+      isTestCaseLocked: true,
+    };
+    renderMeasureGroupComponent(customProps);
+
+    const scoringUnit = screen.getByRole("textbox", { name: "Scoring Unit" });
+    expect(scoringUnit).toHaveAttribute("readonly");
+    expect(scoringUnit).toHaveValue("-");
+    const initialPopulation = screen.getByRole("textbox", {
+      name: "Initial Population",
+    });
+    expect(initialPopulation).toHaveAttribute("readonly");
+    expect(initialPopulation).toHaveValue("-");
+
+    const saveButton = screen.queryByTestId("group-form-submit-btn");
+    expect(saveButton).not.toBeInTheDocument();
+  });
+
+  test("displays error alert when test cases are locked and locking feature is enabled", async () => {
+    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
+      Locking: true,
+    }));
+    const checkTestCasesLockStatusMock = jest.fn().mockResolvedValue(true);
+    const setAlertMessageMock = jest.fn();
+    const customProps: MeasureGroupProps = {
+      ...props,
+      checkTestCasesLockStatus: checkTestCasesLockStatusMock,
+      setAlertMessage: setAlertMessageMock,
+    };
+    renderMeasureGroupComponent(customProps);
+
+    const groupPopulationInput = screen.getByTestId(
+      "select-measure-group-population-input"
+    ) as HTMLInputElement;
+    fireEvent.change(groupPopulationInput, {
+      target: { value: group.populations[0].definition },
+    });
+
+    // submit the form
+    await expect(screen.getByTestId("group-form-submit-btn")).toBeEnabled();
+    userEvent.click(screen.getByTestId("group-form-submit-btn"));
+
+    await waitFor(() => {
+      expect(checkTestCasesLockStatusMock).toHaveBeenCalled();
+      expect(setAlertMessageMock).toHaveBeenCalledWith({
+        type: "error",
+        message:
+          "This measure cannot be saved because changes to the Population Criteria will update test cases and one or more test cases are locked by another user.",
+        canClose: false,
+      });
     });
   });
 });

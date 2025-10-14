@@ -160,6 +160,15 @@ declare module "@madie/madie-util" {
       testCaseConfig: TestCaseConfiguration,
       measureId: String
     ): Promise<Response>;
+    getAllOrganizations(): Promise<Organization[]>;
+    updateGroup(group: Group, measureId: string): Promise<Group>;
+    createGroup(group: Group, measureId: string): Promise<Group>;
+    deleteMeasureGroup(groupId: string, measureId: string): Promise<Measure>;
+    checkTestCasesLocked(measureId: string): Promise<boolean>;
+    getCqmMeasure(
+      measureId: String,
+      abortController: AbortController
+    ): Promise<Response>;
   }
 
   export function useMeasureServiceApi(): MeasureServiceApi;
