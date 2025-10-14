@@ -34,9 +34,9 @@ import PeriodDateTimeComponent from "./types/PeriodDateTimeComponent";
 import ChoiceType from "./ChoiceType";
 import QuantityComponent from "./types/QuantityComponent";
 import IdentifierComponent from "./types/IdentifierComponent";
-import QuantityIntervalInput from "../../../../../../common/quantityIntervalInput/QuantityIntervalInput";
 import MoneyComponent from "./types/MoneyComponent";
 import TimingComponent from "./types/TimingComponent";
+import RangeComponent from "./types/RangeComponent";
 
 // onChange is being deprecated as no updates to the resource are tracked.
 // Changes directly to the json should be done with a dispatch, this propagates downstream changes in formik.
@@ -52,10 +52,6 @@ const TypeEditor = ({
   const { requiredFields, formInfo } = useRequiredFields();
   let required = getRequired(requiredFields, stripAllIndexes(label));
   const fhirDefinitionsService = useRef(useFhirDefinitionsServiceApi());
-  const currentQuantityRatio = {
-    low: {},
-    high: {},
-  };
 
   if (typeof label !== "string") {
     console.warn("TypeEditor: label is not a string", label);
@@ -537,14 +533,11 @@ const TypeEditor = ({
         );
       case "Range":
         return (
-          <QuantityIntervalInput
-            label={label}
-            quantityInterval={currentQuantityRatio}
-            onQuantityIntervalChange={(val) => {
-              formik.setFieldTouched(label);
-              formik.setFieldValue(label, val);
-            }}
+          <RangeComponent
             canEdit={canEdit}
+            label={label}
+            structureDefinition={structureDefinition}
+            fieldRequired={false}
           />
         );
       case "Coding":
