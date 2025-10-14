@@ -32,7 +32,7 @@ import ElementSection from "../../../../../../common/ElementSection";
 import CodeableConceptComponent from "./types/CodeableConceptComponent";
 import PeriodDateTimeComponent from "./types/PeriodDateTimeComponent";
 import ChoiceType from "./ChoiceType";
-import QuantityInput from "./types/QuantityInput";
+import QuantityComponent from "./types/QuantityComponent";
 import IdentifierComponent from "./types/IdentifierComponent";
 import QuantityIntervalInput from "../../../../../../common/quantityIntervalInput/QuantityIntervalInput";
 import MoneyComponent from "./types/MoneyComponent";
@@ -233,13 +233,34 @@ const TypeEditor = ({
         );
       case "Quantity":
         return (
-          <QuantityInput
-            canEdit={canEdit}
-            label={"Quantity"}
-            onChange={(quantity) => {
-              formik.setFieldValue(label, quantity);
-            }}
-          />
+          <>
+            {showAddAttributeButton && values ? (
+              values.map((el, index) => (
+                <QuantityComponent
+                  key={index}
+                  canEdit={canEdit}
+                  label={`${label}[${index}]`}
+                  structureDefinition={structureDefinition}
+                  fieldRequired={required}
+                  showAddAttributeButton={
+                    showAddAttributeButton && index === values.length - 1
+                  }
+                  addTitle={addTitle}
+                  handleAddElement={handleAddElement}
+                />
+              ))
+            ) : (
+              <QuantityComponent
+                canEdit={canEdit}
+                label={label}
+                structureDefinition={structureDefinition}
+                fieldRequired={required}
+                showAddAttributeButton={showAddAttributeButton}
+                addTitle={addTitle}
+                handleAddElement={handleAddElement}
+              />
+            )}
+          </>
         );
       case "Period":
         return (
