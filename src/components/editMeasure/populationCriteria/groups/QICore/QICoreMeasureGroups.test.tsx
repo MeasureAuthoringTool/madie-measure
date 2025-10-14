@@ -2531,14 +2531,13 @@ describe("Measure Groups Page", () => {
     await expect(screen.getByTestId("group-form-submit-btn")).toBeEnabled();
     userEvent.click(screen.getByTestId("group-form-submit-btn"));
 
+    // Verify error toast appears
     await waitFor(() => {
-      expect(checkTestCasesLockStatusMock).toHaveBeenCalled();
-      expect(setAlertMessageMock).toHaveBeenCalledWith({
-        type: "error",
-        message:
-          "This measure cannot be saved because changes to the Population Criteria will update test cases and one or more test cases are locked by another user.",
-        canClose: false,
-      });
+      const errorToast = screen.getByTestId("population-criteria-error");
+      expect(errorToast).toBeInTheDocument();
+      expect(errorToast).toHaveTextContent(
+        "This measure cannot be saved because changes to the Population Criteria will update test cases and one or more test cases are locked by another user."
+      );
     });
   });
 });
