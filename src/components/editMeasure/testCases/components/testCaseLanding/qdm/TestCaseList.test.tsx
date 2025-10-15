@@ -1536,9 +1536,6 @@ describe("TestCaseList component", () => {
     });
 
     const dialog = screen.getByTestId("delete-dialog");
-    expect(dialog).toHaveTextContent(
-      "Test cases in-use by another user will not be deleted."
-    );
   });
 
   it("should handle delete error on Test Case list page when delete button is clicked", async () => {

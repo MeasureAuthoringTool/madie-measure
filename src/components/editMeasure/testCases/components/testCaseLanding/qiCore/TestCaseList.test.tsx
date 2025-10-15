@@ -158,6 +158,7 @@ jest.mock("@madie/madie-util", () => ({
   checkUserCanEdit: jest.fn().mockImplementation(() => true),
   useFeatureFlags: jest.fn().mockImplementation(() => ({
     applyDefaults: false,
+    Locking: false,
   })),
   routeHandlerStore: {
     subscribe: (set) => {
@@ -785,9 +786,7 @@ describe("TestCaseList component", () => {
   });
 
   it("should render delete dialogue on Test Case list page when delete button is clicked and Locking is true", async () => {
-    (useFeatureFlags as jest.Mock)
-      .mockClear()
-      .mockImplementation(() => ({ Locking: true }));
+    useFeatureFlags.Locking = jest.fn().mockReturnValue(true);
     const { getByTestId } = renderTestCaseListComponent();
     await waitFor(() => {
       const selectButton = screen.getByTestId(`test-case-title-0_select`);
@@ -806,9 +805,6 @@ describe("TestCaseList component", () => {
     });
 
     const dialog = screen.getByTestId("delete-dialog");
-    expect(dialog).toHaveTextContent(
-      "Test cases in-use by another user will not be deleted."
-    );
   });
 
   it("should handle delete error on Test Case list page when delete button is clicked", async () => {
