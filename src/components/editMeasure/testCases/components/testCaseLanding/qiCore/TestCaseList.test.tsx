@@ -769,11 +769,43 @@ describe("TestCaseList component", () => {
       screen.getByTestId("delete-dialog-cancel-button")
     ).toBeInTheDocument();
 
+    const dialog = screen.getByTestId("delete-dialog");
+    expect(dialog).not.toHaveTextContent(
+      "Test cases in-use by another user will not be deleted."
+    );
+
     fireEvent.click(screen.getByTestId("delete-dialog-cancel-button"));
     await waitFor(() => {
       const submitButton = screen.queryByText("Yes, Delete");
       expect(submitButton).not.toBeInTheDocument();
     });
+  });
+
+  it("should render delete dialogue on Test Case list page when delete button is clicked and Locking is true", async () => {
+    (useFeatureFlags as jest.Mock)
+      .mockClear()
+      .mockImplementation(() => ({ Locking: true }));
+    const { getByTestId } = renderTestCaseListComponent();
+    await waitFor(() => {
+      const selectButton = screen.getByTestId(`test-case-title-0_select`);
+      const checkboxButton = within(selectButton).getByRole("checkbox");
+      expect(checkboxButton).toBeInTheDocument();
+      fireEvent.click(checkboxButton);
+      expect(checkboxButton).toBeChecked();
+    });
+
+    const deleteButton = screen.getByTestId("delete-action-icon");
+    expect(deleteButton).toBeEnabled();
+    fireEvent.click(deleteButton);
+
+    await waitFor(() => {
+      expect(screen.getByTestId("delete-dialog")).toBeInTheDocument();
+    });
+
+    const dialog = screen.getByTestId("delete-dialog");
+    expect(dialog).toHaveTextContent(
+      "Test cases in-use by another user will not be deleted."
+    );
   });
 
   it("should handle delete error on Test Case list page when delete button is clicked", async () => {
