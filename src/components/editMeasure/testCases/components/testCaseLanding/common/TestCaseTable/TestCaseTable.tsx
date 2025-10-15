@@ -535,6 +535,11 @@ const TestCaseTable = (props: TestCaseTableProps) => {
           }}
           dialogTitle={`Delete Test Case`}
           name={selectedTestCases?.map((testCase) => testCase.title).join(", ")}
+          additionalText={
+            featureFlags?.Locking
+              ? " Test cases in-use by another user will not be deleted."
+              : ""
+          }
         />
 
         <ShiftDatesDialog
