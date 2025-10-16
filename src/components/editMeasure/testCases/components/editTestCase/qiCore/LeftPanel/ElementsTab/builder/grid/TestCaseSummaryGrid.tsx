@@ -11,8 +11,6 @@ import ActionCenter, {
   ActionItemDef,
 } from "../../../../../../../../../common/actionCenter/ActionCenter";
 import "../../../../../styles/DataElementsTable.scss";
-import GenerateAttributeHTML from "./GenerateAttributeHTML";
-import { getAttributes, getMaxAttributes } from "./TestCaseSummaryGridUtils";
 
 interface TestCaseSummaryGridProps {
   onRowEdit: (row: any) => void;
@@ -26,28 +24,6 @@ const TestCaseSummaryGrid = ({
   onRowDelete,
 }: TestCaseSummaryGridProps) => {
   const data = React.useMemo(() => entry ?? [], [entry]);
-  const maxAttributes = getMaxAttributes(data);
-  const attributeColumns: ColumnDef<any>[] = Array.from(
-    { length: maxAttributes },
-    (_, index) => ({
-      header: `Attribute ${index + 1}`,
-      accessorFn: (row) => {
-        const attributes = getAttributes(row);
-        const attributeKey = attributes[index];
-        const value = row.resource[attributeKey];
-        return { attributeKey, value };
-      },
-      cell: (params) => {
-        //@ts-ignore
-        const { value, attributeKey } = params.getValue();
-        return value ? (
-          <GenerateAttributeHTML value={value} keyPrefix={attributeKey} />
-        ) : (
-          <div>-</div>
-        );
-      },
-    })
-  );
 
   const actions = React.useMemo<ActionItemDef[]>(
     () => [
@@ -77,7 +53,6 @@ const TestCaseSummaryGrid = ({
         id: "id",
         cell: ({ row }) => <div>{row.original.resource.id}</div>,
       },
-      ...attributeColumns,
       {
         header: "",
         id: "actions",
@@ -90,7 +65,7 @@ const TestCaseSummaryGrid = ({
         ),
       },
     ],
-    [actions, attributeColumns]
+    [actions]
   );
 
   const table = useReactTable({
@@ -101,7 +76,7 @@ const TestCaseSummaryGrid = ({
 
   return (
     <div className="table-scroll-container">
-      <table className="data-elements-table">
+      <table className="data-elements-table test-case-summary-table">
         <thead>
           {table.getHeaderGroups().map((headerGroup) => (
             <tr key={headerGroup.id}>
