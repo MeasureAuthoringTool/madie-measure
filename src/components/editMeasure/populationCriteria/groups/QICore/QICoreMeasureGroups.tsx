@@ -34,7 +34,7 @@ import {
 } from "@madie/madie-design-system/dist/react";
 import { useFormik, FormikProvider, FieldArray, Field, getIn } from "formik";
 import useFormikResetOnEvent from "../../../../common/useFormikResetOnEvent";
-import useMeasureServiceApi from "../../../../../api/useMeasureServiceApi";
+
 import { v4 as uuidv4 } from "uuid";
 import {
   measureGroupSchemaValidator,
@@ -47,6 +47,7 @@ import {
   useDocumentTitle,
   checkUserCanEdit,
   useFeatureFlags,
+  useMeasureServiceApi,
 } from "@madie/madie-util";
 import MeasureGroupsWarningDialog from "../MeasureGroupWarningDialog";
 import {

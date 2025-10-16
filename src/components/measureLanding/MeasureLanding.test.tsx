@@ -14,13 +14,17 @@ import {
   MemoryRouter,
 } from "react-router-dom";
 import { routesConfig } from "../measureRoutes/MeasureRoutes";
-import { MeasureServiceApi } from "../../api/useMeasureServiceApi";
+
 import { ApiContextProvider, ServiceConfig } from "../../api/ServiceContext";
 import userEvent from "@testing-library/user-event";
 import { oneItemResponse } from "../__mocks__/mockMeasureResponses";
 import { within } from "@testing-library/dom";
 // @ts-ignore
-import { useFeatureFlags } from "@madie/madie-util";
+import {
+  useFeatureFlags,
+  MeasureServiceApi,
+  useMeasureServiceApi,
+} from "@madie/madie-util";
 import MeasureLanding from "./MeasureLanding";
 import {
   TRANSFER_MEASURE_SUCCESS,
@@ -80,9 +84,25 @@ const mockMeasureServiceApi = {
   }),
 } as unknown as MeasureServiceApi;
 
-jest.mock("../../api/useMeasureServiceApi", () =>
-  jest.fn(() => mockMeasureServiceApi)
-);
+jest.mock("@madie/madie-util", () => ({
+  useMeasureServiceApi: jest.fn(() => mockMeasureServiceApi),
+  useOktaTokens: jest.fn(() => ({
+    getAccessToken: () => "test.jwt",
+    getUserName: () => mockUser,
+  })),
+  checkUserCanEdit: jest.fn().mockImplementation(() => true),
+  checkUserCanDelete: jest.fn().mockImplementation(() => true),
+  useFeatureFlags: jest.fn(),
+  useDocumentTitle: jest.fn(),
+  measureStore: {
+    updateMeasure: jest.fn((measure) => measure),
+    state: jest.fn().mockImplementation(() => null),
+    initialState: jest.fn().mockImplementation(() => null),
+    subscribe: () => {
+      return { unsubscribe: () => null };
+    },
+  },
+}));
 
 // Custom render function to test MeasureLanding component directly
 // Update to wrap in MemoryRouter to provide router context for useLocation()
@@ -432,7 +452,7 @@ describe("Measure Page", () => {
       expect(screen.queryByText("Unable to fetch measures")).toBeNull();
     });
   });
-
+  //keep skipeed
   test.skip("render associate cms id dialog", async () => {
     //this fails in gitactions no matter what I do, passes locally
     renderRouter(["/measures"]);

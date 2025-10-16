@@ -13,13 +13,26 @@ import TransferDialog, {
   TRANSFER_MEASURE_FAILURE,
 } from "./TransferDialog";
 import userEvent from "@testing-library/user-event";
-import useMeasureServiceApi, {
-  MeasureServiceApi,
-} from "../../../api/useMeasureServiceApi";
+import { MeasureServiceApi } from "@madie/madie-util";
 
-jest.mock("../../../api/useMeasureServiceApi");
-const useMeasureServiceMock =
-  useMeasureServiceApi as jest.Mock<MeasureServiceApi>;
+jest.mock("@madie/madie-util", () => ({
+  useMeasureServiceApi: jest.fn(() => mockMeasureServiceApi),
+  useOktaTokens: jest.fn(() => ({
+    getAccessToken: () => "test.jwt",
+    getUserName: () => "test user",
+  })),
+  checkUserCanEdit: jest.fn().mockImplementation(() => true),
+  checkUserCanDelete: jest.fn().mockImplementation(() => true),
+  useFeatureFlags: jest.fn(),
+  measureStore: {
+    updateMeasure: jest.fn((measure) => measure),
+    state: jest.fn().mockImplementation(() => null),
+    initialState: jest.fn().mockImplementation(() => null),
+    subscribe: () => {
+      return { unsubscribe: () => null };
+    },
+  },
+}));
 
 const testUser = "test user";
 const mockMeasure1 = {
@@ -87,9 +100,7 @@ describe("Transfer Measures Dialog component", () => {
 
   beforeEach(() => {
     jest.resetModules();
-    useMeasureServiceMock.mockImplementation(() => {
-      return mockMeasureServiceApi;
-    });
+    jest.clearAllMocks();
   });
 
   const checkDataRows = async (number: number) => {
@@ -216,14 +227,9 @@ describe("Transfer Measures Dialog component", () => {
   });
 
   it("test handle submit failure", async () => {
-    const mockMeasureServiceApiRejected = {
-      transferMeasures: jest
-        .fn()
-        .mockRejectedValue(new Error(TRANSFER_MEASURE_FAILURE)),
-    } as unknown as MeasureServiceApi;
-    useMeasureServiceMock.mockImplementation(() => {
-      return mockMeasureServiceApiRejected;
-    });
+    mockMeasureServiceApi.transferMeasures = jest
+      .fn()
+      .mockRejectedValue(new Error(TRANSFER_MEASURE_FAILURE));
 
     const submitMock = jest.fn();
     render(
@@ -253,7 +259,7 @@ describe("Transfer Measures Dialog component", () => {
     });
 
     await waitFor(() => {
-      expect(mockMeasureServiceApiRejected.transferMeasures).toBeCalledWith(
+      expect(mockMeasureServiceApi.transferMeasures).toBeCalledWith(
         [mockMeasure1.id],
         "newUser",
         false

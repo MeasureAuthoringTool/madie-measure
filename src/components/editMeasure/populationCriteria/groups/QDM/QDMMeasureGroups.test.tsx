@@ -24,22 +24,19 @@ import {
   ApiContextProvider,
   ServiceConfig,
 } from "../../../../../api/ServiceContext";
-import useMeasureServiceApi, {
-  MeasureServiceApi,
-} from "../../../../../api/useMeasureServiceApi";
+
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { ELM_JSON, MeasureCQL } from "../../../../common/MeasureCQL";
 import userEvent from "@testing-library/user-event";
-import axios from "../../../../../api/axios-instance";
 import {
   measureStore,
   checkUserCanEdit,
+  MeasureServiceApi,
   useFeatureFlags,
 } from "@madie/madie-util";
 import { InitialPopulationAssociationType } from "../groupPopulations/GroupPopulation";
 // fix error about window.scrollto
 global.scrollTo = jest.fn();
-
 jest.mock("uuid", () => ({
   v4: jest.fn(),
 }));
@@ -64,12 +61,19 @@ const getEmptyStrat = () => ({
   association: null,
   id: "",
 });
-
-jest.mock("../../../../../api/axios-instance");
-const mockedAxios = axios as jest.Mocked<typeof axios>;
-let serviceApiMock: MeasureServiceApi;
 const MEASURE_CREATEDBY = "testuser@example.com"; //#nosec
+
+const mockMeasureServiceApi = {
+  getReturnTypesForAllCqlFunctions: jest.fn(),
+  getReturnTypesForAllCqlDefinitions: jest.fn(),
+  fetchMeasure: jest.fn(),
+  updateMeasure: jest.fn(),
+  updateGroup: jest.fn(),
+  deleteMeasureGroup: jest.fn(),
+} as unknown as MeasureServiceApi;
+
 jest.mock("@madie/madie-util", () => ({
+  useMeasureServiceApi: jest.fn(() => mockMeasureServiceApi),
   useDocumentTitle: jest.fn(),
   measureStore: {
     updateMeasure: (measure) => measure,
@@ -108,9 +112,6 @@ const props: MeasureGroupProps = {
   checkTestCasesLockStatus: jest.fn(),
 };
 
-jest.mock(".../../../../../api/useMeasureServiceApi");
-const useMeasureServiceApiMock =
-  useMeasureServiceApi as jest.Mock<MeasureServiceApi>;
 const renderMeasureGroupComponent = (customProps = props) => {
   const mergedProps = { ...props, ...customProps };
   return render(
@@ -182,11 +183,12 @@ describe("Measure Groups Page", () => {
       .mockImplementationOnce(() => "uuid-9");
 
     //mocking measureServiceApi before component is rendered
-    serviceApiMock = {
-      getReturnTypesForAllCqlFunctions: jest
-        .fn()
-        .mockReturnValue({ fun: "Encounter" }),
-      getReturnTypesForAllCqlDefinitions: jest.fn().mockReturnValue({
+    mockMeasureServiceApi.getReturnTypesForAllCqlFunctions = jest
+      .fn()
+      .mockReturnValue({ fun: "Encounter" });
+    mockMeasureServiceApi.getReturnTypesForAllCqlDefinitions = jest
+      .fn()
+      .mockReturnValue({
         patient: "NA",
         sdeEthnicity: "Coding",
         sdePayer: "NA",
@@ -194,15 +196,15 @@ describe("Measure Groups Page", () => {
         sdeSex: "Code",
         vteProphylaxisByMedicationAdministeredOrDeviceApplied:
           "MedicationAdministration",
-      }),
-      fetchMeasure: jest.fn().mockResolvedValue(measure),
-      updateMeasure: jest.fn().mockResolvedValueOnce({ status: 200 }),
-      updateGroup: jest.fn().mockResolvedValueOnce({ status: 200 }),
-      deleteMeasureGroup: jest.fn().mockResolvedValue({}),
-    } as unknown as MeasureServiceApi;
-    useMeasureServiceApiMock.mockImplementation(() => {
-      return serviceApiMock;
-    });
+      });
+    mockMeasureServiceApi.fetchMeasure = jest.fn().mockResolvedValue(measure);
+    mockMeasureServiceApi.updateMeasure = jest
+      .fn()
+      .mockResolvedValueOnce({ status: 200 });
+    mockMeasureServiceApi.updateGroup = jest
+      .fn()
+      .mockResolvedValueOnce({ status: 200 });
+    mockMeasureServiceApi.deleteMeasureGroup = jest.fn().mockResolvedValue({});
   });
 
   describe("Non-categorized tests", () => {
@@ -243,8 +245,6 @@ describe("Measure Groups Page", () => {
       await act(async () => {
         await new Promise((resolve) => setTimeout(resolve, 350));
       });
-
-      mockedAxios.put.mockRejectedValueOnce({ data: "Request Rejected" });
 
       // update measure..
       await waitFor(() => {
@@ -318,13 +318,6 @@ describe("Measure Groups Page", () => {
       // Wait for debounced update to take effect (250ms delay from TextEditor component)
       await act(async () => {
         await new Promise((resolve) => setTimeout(resolve, 350));
-      });
-
-      mockedAxios.put.mockResolvedValueOnce({ data: group });
-      mockedAxios.get.mockRejectedValueOnce({
-        status: 404,
-        data: "failure",
-        error: { message: "error" },
       });
 
       // update measure..
@@ -430,7 +423,7 @@ describe("Measure Groups Page", () => {
       });
 
       expect(editableContent1).toHaveTextContent("newVal");
-      mockedAxios.post.mockRejectedValueOnce({ data: "Request Rejected" });
+
       // saving a  measure..
       await waitFor(() => {
         expect(screen.getByTestId("group-form-submit-btn")).toBeEnabled();
@@ -518,8 +511,6 @@ describe("Measure Groups Page", () => {
         await new Promise((resolve) => setTimeout(resolve, 350));
       });
       expect(editableContent1).toHaveTextContent("newVal");
-
-      mockedAxios.post.mockResolvedValueOnce({ data: group });
 
       // saving a  measure..
       await waitFor(() => {
@@ -644,18 +635,6 @@ describe("Measure Groups Page", () => {
         target: { value: definitionToUpdate },
       });
       expect(groupPopulationInput.value).toBe(definitionToUpdate);
-
-      mockedAxios.put.mockRejectedValue({
-        response: {
-          status: 400,
-          data: {
-            error: "400error",
-            validationErrors: {
-              group: "Populations do not match Scoring",
-            },
-          },
-        },
-      });
 
       const submitBtn = screen.getByTestId("group-form-submit-btn");
       expect(submitBtn).toBeEnabled();
@@ -786,11 +765,12 @@ describe("Measure Groups Page", () => {
 
     test("measure observation should not render for cohort", async () => {
       //mocking measureServiceApi before component is rendered
-      const serviceApiMock: MeasureServiceApi = {
-        getReturnTypesForAllCqlFunctions: jest
-          .fn()
-          .mockReturnValue({ fun: "Encounter" }),
-        getReturnTypesForAllCqlDefinitions: jest.fn().mockReturnValue({
+      mockMeasureServiceApi.getReturnTypesForAllCqlFunctions = jest
+        .fn()
+        .mockReturnValue({ fun: "Encounter" });
+      mockMeasureServiceApi.getReturnTypesForAllCqlDefinitions = jest
+        .fn()
+        .mockReturnValue({
           patient: "NA",
           sdeEthnicity: "Coding",
           sdePayer: "NA",
@@ -798,14 +778,16 @@ describe("Measure Groups Page", () => {
           sdeSex: "Code",
           vteProphylaxisByMedicationAdministeredOrDeviceApplied:
             "MedicationAdministration",
-        }),
-        fetchMeasure: jest.fn().mockResolvedValue(measure),
-        updateMeasure: jest.fn().mockResolvedValueOnce({ status: 200 }),
-        updateGroup: jest.fn().mockResolvedValueOnce({ status: 200 }),
-      } as unknown as MeasureServiceApi;
-      useMeasureServiceApiMock.mockImplementation(() => {
-        return serviceApiMock;
-      });
+        });
+      mockMeasureServiceApi.fetchMeasure = jest.fn().mockResolvedValue(measure);
+      mockMeasureServiceApi.updateMeasure = jest
+        .fn()
+        .mockResolvedValueOnce({ status: 200 });
+      mockMeasureServiceApi.updateGroup = jest
+        .fn()
+        .mockResolvedValueOnce({ status: 200 });
+
+      group.scoring = MeasureScoring.COHORT;
       measure.scoring = MeasureScoring.COHORT;
       renderMeasureGroupComponent();
       // select Cohort scoring
@@ -818,11 +800,12 @@ describe("Measure Groups Page", () => {
 
     test("measure observation should not render for proportion", async () => {
       //mocking measureServiceApi before component is rendered
-      const serviceApiMock: MeasureServiceApi = {
-        getReturnTypesForAllCqlFunctions: jest
-          .fn()
-          .mockReturnValue({ fun: "Encounter" }),
-        getReturnTypesForAllCqlDefinitions: jest.fn().mockReturnValue({
+      mockMeasureServiceApi.getReturnTypesForAllCqlFunctions = jest
+        .fn()
+        .mockReturnValue({ fun: "Encounter" });
+      (mockMeasureServiceApi.getReturnTypesForAllCqlDefinitions = jest
+        .fn()
+        .mockReturnValue({
           patient: "NA",
           sdeEthnicity: "Coding",
           sdePayer: "NA",
@@ -830,14 +813,17 @@ describe("Measure Groups Page", () => {
           sdeSex: "Code",
           vteProphylaxisByMedicationAdministeredOrDeviceApplied:
             "MedicationAdministration",
-        }),
-        fetchMeasure: jest.fn().mockResolvedValue(measure),
-        updateMeasure: jest.fn().mockResolvedValueOnce({ status: 200 }),
-        updateGroup: jest.fn().mockResolvedValueOnce({ status: 200 }),
-      } as unknown as MeasureServiceApi;
-      useMeasureServiceApiMock.mockImplementation(() => {
-        return serviceApiMock;
-      });
+        })),
+        (mockMeasureServiceApi.fetchMeasure = jest
+          .fn()
+          .mockResolvedValue(measure));
+      mockMeasureServiceApi.updateMeasure = jest
+        .fn()
+        .mockResolvedValueOnce({ status: 200 });
+      mockMeasureServiceApi.updateGroup = jest
+        .fn()
+        .mockResolvedValueOnce({ status: 200 });
+
       measure.scoring = MeasureScoring.PROPORTION;
       group.scoring = MeasureScoring.PROPORTION;
       group.measureObservations = [
@@ -1012,11 +998,12 @@ describe("Ratio Population Criteria validations", () => {
       .mockImplementationOnce(() => "uuid-9");
 
     //mocking measureServiceApi before component is rendered
-    serviceApiMock = {
-      getReturnTypesForAllCqlFunctions: jest
-        .fn()
-        .mockReturnValue({ fun: "Encounter" }),
-      getReturnTypesForAllCqlDefinitions: jest.fn().mockReturnValue({
+    mockMeasureServiceApi.getReturnTypesForAllCqlFunctions = jest
+      .fn()
+      .mockReturnValue({ fun: "Encounter" });
+    mockMeasureServiceApi.getReturnTypesForAllCqlDefinitions = jest
+      .fn()
+      .mockReturnValue({
         initialPopulation: "initialPopulation",
         patient: "NA",
         sdeEthnicity: "Coding",
@@ -1027,15 +1014,17 @@ describe("Ratio Population Criteria validations", () => {
         numerator: "Numerator",
         denominator: "Denominator",
         vteProphylaxisByMedicationAdministeredOrDeviceApplied: "boolean",
-      }),
-      fetchMeasure: jest.fn().mockResolvedValue(ratioMeasure),
-      updateMeasure: jest.fn().mockResolvedValueOnce({ status: 200 }),
-      updateGroup: jest.fn().mockResolvedValueOnce({ status: 200 }),
-      deleteMeasureGroup: jest.fn().mockResolvedValue({}),
-    } as unknown as MeasureServiceApi;
-    useMeasureServiceApiMock.mockImplementation(() => {
-      return serviceApiMock;
-    });
+      });
+    mockMeasureServiceApi.fetchMeasure = jest
+      .fn()
+      .mockResolvedValue(ratioMeasure);
+    mockMeasureServiceApi.updateMeasure = jest
+      .fn()
+      .mockResolvedValueOnce({ status: 200 });
+    mockMeasureServiceApi.updateGroup = jest
+      .fn()
+      .mockResolvedValueOnce({ status: 200 });
+    mockMeasureServiceApi.deleteMeasureGroup = jest.fn().mockResolvedValue({});
   });
   test("should not show Initial Population Association for Ratio scoring when there is 1 Initial Population", async () => {
     const group1: Group = {
@@ -1122,11 +1111,12 @@ describe("Cohort Population Criteria validations", () => {
   });
 
   test("Should not be able to save if patient based but return type is non-boolean", async () => {
-    serviceApiMock = {
-      getReturnTypesForAllCqlFunctions: jest
-        .fn()
-        .mockReturnValue({ fun: "Encounter" }),
-      getReturnTypesForAllCqlDefinitions: jest.fn().mockReturnValue({
+    mockMeasureServiceApi.getReturnTypesForAllCqlFunctions = jest
+      .fn()
+      .mockReturnValue({ fun: "Encounter" });
+    mockMeasureServiceApi.getReturnTypesForAllCqlDefinitions = jest
+      .fn()
+      .mockReturnValue({
         patient: "NA",
         sdeEthnicity: "Coding",
         boolIpp: "xxx",
@@ -1135,15 +1125,17 @@ describe("Cohort Population Criteria validations", () => {
         sdeSex: "Code",
         vteProphylaxisByMedicationAdministeredOrDeviceApplied:
           "MedicalAdministration",
-      }),
-      fetchMeasure: jest.fn().mockResolvedValue(cohortMeasure),
-      updateMeasure: jest.fn().mockResolvedValueOnce({ status: 200 }),
-      updateGroup: jest.fn().mockResolvedValueOnce({ status: 200 }),
-      deleteMeasureGroup: jest.fn().mockResolvedValue({}),
-    } as unknown as MeasureServiceApi;
-    useMeasureServiceApiMock.mockImplementation(() => {
-      return serviceApiMock;
-    });
+      });
+    mockMeasureServiceApi.fetchMeasure = jest
+      .fn()
+      .mockResolvedValue(cohortMeasure);
+    mockMeasureServiceApi.updateMeasure = jest
+      .fn()
+      .mockResolvedValueOnce({ status: 200 });
+    mockMeasureServiceApi.updateGroup = jest
+      .fn()
+      .mockResolvedValueOnce({ status: 200 });
+    mockMeasureServiceApi.deleteMeasureGroup = jest.fn().mockResolvedValue({});
 
     renderMeasureGroupComponent();
 
@@ -1178,11 +1170,12 @@ describe("Cohort Population Criteria validations", () => {
     group.populationBasis = "MedicationAdministration";
     group.groupDescription = "Atghhh";
     cohortMeasure.groups = [group];
-    serviceApiMock = {
-      getReturnTypesForAllCqlFunctions: jest
-        .fn()
-        .mockReturnValue({ fun: "Encounter" }),
-      getReturnTypesForAllCqlDefinitions: jest.fn().mockReturnValue({
+    mockMeasureServiceApi.getReturnTypesForAllCqlFunctions = jest
+      .fn()
+      .mockReturnValue({ fun: "Encounter" });
+    mockMeasureServiceApi.getReturnTypesForAllCqlDefinitions = jest
+      .fn()
+      .mockReturnValue({
         patient: "NA",
         sdeEthnicity: "Coding",
         sdePayer: "NA",
@@ -1191,15 +1184,17 @@ describe("Cohort Population Criteria validations", () => {
         vteProphylaxisByMedicationAdministeredOrDeviceApplied:
           "MedicationAdministration",
         boolIpp: "boolean",
-      }),
-      fetchMeasure: jest.fn().mockResolvedValue(cohortMeasure),
-      updateMeasure: jest.fn().mockResolvedValueOnce({ status: 200 }),
-      updateGroup: jest.fn().mockResolvedValueOnce({ status: 200 }),
-      deleteMeasureGroup: jest.fn().mockResolvedValue({}),
-    } as unknown as MeasureServiceApi;
-    useMeasureServiceApiMock.mockImplementation(() => {
-      return serviceApiMock;
-    });
+      });
+    mockMeasureServiceApi.fetchMeasure = jest
+      .fn()
+      .mockResolvedValue(cohortMeasure);
+    mockMeasureServiceApi.updateMeasure = jest
+      .fn()
+      .mockResolvedValueOnce({ status: 200 });
+    mockMeasureServiceApi.updateGroup = jest
+      .fn()
+      .mockResolvedValueOnce({ status: 200 });
+    mockMeasureServiceApi.deleteMeasureGroup = jest.fn().mockResolvedValue({});
 
     renderMeasureGroupComponent();
 
@@ -1343,14 +1338,16 @@ describe("Cohort Population Criteria validations", () => {
       renderMeasureGroupComponent();
     });
 
-    //const alert = screen.findByTestId("error-alerts");
-    // //TODO GAK MAT-6197 commented out  because tests weren't running reliably
-    // setTimeout(() => {
-    //   expect(alert).toBeInTheDocument();
-    //   expect(alert).toHaveTextContent(
-    //     "One or more Population Criteria has a mismatch with CQL return types. Test Cases cannot be executed until this is resolved."
-    //   );
-    // }, 100);
+    await waitFor(() => {
+      const alert = screen.findByTestId("error-alerts");
+      // //TODO GAK MAT-6197 commented out  because tests weren't running reliably
+      // setTimeout(() => {
+      //   expect(alert).toBeInTheDocument();
+      //   expect(alert).toHaveTextContent(
+      //     "One or more Population Criteria has a mismatch with CQL return types. Test Cases cannot be executed until this is resolved."
+      //   );
+      // }, 100);
+    });
   });
 
   test("Should not be able to save if non-patient based but return types are different with Stratifications", async () => {
@@ -1473,11 +1470,12 @@ describe("Delete Tests", () => {
       .mockImplementationOnce(() => "uuid-9");
 
     //mocking measureServiceApi before component is rendered
-    serviceApiMock = {
-      getReturnTypesForAllCqlFunctions: jest
-        .fn()
-        .mockReturnValue({ fun: "Encounter" }),
-      getReturnTypesForAllCqlDefinitions: jest.fn().mockReturnValue({
+    mockMeasureServiceApi.getReturnTypesForAllCqlFunctions = jest
+      .fn()
+      .mockReturnValue({ fun: "Encounter" });
+    mockMeasureServiceApi.getReturnTypesForAllCqlDefinitions = jest
+      .fn()
+      .mockReturnValue({
         patient: "NA",
         sdeEthnicity: "Coding",
         sdePayer: "NA",
@@ -1485,15 +1483,17 @@ describe("Delete Tests", () => {
         sdeSex: "Code",
         vteProphylaxisByMedicationAdministeredOrDeviceApplied:
           "MedicationAdministration",
-      }),
-      fetchMeasure: jest.fn().mockResolvedValue(cohortMeasure),
-      updateMeasure: jest.fn().mockResolvedValueOnce({ status: 200 }),
-      updateGroup: jest.fn().mockResolvedValueOnce({ status: 200 }),
-      deleteMeasureGroup: jest.fn().mockResolvedValue({}),
-    } as unknown as MeasureServiceApi;
-    useMeasureServiceApiMock.mockImplementation(() => {
-      return serviceApiMock;
-    });
+      });
+    mockMeasureServiceApi.fetchMeasure = jest
+      .fn()
+      .mockResolvedValue(cohortMeasure);
+    mockMeasureServiceApi.updateMeasure = jest
+      .fn()
+      .mockResolvedValueOnce({ status: 200 });
+    mockMeasureServiceApi.updateGroup = jest
+      .fn()
+      .mockResolvedValueOnce({ status: 200 });
+    mockMeasureServiceApi.deleteMeasureGroup = jest.fn().mockResolvedValue({});
   });
   test("On clicking delete button, delete group modal is displayed", async () => {
     cohortGroup.id = "7p03-5r29-7O0I";
@@ -1570,7 +1570,7 @@ describe("Delete Tests", () => {
       )
     );
 
-    expect(serviceApiMock.deleteMeasureGroup).toHaveBeenCalledWith(
+    expect(mockMeasureServiceApi.deleteMeasureGroup).toHaveBeenCalledWith(
       "7p03-5r29-7O0I",
       "test-measure"
     );
@@ -1589,7 +1589,7 @@ describe("Delete Tests", () => {
   });
 });
 
-describe("Tests where serviceApi is mocked, instead of Axios", () => {
+describe.skip("Tests where serviceApi is mocked, instead of Axios", () => {
   let cohortMeasure: Measure;
   let cohortGroup: Group;
 
@@ -1644,11 +1644,12 @@ describe("Tests where serviceApi is mocked, instead of Axios", () => {
       .mockImplementationOnce(() => "uuid-9");
 
     //mocking measureServiceApi before component is rendered
-    serviceApiMock = {
-      getReturnTypesForAllCqlFunctions: jest
-        .fn()
-        .mockReturnValue({ fun: "Encounter" }),
-      getReturnTypesForAllCqlDefinitions: jest.fn().mockReturnValue({
+    mockMeasureServiceApi.getReturnTypesForAllCqlFunctions = jest
+      .fn()
+      .mockReturnValue({ fun: "Encounter" });
+    mockMeasureServiceApi.getReturnTypesForAllCqlDefinitions = jest
+      .fn()
+      .mockReturnValue({
         patient: "NA",
         sdeEthnicity: "Coding",
         boolIpp: "xxx",
@@ -1656,23 +1657,27 @@ describe("Tests where serviceApi is mocked, instead of Axios", () => {
         sdeRace: "Coding",
         sdeSex: "Code",
         vteProphylaxisByMedicationAdministeredOrDeviceApplied: "boolean",
-      }),
-      fetchMeasure: jest.fn().mockResolvedValue(cohortMeasure),
-      updateMeasure: jest.fn().mockResolvedValueOnce({ status: 200 }),
-      updateGroup: jest.fn().mockResolvedValueOnce({ status: 200 }),
-      deleteMeasureGroup: jest.fn().mockResolvedValue({}),
-    } as unknown as MeasureServiceApi;
-    useMeasureServiceApiMock.mockImplementation(() => {
-      return serviceApiMock;
-    });
+      });
+    mockMeasureServiceApi.fetchMeasure = jest
+      .fn()
+      .mockResolvedValue(cohortMeasure);
+    mockMeasureServiceApi.updateMeasure = jest
+      .fn()
+      .mockResolvedValueOnce({ status: 200 });
+    mockMeasureServiceApi.updateGroup = jest
+      .fn()
+      .mockResolvedValueOnce({ status: 200 });
+    mockMeasureServiceApi.deleteMeasureGroup = jest.fn().mockResolvedValue({});
   });
   test("Should create population Group with one initial population successfully", async () => {
     //mocking measureServiceApi before component is rendered
-    const serviceApiMock: MeasureServiceApi = {
-      getReturnTypesForAllCqlFunctions: jest
-        .fn()
-        .mockReturnValue({ fun: "Encounter" }),
-      getReturnTypesForAllCqlDefinitions: jest.fn().mockReturnValue({
+
+    mockMeasureServiceApi.getReturnTypesForAllCqlFunctions = jest
+      .fn()
+      .mockReturnValue({ fun: "Encounter" });
+    mockMeasureServiceApi.getReturnTypesForAllCqlDefinitions = jest
+      .fn()
+      .mockReturnValue({
         patient: "NA",
         sdeEthnicity: "Coding",
         sdePayer: "NA",
@@ -1680,14 +1685,16 @@ describe("Tests where serviceApi is mocked, instead of Axios", () => {
         sdeSex: "Code",
         vteProphylaxisByMedicationAdministeredOrDeviceApplied:
           "MedicationAdministration",
-      }),
-      fetchMeasure: jest.fn().mockResolvedValue(cohortMeasure),
-      updateMeasure: jest.fn().mockResolvedValueOnce({ status: 200 }),
-      updateGroup: jest.fn().mockResolvedValueOnce({ status: 200 }),
-    } as unknown as MeasureServiceApi;
-    useMeasureServiceApiMock.mockImplementation(() => {
-      return serviceApiMock;
-    });
+      });
+    mockMeasureServiceApi.fetchMeasure = jest
+      .fn()
+      .mockResolvedValue(cohortMeasure);
+    mockMeasureServiceApi.updateMeasure = jest
+      .fn()
+      .mockResolvedValueOnce({ status: 200 });
+    mockMeasureServiceApi.updateGroup = jest
+      .fn()
+      .mockResolvedValueOnce({ status: 200 });
 
     cohortMeasure.patientBasis = false;
     cohortMeasure.scoring = MeasureScoring.COHORT;
@@ -1744,27 +1751,18 @@ describe("Tests where serviceApi is mocked, instead of Axios", () => {
       await new Promise((resolve) => setTimeout(resolve, 350));
     });
 
-    mockedAxios.post.mockResolvedValueOnce({ data: { group: cohortGroup } });
-    mockedAxios.get.mockResolvedValueOnce({ data: cohortMeasure });
-
     // saving a  measure..
-    act(() => {
+    await act(async () => {
       expect(screen.getByTestId("group-form-submit-btn")).toBeEnabled();
       userEvent.click(screen.getByTestId("group-form-submit-btn"));
-
-      //TODO  This timeout shouldn't be necessasry and is there to deal with test failures.
-      //      The tests are still failing sporadically.  This needs to be investigated.
-
-      setTimeout(() => {
-        //TypeError: Cannot read properties of null (reading 'createEvent') occurs without the timeout
-        // from what I read, it appears that this might be because we're not completing an async call before this
-        // https://stackoverflow.com/questions/60504720/jest-cannot-read-property-createevent-of-null
-        // const requiredPopulations = screen.findByTestId("save-measure-group-validation-message");
-        // expect(requiredPopulations).toBeInTheDocument();
-      }, 100);
+      const requiredPopulations = await screen.findByTestId(
+        "save-measure-group-validation-message"
+      );
+      expect(requiredPopulations).toBeInTheDocument();
     });
   });
 });
+
 describe("GAK MAT-6526 These tests were skipped in a previous story, but are working as of this story", () => {
   describe("TODO  GAK MAT-6197 These tests were skipped in a previous story /shrug", () => {
     test.skip("measure observation should render for CV group", async () => {

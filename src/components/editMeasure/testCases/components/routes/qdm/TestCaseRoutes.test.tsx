@@ -13,6 +13,7 @@ import useCqmConversionService, {
 } from "../../../api/CqmModelConversionService";
 // @ts-ignore
 import { useFeatureFlags } from "@madie/madie-util";
+import useMeasureServiceApi from "../../../api/useMeasureServiceApi";
 
 jest.mock("../../../../../../api/axios-instance");
 global.ResizeObserver = jest.fn().mockImplementation(() => ({
@@ -72,8 +73,24 @@ const mockMeasure = {
   ],
   createdBy: MEASURE_CREATEDBY,
 };
-
+jest.mock("../../testCaseConfiguration/expansion/Expansion", () => () => (
+  <div data-testid="mock-expansion-form">Mock Expansion Component</div>
+));
+jest.mock("../../testCaseConfiguration/rav/RAVPage", () => () => (
+  <div data-testid="rav-option-radio-buttons-group">Mock RAV Component</div>
+));
+jest.mock("../../testCaseConfiguration/sde/SDEPage", () => () => (
+  <div data-testid="sde-option-radio-buttons-group">Mock SDE Component</div>
+));
+jest.mock(
+  "../../testCaseLanding/common/copyTestCases/CopyTestCaseDialog",
+  () => () =>
+    <div data-testid="copy-test-case-dialog">Mock Copy Test Case Dialog</div>
+);
 jest.mock("@madie/madie-util", () => ({
+  // useMeasureServiceApi: jest.fn(() => ( {
+  //   //fetchMeasureBundle: jest.fn().mockResolvedValue({}),
+  // })) ,
   useDocumentTitle: jest.fn(),
   measureStore: {
     updateMeasure: jest.fn((measure) => measure),
@@ -263,7 +280,7 @@ describe("TestCaseRoutes", () => {
         </ApiContextProvider>
       </MemoryRouter>
     );
-    expect(screen.getByTestId("manifest-expansion-form")).toBeInTheDocument();
+    expect(screen.getByTestId("mock-expansion-form")).toBeInTheDocument();
   });
 
   it("should render the Test case data Component", async () => {
