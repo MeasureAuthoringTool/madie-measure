@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import ResourceContext from "../../ResourceContext";
 import { Select } from "@madie/madie-design-system/dist/react";
 import { MenuItem } from "@mui/material";
@@ -33,32 +33,36 @@ export default function ReferenceComponent({
         label: resourceProfile.title,
         value: resourceProfile.type,
       })) || [];
-  // if value is passed, we need to initialize this as value.reference.split('/')[0] or an empty string
   const [selectedReferenceType, setSelectedReferenceType] = useState<string>(
-    value?.reference?.split("/")[0] || ""
+    value?.reference?.split("/")?.[0] || ""
   ); // will need to default to something if editing existing element
-
   // SecondDropdown Utilities
   const resourcesOfSpecifiedType = state.bundle.entry.filter((entry) => {
     // When a resource type has been selected, we need to populate the second dropdown with resources of that type in the json, if they exist
     return selectedReferenceType === entry.resource.resourceType;
   });
 
-  const emptyOptions = [
+  const emptyOption = [
     { label: "ID Not Present (Add New)", value: "add_new_id" },
   ]; // If no resources of that type exist, we need to show a message in the dropdown
   const selectableResoureOptions = resourcesOfSpecifiedType.map((res) => ({
     label: `${selectedReferenceType}/${res.resource.id}`,
     value: `${selectedReferenceType}/${res.resource.id}`,
   }));
-  const finalOptions =
-    selectableResoureOptions.length > 0
-      ? selectableResoureOptions
-      : emptyOptions;
-
+  const finalOptions = selectableResoureOptions.concat(emptyOption);
   const [selectedReferenceId, setSelectedReferenceId] = useState<string>(
     value?.reference || ""
   ); // will need to default to something if editing existing element
+
+  // this appears to be unavoidable to prevent stale state from switching between two references.
+  useEffect(() => {
+    const newType = value?.reference?.split("/")?.[0] || "";
+    const newId = value?.reference || "";
+
+    setSelectedReferenceType(newType);
+    setSelectedReferenceId(newId);
+  }, [value]);
+
   return (
     <>
       {/* Select a reference type from all available profiles */}
