@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import queryString from "query-string";
-import useMeasureServiceApi from "../../../../api/useMeasureServiceApi";
 import {
   Button,
   MadieDialog,
@@ -19,7 +18,11 @@ import {
   InputAdornment,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
-import { measureStore, checkUserCanEdit } from "@madie/madie-util";
+import {
+  measureStore,
+  checkUserCanEdit,
+  useMeasureServiceApi,
+} from "@madie/madie-util";
 import { useFormik } from "formik";
 import useFormikResetOnEvent from "../../../common/useFormikResetOnEvent";
 import MeasureMetaDataRow from "../MeasureMetaDataRow";

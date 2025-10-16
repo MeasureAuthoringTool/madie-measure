@@ -6,7 +6,7 @@ import DraftAction, {
   MODEL_MISMATCH,
 } from "./DraftAction";
 import { Measure, MeasureSet, Model } from "@madie/madie-models";
-import useMeasureServiceApi from "../../../../../api/useMeasureServiceApi";
+import { MeasureServiceApi } from "@madie/madie-util";
 
 const mockUser = "test user";
 jest.mock("@madie/madie-util", () => ({
@@ -14,11 +14,30 @@ jest.mock("@madie/madie-util", () => ({
     getUserName: () => mockUser,
   }),
 }));
-
-jest.mock("../../../../../api/useMeasureServiceApi");
-const mockedUseMeasureServiceApi = useMeasureServiceApi as jest.MockedFunction<
-  typeof useMeasureServiceApi
->;
+const mockMeasureServiceApi = {
+  fetchMeasureDraftStatuses: jest.fn().mockResolvedValue({ "1-2-3-4": true }),
+  getMeasuresByMeasureSetId: jest
+    .fn()
+    .mockResolvedValue([{ model: Model.QICORE }, { model: Model.QICORE }]),
+} as unknown as MeasureServiceApi;
+jest.mock("@madie/madie-util", () => ({
+  useMeasureServiceApi: jest.fn(() => mockMeasureServiceApi),
+  useOktaTokens: jest.fn(() => ({
+    getAccessToken: () => "test.jwt",
+    getUserName: () => mockUser,
+  })),
+  checkUserCanEdit: jest.fn().mockImplementation(() => true),
+  checkUserCanDelete: jest.fn().mockImplementation(() => true),
+  useFeatureFlags: jest.fn(),
+  measureStore: {
+    updateMeasure: jest.fn((measure) => measure),
+    state: jest.fn().mockImplementation(() => null),
+    initialState: jest.fn().mockImplementation(() => null),
+    subscribe: () => {
+      return { unsubscribe: () => null };
+    },
+  },
+}));
 
 const mockMeasureSet = {
   cmsId: "124",
@@ -69,15 +88,6 @@ describe("DraftAction", () => {
   });
 
   it("Should enable action btn if user selects one 4.1 measure and there are no 6.0 measures in MeasureSet", async () => {
-    mockedUseMeasureServiceApi.mockReturnValue({
-      fetchMeasureDraftStatuses: jest
-        .fn()
-        .mockResolvedValue({ "1-2-3-4": true }),
-      getMeasuresByMeasureSetId: jest
-        .fn()
-        .mockResolvedValue([{ model: Model.QICORE }, { model: Model.QICORE }]),
-    });
-
     render(
       <DraftAction
         measures={[qiCoreMeasureVersioned]}
@@ -96,17 +106,15 @@ describe("DraftAction", () => {
   });
 
   it("Should disable action btn if user selects a 4.1.1 versioned measure and there are QI-core-6", async () => {
-    mockedUseMeasureServiceApi.mockReturnValue({
-      fetchMeasureDraftStatuses: jest
-        .fn()
-        .mockResolvedValue({ "1-2-3-4": true }),
-      getMeasuresByMeasureSetId: jest
-        .fn()
-        .mockResolvedValue([
-          { model: Model.QICORE_6_0_0 },
-          { model: Model.QICORE },
-        ]),
-    });
+    mockMeasureServiceApi.fetchMeasureDraftStatuses = jest
+      .fn()
+      .mockResolvedValue({ "1-2-3-4": true });
+    mockMeasureServiceApi.getMeasuresByMeasureSetId = jest
+      .fn()
+      .mockResolvedValue([
+        { model: Model.QICORE_6_0_0 },
+        { model: Model.QICORE },
+      ]);
 
     render(
       <DraftAction
@@ -126,17 +134,15 @@ describe("DraftAction", () => {
   });
 
   it("Should enable action btn if user selects one versioned QI-Core6 measure", async () => {
-    mockedUseMeasureServiceApi.mockReturnValue({
-      fetchMeasureDraftStatuses: jest
-        .fn()
-        .mockResolvedValue({ "1-2-3-4": true }),
-      getMeasuresByMeasureSetId: jest
-        .fn()
-        .mockResolvedValue([
-          { model: Model.QICORE_6_0_0 },
-          { model: Model.QICORE },
-        ]),
-    });
+    mockMeasureServiceApi.fetchMeasureDraftStatuses = jest
+      .fn()
+      .mockResolvedValue({ "1-2-3-4": true });
+    mockMeasureServiceApi.getMeasuresByMeasureSetId = jest
+      .fn()
+      .mockResolvedValue([
+        { model: Model.QICORE_6_0_0 },
+        { model: Model.QICORE },
+      ]);
 
     render(
       <DraftAction
@@ -198,11 +204,9 @@ describe("DraftAction", () => {
   });
 
   it("Should show an error toast if API call fails", async () => {
-    mockedUseMeasureServiceApi.mockReturnValue({
-      fetchMeasureDraftStatuses: jest
-        .fn()
-        .mockRejectedValue(new Error("Network Error")),
-    });
+    mockMeasureServiceApi.fetchMeasureDraftStatuses = jest
+      .fn()
+      .mockRejectedValue(new Error("Network Error"));
 
     render(
       <DraftAction

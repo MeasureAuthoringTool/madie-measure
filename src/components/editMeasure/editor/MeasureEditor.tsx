@@ -41,7 +41,7 @@ import {
   CqlCode,
   CqlCodeSystem,
 } from "@madie/cql-antlr-parser/dist/src";
-import useMeasureServiceApi from "../../../api/useMeasureServiceApi";
+
 import * as _ from "lodash";
 import {
   measureStore,
@@ -49,6 +49,7 @@ import {
   routeHandlerStore,
   checkUserCanEdit,
   useFeatureFlags,
+  useMeasureServiceApi,
 } from "@madie/madie-util";
 import StatusHandler from "./StatusHandler";
 import "./StatusHandler.scss";
@@ -162,7 +163,6 @@ const MeasureEditor = () => {
     new Map<string, Code>()
   );
   const measureServiceApi = useRef(useMeasureServiceApi()).current;
-  //const measureServiceApi = useMeasureServiceApi();
   const { updateMeasure } = measureStore;
   const { measureId } = useParams();
   const [processing, setProcessing] = useState<boolean>(true);
@@ -514,16 +514,17 @@ const MeasureEditor = () => {
       }
       // outer reject from try block. Doesn't convey any meaningful errors
     } catch (err) {
-      console.error(
-        "An error occurred while parsing CQL and translating CQL to ELM",
-        err
-      );
-      setError(true);
-      // header: error
-      setErrorMessage(
-        "Unable to parse CQL and translate CQL to ELM, CQL was not saved!"
-      );
-      setElmAnnotations([]);
+      throw err;
+      // console.error(
+      //   "An error occurred while parsing CQL and translating CQL to ELM",
+      //   err
+      // );
+      // setError(true);
+      // // header: error
+      // setErrorMessage(
+      //   "Unable to parse CQL and translate CQL to ELM, CQL was not saved!"
+      // );
+      // setElmAnnotations([]);
     } finally {
       setProcessing(false);
     }

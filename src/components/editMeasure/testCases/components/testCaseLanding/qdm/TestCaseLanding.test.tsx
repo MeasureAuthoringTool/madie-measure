@@ -10,7 +10,7 @@ import { Measure, Model } from "@madie/madie-models";
 import { CqmMeasure } from "cqm-models";
 import { QdmExecutionContextProvider } from "../../routes/qdm/QdmExecutionContext";
 // @ts-ignore
-import { checkUserCanEdit } from "@madie/madie-util";
+import { checkUserCanEdit, MeasureServiceApi } from "@madie/madie-util";
 import useQdmCqlParsingService, {
   QdmCqlParsingService,
 } from "../../../api/cqlElmTranslationService/useQdmCqlParsingService";
@@ -62,8 +62,13 @@ const setCqmMeasure = jest.fn();
 const setExecutionContextReady = jest.fn();
 const setExecuting = jest.fn();
 const setError = jest.fn();
+const mockMeasureServiceApi: MeasureServiceApi = {
+  updateMeasureTestCaseConfiguration: jest.fn(),
+} as unknown as MeasureServiceApi;
 
 jest.mock("@madie/madie-util", () => ({
+  useMeasureServiceApi: jest.fn(() => mockMeasureServiceApi),
+
   useDocumentTitle: jest.fn(),
   measureStore: {
     updateMeasure: jest.fn((measure) => measure),

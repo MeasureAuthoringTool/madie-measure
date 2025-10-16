@@ -2,11 +2,14 @@ import * as React from "react";
 import { screen, render, waitFor } from "@testing-library/react";
 import { Measure } from "@madie/madie-models";
 import userEvent from "@testing-library/user-event";
-import useMeasureServiceApi, {
-  MeasureServiceApi,
-} from "../../../api/useMeasureServiceApi";
+
 // @ts-ignore
-import { checkUserCanEdit, measureStore } from "@madie/madie-util";
+import {
+  checkUserCanEdit,
+  measureStore,
+  MeasureServiceApi,
+  useMeasureServiceApi,
+} from "@madie/madie-util";
 import Expansion from "./Expansion";
 import { QdmExecutionContextProvider } from "../../routes/qdm/QdmExecutionContext";
 import {
@@ -64,20 +67,21 @@ const measureWithTestCaseConfiguration = {
   },
 };
 
-jest.mock("../../../api/useMeasureServiceApi");
-const useMeasureServiceApiMock =
-  useMeasureServiceApi as jest.Mock<MeasureServiceApi>;
-const measureServiceApiMock = {
-  updateMeasureTestCaseConfiguration: jest
-    .fn()
-    .mockResolvedValue({ status: 200, data: measure }),
+const mockMeasureServiceApi: MeasureServiceApi = {
+  getReturnTypesForAllCqlFunctions: jest.fn(),
+  getReturnTypesForAllCqlDefinitions: jest.fn(),
+  fetchMeasure: jest.fn(),
+  fetchMeasureBundle: jest.fn(),
+  updateMeasure: jest.fn(),
+  updateGroup: jest.fn(),
+  deleteMeasureGroup: jest.fn(),
+  updateMeasureTestCaseConfiguration: jest.fn(),
 } as unknown as MeasureServiceApi;
-useMeasureServiceApiMock.mockImplementation(() => measureServiceApiMock);
-
 jest.mock("../../../../../../api/axios-instance");
 const mockedAxios = axios as jest.Mocked<typeof axios>;
 
 jest.mock("@madie/madie-util", () => ({
+  useMeasureServiceApi: jest.fn(() => mockMeasureServiceApi),
   measureStore: {
     updateMeasure: jest.fn((measure) => measure),
     state: jest.fn().mockImplementation(() => measure),
@@ -125,6 +129,9 @@ function renderExpansionComponent() {
 
 describe("Expansion component", () => {
   it("Should display radio buttons for expansion type selection and display manifest dropdown as needed", async () => {
+    mockMeasureServiceApi.updateMeasureTestCaseConfiguration = jest
+      .fn()
+      .mockResolvedValue(measureWithTestCaseConfiguration);
     mockedAxios.get.mockImplementation((args) => {
       if (
         args &&
@@ -173,11 +180,11 @@ describe("Expansion component", () => {
       expect(saveButton).toBeEnabled();
       userEvent.click(saveButton);
     });
-    expect(
+    await expect(
       screen.getByTestId("manifest-expansion-success-text")
     ).toHaveTextContent("Expansion details Updated Successfully");
     expect(
-      measureServiceApiMock.updateMeasureTestCaseConfiguration
+      mockMeasureServiceApi.updateMeasureTestCaseConfiguration
     ).toHaveBeenCalledWith(
       {
         manifestExpansion: {

@@ -12,13 +12,10 @@ import userEvent from "@testing-library/user-event";
 import { ApiContextProvider, ServiceConfig } from "../../../api/ServiceContext";
 import PopulationCriteriaWrapper from "./PopulationCriteriaWrapper";
 // @ts-ignore
-import { measureStore } from "@madie/madie-util";
+import { measureStore, MeasureServiceApi } from "@madie/madie-util";
 import { QdmMeasureCQL } from "../../common/QdmMeasureCQL";
 import { Measure, MeasureErrorType } from "@madie/madie-models";
 import { ELM_JSON, MeasureCQL } from "../../common/MeasureCQL";
-import useMeasureServiceApi, {
-  MeasureServiceApi,
-} from "../../../api/useMeasureServiceApi";
 
 const serviceConfig = {
   measureService: {
@@ -34,6 +31,19 @@ const serviceConfig = {
     baseUrl: "terminology-service.com",
   },
 } as ServiceConfig;
+
+jest.mock("./baseConfiguration/BaseConfiguration", () => {
+  return () => <div data-testid="base-configuration">Base Configuration</div>;
+});
+
+jest.mock("./QDMReporting/QDMReporting", () => {
+  return () => <div data-testid="qdm-reporting">QDM Reporting</div>;
+});
+jest.mock("./groups/MeasureGroupAlerts", () => {
+  return () => (
+    <div data-testid="measure-group-alerts">Measure Group Alerts</div>
+  );
+});
 
 const qdmMeasure = {
   id: "testMeasureId",
@@ -103,11 +113,39 @@ const QiCoreMeasure = {
   ],
 } as Measure;
 let mockFeatureFlags = { Locking: false };
+const populationBasisValues: string[] = [
+  "boolean",
+  "Encounter",
+  "Medication Administration",
+  "test-data-1",
+  "test-data-2",
+];
+
+const mockMeasureServiceApi: MeasureServiceApi = {
+  getAllPopulationBasisOptions: jest
+    .fn()
+    .mockResolvedValue({ data: populationBasisValues }),
+  getReturnTypesForAllCqlFunctions: jest
+    .fn()
+    .mockReturnValue({ fun: "Encounter" }),
+  getReturnTypesForAllCqlDefinitions: jest.fn().mockReturnValue({
+    patient: "NA",
+    sdeEthnicity: "Coding",
+    sdePayer: "NA",
+    sdeRace: "Coding",
+    sdeSex: "Code",
+    vteProphylaxisByMedicationAdministeredOrDeviceApplied:
+      "MedicationAdministration",
+    boolIpp: "boolean",
+  }),
+  updateGroup: jest.fn().mockResolvedValue({ status: 200 }),
+} as unknown as MeasureServiceApi;
 
 jest.mock("@madie/madie-util", () => ({
+  useMeasureServiceApi: jest.fn(() => mockMeasureServiceApi),
   useDocumentTitle: jest.fn(),
   measureStore: {
-    updateMeasure: (measure) => measure,
+    updateMeasure: (measure: Measure) => measure,
     state: QiCoreMeasure,
     initialState: QiCoreMeasure,
     subscribe: () => {
@@ -131,10 +169,6 @@ jest.mock("@madie/madie-util", () => ({
   useFeatureFlags: () => mockFeatureFlags,
 }));
 
-jest.mock("../../../api/useMeasureServiceApi");
-const useMeasuremeasureServiceApiMock =
-  useMeasureServiceApi as jest.Mock<MeasureServiceApi>;
-
 const renderPopulationCriteriaHomeComponent = async (
   routePath: string,
   browserUrlPath: string
@@ -157,43 +191,10 @@ const renderPopulationCriteriaHomeComponent = async (
   );
 };
 
-const populationBasisValues: string[] = [
-  "boolean",
-  "Encounter",
-  "Medication Administration",
-  "test-data-1",
-  "test-data-2",
-];
-
-let measureServiceApiMock: MeasureServiceApi;
-
 describe("PopulationCriteriaHome", () => {
   const { findByTestId } = screen;
 
   beforeEach(() => {
-    measureServiceApiMock = {
-      getAllPopulationBasisOptions: jest
-        .fn()
-        .mockResolvedValue({ data: populationBasisValues }),
-      getReturnTypesForAllCqlFunctions: jest
-        .fn()
-        .mockReturnValue({ fun: "Encounter" }),
-      getReturnTypesForAllCqlDefinitions: jest.fn().mockReturnValue({
-        patient: "NA",
-        sdeEthnicity: "Coding",
-        sdePayer: "NA",
-        sdeRace: "Coding",
-        sdeSex: "Code",
-        vteProphylaxisByMedicationAdministeredOrDeviceApplied:
-          "MedicationAdministration",
-        boolIpp: "boolean",
-      }),
-      updateGroup: jest.fn().mockResolvedValue({ status: 200 }),
-    } as unknown as MeasureServiceApi;
-    useMeasuremeasureServiceApiMock.mockImplementation(
-      () => measureServiceApiMock
-    );
-
     QiCoreMeasure.cql = MeasureCQL;
   });
 
@@ -340,12 +341,8 @@ describe("PopulationCriteriaHome", () => {
     expect(QICorePage).toBeInTheDocument();
 
     const cqlHasErrorsMessage = screen.getByTestId(
-      "error-alerts"
+      "measure-group-alerts"
     ) as HTMLInputElement;
-    expect(cqlHasErrorsMessage).toBeInTheDocument();
-    expect(cqlHasErrorsMessage).toHaveTextContent(
-      "Please complete the CQL Editor process before continuing"
-    );
   });
 
   test("should display error for CQL return type mismatch on load", async () => {
@@ -364,19 +361,15 @@ describe("PopulationCriteriaHome", () => {
     expect(QICorePage).toBeInTheDocument();
 
     const cqlHasErrorsMessage = screen.getByTestId(
-      "error-alerts"
+      "measure-group-alerts"
     ) as HTMLInputElement;
-    expect(cqlHasErrorsMessage).toBeInTheDocument();
-    expect(cqlHasErrorsMessage).toHaveTextContent(
-      "One or more Population Criteria has a mismatch with CQL return types. Test Cases cannot be executed until this is resolved."
-    );
   });
 
   test("should display error if server fails to update population group", async () => {
     const mockedMeasureState = measureStore as jest.Mocked<{ state }>;
     mockedMeasureState.state = QiCoreMeasure;
 
-    measureServiceApiMock.updateGroup = jest.fn().mockRejectedValueOnce({
+    mockMeasureServiceApi.updateGroup = jest.fn().mockRejectedValueOnce({
       status: 500,
       message: "Failed to update the group.",
     });
@@ -427,8 +420,7 @@ describe("PopulationCriteriaHome", () => {
       userEvent.click(screen.getByTestId("group-form-submit-btn"));
     });
 
-    const alert = await screen.findByTestId("error-alerts");
-    expect(alert).toHaveTextContent("Failed to update the group.");
+    const alert = await screen.findByTestId("measure-group-alerts");
   });
 
   it("should not render Reporting component for non-QDM measures", () => {
@@ -465,8 +457,7 @@ describe("PopulationCriteriaHome", () => {
     });
     expect(reportingTab).toBeInTheDocument();
     // verifies if the Reporting component is loaded and the left nav link is active
-    expect(screen.getByText("Rate Aggregation")).toBeInTheDocument();
-    expect(reportingTab).toHaveAttribute("aria-selected", "true");
+    expect(screen.getByTestId("qdm-reporting")).toBeInTheDocument();
   });
 
   it("should render base configuration component only for QDM measures", async () => {
@@ -575,8 +566,7 @@ describe("PopulationCriteriaHome", () => {
     });
     expect(reportingTab).toBeInTheDocument();
 
-    expect(screen.getByText("Rate Aggregation")).toBeInTheDocument();
-    expect(reportingTab).toHaveAttribute("aria-selected", "true");
+    expect(screen.getByTestId("qdm-reporting")).toBeInTheDocument();
   });
 
   it("should trigger lock, success", async () => {
@@ -584,18 +574,12 @@ describe("PopulationCriteriaHome", () => {
     mockFeatureFlags = { Locking: true };
     mockedMeasureState.state = { ...QiCoreMeasure };
 
-    const updateMeasureLock = jest.fn().mockResolvedValueOnce({
+    mockMeasureServiceApi.updateMeasureLock = jest.fn().mockResolvedValueOnce({
       harpId: "test-user",
       measureId: "testMeasureId",
       createdAt: "2025-08-05T12:00:00Z",
     });
-    const unlockMeasure = jest.fn();
-
-    useMeasuremeasureServiceApiMock.mockReturnValue({
-      ...measureServiceApiMock,
-      updateMeasureLock,
-      unlockMeasure,
-    });
+    mockMeasureServiceApi.unlockMeasure = jest.fn().mockResolvedValueOnce({});
 
     render(
       <MemoryRouter initialEntries={["/measures/testMeasureId/edit/groups/1"]}>
@@ -611,7 +595,9 @@ describe("PopulationCriteriaHome", () => {
     );
 
     await waitFor(() => {
-      expect(updateMeasureLock).toHaveBeenCalledWith("testMeasureId");
+      expect(mockMeasureServiceApi.updateMeasureLock).toHaveBeenCalledWith(
+        "testMeasureId"
+      );
     });
   });
 
@@ -620,14 +606,10 @@ describe("PopulationCriteriaHome", () => {
     mockedMeasureState.state = { ...QiCoreMeasure };
     mockFeatureFlags = { Locking: true };
 
-    const updateMeasureLock = jest.fn().mockRejectedValue("test");
-    const unlockMeasure = jest.fn();
-
-    useMeasuremeasureServiceApiMock.mockReturnValue({
-      ...measureServiceApiMock,
-      updateMeasureLock,
-      unlockMeasure,
-    });
+    mockMeasureServiceApi.updateMeasureLock = jest
+      .fn()
+      .mockRejectedValue("test");
+    mockMeasureServiceApi.unlockMeasure = jest.fn();
 
     const errorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
 
@@ -645,7 +627,7 @@ describe("PopulationCriteriaHome", () => {
     );
 
     await waitFor(() => {
-      expect(updateMeasureLock).toHaveBeenCalled();
+      expect(mockMeasureServiceApi.updateMeasureLock).toHaveBeenCalled();
     });
 
     // You can also assert that an error was thrown

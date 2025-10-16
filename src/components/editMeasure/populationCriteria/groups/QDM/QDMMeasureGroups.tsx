@@ -26,7 +26,6 @@ import {
 } from "@madie/madie-design-system/dist/react";
 import { useFormik, FormikProvider, FieldArray, Field, getIn } from "formik";
 import useFormikResetOnEvent from "../../../../common/useFormikResetOnEvent";
-import useMeasureServiceApi from "../../../../../api/useMeasureServiceApi";
 import { v4 as uuidv4 } from "uuid";
 import {
   qdmMeasureGroupSchemaValidator,
@@ -38,6 +37,7 @@ import {
   routeHandlerStore,
   useDocumentTitle,
   checkUserCanEdit,
+  useMeasureServiceApi,
   useFeatureFlags,
 } from "@madie/madie-util";
 import MeasureGroupsWarningDialog from "../MeasureGroupWarningDialog";
@@ -358,12 +358,12 @@ const MeasureGroups = (props: MeasureGroupProps) => {
         featureFlags.Locking &&
         (await props.checkTestCasesLockStatus())
       ) {
-        props.setAlertMessage({
-          type: "error",
-          message:
-            "This measure cannot be saved because changes to the Population Criteria will update test cases and one or more test cases are locked by another user.",
-          canClose: false,
-        });
+        handleToast(
+          "danger",
+          "This measure cannot be saved because changes to the Population Criteria will update test cases and one or more test cases are locked by another user.",
+          true
+        );
+        return;
       } else {
         submitForm(group);
       }

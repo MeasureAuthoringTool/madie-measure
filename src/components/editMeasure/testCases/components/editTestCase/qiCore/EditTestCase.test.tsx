@@ -45,7 +45,11 @@ import { multiGroupMeasureFixture } from "../../createTestCase/__mocks__/multiGr
 import { nonBoolTestCaseFixture } from "../../createTestCase/__mocks__/nonBoolTestCaseFixture";
 import { TestCaseValidator } from "../../../validators/TestCaseValidator";
 // @ts-ignore
-import { checkUserCanEdit, useFeatureFlags } from "@madie/madie-util";
+import {
+  checkUserCanEdit,
+  useFeatureFlags,
+  MeasureServiceApi,
+} from "@madie/madie-util";
 import { PopulationType as FqmPopulationType } from "fqm-execution/build/types/Enums";
 import { ResourceIdentifier } from "../../../api/models/ResourceIdentifier";
 
@@ -54,6 +58,10 @@ jest.setTimeout(60000);
 
 jest.mock("../../../../../../api/axios-instance");
 const mockedAxios = axios as jest.Mocked<typeof axios>;
+
+const mockMeasureServiceApi: MeasureServiceApi = {
+  updateMeasureTestCaseConfiguration: jest.fn(),
+} as unknown as MeasureServiceApi;
 
 // mock editor to reduce errors and warnings
 const mockEditor = { resize: jest.fn() };
@@ -108,6 +116,7 @@ const MEASURE_CREATEDBY = "testuser";
 let mockApplyDefaults = false;
 jest.mock("@madie/madie-util", () => {
   return {
+    useMeasureServiceApi: jest.fn(() => mockMeasureServiceApi),
     useDocumentTitle: jest.fn(),
     useFeatureFlags: jest.fn(() => {
       return {
