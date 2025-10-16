@@ -7,12 +7,12 @@ import {
   checkUserCanEdit,
   measureStore,
   useFeatureFlags,
+  useMeasureServiceApi,
 } from "@madie/madie-util";
 import { Measure } from "@madie/madie-models";
 import BaseConfiguration from "./baseConfiguration/BaseConfiguration";
 import QDMReporting from "./QDMReporting/QDMReporting";
 import MeasureGroupAlerts from "./groups/MeasureGroupAlerts";
-import useMeasureServiceApi from "../../../api/useMeasureServiceApi";
 
 export const COMPLETE = "complete";
 export const INCOMPLETE = "incomplete";

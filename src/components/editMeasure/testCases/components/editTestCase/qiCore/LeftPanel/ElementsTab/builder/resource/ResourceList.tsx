@@ -111,14 +111,6 @@ const ResourceList = ({ resourceIdentifiers, onClick }: ResourceListProps) => {
         //   customSort(rowA.original.profile, rowB.original.title),
       },
       {
-        header: "Value Set",
-        cell: (info) => <></>,
-        accessorKey: "title",
-        // add in later for sorting
-        // sortingFn: (rowA, rowB) =>
-        //   customSort(rowA.original.title, rowB.original.title),
-      },
-      {
         header: "",
         cell: ({ row }) => {
           const { original } = row;

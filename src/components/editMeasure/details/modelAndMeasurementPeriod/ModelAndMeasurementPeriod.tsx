@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { Measure } from "@madie/madie-models";
-import useMeasureServiceApi from "../../../../api/useMeasureServiceApi";
 import "styled-components/macro";
 import {
   Button,
@@ -18,6 +17,7 @@ import {
   measureStore,
   routeHandlerStore,
   checkUserCanEdit,
+  useMeasureServiceApi,
 } from "@madie/madie-util";
 import { Box } from "@mui/system";
 

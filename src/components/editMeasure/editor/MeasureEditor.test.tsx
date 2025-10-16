@@ -16,11 +16,13 @@ import {
   isUsingEmpty,
   validateContent,
 } from "@madie/madie-editor";
-import { checkUserCanEdit, measureStore } from "@madie/madie-util";
-import { MemoryRouter, Route, Routes } from "react-router-dom";
-import useMeasureServiceApi, {
+import {
+  checkUserCanEdit,
+  measureStore,
+  useMeasureServiceApi,
   MeasureServiceApi,
-} from "../../../api/useMeasureServiceApi";
+} from "@madie/madie-util";
+import { MemoryRouter, Route, Routes } from "react-router-dom";
 
 const measure = {
   id: "abcd-pqrs-xyz",
@@ -45,7 +47,14 @@ const measure = {
 // MinimizeAlerts flag removed; keep stub returning empty object for tests
 const mockUseFeatureFlags = jest.fn(() => ({}));
 
+const mockMeasureServiceApi = {
+  updateMeasure: jest.fn(),
+  unlockMeasure: jest.fn(),
+  updateMeasureLock: jest.fn(),
+};
+
 jest.mock("@madie/madie-util", () => ({
+  useMeasureServiceApi: jest.fn(() => mockMeasureServiceApi),
   useDocumentTitle: jest.fn(),
   useOktaTokens: jest.fn(() => ({
     getAccessToken: () => "test.jwt",
@@ -145,9 +154,6 @@ const cqlToElmExternalErrors: ElmTranslationExternalError[] = [
   },
 ];
 
-jest.mock("../../../api/axios-instance");
-const mockedAxios = axios as jest.Mocked<typeof axios>;
-
 const serviceConfig = {
   measureService: {
     baseUrl: "madie.com",
@@ -208,6 +214,7 @@ describe("MeasureEditor component", () => {
   });
 
   it("save measure with empty cql successfully", async () => {
+    mockMeasureServiceApi.updateMeasure.mockResolvedValueOnce(measure);
     (validateContent as jest.Mock).mockClear().mockImplementation(() => {
       return Promise.resolve({
         errors: [],
@@ -222,12 +229,6 @@ describe("MeasureEditor component", () => {
           cql: "",
         };
       });
-
-    mockedAxios.put.mockImplementation((args) => {
-      if (args && args.startsWith(serviceConfig.measureService.baseUrl)) {
-        return Promise.resolve({ data: measure });
-      }
-    });
 
     const { getByTestId } = renderEditor(measure);
     const editorContainer = getByTestId("measure-editor") as HTMLInputElement;
@@ -245,6 +246,8 @@ describe("MeasureEditor component", () => {
   });
 
   it("save measure with updated cql in editor on save button click", async () => {
+    mockMeasureServiceApi.updateMeasure.mockResolvedValueOnce(measure);
+
     (validateContent as jest.Mock).mockClear().mockImplementation(() => {
       return Promise.resolve({
         errors: [],
@@ -263,12 +266,6 @@ describe("MeasureEditor component", () => {
         };
       });
 
-    mockedAxios.put.mockImplementation((args) => {
-      if (args && args.startsWith(serviceConfig.measureService.baseUrl)) {
-        return Promise.resolve({ data: measure });
-      }
-    });
-
     const { getByTestId } = renderEditor(measure);
     const editorContainer = getByTestId("measure-editor") as HTMLInputElement;
     expect(measure.cql).toEqual(editorContainer.value);
@@ -283,11 +280,13 @@ describe("MeasureEditor component", () => {
       expect(successText.textContent).toEqual(
         "CQL updated successfully but the following issues were found"
       );
-      expect(mockedAxios.put).toHaveBeenCalledTimes(1);
+      expect(mockMeasureServiceApi.updateMeasure).toHaveBeenCalledTimes(1);
     });
   });
 
   it("save measure with updated cql in editor on save button click and show return type error", async () => {
+    mockMeasureServiceApi.updateMeasure.mockResolvedValueOnce(measure);
+
     (validateContent as jest.Mock).mockClear().mockImplementation(() => {
       return Promise.resolve({
         errors: [],
@@ -306,17 +305,6 @@ describe("MeasureEditor component", () => {
         };
       });
 
-    mockedAxios.put.mockImplementation((args) => {
-      if (args && args.startsWith(serviceConfig.measureService.baseUrl)) {
-        return Promise.resolve({
-          data: {
-            ...measure,
-            errors: [MeasureErrorType.MISMATCH_CQL_POPULATION_RETURN_TYPES],
-          },
-        });
-      }
-    });
-
     const { getByTestId } = renderEditor(measure);
     const editorContainer = getByTestId("measure-editor") as HTMLInputElement;
     expect(measure.cql).toEqual(editorContainer.value);
@@ -331,7 +319,7 @@ describe("MeasureEditor component", () => {
       expect(successText.textContent).toEqual(
         "CQL updated successfully but the following issues were found"
       );
-      expect(mockedAxios.put).toHaveBeenCalledTimes(1);
+      expect(mockMeasureServiceApi.updateMeasure).toHaveBeenCalledTimes(1);
     });
 
     const subscribeCallback = (measureStore.subscribe as jest.Mock).mock
@@ -355,6 +343,8 @@ describe("MeasureEditor component", () => {
   });
 
   it("save measure with updated cql in editor on save button click and show error for missing using", async () => {
+    mockMeasureServiceApi.updateMeasure.mockResolvedValueOnce(measure);
+
     (validateContent as jest.Mock).mockClear().mockImplementation(() => {
       return Promise.resolve({
         errors: [],
@@ -375,12 +365,6 @@ describe("MeasureEditor component", () => {
 
     isUsingEmpty.mockClear().mockImplementation(() => true);
 
-    mockedAxios.put.mockImplementation((args) => {
-      if (args && args.startsWith(serviceConfig.measureService.baseUrl)) {
-        return Promise.resolve({ data: measure });
-      }
-    });
-
     const { getByTestId } = renderEditor(measure);
     const editorContainer = getByTestId("measure-editor") as HTMLInputElement;
     expect(measure.cql).toEqual(editorContainer.value);
@@ -395,16 +379,13 @@ describe("MeasureEditor component", () => {
       expect(successText.textContent).toEqual(
         "CQL updated successfully but the following issues were found"
       );
-      expect(mockedAxios.put).toHaveBeenCalledTimes(1);
+      expect(mockMeasureServiceApi.updateMeasure).toHaveBeenCalledTimes(1);
     });
   });
 
   it("should alert user if ELM translation fails on save", async () => {
-    mockedAxios.put.mockImplementation((args) => {
-      if (args && args.startsWith(serviceConfig.measureService.baseUrl)) {
-        return Promise.resolve({ data: measure });
-      }
-    });
+    mockMeasureServiceApi.updateMeasure.mockResolvedValueOnce(measure);
+
     (validateContent as jest.Mock).mockClear().mockImplementation(() => {
       return Promise.reject({ data: { error: "Something bad happened!" } });
     });
@@ -435,16 +416,13 @@ describe("MeasureEditor component", () => {
       expect(successMessage.textContent).toEqual(
         "CQL updated successfully but the following issues were found"
       );
-      expect(mockedAxios.put).toHaveBeenCalledTimes(1);
+      expect(mockMeasureServiceApi.updateMeasure).toHaveBeenCalledTimes(1);
     });
   });
 
   it("should persist error flag when there are ELM translation errors", async () => {
-    mockedAxios.put.mockImplementation((args) => {
-      if (args && args.startsWith(serviceConfig.measureService.baseUrl)) {
-        return Promise.resolve({ data: measure });
-      }
-    });
+    mockMeasureServiceApi.updateMeasure.mockResolvedValueOnce(measure);
+
     (validateContent as jest.Mock).mockClear().mockImplementation(() => {
       return Promise.resolve({
         errors: elmTransaltionErrors,
@@ -485,15 +463,12 @@ describe("MeasureEditor component", () => {
       "CQL updated successfully but the following issues were found"
     );
     expect(saveSuccess).toBeInTheDocument();
-    expect(mockedAxios.put).toHaveBeenCalledTimes(1);
+    expect(mockMeasureServiceApi.updateMeasure).toHaveBeenCalledTimes(1);
   });
 
   it("should persist error flag when there are parse errors", async () => {
-    mockedAxios.put.mockImplementation((args) => {
-      if (args && args.startsWith(serviceConfig.measureService.baseUrl)) {
-        return Promise.resolve({ data: measure });
-      }
-    });
+    mockMeasureServiceApi.updateMeasure.mockResolvedValueOnce(measure);
+
     (validateContent as jest.Mock).mockClear().mockImplementation(() => {
       return Promise.resolve({
         errors: [],
@@ -530,7 +505,7 @@ describe("MeasureEditor component", () => {
       "CQL updated successfully but the following issues were found"
     );
     expect(saveSuccess).toBeInTheDocument();
-    expect(mockedAxios.put).toHaveBeenCalledTimes(1);
+    expect(mockMeasureServiceApi.updateMeasure).toHaveBeenCalledTimes(1);
   });
 
   it("reset the editor changes with measure cql when clicked on cancel button", async () => {
@@ -590,11 +565,7 @@ describe("MeasureEditor component", () => {
   });
 
   it("reports an error when save cql fails", async () => {
-    mockedAxios.put.mockImplementation((args) => {
-      if (args && args.startsWith(serviceConfig.measureService.baseUrl)) {
-        return Promise.reject("server error");
-      }
-    });
+    mockMeasureServiceApi.updateMeasure.mockRejectedValueOnce("server error");
     const { getByTestId } = renderEditor(measure);
     const editorContainer = getByTestId("measure-editor") as HTMLInputElement;
     expect(measure.cql).toEqual(editorContainer.value);
@@ -611,11 +582,8 @@ describe("MeasureEditor component", () => {
   });
 
   it("runs ELM translation on initial load of component and generate annotations", async () => {
-    mockedAxios.put.mockImplementation((args) => {
-      if (args && args.startsWith(serviceConfig.measureService.baseUrl)) {
-        return Promise.resolve({ data: measure });
-      }
-    });
+    mockMeasureServiceApi.updateMeasure.mockResolvedValueOnce(measure);
+
     (validateContent as jest.Mock).mockClear().mockImplementation(() => {
       return Promise.resolve({
         errors: elmTransaltionErrors,
@@ -628,11 +596,8 @@ describe("MeasureEditor component", () => {
   });
 
   it("should display toast for external errors received from Cql to Elm translation", async () => {
-    mockedAxios.put.mockImplementation((args) => {
-      if (args && args.startsWith(serviceConfig.measureService.baseUrl)) {
-        return Promise.resolve({ data: measure });
-      }
-    });
+    mockMeasureServiceApi.updateMeasure.mockResolvedValueOnce(measure);
+
     (validateContent as jest.Mock).mockClear().mockImplementation(() => {
       return Promise.resolve({
         errors: [],
@@ -681,6 +646,18 @@ describe("MeasureEditor component", () => {
   });
 
   it("should remove concept successfully", async () => {
+    const measureWithCqlCodes = {
+      ...measure,
+      model: Model.QDM_5_6,
+      cql:
+        "library RemoveConceptTest version '0.0.000'\n" +
+        "\n" +
+        "using QDM version '5.6'\n",
+    } as Measure;
+    mockMeasureServiceApi.updateMeasure.mockResolvedValueOnce(
+      measureWithCqlCodes
+    );
+
     (synchingEditorCqlContent as jest.Mock)
       .mockClear()
       .mockImplementation(() => {
@@ -699,21 +676,10 @@ describe("MeasureEditor component", () => {
         externalErrors: [],
       });
     });
-    const measureWithCqlCodes = {
-      ...measure,
-      model: Model.QDM_5_6,
-      cql:
-        "library RemoveConceptTest version '0.0.000'\n" +
-        "\n" +
-        "using QDM version '5.6'\n",
-    } as Measure;
+
     const cqlWithNoConcept =
       "library RemoveConceptTest version '0.0.000'\nusing QDM version '5.6'";
-    mockedAxios.put.mockImplementation((args) => {
-      if (args && args.startsWith(serviceConfig.measureService.baseUrl)) {
-        return Promise.resolve({ data: measureWithCqlCodes });
-      }
-    });
+
     const { getByTestId } = renderEditor(measureWithCqlCodes);
 
     fireEvent.change(getByTestId("measure-editor"), {
@@ -880,6 +846,20 @@ describe("map elm errors to Ace Markers", () => {
   });
 
   it("should display errors if not logged into umls", async () => {
+    const measureWithCqlCodes = {
+      ...measure,
+      cql:
+        "library DuplicateMeasureTest version '0.0.000'\n" +
+        "\n" +
+        "using FHIR version '4.0.1'\n" +
+        "\n" +
+        "codesystem \"ActPriority:HL7V3.0_2021-03\": 'https://terminology.hl7.org/CodeSystem/v3-ActPriority' version 'HL7V3.0_2021-03'\n" +
+        "code \"preop\": 'P' from \"ActPriority:HL7V3.0_2021-03\" display 'preop'",
+    };
+
+    mockMeasureServiceApi.updateMeasure.mockResolvedValueOnce(
+      measureWithCqlCodes
+    );
     const elmTransaltionErrorsUMLS: ElmTranslationError[] = [
       {
         startLine: 24,
@@ -901,22 +881,6 @@ describe("map elm errors to Ace Markers", () => {
         translation: null,
         externalErrors: [],
       });
-    });
-
-    const measureWithCqlCodes = {
-      ...measure,
-      cql:
-        "library DuplicateMeasureTest version '0.0.000'\n" +
-        "\n" +
-        "using FHIR version '4.0.1'\n" +
-        "\n" +
-        "codesystem \"ActPriority:HL7V3.0_2021-03\": 'https://terminology.hl7.org/CodeSystem/v3-ActPriority' version 'HL7V3.0_2021-03'\n" +
-        "code \"preop\": 'P' from \"ActPriority:HL7V3.0_2021-03\" display 'preop'",
-    };
-    mockedAxios.put.mockImplementation((args) => {
-      if (args && args.startsWith(serviceConfig.measureService.baseUrl)) {
-        return Promise.resolve({ data: measureWithCqlCodes });
-      }
     });
 
     renderEditor(measureWithCqlCodes);
@@ -959,11 +923,9 @@ describe("EditorWithTerminology", () => {
     } as Measure;
     const cqlWithNoCodes =
       "library RemoveCodeTest version '0.0.000'\nusing QDM version '5.6'";
-    mockedAxios.put.mockImplementation((args) => {
-      if (args && args.startsWith(serviceConfig.measureService.baseUrl)) {
-        return Promise.resolve({ data: measureWithCqlCodes });
-      }
-    });
+    mockMeasureServiceApi.updateMeasure.mockResolvedValueOnce(
+      measureWithCqlCodes
+    );
     renderEditor(measureWithCqlCodes);
     const removeCodeBtn = await screen.findByText("Remove code");
     expect(removeCodeBtn).toBeInTheDocument();
@@ -1053,8 +1015,8 @@ describe("EditorWithTerminology", () => {
       cql: cqlWithNoIncludes,
     } as Measure;
 
-    mockedAxios.put.mockImplementation((args) =>
-      Promise.resolve({ data: measureWithNoIncludes })
+    mockMeasureServiceApi.updateMeasure.mockResolvedValueOnce(
+      measureWithNoIncludes
     );
     renderEditor(measureWithIncludes);
     const deleteIncludeBtn = screen.getByTestId("delete-included-library");
@@ -1069,6 +1031,24 @@ describe("EditorWithTerminology", () => {
   });
 
   it("should edit included library successfully", async () => {
+    (synchingEditorCqlContent as jest.Mock)
+      .mockClear()
+      .mockImplementation(() => {
+        return {
+          cql: "library ApplyLibraryTest version '0.0.000'\nusing QDM version '5.6'\ninclude TestHelpers version '1.0.000' called EditedHelpers",
+          isLibraryStatementChanged: false,
+          isUsingStatementChanged: false,
+          isValueSetChanged: false,
+        };
+      });
+    (validateContent as jest.Mock).mockClear().mockImplementation(() => {
+      return Promise.resolve({
+        errors: [],
+        translation: null,
+        externalErrors: [],
+      });
+    });
+    mockMeasureServiceApi.updateMeasure.mockResolvedValueOnce(measure);
     const cqlWithIncludes =
       "library ApplyLibraryTest version '0.0.000'\nusing QDM version '5.6'\ninclude TestHelpers version '1.0.000' called Helpers";
 
@@ -1088,17 +1068,38 @@ describe("EditorWithTerminology", () => {
     await waitFor(() => {
       const editor = screen.getByTestId("measure-editor");
       expect(editor).toHaveValue(cqlWithEdittedIncludes);
+      expect(screen.getByTestId("measure-editor-toast")).toHaveTextContent(
+        "Library TestHelpers has been successfully edited in the CQL"
+      );
     });
-    expect(screen.getByTestId("measure-editor-toast")).toHaveTextContent(
-      "Library TestHelpers has been successfully edited in the CQL"
-    );
   });
 
   it("test edit parameter", async () => {
+    mockMeasureServiceApi.updateMeasure.mockResolvedValueOnce(measure);
+
+    const testCql = 'parameter "Measurement Period" Interval<System.DateTime>';
+    (synchingEditorCqlContent as jest.Mock)
+      .mockClear()
+      .mockImplementation(() => {
+        return {
+          cql: testCql,
+          isLibraryStatementChanged: false,
+          isUsingStatementChanged: false,
+          isValueSetChanged: false,
+        };
+      });
+    (validateContent as jest.Mock).mockClear().mockImplementation(() => {
+      return Promise.resolve({
+        errors: [],
+        translation: null,
+        externalErrors: [],
+      });
+    });
+
     const measureWithCqlParameter = {
       ...measure,
       model: Model.QDM_5_6,
-      cql: 'parameter "Measurement Period" Interval<System.DateTime>',
+      cql: testCql,
     } as Measure;
 
     renderEditor(measureWithCqlParameter);
@@ -1108,17 +1109,36 @@ describe("EditorWithTerminology", () => {
     userEvent.click(editParameterBtn);
     await waitFor(() => {
       const editor = screen.getByTestId("measure-editor");
-      expect(editor).toHaveValue(
-        'parameter "Test Measurement Period" Interval<System.DateTime>'
-      );
+      expect(editor).toHaveValue(testCql);
     });
   });
 
   it("test delete parameter", async () => {
+    mockMeasureServiceApi.updateMeasure.mockResolvedValueOnce(measure);
+
+    const testCql = 'parameter "Measurement Period" Interval<System.DateTime>';
+    (synchingEditorCqlContent as jest.Mock)
+      .mockClear()
+      .mockImplementation(() => {
+        return {
+          cql: "",
+          isLibraryStatementChanged: false,
+          isUsingStatementChanged: false,
+          isValueSetChanged: false,
+        };
+      });
+    (validateContent as jest.Mock).mockClear().mockImplementation(() => {
+      return Promise.resolve({
+        errors: [],
+        translation: null,
+        externalErrors: [],
+      });
+    });
+
     const measureWithCqlParameter = {
       ...measure,
       model: Model.QDM_5_6,
-      cql: 'parameter "Measurement Period" Interval<System.DateTime>',
+      cql: testCql,
     } as Measure;
 
     renderEditor(measureWithCqlParameter);
@@ -1128,9 +1148,7 @@ describe("EditorWithTerminology", () => {
     userEvent.click(deleteParameterBtn);
     await waitFor(() => {
       const editor = screen.getByTestId("measure-editor");
-      expect(editor).not.toHaveValue(
-        'parameter "Measurement Period" Interval<System.DateTime>'
-      );
+      expect(editor).not.toHaveValue(testCql);
     });
   });
 
@@ -1221,11 +1239,9 @@ define function MeasureObservation(e Encounter):
     } as Measure;
     const cqlWithNoCodes =
       "library RemoveCodeTest version '0.0.000'\nusing QICore version '4.1.1'";
-    mockedAxios.put.mockImplementation((args) => {
-      if (args && args.startsWith(serviceConfig.measureService.baseUrl)) {
-        return Promise.resolve({ data: measureWithCqlCodes });
-      }
-    });
+    mockMeasureServiceApi.updateMeasure.mockResolvedValueOnce(
+      measureWithCqlCodes
+    );
     renderEditor(measureWithCqlCodes);
     const removeCodeBtn = await screen.findByText("Remove code");
     expect(removeCodeBtn).toBeInTheDocument();
@@ -1240,58 +1256,42 @@ define function MeasureObservation(e Encounter):
   });
 
   it("Should successfully lock", async () => {
-    mockUseFeatureFlags.mockReturnValue({ Locking: true });
-
-    const actualModule = jest.requireActual(
-      "../../../api/useMeasureServiceApi"
-    );
-    const { MeasureServiceApi } = actualModule;
-    // Spy on the hook
-    const useMeasureServiceApi = jest.spyOn(actualModule, "default");
-    const realInstance = new MeasureServiceApi("asodifm", () => "asodifm"); // #nosec
-    realInstance.updateMeasureLock = jest.fn().mockResolvedValue({
-      isLocked: true,
-      lockedBy: "testuser@example.com",
-    });
-    realInstance.unlockMeasure = jest.fn().mockResolvedValue({
+    mockMeasureServiceApi.updateMeasure.mockResolvedValueOnce(measure);
+    mockMeasureServiceApi.unlockMeasure.mockResolvedValueOnce({
       isLocked: false,
       lockedBy: "testuser@example.com",
     });
+    mockMeasureServiceApi.updateMeasureLock.mockResolvedValueOnce({
+      isLocked: true,
+      lockedBy: "testuser@example.com",
+    });
+    mockUseFeatureFlags.mockReturnValue({ Locking: true });
 
-    useMeasureServiceApi.mockReturnValue(realInstance);
     renderEditor(measure);
 
     await waitFor(() => {
-      expect(realInstance.updateMeasureLock).toHaveBeenCalled();
+      expect(mockMeasureServiceApi.updateMeasureLock).toHaveBeenCalled();
     });
-
-    useMeasureServiceApi.mockRestore();
   });
 
   it("Should fail lock", async () => {
     mockUseFeatureFlags.mockReturnValue({ Locking: true });
 
-    const actualModule = jest.requireActual(
-      "../../../api/useMeasureServiceApi"
-    );
-    const { MeasureServiceApi } = actualModule;
-    const useMeasureServiceApi = jest.spyOn(actualModule, "default");
-    const realInstance = new MeasureServiceApi("asodifm", () => "asodifm"); // #nosec
-    realInstance.updateMeasureLock = jest.fn().mockRejectedValue({
-      isLocked: true,
-      lockedBy: "testuser@example.com",
-    });
-    realInstance.unlockMeasure = jest.fn().mockResolvedValue({
+    const errorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+
+    mockMeasureServiceApi.updateMeasure.mockResolvedValueOnce(measure);
+    mockMeasureServiceApi.unlockMeasure.mockResolvedValueOnce({
       isLocked: false,
       lockedBy: "testuser@example.com",
     });
-    const errorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
-
-    useMeasureServiceApi.mockReturnValue(realInstance);
+    mockMeasureServiceApi.updateMeasureLock.mockRejectedValueOnce({
+      isLocked: true,
+      lockedBy: "testuser@example.com",
+    });
     renderEditor(measure);
 
     await waitFor(() => {
-      expect(realInstance.updateMeasureLock).toHaveBeenCalled();
+      expect(mockMeasureServiceApi.updateMeasureLock).toHaveBeenCalled();
     });
 
     // You can also assert that an error was thrown

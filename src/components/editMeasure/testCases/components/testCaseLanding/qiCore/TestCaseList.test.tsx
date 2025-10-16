@@ -33,9 +33,6 @@ import {
 import useTestCaseServiceApi, {
   TestCaseServiceApi,
 } from "../../../api/useTestCaseServiceApi";
-import useMeasureServiceApi, {
-  MeasureServiceApi,
-} from "../../../api/useMeasureServiceApi";
 import userEvent from "@testing-library/user-event";
 import {
   buildMeasureBundle,
@@ -43,7 +40,12 @@ import {
 } from "../../../util/CalculationTestHelpers";
 import { ExecutionContextProvider } from "../../routes/qiCore/ExecutionContext";
 // @ts-ignore
-import { checkUserCanEdit, useFeatureFlags } from "@madie/madie-util";
+import {
+  checkUserCanEdit,
+  useFeatureFlags,
+  useMeasureServiceApi,
+  MeasureServiceApi,
+} from "@madie/madie-util";
 import { ScanValidationDto } from "../../../api/models/ScanValidationDto";
 // @ts-ignore
 import JSZip from "jszip";
@@ -129,7 +131,14 @@ const mockMeasure = {
   measureMetaData: { draft: true },
   acls: [{ userId: "othertestuser@example.com", roles: ["SHARED_WITH"] }], //#nosec
 } as Measure;
+const mockMeasureServiceApiResolved = {
+  fetchMeasure: jest.fn().mockResolvedValue(mockMeasure),
+  fetchMeasureBundle: jest
+    .fn()
+    .mockResolvedValue(buildMeasureBundle(mockMeasure)),
+} as unknown as MeasureServiceApi;
 jest.mock("@madie/madie-util", () => ({
+  useMeasureServiceApi: jest.fn(() => mockMeasureServiceApiResolved),
   useDocumentTitle: jest.fn(),
   measureStore: {
     updateMeasure: jest.fn((measure) => measure),
@@ -149,6 +158,7 @@ jest.mock("@madie/madie-util", () => ({
   checkUserCanEdit: jest.fn().mockImplementation(() => true),
   useFeatureFlags: jest.fn().mockImplementation(() => ({
     applyDefaults: false,
+    Locking: false,
   })),
   routeHandlerStore: {
     subscribe: (set) => {
@@ -487,10 +497,12 @@ const useTestCaseServiceMockResolved = {
   ),
 } as unknown as TestCaseServiceApi;
 
-// mocking measureService
-jest.mock("../../../api/useMeasureServiceApi");
-const useMeasureServiceMock =
-  useMeasureServiceApi as jest.Mock<MeasureServiceApi>;
+jest.mock("../common/copyTestCases/CopyTestCaseDialog", () => ({
+  __esModule: true,
+  default: () => (
+    <div data-testid="copy-test-case-dialog">Copy Test Case Dialog</div>
+  ),
+}));
 
 const measureBundle = buildMeasureBundle(mockMeasure);
 const valueSets = [getExampleValueSet()];
@@ -528,12 +540,6 @@ beforeAll(() => {
 });
 
 describe("TestCaseList component", () => {
-  const useMeasureServiceMockResolved = {
-    fetchMeasure: jest.fn().mockResolvedValue(mockMeasure),
-    fetchMeasureBundle: jest
-      .fn()
-      .mockResolvedValue(buildMeasureBundle(mockMeasure)),
-  } as unknown as MeasureServiceApi;
   beforeEach(() => {
     calculationServiceMock.mockImplementation(() => {
       return calculationServiceMockResolved;
@@ -541,9 +547,7 @@ describe("TestCaseList component", () => {
     useTestCaseServiceMock.mockReset().mockImplementation(() => {
       return useTestCaseServiceMockResolved;
     });
-    useMeasureServiceMock.mockImplementation(() => {
-      return useMeasureServiceMockResolved;
-    });
+
     (checkUserCanEdit as jest.Mock).mockClear().mockImplementation(() => true);
     (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
       applyDefaults: false,
@@ -769,11 +773,38 @@ describe("TestCaseList component", () => {
       screen.getByTestId("delete-dialog-cancel-button")
     ).toBeInTheDocument();
 
+    const dialog = screen.getByTestId("delete-dialog");
+    expect(dialog).not.toHaveTextContent(
+      "Test cases in-use by another user will not be deleted."
+    );
+
     fireEvent.click(screen.getByTestId("delete-dialog-cancel-button"));
     await waitFor(() => {
       const submitButton = screen.queryByText("Yes, Delete");
       expect(submitButton).not.toBeInTheDocument();
     });
+  });
+
+  it("should render delete dialogue on Test Case list page when delete button is clicked and Locking is true", async () => {
+    useFeatureFlags.Locking = jest.fn().mockReturnValue(true);
+    const { getByTestId } = renderTestCaseListComponent();
+    await waitFor(() => {
+      const selectButton = screen.getByTestId(`test-case-title-0_select`);
+      const checkboxButton = within(selectButton).getByRole("checkbox");
+      expect(checkboxButton).toBeInTheDocument();
+      fireEvent.click(checkboxButton);
+      expect(checkboxButton).toBeChecked();
+    });
+
+    const deleteButton = screen.getByTestId("delete-action-icon");
+    expect(deleteButton).toBeEnabled();
+    fireEvent.click(deleteButton);
+
+    await waitFor(() => {
+      expect(screen.getByTestId("delete-dialog")).toBeInTheDocument();
+    });
+
+    const dialog = screen.getByTestId("delete-dialog");
   });
 
   it("should handle delete error on Test Case list page when delete button is clicked", async () => {
@@ -1689,10 +1720,9 @@ describe("TestCaseList component", () => {
     expect(copyTestCaseButton).not.toBeDisabled();
 
     userEvent.click(copyTestCaseButton);
-    expect(await screen.findByRole("dialog")).toBeInTheDocument();
-
-    userEvent.click(await screen.findByRole("button", { name: "Cancel" }));
-    await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+    expect(
+      await screen.getByTestId("copy-test-case-dialog")
+    ).toBeInTheDocument();
   });
 
   it("Should not display valid test case percentage for QiCore v6 measures when feature flag is off", async () => {

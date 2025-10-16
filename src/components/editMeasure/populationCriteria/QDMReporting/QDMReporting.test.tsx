@@ -7,9 +7,7 @@ import {
   within,
   act,
 } from "@testing-library/react";
-import useMeasureServiceApi, {
-  MeasureServiceApi,
-} from "../../../../api/useMeasureServiceApi";
+
 import { Measure } from "@madie/madie-models";
 import QDMReporting from "./QDMReporting";
 import userEvent from "@testing-library/user-event";
@@ -17,9 +15,8 @@ import {
   checkUserCanEdit,
   measureStore,
   useFeatureFlags,
+  MeasureServiceApi,
 } from "@madie/madie-util";
-
-jest.mock("../../../../api/useMeasureServiceApi");
 
 const measure = {
   id: "test measure",
@@ -34,7 +31,20 @@ const measure = {
   rateAggregation: "",
 } as unknown as Measure;
 
+const mockMeasureServiceApi: MeasureServiceApi = {
+  updateMeasure: jest.fn(),
+  updateGroup: jest.fn(),
+  createGroup: jest.fn(),
+  fetchMeasure: jest.fn(),
+  deleteMeasureGroup: jest.fn(),
+  unlockMeasure: jest.fn(),
+  updateMeasureLock: jest.fn(),
+  getReturnTypesForAllCqlFunctions: jest.fn(),
+  getReturnTypesForAllCqlDefinitions: jest.fn(),
+} as unknown as MeasureServiceApi;
+
 jest.mock("@madie/madie-util", () => ({
+  useMeasureServiceApi: jest.fn(() => mockMeasureServiceApi),
   useOktaTokens: jest.fn(() => ({
     getAccessToken: () => "test.jwt",
   })),
@@ -64,10 +74,6 @@ jest.mock("@madie/madie-util", () => ({
   })),
 }));
 
-const useMeasureServiceApiMock =
-  useMeasureServiceApi as jest.Mock<MeasureServiceApi>;
-
-let serviceApiMock: MeasureServiceApi;
 const increasedNotation = "Increased score indicates improvement";
 const decreasedNotation = "Decreased score indicates improvement";
 const otherNotation = "Other";
@@ -223,10 +229,10 @@ describe("QDMReporting component", () => {
   });
 
   test("Changes enables Save button and saving successfully displays success message", async () => {
-    serviceApiMock = {
-      updateMeasure: jest.fn().mockResolvedValueOnce({ status: 200 }),
-    } as unknown as MeasureServiceApi;
-    useMeasureServiceApiMock.mockImplementation(() => serviceApiMock);
+    // Instead of reassigning mockMeasureServiceApi, just mock its method:
+    (mockMeasureServiceApi.updateMeasure as jest.Mock).mockResolvedValueOnce({
+      status: 200,
+    });
 
     render(<QDMReporting />);
 
@@ -261,7 +267,7 @@ describe("QDMReporting component", () => {
     await waitFor(() => expect(saveButton).toBeEnabled());
     fireEvent.click(saveButton);
     await waitFor(() =>
-      expect(serviceApiMock.updateMeasure).toBeCalledWith({
+      expect(mockMeasureServiceApi.updateMeasure).toBeCalledWith({
         ...measure,
         rateAggregation: "<p>Test</p>",
         improvementNotation: "Decreased score indicates improvement",
@@ -284,13 +290,11 @@ describe("QDMReporting component", () => {
   });
 
   test("Save with failure will display error message", async () => {
-    serviceApiMock = {
-      updateMeasure: jest.fn().mockRejectedValueOnce({
-        status: 500,
-        response: { data: { message: "update failed" } },
-      }),
-    } as unknown as MeasureServiceApi;
-    useMeasureServiceApiMock.mockImplementation(() => serviceApiMock);
+    // Instead of reassigning mockMeasureServiceApi, just mock its method:
+    (mockMeasureServiceApi.updateMeasure as jest.Mock).mockRejectedValueOnce({
+      status: 500,
+      response: { data: { message: "update failed" } },
+    });
 
     render(<QDMReporting />);
 
@@ -325,7 +329,7 @@ describe("QDMReporting component", () => {
     await waitFor(() => expect(saveButton).toBeEnabled());
     fireEvent.click(saveButton);
     await waitFor(() =>
-      expect(serviceApiMock.updateMeasure).toBeCalledWith({
+      expect(mockMeasureServiceApi.updateMeasure).toBeCalledWith({
         ...measure,
         rateAggregation: "<p>Test</p>",
         improvementNotation: "Decreased score indicates improvement",
@@ -525,14 +529,15 @@ describe("QDMReporting component", () => {
     expect(saveButton).toBeInTheDocument();
     await waitFor(() => expect(saveButton).toBeEnabled());
     fireEvent.click(saveButton);
+    // Verify error toast appears
     await waitFor(() => {
-      expect(checkTestCasesLockStatusMock).toHaveBeenCalled();
-      expect(setAlertMessageMock).toHaveBeenCalledWith({
-        type: "error",
-        message:
-          "This measure cannot be saved because changes to the Population Criteria will update test cases and one or more test cases are locked by another user.",
-        canClose: false,
-      });
+      const errorToast = screen.getByTestId(
+        "edit-reporting-generic-error-text"
+      );
+      expect(errorToast).toBeInTheDocument();
+      expect(errorToast).toHaveTextContent(
+        "This measure cannot be saved because changes to the Population Criteria will update test cases and one or more test cases are locked by another user."
+      );
     });
   });
 });
