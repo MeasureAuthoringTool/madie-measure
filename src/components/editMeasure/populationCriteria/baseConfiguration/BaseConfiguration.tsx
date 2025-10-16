@@ -146,12 +146,12 @@ const BaseConfiguration = (props: BaseConfigurationProps) => {
     }
 
     if (featureFlags.Locking && (await props.checkTestCasesLockStatus())) {
-      props.setAlertMessage({
-        type: "error",
-        message:
-          "This measure cannot be saved because changes to the Population Criteria will update test cases and one or more test cases are locked by another user.",
-        canClose: false,
-      });
+      handleToast(
+        "danger",
+        "This measure cannot be saved because changes to the Population Criteria will update test cases and one or more test cases are locked by another user.",
+        true
+      );
+      return;
     }
 
     const newMeasure: Measure = {
