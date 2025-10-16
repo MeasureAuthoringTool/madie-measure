@@ -211,7 +211,7 @@ $header-weight: 500;
   // Only for QI Core6 data elements table
   &.test-case-summary-table {
     > tbody > tr > td > div {
-      min-height: 150px !important;
+      height: -webkit-fill-available;
     }
   }
 }
