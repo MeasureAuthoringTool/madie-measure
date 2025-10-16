@@ -28,7 +28,7 @@ import { Checkbox, Divider } from "@mui/material";
 import "./TransferDialog.scss";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 import * as Yup from "yup";
-import useMeasureServiceApi from "../../../api/useMeasureServiceApi";
+import { useMeasureServiceApi } from "@madie/madie-util";
 
 export const TRANSFER_MEASURE_SUCCESS =
   "The measure(s) were successfully transferred. If you chose to retain share access, you will still be able to edit the measures.";
@@ -259,7 +259,7 @@ const TransferDialog = ({ measures, open, onClose }: TransferDialogProps) => {
     <>
       <MadieDialog
         form
-        title="Transfer Measure(s)"
+        title="Transfer Measure Ownership"
         dialogProps={{
           onClose,
           open,
@@ -282,9 +282,9 @@ const TransferDialog = ({ measures, open, onClose }: TransferDialogProps) => {
       >
         <div className="transfer-dialog-info-text">
           <div>
-            You are about to Transfer the following measure(s). All versions and
-            drafts will be transferred, so only the most recent measure name
-            appears here.
+            You are about to Transfer ownership of the following measure(s). All
+            versions and drafts will be transferred. So only the most recent
+            measure name appears here.
           </div>
           <div className="warning-message">
             <ErrorOutlineIcon color="error" fontSize="small" />

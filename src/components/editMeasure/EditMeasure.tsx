@@ -13,11 +13,12 @@ import EditMeasureNav from "./EditMeasureNav";
 import MeasureDetails from "./details/MeasureDetails";
 import MeasureEditor from "./editor/MeasureEditor";
 import { Measure, Model } from "@madie/madie-models";
-import useMeasureServiceApi from "../../api/useMeasureServiceApi";
+
 import {
   measureStore,
   routeHandlerStore,
   useFeatureFlags,
+  useMeasureServiceApi,
 } from "@madie/madie-util";
 import CreateVersionDialog from "../common/createVersionDialog/CreateVersionDialog";
 import InvalidTestCaseDialog from "../common/invalidTestCaseDialog/InvalidTestCaseDialog";

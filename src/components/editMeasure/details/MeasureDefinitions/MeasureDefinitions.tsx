@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import queryString from "query-string";
-import useMeasureServiceApi from "../../../../api/useMeasureServiceApi";
+
 import {
   Button,
   Pagination,
@@ -17,7 +17,11 @@ import SearchIcon from "@mui/icons-material/Search";
 import ClearIcon from "@mui/icons-material/Clear";
 import { Typography, IconButton, InputAdornment } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
-import { measureStore, checkUserCanEdit } from "@madie/madie-util";
+import {
+  measureStore,
+  checkUserCanEdit,
+  useMeasureServiceApi,
+} from "@madie/madie-util";
 import { useFormik } from "formik";
 import { MeasureDefinition, Measure } from "@madie/madie-models";
 import useFormikResetOnEvent from "../../../common/useFormikResetOnEvent";

@@ -9,9 +9,7 @@ import { DataCriteria } from "./models/DataCriteria";
 import { CqmConversionService } from "./CqmModelConversionService";
 import { Measure as CqmMeasure, PopulationSet } from "cqm-models";
 import { TranslatedLibrary } from "./models/TranslatedLibrary";
-import useMeasureServiceApi, {
-  MeasureServiceApi,
-} from "../api/useMeasureServiceApi";
+import { useMeasureServiceApi, MeasureServiceApi } from "@madie/madie-util";
 import * as fs from "fs";
 
 jest.mock("../../../../api/axios-instance");
@@ -41,13 +39,13 @@ const measure = {
     sdeIncluded: true,
   },
 } as Measure;
-jest.mock("../api/useMeasureServiceApi");
-const useMeasureServiceApiMock =
-  useMeasureServiceApi as jest.Mock<MeasureServiceApi>;
-const measureServiceApiMock = {
+
+jest.mock("@madie/madie-util", () => ({
+  useMeasureServiceApi: jest.fn(() => mockMeasureServiceApi),
+}));
+const mockMeasureServiceApi = {
   getCqmMeasure: jest.fn().mockResolvedValue(cqmMeasure),
 } as unknown as MeasureServiceApi;
-useMeasureServiceApiMock.mockImplementation(() => measureServiceApiMock);
 
 describe("CqmConversionService", () => {
   const getAccessToken = jest.fn();

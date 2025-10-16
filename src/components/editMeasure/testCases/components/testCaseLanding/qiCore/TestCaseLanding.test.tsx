@@ -61,6 +61,12 @@ jest.mock("@madie/madie-util", () => ({
   })),
 }));
 
+jest.mock("../common/copyTestCases/CopyTestCaseDialog", () => ({
+  __esModule: true,
+  default: () => (
+    <div data-testid="copy-test-case-dialog">Copy Test Case Dialog</div>
+  ),
+}));
 describe("TestCaseLanding component", () => {
   afterEach(() => {
     jest.clearAllMocks();

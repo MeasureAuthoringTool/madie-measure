@@ -31,10 +31,9 @@ import CheckBoxIcon from "@mui/icons-material/CheckBox";
 import "../../measureLanding/MeasureLanding.scss";
 import tw from "twin.macro";
 import "styled-components/macro";
-import useMeasureServiceApi from "../../../api/useMeasureServiceApi";
+import { useMeasureServiceApi, useOktaTokens } from "@madie/madie-util";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import { useOktaTokens } from "@madie/madie-util";
 
 interface ShareDialogProps {
   measures: Measure[];
@@ -440,6 +439,15 @@ const ShareDialog = ({
       });
     }
 
+    const formattedDateShared = (info) => {
+      const result =
+        info.row.original.dateShared === "-"
+          ? "-"
+          : info.row.original.dateShared
+          ? convertDate(info.row.original.dateShared)
+          : "";
+      return result;
+    };
     columnDefs = [
       ...columnDefs,
       {
@@ -457,13 +465,7 @@ const ShareDialog = ({
         header: "Date Shared",
         cell: (info) => (
           <TruncateText
-            text={
-              info.row.original.dateShared === "-"
-                ? "-"
-                : info.row.original.dateShared
-                ? convertDate(info.row.original.dateShared)
-                : ""
-            }
+            text={formattedDateShared(info)}
             maxLength={120}
             dataTestId={`date-shared-${info.row.original.dateShared}_${info.row.original.measureId}`}
           />

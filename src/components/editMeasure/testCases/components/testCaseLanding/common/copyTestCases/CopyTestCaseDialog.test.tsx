@@ -1,5 +1,11 @@
 import CopyTestCaseDialog from "./CopyTestCaseDialog";
-import { render, screen, waitFor, fireEvent } from "@testing-library/react";
+import {
+  render,
+  screen,
+  waitFor,
+  fireEvent,
+  act,
+} from "@testing-library/react";
 import * as React from "react";
 import {
   Measure,
@@ -9,19 +15,22 @@ import {
   ValidationStatus,
 } from "@madie/madie-models";
 import * as _ from "lodash";
-import useMeasureServiceApi, {
-  MeasureServiceApi,
-} from "../../../../../../../api/useMeasureServiceApi";
+
 import userEvent from "@testing-library/user-event";
 import useTestCaseServiceApi, {
   TestCaseServiceApi,
 } from "../../../../api/useTestCaseServiceApi";
-import { useFeatureFlags } from "@madie/madie-util";
+import {
+  useFeatureFlags,
+  useMeasureServiceApi,
+  MeasureServiceApi,
+} from "@madie/madie-util";
 const { getByTestId, getByRole, findByTestId, findByRole } = screen;
 
 const MEASURE_OWNER = "test.user";
 
 jest.mock("@madie/madie-util", () => ({
+  useMeasureServiceApi: jest.fn(() => mockMeasureServiceApi),
   useFeatureFlags: jest.fn().mockReturnValue({}),
 }));
 
@@ -187,29 +196,23 @@ const mockMeasureSearchResponseWithNoMeasures = {
 };
 
 // Mocks
-jest.mock("../../../../../../../api/useMeasureServiceApi");
-const useMeasureServiceMock =
-  useMeasureServiceApi as jest.Mock<MeasureServiceApi>;
-const useMeasureServiceMockResolved = {
-  searchMeasuresByCriteria: jest
-    .fn()
-    .mockResolvedValueOnce(mockMeasureSearchResponse),
-} as unknown as MeasureServiceApi;
-// No measures
-const useMeasureServiceMockResolvedWithNoMeasure = {
-  searchMeasuresByCriteria: jest
-    .fn()
-    .mockResolvedValueOnce(mockMeasureSearchResponseWithNoMeasures),
-  getTestCasesByMeasureId: jest.fn().mockResolvedValue(testCases),
+const mockSearchMeasuresByCriteriaFn = jest
+  .fn()
+  .mockResolvedValue(mockMeasureSearchResponse);
+const mockSearchMeasuresByCriteriaNoMeasuresFn = jest
+  .fn()
+  .mockResolvedValue(mockMeasureSearchResponseWithNoMeasures);
+const mockGetMeasuresByMeasureSetIdFn = jest.fn().mockResolvedValue([]);
+
+const mockMeasureServiceApi: MeasureServiceApi = {
+  searchMeasuresByCriteria: mockSearchMeasuresByCriteriaFn,
+  getMeasuresByMeasureSetId: mockGetMeasuresByMeasureSetIdFn,
 } as unknown as MeasureServiceApi;
 
 jest.mock("../../../../api/useTestCaseServiceApi");
 const useTestCaseServiceMock =
   useTestCaseServiceApi as jest.Mock<TestCaseServiceApi>;
 
-const searchMeasuresByCriteriaFn = jest
-  .fn()
-  .mockResolvedValue(mockMeasureSearchResponse);
 const getAllTestCasesFn = jest.fn().mockResolvedValue(testCases);
 const closeFn = jest.fn().mockName("close");
 
@@ -219,9 +222,6 @@ describe("Copy Test Case Dialog Component", () => {
   });
 
   it("should display list of qdm measures that current user owns", async () => {
-    useMeasureServiceMock.mockImplementation(() => {
-      return useMeasureServiceMockResolved;
-    });
     useTestCaseServiceMock.mockImplementation(() => {
       return {
         copyTestCasesToMeasure: jest.fn().mockResolvedValueOnce(["1", "2"]),
@@ -275,14 +275,10 @@ describe("Copy Test Case Dialog Component", () => {
   });
 
   it("Filter and Search, changes, fire, clear", async () => {
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({}));
-    const useMeasureServiceMockResolvedMultiple = {
-      searchMeasuresByCriteria: searchMeasuresByCriteriaFn,
-    } as unknown as MeasureServiceApi;
+    mockMeasureServiceApi.searchMeasuresByCriteria =
+      mockSearchMeasuresByCriteriaFn;
 
-    useMeasureServiceMock.mockImplementation(() => {
-      return useMeasureServiceMockResolvedMultiple;
-    });
+    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({}));
 
     useTestCaseServiceMock.mockImplementation(() => {
       return {
@@ -301,7 +297,7 @@ describe("Copy Test Case Dialog Component", () => {
     );
 
     await waitFor(() =>
-      expect(searchMeasuresByCriteriaFn).toHaveBeenCalledTimes(1)
+      expect(mockSearchMeasuresByCriteriaFn).toHaveBeenCalledTimes(1)
     );
     const table = await findByTestId("measure-list-tbl");
     const tableHeaders = table.querySelectorAll("thead th");
@@ -337,9 +333,9 @@ describe("Copy Test Case Dialog Component", () => {
     userEvent.type(searchFieldInput, "test{enter}");
 
     await waitFor(() =>
-      expect(searchMeasuresByCriteriaFn).toHaveBeenCalledTimes(2)
+      expect(mockSearchMeasuresByCriteriaFn).toHaveBeenCalledTimes(2)
     );
-    expect(searchMeasuresByCriteriaFn).toHaveBeenNthCalledWith(
+    expect(mockSearchMeasuresByCriteriaFn).toHaveBeenNthCalledWith(
       2, // Second call
       ["OWNED", "SHARED"],
       5,
@@ -359,9 +355,9 @@ describe("Copy Test Case Dialog Component", () => {
     const clearIcon = getByTestId("ClearIcon");
     userEvent.click(clearIcon);
     await waitFor(() =>
-      expect(searchMeasuresByCriteriaFn).toHaveBeenCalledTimes(3)
+      expect(mockSearchMeasuresByCriteriaFn).toHaveBeenCalledTimes(3)
     );
-    expect(searchMeasuresByCriteriaFn).toHaveBeenNthCalledWith(
+    expect(mockSearchMeasuresByCriteriaFn).toHaveBeenNthCalledWith(
       3,
       ["OWNED", "SHARED"],
       5,
@@ -380,9 +376,9 @@ describe("Copy Test Case Dialog Component", () => {
 
     userEvent.type(searchFieldInput, "test{enter}");
     await waitFor(() =>
-      expect(searchMeasuresByCriteriaFn).toHaveBeenCalledTimes(4)
+      expect(mockSearchMeasuresByCriteriaFn).toHaveBeenCalledTimes(4)
     );
-    expect(searchMeasuresByCriteriaFn).toHaveBeenNthCalledWith(
+    expect(mockSearchMeasuresByCriteriaFn).toHaveBeenNthCalledWith(
       4,
       ["OWNED", "SHARED"],
       5,
@@ -401,9 +397,9 @@ describe("Copy Test Case Dialog Component", () => {
   });
 
   it("should display a text when user doesn't have any other measures from same model", async () => {
-    useMeasureServiceMock.mockImplementation(() => {
-      return useMeasureServiceMockResolvedWithNoMeasure;
-    });
+    mockMeasureServiceApi.searchMeasuresByCriteria =
+      mockSearchMeasuresByCriteriaNoMeasuresFn;
+
     useTestCaseServiceMock.mockImplementation(() => {
       return {
         getTestCasesByMeasureId: getAllTestCasesFn,
@@ -435,13 +431,8 @@ describe("Copy Test Case Dialog Component", () => {
   });
 
   it("should display a spinner while copying", async () => {
-    const useMeasureServiceMockResolvedMultiple = {
-      searchMeasuresByCriteria: searchMeasuresByCriteriaFn,
-    } as unknown as MeasureServiceApi;
-
-    useMeasureServiceMock.mockImplementation(() => {
-      return useMeasureServiceMockResolvedMultiple;
-    });
+    mockMeasureServiceApi.searchMeasuresByCriteria =
+      mockSearchMeasuresByCriteriaFn;
 
     useTestCaseServiceMock.mockImplementation(() => {
       return {
@@ -453,7 +444,7 @@ describe("Copy Test Case Dialog Component", () => {
       } as unknown as TestCaseServiceApi;
     });
     const test = new AbortController();
-    await prepCopy(closeFn, searchMeasuresByCriteriaFn);
+    await prepCopy(closeFn, mockSearchMeasuresByCriteriaFn);
     await runCopy();
     expect(closeFn).toHaveBeenCalledTimes(1);
     expect(closeFn).toHaveBeenCalledWith(
@@ -473,7 +464,7 @@ describe("Copy Test Case Dialog Component", () => {
       } as unknown as TestCaseServiceApi;
     });
     const test = new AbortController();
-    await prepCopy(closeFn, searchMeasuresByCriteriaFn);
+    await prepCopy(closeFn, mockSearchMeasuresByCriteriaFn);
     await runCopy();
     expect(closeFn).toHaveBeenCalledTimes(1);
     expect(closeFn).toHaveBeenCalledWith(
@@ -493,7 +484,7 @@ describe("Copy Test Case Dialog Component", () => {
       } as unknown as TestCaseServiceApi;
     });
     const test = new AbortController();
-    await prepCopy(closeFn, searchMeasuresByCriteriaFn);
+    await prepCopy(closeFn, mockSearchMeasuresByCriteriaFn);
     await runCopy();
     expect(closeFn).toHaveBeenCalledTimes(1);
     expect(closeFn).toHaveBeenCalledWith(
@@ -503,12 +494,9 @@ describe("Copy Test Case Dialog Component", () => {
   });
 
   it("should display cannot copy message on CopyTestCaseDialog when test cases have validationStatus Pending or Validating", async () => {
-    const useMeasureServiceMockResolvedMultiple = {
-      searchMeasuresByCriteria: searchMeasuresByCriteriaFn,
-    } as unknown as MeasureServiceApi;
-    useMeasureServiceMock.mockImplementation(() => {
-      return useMeasureServiceMockResolvedMultiple;
-    });
+    useMeasureServiceApi.searchMeasuresByCriteria =
+      mockSearchMeasuresByCriteriaFn;
+
     useTestCaseServiceMock.mockImplementation(() => {
       return {
         getTestCasesByMeasureId: getAllTestCasesFn,
@@ -556,15 +544,10 @@ describe("Copy Test Case Dialog Component", () => {
   });
 
   it("should handle expand/collapse via keyboard interaction", async () => {
-    const getMeasuresByMeasureSetIdMock = jest.fn().mockResolvedValue([]);
-    const useMeasureServiceMockResolvedMultiple = {
-      searchMeasuresByCriteria: searchMeasuresByCriteriaFn,
-      getMeasuresByMeasureSetId: getMeasuresByMeasureSetIdMock,
-    } as unknown as MeasureServiceApi;
-
-    useMeasureServiceMock.mockImplementation(() => {
-      return useMeasureServiceMockResolvedMultiple;
-    });
+    useMeasureServiceApi.searchMeasuresByCriteria =
+      mockSearchMeasuresByCriteriaFn;
+    useMeasureServiceApi.getMeasuresByMeasureSetId =
+      mockGetMeasuresByMeasureSetIdFn;
 
     useTestCaseServiceMock.mockImplementation(() => {
       return {
@@ -572,17 +555,19 @@ describe("Copy Test Case Dialog Component", () => {
       } as unknown as TestCaseServiceApi;
     });
 
-    render(
-      <CopyTestCaseDialog
-        open={true}
-        onClose={closeFn}
-        measure={mockCurrentMeasure}
-        selectedTestCases={testCases.map((tc) => tc.id)}
-      />
-    );
+    act(() => {
+      render(
+        <CopyTestCaseDialog
+          open={true}
+          onClose={closeFn}
+          measure={mockCurrentMeasure}
+          selectedTestCases={testCases.map((tc) => tc.id)}
+        />
+      );
+    });
 
     await waitFor(() => {
-      expect(searchMeasuresByCriteriaFn).toHaveBeenCalledTimes(1);
+      expect(mockSearchMeasuresByCriteriaFn).toHaveBeenCalledTimes(1);
     });
 
     const table = await findByTestId("measure-list-tbl");
@@ -592,26 +577,23 @@ describe("Copy Test Case Dialog Component", () => {
 
     expect(expandButtons.length).toBeGreaterThan(0);
 
-    fireEvent.keyDown(expandButtons[0], { key: "Enter" });
+    act(() => {
+      fireEvent.keyDown(expandButtons[0], { key: "Enter" });
+    });
 
     await waitFor(() => {
-      expect(getMeasuresByMeasureSetIdMock).toHaveBeenCalledTimes(1);
+      expect(mockGetMeasuresByMeasureSetIdFn).toHaveBeenCalledTimes(1);
     });
 
     fireEvent.keyDown(expandButtons[0], { key: " " });
-    expect(getMeasuresByMeasureSetIdMock).toHaveBeenCalledTimes(1);
+    expect(mockGetMeasuresByMeasureSetIdFn).toHaveBeenCalledTimes(1);
   });
 
   it("should handle expand/collapse via click interaction", async () => {
-    const getMeasuresByMeasureSetIdMock = jest.fn().mockResolvedValue([]);
-    const useMeasureServiceMockResolvedMultiple = {
-      searchMeasuresByCriteria: searchMeasuresByCriteriaFn,
-      getMeasuresByMeasureSetId: getMeasuresByMeasureSetIdMock,
-    } as unknown as MeasureServiceApi;
-
-    useMeasureServiceMock.mockImplementation(() => {
-      return useMeasureServiceMockResolvedMultiple;
-    });
+    mockMeasureServiceApi.searchMeasuresByCriteria =
+      mockSearchMeasuresByCriteriaFn;
+    mockMeasureServiceApi.getMeasuresByMeasureSetId =
+      mockGetMeasuresByMeasureSetIdFn;
 
     useTestCaseServiceMock.mockImplementation(() => {
       return {
@@ -629,7 +611,7 @@ describe("Copy Test Case Dialog Component", () => {
     );
 
     await waitFor(() => {
-      expect(searchMeasuresByCriteriaFn).toHaveBeenCalledTimes(1);
+      expect(mockSearchMeasuresByCriteriaFn).toHaveBeenCalledTimes(1);
     });
 
     const table = await findByTestId("measure-list-tbl");
@@ -642,7 +624,7 @@ describe("Copy Test Case Dialog Component", () => {
     fireEvent.click(expandButtons[0]);
 
     await waitFor(() => {
-      expect(getMeasuresByMeasureSetIdMock).toHaveBeenCalledTimes(1);
+      expect(mockGetMeasuresByMeasureSetIdFn).toHaveBeenCalledTimes(1);
     });
   });
 });
