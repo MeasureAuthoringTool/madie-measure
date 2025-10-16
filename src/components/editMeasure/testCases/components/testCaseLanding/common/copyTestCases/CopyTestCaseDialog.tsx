@@ -43,11 +43,11 @@ import {
 import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
-import useMeasureServiceApi from "../../../../../../../api/useMeasureServiceApi";
+
 import "./tcPagination.scss";
 import useTestCaseServiceApi from "../../../../api/useTestCaseServiceApi";
 import Typography from "@mui/material/Typography";
-import { useFeatureFlags } from "@madie/madie-util";
+import { useMeasureServiceApi, useFeatureFlags } from "@madie/madie-util";
 
 const TH = tw.th`p-3 text-left text-sm font-bold capitalize`;
 

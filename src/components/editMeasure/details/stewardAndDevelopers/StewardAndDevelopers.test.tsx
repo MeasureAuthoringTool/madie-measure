@@ -8,10 +8,12 @@ import {
 } from "@testing-library/react";
 import StewardAndDevelopers from "./StewardAndDevelopers";
 import { Measure, MeasureMetadata, Organization } from "@madie/madie-models";
-import { checkUserCanEdit } from "@madie/madie-util";
-import useMeasureServiceApi, {
+import {
+  checkUserCanEdit,
+  useMeasureServiceApi,
   MeasureServiceApi,
-} from "../../../../api/useMeasureServiceApi";
+} from "@madie/madie-util";
+
 import { act } from "react-dom/test-utils";
 
 const mockHistoryPush = jest.fn();
@@ -20,9 +22,6 @@ jest.mock("react-router-dom", () => ({
   ...(jest.requireActual("react-router-dom") as any),
   useNavigate: () => mockHistoryPush,
 }));
-jest.mock("../../../../api/useMeasureServiceApi");
-const useMeasureServiceApiMock =
-  useMeasureServiceApi as jest.Mock<MeasureServiceApi>;
 
 const organizationList: Organization[] = [
   {
@@ -70,6 +69,7 @@ const mockMeasure = {
 } as Measure;
 
 jest.mock("@madie/madie-util", () => ({
+  useMeasureServiceApi: jest.fn(() => mockMeasureServiceApi),
   useKeyPress: jest.fn(() => false),
   measureStore: {
     updateMeasure: jest.fn((measure) => measure),
@@ -92,15 +92,19 @@ jest.mock("@madie/madie-util", () => ({
   checkUserCanEdit: jest.fn().mockResolvedValue(true),
 }));
 
-let serviceApiMock: MeasureServiceApi;
+const mockMeasureServiceApi: MeasureServiceApi = {
+  updateMeasure: jest.fn().mockResolvedValue({ status: 200 }),
+  getAllOrganizations: jest.fn().mockResolvedValue(organizationList),
+} as unknown as MeasureServiceApi;
 
 describe("Steward and Developers component", () => {
   beforeEach(() => {
-    serviceApiMock = {
-      updateMeasure: jest.fn().mockResolvedValueOnce({ status: 200 }),
-      getAllOrganizations: jest.fn().mockResolvedValue(organizationList),
-    } as unknown as MeasureServiceApi;
-    useMeasureServiceApiMock.mockImplementation(() => serviceApiMock);
+    mockMeasureServiceApi.updateMeasure = jest
+      .fn()
+      .mockResolvedValueOnce({ status: 200 });
+    mockMeasureServiceApi.getAllOrganizations = jest
+      .fn()
+      .mockResolvedValue(organizationList);
     mockMeasure.measureMetaData = { ...mockMetaData };
   });
   const setErrorMessage = jest.fn();
@@ -166,12 +170,13 @@ describe("Steward and Developers component", () => {
   });
 
   it("should display a toast message if the service fails to fetch organization list", async () => {
-    serviceApiMock = {
-      updateMeasure: jest.fn().mockResolvedValue(undefined),
-      getAllOrganizations: jest.fn().mockRejectedValue(undefined),
-    } as unknown as MeasureServiceApi;
+    mockMeasureServiceApi.updateMeasure = jest
+      .fn()
+      .mockResolvedValue(undefined);
+    mockMeasureServiceApi.getAllOrganizations = jest
+      .fn()
+      .mockRejectedValue(undefined);
 
-    useMeasureServiceApiMock.mockImplementation(() => serviceApiMock);
     render(<StewardAndDevelopers setErrorMessage={setErrorMessage} />);
     await waitFor(() =>
       expect(setErrorMessage).toHaveBeenCalledWith(
@@ -289,7 +294,7 @@ describe("Steward and Developers component", () => {
       fireEvent.click(saveButton);
     });
 
-    expect(serviceApiMock.updateMeasure).toHaveBeenCalledWith({
+    expect(mockMeasureServiceApi.updateMeasure).toHaveBeenCalledWith({
       ...mockMeasure,
       measureMetaData: {
         ...mockMetaData,
@@ -312,11 +317,12 @@ describe("Steward and Developers component", () => {
   });
 
   it("should display error message in toast, if update to measure fails", async () => {
-    serviceApiMock = {
-      updateMeasure: jest.fn().mockRejectedValue(undefined),
-      getAllOrganizations: jest.fn().mockResolvedValue(organizationList),
-    } as unknown as MeasureServiceApi;
-    useMeasureServiceApiMock.mockImplementation(() => serviceApiMock);
+    mockMeasureServiceApi.updateMeasure = jest
+      .fn()
+      .mockRejectedValue(undefined);
+    mockMeasureServiceApi.getAllOrganizations = jest
+      .fn()
+      .mockResolvedValue(organizationList);
 
     render(<StewardAndDevelopers setErrorMessage={setErrorMessage} />);
     await act(async () => {

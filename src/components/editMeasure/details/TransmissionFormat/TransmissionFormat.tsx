@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import useMeasureServiceApi from "../../../../api/useMeasureServiceApi";
+
 import {
   Button,
   MadieDiscardDialog,
@@ -7,6 +7,7 @@ import {
 } from "@madie/madie-design-system/dist/react";
 import { Typography } from "@mui/material";
 import {
+  useMeasureServiceApi,
   measureStore,
   routeHandlerStore,
   checkUserCanEdit,

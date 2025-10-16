@@ -12,7 +12,6 @@ import "styled-components/macro";
 import MeasureList from "./measureList/MeasureList";
 import { Measure, OwnershipType } from "@madie/madie-models";
 
-import useMeasureServiceApi from "../../api/useMeasureServiceApi";
 import {
   Pagination,
   MadieSpinner,
@@ -21,7 +20,11 @@ import {
   Toast,
 } from "@madie/madie-design-system/dist/react";
 import "./MeasureLanding.scss";
-import { useDocumentTitle, useFeatureFlags } from "@madie/madie-util";
+import {
+  useDocumentTitle,
+  useFeatureFlags,
+  useMeasureServiceApi,
+} from "@madie/madie-util";
 import StatusHandler from "../editMeasure/editor/StatusHandler";
 import _ from "lodash";
 import { getTabStorageKey } from "./measureLandingUtils";

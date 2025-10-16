@@ -4,9 +4,7 @@ import { act } from "react-dom/test-utils";
 import SDEPage from "./SDEPage";
 import { Measure } from "@madie/madie-models";
 import userEvent from "@testing-library/user-event";
-import useMeasureServiceApi, {
-  MeasureServiceApi,
-} from "../../../api/useMeasureServiceApi";
+import { useMeasureServiceApi, MeasureServiceApi } from "@madie/madie-util";
 import { QdmExecutionContextProvider } from "../../routes/qdm/QdmExecutionContext";
 
 const measure = {
@@ -21,12 +19,12 @@ const measure = {
   acls: [{ userId: "othertestuser@example.com", roles: ["SHARED_WITH"] }], //#nosec
 } as unknown as Measure;
 
-jest.mock("../../../api/useMeasureServiceApi");
-const useMeasureServiceApiMock =
-  useMeasureServiceApi as jest.Mock<MeasureServiceApi>;
-let serviceApiMock: MeasureServiceApi;
+const mockMeasureServiceApi: MeasureServiceApi = {
+  updateMeasureTestCaseConfiguration: jest.fn(),
+} as unknown as MeasureServiceApi;
 
 jest.mock("@madie/madie-util", () => ({
+  useMeasureServiceApi: jest.fn(() => mockMeasureServiceApi),
   measureStore: {
     updateMeasure: jest.fn((measure) => measure),
     state: jest.fn().mockImplementation(() => measure),
@@ -58,12 +56,9 @@ describe("SDEPage component", () => {
   const { getByTestId, findByTestId, getByText, getByLabelText } = screen;
 
   test("Changes to Test Case Configuration enables Save button and saving successfully displays success message", async () => {
-    serviceApiMock = {
-      updateMeasureTestCaseConfiguration: jest
-        .fn()
-        .mockResolvedValueOnce({ status: 200 }),
-    } as unknown as MeasureServiceApi;
-    useMeasureServiceApiMock.mockImplementation(() => serviceApiMock);
+    mockMeasureServiceApi.updateMeasureTestCaseConfiguration = jest
+      .fn()
+      .mockResolvedValueOnce({ status: 200 });
 
     renderSdePageComponent();
 
@@ -75,10 +70,9 @@ describe("SDEPage component", () => {
     userEvent.click(saveButton);
 
     await waitFor(() =>
-      expect(serviceApiMock.updateMeasureTestCaseConfiguration).toBeCalledWith(
-        { sdeIncluded: true },
-        measure.id
-      )
+      expect(
+        mockMeasureServiceApi.updateMeasureTestCaseConfiguration
+      ).toBeCalledWith({ sdeIncluded: true }, measure.id)
     );
 
     expect(

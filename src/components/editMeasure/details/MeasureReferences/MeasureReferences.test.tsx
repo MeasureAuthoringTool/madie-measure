@@ -9,27 +9,25 @@ import {
   ServiceConfig,
 } from "../../../../api/ServiceContext";
 import MeasureReferences from "./MeasureReferences";
-import useMeasureServiceApi, {
-  MeasureServiceApi,
-} from "../../../../api/useMeasureServiceApi";
 // @ts-ignore
-import { measureStore, useFeatureFlags } from "@madie/madie-util";
+import {
+  MeasureServiceApi,
+  useMeasureServiceApi,
+  measureStore,
+  useFeatureFlags,
+} from "@madie/madie-util";
 import { Measure, Model, Reference } from "@madie/madie-models";
 import userEvent from "@testing-library/user-event";
 
-jest.mock("../../../../api/useMeasureServiceApi");
-const useMeasureServiceApiMock =
-  useMeasureServiceApi as jest.Mock<MeasureServiceApi>;
 const measure = {
   id: "measure ID",
   measureName: "measureName",
   createdBy: "testuser@example.com", //#nosec
 } as Measure;
 
-let serviceApiMock = {
+let mockMeasureServiceApi = {
   updateMeasure: jest.fn().mockResolvedValue({ status: 200, data: measure }),
 } as unknown as MeasureServiceApi;
-useMeasureServiceApiMock.mockImplementation(() => serviceApiMock);
 
 const expectedOptions1 = ["Citation", "Justification", "Unknown"];
 const expectedOptions2 = ["Citation", "Justification"];
@@ -61,6 +59,7 @@ const measureWithElevenItems = {
 };
 
 jest.mock("@madie/madie-util", () => ({
+  useMeasureServiceApi: jest.fn(() => mockMeasureServiceApi),
   useDocumentTitle: jest.fn(),
   useOktaTokens: jest.fn(() => ({
     getAccessToken: () => "test.jwt",
@@ -237,11 +236,9 @@ describe("Measure References Component", () => {
       ...testMeasure,
       measureMetaData: { references: [updatedReference] },
     };
-    serviceApiMock = {
-      updateMeasure: jest
-        .fn()
-        .mockResolvedValueOnce({ data: updatedMeasure, status: 200 }),
-    } as unknown as MeasureServiceApi;
+    mockMeasureServiceApi.updateMeasure = jest
+      .fn()
+      .mockResolvedValueOnce({ data: updatedMeasure, status: 200 });
 
     render(
       <ApiContextProvider value={serviceConfig}>
@@ -365,9 +362,9 @@ describe("Measure References Component", () => {
   it("should show error message when delete measure reference page fails", async () => {
     measureStore.state.mockImplementation(() => measureWithNineItems);
     measureStore.initialState.mockImplementation(() => measureWithNineItems);
-    serviceApiMock = {
-      updateMeasure: jest.fn().mockRejectedValueOnce({ data: {} }),
-    } as unknown as MeasureServiceApi;
+    mockMeasureServiceApi.updateMeasure = jest
+      .fn()
+      .mockRejectedValueOnce({ data: {} });
     render(
       <ApiContextProvider value={serviceConfig}>
         <MemoryRouter initialEntries={["/"]}>
@@ -448,12 +445,9 @@ describe("Measure References Component", () => {
     measureStore.initialState.mockImplementation(() => measureWithNineItems);
 
     // Mock API to resolve with updated measure (simulate deletion)
-    serviceApiMock = {
-      updateMeasure: jest
-        .fn()
-        .mockResolvedValueOnce({ status: 200, data: measureWithNineItems }),
-    } as unknown as MeasureServiceApi;
-    useMeasureServiceApiMock.mockImplementation(() => serviceApiMock);
+    mockMeasureServiceApi.updateMeasure = jest
+      .fn()
+      .mockResolvedValueOnce({ status: 200, data: measureWithNineItems });
 
     render(
       <ApiContextProvider value={serviceConfig}>
@@ -489,10 +483,9 @@ describe("Measure References Component", () => {
     measureStore.initialState.mockImplementation(() => measureWithNineItems);
 
     // Mock API to reject (simulate failure)
-    serviceApiMock = {
-      updateMeasure: jest.fn().mockRejectedValueOnce({ data: {} }),
-    } as unknown as MeasureServiceApi;
-    useMeasureServiceApiMock.mockImplementation(() => serviceApiMock);
+    mockMeasureServiceApi.updateMeasure = jest
+      .fn()
+      .mockRejectedValueOnce({ data: {} });
 
     render(
       <ApiContextProvider value={serviceConfig}>
