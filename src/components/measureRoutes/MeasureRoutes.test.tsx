@@ -4,61 +4,19 @@ import * as React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import { routesConfig } from "./MeasureRoutes";
 import { createMemoryRouter, RouterProvider } from "react-router";
-import useMeasureServiceApi, {
-  MeasureServiceApi,
-} from "../../api/useMeasureServiceApi";
+import { MeasureServiceApi } from "@madie/madie-util";
 import { Measure } from "@madie/madie-models";
 
-jest.mock("@madie/madie-util", () => ({
-  useDocumentTitle: jest.fn(),
-  useOktaTokens: () => ({
-    getAccessToken: () => "test.jwt",
-    getUserName: () => "test user",
-  }),
-}));
-
-jest.mock("../../api/useMeasureServiceApi");
 jest.mock("react-router-dom", () => ({
   ...jest.requireActual("react-router-dom"),
 }));
 
-const useMeasureServiceApiMock =
-  useMeasureServiceApi as jest.Mock<MeasureServiceApi>;
-
-const MEASURE_CREATEDBY = "testuser@example.com";
-const measure = {
-  id: "measure ID",
-  createdBy: MEASURE_CREATEDBY,
-} as Measure;
-
-const serviceApiMock = {
-  fetchMeasure: jest.fn().mockResolvedValue(measure),
-  fetchMeasures: jest.fn().mockResolvedValue({
-    content: [measure],
-    totalPages: 1,
-    totalElements: 1,
-    numberOfElements: 1,
-    pageable: {
-      sort: {
-        empty: false,
-        sorted: true,
-        unsorted: false,
-      },
-      offset: 0,
-      pageNumber: 0,
-      pageSize: 10,
-      paged: true,
-      unpaged: false,
-    },
-  }),
-} as unknown as MeasureServiceApi;
-
-useMeasureServiceApiMock.mockImplementation(() => {
-  return serviceApiMock;
+jest.mock("../measureLanding/MeasureLanding", () => () => {
+  return <div data-testid="measure-landing">MeasureLanding</div>;
 });
 
-const mockUser = "TestUser1";
 jest.mock("@madie/madie-util", () => ({
+  useMeasureServiceApi: jest.fn(() => mockMeasureServiceApi),
   useDocumentTitle: jest.fn(),
   useOktaTokens: () => ({
     getAccessToken: () => "test.jwt",
@@ -84,6 +42,36 @@ jest.mock("@madie/madie-util", () => ({
     },
   },
 }));
+
+const MEASURE_CREATEDBY = "testuser@example.com";
+const measure = {
+  id: "measure ID",
+  createdBy: MEASURE_CREATEDBY,
+} as Measure;
+
+const mockMeasureServiceApi = {
+  fetchMeasure: jest.fn().mockResolvedValue(measure),
+  fetchMeasures: jest.fn().mockResolvedValue({
+    content: [measure],
+    totalPages: 1,
+    totalElements: 1,
+    numberOfElements: 1,
+    pageable: {
+      sort: {
+        empty: false,
+        sorted: true,
+        unsorted: false,
+      },
+      offset: 0,
+      pageNumber: 0,
+      pageSize: 10,
+      paged: true,
+      unpaged: false,
+    },
+  }),
+} as unknown as MeasureServiceApi;
+
+const mockUser = "TestUser1";
 
 jest.mock("../notfound/NotFound", () => () => {
   return (

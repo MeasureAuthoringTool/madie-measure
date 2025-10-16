@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import "twin.macro";
 import "styled-components/macro";
-import useMeasureServiceApi from "../../../../api/useMeasureServiceApi";
 import {
   Button,
   MadieDiscardDialog,
@@ -12,6 +11,7 @@ import {
   measureStore,
   routeHandlerStore,
   checkUserCanEdit,
+  useMeasureServiceApi,
 } from "@madie/madie-util";
 import { useFormik } from "formik";
 import useFormikResetOnEvent from "../../../common/useFormikResetOnEvent";

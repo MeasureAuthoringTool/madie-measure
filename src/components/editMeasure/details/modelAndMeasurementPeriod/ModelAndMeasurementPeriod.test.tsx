@@ -8,11 +8,10 @@ import {
   act,
 } from "@testing-library/react";
 import ModelAndMeasurementPeriod from "./ModelAndMeasurementPeriod";
-import useMeasureServiceApi, {
-  MeasureServiceApi,
-} from "../../../../api/useMeasureServiceApi";
+import { useMeasureServiceApi, MeasureServiceApi } from "@madie/madie-util";
 import { Measure } from "@madie/madie-models";
 import userEvent from "@testing-library/user-event";
+import { update } from "lodash";
 
 const mockHistoryPush = jest.fn();
 const setErrorMessage = jest.fn();
@@ -21,7 +20,6 @@ jest.mock("react-router-dom", () => ({
   ...(jest.requireActual("react-router-dom") as any),
   useNavigate: () => mockHistoryPush,
 }));
-jest.mock("../../../../api/useMeasureServiceApi");
 
 const testUser = "john doe";
 const measure = {
@@ -38,6 +36,7 @@ const measure = {
 } as unknown as Measure;
 
 jest.mock("@madie/madie-util", () => ({
+  useMeasureServiceApi: jest.fn(() => mockMeasureServiceApi),
   checkUserCanEdit: jest.fn(() => {
     return true;
   }),
@@ -61,10 +60,9 @@ jest.mock("@madie/madie-util", () => ({
   },
 }));
 
-const useMeasureServiceApiMock =
-  useMeasureServiceApi as jest.Mock<MeasureServiceApi>;
-
-let serviceApiMock: MeasureServiceApi;
+let mockMeasureServiceApi: MeasureServiceApi = {
+  updateMeasure: jest.fn(),
+} as unknown as MeasureServiceApi;
 
 describe("Model and Measurement Period component", () => {
   afterEach(() => {
@@ -99,10 +97,10 @@ describe("Model and Measurement Period component", () => {
   });
 
   it("saving measurement information successfully and displaying success message", async () => {
-    serviceApiMock = {
-      updateMeasure: jest.fn().mockResolvedValueOnce({ status: 200 }),
-    } as unknown as MeasureServiceApi;
-    useMeasureServiceApiMock.mockImplementation(() => serviceApiMock);
+    mockMeasureServiceApi.updateMeasure = jest
+      .fn()
+      .mockResolvedValueOnce({ status: 200 });
+
     measure.measurementPeriodEnd = null;
     measure.measurementPeriodStart = null;
     render(<ModelAndMeasurementPeriod setErrorMessage={setErrorMessage} />);
@@ -143,13 +141,11 @@ describe("Model and Measurement Period component", () => {
   });
 
   it("saving measurement information fails and displays error message", async () => {
-    serviceApiMock = {
-      updateMeasure: jest.fn().mockRejectedValueOnce({
-        status: 500,
-        response: { data: { message: "update failed" } },
-      }),
-    } as unknown as MeasureServiceApi;
-    useMeasureServiceApiMock.mockImplementation(() => serviceApiMock);
+    mockMeasureServiceApi.updateMeasure = jest.fn().mockRejectedValueOnce({
+      status: 500,
+      response: { data: { message: "update failed" } },
+    }) as unknown as MeasureServiceApi;
+
     measure.measurementPeriodEnd = null;
     measure.measurementPeriodStart = null;
     render(<ModelAndMeasurementPeriod setErrorMessage={setErrorMessage} />);
@@ -404,9 +400,9 @@ describe("Model and Measurement Period component", () => {
     const createBtn = getByTestId("model-and-measurement-save-button");
     expect(createBtn).toBeInTheDocument();
     expect(createBtn).toBeEnabled();
-    serviceApiMock = {
-      updateMeasure: jest.fn().mockResolvedValueOnce({ status: 200 }),
-    } as unknown as MeasureServiceApi;
+    mockMeasureServiceApi.updateMeasure = jest
+      .fn()
+      .mockResolvedValueOnce({ status: 200 });
     act(async () => {
       fireEvent.click(createBtn);
       await waitFor(
@@ -444,12 +440,10 @@ describe("Model and Measurement Period component", () => {
     const createBtn = getByTestId("model-and-measurement-save-button");
     expect(createBtn).toBeInTheDocument();
     expect(createBtn).toBeEnabled();
-    serviceApiMock = {
-      updateMeasure: jest.fn().mockRejectedValueOnce({
-        status: 500,
-        response: { data: { message: "update failed" } },
-      }),
-    } as unknown as MeasureServiceApi;
+    mockMeasureServiceApi.updateMeasure = jest.fn().mockRejectedValueOnce({
+      status: 500,
+      response: { data: { message: "update failed" } },
+    }) as unknown as MeasureServiceApi;
     act(async () => {
       fireEvent.click(createBtn);
       await waitFor(

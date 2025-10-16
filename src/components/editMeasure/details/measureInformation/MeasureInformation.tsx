@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "twin.macro";
 import { Endorsement, Measure, Model } from "@madie/madie-models";
-import useMeasureServiceApi from "../../../../api/useMeasureServiceApi";
 import "styled-components/macro";
 import {
   AutoComplete,
@@ -25,6 +24,7 @@ import {
   measureStore,
   routeHandlerStore,
   checkUserCanEdit,
+  useMeasureServiceApi,
 } from "@madie/madie-util";
 import { Box } from "@mui/system";
 import {

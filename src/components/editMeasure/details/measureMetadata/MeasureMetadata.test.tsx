@@ -8,15 +8,17 @@ import {
   screen,
 } from "@testing-library/react";
 
-import useMeasureServiceApi, {
+import {
+  useMeasureServiceApi,
   MeasureServiceApi,
-} from "../../../../api/useMeasureServiceApi";
+  checkUserCanEdit,
+  measureStore,
+} from "@madie/madie-util";
 import { Measure } from "@madie/madie-models";
 import MeasureMetadataForm from "./MeasureMetadata";
-import { checkUserCanEdit } from "@madie/madie-util";
+
 import userEvent from "@testing-library/user-event";
 
-jest.mock("../../../../api/useMeasureServiceApi");
 const setErrorMessage = jest.fn();
 const testUser = "john doe";
 const mockMetaData = {
@@ -37,7 +39,12 @@ const mockMeasure = {
   acls: [{ userId: "othertestuser@example.com", roles: ["SHARED_WITH"] }],
 } as unknown as Measure;
 
+const mockMeasureServiceApi = {
+  updateMeasure: jest.fn().mockResolvedValue(undefined),
+} as unknown as MeasureServiceApi;
+
 jest.mock("@madie/madie-util", () => ({
+  useMeasureServiceApi: jest.fn(() => mockMeasureServiceApi),
   checkUserCanEdit: jest.fn(() => {
     return true;
   }),

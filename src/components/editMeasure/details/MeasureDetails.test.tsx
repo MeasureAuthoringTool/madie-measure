@@ -9,10 +9,11 @@ import MeasureInformation from "./measureInformation/MeasureInformation";
 import MeasureMetadata from "./measureMetadata/MeasureMetadata";
 import { Measure } from "@madie/madie-models";
 // @ts-ignore
-import { measureStore, useFeatureFlags } from "@madie/madie-util";
-import useMeasureServiceApi, {
+import {
+  measureStore,
+  useFeatureFlags,
   MeasureServiceApi,
-} from "../../../api/useMeasureServiceApi";
+} from "@madie/madie-util";
 
 const measure = {
   id: "1",
@@ -100,11 +101,15 @@ const mockUseFeatureFlags = jest.fn(() => ({
   Locking: false,
 }));
 
-let measureServiceApiMock: MeasureServiceApi;
+const mockMeasureServiceApi: MeasureServiceApi = {
+  unlockMeasure: jest.fn(),
+  updateMeasureLock: jest.fn(),
+} as unknown as MeasureServiceApi;
 
 jest.mock("./measureInformation/MeasureInformation");
 jest.mock("./measureMetadata/MeasureMetadata");
 jest.mock("@madie/madie-util", () => ({
+  useMeasureServiceApi: jest.fn(() => mockMeasureServiceApi),
   useDocumentTitle: jest.fn(),
   useFeatureFlags: jest.fn(() => mockUseFeatureFlags()),
   measureStore: {
@@ -131,9 +136,7 @@ jest.mock("@madie/madie-util", () => ({
     initialState: { canTravel: false, pendingPath: "" },
   },
 }));
-jest.mock("../../../api/useMeasureServiceApi");
-const useMeasuremeasureServiceApiMock =
-  useMeasureServiceApi as jest.Mock<MeasureServiceApi>;
+
 const MeasureInformationMock = MeasureInformation as jest.Mock<JSX.Element>;
 const MeasureMetadataMock = MeasureMetadata as jest.Mock<JSX.Element>;
 const setErrorMessage = jest.fn();
@@ -633,10 +636,8 @@ describe("MeasureDetails component", () => {
       lockedAt: "2025-08-05T12:00:00Z",
     });
     const unlockMeasure = jest.fn();
-    (useMeasureServiceApi as jest.Mock).mockReturnValue({
-      updateMeasureLock,
-      unlockMeasure,
-    });
+    mockMeasureServiceApi.updateMeasureLock = updateMeasureLock;
+    mockMeasureServiceApi.unlockMeasure = unlockMeasure;
 
     render(
       <ApiContextProvider value={serviceConfig}>
@@ -676,11 +677,8 @@ describe("MeasureDetails component", () => {
     });
 
     const unlockMeasure = jest.fn();
-    useMeasuremeasureServiceApiMock.mockReturnValue({
-      ...measureServiceApiMock,
-      updateMeasureLock,
-      unlockMeasure,
-    });
+    mockMeasureServiceApi.updateMeasureLock = updateMeasureLock;
+    mockMeasureServiceApi.unlockMeasure = unlockMeasure;
 
     const errorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
 

@@ -9,28 +9,21 @@ import {
 } from "../../../../api/ServiceContext";
 import MeasureDefinitions from "./MeasureDefinitions";
 // @ts-ignore
-import { measureStore } from "@madie/madie-util";
+import { measureStore, MeasureServiceApi } from "@madie/madie-util";
 import { Measure, MeasureDefinition } from "@madie/madie-models";
 import userEvent from "@testing-library/user-event";
-import useMeasureServiceApi, {
-  MeasureServiceApi,
-} from "../../../../api/useMeasureServiceApi";
 
-jest.mock("../../../../api/useMeasureServiceApi");
-const useMeasureServiceApiMock =
-  useMeasureServiceApi as jest.Mock<MeasureServiceApi>;
 const measure = {
   id: "measure ID",
   measureName: "measureName",
   createdBy: "testuser@example.com", //#nosec
 } as Measure;
 
-let serviceApiMock = {
+let mockMeasureServiceApi = {
   updateMeasure: jest.fn().mockResolvedValue({ status: 200, data: measure }),
 } as unknown as MeasureServiceApi;
-useMeasureServiceApiMock.mockImplementation(() => serviceApiMock);
 
-function createDefinitiions(number: number): MeasureDefinition[] {
+function createDefinitions(number: number): MeasureDefinition[] {
   const definitions: MeasureDefinition[] = [];
   for (let i = 0; i < number; i++) {
     definitions.push({
@@ -44,14 +37,15 @@ function createDefinitiions(number: number): MeasureDefinition[] {
 
 const measureWithNineItems = {
   ...measure,
-  measureMetaData: { measureDefinitions: createDefinitiions(9) },
+  measureMetaData: { measureDefinitions: createDefinitions(9) },
 };
 const measureWithElevenItems = {
   ...measure,
-  measureMetaData: { measureDefinitions: createDefinitiions(11) },
+  measureMetaData: { measureDefinitions: createDefinitions(11) },
 };
 
 jest.mock("@madie/madie-util", () => ({
+  useMeasureServiceApi: jest.fn(() => mockMeasureServiceApi),
   useDocumentTitle: jest.fn(),
   useOktaTokens: jest.fn(() => ({
     getAccessToken: () => "test.jwt",
@@ -405,7 +399,7 @@ describe("Measure Definitions Component", () => {
     );
     measureStore.state.mockImplementationOnce(() => measureWithNineItems);
 
-    serviceApiMock = {
+    mockMeasureServiceApi = {
       updateMeasure: jest.fn().mockRejectedValueOnce({ data: {} }),
     } as unknown as MeasureServiceApi;
 

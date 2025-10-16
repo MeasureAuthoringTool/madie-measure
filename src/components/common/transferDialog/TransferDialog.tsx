@@ -28,7 +28,7 @@ import { Checkbox, Divider } from "@mui/material";
 import "./TransferDialog.scss";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 import * as Yup from "yup";
-import useMeasureServiceApi from "../../../api/useMeasureServiceApi";
+import { useMeasureServiceApi } from "@madie/madie-util";
 
 export const TRANSFER_MEASURE_SUCCESS =
   "The measure(s) were successfully transferred. If you chose to retain share access, you will still be able to edit the measures.";

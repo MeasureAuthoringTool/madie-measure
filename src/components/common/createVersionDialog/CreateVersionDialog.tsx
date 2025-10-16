@@ -11,7 +11,7 @@ import {
 } from "@madie/madie-design-system/dist/react";
 import "./CreateVersionDialog.scss";
 import * as _ from "lodash";
-import useMeasureServiceApi from "../../../api/useMeasureServiceApi";
+import { useMeasureServiceApi } from "@madie/madie-util";
 
 interface VersionInfo {
   type: string;
@@ -24,7 +24,11 @@ const VERSION_OPTIONS = OPTIONS.map((ref, i) => (
     {_.startCase(ref)}
   </MenuItem>
 ));
-
+export function formikErrorHandler(formik, name: string) {
+  if (formik.touched[name] && formik.errors[name]) {
+    return `${formik.errors[name]}`;
+  }
+}
 const CreateVersionDialog = ({
   currentVersion,
   open,
@@ -35,11 +39,7 @@ const CreateVersionDialog = ({
   measureId,
 }) => {
   const measureServiceApi = useRef(useMeasureServiceApi()).current;
-  function formikErrorHandler(name: string) {
-    if (formik.touched[name] && formik.errors[name]) {
-      return `${formik.errors[name]}`;
-    }
-  }
+
   //given a version number string, we can divide into three parts and increment and rejoin based on whatever.
   const [newVersionNumber, setNewVersionNumber] = useState<string>("");
   const formik = useFormik({
@@ -178,7 +178,7 @@ const CreateVersionDialog = ({
               required
               label="Confirm New Version #"
               placeholder="Confirm New Version Number"
-              helperText={formikErrorHandler("confirmedVersion")}
+              helperText={formikErrorHandler(formik, "confirmedVersion")}
               tooltipText="Input the new version # located to the left to confirm."
               id="confirm-version"
               inputProps={{
@@ -194,7 +194,10 @@ const CreateVersionDialog = ({
         sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
         open={loading}
       >
-        <MadieSpinner style={{ height: 50, width: 50 }} />
+        <MadieSpinner
+          data-testid="madie-spinner"
+          style={{ height: 50, width: 50 }}
+        />
       </Backdrop>
     </MadieDialog>
   );
