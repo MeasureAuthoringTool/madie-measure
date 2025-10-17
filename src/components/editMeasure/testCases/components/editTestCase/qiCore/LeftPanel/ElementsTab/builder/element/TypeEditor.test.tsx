@@ -2819,6 +2819,7 @@ describe("TypeEditor Component", () => {
         setFieldTouched: jest.fn(),
         setFieldValue: jest.fn(),
       }),
+      values: {},
     } as unknown as FormikProps<any>;
 
     render(
