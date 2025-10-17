@@ -58,11 +58,13 @@ export default function ReferenceComponent({
   useEffect(() => {
     const newType = value?.reference?.split("/")?.[0] || "";
     const newId = value?.reference || "";
-
     setSelectedReferenceType(newType);
-    setSelectedReferenceId(newId);
-  }, [value]);
-
+    // if the earmark is present, we do not want to update our local state.
+    if (!formikContext.values["add_new_resource"]) {
+      // This is the instance that we're adding a new resource. Right now, we have an id for a resource that doesn't exist. We want it to instead display add new
+      setSelectedReferenceId(newId);
+    }
+  }, [value, formikContext.values["add_new_resource"]]);
   return (
     <>
       {/* Select a reference type from all available profiles */}
@@ -153,13 +155,13 @@ export default function ReferenceComponent({
                   `${label}.reference`,
                   `${selectedReferenceType}/${newMadieResource.resource.id}`
                 );
-                setSelectedReferenceId(
-                  `${selectedReferenceType}/${newMadieResource.resource.id}`
-                );
+                setSelectedReferenceId("add_new_id");
               } else {
+                // when selecting a known value we need to blank the add_new_id
                 formikContext.setFieldValue(label, {
                   reference: e.target.value,
                 });
+                formikContext.setFieldValue("add_new_resource", undefined);
                 setSelectedReferenceId(e.target.value);
               }
             }}
