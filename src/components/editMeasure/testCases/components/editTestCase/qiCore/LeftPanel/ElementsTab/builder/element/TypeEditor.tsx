@@ -37,6 +37,7 @@ import IdentifierComponent from "./types/IdentifierComponent";
 import QuantityIntervalInput from "../../../../../../common/quantityIntervalInput/QuantityIntervalInput";
 import MoneyComponent from "./types/MoneyComponent";
 import TimingComponent from "./types/TimingComponent";
+import ReferenceComponent from "./types/ReferenceComponent";
 
 // onChange is being deprecated as no updates to the resource are tracked.
 // Changes directly to the json should be done with a dispatch, this propagates downstream changes in formik.
@@ -56,11 +57,6 @@ const TypeEditor = ({
     low: {},
     high: {},
   };
-
-  if (typeof label !== "string") {
-    console.warn("TypeEditor: label is not a string", label);
-    throw new Error("TypeEditor: label is not a string");
-  }
 
   let type: string = structureDefinition?.type?.find((t) =>
     _.toLower(label).includes(_.toLower(t.code))
@@ -595,6 +591,20 @@ const TypeEditor = ({
             label={label}
             canEdit={canEdit}
             fieldRequired={false}
+          />
+        );
+      case "Reference":
+        return (
+          <ReferenceComponent
+            structureDefinition={structureDefinition}
+            label={label}
+            canEdit={canEdit}
+            required={required}
+            helperText={formikErrorHandler(label)}
+            error={getNestedProperty(formik.errors, label)}
+            showAddAttributeButton={showAddAttributeButton}
+            addTitle={addTitle}
+            {...formik.getFieldProps(label)}
           />
         );
       case "Extension":
