@@ -1,4 +1,6 @@
 import { ElementDefinition } from "fhir/r4";
+import { v4 as uuidv4 } from "uuid";
+import { ResourceIdentifier } from "./models/ResourceIdentifier";
 import * as Yup from "yup";
 import * as _ from "lodash";
 
@@ -493,6 +495,25 @@ export function mergePathWithIndex(pathWithIndex, pathWithoutIndex) {
   }
 
   return pathWithIndex + "." + pathWithoutIndex; // Default fallback if no index
+}
+
+export function buildMadieResourceFromResourceIdentifier(
+  resourceIdentifier: ResourceIdentifier
+) {
+  const id = uuidv4();
+  const newEntry = {
+    fullUrl: `https://madie.cms.gov/${resourceIdentifier.type}/${id}`,
+    resource: {
+      id,
+      resourceType: resourceIdentifier.type,
+    },
+  };
+  if (!_.isEmpty(resourceIdentifier.profile)) {
+    newEntry.resource["meta"] = {
+      profile: [resourceIdentifier.profile],
+    };
+  }
+  return newEntry;
 }
 
 export function addCardinalityToElement(nextEntry, elemPath) {
