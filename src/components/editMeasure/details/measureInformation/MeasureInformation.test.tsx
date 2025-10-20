@@ -9,9 +9,7 @@ import {
 } from "@testing-library/react";
 
 import MeasureInformation from "./MeasureInformation";
-import useMeasureServiceApi, {
-  MeasureServiceApi,
-} from "../../../../api/useMeasureServiceApi";
+
 import useQdmElmTranslationServiceApi, {
   QdmElmTranslationServiceApi,
 } from "../../../../api/useQdmElmTranslationServiceApi";
@@ -22,7 +20,11 @@ import { Measure, Model } from "@madie/madie-models";
 import { AxiosError, AxiosResponse } from "axios";
 import { parseContent, synchingEditorCqlContent } from "@madie/madie-editor";
 import userEvent from "@testing-library/user-event";
-import { checkUserCanEdit, measureStore } from "@madie/madie-util";
+import {
+  checkUserCanEdit,
+  measureStore,
+  MeasureServiceApi,
+} from "@madie/madie-util";
 
 const mockHistoryPush = jest.fn();
 
@@ -31,7 +33,6 @@ jest.mock("react-router-dom", () => ({
   useNavigate: () => mockHistoryPush,
 }));
 
-jest.mock("../../../../api/useMeasureServiceApi");
 jest.mock("../../../../api/useQdmElmTranslationServiceApi");
 jest.mock("../../../../api/useFhirElmTranslationServiceApi");
 const useQdmElmTranslationServiceApiMock =
@@ -88,7 +89,22 @@ jest.mock("@madie/madie-editor", () => ({
   }),
 }));
 
+const endorserList = [
+  {
+    endorserOrganization: "-",
+  },
+  {
+    endorserOrganization: "NQF",
+  },
+];
+const mockMeasureServiceApi = {
+  getAllEndorsers: jest.fn().mockResolvedValue(endorserList),
+  createCmsId: jest.fn(),
+  updateMeasure: jest.fn().mockResolvedValue({ status: 200 }),
+} as unknown as MeasureServiceApi;
 jest.mock("@madie/madie-util", () => ({
+  useMeasureServiceApi: jest.fn(() => mockMeasureServiceApi),
+
   useOktaTokens: jest.fn(() => ({
     getAccessToken: () => "test.jwt",
   })),
@@ -117,18 +133,6 @@ jest.mock("@madie/madie-util", () => ({
   }),
 }));
 
-const useMeasureServiceApiMock =
-  useMeasureServiceApi as jest.Mock<MeasureServiceApi>;
-
-const endorserList = [
-  {
-    endorserOrganization: "-",
-  },
-  {
-    endorserOrganization: "NQF",
-  },
-];
-
 const axiosError: AxiosError = {
   response: {
     status: 500,
@@ -136,8 +140,6 @@ const axiosError: AxiosError = {
   } as AxiosResponse,
   toJSON: jest.fn(),
 } as unknown as AxiosError;
-
-let serviceApiMock: MeasureServiceApi;
 
 describe("MeasureInformation component", () => {
   beforeEach(() => {
@@ -154,12 +156,6 @@ describe("MeasureInformation component", () => {
     useFhirElmTranslationServiceApiMock.mockImplementation(() => {
       return fhirElmTranslationServiceApiMock;
     });
-
-    serviceApiMock = {
-      getAllEndorsers: jest.fn().mockResolvedValue(endorserList),
-      createCmsId: jest.fn().mockResolvedValue(2),
-    } as unknown as MeasureServiceApi;
-    useMeasureServiceApiMock.mockImplementation(() => serviceApiMock);
 
     measure = {
       id: "test measure",
@@ -287,11 +283,12 @@ describe("MeasureInformation component", () => {
   });
 
   test("Intended venue field being disable when user is not owner", async () => {
-    serviceApiMock = {
-      getAllEndorsers: jest.fn().mockResolvedValue(endorserList),
-      updateMeasure: jest.fn().mockResolvedValueOnce({ status: 200 }),
-    } as unknown as MeasureServiceApi;
-    useMeasureServiceApiMock.mockImplementation(() => serviceApiMock);
+    mockMeasureServiceApi.getAllEndorsers = jest
+      .fn()
+      .mockResolvedValue(endorserList);
+    mockMeasureServiceApi.updateMeasure = jest
+      .fn()
+      .mockResolvedValueOnce({ status: 200 });
     (checkUserCanEdit as jest.Mock).mockImplementation(() => {
       return false;
     });
@@ -305,11 +302,12 @@ describe("MeasureInformation component", () => {
   });
 
   test("Adding intended venue and saving it", async () => {
-    serviceApiMock = {
-      getAllEndorsers: jest.fn().mockResolvedValue(endorserList),
-      updateMeasure: jest.fn().mockResolvedValueOnce({ status: 200 }),
-    } as unknown as MeasureServiceApi;
-    useMeasureServiceApiMock.mockImplementation(() => serviceApiMock);
+    mockMeasureServiceApi.getAllEndorsers = jest
+      .fn()
+      .mockResolvedValue(endorserList);
+    mockMeasureServiceApi.updateMeasure = jest
+      .fn()
+      .mockResolvedValueOnce({ status: 200 });
     (checkUserCanEdit as jest.Mock).mockImplementation(() => {
       return true;
     });
@@ -349,11 +347,12 @@ describe("MeasureInformation component", () => {
     });
   });
   test("Adding Eligible Clinician (EC) intended venue and saving it", async () => {
-    serviceApiMock = {
-      getAllEndorsers: jest.fn().mockResolvedValue(endorserList),
-      updateMeasure: jest.fn().mockResolvedValueOnce({ status: 200 }),
-    } as unknown as MeasureServiceApi;
-    useMeasureServiceApiMock.mockImplementation(() => serviceApiMock);
+    mockMeasureServiceApi.getAllEndorsers = jest
+      .fn()
+      .mockResolvedValue(endorserList);
+    mockMeasureServiceApi.updateMeasure = jest
+      .fn()
+      .mockResolvedValueOnce({ status: 200 });
     (checkUserCanEdit as jest.Mock).mockImplementation(() => {
       return true;
     });
@@ -384,11 +383,12 @@ describe("MeasureInformation component", () => {
   });
 
   test("Adding no value for intended venue and saving it", async () => {
-    serviceApiMock = {
-      getAllEndorsers: jest.fn().mockResolvedValue(endorserList),
-      updateMeasure: jest.fn().mockResolvedValueOnce({ status: 200 }),
-    } as unknown as MeasureServiceApi;
-    useMeasureServiceApiMock.mockImplementation(() => serviceApiMock);
+    mockMeasureServiceApi.getAllEndorsers = jest
+      .fn()
+      .mockResolvedValue(endorserList);
+    mockMeasureServiceApi.updateMeasure = jest
+      .fn()
+      .mockResolvedValueOnce({ status: 200 });
     (checkUserCanEdit as jest.Mock).mockImplementation(() => {
       return true;
     });
@@ -459,11 +459,12 @@ describe("MeasureInformation component", () => {
 
   it("should regenerate ELM when the CQL Library Name is updated", async () => {
     measureStore.state.mockImplementation(() => measure);
-    serviceApiMock = {
-      getAllEndorsers: jest.fn().mockResolvedValue(endorserList),
-      updateMeasure: jest.fn().mockResolvedValueOnce({ status: 200 }),
-    } as unknown as MeasureServiceApi;
-    useMeasureServiceApiMock.mockImplementation(() => serviceApiMock);
+    mockMeasureServiceApi.getAllEndorsers = jest
+      .fn()
+      .mockResolvedValue(endorserList);
+    mockMeasureServiceApi.updateMeasure = jest
+      .fn()
+      .mockResolvedValueOnce({ status: 200 });
 
     const testMeasure = {
       ...measure,
@@ -507,7 +508,7 @@ describe("MeasureInformation component", () => {
     });
 
     await waitFor(() =>
-      expect(serviceApiMock.updateMeasure).toBeCalledWith({
+      expect(mockMeasureServiceApi.updateMeasure).toBeCalledWith({
         ...testMeasure,
         cqlLibraryName: modifiedLibName,
         elmJson: JSON.stringify({ library: modifiedLibName }),
@@ -656,15 +657,16 @@ describe("MeasureInformation component", () => {
   });
 
   it("gracefully handles issue with generate cms id", async () => {
-    serviceApiMock = {
-      getAllEndorsers: jest.fn().mockResolvedValue(endorserList),
-      updateMeasure: jest.fn().mockResolvedValueOnce({ status: 200 }),
-      createCmsId: jest.fn().mockRejectedValueOnce({
-        status: 403,
-        response: { data: { message: "Failed to generate CMS ID." } },
-      }),
-    } as unknown as MeasureServiceApi;
-    useMeasureServiceApiMock.mockImplementation(() => serviceApiMock);
+    mockMeasureServiceApi.getAllEndorsers = jest
+      .fn()
+      .mockResolvedValue(endorserList);
+    mockMeasureServiceApi.updateMeasure = jest
+      .fn()
+      .mockResolvedValueOnce({ status: 200 });
+    mockMeasureServiceApi.createCmsId = jest.fn().mockRejectedValueOnce({
+      status: 403,
+      response: { data: { message: "Failed to generate CMS ID." } },
+    });
 
     measure.measureSet = {
       id: "id1",
@@ -699,7 +701,13 @@ describe("MeasureInformation component", () => {
   });
 
   it("cms id popup closes on cancel click", async () => {
-    useMeasureServiceApiMock.mockImplementation(() => serviceApiMock);
+    mockMeasureServiceApi.createCmsId = jest
+      .fn()
+      .mockResolvedValueOnce({ status: 200 });
+    mockMeasureServiceApi.getAllEndorsers = jest
+      .fn()
+      .mockResolvedValue(endorserList);
+
     measure.measureSet = {
       id: "id1",
       measureSetId: "testMeasureId",
@@ -769,11 +777,12 @@ describe("MeasureInformation component", () => {
   });
 
   it("saving measurement information successfully and displaying success message", async () => {
-    serviceApiMock = {
-      getAllEndorsers: jest.fn().mockResolvedValue(endorserList),
-      updateMeasure: jest.fn().mockResolvedValueOnce({ status: 200 }),
-    } as unknown as MeasureServiceApi;
-    useMeasureServiceApiMock.mockImplementation(() => serviceApiMock);
+    mockMeasureServiceApi.createCmsId = jest
+      .fn()
+      .mockResolvedValueOnce({ status: 200 });
+    mockMeasureServiceApi.getAllEndorsers = jest
+      .fn()
+      .mockResolvedValue(endorserList);
     measure.measureName = "";
 
     render(<MeasureInformation setErrorMessage={setErrorMessage} />);
@@ -802,14 +811,13 @@ describe("MeasureInformation component", () => {
   });
 
   it("should display error message when updating failed", async () => {
-    serviceApiMock = {
-      getAllEndorsers: jest.fn().mockResolvedValue(endorserList),
-      updateMeasure: jest.fn().mockRejectedValueOnce({
-        status: 500,
-        response: { data: { message: "update failed" } },
-      }),
-    } as unknown as MeasureServiceApi;
-    useMeasureServiceApiMock.mockImplementation(() => serviceApiMock);
+    mockMeasureServiceApi.updateMeasure = jest.fn().mockRejectedValueOnce({
+      status: 500,
+      response: { data: { message: "update failed" } },
+    });
+    mockMeasureServiceApi.getAllEndorsers = jest
+      .fn()
+      .mockResolvedValue(endorserList);
 
     measure.measureName = "";
     render(<MeasureInformation setErrorMessage={setErrorMessage} />);
@@ -973,7 +981,12 @@ describe("MeasureInformation component", () => {
   });
 
   it("Discard dialog opens and succeeds", async () => {
-    useMeasureServiceApiMock.mockImplementation(() => serviceApiMock);
+    mockMeasureServiceApi.getAllEndorsers = jest
+      .fn()
+      .mockResolvedValue(endorserList);
+    mockMeasureServiceApi.updateMeasure = jest
+      .fn()
+      .mockResolvedValueOnce({ status: 200 });
     (checkUserCanEdit as jest.Mock).mockImplementation(() => {
       return true;
     });

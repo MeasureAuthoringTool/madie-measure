@@ -11,9 +11,9 @@ import {
   measureStore,
   checkUserCanEdit,
   routeHandlerStore,
+  useMeasureServiceApi,
 } from "@madie/madie-util";
 import "../testCaseConfiguration.scss";
-import useMeasureServiceApi from "../../../api/useMeasureServiceApi";
 import { Typography } from "@mui/material";
 import useFormikResetOnEvent from "../../../../../common/useFormikResetOnEvent";
 

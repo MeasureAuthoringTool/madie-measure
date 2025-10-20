@@ -4,9 +4,7 @@ import { act } from "react-dom/test-utils";
 import RAVPage from "./RAVPage";
 import { Measure } from "@madie/madie-models";
 import userEvent from "@testing-library/user-event";
-import useMeasureServiceApi, {
-  MeasureServiceApi,
-} from "../../../api/useMeasureServiceApi";
+import { useMeasureServiceApi, MeasureServiceApi } from "@madie/madie-util";
 
 const measure = {
   id: "test measure",
@@ -20,12 +18,12 @@ const measure = {
   acls: [{ userId: "othertestuser@example.com", roles: ["SHARED_WITH"] }],
 } as unknown as Measure;
 
-jest.mock("../../../api/useMeasureServiceApi");
-const useMeasureServiceApiMock =
-  useMeasureServiceApi as jest.Mock<MeasureServiceApi>;
-let serviceApiMock: MeasureServiceApi;
+const mockMeasureServiceApi: MeasureServiceApi = {
+  updateMeasureTestCaseConfiguration: jest.fn(),
+} as unknown as MeasureServiceApi;
 
 jest.mock("@madie/madie-util", () => ({
+  useMeasureServiceApi: jest.fn(() => mockMeasureServiceApi),
   measureStore: {
     updateMeasure: jest.fn((measure) => measure),
     state: jest.fn().mockImplementation(() => measure),
@@ -62,12 +60,9 @@ describe("RAVPage component", () => {
   });
 
   test("Changes to Test Case Configuration enables Save button and saving successfully displays success toast", async () => {
-    serviceApiMock = {
-      updateMeasureTestCaseConfiguration: jest
-        .fn()
-        .mockResolvedValueOnce({ status: 200 }),
-    } as unknown as MeasureServiceApi;
-    useMeasureServiceApiMock.mockImplementation(() => serviceApiMock);
+    mockMeasureServiceApi.updateMeasureTestCaseConfiguration = jest
+      .fn()
+      .mockResolvedValueOnce({ status: 200 });
 
     renderRavPageComponent();
 
@@ -86,10 +81,9 @@ describe("RAVPage component", () => {
     await waitFor(() => expect(saveButton).toBeEnabled());
     userEvent.click(saveButton);
     await waitFor(() =>
-      expect(serviceApiMock.updateMeasureTestCaseConfiguration).toBeCalledWith(
-        { ravIncluded: true },
-        measure.id
-      )
+      expect(
+        mockMeasureServiceApi.updateMeasureTestCaseConfiguration
+      ).toBeCalledWith({ ravIncluded: true }, measure.id)
     );
 
     const successToast = getByTestId("edit-rav-success-text");
@@ -106,13 +100,12 @@ describe("RAVPage component", () => {
   });
 
   test("Changes to Test Case Configuration enables Save button but fails to save successfully and displays error toast", async () => {
-    serviceApiMock = {
-      updateMeasureTestCaseConfiguration: jest.fn().mockRejectedValueOnce({
+    mockMeasureServiceApi.updateMeasureTestCaseConfiguration = jest
+      .fn()
+      .mockRejectedValueOnce({
         status: 500,
         response: { data: { message: "failed to update measure" } },
-      }),
-    } as unknown as MeasureServiceApi;
-    useMeasureServiceApiMock.mockImplementation(() => serviceApiMock);
+      });
 
     renderRavPageComponent();
 
@@ -131,7 +124,9 @@ describe("RAVPage component", () => {
     await waitFor(() => expect(saveButton).toBeEnabled());
     userEvent.click(saveButton);
     await waitFor(() =>
-      expect(serviceApiMock.updateMeasureTestCaseConfiguration).toBeCalledWith(
+      expect(
+        mockMeasureServiceApi.updateMeasureTestCaseConfiguration
+      ).toBeCalledWith(
         {
           ravIncluded: true,
         },

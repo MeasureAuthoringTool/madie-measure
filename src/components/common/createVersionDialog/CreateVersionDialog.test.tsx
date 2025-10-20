@@ -10,15 +10,9 @@ import { Simulate } from "react-dom/test-utils";
 import * as React from "react";
 import userEvent from "@testing-library/user-event";
 import clearAllMocks = jest.clearAllMocks;
-import CreateVersionDialog from "./CreateVersionDialog";
-import useMeasureServiceApi, {
-  MeasureServiceApi,
-} from "../../../api/useMeasureServiceApi";
+import CreateVersionDialog, { formikErrorHandler } from "./CreateVersionDialog";
 import { oneItemResponse } from "../../__mocks__/mockMeasureResponses";
 
-jest.mock("../../../api/useMeasureServiceApi");
-const useMeasureServiceMock =
-  useMeasureServiceApi as jest.Mock<MeasureServiceApi>;
 const mockMeasureServiceApi = {
   searchMeasuresByMeasureNameOrEcqmTitle: jest
     .fn()
@@ -35,19 +29,17 @@ const mockMeasureServiceApi = {
   getMeasureExport: jest
     .fn()
     .mockResolvedValue({ size: 635581, type: "application/octet-stream" }),
-} as unknown as MeasureServiceApi;
+};
 
-jest.mock("../../../api/useMeasureServiceApi", () =>
-  jest.fn(() => mockMeasureServiceApi)
-);
+jest.mock("@madie/madie-util", () => ({
+  useMeasureServiceApi: jest.fn(() => mockMeasureServiceApi),
+}));
+
 describe("Create Version Dialog component", () => {
   const { getByTestId } = screen;
 
   beforeEach(() => {
     jest.resetModules();
-    useMeasureServiceMock.mockReset().mockImplementation(() => {
-      return mockMeasureServiceApi;
-    });
   });
   it("should render version dialog and the continue button is disabled", () => {
     render(
@@ -219,6 +211,16 @@ describe("Create Version Dialog component", () => {
     });
   });
 
+  it("should fail versioning because confirmed version does not match new version", async () => {
+    const formik = {
+      errors: {
+        confirmedVersion: "Confirmed version does not match new version",
+      },
+      touched: { confirmedVersion: true },
+    };
+    const result = formikErrorHandler(formik, "confirmedVersion");
+  });
+
   it("should display error text when versioning error is present", async () => {
     const onSubmitFn = jest.fn();
     render(
@@ -233,6 +235,29 @@ describe("Create Version Dialog component", () => {
       />
     );
     expect(screen.getByTestId("create-version-dialog")).toBeInTheDocument();
-    expect(screen.getByTestId("version-helper-text")).toBeInTheDocument();
+    const helperText = await screen.getByTestId("version-helper-text");
+    expect(helperText).toBeInTheDocument();
+    expect(helperText).toHaveTextContent(
+      "Something has gone wrong. Please insert sand in the disk drive to continue."
+    );
+  });
+
+  it("should show loading spinner when loading prop is true", () => {
+    waitFor(() =>
+      render(
+        <CreateVersionDialog
+          currentVersion="0.0.000"
+          open={true}
+          onClose={jest.fn()}
+          onSubmit={jest.fn()}
+          versionHelperText=""
+          loading={true}
+        />
+      )
+    );
+
+    expect(screen.getByTestId("madie-spinner")).toBeInTheDocument();
+    const backdrop = document.querySelector(".MuiBackdrop-root");
+    expect(backdrop).toBeInTheDocument();
   });
 });

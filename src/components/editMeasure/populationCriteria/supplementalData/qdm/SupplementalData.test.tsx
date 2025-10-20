@@ -13,10 +13,13 @@ import {
   ServiceConfig,
   ApiContextProvider,
 } from "../../../../../api/ServiceContext";
-import useMeasureServiceApi, {
+
+import {
+  checkUserCanEdit,
   MeasureServiceApi,
-} from "../../../../../api/useMeasureServiceApi";
-import { checkUserCanEdit, useFeatureFlags } from "@madie/madie-util";
+  useFeatureFlags,
+  useMeasureServiceApi,
+} from "@madie/madie-util";
 import SupplementalData, { SupplementalDataProps } from "./SupplementalData";
 import { QdmMeasureCQL } from "../../../../common/QdmMeasureCQL";
 
@@ -57,6 +60,8 @@ const mockTestMeasure = {
 } as unknown as Measure;
 
 jest.mock("@madie/madie-util", () => ({
+  useMeasureServiceApi: jest.fn(() => mockMeasureServiceApi),
+
   checkUserCanEdit: jest.fn().mockImplementation(() => true),
   useKeyPress: jest.fn(() => false),
   measureStore: {
@@ -84,10 +89,14 @@ jest.mock("@madie/madie-util", () => ({
   },
 }));
 
-jest.mock("../../../../../api/useMeasureServiceApi");
-const useMeasureServiceApiMock =
-  useMeasureServiceApi as jest.Mock<MeasureServiceApi>;
-let measureServiceApi: MeasureServiceApi;
+const mockMeasureServiceApi: MeasureServiceApi = {
+  getReturnTypesForAllCqlFunctions: jest.fn(),
+  getReturnTypesForAllCqlDefinitions: jest.fn(),
+  fetchMeasure: jest.fn(),
+  updateMeasure: jest.fn(),
+  updateGroup: jest.fn(),
+  deleteMeasureGroup: jest.fn(),
+} as unknown as MeasureServiceApi;
 
 const props: SupplementalDataProps = {
   setAlertMessage: jest.fn,
@@ -171,12 +180,9 @@ describe("SupplementalData Component QDM", () => {
       supplementalData: newSupplementalData,
       supplementalDataDescription: newSupplementalDataDescription,
     };
-    measureServiceApi = {
-      updateMeasure: jest
-        .fn()
-        .mockResolvedValueOnce({ status: 200, data: updatedMeasure }),
-    } as unknown as MeasureServiceApi;
-    useMeasureServiceApiMock.mockImplementation(() => measureServiceApi);
+    mockMeasureServiceApi.updateMeasure = jest
+      .fn()
+      .mockResolvedValueOnce({ status: 200, data: updatedMeasure });
 
     RenderSupplementalElements();
 
@@ -253,7 +259,7 @@ describe("SupplementalData Component QDM", () => {
     });
 
     await waitFor(() =>
-      expect(measureServiceApi.updateMeasure).toBeCalledWith({
+      expect(mockMeasureServiceApi.updateMeasure).toBeCalledWith({
         ...updatedMeasure,
       })
     );
@@ -264,10 +270,9 @@ describe("SupplementalData Component QDM", () => {
 
     // Mock API to simulate server error
     const failureMessage = "Internal Server Error";
-    measureServiceApi = {
-      updateMeasure: jest.fn().mockRejectedValueOnce(failureMessage),
-    } as unknown as MeasureServiceApi;
-    useMeasureServiceApiMock.mockImplementation(() => measureServiceApi);
+    mockMeasureServiceApi.updateMeasure = jest
+      .fn()
+      .mockRejectedValueOnce(failureMessage);
 
     RenderSupplementalElements();
 
@@ -493,14 +498,14 @@ describe("SupplementalData Component QDM", () => {
     expect(saveButton).toBeInTheDocument();
     await waitFor(() => expect(saveButton).toBeEnabled());
     fireEvent.click(saveButton);
+
+    // Verify error toast appears
     await waitFor(() => {
-      expect(checkTestCasesLockStatusMock).toHaveBeenCalled();
-      expect(setAlertMessageMock).toHaveBeenCalledWith({
-        type: "error",
-        message:
-          "This measure cannot be saved because changes to the Population Criteria will update test cases and one or more test cases are locked by another user.",
-        canClose: false,
-      });
+      const errorToast = screen.getByTestId("supplemental-data-error");
+      expect(errorToast).toBeInTheDocument();
+      expect(errorToast).toHaveTextContent(
+        "This measure cannot be saved because changes to the Population Criteria will update test cases and one or more test cases are locked by another user."
+      );
     });
   });
 });
