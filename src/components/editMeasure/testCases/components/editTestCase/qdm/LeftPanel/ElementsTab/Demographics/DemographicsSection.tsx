@@ -52,7 +52,6 @@ const checkMismatch = (
   return !concepts.some(
     (concept) =>
       concept.code === dataCode.code &&
-      concept.display === dataCode.display &&
       concept.system === dataCode.system &&
       concept.version === dataCode.version
   );
