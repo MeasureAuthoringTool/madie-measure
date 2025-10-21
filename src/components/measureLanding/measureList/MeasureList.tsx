@@ -52,6 +52,7 @@ import {
   CollapseIcon,
 } from "../../../icons/MeasureListTableRightArrowIcons";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
+import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import { exportMeasure as downloadMeasureExport } from "../../../utils/exportUtil";
 import { MeasureSearchCriteria } from "../MeasureLanding";
 import Search from "./measureSearch/Search";
@@ -293,34 +294,43 @@ export default function MeasureList(props: {
           Action
         </button>
       ),
-      cell: (info) => (
-        <Button
-          variant="outline-filled"
-          data-testid={`measure-action-${info.row.original.id}`}
-          aria-label={`${
-            checkUserCanEdit(
-              info.row.original.actions?.measureSet?.owner,
-              info.row.original.actions?.measureSet?.acls
-            ) && info.row.original.actions.measureMetaData?.draft
-              ? "Edit"
-              : "View"
-          } Measure ${info.row.original.measureName} ${
-            info.row.original.version
-          }${info.row.original.actions.measureMetaData?.draft ? " Draft" : ""}`}
-          onClick={() => {
-            navigate(`/measures/${info.row.original.id}/edit/details/`);
-          }}
-          role="button"
-          tabIndex={0}
-        >
-          {checkUserCanEdit(
+      cell: (info) => {
+        const isLockedByOther =
+          featureFlags?.Locking && !!info.row.original.actions?.measureLock;
+        const canEdit =
+          checkUserCanEdit(
             info.row.original.actions?.measureSet?.owner,
             info.row.original.actions?.measureSet?.acls
-          ) && info.row.original.actions.measureMetaData?.draft
-            ? "Edit"
-            : "View"}
-        </Button>
-      ),
+          ) && info.row.original.actions.measureMetaData?.draft;
+
+        const buttonText = isLockedByOther ? "View" : canEdit ? "Edit" : "View";
+
+        return (
+          <Button
+            variant="outline-filled"
+            data-testid={`measure-action-${info.row.original.id}`}
+            aria-label={`${buttonText} Measure ${
+              info.row.original.measureName
+            } ${info.row.original.version}${
+              info.row.original.actions.measureMetaData?.draft ? " Draft" : ""
+            }${
+              isLockedByOther
+                ? ` (Locked by ${info.row.original.actions.measureLock.lockedBy})`
+                : ""
+            }`}
+            onClick={() => {
+              navigate(`/measures/${info.row.original.id}/edit/details/`);
+            }}
+            role="button"
+            tabIndex={0}
+          >
+            {isLockedByOther && (
+              <LockOutlinedIcon sx={{ fontSize: 16, marginRight: 0.5 }} />
+            )}
+            {buttonText}
+          </Button>
+        );
+      },
       accessorKey: "actions",
       enableSorting: false,
     },
@@ -434,34 +444,43 @@ export default function MeasureList(props: {
           Action
         </button>
       ),
-      cell: (info) => (
-        <Button
-          variant="outline-filled"
-          data-testid={`measure-action-${info.row.original.id}`}
-          aria-label={`${
-            checkUserCanEdit(
-              info.row.original.actions?.measureSet?.owner,
-              info.row.original.actions?.measureSet?.acls
-            ) && info.row.original.actions.measureMetaData?.draft
-              ? "Edit"
-              : "View"
-          } Measure ${info.row.original.measureName} ${
-            info.row.original.version
-          }${info.row.original.actions.measureMetaData?.draft ? " Draft" : ""}`}
-          onClick={() => {
-            navigate(`/measures/${info.row.original.id}/edit/details/`);
-          }}
-          tabIndex={0}
-          role="button"
-        >
-          {checkUserCanEdit(
+      cell: (info) => {
+        const isLockedByOther =
+          featureFlags?.Locking && !!info.row.original.actions?.measureLock;
+        const canEdit =
+          checkUserCanEdit(
             info.row.original.actions?.measureSet?.owner,
             info.row.original.actions?.measureSet?.acls
-          ) && info.row.original.actions.measureMetaData?.draft
-            ? "Edit"
-            : "View"}
-        </Button>
-      ),
+          ) && info.row.original.actions.measureMetaData?.draft;
+
+        const buttonText = isLockedByOther ? "View" : canEdit ? "Edit" : "View";
+
+        return (
+          <Button
+            variant="outline-filled"
+            data-testid={`measure-action-${info.row.original.id}`}
+            aria-label={`${buttonText} Measure ${
+              info.row.original.measureName
+            } ${info.row.original.version}${
+              info.row.original.actions.measureMetaData?.draft ? " Draft" : ""
+            }${
+              isLockedByOther
+                ? ` (Locked by ${info.row.original.actions.measureLock.lockedBy})`
+                : ""
+            }`}
+            onClick={() => {
+              navigate(`/measures/${info.row.original.id}/edit/details/`);
+            }}
+            tabIndex={0}
+            role="button"
+          >
+            {isLockedByOther && (
+              <LockOutlinedIcon sx={{ fontSize: 16, marginRight: 0.5 }} />
+            )}
+            {buttonText}
+          </Button>
+        );
+      },
       accessorKey: "actions",
       enableSorting: false,
     },
