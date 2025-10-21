@@ -1,0 +1,13 @@
+.range-component {
+  display: flex;
+  flex-direction: column;
+
+  .quantity-row {
+    display: flex;
+    align-items: flex-start;
+
+    .separator {
+      margin: 35px 10px;
+    }
+  }
+}

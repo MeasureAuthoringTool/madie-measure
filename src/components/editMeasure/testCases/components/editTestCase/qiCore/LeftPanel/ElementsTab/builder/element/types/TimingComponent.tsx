@@ -11,8 +11,8 @@ import { MenuItem } from "@mui/material";
 import { Select } from "@madie/madie-design-system/dist/react";
 import StringComponent from "./StringComponent";
 import PeriodDateTimeComponent from "./PeriodDateTimeComponent";
-import QuantityIntervalInput from "../../../../../../../common/quantityIntervalInput/QuantityIntervalInput";
 import "./TimingComponent.scss";
+import RangeComponent from "./RangeComponent";
 
 const GROUP_GAP = "1.5rem";
 const boundsOptions = ["-", "Duration", "Range", "Period"];
@@ -64,11 +64,6 @@ const TimingComponent = ({
   const offsetPath = `${label}.repeat.offset`;
 
   const codePath = `${label}.code`;
-
-  const currentQuantityRatio = {
-    low: {},
-    high: {},
-  };
 
   return (
     <div id="timing-component">
@@ -139,16 +134,11 @@ const TimingComponent = ({
       )}
 
       {boundsValue === "Range" && (
-        <QuantityIntervalInput
-          label={"Range"}
-          quantityInterval={
-            getIn(formik.values, boundsRangePath) || currentQuantityRatio
-          }
-          onQuantityIntervalChange={(val) => {
-            formik.setFieldTouched(boundsRangePath);
-            formik.setFieldValue(boundsRangePath, val);
-          }}
+        <RangeComponent
           canEdit={canEdit}
+          label={boundsRangePath}
+          structureDefinition={structureDefinition}
+          fieldRequired={false}
         />
       )}
 
