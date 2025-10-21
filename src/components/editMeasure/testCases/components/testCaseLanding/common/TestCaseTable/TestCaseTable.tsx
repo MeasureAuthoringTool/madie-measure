@@ -26,6 +26,7 @@ import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import FiberManualRecord from "@mui/icons-material/FiberManualRecord";
+import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import ShiftDatesDialog from "../shiftDates/ShiftDatesDialog";
 import { checkUserCanEdit, useFeatureFlags } from "@madie/madie-util";
 import _ from "lodash";
@@ -152,6 +153,7 @@ const TestCaseTable = (props: TestCaseTableProps) => {
       action: tc,
       caseNumber: tc.caseNumber,
       createdBeforeVersioning: tc.createdBeforeVersioning,
+      testCaseLock: tc.testCaseLock,
     }));
   };
 
@@ -166,6 +168,7 @@ const TestCaseTable = (props: TestCaseTableProps) => {
     id: string;
     caseNumber: number;
     createdBeforeVersioning: boolean;
+    testCaseLock?: any;
   };
 
   const [data, setData] = useState<TCRow[]>([]);
@@ -366,35 +369,39 @@ const TestCaseTable = (props: TestCaseTableProps) => {
             Action
           </button>
         ),
-        cell: (info) => (
-          <Button
-            variant="outline-filled"
-            data-testid={`view-edit-test-case-button-${info.row.original.id}`}
-            aria-label={`${
-              checkUserCanEdit(
-                measure.measureSet?.owner,
-                measure.measureSet?.acls
-              )
-                ? "Edit"
-                : "View"
-            } Test Case ${info.row.original.group} ${info.row.original.title}`}
-            onClick={() => {
-              const editTestCaseUrl = _.isEmpty(measure?.groups)
-                ? `../${info.row.original.id}`
-                : `../../${info.row.original.id}`;
-              navigate(editTestCaseUrl, { relative: "path" });
-            }}
-            role="button"
-            tabIndex={0}
-          >
-            {checkUserCanEdit(
-              measure.measureSet?.owner,
-              measure.measureSet?.acls
-            )
-              ? "Edit"
-              : "View"}
-          </Button>
-        ),
+        cell: (info) => {
+          const isLockedByOther =
+            featureFlags?.Locking && !!info.row.original.testCaseLock;
+          const canEdit = checkUserCanEdit(
+            measure.measureSet?.owner,
+            measure.measureSet?.acls
+          );
+          const buttonText = isLockedByOther ? "View" : canEdit ? "Edit" : "View";
+
+          return (
+            <Button
+              variant="outline-filled"
+              data-testid={`view-edit-test-case-button-${info.row.original.id}`}
+              aria-label={`${buttonText} Test Case ${info.row.original.group} ${info.row.original.title}`}
+              onClick={() => {
+                const editTestCaseUrl = _.isEmpty(measure?.groups)
+                  ? `../${info.row.original.id}`
+                  : `../../${info.row.original.id}`;
+                navigate(editTestCaseUrl, { relative: "path" });
+              }}
+              role="button"
+              tabIndex={0}
+            >
+              {isLockedByOther && (
+                <LockOutlinedIcon
+                  sx={{ fontSize: 16, marginRight: 0.5 }}
+                  data-testid={`test-case-action-lock-icon-${info.row.original.id}`}
+                />
+              )}
+              {buttonText}
+            </Button>
+          );
+        },
         accessorKey: "action",
         enableSorting: false,
       },
