@@ -34,9 +34,10 @@ import PeriodDateTimeComponent from "./types/PeriodDateTimeComponent";
 import ChoiceType from "./ChoiceType";
 import QuantityComponent from "./types/QuantityComponent";
 import IdentifierComponent from "./types/IdentifierComponent";
-import QuantityIntervalInput from "../../../../../../common/quantityIntervalInput/QuantityIntervalInput";
 import MoneyComponent from "./types/MoneyComponent";
 import TimingComponent from "./types/TimingComponent";
+import RangeComponent from "./types/RangeComponent";
+import ReferenceComponent from "./types/ReferenceComponent";
 
 // onChange is being deprecated as no updates to the resource are tracked.
 // Changes directly to the json should be done with a dispatch, this propagates downstream changes in formik.
@@ -52,15 +53,6 @@ const TypeEditor = ({
   const { requiredFields, formInfo } = useRequiredFields();
   let required = getRequired(requiredFields, stripAllIndexes(label));
   const fhirDefinitionsService = useRef(useFhirDefinitionsServiceApi());
-  const currentQuantityRatio = {
-    low: {},
-    high: {},
-  };
-
-  if (typeof label !== "string") {
-    console.warn("TypeEditor: label is not a string", label);
-    throw new Error("TypeEditor: label is not a string");
-  }
 
   let type: string = structureDefinition?.type?.find((t) =>
     _.toLower(label).includes(_.toLower(t.code))
@@ -537,14 +529,11 @@ const TypeEditor = ({
         );
       case "Range":
         return (
-          <QuantityIntervalInput
-            label={label}
-            quantityInterval={currentQuantityRatio}
-            onQuantityIntervalChange={(val) => {
-              formik.setFieldTouched(label);
-              formik.setFieldValue(label, val);
-            }}
+          <RangeComponent
             canEdit={canEdit}
+            label={label}
+            structureDefinition={structureDefinition}
+            fieldRequired={false}
           />
         );
       case "Coding":
@@ -595,6 +584,20 @@ const TypeEditor = ({
             label={label}
             canEdit={canEdit}
             fieldRequired={false}
+          />
+        );
+      case "Reference":
+        return (
+          <ReferenceComponent
+            structureDefinition={structureDefinition}
+            label={label}
+            canEdit={canEdit}
+            required={required}
+            helperText={formikErrorHandler(label)}
+            error={getNestedProperty(formik.errors, label)}
+            showAddAttributeButton={showAddAttributeButton}
+            addTitle={addTitle}
+            {...formik.getFieldProps(label)}
           />
         );
       case "Extension":

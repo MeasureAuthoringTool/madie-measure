@@ -14,6 +14,7 @@ import { RequiredFieldsProvider } from "./RequiredFieldsContext";
 import mockRequiredFields from "./mockRequiredFields";
 import mockFormInfo from "./mockFormInfo";
 import { ExecutionContextProvider } from "../../../../../../routes/qiCore/ExecutionContext";
+import { useQiCoreResource } from "../../../../../../../util/QiCorePatientProvider";
 
 const getNestedProperty = (obj, path) => {
   return path.split(".").reduce((current, key) => current && current[key], obj);
@@ -216,6 +217,9 @@ useFhirDefinitionsServiceApiMock.mockImplementation(
   () => fhirDefinitionsServiceApiMock
 );
 
+jest.mock("../../../../../../../util/QiCorePatientProvider", () => ({
+  useQiCoreResource: jest.fn(),
+}));
 jest.mock("../../../../../../../api/fhirDefinitionServiceUtilities", () => {
   return {
     ...jest.requireActual(
@@ -237,8 +241,15 @@ const terminologyServiceApiMock = {
 useTerminologyServiceApiMock.mockImplementation(
   () => terminologyServiceApiMock
 );
-
+const mockBundle = {
+  entry: [{ resource: { resourceType: "Patient", id: "patient-1" } }],
+};
 describe("TypeEditor Component", () => {
+  beforeEach(() => {
+    (useQiCoreResource as jest.Mock).mockReturnValue({
+      state: { bundle: mockBundle },
+    });
+  });
   test("Should render String component", () => {
     // const handleChange = jest.fn();
     render(
@@ -1939,43 +1950,67 @@ describe("TypeEditor Component", () => {
     expect(await screen.findByLabelText("Repeat.Offset")).toBeInTheDocument();
   });
 
-  test("Should render Range component (QuantityIntervalInput) and handle onQuantityIntervalChange", () => {
-    const setFieldTouched = jest.fn();
-    const setFieldValue = jest.fn();
-    const mockFormik = {
-      setFieldTouched,
-      setFieldValue,
-      getFieldProps: () => ({
-        label: "Observation.range",
-        name: "Observation.range",
-        value: { low: { value: "1" }, high: { value: "10" } },
-        onChange: jest.fn(),
-        onBlur: jest.fn(),
-      }),
-    } as any;
+  test("Should render Range component", async () => {
+    const mockFormik: FormikContextType<any> = {
+      values: {
+        "Observation.referenceRange[0].age": {
+          low: { value: "1" },
+          high: { value: "10" },
+        },
+      },
+      touched: {},
+      getFieldProps: (label) => {
+        const value = getNestedProperty(mockFormik.values, label);
+        return { value, name: label, onChange: jest.fn(), onBlur: jest.fn() };
+      },
+      handleChange: () => {},
+      setFieldValue: jest.fn(),
+      setFieldTouched: jest.fn(),
+    };
 
     render(
-      <FormikProvider value={mockFormik}>
-        <RequiredFieldsProvider requiredFields={{}} formInfo={[]}>
-          <TypeEditor
-            resource={null}
-            structureDefinition={{
-              id: "Observation.range",
-              path: "Observation.range",
-              min: 0,
-              max: "1",
-              type: [{ code: "Range" }],
-            }}
-            label="Observation.range"
-            canEdit={true}
-            parentStructureDefinition={null}
-          />
-        </RequiredFieldsProvider>
-      </FormikProvider>
+      <ExecutionContextProvider
+        value={{
+          measureState: [null, jest.fn()],
+          bundleState: [null, jest.fn()],
+          valueSetsState: [[], jest.fn()],
+          executionContextReady: true,
+          executing: false,
+          setExecuting: jest.fn(),
+          contextFailure: false,
+        }}
+      >
+        <FormikProvider value={mockFormik}>
+          <RequiredFieldsProvider requiredFields={{}} formInfo={[]}>
+            <TypeEditor
+              resource={null}
+              structureDefinition={{
+                id: "Observation.referenceRange[0].age",
+                type: [{ code: "Range" }],
+                required: false,
+                canBeMultipleCardinality: false,
+                max: "1",
+                min: 0,
+              }}
+              label="Observation.referenceRange[0].age"
+              canEdit={true}
+              parentStructureDefinition={null}
+            />
+          </RequiredFieldsProvider>
+        </FormikProvider>
+      </ExecutionContextProvider>
     );
 
-    expect(screen.getByText("Low")).toBeInTheDocument();
-    expect(screen.getByText("High")).toBeInTheDocument();
+    // Assert Low/High inputs
+    expect(await screen.findByText("Low")).toBeInTheDocument();
+    expect(await screen.findByText("High")).toBeInTheDocument();
+
+    // Check that "Unit(s)" appears twice
+    const unitLabels = screen.getAllByText("Unit(s)");
+    expect(unitLabels).toHaveLength(2);
+
+    // Assert Comparator is NOT present
+    expect(screen.queryByLabelText(/Comparator/i)).not.toBeInTheDocument();
   });
 
   test("renders QuantityComponent fields correctly", async () => {
@@ -2785,5 +2820,84 @@ describe("TypeEditor Component", () => {
       const addButtons = screen.queryAllByText("Id");
       expect(addButtons).toHaveLength(0);
     });
+  });
+  test("Should render a reference component", () => {
+    const mockBundle = {
+      entry: [{ resource: { resourceType: "Patient", id: "patient-1" } }],
+    };
+
+    (useQiCoreResource as jest.Mock).mockReturnValue({
+      state: { bundle: mockBundle },
+      loading: false,
+      error: null,
+    });
+    const onChange = jest.fn();
+    const setFieldTouched = jest.fn();
+    const mockFormik = {
+      setFieldTouched: setFieldTouched,
+      setFieldValue: onChange,
+      getFieldProps: () => ({
+        label: "Claim.patient",
+        name: "Claim.patient",
+        value: undefined,
+        setFieldTouched: jest.fn(),
+        setFieldValue: jest.fn(),
+      }),
+      values: {},
+    } as unknown as FormikProps<any>;
+
+    render(
+      <ExecutionContextProvider
+        value={{
+          measureState: [null, jest.fn()],
+          bundleState: [null, jest.fn()],
+          valueSetsState: [null, jest.fn()],
+          executionContextReady: true,
+          executing: false,
+          setExecuting: jest.fn(),
+          contextFailure: false,
+        }}
+      >
+        <FormikProvider value={mockFormik}>
+          <RequiredFieldsProvider
+            requiredFields={{ "Claim.patient": true }}
+            formInfo={[
+              "Claim.patient",
+              {
+                id: "Claim.patient",
+                required: true,
+                canBeMultipleCardinality: false,
+              },
+            ]}
+          >
+            <TypeEditor
+              structureDefinition={{
+                id: "Claim.patient",
+                path: "Claim.patient",
+                min: 0,
+                max: "*",
+                type: [
+                  {
+                    code: "Reference",
+                    targetProfile: [
+                      "http://hl7.org/fhir/StructureDefinition/Patient",
+                    ],
+                  },
+                ],
+              }}
+              label="Claim.patient"
+              canEdit={true}
+              parentStructureDefinition={null}
+            />
+          </RequiredFieldsProvider>
+        </FormikProvider>
+      </ExecutionContextProvider>
+    );
+
+    const referenceSelect = screen.getByRole("combobox", {
+      name: "Reference Type",
+    });
+    expect(referenceSelect).toBeInTheDocument();
+    expect(referenceSelect).toHaveTextContent("Select");
   });
 });
