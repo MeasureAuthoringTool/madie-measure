@@ -2,12 +2,11 @@ import { act, render, screen } from "@testing-library/react";
 import * as React from "react";
 import clearAllMocks = jest.clearAllMocks;
 import ViewHRModal from "./ViewHRModal";
-import useMeasureServiceApi, {
-  MeasureServiceApi,
-} from "../../../api/useMeasureServiceApi";
+import { MeasureServiceApi } from "@madie/madie-util";
 import userEvent from "@testing-library/user-event";
 
 jest.mock("@madie/madie-util", () => ({
+  useMeasureServiceApi: jest.fn(() => mockMeasureServiceApi),
   measureStore: {
     updateMeasure: jest.fn((measure) => measure),
     state: jest.fn().mockImplementation(() => null),
@@ -18,21 +17,14 @@ jest.mock("@madie/madie-util", () => ({
   },
 }));
 
-jest.mock("../../../api/useMeasureServiceApi");
 const mockMeasureServiceApi = {
+  useMeasureServiceApi: jest.fn(() => mockMeasureServiceApi),
+
   fetchHumanReadable: jest
     .fn()
-    .mockResolvedValueOnce("<html>test human readable</html>"),
+    .mockResolvedValueOnce("<html>test human readable</html>")
+    .mockRejectedValueOnce("error"),
 } as unknown as MeasureServiceApi;
-const mockMeasureServiceApiError = {
-  fetchHumanReadable: jest.fn().mockRejectedValueOnce("error"),
-} as unknown as MeasureServiceApi;
-const useMeasureServiceApiMock =
-  useMeasureServiceApi as jest.Mock<MeasureServiceApi>;
-
-useMeasureServiceApiMock.mockImplementation(() => {
-  return mockMeasureServiceApi;
-});
 
 const onCloseFn = jest.fn();
 const exportMeasure = jest.fn();
@@ -69,9 +61,6 @@ describe("View Human Readable Modal component", () => {
   });
 
   it("should still display human readable modal when it has error", async () => {
-    useMeasureServiceApiMock.mockReset().mockImplementation(() => {
-      return mockMeasureServiceApiError;
-    });
     renderComponent();
     expect(screen.getByTestId("view-hr-modal")).toBeInTheDocument();
   });

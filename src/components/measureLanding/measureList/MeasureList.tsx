@@ -10,6 +10,11 @@ import React, {
 import tw from "twin.macro";
 import "styled-components/macro";
 import { Measure, Model } from "@madie/madie-models";
+import {
+  useMeasureServiceApi,
+  checkUserCanEdit,
+  useFeatureFlags,
+} from "@madie/madie-util";
 import { useNavigate } from "react-router-dom";
 import { Chip } from "@mui/material";
 import {
@@ -25,10 +30,11 @@ import {
   getSortedRowModel,
   SortingState,
 } from "@tanstack/react-table";
-
+import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore";
+import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
+import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import "../../editMeasure/testCases/components/testCaseLanding/common/TestCase.scss";
 import InvalidTestCaseDialog from "../../common/invalidTestCaseDialog/InvalidTestCaseDialog";
-import useMeasureServiceApi from "../../../api/useMeasureServiceApi";
-import { checkUserCanEdit, useFeatureFlags } from "@madie/madie-util";
 import CreatVersionDialog from "../../common/createVersionDialog/CreateVersionDialog";
 import DraftMeasureDialog from "../../common/draftMeasureDialog/DraftMeasureDialog";
 import versionErrorHelper from "../../../utils/versionErrorHelper";
@@ -1025,7 +1031,7 @@ export default function MeasureList(props: {
     copyMetaData: boolean
   ) => {
     measureServiceApi
-      .associateCmdId(qiCoreMeasureId, qdmMeasureId, copyMetaData)
+      .associateCmsId(qiCoreMeasureId, qdmMeasureId, copyMetaData)
       .then((measureSet) => {
         doUpdateList();
 
@@ -1089,7 +1095,8 @@ export default function MeasureList(props: {
       <table
         tw="min-w-full"
         data-testid="measure-list-tbl"
-        className="ml-table"
+        className="tcl-table"
+        id="testCaseListTable"
         style={{
           borderTop: "solid 1px #8c8c8c",
           borderSpacing: "0 2em !important",
@@ -1124,31 +1131,46 @@ export default function MeasureList(props: {
                           !header.column.getCanSort()
                         }
                         onClick={() => handleSort(header.id.replace("_", "."))}
+                        data-testid={`header-${header.id.replace("_", ".")}`}
                         title={
                           header.column.getCanSort()
-                            ? header.column.getNextSortingOrder() === "asc"
-                              ? "Sort ascending"
-                              : header.column.getNextSortingOrder() === "desc"
-                              ? "Sort descending"
-                              : "Clear sort"
+                            ? props.currentSort ===
+                              header.column.id.replace("_", ".")
+                              ? props.currentSort &&
+                                props.currentDirection &&
+                                props.currentDirection === "ASC"
+                                ? "Sort descending"
+                                : props.currentDirection === "DESC"
+                                ? "Clear sort"
+                                : "Sort ascending"
+                              : "Sort ascending"
                             : undefined
                         }
                       >
-                        {/*TODO Sorting functionality is disabled as per MAT-7532, Will be enabled in future */}
-                        {/*<span className="arrowDisplay">*/}
-                        {/*  {header.column.getCanSort() &&*/}
-                        {/*    isHovered &&*/}
-                        {/*    !header.column.getIsSorted() && <UnfoldMoreIcon />}*/}
-
-                        {/*  {{*/}
-                        {/*    asc: <KeyboardArrowUpIcon />,*/}
-                        {/*    desc: <KeyboardArrowDownIcon />,*/}
-                        {/*  }[header.column.getIsSorted() as string] ?? null}*/}
-                        {/*</span>*/}
                         {flexRender(
                           header.column.columnDef.header,
                           header.getContext()
                         )}
+                        <span className="arrowDisplay">
+                          {header.column.getCanSort() ? (
+                            props.currentSort ===
+                            header.column.id.replace("_", ".") ? (
+                              props.currentSort &&
+                              props.currentDirection &&
+                              props.currentDirection === "ASC" ? (
+                                <KeyboardArrowUpIcon />
+                              ) : (
+                                <KeyboardArrowDownIcon />
+                              )
+                            ) : isHovered ? (
+                              <UnfoldMoreIcon />
+                            ) : (
+                              ""
+                            )
+                          ) : (
+                            ""
+                          )}
+                        </span>
                       </button>
                     ) : (
                       flexRender(

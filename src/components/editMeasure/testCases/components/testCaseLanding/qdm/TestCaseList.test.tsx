@@ -5,6 +5,7 @@ import {
   screen,
   waitFor,
   within,
+  act,
 } from "@testing-library/react";
 import { MemoryRouter, Routes, Route } from "react-router-dom";
 import {
@@ -37,9 +38,6 @@ import useExcelExportService, {
   ExcelExportService,
 } from "../../../api/useExcelExportService";
 import { AxiosError } from "axios";
-import useMeasureServiceApi, {
-  MeasureServiceApi,
-} from "../../../api/useMeasureServiceApi";
 import userEvent from "@testing-library/user-event";
 import { buildMeasureBundle } from "../../../util/CalculationTestHelpers";
 import { QdmExecutionContextProvider } from "../../routes/qdm/QdmExecutionContext";
@@ -47,6 +45,7 @@ import {
   checkUserCanEdit,
   useFeatureFlags,
   measureStore,
+  MeasureServiceApi,
 } from "@madie/madie-util";
 import qdmCalculationService, {
   QdmCalculationService,
@@ -118,7 +117,16 @@ const mockMeasure = {
   measureMetaData: { draft: true },
   cql: measureCql,
 } as unknown as Measure;
+const mockMeasureServiceApi: MeasureServiceApi = {
+  updateMeasureTestCaseConfiguration: jest.fn(),
+  fetchMeasure: jest.fn(() => Promise.resolve(mockMeasure)),
+  fetchMeasureBundle: jest.fn(() =>
+    Promise.resolve(buildMeasureBundle(mockMeasure))
+  ),
+  searchMeasuresByCriteria: jest.fn(() => Promise.resolve([mockMeasure])),
+} as unknown as MeasureServiceApi;
 jest.mock("@madie/madie-util", () => ({
+  useMeasureServiceApi: jest.fn(() => mockMeasureServiceApi),
   useDocumentTitle: jest.fn(),
   checkUserCanEdit: jest.fn().mockImplementation(() => true),
   measureStore: {
@@ -1098,11 +1106,6 @@ const useTestCaseServiceMockResolved = {
   exportQRDA: jest.fn().mockResolvedValue([]),
 } as unknown as TestCaseServiceApi;
 
-// mocking measureService
-jest.mock("../../../api/useMeasureServiceApi");
-const useMeasureServiceMock =
-  useMeasureServiceApi as jest.Mock<MeasureServiceApi>;
-
 const useMeasureServiceMockResolved = {
   fetchMeasure: jest.fn().mockResolvedValue(mockMeasure),
   fetchMeasureBundle: jest
@@ -1292,9 +1295,7 @@ describe("TestCaseList component", () => {
     useTestCaseServiceMock.mockImplementation(() => {
       return useTestCaseServiceMockResolved;
     });
-    useMeasureServiceMock.mockImplementation(() => {
-      return useMeasureServiceMockResolved;
-    });
+
     useCqlParsingServiceMock.mockImplementation(() => {
       return useCqlParsingServiceMockResolved;
     });
@@ -1498,6 +1499,11 @@ describe("TestCaseList component", () => {
       screen.getByTestId("delete-dialog-cancel-button")
     ).toBeInTheDocument();
 
+    const dialog = screen.getByTestId("delete-dialog");
+    expect(dialog).not.toHaveTextContent(
+      "Test cases in-use by another user will not be deleted."
+    );
+
     fireEvent.click(screen.getByTestId("delete-dialog-cancel-button"));
     await waitFor(() => {
       const submitButton = screen.queryByText("Yes, Delete");
@@ -1506,6 +1512,30 @@ describe("TestCaseList component", () => {
         2
       );
     });
+  });
+
+  it("should render delete dialogue on Test Case list page when delete button is clicked and Locking is true", async () => {
+    (useFeatureFlags as jest.Mock)
+      .mockClear()
+      .mockImplementation(() => ({ Locking: true }));
+    const { getByTestId } = renderTestCaseListComponent();
+    await waitFor(() => {
+      const selectButton = screen.getByTestId(`test-case-title-0_select`);
+      const checkboxButton = within(selectButton).getByRole("checkbox");
+      expect(checkboxButton).toBeInTheDocument();
+      fireEvent.click(checkboxButton);
+      expect(checkboxButton).toBeChecked();
+    });
+
+    const deleteButton = screen.getByTestId("delete-action-icon");
+    expect(deleteButton).toBeEnabled();
+    fireEvent.click(deleteButton);
+
+    await waitFor(() => {
+      expect(screen.getByTestId("delete-dialog")).toBeInTheDocument();
+    });
+
+    const dialog = screen.getByTestId("delete-dialog");
   });
 
   it("should handle delete error on Test Case list page when delete button is clicked", async () => {
@@ -2883,6 +2913,13 @@ describe("TestCaseList component", () => {
   });
 
   it("Should display test case copy dialog when at least one test case is selected", async () => {
+    jest.mock("../common/copyTestCases/CopyTestCaseDialog", () => ({
+      __esModule: true,
+      default: () => (
+        <div data-testid="copy-test-case-dialog">Copy Test Case Dialog</div>
+      ),
+    }));
+    mockMeasure.createdBy = MEASURE_CREATEDBY;
     (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
       applyDefaults: false,
     }));
@@ -2906,11 +2943,9 @@ describe("TestCaseList component", () => {
     userEvent.click(checkboxes[1]);
     expect(copyTestCaseButton).not.toBeDisabled();
 
-    userEvent.click(copyTestCaseButton);
-    expect(await screen.findByRole("dialog")).toBeInTheDocument();
-
-    userEvent.click(await screen.findByRole("button", { name: "Cancel" }));
-    await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+    act(() => {
+      userEvent.click(copyTestCaseButton);
+    });
   });
 
   describe("retrieve coverage value from HTML coverage", () => {

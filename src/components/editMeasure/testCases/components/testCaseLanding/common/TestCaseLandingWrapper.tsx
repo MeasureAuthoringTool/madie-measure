@@ -34,6 +34,7 @@ const TestCaseLandingWrapper = (props) => {
   return (
     <div
       tw="grid gap-4 mx-8 my-6 shadow-lg rounded-md border border-slate bg-white"
+      data-testid="test-case-landing-wrapper"
       style={{
         marginTop: 16,
         gridTemplateColumns: `${

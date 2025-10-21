@@ -17,8 +17,7 @@ import {
 } from "cqm-models";
 import { ServiceConfig } from "../../../../api/ServiceContext";
 import useServiceConfig from "../../../../api/useServiceConfig";
-import useMeasureServiceApi from "../api/useMeasureServiceApi";
-import { useOktaTokens } from "@madie/madie-util";
+import { useOktaTokens, useMeasureServiceApi } from "@madie/madie-util";
 import axios from "../../../../api/axios-instance";
 import { DataCriteria } from "./models/DataCriteria";
 import _ from "lodash";

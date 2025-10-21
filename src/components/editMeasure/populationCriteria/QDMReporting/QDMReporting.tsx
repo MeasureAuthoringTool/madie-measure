@@ -6,10 +6,11 @@ import {
   measureStore,
   checkUserCanEdit,
   routeHandlerStore,
+  useMeasureServiceApi,
   useFeatureFlags,
 } from "@madie/madie-util";
 import MetaDataWrapper from "../../../editMeasure/details/MetaDataWrapper";
-import useMeasureServiceApi from "../../../../api/useMeasureServiceApi";
+
 import {
   Select,
   MadieDiscardDialog,
@@ -126,12 +127,13 @@ const QDMReporting = (props: ReportingProps) => {
 
   const handleSubmit = async (values) => {
     if (featureFlags.Locking && (await props.checkTestCasesLockStatus())) {
-      props.setAlertMessage({
-        type: "error",
-        message:
-          "This measure cannot be saved because changes to the Population Criteria will update test cases and one or more test cases are locked by another user.",
-        canClose: false,
-      });
+      handleToast(
+        "danger",
+        "This measure cannot be saved because changes to the Population Criteria will update test cases and one or more test cases are locked by another user.",
+        true
+      );
+      formik.resetForm();
+      return;
     }
     const newMeasure: Measure = {
       ...measure,

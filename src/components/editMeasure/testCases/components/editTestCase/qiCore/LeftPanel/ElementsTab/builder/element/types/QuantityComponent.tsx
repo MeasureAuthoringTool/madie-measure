@@ -14,23 +14,37 @@ import DecimalInput from "../../../../../../../common/DecimalInput/DecimalInput"
 import "./QuantityComponent.scss";
 import AddElementButton from "../../../../../../../common/AddElementButton";
 
+export interface QuantityComponentProps extends TypeComponentProps {
+  showLabel?: boolean;
+  valueFieldLabel?: string;
+}
+
 const QuantityComponent = ({
   canEdit,
   label,
+  showLabel = true,
+  valueFieldLabel = "Value",
   structureDefinition,
-  showAddAttributeButton,
-  addTitle,
-  handleAddElement,
-}: TypeComponentProps) => {
+  showAddAttributeButton = false,
+  addTitle = "",
+  handleAddElement = () => {},
+}: QuantityComponentProps) => {
   const formik = useFormikContext();
 
   /*
-  Determine if the structureDefinition represents a SimpleQuantity.
-  The comparator is not used on a SimpleQuantity (https://hl7.org/fhir/datatypes.html#SimpleQuantity).
-  Use this flag to conditionally hide the comparator field in the UI.
+    Determine whether to display the comparator field:
+
+    - Shown only for "Quantity" types that are NOT SimpleQuantity.
+    - Hidden for:
+        - SimpleQuantity (profile includes SimpleQuantity)
+        - Range types or any other type
   */
-  const isSimpleQuantity = structureDefinition?.type?.[0]?.profile?.includes(
-    "http://hl7.org/fhir/StructureDefinition/SimpleQuantity"
+  const showComparator = structureDefinition?.type?.some(
+    ({ code, profile }) =>
+      code === "Quantity" &&
+      !profile?.includes(
+        "http://hl7.org/fhir/StructureDefinition/SimpleQuantity"
+      )
   );
 
   const comparatorPath = `${label}.comparator`;
@@ -43,11 +57,11 @@ const QuantityComponent = ({
   return (
     <div className="element-editor-add-row">
       <div className="quantity-component">
-        <InputLabel>{label}</InputLabel>
+        {showLabel && <InputLabel>{label}</InputLabel>}
 
         <div className="quantity-fields">
           {/* Comparator field */}
-          {!isSimpleQuantity && (
+          {showComparator && (
             <div className="comparator-input">
               <CodesComponent
                 label="Comparator"
@@ -76,7 +90,7 @@ const QuantityComponent = ({
           {/* Value field */}
           <div className="value-input">
             <DecimalInput
-              label="Value"
+              label={valueFieldLabel}
               value={getIn(formik.values, valuePath) ?? ""}
               handleChange={(val) => {
                 const existing = getIn(formik.values, label) || {};

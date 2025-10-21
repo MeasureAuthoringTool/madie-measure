@@ -14,13 +14,17 @@ import {
   MemoryRouter,
 } from "react-router-dom";
 import { routesConfig } from "../measureRoutes/MeasureRoutes";
-import { MeasureServiceApi } from "../../api/useMeasureServiceApi";
+
 import { ApiContextProvider, ServiceConfig } from "../../api/ServiceContext";
 import userEvent from "@testing-library/user-event";
 import { oneItemResponse } from "../__mocks__/mockMeasureResponses";
 import { within } from "@testing-library/dom";
 // @ts-ignore
-import { useFeatureFlags } from "@madie/madie-util";
+import {
+  useFeatureFlags,
+  MeasureServiceApi,
+  useMeasureServiceApi,
+} from "@madie/madie-util";
 import MeasureLanding from "./MeasureLanding";
 import {
   TRANSFER_MEASURE_SUCCESS,
@@ -80,9 +84,25 @@ const mockMeasureServiceApi = {
   }),
 } as unknown as MeasureServiceApi;
 
-jest.mock("../../api/useMeasureServiceApi", () =>
-  jest.fn(() => mockMeasureServiceApi)
-);
+jest.mock("@madie/madie-util", () => ({
+  useMeasureServiceApi: jest.fn(() => mockMeasureServiceApi),
+  useOktaTokens: jest.fn(() => ({
+    getAccessToken: () => "test.jwt",
+    getUserName: () => mockUser,
+  })),
+  checkUserCanEdit: jest.fn().mockImplementation(() => true),
+  checkUserCanDelete: jest.fn().mockImplementation(() => true),
+  useFeatureFlags: jest.fn(),
+  useDocumentTitle: jest.fn(),
+  measureStore: {
+    updateMeasure: jest.fn((measure) => measure),
+    state: jest.fn().mockImplementation(() => null),
+    initialState: jest.fn().mockImplementation(() => null),
+    subscribe: () => {
+      return { unsubscribe: () => null };
+    },
+  },
+}));
 
 // Custom render function to test MeasureLanding component directly
 // Update to wrap in MemoryRouter to provide router context for useLocation()
@@ -120,7 +140,7 @@ describe("Measure Page", () => {
     );
   };
 
-  test("shows owned measures on page load", async () => {
+  test("shows owned measures on page load, and sorting works", async () => {
     renderRouter(["/measures?tab=0&page=1&limit=10"]);
     const measure1 = await screen.findByText("TestMeasure1");
     expect(measure1).toBeInTheDocument();
@@ -154,6 +174,70 @@ describe("Measure Page", () => {
     expect(ownedMeasuresTab).toHaveClass("Mui-selected");
     expect(sharedMeasuresTab).not.toHaveClass("Mui-selected");
     expect(allMeasuresTab).not.toHaveClass("Mui-selected");
+
+    const measureSortHeader = screen.getByTestId("header-measureName");
+    expect(measureSortHeader).toBeInTheDocument();
+    expect(measureSortHeader.title).toBe("Sort ascending");
+    // sort ascending
+    userEvent.click(measureSortHeader);
+    await waitFor(() => {
+      expect(
+        mockMeasureServiceApi.searchMeasuresByCriteria
+      ).toHaveBeenCalledWith(
+        ["OWNED"],
+        "10",
+        0,
+        "measureName",
+        "ASC",
+        {
+          optionalSearchProperties: [],
+          searchField: "",
+        },
+        expect.any(AbortController)
+      );
+    });
+    // sort descending
+    const updatedHeader = screen.getByTestId("header-measureName");
+    expect(updatedHeader.title).toBe("Sort descending");
+    userEvent.click(updatedHeader);
+    await waitFor(() => {
+      expect(
+        mockMeasureServiceApi.searchMeasuresByCriteria
+      ).toHaveBeenCalledWith(
+        ["OWNED"],
+        "10",
+        0,
+        "measureName",
+        "DESC",
+        {
+          optionalSearchProperties: [],
+          searchField: "",
+        },
+        expect.any(AbortController)
+      );
+    });
+
+    const updatedHeader2 = screen.getByTestId("header-measureName");
+    expect(updatedHeader2.title).toBe("Clear sort");
+    userEvent.click(updatedHeader2);
+    await waitFor(() => {
+      expect(
+        mockMeasureServiceApi.searchMeasuresByCriteria
+      ).toHaveBeenCalledWith(
+        ["OWNED"],
+        "10",
+        0,
+        "",
+        "",
+        {
+          optionalSearchProperties: [],
+          searchField: "",
+        },
+        expect.any(AbortController)
+      );
+    });
+    const updatedHeader3 = screen.getByTestId("header-measureName");
+    expect(updatedHeader3.title).toBe("Sort ascending");
   });
 
   test("shared measure nav click triggers nav", async () => {
@@ -432,7 +516,7 @@ describe("Measure Page", () => {
       expect(screen.queryByText("Unable to fetch measures")).toBeNull();
     });
   });
-
+  //keep skipeed
   test.skip("render associate cms id dialog", async () => {
     //this fails in gitactions no matter what I do, passes locally
     renderRouter(["/measures"]);

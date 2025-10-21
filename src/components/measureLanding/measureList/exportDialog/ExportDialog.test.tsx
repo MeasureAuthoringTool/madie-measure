@@ -32,4 +32,23 @@ describe("Export Dialog", () => {
     });
     expect(getByText("Continue")).toBeInTheDocument();
   });
+
+  test("renders a continue button when warning", () => {
+    renderExportDialog({
+      downloadState: "failure",
+      failureMessage: [
+        "Missing CQL",
+        "Missing Population Criteria",
+        "Missing Measure Developers",
+        "Missing Steward",
+        "Missing Description",
+        "Measure Type is required",
+      ],
+      measureName: "measureName",
+      open: true,
+      handleContinueDialog: jest.fn(),
+      handleCancelDialog: jest.fn(),
+    });
+    expect(screen.queryByText("Continue")).not.toBeInTheDocument();
+  });
 });

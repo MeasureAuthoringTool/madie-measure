@@ -3,7 +3,7 @@ import {
   MadieDialog,
   MadieSpinner,
 } from "@madie/madie-design-system/dist/react";
-import useMeasureServiceApi from "../../../api/useMeasureServiceApi";
+import { useMeasureServiceApi } from "@madie/madie-util";
 import { DialogContent, Typography, Backdrop } from "@mui/material";
 
 interface ModalProps {

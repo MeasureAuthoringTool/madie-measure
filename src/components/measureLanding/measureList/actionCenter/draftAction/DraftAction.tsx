@@ -3,7 +3,7 @@ import { IconButton } from "@mui/material";
 import Tooltip from "@mui/material/Tooltip";
 import { Measure } from "@madie/madie-models";
 import EditCalendarOutlinedIcon from "@mui/icons-material/EditCalendarOutlined";
-import useMeasureServiceApi from "../../../../../api/useMeasureServiceApi";
+import { useMeasureServiceApi } from "@madie/madie-util";
 import { Toast } from "@madie/madie-design-system/dist/react";
 
 import _ from "lodash";

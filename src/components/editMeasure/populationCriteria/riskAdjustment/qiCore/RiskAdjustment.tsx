@@ -3,11 +3,12 @@ import "twin.macro";
 import "styled-components/macro";
 import { useFormik } from "formik";
 import useFormikResetOnEvent from "../../../../common/useFormikResetOnEvent";
-import useMeasureServiceApi from "../../../../../api/useMeasureServiceApi";
+
 import {
   checkUserCanEdit,
   measureStore,
   routeHandlerStore,
+  useMeasureServiceApi,
   useFeatureFlags,
 } from "@madie/madie-util";
 import { CqlAntlr } from "@madie/cql-antlr-parser/dist/src";
@@ -103,12 +104,13 @@ const RiskAdjustment = (props: RiskAdjustmentProps) => {
 
   const handleSubmit = async (values) => {
     if (featureFlags.Locking && (await props.checkTestCasesLockStatus())) {
-      props.setAlertMessage({
-        type: "error",
-        message:
-          "This measure cannot be saved because changes to the Population Criteria will update test cases and one or more test cases are locked by another user.",
-        canClose: false,
-      });
+      handleToast(
+        "danger",
+        "This measure cannot be saved because changes to the Population Criteria will update test cases and one or more test cases are locked by another user.",
+        true
+      );
+      formik.resetForm();
+      return;
     }
 
     const modifiedMeasure = {
