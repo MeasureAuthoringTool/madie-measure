@@ -206,7 +206,7 @@ const ResourceEditor = ({
         );
     }
   }, [selectedResourceID, state, setActiveTab, setLastAddedElemPath]);
-
+  debugger
   const saveElements = (newValue: ElementDefinition[] | null) => {
     // removed uncessesary reference to modifying displayedElements.
     // Any updates through dispatch will trickle down child component references accordingly.
@@ -284,7 +284,9 @@ const ResourceEditor = ({
       {selectedResource && (
         <div className="resource-editor">
           <div className="resource-header">
-            <Typography>{resourceBasePath}</Typography>
+            <Typography>
+              {selectedResource?.definition?.title ?? resourceBasePath}
+            </Typography>
             <div className="spacer" />
             <Typography sx={{ fontSize: "14px" }}>
               <span style={{ color: "125496", fontWeight: 700 }}>
