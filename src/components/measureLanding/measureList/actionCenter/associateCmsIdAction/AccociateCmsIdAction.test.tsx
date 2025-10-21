@@ -8,14 +8,19 @@ import AssociateCmsIdAction, {
   MUST_HAVE_CMS_ID,
   MUST_NOT_HAVE_CMS_ID,
   SELECT_TWO_MEASURES,
+  MEASURE_LOCKED_MESSAGE,
 } from "./AccociateCmsIdAction";
 import { Measure, MeasureSet, Model } from "@madie/madie-models";
 import userEvent from "@testing-library/user-event";
+import { useFeatureFlags } from "@madie/madie-util";
 
 const mockUser = "test user";
 jest.mock("@madie/madie-util", () => ({
   useOktaTokens: () => ({
     getUserName: () => mockUser,
+  }),
+  useFeatureFlags: jest.fn().mockReturnValue({
+    Locking: false,
   }),
 }));
 
@@ -37,7 +42,7 @@ const qiCoreMeasure = {
   measureSet: { ...mockMeasureSet, cmsId: null },
   measureSetId: "1-2-3-4",
   measureMetaData: { draft: true },
-} as Measure;
+} as unknown as Measure;
 
 const associateCmsId = jest.fn();
 
@@ -165,6 +170,42 @@ describe("AssociateCmsIdAction", () => {
   });
 
   it("Should enable action btn if one QDM measure and QI-Core is selected, QDM measure has CMS id, QICore measure has no CMS ID and is in draft state, and both measures are owned by user", () => {
+    render(
+      <AssociateCmsIdAction
+        measures={[qdmMeasure, qiCoreMeasure]}
+        onClick={associateCmsId}
+      />
+    );
+    expect(screen.getByTestId("associate-cms-id-action-btn")).toBeEnabled();
+    expect(screen.getByTestId("associate-cms-id-tooltip")).toHaveAttribute(
+      "aria-label",
+      ASSOCIATE_CMS_ID
+    );
+    userEvent.click(screen.getByTestId("associate-cms-id-action-btn"));
+    expect(associateCmsId).toHaveBeenCalled();
+  });
+
+  it("Should disable action btn if feature flag Locking is enabled and QI-Core measure is locked", () => {
+    (useFeatureFlags as jest.Mock).mockReturnValue({ Locking: true });
+    const lockedQiCoreMeasure = {
+      ...qiCoreMeasure,
+      measureLock: { lockedBy: mockUser, lockDateTime: new Date() },
+    } as unknown as Measure;
+    render(
+      <AssociateCmsIdAction
+        measures={[qdmMeasure, lockedQiCoreMeasure]}
+        onClick={associateCmsId}
+      />
+    );
+    expect(screen.getByTestId("associate-cms-id-action-btn")).toBeDisabled();
+    expect(screen.getByTestId("associate-cms-id-tooltip")).toHaveAttribute(
+      "aria-label",
+      MEASURE_LOCKED_MESSAGE + " " + mockUser
+    );
+  });
+
+  it("Should enable action btn if feature flag Locking is enabled and QI-Core measure is not locked", () => {
+    (useFeatureFlags as jest.Mock).mockReturnValue({ Locking: true });
     render(
       <AssociateCmsIdAction
         measures={[qdmMeasure, qiCoreMeasure]}
