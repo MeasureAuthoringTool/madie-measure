@@ -31,7 +31,9 @@ import "./Builder.scss";
 import {
   getTopLevelElements,
   getLastPart,
+  buildMadieResourceFromResourceIdentifier,
 } from "../../../../../../api/fhirDefinitionServiceUtilities";
+import { ResourceContextProvider } from "./ResourceContext";
 
 interface BuilderProps {
   testCase: TestCase;
@@ -84,11 +86,12 @@ const Builder = ({
   };
 
   const [selectedResourceID, setSelectedResourceId] = useState<string>(null); // one single source of truth.
+  const [allResourceProfiles, setAllResourceProfiles] = useState<any[]>([]); // all profiles for all resources
   const [resources, setResources] = useState<ResourceIdentifier[]>(null);
   const addedResources = state?.bundle?.entry?.length || 0;
   const [savedGridID, setSavedGridID] = useState(null);
   useEffect(() => {
-    const resourcesPromise = fhirDefinitionsService.current.getResources();
+    const resourcesPromise = fhirDefinitionsService.current.getResources(); // this is needed in reference component for the hr name
     const relevantElementsPromise =
       fhirElmTranslationService.current.fetchRelevantDataElements(measure);
     Promise.all([resourcesPromise, relevantElementsPromise]).then(
@@ -105,6 +108,7 @@ const Builder = ({
                   relevantTypes.includes(r.type) ||
                   "PATIENT" === r.type.toUpperCase()
               );
+          setAllResourceProfiles(resources);
           setResources(filteredResources);
         }
       }
@@ -156,19 +160,8 @@ const Builder = ({
           <ResourceList
             resourceIdentifiers={resources}
             onClick={async (resourceIdentifier: ResourceIdentifier) => {
-              const id = uuidv4();
-              const newEntry = {
-                fullUrl: `https://madie.cms.gov/${resourceIdentifier.type}/${id}`,
-                resource: {
-                  id,
-                  resourceType: resourceIdentifier.type,
-                },
-              };
-              if (!_.isEmpty(resourceIdentifier.profile)) {
-                newEntry.resource["meta"] = {
-                  profile: [resourceIdentifier.profile],
-                };
-              }
+              const newEntry =
+                buildMadieResourceFromResourceIdentifier(resourceIdentifier);
               await fhirDefinitionsService.current
                 .getResourceTree(resourceIdentifier.id)
                 .then((resourceTree) => {
@@ -208,15 +201,17 @@ const Builder = ({
         {activeTab === "Added" && (
           <>
             {selectedResourceID && (
-              <ResourceEditor
-                selectedResourceID={selectedResourceID}
-                setValidationSchema={setValidationSchema}
-                setInitialFormikValuesStu6={setInitialFormikValuesStu6}
-                onCancel={() =>
-                  handleCancel(setSelectedResourceId, savedGridID)
-                }
-                canEdit={canEdit}
-              />
+              <ResourceContextProvider value={allResourceProfiles}>
+                <ResourceEditor
+                  selectedResourceID={selectedResourceID}
+                  setValidationSchema={setValidationSchema}
+                  setInitialFormikValuesStu6={setInitialFormikValuesStu6}
+                  onCancel={() =>
+                    handleCancel(setSelectedResourceId, savedGridID)
+                  }
+                  canEdit={canEdit}
+                />
+              </ResourceContextProvider>
             )}
             <TestCaseSummaryGrid
               entry={state?.bundle?.entry}
