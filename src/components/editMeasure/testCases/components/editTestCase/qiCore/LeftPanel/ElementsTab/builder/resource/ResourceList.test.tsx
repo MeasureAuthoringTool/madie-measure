@@ -152,11 +152,10 @@ describe("ResourceList component", () => {
       />
     );
 
-    // Add button for qicore-patient should be disabled
+    // Add button for QICore pateint and other resource should NOT be disabled
     const addBtn = screen.getByTestId("add-element-qicore-patient");
     expect(addBtn).not.toBeDisabled();
 
-    // Add button for other resource should NOT be disabled
     const addBtnOther = screen.getByTestId("add-element-2");
     expect(addBtnOther).not.toBeDisabled();
   });
