@@ -35,10 +35,7 @@ export default function VersionAction(props: PropTypes) {
       /* check if there is not already a Version for that measure set*/
     ) {
       if (featureFlags.Locking) {
-        if (
-          measures[0].measureLock?.lockedBy &&
-          !measures[0].hasLockedTestCases
-        ) {
+        if (measures[0].measureLock?.lockedBy) {
           setDisableVersionBtn(true);
           setTooltipMessage(
             `${MEASURE_LOCKED_MESSAGE} ${measures[0].measureLock.lockedBy}`
