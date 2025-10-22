@@ -360,7 +360,6 @@ it("shows does not show an add button when patient is selected, if a bundle entr
       </FormikProvider>
     </ResourceContext.Provider>
   );
-  // change the type
   const referenceTypeSelect = screen.getByTestId("reference-type-select");
   // open the select dropdown
   userEvent.click(referenceTypeSelect);
@@ -393,13 +392,4 @@ it("shows does not show an add button when patient is selected, if a bundle entr
     (option) => option.textContent
   );
   expect(referenceOptionTexts).not.toContain("ID Not Present (Add New)");
-  // expect there to be no option of add new
-
-  // userEvent.click(referenceSelectDropdown);
-  // const referenceOptionsList = await screen.findAllByTestId(/-option/i);
-  // userEvent.click(referenceOptionsList[0]);
-  // // expect the option to be selected.
-  // await waitFor(() => {
-  //   expect(mockFormik.setFieldValue).toHaveBeenCalled();
-  // });
 });
