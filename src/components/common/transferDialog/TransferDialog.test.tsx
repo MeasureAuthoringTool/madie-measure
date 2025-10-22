@@ -277,7 +277,7 @@ describe("Transfer Measures Dialog component", () => {
       expect(setStatusHandlerMock).toHaveBeenCalledWith({
         warning: {
           status: true,
-          primaryMessage: `2 measure(s) could not be transferred. Please try again, or contact help desk if the issue persists.`,
+          primaryMessage: `2 measures could not be transferred. Please try again, or contact help desk if the issue persists.`,
           secondaryMessages: expect.arrayContaining([
             mockMeasure1.measureName,
             mockMeasure3.measureName,

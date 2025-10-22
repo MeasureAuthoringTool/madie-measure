@@ -713,7 +713,7 @@ describe("Action Center Tests", () => {
       warning: {
         status: true,
         primaryMessage:
-          "1 measure(s) could not be transferred. Please try again, or contact help desk if the issue persists.",
+          "1 measures could not be transferred. Please try again, or contact help desk if the issue persists.",
         secondaryMessages: ["new measure - A"],
       },
     });

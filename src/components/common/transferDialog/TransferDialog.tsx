@@ -254,7 +254,7 @@ const TransferDialog = ({
           setStatusHandler({
             warning: {
               status: true,
-              primaryMessage: `${failedMeasureNames?.length} measure(s) could not be transferred. Please try again, or contact help desk if the issue persists.`,
+              primaryMessage: `${failedMeasureNames?.length} measures could not be transferred. Please try again, or contact help desk if the issue persists.`,
               secondaryMessages: failedMeasureNames,
             },
           });
