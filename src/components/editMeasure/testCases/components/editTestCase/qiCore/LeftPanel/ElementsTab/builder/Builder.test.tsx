@@ -11,6 +11,7 @@ import {
 } from "../../../../../../../../../api/ServiceContext";
 import { useFormikContext } from "formik";
 import { mockBundle } from "./grid/TestCaseSummaryGrid.test";
+import { within } from "@testing-library/dom";
 
 const serviceConfig: ServiceConfig = {
   measureService: {
@@ -70,35 +71,36 @@ jest.mock(
   "../../../../../../../../../api/useFhirElmTranslationServiceApi",
   () => {
     return () => ({
-      fetchRelevantDataElements: () => [
-        {
-          oid: "ts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1095.101",
-          title: "Hospice Status",
-          description: "Procedure: Hospice Status",
-          type: "Procedure",
-          drc: false,
-          codeId: null,
-          name: "Hospice Status",
-        },
-        {
-          oid: "ts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1095.91",
-          title: "Dietitian Referral",
-          description: "Procedure: Dietitian Referral",
-          type: "Procedure",
-          drc: false,
-          codeId: null,
-          name: "Dietitian Referral",
-        },
-        {
-          oid: "ts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.666.5.307",
-          title: "Encounter Inpatient",
-          description: "Encounter: Encounter Inpatient",
-          type: "Encounter",
-          drc: false,
-          codeId: null,
-          name: "Encounter Inpatient",
-        },
-      ],
+      fetchRelevantDataElements: () =>
+        Promise.resolve([
+          {
+            oid: "ts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1095.101",
+            title: "Hospice Status",
+            description: "Procedure: Hospice Status",
+            type: "Procedure",
+            drc: false,
+            codeId: null,
+            name: "Hospice Status",
+          },
+          {
+            oid: "ts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1095.91",
+            title: "Dietitian Referral",
+            description: "Procedure: Dietitian Referral",
+            type: "Procedure",
+            drc: false,
+            codeId: null,
+            name: "Dietitian Referral",
+          },
+          {
+            oid: "ts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.666.5.307",
+            title: "Encounter Inpatient",
+            description: "Encounter: Encounter Inpatient",
+            type: "Encounter",
+            drc: false,
+            codeId: null,
+            name: "Encounter Inpatient",
+          },
+        ]),
     });
   }
 );
@@ -197,7 +199,14 @@ describe("Builder Component", () => {
 
     userEvent.click(addedTab);
     expect(addedTab).toHaveAttribute("aria-selected", "true");
-    expect(screen.getByText("Resource & Value Set")).toBeInTheDocument();
+    expect(screen.getByText("Profile")).toBeInTheDocument();
+    // switch to added tab and check for content
+    userEvent.click(screen.getByRole("tab", { name: /Added/i }));
+    expect(
+      within(
+        screen.getByRole("table").querySelector("td:nth-child(1)")
+      ).getByText("QICore Encounter")
+    ).toBeInTheDocument();
   });
 });
 
