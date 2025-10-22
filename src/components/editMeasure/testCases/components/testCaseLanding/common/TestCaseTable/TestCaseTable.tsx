@@ -9,6 +9,7 @@ import {
 } from "@tanstack/react-table";
 import "styled-components/macro";
 import { Model, TestCase } from "@madie/madie-models";
+import { Tooltip } from "@mui/material";
 import {
   TestCaseStatus,
   TestCaseValidationStatus,
@@ -376,13 +377,23 @@ const TestCaseTable = (props: TestCaseTableProps) => {
             measure.measureSet?.owner,
             measure.measureSet?.acls
           );
-          const buttonText = isLockedByOther ? "View" : canEdit ? "Edit" : "View";
+          const buttonText = isLockedByOther
+            ? "View"
+            : canEdit
+            ? "Edit"
+            : "View";
 
-          return (
+          const buttonElement = (
             <Button
               variant="outline-filled"
               data-testid={`view-edit-test-case-button-${info.row.original.id}`}
-              aria-label={`${buttonText} Test Case ${info.row.original.group} ${info.row.original.title}`}
+              aria-label={`${buttonText} Test Case ${info.row.original.group} ${
+                info.row.original.title
+              }${
+                isLockedByOther
+                  ? ` (Locked by ${info.row.original.testCaseLock.lockedBy})`
+                  : ""
+              }`}
               onClick={() => {
                 const editTestCaseUrl = _.isEmpty(measure?.groups)
                   ? `../${info.row.original.id}`
@@ -401,6 +412,33 @@ const TestCaseTable = (props: TestCaseTableProps) => {
               {buttonText}
             </Button>
           );
+
+          if (isLockedByOther) {
+            return (
+              <Tooltip
+                title={
+                  <>
+                    Locked while being edited by
+                    <br />
+                    {info.row.original.testCaseLock.lockedBy}
+                  </>
+                }
+                arrow
+                slotProps={{
+                  tooltip: {
+                    sx: {
+                      maxWidth: "none",
+                      whiteSpace: "nowrap",
+                    },
+                  },
+                }}
+              >
+                <span>{buttonElement}</span>
+              </Tooltip>
+            );
+          }
+
+          return buttonElement;
         },
         accessorKey: "action",
         enableSorting: false,
