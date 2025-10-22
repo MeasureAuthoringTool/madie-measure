@@ -25,7 +25,9 @@ import {
   useFeatureFlags,
   useMeasureServiceApi,
 } from "@madie/madie-util";
-import StatusHandler from "../editMeasure/editor/StatusHandler";
+import StatusHandler, {
+  INITIAL_STATUS_HANDLER,
+} from "../editMeasure/editor/StatusHandler";
 import _ from "lodash";
 import { getTabStorageKey } from "./measureLandingUtils";
 
@@ -75,6 +77,7 @@ export default function MeasureLanding() {
   const [errMsg, setErrMsg] = useState(undefined);
   const [currentSort, setCurrentSort] = useState("");
   const [currentDirection, setCurrentDirection] = useState("");
+  const [statusHandler, setStatusHandler] = useState(INITIAL_STATUS_HANDLER);
   const abortController = useRef<AbortController | null>(null);
   // Incrementing id to identify the latest in-flight request; prevents stale requests
   const requestIdRef = useRef(0);
@@ -375,6 +378,9 @@ export default function MeasureLanding() {
 
   return (
     <div id="measure-landing" data-testid="measure-landing">
+      <div id="status-handler-container">
+        <StatusHandler {...statusHandler} />
+      </div>
       <div className="measure-table">
         <section
           tw="flex flex-row"
@@ -457,7 +463,7 @@ export default function MeasureLanding() {
                 setCurrentSort={setCurrentSort}
                 currentDirection={currentDirection}
                 setCurrentDirection={setCurrentDirection}
-                setErrMsg={setErrMsg}
+                setStatusHandler={setStatusHandler}
                 search={search}
                 // Toast props
                 toastOpen={toastOpen}

@@ -88,8 +88,8 @@ const mockMeasure6 = {
 } as Measure;
 
 const mockTransferMeasuresResponse = jest.fn().mockResolvedValue({
-  success: true,
-  message: "Measures transferred successfully",
+  status: 200,
+  data: [],
 });
 const mockMeasureServiceApi = {
   transferMeasures: mockTransferMeasuresResponse,
@@ -118,6 +118,7 @@ describe("Transfer Measures Dialog component", () => {
         measures={[mockMeasure1]}
         open={true}
         onClose={jest.fn()}
+        setStatusHandler={jest.fn()}
       />
     );
 
@@ -139,6 +140,7 @@ describe("Transfer Measures Dialog component", () => {
         ]}
         open={true}
         onClose={jest.fn()}
+        setStatusHandler={jest.fn()}
       />
     );
 
@@ -169,6 +171,7 @@ describe("Transfer Measures Dialog component", () => {
         ]}
         open={true}
         onClose={jest.fn()}
+        setStatusHandler={jest.fn()}
       />
     );
     expect(getByTestId("transfer-measure-tbl")).toBeInTheDocument();
@@ -191,6 +194,7 @@ describe("Transfer Measures Dialog component", () => {
         measures={[mockMeasure1]}
         open={true}
         onClose={submitMock}
+        setStatusHandler={jest.fn()}
       />
     );
     await checkDataRows(1);
@@ -226,6 +230,69 @@ describe("Transfer Measures Dialog component", () => {
     });
   });
 
+  it("should handle partial transfer (206)", async () => {
+    // Have 3 measures, fail 2 of them
+    const measures = [mockMeasure1, mockMeasure2, mockMeasure3];
+    const failedMeasureIds = [mockMeasure1.id, mockMeasure3.id];
+
+    // Mock API to return 206 with the 2 failed measure IDs
+    mockTransferMeasuresResponse.mockResolvedValue({
+      status: 206,
+      data: failedMeasureIds,
+    });
+
+    const setStatusHandlerMock = jest.fn();
+    const onCloseMock = jest.fn();
+
+    render(
+      <TransferDialog
+        measures={measures}
+        open={true}
+        onClose={onCloseMock}
+        setStatusHandler={setStatusHandlerMock}
+      />
+    );
+
+    const transferBtn = screen.getByTestId("transfer-save-button");
+    const newHarpIdInput = screen.getByTestId("harp-id-input");
+
+    expect(transferBtn).toBeInTheDocument();
+    expect(transferBtn).toBeDisabled();
+
+    fireEvent.change(newHarpIdInput, { target: { value: "newUser" } });
+
+    expect(transferBtn).toBeEnabled();
+
+    fireEvent.click(transferBtn);
+
+    await waitFor(() => {
+      // Verify API call
+      expect(mockTransferMeasuresResponse).toHaveBeenCalledWith(
+        measures.map((m) => m.id),
+        "newUser",
+        false
+      );
+
+      // Verify warning status with 2 failed measures
+      expect(setStatusHandlerMock).toHaveBeenCalledWith({
+        warning: {
+          status: true,
+          primaryMessage: `2 measure(s) could not be transferred. Please try again, or contact help desk if the issue persists.`,
+          secondaryMessages: expect.arrayContaining([
+            mockMeasure1.measureName,
+            mockMeasure3.measureName,
+          ]),
+        },
+      });
+
+      // Verify dialog closes without toast
+      expect(onCloseMock).toHaveBeenCalledWith({
+        toastType: "success",
+        toastOpen: false,
+      });
+    });
+  });
+
   it("test handle submit failure", async () => {
     mockMeasureServiceApi.transferMeasures = jest
       .fn()
@@ -237,6 +304,7 @@ describe("Transfer Measures Dialog component", () => {
         measures={[mockMeasure1]}
         open={true}
         onClose={submitMock}
+        setStatusHandler={jest.fn()}
       />
     );
     await checkDataRows(1);

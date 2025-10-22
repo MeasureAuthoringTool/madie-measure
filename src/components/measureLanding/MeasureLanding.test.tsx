@@ -80,7 +80,8 @@ const mockMeasureServiceApi = {
     allMeasures: 10,
   }),
   transferMeasures: jest.fn().mockResolvedValue({
-    data: true,
+    status: 200,
+    data: [],
   }),
 } as unknown as MeasureServiceApi;
 

@@ -35,6 +35,10 @@ import {
   ServiceConfig,
 } from "@madie/madie-util";
 import { AxiosError, AxiosResponse } from "axios";
+import {
+  TRANSFER_MEASURE_FAILURE,
+  TRANSFER_MEASURE_SUCCESS,
+} from "../../common/transferDialog/TransferDialog";
 
 const EXPORT_FAILURE_MESSAGE =
   "Unable to Export measure. Package could not be generated. Please try again and contact the Help Desk if the problem persists.";
@@ -104,8 +108,6 @@ jest.mock("./measureSearch/Search", () => ({
   __esModule: true,
   default: () => <div data-testid="measure-search">Measure Search</div>,
 }));
-
-const retrieveMeasuresMock = jest.fn();
 
 const MEASURE_CREATEDBY = "testuser@example.com"; //#nosec
 const testGroup = [
@@ -274,6 +276,8 @@ const setToastMessageMock = jest.fn();
 const setToastTypeMock = jest.fn();
 const onToastCloseMock = jest.fn();
 const handleToastMock = jest.fn();
+const retrieveMeasuresMock = jest.fn();
+const setStatusHandlerMock = jest.fn();
 
 // Base props for most test renders
 const baseProps = {
@@ -299,6 +303,8 @@ const baseProps = {
   setToastType: setToastTypeMock,
   onToastClose: onToastCloseMock,
   handleToast: handleToastMock,
+  retrieveMeasures: retrieveMeasuresMock,
+  setStatusHandler: setStatusHandlerMock,
 };
 const mockFetchMeasures = jest.fn().mockResolvedValue(oneItemResponse);
 const mockFetchMeasure = jest.fn().mockResolvedValue(oneItemResponse);
@@ -333,7 +339,8 @@ const mockMeasureServiceApi = {
     .fn()
     .mockResolvedValue([{ model: Model.QICORE }, { model: Model.QICORE }]),
   transferMeasures: jest.fn().mockResolvedValue({
-    data: true,
+    status: 200,
+    data: [],
   }),
 } as unknown as MeasureServiceApi;
 
@@ -368,9 +375,10 @@ describe("Action Center Tests", () => {
     (mockMeasureServiceApi.getMeasuresByMeasureSetId = jest
       .fn()
       .mockResolvedValue([{ model: Model.QICORE }, { model: Model.QICORE }])),
-      (mockMeasureServiceApi.transferMeasures = jest
-        .fn()
-        .mockResolvedValue({ data: true }));
+      (mockMeasureServiceApi.transferMeasures = jest.fn().mockResolvedValue({
+        status: 200,
+        data: [],
+      }));
     mockOktaTokenApi.getAccessToken = jest.fn().mockResolvedValue("test.jwt");
     mockOktaTokenApi.getUserName = jest.fn().mockReturnValue("test user");
   });
@@ -572,124 +580,145 @@ describe("Action Center Tests", () => {
     unmount();
   });
 
-  it("should display transfer dialog on clicking transfer action button, and submit the form values", async () => {
+  it("opens transfer dialog and successfully transfers selected measure and shows success toast", async () => {
     const { unmount } = render(
       <ServiceContext.Provider value={serviceConfig}>
-        <MeasureList
-          retrieveMeasures={retrieveMeasuresMock}
-          measureList={measures}
-          setMeasureList={setMeasureListMock}
-          setTotalPages={setTotalPagesMock}
-          setTotalItems={setTotalItemsMock}
-          setVisibleItems={setVisibleItemsMock}
-          setOffset={setOffsetMock}
-          setLoading={setLoadingMock}
-          activeTab={0}
-          searchCriteria={null}
-          setSearchCriteria={setSearchCriteriaMock}
-          currentLimit={10}
-          currentPage={0}
-          setErrMsg={setErrMsgMock}
-          // Toast props
-          toastOpen={false}
-          toastMessage=""
-          toastType="danger"
-          setToastOpen={setToastOpenMock}
-          setToastMessage={setToastMessageMock}
-          setToastType={setToastTypeMock}
-          onToastClose={onToastCloseMock}
-          handleToast={handleToastMock}
-        />
+        <MeasureList {...baseProps} />
       </ServiceContext.Provider>
     );
+
     const checkBoxes = await screen.findAllByRole("checkbox");
     expect(checkBoxes.length).toBe(6);
-    let transferButton: HTMLElement;
-    await waitFor(() => {
-      userEvent.click(checkBoxes[1]);
-      transferButton = screen.getByTestId("transfer-action-btn");
-    });
-    await waitFor(() => {
-      expect(transferButton).toBeInTheDocument();
+    userEvent.click(checkBoxes[1]);
 
-      userEvent.click(transferButton);
-    });
+    const transferActionButton = screen.getByTestId("transfer-action-btn");
+    expect(transferActionButton).toBeInTheDocument();
+    userEvent.click(transferActionButton);
+
+    const transferDialog = await screen.findByTestId("transfer-dialog");
+    expect(transferDialog).toBeInTheDocument();
+
+    const newHarpIdInput = screen.getByTestId("harp-id-input");
+    fireEvent.change(newHarpIdInput, { target: { value: "newUser" } });
+    expect(newHarpIdInput.value).toBe("newUser");
+
+    const transferSaveButton = screen.getByTestId("transfer-save-button");
+    expect(transferSaveButton).toBeEnabled();
+    fireEvent.click(transferSaveButton);
+
     await waitFor(() => {
-      expect(screen.getByTestId("transfer-dialog")).toBeInTheDocument();
+      expect(screen.queryByTestId("transfer-dialog")).not.toBeInTheDocument();
     });
+
+    expect(mockMeasureServiceApi.transferMeasures).toHaveBeenCalledWith(
+      ["IDIDID1"],
+      "newUser",
+      false
+    );
+
+    // Verify that the success toast is shown
+    expect(setToastOpenMock).toHaveBeenCalledWith(true);
+    expect(setToastTypeMock).toHaveBeenCalledWith("success");
+    expect(setToastMessageMock).toHaveBeenCalledWith(TRANSFER_MEASURE_SUCCESS);
 
     unmount();
   });
 
-  it("should display transfer dialog but not update list if there is error transferring measures", async () => {
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-      TransferMeasure: true,
-    }));
-
+  it("opens transfer dialog and shows error toast when transfer fails", async () => {
     mockMeasureServiceApi.transferMeasures = jest
       .fn()
       .mockRejectedValue(new Error("Transfer failed"));
 
     const { unmount } = render(
       <ServiceContext.Provider value={serviceConfig}>
-        <MeasureList
-          retrieveMeasures={retrieveMeasuresMock}
-          measureList={measures}
-          setMeasureList={setMeasureListMock}
-          setTotalPages={setTotalPagesMock}
-          setTotalItems={setTotalItemsMock}
-          setVisibleItems={setVisibleItemsMock}
-          setOffset={setOffsetMock}
-          setLoading={setLoadingMock}
-          activeTab={0}
-          searchCriteria={null}
-          setSearchCriteria={setSearchCriteriaMock}
-          currentLimit={10}
-          currentPage={0}
-          setErrMsg={setErrMsgMock}
-          // Toast props
-          toastOpen={false}
-          toastMessage=""
-          toastType="danger"
-          setToastOpen={setToastOpenMock}
-          setToastMessage={setToastMessageMock}
-          setToastType={setToastTypeMock}
-          onToastClose={onToastCloseMock}
-          handleToast={handleToastMock}
-        />
+        <MeasureList {...baseProps} />
       </ServiceContext.Provider>
     );
-    const checkBoxes = await screen.findAllByRole("checkbox");
-    expect(checkBoxes.length).toBe(6);
-    userEvent.click(checkBoxes[1]);
-    const transferButton = screen.getByTestId("transfer-action-btn");
-    expect(transferButton).toBeInTheDocument();
-    userEvent.click(transferButton);
 
-    await waitFor(async () => {
-      expect(screen.getByTestId("transfer-dialog")).toBeInTheDocument();
-    });
+    const checkBoxes = await screen.findAllByRole("checkbox");
+    userEvent.click(checkBoxes[1]);
+
+    const transferActionButton = screen.getByTestId("transfer-action-btn");
+    userEvent.click(transferActionButton);
+
+    const transferDialog = await screen.findByTestId("transfer-dialog");
+    expect(transferDialog).toBeInTheDocument();
 
     const newHarpIdInput = screen.getByTestId("harp-id-input");
-    expect(newHarpIdInput).toBeInTheDocument();
-    expect(newHarpIdInput.value).toBe("");
-    const transferBtn = screen.getByTestId("transfer-save-button");
-    expect(transferBtn).toBeInTheDocument();
-    expect(transferBtn).toBeDisabled();
+    fireEvent.change(newHarpIdInput, { target: { value: "newUser" } });
 
-    fireEvent.change(newHarpIdInput, {
-      target: { value: "newUser" },
-    });
-    expect(newHarpIdInput.value).toBe("newUser");
-    expect(transferBtn).toBeEnabled();
+    const transferSaveButton = screen.getByTestId("transfer-save-button");
+    fireEvent.click(transferSaveButton);
 
-    act(() => {
-      fireEvent.click(transferBtn);
-    });
-
-    await waitFor(async () => {
+    await waitFor(() => {
       expect(screen.queryByTestId("transfer-dialog")).not.toBeInTheDocument();
     });
+
+    expect(mockMeasureServiceApi.transferMeasures).toHaveBeenCalledWith(
+      ["IDIDID1"],
+      "newUser",
+      false
+    );
+
+    // Verify that the failure toast is shown
+    expect(setToastOpenMock).toHaveBeenCalledWith(true);
+    expect(setToastTypeMock).toHaveBeenCalledWith("danger");
+    expect(setToastMessageMock).toHaveBeenCalledWith(TRANSFER_MEASURE_FAILURE);
+
+    unmount();
+  });
+
+  it("opens transfer dialog and updates status handler for partial transfer failure", async () => {
+    mockMeasureServiceApi.transferMeasures = jest.fn().mockResolvedValue({
+      status: 206,
+      data: ["IDIDID1"], // IDs of measures that failed
+    });
+
+    const setStatusHandlerMock = jest.fn();
+
+    const { unmount } = render(
+      <ServiceContext.Provider value={serviceConfig}>
+        <MeasureList {...baseProps} setStatusHandler={setStatusHandlerMock} />
+      </ServiceContext.Provider>
+    );
+
+    const checkBoxes = await screen.findAllByRole("checkbox");
+    userEvent.click(checkBoxes[1]);
+
+    const transferButton = screen.getByTestId("transfer-action-btn");
+    userEvent.click(transferButton);
+
+    const transferDialog = await screen.findByTestId("transfer-dialog");
+    expect(transferDialog).toBeInTheDocument();
+
+    const newHarpIdInput = screen.getByTestId("harp-id-input");
+    fireEvent.change(newHarpIdInput, { target: { value: "newUser" } });
+    expect(newHarpIdInput.value).toBe("newUser");
+
+    const transferSaveButton = screen.getByTestId("transfer-save-button");
+    fireEvent.click(transferSaveButton);
+
+    await waitFor(() => {
+      expect(screen.queryByTestId("transfer-dialog")).not.toBeInTheDocument();
+    });
+
+    expect(mockMeasureServiceApi.transferMeasures).toHaveBeenCalledWith(
+      ["IDIDID1"],
+      "newUser",
+      false
+    );
+
+    // Verify status handler is called with warning
+    expect(setStatusHandlerMock).toHaveBeenCalledWith({
+      warning: {
+        status: true,
+        primaryMessage:
+          "1 measure(s) could not be transferred. Please try again, or contact help desk if the issue persists.",
+        secondaryMessages: ["new measure - A"],
+      },
+    });
+
+    expect(setToastOpenMock).toHaveBeenCalledWith(false);
 
     unmount();
   });

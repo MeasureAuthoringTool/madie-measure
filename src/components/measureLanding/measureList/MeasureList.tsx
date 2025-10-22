@@ -91,7 +91,7 @@ export default function MeasureList(props: {
   setCurrentSort?;
   currentDirection?;
   setCurrentDirection?;
-  setErrMsg;
+  setStatusHandler;
   search: any;
   // Toast props
   toastOpen: boolean;
@@ -1300,6 +1300,7 @@ export default function MeasureList(props: {
         measures={selectedMeasures}
         open={transferDialog.open}
         onClose={handleTransferDialogClose}
+        setStatusHandler={props.setStatusHandler}
       />
       <ViewMeasureHistoryDialog
         measures={selectedMeasures}
