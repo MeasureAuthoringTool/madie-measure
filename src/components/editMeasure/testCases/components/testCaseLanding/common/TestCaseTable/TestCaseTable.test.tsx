@@ -255,6 +255,7 @@ const renderWithTestCase = (
         shiftDatesDialogModalOpen={shiftDatesDialogModalOpen}
         setShiftDatesDialogModalOpen={setShiftDatesDialogModalOpen}
         setWarnings={jest.fn()}
+        setShiftTestCaseDatesWarnings={jest.fn()}
         page={page}
       />
     </MemoryRouter>
@@ -835,6 +836,7 @@ describe("TestCase component", () => {
           shiftDatesDialogModalOpen={false}
           setShiftDatesDialogModalOpen={jest.fn()}
           setWarnings={jest.fn()}
+          setShiftTestCaseDatesWarnings={jest.fn()}
           page={2}
         />
       </MemoryRouter>
@@ -848,5 +850,219 @@ describe("TestCase component", () => {
       rowCheckboxesAfter.every((cb) => !(cb as HTMLInputElement).checked)
     ).toBe(true);
     expect((selectAllCheckboxAfter as HTMLInputElement).checked).toBe(false);
+  });
+
+  describe("Test Case Lock Functionality", () => {
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it("should display lock icon and View button when test case is locked by another user", async () => {
+      (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
+        Locking: true,
+      }));
+      checkUserCanEdit.mockImplementation(() => true);
+
+      const lockedTestCase = {
+        ...testCase,
+        testCaseLock: {
+          testCaseId: testCase.id,
+          lockedBy: "anotheruser@example.com",
+          lockedAt: "2024-10-22T10:00:00.000Z",
+          expiresAt: "2024-10-22T10:15:00.000Z",
+        },
+      };
+
+      const deleteTestCase = jest.fn();
+      const exportTestCase = jest.fn();
+      const setSelectedTestCasesMock = jest.fn();
+
+      renderWithTestCase(
+        [lockedTestCase],
+        true,
+        deleteTestCase,
+        exportTestCase,
+        undefined,
+        { ...measures[2], measureMetaData: { draft: true } },
+        setSelectedTestCasesMock,
+        undefined,
+        []
+      );
+
+      await waitFor(() => {
+        const actionButton = screen.getByTestId(
+          `view-edit-test-case-button-${lockedTestCase.id}`
+        );
+        expect(actionButton).toBeInTheDocument();
+        expect(actionButton).toHaveTextContent("View");
+
+        const lockIcon = screen.getByTestId(
+          `test-case-action-lock-icon-${lockedTestCase.id}`
+        );
+        expect(lockIcon).toBeInTheDocument();
+      });
+    });
+
+    it("should display Edit button when test case is not locked and user has edit permission", async () => {
+      (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
+        Locking: true,
+      }));
+      checkUserCanEdit.mockImplementation(() => true);
+
+      const deleteTestCase = jest.fn();
+      const exportTestCase = jest.fn();
+      const setSelectedTestCasesMock = jest.fn();
+
+      renderWithTestCase(
+        [testCase],
+        true,
+        deleteTestCase,
+        exportTestCase,
+        undefined,
+        { ...measures[2], measureMetaData: { draft: true } },
+        setSelectedTestCasesMock,
+        undefined,
+        []
+      );
+
+      await waitFor(() => {
+        const actionButton = screen.getByTestId(
+          `view-edit-test-case-button-${testCase.id}`
+        );
+        expect(actionButton).toBeInTheDocument();
+        expect(actionButton).toHaveTextContent("Edit");
+
+        const lockIcon = screen.queryByTestId(
+          `test-case-action-lock-icon-${testCase.id}`
+        );
+        expect(lockIcon).not.toBeInTheDocument();
+      });
+    });
+
+    it("should display tooltip when hovering over locked test case button", async () => {
+      (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
+        Locking: true,
+      }));
+      checkUserCanEdit.mockImplementation(() => true);
+
+      const lockedTestCase = {
+        ...testCase,
+        testCaseLock: {
+          testCaseId: testCase.id,
+          lockedBy: "john.doe@example.com",
+          lockedAt: "2024-10-22T10:00:00.000Z",
+          expiresAt: "2024-10-22T10:15:00.000Z",
+        },
+      };
+
+      const deleteTestCase = jest.fn();
+      const exportTestCase = jest.fn();
+      const setSelectedTestCasesMock = jest.fn();
+
+      renderWithTestCase(
+        [lockedTestCase],
+        true,
+        deleteTestCase,
+        exportTestCase,
+        undefined,
+        { ...measures[2], measureMetaData: { draft: true } },
+        setSelectedTestCasesMock,
+        undefined,
+        []
+      );
+
+      const actionButton = await screen.findByTestId(
+        `view-edit-test-case-button-${lockedTestCase.id}`
+      );
+
+      await userEvent.hover(actionButton);
+
+      await waitFor(() => {
+        const tooltipText = screen.getByRole("tooltip");
+        expect(tooltipText).toHaveTextContent("Locked while being edited by");
+        expect(tooltipText).toHaveTextContent("john.doe@example.com");
+      });
+    });
+
+    it("should not display lock icon when Locking feature flag is disabled", async () => {
+      (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
+        Locking: false,
+      }));
+      checkUserCanEdit.mockImplementation(() => true);
+
+      const lockedTestCase = {
+        ...testCase,
+        testCaseLock: {
+          testCaseId: testCase.id,
+          lockedBy: "anotheruser@example.com",
+          lockedAt: "2024-10-22T10:00:00.000Z",
+          expiresAt: "2024-10-22T10:15:00.000Z",
+        },
+      };
+
+      const deleteTestCase = jest.fn();
+      const exportTestCase = jest.fn();
+      const setSelectedTestCasesMock = jest.fn();
+
+      renderWithTestCase(
+        [lockedTestCase],
+        true,
+        deleteTestCase,
+        exportTestCase,
+        undefined,
+        { ...measures[2], measureMetaData: { draft: true } },
+        setSelectedTestCasesMock,
+        undefined,
+        []
+      );
+
+      await waitFor(() => {
+        const actionButton = screen.getByTestId(
+          `view-edit-test-case-button-${lockedTestCase.id}`
+        );
+        expect(actionButton).toHaveTextContent("Edit");
+
+        const lockIcon = screen.queryByTestId(
+          `test-case-action-lock-icon-${lockedTestCase.id}`
+        );
+        expect(lockIcon).not.toBeInTheDocument();
+      });
+    });
+
+    it("should display View button when user has no edit permission regardless of lock", async () => {
+      (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
+        Locking: true,
+      }));
+      checkUserCanEdit.mockImplementation(() => false);
+
+      const deleteTestCase = jest.fn();
+      const exportTestCase = jest.fn();
+      const setSelectedTestCasesMock = jest.fn();
+
+      renderWithTestCase(
+        [testCase],
+        true,
+        deleteTestCase,
+        exportTestCase,
+        undefined,
+        { ...measures[2], measureMetaData: { draft: true } },
+        setSelectedTestCasesMock,
+        undefined,
+        []
+      );
+
+      await waitFor(() => {
+        const actionButton = screen.getByTestId(
+          `view-edit-test-case-button-${testCase.id}`
+        );
+        expect(actionButton).toBeInTheDocument();
+        expect(actionButton).toHaveTextContent("View");
+
+        const lockIcon = screen.queryByTestId(
+          `test-case-action-lock-icon-${testCase.id}`
+        );
+        expect(lockIcon).not.toBeInTheDocument();
+      });
+    });
   });
 });
