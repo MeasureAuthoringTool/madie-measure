@@ -146,7 +146,7 @@ describe("VersionAction", () => {
           {
             ...qiCoreMeasure,
             hasLockedTestCases: true,
-            measureLock: { lockedBy: lockedByUser } as MeasureLock,
+            measureLock: { lockedBy: null } as unknown as MeasureLock,
           },
         ]}
         onClick={() => {}}
