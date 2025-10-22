@@ -81,7 +81,7 @@ const StatusHandler = ({
         "warning",
         warning.primaryMessage,
         warning.secondaryMessages,
-        outboundAnnotations?.length > 0 ? outboundAnnotations : null
+        null
       )
     );
   } else if (success?.status === "success") {
