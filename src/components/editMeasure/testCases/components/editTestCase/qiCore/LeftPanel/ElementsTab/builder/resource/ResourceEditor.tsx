@@ -49,6 +49,23 @@ interface ResourceEditorProps {
   selectedResourceID: string;
 }
 
+// Determines the resource name to display based on the title and base resource name
+// e.g. "QI-Core Condition Encounter Diagnosis" or "US Core Condition Encounter Diagnosis" becomes "Condition Encounter Diagnosis"
+export const getResourceName = (title: string, baseResourceType: string) => {
+  if (!title) {
+    return baseResourceType;
+  }
+  if (title.includes("QI-Core")) {
+    return title.replace("QI-Core", "").trim();
+  } else if (title.includes("QICore")) {
+    return title.replace("QICore", "").trim();
+  } else if (title.includes("US Core")) {
+    return title.replace("US Core", "").trim();
+  } else {
+    return title;
+  }
+};
+
 const ResourceEditor = ({
   selectedResourceID,
   onCancel,
@@ -284,7 +301,12 @@ const ResourceEditor = ({
       {selectedResource && (
         <div className="resource-editor">
           <div className="resource-header">
-            <Typography>{resourceBasePath}</Typography>
+            <Typography>
+              {getResourceName(
+                selectedResource?.definition?.title,
+                resourceBasePath
+              )}
+            </Typography>
             <div className="spacer" />
             <Typography sx={{ fontSize: "14px" }}>
               <span style={{ color: "125496", fontWeight: 700 }}>

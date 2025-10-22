@@ -1,7 +1,8 @@
 import * as React from "react";
-import { act, render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import ResourceEditor, {
   deleteMultipleCardinalityElement,
+  getResourceName,
 } from "./ResourceEditor";
 import { QiCoreResourceContext } from "../../../../../../../util/QiCorePatientProvider";
 import mockClaimResponseStructuredDef from "./mockSelectedResourceTree.json";
@@ -822,7 +823,7 @@ describe("ResourceEditor", () => {
     });
   });
 });
-describe("Test the ResourceEditor deleteMultipleElements functionality", () => {
+describe("Test the ResourceEditor utility functions", () => {
   it("Should call dispatch with correct payload when deleting multiple elements", async () => {
     const mockDispatch = jest.fn();
 
@@ -844,5 +845,30 @@ describe("Test the ResourceEditor deleteMultipleElements functionality", () => {
       mockDispatch
     );
     expect(mockDispatch).toHaveBeenCalledTimes(1);
+  });
+
+  it("Should return correct resource name based on profile title and base resource type", async () => {
+    // profile title not present
+    expect(getResourceName(undefined, "Encounter")).toBe("Encounter");
+
+    // profile title present and starts with 'QI-Core'
+    expect(
+      getResourceName("QI-Core Condition Encounter Diagnosis", "Encounter")
+    ).toBe("Condition Encounter Diagnosis");
+
+    // profile title present and starts with 'QICore'
+    expect(
+      getResourceName("QICore Condition Encounter Diagnosis", "Encounter")
+    ).toBe("Condition Encounter Diagnosis");
+
+    // profile title present and starts with 'US Core'
+    expect(
+      getResourceName("US Core Condition Encounter Diagnosis", "Encounter")
+    ).toBe("Condition Encounter Diagnosis");
+
+    // profile title present but doesn't contain 'US Core' or 'QI-Core' or 'QICore'
+    expect(
+      getResourceName("Test Condition Encounter Diagnosis", "Encounter")
+    ).toBe("Test Condition Encounter Diagnosis");
   });
 });
