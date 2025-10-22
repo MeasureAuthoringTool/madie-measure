@@ -99,6 +99,45 @@ const mockBundle = {
   entry: [{ resource: { resourceType: "Patient", id: "patient-1" } }],
 };
 
+const mockBundle2 = {
+  id: "e7e89316-1011-404a-b129-ba5636569a96",
+  resourceType: "Bundle",
+  type: "collection",
+  entry: [
+    {
+      fullUrl:
+        "https://madie.cms.gov/AdverseEvent/63cfef64-b0ec-404e-9e57-7ebc675a564c",
+      resource: {
+        id: "63cfef64-b0ec-404e-9e57-7ebc675a564c",
+        resourceType: "AdverseEvent",
+        meta: {
+          profile: [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-adverseevent",
+          ],
+        },
+        actuality: "",
+        event: "",
+        subject: {
+          reference: "Patient/ef8bab3d-c297-4d0e-a5db-aea407a9bf78",
+        },
+        recorder: "",
+      },
+    },
+    {
+      fullUrl:
+        "https://madie.cms.gov/Patient/ef8bab3d-c297-4d0e-a5db-aea407a9bf78",
+      resource: {
+        id: "ef8bab3d-c297-4d0e-a5db-aea407a9bf78",
+        resourceType: "Patient",
+        meta: {
+          profile: [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient",
+          ],
+        },
+      },
+    },
+  ],
+};
 describe("ReferenceComponent", () => {
   beforeEach(() => {
     mockFormikObj.touched = {};
@@ -299,4 +338,58 @@ describe("ReferenceComponent", () => {
     );
     expect(screen.getByLabelText("Reference Type")).toBeInTheDocument();
   });
+});
+
+it("shows does not show an add button when patient is selected, if a bundle entry of patient already exists.", async () => {
+  (useQiCoreResource as jest.Mock).mockReturnValue({
+    state: { bundle: mockBundle2 },
+  });
+
+  render(
+    <ResourceContext.Provider value={mockResourceProfiles}>
+      <FormikProvider value={mockFormik}>
+        <ReferenceComponent
+          structureDefinition={mockStructureDefinition}
+          canEdit={true}
+          required={true}
+          helperText="Select a reference"
+          error={false}
+          showAddAttributeButton={false}
+          addTitle=""
+        />
+      </FormikProvider>
+    </ResourceContext.Provider>
+  );
+  const referenceTypeSelect = screen.getByTestId("reference-type-select");
+  // open the select dropdown
+  userEvent.click(referenceTypeSelect);
+  const referenceTypeSelectDropdown = within(referenceTypeSelect).getByRole(
+    "combobox"
+  ) as HTMLInputElement;
+  userEvent.click(referenceTypeSelectDropdown);
+  const referenceTypeOptionsList = await screen.findAllByTestId(/-option/i);
+  const optionTexts = referenceTypeOptionsList.map(
+    (option) => option.textContent
+  );
+  expect(optionTexts).toContain("Patient", "Practitioner");
+  // now click on patient option
+  const patientOption = screen.getByTestId("Patient-option");
+  userEvent.click(patientOption);
+
+  // now the second dropdown should appear
+  const referenceLabel = await screen.findByText("Specify Patient");
+  expect(referenceLabel).toBeInTheDocument();
+
+  const referenceSelect = screen.getByTestId("reference-select");
+  expect(referenceSelect).toBeInTheDocument();
+  userEvent.click(referenceSelect);
+  const referenceSelectDropdown = within(referenceSelect).getByRole(
+    "combobox"
+  ) as HTMLInputElement;
+  userEvent.click(referenceSelectDropdown);
+  const referenceOptionsList = await screen.findAllByTestId(/-option/i);
+  const referenceOptionTexts = referenceOptionsList.map(
+    (option) => option.textContent
+  );
+  expect(referenceOptionTexts).not.toContain("ID Not Present (Add New)");
 });
