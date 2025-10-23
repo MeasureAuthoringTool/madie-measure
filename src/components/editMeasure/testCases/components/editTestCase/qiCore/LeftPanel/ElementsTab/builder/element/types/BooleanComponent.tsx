@@ -2,7 +2,7 @@ import React from "react";
 import { MenuItem as MuiMenuItem } from "@mui/material";
 import { Select } from "@madie/madie-design-system/dist/react";
 import { TypeComponentProps } from "./TypeComponentProps";
-import AddElementButton from "../../../../../../../common/AddElementButton";
+import AddElementButton from "../../../../../../../common/UIOnlyModelAgnostic/AddElementButton";
 
 const BooleanComponent = ({
   canEdit,

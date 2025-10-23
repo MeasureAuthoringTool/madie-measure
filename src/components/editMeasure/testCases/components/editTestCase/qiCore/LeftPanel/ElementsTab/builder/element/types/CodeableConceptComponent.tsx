@@ -3,7 +3,6 @@ import "twin.macro";
 import "styled-components/macro";
 import { Coding } from "fhir/r4";
 import CodingComponent from "./CodingComponent";
-import AddElementButton from "../../../../../../../common/AddElementButton";
 
 const CodeableConceptComponent = ({
   canEdit,

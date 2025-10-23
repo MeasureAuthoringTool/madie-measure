@@ -14,7 +14,7 @@ import {
   InputLabel,
 } from "@madie/madie-design-system/dist/react";
 import DateField from "./DateField";
-import AddElementButton from "../../../../../../../common/AddElementButton";
+import AddElementButton from "../../../../../../../common/UIOnlyModelAgnostic/AddElementButton";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);

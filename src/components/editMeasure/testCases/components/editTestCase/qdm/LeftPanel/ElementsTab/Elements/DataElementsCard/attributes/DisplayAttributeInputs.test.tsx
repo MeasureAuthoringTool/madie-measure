@@ -14,8 +14,7 @@ import {
 } from "../../../../../../../../../../../api/ServiceContext";
 import { EncounterOrder, AssessmentPerformed } from "cqm-models";
 import userEvent from "@testing-library/user-event";
-import { mockValueSets } from "../../../../../../../common/componentDataType/ComponentType.test";
-
+import { mockValueSets } from "../../../../../../../QDM/componentDataType/ComponentType.test";
 const serviceConfig = {
   testCaseService: {
     baseUrl: "base.url",

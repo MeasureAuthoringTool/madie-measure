@@ -2,8 +2,8 @@ import React, { useState } from "react";
 import "twin.macro";
 import "styled-components/macro";
 import { CQL, ValueSet } from "cqm-models";
-import IntegerInput from "../IntegerInput/IntegerInput";
-import CodeInput from "../codeInput/CodeInput";
+import IntegerInput from "../../QDM/IntegerInput/IntegerInput";
+import CodeInput from "../../QDM/codeInput/CodeInput";
 
 interface CodeInputProps {
   canEdit: boolean;

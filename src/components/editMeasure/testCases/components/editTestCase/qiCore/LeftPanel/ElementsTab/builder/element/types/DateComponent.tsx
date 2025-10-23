@@ -17,7 +17,7 @@ import {
   YEAR_MONTH_DAY_FORMAT,
   formatOptionRenderMap,
 } from "./DateTimeComponent";
-import AddElementButton from "../../../../../../../common/AddElementButton";
+import AddElementButton from "../../../../../../../common/UIOnlyModelAgnostic/AddElementButton";
 dayjs.extend(utc);
 dayjs.extend(timezone);
 dayjs.extend(advancedFormat);

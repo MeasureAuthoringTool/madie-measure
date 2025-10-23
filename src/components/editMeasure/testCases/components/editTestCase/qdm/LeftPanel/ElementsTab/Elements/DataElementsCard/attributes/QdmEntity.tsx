@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
 import "twin.macro";
 import "styled-components/macro";
-import IdentifierInput from "../../../../../../../common/Identifier/IdentifierInput";
+import IdentifierInput from "../../../../../../../QDM/Identifier/IdentifierInput";
 import cqmModels from "cqm-models";
-import StringInput from "../../../../../../../common/string/StringInput";
-import CodeInput from "../../../../../../../common/codeInput/CodeInput";
+import StringInput from "../../../../../../../QDM/string/StringInput";
+import CodeInput from "../../../../../../../QDM/codeInput/CodeInput";
 import _ from "lodash";
 
 export const LOCATION_ATTRIBUTES = ["LocationType"];
