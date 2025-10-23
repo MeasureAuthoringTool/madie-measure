@@ -10,6 +10,7 @@ import utc from "dayjs/plugin/utc";
 import advancedFormat from "dayjs/plugin/advancedFormat";
 import { Select, TimeField } from "@madie/madie-design-system/dist/react";
 import DateField from "./DateField";
+import { formatOptionRenderMap } from "./DateTimeComponent";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -74,7 +75,7 @@ const renderFormats = (formats: string[]) => {
         value={value}
         data-testid={`${value}-option`}
       >
-        {value}
+        {formatOptionRenderMap[value]}
       </MuiMenuItem>
     )),
   ];
@@ -106,7 +107,7 @@ const PeriodDateTimeComponent = ({
         ? getCurrentFormat(start)
         : end
         ? getCurrentFormat(end)
-        : null;
+        : YEAR_MONTH_DAY_FORMAT;
       setFormat(fmt === "Invalid Format" ? null : fmt);
     }
 
@@ -140,7 +141,7 @@ const PeriodDateTimeComponent = ({
           style={{ height: "38.125px", marginBottom: "2px" }}
           required={fieldRequired}
           id={`date-time-format-selector-${label}`}
-          label={`Format`}
+          label="Date Precision Level"
           inputProps={{
             "data-testid": `date-time-format-selector-input-field-${label}`,
             "aria-describedby": `date-time-format-selector-input-field-helper-text-${label}`,
@@ -151,6 +152,9 @@ const PeriodDateTimeComponent = ({
             "aria-required": "true",
           }}
           options={renderFormats(formatOptions1)}
+          renderValue={(e) => {
+            return formatOptionRenderMap[e];
+          }}
           onChange={(event) => {
             const { value } = event.target;
             setFormat(value);
@@ -185,7 +189,7 @@ const PeriodDateTimeComponent = ({
               value={startDate}
               views={format ? formatMap[format] : ["year"]}
               disabled={!canEdit || !format || format === "Invalid Format"}
-              placeholder={format || ""}
+              placeholder={format ? formatOptionRenderMap[format] : ""}
               id={`start-${format || "year"}-field-${label}`}
               onChange={(newDate) => {
                 if (!newDate) return;
@@ -249,7 +253,7 @@ const PeriodDateTimeComponent = ({
               value={endDate}
               views={format ? formatMap[format] : ["year"]}
               disabled={!canEdit || !format || format === "Invalid Format"}
-              placeholder={format || ""}
+              placeholder={format ? formatOptionRenderMap[format] : ""}
               id={`end-${format || "year"}-field-${label}`}
               onChange={(newDate) => {
                 if (!newDate) return;
