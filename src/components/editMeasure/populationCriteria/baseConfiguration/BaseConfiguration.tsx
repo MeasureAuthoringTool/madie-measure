@@ -118,6 +118,16 @@ const BaseConfiguration = (props: BaseConfigurationProps) => {
   };
 
   const handleSubmit = async () => {
+    if (featureFlags.Locking && (await props.checkTestCasesLockStatus())) {
+      handleToast(
+        "danger",
+        "This measure cannot be saved because changes to the Population Criteria will update test cases and one or more test cases are locked by another user.",
+        true
+      );
+      formik.resetForm();
+      return;
+    }
+
     if (
       currentScoring != undefined &&
       formik.values.scoring !== currentScoring
@@ -143,16 +153,6 @@ const BaseConfiguration = (props: BaseConfigurationProps) => {
       formik.values.patientBasis !== String(measure?.patientBasis)
     ) {
       measure.groups = null;
-    }
-
-    if (featureFlags.Locking && (await props.checkTestCasesLockStatus())) {
-      handleToast(
-        "danger",
-        "This measure cannot be saved because changes to the Population Criteria will update test cases and one or more test cases are locked by another user.",
-        true
-      );
-      formik.resetForm();
-      return;
     }
 
     const newMeasure: Measure = {
