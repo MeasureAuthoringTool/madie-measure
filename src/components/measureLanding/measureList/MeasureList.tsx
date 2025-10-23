@@ -295,13 +295,15 @@ export default function MeasureList(props: {
         </button>
       ),
       cell: (info) => {
-        const isLockedByOther =
-          featureFlags?.Locking && !!info.row.original.actions?.measureLock;
         const canEdit =
           checkUserCanEdit(
             info.row.original.actions?.measureSet?.owner,
             info.row.original.actions?.measureSet?.acls
           ) && info.row.original.actions.measureMetaData?.draft;
+        const isLockedByOther =
+          featureFlags?.Locking &&
+          canEdit &&
+          !!info.row.original.actions?.measureLock;
 
         const buttonText = isLockedByOther ? "View" : canEdit ? "Edit" : "View";
 
@@ -472,13 +474,15 @@ export default function MeasureList(props: {
         </button>
       ),
       cell: (info) => {
-        const isLockedByOther =
-          featureFlags?.Locking && !!info.row.original.actions?.measureLock;
         const canEdit =
           checkUserCanEdit(
             info.row.original.actions?.measureSet?.owner,
             info.row.original.actions?.measureSet?.acls
           ) && info.row.original.actions.measureMetaData?.draft;
+        const isLockedByOther =
+          featureFlags?.Locking &&
+          canEdit &&
+          !!info.row.original.actions?.measureLock;
 
         const buttonText = isLockedByOther ? "View" : canEdit ? "Edit" : "View";
 
