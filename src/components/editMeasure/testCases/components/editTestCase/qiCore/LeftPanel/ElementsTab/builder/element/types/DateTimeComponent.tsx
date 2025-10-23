@@ -38,6 +38,12 @@ export const formatMap = {
   [YEAR_MONTH_DAY_FORMAT]: ["year", "month", "day"],
   [DATE_TIME_ZONE_FORMAT]: ["year", "day", "month"],
 };
+export const formatOptionRenderMap = {
+  [YEAR_FORMAT]: "YYYY",
+  [YEAR_MONTH_FORMAT]: "MM-YYYY",
+  [YEAR_MONTH_DAY_FORMAT]: "MM-DD-YYYY",
+  [DATE_TIME_ZONE_FORMAT]: "MM-DD-YYYYTHH:mm:ssZ",
+};
 export const formatRank = {
   [YEAR_FORMAT]: 1,
   [YEAR_MONTH_FORMAT]: 2,
@@ -79,7 +85,7 @@ const renderFormats = (formats: string[]) => {
         value={value}
         data-testid={`${value}-option`}
       >
-        {value}
+        {formatOptionRenderMap[value]}
       </MuiMenuItem>
     )),
   ];
@@ -122,7 +128,7 @@ const DateTimeComponent = ({
       }
     } else {
       // we don't have a value here we're just going to set nothing on the format
-      setFormat(null);
+      setFormat(YEAR_MONTH_DAY_FORMAT);
       setDate(null);
     }
   }, [value]);
@@ -149,7 +155,7 @@ const DateTimeComponent = ({
                 style={{ height: "38.125px", marginBottom: "2px" }}
                 required={fieldRequired}
                 id={`date-time-format-selector-${label}`}
-                label={`Format`}
+                label="Date Precision Level"
                 inputProps={{
                   "data-testid": `date-time-format-selector-input-field-${label}`,
                   "aria-describedby": `date-time-format-selector-input-field-helper-text-${label}`,
@@ -160,6 +166,9 @@ const DateTimeComponent = ({
                   "aria-required": "true",
                 }}
                 options={renderFormats(formatOptions1)}
+                renderValue={(e) => {
+                  return formatOptionRenderMap[e];
+                }}
                 onChange={(event) => {
                   const { value } = event.target;
                   if (format) {
@@ -187,7 +196,7 @@ const DateTimeComponent = ({
               value={date}
               views={format ? formatMap[format] : ["year"]}
               disabled={!canEdit || !format || format === "Invalid Format"}
-              placeholder={format || ""}
+              placeholder={format ? formatOptionRenderMap[format] : ""}
               id={`${format || "year"}-field-${label}`}
               onChange={(newDate) => {
                 if (!newDate) return;
