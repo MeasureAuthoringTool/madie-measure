@@ -16,7 +16,7 @@ import {
   useFeatureFlags,
 } from "@madie/madie-util";
 import { useNavigate } from "react-router-dom";
-import { Chip } from "@mui/material";
+import { Chip, Tooltip } from "@mui/material";
 import {
   Button,
   TruncateText,
@@ -295,17 +295,19 @@ export default function MeasureList(props: {
         </button>
       ),
       cell: (info) => {
-        const isLockedByOther =
-          featureFlags?.Locking && !!info.row.original.actions?.measureLock;
         const canEdit =
           checkUserCanEdit(
             info.row.original.actions?.measureSet?.owner,
             info.row.original.actions?.measureSet?.acls
           ) && info.row.original.actions.measureMetaData?.draft;
+        const isLockedByOther =
+          featureFlags?.Locking &&
+          canEdit &&
+          !!info.row.original.actions?.measureLock;
 
         const buttonText = isLockedByOther ? "View" : canEdit ? "Edit" : "View";
 
-        return (
+        const buttonElement = (
           <Button
             variant="outline-filled"
             data-testid={`measure-action-${info.row.original.id}`}
@@ -330,6 +332,33 @@ export default function MeasureList(props: {
             {buttonText}
           </Button>
         );
+
+        if (isLockedByOther) {
+          return (
+            <Tooltip
+              title={
+                <>
+                  Locked while being edited by
+                  <br />
+                  {info.row.original.actions.measureLock.lockedBy}
+                </>
+              }
+              arrow
+              slotProps={{
+                tooltip: {
+                  sx: {
+                    maxWidth: "none",
+                    whiteSpace: "nowrap",
+                  },
+                },
+              }}
+            >
+              <span>{buttonElement}</span>
+            </Tooltip>
+          );
+        }
+
+        return buttonElement;
       },
       accessorKey: "actions",
       enableSorting: false,
@@ -445,17 +474,19 @@ export default function MeasureList(props: {
         </button>
       ),
       cell: (info) => {
-        const isLockedByOther =
-          featureFlags?.Locking && !!info.row.original.actions?.measureLock;
         const canEdit =
           checkUserCanEdit(
             info.row.original.actions?.measureSet?.owner,
             info.row.original.actions?.measureSet?.acls
           ) && info.row.original.actions.measureMetaData?.draft;
+        const isLockedByOther =
+          featureFlags?.Locking &&
+          canEdit &&
+          !!info.row.original.actions?.measureLock;
 
         const buttonText = isLockedByOther ? "View" : canEdit ? "Edit" : "View";
 
-        return (
+        const buttonElement = (
           <Button
             variant="outline-filled"
             data-testid={`measure-action-${info.row.original.id}`}
@@ -480,6 +511,33 @@ export default function MeasureList(props: {
             {buttonText}
           </Button>
         );
+
+        if (isLockedByOther) {
+          return (
+            <Tooltip
+              title={
+                <>
+                  Locked while being edited by
+                  <br />
+                  {info.row.original.actions.measureLock.lockedBy}
+                </>
+              }
+              arrow
+              slotProps={{
+                tooltip: {
+                  sx: {
+                    maxWidth: "none",
+                    whiteSpace: "nowrap",
+                  },
+                },
+              }}
+            >
+              <span>{buttonElement}</span>
+            </Tooltip>
+          );
+        }
+
+        return buttonElement;
       },
       accessorKey: "actions",
       enableSorting: false,

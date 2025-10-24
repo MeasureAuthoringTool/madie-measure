@@ -417,6 +417,16 @@ const MeasureGroups = (props: MeasureGroupProps) => {
     // enableReinitialize: true,
     onSubmit: async (group: Group) => {
       window.scrollTo(0, 0);
+      if (featureFlags.Locking && (await props.checkTestCasesLockStatus())) {
+        handleToast(
+          "danger",
+          "This measure cannot be saved because changes to the Population Criteria will update test cases and one or more test cases are locked by another user.",
+          true
+        );
+        formik.resetForm();
+        return;
+      }
+
       if (
         measure?.groups &&
         !(measureGroupNumber >= measure?.groups?.length) &&
@@ -436,16 +446,6 @@ const MeasureGroups = (props: MeasureGroupProps) => {
           open: true,
           modalType: "popBasis",
         }));
-      } else if (
-        featureFlags.Locking &&
-        (await props.checkTestCasesLockStatus())
-      ) {
-        handleToast(
-          "danger",
-          "This measure cannot be saved because changes to the Population Criteria will update test cases and one or more test cases are locked by another user.",
-          true
-        );
-        return;
       } else {
         submitForm(group);
       }

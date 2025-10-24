@@ -45,11 +45,32 @@ export default function ReferenceComponent({
   const emptyOption = [
     { label: "ID Not Present (Add New)", value: "add_new_id" },
   ]; // If no resources of that type exist, we need to show a message in the dropdown
-  const selectableResoureOptions = resourcesOfSpecifiedType.map((res) => ({
+  const selectableResourceOptions = resourcesOfSpecifiedType.map((res) => ({
     label: `${selectedReferenceType}/${res.resource.id}`,
     value: `${selectedReferenceType}/${res.resource.id}`,
   }));
-  const finalOptions = selectableResoureOptions.concat(emptyOption);
+  // our business logic is that we do not allow multiple patients. cannot create new if one exists.
+  const getFinalOptions = (
+    selectedReferenceType,
+    selectableResourceOptions
+  ) => {
+    // we concat only if there's no selecatble resource options
+    if (
+      selectedReferenceType === "Patient" &&
+      selectableResourceOptions.length
+    ) {
+      return selectableResourceOptions;
+    } else {
+      return selectableResourceOptions.concat(emptyOption);
+    }
+  };
+
+  // const finalOptions = selectableResourceOptions.concat(emptyOption);
+  const finalOptions = getFinalOptions(
+    selectedReferenceType,
+    selectableResourceOptions
+  );
+
   const [selectedReferenceId, setSelectedReferenceId] = useState<string>(
     value?.reference || ""
   ); // will need to default to something if editing existing element

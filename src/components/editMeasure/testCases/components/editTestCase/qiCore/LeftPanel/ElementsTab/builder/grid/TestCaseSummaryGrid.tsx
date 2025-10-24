@@ -11,19 +11,24 @@ import ActionCenter, {
   ActionItemDef,
 } from "../../../../../../../../../common/actionCenter/ActionCenter";
 import "../../../../../styles/DataElementsTable.scss";
+import { BundleEntry } from "fhir/r4";
 
+export interface GridDataEntry {
+  title: string;
+  entry: BundleEntry;
+}
 interface TestCaseSummaryGridProps {
   onRowEdit: (row: any) => void;
   onRowDelete: (row: any) => void;
-  entry: any;
+  gridData: GridDataEntry[];
 }
 
 const TestCaseSummaryGrid = ({
-  entry,
+  gridData,
   onRowEdit,
   onRowDelete,
 }: TestCaseSummaryGridProps) => {
-  const data = React.useMemo(() => entry ?? [], [entry]);
+  const data = React.useMemo(() => gridData ?? [], [gridData]);
 
   const actions = React.useMemo<ActionItemDef[]>(
     () => [
@@ -44,14 +49,14 @@ const TestCaseSummaryGrid = ({
   const columns = React.useMemo<ColumnDef<any>[]>(
     () => [
       {
-        header: "Resource & Value Set",
+        header: "Profile",
         id: "resourceType",
-        cell: ({ row }) => <div>{row.original.resource.resourceType}</div>,
+        cell: ({ row }) => <div>{row.original.title}</div>,
       },
       {
         header: "ID",
         id: "id",
-        cell: ({ row }) => <div>{row.original.resource.id}</div>,
+        cell: ({ row }) => <div>{row.original.entry.resource.id}</div>,
       },
       {
         header: "",
@@ -59,8 +64,8 @@ const TestCaseSummaryGrid = ({
         cell: ({ row }) => (
           <ActionCenter
             actions={actions}
-            testId={row.original.resource.id}
-            target={row.original}
+            testId={row.original.entry.resource.id}
+            target={row.original.entry}
           />
         ),
       },

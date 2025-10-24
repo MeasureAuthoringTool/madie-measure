@@ -1,6 +1,6 @@
 import * as React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
-import TestCaseSummaryGrid from "./TestCaseSummaryGrid";
+import TestCaseSummaryGrid, { GridDataEntry } from "./TestCaseSummaryGrid";
 import { within } from "@testing-library/dom";
 import userEvent from "@testing-library/user-event";
 
@@ -11,7 +11,9 @@ export const mockBundle = {
         resourceType: "Encounter",
         id: "ec-1",
         meta: {
-          profile: ["www.wwww.www.com"], // Partially covered case
+          profile: [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-encounter",
+          ], // Partially covered case
           extensions: {
             nested: {
               deeper: {
@@ -30,6 +32,15 @@ export const mockBundle = {
     },
   ],
 };
+
+const gridData = [
+  { title: "QICore Encounter", entry: mockBundle.entry[0] },
+  {
+    title: "QICore Procedure",
+    entry: mockBundle.entry[1],
+  },
+] as GridDataEntry[];
+
 describe("TestCaseSummaryGrid", () => {
   const mockOnRowEdit = jest.fn();
   const mockOnRowDelete = jest.fn();
@@ -37,21 +48,21 @@ describe("TestCaseSummaryGrid", () => {
   it("should render the table with correct headers and data from the bundle", () => {
     render(
       <TestCaseSummaryGrid
-        entry={mockBundle.entry}
+        gridData={gridData}
         onRowEdit={mockOnRowEdit}
         onRowDelete={mockOnRowDelete}
       />
     );
 
     const columnHeaders = screen.getAllByRole("columnheader");
-    expect(
-      within(columnHeaders[0]).getByText("Resource & Value Set")
-    ).toBeInTheDocument();
+    expect(within(columnHeaders[0]).getByText("Profile")).toBeInTheDocument();
     expect(within(columnHeaders[1]).getByText("ID")).toBeInTheDocument();
 
     const rows = screen.getAllByRole("row");
     expect(
-      within(rows[1].querySelector("td:nth-child(1)")).getByText("Encounter")
+      within(rows[1].querySelector("td:nth-child(1)")).getByText(
+        "QICore Encounter"
+      )
     ).toBeInTheDocument();
 
     expect(
@@ -59,7 +70,9 @@ describe("TestCaseSummaryGrid", () => {
     ).toBeInTheDocument();
 
     expect(
-      within(rows[2].querySelector("td:nth-child(1)")).getByText("Procedure")
+      within(rows[2].querySelector("td:nth-child(1)")).getByText(
+        "QICore Procedure"
+      )
     ).toBeInTheDocument();
 
     expect(
@@ -70,37 +83,33 @@ describe("TestCaseSummaryGrid", () => {
   it("should render the table with no data", () => {
     render(
       <TestCaseSummaryGrid
-        entry={[]}
+        gridData={[]}
         onRowEdit={mockOnRowEdit}
         onRowDelete={mockOnRowDelete}
       />
     );
 
     const columnHeaders = screen.getAllByRole("columnheader");
-    expect(
-      within(columnHeaders[0]).getByText("Resource & Value Set")
-    ).toBeInTheDocument();
+    expect(within(columnHeaders[0]).getByText("Profile")).toBeInTheDocument();
   });
 
   it("should render the table with undefined, no data", () => {
     render(
       <TestCaseSummaryGrid
-        entry={undefined}
+        gridData={undefined}
         onRowEdit={mockOnRowEdit}
         onRowDelete={mockOnRowDelete}
       />
     );
 
     const columnHeaders = screen.getAllByRole("columnheader");
-    expect(
-      within(columnHeaders[0]).getByText("Resource & Value Set")
-    ).toBeInTheDocument();
+    expect(within(columnHeaders[0]).getByText("Profile")).toBeInTheDocument();
   });
 
   it("should render ActionCenter with correct actions", async () => {
     render(
       <TestCaseSummaryGrid
-        entry={mockBundle.entry}
+        gridData={gridData}
         onRowEdit={mockOnRowEdit}
         onRowDelete={mockOnRowDelete}
       />
@@ -121,7 +130,7 @@ describe("TestCaseSummaryGrid", () => {
   it("should call onRowEdit when Edit action is clicked", async () => {
     render(
       <TestCaseSummaryGrid
-        entry={mockBundle.entry}
+        gridData={gridData}
         onRowEdit={mockOnRowEdit}
         onRowDelete={mockOnRowDelete}
       />
@@ -140,7 +149,7 @@ describe("TestCaseSummaryGrid", () => {
   it("should call onRowDelete when Delete action is clicked", async () => {
     render(
       <TestCaseSummaryGrid
-        entry={mockBundle.entry}
+        gridData={gridData}
         onRowEdit={mockOnRowEdit}
         onRowDelete={mockOnRowDelete}
       />

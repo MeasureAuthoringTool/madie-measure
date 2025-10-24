@@ -622,7 +622,7 @@ describe("TypeEditor Component", () => {
     expect(dateFieldInput.value).toBe("01/01/2019");
 
     const formatSelectorField = screen.getByRole("combobox", {
-      name: "Format",
+      name: "Date Precision Level",
     });
     expect(formatSelectorField).toBeInTheDocument();
     userEvent.click(formatSelectorField);
@@ -1950,43 +1950,67 @@ describe("TypeEditor Component", () => {
     expect(await screen.findByLabelText("Repeat.Offset")).toBeInTheDocument();
   });
 
-  test("Should render Range component (QuantityIntervalInput) and handle onQuantityIntervalChange", () => {
-    const setFieldTouched = jest.fn();
-    const setFieldValue = jest.fn();
-    const mockFormik = {
-      setFieldTouched,
-      setFieldValue,
-      getFieldProps: () => ({
-        label: "Observation.range",
-        name: "Observation.range",
-        value: { low: { value: "1" }, high: { value: "10" } },
-        onChange: jest.fn(),
-        onBlur: jest.fn(),
-      }),
-    } as any;
+  test("Should render Range component", async () => {
+    const mockFormik: FormikContextType<any> = {
+      values: {
+        "Observation.referenceRange[0].age": {
+          low: { value: "1" },
+          high: { value: "10" },
+        },
+      },
+      touched: {},
+      getFieldProps: (label) => {
+        const value = getNestedProperty(mockFormik.values, label);
+        return { value, name: label, onChange: jest.fn(), onBlur: jest.fn() };
+      },
+      handleChange: () => {},
+      setFieldValue: jest.fn(),
+      setFieldTouched: jest.fn(),
+    };
 
     render(
-      <FormikProvider value={mockFormik}>
-        <RequiredFieldsProvider requiredFields={{}} formInfo={[]}>
-          <TypeEditor
-            resource={null}
-            structureDefinition={{
-              id: "Observation.range",
-              path: "Observation.range",
-              min: 0,
-              max: "1",
-              type: [{ code: "Range" }],
-            }}
-            label="Observation.range"
-            canEdit={true}
-            parentStructureDefinition={null}
-          />
-        </RequiredFieldsProvider>
-      </FormikProvider>
+      <ExecutionContextProvider
+        value={{
+          measureState: [null, jest.fn()],
+          bundleState: [null, jest.fn()],
+          valueSetsState: [[], jest.fn()],
+          executionContextReady: true,
+          executing: false,
+          setExecuting: jest.fn(),
+          contextFailure: false,
+        }}
+      >
+        <FormikProvider value={mockFormik}>
+          <RequiredFieldsProvider requiredFields={{}} formInfo={[]}>
+            <TypeEditor
+              resource={null}
+              structureDefinition={{
+                id: "Observation.referenceRange[0].age",
+                type: [{ code: "Range" }],
+                required: false,
+                canBeMultipleCardinality: false,
+                max: "1",
+                min: 0,
+              }}
+              label="Observation.referenceRange[0].age"
+              canEdit={true}
+              parentStructureDefinition={null}
+            />
+          </RequiredFieldsProvider>
+        </FormikProvider>
+      </ExecutionContextProvider>
     );
 
-    expect(screen.getByText("Low")).toBeInTheDocument();
-    expect(screen.getByText("High")).toBeInTheDocument();
+    // Assert Low/High inputs
+    expect(await screen.findByText("Low")).toBeInTheDocument();
+    expect(await screen.findByText("High")).toBeInTheDocument();
+
+    // Check that "Unit(s)" appears twice
+    const unitLabels = screen.getAllByText("Unit(s)");
+    expect(unitLabels).toHaveLength(2);
+
+    // Assert Comparator is NOT present
+    expect(screen.queryByLabelText(/Comparator/i)).not.toBeInTheDocument();
   });
 
   test("renders QuantityComponent fields correctly", async () => {

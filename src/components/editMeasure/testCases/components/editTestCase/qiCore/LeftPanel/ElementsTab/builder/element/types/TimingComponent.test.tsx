@@ -450,7 +450,10 @@ describe("TimingComponent", () => {
     });
   });
 
-  test("TimingComponent calls Formik setFieldValue when QuantityIntervalInput (Range) low/high values change", async () => {
+  test("TimingComponent calls Formik setFieldValue when Range bounds low/high values change", async () => {
+    const basePath =
+      "MedicationRequest.dosageInstruction[0].timing.repeat.boundsRange";
+
     renderTimingComponent({
       initialValues: {
         MedicationRequest: {
@@ -471,38 +474,101 @@ describe("TimingComponent", () => {
       },
     });
 
-    const inputLow = screen.getByTestId(
-      "quantity-value-input-low"
+    const lowContainer = screen.getByText("Low").closest(".quantity-fields")!;
+    const inputLow = within(lowContainer).getByTestId(
+      "decimal-input-field-Low"
     ) as HTMLInputElement;
+    const unitLow = within(lowContainer).getByTestId(
+      "unit-input-input"
+    ) as HTMLInputElement;
+
     expect(inputLow.value).toBe("1");
+    expect(unitLow.value).toBe("cm");
 
-    const inputHigh = screen.getByTestId(
-      "quantity-value-input-high"
-    ) as HTMLInputElement;
-    expect(inputHigh.value).toBe("2");
-
-    // Change low value
     fireEvent.change(inputLow, { target: { value: "10" } });
-    fireEvent.blur(inputLow);
-
-    // Change high value
-    fireEvent.change(inputHigh, { target: { value: "20" } });
-    fireEvent.blur(inputHigh);
 
     await waitFor(() => {
-      expect(setFieldValueMock).toHaveBeenCalledWith(
-        "MedicationRequest.dosageInstruction[0].timing.repeat.boundsRange",
-        {
-          low: {
-            value: 10,
-            unit: "cm",
-          },
-          high: {
-            value: 20,
-            unit: "cm",
-          },
-        }
-      );
+      expect(setFieldValueMock).toHaveBeenCalledWith(`${basePath}.low`, {
+        value: 10,
+        unit: "cm",
+      });
+    });
+
+    const highContainer = screen.getByText("High").closest(".quantity-fields")!;
+    const inputHigh = within(highContainer).getByTestId(
+      "decimal-input-field-High"
+    ) as HTMLInputElement;
+    const unitHigh = within(highContainer).getByTestId(
+      "unit-input-input"
+    ) as HTMLInputElement;
+
+    expect(inputHigh.value).toBe("2");
+    expect(unitHigh.value).toBe("cm");
+
+    fireEvent.change(inputHigh, { target: { value: "20" } });
+
+    await waitFor(() => {
+      expect(setFieldValueMock).toHaveBeenCalledWith(`${basePath}.high`, {
+        value: 20,
+        unit: "cm",
+      });
+    });
+  });
+
+  test("TimingComponent calls Formik setFieldValue when Range bounds units change", async () => {
+    const basePath =
+      "MedicationRequest.dosageInstruction[0].timing.repeat.boundsRange";
+
+    renderTimingComponent({
+      initialValues: {
+        MedicationRequest: {
+          dosageInstruction: [
+            {
+              timing: {
+                repeat: {
+                  bounds: { x: "Range" },
+                  boundsRange: {
+                    low: { value: 1, unit: "cm" },
+                    high: { value: 2, unit: "cm" },
+                  },
+                },
+              },
+            },
+          ],
+        },
+      },
+    });
+
+    const lowContainer = screen.getByText("Low").closest(".quantity-fields")!;
+    const unitLow = within(lowContainer).getByTestId(
+      "unit-input-input"
+    ) as HTMLInputElement;
+
+    expect(unitLow.value).toBe("cm");
+
+    fireEvent.change(unitLow, { target: { value: "mm" } });
+
+    await waitFor(() => {
+      expect(setFieldValueMock).toHaveBeenCalledWith(`${basePath}.low`, {
+        value: 1,
+        unit: "mm",
+      });
+    });
+
+    const highContainer = screen.getByText("High").closest(".quantity-fields")!;
+    const unitHigh = within(highContainer).getByTestId(
+      "unit-input-input"
+    ) as HTMLInputElement;
+
+    expect(unitHigh.value).toBe("cm");
+
+    fireEvent.change(unitHigh, { target: { value: "mm" } });
+
+    await waitFor(() => {
+      expect(setFieldValueMock).toHaveBeenCalledWith(`${basePath}.high`, {
+        value: 2,
+        unit: "mm",
+      });
     });
   });
 

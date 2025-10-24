@@ -329,6 +329,6 @@ describe("ElementsTab", () => {
     const addedTab = screen.getByTestId("added-tab");
     expect(addedTab).toBeInTheDocument();
     userEvent.click(addedTab);
-    expect(screen.getByText("Resource & Value Set")).toBeInTheDocument();
+    expect(screen.getByText("Profile")).toBeInTheDocument();
   });
 });

@@ -9,7 +9,6 @@ import { Box } from "@mui/material";
 import _ from "lodash";
 import ResourceList from "./resource/ResourceList";
 import TestCaseSummaryGrid from "./grid/TestCaseSummaryGrid";
-import { v4 as uuidv4 } from "uuid";
 import ResourceEditor from "./resource/ResourceEditor";
 import { TestCase } from "@madie/madie-models";
 import {
@@ -33,6 +32,7 @@ import {
   getLastPart,
   buildMadieResourceFromResourceIdentifier,
 } from "../../../../../../api/fhirDefinitionServiceUtilities";
+import { BundleEntry } from "fhir/r4";
 import { ResourceContextProvider } from "./ResourceContext";
 
 interface BuilderProps {
@@ -63,6 +63,26 @@ export function scrollToElementByIdWhenAvailable(
   }, checkInterval);
 }
 
+// prepare data for summary grid by adding profile titles
+const prepareSummaryGridData = (
+  entries: Array<BundleEntry>,
+  resourceIdentifiers: Array<ResourceIdentifier>
+) => {
+  if (_.isEmpty(entries)) {
+    return [];
+  }
+
+  return entries?.map((entry: BundleEntry) => {
+    const resourceDef = resourceIdentifiers?.find(
+      (res) => res.profile === entry.resource.meta?.profile?.[0]
+    );
+    if (resourceDef) {
+      return { entry, title: resourceDef.title };
+    }
+    return { entry, title: entry.resource.resourceType };
+  });
+};
+
 const Builder = ({
   canEdit,
   setInitialFormikValuesStu6,
@@ -86,48 +106,47 @@ const Builder = ({
   };
 
   const [selectedResourceID, setSelectedResourceId] = useState<string>(null); // one single source of truth.
-  const [allResourceProfiles, setAllResourceProfiles] = useState<any[]>([]); // all profiles for all resources
+  const [resourceIdentifiers, setResourceIdentifiers] = useState([]);
   const [resources, setResources] = useState<ResourceIdentifier[]>(null);
   const addedResources = state?.bundle?.entry?.length || 0;
   const [savedGridID, setSavedGridID] = useState(null);
   useEffect(() => {
-    const resourcesPromise = fhirDefinitionsService.current.getResources(); // this is needed in reference component for the hr name
-    const relevantElementsPromise =
-      fhirElmTranslationService.current.fetchRelevantDataElements(measure);
-    Promise.all([resourcesPromise, relevantElementsPromise]).then(
-      ([resources, sdcs]) => {
-        const relevantTypes = sdcs?.map(
-          (relevantElement) => relevantElement.type
-        );
-        if (!_.isEmpty(resources)) {
-          const uniqueResources = _.uniq(resources.sort());
-          const filteredResources = _.isEmpty(relevantTypes)
-            ? uniqueResources
-            : uniqueResources.filter(
-                (r) =>
-                  relevantTypes.includes(r.type) ||
-                  "PATIENT" === r.type.toUpperCase()
-              );
-
-          // Move "qicore-patient" to the top if present, else keep order
-          const patientIdx = filteredResources.findIndex(
-            (r) => r.id === "qicore-patient"
+    const fetchResources = async () => {
+      const resourceIdentifiers =
+        await fhirDefinitionsService.current.getResources();
+      setResourceIdentifiers(resourceIdentifiers);
+      fhirElmTranslationService.current
+        .fetchRelevantDataElements(measure)
+        .then((sdcs) => {
+          const relevantTypes = sdcs?.map(
+            (relevantElement) => relevantElement.type
           );
-          let sortedResources = filteredResources;
-          if (patientIdx > 0) {
-            sortedResources = [
-              filteredResources[patientIdx],
-              ...filteredResources.slice(0, patientIdx),
-              ...filteredResources.slice(patientIdx + 1),
-            ];
+          if (!_.isEmpty(resourceIdentifiers)) {
+            const uniqueResources = _.uniq(resourceIdentifiers.sort());
+            const filteredResources = _.isEmpty(relevantTypes)
+              ? uniqueResources
+              : uniqueResources.filter(
+                  (r) =>
+                    relevantTypes.includes(r.type) ||
+                    "PATIENT" === r.type.toUpperCase()
+                );
+            const patientIdx = filteredResources.findIndex(
+              (r) => r.id === "qicore-patient"
+            );
+            let sortedResources = filteredResources;
+            if (patientIdx > 0) {
+              sortedResources = [
+                filteredResources[patientIdx],
+                ...filteredResources.slice(0, patientIdx),
+                ...filteredResources.slice(patientIdx + 1),
+              ];
+            }
+            setResources(sortedResources);
           }
-
-          setAllResourceProfiles(resources);
-          setResources(sortedResources);
-        }
-      }
-    );
-  }, []);
+        });
+    };
+    fetchResources();
+  }, [measure]);
 
   // check if patient resource is already added
   const isPatientAdded = !!state?.bundle?.entry?.some(
@@ -221,7 +240,7 @@ const Builder = ({
         {activeTab === "Added" && (
           <>
             {selectedResourceID && (
-              <ResourceContextProvider value={allResourceProfiles}>
+              <ResourceContextProvider value={resourceIdentifiers}>
                 <ResourceEditor
                   selectedResourceID={selectedResourceID}
                   setValidationSchema={setValidationSchema}
@@ -234,7 +253,10 @@ const Builder = ({
               </ResourceContextProvider>
             )}
             <TestCaseSummaryGrid
-              entry={state?.bundle?.entry}
+              gridData={prepareSummaryGridData(
+                state?.bundle?.entry,
+                resourceIdentifiers
+              )}
               onRowEdit={(row) =>
                 handleRowEdit(row, setSelectedResourceId, setSavedGridID)
               }
