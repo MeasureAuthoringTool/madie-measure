@@ -255,4 +255,29 @@ describe("scrollToElementByIdWhenAvailable", () => {
 
     expect(clearIntervalSpy).toHaveBeenCalledTimes(1);
   });
+
+  it("always displays QI Core Patient at the top of the available resources list", async () => {
+    (useFormikContext as jest.Mock).mockReturnValue({
+      resetForm: jest.fn(),
+      dirty: false,
+    });
+
+    renderBuilderComponent();
+
+    const availableTab = await screen.findByText("Available");
+    expect(availableTab).toBeInTheDocument();
+
+    const rows = await screen.findAllByRole("row");
+    const firstResourceRow = rows.find((row) =>
+      row.textContent?.includes("QICore Patient")
+    );
+
+    // The first resource row should be the first after the header
+    expect(rows.indexOf(firstResourceRow!)).toBe(1);
+
+    const resourceTitles = rows.slice(1).map((row) => row.textContent);
+    expect(resourceTitles[0]).toContain("QICore Patient");
+    expect(resourceTitles[1]).toContain("QICore Procedure");
+    expect(resourceTitles[2]).toContain("QICore Encounter");
+  });
 });
