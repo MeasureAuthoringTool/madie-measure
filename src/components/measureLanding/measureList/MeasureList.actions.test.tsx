@@ -670,8 +670,8 @@ describe("Action Center Tests", () => {
 
   it("opens transfer dialog and updates status handler for partial transfer failure", async () => {
     mockMeasureServiceApi.transferMeasures = jest.fn().mockResolvedValue({
-      status: 206,
-      data: ["IDIDID1"], // IDs of measures that failed
+      status: 207,
+      data: ["IDIDID1"], // ID of measure that failed
     });
 
     const setStatusHandlerMock = jest.fn();
@@ -713,7 +713,7 @@ describe("Action Center Tests", () => {
       warning: {
         status: true,
         primaryMessage:
-          "1 measures could not be transferred. Please try again, or contact help desk if the issue persists.",
+          "1 Measures could not be transferred. Please try again, or contact help desk if the issue persists.",
         secondaryMessages: ["new measure - A"],
       },
     });

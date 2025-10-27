@@ -230,14 +230,14 @@ describe("Transfer Measures Dialog component", () => {
     });
   });
 
-  it("should handle partial transfer (206)", async () => {
+  it("should handle partial transfer (207)", async () => {
     // Have 3 measures, fail 2 of them
     const measures = [mockMeasure1, mockMeasure2, mockMeasure3];
     const failedMeasureIds = [mockMeasure1.id, mockMeasure3.id];
 
-    // Mock API to return 206 with the 2 failed measure IDs
+    // Mock API to return 207 with the 2 failed measure IDs
     mockTransferMeasuresResponse.mockResolvedValue({
-      status: 206,
+      status: 207,
       data: failedMeasureIds,
     });
 
@@ -277,7 +277,7 @@ describe("Transfer Measures Dialog component", () => {
       expect(setStatusHandlerMock).toHaveBeenCalledWith({
         warning: {
           status: true,
-          primaryMessage: `2 measures could not be transferred. Please try again, or contact help desk if the issue persists.`,
+          primaryMessage: `2 Measures could not be transferred. Please try again, or contact help desk if the issue persists.`,
           secondaryMessages: expect.arrayContaining([
             mockMeasure1.measureName,
             mockMeasure3.measureName,

@@ -244,7 +244,7 @@ const TransferDialog = ({
             toastMessage: TRANSFER_MEASURE_SUCCESS,
             toastOpen: true,
           });
-        } else if (response.status === 206) {
+        } else if (response.status === 207) {
           const failedMeasureIds: string[] = response.data;
 
           const failedMeasureNames = measures
@@ -254,7 +254,7 @@ const TransferDialog = ({
           setStatusHandler({
             warning: {
               status: true,
-              primaryMessage: `${failedMeasureNames?.length} measures could not be transferred. Please try again, or contact help desk if the issue persists.`,
+              primaryMessage: `${failedMeasureNames?.length} Measures could not be transferred. Please try again, or contact help desk if the issue persists.`,
               secondaryMessages: failedMeasureNames,
             },
           });
