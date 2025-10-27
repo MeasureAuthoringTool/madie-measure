@@ -15,6 +15,7 @@ import {
   YEAR_FORMAT,
   YEAR_MONTH_FORMAT,
   YEAR_MONTH_DAY_FORMAT,
+  formatOptionRenderMap,
 } from "./DateTimeComponent";
 import AddElementButton from "../../../../../../../common/AddElementButton";
 dayjs.extend(utc);
@@ -49,7 +50,7 @@ const renderFormats = (formats) => {
         value={value}
         data-testid={`${value}-option`}
       >
-        {value}
+        {formatOptionRenderMap[value]}
       </MuiMenuItem>
     )),
   ];
@@ -81,7 +82,7 @@ const DateTimeComponent = ({
         setDate(dayjs(value));
       }
     } else {
-      setFormat(null);
+      setFormat(YEAR_MONTH_DAY_FORMAT);
       setDate(null);
     }
   }, [value]);
@@ -107,7 +108,7 @@ const DateTimeComponent = ({
               style={{ height: "38.125px", marginBottim: "2px" }}
               required={fieldRequired}
               id={`date-format-selector-${label}`}
-              label={`Format`}
+              label="Date Precision Level"
               inputProps={{
                 "data-testid": `date-format-selector-input-field-${label}`,
                 "aria-describedby": `date-format-selector-input-field-helper-text-${label}`,
@@ -118,6 +119,9 @@ const DateTimeComponent = ({
                 "aria-required": "true",
               }}
               options={renderFormats(formatOptions1)}
+              renderValue={(e) => {
+                return formatOptionRenderMap[e];
+              }}
               onChange={(event) => {
                 const { value } = event.target;
                 if (format) {
@@ -138,7 +142,7 @@ const DateTimeComponent = ({
             <DateField
               label="Date Field"
               helperText={helperText}
-              placeholder={format}
+              placeholder={format ? formatOptionRenderMap[format] : ""}
               required={fieldRequired}
               error={error}
               value={date ? dayjs(date) : null}

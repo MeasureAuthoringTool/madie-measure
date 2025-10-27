@@ -34,10 +34,15 @@ import "./ResourceList.scss";
 export interface ResourceListProps {
   resourceIdentifiers?: ResourceIdentifier[];
   onClick: (resourceIdentifier: ResourceIdentifier) => void;
+  isPatientAdded?: boolean;
 }
 const TH = tw.th`p-3 text-left text-sm font-bold capitalize`;
 
-const ResourceList = ({ resourceIdentifiers, onClick }: ResourceListProps) => {
+const ResourceList = ({
+  resourceIdentifiers,
+  onClick,
+  isPatientAdded,
+}: ResourceListProps) => {
   const [visibleResources, setVisibleResources] = useState(resourceIdentifiers);
   const [resourceFilter, setResourceFilter] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
@@ -114,6 +119,8 @@ const ResourceList = ({ resourceIdentifiers, onClick }: ResourceListProps) => {
         header: "",
         cell: ({ row }) => {
           const { original } = row;
+          const isPatient = original.id === "qicore-patient";
+          const isDisabled = isPatient && isPatientAdded;
           return (
             <>
               <IconButton
@@ -121,8 +128,11 @@ const ResourceList = ({ resourceIdentifiers, onClick }: ResourceListProps) => {
                 onClick={() => {
                   onClick(original);
                 }}
+                disabled={isDisabled}
               >
-                <AddCircleOutlineIcon sx={{ color: "#0073C8" }} />
+                <AddCircleOutlineIcon
+                  sx={{ color: isDisabled ? "#BDBDBD" : "#0073C8" }}
+                />
               </IconButton>
               <IconButton>
                 <EditIcon color="#0073C8" />
@@ -133,7 +143,7 @@ const ResourceList = ({ resourceIdentifiers, onClick }: ResourceListProps) => {
         accessorKey: "action",
       },
     ];
-  }, [visibleResources]);
+  }, [visibleResources, isPatientAdded]);
   const canGoNext = (() => {
     return page < totalPages;
   })();

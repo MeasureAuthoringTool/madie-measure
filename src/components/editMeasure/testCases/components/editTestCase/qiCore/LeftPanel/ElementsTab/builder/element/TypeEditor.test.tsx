@@ -622,7 +622,7 @@ describe("TypeEditor Component", () => {
     expect(dateFieldInput.value).toBe("01/01/2019");
 
     const formatSelectorField = screen.getByRole("combobox", {
-      name: "Format",
+      name: "Date Precision Level",
     });
     expect(formatSelectorField).toBeInTheDocument();
     userEvent.click(formatSelectorField);

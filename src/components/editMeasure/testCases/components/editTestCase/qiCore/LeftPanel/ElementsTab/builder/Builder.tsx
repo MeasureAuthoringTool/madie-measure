@@ -130,12 +130,28 @@ const Builder = ({
                     relevantTypes.includes(r.type) ||
                     "PATIENT" === r.type.toUpperCase()
                 );
-            setResources(filteredResources);
+            const patientIdx = filteredResources.findIndex(
+              (r) => r.id === "qicore-patient"
+            );
+            let sortedResources = filteredResources;
+            if (patientIdx > 0) {
+              sortedResources = [
+                filteredResources[patientIdx],
+                ...filteredResources.slice(0, patientIdx),
+                ...filteredResources.slice(patientIdx + 1),
+              ];
+            }
+            setResources(sortedResources);
           }
         });
     };
     fetchResources();
   }, [measure]);
+
+  // check if patient resource is already added
+  const isPatientAdded = !!state?.bundle?.entry?.some(
+    (e) => e.resource?.resourceType === "Patient"
+  );
 
   return (
     <Box
@@ -218,6 +234,7 @@ const Builder = ({
                 payload: newEntry,
               });
             }}
+            isPatientAdded={isPatientAdded}
           />
         )}
         {activeTab === "Added" && (
