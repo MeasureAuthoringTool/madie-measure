@@ -462,13 +462,18 @@ const TestCaseList = (props: TestCaseListProps) => {
     // request all test cases ->
     const validTestCases = testCases?.filter((tc) => tc.validResource);
 
+    const testCasesToExecute = measure?.testCaseConfiguration
+      ?.executeInvalidTestCases
+      ? testCases
+      : validTestCases;
+
     if (validTestCases && validTestCases.length > 0 && measureBundle) {
       setExecuting(true);
       try {
         const calculationOutput: CalculationOutput<any> =
           await calculation.current.calculateTestCases(
             measure,
-            validTestCases,
+            testCasesToExecute,
             measureBundle,
             valueSets
           );
