@@ -195,4 +195,40 @@ describe("ResourceList component", () => {
     const addBtnOther = screen.getByTestId("add-element-2");
     expect(addBtnOther).not.toBeDisabled();
   });
+
+  it("disables add resource button for QICore patient and US Core patient profile when one patient is already added", async () => {
+    const resourceList = [
+      {
+        id: "qicore-patient",
+        title: "QI Core Patient",
+        type: "Patient",
+        category: "Demo",
+        profile: "profile-patient",
+      },
+      {
+        id: "us-core-patient",
+        title: "US QI Core Patient",
+        type: "Patient",
+        category: "Demo",
+        profile: "profile-other",
+      },
+    ];
+    const onClick = jest.fn();
+
+    render(
+      <ResourceList
+        resourceIdentifiers={resourceList}
+        onClick={onClick}
+        isPatientAdded={true}
+      />
+    );
+
+    // Add button for qicore-patient should be disabled
+    const addBtn = screen.getByTestId("add-element-qicore-patient");
+    expect(addBtn).toBeDisabled();
+
+    // Add button for other resource should NOT be disabled
+    const addBtnOther = screen.getByTestId("add-element-us-core-patient");
+    expect(addBtnOther).toBeDisabled();
+  });
 });
