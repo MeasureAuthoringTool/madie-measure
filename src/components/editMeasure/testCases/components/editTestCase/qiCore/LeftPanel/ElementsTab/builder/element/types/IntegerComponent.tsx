@@ -7,7 +7,7 @@ import {
   SIGNED_MINIMUM,
   INTEGER_MAXIMUM,
 } from "../typesValidations/FhirNumbers";
-import AddElementButton from "../../../../../../../common/AddElementButton";
+import AddElementButton from "../../../../../../../common/UIOnlyModelAgnostic/AddElementButton";
 export enum IntegerType {
   UNSIGNED = "Unsigned",
   SIGNED = "Signed",

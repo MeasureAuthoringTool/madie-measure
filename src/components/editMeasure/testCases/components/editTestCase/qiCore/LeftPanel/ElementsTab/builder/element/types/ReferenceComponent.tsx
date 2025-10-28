@@ -3,7 +3,7 @@ import ResourceContext from "../../ResourceContext";
 import { Select } from "@madie/madie-design-system/dist/react";
 import { MenuItem } from "@mui/material";
 import { useQiCoreResource } from "../../../../../../../../util/QiCorePatientProvider";
-import AddElementButton from "../../../../../../../common/AddElementButton";
+import AddElementButton from "../../../../../../../common/UIOnlyModelAgnostic/AddElementButton";
 import { useFormikContext } from "formik";
 import { buildMadieResourceFromResourceIdentifier } from "../../../../../../../../api/fhirDefinitionServiceUtilities";
 

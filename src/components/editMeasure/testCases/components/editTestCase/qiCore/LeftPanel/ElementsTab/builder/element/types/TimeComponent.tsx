@@ -3,7 +3,7 @@ import { TypeComponentProps } from "./TypeComponentProps";
 import { TimeField } from "@madie/madie-design-system/dist/react";
 import timezone from "dayjs/plugin/timezone";
 import dayjs from "dayjs";
-import AddElementButton from "../../../../../../../common/AddElementButton";
+import AddElementButton from "../../../../../../../common/UIOnlyModelAgnostic/AddElementButton";
 
 dayjs.extend(timezone);
 

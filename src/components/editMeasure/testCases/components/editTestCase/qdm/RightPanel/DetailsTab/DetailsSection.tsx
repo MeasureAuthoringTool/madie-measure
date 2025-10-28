@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import ElementSection from "../../../../common/ElementSection";
+import ElementSection from "../../../../common/UIOnlyModelAgnostic/ElementSection";
 import { useFormikContext } from "formik";
 import {
   TextField,

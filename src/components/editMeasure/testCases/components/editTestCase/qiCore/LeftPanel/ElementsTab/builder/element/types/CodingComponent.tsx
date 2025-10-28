@@ -13,7 +13,7 @@ import { Coding, Extension, ValueSet } from "fhir/r4";
 import { getValueSetUrl } from "../../../../../../../../api/fhirDefinitionServiceUtilities";
 import useTerminologyServiceApi from "../../../../../../../../api/useTerminologyServiceApi";
 import { getOidFromString } from "@madie/madie-util";
-import AddElementButton from "../../../../../../../common/AddElementButton";
+import AddElementButton from "../../../../../../../common/UIOnlyModelAgnostic/AddElementButton";
 
 const placeHolder = (label: string) => (
   <span style={{ color: "#717171" }}>{label}</span>

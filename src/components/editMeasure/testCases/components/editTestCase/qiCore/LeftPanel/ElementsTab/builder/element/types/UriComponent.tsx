@@ -2,7 +2,7 @@ import React from "react";
 import { TypeComponentProps } from "./TypeComponentProps";
 import Box from "@mui/material/Box";
 import { TextField } from "@madie/madie-design-system/dist/react/";
-import AddElementButton from "../../../../../../../common/AddElementButton";
+import AddElementButton from "../../../../../../../common/UIOnlyModelAgnostic/AddElementButton";
 
 const UriComponent = ({
   canEdit,

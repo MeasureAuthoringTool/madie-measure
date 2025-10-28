@@ -5,23 +5,23 @@ import {
   TimeField,
   Button,
 } from "@madie/madie-design-system/dist/react";
-import IntegerInput from "../../../../../../../common/IntegerInput/IntegerInput";
+import IntegerInput from "../../../../../../../QDM/IntegerInput/IntegerInput";
 import "./DisplayAttributeInputs.scss";
-import RatioInput from "../../../../../../../common/ratioInput/RatioInput";
+import RatioInput from "../../../../../../../QDM/ratioInput/RatioInput";
 import QuantityInput from "../../../../../../../common/quantityInput/QuantityInput";
 import DecimalInput from "../../../../../../../common/DecimalInput/DecimalInput";
-import DateTimeInput from "../../../../../../../common/dateTimeInput/DateTimeInput";
+import DateTimeInput from "../../../../../../../QDM/dateTimeInput/DateTimeInput";
 import QdmEntity from "./QdmEntity";
-import CodeInput from "../../../../../../../common/codeInput/CodeInput";
+import CodeInput from "../../../../../../../QDM/codeInput/CodeInput";
 import "twin.macro";
 import "styled-components/macro";
 import useQdmExecutionContext from "../../../../../../../routes/qdm/useQdmExecutionContext";
-import QuantityIntervalInput from "../../../../../../../common/quantityIntervalInput/QuantityIntervalInput";
-import StringInput from "../../../../../../../common/string/StringInput";
-import DataElementSelector from "../../../../../../../common/DataElementSelector/DataElementSelector";
-import DiagnosisComponent from "../../../../../../../common/DiagnosisComponent/DiagnosisComponent";
-import ComponentType from "../../../../../../../common/componentDataType/ComponentType";
-import FacilityLocation from "../../../../../../../common/facilityLocation/FacilityLocation";
+import QuantityIntervalInput from "../../../../../../../QDM/quantityIntervalInput/QuantityIntervalInput";
+import StringInput from "../../../../../../../QDM/string/StringInput";
+import DataElementSelector from "../../../../../../../QDM/DataElementSelector/DataElementSelector";
+import DiagnosisComponent from "../../../../../../../QDM/DiagnosisComponent/DiagnosisComponent";
+import ComponentType from "../../../../../../../QDM/componentDataType/ComponentType";
+import FacilityLocation from "../../../../../../../QDM/facilityLocation/FacilityLocation";
 
 interface DisplayAttributeInputsProps {
   attributeType?: string;

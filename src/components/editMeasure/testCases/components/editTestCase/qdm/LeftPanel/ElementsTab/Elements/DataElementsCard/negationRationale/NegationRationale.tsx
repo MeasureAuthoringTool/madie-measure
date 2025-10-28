@@ -5,7 +5,7 @@ import { Chip } from "@mui/material";
 import _ from "lodash";
 import { DataElement, CqmMeasure, CQL } from "cqm-models";
 import { makeStyles } from "@mui/styles";
-import CodeInput from "../../../../../../../common/codeInput/CodeInput";
+import CodeInput from "../../../../../../../QDM/codeInput/CodeInput";
 import { Button } from "@madie/madie-design-system/dist/react";
 
 interface NegationRationaleProps {
