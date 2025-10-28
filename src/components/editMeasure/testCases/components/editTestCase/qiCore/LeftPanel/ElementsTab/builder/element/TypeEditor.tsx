@@ -28,7 +28,7 @@ import {
 } from "../../../../../../../api/fhirDefinitionServiceUtilities";
 import CodingComponent from "./types/CodingComponent";
 import { useRequiredFields } from "./RequiredFieldsContext";
-import ElementSection from "../../../../../../common/ElementSection";
+import ElementSection from "../../../../../../common/UIOnlyModelAgnostic/ElementSection";
 import CodeableConceptComponent from "./types/CodeableConceptComponent";
 import PeriodDateTimeComponent from "./types/PeriodDateTimeComponent";
 import ChoiceType from "./ChoiceType";

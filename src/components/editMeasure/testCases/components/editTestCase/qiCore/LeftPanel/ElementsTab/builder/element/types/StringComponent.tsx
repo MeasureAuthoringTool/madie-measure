@@ -1,7 +1,7 @@
 import React from "react";
 import { TypeComponentProps } from "./TypeComponentProps";
 import { TextField } from "@madie/madie-design-system/dist/react";
-import AddElementButton from "../../../../../../../common/AddElementButton";
+import AddElementButton from "../../../../../../../common/UIOnlyModelAgnostic/AddElementButton";
 
 /*
   String component is either going to need to be very smart, or we're going to have to provide validations ahead of time. 

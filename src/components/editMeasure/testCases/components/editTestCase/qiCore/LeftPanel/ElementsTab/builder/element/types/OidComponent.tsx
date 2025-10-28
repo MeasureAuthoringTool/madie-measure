@@ -3,7 +3,7 @@ import { FormHelperText } from "@mui/material";
 import { TypeComponentProps } from "./TypeComponentProps";
 import { TextField } from "@madie/madie-design-system/dist/react";
 import _ from "lodash";
-import AddElementButton from "../../../../../../../common/AddElementButton";
+import AddElementButton from "../../../../../../../common/UIOnlyModelAgnostic/AddElementButton";
 
 const OidComponent = ({
   canEdit,

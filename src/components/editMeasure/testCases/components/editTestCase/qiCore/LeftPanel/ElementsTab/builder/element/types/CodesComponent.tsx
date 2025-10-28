@@ -7,7 +7,7 @@ import * as _ from "lodash";
 import useFhirDefinitionsServiceApi from "../../../../../../../../api/useFhirDefinitionsService";
 import { getValueSetUrl } from "../../../../../../../../api/fhirDefinitionServiceUtilities";
 import useTerminologyServiceApi from "../../../../../../../../api/useTerminologyServiceApi";
-import AddElementButton from "../../../../../../../common/AddElementButton";
+import AddElementButton from "../../../../../../../common/UIOnlyModelAgnostic/AddElementButton";
 import "./CodesComponent.scss";
 
 const CodesComponent = ({
