@@ -479,6 +479,14 @@ const TestCaseList = (props: TestCaseListProps) => {
           );
         setCalculationOutput(calculationOutput);
       } catch (error) {
+        if (
+          error.message == "Unexpected end of JSON input" ||
+          error.message == "Cannot read properties of null (reading 'entry')" ||
+          error.message.includes("not valid JSON")
+        ) {
+          error.message =
+            "Some test cases could not be executed due to syntax errors in their definitions. Please review and correct the syntax issues, then try running the tests again.";
+        }
         console.error("calculateTestCases: error.message = " + error.message);
         setErrors((prevState) => [...prevState, error.message]);
       }
