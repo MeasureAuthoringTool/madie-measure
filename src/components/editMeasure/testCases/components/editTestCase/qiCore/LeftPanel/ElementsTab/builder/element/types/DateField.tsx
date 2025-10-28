@@ -56,7 +56,6 @@ const DateField = ({
   format = null,
   ...rest
 }) => {
-  console.log("format is", format);
   return (
     <Box sx={{ ...containerSx }}>
       <DatePicker
