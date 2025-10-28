@@ -141,6 +141,7 @@ const DateTimeComponent = ({
             ></Select>
             <DateField
               label="Date Field"
+              format={format}
               helperText={helperText}
               placeholder={format ? formatOptionRenderMap[format] : ""}
               required={fieldRequired}

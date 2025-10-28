@@ -196,6 +196,7 @@ const DateTimeComponent = ({
               value={date}
               views={format ? formatMap[format] : ["year"]}
               disabled={!canEdit || !format || format === "Invalid Format"}
+              format={format}
               placeholder={format ? formatOptionRenderMap[format] : ""}
               id={`${format || "year"}-field-${label}`}
               onChange={(newDate) => {
