@@ -31,7 +31,9 @@ describe("FhirElmTranslationServiceApi", () => {
       const error = new Error("Network error");
       (axios.get as jest.Mock).mockRejectedValue(error);
       const spy = jest.spyOn(console, "error").mockImplementation(() => {});
-      await expect(api.fetchTranslatorVersion(false)).rejects.toThrow("Error: Network error");
+      await expect(api.fetchTranslatorVersion(false)).rejects.toThrow(
+        "Error: Network error"
+      );
       expect(spy).toHaveBeenCalledWith(
         "unable to retrieve translator version:",
         error
