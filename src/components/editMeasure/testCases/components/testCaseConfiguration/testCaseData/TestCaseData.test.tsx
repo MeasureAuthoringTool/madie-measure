@@ -86,7 +86,7 @@ jest.mock("@madie/madie-util", () => ({
 }));
 
 const setExecutionContextReady = jest.fn();
-const mockWarning = jest.fn();
+const mockShiftTestCaseDatesWarning = jest.fn();
 
 // mocking testCaseService
 jest.mock("../../../api/useTestCaseServiceApi");
@@ -112,7 +112,7 @@ function renderTestCaseDataComponent() {
           warnings={[]}
           setErrors={() => {}}
           setImportWarnings={() => {}}
-          setWarnings={mockWarning}
+          setShiftTestCaseDatesWarnings={mockShiftTestCaseDatesWarning}
         />
       </QdmExecutionContextProvider>
     </ApiContextProvider>
@@ -357,7 +357,9 @@ describe("TestCaseData", () => {
     act(() => {
       fireEvent.click(saveButton);
     });
-    await waitFor(() => expect(mockWarning.mock.calls).toHaveLength(1));
+    await waitFor(() =>
+      expect(mockShiftTestCaseDatesWarning.mock.calls).toHaveLength(1)
+    );
   });
 
   it("should display disabled state of the form when user doesn't have authorization to edit", () => {
@@ -567,7 +569,9 @@ describe("TestCaseData", () => {
       fireEvent.click(saveButton);
     });
 
-    await waitFor(() => expect(mockWarning.mock.calls).toHaveLength(1));
+    await waitFor(() =>
+      expect(mockShiftTestCaseDatesWarning.mock.calls).toHaveLength(1)
+    );
   });
 
   it("should display an error message when unable to shift all test case dates when feature flag is on", async () => {
@@ -607,7 +611,9 @@ describe("TestCaseData", () => {
       fireEvent.click(saveButton);
     });
 
-    await waitFor(() => expect(mockWarning.mock.calls).toHaveLength(0));
+    await waitFor(() =>
+      expect(mockShiftTestCaseDatesWarning.mock.calls).toHaveLength(0)
+    );
 
     await waitFor(() =>
       expect(
@@ -655,7 +661,9 @@ describe("TestCaseData", () => {
       fireEvent.click(saveButton);
     });
 
-    await waitFor(() => expect(mockWarning.mock.calls).toHaveLength(0));
+    await waitFor(() =>
+      expect(mockShiftTestCaseDatesWarning.mock.calls).toHaveLength(0)
+    );
 
     await waitFor(() =>
       expect(
