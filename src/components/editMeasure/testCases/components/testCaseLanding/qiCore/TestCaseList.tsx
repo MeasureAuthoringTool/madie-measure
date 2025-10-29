@@ -462,18 +462,31 @@ const TestCaseList = (props: TestCaseListProps) => {
     // request all test cases ->
     const validTestCases = testCases?.filter((tc) => tc.validResource);
 
+    const testCasesToExecute = measure?.testCaseConfiguration
+      ?.executeInvalidTestCases
+      ? testCases
+      : validTestCases;
+
     if (validTestCases && validTestCases.length > 0 && measureBundle) {
       setExecuting(true);
       try {
         const calculationOutput: CalculationOutput<any> =
           await calculation.current.calculateTestCases(
             measure,
-            validTestCases,
+            testCasesToExecute,
             measureBundle,
             valueSets
           );
         setCalculationOutput(calculationOutput);
       } catch (error) {
+        if (
+          error.message == "Unexpected end of JSON input" ||
+          error.message == "Cannot read properties of null (reading 'entry')" ||
+          error.message.includes("not valid JSON")
+        ) {
+          error.message =
+            "Some test cases could not be executed due to syntax errors in their definitions. Please review and correct the syntax issues, then try running the tests again.";
+        }
         console.error("calculateTestCases: error.message = " + error.message);
         setErrors((prevState) => [...prevState, error.message]);
       }

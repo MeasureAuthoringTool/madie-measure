@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import AttributeSelector from "../../../../../../../common/attributeSelector/AttributeSelector";
+import AttributeSelector from "../../../../../../../QDM/attributeSelector/AttributeSelector";
 import { DataElement } from "cqm-models";
 import * as _ from "lodash";
 import {

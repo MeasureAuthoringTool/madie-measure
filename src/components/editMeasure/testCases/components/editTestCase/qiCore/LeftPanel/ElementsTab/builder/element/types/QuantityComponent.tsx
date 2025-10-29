@@ -12,7 +12,7 @@ import { getIn, useFormikContext } from "formik";
 import CodesComponent from "./CodesComponent";
 import DecimalInput from "../../../../../../../common/DecimalInput/DecimalInput";
 import "./QuantityComponent.scss";
-import AddElementButton from "../../../../../../../common/AddElementButton";
+import AddElementButton from "../../../../../../../common/UIOnlyModelAgnostic/AddElementButton";
 
 export interface QuantityComponentProps extends TypeComponentProps {
   showLabel?: boolean;

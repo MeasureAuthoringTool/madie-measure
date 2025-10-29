@@ -3,7 +3,7 @@ import { FormControl } from "@mui/material";
 import "twin.macro";
 import "styled-components/macro";
 import { CQL } from "cqm-models";
-import DateTimeInput from "../dateTimeInput/DateTimeInput";
+import DateTimeInput from "../../QDM/dateTimeInput/DateTimeInput";
 
 interface DateTimeIntervalProps {
   label: string;
