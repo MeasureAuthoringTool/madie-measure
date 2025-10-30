@@ -273,7 +273,8 @@ describe("scrollToElementByIdWhenAvailable", () => {
 
     const resourceTitles = rows.slice(1).map((row) => row.textContent);
     expect(resourceTitles[0]).toContain("QICore Patient");
-    expect(resourceTitles[1]).toContain("QICore Procedure");
-    expect(resourceTitles[2]).toContain("QICore Encounter");
+    expect(resourceTitles[1]).toContain("QICore ServiceRequest");
+    expect(resourceTitles[2]).toContain("QICore Procedure");
+    expect(resourceTitles[3]).toContain("QICore Encounter");
   });
 });
