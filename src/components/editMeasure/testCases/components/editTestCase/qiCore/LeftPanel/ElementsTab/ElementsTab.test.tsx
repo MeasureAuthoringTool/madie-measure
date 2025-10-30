@@ -277,13 +277,9 @@ describe("ElementsTab", () => {
         return Promise.resolve({
           data: [
             {
-              oid: "ts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1110.42",
-              title: "Statin Allergen",
-              description: "AdverseEvent: Statin Allergen",
+              profile:
+                "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-adverseevent",
               type: "AdverseEvent",
-              drc: false,
-              codeId: null,
-              name: "Statin Allergen",
             },
           ],
         });
