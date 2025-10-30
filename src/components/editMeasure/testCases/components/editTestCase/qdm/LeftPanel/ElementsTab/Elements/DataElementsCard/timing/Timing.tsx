@@ -1,6 +1,6 @@
 import React from "react";
-import DateTimeInput from "../../../../../../../common/dateTimeInput/DateTimeInput";
-import DateTimeInterval from "../../../../../../../common/dateTimeInterval/DateTimeInterval";
+import DateTimeInput from "../../../../../../../QDM/dateTimeInput/DateTimeInput";
+import DateTimeInterval from "../../../../../../../QDM/dateTimeInterval/DateTimeInterval";
 import { QDMDate } from "cqm-models";
 import "./Timing.scss";
 import { PRIMARY_TIMING_ATTRIBUTES } from "../../../../../../../../util/QdmAttributeHelpers";

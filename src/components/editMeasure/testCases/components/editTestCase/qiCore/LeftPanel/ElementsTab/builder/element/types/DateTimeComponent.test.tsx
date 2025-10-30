@@ -126,7 +126,7 @@ describe("DateTimeComponent", () => {
       `${YEAR_MONTH_FORMAT}-field-birthday-input`
     ) as HTMLInputElement;
     userEvent.type(input, "January 2025");
-    expect(input.value).toBe("January 2025");
+    expect(input.value).toBe("01-2025");
     expect(handleChange).toBeCalledWith("2025-01");
   });
 

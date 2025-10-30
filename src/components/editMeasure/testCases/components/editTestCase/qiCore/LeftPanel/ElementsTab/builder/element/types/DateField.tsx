@@ -53,6 +53,7 @@ const DateField = ({
   views,
   onChange,
   placeholder = "",
+  format = null,
   ...rest
 }) => {
   return (
@@ -78,6 +79,15 @@ const DateField = ({
               helperText: helperText,
               onBlur: rest?.onBlur,
             };
+          },
+          field: (params) => {
+            const copyParams = { ...params };
+            // this code change fixes an edge case where the format psuedostate of the placeholder does not match the format.
+            if (format === "YYYY-MM") {
+              //@ts-ignore
+              copyParams.format = "MM-YYYY";
+            }
+            return copyParams;
           },
           openPickerButton: {
             id: `${id}-open-picker-button`,

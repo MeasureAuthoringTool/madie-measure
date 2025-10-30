@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
-import ElementSection from "../../../../../common/ElementSection";
+import ElementSection from "../../../../../common/UIOnlyModelAgnostic/ElementSection";
 import { Select } from "@madie/madie-design-system/dist/react";
 import FormControl from "@mui/material/FormControl";
 import { DataElement, ValueSet } from "cqm-models";
-import DateTimeInput from "../../../../../common/dateTimeInput/DateTimeInput";
+import DateTimeInput from "../../../../../QDM/dateTimeInput/DateTimeInput";
 import dayjs from "dayjs";
 import "./DemographicsSection.scss";
 import utc from "dayjs/plugin/utc";

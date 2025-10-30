@@ -14,7 +14,7 @@ import {
   InputLabel,
 } from "@madie/madie-design-system/dist/react";
 import DateField from "./DateField";
-import AddElementButton from "../../../../../../../common/AddElementButton";
+import AddElementButton from "../../../../../../../common/UIOnlyModelAgnostic/AddElementButton";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -196,6 +196,7 @@ const DateTimeComponent = ({
               value={date}
               views={format ? formatMap[format] : ["year"]}
               disabled={!canEdit || !format || format === "Invalid Format"}
+              format={format}
               placeholder={format ? formatOptionRenderMap[format] : ""}
               id={`${format || "year"}-field-${label}`}
               onChange={(newDate) => {

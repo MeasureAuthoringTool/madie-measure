@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import "twin.macro";
 import "styled-components/macro";
-import Quantity from "../quantityInput/QuantityInput";
+import Quantity from "../../common/quantityInput/QuantityInput";
 import { CQL } from "cqm-models";
 
 interface RatioInputProps {

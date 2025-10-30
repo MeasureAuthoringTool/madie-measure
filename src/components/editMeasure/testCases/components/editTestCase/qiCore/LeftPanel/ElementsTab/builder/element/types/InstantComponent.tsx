@@ -3,7 +3,7 @@ import { Instant } from "@madie/madie-design-system/dist/react";
 
 import dayjs from "dayjs";
 import { INSTANT_REGEX } from "../typesValidations/fhirR4Validations";
-import AddElementButton from "../../../../../../../common/AddElementButton";
+import AddElementButton from "../../../../../../../common/UIOnlyModelAgnostic/AddElementButton";
 
 const isValidInstant = (instantString: string) => {
   if (!INSTANT_REGEX.test(instantString)) return false;
