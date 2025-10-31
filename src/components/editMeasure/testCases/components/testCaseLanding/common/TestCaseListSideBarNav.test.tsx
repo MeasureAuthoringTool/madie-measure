@@ -77,7 +77,7 @@ describe("TestCase component", () => {
     );
 
     expect(screen.getByRole("navigation")).toBeInTheDocument();
-    expect(screen.getAllByRole("tab").length).toEqual(6);
+    expect(screen.getAllByRole("tab").length).toEqual(7);
     const activeLink = screen.getByRole("tab", {
       name: "Population Criteria 2",
     });
@@ -99,7 +99,7 @@ describe("TestCase component", () => {
     );
 
     expect(screen.getByRole("navigation")).toBeInTheDocument();
-    expect(screen.getAllByRole("tab").length).toEqual(6);
+    expect(screen.getAllByRole("tab").length).toEqual(7);
   });
 
   it("should render RAV tab for QDM measures", async () => {
@@ -140,6 +140,30 @@ describe("TestCase component", () => {
     );
 
     expect(screen.queryByRole("tab", { name: "RAV" })).toBeInTheDocument();
+  });
+
+  it("should render execution option tab for QI Core measures", async () => {
+    render(
+      <MemoryRouter>
+        <TestCaseListSideBarNav {...defaultProps} qdm={false} />
+      </MemoryRouter>
+    );
+
+    expect(
+      screen.queryByRole("tab", { name: "Execution Options" })
+    ).toBeInTheDocument();
+  });
+
+  it("should render execution option tab for QDM measures", async () => {
+    render(
+      <MemoryRouter>
+        <TestCaseListSideBarNav {...defaultProps} qdm={true} />
+      </MemoryRouter>
+    );
+
+    expect(
+      screen.queryByRole("tab", { name: "Execution Options" })
+    ).toBeInTheDocument();
   });
 
   it("should render Expansion tab for QI Core measures", async () => {
