@@ -3,7 +3,7 @@ import "@testing-library/jest-dom";
 import { describe, expect } from "@jest/globals";
 import { MemoryRouter, useNavigate } from "react-router-dom";
 import EditTestCaseBreadCrumbs from "./EditTestCaseBreadCrumbs";
-import { render, screen, cleanup } from "@testing-library/react";
+import { render, screen, cleanup, waitFor } from "@testing-library/react";
 // @ts-ignore
 import { measureStore } from "@madie/madie-util";
 import { Measure, TestCase } from "@madie/madie-models";
@@ -88,7 +88,7 @@ describe("EditTestCaseBreadCrumbs", () => {
     cleanup();
   });
 
-  it("should render the select component and display the locked icon", () => {
+  it("should render the select component and display the locked icon", async () => {
     render(
       <MemoryRouter>
         <EditTestCaseBreadCrumbs
@@ -111,7 +111,14 @@ describe("EditTestCaseBreadCrumbs", () => {
 
     const selectElement = screen.getByRole("combobox");
     expect(selectElement).toBeInTheDocument();
-    expect(screen.getByTestId("locked-icon")).toBeInTheDocument();
+    const tooltipIcon = screen.getByTestId("locked-icon");
+    expect(tooltipIcon).toBeInTheDocument();
+    userEvent.hover(tooltipIcon);
+    await waitFor(() => {
+      expect(
+        screen.getByText("Locked while being edited by user1")
+      ).toBeInTheDocument();
+    });
   });
 
   it("should display the correct test case in the dropdown", async () => {
@@ -211,5 +218,36 @@ describe("EditTestCaseBreadCrumbs", () => {
     expect(mockNavigate).toHaveBeenCalledWith(
       "/measures/123/edit/test-cases/3"
     );
+  });
+
+  it("should render the select component and display default locked tooltip", async () => {
+    render(
+      <MemoryRouter>
+        <EditTestCaseBreadCrumbs
+          testCase={
+            {
+              title: "Case #1: Group1 - Title1",
+              series: "",
+              createdAt: "",
+              createdBy: "",
+              description: "",
+              testCaseLock: {},
+            } as TestCase
+          }
+          measureId="unknown"
+          lockingEnabled={true}
+          canEdit={true}
+        />
+      </MemoryRouter>
+    );
+
+    const selectElement = screen.getByRole("combobox");
+    expect(selectElement).toBeInTheDocument();
+    const tooltipIcon = screen.getByTestId("locked-icon");
+    expect(tooltipIcon).toBeInTheDocument();
+    userEvent.hover(tooltipIcon);
+    await waitFor(() => {
+      expect(screen.getByText("Test Case is locked")).toBeInTheDocument();
+    });
   });
 });

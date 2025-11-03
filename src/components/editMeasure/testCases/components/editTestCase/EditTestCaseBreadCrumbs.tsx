@@ -86,7 +86,7 @@ const EditTestCaseBreadCrumbs = (props: EditTestCaseBreadCrumbsProps) => {
               title={
                 testCase.testCaseLock?.lockedBy
                   ? `Locked while being edited by ${testCase.testCaseLock.lockedBy}`
-                  : ""
+                  : "Test Case is locked"
               }
             >
               <LockOutlinedIcon
