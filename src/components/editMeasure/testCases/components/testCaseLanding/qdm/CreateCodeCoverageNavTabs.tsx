@@ -110,7 +110,9 @@ export default function CreateCodeCoverageNavTabs(props: NavTabProps) {
     ) ||
     _.isNil(measure?.groups) ||
     measure?.groups.length === 0 ||
-    _.isEmpty(validTestCases) ||
+    (measure?.testCaseConfiguration?.executeInvalidTestCases
+      ? false
+      : _.isEmpty(validTestCases)) ||
     contextFailure;
 
   const handleOpen = async (event: React.MouseEvent<HTMLButtonElement>) => {

@@ -113,9 +113,7 @@ const StatusHandler = ({
         createShiftTestCaseDatesWarningMessage(withoutDuplicates, testDataId)
       );
     }
-  }
-
-  if (warning && warningMessages) {
+  } else if (warning && warningMessages) {
     const withoutDuplicates = [...new Set(warningMessages)];
     if (withoutDuplicates.length > 0) {
       alerts.push(createWarningMessage(withoutDuplicates, testDataId));

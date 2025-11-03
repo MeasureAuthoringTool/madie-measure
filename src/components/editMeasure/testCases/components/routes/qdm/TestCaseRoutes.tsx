@@ -18,6 +18,7 @@ import SDEPage from "../../testCaseConfiguration/sde/SDEPage";
 import Expansion from "../../testCaseConfiguration/expansion/Expansion";
 import TestCaseData from "../../testCaseConfiguration/testCaseData/TestCaseData";
 import RAVPage from "../../testCaseConfiguration/rav/RAVPage";
+import ExecutionOptions from "../../testCaseConfiguration/executionOptions/ExecutionOptions";
 
 const TestCaseRoutes = () => {
   const [cqmMeasureErrors, setCqmMeasureErrors] = useState<Array<string>>([]);
@@ -287,6 +288,19 @@ const TestCaseRoutes = () => {
           <Route
             path="/list-page/expansion"
             element={<TestCaseLandingWrapper qdm children={<Expansion />} />}
+          />
+          <Route
+            path="/list-page/execution-options"
+            element={
+              <TestCaseLandingWrapper
+                qdm={false}
+                children={
+                  <ExecutionOptions
+                    setCustomWarningMessages={setCustomWarningMessages}
+                  />
+                }
+              />
+            }
           />
           <Route
             path="/list-page/test-case-data"
