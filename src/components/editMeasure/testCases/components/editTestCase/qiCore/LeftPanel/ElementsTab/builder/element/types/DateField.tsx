@@ -56,6 +56,14 @@ const DateField = ({
   format = null,
   ...rest
 }) => {
+  console.log('format is', format)
+  const updatedFormat = ((format) => {
+    if (format === "YYYY-MM") return "MM-YYYY";
+    if (format === "YYYY-MM-DD" || format === "YYYY-MM-DDTHH:mm:ssZ") {
+      return "MM-DD-YYYY";
+    }
+    return format;
+  })(format);
   return (
     <Box sx={{ ...containerSx }}>
       <DatePicker
@@ -65,11 +73,16 @@ const DateField = ({
         views={views}
         disabled={disabled}
         onClose={() => rest?.onBlur()}
+        // need this to false to prevent MUI from adding their own format masking that conflicts with ours
+        disableMaskedInput={false}
+        // i only want to apply format if updatedFormat is not undefined
+        format={updatedFormat ? updatedFormat : undefined}
         slotProps={{
           textField: (params) => {
             const { InputProps } = params;
             InputProps["data-testid"] = id;
             InputProps["aria-required"] = required;
+            console.log("params", params);
             return {
               id: id,
               label,
@@ -79,15 +92,6 @@ const DateField = ({
               helperText: helperText,
               onBlur: rest?.onBlur,
             };
-          },
-          field: (params) => {
-            const copyParams = { ...params };
-            // this code change fixes an edge case where the format psuedostate of the placeholder does not match the format.
-            if (format === "YYYY-MM") {
-              //@ts-ignore
-              copyParams.format = "MM-YYYY";
-            }
-            return copyParams;
           },
           openPickerButton: {
             id: `${id}-open-picker-button`,
