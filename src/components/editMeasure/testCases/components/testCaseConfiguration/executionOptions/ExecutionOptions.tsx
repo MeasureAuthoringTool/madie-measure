@@ -74,12 +74,11 @@ export default function ExecutionOptions({ setCustomWarningMessages }) {
           ]);
         }
       } catch (err: any) {
+        console.error(err);
         setToast({
           open: true,
           type: "danger",
-          message:
-            "Error updating Test Case Configuration: " +
-            err?.response?.data?.message?.toString(),
+          message: "Error updating Test Case Configuration: ",
         });
       }
     },
