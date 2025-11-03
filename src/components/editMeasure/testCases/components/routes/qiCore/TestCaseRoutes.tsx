@@ -26,6 +26,7 @@ import TestCaseData from "../../testCaseConfiguration/testCaseData/TestCaseData"
 import SDEPage from "../../testCaseConfiguration/sde/SDEPage";
 import Expansion from "../../testCaseConfiguration/expansion/Expansion";
 import RAVPage from "../../testCaseConfiguration/rav/RAVPage";
+import ExecutionOptions from "../../testCaseConfiguration/executionOptions/ExecutionOptions";
 
 export const CQL_RETURN_TYPES_MISMATCH_ERROR =
   "One or more Population Criteria has a mismatch with CQL return types. Test Cases cannot be executed until this is resolved.";
@@ -89,6 +90,15 @@ const TestCaseRoutes = () => {
       ) {
         localErrors.push(CQL_RETURN_TYPES_MISMATCH_ERROR);
         setErrors(localErrors);
+      }
+      if (measure?.testCaseConfiguration?.executeInvalidTestCases) {
+        setCustomWarningMessages([
+          {
+            message:
+              "Execution of invalid test cases is enabled. You may receive inaccurate pass/fail results. You can update this setting in Execution Configuration tab.",
+            testDataId: "test-cases-in-use-warning",
+          },
+        ]);
       } else {
         setErrors(
           localErrors.filter((s) => s !== CQL_RETURN_TYPES_MISMATCH_ERROR)
@@ -243,6 +253,20 @@ const TestCaseRoutes = () => {
             path="/list-page/expansion"
             element={
               <TestCaseLandingWrapper qdm={false} children={<Expansion />} />
+            }
+          />
+
+          <Route
+            path="/list-page/execution-options"
+            element={
+              <TestCaseLandingWrapper
+                qdm={false}
+                children={
+                  <ExecutionOptions
+                    setCustomWarningMessages={setCustomWarningMessages}
+                  />
+                }
+              />
             }
           />
 

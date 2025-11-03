@@ -459,15 +459,13 @@ const TestCaseList = (props: TestCaseListProps) => {
       ]);
       return null;
     }
-    // request all test cases ->
-    const validTestCases = testCases?.filter((tc) => tc.validResource);
 
     const testCasesToExecute = measure?.testCaseConfiguration
       ?.executeInvalidTestCases
       ? testCases
-      : validTestCases;
+      : testCases?.filter((tc) => tc.validResource);
 
-    if (validTestCases && validTestCases.length > 0 && measureBundle) {
+    if (testCasesToExecute && testCasesToExecute.length > 0 && measureBundle) {
       setExecuting(true);
       try {
         const calculationOutput: CalculationOutput<any> =
@@ -479,19 +477,28 @@ const TestCaseList = (props: TestCaseListProps) => {
           );
         setCalculationOutput(calculationOutput);
       } catch (error) {
+        console.error("calculateTestCases: error.message = " + error?.message);
+
+        const syntaxErrorMessages = [
+          "Unexpected end of JSON input",
+          "Cannot read properties of null (reading 'entry')",
+          "not valid JSON",
+        ];
+        const syntaxErrorMessage =
+          "Some test cases could not be executed due to syntax errors in their definitions. Please review and correct the syntax issues, then try running the tests again.";
+
         if (
-          error.message == "Unexpected end of JSON input" ||
-          error.message == "Cannot read properties of null (reading 'entry')" ||
-          error.message.includes("not valid JSON")
+          error instanceof SyntaxError ||
+          (error?.name && error.name.includes("SyntaxError")) ||
+          syntaxErrorMessages.includes(error?.message)
         ) {
-          error.message =
-            "Some test cases could not be executed due to syntax errors in their definitions. Please review and correct the syntax issues, then try running the tests again.";
+          setErrors((prevState) => [...prevState, syntaxErrorMessage]);
+        } else {
+          setErrors((prevState) => [...prevState, error?.message]);
         }
-        console.error("calculateTestCases: error.message = " + error.message);
-        setErrors((prevState) => [...prevState, error.message]);
       }
       setExecuting(false);
-    } else if (_.isNil(validTestCases) || _.isEmpty(validTestCases)) {
+    } else if (_.isNil(testCasesToExecute) || _.isEmpty(testCasesToExecute)) {
       console.error("calculateTestCases: No valid test cases to execute");
       setErrors((prevState) => [
         ...prevState,
