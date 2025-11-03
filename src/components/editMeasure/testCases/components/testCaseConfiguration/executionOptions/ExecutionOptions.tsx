@@ -78,7 +78,8 @@ export default function ExecutionOptions({ setCustomWarningMessages }) {
         setToast({
           open: true,
           type: "danger",
-          message: "Error updating Test Case Configuration",
+          message:
+            "An error occurred while updating the Test Case Configuration.",
         });
       }
     },
