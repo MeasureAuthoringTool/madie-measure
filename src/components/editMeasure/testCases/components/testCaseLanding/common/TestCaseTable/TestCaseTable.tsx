@@ -26,7 +26,9 @@ import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import FiberManualRecord from "@mui/icons-material/FiberManualRecord";
+import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import ShiftDatesDialog from "../shiftDates/ShiftDatesDialog";
+import { Tooltip } from "@mui/material";
 import { checkUserCanEdit, useFeatureFlags } from "@madie/madie-util";
 import _ from "lodash";
 import { useNavigate } from "react-router-dom";
@@ -366,35 +368,73 @@ const TestCaseTable = (props: TestCaseTableProps) => {
             Action
           </button>
         ),
-        cell: (info) => (
-          <Button
-            variant="outline-filled"
-            data-testid={`view-edit-test-case-button-${info.row.original.id}`}
-            aria-label={`${
-              checkUserCanEdit(
-                measure.measureSet?.owner,
-                measure.measureSet?.acls
-              )
-                ? "Edit"
-                : "View"
-            } Test Case ${info.row.original.group} ${info.row.original.title}`}
-            onClick={() => {
-              const editTestCaseUrl = _.isEmpty(measure?.groups)
-                ? `../${info.row.original.id}`
-                : `../../${info.row.original.id}`;
-              navigate(editTestCaseUrl, { relative: "path" });
-            }}
-            role="button"
-            tabIndex={0}
-          >
-            {checkUserCanEdit(
-              measure.measureSet?.owner,
-              measure.measureSet?.acls
-            )
-              ? "Edit"
-              : "View"}
-          </Button>
-        ),
+        cell: (info) => {
+          const testCase = testCases.find(
+            (tc) => tc.id === info.row.original.id
+          );
+          const isLockedByOther =
+            featureFlags?.Locking && canEdit && !!testCase?.testCaseLock;
+
+          const buttonText = isLockedByOther
+            ? "View"
+            : canEdit
+            ? "Edit"
+            : "View";
+
+          const buttonElement = (
+            <Button
+              variant="outline-filled"
+              data-testid={`view-edit-test-case-button-${info.row.original.id}`}
+              aria-label={`${buttonText} Test Case ${info.row.original.group} ${
+                info.row.original.title
+              }${
+                isLockedByOther
+                  ? `(Locked by ${testCase.testCaseLock.lockedBy})`
+                  : ""
+              }`}
+              onClick={() => {
+                const editTestCaseUrl = _.isEmpty(measure?.groups)
+                  ? `../${info.row.original.id}`
+                  : `../../${info.row.original.id}`;
+                navigate(editTestCaseUrl, { relative: "path" });
+              }}
+              role="button"
+              tabIndex={0}
+            >
+              {isLockedByOther && (
+                <LockOutlinedIcon sx={{ fontSize: 16, marginRight: 0.5 }} />
+              )}
+              {buttonText}
+            </Button>
+          );
+
+          if (isLockedByOther) {
+            return (
+              <Tooltip
+                title={
+                  <>
+                    Locked while being edited by
+                    <br />
+                    {testCase.testCaseLock.lockedBy}
+                  </>
+                }
+                arrow
+                slotProps={{
+                  tooltip: {
+                    sx: {
+                      maxWidth: "none",
+                      whiteSpace: "nowrap",
+                    },
+                  },
+                }}
+              >
+                <span>{buttonElement}</span>
+              </Tooltip>
+            );
+          }
+
+          return buttonElement;
+        },
         accessorKey: "action",
         enableSorting: false,
       },
