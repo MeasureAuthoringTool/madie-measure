@@ -882,7 +882,7 @@ describe("TestCase component", () => {
 
       renderWithTestCase(
         [lockedTestCase],
-        true, // canEdit
+        true,
         deleteTestCase,
         exportTestCase,
         onCloneTestCase,
@@ -900,7 +900,6 @@ describe("TestCase component", () => {
         expect(actionButton).toBeInTheDocument();
         expect(actionButton).toHaveTextContent("View");
 
-        // Check for lock icon
         const lockIcon = within(actionButton).getByTestId("LockOutlinedIcon");
         expect(lockIcon).toBeInTheDocument();
       });
@@ -918,7 +917,7 @@ describe("TestCase component", () => {
 
       renderWithTestCase(
         [lockedTestCase],
-        true, // canEdit
+        true,
         deleteTestCase,
         exportTestCase,
         onCloneTestCase,
@@ -939,7 +938,6 @@ describe("TestCase component", () => {
         `view-edit-test-case-button-${lockedTestCase.id}`
       );
 
-      // Check that the button has "View" text and a lock icon
       expect(actionButton).toHaveTextContent("View");
       const lockIcon = within(actionButton).getByTestId("LockOutlinedIcon");
       expect(lockIcon).toBeInTheDocument();
@@ -957,7 +955,7 @@ describe("TestCase component", () => {
 
       renderWithTestCase(
         [lockedTestCase],
-        true, // canEdit
+        true,
         deleteTestCase,
         exportTestCase,
         onCloneTestCase,
@@ -992,7 +990,7 @@ describe("TestCase component", () => {
 
       renderWithTestCase(
         [lockedTestCase],
-        true, // canEdit
+        true,
         deleteTestCase,
         exportTestCase,
         onCloneTestCase,
@@ -1010,7 +1008,6 @@ describe("TestCase component", () => {
         expect(actionButton).toBeInTheDocument();
         expect(actionButton).toHaveTextContent("Edit");
 
-        // Check that lock icon is NOT present
         const lockIcon = within(actionButton).queryByTestId("LockOutlinedIcon");
         expect(lockIcon).not.toBeInTheDocument();
       });
@@ -1028,7 +1025,7 @@ describe("TestCase component", () => {
 
       renderWithTestCase(
         [lockedTestCase],
-        false, // canEdit = false
+        false,
         deleteTestCase,
         exportTestCase,
         onCloneTestCase,
@@ -1046,7 +1043,6 @@ describe("TestCase component", () => {
         expect(actionButton).toBeInTheDocument();
         expect(actionButton).toHaveTextContent("View");
 
-        // Check that lock icon is NOT present when user doesn't have edit access
         const lockIcon = within(actionButton).queryByTestId("LockOutlinedIcon");
         expect(lockIcon).not.toBeInTheDocument();
       });
@@ -1069,7 +1065,7 @@ describe("TestCase component", () => {
 
       renderWithTestCase(
         [unlockedTestCase],
-        true, // canEdit
+        true,
         deleteTestCase,
         exportTestCase,
         onCloneTestCase,
@@ -1087,7 +1083,6 @@ describe("TestCase component", () => {
         expect(actionButton).toBeInTheDocument();
         expect(actionButton).toHaveTextContent("Edit");
 
-        // Check that lock icon is NOT present
         const lockIcon = within(actionButton).queryByTestId("LockOutlinedIcon");
         expect(lockIcon).not.toBeInTheDocument();
       });
@@ -1105,7 +1100,7 @@ describe("TestCase component", () => {
 
       renderWithTestCase(
         [lockedTestCase],
-        true, // canEdit
+        true,
         deleteTestCase,
         exportTestCase,
         onCloneTestCase,
