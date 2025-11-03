@@ -49,6 +49,14 @@ jest.mock("../../../../../../api/useFhirDefinitionsService", () => {
           "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient",
       },
       {
+        id: "qicore-service-request",
+        title: "QICore ServiceRequest",
+        type: "ServiceRequest",
+        category: "Clinical.Summary",
+        profile:
+          "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-servicerequest",
+      },
+      {
         id: "qicore-procedure",
         title: "QICore Procedure",
         type: "Procedure",
@@ -74,31 +82,19 @@ jest.mock(
       fetchRelevantDataElements: () =>
         Promise.resolve([
           {
-            oid: "ts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1095.101",
-            title: "Hospice Status",
-            description: "Procedure: Hospice Status",
-            type: "Procedure",
-            drc: false,
-            codeId: null,
-            name: "Hospice Status",
+            profile:
+              "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-servicerequest",
+            type: "ServiceRequest",
           },
           {
-            oid: "ts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1095.91",
-            title: "Dietitian Referral",
-            description: "Procedure: Dietitian Referral",
+            profile:
+              "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-procedure",
             type: "Procedure",
-            drc: false,
-            codeId: null,
-            name: "Dietitian Referral",
           },
           {
-            oid: "ts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.666.5.307",
-            title: "Encounter Inpatient",
-            description: "Encounter: Encounter Inpatient",
+            profile:
+              "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-encounter",
             type: "Encounter",
-            drc: false,
-            codeId: null,
-            name: "Encounter Inpatient",
           },
         ]),
     });
@@ -195,7 +191,7 @@ describe("Builder Component", () => {
     expect(availableTab).toHaveAttribute("aria-selected", "true");
     expect(await screen.findByLabelText("Search")).toBeInTheDocument();
     const rows = await screen.findAllByRole("row");
-    expect(rows).toHaveLength(4);
+    expect(rows).toHaveLength(5);
 
     userEvent.click(addedTab);
     expect(addedTab).toHaveAttribute("aria-selected", "true");
@@ -277,7 +273,8 @@ describe("scrollToElementByIdWhenAvailable", () => {
 
     const resourceTitles = rows.slice(1).map((row) => row.textContent);
     expect(resourceTitles[0]).toContain("QICore Patient");
-    expect(resourceTitles[1]).toContain("QICore Procedure");
-    expect(resourceTitles[2]).toContain("QICore Encounter");
+    expect(resourceTitles[1]).toContain("QICore ServiceRequest");
+    expect(resourceTitles[2]).toContain("QICore Procedure");
+    expect(resourceTitles[3]).toContain("QICore Encounter");
   });
 });
