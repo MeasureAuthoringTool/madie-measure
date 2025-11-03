@@ -88,38 +88,48 @@ describe("EditTestCaseBreadCrumbs", () => {
     cleanup();
   });
 
-  it("should render the select component", () => {
+  it("should render the select component and display the locked icon", () => {
     render(
       <MemoryRouter>
         <EditTestCaseBreadCrumbs
-          testCase={{
-            title: "Case #1: Group1 - Title1",
-            series: "",
-            createdAt: "",
-            createdBy: "",
-            description: "",
-          }}
+          testCase={
+            {
+              title: "Case #1: Group1 - Title1",
+              series: "",
+              createdAt: "",
+              createdBy: "",
+              description: "",
+              testCaseLock: { lockedBy: "user1" },
+            } as TestCase
+          }
           measureId="unknown"
+          lockingEnabled={true}
+          canEdit={true}
         />
       </MemoryRouter>
     );
 
     const selectElement = screen.getByRole("combobox");
     expect(selectElement).toBeInTheDocument();
+    expect(screen.getByTestId("locked-icon")).toBeInTheDocument();
   });
 
   it("should display the correct test case in the dropdown", async () => {
     render(
       <MemoryRouter>
         <EditTestCaseBreadCrumbs
-          testCase={{
-            title: "Case #1: Group1 - Title1",
-            series: "",
-            createdAt: "",
-            createdBy: "",
-            description: "",
-          }}
+          testCase={
+            {
+              title: "Case #1: Group1 - Title1",
+              series: "",
+              createdAt: "",
+              createdBy: "",
+              description: "",
+            } as unknown as TestCase
+          }
           measureId="unknown"
+          lockingEnabled={false}
+          canEdit={false}
         />
       </MemoryRouter>
     );
@@ -132,14 +142,18 @@ describe("EditTestCaseBreadCrumbs", () => {
     render(
       <MemoryRouter>
         <EditTestCaseBreadCrumbs
-          testCase={{
-            title: "Case #1: Group1 - Title1",
-            series: "",
-            createdAt: "",
-            createdBy: "",
-            description: "",
-          }}
+          testCase={
+            {
+              title: "Case #1: Group1 - Title1",
+              series: "",
+              createdAt: "",
+              createdBy: "",
+              description: "",
+            } as unknown as TestCase
+          }
           measureId="unknown"
+          lockingEnabled={false}
+          canEdit={true}
         />
       </MemoryRouter>
     );
@@ -169,14 +183,18 @@ describe("EditTestCaseBreadCrumbs", () => {
     render(
       <MemoryRouter>
         <EditTestCaseBreadCrumbs
-          testCase={{
-            title: "Case #1: Group1 - Title1",
-            series: "",
-            createdAt: "",
-            createdBy: "",
-            description: "",
-          }}
+          testCase={
+            {
+              title: "Case #1: Group1 - Title1",
+              series: "",
+              createdAt: "",
+              createdBy: "",
+              description: "",
+            } as unknown as TestCase
+          }
           measureId="unknown"
+          lockingEnabled={false}
+          canEdit={true}
         />
       </MemoryRouter>
     );
