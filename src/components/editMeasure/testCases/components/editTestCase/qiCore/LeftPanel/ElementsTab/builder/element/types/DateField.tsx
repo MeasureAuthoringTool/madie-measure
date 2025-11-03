@@ -56,7 +56,6 @@ const DateField = ({
   format = null,
   ...rest
 }) => {
-  console.log('format is', format)
   const updatedFormat = ((format) => {
     if (format === "YYYY-MM") return "MM-YYYY";
     if (format === "YYYY-MM-DD" || format === "YYYY-MM-DDTHH:mm:ssZ") {
@@ -82,7 +81,6 @@ const DateField = ({
             const { InputProps } = params;
             InputProps["data-testid"] = id;
             InputProps["aria-required"] = required;
-            console.log("params", params);
             return {
               id: id,
               label,
