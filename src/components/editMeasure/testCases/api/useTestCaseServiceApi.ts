@@ -8,6 +8,7 @@ import {
   Measure,
   PopulationDto,
   TestCase,
+  TestCaseExcelExportDto,
   TestCaseImportRequest,
 } from "@madie/madie-models";
 import { useOktaTokens } from "@madie/madie-util";
@@ -276,6 +277,25 @@ export class TestCaseServiceApi {
           Authorization: `Bearer ${this.getAccessToken()}`,
         },
         responseType: "blob",
+      }
+    );
+    return response.data;
+  }
+
+  async exportExcel(
+    measureId: string,
+    testCaseExcelExportDtos: TestCaseExcelExportDto[]
+  ): Promise<Blob> {
+    const response = await axios.put(
+      `${this.baseUrl}/measures/${measureId}/test-cases/excel`,
+      testCaseExcelExportDtos,
+      {
+        headers: {
+          Authorization: `Bearer ${this.getAccessToken()}`,
+        },
+        responseType: "blob",
+        maxBodyLength: Infinity,
+        maxContentLength: Infinity,
       }
     );
     return response.data;
