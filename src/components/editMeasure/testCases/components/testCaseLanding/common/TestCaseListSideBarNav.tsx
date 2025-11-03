@@ -206,6 +206,14 @@ const TestCaseListSideBarNav = ({
                     onChange={handleChange}
                   />
                   <Tab
+                    label="Execution Options"
+                    value="execution-options"
+                    data-testid="nav-link-execution-options"
+                    type="C"
+                    orientation="vertical"
+                    onChange={handleChange}
+                  />
+                  <Tab
                     label="Test Case Data"
                     value="test-case-data"
                     data-testid="test-case-data"
