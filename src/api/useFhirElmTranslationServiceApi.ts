@@ -4,14 +4,9 @@ import { ServiceConfig } from "./ServiceContext";
 import { useOktaTokens } from "@madie/madie-util";
 import { Measure } from "@madie/madie-models";
 
-export interface SourceDataCriteria {
-  oid: string;
-  title: string;
-  description: string;
+export interface RelevantElement {
   type: string;
-  drc: string;
-  codeId: string;
-  name: string;
+  profile: string;
 }
 
 export class FhirElmTranslationServiceApi {
@@ -38,8 +33,9 @@ export class FhirElmTranslationServiceApi {
   }
 
   async fetchRelevantDataElements(
-    measure: Measure
-  ): Promise<Array<SourceDataCriteria>> {
+    measure: Measure,
+    signal?: AbortSignal
+  ): Promise<Array<RelevantElement>> {
     try {
       const response = await axios.put(
         `${this.baseUrl}/fhir/cql/relevant-elements`,
@@ -49,6 +45,7 @@ export class FhirElmTranslationServiceApi {
             Authorization: `Bearer ${this.getAccessToken()}`,
             "Content-Type": "application/json",
           },
+          signal,
         }
       );
       return response.data;

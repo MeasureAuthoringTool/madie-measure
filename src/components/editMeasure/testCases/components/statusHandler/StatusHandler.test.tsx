@@ -409,4 +409,28 @@ describe("StatusHandler Component", () => {
       expect.anything()
     );
   });
+
+  test("covers warningMessages branch when shiftTestCaseDatesWarning is empty", () => {
+    render(
+      <StatusHandler
+        warning={true}
+        warningMessages={["Only warning message"]}
+        testDataId="test_data_id"
+        shiftTestCaseDatesWarning={[]} // explicitly empty
+      />
+    );
+    expect(screen.queryByText("Only warning message")).not.toBeInTheDocument();
+  });
+
+  test("covers warningMessages branch when warningMessages are empty", () => {
+    render(
+      <StatusHandler
+        warning={true}
+        warningMessages={[]}
+        testDataId="test_data_id"
+        // shiftTestCaseDatesWarning is omitted
+      />
+    );
+    expect(screen.queryByText("Warning message")).not.toBeInTheDocument();
+  });
 });
