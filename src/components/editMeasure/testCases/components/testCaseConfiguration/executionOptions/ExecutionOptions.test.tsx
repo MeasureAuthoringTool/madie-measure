@@ -109,7 +109,7 @@ describe("ExecutionOptions component", () => {
       "execution-options-generic-error-text"
     );
     expect(errorToast.textContent).toEqual(
-      "Error updating Test Case Configuration: failed to update measure"
+      "An error occurred while updating the Test Case Configuration."
     );
 
     const toastCloseButton = screen.getByTestId("close-error-button");
