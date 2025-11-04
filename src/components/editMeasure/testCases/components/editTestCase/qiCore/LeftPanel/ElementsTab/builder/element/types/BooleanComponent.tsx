@@ -1,9 +1,8 @@
 import React from "react";
-import { MenuItem as MuiMenuItem } from "@mui/material";
+import { MenuItem as MuiMenuItem, IconButton, Tooltip } from "@mui/material";
 import { Select } from "@madie/madie-design-system/dist/react";
 import { TypeComponentProps } from "./TypeComponentProps";
 import AddElementButton from "../../../../../../../common/UIOnlyModelAgnostic/AddElementButton";
-import { IconButton, Tooltip } from "@mui/material";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 
 const BooleanComponent = ({
