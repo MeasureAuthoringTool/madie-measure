@@ -9,6 +9,8 @@ import { getValueSetUrl } from "../../../../../../../../api/fhirDefinitionServic
 import useTerminologyServiceApi from "../../../../../../../../api/useTerminologyServiceApi";
 import AddElementButton from "../../../../../../../common/UIOnlyModelAgnostic/AddElementButton";
 import "./CodesComponent.scss";
+import { IconButton, Tooltip } from "@mui/material";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 
 const CodesComponent = ({
   canEdit,
@@ -20,6 +22,8 @@ const CodesComponent = ({
   showAddAttributeButton,
   addTitle,
   handleAddElement,
+  showDeleteButton = false,
+  handleDeleteElement,
 }: TypeComponentProps) => {
   const [codes, setCodes] = useState([]);
   const fhirDefinitionServiceApi = useRef(useFhirDefinitionsServiceApi());
@@ -173,6 +177,18 @@ const CodesComponent = ({
             }}
           />
         </div>
+        {showDeleteButton && canEdit && (
+          <Tooltip title="Delete" placement="top" arrow>
+            <IconButton
+              onClick={handleDeleteElement}
+              data-testid={`delete-button-${label}`}
+              aria-label={`delete ${label}`}
+              size="small"
+            >
+              <DeleteOutlineIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+        )}
         {showAddAttributeButton && addTitle && (
           <AddElementButton name={addTitle} onClick={handleAddElement} />
         )}
