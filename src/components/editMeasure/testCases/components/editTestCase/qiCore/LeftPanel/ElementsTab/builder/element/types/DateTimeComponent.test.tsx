@@ -154,7 +154,7 @@ describe("DateTimeComponent", () => {
     const input = screen.getByTestId(
       `${YEAR_MONTH_DAY_FORMAT}-field-birthday-input`
     );
-    userEvent.type(input, "01/01/2025");
+    userEvent.type(input, "01-01-2025");
     expect(handleChange).toBeCalledWith("2025-01-01");
   });
 
@@ -186,7 +186,7 @@ describe("DateTimeComponent", () => {
     const input = screen.getByTestId(
       `${YEAR_MONTH_DAY_FORMAT}-field-birthday-input`
     );
-    userEvent.type(input, "01/01/2025");
+    userEvent.type(input, "01-01-2025");
     expect(handleChange).toBeCalledWith("2025-01-01");
 
     // Test AddElementButton click
