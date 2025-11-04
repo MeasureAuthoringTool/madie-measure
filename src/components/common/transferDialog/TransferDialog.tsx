@@ -29,6 +29,7 @@ import "./TransferDialog.scss";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 import * as Yup from "yup";
 import { useMeasureServiceApi } from "@madie/madie-util";
+import { INITIAL_STATUS_HANDLER } from "../../editMeasure/editor/StatusHandler";
 
 export const TRANSFER_MEASURE_SUCCESS =
   "The measure(s) were successfully transferred. If you chose to retain share access, you will still be able to edit the measures.";
@@ -214,32 +215,65 @@ interface TransferDialogProps {
   measures: Measure[];
   open: boolean;
   onClose: Function;
+  setStatusHandler: Function;
 }
 
-const TransferDialog = ({ measures, open, onClose }: TransferDialogProps) => {
+const TransferDialog = ({
+  measures,
+  open,
+  onClose,
+  setStatusHandler,
+}: TransferDialogProps) => {
   const measureServiceApi = useRef(useMeasureServiceApi()).current;
 
   const handleSave = async () => {
+    setStatusHandler(INITIAL_STATUS_HANDLER);
+
     const measureIds = measures.map((m) => m.id);
-    try {
-      await measureServiceApi.transferMeasures(
+
+    return measureServiceApi
+      .transferMeasures(
         measureIds,
         formik.values.harpId,
         formik.values.retainShareAccess
-      );
-      onClose({
-        toastType: "success",
-        toastMessage: TRANSFER_MEASURE_SUCCESS,
-        toastOpen: true,
+      )
+      .then((response) => {
+        if (response.status === 200) {
+          onClose({
+            toastType: "success",
+            toastMessage: TRANSFER_MEASURE_SUCCESS,
+            toastOpen: true,
+          });
+        } else if (response.status === 207) {
+          const failedMeasureIds: string[] = response.data;
+
+          const failedMeasureNames = measures
+            .filter((measure) => failedMeasureIds.includes(measure.id))
+            .map((measure) => measure.measureName);
+
+          setStatusHandler({
+            warning: {
+              status: true,
+              primaryMessage: `${failedMeasureNames?.length} Measures could not be transferred. Please try again, or contact help desk if the issue persists.`,
+              secondaryMessages: failedMeasureNames,
+            },
+          });
+
+          // Close dialog and refresh the measure list without showing a toast.
+          onClose({
+            toastType: "success",
+            toastOpen: false,
+          });
+        }
+      })
+      .catch((error) => {
+        console.error("TransferDialog: handleSave: error = ", error);
+        onClose({
+          toastType: "danger",
+          toastMessage: TRANSFER_MEASURE_FAILURE,
+          toastOpen: true,
+        });
       });
-    } catch (error) {
-      console.error("TransferDialog: handleSave: error = ", error);
-      onClose({
-        toastType: "danger",
-        toastMessage: TRANSFER_MEASURE_FAILURE,
-        toastOpen: true,
-      });
-    }
   };
 
   const formik = useFormik({

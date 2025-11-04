@@ -1,5 +1,14 @@
 #measure-landing {
   position: relative;
+
+  #status-handler-container {
+    margin: 10px 32px 0;
+
+    .minimized-alert {
+      margin-top: -60px;
+      margin-right: 20px;
+    }
+  }
 }
 
 .measure-table {
