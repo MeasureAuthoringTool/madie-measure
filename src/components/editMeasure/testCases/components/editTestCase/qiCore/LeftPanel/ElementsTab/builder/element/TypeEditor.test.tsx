@@ -1918,6 +1918,9 @@ describe("TypeEditor Component", () => {
       </ExecutionContextProvider>
     );
 
+    userEvent.click(
+      screen.getByTestId("elements-heading-expansion-button-Timing")
+    );
     expect(await screen.findByText("Event[0]")).toBeInTheDocument();
     expect(await screen.findByLabelText("Repeat.Bounds")).toBeInTheDocument();
     expect(await screen.findByLabelText("Repeat.Count")).toBeInTheDocument();
