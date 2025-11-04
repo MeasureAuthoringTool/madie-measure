@@ -384,6 +384,46 @@ describe("StatusHandler Component", () => {
     );
   });
 
+  it("Should display a warning alert when warning.status is true and primaryMessage is present", () => {
+    const warning = {
+      status: true,
+      primaryMessage: "This is a warning",
+      secondaryMessages: ["Minor issue detected"],
+    };
+
+    render(
+      <StatusHandler
+        success={{ status: null, primaryMessage: "", secondaryMessages: [] }}
+        warning={warning}
+        error={false}
+        errorMessage={null}
+        outboundAnnotations={[]}
+        hasSubTitle={false}
+      />
+    );
+
+    expect(MadieAlert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        alerts: expect.arrayContaining([
+          expect.objectContaining({
+            type: "warning",
+            copyButton: true,
+            canClose: false,
+          }),
+        ]),
+      }),
+      expect.anything()
+    );
+
+    expect(screen.getByTestId("generic-warning-text-header")).toHaveTextContent(
+      warning.primaryMessage
+    );
+
+    expect(screen.getByTestId("library-warning")).toHaveTextContent(
+      "Minor issue detected"
+    );
+  });
+
   it("Should not display annotations when Error flag is false and annotations are warning type", () => {
     const success = {
       status: undefined,

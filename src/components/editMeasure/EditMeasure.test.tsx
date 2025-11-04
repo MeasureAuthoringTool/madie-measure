@@ -179,7 +179,10 @@ const mockMeasureServiceApi = {
   getMeasuresByMeasureSetId: jest.fn().mockImplementation((measureSetId) => {
     return [measure];
   }),
-  transferMeasures: jest.fn().mockResolvedValue({ data: true }),
+  transferMeasures: jest.fn().mockResolvedValue({
+    status: 200,
+    data: [],
+  }),
   draftMeasure: jest.fn().mockResolvedValue({ id: "newDraftId" }),
   unshareMeasures: jest.fn().mockResolvedValue({ measureId1: [] }),
 } as unknown as MeasureServiceApi;
