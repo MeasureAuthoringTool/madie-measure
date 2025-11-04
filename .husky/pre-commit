@@ -1,4 +1,16 @@
 #!/bin/sh
 . "$(dirname "$0")/_/husky.sh"
 
-npm exec pretty-quick --staged && npm exec concurrently npm:test npm:lint
+# Format staged files
+npm exec pretty-quick --staged || exit 1
+
+# Run lint and check for errors (exit code 2 means errors present)
+npm run lint
+LINT_EXIT=$?
+if [ $LINT_EXIT -eq 2 ]; then
+  echo "❌ Lint errors found. Please fix them before committing."
+  exit 1
+fi
+
+# Run tests
+npm test
