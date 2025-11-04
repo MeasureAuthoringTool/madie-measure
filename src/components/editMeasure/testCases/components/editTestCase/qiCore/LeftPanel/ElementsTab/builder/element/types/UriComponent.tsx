@@ -1,6 +1,8 @@
 import React from "react";
 import { TypeComponentProps } from "./TypeComponentProps";
 import Box from "@mui/material/Box";
+import { IconButton, Tooltip } from "@mui/material";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import { TextField } from "@madie/madie-design-system/dist/react/";
 import AddElementButton from "../../../../../../../common/UIOnlyModelAgnostic/AddElementButton";
 
@@ -12,11 +14,16 @@ const UriComponent = ({
   showAddAttributeButton,
   addTitle,
   handleAddElement,
+  showDeleteButton,
+  handleDeleteElement,
   ...props
 }: TypeComponentProps) => {
   const { value } = props;
   return (
-    <div className="element-editor-add-row">
+    <div
+      className="element-editor-add-row"
+      style={{ display: "flex", alignItems: "center", gap: "8px" }}
+    >
       <TextField
         required={fieldRequired}
         readOnly={!canEdit}
@@ -36,6 +43,19 @@ const UriComponent = ({
         {...props}
         value={value || ""}
       />
+      {showDeleteButton && canEdit && (
+        <Tooltip title="Delete" arrow>
+          <IconButton
+            onClick={handleDeleteElement}
+            data-testid={`delete-button-${label}`}
+            size="small"
+            color="error"
+            aria-label="delete element"
+          >
+            <DeleteOutlineIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
+      )}
       {showAddAttributeButton && addTitle && (
         <AddElementButton name={addTitle} onClick={handleAddElement} />
       )}

@@ -133,6 +133,13 @@ const TypeEditor = ({
     ]);
   };
 
+  // remove element at specific index from value array
+  const handleDeleteElement = (index: number) => {
+    const currentValues = _.get(formik.values, label, []);
+    const updatedValues = currentValues.filter((_, i) => i !== index);
+    formik.setFieldValue(label, updatedValues);
+  };
+
   const formikErrorHandler = (name: string) => {
     const touched = getNestedProperty(formik.touched, name);
     const errors = getNestedProperty(formik.errors, name);
@@ -446,6 +453,8 @@ const TypeEditor = ({
                   showAddAttributeButton={
                     showAddAttributeButton && index === values.length - 1
                   }
+                  showDeleteButton={index > 0}
+                  handleDeleteElement={() => handleDeleteElement(index)}
                   addTitle={addTitle}
                   handleAddElement={handleAddElement}
                   error={getNestedProperty(formik.errors, `${label}[${index}]`)}
@@ -491,6 +500,8 @@ const TypeEditor = ({
                   showAddAttributeButton={
                     showAddAttributeButton && index === values.length - 1
                   }
+                  showDeleteButton={index > 0}
+                  handleDeleteElement={() => handleDeleteElement(index)}
                   addTitle={addTitle}
                   handleAddElement={handleAddElement}
                   {...formik.getFieldProps(`${label}[${index}]`)}

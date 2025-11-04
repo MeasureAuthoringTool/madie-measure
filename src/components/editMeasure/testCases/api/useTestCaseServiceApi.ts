@@ -206,9 +206,6 @@ export class TestCaseServiceApi {
 
   async validateTestCaseBundle(bundle: any, model: string) {
     try {
-      console.log("Validating test case bundle:", bundle);
-      console.log("using this.baseUrl:", this.baseUrl);
-      console.log("and model:", model);
       const response = await axios.post<HapiOperationOutcome>(
         `${this.baseUrl}/validations/bundles`,
         bundle,

@@ -1,5 +1,5 @@
 import * as React from "react";
-import { render, screen, act, waitFor } from "@testing-library/react";
+import { render, screen, act, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import TypeEditor from "./TypeEditor";
@@ -2939,6 +2939,306 @@ describe("TypeEditor Component", () => {
 
       // Should call setFieldValue to add new element
       expect(uriArrayFormik.setFieldValue).toHaveBeenCalled();
+    });
+
+    test("Should show delete buttons for canonical arrays with multiple elements", () => {
+      const canonicalArrayFormik = {
+        handleChange: jest.fn(),
+        setFieldValue: jest.fn(),
+        setFieldTouched: jest.fn(),
+        values: {
+          CarePlan: {
+            activity: [
+              {
+                detail: {
+                  instantiatesCanonical: [
+                    "http://example.org/ActivityDefinition/1",
+                    "http://example.org/ActivityDefinition/2",
+                  ],
+                },
+              },
+            ],
+          },
+        },
+        getFieldProps: (label) => {
+          const match = label.match(/instantiatesCanonical\[(\d+)]/);
+          if (match) {
+            const index = parseInt(match[1]);
+            return {
+              value: [
+                "http://example.org/ActivityDefinition/1",
+                "http://example.org/ActivityDefinition/2",
+              ][index],
+              name: label,
+              onChange: jest.fn(),
+              onBlur: jest.fn(),
+            };
+          }
+        },
+      };
+
+      render(
+        <FormikProvider value={canonicalArrayFormik}>
+          <RequiredFieldsProvider
+            requiredFields={mockRequiredFields}
+            formInfo={mockFormInfo}
+          >
+            <TypeEditor
+              resource={null}
+              structureDefinition={{
+                id: "CarePlan.activity.detail.instantiatesCanonical",
+                path: "CarePlan.activity.detail.instantiatesCanonical",
+                min: 0,
+                max: "*",
+                type: [
+                  {
+                    code: "canonical",
+                  },
+                ],
+              }}
+              label="CarePlan.activity[0].detail.instantiatesCanonical"
+              canEdit={true}
+              parentStructureDefinition={null}
+            />
+          </RequiredFieldsProvider>
+        </FormikProvider>
+      );
+
+      // First element should NOT have a delete button
+      const deleteButtons = screen.queryAllByTestId(/delete-button-/);
+      expect(deleteButtons).toHaveLength(1);
+
+      // Only the second element should have a delete button
+      const secondDeleteButton = screen.getByTestId(
+        "delete-button-CarePlan.activity[0].detail.instantiatesCanonical[1]"
+      );
+      expect(secondDeleteButton).toBeInTheDocument();
+    });
+
+    test("Should handle clicking delete button for canonical arrays", () => {
+      const canonicalArrayFormik = {
+        handleChange: jest.fn(),
+        setFieldValue: jest.fn(),
+        setFieldTouched: jest.fn(),
+        values: {
+          CarePlan: {
+            activity: [
+              {
+                detail: {
+                  instantiatesCanonical: [
+                    "http://example.org/ActivityDefinition/1",
+                    "http://example.org/ActivityDefinition/2",
+                  ],
+                },
+              },
+            ],
+          },
+        },
+        getFieldProps: (label) => {
+          const match = label.match(/instantiatesCanonical\[(\d+)]/);
+          if (match) {
+            const index = parseInt(match[1]);
+            return {
+              value: [
+                "http://example.org/ActivityDefinition/1",
+                "http://example.org/ActivityDefinition/2",
+              ][index],
+              name: label,
+              onChange: jest.fn(),
+              onBlur: jest.fn(),
+            };
+          }
+        },
+      };
+
+      render(
+        <FormikProvider value={canonicalArrayFormik}>
+          <RequiredFieldsProvider
+            requiredFields={mockRequiredFields}
+            formInfo={mockFormInfo}
+          >
+            <TypeEditor
+              resource={null}
+              structureDefinition={{
+                id: "CarePlan.activity.detail.instantiatesCanonical",
+                path: "CarePlan.activity.detail.instantiatesCanonical",
+                min: 0,
+                max: "*",
+                type: [
+                  {
+                    code: "canonical",
+                  },
+                ],
+              }}
+              label="CarePlan.activity[0].detail.instantiatesCanonical"
+              canEdit={true}
+              parentStructureDefinition={null}
+            />
+          </RequiredFieldsProvider>
+        </FormikProvider>
+      );
+
+      // Only one delete button should be shown (for the second element)
+      const deleteButtons = screen.getAllByLabelText("delete element");
+      expect(deleteButtons).toHaveLength(1);
+
+      // Click the delete button (which belongs to the second element)
+      userEvent.click(deleteButtons[0]);
+
+      // Should call setFieldValue to remove the second element
+      expect(canonicalArrayFormik.setFieldValue).toHaveBeenCalledWith(
+        "CarePlan.activity[0].detail.instantiatesCanonical",
+        ["http://example.org/ActivityDefinition/1"]
+      );
+    });
+
+    test("Should show delete buttons for uri arrays with multiple elements", () => {
+      const uriArrayFormik = {
+        handleChange: jest.fn(),
+        setFieldValue: jest.fn(),
+        setFieldTouched: jest.fn(),
+        values: {
+          CarePlan: {
+            activity: [
+              {
+                detail: {
+                  instantiatesUri: [
+                    "http://example.org/uri/1",
+                    "http://example.org/uri/2",
+                  ],
+                },
+              },
+            ],
+          },
+        },
+        getFieldProps: (label) => {
+          const match = label.match(/instantiatesUri\[(\d+)]/);
+          if (match) {
+            const index = parseInt(match[1]);
+            return {
+              value: ["http://example.org/uri/1", "http://example.org/uri/2"][
+                index
+              ],
+              name: label,
+              onChange: jest.fn(),
+              onBlur: jest.fn(),
+            };
+          }
+        },
+      };
+
+      render(
+        <FormikProvider value={uriArrayFormik}>
+          <RequiredFieldsProvider
+            requiredFields={mockRequiredFields}
+            formInfo={mockFormInfo}
+          >
+            <TypeEditor
+              resource={null}
+              structureDefinition={{
+                id: "CarePlan.activity.detail.instantiatesUri",
+                path: "CarePlan.activity.detail.instantiatesUri",
+                min: 0,
+                max: "*",
+                type: [
+                  {
+                    code: "uri",
+                  },
+                ],
+              }}
+              label="CarePlan.activity[0].detail.instantiatesUri"
+              canEdit={true}
+              parentStructureDefinition={null}
+            />
+          </RequiredFieldsProvider>
+        </FormikProvider>
+      );
+
+      // First element should NOT have a delete button
+      const deleteButtons = screen.queryAllByTestId(/delete-button-/);
+      expect(deleteButtons).toHaveLength(1);
+
+      // Only the second element should have a delete button
+      const secondDeleteButton = screen.getByTestId(
+        "delete-button-CarePlan.activity[0].detail.instantiatesUri[1]"
+      );
+      expect(secondDeleteButton).toBeInTheDocument();
+    });
+
+    test("Should handle clicking delete button for uri arrays", () => {
+      const uriArrayFormik = {
+        handleChange: jest.fn(),
+        setFieldValue: jest.fn(),
+        setFieldTouched: jest.fn(),
+        values: {
+          CarePlan: {
+            activity: [
+              {
+                detail: {
+                  instantiatesUri: [
+                    "http://example.org/uri/1",
+                    "http://example.org/uri/2",
+                  ],
+                },
+              },
+            ],
+          },
+        },
+        getFieldProps: (label) => {
+          const match = label.match(/instantiatesUri\[(\d+)]/);
+          if (match) {
+            const index = parseInt(match[1]);
+            return {
+              value: ["http://example.org/uri/1", "http://example.org/uri/2"][
+                index
+              ],
+              name: label,
+              onChange: jest.fn(),
+              onBlur: jest.fn(),
+            };
+          }
+        },
+      };
+
+      render(
+        <FormikProvider value={uriArrayFormik}>
+          <RequiredFieldsProvider
+            requiredFields={mockRequiredFields}
+            formInfo={mockFormInfo}
+          >
+            <TypeEditor
+              resource={null}
+              structureDefinition={{
+                id: "CarePlan.activity.detail.instantiatesUri",
+                path: "CarePlan.activity.detail.instantiatesUri",
+                min: 0,
+                max: "*",
+                type: [
+                  {
+                    code: "uri",
+                  },
+                ],
+              }}
+              label="CarePlan.activity[0].detail.instantiatesUri"
+              canEdit={true}
+              parentStructureDefinition={null}
+            />
+          </RequiredFieldsProvider>
+        </FormikProvider>
+      );
+
+      // Only one delete button should be shown (for the second element)
+      const deleteButtons = screen.getAllByLabelText("delete element");
+      expect(deleteButtons).toHaveLength(1);
+
+      // Click the delete button (which belongs to the second element)
+      userEvent.click(deleteButtons[0]);
+
+      // Should call setFieldValue to remove the second element
+      expect(uriArrayFormik.setFieldValue).toHaveBeenCalledWith(
+        "CarePlan.activity[0].detail.instantiatesUri",
+        ["http://example.org/uri/1"]
+      );
     });
 
     test("Should render Quantity components as array when multiple cardinality", async () => {
