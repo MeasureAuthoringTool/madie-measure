@@ -64,11 +64,16 @@ const TypeEditor = ({
   // is multiple cardinality?
   if (structureDefinition?.max === "*") {
     // is it not already terminated with an index?
-    if (!getIndexFromPath(label) && !values?.length) {
+    if (
+      !getIndexFromPath(label) &&
+      !values?.length &&
+      isComponentDataType(type)
+    ) {
       // we are just going to add a zero for now. could be smarter later
       // TO DO: We will eventually need to map inner elements of multiple cardinality based on how many elements are in the form
       // something like Array.From(numOfElementsInForm, _index) =>) had a previous rendition of this guy working in 8500 pr commits
       // https://github.com/MeasureAuthoringTool/madie-measure/pull/901
+      // Only add [0] for component data types, not BackboneElements which need to render their structure first
       label = `${structureDefinition.id}[0]`;
     }
   }
