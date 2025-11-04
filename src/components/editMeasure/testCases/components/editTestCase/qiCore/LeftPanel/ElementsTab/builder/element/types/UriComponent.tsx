@@ -11,6 +11,7 @@ const UriComponent = ({
   structureDefinition,
   showAddAttributeButton,
   addTitle,
+  handleAddElement,
   ...props
 }: TypeComponentProps) => {
   const { value } = props;
@@ -36,7 +37,7 @@ const UriComponent = ({
         value={value || ""}
       />
       {showAddAttributeButton && addTitle && (
-        <AddElementButton name={addTitle} />
+        <AddElementButton name={addTitle} onClick={handleAddElement} />
       )}
     </div>
   );

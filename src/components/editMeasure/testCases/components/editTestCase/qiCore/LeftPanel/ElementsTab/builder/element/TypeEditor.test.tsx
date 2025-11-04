@@ -2645,6 +2645,302 @@ describe("TypeEditor Component", () => {
       expect(codeInput2.value).toEqual("tue");
     });
 
+    test("Should render Canonical/URL components as array when multiple cardinality", () => {
+      const canonicalArrayFormik = {
+        ...formik,
+        values: {
+          CarePlan: {
+            activity: [
+              {
+                detail: {
+                  instantiatesCanonical: [
+                    "http://example.org/ActivityDefinition/1",
+                    "http://example.org/ActivityDefinition/2",
+                  ],
+                },
+              },
+            ],
+          },
+        },
+        getFieldProps: (label) => {
+          const match = label.match(/instantiatesCanonical\[(\d+)]/);
+          if (match) {
+            const index = parseInt(match[1]);
+            return {
+              value: [
+                "http://example.org/ActivityDefinition/1",
+                "http://example.org/ActivityDefinition/2",
+              ][index],
+              name: label,
+              onChange: jest.fn(),
+              onBlur: jest.fn(),
+            };
+          }
+        },
+      };
+
+      render(
+        <FormikProvider value={canonicalArrayFormik}>
+          <RequiredFieldsProvider
+            requiredFields={mockRequiredFields}
+            formInfo={mockFormInfo}
+          >
+            <TypeEditor
+              resource={null}
+              structureDefinition={{
+                id: "CarePlan.activity.detail.instantiatesCanonical",
+                path: "CarePlan.activity.detail.instantiatesCanonical",
+                min: 0,
+                max: "*",
+                type: [
+                  {
+                    code: "canonical",
+                  },
+                ],
+              }}
+              label="CarePlan.activity[0].detail.instantiatesCanonical"
+              canEdit={true}
+              parentStructureDefinition={null}
+            />
+          </RequiredFieldsProvider>
+        </FormikProvider>
+      );
+
+      // Should render 2 URL components (canonical uses UrlComponent)
+      const urlInput1 = screen.getByTestId(
+        "url-input-field-CarePlan.activity[0].detail.instantiatesCanonical[0]"
+      ) as HTMLInputElement;
+      expect(urlInput1.value).toEqual(
+        "http://example.org/ActivityDefinition/1"
+      );
+      const urlInput2 = screen.getByTestId(
+        "url-input-field-CarePlan.activity[0].detail.instantiatesCanonical[1]"
+      ) as HTMLInputElement;
+      expect(urlInput2.value).toEqual(
+        "http://example.org/ActivityDefinition/2"
+      );
+
+      // Add button should only appear on the last element
+      const addButtons = screen.getAllByText("Add Instantiates Canonical");
+      expect(addButtons).toHaveLength(1);
+    });
+
+    test("Should handle clicking add button for canonical arrays", () => {
+      const canonicalArrayFormik = {
+        ...formik,
+        values: {
+          CarePlan: {
+            activity: [
+              {
+                detail: {
+                  instantiatesCanonical: [
+                    "http://example.org/ActivityDefinition/1",
+                  ],
+                },
+              },
+            ],
+          },
+        },
+        getFieldProps: (label) => {
+          const match = label.match(/instantiatesCanonical\[(\d+)]/);
+          if (match) {
+            const index = parseInt(match[1]);
+            return {
+              value: ["http://example.org/ActivityDefinition/1"][index],
+              name: label,
+              onChange: jest.fn(),
+              onBlur: jest.fn(),
+            };
+          }
+        },
+      };
+
+      render(
+        <FormikProvider value={canonicalArrayFormik}>
+          <RequiredFieldsProvider
+            requiredFields={mockRequiredFields}
+            formInfo={mockFormInfo}
+          >
+            <TypeEditor
+              resource={null}
+              structureDefinition={{
+                id: "CarePlan.activity.detail.instantiatesCanonical",
+                path: "CarePlan.activity.detail.instantiatesCanonical",
+                min: 0,
+                max: "*",
+                type: [
+                  {
+                    code: "canonical",
+                  },
+                ],
+              }}
+              label="CarePlan.activity[0].detail.instantiatesCanonical"
+              canEdit={true}
+              parentStructureDefinition={null}
+            />
+          </RequiredFieldsProvider>
+        </FormikProvider>
+      );
+
+      const addButtons = screen.getAllByText("Add Instantiates Canonical");
+      expect(addButtons).toHaveLength(1);
+
+      // Click the add button
+      userEvent.click(addButtons[0]);
+
+      // Should call setFieldValue to add new element
+      expect(canonicalArrayFormik.setFieldValue).toHaveBeenCalled();
+    });
+
+    test("Should render URI components as array when multiple cardinality", () => {
+      const uriArrayFormik = {
+        ...formik,
+        values: {
+          CarePlan: {
+            activity: [
+              {
+                detail: {
+                  instantiatesUri: [
+                    "http://example.org/uri/1",
+                    "http://example.org/uri/2",
+                    "http://example.org/uri/3",
+                  ],
+                },
+              },
+            ],
+          },
+        },
+        getFieldProps: (label) => {
+          const match = label.match(/instantiatesUri\[(\d+)]/);
+          if (match) {
+            const index = parseInt(match[1]);
+            return {
+              value: [
+                "http://example.org/uri/1",
+                "http://example.org/uri/2",
+                "http://example.org/uri/3",
+              ][index],
+              name: label,
+              onChange: jest.fn(),
+              onBlur: jest.fn(),
+            };
+          }
+        },
+      };
+
+      render(
+        <FormikProvider value={uriArrayFormik}>
+          <RequiredFieldsProvider
+            requiredFields={mockRequiredFields}
+            formInfo={mockFormInfo}
+          >
+            <TypeEditor
+              resource={null}
+              structureDefinition={{
+                id: "CarePlan.activity.detail.instantiatesUri",
+                path: "CarePlan.activity.detail.instantiatesUri",
+                min: 0,
+                max: "*",
+                type: [
+                  {
+                    code: "uri",
+                  },
+                ],
+              }}
+              label="CarePlan.activity[0].detail.instantiatesUri"
+              canEdit={true}
+              parentStructureDefinition={null}
+            />
+          </RequiredFieldsProvider>
+        </FormikProvider>
+      );
+
+      // Should render 3 URI components
+      const uriInput1 = screen.getByTestId(
+        "uri-input-field-CarePlan.activity[0].detail.instantiatesUri[0]"
+      ) as HTMLInputElement;
+      expect(uriInput1.value).toEqual("http://example.org/uri/1");
+
+      const uriInput2 = screen.getByTestId(
+        "uri-input-field-CarePlan.activity[0].detail.instantiatesUri[1]"
+      ) as HTMLInputElement;
+      expect(uriInput2.value).toEqual("http://example.org/uri/2");
+
+      const uriInput3 = screen.getByTestId(
+        "uri-input-field-CarePlan.activity[0].detail.instantiatesUri[2]"
+      ) as HTMLInputElement;
+      expect(uriInput3.value).toEqual("http://example.org/uri/3");
+
+      // Add button should only appear on the last element
+      const addButtons = screen.getAllByText("Add Instantiates Uri");
+      expect(addButtons).toHaveLength(1);
+    });
+
+    test("Should handle clicking add button for uri arrays", () => {
+      const uriArrayFormik = {
+        ...formik,
+        values: {
+          CarePlan: {
+            activity: [
+              {
+                detail: {
+                  instantiatesUri: ["http://example.org/uri/1"],
+                },
+              },
+            ],
+          },
+        },
+        getFieldProps: (label) => {
+          const match = label.match(/instantiatesUri\[(\d+)]/);
+          if (match) {
+            const index = parseInt(match[1]);
+            return {
+              value: ["http://example.org/uri/1"][index],
+              name: label,
+              onChange: jest.fn(),
+              onBlur: jest.fn(),
+            };
+          }
+        },
+      };
+
+      render(
+        <FormikProvider value={uriArrayFormik}>
+          <RequiredFieldsProvider
+            requiredFields={mockRequiredFields}
+            formInfo={mockFormInfo}
+          >
+            <TypeEditor
+              resource={null}
+              structureDefinition={{
+                id: "CarePlan.activity.detail.instantiatesUri",
+                path: "CarePlan.activity.detail.instantiatesUri",
+                min: 0,
+                max: "*",
+                type: [
+                  {
+                    code: "uri",
+                  },
+                ],
+              }}
+              label="CarePlan.activity[0].detail.instantiatesUri"
+              canEdit={true}
+              parentStructureDefinition={null}
+            />
+          </RequiredFieldsProvider>
+        </FormikProvider>
+      );
+
+      const addButtons = screen.getAllByText("Add Instantiates Uri");
+      expect(addButtons).toHaveLength(1);
+
+      // Click the add button
+      userEvent.click(addButtons[0]);
+
+      // Should call setFieldValue to add new element
+      expect(uriArrayFormik.setFieldValue).toHaveBeenCalled();
+    });
+
     test("Should render Quantity components as array when multiple cardinality", async () => {
       useFhirDefinitionsServiceApiMock.mockImplementation(
         () =>

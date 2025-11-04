@@ -9,6 +9,7 @@ const UrlComponent = ({
   label = "URL",
   showAddAttributeButton,
   addTitle,
+  handleAddElement,
   ...rest
 }: TypeComponentProps) => {
   return (
@@ -31,7 +32,7 @@ const UrlComponent = ({
         {...rest}
       />
       {showAddAttributeButton && addTitle && (
-        <AddElementButton name={addTitle} />
+        <AddElementButton name={addTitle} onClick={handleAddElement} />
       )}
     </div>
   );

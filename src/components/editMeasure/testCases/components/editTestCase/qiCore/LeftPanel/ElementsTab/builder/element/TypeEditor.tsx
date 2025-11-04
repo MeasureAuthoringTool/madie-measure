@@ -147,6 +147,7 @@ const TypeEditor = ({
     ? _.startCase(getLastPart(structureDefinition.id))
     : "";
   const showAddAttributeButton = Boolean(!isRoot && canBeMultipleCardinality);
+
   if (isComponentDataType(type)) {
     switch (type) {
       case "string":
@@ -432,34 +433,82 @@ const TypeEditor = ({
         );
       case "uri":
         return (
-          <UriComponent
-            canEdit={canEdit}
-            structureDefinition={structureDefinition}
-            fieldRequired={required}
-            label={label}
-            helperText={formikErrorHandler(label)}
-            showAddAttributeButton={showAddAttributeButton}
-            addTitle={addTitle}
-            error={getNestedProperty(formik.errors, label)}
-            {...formik.getFieldProps(label)}
-            onChange={({ target }) => {
-              formik.setFieldTouched(label);
-              formik.setFieldValue(label, target.value);
-            }}
-          />
+          <>
+            {showAddAttributeButton && values ? (
+              values.map((el, index) => (
+                <UriComponent
+                  key={index}
+                  canEdit={canEdit}
+                  structureDefinition={structureDefinition}
+                  fieldRequired={required}
+                  label={`${label}[${index}]`}
+                  helperText={formikErrorHandler(`${label}[${index}]`)}
+                  showAddAttributeButton={
+                    showAddAttributeButton && index === values.length - 1
+                  }
+                  addTitle={addTitle}
+                  handleAddElement={handleAddElement}
+                  error={getNestedProperty(formik.errors, `${label}[${index}]`)}
+                  {...formik.getFieldProps(`${label}[${index}]`)}
+                  onChange={({ target }) => {
+                    formik.setFieldTouched(`${label}[${index}]`);
+                    formik.setFieldValue(`${label}[${index}]`, target.value);
+                  }}
+                />
+              ))
+            ) : (
+              <UriComponent
+                canEdit={canEdit}
+                structureDefinition={structureDefinition}
+                fieldRequired={required}
+                label={label}
+                helperText={formikErrorHandler(label)}
+                showAddAttributeButton={showAddAttributeButton}
+                addTitle={addTitle}
+                handleAddElement={handleAddElement}
+                error={getNestedProperty(formik.errors, label)}
+                {...formik.getFieldProps(label)}
+                onChange={({ target }) => {
+                  formik.setFieldTouched(label);
+                  formik.setFieldValue(label, target.value);
+                }}
+              />
+            )}
+          </>
         );
       case "url":
       case "canonical":
         return (
-          <UrlComponent
-            canEdit={canEdit}
-            structureDefinition={structureDefinition}
-            fieldRequired={required}
-            label={label}
-            showAddAttributeButton={showAddAttributeButton}
-            addTitle={addTitle}
-            {...formik.getFieldProps(label)}
-          />
+          <>
+            {showAddAttributeButton && values ? (
+              values.map((el, index) => (
+                <UrlComponent
+                  key={index}
+                  canEdit={canEdit}
+                  structureDefinition={structureDefinition}
+                  fieldRequired={required}
+                  label={`${label}[${index}]`}
+                  showAddAttributeButton={
+                    showAddAttributeButton && index === values.length - 1
+                  }
+                  addTitle={addTitle}
+                  handleAddElement={handleAddElement}
+                  {...formik.getFieldProps(`${label}[${index}]`)}
+                />
+              ))
+            ) : (
+              <UrlComponent
+                canEdit={canEdit}
+                structureDefinition={structureDefinition}
+                fieldRequired={required}
+                label={label}
+                showAddAttributeButton={showAddAttributeButton}
+                addTitle={addTitle}
+                handleAddElement={handleAddElement}
+                {...formik.getFieldProps(label)}
+              />
+            )}
+          </>
         );
       case "date":
         return (
