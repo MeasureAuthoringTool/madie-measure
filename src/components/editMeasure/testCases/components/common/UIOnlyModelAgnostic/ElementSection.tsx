@@ -14,12 +14,14 @@ const ElementSection = (props: ElementSectionProps) => {
   const [open, setOpen] = useState(startOpen);
   const chevronClass = open ? "chevron-display open" : "chevron-display";
   const growingDivClass = open ? "growing-div open" : "growing-div";
+
   return (
     <div
       className="test-case-tab-heading"
       data-testid={`elements-${props.title}-sub-heading`}
     >
       <div
+        data-testid={`elements-heading-expansion-button-${title}`}
         onClick={() => {
           setOpen(!open);
         }}
