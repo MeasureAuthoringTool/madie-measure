@@ -1,5 +1,4 @@
 import React, { useState, useMemo, useEffect, useCallback } from "react";
-import * as _ from "lodash";
 import { ResourceIdentifier } from "../../../../../../../api/models/ResourceIdentifier";
 import "../../../../../../../../../measureLanding/MeasureLanding.scss";
 import tw from "twin.macro";

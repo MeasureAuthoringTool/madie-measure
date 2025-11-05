@@ -13,6 +13,7 @@ import {
   Model,
   PopulationType,
   TestCase,
+  TestCaseExcelExportDto,
 } from "@madie/madie-models";
 import { measureCql } from "../components/editTestCase/groupCoverage/_mocks_/QdmCovergaeMeasureCql";
 
@@ -215,6 +216,49 @@ describe("TestCaseServiceApi Tests", () => {
     } catch (error) {
       expect(error.status).toBe(500);
     }
+  });
+
+  it("test exportExcel success", async () => {
+    const excelBlob = new Blob(["excel-data"], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
+    const successResponse = { status: 200, data: excelBlob };
+    axios.put = jest.fn().mockResolvedValueOnce(successResponse);
+
+    const testCaseExcelExportDtos: TestCaseExcelExportDto[] = [
+      {
+        groupId: "group-1",
+        groupNumber: "1",
+        testCaseExecutionResults: [],
+      },
+    ];
+
+    const result = await testCaseService.exportExcel(
+      "testMeasureId",
+      testCaseExcelExportDtos
+    );
+
+    expect(axios.put).toBeCalledTimes(1);
+    expect(result).toEqual(excelBlob);
+  });
+
+  it("test exportExcel failure", async () => {
+    const errorResponse = { status: 500 };
+    axios.put = jest.fn().mockRejectedValueOnce(errorResponse);
+
+    const testCaseExcelExportDtos: TestCaseExcelExportDto[] = [
+      {
+        groupId: "group-1",
+        groupNumber: "1",
+        testCaseExecutionResults: [],
+      },
+    ];
+
+    await expect(
+      testCaseService.exportExcel("testMeasureId", testCaseExcelExportDtos)
+    ).rejects.toEqual(errorResponse);
+
+    expect(axios.put).toBeCalledTimes(1);
   });
 
   it("test createTestCase success", async () => {

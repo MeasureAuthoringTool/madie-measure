@@ -32,7 +32,8 @@ const mockMeasureServiceApi = {
     .fn()
     .mockResolvedValue([{ model: Model.QICORE }, { model: Model.QICORE }]),
   transferMeasures: jest.fn().mockResolvedValue({
-    data: true,
+    status: 200,
+    data: [],
   }),
 } as unknown as MeasureServiceApi;
 

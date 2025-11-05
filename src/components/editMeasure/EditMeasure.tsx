@@ -48,6 +48,7 @@ import ViewHRModal from "../common/viewHumanReadableModal/ViewHRModal";
 import ShareDialog from "../common/shareDialog/ShareDialog";
 import TransferDialog from "../common/transferDialog/TransferDialog";
 import ViewMeasureHistoryDialog from "../common/viewMeasureHistoryDialog/ViewMeasureHistoryDialog";
+import StatusHandler, { INITIAL_STATUS_HANDLER } from "./editor/StatusHandler";
 
 const OBJECT_ID_REGEX = /\/[a-f0-9]{24}/g;
 
@@ -150,6 +151,7 @@ export default function EditMeasure() {
   const [toastOpen, setToastOpen] = useState<boolean>(false);
   const [toastMessage, setToastMessage] = useState<string>("");
   const [toastType, setToastType] = useState<string>("danger");
+  const [statusHandler, setStatusHandler] = useState(INITIAL_STATUS_HANDLER);
   const [measure, setMeasure] = useState<any>(measureStore.state);
 
   const [downloadState, setDownloadState] = useState(null);
@@ -622,6 +624,8 @@ export default function EditMeasure() {
                   copyButton={true}
                 />
               )}
+
+              <StatusHandler {...statusHandler} />
             </div>
             <Routes>
               {/* root nav links with wild card operators. We always want these displayed regardless of deeper navigation */}
@@ -724,6 +728,7 @@ export default function EditMeasure() {
             measures={[measure]}
             open={transferDialog.open}
             onClose={handleTransferDialogClose}
+            setStatusHandler={setStatusHandler}
           />
           <ViewMeasureHistoryDialog
             measures={[measure]}

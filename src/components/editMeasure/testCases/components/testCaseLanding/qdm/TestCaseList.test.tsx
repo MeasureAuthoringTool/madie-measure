@@ -13,6 +13,9 @@ import {
   ServiceConfig,
 } from "../../../../../../api/ServiceContext";
 import {
+  DEFINITION_CALLSTACK_ERROR,
+  EXCEL_ERROR_MESSAGE,
+  EXCEL_SUCCESS_MESSAGE,
   getCoverageValueFromHtml,
   IMPORT_ERROR,
   removeHtmlCoverageHeader,
@@ -34,10 +37,6 @@ import {
 import useTestCaseServiceApi, {
   TestCaseServiceApi,
 } from "../../../api/useTestCaseServiceApi";
-import useExcelExportService, {
-  ExcelExportService,
-} from "../../../api/useExcelExportService";
-import { AxiosError } from "axios";
 import userEvent from "@testing-library/user-event";
 import { buildMeasureBundle } from "../../../util/CalculationTestHelpers";
 import { QdmExecutionContextProvider } from "../../routes/qdm/QdmExecutionContext";
@@ -1113,11 +1112,6 @@ const useMeasureServiceMockResolved = {
     .mockResolvedValue(buildMeasureBundle(mockMeasure)),
 } as unknown as MeasureServiceApi;
 
-// mocking excelExportService
-jest.mock("../../../api/useExcelExportService");
-const useExcelExportServiceMock =
-  useExcelExportService as jest.Mock<ExcelExportService>;
-
 jest.useFakeTimers();
 jest.spyOn(global, "setTimeout");
 
@@ -2127,18 +2121,11 @@ describe("TestCaseList component", () => {
       getTestCaseSeriesForMeasure: jest
         .fn()
         .mockResolvedValue(["Series 1", "Series 2"]),
+      exportExcel: jest.fn().mockResolvedValue("Excel data"),
     } as unknown as TestCaseServiceApi;
 
     useTestCaseServiceMock.mockImplementation(() => {
       return useTestCaseServiceMockResolve;
-    });
-
-    const useExcelExportServiceMockResolved = {
-      generateExcel: jest.fn().mockResolvedValue("test excel"),
-    } as unknown as ExcelExportService;
-
-    useExcelExportServiceMock.mockImplementation(() => {
-      return useExcelExportServiceMockResolved;
     });
 
     mockMeasure.cqlErrors = false;
@@ -2178,11 +2165,9 @@ describe("TestCaseList component", () => {
     expect(exportExcel).toBeInTheDocument();
     fireEvent.click(exportExcel);
     await waitFor(() => {
-      expect(
-        screen.getByText("Excel exported successfully")
-      ).toBeInTheDocument();
+      expect(screen.getByText(EXCEL_SUCCESS_MESSAGE)).toBeInTheDocument();
     });
-    fireEvent.keyDown(screen.getByText("Excel exported successfully"), {
+    fireEvent.keyDown(screen.getByText(EXCEL_SUCCESS_MESSAGE), {
       key: "Escape",
       code: "Escape",
       keyCode: 27,
@@ -2190,13 +2175,11 @@ describe("TestCaseList component", () => {
     });
 
     await waitFor(() => {
-      expect(
-        screen.queryByText("Excel exported successfully")
-      ).not.toBeInTheDocument();
+      expect(screen.queryByText(EXCEL_SUCCESS_MESSAGE)).not.toBeInTheDocument();
     });
   });
 
-  it("should display failed message when Excel Export failed", async () => {
+  it("should display error message when Excel Export button clicked", async () => {
     (checkUserCanEdit as jest.Mock).mockClear().mockImplementation(() => true);
     (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({}));
     const useTestCaseServiceMockResolve = {
@@ -2204,27 +2187,18 @@ describe("TestCaseList component", () => {
       getTestCaseSeriesForMeasure: jest
         .fn()
         .mockResolvedValue(["Series 1", "Series 2"]),
+      exportExcel: jest
+        .fn()
+        .mockRejectedValue(new Error("Unable to export Excel.")),
     } as unknown as TestCaseServiceApi;
 
     useTestCaseServiceMock.mockImplementation(() => {
       return useTestCaseServiceMockResolve;
     });
 
-    const useExcelExportServiceMockRejected = {
-      generateExcel: jest
-        .fn()
-        .mockRejectedValue(new AxiosError("Excel export failed")),
-    } as unknown as ExcelExportService;
-
-    useExcelExportServiceMock.mockImplementation(() => {
-      return useExcelExportServiceMockRejected;
-    });
-
-    const errorMessage =
-      "Excel export failed. Please try again. If the issue continues, please contact helpdesk.";
-
     mockMeasure.cqlErrors = false;
     mockMeasure.errors = [];
+    mockMeasure.testCases = testCases;
     renderTestCaseListComponent();
     await screen.findByTestId("test-case-tbl");
 
@@ -2253,16 +2227,27 @@ describe("TestCaseList component", () => {
     expect(exportButton).toBeEnabled();
     fireEvent.click(exportButton);
 
-    const exportExcel = screen.getByTestId(`export-excel-${mockMeasure.id}`);
+    const exportExcel = screen.getByRole("button", {
+      name: "Excel",
+    });
     expect(exportExcel).toBeInTheDocument();
     fireEvent.click(exportExcel);
+    await waitFor(() => {
+      expect(screen.getByText(EXCEL_ERROR_MESSAGE)).toBeInTheDocument();
+    });
+    fireEvent.keyDown(screen.getByText(EXCEL_ERROR_MESSAGE), {
+      key: "Escape",
+      code: "Escape",
+      keyCode: 27,
+      charCode: 27,
+    });
 
     await waitFor(() => {
-      expect(screen.queryByText(errorMessage)).not.toBeInTheDocument();
+      expect(screen.queryByText(EXCEL_ERROR_MESSAGE)).not.toBeInTheDocument();
     });
   });
 
-  it("should display failed message when getDefinitionCallstacks failed", async () => {
+  it("should display error message when getDefinitionCallstacks failed", async () => {
     (checkUserCanEdit as jest.Mock).mockClear().mockImplementation(() => true);
     (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({}));
     const useTestCaseServiceMockResolve = {
@@ -2286,9 +2271,6 @@ describe("TestCaseList component", () => {
     useCqlParsingServiceMock.mockImplementation(() => {
       return useCqlParsingServiceMockRejected;
     });
-
-    const errorMessage =
-      "Error while Parsing CQL for callStack, Please try again. If the issue continues, please contact helpdesk.";
 
     mockMeasure.cqlErrors = false;
     mockMeasure.errors = [];
@@ -2324,9 +2306,9 @@ describe("TestCaseList component", () => {
     expect(exportExcel).toBeInTheDocument();
     fireEvent.click(exportExcel);
     await waitFor(() => {
-      expect(screen.getByText(errorMessage)).toBeInTheDocument();
+      expect(screen.getByText(DEFINITION_CALLSTACK_ERROR)).toBeInTheDocument();
     });
-    fireEvent.keyDown(screen.getByText(errorMessage), {
+    fireEvent.keyDown(screen.getByText(DEFINITION_CALLSTACK_ERROR), {
       key: "Escape",
       code: "Escape",
       keyCode: 27,
@@ -2334,7 +2316,9 @@ describe("TestCaseList component", () => {
     });
 
     await waitFor(() => {
-      expect(screen.queryByText(errorMessage)).not.toBeInTheDocument();
+      expect(
+        screen.queryByText(DEFINITION_CALLSTACK_ERROR)
+      ).not.toBeInTheDocument();
     });
   });
 

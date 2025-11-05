@@ -126,7 +126,7 @@ export class CalculationService {
   buildPatientBundle(testCase: TestCase): Bundle {
     const testCaseBundle: Bundle = JSON.parse(testCase.json);
     testCaseBundle.entry
-      .filter((entry) => {
+      ?.filter((entry) => {
         return entry.resource.resourceType === "Patient";
       })
       .forEach((entry) => {

@@ -195,6 +195,7 @@ const EditTestCase = (props: EditTestCaseProps) => {
   const testCaseService = useRef(useTestCaseServiceApi());
   const calculation = useRef(calculationService());
   const fhirCqlParsingService = useRef(useFhirCqlParsingService());
+  const abortController = useRef(null);
   const [alert, setAlert] = useState<AlertProps>(null);
   const { errors, setErrors } = props;
   // Toast utilities
@@ -436,8 +437,9 @@ const EditTestCase = (props: EditTestCaseProps) => {
     }
 
     if (_.isNil(callstackMap) && measure?.cql) {
+      abortController.current = new AbortController();
       fhirCqlParsingService.current
-        .getDefinitionCallstacks(measure.cql)
+        .getDefinitionCallstacks(measure.cql, abortController.current.signal)
         .then((callstack: CqlDefinitionCallstack) => {
           setCallstackMap(callstack);
         })
@@ -464,6 +466,9 @@ const EditTestCase = (props: EditTestCaseProps) => {
       if (featureFlags?.Locking && canEdit) {
         window.removeEventListener("beforeunload", handleUnload);
         testCaseService.current.unlockTestCase(id);
+      }
+      if (abortController.current) {
+        abortController.current.abort();
       }
     };
   }, [
@@ -1296,7 +1301,11 @@ const EditTestCase = (props: EditTestCaseProps) => {
                             validationStatus={testCase?.validationStatus}
                           />
                           <span className="ml-2">
-                            Validations ({validationErrors?.length || 0})
+                            Validations (
+                            {validationErrors?.filter(
+                              (error) => !/^information/.test(error?.severity)
+                            ).length || 0}
+                            )
                           </span>
                         </div>
 

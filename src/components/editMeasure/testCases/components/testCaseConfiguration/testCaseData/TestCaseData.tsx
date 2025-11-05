@@ -30,7 +30,7 @@ const TestCaseData = (props: TestCaseListProps) => {
   const [toastType, setToastType] = useState<string>("danger");
   const testCaseService = useRef(useTestCaseServiceApi());
   const [executing, setExecuting] = useState<boolean>(false);
-  const { setWarnings } = props;
+  const { setShiftTestCaseDatesWarnings } = props;
   const featureFlags = useFeatureFlags();
 
   useEffect(() => {
@@ -101,7 +101,7 @@ const TestCaseData = (props: TestCaseListProps) => {
           if (featureFlags?.Locking) {
             handleToast("danger", err.message, true);
           } else {
-            setWarnings((prevState) => [
+            setShiftTestCaseDatesWarnings((prevState) => [
               ...prevState,
               err?.response?.data?.message,
             ]);
@@ -115,7 +115,10 @@ const TestCaseData = (props: TestCaseListProps) => {
         )
         .then((failedTestCases) => {
           if (failedTestCases.length > 0) {
-            setWarnings((prevState) => [...prevState, ...failedTestCases]);
+            setShiftTestCaseDatesWarnings((prevState) => [
+              ...prevState,
+              ...failedTestCases,
+            ]);
           } else {
             handleToast(
               "success",

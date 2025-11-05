@@ -90,6 +90,7 @@ const Builder = ({
 }: BuilderProps) => {
   const fhirDefinitionsService = useRef(useFhirDefinitionsServiceApi());
   const fhirElmTranslationService = useRef(useFhirElmTranslationServiceApi());
+  const abortController = useRef(null);
   const { state, dispatch } = useQiCoreResource();
   const { measureState } = useExecutionContext();
   const [measure] = measureState;
@@ -115,19 +116,20 @@ const Builder = ({
       const resourceIdentifiers =
         await fhirDefinitionsService.current.getResources();
       setResourceIdentifiers(resourceIdentifiers);
+      abortController.current = new AbortController();
       fhirElmTranslationService.current
-        .fetchRelevantDataElements(measure)
-        .then((sdcs) => {
-          const relevantTypes = sdcs?.map(
-            (relevantElement) => relevantElement.type
+        .fetchRelevantDataElements(measure, abortController.current.signal)
+        .then((relevantElements) => {
+          const profiles = relevantElements?.map(
+            (relevantElement) => relevantElement.profile
           );
           if (!_.isEmpty(resourceIdentifiers)) {
             const uniqueResources = _.uniq(resourceIdentifiers.sort());
-            const filteredResources = _.isEmpty(relevantTypes)
+            const filteredResources = _.isEmpty(profiles)
               ? uniqueResources
               : uniqueResources.filter(
                   (r) =>
-                    relevantTypes.includes(r.type) ||
+                    profiles.includes(r.profile) ||
                     "PATIENT" === r.type.toUpperCase()
                 );
             const patientIdx = filteredResources.findIndex(
@@ -146,6 +148,12 @@ const Builder = ({
         });
     };
     fetchResources();
+    // Cleanup: abort the request on unmounts or dependencies change
+    return () => {
+      if (abortController.current) {
+        abortController.current.abort();
+      }
+    };
   }, [measure]);
 
   // check if patient resource is already added

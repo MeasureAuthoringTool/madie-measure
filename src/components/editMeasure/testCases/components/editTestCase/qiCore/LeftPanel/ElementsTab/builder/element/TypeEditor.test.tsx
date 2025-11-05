@@ -509,7 +509,7 @@ describe("TypeEditor Component", () => {
       `YYYY-MM-DDTHH:mm:ssZ-field-ClaimResponse.date-input`
     ) as HTMLInputElement;
 
-    userEvent.type(dateInput, "09/26/2024");
+    userEvent.type(dateInput, "09-26-2024");
 
     expect(onChange).toHaveBeenCalledWith(
       "ClaimResponse.date",
@@ -619,7 +619,7 @@ describe("TypeEditor Component", () => {
     const dateFieldInput = screen.getByTestId(
       "YYYY-MM-DD-field-ClaimResponse.date-input"
     ) as HTMLInputElement;
-    expect(dateFieldInput.value).toBe("01/01/2019");
+    expect(dateFieldInput.value).toBe("01-01-2019");
 
     const formatSelectorField = screen.getByRole("combobox", {
       name: "Date Precision Level",
@@ -2511,8 +2511,8 @@ describe("TypeEditor Component", () => {
       expect(datetime2).toBeInTheDocument();
 
       // let's change the value of the first datetime component to trigger change event
-      userEvent.type(datetime1, "09/02/2025");
-      expect(datetime1.value).toEqual("09/02/2025");
+      userEvent.type(datetime1, "09-02-2025");
+      expect(datetime1.value).toEqual("09-02-2025");
       expect(formik.setFieldValue).toHaveBeenCalled();
       expect(formik.setFieldTouched).toHaveBeenCalled();
     });
