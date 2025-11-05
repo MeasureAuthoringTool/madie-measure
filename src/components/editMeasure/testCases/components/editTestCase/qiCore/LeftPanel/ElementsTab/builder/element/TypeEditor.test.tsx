@@ -3496,4 +3496,221 @@ describe("TypeEditor Component", () => {
     expect(referenceSelect).toBeInTheDocument();
     expect(referenceSelect).toHaveTextContent("Select");
   });
+
+  test("Should render Integer components as array when multiple cardinality", () => {
+    //@ts-ignore
+    const integerArrayFormik = {
+      ...mockFormik,
+      values: {
+        Claim: {
+          item: [
+            {
+              careTeamSequence: [1, 2, 3],
+            },
+          ],
+        },
+      },
+      getFieldProps: (label: string) => {
+        const match = label.match(/careTeamSequence\[(\d+)]/);
+        if (match) {
+          const index = parseInt(match[1]);
+          return {
+            value: [1, 2, 3][index],
+            name: label,
+            onChange: jest.fn(),
+            onBlur: jest.fn(),
+          };
+        }
+        return {
+          value: "",
+          name: label,
+          onChange: jest.fn(),
+          onBlur: jest.fn(),
+        };
+      },
+    };
+
+    render(
+      //@ts-ignore
+      <FormikProvider value={integerArrayFormik}>
+        <RequiredFieldsProvider
+          requiredFields={mockRequiredFields}
+          formInfo={mockFormInfo}
+        >
+          <TypeEditor
+            resource={null}
+            structureDefinition={{
+              id: "Claim.item.careTeamSequence",
+              path: "Claim.item.careTeamSequence",
+              min: 0,
+              max: "*",
+              type: [
+                {
+                  code: "positiveInt",
+                },
+              ],
+            }}
+            label="Claim.item[0].careTeamSequence"
+            canEdit={true}
+            parentStructureDefinition={null}
+          />
+        </RequiredFieldsProvider>
+      </FormikProvider>
+    );
+
+    // Check that all three integer inputs are rendered
+    expect(
+      screen.getByTestId(
+        "integer-field-input-Claim.item[0].careTeamSequence[0]"
+      )
+    ).toBeInTheDocument();
+    expect(
+      (
+        screen.getByTestId(
+          "integer-field-input-Claim.item[0].careTeamSequence[0]"
+        ) as HTMLInputElement
+      ).value
+    ).toBe("1");
+
+    expect(
+      screen.getByTestId(
+        "integer-field-input-Claim.item[0].careTeamSequence[1]"
+      )
+    ).toBeInTheDocument();
+    expect(
+      (
+        screen.getByTestId(
+          "integer-field-input-Claim.item[0].careTeamSequence[1]"
+        ) as HTMLInputElement
+      ).value
+    ).toBe("2");
+
+    expect(
+      screen.getByTestId(
+        "integer-field-input-Claim.item[0].careTeamSequence[2]"
+      )
+    ).toBeInTheDocument();
+    expect(
+      (
+        screen.getByTestId(
+          "integer-field-input-Claim.item[0].careTeamSequence[2]"
+        ) as HTMLInputElement
+      ).value
+    ).toBe("3");
+
+    // Delete buttons should appear on elements after the first one
+    const deleteButtons = screen.getAllByRole("button", {
+      name: /delete Claim.item\[0\].careTeamSequence\[\d+\]/,
+    });
+    expect(deleteButtons).toHaveLength(2); // Elements 1 and 2 should have delete buttons
+
+    // Add button should only appear on the last element
+    const addButtons = screen.getAllByText("Add Care Team Sequence");
+    expect(addButtons).toHaveLength(1);
+
+    // Click the add button
+    userEvent.click(addButtons[0]);
+    expect(integerArrayFormik.setFieldValue).toHaveBeenCalled();
+
+    // Click a delete button
+    userEvent.click(deleteButtons[0]);
+    expect(integerArrayFormik.setFieldValue).toHaveBeenCalled();
+  });
+
+  test("Should render Boolean components as array when multiple cardinality", () => {
+    //@ts-ignore
+    const booleanArrayFormik = {
+      ...mockFormik,
+      values: {
+        Observation: {
+          component: [
+            {
+              valueBoolean: [true, false, true],
+            },
+          ],
+        },
+      },
+      getFieldProps: (label: string) => {
+        const match = label.match(/valueBoolean\[(\d+)]/);
+        if (match) {
+          const index = parseInt(match[1]);
+          return {
+            value: [true, false, true][index],
+            name: label,
+            onChange: jest.fn(),
+            onBlur: jest.fn(),
+          };
+        }
+        return {
+          value: "",
+          name: label,
+          onChange: jest.fn(),
+          onBlur: jest.fn(),
+        };
+      },
+    };
+
+    render(
+      //@ts-ignore
+      <FormikProvider value={booleanArrayFormik}>
+        <RequiredFieldsProvider
+          requiredFields={mockRequiredFields}
+          formInfo={mockFormInfo}
+        >
+          <TypeEditor
+            resource={null}
+            structureDefinition={{
+              id: "Observation.component.valueBoolean",
+              path: "Observation.component.valueBoolean",
+              min: 0,
+              max: "*",
+              type: [
+                {
+                  code: "boolean",
+                },
+              ],
+            }}
+            label="Observation.component[0].valueBoolean"
+            canEdit={true}
+            parentStructureDefinition={null}
+          />
+        </RequiredFieldsProvider>
+      </FormikProvider>
+    );
+
+    // Check that all three boolean selects are rendered
+    expect(
+      screen.getByTestId(
+        "boolean-field-Observation.component[0].valueBoolean[0]"
+      )
+    ).toBeInTheDocument();
+    expect(
+      screen.getByTestId(
+        "boolean-field-Observation.component[0].valueBoolean[1]"
+      )
+    ).toBeInTheDocument();
+    expect(
+      screen.getByTestId(
+        "boolean-field-Observation.component[0].valueBoolean[2]"
+      )
+    ).toBeInTheDocument();
+
+    // Delete buttons should appear on elements after the first one
+    const deleteButtons = screen.getAllByRole("button", {
+      name: /delete Observation.component\[0\].valueBoolean\[\d+\]/,
+    });
+    expect(deleteButtons).toHaveLength(2); // Elements 1 and 2 should have delete buttons
+
+    // Add button should only appear on the last element
+    const addButtons = screen.getAllByText("Add Value Boolean");
+    expect(addButtons).toHaveLength(1);
+
+    // Click the add button
+    userEvent.click(addButtons[0]);
+    expect(booleanArrayFormik.setFieldValue).toHaveBeenCalled();
+
+    // Click a delete button
+    userEvent.click(deleteButtons[0]);
+    expect(booleanArrayFormik.setFieldValue).toHaveBeenCalled();
+  });
 });
