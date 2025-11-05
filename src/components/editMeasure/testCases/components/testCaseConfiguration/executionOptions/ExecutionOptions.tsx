@@ -72,6 +72,8 @@ export default function ExecutionOptions({ setCustomWarningMessages }) {
               testDataId: "test-cases-execute-invalid-test-cases-warning",
             },
           ]);
+        } else {
+          setCustomWarningMessages([]);
         }
       } catch (err: any) {
         console.error(err);

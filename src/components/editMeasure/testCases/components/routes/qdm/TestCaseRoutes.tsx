@@ -144,6 +144,15 @@ const TestCaseRoutes = () => {
               ]);
             });
         }
+        if (measure?.testCaseConfiguration?.executeInvalidTestCases) {
+          setCustomWarningMessages([
+            {
+              message:
+                "Execution of invalid test cases is enabled. You may receive inaccurate pass/fail results. You can update this setting in Execution Configuration tab.",
+              testDataId: "test-cases-in-use-warning",
+            },
+          ]);
+        }
         setCqmMeasureErrors((prevState) => [...prevState, ...localErrors]);
       }
     }
