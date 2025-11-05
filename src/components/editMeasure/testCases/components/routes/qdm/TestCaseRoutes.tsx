@@ -109,7 +109,10 @@ const TestCaseRoutes = () => {
             "No Population Criteria is associated with this measure. Please review the Population Criteria tab."
           );
         }
-        if (!localErrors.length) {
+        if (
+          !localErrors.length ||
+          measure?.testCaseConfiguration?.executeInvalidTestCases
+        ) {
           onAbort();
           cqmMeasureConvertAbortController.current = new AbortController();
           cqmService.current
