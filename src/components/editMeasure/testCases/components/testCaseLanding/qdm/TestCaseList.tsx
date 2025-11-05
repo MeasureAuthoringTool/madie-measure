@@ -64,6 +64,11 @@ import OverlappingCodesDialog from "../common/overLappingCodes/OverlappingCodesD
 
 export const IMPORT_ERROR =
   "An error occurred while importing your test cases. Please try again, or reach out to the Help Desk.";
+export const EXCEL_SUCCESS_MESSAGE = "Excel exported successfully.";
+export const EXCEL_ERROR_MESSAGE =
+  "Error exporting Excel. Please try again. If the issue continues, please contact helpdesk.";
+export const DEFINITION_CALLSTACK_ERROR =
+  "Error while Parsing CQL for callStack. Please try again. If the issue continues, please contact helpdesk.";
 export const coverageHeaderRegex =
   /<h2> .* Clause Coverage: (\d*\.\d+|\d*|NaN)%<\/h2>/i;
 export const removeHtmlCoverageHeader = (
@@ -508,64 +513,61 @@ const TestCaseList = (props: TestCaseListProps) => {
     : 0;
 
   const exportExcel = async () => {
-    if (measure?.cql) {
-      setExportExecuting(true);
-      setOptionsOpen(false);
-      setExportOptionsOpen(false);
-      qdmCqlParsingService.current
-        .getDefinitionCallstacks(measure.cql)
-        .then((callstack: CqlDefinitionCallstack) => {
-          const testCaseDtos: TestCaseExcelExportDto[] =
-            createExcelExportDtosForAllTestCases(
-              measure,
-              cqmMeasure,
-              calculationOutput,
-              callstack
-            );
-          excelExportService.current
-            .generateExcel(testCaseDtos)
-            .then((response: AxiosResponse) => {
-              const excelData: Blob = response.data;
-              var exportBlob = new Blob([excelData], {
-                type: "application/vnd.ms-excel",
-              });
-              const url = window.URL.createObjectURL(exportBlob);
-              const link = document.createElement("a");
-              link.href = url;
-              link.setAttribute(
-                "download",
-                `${measure.ecqmTitle}-v${measure.version}-QDM-TestCases.xlsx`
-              );
-              document.body.appendChild(link);
-              link.click();
-              setToastOpen(true);
-              setToastType("success");
-              setToastMessage("Excel exported successfully");
-              document.body.removeChild(link);
-              setExportExecuting(false);
-            })
-            .catch((error: AxiosError) => {
-              setToastOpen(true);
-              setToastType("danger");
-              setToastMessage(
-                error?.message +
-                  ". Please try again. If the issue continues, please contact helpdesk."
-              );
-              setExportExecuting(false);
-            });
-        })
-        .catch((error) => {
-          console.error(
-            "Error while Parsing CQL for callStack: err.message = " +
-              error.message
-          );
-          setToastOpen(true);
-          setToastType("danger");
-          setToastMessage(
-            "Error while Parsing CQL for callStack, Please try again. If the issue continues, please contact helpdesk."
-          );
-          setExportExecuting(false);
-        });
+    let callstack: CqlDefinitionCallstack;
+
+    setExportExecuting(true);
+    setOptionsOpen(false);
+    setExportOptionsOpen(false);
+
+    try {
+      callstack = await qdmCqlParsingService.current.getDefinitionCallstacks(
+        measure.cql
+      );
+    } catch (error) {
+      console.error(
+        "Error while Parsing CQL for callStack: err.message = " + error.message
+      );
+      setToastOpen(true);
+      setToastType("danger");
+      setToastMessage(DEFINITION_CALLSTACK_ERROR);
+      setExportExecuting(false);
+      // stop further execution if callstack fails
+      return;
+    }
+
+    try {
+      const testCaseExcelExportDtos: TestCaseExcelExportDto[] =
+        createExcelExportDtosForAllTestCases(
+          measure,
+          cqmMeasure,
+          calculationOutput,
+          callstack
+        );
+
+      const excelBlob: Blob = await testCaseService.current.exportExcel(
+        measureId,
+        testCaseExcelExportDtos
+      );
+
+      const url = window.URL.createObjectURL(excelBlob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute(
+        "download",
+        `${measure.ecqmTitle}-v${measure.version}-QDM-TestCases.xlsx`
+      );
+      document.body.appendChild(link);
+      link.click();
+      setToastOpen(true);
+      setToastType("success");
+      setToastMessage(EXCEL_SUCCESS_MESSAGE);
+      document.body.removeChild(link);
+    } catch (error) {
+      setToastOpen(true);
+      setToastType("danger");
+      setToastMessage(EXCEL_ERROR_MESSAGE);
+    } finally {
+      setExportExecuting(false);
     }
   };
 

@@ -30,7 +30,7 @@ describe("DateComponent", () => {
       "YYYY-MM-DD-field-birthday-input"
     );
     expect(dateFieldInput).toBeInTheDocument();
-    expect(dateFieldInput.value).toBe("09/26/2024");
+    expect(dateFieldInput.value).toBe("09-26-2024");
   });
   test("Should render DateComponent with default label", () => {
     const handleChange = jest.fn();
@@ -92,7 +92,7 @@ describe("DateComponent", () => {
       "YYYY-MM-DD-field-birthday-input"
     );
     expect(dateFieldInput).toBeInTheDocument();
-    expect(dateFieldInput.value).toBe("09/26/2024");
+    expect(dateFieldInput.value).toBe("09-26-2024");
 
     fireEvent.change(dateFieldInput, {
       target: { value: "2024-09-27" },
@@ -107,7 +107,7 @@ describe("DateComponent", () => {
         structureDefinition={null}
       />
     );
-    expect(dateFieldInput.value).toBe("09/27/2024");
+    expect(dateFieldInput.value).toBe("09-27-2024");
   });
 
   test("Should handleFormat and and date from empty", async () => {
@@ -234,8 +234,8 @@ describe("DateComponent", () => {
     const dateFieldInput = screen.getByTestId(
       `${YEAR_MONTH_DAY_FORMAT}-field-birthday-input`
     );
-    userEvent.type(dateFieldInput, "01/01/2025");
-    expect(dateFieldInput.value).toBe("01/01/2025");
+    userEvent.type(dateFieldInput, "01-01-2025");
+    expect(dateFieldInput.value).toBe("01-01-2025");
     expect(handleChange).toBeCalledWith("2025-01-01");
   });
 

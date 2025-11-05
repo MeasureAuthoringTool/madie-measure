@@ -1296,7 +1296,11 @@ const EditTestCase = (props: EditTestCaseProps) => {
                             validationStatus={testCase?.validationStatus}
                           />
                           <span className="ml-2">
-                            Validations ({validationErrors?.length || 0})
+                            Validations (
+                            {validationErrors?.filter(
+                              (error) => !/^information/.test(error?.severity)
+                            ).length || 0}
+                            )
                           </span>
                         </div>
 
