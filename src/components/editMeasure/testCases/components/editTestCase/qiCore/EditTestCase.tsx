@@ -1386,8 +1386,13 @@ const EditTestCase = (props: EditTestCaseProps) => {
                     ) ||
                     _.isNil(measure?.groups) ||
                     measure?.groups.length === 0 ||
-                    (!isJsonModified() && hasErrorSeverity(validationErrors)) ||
-                    isEmptyTestCaseJsonString(editorVal) ||
+                    (!isJsonModified() &&
+                    measure?.testCaseConfiguration?.executeInvalidTestCases
+                      ? false
+                      : hasErrorSeverity(validationErrors)) ||
+                    (measure?.testCaseConfiguration?.executeInvalidTestCases
+                      ? false
+                      : isEmptyTestCaseJsonString(editorVal)) ||
                     !executionContextReady ||
                     executing
                   }

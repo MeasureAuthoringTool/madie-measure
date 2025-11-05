@@ -105,7 +105,10 @@ const TestCaseRoutes = () => {
         );
       }
 
-      if (!localErrors.length) {
+      if (
+        measure?.testCaseConfiguration?.executeInvalidTestCases ||
+        !localErrors.length
+      ) {
         measureService.current
           .fetchMeasureBundle(measure)
           .then((bundle: Bundle) => {
@@ -140,6 +143,7 @@ const TestCaseRoutes = () => {
   }, [measureBundle, measure]);
 
   useEffect(() => {
+    console.log(measureBundle, valueSets, measure);
     setExecutionContextReady(!!measureBundle && !!valueSets && !!measure);
   }, [measureBundle, measure, valueSets]);
 
