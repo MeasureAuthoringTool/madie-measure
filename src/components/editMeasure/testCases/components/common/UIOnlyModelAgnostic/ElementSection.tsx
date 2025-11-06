@@ -22,6 +22,7 @@ const ElementSection = (props: ElementSectionProps) => {
     >
       <div
         data-testid={`elements-heading-expansion-button-${title}`}
+        className="heading-row"
         onClick={() => {
           setOpen(!open);
         }}
