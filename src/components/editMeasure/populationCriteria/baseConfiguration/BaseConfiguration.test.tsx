@@ -12,6 +12,7 @@ import {
   useMeasureServiceApi,
   MeasureServiceApi,
   useFeatureFlags,
+  measureStore,
 } from "@madie/madie-util";
 import { Measure } from "@madie/madie-models";
 import userEvent from "@testing-library/user-event";
@@ -55,8 +56,8 @@ jest.mock("@madie/madie-util", () => ({
   useKeyPress: jest.fn(() => false),
   measureStore: {
     updateMeasure: jest.fn(),
-    state: measure,
-    initialState: jest.fn(),
+    state: jest.fn().mockImplementation(() => null),
+    initialState: jest.fn().mockImplementation(() => null),
     subscribe: () => {
       return { unsubscribe: () => null };
     },
@@ -89,6 +90,11 @@ describe("Base Configuration component", () => {
     getByText,
     getByLabelText,
   } = screen;
+
+  beforeEach(() => {
+    measureStore.state.mockImplementation(() => measure);
+    measureStore.initialState.mockImplementation(() => measure);
+  });
 
   test("Measure Group Scoring renders to correct options length, and defaults to empty string", async () => {
     render(<BaseConfiguration />);
@@ -625,6 +631,38 @@ describe("Base Configuration component", () => {
     render(
       <BaseConfiguration
         isTestCaseLocked={true}
+        checkTestCasesLockStatus={jest.fn()}
+        setAlertMessage={jest.fn()}
+      />
+    );
+
+    const scoringSelectInput = screen.getByTestId("scoring-select");
+    expect(scoringSelectInput).toHaveAttribute("readonly");
+    expect(scoringSelectInput).toHaveValue("-");
+
+    const measureType = screen.getByRole("textbox", { name: "Measure Type" });
+    expect(measureType).toHaveAttribute("readonly");
+    expect(measureType).toHaveValue("-");
+
+    const patientBasis = screen.getByRole("textbox", { name: "Patient Basis" });
+    expect(patientBasis).toHaveAttribute("readonly");
+    expect(patientBasis).toHaveValue("-");
+
+    const saveButton = screen.queryByTestId("measure-Base Configuration-save");
+    expect(saveButton).toBeDisabled();
+  });
+
+  it("renders BaseConfiguration in readonly mode when measure locked", () => {
+    const lockedMeasure = {
+      ...measure,
+      measureLock: { lockedBy: "anotherUser" },
+    };
+    measureStore.state.mockImplementation(() => lockedMeasure);
+    measureStore.initialState.mockImplementation(() => lockedMeasure);
+
+    render(
+      <BaseConfiguration
+        isTestCaseLocked={false}
         checkTestCasesLockStatus={jest.fn()}
         setAlertMessage={jest.fn()}
       />

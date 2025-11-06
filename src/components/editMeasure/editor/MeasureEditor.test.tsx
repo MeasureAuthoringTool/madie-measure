@@ -1299,4 +1299,18 @@ define function MeasureObservation(e Encounter):
 
     errorSpy.mockRestore();
   });
+
+  it("should render editor as read-only when measure is locked", async () => {
+    const lockedMeasure = {
+      ...measure,
+      measureLock: { lockedBy: "anotherUser" },
+    };
+    mockUseFeatureFlags.mockReturnValue({ Locking: true });
+    measureStore.state.mockImplementationOnce(() => lockedMeasure);
+
+    renderEditor(lockedMeasure);
+
+    expect(screen.queryByTestId("save-cql-btn")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("reset-cql-btn")).not.toBeInTheDocument();
+  });
 });

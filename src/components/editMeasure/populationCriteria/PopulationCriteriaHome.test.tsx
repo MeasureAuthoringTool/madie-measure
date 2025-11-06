@@ -12,7 +12,11 @@ import userEvent from "@testing-library/user-event";
 import { ApiContextProvider, ServiceConfig } from "../../../api/ServiceContext";
 import PopulationCriteriaWrapper from "./PopulationCriteriaWrapper";
 // @ts-ignore
-import { measureStore, MeasureServiceApi } from "@madie/madie-util";
+import {
+  measureStore,
+  MeasureServiceApi,
+  checkUserCanEdit,
+} from "@madie/madie-util";
 import { QdmMeasureCQL } from "../../common/QdmMeasureCQL";
 import { Measure, MeasureErrorType } from "@madie/madie-models";
 import { ELM_JSON, MeasureCQL } from "../../common/MeasureCQL";
@@ -634,5 +638,32 @@ describe("PopulationCriteriaHome", () => {
     expect(errorSpy).toHaveBeenCalled();
 
     errorSpy.mockRestore();
+  });
+
+  it("Add Population Criteria link should not show if the measure is locked", async () => {
+    checkUserCanEdit.mockReturnValue(true);
+    const lockedMeasure = {
+      ...QiCoreMeasure,
+      measureLock: { lockedBy: "anotherUser" },
+    };
+    const mockedMeasureState = measureStore as jest.Mocked<{ state }>;
+    mockedMeasureState.state = { ...lockedMeasure };
+
+    await renderPopulationCriteriaHomeComponent(
+      "supplemental-data",
+      "supplemental-data"
+    );
+
+    expect(
+      await screen.findByRole("button", {
+        name: /Population Criteria/i,
+      })
+    ).toBeInTheDocument();
+
+    // verify Add Population Criteria link does not show as the measure is locked
+    const addPopulationCriteriaLink = screen.queryByRole("link", {
+      name: "Add Population Criteria",
+    });
+    expect(addPopulationCriteriaLink).not.toBeInTheDocument();
   });
 });

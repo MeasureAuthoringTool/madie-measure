@@ -9,8 +9,8 @@ import {
 import TransmissionFormat from "./TransmissionFormat";
 
 import {
-  measureStorem,
-  useMeasureServiceApi,
+  measureStore,
+  checkUserCanEdit,
   MeasureServiceApi,
 } from "@madie/madie-util";
 import { Measure } from "@madie/madie-models";
@@ -226,5 +226,26 @@ describe("Transmission Format page", () => {
     await waitFor(() => {
       expect(toastCloseButton).not.toBeInTheDocument();
     });
+  });
+
+  it("Should render disabled components the measure is locked", async () => {
+    checkUserCanEdit.mockReturnValue(true);
+    const lockedMeasure = {
+      ...measure,
+      measureLock: { lockedBy: "anotherUser" },
+    };
+    measureStore.state.mockImplementation(() => lockedMeasure);
+    measureStore.initialState.mockImplementation(() => lockedMeasure);
+
+    render(
+      <ApiContextProvider value={serviceConfig}>
+        <MemoryRouter initialEntries={["/"]}>
+          <TransmissionFormat setErrorMessage={jest.fn()} />
+        </MemoryRouter>
+      </ApiContextProvider>
+    );
+    const editor = screen.getByTestId("transmissionFormat-value");
+    expect(editor).toHaveClass("rich-text-editor_read_only");
+    expect(editor).toHaveTextContent("-");
   });
 });

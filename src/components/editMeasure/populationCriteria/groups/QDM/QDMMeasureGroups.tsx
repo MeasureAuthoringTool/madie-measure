@@ -171,7 +171,8 @@ const MeasureGroups = (props: MeasureGroupProps) => {
       measure?.measureSet?.owner,
       measure?.measureSet?.acls,
       measure?.measureMetaData?.draft
-    );
+    ) &&
+    !measure?.measureLock;
   const measureServiceApi = useMeasureServiceApi();
   const featureFlags = useFeatureFlags();
   let location = useLocation();
@@ -1133,7 +1134,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                       variant="cyan"
                       type="submit"
                       data-testid="group-form-submit-btn"
-                      disabled={!(formik.isValid && formik.dirty)}
+                      disabled={!(formik.isValid && formik.dirty && canEdit)}
                     >
                       Save
                     </Button>

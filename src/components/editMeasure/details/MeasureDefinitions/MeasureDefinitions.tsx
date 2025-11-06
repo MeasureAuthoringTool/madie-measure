@@ -51,11 +51,12 @@ const MeasureDefinitions = (props: MeasureDefinitionsProps) => {
     useState<MeasureDefinition>(null);
 
   // Form utilities
-  const canEdit = checkUserCanEdit(
-    measure?.measureSet?.owner,
-    measure?.measureSet?.acls,
-    measure?.measureMetaData?.draft
-  );
+  const canEdit =
+    checkUserCanEdit(
+      measure?.measureSet?.owner,
+      measure?.measureSet?.acls,
+      measure?.measureMetaData?.draft
+    ) && !measure?.measureLock;
 
   const values = queryString.parse(search);
   const INITIAL_VALUES = {

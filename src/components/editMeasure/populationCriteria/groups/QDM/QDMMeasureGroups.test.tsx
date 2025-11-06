@@ -1587,6 +1587,17 @@ describe("Delete Tests", () => {
       expect(editableContent).toHaveTextContent("");
     });
   });
+
+  test("Should not be able to update when measure is locked", async () => {
+    const lockedMeasure = {
+      ...cohortMeasure,
+      measureLock: { lockedBy: "anotherUser" },
+    };
+    measureStore.state.mockImplementationOnce(() => lockedMeasure);
+
+    const { getByTestId } = renderMeasureGroupComponent();
+    expect(getByTestId("group-form-submit-btn")).toBeDisabled();
+  });
 });
 
 describe.skip("Tests where serviceApi is mocked, instead of Axios", () => {

@@ -540,6 +540,34 @@ describe("QDMReporting component", () => {
       );
     });
   });
+
+  test("Renders in read only when measure is locked", async () => {
+    const lockedMeasure = {
+      ...measure,
+      measureLock: { lockedBy: "anotherUser" },
+    };
+    measureStore.state.mockImplementation(() => lockedMeasure);
+    measureStore.initialState.mockImplementation(() => lockedMeasure);
+
+    render(
+      <QDMReporting
+        isTestCaseLocked={false}
+        checkTestCasesLockStatus={jest.fn()}
+        setAlertMessage={jest.fn()}
+      />
+    );
+
+    const improvementNotationSelect = screen.getByTestId(
+      "improvement-notation-select"
+    ) as HTMLInputElement;
+    expect(improvementNotationSelect).toHaveProperty("readOnly", true);
+    expect(improvementNotationSelect).toHaveTextContent("-");
+
+    const description = screen.getByTestId(
+      "improvement-notation-description-rich-text-editor"
+    );
+    expect(description).toHaveTextContent("-");
+  });
 });
 
 const selectAnOptionForImprovementNotation = async (notationValue) => {

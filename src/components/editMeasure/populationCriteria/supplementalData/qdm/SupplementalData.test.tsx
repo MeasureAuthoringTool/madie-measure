@@ -18,7 +18,7 @@ import {
   checkUserCanEdit,
   MeasureServiceApi,
   useFeatureFlags,
-  useMeasureServiceApi,
+  measureStore,
 } from "@madie/madie-util";
 import SupplementalData, { SupplementalDataProps } from "./SupplementalData";
 import { QdmMeasureCQL } from "../../../../common/QdmMeasureCQL";
@@ -507,5 +507,35 @@ describe("SupplementalData Component QDM", () => {
         "This measure cannot be saved because changes to the Population Criteria will update test cases and one or more test cases are locked by another user."
       );
     });
+  });
+
+  it("Should render disabled components if the measure is locked", async () => {
+    checkUserCanEdit.mockReturnValue(true);
+    const lockedMeasure = {
+      ...mockTestMeasure,
+      measureLock: { lockedBy: "anotherUser" },
+    };
+    measureStore.state.mockImplementation(() => lockedMeasure);
+    measureStore.initialState.mockImplementation(() => lockedMeasure);
+    RenderSupplementalElements();
+    const supplementalElements = screen.getByRole("textbox", {
+      name: "Definition",
+    });
+    expect(supplementalElements).toHaveTextContent("Initial Population");
+
+    const descriptionEditor = screen.getByTestId(
+      "supplemental-data-description-rich-text-editor"
+    );
+    expect(descriptionEditor).toBeInTheDocument();
+
+    const content = within(descriptionEditor).getByTestId(
+      "supplementalDataDescription-value"
+    );
+    expect(content).toHaveTextContent("test description");
+
+    const allFormFields = screen.getAllByRole("textbox");
+    for (const formField of allFormFields) {
+      expect(formField).toHaveAttribute("readonly");
+    }
   });
 });

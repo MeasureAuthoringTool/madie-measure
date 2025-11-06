@@ -88,7 +88,8 @@ const QDMReporting = (props: ReportingProps) => {
       measure?.measureSet?.owner,
       measure?.measureSet?.acls,
       measure?.measureMetaData?.draft
-    );
+    ) &&
+    !measure?.measureLock;
 
   const formik = useFormik({
     initialValues: {

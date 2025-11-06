@@ -47,7 +47,8 @@ const RiskAdjustment = (props: RiskAdjustmentProps) => {
       measure?.measureSet?.owner,
       measure?.measureSet?.acls,
       measure?.measureMetaData?.draft
-    );
+    ) &&
+    !measure?.measureLock;
 
   // Fetching definitions from CQL to populate dropdown
   useEffect(() => {

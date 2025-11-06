@@ -46,11 +46,12 @@ const TransmissionFormat = (props: TransmissionFormatProps) => {
     setToastOpen(open);
   };
   // Form utilities
-  const canEdit = checkUserCanEdit(
-    measure?.measureSet?.owner,
-    measure?.measureSet?.acls,
-    measure?.measureMetaData?.draft
-  );
+  const canEdit =
+    checkUserCanEdit(
+      measure?.measureSet?.owner,
+      measure?.measureSet?.acls,
+      measure?.measureMetaData?.draft
+    ) && !measure?.measureLock;
   const INITIAL_VALUES = {
     transmissionFormat: measure?.measureMetaData?.transmissionFormat || "",
   };
@@ -139,7 +140,7 @@ const TransmissionFormat = (props: TransmissionFormatProps) => {
             onClick={() => setDiscardDialogOpen(true)}
             variant="outline"
             data-testid="cancel-button"
-            disabled={!formik.dirty}
+            disabled={!formik.dirty && !canEdit}
             style={{ marginTop: 20, float: "right", marginRight: 32 }}
           >
             Discard Changes
@@ -149,7 +150,7 @@ const TransmissionFormat = (props: TransmissionFormatProps) => {
             variant="cyan"
             type="submit"
             data-testid="save-button"
-            disabled={!(formik.isValid && formik.dirty)}
+            disabled={!(formik.isValid && formik.dirty && canEdit)}
             style={{ marginTop: 20, float: "right" }}
           >
             Save

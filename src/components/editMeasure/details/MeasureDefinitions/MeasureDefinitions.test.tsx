@@ -515,4 +515,27 @@ describe("Measure Definitions Component", () => {
 
     expect(definitionEditor).toHaveTextContent("definition 1");
   });
+
+  it("test cannot edit measure definition when measure is locked", async () => {
+    const lockedMeasure = {
+      ...measureWithNineItems,
+      measureLock: { lockedBy: "anotherUser" },
+    };
+    measureStore.state.mockImplementation(() => lockedMeasure);
+    measureStore.initialState.mockImplementation(() => lockedMeasure);
+    render(
+      <ApiContextProvider value={serviceConfig}>
+        <MemoryRouter initialEntries={["/"]}>
+          <MeasureDefinitions setErrorMessage={jest.fn()} />
+        </MemoryRouter>
+      </ApiContextProvider>
+    );
+    await checkRows(9);
+
+    const editButton = queryByTestId(`edit-measure-definition-id 1`);
+    expect(editButton).not.toBeInTheDocument();
+
+    const deleteButton = queryByTestId(`delete-measure-definition-id 1`);
+    expect(deleteButton).not.toBeInTheDocument();
+  });
 });

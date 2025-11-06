@@ -91,11 +91,12 @@ const MeasureReferences = (props: MeasureReferencesProps) => {
     setToastOpen(open);
   };
   // Form utilities
-  const canEdit = checkUserCanEdit(
-    measure?.measureSet?.owner,
-    measure?.measureSet?.acls,
-    measure?.measureMetaData?.draft
-  );
+  const canEdit =
+    checkUserCanEdit(
+      measure?.measureSet?.owner,
+      measure?.measureSet?.acls,
+      measure?.measureMetaData?.draft
+    ) && !measure?.measureLock;
   const INITIAL_VALUES = {
     id: selectedReference?.id,
     referenceType:

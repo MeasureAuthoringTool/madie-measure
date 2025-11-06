@@ -69,7 +69,8 @@ const BaseConfiguration = (props: BaseConfigurationProps) => {
       measure?.measureSet?.owner,
       measure?.measureSet?.acls,
       measure?.measureMetaData?.draft
-    );
+    ) &&
+    !measure.measureLock;
   useEffect(() => {
     if (measure && measure.scoring) {
       setCurrentScoring(measure.scoring);

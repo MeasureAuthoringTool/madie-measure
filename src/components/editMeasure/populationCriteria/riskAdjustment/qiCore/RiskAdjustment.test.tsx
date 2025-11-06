@@ -19,7 +19,7 @@ import {
 import {
   checkUserCanEdit,
   MeasureServiceApi,
-  useMeasureServiceApi,
+  measureStore,
   useFeatureFlags,
 } from "@madie/madie-util";
 
@@ -656,5 +656,30 @@ describe("QiCore RiskAdjustment Component", () => {
         "This measure cannot be saved because changes to the Population Criteria will update test cases and one or more test cases are locked by another user."
       );
     });
+  });
+
+  it("Should render disabled components if the measure is locked", async () => {
+    checkUserCanEdit.mockReturnValue(true);
+    const lockedMeasure = {
+      ...mockTestMeasure,
+      measureLock: { lockedBy: "anotherUser" },
+    };
+    measureStore.state.mockImplementation(() => lockedMeasure);
+    measureStore.initialState.mockImplementation(() => lockedMeasure);
+    RenderRiskAdjustment();
+    const riskAdjustments = screen.getByRole("textbox", {
+      name: "Definition",
+    });
+    expect(riskAdjustments).toHaveTextContent("Initial Population");
+
+    const descriptionEditor = screen.getByTestId(
+      "risk-adjustment-description-rich-text-editor"
+    );
+    expect(descriptionEditor).toBeInTheDocument();
+
+    const allFormFields = screen.getAllByRole("textbox");
+    for (const formField of allFormFields) {
+      expect(formField).toHaveAttribute("readonly");
+    }
   });
 });

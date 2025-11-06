@@ -794,4 +794,27 @@ describe("Measure References Component", () => {
 
     expect(referenceEditor).toHaveTextContent("text 2");
   });
+
+  it("render Reference in read-only mode when measure is locked", async () => {
+    const lockedMeasure = {
+      ...measureWithNineItems,
+      measureLock: { lockedBy: "anotherUser" },
+    };
+    measureStore.state.mockImplementation(() => lockedMeasure);
+    measureStore.initialState.mockImplementation(() => lockedMeasure);
+
+    render(
+      <ApiContextProvider value={serviceConfig}>
+        <MemoryRouter initialEntries={["/"]}>
+          <MeasureReferences setErrorMessage={jest.fn()} />
+        </MemoryRouter>
+      </ApiContextProvider>
+    );
+
+    const editButton = screen.queryByTestId(`edit-measure-reference-id 1`);
+    expect(editButton).not.toBeInTheDocument();
+
+    const deleteButton = screen.queryByTestId(`delete-measure-reference-id 1`);
+    expect(deleteButton).not.toBeInTheDocument();
+  });
 });

@@ -2468,4 +2468,23 @@ describe("Measure Groups Page", () => {
       );
     });
   });
+
+  test("Should not be able to update when measure is locked", async () => {
+    const lockedMeasure = {
+      ...measure,
+      measureLock: { lockedBy: "anotherUser" },
+    };
+    measureStore.state.mockImplementation(() => lockedMeasure);
+    measureStore.initialState.mockImplementation(() => lockedMeasure);
+
+    const populationBasis = "MedicationAdministration";
+    group.id = "7p03-5r29-7O0I";
+    group.scoringUnit = "testScoringUnit";
+    group.scoringPrecision = "2";
+    group.populationBasis = populationBasis;
+    measure.groups = [group];
+    const { getByTestId } = renderMeasureGroupComponent();
+
+    expect(getByTestId("group-form-submit-btn")).toBeDisabled();
+  });
 });

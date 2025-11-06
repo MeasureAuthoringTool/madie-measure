@@ -8,8 +8,12 @@ import {
   act,
 } from "@testing-library/react";
 import ModelAndMeasurementPeriod from "./ModelAndMeasurementPeriod";
-import { useMeasureServiceApi, MeasureServiceApi } from "@madie/madie-util";
-import { Measure } from "@madie/madie-models";
+import {
+  MeasureServiceApi,
+  checkUserCanEdit,
+  measureStore,
+} from "@madie/madie-util";
+import { Measure, MeasureLock } from "@madie/madie-models";
 import userEvent from "@testing-library/user-event";
 import { update } from "lodash";
 
@@ -526,6 +530,34 @@ describe("Model and Measurement Period component", () => {
     fireEvent.click(discardDialogCancelButton);
     await waitFor(() => {
       expect(queryByText("You have unsaved changes.")).not.toBeVisible();
+    });
+  });
+
+  it("should render the component with measure's read-only information when measure is locked", async () => {
+    (checkUserCanEdit as jest.Mock).mockImplementation(() => {
+      return true;
+    });
+    const lockedMeasure: Measure = {
+      ...measure,
+      measureLock: { lockedBy: "anotherUser" } as unknown as MeasureLock,
+    };
+    measureStore.state.mockImplementation(() => lockedMeasure);
+
+    render(<ModelAndMeasurementPeriod setErrorMessage={setErrorMessage} />);
+
+    const result: HTMLElement = getByTestId("model-measurement-form");
+    expect(result).toBeInTheDocument();
+
+    await act(async () => {
+      const measurementPeriodStartInput = screen.getByRole("textbox", {
+        name: /Measurement Period - Start Date/i,
+      }) as HTMLInputElement;
+      expect(measurementPeriodStartInput).toHaveAttribute("readonly");
+
+      const measurementPeriodEndInput = screen.getByRole("textbox", {
+        name: /Measurement Period - End Date/i,
+      }) as HTMLInputElement;
+      expect(measurementPeriodEndInput).toHaveAttribute("readonly");
     });
   });
 });

@@ -32,7 +32,8 @@ export function PopulationCriteriaHome() {
       measure?.measureSet?.owner,
       measure?.measureSet?.acls,
       measure?.measureMetaData?.draft
-    );
+    ) &&
+    !measure?.measureLock;
 
   const checkTestCasesLockStatus = async () => {
     if (featureFlags.Locking) {

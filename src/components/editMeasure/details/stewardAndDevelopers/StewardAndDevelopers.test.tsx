@@ -7,10 +7,15 @@ import {
   within,
 } from "@testing-library/react";
 import StewardAndDevelopers from "./StewardAndDevelopers";
-import { Measure, MeasureMetadata, Organization } from "@madie/madie-models";
+import {
+  Measure,
+  MeasureMetadata,
+  Organization,
+  MeasureLock,
+} from "@madie/madie-models";
 import {
   checkUserCanEdit,
-  useMeasureServiceApi,
+  measureStore,
   MeasureServiceApi,
 } from "@madie/madie-util";
 
@@ -73,10 +78,9 @@ jest.mock("@madie/madie-util", () => ({
   useKeyPress: jest.fn(() => false),
   measureStore: {
     updateMeasure: jest.fn((measure) => measure),
-    state: jest.fn().mockImplementation(() => mockMeasure),
+    state: jest.fn().mockImplementation(() => null),
     initialState: jest.fn().mockImplementation(() => null),
-    subscribe: (set) => {
-      set(mockMeasure);
+    subscribe: () => {
       return { unsubscribe: () => null };
     },
   },
@@ -106,6 +110,7 @@ describe("Steward and Developers component", () => {
       .fn()
       .mockResolvedValue(organizationList);
     mockMeasure.measureMetaData = { ...mockMetaData };
+    measureStore.state.mockImplementation(() => mockMeasure);
   });
   const setErrorMessage = jest.fn();
   afterEach(() => jest.clearAllMocks());
@@ -408,6 +413,24 @@ describe("Steward and Developers component", () => {
     fireEvent.click(discardDialogCancelButton);
     await waitFor(() => {
       expect(screen.queryByText("You have unsaved changes.")).not.toBeVisible();
+    });
+  });
+
+  it("should display readonly text if measure is locked", async () => {
+    (checkUserCanEdit as jest.Mock).mockReturnValue(true);
+    const lockedMeasure: Measure = {
+      ...mockMeasure,
+      measureMetaData: mockMetaData,
+      measureLock: { lockedBy: "anotherUser" } as unknown as MeasureLock,
+    };
+    measureStore.state.mockImplementation(() => lockedMeasure);
+
+    render(<StewardAndDevelopers setErrorMessage={setErrorMessage} />);
+
+    await waitFor(() => {
+      const steward = screen.getByRole("textbox", { name: "Steward" });
+      expect(steward).toHaveAttribute("readonly");
+      expect(steward).toHaveValue(mockMetaData.steward.name);
     });
   });
 });

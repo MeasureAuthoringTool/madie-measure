@@ -213,7 +213,8 @@ const MeasureGroups = (props: MeasureGroupProps) => {
       measure?.measureSet?.owner,
       measure?.measureSet?.acls,
       measure?.measureMetaData?.draft
-    );
+    ) &&
+    !measure?.measureLock;
   const measureServiceApi = useMeasureServiceApi();
   const featureFlags = useFeatureFlags();
   let location = useLocation();
@@ -1522,7 +1523,8 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                       disabled={
                         !(
                           formik.isValid &&
-                          (formik.dirty || associationChanged)
+                          (formik.dirty || associationChanged) &&
+                          canEdit
                         )
                       }
                     >

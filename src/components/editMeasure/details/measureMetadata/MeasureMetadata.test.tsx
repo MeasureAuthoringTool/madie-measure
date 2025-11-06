@@ -14,7 +14,7 @@ import {
   checkUserCanEdit,
   measureStore,
 } from "@madie/madie-util";
-import { Measure } from "@madie/madie-models";
+import { Measure, MeasureLock, MeasureMetadata } from "@madie/madie-models";
 import MeasureMetadataForm from "./MeasureMetadata";
 
 import userEvent from "@testing-library/user-event";
@@ -427,6 +427,28 @@ describe("MeasureRationale component", () => {
       await waitFor(() => expect(input).toBeInTheDocument());
       const requiredText = await screen.findByText("Indicates required field");
       expect(requiredText).toBeInTheDocument();
+    });
+
+    it("Should display read-only fields when measure is locked", () => {
+      (checkUserCanEdit as jest.Mock).mockImplementationOnce(() => {
+        return true;
+      });
+      const lockedMeasure: Measure = {
+        ...mockMeasure,
+        measureMetaData: mockMetaData as unknown as MeasureMetadata,
+        measureLock: { lockedBy: "anotherUser" } as unknown as MeasureLock,
+      };
+      measureStore.state = lockedMeasure;
+
+      render(
+        <MeasureMetadataForm
+          measureMetadataType="Rationale"
+          setErrorMessage={setErrorMessage}
+        />
+      );
+
+      const input = screen.queryByText("measureRationaleInput");
+      expect(input).not.toBeInTheDocument();
     });
   });
 });

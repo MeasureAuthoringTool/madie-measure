@@ -265,11 +265,12 @@ export default function MeasureInformation(props: MeasureInformationProps) {
       });
   }, []);
 
-  const canEdit = checkUserCanEdit(
-    measure?.measureSet?.owner,
-    measure?.measureSet?.acls,
-    measure?.measureMetaData?.draft
-  );
+  const canEdit =
+    checkUserCanEdit(
+      measure?.measureSet?.owner,
+      measure?.measureSet?.acls,
+      measure?.measureMetaData?.draft
+    ) && !measure?.measureLock;
 
   const handleEndorserChange = (selectedValue: string) => {
     if (selectedValue === "" || selectedValue === "-") {
@@ -561,11 +562,13 @@ export default function MeasureInformation(props: MeasureInformationProps) {
 
           <CmsIdentifier
             //cannot generate id if shared, only owner can
-            canEdit={checkUserCanEdit(
-              measure?.measureSet?.owner,
-              [],
-              measure?.measureMetaData?.draft
-            )}
+            canEdit={
+              checkUserCanEdit(
+                measure?.measureSet?.owner,
+                [],
+                measure?.measureMetaData?.draft
+              ) && !measure?.measureLock
+            }
             label="CMS ID"
             cmsId={measure?.measureSet?.cmsId}
             model={measure?.model}
