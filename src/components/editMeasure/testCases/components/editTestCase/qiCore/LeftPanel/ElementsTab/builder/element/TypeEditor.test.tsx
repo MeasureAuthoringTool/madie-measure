@@ -2051,10 +2051,11 @@ describe("TypeEditor Component", () => {
     const mockFormikQuantity: FormikContextType<any> = {
       values: {
         "Observation.valueQuantity": {
+          comparator: ">",
           value: 10,
-          unit: "mg",
-          system: "http://unitsofmeasure.org",
           code: "mg",
+          unit: "milligram",
+          system: "http://unitsofmeasure.org",
         },
       },
       touched: {},
@@ -2110,9 +2111,9 @@ describe("TypeEditor Component", () => {
     const valueInput = await screen.findByTestId("decimal-input-field-Value");
     expect(valueInput).toBeInTheDocument();
 
-    // Unit input
-    const unitInput = await screen.findByTestId("unit-input-input");
-    expect(unitInput).toBeInTheDocument();
+    // Code input
+    const codeInput = await screen.findByTestId("code-input-input");
+    expect(codeInput).toBeInTheDocument();
   });
 
   test("renders SimpleQuantityComponent fields correctly inside TypeEditor", async () => {
@@ -2217,9 +2218,9 @@ describe("TypeEditor Component", () => {
     const valueInput = await screen.findByTestId("decimal-input-field-Value");
     expect(valueInput).toBeInTheDocument();
 
-    // Unit input
-    const unitInput = await screen.findByTestId("unit-input-input");
-    expect(unitInput).toBeInTheDocument();
+    // Code input
+    const codeInput = await screen.findByTestId("code-input-input");
+    expect(codeInput).toBeInTheDocument();
 
     // Comparator should NOT exist
     const comparator = screen.queryByLabelText("Comparator");
@@ -3281,8 +3282,20 @@ describe("TypeEditor Component", () => {
           Device: {
             property: {
               valueQuantity: [
-                { value: 10, unit: "mg", comparator: ">" },
-                { value: 20, unit: "g", comparator: "<=" },
+                {
+                  comparator: ">",
+                  value: 10,
+                  code: "mg",
+                  unit: "milligram",
+                  system: "http://unitsofmeasure.org",
+                },
+                {
+                  comparator: "<=",
+                  value: 20,
+                  code: "g",
+                  unit: "gram",
+                  system: "http://unitsofmeasure.org",
+                },
               ],
             },
           },
@@ -3333,23 +3346,23 @@ describe("TypeEditor Component", () => {
       const valueInputs = await screen.findAllByTestId(
         "decimal-input-field-Value"
       );
-      const unitInputs = await screen.findAllByTestId("unit-input-input");
+      const codeInputs = await screen.findAllByTestId("code-input-input");
       const comparatorInputs = await screen.findAllByTestId(
         "code-selector-input-Comparator"
       );
 
       expect(valueInputs).toHaveLength(2);
-      expect(unitInputs).toHaveLength(2);
+      expect(codeInputs).toHaveLength(2);
       expect(comparatorInputs).toHaveLength(2);
+
+      expect(comparatorInputs[0]).toHaveValue(">");
+      expect(comparatorInputs[1]).toHaveValue("<=");
 
       expect(valueInputs[0]).toHaveValue(10);
       expect(valueInputs[1]).toHaveValue(20);
 
-      expect(unitInputs[0]).toHaveValue("mg");
-      expect(unitInputs[1]).toHaveValue("g");
-
-      expect(comparatorInputs[0]).toHaveValue(">");
-      expect(comparatorInputs[1]).toHaveValue("<=");
+      expect(codeInputs[0]).toHaveValue("mg");
+      expect(codeInputs[1]).toHaveValue("g");
 
       const addButtons = screen.getAllByText("Add Value Quantity");
       expect(addButtons).toHaveLength(1);

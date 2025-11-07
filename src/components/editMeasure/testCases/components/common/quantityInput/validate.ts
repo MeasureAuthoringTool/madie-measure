@@ -3,6 +3,7 @@ import * as ucum from "@lhncbc/ucum-lhc";
 export class ValidationResult {
   label?: string;
   helperText?: string;
+  ucumUnitCode?: number;
   error: boolean;
 }
 
@@ -45,6 +46,7 @@ export const validate = (code): ValidationResult => {
     if (parseResp.status === "valid") {
       validationResult.error = false;
       validationResult.label = parseResp.unit.name;
+      validationResult.ucumUnitCode = parseResp.unit.code;
     } else {
       if (parseResp?.suggestions) {
         let errorMsg: string = parseResp.suggestions[0]?.msg + ": ";
