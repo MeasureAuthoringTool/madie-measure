@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import * as ucum from "@lhncbc/ucum-lhc";
 import { TextField, InputLabel } from "@madie/madie-design-system/dist/react/";
 import "twin.macro";
@@ -13,6 +13,8 @@ import CodesComponent from "./CodesComponent";
 import DecimalInput from "../../../../../../../common/DecimalInput/DecimalInput";
 import "./QuantityComponent.scss";
 import AddElementButton from "../../../../../../../common/UIOnlyModelAgnostic/AddElementButton";
+import { IconButton, Tooltip } from "@mui/material";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 
 export interface QuantityComponentProps extends TypeComponentProps {
   showLabel?: boolean;
@@ -28,8 +30,16 @@ const QuantityComponent = ({
   showAddAttributeButton = false,
   addTitle = "",
   handleAddElement = () => {},
+  showDeleteButton = false,
+  handleDeleteElement,
 }: QuantityComponentProps) => {
   const formik = useFormikContext();
+
+  const updateQuantityCode = (code: string, unit: string, system: string) => {
+    formik.setFieldValue(`${label}.code`, code);
+    formik.setFieldValue(`${label}.unit`, unit);
+    formik.setFieldValue(`${label}.system`, system);
+  };
 
   /*
     Determine whether to display the comparator field:
@@ -48,11 +58,15 @@ const QuantityComponent = ({
   );
 
   const comparatorPath = `${label}.comparator`;
-  const valuePath = `${label}.value`;
+  const comparator = getIn(formik.values, comparatorPath);
 
-  const unitPath = `${label}.unit`;
-  const unitValue = getIn(formik.values, unitPath);
-  const validationResult: ValidationResult = validate(unitValue);
+  const valuePath = `${label}.value`;
+  const value = getIn(formik.values, valuePath);
+
+  const codePath = `${label}.code`;
+  const code = getIn(formik.values, codePath);
+
+  const validationResult = useMemo(() => validate(code), [code]);
 
   return (
     <div className="element-editor-add-row">
@@ -73,14 +87,8 @@ const QuantityComponent = ({
                     strength: "required",
                   },
                 }}
-                value={getIn(formik.values, comparatorPath)}
-                onChange={(val) => {
-                  const existing = getIn(formik.values, label) || {};
-                  formik.setFieldValue(label, {
-                    ...existing,
-                    comparator: val,
-                  });
-                }}
+                value={comparator ?? ""}
+                onChange={(val) => formik.setFieldValue(comparatorPath, val)}
                 canEdit={canEdit}
                 fieldRequired={false}
               />
@@ -91,39 +99,73 @@ const QuantityComponent = ({
           <div className="value-input">
             <DecimalInput
               label={valueFieldLabel}
-              value={getIn(formik.values, valuePath) ?? ""}
-              handleChange={(val) => {
-                const existing = getIn(formik.values, label) || {};
-                formik.setFieldValue(label, {
-                  ...existing,
-                  value: val !== "" ? parseFloat(val) : null,
-                });
-              }}
+              value={value ?? ""}
+              handleChange={(val) =>
+                formik.setFieldValue(
+                  valuePath,
+                  val !== "" ? parseFloat(val) : null
+                )
+              }
               canEdit={canEdit}
               required={false}
               placeholder=""
             />
           </div>
 
-          {/* Unit(s) field */}
-          <div className="unit-input">
+          {/* Unit(s) field (corresponds to the "code" key in Formik. Labeled as "Unit(s)" in the UI for the user) */}
+          <div className="code-input">
             <TextField
-              id={"unit-input"}
-              data-testid="unit-input"
+              id={"code-input"}
+              data-testid="code-input"
               readOnly={!canEdit}
               label="Unit(s)"
               error={!!validationResult.error}
               helperText={validationResult.helperText}
-              value={getIn(formik.values, label)?.unit ?? ""}
+              value={code ?? ""}
               onChange={(e) => {
-                const existing = getIn(formik.values, label) || {};
-                formik.setFieldValue(label, {
-                  ...existing,
-                  unit: e.target.value,
-                });
+                const inputCode = e.target.value;
+
+                if (!inputCode) {
+                  // Code cleared so remove code, unit, system
+                  updateQuantityCode(undefined, undefined, undefined);
+                  return;
+                }
+
+                // Validate the input code
+                const validation = validate(inputCode);
+
+                if (validation.label) {
+                  // Valid code so set code, unit, system
+                  // For bracketed code (ucumUnitCode === 1), set the unit (human readable name) to the input code too
+                  const unit =
+                    validation.ucumUnitCode === 1
+                      ? inputCode
+                      : validation.label;
+                  updateQuantityCode(
+                    inputCode,
+                    unit,
+                    "http://unitsofmeasure.org"
+                  );
+                } else {
+                  // Invalid code so keep code, remove unit and system
+                  updateQuantityCode(inputCode, undefined, undefined);
+                }
               }}
             />
           </div>
+
+          {showDeleteButton && canEdit && (
+            <Tooltip title="Delete" placement="top" arrow>
+              <IconButton
+                onClick={handleDeleteElement}
+                data-testid={`delete-button-${label}`}
+                aria-label={`delete ${label}`}
+                size="small"
+              >
+                <DeleteOutlineIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+          )}
 
           {showAddAttributeButton && addTitle && canEdit && (
             <AddElementButton name={addTitle} onClick={handleAddElement} />

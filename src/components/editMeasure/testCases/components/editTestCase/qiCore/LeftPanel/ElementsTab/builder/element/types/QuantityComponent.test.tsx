@@ -15,13 +15,22 @@ jest.mock("../../../../../../../../api/useFhirDefinitionsService");
 jest.mock("../../../../../../../../api/useTerminologyServiceApi");
 
 jest.mock("../../../../../../../common/quantityInput/validate", () => ({
-  validate: (unitValue: string) => {
-    if (unitValue === "z") {
+  validate: (codeInput: string) => {
+    if (codeInput === "z") {
       return {
         error: true,
         helperText: "z is not a valid UCUM code. No alternatives were found.",
       };
     }
+
+    if (codeInput === "mg") {
+      return { error: false, label: "milligram", ucumUnitCode: 0 };
+    }
+
+    if (codeInput === "{bracketedCode}") {
+      return { error: false, label: 1, ucumUnitCode: 1 };
+    }
+
     return {
       error: false,
       helperText: "",
@@ -99,7 +108,7 @@ const renderWithFormik = ({
   structureDefinition = quantityStructureDefinition,
   canEdit = true,
   initialValues = {
-    Observation: { quantity: { value: 10, unit: "mg", comparator: ">" } },
+    Observation: { quantity: { value: 10, code: "mg", comparator: ">" } },
   },
   showAddAttributeButton = false,
   addTitle = "",
@@ -150,10 +159,10 @@ describe("QuantityComponent", () => {
     expect(valueInput).toBeInTheDocument();
     expect((valueInput as HTMLInputElement).value).toBe("10");
 
-    // Unit input
-    const unitInput = await screen.findByTestId("unit-input-input");
-    expect(unitInput).toBeInTheDocument();
-    expect((unitInput as HTMLInputElement).value).toBe("mg");
+    // Code input
+    const codeInput = await screen.findByTestId("code-input-input");
+    expect(codeInput).toBeInTheDocument();
+    expect((codeInput as HTMLInputElement).value).toBe("mg");
   });
 
   test("hides comparator field for SimpleQuantity structure definition because SimpleQuantity does not allow a comparator", async () => {
@@ -218,17 +227,17 @@ describe("QuantityComponent", () => {
     });
   });
 
-  test("sets unit when field object is initially empty", async () => {
+  test("sets code when field object is initially empty", async () => {
     renderWithFormik({ initialValues: { Observation: {} } });
 
-    const unitInput = (await screen.findByTestId(
-      "unit-input-input"
+    const codeInput = (await screen.findByTestId(
+      "code-input-input"
     )) as HTMLInputElement;
-    expect(unitInput.value).toBe("");
-    fireEvent.change(unitInput, { target: { value: "kg" } });
+    expect(codeInput.value).toBe("");
+    fireEvent.change(codeInput, { target: { value: "kg" } });
 
     await waitFor(() => {
-      expect(unitInput.value).toBe("kg");
+      expect(codeInput.value).toBe("kg");
     });
   });
 
@@ -247,53 +256,271 @@ describe("QuantityComponent", () => {
     });
   });
 
-  test("updates unit when Unit input changes", async () => {
+  test("updates code when code input changes", async () => {
     renderWithFormik();
 
-    const unitInput = (await screen.findByTestId(
-      "unit-input-input"
+    const codeInput = (await screen.findByTestId(
+      "code-input-input"
     )) as HTMLInputElement;
-    expect(unitInput).toBeInTheDocument();
+    expect(codeInput).toBeInTheDocument();
 
-    fireEvent.change(unitInput, { target: { value: "g" } });
+    fireEvent.change(codeInput, { target: { value: "g" } });
 
     await waitFor(() => {
-      expect(unitInput.value).toBe("g");
+      expect(codeInput.value).toBe("g");
     });
   });
 
-  test("displays validation error for invalid unit 'z'", async () => {
+  test("displays validation error for invalid code 'z'", async () => {
     renderWithFormik({
       label: "Observation.quantity",
       structureDefinition: quantityStructureDefinition,
       canEdit: true,
     });
 
-    const unitInput = screen.getByTestId("unit-input-input");
-    await userEvent.clear(unitInput);
-    await userEvent.type(unitInput, "z");
+    const codeInput = screen.getByTestId("code-input-input");
+    await userEvent.clear(codeInput);
+    await userEvent.type(codeInput, "z");
 
     await waitFor(() => {
-      expect(screen.getByTestId("unit-input-helper-text")).toHaveTextContent(
+      expect(screen.getByTestId("code-input-helper-text")).toHaveTextContent(
         "z is not a valid UCUM code. No alternatives were found."
       );
     });
   });
 
-  test("does not display validation error for valid unit 'mg'", async () => {
+  test("does not display validation error for valid code 'mg'", async () => {
     renderWithFormik({
       label: "Observation.quantity",
       structureDefinition: quantityStructureDefinition,
       canEdit: true,
     });
 
-    const unitInput = screen.getByTestId("unit-input-input");
-    await userEvent.clear(unitInput);
-    await userEvent.type(unitInput, "mg");
+    const codeInput = screen.getByTestId("code-input-input");
+    await userEvent.clear(codeInput);
+    await userEvent.type(codeInput, "mg");
 
     await waitFor(() => {
-      const helperText = screen.queryByTestId("unit-input-helper-text");
+      const helperText = screen.queryByTestId("code-input-helper-text");
       expect(helperText).toBeNull();
+    });
+  });
+
+  test("updates code, unit, and system for UCUM code", async () => {
+    let formikValues: any;
+    const initialValues = {
+      Observation: {
+        quantity: { value: 10, code: "", comparator: "" },
+      },
+    };
+
+    render(
+      <ExecutionContextProvider
+        value={{
+          measureState: [null, jest.fn()],
+          bundleState: [null, jest.fn()],
+          valueSetsState: [[], jest.fn()],
+          executionContextReady: true,
+          executing: false,
+          setExecuting: jest.fn(),
+          contextFailure: false,
+        }}
+      >
+        <Formik initialValues={initialValues} onSubmit={jest.fn()}>
+          {(formik) => {
+            formikValues = formik.values;
+            return (
+              <QuantityComponent
+                label="Observation.quantity"
+                canEdit={true}
+                structureDefinition={quantityStructureDefinition}
+              />
+            );
+          }}
+        </Formik>
+      </ExecutionContextProvider>
+    );
+
+    const codeInput = (await screen.findByTestId(
+      "code-input-input"
+    )) as HTMLInputElement;
+
+    fireEvent.change(codeInput, { target: { value: "mg" } });
+
+    await waitFor(() => {
+      expect(codeInput.value).toBe("mg");
+
+      const updatedQuantity = formikValues.Observation.quantity;
+      expect(updatedQuantity.code).toBe("mg");
+      expect(updatedQuantity.unit).toBe("milligram");
+      expect(updatedQuantity.system).toBe("http://unitsofmeasure.org");
+    });
+  });
+
+  test("removes unit and system for invalid UCUM code", async () => {
+    let formikValues: any;
+
+    const initialValues = {
+      Observation: {
+        quantity: {
+          value: 10,
+          code: "mg",
+          unit: "milligram",
+          system: "http://unitsofmeasure.org",
+          comparator: ">",
+        },
+      },
+    };
+
+    render(
+      <ExecutionContextProvider
+        value={{
+          measureState: [null, jest.fn()],
+          bundleState: [null, jest.fn()],
+          valueSetsState: [[], jest.fn()],
+          executionContextReady: true,
+          executing: false,
+          setExecuting: jest.fn(),
+          contextFailure: false,
+        }}
+      >
+        <Formik initialValues={initialValues} onSubmit={jest.fn()}>
+          {(formik) => {
+            formikValues = formik.values;
+            return (
+              <QuantityComponent
+                label="Observation.quantity"
+                canEdit={true}
+                structureDefinition={quantityStructureDefinition}
+              />
+            );
+          }}
+        </Formik>
+      </ExecutionContextProvider>
+    );
+
+    const codeInput = (await screen.findByTestId(
+      "code-input-input"
+    )) as HTMLInputElement;
+
+    // invalid code
+    fireEvent.change(codeInput, { target: { value: "z" } });
+
+    await waitFor(() => {
+      const updatedQuantity = formikValues.Observation.quantity;
+      expect(updatedQuantity.code).toBe("z"); // code is still set
+      expect(updatedQuantity.unit).toBeUndefined(); // unit removed
+      expect(updatedQuantity.system).toBeUndefined(); // system removed
+    });
+  });
+
+  test("sets unit to code input when ucumUnitCode is 1 (bracketed code)", async () => {
+    let formikValues: any;
+    const initialValues = {
+      Observation: {
+        quantity: {
+          value: 10,
+          code: "mg",
+          unit: "milligram",
+          system: "http://unitsofmeasure.org",
+          comparator: ">",
+        },
+      },
+    };
+
+    render(
+      <ExecutionContextProvider
+        value={{
+          measureState: [null, jest.fn()],
+          bundleState: [null, jest.fn()],
+          valueSetsState: [[], jest.fn()],
+          executionContextReady: true,
+          executing: false,
+          setExecuting: jest.fn(),
+          contextFailure: false,
+        }}
+      >
+        <Formik initialValues={initialValues} onSubmit={jest.fn()}>
+          {(formik) => {
+            formikValues = formik.values;
+            return (
+              <QuantityComponent
+                label="Observation.quantity"
+                canEdit={true}
+                structureDefinition={quantityStructureDefinition}
+              />
+            );
+          }}
+        </Formik>
+      </ExecutionContextProvider>
+    );
+
+    const codeInput = (await screen.findByTestId(
+      "code-input-input"
+    )) as HTMLInputElement;
+
+    fireEvent.change(codeInput, { target: { value: "{bracketedCode}" } });
+
+    await waitFor(() => {
+      const updatedQuantity = formikValues.Observation.quantity;
+      expect(updatedQuantity.code).toBe("{bracketedCode}");
+      expect(updatedQuantity.unit).toBe("{bracketedCode}"); // unit is set to code
+      expect(updatedQuantity.system).toBe("http://unitsofmeasure.org");
+    });
+  });
+
+  test("clearing code removes unit and system", async () => {
+    let formikValues: any;
+    const initialValues = {
+      Observation: {
+        quantity: {
+          value: 10,
+          code: "mg",
+          unit: "milligram",
+          system: "http://unitsofmeasure.org",
+          comparator: ">",
+        },
+      },
+    };
+
+    render(
+      <ExecutionContextProvider
+        value={{
+          measureState: [null, jest.fn()],
+          bundleState: [null, jest.fn()],
+          valueSetsState: [[], jest.fn()],
+          executionContextReady: true,
+          executing: false,
+          setExecuting: jest.fn(),
+          contextFailure: false,
+        }}
+      >
+        <Formik initialValues={initialValues} onSubmit={jest.fn()}>
+          {(formik) => {
+            formikValues = formik.values;
+            return (
+              <QuantityComponent
+                label="Observation.quantity"
+                canEdit={true}
+                structureDefinition={quantityStructureDefinition}
+              />
+            );
+          }}
+        </Formik>
+      </ExecutionContextProvider>
+    );
+
+    const codeInput = (await screen.findByTestId(
+      "code-input-input"
+    )) as HTMLInputElement;
+
+    fireEvent.change(codeInput, { target: { value: "" } });
+
+    await waitFor(() => {
+      const updatedQuantity = formikValues.Observation.quantity;
+      expect(updatedQuantity.code).toBeUndefined();
+      expect(updatedQuantity.unit).toBeUndefined();
+      expect(updatedQuantity.system).toBeUndefined();
     });
   });
 
@@ -314,10 +541,10 @@ describe("QuantityComponent", () => {
     )) as HTMLTextAreaElement;
     expect(valueInput).toHaveAttribute("readonly");
 
-    const unitInput = (await screen.findByTestId(
-      "unit-input"
+    const codeInput = (await screen.findByTestId(
+      "code-input"
     )) as HTMLTextAreaElement;
-    expect(unitInput).toHaveAttribute("readonly");
+    expect(codeInput).toHaveAttribute("readonly");
   });
 
   test("calls handleAddElement when AddElementButton is clicked", async () => {

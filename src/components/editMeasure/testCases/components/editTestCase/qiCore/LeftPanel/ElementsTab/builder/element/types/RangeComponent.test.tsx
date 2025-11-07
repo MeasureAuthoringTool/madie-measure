@@ -94,8 +94,8 @@ const renderWithFormik = ({
   initialValues = {
     Observation: {
       range: {
-        low: { value: 1, unit: "cm" },
-        high: { value: 5, unit: "cm" },
+        low: { value: 1, code: "cm" },
+        high: { value: 5, code: "cm" },
       },
     },
   },
@@ -135,23 +135,23 @@ describe("RangeComponent", () => {
     const inputLow = within(lowContainer).getByTestId(
       "decimal-input-field-Low"
     ) as HTMLInputElement;
-    const unitLow = within(lowContainer).getByTestId(
-      "unit-input-input"
+    const codeLow = within(lowContainer).getByTestId(
+      "code-input-input"
     ) as HTMLInputElement;
 
     expect(inputLow.value).toBe("1");
-    expect(unitLow.value).toBe("cm");
+    expect(codeLow.value).toBe("cm");
 
     const highContainer = screen.getByText("High").closest(".quantity-fields")!;
     const inputHigh = within(highContainer).getByTestId(
       "decimal-input-field-High"
     ) as HTMLInputElement;
-    const unitHigh = within(highContainer).getByTestId(
-      "unit-input-input"
+    const codeHigh = within(highContainer).getByTestId(
+      "code-input-input"
     ) as HTMLInputElement;
 
     expect(inputHigh.value).toBe("5");
-    expect(unitHigh.value).toBe("cm");
+    expect(codeHigh.value).toBe("cm");
 
     // Comparator should not be rendered for RangeComponent
     expect(screen.queryByText("Comparator")).not.toBeInTheDocument();
@@ -183,21 +183,21 @@ describe("RangeComponent", () => {
     renderWithFormik();
 
     const lowContainer = screen.getByText("Low").closest(".quantity-fields")!;
-    const unitLow = within(lowContainer).getByTestId(
-      "unit-input-input"
+    const codeLow = within(lowContainer).getByTestId(
+      "code-input-input"
     ) as HTMLInputElement;
 
     const highContainer = screen.getByText("High").closest(".quantity-fields")!;
-    const unitHigh = within(highContainer).getByTestId(
-      "unit-input-input"
+    const codeHigh = within(highContainer).getByTestId(
+      "code-input-input"
     ) as HTMLInputElement;
 
-    fireEvent.change(unitLow, { target: { value: "m" } });
-    fireEvent.change(unitHigh, { target: { value: "m" } });
+    fireEvent.change(codeLow, { target: { value: "m" } });
+    fireEvent.change(codeHigh, { target: { value: "m" } });
 
     await waitFor(() => {
-      expect(unitLow.value).toBe("m");
-      expect(unitHigh.value).toBe("m");
+      expect(codeLow.value).toBe("m");
+      expect(codeHigh.value).toBe("m");
     });
   });
 
@@ -210,8 +210,8 @@ describe("RangeComponent", () => {
     const inputLow = within(lowContainer).getByTestId(
       "decimal-field-Low"
     ) as HTMLTextAreaElement;
-    const unitLow = within(lowContainer).getByTestId(
-      "unit-input"
+    const codeLow = within(lowContainer).getByTestId(
+      "code-input"
     ) as HTMLTextAreaElement;
 
     const highContainer = screen
@@ -220,13 +220,13 @@ describe("RangeComponent", () => {
     const inputHigh = within(highContainer).getByTestId(
       "decimal-field-High"
     ) as HTMLTextAreaElement;
-    const unitHigh = within(highContainer).getByTestId(
-      "unit-input"
+    const codeHigh = within(highContainer).getByTestId(
+      "code-input"
     ) as HTMLTextAreaElement;
 
     expect(inputLow).toHaveAttribute("readonly");
-    expect(unitLow).toHaveAttribute("readonly");
+    expect(codeLow).toHaveAttribute("readonly");
     expect(inputHigh).toHaveAttribute("readonly");
-    expect(unitHigh).toHaveAttribute("readonly");
+    expect(codeHigh).toHaveAttribute("readonly");
   });
 });
