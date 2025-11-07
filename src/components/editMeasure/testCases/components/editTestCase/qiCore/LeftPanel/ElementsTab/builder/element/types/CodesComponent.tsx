@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { TypeComponentProps } from "./TypeComponentProps";
 import Box from "@mui/system/Box";
-import { MenuItem } from "@mui/material";
+import { MenuItem, IconButton, Tooltip } from "@mui/material";
 import { Select } from "@madie/madie-design-system/dist/react";
 import * as _ from "lodash";
 import useFhirDefinitionsServiceApi from "../../../../../../../../api/useFhirDefinitionsService";
@@ -9,6 +9,7 @@ import { getValueSetUrl } from "../../../../../../../../api/fhirDefinitionServic
 import useTerminologyServiceApi from "../../../../../../../../api/useTerminologyServiceApi";
 import AddElementButton from "../../../../../../../common/UIOnlyModelAgnostic/AddElementButton";
 import "./CodesComponent.scss";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 
 const CodesComponent = ({
   canEdit,
@@ -20,6 +21,8 @@ const CodesComponent = ({
   showAddAttributeButton,
   addTitle,
   handleAddElement,
+  showDeleteButton = false,
+  handleDeleteElement,
 }: TypeComponentProps) => {
   const [codes, setCodes] = useState([]);
   const fhirDefinitionServiceApi = useRef(useFhirDefinitionsServiceApi());
@@ -173,6 +176,18 @@ const CodesComponent = ({
             }}
           />
         </div>
+        {showDeleteButton && canEdit && (
+          <Tooltip title="Delete" placement="top" arrow>
+            <IconButton
+              onClick={handleDeleteElement}
+              data-testid={`delete-button-${label}`}
+              aria-label={`delete ${label}`}
+              size="small"
+            >
+              <DeleteOutlineIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+        )}
         {showAddAttributeButton && addTitle && (
           <AddElementButton name={addTitle} onClick={handleAddElement} />
         )}
