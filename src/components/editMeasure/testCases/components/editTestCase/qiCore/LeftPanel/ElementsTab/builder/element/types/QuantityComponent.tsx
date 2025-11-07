@@ -13,6 +13,8 @@ import CodesComponent from "./CodesComponent";
 import DecimalInput from "../../../../../../../common/DecimalInput/DecimalInput";
 import "./QuantityComponent.scss";
 import AddElementButton from "../../../../../../../common/UIOnlyModelAgnostic/AddElementButton";
+import { IconButton, Tooltip } from "@mui/material";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 
 export interface QuantityComponentProps extends TypeComponentProps {
   showLabel?: boolean;
@@ -28,6 +30,8 @@ const QuantityComponent = ({
   showAddAttributeButton = false,
   addTitle = "",
   handleAddElement = () => {},
+  showDeleteButton = false,
+  handleDeleteElement,
 }: QuantityComponentProps) => {
   const formik = useFormikContext();
 
@@ -149,6 +153,19 @@ const QuantityComponent = ({
               }}
             />
           </div>
+
+          {showDeleteButton && canEdit && (
+            <Tooltip title="Delete" placement="top" arrow>
+              <IconButton
+                onClick={handleDeleteElement}
+                data-testid={`delete-button-${label}`}
+                aria-label={`delete ${label}`}
+                size="small"
+              >
+                <DeleteOutlineIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+          )}
 
           {showAddAttributeButton && addTitle && canEdit && (
             <AddElementButton name={addTitle} onClick={handleAddElement} />
