@@ -346,6 +346,8 @@ const EditTestCase = () => {
         <EditTestCaseBreadCrumbs
           testCase={currentTestCase}
           measureId={measureId}
+          lockingEnabled={featureFlags?.Locking}
+          canEdit={canEdit}
         />
 
         <form

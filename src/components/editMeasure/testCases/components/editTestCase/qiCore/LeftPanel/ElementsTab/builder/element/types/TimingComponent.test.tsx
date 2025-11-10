@@ -463,8 +463,8 @@ describe("TimingComponent", () => {
                 repeat: {
                   bounds: { x: "Range" },
                   boundsRange: {
-                    low: { value: 1, unit: "cm" },
-                    high: { value: 2, unit: "cm" },
+                    low: { value: 1, code: "cm" },
+                    high: { value: 2, code: "cm" },
                   },
                 },
               },
@@ -479,7 +479,7 @@ describe("TimingComponent", () => {
       "decimal-input-field-Low"
     ) as HTMLInputElement;
     const unitLow = within(lowContainer).getByTestId(
-      "unit-input-input"
+      "code-input-input"
     ) as HTMLInputElement;
 
     expect(inputLow.value).toBe("1");
@@ -488,10 +488,10 @@ describe("TimingComponent", () => {
     fireEvent.change(inputLow, { target: { value: "10" } });
 
     await waitFor(() => {
-      expect(setFieldValueMock).toHaveBeenCalledWith(`${basePath}.low`, {
-        value: 10,
-        unit: "cm",
-      });
+      expect(setFieldValueMock).toHaveBeenCalledWith(
+        `${basePath}.low.value`,
+        10
+      );
     });
 
     const highContainer = screen.getByText("High").closest(".quantity-fields")!;
@@ -499,7 +499,7 @@ describe("TimingComponent", () => {
       "decimal-input-field-High"
     ) as HTMLInputElement;
     const unitHigh = within(highContainer).getByTestId(
-      "unit-input-input"
+      "code-input-input"
     ) as HTMLInputElement;
 
     expect(inputHigh.value).toBe("2");
@@ -508,10 +508,10 @@ describe("TimingComponent", () => {
     fireEvent.change(inputHigh, { target: { value: "20" } });
 
     await waitFor(() => {
-      expect(setFieldValueMock).toHaveBeenCalledWith(`${basePath}.high`, {
-        value: 20,
-        unit: "cm",
-      });
+      expect(setFieldValueMock).toHaveBeenCalledWith(
+        `${basePath}.high.value`,
+        20
+      );
     });
   });
 
@@ -528,8 +528,8 @@ describe("TimingComponent", () => {
                 repeat: {
                   bounds: { x: "Range" },
                   boundsRange: {
-                    low: { value: 1, unit: "cm" },
-                    high: { value: 2, unit: "cm" },
+                    low: { value: 1, code: "cm" },
+                    high: { value: 2, code: "cm" },
                   },
                 },
               },
@@ -541,35 +541,47 @@ describe("TimingComponent", () => {
 
     const lowContainer = screen.getByText("Low").closest(".quantity-fields")!;
     const unitLow = within(lowContainer).getByTestId(
-      "unit-input-input"
+      "code-input-input"
     ) as HTMLInputElement;
 
     expect(unitLow.value).toBe("cm");
 
     fireEvent.change(unitLow, { target: { value: "mm" } });
 
-    await waitFor(() => {
-      expect(setFieldValueMock).toHaveBeenCalledWith(`${basePath}.low`, {
-        value: 1,
-        unit: "mm",
-      });
-    });
+    expect(setFieldValueMock).toHaveBeenCalledWith(
+      "MedicationRequest.dosageInstruction[0].timing.repeat.boundsRange.low.code",
+      "mm"
+    );
+    expect(setFieldValueMock).toHaveBeenCalledWith(
+      "MedicationRequest.dosageInstruction[0].timing.repeat.boundsRange.low.unit",
+      "millimeter"
+    );
+    expect(setFieldValueMock).toHaveBeenCalledWith(
+      "MedicationRequest.dosageInstruction[0].timing.repeat.boundsRange.low.system",
+      "http://unitsofmeasure.org"
+    );
 
     const highContainer = screen.getByText("High").closest(".quantity-fields")!;
     const unitHigh = within(highContainer).getByTestId(
-      "unit-input-input"
+      "code-input-input"
     ) as HTMLInputElement;
 
     expect(unitHigh.value).toBe("cm");
 
     fireEvent.change(unitHigh, { target: { value: "mm" } });
 
-    await waitFor(() => {
-      expect(setFieldValueMock).toHaveBeenCalledWith(`${basePath}.high`, {
-        value: 2,
-        unit: "mm",
-      });
-    });
+    expect(setFieldValueMock).toHaveBeenCalledWith(
+      "MedicationRequest.dosageInstruction[0].timing.repeat.boundsRange.high.code",
+      "mm"
+    );
+    expect(setFieldValueMock).toHaveBeenCalledWith(
+      "MedicationRequest.dosageInstruction[0].timing.repeat.boundsRange.high.unit",
+      "millimeter"
+    );
+    expect(setFieldValueMock).toHaveBeenCalledWith(
+      "MedicationRequest.dosageInstruction[0].timing.repeat.boundsRange.high.system",
+      "http://unitsofmeasure.org"
+    );
   });
 
   test("TimingComponent calls Formik setFieldValue when PeriodDateTimeComponent (Period) start/end values change", async () => {

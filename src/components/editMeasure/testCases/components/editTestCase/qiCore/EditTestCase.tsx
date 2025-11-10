@@ -371,7 +371,11 @@ const EditTestCase = (props: EditTestCaseProps) => {
     } catch (e) {
       setErrors([
         ...errors,
-        "Test Case JSON contains a syntax error. Test case can be saved, but not run.",
+        `Test Case JSON contains a syntax error. ${
+          measure?.testCaseConfiguration?.executeInvalidTestCases
+            ? ""
+            : "Test case can be saved, but not run"
+        }.`,
       ]);
       return testCase?.json;
     }
@@ -976,7 +980,12 @@ const EditTestCase = (props: EditTestCaseProps) => {
         id="edit-test-case-qi-core"
         onSubmit={formik.handleSubmit}
       >
-        <EditTestCaseBreadCrumbs testCase={testCase} measureId={measureId} />
+        <EditTestCaseBreadCrumbs
+          testCase={testCase}
+          measureId={measureId}
+          lockingEnabled={featureFlags?.Locking}
+          canEdit={canEdit}
+        />
         <div className="allotment-wrapper">
           <Allotment
             ref={allotmentRef}
@@ -1390,8 +1399,13 @@ const EditTestCase = (props: EditTestCaseProps) => {
                     ) ||
                     _.isNil(measure?.groups) ||
                     measure?.groups.length === 0 ||
-                    (!isJsonModified() && hasErrorSeverity(validationErrors)) ||
-                    isEmptyTestCaseJsonString(editorVal) ||
+                    (!isJsonModified() &&
+                    measure?.testCaseConfiguration?.executeInvalidTestCases
+                      ? false
+                      : hasErrorSeverity(validationErrors)) ||
+                    (measure?.testCaseConfiguration?.executeInvalidTestCases
+                      ? false
+                      : isEmptyTestCaseJsonString(editorVal)) ||
                     !executionContextReady ||
                     executing
                   }

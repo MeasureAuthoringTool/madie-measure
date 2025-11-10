@@ -18,4 +18,10 @@ describe("validate", () => {
     expect(result.error).toBe(true);
     expect(result.label).toBe(undefined);
   });
+  it("should return ucumUnitCode value of 1 when a bracketed unit is entered", () => {
+    const result = validate("{bracketedCode}");
+    expect(result.error).toBe(false);
+    expect(result.ucumUnitCode).toBe(1);
+    expect(result.label).toBe(1);
+  });
 });
