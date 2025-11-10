@@ -786,7 +786,9 @@ describe("TestCaseList component", () => {
   });
 
   it("should render delete dialogue on Test Case list page when delete button is clicked and Locking is true", async () => {
-    useFeatureFlags.Locking = jest.fn().mockReturnValue(true);
+    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
+      Locking: true,
+    }));
     const { getByTestId } = renderTestCaseListComponent();
     await waitFor(() => {
       const selectButton = screen.getByTestId(`test-case-title-0_select`);

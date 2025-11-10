@@ -16,5 +16,7 @@ export interface TypeComponentProps {
   showAddAttributeButton?: boolean;
   addTitle?: string;
   handleAddElement?: () => void;
+  showDeleteButton?: boolean;
+  handleDeleteElement?: () => void;
   containerStyle?: React.CSSProperties;
 }
