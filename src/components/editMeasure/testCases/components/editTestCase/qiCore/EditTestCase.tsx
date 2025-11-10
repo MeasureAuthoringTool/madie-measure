@@ -976,7 +976,12 @@ const EditTestCase = (props: EditTestCaseProps) => {
         id="edit-test-case-qi-core"
         onSubmit={formik.handleSubmit}
       >
-        <EditTestCaseBreadCrumbs testCase={testCase} measureId={measureId} />
+        <EditTestCaseBreadCrumbs
+          testCase={testCase}
+          measureId={measureId}
+          lockingEnabled={featureFlags?.Locking}
+          canEdit={canEdit}
+        />
         <div className="allotment-wrapper">
           <Allotment
             ref={allotmentRef}
