@@ -14,6 +14,7 @@ import {
 import ShareAction from "./shareAction/ShareAction";
 import TransferAction from "./transferAction/TransferAction";
 import HistoryAction from "./historyAction/HistoryAction";
+import CompareVersionsAction from "./compareVersionsAction/CompareVersionsAction";
 
 interface PropTypes {
   measures: Measure[];
@@ -29,6 +30,7 @@ interface PropTypes {
   setViewHumanReadableModal: any;
   activeTab: number;
   setTransferDialog: any;
+  openCompareVersionsDialog?: () => void;
 }
 export default function ActionCenter(props: PropTypes) {
   const [canEdit, setCanEdit] = useState<boolean>(false);
@@ -114,6 +116,12 @@ export default function ActionCenter(props: PropTypes) {
     }
   }, [props.setViewMeasureHistoryDialog, props.measures]);
 
+  const compareVersions = useCallback(() => {
+    if (props.openCompareVersionsDialog) {
+      props.openCompareVersionsDialog();
+    }
+  }, [props.openCompareVersionsDialog]);
+
   const isSelectedMeasureEditable = (measures) => {
     return (
       measures &&
@@ -197,6 +205,12 @@ export default function ActionCenter(props: PropTypes) {
       )}
       {featureFlags?.MeasureHistory && (
         <HistoryAction measures={props.measures} onClick={viewMeasureHistory} />
+      )}
+      {featureFlags?.CompareMeasureVersions && (
+        <CompareVersionsAction
+          measures={props.measures}
+          onClick={compareVersions}
+        />
       )}
     </div>
   );

@@ -33,6 +33,7 @@ declare module "@madie/madie-util" {
     TransferMeasure: boolean;
     MeasureHistory: boolean;
     Calculator: boolean;
+    CompareMeasureVersions: boolean;
   }
 
   export interface ServiceConfig {
