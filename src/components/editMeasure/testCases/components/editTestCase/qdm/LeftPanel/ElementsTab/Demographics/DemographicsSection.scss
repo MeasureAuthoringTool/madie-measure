@@ -13,12 +13,12 @@
     flex-grow: 1;
     column-gap: 32px;
 
-    > div:first-of-type {
-      max-width: 200px;
-    }
-
     > div {
       max-width: 150px;
+    }
+
+    > div:first-of-type {
+      max-width: 200px;
     }
 
     .demographics-ethnicity {
