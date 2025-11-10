@@ -64,11 +64,16 @@ const TypeEditor = ({
   // is multiple cardinality?
   if (structureDefinition?.max === "*") {
     // is it not already terminated with an index?
-    if (!getIndexFromPath(label) && !values?.length) {
+    if (
+      !getIndexFromPath(label) &&
+      !values?.length &&
+      isComponentDataType(type)
+    ) {
       // we are just going to add a zero for now. could be smarter later
       // TO DO: We will eventually need to map inner elements of multiple cardinality based on how many elements are in the form
       // something like Array.From(numOfElementsInForm, _index) =>) had a previous rendition of this guy working in 8500 pr commits
       // https://github.com/MeasureAuthoringTool/madie-measure/pull/901
+      // Only add [0] for component data types, not BackboneElements which need to render their structure first
       label = `${structureDefinition.id}[0]`;
     }
   }
@@ -133,6 +138,13 @@ const TypeEditor = ({
     ]);
   };
 
+  // remove element at specific index from value array
+  const handleDeleteElement = (index: number) => {
+    const currentValues = _.get(formik.values, label, []);
+    const updatedValues = currentValues.filter((_, i) => i !== index);
+    formik.setFieldValue(label, updatedValues);
+  };
+
   const formikErrorHandler = (name: string) => {
     const touched = getNestedProperty(formik.touched, name);
     const errors = getNestedProperty(formik.errors, name);
@@ -147,6 +159,7 @@ const TypeEditor = ({
     ? _.startCase(getLastPart(structureDefinition.id))
     : "";
   const showAddAttributeButton = Boolean(!isRoot && canBeMultipleCardinality);
+
   if (isComponentDataType(type)) {
     switch (type) {
       case "string":
@@ -166,6 +179,8 @@ const TypeEditor = ({
                   showAddAttributeButton={
                     showAddAttributeButton && index === values.length - 1
                   }
+                  showDeleteButton={index > 0}
+                  handleDeleteElement={() => handleDeleteElement(index)}
                   addTitle={addTitle}
                   handleAddElement={handleAddElement}
                   {...formik.getFieldProps(`${label}[${index}]`)}
@@ -237,6 +252,8 @@ const TypeEditor = ({
                   showAddAttributeButton={
                     showAddAttributeButton && index === values.length - 1
                   }
+                  showDeleteButton={index > 0}
+                  handleDeleteElement={() => handleDeleteElement(index)}
                   addTitle={addTitle}
                   handleAddElement={handleAddElement}
                 />
@@ -281,6 +298,8 @@ const TypeEditor = ({
                   showAddAttributeButton={
                     showAddAttributeButton && index === values.length - 1
                   }
+                  showDeleteButton={index > 0}
+                  handleDeleteElement={() => handleDeleteElement(index)}
                   addTitle={addTitle}
                   handleAddElement={handleAddElement}
                   {...formik.getFieldProps(`${label}[${index}]`)}
@@ -331,6 +350,8 @@ const TypeEditor = ({
                   showAddAttributeButton={
                     showAddAttributeButton && index === values.length - 1
                   }
+                  showDeleteButton={index > 0}
+                  handleDeleteElement={() => handleDeleteElement(index)}
                   addTitle={addTitle}
                   handleAddElement={handleAddElement}
                   {...formik.getFieldProps(`${label}[${index}]`)}
@@ -386,22 +407,52 @@ const TypeEditor = ({
       case "positiveInt":
       case "unsignedInt":
         return (
-          <IntegerComponent
-            structureDefinition={undefined}
-            canEdit={canEdit}
-            fieldRequired={required}
-            label={label}
-            helperText={formikErrorHandler(label)}
-            error={getNestedProperty(formik.errors, label)}
-            integerType={
-              type === "unsignedInt"
-                ? IntegerType.UNSIGNED
-                : IntegerType.POSITIVE_INT
-            }
-            showAddAttributeButton={showAddAttributeButton}
-            addTitle={addTitle}
-            {...formik.getFieldProps(label)}
-          />
+          <>
+            {showAddAttributeButton && values ? (
+              values.map((el, index) => (
+                <IntegerComponent
+                  key={index}
+                  structureDefinition={undefined}
+                  canEdit={canEdit}
+                  fieldRequired={required}
+                  label={`${label}[${index}]`}
+                  helperText={formikErrorHandler(`${label}[${index}]`)}
+                  error={getNestedProperty(formik.errors, `${label}[${index}]`)}
+                  integerType={
+                    type === "unsignedInt"
+                      ? IntegerType.UNSIGNED
+                      : IntegerType.POSITIVE_INT
+                  }
+                  showAddAttributeButton={
+                    showAddAttributeButton && index === values.length - 1
+                  }
+                  showDeleteButton={index > 0}
+                  handleDeleteElement={() => handleDeleteElement(index)}
+                  addTitle={addTitle}
+                  handleAddElement={handleAddElement}
+                  {...formik.getFieldProps(`${label}[${index}]`)}
+                />
+              ))
+            ) : (
+              <IntegerComponent
+                structureDefinition={undefined}
+                canEdit={canEdit}
+                fieldRequired={required}
+                label={label}
+                helperText={formikErrorHandler(label)}
+                error={getNestedProperty(formik.errors, label)}
+                integerType={
+                  type === "unsignedInt"
+                    ? IntegerType.UNSIGNED
+                    : IntegerType.POSITIVE_INT
+                }
+                showAddAttributeButton={showAddAttributeButton}
+                addTitle={addTitle}
+                handleAddElement={handleAddElement}
+                {...formik.getFieldProps(label)}
+              />
+            )}
+          </>
         );
       case "Identifier":
         return (
@@ -418,48 +469,125 @@ const TypeEditor = ({
       case "http://hl7.org/fhirpath/System.Boolean":
       case "boolean":
         return (
-          <BooleanComponent
-            canEdit={canEdit}
-            structureDefinition={null}
-            fieldRequired={required}
-            label={label}
-            helperText={formikErrorHandler(label)}
-            error={getNestedProperty(formik.errors, label)}
-            showAddAttributeButton={showAddAttributeButton}
-            addTitle={addTitle}
-            {...formik.getFieldProps(label)}
-          />
+          <>
+            {showAddAttributeButton && values ? (
+              values.map((el, index) => (
+                <BooleanComponent
+                  key={index}
+                  canEdit={canEdit}
+                  structureDefinition={null}
+                  fieldRequired={required}
+                  label={`${label}[${index}]`}
+                  helperText={formikErrorHandler(`${label}[${index}]`)}
+                  error={getNestedProperty(formik.errors, `${label}[${index}]`)}
+                  showAddAttributeButton={
+                    showAddAttributeButton && index === values.length - 1
+                  }
+                  showDeleteButton={index > 0}
+                  handleDeleteElement={() => handleDeleteElement(index)}
+                  addTitle={addTitle}
+                  handleAddElement={handleAddElement}
+                  {...formik.getFieldProps(`${label}[${index}]`)}
+                />
+              ))
+            ) : (
+              <BooleanComponent
+                canEdit={canEdit}
+                structureDefinition={null}
+                fieldRequired={required}
+                label={label}
+                helperText={formikErrorHandler(label)}
+                error={getNestedProperty(formik.errors, label)}
+                showAddAttributeButton={showAddAttributeButton}
+                addTitle={addTitle}
+                handleAddElement={handleAddElement}
+                {...formik.getFieldProps(label)}
+              />
+            )}
+          </>
         );
       case "uri":
         return (
-          <UriComponent
-            canEdit={canEdit}
-            structureDefinition={structureDefinition}
-            fieldRequired={required}
-            label={label}
-            helperText={formikErrorHandler(label)}
-            showAddAttributeButton={showAddAttributeButton}
-            addTitle={addTitle}
-            error={getNestedProperty(formik.errors, label)}
-            {...formik.getFieldProps(label)}
-            onChange={({ target }) => {
-              formik.setFieldTouched(label);
-              formik.setFieldValue(label, target.value);
-            }}
-          />
+          <>
+            {showAddAttributeButton && values ? (
+              values.map((el, index) => (
+                <UriComponent
+                  key={index}
+                  canEdit={canEdit}
+                  structureDefinition={structureDefinition}
+                  fieldRequired={required}
+                  label={`${label}[${index}]`}
+                  helperText={formikErrorHandler(`${label}[${index}]`)}
+                  showAddAttributeButton={
+                    showAddAttributeButton && index === values.length - 1
+                  }
+                  showDeleteButton={index > 0}
+                  handleDeleteElement={() => handleDeleteElement(index)}
+                  addTitle={addTitle}
+                  handleAddElement={handleAddElement}
+                  error={getNestedProperty(formik.errors, `${label}[${index}]`)}
+                  {...formik.getFieldProps(`${label}[${index}]`)}
+                  onChange={({ target }) => {
+                    formik.setFieldTouched(`${label}[${index}]`);
+                    formik.setFieldValue(`${label}[${index}]`, target.value);
+                  }}
+                />
+              ))
+            ) : (
+              <UriComponent
+                canEdit={canEdit}
+                structureDefinition={structureDefinition}
+                fieldRequired={required}
+                label={label}
+                helperText={formikErrorHandler(label)}
+                showAddAttributeButton={showAddAttributeButton}
+                addTitle={addTitle}
+                handleAddElement={handleAddElement}
+                error={getNestedProperty(formik.errors, label)}
+                {...formik.getFieldProps(label)}
+                onChange={({ target }) => {
+                  formik.setFieldTouched(label);
+                  formik.setFieldValue(label, target.value);
+                }}
+              />
+            )}
+          </>
         );
       case "url":
       case "canonical":
         return (
-          <UrlComponent
-            canEdit={canEdit}
-            structureDefinition={structureDefinition}
-            fieldRequired={required}
-            label={label}
-            showAddAttributeButton={showAddAttributeButton}
-            addTitle={addTitle}
-            {...formik.getFieldProps(label)}
-          />
+          <>
+            {showAddAttributeButton && values ? (
+              values.map((el, index) => (
+                <UrlComponent
+                  key={index}
+                  canEdit={canEdit}
+                  structureDefinition={structureDefinition}
+                  fieldRequired={required}
+                  label={`${label}[${index}]`}
+                  showAddAttributeButton={
+                    showAddAttributeButton && index === values.length - 1
+                  }
+                  showDeleteButton={index > 0}
+                  handleDeleteElement={() => handleDeleteElement(index)}
+                  addTitle={addTitle}
+                  handleAddElement={handleAddElement}
+                  {...formik.getFieldProps(`${label}[${index}]`)}
+                />
+              ))
+            ) : (
+              <UrlComponent
+                canEdit={canEdit}
+                structureDefinition={structureDefinition}
+                fieldRequired={required}
+                label={label}
+                showAddAttributeButton={showAddAttributeButton}
+                addTitle={addTitle}
+                handleAddElement={handleAddElement}
+                {...formik.getFieldProps(label)}
+              />
+            )}
+          </>
         );
       case "date":
         return (
@@ -496,6 +624,8 @@ const TypeEditor = ({
                   showAddAttributeButton={
                     showAddAttributeButton && index === values.length - 1
                   }
+                  showDeleteButton={index > 0}
+                  handleDeleteElement={() => handleDeleteElement(index)}
                   addTitle={addTitle}
                   handleAddElement={handleAddElement}
                   {...formik.getFieldProps(`${label}[${index}]`)}

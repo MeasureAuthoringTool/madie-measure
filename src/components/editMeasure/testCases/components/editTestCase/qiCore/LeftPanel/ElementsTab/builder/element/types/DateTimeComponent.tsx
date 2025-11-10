@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { TypeComponentProps } from "./TypeComponentProps";
-import { MenuItem as MuiMenuItem } from "@mui/material";
+import { MenuItem as MuiMenuItem, IconButton, Tooltip } from "@mui/material";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import Box from "@mui/material/Box";
 import { LocalizationProvider } from "@mui/x-date-pickers";
@@ -15,6 +15,7 @@ import {
 } from "@madie/madie-design-system/dist/react";
 import DateField from "./DateField";
 import AddElementButton from "../../../../../../../common/UIOnlyModelAgnostic/AddElementButton";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -102,6 +103,8 @@ const DateTimeComponent = ({
   showAddAttributeButton,
   handleAddElement,
   addTitle,
+  showDeleteButton = false,
+  handleDeleteElement,
 }: TypeComponentProps) => {
   const [format, setFormat] = useState<string>(null);
   const [date, setDate] = useState<any>(null); // dayjs obj
@@ -242,6 +245,18 @@ const DateTimeComponent = ({
           </div>
         </LocalizationProvider>
       </Box>
+      {showDeleteButton && canEdit && (
+        <Tooltip title="Delete" placement="top" arrow>
+          <IconButton
+            onClick={handleDeleteElement}
+            data-testid={`delete-button-${label}`}
+            aria-label={`delete ${label}`}
+            size="small"
+          >
+            <DeleteOutlineIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
+      )}
       {showAddAttributeButton && addTitle && (
         <AddElementButton name={addTitle} onClick={handleAddElement} />
       )}

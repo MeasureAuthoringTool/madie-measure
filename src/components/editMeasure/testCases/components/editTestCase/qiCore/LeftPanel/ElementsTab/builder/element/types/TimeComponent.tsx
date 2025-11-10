@@ -4,6 +4,8 @@ import { TimeField } from "@madie/madie-design-system/dist/react";
 import timezone from "dayjs/plugin/timezone";
 import dayjs from "dayjs";
 import AddElementButton from "../../../../../../../common/UIOnlyModelAgnostic/AddElementButton";
+import { IconButton, Tooltip } from "@mui/material";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 
 dayjs.extend(timezone);
 
@@ -16,6 +18,8 @@ const TimeComponent = ({
   showAddAttributeButton,
   addTitle,
   handleAddElement,
+  showDeleteButton = false,
+  handleDeleteElement,
 }: TypeComponentProps) => {
   const TIME_FORMAT = "HH:mm:ss";
   const [time, setTime] = React.useState(
@@ -41,6 +45,18 @@ const TimeComponent = ({
           value={time}
         />
       </div>
+      {showDeleteButton && canEdit && (
+        <Tooltip title="Delete" placement="top" arrow>
+          <IconButton
+            onClick={handleDeleteElement}
+            data-testid={`delete-button-${label}`}
+            aria-label={`delete ${label}`}
+            size="small"
+          >
+            <DeleteOutlineIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
+      )}
       {showAddAttributeButton && addTitle && (
         <AddElementButton name={addTitle} onClick={handleAddElement} />
       )}{" "}

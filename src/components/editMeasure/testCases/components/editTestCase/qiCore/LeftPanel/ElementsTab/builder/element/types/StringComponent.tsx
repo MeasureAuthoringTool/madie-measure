@@ -2,6 +2,8 @@ import React from "react";
 import { TypeComponentProps } from "./TypeComponentProps";
 import { TextField } from "@madie/madie-design-system/dist/react";
 import AddElementButton from "../../../../../../../common/UIOnlyModelAgnostic/AddElementButton";
+import { IconButton, Tooltip } from "@mui/material";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 
 /*
   String component is either going to need to be very smart, or we're going to have to provide validations ahead of time. 
@@ -19,6 +21,8 @@ const StringComponent = ({
   showAddAttributeButton = false,
   addTitle,
   handleAddElement,
+  showDeleteButton = false,
+  handleDeleteElement,
   ...props
 }: TypeComponentProps) => {
   function isRootLabel(label) {
@@ -58,6 +62,18 @@ const StringComponent = ({
         {...props}
         value={value || ""}
       />
+      {showDeleteButton && canEdit && (
+        <Tooltip title="Delete" placement="top" arrow>
+          <IconButton
+            onClick={handleDeleteElement}
+            data-testid={`delete-button-${label}`}
+            aria-label={`delete ${label}`}
+            size="small"
+          >
+            <DeleteOutlineIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
+      )}
       {showAddAttributeButton && addTitle && (
         <AddElementButton name={addTitle} onClick={handleAddElement} />
       )}
