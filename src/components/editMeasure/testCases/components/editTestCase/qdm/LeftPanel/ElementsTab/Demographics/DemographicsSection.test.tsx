@@ -66,7 +66,7 @@ describe("DemographicsSection", () => {
     }));
   });
 
-  const renderDemographicsSection = () => {
+  const renderDemographicsSection = (canEdit = true) => {
     render(
       <QdmExecutionContextProvider
         value={{
@@ -82,7 +82,7 @@ describe("DemographicsSection", () => {
         <FormikProvider value={mockFormik}>
           <DemographicsSection
             handleTestCaseWarnings={handleWarnings}
-            canEdit={true}
+            canEdit={canEdit}
           />
         </FormikProvider>
       </QdmExecutionContextProvider>
@@ -109,6 +109,11 @@ describe("DemographicsSection", () => {
         payload: expect.anything(),
       });
     });
+  });
+
+  it("Should render in readOnly mdoe", async () => {
+    renderDemographicsSection(false);
+    expect(screen.getByText("Date of Birth")).toBeInTheDocument();
   });
 
   it("should handle expired date time change", async () => {
