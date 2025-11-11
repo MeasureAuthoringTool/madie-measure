@@ -37,6 +37,7 @@ export interface BaseConfigurationProps {
   isTestCaseLocked: boolean;
   checkTestCasesLockStatus: Function;
   setAlertMessage: Function;
+  measureLockedByAnotherUser: boolean;
 }
 
 const BaseConfiguration = (props: BaseConfigurationProps) => {
@@ -69,7 +70,8 @@ const BaseConfiguration = (props: BaseConfigurationProps) => {
       measure?.measureSet?.owner,
       measure?.measureSet?.acls,
       measure?.measureMetaData?.draft
-    );
+    ) &&
+    !props.measureLockedByAnotherUser;
   useEffect(() => {
     if (measure && measure.scoring) {
       setCurrentScoring(measure.scoring);

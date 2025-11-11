@@ -171,7 +171,9 @@ function renderTimingComponent({
 describe("TimingComponent", () => {
   test("triggers Formik setFieldValue on interactions", async () => {
     renderTimingComponent({});
-
+    userEvent.click(
+      screen.getByTestId("elements-heading-expansion-button-Timing")
+    );
     // Event
     const formatSelector = screen.getByTestId(
       "date-time-format-selector-input-field-Event[0]"
@@ -473,7 +475,9 @@ describe("TimingComponent", () => {
         },
       },
     });
-
+    userEvent.click(
+      screen.getByTestId("elements-heading-expansion-button-Timing")
+    );
     const lowContainer = screen.getByText("Low").closest(".quantity-fields")!;
     const inputLow = within(lowContainer).getByTestId(
       "decimal-input-field-Low"
@@ -539,6 +543,9 @@ describe("TimingComponent", () => {
       },
     });
 
+    userEvent.click(
+      screen.getByTestId("elements-heading-expansion-button-Timing")
+    );
     const lowContainer = screen.getByText("Low").closest(".quantity-fields")!;
     const unitLow = within(lowContainer).getByTestId(
       "code-input-input"
@@ -600,7 +607,9 @@ describe("TimingComponent", () => {
         },
       },
     });
-
+    userEvent.click(
+      screen.getByTestId("elements-heading-expansion-button-Timing")
+    );
     // Select Period format
     const formatSelector = screen.getByTestId(
       "date-time-format-selector-input-field-Period"

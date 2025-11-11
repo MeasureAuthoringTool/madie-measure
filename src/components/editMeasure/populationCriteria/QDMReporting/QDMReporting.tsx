@@ -62,6 +62,7 @@ export interface ReportingProps {
   isTestCaseLocked: boolean;
   checkTestCasesLockStatus: Function;
   setAlertMessage: Function;
+  measureLockedByAnotherUser: boolean;
 }
 
 const QDMReporting = (props: ReportingProps) => {
@@ -88,7 +89,8 @@ const QDMReporting = (props: ReportingProps) => {
       measure?.measureSet?.owner,
       measure?.measureSet?.acls,
       measure?.measureMetaData?.draft
-    );
+    ) &&
+    !props.measureLockedByAnotherUser;
 
   const formik = useFormik({
     initialValues: {
