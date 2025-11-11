@@ -2,7 +2,6 @@ import * as React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import CompareVersionsAction, {
   NOTHING_SELECTED,
-  DIFFERENT_MEASURES,
   VALID_COMPARE,
 } from "./CompareVersionsAction";
 import { Measure, Model } from "@madie/madie-models";
@@ -139,7 +138,7 @@ describe("CompareVersionsAction component", () => {
     expect(screen.getByTestId("compare-versions-action-btn")).toBeDisabled();
     expect(
       screen.getByTestId("compare-versions-action-tooltip")
-    ).toHaveAttribute("aria-label", DIFFERENT_MEASURES);
+    ).toHaveAttribute("aria-label", NOTHING_SELECTED);
   });
 
   it("should call onClick when button is clicked and enabled", async () => {

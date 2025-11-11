@@ -11,8 +11,6 @@ interface PropTypes {
 
 export const NOTHING_SELECTED =
   "Select 2 instances within the same measure set to compare measure versions";
-export const DIFFERENT_MEASURES =
-  "Select 2 instances within the same measure set to compare measure versions";
 export const VALID_COMPARE = "Compare Measure Versions";
 
 interface CompareVersionsIconProps {
@@ -57,7 +55,7 @@ export default function CompareVersionsAction(props: PropTypes) {
       setTooltipMessage(VALID_COMPARE);
       setDisableCompareBtn(false);
     } else {
-      setTooltipMessage(DIFFERENT_MEASURES);
+      setTooltipMessage(NOTHING_SELECTED);
     }
   }, [measures]);
 
