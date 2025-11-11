@@ -1,9 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { DataElement } from "cqm-models";
 import * as _ from "lodash";
+import { Tooltip } from "@mui/material";
 
 const CodesRow = ({ code }) => {
-  return <div className="codes-row">{code}</div>;
+  return (
+    <div className="codes-row">
+      <Tooltip title={`Code System Version: ${code.version}`}>
+        <span>{`${code.system}: ${code.code}`}</span>
+      </Tooltip>
+    </div>
+  );
 };
 
 // we care about the codes
@@ -21,9 +28,17 @@ const DataTypeCell = (props: { element: DataElement; codeSystemMap: any }) => {
       setCodeList(
         codes.map((code) => {
           if (codeSystemMap[code.system]) {
-            return `${codeSystemMap[code.system]}: ${code.code}`;
+            return {
+              system: codeSystemMap[code.system],
+              code: code.code,
+              version: code.version?.replace(/urn:hl7:version:/g, ""),
+            };
           }
-          return `${code.system}: ${code.code}`;
+          return {
+            system: code.system,
+            code: code.code,
+            version: code.version?.replace(/urn:hl7:version:/g, ""),
+          };
         })
       );
     }

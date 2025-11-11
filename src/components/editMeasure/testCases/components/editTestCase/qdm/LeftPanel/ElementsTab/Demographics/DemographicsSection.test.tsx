@@ -191,6 +191,9 @@ describe("DemographicsSection", () => {
     expect(options).toHaveLength(3);
     userEvent.click(options[2]);
     expect(ethnicitySelect).toHaveTextContent("Not Hispanic or Latino");
+    expect(
+      screen.getByTestId("demographics-ethnicity-tooltip")
+    ).toHaveAttribute("aria-label", "Code System Version: 1.2");
   });
 
   it("should render expired on load", async () => {
@@ -248,6 +251,10 @@ describe("DemographicsSection", () => {
     expect(options).toHaveLength(4);
     userEvent.click(options[2]);
     expect(raceSelector).toHaveTextContent("Asian");
+    expect(screen.getByTestId("demographics-race-tooltip")).toHaveAttribute(
+      "aria-label",
+      "Code System Version: 1.2"
+    );
   });
 
   it("should handle Gender change", () => {
@@ -276,6 +283,10 @@ describe("DemographicsSection", () => {
     expect(options).toHaveLength(3);
     userEvent.click(options[2]);
     expect(genderSelector).toHaveTextContent("Male (finding)");
+    expect(screen.getByTestId("demographics-gender-tooltip")).toHaveAttribute(
+      "aria-label",
+      "Code System Version: 2024-09"
+    );
   });
 
   it("should clear Race selection when selecting dash option (no selection)", () => {
