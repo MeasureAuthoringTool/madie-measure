@@ -109,7 +109,10 @@ const TestCaseRoutes = () => {
             "No Population Criteria is associated with this measure. Please review the Population Criteria tab."
           );
         }
-        if (!localErrors.length) {
+        if (
+          !localErrors.length ||
+          measure?.testCaseConfiguration?.executeInvalidTestCases
+        ) {
           onAbort();
           cqmMeasureConvertAbortController.current = new AbortController();
           cqmService.current
@@ -140,6 +143,15 @@ const TestCaseRoutes = () => {
                 "An error occurred, please try again. If the error persists, please contact the help desk",
               ]);
             });
+        }
+        if (measure?.testCaseConfiguration?.executeInvalidTestCases) {
+          setCustomWarningMessages([
+            {
+              message:
+                "Execution of invalid test cases is enabled. You may receive inaccurate pass/fail results. You can update this setting in Execution Configuration tab.",
+              testDataId: "test-cases-in-use-warning",
+            },
+          ]);
         }
         setCqmMeasureErrors((prevState) => [...prevState, ...localErrors]);
       }

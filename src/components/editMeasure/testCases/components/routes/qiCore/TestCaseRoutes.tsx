@@ -105,7 +105,10 @@ const TestCaseRoutes = () => {
         );
       }
 
-      if (!localErrors.length) {
+      if (
+        measure?.testCaseConfiguration?.executeInvalidTestCases ||
+        !localErrors.length
+      ) {
         measureService.current
           .fetchMeasureBundle(measure)
           .then((bundle: Bundle) => {

@@ -455,13 +455,16 @@ const TestCaseList = (props: TestCaseListProps) => {
       return null;
     }
 
-    const validTestCases = testCases?.filter((tc) => tc.validResource);
+    const testCasesToExecute = measure?.testCaseConfiguration
+      ?.executeInvalidTestCases
+      ? testCases
+      : testCases?.filter((tc) => tc.validResource);
 
-    if (validTestCases && validTestCases.length > 0 && cqmMeasure) {
+    if (testCasesToExecute && testCasesToExecute.length > 0 && cqmMeasure) {
       setExecuting(true);
       try {
         // calculation service needs to be changed: currently it is using QI Core calculation service
-        const patients = validTestCases.map((tc) => JSON.parse(tc.json));
+        const patients = testCasesToExecute.map((tc) => JSON.parse(tc.json));
         const calculationOutput: CqmExecutionResultsByPatient =
           await qdmCalculation.current.calculateQdmTestCases(
             cqmMeasure,
@@ -472,12 +475,18 @@ const TestCaseList = (props: TestCaseListProps) => {
         console.error("calculateTestCases: error.message = ", error);
         setToastOpen(true);
         setToastType("danger");
-        setToastMessage(
-          "Error while executing test cases. Message: " + error.message
-        );
+        const syntaxErrorMessage =
+          "Some test cases could not be executed due to syntax errors in their definitions. Please review and correct the syntax issues, then try running the tests again.";
+        if (
+          error instanceof SyntaxError ||
+          (error?.name && error.name.includes("SyntaxError"))
+        ) {
+          setToastMessage(syntaxErrorMessage);
+        }
+        setToastMessage("Error while executing test cases");
       }
       setExecuting(false);
-    } else if (_.isNil(validTestCases) || _.isEmpty(validTestCases)) {
+    } else if (_.isNil(testCasesToExecute) || _.isEmpty(testCasesToExecute)) {
       console.error("calculateTestCases: No valid test cases to execute");
       setToastOpen(true);
       setToastType("danger");
