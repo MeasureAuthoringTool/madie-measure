@@ -69,7 +69,9 @@ describe("ActionCenter Component", () => {
       render(
         <MemoryRouter>
           <ActionCenter
-            selectedTestCases={[{ id: "1", validResource: true }]}
+            selectedTestCases={[
+              { id: "1", validResource: true, title: "Test Case 1" },
+            ]}
             canEdit={true}
             isQDM={false}
             isDraft={true}
@@ -89,7 +91,9 @@ describe("ActionCenter Component", () => {
       render(
         <MemoryRouter>
           <ActionCenter
-            selectedTestCases={[{ id: "1", validResource: true }]}
+            selectedTestCases={[
+              { id: "1", validResource: true, title: "Test Case 1" },
+            ]}
             canEdit={true}
             isQDM={false}
             isDraft={false}
@@ -106,7 +110,9 @@ describe("ActionCenter Component", () => {
     });
 
     it("should display action buttons based on selected valid test cases", () => {
-      const selectedTestCase = [{ id: "1", validResource: true }];
+      const selectedTestCase = [
+        { id: "1", validResource: true, title: "Test Case 1" },
+      ];
       render(
         <MemoryRouter>
           <ActionCenter
@@ -127,7 +133,9 @@ describe("ActionCenter Component", () => {
     });
 
     it("should display action buttons based on selected invalid test cases", () => {
-      const selectedTestCaseInvalid = [{ id: "1", validResource: false }];
+      const selectedTestCaseInvalid = [
+        { id: "1", validResource: false, title: "Test Case 1" },
+      ];
       render(
         <MemoryRouter>
           <ActionCenter
@@ -148,7 +156,9 @@ describe("ActionCenter Component", () => {
     });
 
     it("should show appropriate tooltips based on button states", async () => {
-      const selectedTestCase = [{ id: "1", validResource: true }];
+      const selectedTestCase = [
+        { id: "1", validResource: true, title: "Test Case 1" },
+      ];
       render(
         <MemoryRouter>
           <ActionCenter
@@ -184,8 +194,59 @@ describe("ActionCenter Component", () => {
       expect(exportTooltip).toHaveAttribute("aria-label", "Export test cases");
     });
 
+    it("should disable clone button when no test case is selected", () => {
+      render(
+        <MemoryRouter>
+          <ActionCenter
+            selectedTestCases={[]}
+            canEdit={true}
+            isQDM={false}
+            isDraft={true}
+          />
+        </MemoryRouter>
+      );
+
+      const cloneBtn = screen.getByTestId("clone-action-btn");
+      const cloneTooltip = screen.getByTestId("clone-tooltip");
+
+      expect(cloneBtn).toBeDisabled();
+      expect(cloneTooltip).toHaveAttribute(
+        "aria-label",
+        "Select a valid test case to clone"
+      );
+    });
+
+    it("should disable clone button if test case title is 226 characters or more", () => {
+      const longTitle = "A".repeat(226);
+      const selectedTestCase = [
+        { id: "1", validResource: true, title: longTitle },
+      ];
+
+      render(
+        <MemoryRouter>
+          <ActionCenter
+            selectedTestCases={selectedTestCase}
+            canEdit={true}
+            isQDM={false}
+            isDraft={true}
+          />
+        </MemoryRouter>
+      );
+
+      const cloneBtn = screen.getByTestId("clone-action-btn");
+      const cloneTooltip = screen.getByTestId("clone-tooltip");
+
+      expect(cloneBtn).toBeDisabled();
+      expect(cloneTooltip).toHaveAttribute(
+        "aria-label",
+        "The test case title is too long to clone"
+      );
+    });
+
     it("should clone test case when clone button is clicked", () => {
-      const selectedTestCase = [{ id: "1", validResource: true }];
+      const selectedTestCase = [
+        { id: "1", validResource: true, title: "Test Case 1" },
+      ];
       const onCloneTestCase = jest.fn();
       render(
         <MemoryRouter>
@@ -205,7 +266,9 @@ describe("ActionCenter Component", () => {
     });
 
     it("should export transaction bundle for QI-Core", () => {
-      const selectedTestCase = [{ id: "1", validResource: true }];
+      const selectedTestCase = [
+        { id: "1", validResource: true, title: "Test Case 1" },
+      ];
       const setExportOptionsOpen = jest.fn();
       const exportTestCases = jest.fn();
 
@@ -235,7 +298,9 @@ describe("ActionCenter Component", () => {
     });
 
     it("should export collection bundle for QI-Core", () => {
-      const selectedTestCase = [{ id: "1", validResource: true }];
+      const selectedTestCase = [
+        { id: "1", validResource: true, title: "Test Case 1" },
+      ];
       const setExportOptionsOpen = jest.fn();
       const exportTestCases = jest.fn();
       render(
@@ -264,7 +329,9 @@ describe("ActionCenter Component", () => {
     });
 
     it("should export QRDA for QDM", () => {
-      const selectedTestCase = [{ id: "1" }];
+      const selectedTestCase = [
+        { id: "1", validResource: true, title: "Test Case 1" },
+      ];
       const setExportOptionsOpen = jest.fn();
       const onExportQRDA = jest.fn();
       render(
@@ -293,7 +360,9 @@ describe("ActionCenter Component", () => {
     });
 
     it("should export Excel for QDM", () => {
-      const selectedTestCase = [{ id: "1" }];
+      const selectedTestCase = [
+        { id: "1", validResource: true, title: "Test Case 1" },
+      ];
       const setExportOptionsOpen = jest.fn();
       const onExportExcel = jest.fn();
       render(
@@ -322,7 +391,9 @@ describe("ActionCenter Component", () => {
     });
 
     it("should disable export button if execution status is NA for QDM", async () => {
-      const selectedTestCase = [{ id: "1", executionStatus: "NA" }];
+      const selectedTestCase = [
+        { id: "1", executionStatus: "NA", title: "Test Case 1" },
+      ];
       const setExportOptionsOpen = jest.fn();
       const onExportExcel = jest.fn();
       render(
@@ -352,7 +423,12 @@ describe("ActionCenter Component", () => {
 
     it("should disable delete icon when test case is created before versioning on versioned measures", async () => {
       const selectedTestCase = [
-        { id: "1", validResource: true, createdBeforeVersioning: true },
+        {
+          id: "1",
+          validResource: true,
+          title: "Test Case 1",
+          createdBeforeVersioning: true,
+        },
       ];
       render(
         <MemoryRouter>
