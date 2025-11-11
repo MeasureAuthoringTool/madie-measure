@@ -563,11 +563,13 @@ export default function MeasureInformation(props: MeasureInformationProps) {
 
           <CmsIdentifier
             //cannot generate id if shared, only owner can
-            canEdit={checkUserCanEdit(
-              measure?.measureSet?.owner,
-              [],
-              measure?.measureMetaData?.draft
-            )}
+            canEdit={
+              checkUserCanEdit(
+                measure?.measureSet?.owner,
+                [],
+                measure?.measureMetaData?.draft
+              ) && !measureLockedByAnotherUser
+            }
             label="CMS ID"
             cmsId={measure?.measureSet?.cmsId}
             model={measure?.model}
