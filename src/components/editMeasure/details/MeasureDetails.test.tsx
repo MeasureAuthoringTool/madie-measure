@@ -175,6 +175,8 @@ describe("MeasureDetails component", () => {
                 <MeasureDetails
                   setErrorMessage={setErrorMessage}
                   isQDM={false}
+                  featureFlags={mockUseFeatureFlags()}
+                  measureLockedByAnotherUser={false}
                 />
               }
             />
@@ -707,5 +709,28 @@ describe("MeasureDetails component", () => {
 
       errorSpy.mockRestore();
     });
+  });
+
+  it("should render MeasureInformation component with measureLockedByAnotherUser as true", () => {
+    render(
+      <ApiContextProvider value={serviceConfig}>
+        <MemoryRouter initialEntries={[{ pathname: "/foo" }]}>
+          <Routes>
+            <Route
+              path="/foo"
+              element={
+                <MeasureDetails
+                  setErrorMessage={setErrorMessage}
+                  isQDM={false}
+                  featureFlags={mockUseFeatureFlags()}
+                  measureLockedByAnotherUser={true}
+                />
+              }
+            />
+          </Routes>
+        </MemoryRouter>
+      </ApiContextProvider>
+    );
+    expect(getByText("Mock Measure Info")).toBeTruthy();
   });
 });

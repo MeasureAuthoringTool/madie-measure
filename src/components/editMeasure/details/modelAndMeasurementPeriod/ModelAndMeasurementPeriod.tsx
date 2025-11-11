@@ -35,11 +35,12 @@ interface modelAndMeasurementPeriod {
 
 interface ModelAndMeasurementPeriodProps {
   setErrorMessage: Function;
+  measureLockedByAnotherUser: boolean;
 }
 const DATE_FORMAT = "YYYY-MM-DDTHH:mm:ss";
 
 const ModelAndMeasurementPeriod = (props: ModelAndMeasurementPeriodProps) => {
-  const { setErrorMessage } = props;
+  const { setErrorMessage, measureLockedByAnotherUser } = props;
   const measureServiceApi = useMeasureServiceApi();
   const { updateMeasure } = measureStore;
   const [measure, setMeasure] = useState<any>(measureStore.state);
@@ -95,11 +96,12 @@ const ModelAndMeasurementPeriod = (props: ModelAndMeasurementPeriodProps) => {
     });
   }, [formik.dirty]);
 
-  const canEdit = checkUserCanEdit(
-    measure?.measureSet?.owner,
-    measure?.measureSet?.acls,
-    measure?.measureMetaData?.draft
-  );
+  const canEdit =
+    checkUserCanEdit(
+      measure?.measureSet?.owner,
+      measure?.measureSet?.acls,
+      measure?.measureMetaData?.draft
+    ) && !measureLockedByAnotherUser;
   const onToastClose = () => {
     setToastType("danger");
     setToastMessage("");

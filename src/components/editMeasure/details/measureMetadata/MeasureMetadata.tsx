@@ -23,10 +23,11 @@ export interface MeasureMetadataProps {
   header?: string;
   setErrorMessage: Function;
   required?: boolean;
+  measureLockedByAnotherUser: boolean;
 }
 
 export default function MeasureMetadata(props: MeasureMetadataProps) {
-  const { setErrorMessage, required } = props;
+  const { setErrorMessage, required, measureLockedByAnotherUser } = props;
   const { measureMetadataId, measureMetadataType, header } = props;
   const typeLower = _.kebabCase(measureMetadataType.toLowerCase());
   const { updateMeasure } = measureStore;
@@ -55,11 +56,12 @@ export default function MeasureMetadata(props: MeasureMetadataProps) {
     setToastOpen(open);
   };
 
-  const canEdit = checkUserCanEdit(
-    measure?.measureSet?.owner,
-    measure?.measureSet?.acls,
-    measure?.measureMetaData?.draft
-  );
+  const canEdit =
+    checkUserCanEdit(
+      measure?.measureSet?.owner,
+      measure?.measureSet?.acls,
+      measure?.measureMetaData?.draft
+    ) && !measureLockedByAnotherUser;
   const formik = useFormik({
     enableReinitialize: true,
     initialValues: { genericField: getInitialValues(measure, typeLower) },

@@ -57,10 +57,11 @@ interface measureInformationForm {
 
 interface MeasureInformationProps {
   setErrorMessage: Function;
+  measureLockedByAnotherUser: boolean;
 }
 
 export default function MeasureInformation(props: MeasureInformationProps) {
-  const { setErrorMessage } = props;
+  const { setErrorMessage, measureLockedByAnotherUser } = props;
   const measureServiceApi = useMeasureServiceApi();
   const qdmElmTranslationService = useQdmElmTranslationServiceApi();
   const fhirElmTranslationService = useFhirElmTranslationServiceApi();
@@ -265,11 +266,12 @@ export default function MeasureInformation(props: MeasureInformationProps) {
       });
   }, []);
 
-  const canEdit = checkUserCanEdit(
-    measure?.measureSet?.owner,
-    measure?.measureSet?.acls,
-    measure?.measureMetaData?.draft
-  );
+  const canEdit =
+    checkUserCanEdit(
+      measure?.measureSet?.owner,
+      measure?.measureSet?.acls,
+      measure?.measureMetaData?.draft
+    ) && !measureLockedByAnotherUser;
 
   const handleEndorserChange = (selectedValue: string) => {
     if (selectedValue === "" || selectedValue === "-") {
@@ -561,11 +563,13 @@ export default function MeasureInformation(props: MeasureInformationProps) {
 
           <CmsIdentifier
             //cannot generate id if shared, only owner can
-            canEdit={checkUserCanEdit(
-              measure?.measureSet?.owner,
-              [],
-              measure?.measureMetaData?.draft
-            )}
+            canEdit={
+              checkUserCanEdit(
+                measure?.measureSet?.owner,
+                [],
+                measure?.measureMetaData?.draft
+              ) && !measureLockedByAnotherUser
+            }
             label="CMS ID"
             cmsId={measure?.measureSet?.cmsId}
             model={measure?.model}
