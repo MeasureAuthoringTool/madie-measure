@@ -371,7 +371,11 @@ const EditTestCase = (props: EditTestCaseProps) => {
     } catch (e) {
       setErrors([
         ...errors,
-        "Test Case JSON contains a syntax error. Test case can be saved, but not run.",
+        `Test Case JSON contains a syntax error. ${
+          measure?.testCaseConfiguration?.executeInvalidTestCases
+            ? ""
+            : "Test case can be saved, but not run"
+        }.`,
       ]);
       return testCase?.json;
     }

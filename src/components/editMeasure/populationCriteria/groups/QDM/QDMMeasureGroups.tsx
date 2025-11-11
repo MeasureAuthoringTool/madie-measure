@@ -148,6 +148,7 @@ export interface MeasureGroupProps {
   setAlertMessage: Function;
   isTestCaseLocked: boolean;
   checkTestCasesLockStatus: Function;
+  measureLockedByAnotherUser: boolean;
 }
 
 const INITIAL_ALERT_MESSAGE = {
@@ -171,7 +172,8 @@ const MeasureGroups = (props: MeasureGroupProps) => {
       measure?.measureSet?.owner,
       measure?.measureSet?.acls,
       measure?.measureMetaData?.draft
-    );
+    ) &&
+    !props.measureLockedByAnotherUser;
   const measureServiceApi = useMeasureServiceApi();
   const featureFlags = useFeatureFlags();
   let location = useLocation();

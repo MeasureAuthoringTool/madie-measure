@@ -30,9 +30,10 @@ const checkedIcon = <CheckBoxIcon fontSize="small" />;
 // Need to have 2 diff sizes of buttons
 interface StewardAndDevelopersProps {
   setErrorMessage: Function;
+  measureLockedByAnotherUser: boolean;
 }
 export default function StewardAndDevelopers(props: StewardAndDevelopersProps) {
-  const { setErrorMessage } = props;
+  const { setErrorMessage, measureLockedByAnotherUser } = props;
   const measureServiceApi = useMeasureServiceApi();
   const [organizations, setOrganizations] = useState<Organization[]>();
   const [measure, setMeasure] = useState<any>(measureStore.state);
@@ -53,11 +54,12 @@ export default function StewardAndDevelopers(props: StewardAndDevelopersProps) {
     setToastOpen(open);
   };
 
-  const canEdit = checkUserCanEdit(
-    measure?.measureSet?.owner,
-    measure?.measureSet?.acls,
-    measure?.measureMetaData?.draft
-  );
+  const canEdit =
+    checkUserCanEdit(
+      measure?.measureSet?.owner,
+      measure?.measureSet?.acls,
+      measure?.measureMetaData?.draft
+    ) && !measureLockedByAnotherUser;
   const formik = useFormik({
     enableReinitialize: true,
     initialValues: {

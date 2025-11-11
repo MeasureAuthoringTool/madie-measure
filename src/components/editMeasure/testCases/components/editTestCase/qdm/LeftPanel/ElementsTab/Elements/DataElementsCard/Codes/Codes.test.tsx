@@ -178,6 +178,9 @@ describe("Codes section", () => {
     );
     // verify chips is added
     expect(await screen.findByTestId("SNOMEDCT_183452005")).toBeInTheDocument();
+    expect(
+      screen.getByTestId("chip-tooltip-SNOMEDCT_183452005")
+    ).toHaveAttribute("aria-label", "Code System Version: 2023-03");
   });
 
   it("Should add a custom code concept and display chips", async () => {

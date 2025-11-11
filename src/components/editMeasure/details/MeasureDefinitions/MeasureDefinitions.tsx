@@ -32,10 +32,11 @@ import TextEditor from "../../populationCriteria/groups/TextEditor";
 
 interface MeasureDefinitionsProps {
   setErrorMessage: Function;
+  measureLockedByAnotherUser: boolean;
 }
 
 const MeasureDefinitions = (props: MeasureDefinitionsProps) => {
-  const { setErrorMessage } = props;
+  const { setErrorMessage, measureLockedByAnotherUser } = props;
   const { search } = useLocation();
   let navigate = useNavigate();
   const measureServiceApi = useMeasureServiceApi();
@@ -51,11 +52,12 @@ const MeasureDefinitions = (props: MeasureDefinitionsProps) => {
     useState<MeasureDefinition>(null);
 
   // Form utilities
-  const canEdit = checkUserCanEdit(
-    measure?.measureSet?.owner,
-    measure?.measureSet?.acls,
-    measure?.measureMetaData?.draft
-  );
+  const canEdit =
+    checkUserCanEdit(
+      measure?.measureSet?.owner,
+      measure?.measureSet?.acls,
+      measure?.measureMetaData?.draft
+    ) && !measureLockedByAnotherUser;
 
   const values = queryString.parse(search);
   const INITIAL_VALUES = {

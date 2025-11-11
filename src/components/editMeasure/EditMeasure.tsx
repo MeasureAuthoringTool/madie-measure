@@ -158,6 +158,9 @@ export default function EditMeasure() {
   const [failureMessage, setFailureMessage] = useState(null);
   const abortController = useRef(null);
 
+  const measureLockedByAnotherUser =
+    featureFlags?.Locking && measure?.measureLock;
+
   useEffect(() => {
     const deleteListener = () => {
       setDeleteOpen(true);
@@ -636,10 +639,18 @@ export default function EditMeasure() {
                     setErrorMessage={setErrorMessage}
                     isQDM={isQDM}
                     featureFlags={featureFlags}
+                    measureLockedByAnotherUser={measureLockedByAnotherUser}
                   />
                 }
               />
-              <Route path={`/cql-editor`} element={<MeasureEditor />} />
+              <Route
+                path={`/cql-editor`}
+                element={
+                  <MeasureEditor
+                    measureLockedByAnotherUser={measureLockedByAnotherUser}
+                  />
+                }
+              />
               <Route
                 path={`/test-cases/*`}
                 element={
@@ -650,23 +661,43 @@ export default function EditMeasure() {
               />
               <Route
                 path={`/groups/:groupNumber`}
-                element={<PopulationCriteriaWrapper />}
+                element={
+                  <PopulationCriteriaWrapper
+                    measureLockedByAnotherUser={measureLockedByAnotherUser}
+                  />
+                }
               />
               <Route
                 path={`/supplemental-data`}
-                element={<PopulationCriteriaWrapper />}
+                element={
+                  <PopulationCriteriaWrapper
+                    measureLockedByAnotherUser={measureLockedByAnotherUser}
+                  />
+                }
               />
               <Route
                 path={`/risk-adjustment`}
-                element={<PopulationCriteriaWrapper />}
+                element={
+                  <PopulationCriteriaWrapper
+                    measureLockedByAnotherUser={measureLockedByAnotherUser}
+                  />
+                }
               />
               <Route
                 path={`/base-configuration`}
-                element={<PopulationCriteriaWrapper />}
+                element={
+                  <PopulationCriteriaWrapper
+                    measureLockedByAnotherUser={measureLockedByAnotherUser}
+                  />
+                }
               />
               <Route
                 path={`/reporting`}
-                element={<PopulationCriteriaWrapper />}
+                element={
+                  <PopulationCriteriaWrapper
+                    measureLockedByAnotherUser={measureLockedByAnotherUser}
+                  />
+                }
               />
               <Route path={`/review-info`} element={<ReviewInfo />} />
               <Route path="*" element={<NotFound />} />
