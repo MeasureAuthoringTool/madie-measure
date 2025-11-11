@@ -343,7 +343,7 @@ const DemographicsSection = ({ handleTestCaseWarnings, canEdit }) => {
         children={
           <div className="demographics-container">
             {/* container */}
-            <div className="demographics-row">
+            <div className={`demographics-row ${!canEdit ? "readonly" : ""}`}>
               <DateTimeInput
                 label="Date of Birth"
                 canEdit={canEdit}

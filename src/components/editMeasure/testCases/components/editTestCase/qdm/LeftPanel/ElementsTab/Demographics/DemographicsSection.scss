@@ -6,11 +6,26 @@
 .demographics-container {
   display: grid;
   grid-row-gap: 32px;
+
   .demographics-row {
     display: flex;
     flex-direction: row;
     flex-grow: 1;
     column-gap: 32px;
+
+    &.readonly {
+      > div {
+        max-width: 150px;
+      }
+
+      > div:first-of-type {
+        max-width: 200px;
+      }
+    }
+
+    label {
+      overflow: visible;
+    }
 
     .demographics-ethnicity {
       min-width: 250px;
