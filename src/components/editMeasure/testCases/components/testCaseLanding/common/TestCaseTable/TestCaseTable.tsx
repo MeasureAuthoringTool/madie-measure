@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import tw from "twin.macro";
 import {
   useReactTable,
@@ -186,12 +186,6 @@ const TestCaseTable = (props: TestCaseTableProps) => {
       setData(transFormData(testCases));
     }
   }, [testCases]);
-
-  useEffect(() => {
-    if (table && table.toggleAllRowsSelected) {
-      table.toggleAllRowsSelected(false);
-    }
-  }, [props.page]);
 
   const columns = useMemo<ColumnDef<TCRow>[]>(() => {
     const columnDefs = [];
@@ -473,6 +467,23 @@ const TestCaseTable = (props: TestCaseTableProps) => {
       sorting,
     },
   });
+  // unchecks boxes on page change or testCases change
+  useEffect(() => {
+    if (!table) return;
+    const clearSelection = () => {
+      //deslect on page change
+      if (props.page && table.toggleAllRowsSelected) {
+        table.toggleAllRowsSelected(false);
+      }
+      // deslect on testCases change since we're not full refreshing
+      if (props.testCases) {
+        table.resetRowSelection();
+      }
+    };
+
+    clearSelection();
+  }, [props.page, props.testCases, table]);
+
   useEffect(() => {
     const selectedRowIds = table
       .getSelectedRowModel()

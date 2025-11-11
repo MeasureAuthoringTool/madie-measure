@@ -58,6 +58,7 @@ const checkMismatch = (
 };
 
 const DemographicsSection = ({ handleTestCaseWarnings, canEdit }) => {
+  canEdit = true;
   dayjs.extend(utc);
   dayjs.utc().format(); // utc format
   const { state, dispatch } = useQdmPatient();

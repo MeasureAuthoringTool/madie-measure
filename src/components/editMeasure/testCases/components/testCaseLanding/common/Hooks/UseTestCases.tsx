@@ -239,7 +239,15 @@ function UseFetchTestCases({ measureId, setErrors }) {
         });
       }
     }
-  }, [sortedTestCases, curPage, curLimit, filter, searchQuery, sorting]);
+  }, [
+    testCases,
+    sortedTestCases,
+    curPage,
+    curLimit,
+    filter,
+    searchQuery,
+    sorting,
+  ]);
   useEffect(() => {
     getTestCasePage();
   }, [getTestCasePage]);
@@ -270,13 +278,33 @@ function UseFetchTestCases({ measureId, setErrors }) {
       });
   }, [measureId, testCaseService, setErrors]);
 
+  // We want to modify the local state of test cases on successful modifications
+  const removeTestCases = (testCaseIds: string[]) => {
+    // works
+    setTestCases((prevTestCases) =>
+      prevTestCases.filter((testCase) => !testCaseIds.includes(testCase.id))
+    );
+  };
+  const insertTestCases = (newTestCases: TestCase[]) => {
+    const updatedTestCases = [...newTestCases, ...testCases];
+    setTestCases(updatedTestCases);
+  };
+  const removeAllTestCases = () => {
+    // works
+    setTestCases([]);
+  };
+
   useEffect(() => {
     retrieveTestCases();
   }, [retrieveTestCases]);
+  // removeTestCase, addTestCase, cloneTestCase
   return {
     testCaseService,
     testCases: sortedTestCases, //all test cases to run execution against
     testCasePage, //all pagination required values
+    removeTestCases,
+    removeAllTestCases,
+    insertTestCases,
     setTestCases,
     loadingState,
     setLoadingState,

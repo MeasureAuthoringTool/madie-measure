@@ -96,6 +96,9 @@ const TestCaseList = (props: TestCaseListProps) => {
     testCases,
     setTestCases,
     testCaseService,
+    insertTestCases,
+    removeTestCases,
+    removeAllTestCases,
     loadingState,
     setLoadingState,
     retrieveTestCases,
@@ -236,6 +239,7 @@ const TestCaseList = (props: TestCaseListProps) => {
   }, [measure]);
 
   useEffect(() => {
+<<<<<<< HEAD
     const createTestCaseListener = () => {
       retrieveTestCases();
     };
@@ -254,6 +258,9 @@ const TestCaseList = (props: TestCaseListProps) => {
       ?.executeInvalidTestCases
       ? testCases
       : testCases?.filter((tc) => tc.validResource);
+=======
+    const validTestCases = testCases?.filter((tc) => tc.validResource);
+>>>>>>> d65faac3 (MAT-6563: Update test case list page to avoid refreshes)
     if (validTestCases && calculationOutput?.results && selectedPopCriteria) {
       // Pull Clause Coverage from coverage HTML
       setCoveragePercentage(
@@ -304,10 +311,10 @@ const TestCaseList = (props: TestCaseListProps) => {
     testCaseService.current
       .deleteTestCases(measureId, testCaseIds)
       .then(() => {
-        retrieveTestCases();
         setToastOpen(true);
         setToastType("success");
         setToastMessage("Test cases successfully deleted");
+        removeTestCases(testCaseIds);
       })
       .catch((err) => {
         console.error("deleteTestCases: err.message = " + err.message);
@@ -343,11 +350,11 @@ const TestCaseList = (props: TestCaseListProps) => {
     testCaseService.current
       .deleteTestCases(measureId, currentTestCaseIds)
       .then(() => {
-        retrieveTestCases();
         setOpenDeleteAllTestCasesDialog(false);
         setToastOpen(true);
         setToastType("success");
         setToastMessage("Test cases successfully deleted");
+        removeAllTestCases();
       })
       .catch((err) => {
         setOpenDeleteAllTestCasesDialog(false);
@@ -572,11 +579,14 @@ const TestCaseList = (props: TestCaseListProps) => {
     clonedTestCase.title =
       clonedTestCase.title + "-" + new ObjectId().toString();
     try {
-      await testCaseService.current.createTestCase(clonedTestCase, measureId);
+      const testCase = await testCaseService.current.createTestCase(
+        clonedTestCase,
+        measureId
+      );
       setToastOpen(true);
       setToastType("success");
       setToastMessage("Test case cloned successfully");
-      retrieveTestCases();
+      insertTestCases([testCase]);
     } catch (error) {
       setToastOpen(true);
       setToastMessage(
@@ -651,7 +661,11 @@ const TestCaseList = (props: TestCaseListProps) => {
                 validationPercentage={validationPercentage}
               />
             </div>
-            <CreateNewTestCaseDialog open={createOpen} onClose={handleClose} />
+            <CreateNewTestCaseDialog
+              open={createOpen}
+              onClose={handleClose}
+              onSuccess={insertTestCases}
+            />
             {activeTab === "passing" && (
               <div tw="overflow-x-auto sm:-mx-6 lg:-mx-8">
                 <div tw="py-2 inline-block min-w-full sm:px-6 lg:px-8">
