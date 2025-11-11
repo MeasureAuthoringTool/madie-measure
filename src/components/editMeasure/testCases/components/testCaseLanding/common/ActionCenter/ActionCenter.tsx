@@ -71,6 +71,9 @@ export default function ActionCenter(props: ActionCenterProps) {
   const [disabledDeleteBtnMessage, setDisabledDeleteBtnMessage] = useState<
     string | undefined
   >();
+  const [cloneTooltipBtnMessage, setCloneTooltipBtnMessage] = useState<string>(
+    "Select a valid test case to clone"
+  );
 
   useEffect(() => {
     deleteButtonCheck();
@@ -155,12 +158,21 @@ export default function ActionCenter(props: ActionCenterProps) {
   const cloneButtonCheck = () => {
     if (
       canEdit &&
-      selectedTestCases?.length == 1 &&
+      selectedTestCases?.length === 1 &&
       selectedTestCases[0]?.validResource
     ) {
-      setDisableCloneBtn(false);
+      const testCaseTitle = selectedTestCases[0].title;
+
+      if (testCaseTitle.length >= 226) {
+        setDisableCloneBtn(true);
+        setCloneTooltipBtnMessage("The test case title is too long to clone");
+      } else {
+        setDisableCloneBtn(false);
+        setCloneTooltipBtnMessage("Clone test case");
+      }
     } else {
       setDisableCloneBtn(true);
+      setCloneTooltipBtnMessage("Select a valid test case to clone");
     }
   };
 
@@ -335,11 +347,7 @@ export default function ActionCenter(props: ActionCenterProps) {
 
               <Tooltip
                 data-testid="clone-tooltip"
-                title={
-                  disableCloneBtn
-                    ? "Select a valid test case to clone"
-                    : "Clone test case"
-                }
+                title={cloneTooltipBtnMessage}
                 placement="top"
                 arrow
               >
