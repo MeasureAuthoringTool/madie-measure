@@ -1,10 +1,12 @@
 import React, { Suspense } from "react";
 
 import PopulationCriteriaHome from "./PopulationCriteriaHome";
-const PopulationCriteriaWrapper = () => {
+const PopulationCriteriaWrapper = ({ measureLockedByAnotherUser }) => {
   return (
     <Suspense fallback={<div>loading</div>}>
-      <PopulationCriteriaHome />
+      <PopulationCriteriaHome
+        measureLockedByAnotherUser={measureLockedByAnotherUser}
+      />
     </Suspense>
   );
 };

@@ -18,7 +18,7 @@ export const COMPLETE = "complete";
 export const INCOMPLETE = "incomplete";
 export const NONE = "none";
 
-export function PopulationCriteriaHome() {
+export function PopulationCriteriaHome({ measureLockedByAnotherUser }) {
   const { pathname } = useLocation();
   const { groupNumber, measureId } = useParams();
   const measureServiceApi = useRef(useMeasureServiceApi()).current;
@@ -32,7 +32,8 @@ export function PopulationCriteriaHome() {
       measure?.measureSet?.owner,
       measure?.measureSet?.acls,
       measure?.measureMetaData?.draft
-    );
+    ) &&
+    !measureLockedByAnotherUser;
 
   const checkTestCasesLockStatus = async () => {
     if (featureFlags.Locking) {
@@ -291,6 +292,7 @@ export function PopulationCriteriaHome() {
             isTestCaseLocked={isTestCaseLocked}
             checkTestCasesLockStatus={checkTestCasesLockStatus}
             setAlertMessage={setAlertMessage}
+            measureLockedByAnotherUser={measureLockedByAnotherUser}
           />
         )}
 
@@ -304,6 +306,7 @@ export function PopulationCriteriaHome() {
             setAlertMessage={setAlertMessage}
             isTestCaseLocked={isTestCaseLocked}
             checkTestCasesLockStatus={checkTestCasesLockStatus}
+            measureLockedByAnotherUser={measureLockedByAnotherUser}
           />
         )}
         {/* what's a better way to say if QDM or QICore?
@@ -313,6 +316,7 @@ export function PopulationCriteriaHome() {
             isTestCaseLocked={isTestCaseLocked}
             checkTestCasesLockStatus={checkTestCasesLockStatus}
             setAlertMessage={setAlertMessage}
+            measureLockedByAnotherUser={measureLockedByAnotherUser}
           />
         )}
 
@@ -321,6 +325,7 @@ export function PopulationCriteriaHome() {
             isTestCaseLocked={isTestCaseLocked}
             checkTestCasesLockStatus={checkTestCasesLockStatus}
             setAlertMessage={setAlertMessage}
+            measureLockedByAnotherUser={measureLockedByAnotherUser}
           />
         )}
 
@@ -329,6 +334,7 @@ export function PopulationCriteriaHome() {
             isTestCaseLocked={isTestCaseLocked}
             checkTestCasesLockStatus={checkTestCasesLockStatus}
             setAlertMessage={setAlertMessage}
+            measureLockedByAnotherUser={measureLockedByAnotherUser}
           />
         )}
       </div>

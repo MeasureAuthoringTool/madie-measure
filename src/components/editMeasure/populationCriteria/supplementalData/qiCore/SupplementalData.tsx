@@ -49,6 +49,7 @@ export interface SupplementalDataProps {
   isTestCaseLocked: boolean;
   checkTestCasesLockStatus: Function;
   setAlertMessage: Function;
+  measureLockedByAnotherUser: boolean;
 }
 
 const SupplementalData = (props: SupplementalDataProps) => {
@@ -71,7 +72,8 @@ const SupplementalData = (props: SupplementalDataProps) => {
       measure?.measureSet?.owner,
       measure?.measureSet?.acls,
       measure?.measureMetaData?.draft
-    );
+    ) &&
+    !props.measureLockedByAnotherUser;
 
   // Fetching definitions from CQL to populate dropdown
   useEffect(() => {

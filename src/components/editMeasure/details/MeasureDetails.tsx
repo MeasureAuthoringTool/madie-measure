@@ -33,6 +33,7 @@ export interface MeasureDetailsProps {
   setErrorMessage: Function;
   isQDM: boolean;
   featureFlags;
+  measureLockedByAnotherUser: boolean;
 }
 
 export interface LinkItem {
@@ -50,7 +51,8 @@ export interface Link {
 }
 
 export default function MeasureDetails(props: MeasureDetailsProps) {
-  const { setErrorMessage, isQDM, featureFlags } = props;
+  const { setErrorMessage, isQDM, featureFlags, measureLockedByAnotherUser } =
+    props;
   const { measureId } = useParams();
   const measureServiceApi = useRef(useMeasureServiceApi()).current;
   useDocumentTitle("MADiE Edit Measure Details");
@@ -74,11 +76,13 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
   const measureReferencesLink = "measure-references";
 
   const [measure, setMeasure] = useState<any>(measureStore.state);
-  const canEdit: boolean = checkUserCanEdit(
-    measure?.measureSet?.owner,
-    measure?.measureSet?.acls,
-    measure?.measureMetaData?.draft
-  );
+  const canEdit: boolean =
+    checkUserCanEdit(
+      measure?.measureSet?.owner,
+      measure?.measureSet?.acls,
+      measure?.measureMetaData?.draft
+    ) && !props.measureLockedByAnotherUser;
+
   useEffect(() => {
     // Subscribe to store
     const subscription = measureStore.subscribe(setMeasure);
@@ -278,17 +282,30 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
         <Routes>
           <Route
             path={detailsLink}
-            element={<MeasureInformation setErrorMessage={setErrorMessage} />}
+            element={
+              <MeasureInformation
+                setErrorMessage={setErrorMessage}
+                measureLockedByAnotherUser={measureLockedByAnotherUser}
+              />
+            }
           />
           <Route
             path={modelPeriodLink}
             element={
-              <ModelAndMeasurementPeriod setErrorMessage={setErrorMessage} />
+              <ModelAndMeasurementPeriod
+                setErrorMessage={setErrorMessage}
+                measureLockedByAnotherUser={measureLockedByAnotherUser}
+              />
             }
           />
           <Route
             path={stewardLink}
-            element={<StewardAndDevelopers setErrorMessage={setErrorMessage} />}
+            element={
+              <StewardAndDevelopers
+                setErrorMessage={setErrorMessage}
+                measureLockedByAnotherUser={measureLockedByAnotherUser}
+              />
+            }
           />
           <Route
             path={descriptionLink}
@@ -299,6 +316,7 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
                 measureMetadataType="Description"
                 header="Description"
                 setErrorMessage={setErrorMessage}
+                measureLockedByAnotherUser={measureLockedByAnotherUser}
               />
             }
           />
@@ -310,6 +328,7 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
                 measureMetadataType="Copyright"
                 header="Copyright"
                 setErrorMessage={setErrorMessage}
+                measureLockedByAnotherUser={measureLockedByAnotherUser}
               />
             }
           />
@@ -321,6 +340,7 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
                 measureMetadataType="Disclaimer"
                 header="Disclaimer"
                 setErrorMessage={setErrorMessage}
+                measureLockedByAnotherUser={measureLockedByAnotherUser}
               />
             }
           />
@@ -332,6 +352,7 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
                 measureMetadataType="Rationale"
                 header="Rationale"
                 setErrorMessage={setErrorMessage}
+                measureLockedByAnotherUser={measureLockedByAnotherUser}
               />
             }
           />
@@ -344,6 +365,7 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
                   measureMetadataType="Purpose"
                   header="Purpose"
                   setErrorMessage={setErrorMessage}
+                  measureLockedByAnotherUser={measureLockedByAnotherUser}
                 />
               }
             />
@@ -356,6 +378,7 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
                 measureMetadataType="Guidance (Usage)"
                 header="Guidance (Usage)"
                 setErrorMessage={setErrorMessage}
+                measureLockedByAnotherUser={measureLockedByAnotherUser}
               />
             }
           />
@@ -367,6 +390,7 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
                 measureMetadataType="Clinical Recommendation Statement"
                 header="Clinical Recommendation"
                 setErrorMessage={setErrorMessage}
+                measureLockedByAnotherUser={measureLockedByAnotherUser}
               />
             }
           />
@@ -375,7 +399,10 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
               <Route
                 path={transmissionFormat}
                 element={
-                  <TransmissionFormat setErrorMessage={setErrorMessage} />
+                  <TransmissionFormat
+                    setErrorMessage={setErrorMessage}
+                    measureLockedByAnotherUser={measureLockedByAnotherUser}
+                  />
                 }
               />
               <Route
@@ -386,13 +413,17 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
                     measureMetadataType="Measure Set"
                     header="Measure Set"
                     setErrorMessage={setErrorMessage}
+                    measureLockedByAnotherUser={measureLockedByAnotherUser}
                   />
                 }
               />
               <Route
                 path={referencesLink}
                 element={
-                  <MeasureReferences setErrorMessage={setErrorMessage} />
+                  <MeasureReferences
+                    setErrorMessage={setErrorMessage}
+                    measureLockedByAnotherUser={measureLockedByAnotherUser}
+                  />
                 }
               />
 
@@ -404,6 +435,7 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
                     measureMetadataType="Definition"
                     header="Definition"
                     setErrorMessage={setErrorMessage}
+                    measureLockedByAnotherUser={measureLockedByAnotherUser}
                   />
                 }
               />
@@ -414,7 +446,10 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
               <Route
                 path={measureDefinitionLink}
                 element={
-                  <MeasureDefinitions setErrorMessage={setErrorMessage} />
+                  <MeasureDefinitions
+                    setErrorMessage={setErrorMessage}
+                    measureLockedByAnotherUser={measureLockedByAnotherUser}
+                  />
                 }
               />
             </>
@@ -424,7 +459,10 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
               <Route
                 path={measureReferencesLink}
                 element={
-                  <MeasureReferences setErrorMessage={setErrorMessage} />
+                  <MeasureReferences
+                    setErrorMessage={setErrorMessage}
+                    measureLockedByAnotherUser={measureLockedByAnotherUser}
+                  />
                 }
               />
             </>
