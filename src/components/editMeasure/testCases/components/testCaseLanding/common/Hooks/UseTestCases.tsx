@@ -280,14 +280,21 @@ function UseFetchTestCases({ measureId, setErrors }) {
 
   // We want to modify the local state of test cases on successful modifications
   const removeTestCases = (testCaseIds: string[]) => {
-    // works
+    // should show either deleting test casees or deleting test case based on length
+    setLoadingState({
+      loading: true,
+      message: `Deleting test case${testCaseIds.length > 1 ? "s" : ""}`,
+    });
     setTestCases((prevTestCases) =>
       prevTestCases.filter((testCase) => !testCaseIds.includes(testCase.id))
     );
+    setLoadingState({ loading: false, message: "" });
   };
   const insertTestCases = (newTestCases: TestCase[]) => {
+    setLoadingState({ loading: true, message: "Adding Test Case" });
     const updatedTestCases = [...newTestCases, ...testCases];
     setTestCases(updatedTestCases);
+    setLoadingState({ loading: false, message: "" });
   };
 
   useEffect(() => {
