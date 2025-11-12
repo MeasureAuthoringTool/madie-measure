@@ -21,8 +21,9 @@ $grey-19: #dddddd;
     > .chevron-display {
       color: $blue-60;
       transition: all 0.2s ease;
+      rotate: 90deg;
       &.open {
-        transform: rotate(90deg);
+        transform: rotate(-180deg);
       }
     }
   }
