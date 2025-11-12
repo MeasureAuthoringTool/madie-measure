@@ -469,7 +469,6 @@ const TestCaseTable = (props: TestCaseTableProps) => {
   });
   // unchecks boxes on page change or testCases change
   useEffect(() => {
-    if (!table) return;
     const clearSelection = () => {
       //deslect on page change
       if (props.page && table.toggleAllRowsSelected) {

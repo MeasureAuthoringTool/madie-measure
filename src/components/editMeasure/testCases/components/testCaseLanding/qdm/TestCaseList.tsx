@@ -115,7 +115,6 @@ const TestCaseList = (props: TestCaseListProps) => {
     setTestCases,
     insertTestCases,
     removeTestCases,
-    removeAllTestCases,
     testCaseService,
     loadingState,
     setLoadingState,

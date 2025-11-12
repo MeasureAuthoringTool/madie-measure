@@ -289,10 +289,6 @@ function UseFetchTestCases({ measureId, setErrors }) {
     const updatedTestCases = [...newTestCases, ...testCases];
     setTestCases(updatedTestCases);
   };
-  const removeAllTestCases = () => {
-    // works
-    setTestCases([]);
-  };
 
   useEffect(() => {
     retrieveTestCases();
@@ -303,7 +299,6 @@ function UseFetchTestCases({ measureId, setErrors }) {
     testCases: sortedTestCases, //all test cases to run execution against
     testCasePage, //all pagination required values
     removeTestCases,
-    removeAllTestCases,
     insertTestCases,
     setTestCases,
     loadingState,

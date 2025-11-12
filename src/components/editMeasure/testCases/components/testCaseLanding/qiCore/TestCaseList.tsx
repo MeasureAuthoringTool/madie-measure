@@ -98,7 +98,6 @@ const TestCaseList = (props: TestCaseListProps) => {
     testCaseService,
     insertTestCases,
     removeTestCases,
-    removeAllTestCases,
     loadingState,
     setLoadingState,
     retrieveTestCases,
@@ -166,8 +165,6 @@ const TestCaseList = (props: TestCaseListProps) => {
   const [selectedPopCriteria, setSelectedPopCriteria] = useState<Group>();
 
   const [openImportDialog, setOpenImportDialog] = useState<boolean>(false);
-  const [openDeleteAllTestCasesDialog, setOpenDeleteAllTestCasesDialog] =
-    useState<boolean>(false);
   const abortController = useRef(null);
   const [createOpen, setCreateOpen] = useState<boolean>(false);
   const [deleteDialogModalOpen, setDeleteDialogModalOpen] =
@@ -342,23 +339,6 @@ const TestCaseList = (props: TestCaseListProps) => {
         } else {
           setErrors((prevState) => [...prevState, err.message]);
         }
-      });
-  };
-
-  const deleteAllTestCases = () => {
-    const currentTestCaseIds = _.map(measure.testCases, "id");
-    testCaseService.current
-      .deleteTestCases(measureId, currentTestCaseIds)
-      .then(() => {
-        setOpenDeleteAllTestCasesDialog(false);
-        setToastOpen(true);
-        setToastType("success");
-        setToastMessage("Test cases successfully deleted");
-        removeAllTestCases();
-      })
-      .catch((err) => {
-        setOpenDeleteAllTestCasesDialog(false);
-        setErrors((prevState) => [...prevState, err?.response?.data?.message]);
       });
   };
 
@@ -783,17 +763,6 @@ const TestCaseList = (props: TestCaseListProps) => {
           <Typography color="inherit">{loadingState.message}</Typography>
         </div>
       )}
-      <MadieDeleteDialog
-        open={openDeleteAllTestCasesDialog}
-        onContinue={() => {
-          deleteAllTestCases();
-        }}
-        onClose={() => {
-          setOpenDeleteAllTestCasesDialog(false);
-        }}
-        dialogTitle="Delete All Test Cases"
-        name="All Test Cases"
-      />
       <CopyTestCaseDialog
         selectedTestCases={selectedTestCases}
         open={openCopyTestCaseDialog}
