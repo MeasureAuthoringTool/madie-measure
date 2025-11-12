@@ -7,7 +7,7 @@ import {
   Button,
   MadieDiscardDialog,
 } from "@madie/madie-design-system/dist/react";
-import { MenuItem, Chip } from "@mui/material";
+import { MenuItem, Chip, Tooltip } from "@mui/material";
 import _ from "lodash";
 import {
   DataElement,
@@ -102,6 +102,7 @@ const Codes = ({
           return {
             text: `${codeSystemDisplayName}: ${codes.code}`,
             id: `${codeSystemDisplayName}_${codes.code}`,
+            version: codes.version?.replace(/urn:hl7:version:/g, ""),
           };
         }
       );
@@ -327,14 +328,21 @@ const Codes = ({
       <div tw="flex flex-wrap gap-2">
         {chips.map((chip) => {
           return (
-            <Chip
-              disabled={!canEdit}
-              id={chip?.id}
-              data-testid={chip?.id}
-              className={classes.customChips}
-              label={chip?.text}
-              onDelete={() => handleDeleteCode(chip)}
-            />
+            <Tooltip
+              title={`Code System Version: ${chip.version}`}
+              data-testid={`chip-tooltip-${chip?.id}`}
+            >
+              <span>
+                <Chip
+                  disabled={!canEdit}
+                  id={chip?.id}
+                  data-testid={chip?.id}
+                  className={classes.customChips}
+                  label={chip?.text}
+                  onDelete={() => handleDeleteCode(chip)}
+                />
+              </span>
+            </Tooltip>
           );
         })}
       </div>

@@ -18,10 +18,11 @@ import TextEditor from "../../populationCriteria/groups/TextEditor";
 
 interface TransmissionFormatProps {
   setErrorMessage: Function;
+  measureLockedByAnotherUser: boolean;
 }
 
 const TransmissionFormat = (props: TransmissionFormatProps) => {
-  const { setErrorMessage } = props;
+  const { setErrorMessage, measureLockedByAnotherUser } = props;
   const measureServiceApi = useMeasureServiceApi();
   const { updateMeasure } = measureStore;
   const [measure, setMeasure] = useState<any>(measureStore.state);
@@ -46,11 +47,12 @@ const TransmissionFormat = (props: TransmissionFormatProps) => {
     setToastOpen(open);
   };
   // Form utilities
-  const canEdit = checkUserCanEdit(
-    measure?.measureSet?.owner,
-    measure?.measureSet?.acls,
-    measure?.measureMetaData?.draft
-  );
+  const canEdit =
+    checkUserCanEdit(
+      measure?.measureSet?.owner,
+      measure?.measureSet?.acls,
+      measure?.measureMetaData?.draft
+    ) && !measureLockedByAnotherUser;
   const INITIAL_VALUES = {
     transmissionFormat: measure?.measureMetaData?.transmissionFormat || "",
   };

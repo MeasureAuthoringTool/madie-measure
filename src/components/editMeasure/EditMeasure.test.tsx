@@ -197,6 +197,7 @@ jest.mock("@madie/madie-util", () => ({
   checkUserCanEdit: jest.fn(),
   useFeatureFlags: jest.fn(() => ({
     TransferMeasure: true,
+    Locking: false,
   })),
   measureStore: {
     updateMeasure: jest.fn((measure) => measure),
@@ -953,5 +954,31 @@ describe("EditMeasure Component", () => {
       },
       { timeout: 3000 }
     );
+  });
+
+  test("Renders in read-only mode when measure is locked", async () => {
+    useFeatureFlags.mockImplementation(() => ({
+      TransferMeasure: true,
+      Locking: true,
+    }));
+    const lockedMeasure = {
+      ...measure,
+      measureLock: { lockedBy: "anotherUser" },
+    };
+    measureStore.state.mockImplementation(() => lockedMeasure);
+
+    renderRouter();
+
+    const result = await findByTestId("editMeasure");
+    expect(result).toBeInTheDocument();
+    expect(mockMeasureServiceApi.fetchMeasure).toHaveBeenCalled();
+    const loading = queryByTestId("loading");
+    expect(loading).toBeNull();
+
+    const detailsLink = await findByText("Details");
+    expect(detailsLink).toBeInTheDocument();
+    await waitFor(() => {
+      expect(detailsLink).toHaveAttribute("aria-selected", "true");
+    });
   });
 });

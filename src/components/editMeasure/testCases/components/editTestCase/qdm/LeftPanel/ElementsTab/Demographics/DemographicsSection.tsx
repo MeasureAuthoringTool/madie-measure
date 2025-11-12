@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import ElementSection from "../../../../../common/UIOnlyModelAgnostic/ElementSection";
-import { Select } from "@madie/madie-design-system/dist/react";
+import { MadieTooltip, Select } from "@madie/madie-design-system/dist/react";
 import FormControl from "@mui/material/FormControl";
 import { DataElement, ValueSet } from "cqm-models";
 import DateTimeInput from "../../../../../QDM/dateTimeInput/DateTimeInput";
@@ -21,7 +21,7 @@ import {
   getValueSetsForDemographic,
   getDataElementByStatus,
 } from "./DemographicsSectionConst";
-import { MenuItem } from "@mui/material";
+import { MenuItem, Tooltip } from "@mui/material";
 import {
   PatientActionType,
   useQdmPatient,
@@ -343,7 +343,7 @@ const DemographicsSection = ({ handleTestCaseWarnings, canEdit }) => {
         children={
           <div className="demographics-container">
             {/* container */}
-            <div className="demographics-row">
+            <div className={`demographics-row ${!canEdit ? "readonly" : ""}`}>
               <DateTimeInput
                 label="Date of Birth"
                 canEdit={canEdit}
@@ -397,51 +397,77 @@ const DemographicsSection = ({ handleTestCaseWarnings, canEdit }) => {
               )}
 
               <FormControl>
-                <Select
-                  id="demographics-race-selector"
-                  label="Race"
-                  readOnly={!canEdit}
-                  inputProps={{
-                    "data-testid": `demographics-race-input`,
-                  }}
-                  value={raceDataElement?.dataElementCodes?.[0].display ?? ""}
-                  placeHolder={{ name: "Select a Race", value: "" }}
-                  onChange={handleRaceChange}
-                  options={selectOptions(raceValueSets, true)}
-                ></Select>
+                <Tooltip
+                  title={`Code System Version: ${raceValueSets?.[0]?.concepts?.[0]?.version}`}
+                  data-testid={`demographics-race-tooltip`}
+                >
+                  <span>
+                    <Select
+                      id="demographics-race-selector"
+                      label="Race"
+                      readOnly={!canEdit}
+                      inputProps={{
+                        "data-testid": `demographics-race-input`,
+                      }}
+                      value={
+                        raceDataElement?.dataElementCodes?.[0].display ?? ""
+                      }
+                      placeHolder={{ name: "Select a Race", value: "" }}
+                      onChange={handleRaceChange}
+                      options={selectOptions(raceValueSets, true)}
+                    ></Select>
+                  </span>
+                </Tooltip>
               </FormControl>
               <FormControl>
-                <Select
-                  id="demographics-gender-selector"
-                  label="Sex"
-                  readOnly={!canEdit}
-                  inputProps={{
-                    "data-testid": `demographics-gender-input`,
-                  }}
-                  value={genderDataElement?.dataElementCodes?.[0].display ?? ""}
-                  placeHolder={{ name: "Select a Gender", value: "" }}
-                  onChange={handleGenderChange}
-                  options={selectOptions(genderValueSets, true)}
-                ></Select>
+                <Tooltip
+                  title={`Code System Version: ${genderValueSets?.[0]?.concepts?.[0]?.version}`}
+                  data-testid={`demographics-gender-tooltip`}
+                >
+                  <span>
+                    <Select
+                      id="demographics-gender-selector"
+                      label="Sex"
+                      readOnly={!canEdit}
+                      inputProps={{
+                        "data-testid": `demographics-gender-input`,
+                      }}
+                      value={
+                        genderDataElement?.dataElementCodes?.[0].display ?? ""
+                      }
+                      placeHolder={{ name: "Select a Gender", value: "" }}
+                      onChange={handleGenderChange}
+                      options={selectOptions(genderValueSets, true)}
+                    ></Select>
+                  </span>
+                </Tooltip>
               </FormControl>
             </div>
             <div className="demographics-row">
               <FormControl>
-                <Select
-                  id="demographics-ethnicity-selector"
-                  label="Ethnicity"
-                  className="demographics-ethnicity"
-                  readOnly={!canEdit}
-                  inputProps={{
-                    "data-testid": `demographics-ethnicity-input`,
-                  }}
-                  value={
-                    ethnicityDataElement?.dataElementCodes?.[0].display ?? ""
-                  }
-                  placeHolder={{ name: "Select an Ethnicity", value: "" }}
-                  onChange={handleEthnicityChange}
-                  options={selectOptions(ethnicityValueSets, true)}
-                ></Select>
+                <Tooltip
+                  title={`Code System Version: ${ethnicityValueSets?.[0]?.concepts?.[0]?.version}`}
+                  data-testid={`demographics-ethnicity-tooltip`}
+                >
+                  <span>
+                    <Select
+                      id="demographics-ethnicity-selector"
+                      label="Ethnicity"
+                      className="demographics-ethnicity"
+                      readOnly={!canEdit}
+                      inputProps={{
+                        "data-testid": `demographics-ethnicity-input`,
+                      }}
+                      value={
+                        ethnicityDataElement?.dataElementCodes?.[0].display ??
+                        ""
+                      }
+                      placeHolder={{ name: "Select an Ethnicity", value: "" }}
+                      onChange={handleEthnicityChange}
+                      options={selectOptions(ethnicityValueSets, true)}
+                    ></Select>
+                  </span>
+                </Tooltip>
               </FormControl>
             </div>
           </div>

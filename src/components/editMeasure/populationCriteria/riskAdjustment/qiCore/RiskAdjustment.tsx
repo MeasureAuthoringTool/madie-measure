@@ -49,6 +49,7 @@ export interface RiskAdjustmentProps {
   isTestCaseLocked: boolean;
   checkTestCasesLockStatus: Function;
   setAlertMessage: Function;
+  measureLockedByAnotherUser: boolean;
 }
 const RiskAdjustment = (props: RiskAdjustmentProps) => {
   const [measure, setMeasure] = useState<Measure>(measureStore.state);
@@ -70,7 +71,8 @@ const RiskAdjustment = (props: RiskAdjustmentProps) => {
       measure?.measureSet?.owner,
       measure?.measureSet?.acls,
       measure?.measureMetaData?.draft
-    );
+    ) &&
+    !props.measureLockedByAnotherUser;
 
   // Fetching definitions from CQL to populate dropdown
   useEffect(() => {
