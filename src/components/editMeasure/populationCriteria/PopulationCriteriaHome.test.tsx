@@ -155,9 +155,6 @@ jest.mock("@madie/madie-util", () => ({
   useOktaTokens: () => ({
     getAccessToken: () => "test.jwt",
   }),
-  checkUserCanEdit: jest.fn(() => {
-    return true;
-  }),
   routeHandlerStore: {
     subscribe: () => {
       return { unsubscribe: () => null };
@@ -183,7 +180,7 @@ const renderPopulationCriteriaHomeComponent = async (
         <Routes>
           <Route
             path={`/measures/testMeasureId/edit/${routePath}`}
-            element={<PopulationCriteriaWrapper />}
+            element={<PopulationCriteriaWrapper measureCanEdit={true} />}
           />
         </Routes>
       </ApiContextProvider>
@@ -587,7 +584,7 @@ describe("PopulationCriteriaHome", () => {
           <Routes>
             <Route
               path="/measures/:measureId/edit/groups/:groupNumber"
-              element={<PopulationCriteriaWrapper />}
+              element={<PopulationCriteriaWrapper measureCanEdit={true} />}
             />
           </Routes>
         </ApiContextProvider>
@@ -619,7 +616,7 @@ describe("PopulationCriteriaHome", () => {
           <Routes>
             <Route
               path="/measures/:measureId/edit/groups/:groupNumber"
-              element={<PopulationCriteriaWrapper />}
+              element={<PopulationCriteriaWrapper measureCanEdit={true} />}
             />
           </Routes>
         </ApiContextProvider>

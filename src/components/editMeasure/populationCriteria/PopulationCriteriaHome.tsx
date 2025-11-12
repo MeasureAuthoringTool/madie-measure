@@ -4,7 +4,6 @@ import "styled-components/macro";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import PopulationCriteriaSideNav from "./populationCriteriaSideNav/PopulationCriteriaSideNav";
 import {
-  checkUserCanEdit,
   measureStore,
   useFeatureFlags,
   useMeasureServiceApi,
@@ -18,7 +17,7 @@ export const COMPLETE = "complete";
 export const INCOMPLETE = "incomplete";
 export const NONE = "none";
 
-export function PopulationCriteriaHome({ measureLockedByAnotherUser }) {
+export function PopulationCriteriaHome({ measureCanEdit }) {
   const { pathname } = useLocation();
   const { groupNumber, measureId } = useParams();
   const measureServiceApi = useRef(useMeasureServiceApi()).current;
@@ -26,14 +25,7 @@ export function PopulationCriteriaHome({ measureLockedByAnotherUser }) {
   const featureFlags = useFeatureFlags();
   const [isTestCaseLocked, setIsTestCaseLocked] = useState<any>(false);
 
-  const canEdit =
-    !isTestCaseLocked &&
-    checkUserCanEdit(
-      measure?.measureSet?.owner,
-      measure?.measureSet?.acls,
-      measure?.measureMetaData?.draft
-    ) &&
-    !measureLockedByAnotherUser;
+  const canEdit = !isTestCaseLocked && measureCanEdit;
 
   const checkTestCasesLockStatus = async () => {
     if (featureFlags.Locking) {
@@ -292,7 +284,7 @@ export function PopulationCriteriaHome({ measureLockedByAnotherUser }) {
             isTestCaseLocked={isTestCaseLocked}
             checkTestCasesLockStatus={checkTestCasesLockStatus}
             setAlertMessage={setAlertMessage}
-            measureLockedByAnotherUser={measureLockedByAnotherUser}
+            measureCanEdit={measureCanEdit}
           />
         )}
 
@@ -306,7 +298,7 @@ export function PopulationCriteriaHome({ measureLockedByAnotherUser }) {
             setAlertMessage={setAlertMessage}
             isTestCaseLocked={isTestCaseLocked}
             checkTestCasesLockStatus={checkTestCasesLockStatus}
-            measureLockedByAnotherUser={measureLockedByAnotherUser}
+            measureCanEdit={measureCanEdit}
           />
         )}
         {/* what's a better way to say if QDM or QICore?
@@ -316,7 +308,7 @@ export function PopulationCriteriaHome({ measureLockedByAnotherUser }) {
             isTestCaseLocked={isTestCaseLocked}
             checkTestCasesLockStatus={checkTestCasesLockStatus}
             setAlertMessage={setAlertMessage}
-            measureLockedByAnotherUser={measureLockedByAnotherUser}
+            measureCanEdit={measureCanEdit}
           />
         )}
 
@@ -325,7 +317,7 @@ export function PopulationCriteriaHome({ measureLockedByAnotherUser }) {
             isTestCaseLocked={isTestCaseLocked}
             checkTestCasesLockStatus={checkTestCasesLockStatus}
             setAlertMessage={setAlertMessage}
-            measureLockedByAnotherUser={measureLockedByAnotherUser}
+            measureCanEdit={measureCanEdit}
           />
         )}
 
@@ -334,7 +326,7 @@ export function PopulationCriteriaHome({ measureLockedByAnotherUser }) {
             isTestCaseLocked={isTestCaseLocked}
             checkTestCasesLockStatus={checkTestCasesLockStatus}
             setAlertMessage={setAlertMessage}
-            measureLockedByAnotherUser={measureLockedByAnotherUser}
+            measureCanEdit={measureCanEdit}
           />
         )}
       </div>

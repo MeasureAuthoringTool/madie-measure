@@ -12,7 +12,6 @@ import { Measure } from "@madie/madie-models";
 import QDMReporting from "./QDMReporting";
 import userEvent from "@testing-library/user-event";
 import {
-  checkUserCanEdit,
   measureStore,
   useFeatureFlags,
   MeasureServiceApi,
@@ -66,9 +65,6 @@ jest.mock("@madie/madie-util", () => ({
     state: { canTravel: true, pendingPath: "" },
     initialState: { canTravel: true, pendingPath: "" },
   },
-  checkUserCanEdit: jest.fn(() => {
-    return true;
-  }),
   useFeatureFlags: jest.fn(() => ({
     Locking: false,
   })),
@@ -81,7 +77,6 @@ const otherNotation = "Other";
 describe("QDMReporting component", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    checkUserCanEdit.mockReturnValue(true);
     measureStore.state = jest.fn().mockImplementation(() => measure);
   });
   afterEach(() => {
@@ -93,7 +88,14 @@ describe("QDMReporting component", () => {
   const { getByText, getByRole, getByLabelText } = screen;
 
   test("QDMReporting renders to correctly with defaults", async () => {
-    render(<QDMReporting />);
+    render(
+      <QDMReporting
+        isTestCaseLocked={false}
+        checkTestCasesLockStatus={jest.fn()}
+        setAlertMessage={jest.fn()}
+        measureCanEdit={true}
+      />
+    );
 
     const rateAggregation = await screen.getByTestId(
       "rate-aggregation-rich-text-editor"
@@ -116,7 +118,14 @@ describe("QDMReporting component", () => {
       improvementNotation: "Increased score indicates improvement",
     };
     measureStore.state = jest.fn().mockImplementation(() => newMeasure);
-    render(<QDMReporting />);
+    render(
+      <QDMReporting
+        isTestCaseLocked={false}
+        checkTestCasesLockStatus={jest.fn()}
+        setAlertMessage={jest.fn()}
+        measureCanEdit={true}
+      />
+    );
 
     const rateAggregation = await screen.getByTestId(
       "rate-aggregation-rich-text-editor"
@@ -133,7 +142,14 @@ describe("QDMReporting component", () => {
   });
 
   test("Change enables Discard button and Keep working action should retain changes", async () => {
-    render(<QDMReporting />);
+    render(
+      <QDMReporting
+        isTestCaseLocked={false}
+        checkTestCasesLockStatus={jest.fn()}
+        setAlertMessage={jest.fn()}
+        measureCanEdit={true}
+      />
+    );
     const descriptionEditor = screen.getByTestId(
       "rate-aggregation-rich-text-editor"
     );
@@ -179,7 +195,14 @@ describe("QDMReporting component", () => {
   });
 
   test("Change enables Discard button and Discard changes action should discard changes", async () => {
-    render(<QDMReporting />);
+    render(
+      <QDMReporting
+        isTestCaseLocked={false}
+        checkTestCasesLockStatus={jest.fn()}
+        setAlertMessage={jest.fn()}
+        measureCanEdit={true}
+      />
+    );
 
     const descriptionEditor = screen.getByTestId(
       "rate-aggregation-rich-text-editor"
@@ -234,7 +257,14 @@ describe("QDMReporting component", () => {
       status: 200,
     });
 
-    render(<QDMReporting />);
+    render(
+      <QDMReporting
+        isTestCaseLocked={false}
+        checkTestCasesLockStatus={jest.fn()}
+        setAlertMessage={jest.fn()}
+        measureCanEdit={true}
+      />
+    );
 
     const descriptionEditor = screen.getByTestId(
       "rate-aggregation-rich-text-editor"
@@ -296,7 +326,14 @@ describe("QDMReporting component", () => {
       response: { data: { message: "update failed" } },
     });
 
-    render(<QDMReporting />);
+    render(
+      <QDMReporting
+        isTestCaseLocked={false}
+        checkTestCasesLockStatus={jest.fn()}
+        setAlertMessage={jest.fn()}
+        measureCanEdit={true}
+      />
+    );
 
     const descriptionEditor = screen.getByTestId(
       "rate-aggregation-rich-text-editor"
@@ -351,7 +388,14 @@ describe("QDMReporting component", () => {
   });
 
   test("Improvement Notation description is mandatory for 'Other' Improvement Notation", async () => {
-    render(<QDMReporting />);
+    render(
+      <QDMReporting
+        isTestCaseLocked={false}
+        checkTestCasesLockStatus={jest.fn()}
+        setAlertMessage={jest.fn()}
+        measureCanEdit={true}
+      />
+    );
 
     const descriptionEditor = screen.getByTestId(
       "improvement-notation-description-rich-text-editor"
@@ -384,7 +428,14 @@ describe("QDMReporting component", () => {
   });
 
   test("Improvement Notation description is not mandatory for Increased Improvement Notation", async () => {
-    render(<QDMReporting />);
+    render(
+      <QDMReporting
+        isTestCaseLocked={false}
+        checkTestCasesLockStatus={jest.fn()}
+        setAlertMessage={jest.fn()}
+        measureCanEdit={true}
+      />
+    );
     const descriptionEditor = screen.getByTestId(
       "improvement-notation-description-rich-text-editor"
     );
@@ -401,7 +452,14 @@ describe("QDMReporting component", () => {
   });
 
   test("Improvement Notation description is not mandatory for 'Increased Improvement Notation'", async () => {
-    render(<QDMReporting />);
+    render(
+      <QDMReporting
+        isTestCaseLocked={false}
+        checkTestCasesLockStatus={jest.fn()}
+        setAlertMessage={jest.fn()}
+        measureCanEdit={true}
+      />
+    );
 
     let editor = within(
       screen.getByTestId("improvement-notation-description-rich-text-editor")
@@ -430,7 +488,14 @@ describe("QDMReporting component", () => {
   });
 
   test("Improvement Notation description is mandatory for 'Other'", async () => {
-    render(<QDMReporting />);
+    render(
+      <QDMReporting
+        isTestCaseLocked={false}
+        checkTestCasesLockStatus={jest.fn()}
+        setAlertMessage={jest.fn()}
+        measureCanEdit={true}
+      />
+    );
 
     let editor = within(
       screen.getByTestId("improvement-notation-description-rich-text-editor")
@@ -468,10 +533,15 @@ describe("QDMReporting component", () => {
     });
   });
 
-  test("Improvement Notation and Increased Notation Description are both read only fields when checkUserCanEdit returns false", async () => {
-    checkUserCanEdit.mockReturnValue(false);
-
-    render(<QDMReporting />);
+  test("Improvement Notation and Increased Notation Description are both read only fields when measure is not editable", async () => {
+    render(
+      <QDMReporting
+        isTestCaseLocked={true}
+        checkTestCasesLockStatus={jest.fn()}
+        setAlertMessage={jest.fn()}
+        measureCanEdit={false}
+      />
+    );
 
     const improvementNotationSelect = screen.getByTestId(
       "improvement-notation-select"
@@ -491,6 +561,7 @@ describe("QDMReporting component", () => {
         isTestCaseLocked={true}
         checkTestCasesLockStatus={jest.fn()}
         setAlertMessage={jest.fn()}
+        measureCanEdit={false}
       />
     );
 
@@ -518,6 +589,7 @@ describe("QDMReporting component", () => {
         isTestCaseLocked={false}
         checkTestCasesLockStatus={checkTestCasesLockStatusMock}
         setAlertMessage={setAlertMessageMock}
+        measureCanEdit={true}
       />
     );
 

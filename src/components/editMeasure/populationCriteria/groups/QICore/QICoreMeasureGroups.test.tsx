@@ -31,7 +31,6 @@ import * as _ from "lodash";
 // @ts-ignore
 import {
   measureStore,
-  checkUserCanEdit,
   MeasureServiceApi,
   useFeatureFlags,
 } from "@madie/madie-util";
@@ -130,9 +129,6 @@ jest.mock("@madie/madie-util", () => ({
   useOktaTokens: () => ({
     getAccessToken: () => "test.jwt",
   }),
-  checkUserCanEdit: jest.fn(() => {
-    return true;
-  }),
   useFeatureFlags: jest.fn(() => ({
     Locking: false,
   })),
@@ -152,8 +148,14 @@ const props: MeasureGroupProps = {
   setIsFormDirty: jest.fn,
   measureId: "testMeasureId",
   setAlertMessage: jest.fn,
-  isTestCaseLocked: false,
   checkTestCasesLockStatus: jest.fn,
+  isTestCaseLocked: true,
+  measureCanEdit: false,
+};
+const customProps: MeasureGroupProps = {
+  ...props,
+  isTestCaseLocked: false,
+  measureCanEdit: true,
 };
 
 describe("Measure Groups Page", () => {
@@ -240,7 +242,7 @@ describe("Measure Groups Page", () => {
   };
 
   test("Measure Group Scoring renders to correct options length, and defaults to empty string", async () => {
-    renderMeasureGroupComponent();
+    renderMeasureGroupComponent(customProps);
     const scoringSelectInput = screen.getByTestId(
       "scoring-select-input"
     ) as HTMLInputElement;
@@ -254,7 +256,7 @@ describe("Measure Groups Page", () => {
 
   // Todo Need to fix this test case
   test.skip("MeasureGroups renders a list of definitions based on parsed CQL", async () => {
-    renderMeasureGroupComponent();
+    renderMeasureGroupComponent(customProps);
 
     // Test that each Scoring selection displays the correct population filters
     await act(async () => {
@@ -316,7 +318,7 @@ describe("Measure Groups Page", () => {
     group.id = "";
     measure.groups = [group];
 
-    await waitFor(() => renderMeasureGroupComponent());
+    await waitFor(() => renderMeasureGroupComponent(customProps));
     // verifies if the scoring value is population from group object
     const scoringSelectInput = screen.getByTestId(
       "scoring-select-input"
@@ -341,7 +343,7 @@ describe("Measure Groups Page", () => {
 
   test("Should create population Group with one initial population successfully", async () => {
     const populationBasis = "Encounter";
-    await waitFor(() => renderMeasureGroupComponent());
+    await waitFor(() => renderMeasureGroupComponent(customProps));
     await changePopulationBasis(populationBasis);
 
     const descriptionEditor = screen.getByTestId(
@@ -444,7 +446,7 @@ describe("Measure Groups Page", () => {
     group.id = "7p03-5r29-7O0I";
     group.groupDescription = "testDescription";
     measure.groups = [group];
-    await waitFor(() => renderMeasureGroupComponent());
+    await waitFor(() => renderMeasureGroupComponent(customProps));
 
     expect(screen.getByTestId("title").textContent).toBe(
       "Population Criteria 1"
@@ -477,7 +479,7 @@ describe("Measure Groups Page", () => {
     group.id = "7p03-5r29-7O0I";
     group.groupDescription = "testDescription";
     measure.groups = [group];
-    const { rerender } = renderMeasureGroupComponent();
+    const { rerender } = renderMeasureGroupComponent(customProps);
 
     expect(screen.getByTestId("title").textContent).toBe(
       "Population Criteria 1"
@@ -519,7 +521,7 @@ describe("Measure Groups Page", () => {
     group.improvementNotation = "Increased score indicates improvement";
     group.improvementNotationDescription = "Large";
     measure.groups = [group];
-    await waitFor(() => renderMeasureGroupComponent());
+    await waitFor(() => renderMeasureGroupComponent(customProps));
 
     expect(screen.getByTestId("populations-tab")).toBeInTheDocument();
 
@@ -543,7 +545,7 @@ describe("Measure Groups Page", () => {
 
   test("Should be able to save multiple groups  ", async () => {
     const populationBasis = "Encounter";
-    const { rerender } = renderMeasureGroupComponent();
+    const { rerender } = renderMeasureGroupComponent(customProps);
     await changePopulationBasis(populationBasis);
 
     // select a scoring
@@ -638,6 +640,7 @@ describe("Measure Groups Page", () => {
                   setAlertMessage={jest.fn}
                   isTestCaseLocked={false}
                   checkTestCasesLockStatus={jest.fn}
+                  measureCanEdit={true}
                 />
               }
             ></Route>
@@ -729,7 +732,7 @@ describe("Measure Groups Page", () => {
     group.scoringPrecision = "2";
     group.populationBasis = populationBasis;
     measure.groups = [group];
-    const { getByTestId, getByText } = renderMeasureGroupComponent();
+    const { getByTestId, getByText } = renderMeasureGroupComponent(customProps);
     // initial population before update
     const groupPopulationInput = screen.getByTestId(
       "select-measure-group-population-input"
@@ -824,7 +827,7 @@ describe("Measure Groups Page", () => {
     };
     measure.groups = [newGroup];
 
-    await waitFor(() => renderMeasureGroupComponent());
+    await waitFor(() => renderMeasureGroupComponent(customProps));
     const popBasisSelect = screen.getByRole("combobox", {
       name: "Population Basis",
     }) as HTMLInputElement;
@@ -928,7 +931,7 @@ describe("Measure Groups Page", () => {
     };
     measure.groups = [newGroup];
 
-    await waitFor(() => renderMeasureGroupComponent());
+    await waitFor(() => renderMeasureGroupComponent(customProps));
     const scoringSelectInput = screen.getByTestId(
       "scoring-select-input"
     ) as HTMLInputElement;
@@ -1017,7 +1020,7 @@ describe("Measure Groups Page", () => {
     group.improvementNotation = "Increased score indicates improvement";
     measure.groups = [group];
 
-    await waitFor(() => renderMeasureGroupComponent());
+    await waitFor(() => renderMeasureGroupComponent(customProps));
 
     // verify is the scoring type is Cohort
     const scoringSelectInput = screen.getByTestId(
@@ -1093,7 +1096,7 @@ describe("Measure Groups Page", () => {
   });
 
   test("Should not display a success toast if server fails to create population Group", async () => {
-    renderMeasureGroupComponent();
+    renderMeasureGroupComponent(customProps);
     await changePopulationBasis("Encounter");
     // select a scoring
     const scoringSelect = screen.getByTestId("scoring-select");
@@ -1142,7 +1145,7 @@ describe("Measure Groups Page", () => {
     group.measureGroupTypes = [MeasureGroupTypes.PROCESS];
     group.populationBasis = "MedicationAdministration";
     measure.groups = [group];
-    renderMeasureGroupComponent();
+    renderMeasureGroupComponent(customProps);
 
     // update initial population from dropdown
     const definitionToUpdate =
@@ -1178,7 +1181,7 @@ describe("Measure Groups Page", () => {
     group.measureGroupTypes = [MeasureGroupTypes.PROCESS];
     group.populationBasis = "MedicationAdministration";
     measure.groups = [group];
-    renderMeasureGroupComponent();
+    renderMeasureGroupComponent(customProps);
 
     // update initial population from dropdown
     const definitionToUpdate =
@@ -1210,7 +1213,7 @@ describe("Measure Groups Page", () => {
   });
 
   test("Form displays message next to save button about required populations", async () => {
-    await waitFor(() => renderMeasureGroupComponent());
+    await waitFor(() => renderMeasureGroupComponent(customProps));
     expect(screen.getByRole("button", { name: "Save" })).toBeDisabled();
     expect(
       screen.getByText("You must set all required Populations.")
@@ -1218,7 +1221,7 @@ describe("Measure Groups Page", () => {
   });
 
   test("Save button is disabled until all required Cohort populations are entered", async () => {
-    renderMeasureGroupComponent();
+    renderMeasureGroupComponent(customProps);
     expect(screen.getByRole("button", { name: "Save" })).toBeDisabled();
     await changePopulationBasis("Encounter");
     // select a scoring
@@ -1264,7 +1267,7 @@ describe("Measure Groups Page", () => {
   });
 
   test.skip("Save button is disabled until all required Proportion populations are entered", async () => {
-    renderMeasureGroupComponent();
+    renderMeasureGroupComponent(customProps);
     await changePopulationBasis("Encounter");
 
     // Select the scoring value to Proportion
@@ -1308,7 +1311,7 @@ describe("Measure Groups Page", () => {
   });
 
   it.skip("Save button is disabled until all required Ratio populations are entered", async () => {
-    renderMeasureGroupComponent();
+    renderMeasureGroupComponent(customProps);
     await changePopulationBasis("Encounter");
 
     // Select the scoring value to RATIO
@@ -1360,7 +1363,7 @@ describe("Measure Groups Page", () => {
   });
 
   test("Save button is disabled until all required CV populations are entered", async () => {
-    renderMeasureGroupComponent();
+    renderMeasureGroupComponent(customProps);
     await changePopulationBasis("Encounter");
 
     // Select scoring to CONTINUOUS_VARIABLE
@@ -1438,7 +1441,9 @@ describe("Measure Groups Page", () => {
   });
 
   test("should display default select for scoring unit", async () => {
-    const { getByTestId } = await waitFor(() => renderMeasureGroupComponent());
+    const { getByTestId } = await waitFor(() =>
+      renderMeasureGroupComponent(customProps)
+    );
     const scoringUnitLabel = getByTestId("scoring-unit-text-input");
     expect(scoringUnitLabel).toBeInTheDocument();
   });
@@ -1449,7 +1454,7 @@ describe("Measure Groups Page", () => {
     group.groupDescription = "testDescription";
     group.populationBasis = "Encounter";
     measure.groups = [group];
-    const { getByTestId, getByText } = renderMeasureGroupComponent();
+    const { getByTestId, getByText } = renderMeasureGroupComponent(customProps);
 
     const measureGroupTypeSelect = getByTestId("measure-group-type-dropdown");
     await act(async () => {
@@ -1482,7 +1487,7 @@ describe("Measure Groups Page", () => {
   test("Should not display a success toast when adding group and response returns back no group", async () => {
     mockMeasureServiceApi.createGroup = jest.fn().mockResolvedValue(null);
     measure.groups = [];
-    renderMeasureGroupComponent();
+    renderMeasureGroupComponent(customProps);
     await changePopulationBasis("Encounter");
     // select a scoring
     const scoringSelect = screen.getByTestId("scoring-select");
@@ -1528,7 +1533,7 @@ describe("Measure Groups Page", () => {
   });
 
   test("Add/remove second IP for ratio group", async () => {
-    await waitFor(() => renderMeasureGroupComponent());
+    await waitFor(() => renderMeasureGroupComponent(customProps));
 
     // select Ratio scoring
     const scoringSelect = screen.getByTestId("scoring-select");
@@ -1590,7 +1595,7 @@ describe("Measure Groups Page", () => {
       { ...getEmptyStrat(), id: "id-2" },
     ];
     measure.groups = [group];
-    renderMeasureGroupComponent();
+    renderMeasureGroupComponent(customProps);
     userEvent.click(screen.getByTestId("stratifications-tab"));
     const helperText = await screen.findByText("CQL Definition is required.");
     expect(helperText).toBeInTheDocument();
@@ -1606,7 +1611,7 @@ describe("Measure Groups Page", () => {
       { ...getEmptyStrat(), id: "id-2" },
     ];
     measure.groups = [group];
-    renderMeasureGroupComponent();
+    renderMeasureGroupComponent(customProps);
     userEvent.click(screen.getByTestId("stratifications-tab"));
     const removeButton = screen.queryByTestId("remove-strat-button");
     await waitFor(() => expect(removeButton).not.toBeInTheDocument());
@@ -1623,7 +1628,7 @@ describe("Measure Groups Page", () => {
       { ...getEmptyStrat(), id: "id-3" },
     ];
     measure.groups = [group];
-    renderMeasureGroupComponent();
+    renderMeasureGroupComponent(customProps);
     expect(screen.getByTestId("stratifications-tab")).toBeInTheDocument();
     userEvent.click(screen.getByTestId("stratifications-tab"));
     const removeButton = screen.getAllByTestId("remove-strat-button")[0];
@@ -1641,7 +1646,7 @@ describe("Measure Groups Page", () => {
       { ...getEmptyStrat(), id: "id-3" },
     ];
     measure.groups = [group];
-    renderMeasureGroupComponent();
+    renderMeasureGroupComponent(customProps);
     expect(screen.getByTestId("stratifications-tab")).toBeInTheDocument();
     userEvent.click(screen.getByTestId("stratifications-tab"));
     const removeButton = screen.getAllByTestId("remove-strat-button")[0];
@@ -1661,7 +1666,7 @@ describe("Measure Groups Page", () => {
       { ...getEmptyStrat(), id: "id-2" },
     ];
     measure.groups = [group];
-    const { queryByTestId } = renderMeasureGroupComponent();
+    const { queryByTestId } = renderMeasureGroupComponent(customProps);
     userEvent.click(screen.getByTestId("stratifications-tab"));
     const removeButton = queryByTestId("remove-strat-button");
     expect(removeButton).not.toBeInTheDocument();
@@ -1678,7 +1683,7 @@ describe("Measure Groups Page", () => {
     group.improvementNotation = "Increased score indicates improvement";
     group.stratifications = [];
     measure.groups = [group];
-    renderMeasureGroupComponent();
+    renderMeasureGroupComponent(customProps);
     userEvent.click(screen.getByTestId("stratifications-tab"));
     await waitFor(() => {
       expect(group.stratifications.length == 2);
@@ -1700,7 +1705,7 @@ describe("Measure Groups Page", () => {
     measure.groups = [group];
     const errorMessage =
       "The selected definition does not align with the Population Basis field selection of boolean";
-    renderMeasureGroupComponent();
+    renderMeasureGroupComponent(customProps);
     // switch to stratification tab
     userEvent.click(screen.getByTestId("stratifications-tab"));
     // select Initial population from dropdown for start 1
@@ -1726,7 +1731,7 @@ describe("Measure Groups Page", () => {
   });
 
   test("measure observation should not render for cohort", async () => {
-    renderMeasureGroupComponent();
+    renderMeasureGroupComponent(customProps);
     // select Cohort scoring
     const scoringSelect = screen.getByTestId("scoring-select");
     userEvent.click(getByRole(scoringSelect, "combobox"));
@@ -1742,7 +1747,7 @@ describe("Measure Groups Page", () => {
   });
 
   test("measure observation should not render for proportion", async () => {
-    renderMeasureGroupComponent();
+    renderMeasureGroupComponent(customProps);
     // select Proportion scoring
     const scoringSelect = screen.getByTestId("scoring-select");
     userEvent.click(getByRole(scoringSelect, "combobox"));
@@ -1764,7 +1769,7 @@ describe("Measure Groups Page", () => {
   });
 
   test("measure observation should render for CV group", async () => {
-    renderMeasureGroupComponent();
+    renderMeasureGroupComponent(customProps);
 
     const scoringSelect = screen.getByTestId("scoring-select");
     userEvent.click(getByRole(scoringSelect, "combobox"));
@@ -1814,7 +1819,7 @@ describe("Measure Groups Page", () => {
     ];
 
     measure.groups = [group];
-    await waitFor(() => renderMeasureGroupComponent());
+    await waitFor(() => renderMeasureGroupComponent(customProps));
 
     const observationInput = screen.getByTestId(
       "measure-observation-cv-obs-input"
@@ -1855,7 +1860,7 @@ describe("Measure Groups Page", () => {
       },
     ];
     measure.groups = [group];
-    await waitFor(() => renderMeasureGroupComponent());
+    await waitFor(() => renderMeasureGroupComponent(customProps));
 
     const numeratorObservationInput = screen.getByTestId(
       "measure-observation-numerator-input"
@@ -1870,7 +1875,7 @@ describe("Measure Groups Page", () => {
 
   //TODO Fix skip GAK MAT-9176
   test.skip("measure observation should be included in persisted output for continuous variable", async () => {
-    renderMeasureGroupComponent();
+    renderMeasureGroupComponent(customProps);
     await changePopulationBasis("Encounter");
 
     // Select scoring to CONTINUOUS_VARIABLE
@@ -1965,7 +1970,7 @@ describe("Measure Groups Page", () => {
 
   //TODO Fix skip GAK MAT-9176
   test.skip("measure observation should be included in persisted output for ratio", async () => {
-    renderMeasureGroupComponent();
+    renderMeasureGroupComponent(customProps);
     await changePopulationBasis("Encounter");
     // Select scoring to Ratio
     const scoringSelect = screen.getByTestId("scoring-select");
@@ -2089,7 +2094,7 @@ describe("Measure Groups Page", () => {
       scoringPrecision: "",
     };
     measure.groups = [group1];
-    renderMeasureGroupComponent();
+    renderMeasureGroupComponent(customProps);
 
     // verify  IP1 association type radio group is not visible
     const association1 = screen.queryByTestId(
@@ -2121,7 +2126,7 @@ describe("Measure Groups Page", () => {
       scoringPrecision: "",
     };
     measure.groups = [group1];
-    renderMeasureGroupComponent();
+    renderMeasureGroupComponent(customProps);
 
     const association1 = screen.getByTestId(
       "measure-group-initial-population-association-id-1"
@@ -2166,8 +2171,9 @@ describe("Measure Groups Page", () => {
   });
 
   test("render Measure group properties in readonly mode if user is not the measure owner", async () => {
-    (checkUserCanEdit as jest.Mock).mockImplementation(() => false);
-    await waitFor(() => renderMeasureGroupComponent());
+    await waitFor(() =>
+      renderMeasureGroupComponent({ ...customProps, measureCanEdit: false })
+    );
     const descriptionEditor = screen.getByTestId(
       "group-description-rich-text-editor"
     );
@@ -2183,7 +2189,6 @@ describe("Measure Groups Page", () => {
   });
 
   test("should allow Ratio measures to select stratifications", async () => {
-    (checkUserCanEdit as jest.Mock).mockImplementation(() => true);
     const group1: Group = {
       id: "1",
       scoring: "Ratio",
@@ -2202,7 +2207,7 @@ describe("Measure Groups Page", () => {
       scoringPrecision: "",
     };
     measure.groups = [group1];
-    renderMeasureGroupComponent();
+    renderMeasureGroupComponent(customProps);
 
     const stratTab = screen.getByTestId("stratifications-tab");
     expect(stratTab).toBeInTheDocument();
@@ -2212,7 +2217,6 @@ describe("Measure Groups Page", () => {
   });
 
   test("should fail Ratio measures with multiple IPs when selecting multiple stratification associations", async () => {
-    (checkUserCanEdit as jest.Mock).mockImplementation(() => true);
     const errorMessage =
       "Ratio measures with two IPs must have one population for associations";
     const group1: Group = {
@@ -2250,7 +2254,7 @@ describe("Measure Groups Page", () => {
       ],
     };
     measure.groups = [group1];
-    renderMeasureGroupComponent();
+    renderMeasureGroupComponent(customProps);
 
     const stratTab = screen.getByTestId("stratifications-tab");
     expect(stratTab).toBeInTheDocument();
@@ -2300,7 +2304,7 @@ describe("Measure Groups Page", () => {
       ],
     };
     measure.groups = [group1];
-    renderMeasureGroupComponent();
+    renderMeasureGroupComponent(customProps);
 
     const stratTab = screen.getByTestId("stratifications-tab");
     expect(stratTab).toBeInTheDocument();
@@ -2345,7 +2349,7 @@ describe("Measure Groups Page", () => {
       ],
     };
     measure.groups = [group1];
-    renderMeasureGroupComponent();
+    renderMeasureGroupComponent(customProps);
 
     const stratTab = screen.getByTestId("stratifications-tab");
     expect(stratTab).toBeInTheDocument();
@@ -2362,11 +2366,7 @@ describe("Measure Groups Page", () => {
     (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
       Locking: true,
     }));
-    const customProps: MeasureGroupProps = {
-      ...props,
-      isTestCaseLocked: true,
-    };
-    renderMeasureGroupComponent(customProps);
+    renderMeasureGroupComponent({ ...customProps, isTestCaseLocked: true });
     const descriptionEditor = screen.getByTestId(
       "group-description-rich-text-editor"
     );
@@ -2394,7 +2394,7 @@ describe("Measure Groups Page", () => {
     (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
       Locking: true,
     }));
-    renderMeasureGroupComponent();
+    renderMeasureGroupComponent(customProps);
     const descriptionEditor = screen.getByTestId(
       "group-description-rich-text-editor"
     );
@@ -2423,11 +2423,7 @@ describe("Measure Groups Page", () => {
     const checkTestCasesLockStatusMock = jest.fn().mockResolvedValue(true);
     const setAlertMessageMock = jest.fn();
 
-    renderMeasureGroupComponent({
-      ...props,
-      checkTestCasesLockStatus: checkTestCasesLockStatusMock,
-      setAlertMessage: setAlertMessageMock,
-    });
+    renderMeasureGroupComponent(customProps);
 
     await changePopulationBasis("Encounter");
 

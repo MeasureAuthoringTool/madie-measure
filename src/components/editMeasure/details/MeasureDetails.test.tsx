@@ -123,9 +123,6 @@ jest.mock("@madie/madie-util", () => ({
   useOktaTokens: () => ({
     getAccessToken: () => "test.jwt",
   }),
-  checkUserCanEdit: jest.fn(() => {
-    return true;
-  }),
   routeHandlerStore: {
     subscribe: (set) => {
       set({ canTravel: false, pendingPath: "" });
@@ -176,7 +173,7 @@ describe("MeasureDetails component", () => {
                   setErrorMessage={setErrorMessage}
                   isQDM={false}
                   featureFlags={mockUseFeatureFlags()}
-                  measureLockedByAnotherUser={false}
+                  measureCanEdit={false}
                 />
               }
             />
@@ -199,7 +196,9 @@ describe("MeasureDetails component", () => {
               element={
                 <MeasureDetails
                   setErrorMessage={setErrorMessage}
+                  featureFlags={mockUseFeatureFlags()}
                   isQDM={false}
+                  measureCanEdit={false}
                 />
               }
             />
@@ -222,7 +221,9 @@ describe("MeasureDetails component", () => {
               element={
                 <MeasureDetails
                   setErrorMessage={setErrorMessage}
+                  featureFlags={mockUseFeatureFlags()}
                   isQDM={false}
+                  measureCanEdit={false}
                 />
               }
             />
@@ -253,7 +254,9 @@ describe("MeasureDetails component", () => {
               element={
                 <MeasureDetails
                   setErrorMessage={setErrorMessage}
+                  featureFlags={mockUseFeatureFlags()}
                   isQDM={false}
+                  measureCanEdit={false}
                 />
               }
             />
@@ -286,7 +289,9 @@ describe("MeasureDetails component", () => {
               element={
                 <MeasureDetails
                   setErrorMessage={setErrorMessage}
+                  featureFlags={mockUseFeatureFlags()}
                   isQDM={false}
+                  measureCanEdit={false}
                 />
               }
             />
@@ -317,7 +322,9 @@ describe("MeasureDetails component", () => {
               element={
                 <MeasureDetails
                   setErrorMessage={setErrorMessage}
+                  featureFlags={mockUseFeatureFlags()}
                   isQDM={false}
+                  measureCanEdit={false}
                 />
               }
             />
@@ -348,7 +355,9 @@ describe("MeasureDetails component", () => {
               element={
                 <MeasureDetails
                   setErrorMessage={setErrorMessage}
+                  featureFlags={mockUseFeatureFlags()}
                   isQDM={false}
+                  measureCanEdit={false}
                 />
               }
             />
@@ -382,7 +391,9 @@ describe("MeasureDetails component", () => {
               element={
                 <MeasureDetails
                   setErrorMessage={setErrorMessage}
+                  featureFlags={mockUseFeatureFlags()}
                   isQDM={false}
+                  measureCanEdit={false}
                 />
               }
             />
@@ -415,7 +426,9 @@ describe("MeasureDetails component", () => {
               element={
                 <MeasureDetails
                   setErrorMessage={setErrorMessage}
+                  featureFlags={mockUseFeatureFlags()}
                   isQDM={true}
+                  measureCanEdit={false}
                 />
               }
             />
@@ -439,7 +452,9 @@ describe("MeasureDetails component", () => {
               element={
                 <MeasureDetails
                   setErrorMessage={setErrorMessage}
+                  featureFlags={mockUseFeatureFlags()}
                   isQDM={true}
+                  measureCanEdit={false}
                 />
               }
             />
@@ -463,7 +478,9 @@ describe("MeasureDetails component", () => {
               element={
                 <MeasureDetails
                   setErrorMessage={setErrorMessage}
+                  featureFlags={mockUseFeatureFlags()}
                   isQDM={true}
+                  measureCanEdit={true}
                 />
               }
             />
@@ -491,7 +508,9 @@ describe("MeasureDetails component", () => {
               element={
                 <MeasureDetails
                   setErrorMessage={setErrorMessage}
+                  featureFlags={mockUseFeatureFlags()}
                   isQDM={true}
+                  measureCanEdit={true}
                 />
               }
             />
@@ -514,7 +533,9 @@ describe("MeasureDetails component", () => {
               element={
                 <MeasureDetails
                   setErrorMessage={setErrorMessage}
+                  featureFlags={mockUseFeatureFlags()}
                   isQDM={false}
+                  measureCanEdit={true}
                 />
               }
             />
@@ -542,7 +563,9 @@ describe("MeasureDetails component", () => {
               element={
                 <MeasureDetails
                   setErrorMessage={setErrorMessage}
+                  featureFlags={mockUseFeatureFlags()}
                   isQDM={true}
+                  measureCanEdit={true}
                 />
               }
             />
@@ -605,7 +628,9 @@ describe("MeasureDetails component", () => {
               element={
                 <MeasureDetails
                   setErrorMessage={setErrorMessage}
+                  featureFlags={mockUseFeatureFlags()}
                   isQDM={true}
+                  measureCanEdit={true}
                 />
               }
             />
@@ -652,6 +677,7 @@ describe("MeasureDetails component", () => {
                   featureFlags={{ Locking: true }}
                   setErrorMessage={setErrorMessage}
                   isQDM={true}
+                  measureCanEdit={true}
                 />
               }
             />
@@ -695,6 +721,7 @@ describe("MeasureDetails component", () => {
                   featureFlags={{ Locking: true }}
                   setErrorMessage={setErrorMessage}
                   isQDM={true}
+                  measureCanEdit={true}
                 />
               }
             />
@@ -723,7 +750,7 @@ describe("MeasureDetails component", () => {
                   setErrorMessage={setErrorMessage}
                   isQDM={false}
                   featureFlags={mockUseFeatureFlags()}
-                  measureLockedByAnotherUser={true}
+                  measureCanEdit={true}
                 />
               }
             />
