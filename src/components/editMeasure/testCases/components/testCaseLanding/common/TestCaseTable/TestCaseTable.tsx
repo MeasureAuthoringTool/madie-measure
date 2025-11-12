@@ -471,13 +471,9 @@ const TestCaseTable = (props: TestCaseTableProps) => {
   useEffect(() => {
     const clearSelection = () => {
       //deslect on page change
-      if (props.page && table.toggleAllRowsSelected) {
-        table.toggleAllRowsSelected(false);
-      }
-      // deslect on testCases change since we're not full refreshing
-      if (props.testCases) {
-        table.resetRowSelection();
-      }
+      table.toggleAllRowsSelected(false);
+      // deselect on testCases change
+      table.resetRowSelection();
     };
 
     clearSelection();
