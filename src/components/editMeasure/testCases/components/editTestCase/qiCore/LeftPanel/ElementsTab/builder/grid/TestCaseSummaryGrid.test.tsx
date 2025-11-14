@@ -202,7 +202,7 @@ describe("TestCaseSummaryGrid", () => {
     );
 
     const firstActionCenterButton = screen.getByTestId(
-      "action-center-button-pd-1"
+      "action-center-button-ec-1"
     );
     userEvent.click(firstActionCenterButton);
     const viewAction = await screen.findByRole("menuitem", { name: "View" });
@@ -211,5 +211,8 @@ describe("TestCaseSummaryGrid", () => {
       name: "Delete",
     });
     expect(deleteAction).not.toBeInTheDocument();
+
+    userEvent.click(viewAction);
+    expect(mockOnRowEdit).toHaveBeenCalledWith(mockBundle.entry[0]);
   });
 });
