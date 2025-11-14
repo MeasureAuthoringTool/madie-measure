@@ -269,6 +269,7 @@ const Builder = ({
                 handleRowEdit(row, setSelectedResourceId, setSavedGridID)
               }
               onRowDelete={(row) => handleRowDelete(row, dispatch)}
+              testCaseCanEdit={canEdit}
             />
           </>
         )}
