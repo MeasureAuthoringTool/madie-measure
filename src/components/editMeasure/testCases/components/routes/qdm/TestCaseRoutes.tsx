@@ -198,35 +198,20 @@ const TestCaseRoutes = () => {
         contextFailure,
       }}
     >
-      {cqmMeasureErrors && cqmMeasureErrors.length > 0 && (
-        <StatusHandler
-          error={true}
-          errorMessages={cqmMeasureErrors}
-          testDataId="execution_context_loading_errors"
-        />
-      )}
-      {importErrors && importErrors.length > 0 && (
-        <StatusHandler
-          error={true}
-          errorMessages={importErrors}
-          testDataId="import-error-messages"
-        />
-      )}
-      {(warnings?.length || customWarningMessages?.length > 0) && (
-        <StatusHandler
-          warning={true}
-          shiftTestCaseDatesWarning={shiftTestCaseDatesWarnings}
-          customWarningMessages={customWarningMessages}
-          testDataId="execution_context_loading_warning"
-        />
-      )}
-
-      {importWarnings && importWarnings.length > 0 && (
-        <StatusHandler
-          importWarnings={importWarnings}
-          testDataId="import-warning-messages"
-        />
-      )}
+      <StatusHandler
+        error={cqmMeasureErrors?.length > 0 || importErrors?.length > 0}
+        errorMessages={[...(cqmMeasureErrors || []), ...(importErrors || [])]}
+        warning={
+          warnings?.length > 0 ||
+          customWarningMessages?.length > 0 ||
+          shiftTestCaseDatesWarnings?.length > 0
+        }
+        warningMessages={warnings}
+        customWarningMessages={customWarningMessages}
+        shiftTestCaseDatesWarning={shiftTestCaseDatesWarnings}
+        importWarnings={importWarnings}
+        testDataId="test-case-alerts"
+      />
       <Routes>
         <Route path="/list-page">
           <Route
