@@ -67,6 +67,15 @@ const DeleteDisabledIconStyles = {
   height: 24,
 };
 
+const deleteTooltipStyles = {
+  maxWidth: 300,
+  padding: "8px 16px",
+  textAlign: "center",
+  fontFamily: "Rubik",
+  fontSize: "14px",
+  lineHeight: "19px",
+};
+
 export const convertDate = (date: string) => {
   if (!date) {
     return { date: "", time: "" };
@@ -219,7 +228,7 @@ const TestCaseTable = (props: TestCaseTableProps) => {
           style={{
             display: "flex",
             flexDirection: "row",
-            gap: 3,
+            gap: 16,
           }}
         >
           <div className="px-1">
@@ -234,13 +243,21 @@ const TestCaseTable = (props: TestCaseTableProps) => {
           {canEdit &&
           !measure.measureMetaData?.draft &&
           info.row.original.createdBeforeVersioning ? (
-            <div>
-              <DeleteDisabledIcon
-                sx={DeleteDisabledIconStyles}
-                aria-label={`Test case "${info.row.original.title}" in group "${info.row.original.group}" cannot be deleted because it was created before the measure was versioned`}
-                data-testid={`test-case-no-delete-icon-${info.row.original.id}`}
-              />
-            </div>
+            <Tooltip
+              data-testid="delete-disabled-tooltip"
+              title="Test cases present at versioning can't be deleted; only newly added ones can."
+              placement="top"
+              arrow
+              slotProps={{ tooltip: { sx: deleteTooltipStyles } }}
+            >
+              <div>
+                <DeleteDisabledIcon
+                  sx={DeleteDisabledIconStyles}
+                  aria-label={`Test case "${info.row.original.title}" in group "${info.row.original.group}" cannot be deleted because it was created before the measure was versioned`}
+                  data-testid={`test-case-no-delete-icon-${info.row.original.id}`}
+                />
+              </div>
+            </Tooltip>
           ) : null}
         </div>
       ),

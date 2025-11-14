@@ -649,11 +649,17 @@ describe("TestCase component", () => {
       1
     );
 
-    await waitFor(() => {
-      expect(
-        screen.getByTestId(`test-case-no-delete-icon-${testCase.id}`)
-      ).toBeInTheDocument();
-    });
+    const noDeleteIcon = screen.getByTestId(
+      `test-case-no-delete-icon-${testCase.id}`
+    );
+    expect(noDeleteIcon).toBeInTheDocument();
+
+    userEvent.hover(noDeleteIcon);
+
+    const tooltip = await screen.findByRole("tooltip");
+    expect(tooltip).toHaveTextContent(
+      "Test cases present at versioning can't be deleted; only newly added ones can."
+    );
   });
 
   it("should NOT render DeleteForeverIcon when canEdit=false", async () => {
