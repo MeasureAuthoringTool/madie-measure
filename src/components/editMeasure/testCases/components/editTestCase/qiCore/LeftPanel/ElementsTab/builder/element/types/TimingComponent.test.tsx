@@ -195,14 +195,10 @@ describe("TimingComponent", () => {
     fireEvent.change(boundsInput, { target: { value: "Duration" } });
     await waitFor(() => {
       expect(setFieldValueMock).toHaveBeenCalledWith(
-        "MedicationRequest.dosageInstruction[0].timing.repeat.bounds[x]",
-        "Duration"
-      );
-      expect(setFieldValueMock).toHaveBeenCalledWith(
         "MedicationRequest.dosageInstruction[0].timing.repeat.boundsRange",
         undefined
       );
-      expect(setFieldValueMock).toHaveBeenLastCalledWith(
+      expect(setFieldValueMock).toHaveBeenCalledWith(
         "MedicationRequest.dosageInstruction[0].timing.repeat.boundsPeriod",
         undefined
       );
@@ -212,14 +208,10 @@ describe("TimingComponent", () => {
     fireEvent.change(boundsInput, { target: { value: "Range" } });
     await waitFor(() => {
       expect(setFieldValueMock).toHaveBeenCalledWith(
-        "MedicationRequest.dosageInstruction[0].timing.repeat.bounds[x]",
-        "Range"
-      );
-      expect(setFieldValueMock).toHaveBeenCalledWith(
         "MedicationRequest.dosageInstruction[0].timing.repeat.boundsRange",
         undefined
       );
-      expect(setFieldValueMock).toHaveBeenLastCalledWith(
+      expect(setFieldValueMock).toHaveBeenCalledWith(
         "MedicationRequest.dosageInstruction[0].timing.repeat.boundsPeriod",
         undefined
       );
@@ -229,14 +221,10 @@ describe("TimingComponent", () => {
     fireEvent.change(boundsInput, { target: { value: "Period" } });
     await waitFor(() => {
       expect(setFieldValueMock).toHaveBeenCalledWith(
-        "MedicationRequest.dosageInstruction[0].timing.repeat.bounds[x]",
-        "Period"
-      );
-      expect(setFieldValueMock).toHaveBeenCalledWith(
         "MedicationRequest.dosageInstruction[0].timing.repeat.boundsRange",
         undefined
       );
-      expect(setFieldValueMock).toHaveBeenLastCalledWith(
+      expect(setFieldValueMock).toHaveBeenCalledWith(
         "MedicationRequest.dosageInstruction[0].timing.repeat.boundsPeriod",
         undefined
       );
@@ -246,14 +234,10 @@ describe("TimingComponent", () => {
     fireEvent.change(boundsInput, { target: { value: "-" } });
     await waitFor(() => {
       expect(setFieldValueMock).toHaveBeenCalledWith(
-        "MedicationRequest.dosageInstruction[0].timing.repeat.bounds",
-        undefined
-      );
-      expect(setFieldValueMock).toHaveBeenCalledWith(
         "MedicationRequest.dosageInstruction[0].timing.repeat.boundsRange",
         undefined
       );
-      expect(setFieldValueMock).toHaveBeenLastCalledWith(
+      expect(setFieldValueMock).toHaveBeenCalledWith(
         "MedicationRequest.dosageInstruction[0].timing.repeat.boundsPeriod",
         undefined
       );
@@ -406,17 +390,41 @@ describe("TimingComponent", () => {
       "5"
     );
 
-    // Code
-    const code = screen.getByLabelText("Code");
-    userEvent.click(code);
-    const bidOption = await screen.findByText("Twice a day");
-    userEvent.click(bidOption);
-    await waitFor(() => {
-      expect(setFieldValueMock).toHaveBeenLastCalledWith(
-        "MedicationRequest.dosageInstruction[0].timing.code",
-        "BID"
-      );
+    const valueSetSelect = screen.getByRole("combobox", {
+      name: "Value Set / Direct Reference Code",
     });
+    userEvent.click(valueSetSelect);
+    expect(screen.getAllByRole("option")).toHaveLength(2);
+
+    expect(screen.getAllByRole("option")[0]).toHaveTextContent("Custom Code");
+
+    // select custom code option
+    userEvent.click(screen.getAllByRole("option")[0]);
+    const codeSystem = screen.getByRole("textbox", {
+      name: "Custom Code System",
+    });
+
+    expect(codeSystem).toBeInTheDocument();
+    userEvent.type(codeSystem, "http://example.com/custom-system");
+
+    const code = screen.getByRole("textbox", {
+      name: "Custom Code",
+    });
+    expect(code).toBeInTheDocument();
+    userEvent.type(code, "C1");
+
+    expect(setFieldValueMock).toHaveBeenCalledWith(
+      "MedicationRequest.dosageInstruction[0].timing.code",
+      {
+        coding: [
+          {
+            code: "C1",
+            display: "C1",
+            system: "http://example.com/custom-system",
+          },
+        ],
+      }
+    );
 
     // Add buttons
     userEvent.click(screen.getByText("Add Repeat.When"));
@@ -599,7 +607,7 @@ describe("TimingComponent", () => {
             {
               timing: {
                 repeat: {
-                  bounds: { x: "Period" },
+                  bounds: "Period",
                 },
               },
             },
@@ -610,6 +618,12 @@ describe("TimingComponent", () => {
     userEvent.click(
       screen.getByTestId("elements-heading-expansion-button-Timing")
     );
+
+    const boundsInput = screen.getByTestId(
+      "repeat-bounds-input"
+    ) as HTMLInputElement;
+    fireEvent.change(boundsInput, { target: { value: "Period" } });
+
     // Select Period format
     const formatSelector = screen.getByTestId(
       "date-time-format-selector-input-field-Period"
