@@ -1265,6 +1265,7 @@ define function MeasureObservation(e Encounter):
       isLocked: true,
       lockedBy: "testuser@example.com",
     });
+
     mockUseFeatureFlags.mockReturnValue({ Locking: true });
 
     renderEditor(measure);
