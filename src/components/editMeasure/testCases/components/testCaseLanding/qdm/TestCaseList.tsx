@@ -113,6 +113,8 @@ const TestCaseList = (props: TestCaseListProps) => {
   const {
     testCases,
     setTestCases,
+    insertTestCases,
+    removeTestCases,
     testCaseService,
     loadingState,
     setLoadingState,
@@ -250,21 +252,6 @@ const TestCaseList = (props: TestCaseListProps) => {
       retrieveTestCases();
     }
   }, [measureId, testCaseService]);
-
-  useEffect(() => {
-    const createTestCaseListener = () => {
-      retrieveTestCases();
-    };
-    window.addEventListener("createTestCase", createTestCaseListener, false);
-    return () => {
-      window.removeEventListener(
-        "createTestCase",
-        createTestCaseListener,
-        false
-      );
-    };
-  }, []);
-
   useEffect(() => {
     const validTestCases = measure?.testCaseConfiguration
       ?.executeInvalidTestCases
@@ -385,10 +372,10 @@ const TestCaseList = (props: TestCaseListProps) => {
     testCaseService.current
       .deleteTestCases(measureId, testCaseIds)
       .then(() => {
-        retrieveTestCases();
         setToastOpen(true);
         setToastType("success");
         setToastMessage("Test cases successfully deleted");
+        removeTestCases(testCaseIds);
       })
       .catch((err) => {
         console.error("deleteTestCases: err.message = " + err.message);
@@ -428,11 +415,14 @@ const TestCaseList = (props: TestCaseListProps) => {
   const handleCloneTestCase = async (testCase: TestCase) => {
     try {
       const clonedTestCase = cloneTestCase(testCase);
-      await testCaseService.current.createTestCase(clonedTestCase, measureId);
+      const result = await testCaseService.current.createTestCase(
+        clonedTestCase,
+        measureId
+      );
       setToastOpen(true);
       setToastType("success");
       setToastMessage("Test case cloned successfully");
-      retrieveTestCases();
+      insertTestCases([result]);
     } catch (error) {
       setToastOpen(true);
       setToastMessage(
@@ -734,6 +724,7 @@ const TestCaseList = (props: TestCaseListProps) => {
               open={createOpen}
               onClose={handleClose}
               measure={measure}
+              onSuccess={insertTestCases}
             />
             {activeTab === "passing" && (
               <div tw="overflow-x-auto sm:-mx-6 lg:-mx-8">
