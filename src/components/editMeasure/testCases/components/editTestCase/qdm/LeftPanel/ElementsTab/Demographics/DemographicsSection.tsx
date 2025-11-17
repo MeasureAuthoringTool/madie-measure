@@ -399,8 +399,10 @@ const DemographicsSection = ({ handleTestCaseWarnings, canEdit }) => {
               <FormControl>
                 <Tooltip
                   title={`Code System Version: ${
-                    raceValueSets?.[0]?.concepts?.[0]?.version ??
-                    "not available"
+                    raceValueSets?.[0]?.concepts?.[0]?.version &&
+                    raceValueSets?.[0]?.concepts?.[0]?.version !== "null"
+                      ? raceValueSets?.[0]?.concepts?.[0]?.version
+                      : "not available"
                   }`}
                   data-testid={`demographics-race-tooltip`}
                 >
@@ -425,8 +427,10 @@ const DemographicsSection = ({ handleTestCaseWarnings, canEdit }) => {
               <FormControl>
                 <Tooltip
                   title={`Code System Version: ${
-                    genderValueSets?.[0]?.concepts?.[0]?.version ??
-                    "not available"
+                    genderValueSets?.[0]?.concepts?.[0]?.version &&
+                    genderValueSets?.[0]?.concepts?.[0]?.version !== "null"
+                      ? genderValueSets?.[0]?.concepts?.[0]?.version
+                      : "not available"
                   }`}
                   data-testid={`demographics-gender-tooltip`}
                 >
@@ -453,8 +457,10 @@ const DemographicsSection = ({ handleTestCaseWarnings, canEdit }) => {
               <FormControl>
                 <Tooltip
                   title={`Code System Version: ${
-                    ethnicityValueSets?.[0]?.concepts?.[0]?.version ??
-                    "not available"
+                    ethnicityValueSets?.[0]?.concepts?.[0]?.version &&
+                    ethnicityValueSets?.[0]?.concepts?.[0]?.version !== "null"
+                      ? ethnicityValueSets?.[0]?.concepts?.[0]?.version
+                      : "not available"
                   }`}
                   data-testid={`demographics-ethnicity-tooltip`}
                 >
