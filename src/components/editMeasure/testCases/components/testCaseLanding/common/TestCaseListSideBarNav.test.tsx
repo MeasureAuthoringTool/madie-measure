@@ -22,7 +22,9 @@ const groups: Group[] = [
   },
 ];
 jest.mock("@madie/madie-util", () => ({
-  useFeatureFlags: jest.fn().mockReturnValue({}),
+  useFeatureFlags: jest.fn(() => ({
+    ExecutionConfigurationTab: true,
+  })),
 }));
 describe("TestCase component", () => {
   afterEach(() => {
@@ -219,5 +221,35 @@ describe("TestCase component", () => {
 
     fireEvent.click(screen.getByTestId("test-case-sidebar-collapse-icon"));
     expect(setIsCollapsed).toHaveBeenCalledWith(true);
+  });
+
+  it("should not render execution option tab for QI Core measures when execution configuration feature flag is off", async () => {
+    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
+      ExecutionConfigurationTab: false,
+    }));
+    render(
+      <MemoryRouter>
+        <TestCaseListSideBarNav {...defaultProps} qdm={false} />
+      </MemoryRouter>
+    );
+
+    expect(
+      screen.queryByRole("tab", { name: "Execution Options" })
+    ).not.toBeInTheDocument();
+  });
+
+  it("should not render execution option tab for QDM measures when execution configuration feature flag is off", async () => {
+    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
+      ExecutionConfigurationTab: false,
+    }));
+    render(
+      <MemoryRouter>
+        <TestCaseListSideBarNav {...defaultProps} qdm={true} />
+      </MemoryRouter>
+    );
+
+    expect(
+      screen.queryByRole("tab", { name: "Execution Options" })
+    ).not.toBeInTheDocument();
   });
 });

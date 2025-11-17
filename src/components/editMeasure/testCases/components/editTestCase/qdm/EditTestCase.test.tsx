@@ -661,7 +661,7 @@ describe("EditTestCase QDM Component", () => {
     expect(livingStatusInput.value).toBe("Living");
   });
 
-  it.skip("discard button resets form if form changed", async () => {
+  it("discard button resets form if form changed", async () => {
     testCase.json = "";
     renderEditTestCaseComponent();
 
@@ -882,7 +882,7 @@ describe("EditTestCase QDM Component", () => {
     });
   });
 
-  it.skip("Should render the details tab with relevant information", async () => {
+  it("Should render the details tab with relevant information", async () => {
     testCase.json = JSON.stringify(testCaseJson);
     await waitFor(() => renderEditTestCaseComponent());
 
@@ -935,7 +935,7 @@ describe("EditTestCase QDM Component", () => {
     });
   }, 30000);
 
-  it.skip("Should not update test case because of special characters", async () => {
+  it("Should not update test case because of special characters", async () => {
     testCase.json = JSON.stringify(testCaseJson);
     await waitFor(() => renderEditTestCaseComponent());
 

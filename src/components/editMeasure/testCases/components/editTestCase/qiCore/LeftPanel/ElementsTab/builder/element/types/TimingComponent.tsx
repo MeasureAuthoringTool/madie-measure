@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useState } from "react";
 import { getIn, useFormikContext } from "formik";
 import { TypeComponentProps } from "./TypeComponentProps";
 import DecimalInput from "../../../../../../../common/DecimalInput/DecimalInput";
@@ -14,6 +14,7 @@ import PeriodDateTimeComponent from "./PeriodDateTimeComponent";
 import "./TimingComponent.scss";
 import RangeComponent from "./RangeComponent";
 import ElementSection from "../../../../../../../common/UIOnlyModelAgnostic/ElementSection";
+import CodeableConceptComponent from "./CodeableConceptComponent";
 
 const GROUP_GAP = "1.5rem";
 const boundsOptions = ["-", "Duration", "Range", "Period"];
@@ -34,8 +35,6 @@ const TimingComponent = ({
   const eventArrayPath = `${label}.event`;
   const eventValues = getIn(formik.values, eventArrayPath) || [""];
 
-  const boundsPath = `${label}.repeat.bounds[x]`;
-  const boundsValue = getIn(formik.values, boundsPath);
   const boundsRangePath = `${label}.repeat.boundsRange`;
   const boundsPeriodPath = `${label}.repeat.boundsPeriod`;
 
@@ -66,10 +65,16 @@ const TimingComponent = ({
 
   const codePath = `${label}.code`;
 
+  const [boundsValue, setBoundsValue] = useState(() => {
+    if (getIn(formik.values, boundsRangePath)) return "Range";
+    if (getIn(formik.values, boundsPeriodPath)) return "Period";
+    return "-";
+  });
+
   return (
-    <div id="timing-component">
-      {/* Event */}
-      <ElementSection title={"Timing"} startOpen={false}>
+    <ElementSection title={"Timing"} startOpen={false}>
+      <div id="timing-component">
+        {/* Event */}
         {eventValues.map((_, index) => (
           <DateTimeComponent
             key={`${eventArrayPath}-${index}`}
@@ -103,14 +108,9 @@ const TimingComponent = ({
             onChange={(e) => {
               const selectedBounds = e.target.value;
 
-              if (selectedBounds === "-") {
-                // Clear the entire bounds object
-                formik.setFieldValue(`${label}.repeat.bounds`, undefined);
-              } else {
-                formik.setFieldValue(boundsPath, selectedBounds);
-              }
+              setBoundsValue(selectedBounds);
 
-              // Reset other bound fields
+              // Clear all Formik bound fields whenever selection changes
               formik.setFieldValue(boundsRangePath, undefined);
               formik.setFieldValue(boundsPeriodPath, undefined);
             }}
@@ -389,9 +389,9 @@ const TimingComponent = ({
         </div>
 
         {/* Code */}
-        <CodesComponent
+        <CodeableConceptComponent
           label="Code"
-          resource={resource}
+          canEdit={canEdit}
           structureDefinition={{
             path: label,
             binding: {
@@ -399,13 +399,16 @@ const TimingComponent = ({
               strength: "preferred",
             },
           }}
+          showAddAttributeButton={false}
+          addTitle={null}
           value={getIn(formik.values, codePath)}
-          onChange={(val) => formik.setFieldValue(codePath, val)}
-          canEdit={canEdit}
-          fieldRequired={false}
+          onChange={(value) => {
+            formik.setFieldTouched(codePath);
+            formik.setFieldValue(codePath, value);
+          }}
         />
-      </ElementSection>
-    </div>
+      </div>
+    </ElementSection>
   );
 };
 

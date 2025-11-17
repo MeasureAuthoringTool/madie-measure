@@ -1950,6 +1950,7 @@ describe("TypeEditor Component", () => {
     ).toBeInTheDocument();
     expect(await screen.findByLabelText("Repeat.When[0]")).toBeInTheDocument();
     expect(await screen.findByLabelText("Repeat.Offset")).toBeInTheDocument();
+    expect(await screen.findByText("Code")).toBeInTheDocument();
   });
 
   test("Should render Range component", async () => {
