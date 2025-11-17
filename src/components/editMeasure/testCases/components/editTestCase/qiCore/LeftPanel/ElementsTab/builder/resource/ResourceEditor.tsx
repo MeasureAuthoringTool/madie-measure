@@ -229,7 +229,6 @@ const ResourceEditor = ({
     // Any updates through dispatch will trickle down child component references accordingly.
 
     const { type } = selectedResource?.definition;
-
     const formikCleanedValues = removeUndefinedAndEmptyObjects(values);
     const nextEntry = _.cloneDeep(selectedResource.bundleEntry);
     // Update with formik values
@@ -466,7 +465,7 @@ const ResourceEditor = ({
         open={addDialogOpen}
         basePath={resourceBasePath}
         options={allElements}
-        value={displayedElements}
+        value={displayedElements.filter((el) => !el.id.includes("[x]"))} // avoid adding empty choice elements.
         saveElements={saveElements}
         onClose={() => setAddDialogOpen(false)}
       />
