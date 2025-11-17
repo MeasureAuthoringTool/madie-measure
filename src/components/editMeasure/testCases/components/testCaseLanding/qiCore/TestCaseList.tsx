@@ -236,28 +236,10 @@ const TestCaseList = (props: TestCaseListProps) => {
   }, [measure]);
 
   useEffect(() => {
-<<<<<<< HEAD
-    const createTestCaseListener = () => {
-      retrieveTestCases();
-    };
-    window.addEventListener("createTestCase", createTestCaseListener, false);
-    return () => {
-      window.removeEventListener(
-        "createTestCase",
-        createTestCaseListener,
-        false
-      );
-    };
-  }, []);
-
-  useEffect(() => {
     const validTestCases = measure?.testCaseConfiguration
       ?.executeInvalidTestCases
       ? testCases
       : testCases?.filter((tc) => tc.validResource);
-=======
-    const validTestCases = testCases?.filter((tc) => tc.validResource);
->>>>>>> d65faac3 (MAT-6563: Update test case list page to avoid refreshes)
     if (validTestCases && calculationOutput?.results && selectedPopCriteria) {
       // Pull Clause Coverage from coverage HTML
       setCoveragePercentage(
