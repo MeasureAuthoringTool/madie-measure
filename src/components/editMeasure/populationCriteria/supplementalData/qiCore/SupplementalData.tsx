@@ -8,7 +8,6 @@ import {
 import {
   measureStore,
   routeHandlerStore,
-  checkUserCanEdit,
   useMeasureServiceApi,
   useFeatureFlags,
 } from "@madie/madie-util";
@@ -49,7 +48,7 @@ export interface SupplementalDataProps {
   isTestCaseLocked: boolean;
   checkTestCasesLockStatus: Function;
   setAlertMessage: Function;
-  measureLockedByAnotherUser: boolean;
+  measureCanEdit: boolean;
 }
 
 const SupplementalData = (props: SupplementalDataProps) => {
@@ -66,14 +65,7 @@ const SupplementalData = (props: SupplementalDataProps) => {
     };
   }, []);
 
-  const canEdit =
-    !props.isTestCaseLocked &&
-    checkUserCanEdit(
-      measure?.measureSet?.owner,
-      measure?.measureSet?.acls,
-      measure?.measureMetaData?.draft
-    ) &&
-    !props.measureLockedByAnotherUser;
+  const canEdit = !props.isTestCaseLocked && props.measureCanEdit;
 
   // Fetching definitions from CQL to populate dropdown
   useEffect(() => {

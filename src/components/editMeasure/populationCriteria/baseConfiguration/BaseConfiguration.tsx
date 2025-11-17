@@ -37,7 +37,7 @@ export interface BaseConfigurationProps {
   isTestCaseLocked: boolean;
   checkTestCasesLockStatus: Function;
   setAlertMessage: Function;
-  measureLockedByAnotherUser: boolean;
+  measureCanEdit: boolean;
 }
 
 const BaseConfiguration = (props: BaseConfigurationProps) => {
@@ -64,14 +64,7 @@ const BaseConfiguration = (props: BaseConfigurationProps) => {
     };
   }, []);
 
-  const canEdit =
-    !props.isTestCaseLocked &&
-    checkUserCanEdit(
-      measure?.measureSet?.owner,
-      measure?.measureSet?.acls,
-      measure?.measureMetaData?.draft
-    ) &&
-    !props.measureLockedByAnotherUser;
+  const canEdit = !props.isTestCaseLocked && props.measureCanEdit;
   useEffect(() => {
     if (measure && measure.scoring) {
       setCurrentScoring(measure.scoring);

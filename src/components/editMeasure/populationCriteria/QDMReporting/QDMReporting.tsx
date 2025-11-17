@@ -4,7 +4,6 @@ import { useFormik } from "formik";
 import { Measure } from "@madie/madie-models";
 import {
   measureStore,
-  checkUserCanEdit,
   routeHandlerStore,
   useMeasureServiceApi,
   useFeatureFlags,
@@ -62,7 +61,7 @@ export interface ReportingProps {
   isTestCaseLocked: boolean;
   checkTestCasesLockStatus: Function;
   setAlertMessage: Function;
-  measureLockedByAnotherUser: boolean;
+  measureCanEdit: boolean;
 }
 
 const QDMReporting = (props: ReportingProps) => {
@@ -83,14 +82,7 @@ const QDMReporting = (props: ReportingProps) => {
       subscription.unsubscribe();
     };
   }, []);
-  const canEdit =
-    !props.isTestCaseLocked &&
-    checkUserCanEdit(
-      measure?.measureSet?.owner,
-      measure?.measureSet?.acls,
-      measure?.measureMetaData?.draft
-    ) &&
-    !props.measureLockedByAnotherUser;
+  const canEdit = !props.isTestCaseLocked && props.measureCanEdit;
 
   const formik = useFormik({
     initialValues: {

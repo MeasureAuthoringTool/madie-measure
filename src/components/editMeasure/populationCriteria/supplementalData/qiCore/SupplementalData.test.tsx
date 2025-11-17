@@ -15,12 +15,7 @@ import {
   ApiContextProvider,
 } from "../../../../../api/ServiceContext";
 
-import {
-  checkUserCanEdit,
-  MeasureServiceApi,
-  useMeasureServiceApi,
-  useFeatureFlags,
-} from "@madie/madie-util";
+import { MeasureServiceApi, useFeatureFlags } from "@madie/madie-util";
 import SupplementalData, { SupplementalDataProps } from "./SupplementalData";
 
 const serviceConfig = {
@@ -61,7 +56,6 @@ const mockTestMeasure = {
 
 jest.mock("@madie/madie-util", () => ({
   useMeasureServiceApi: jest.fn(() => mockMeasureServiceApi),
-  checkUserCanEdit: jest.fn().mockImplementation(() => true),
   useKeyPress: jest.fn(() => false),
   measureStore: {
     updateMeasure: (measure) => measure,
@@ -101,6 +95,7 @@ const props: SupplementalDataProps = {
   setAlertMessage: jest.fn,
   isTestCaseLocked: false,
   checkTestCasesLockStatus: jest.fn(),
+  measureCanEdit: true,
 };
 const RenderSupplementalElements = (customProps = props) => {
   const mergedProps = { ...props, ...customProps };
@@ -133,8 +128,7 @@ describe("SupplementalData Component QI-Core", () => {
   });
 
   it("Should render disabled components if the user doesn't have permissions", async () => {
-    checkUserCanEdit.mockReturnValue(false);
-    RenderSupplementalElements();
+    RenderSupplementalElements({ ...props, measureCanEdit: false });
 
     const supplementalElements = screen.getByRole("textbox", {
       name: "Definition",
@@ -159,7 +153,6 @@ describe("SupplementalData Component QI-Core", () => {
   });
 
   it("Should successfully update supplemental Elements values with default IncludeInReportTypes and save to DB", async () => {
-    checkUserCanEdit.mockReturnValue(true);
     // Mocking service call to update measure
     const newSupplementalData = [
       {
@@ -336,8 +329,6 @@ describe("SupplementalData Component QI-Core", () => {
   });
 
   it("Should fail an update to supplemental data values because of unexpected internal server issues", async () => {
-    checkUserCanEdit.mockReturnValue(true);
-
     // Mock API to simulate server error
     const failureMessage = "Internal Server Error";
     mockMeasureServiceApi.updateMeasure = jest

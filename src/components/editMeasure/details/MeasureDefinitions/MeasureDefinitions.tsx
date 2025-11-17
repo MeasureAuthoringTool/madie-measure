@@ -6,7 +6,6 @@ import {
   Button,
   Pagination,
   TextField,
-  TextArea,
   Toast,
   MadieDialog,
   MadieDeleteDialog,
@@ -17,11 +16,7 @@ import SearchIcon from "@mui/icons-material/Search";
 import ClearIcon from "@mui/icons-material/Clear";
 import { Typography, IconButton, InputAdornment } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
-import {
-  measureStore,
-  checkUserCanEdit,
-  useMeasureServiceApi,
-} from "@madie/madie-util";
+import { measureStore, useMeasureServiceApi } from "@madie/madie-util";
 import { useFormik } from "formik";
 import { MeasureDefinition, Measure } from "@madie/madie-models";
 import useFormikResetOnEvent from "../../../common/useFormikResetOnEvent";
@@ -32,11 +27,11 @@ import TextEditor from "../../populationCriteria/groups/TextEditor";
 
 interface MeasureDefinitionsProps {
   setErrorMessage: Function;
-  measureLockedByAnotherUser: boolean;
+  measureCanEdit: boolean;
 }
 
 const MeasureDefinitions = (props: MeasureDefinitionsProps) => {
-  const { setErrorMessage, measureLockedByAnotherUser } = props;
+  const { setErrorMessage, measureCanEdit } = props;
   const { search } = useLocation();
   let navigate = useNavigate();
   const measureServiceApi = useMeasureServiceApi();
@@ -52,13 +47,6 @@ const MeasureDefinitions = (props: MeasureDefinitionsProps) => {
     useState<MeasureDefinition>(null);
 
   // Form utilities
-  const canEdit =
-    checkUserCanEdit(
-      measure?.measureSet?.owner,
-      measure?.measureSet?.acls,
-      measure?.measureMetaData?.draft
-    ) && !measureLockedByAnotherUser;
-
   const values = queryString.parse(search);
   const INITIAL_VALUES = {
     id: selectedDefinition?.id,
@@ -410,7 +398,7 @@ const MeasureDefinitions = (props: MeasureDefinitionsProps) => {
                 >
                   <Button
                     id="create-definition"
-                    disabled={!canEdit}
+                    disabled={!measureCanEdit}
                     variant="outline-filled"
                     className="page-header-action-button"
                     data-testid="create-definition-button"
@@ -452,7 +440,7 @@ const MeasureDefinitions = (props: MeasureDefinitionsProps) => {
                     handleClick={handleClick}
                     id={definition.id}
                     key={`${definition.term}-${index}`}
-                    canEdit={canEdit}
+                    canEdit={measureCanEdit}
                     type="definition"
                   />
                 ))
@@ -522,7 +510,7 @@ const MeasureDefinitions = (props: MeasureDefinitionsProps) => {
           <div>
             <TextField
               required
-              readOnly={!canEdit}
+              readOnly={!measureCanEdit}
               label="Term"
               placeholder="Placeholder"
               id="measure-definition-term"
@@ -541,7 +529,7 @@ const MeasureDefinitions = (props: MeasureDefinitionsProps) => {
               required
               data-testid="measure-definition"
               setFieldValue={formik.setFieldValue}
-              readOnly={!canEdit}
+              readOnly={!measureCanEdit}
               error={
                 formik.touched.definition && Boolean(formik.errors.definition)
               }

@@ -30,7 +30,6 @@ import { ELM_JSON, MeasureCQL } from "../../../../common/MeasureCQL";
 import userEvent from "@testing-library/user-event";
 import {
   measureStore,
-  checkUserCanEdit,
   MeasureServiceApi,
   useFeatureFlags,
 } from "@madie/madie-util";
@@ -86,9 +85,6 @@ jest.mock("@madie/madie-util", () => ({
   useOktaTokens: () => ({
     getAccessToken: () => "test.jwt",
   }),
-  checkUserCanEdit: jest.fn(() => {
-    return true;
-  }),
   useFeatureFlags: jest.fn(() => ({
     Locking: false,
   })),
@@ -122,7 +118,7 @@ const renderMeasureGroupComponent = (customProps = props) => {
         <Routes>
           <Route
             path="/measures/test-measure/edit/groups/:groupNumber"
-            element={<MeasureGroups {...mergedProps} />}
+            element={<MeasureGroups {...mergedProps} measureCanEdit={true} />}
           />
         </Routes>
       </ApiContextProvider>
@@ -1900,7 +1896,6 @@ describe("GAK MAT-6526 These tests were skipped in a previous story, but are wor
     });
 
     test.skip("Measure Group Description should not render input field if user is not the measure owner", async () => {
-      (checkUserCanEdit as jest.Mock).mockImplementation(() => false);
       const { queryByTestId } = await waitFor(() =>
         renderMeasureGroupComponent()
       );
@@ -1909,7 +1904,6 @@ describe("GAK MAT-6526 These tests were skipped in a previous story, but are wor
     });
 
     test.skip("Measure Group Save button should not render if user is not the measure owner", async () => {
-      (checkUserCanEdit as jest.Mock).mockImplementation(() => false);
       const { queryByTestId } = await waitFor(() =>
         renderMeasureGroupComponent()
       );

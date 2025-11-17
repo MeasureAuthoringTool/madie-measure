@@ -16,12 +16,7 @@ import {
   ApiContextProvider,
 } from "../../../../../api/ServiceContext";
 
-import {
-  checkUserCanEdit,
-  MeasureServiceApi,
-  useMeasureServiceApi,
-  useFeatureFlags,
-} from "@madie/madie-util";
+import { MeasureServiceApi, useFeatureFlags } from "@madie/madie-util";
 
 const serviceConfig: ServiceConfig = {
   measureService: {
@@ -61,7 +56,6 @@ const mockTestMeasure = {
 
 jest.mock("@madie/madie-util", () => ({
   useMeasureServiceApi: jest.fn(() => mockMeasureServiceApi),
-  checkUserCanEdit: jest.fn().mockImplementation(() => true),
   useKeyPress: jest.fn(() => false),
   measureStore: {
     updateMeasure: (measure: Measure) => measure,
@@ -101,6 +95,7 @@ const props: RiskAdjustmentProps = {
   setAlertMessage: jest.fn,
   isTestCaseLocked: false,
   checkTestCasesLockStatus: jest.fn(),
+  measureCanEdit: true,
 };
 
 const RenderRiskAdjustment = (customProps = props) => {
@@ -135,7 +130,6 @@ describe("QiCore RiskAdjustment Component", () => {
   });
 
   it.skip("Should render disabled components if the user doesn't have permissions", async () => {
-    checkUserCanEdit.mockReturnValue(false);
     RenderRiskAdjustment();
     const riskAdjustments = screen.getByRole("textbox", {
       name: "Definition",
@@ -154,8 +148,6 @@ describe("QiCore RiskAdjustment Component", () => {
   });
 
   it.skip("Should successfully update risk Adjustment values and save to DB on 200", async () => {
-    checkUserCanEdit.mockReturnValue(true);
-
     const newRiskAdjustments = [
       {
         definition: "Initial Population",
@@ -275,7 +267,6 @@ describe("QiCore RiskAdjustment Component", () => {
   });
 
   it.skip("Should successfully update risk Adjustment values and save to DB on 201", async () => {
-    checkUserCanEdit.mockReturnValue(true);
     const newRiskAdjustments = [
       {
         definition: "Initial Population",
@@ -568,7 +559,6 @@ describe("QiCore RiskAdjustment Component", () => {
   });
 
   it.skip("should allow users to add and delete a value using the chip delete icon", async () => {
-    checkUserCanEdit.mockReturnValue(true);
     // Mocking service call to update measure
     RenderRiskAdjustment();
 

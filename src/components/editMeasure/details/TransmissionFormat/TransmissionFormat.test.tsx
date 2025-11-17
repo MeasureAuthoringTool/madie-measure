@@ -8,11 +8,7 @@ import {
 } from "../../../../api/ServiceContext";
 import TransmissionFormat from "./TransmissionFormat";
 
-import {
-  measureStorem,
-  useMeasureServiceApi,
-  MeasureServiceApi,
-} from "@madie/madie-util";
+import { MeasureServiceApi } from "@madie/madie-util";
 import { Measure } from "@madie/madie-models";
 import userEvent from "@testing-library/user-event";
 
@@ -36,7 +32,6 @@ jest.mock("@madie/madie-util", () => ({
   useOktaTokens: jest.fn(() => ({
     getAccessToken: () => "test.jwt",
   })),
-  checkUserCanEdit: jest.fn().mockImplementation(() => true),
   measureStore: {
     updateMeasure: jest.fn((measure) => measure),
     state: jest.fn().mockImplementation(() => measure),
@@ -86,7 +81,10 @@ describe("Transmission Format page", () => {
     render(
       <ApiContextProvider value={serviceConfig}>
         <MemoryRouter initialEntries={["/"]}>
-          <TransmissionFormat setErrorMessage={jest.fn()} />
+          <TransmissionFormat
+            setErrorMessage={jest.fn()}
+            measureCanEdit={true}
+          />
         </MemoryRouter>
       </ApiContextProvider>
     );
@@ -116,7 +114,10 @@ describe("Transmission Format page", () => {
     render(
       <ApiContextProvider value={serviceConfig}>
         <MemoryRouter initialEntries={["/"]}>
-          <TransmissionFormat setErrorMessage={jest.fn()} />
+          <TransmissionFormat
+            setErrorMessage={jest.fn()}
+            measureCanEdit={true}
+          />
         </MemoryRouter>
       </ApiContextProvider>
     );
@@ -169,7 +170,10 @@ describe("Transmission Format page", () => {
     render(
       <ApiContextProvider value={serviceConfig}>
         <MemoryRouter initialEntries={["/"]}>
-          <TransmissionFormat setErrorMessage={jest.fn()} />
+          <TransmissionFormat
+            setErrorMessage={jest.fn()}
+            measureCanEdit={true}
+          />
         </MemoryRouter>
       </ApiContextProvider>
     );
@@ -202,7 +206,10 @@ describe("Transmission Format page", () => {
     render(
       <ApiContextProvider value={serviceConfig}>
         <MemoryRouter initialEntries={["/"]}>
-          <TransmissionFormat setErrorMessage={jest.fn()} />
+          <TransmissionFormat
+            setErrorMessage={jest.fn()}
+            measureCanEdit={true}
+          />
         </MemoryRouter>
       </ApiContextProvider>
     );

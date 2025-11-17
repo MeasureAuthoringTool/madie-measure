@@ -24,6 +24,7 @@ import {
   checkUserCanEdit,
   measureStore,
   MeasureServiceApi,
+  useFeatureFlags,
 } from "@madie/madie-util";
 
 const mockHistoryPush = jest.fn();
@@ -104,7 +105,9 @@ const mockMeasureServiceApi = {
 } as unknown as MeasureServiceApi;
 jest.mock("@madie/madie-util", () => ({
   useMeasureServiceApi: jest.fn(() => mockMeasureServiceApi),
-
+  useFeatureFlags: jest.fn().mockReturnValue({
+    Locking: true,
+  }),
   useOktaTokens: jest.fn(() => ({
     getAccessToken: () => "test.jwt",
   })),
@@ -201,7 +204,12 @@ describe("MeasureInformation component", () => {
     measureStore.state.mockImplementationOnce(() => measure);
     checkUserCanEdit.mockImplementationOnce(() => true);
     await act(async () => {
-      render(<MeasureInformation setErrorMessage={setErrorMessage} />);
+      render(
+        <MeasureInformation
+          setErrorMessage={setErrorMessage}
+          measureCanEdit={true}
+        />
+      );
       const endorserAutoComplete = await screen.findByTestId("endorser");
       fireEvent.keyDown(endorserAutoComplete, { key: "ArrowDown" });
       // selects 2nd option
@@ -242,7 +250,12 @@ describe("MeasureInformation component", () => {
     (checkUserCanEdit as jest.Mock).mockImplementation(() => {
       return true;
     });
-    render(<MeasureInformation setErrorMessage={setErrorMessage} />);
+    render(
+      <MeasureInformation
+        setErrorMessage={setErrorMessage}
+        measureCanEdit={true}
+      />
+    );
 
     const endorserAutoComplete = await screen.findByTestId("endorser");
     fireEvent.keyDown(endorserAutoComplete, { key: "ArrowDown" });
@@ -292,7 +305,12 @@ describe("MeasureInformation component", () => {
     (checkUserCanEdit as jest.Mock).mockImplementation(() => {
       return false;
     });
-    render(<MeasureInformation setErrorMessage={setErrorMessage} />);
+    render(
+      <MeasureInformation
+        setErrorMessage={setErrorMessage}
+        measureCanEdit={false}
+      />
+    );
 
     const intendedVenueComplete = screen.getByRole("textbox", {
       name: "Intended Venue",
@@ -311,7 +329,12 @@ describe("MeasureInformation component", () => {
     (checkUserCanEdit as jest.Mock).mockImplementation(() => {
       return true;
     });
-    render(<MeasureInformation setErrorMessage={setErrorMessage} />);
+    render(
+      <MeasureInformation
+        setErrorMessage={setErrorMessage}
+        measureCanEdit={true}
+      />
+    );
 
     const intendedVenueComplete = (await screen.findByTestId(
       "intended-venue-input"
@@ -356,7 +379,12 @@ describe("MeasureInformation component", () => {
     (checkUserCanEdit as jest.Mock).mockImplementation(() => {
       return true;
     });
-    render(<MeasureInformation setErrorMessage={setErrorMessage} />);
+    render(
+      <MeasureInformation
+        setErrorMessage={setErrorMessage}
+        measureCanEdit={true}
+      />
+    );
 
     const intendedVenueComplete = (await screen.findByTestId(
       "intended-venue-input"
@@ -392,7 +420,12 @@ describe("MeasureInformation component", () => {
     (checkUserCanEdit as jest.Mock).mockImplementation(() => {
       return true;
     });
-    render(<MeasureInformation setErrorMessage={setErrorMessage} />);
+    render(
+      <MeasureInformation
+        setErrorMessage={setErrorMessage}
+        measureCanEdit={true}
+      />
+    );
 
     const intendedVenueComplete = (await screen.findByTestId(
       "intended-venue-input"
@@ -422,7 +455,12 @@ describe("MeasureInformation component", () => {
     measureStore.state.mockImplementationOnce(() => measure);
     checkUserCanEdit.mockImplementationOnce(() => true);
     await act(async () => {
-      render(<MeasureInformation setErrorMessage={setErrorMessage} />);
+      render(
+        <MeasureInformation
+          setErrorMessage={setErrorMessage}
+          measureCanEdit={true}
+        />
+      );
       const endorserAutoComplete = await screen.findByTestId("endorser");
       fireEvent.keyDown(endorserAutoComplete, { key: "ArrowDown" });
       // selects 2nd option
@@ -473,7 +511,12 @@ describe("MeasureInformation component", () => {
       cql: "modified cql",
     } as unknown as Measure;
 
-    render(<MeasureInformation setErrorMessage={setErrorMessage} />);
+    render(
+      <MeasureInformation
+        setErrorMessage={setErrorMessage}
+        measureCanEdit={true}
+      />
+    );
 
     const cqlLibraryName = (await screen.findByRole("textbox", {
       name: "Measure CQL Library Name",
@@ -530,7 +573,12 @@ describe("MeasureInformation component", () => {
 
   it("should render the component with measure's information populated", async () => {
     checkUserCanEdit.mockImplementationOnce(() => true);
-    render(<MeasureInformation setErrorMessage={setErrorMessage} />);
+    render(
+      <MeasureInformation
+        setErrorMessage={setErrorMessage}
+        measureCanEdit={true}
+      />
+    );
 
     const result: HTMLElement = getByTestId("measure-information-form");
     expect(result).toBeInTheDocument();
@@ -575,7 +623,12 @@ describe("MeasureInformation component", () => {
       measureId: undefined,
       cql: "modified cql",
     } as unknown as Measure;
-    render(<MeasureInformation setErrorMessage={setErrorMessage} />);
+    render(
+      <MeasureInformation
+        setErrorMessage={setErrorMessage}
+        measureCanEdit={true}
+      />
+    );
 
     const result: HTMLElement = getByTestId("measure-information-form");
     expect(result).toBeInTheDocument();
@@ -601,7 +654,12 @@ describe("MeasureInformation component", () => {
       model: Model.QDM_5_6,
     } as unknown as Measure;
     measureStore.state.mockImplementation(() => testMeasure);
-    render(<MeasureInformation setErrorMessage={setErrorMessage} />);
+    render(
+      <MeasureInformation
+        setErrorMessage={setErrorMessage}
+        measureCanEdit={true}
+      />
+    );
 
     const result: HTMLElement = getByTestId("measure-information-form");
     expect(result).toBeInTheDocument();
@@ -627,7 +685,12 @@ describe("MeasureInformation component", () => {
       owner: "test.com",
     };
 
-    render(<MeasureInformation setErrorMessage={setErrorMessage} />);
+    render(
+      <MeasureInformation
+        setErrorMessage={setErrorMessage}
+        measureCanEdit={true}
+      />
+    );
     const result: HTMLElement = getByTestId("measure-information-form");
     expect(result).toBeInTheDocument();
 
@@ -648,7 +711,12 @@ describe("MeasureInformation component", () => {
       measureSetId: "testMeasureId",
       owner: "test.com",
     };
-    render(<MeasureInformation setErrorMessage={setErrorMessage} />);
+    render(
+      <MeasureInformation
+        setErrorMessage={setErrorMessage}
+        measureCanEdit={true}
+      />
+    );
     const cmsId = screen.getByRole("textbox", {
       name: "CMS ID",
     }) as HTMLInputElement;
@@ -674,7 +742,12 @@ describe("MeasureInformation component", () => {
       owner: "test.com",
     };
 
-    render(<MeasureInformation setErrorMessage={setErrorMessage} />);
+    render(
+      <MeasureInformation
+        setErrorMessage={setErrorMessage}
+        measureCanEdit={true}
+      />
+    );
     const result: HTMLElement = screen.getByTestId("measure-information-form");
     expect(result).toBeInTheDocument();
 
@@ -714,7 +787,12 @@ describe("MeasureInformation component", () => {
       owner: "test.com",
     };
 
-    render(<MeasureInformation setErrorMessage={setErrorMessage} />);
+    render(
+      <MeasureInformation
+        setErrorMessage={setErrorMessage}
+        measureCanEdit={true}
+      />
+    );
     const result: HTMLElement = screen.getByTestId("measure-information-form");
     expect(result).toBeInTheDocument();
     const cmsIdBtn = screen.getByTestId(
@@ -741,7 +819,12 @@ describe("MeasureInformation component", () => {
 
   it("Should display measure Version ID when it is not null", async () => {
     measure.versionId = "testVersionId";
-    render(<MeasureInformation setErrorMessage={setErrorMessage} />);
+    render(
+      <MeasureInformation
+        setErrorMessage={setErrorMessage}
+        measureCanEdit={true}
+      />
+    );
 
     const result: HTMLElement = getByTestId("measure-information-form");
     expect(result).toBeInTheDocument();
@@ -759,7 +842,12 @@ describe("MeasureInformation component", () => {
 
   it("should render the component with a blank measure name", async () => {
     measure.measureName = "";
-    render(<MeasureInformation setErrorMessage={setErrorMessage} />);
+    render(
+      <MeasureInformation
+        setErrorMessage={setErrorMessage}
+        measureCanEdit={true}
+      />
+    );
     const result: HTMLElement = getByTestId("measure-information-form");
     expect(result).toBeInTheDocument();
     await act(async () => {
@@ -769,7 +857,12 @@ describe("MeasureInformation component", () => {
   });
 
   it("Check if the measurement information save button is present", () => {
-    render(<MeasureInformation setErrorMessage={setErrorMessage} />);
+    render(
+      <MeasureInformation
+        setErrorMessage={setErrorMessage}
+        measureCanEdit={true}
+      />
+    );
     const result: HTMLElement = getByTestId(
       "measurement-information-save-button"
     );
@@ -785,7 +878,12 @@ describe("MeasureInformation component", () => {
       .mockResolvedValue(endorserList);
     measure.measureName = "";
 
-    render(<MeasureInformation setErrorMessage={setErrorMessage} />);
+    render(
+      <MeasureInformation
+        setErrorMessage={setErrorMessage}
+        measureCanEdit={true}
+      />
+    );
 
     await act(async () => {
       const input = await findByTestId("measure-name-input");
@@ -820,7 +918,12 @@ describe("MeasureInformation component", () => {
       .mockResolvedValue(endorserList);
 
     measure.measureName = "";
-    render(<MeasureInformation setErrorMessage={setErrorMessage} />);
+    render(
+      <MeasureInformation
+        setErrorMessage={setErrorMessage}
+        measureCanEdit={true}
+      />
+    );
 
     await act(async () => {
       const input = await findByTestId("measure-name-input");
@@ -842,7 +945,12 @@ describe("MeasureInformation component", () => {
 
   it("Should be editable if measure is shared with the user", () => {
     measure.model = Model.QICORE;
-    render(<MeasureInformation setErrorMessage={setErrorMessage} />);
+    render(
+      <MeasureInformation
+        setErrorMessage={setErrorMessage}
+        measureCanEdit={true}
+      />
+    );
     const result: HTMLElement = getByTestId("measure-information-form");
     expect(result).toBeInTheDocument();
 
@@ -871,13 +979,18 @@ describe("MeasureInformation component", () => {
     expect(endorser).toBeEnabled();
   });
 
-  it("Should should set the following elements to read only if measure is not shared with the user", async () => {
+  it("Should set the following elements to read only if measure is not shared with the user", async () => {
     (checkUserCanEdit as jest.Mock).mockImplementation(() => {
       return false;
     });
     measure.model = Model.QDM_5_6;
     await act(async () => {
-      render(<MeasureInformation setErrorMessage={setErrorMessage} />);
+      render(
+        <MeasureInformation
+          setErrorMessage={setErrorMessage}
+          measureCanEdit={false}
+        />
+      );
       const result: HTMLElement = getByTestId("measure-information-form");
       expect(result).toBeInTheDocument();
 
@@ -925,7 +1038,12 @@ describe("MeasureInformation component", () => {
     (checkUserCanEdit as jest.Mock).mockImplementation(() => {
       return true;
     });
-    render(<MeasureInformation setErrorMessage={setErrorMessage} />);
+    render(
+      <MeasureInformation
+        setErrorMessage={setErrorMessage}
+        measureCanEdit={true}
+      />
+    );
     const endorserAutoComplete = await screen.findByTestId("endorser");
     fireEvent.keyDown(endorserAutoComplete, { key: "ArrowDown" });
     // selects 2nd option
@@ -950,7 +1068,12 @@ describe("MeasureInformation component", () => {
     (checkUserCanEdit as jest.Mock).mockImplementation(() => {
       return true;
     });
-    render(<MeasureInformation setErrorMessage={setErrorMessage} />);
+    render(
+      <MeasureInformation
+        setErrorMessage={setErrorMessage}
+        measureCanEdit={true}
+      />
+    );
 
     const endorserAutoComplete = await screen.findByTestId("endorser");
 
@@ -991,7 +1114,12 @@ describe("MeasureInformation component", () => {
       return true;
     });
     measure.measureName = "";
-    render(<MeasureInformation setErrorMessage={setErrorMessage} />);
+    render(
+      <MeasureInformation
+        setErrorMessage={setErrorMessage}
+        measureCanEdit={true}
+      />
+    );
     await act(async () => {
       const input = await findByTestId("measure-name-input");
       fireEvent.change(input, {
@@ -1018,7 +1146,12 @@ describe("MeasureInformation component", () => {
 
   it("Discard dialog opens and cancels", async () => {
     measure.measureName = "";
-    render(<MeasureInformation setErrorMessage={setErrorMessage} />);
+    render(
+      <MeasureInformation
+        setErrorMessage={setErrorMessage}
+        measureCanEdit={true}
+      />
+    );
     await act(async () => {
       const input = await findByTestId("measure-name-input");
       fireEvent.change(input, {
@@ -1043,7 +1176,12 @@ describe("MeasureInformation component", () => {
   });
 
   it("should render endorser dropdown with endorser list", async () => {
-    render(<MeasureInformation setErrorMessage={setErrorMessage} />);
+    render(
+      <MeasureInformation
+        setErrorMessage={setErrorMessage}
+        measureCanEdit={true}
+      />
+    );
     const endorserDropDown = await screen.findByTestId("endorser");
     fireEvent.keyDown(endorserDropDown, { key: "ArrowDown" });
 
@@ -1061,7 +1199,12 @@ describe("MeasureInformation component", () => {
   it("should disable endorserId when endorser is unselected", async () => {
     checkUserCanEdit.mockImplementationOnce(() => true);
     await act(async () => {
-      render(<MeasureInformation setErrorMessage={setErrorMessage} />);
+      render(
+        <MeasureInformation
+          setErrorMessage={setErrorMessage}
+          measureCanEdit={true}
+        />
+      );
       const endorserAutoComplete = await screen.findByTestId("endorser");
       const endorserComboBox =
         within(endorserAutoComplete).getByRole("combobox");
@@ -1110,7 +1253,12 @@ describe("MeasureInformation component", () => {
     } as unknown as Measure;
     measureStore.state.mockImplementationOnce(() => testMeasure);
     checkUserCanEdit.mockImplementationOnce(() => true);
-    render(<MeasureInformation setErrorMessage={setErrorMessage} />);
+    render(
+      <MeasureInformation
+        setErrorMessage={setErrorMessage}
+        measureCanEdit={true}
+      />
+    );
     await waitFor(async () => {
       const translatorVersion = await findByTestId(
         "translator-version-text-field"
@@ -1136,7 +1284,12 @@ describe("MeasureInformation component", () => {
       } as unknown as QdmElmTranslationServiceApi;
     });
 
-    render(<MeasureInformation setErrorMessage={setErrorMessage} />);
+    render(
+      <MeasureInformation
+        setErrorMessage={setErrorMessage}
+        measureCanEdit={true}
+      />
+    );
     await waitFor(async () => {
       const translatorVersionText = await findByText(
         "Unable to determine translator version."
@@ -1153,7 +1306,12 @@ describe("MeasureInformation component", () => {
     } as unknown as Measure;
     measureStore.state.mockImplementationOnce(() => testMeasure);
     checkUserCanEdit.mockImplementationOnce(() => true);
-    render(<MeasureInformation setErrorMessage={setErrorMessage} />);
+    render(
+      <MeasureInformation
+        setErrorMessage={setErrorMessage}
+        measureCanEdit={true}
+      />
+    );
     await waitFor(async () => {
       const translatorVersion = await findByTestId(
         "translator-version-text-field"
@@ -1181,7 +1339,12 @@ describe("MeasureInformation component", () => {
       } as unknown as QdmElmTranslationServiceApi;
     });
 
-    render(<MeasureInformation setErrorMessage={setErrorMessage} />);
+    render(
+      <MeasureInformation
+        setErrorMessage={setErrorMessage}
+        measureCanEdit={true}
+      />
+    );
     await waitFor(async () => {
       const translatorVersionText = await findByText(
         "Unable to determine translator version."
@@ -1198,7 +1361,12 @@ describe("MeasureInformation component", () => {
     } as unknown as Measure;
     measureStore.state.mockImplementationOnce(() => testMeasure);
     checkUserCanEdit.mockImplementationOnce(() => true);
-    render(<MeasureInformation setErrorMessage={setErrorMessage} />);
+    render(
+      <MeasureInformation
+        setErrorMessage={setErrorMessage}
+        measureCanEdit={true}
+      />
+    );
     await waitFor(async () => {
       const translatorVersion = await findByTestId(
         "translator-version-text-field"
@@ -1218,7 +1386,12 @@ describe("MeasureInformation component", () => {
     measureStore.state.mockImplementationOnce(() => testMeasure);
     checkUserCanEdit.mockImplementationOnce(() => true);
     await act(async () => {
-      render(<MeasureInformation setErrorMessage={setErrorMessage} />);
+      render(
+        <MeasureInformation
+          setErrorMessage={setErrorMessage}
+          measureCanEdit={true}
+        />
+      );
       const translatorVersionText = await findByText(
         "Currently using CQL to ELM Translator Version"
       );
@@ -1236,7 +1409,12 @@ describe("MeasureInformation component", () => {
     measureStore.state.mockImplementationOnce(() => testMeasure);
     checkUserCanEdit.mockImplementationOnce(() => true);
     await act(async () => {
-      render(<MeasureInformation setErrorMessage={setErrorMessage} />);
+      render(
+        <MeasureInformation
+          setErrorMessage={setErrorMessage}
+          measureCanEdit={true}
+        />
+      );
       const translatorVersionText = await findByText(
         "Currently using CQL to ELM Translator Version"
       );
@@ -1264,7 +1442,12 @@ describe("MeasureInformation component", () => {
     });
 
     await act(async () => {
-      render(<MeasureInformation setErrorMessage={setErrorMessage} />);
+      render(
+        <MeasureInformation
+          setErrorMessage={setErrorMessage}
+          measureCanEdit={true}
+        />
+      );
       const translatorVersionText = await findByText(
         "Unable to determine translator version."
       );
@@ -1282,7 +1465,12 @@ describe("MeasureInformation component", () => {
     measureStore.state.mockImplementationOnce(() => testMeasure);
     checkUserCanEdit.mockImplementationOnce(() => true);
     await act(async () => {
-      render(<MeasureInformation setErrorMessage={setErrorMessage} />);
+      render(
+        <MeasureInformation
+          setErrorMessage={setErrorMessage}
+          measureCanEdit={true}
+        />
+      );
       const translatorVersionText = await findByText(
         "Versioned with CQL to ELM Translator Version"
       );
