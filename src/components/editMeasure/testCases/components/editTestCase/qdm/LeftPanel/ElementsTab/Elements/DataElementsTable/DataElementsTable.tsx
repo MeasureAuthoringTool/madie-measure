@@ -59,7 +59,10 @@ const DataElementTable = ({
       const codeSystemMap = {};
       valueSets.forEach((valueSet) => {
         valueSet.concepts.forEach((concept) => {
-          codeSystemMap[concept.code_system_oid] = concept.code_system_name;
+          codeSystemMap[concept.code_system_oid] = {
+            name: concept.code_system_name,
+            version: concept.code_system_version,
+          };
         });
       });
       setCodeSystemMap(codeSystemMap);
