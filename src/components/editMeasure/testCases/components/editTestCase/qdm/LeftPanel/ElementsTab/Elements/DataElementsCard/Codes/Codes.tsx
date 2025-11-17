@@ -285,7 +285,7 @@ const Codes = ({
                   SelectDisplayProps={{
                     "aria-required": "true",
                   }}
-                  diabled={!canEdit}
+                  disabled={!canEdit}
                   options={
                     relatedCodeConcepts
                       ? relatedCodeConcepts.map((concept) => (
@@ -329,7 +329,7 @@ const Codes = ({
         {chips.map((chip) => {
           return (
             <Tooltip
-              title={`Code System Version: ${chip.version}`}
+              title={`Code System Version: ${chip.version ?? "not available"}`}
               data-testid={`chip-tooltip-${chip?.id}`}
             >
               <span>

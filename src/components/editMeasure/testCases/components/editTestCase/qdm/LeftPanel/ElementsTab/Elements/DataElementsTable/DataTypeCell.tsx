@@ -6,7 +6,9 @@ import { Tooltip } from "@mui/material";
 const CodesRow = ({ code }) => {
   return (
     <div className="codes-row">
-      <Tooltip title={`Code System Version: ${code.version}`}>
+      <Tooltip
+        title={`Code System Version: ${code.version ?? "not available"}`}
+      >
         <span>{`${code.system}: ${code.code}`}</span>
       </Tooltip>
     </div>
@@ -29,9 +31,9 @@ const DataTypeCell = (props: { element: DataElement; codeSystemMap: any }) => {
         codes.map((code) => {
           if (codeSystemMap[code.system]) {
             return {
-              system: codeSystemMap[code.system],
+              system: codeSystemMap[code.system].name,
               code: code.code,
-              version: code.version?.replace(/urn:hl7:version:/g, ""),
+              version: codeSystemMap[code.system].version,
             };
           }
           return {

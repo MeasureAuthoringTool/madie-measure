@@ -173,7 +173,7 @@ describe("DataTypeCell", () => {
     const dataEl = new AssessmentPerformed();
     const testCode = new Code("code", "system", "version", "display");
     const codeSystemMap = {
-      system: "DISPLAY",
+      system: { name: "DISPLAY", version: "1.0" },
     };
     dataEl.set("dataElementCodes", [testCode]);
     render(<DataTypeCell element={dataEl} codeSystemMap={codeSystemMap} />);
