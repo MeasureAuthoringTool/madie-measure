@@ -557,12 +557,24 @@ const TestCaseList = (props: TestCaseListProps) => {
     }
   };
 
-  const onCopyTestCaseClose = (msg?: string, toastType?: string) => {
+  const onCopyTestCaseClose = (
+    msg?: string,
+    toastType?: string,
+    failedTestCaseIds?: any
+  ) => {
     setOpenCopyTestCaseDialog(false);
     if (toastType) {
       setToastType(toastType);
       setToastMessage(msg);
       setToastOpen(true);
+    } else {
+      setCustomWarningMessages([
+        {
+          message: msg,
+          details: failedTestCaseIds,
+          testDataId: "test-cases-copy-to-warning",
+        },
+      ]);
     }
   };
 
