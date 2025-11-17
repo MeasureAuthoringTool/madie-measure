@@ -31,9 +31,9 @@ const DataTypeCell = (props: { element: DataElement; codeSystemMap: any }) => {
         codes.map((code) => {
           if (codeSystemMap[code.system]) {
             return {
-              system: codeSystemMap[code.system].name,
+              system: codeSystemMap[code.system],
               code: code.code,
-              version: codeSystemMap[code.system].version,
+              version: code.version?.replace(/urn:hl7:version:/g, ""),
             };
           }
           return {
