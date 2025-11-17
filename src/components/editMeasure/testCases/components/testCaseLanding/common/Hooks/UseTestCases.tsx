@@ -251,7 +251,7 @@ function UseFetchTestCases({ measureId, setErrors }) {
   useEffect(() => {
     getTestCasePage();
   }, [getTestCasePage]);
-  // this will only ever get the total test cases
+
   const retrieveTestCases = useCallback(() => {
     setLoadingState(() => ({
       loading: true,
@@ -300,7 +300,7 @@ function UseFetchTestCases({ measureId, setErrors }) {
   useEffect(() => {
     retrieveTestCases();
   }, [retrieveTestCases]);
-  // removeTestCase, addTestCase, cloneTestCase
+
   return {
     testCaseService,
     testCases: sortedTestCases, //all test cases to run execution against
