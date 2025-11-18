@@ -1,9 +1,7 @@
 import * as React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
-import TestCaseRoutes, {
-  CQL_RETURN_TYPES_MISMATCH_ERROR,
-} from "./TestCaseRoutes";
+import TestCaseRoutes from "./TestCaseRoutes";
 import userEvent from "@testing-library/user-event";
 import axios from "../../../../../../api/axios-instance";
 import {
@@ -20,11 +18,7 @@ import { Bundle } from "fhir/r4";
 import { act } from "react-dom/test-utils";
 import NotFound from "../../notfound/NotFound";
 // @ts-ignore
-import {
-  useFeatureFlags,
-  useMeasureServiceApi,
-  MeasureServiceApi,
-} from "@madie/madie-util";
+import { MeasureServiceApi } from "@madie/madie-util";
 
 // mock the editor cause we don't care for this test and it gets rid of errors
 jest.mock("../../editor/Editor", () => () => <div>editor contents</div>);
