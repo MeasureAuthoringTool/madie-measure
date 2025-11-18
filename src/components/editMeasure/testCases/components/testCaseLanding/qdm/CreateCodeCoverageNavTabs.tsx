@@ -108,6 +108,10 @@ export default function CreateCodeCoverageNavTabs(props: NavTabProps) {
     measure?.errors?.includes(
       MeasureErrorType.MISMATCH_CQL_POPULATION_RETURN_TYPES
     ) ||
+    measure?.errors?.includes(MeasureErrorType.MISMATCH_CQL_RISK_ADJUSTMENT) ||
+    measure?.errors?.includes(
+      MeasureErrorType.MISMATCH_CQL_SUPPLEMENTAL_DATA
+    ) ||
     _.isNil(measure?.groups) ||
     measure?.groups.length === 0 ||
     (measure?.testCaseConfiguration?.executeInvalidTestCases
