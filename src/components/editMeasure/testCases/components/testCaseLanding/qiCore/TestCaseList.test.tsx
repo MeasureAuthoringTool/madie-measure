@@ -1755,6 +1755,46 @@ describe("TestCaseList component", () => {
     expect(tabElement).not.toBeInTheDocument();
   });
 
+  it("should disable execute button if CQL risk adjustment type mismatch error exists on measure", async () => {
+    mockMeasure.createdBy = MEASURE_CREATEDBY;
+    mockMeasure.errors = [MeasureErrorType.MISMATCH_CQL_RISK_ADJUSTMENT];
+    renderTestCaseListComponent();
+
+    const table = await screen.findByTestId("test-case-tbl");
+    const tableRows = table.querySelectorAll("tbody tr");
+    await waitFor(() => {
+      expect(tableRows[2]).toHaveTextContent("N/A");
+      expect(tableRows[1]).toHaveTextContent("N/A");
+      expect(tableRows[0]).toHaveTextContent("Invalid");
+    });
+
+    const executeAllTestCasesButton = screen.getByRole("button", {
+      name: "Run Test(s)",
+    });
+
+    await waitFor(() => expect(executeAllTestCasesButton).toBeDisabled());
+  });
+
+  it("should disable execute button if CQL supplemental data type mismatch error exists on measure", async () => {
+    mockMeasure.createdBy = MEASURE_CREATEDBY;
+    mockMeasure.errors = [MeasureErrorType.MISMATCH_CQL_SUPPLEMENTAL_DATA];
+    renderTestCaseListComponent();
+
+    const table = await screen.findByTestId("test-case-tbl");
+    const tableRows = table.querySelectorAll("tbody tr");
+    await waitFor(() => {
+      expect(tableRows[2]).toHaveTextContent("N/A");
+      expect(tableRows[1]).toHaveTextContent("N/A");
+      expect(tableRows[0]).toHaveTextContent("Invalid");
+    });
+
+    const executeAllTestCasesButton = screen.getByRole("button", {
+      name: "Run Test(s)",
+    });
+
+    await waitFor(() => expect(executeAllTestCasesButton).toBeDisabled());
+  });
+
   describe("TestCaseList component with deleteMultipleTestCases", () => {
     it("should delete selected test cases", async () => {
       useTestCaseServiceMock.mockImplementation(() => {
