@@ -252,10 +252,9 @@ const EditTestCase = (props: EditTestCaseProps) => {
   const [calculationDialogOpen, setCalculationDialogOpen] = useState(false);
   const { updateMeasure } = measureStore;
 
-  const canEdit = checkUserCanEdit(
-    measure?.measureSet?.owner,
-    measure?.measureSet?.acls
-  );
+  const canEdit =
+    checkUserCanEdit(measure?.measureSet?.owner, measure?.measureSet?.acls) &&
+    !(featureFlags.Locking && testCase?.testCaseLock);
 
   const formik = useFormik({
     initialValues: { ...INITIAL_VALUES },
