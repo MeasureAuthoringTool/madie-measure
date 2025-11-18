@@ -38,6 +38,7 @@ export type QrdaRequestDTO = {
 export interface CopyResult {
   copiedTestCases: TestCase[];
   didClearExpectedValues: boolean;
+  failedTestCases: TestCase[];
 }
 
 export const SHIFT_TEST_CASE_DATES_ERROR =

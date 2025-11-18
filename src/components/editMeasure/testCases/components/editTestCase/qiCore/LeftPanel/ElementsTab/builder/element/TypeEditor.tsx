@@ -933,8 +933,6 @@ const TypeEditor = ({
               "ContactPoint",
               "ContactDetail",
               "DataRequirement",
-              "Quantity",
-              "Range",
             ];
 
             const filteredChildDef = {
