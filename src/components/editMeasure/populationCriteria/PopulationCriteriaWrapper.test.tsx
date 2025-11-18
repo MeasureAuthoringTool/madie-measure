@@ -1,0 +1,87 @@
+import * as React from "react";
+import { render, screen, waitFor } from "@testing-library/react";
+import { MemoryRouter } from "react-router-dom";
+import userEvent from "@testing-library/user-event";
+import PopulationCriteriaWrapper from "./PopulationCriteriaWrapper";
+import { Measure } from "@madie/madie-models";
+
+const QiCoreMeasure = {
+  id: "testMeasureId",
+  measureName: "the measure for testing",
+  model: "QI-Core v4.1.1",
+  scoring: "Cohort",
+  baseConfigurationTypes: ["Outcome"],
+  groups: [
+    {
+      id: "testGroupId",
+      scoring: "Cohort",
+      populations: [
+        {
+          id: "id-1",
+          name: "initialPopulation",
+          definition: "Initial Population",
+        },
+      ],
+      groupDescription: "test description",
+      measureGroupTypes: ["Outcome"],
+      populationBasis: "boolean",
+      scoringUnit: "",
+    },
+  ],
+} as Measure;
+
+let mockFeatureFlags = { Locking: false };
+jest.mock("@madie/madie-util", () => ({
+  useMeasureServiceApi: jest.fn(() => {}),
+  useDocumentTitle: jest.fn(),
+  measureStore: {
+    updateMeasure: (measure: Measure) => measure,
+    state: QiCoreMeasure,
+    initialState: QiCoreMeasure,
+    subscribe: () => {
+      return { unsubscribe: () => null };
+    },
+  },
+  useOktaTokens: () => ({
+    getAccessToken: () => "test.jwt",
+  }),
+  useFeatureFlags: () => mockFeatureFlags,
+}));
+
+describe("PopulationCriteriaWrapper", () => {
+  it("renders PopulationCriteriaWrapper when measure is not locked", () => {
+    render(
+      <MemoryRouter>
+        <PopulationCriteriaWrapper measureCanEdit={true} />
+      </MemoryRouter>
+    );
+
+    expect(screen.getByText("Population Criteria")).toBeInTheDocument();
+  });
+
+  it("renders PopulationCriteriaWrapper when measure is locked", async () => {
+    mockFeatureFlags = { Locking: true };
+    render(
+      <MemoryRouter>
+        <PopulationCriteriaWrapper
+          measureCanEdit={true}
+          measureLockedBy={"user123"}
+        />
+      </MemoryRouter>
+    );
+
+    expect(
+      screen.getByText(
+        "This measure is currently edited by HARP ID user123. You will be unable to make changes until it's saved."
+      )
+    ).toBeInTheDocument();
+
+    userEvent.click(screen.getByText("Close"));
+
+    await waitFor(() => {
+      expect(
+        screen.queryByText("Measure currently In-Use")
+      ).not.toBeInTheDocument();
+    });
+  });
+});

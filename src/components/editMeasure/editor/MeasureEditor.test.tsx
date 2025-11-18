@@ -1304,3 +1304,35 @@ define function MeasureObservation(e Encounter):
     errorSpy.mockRestore();
   });
 });
+
+describe("Measure Editor - measure locked", () => {
+  it("should show locked message when measure is locked", async () => {
+    render(
+      <ApiContextProvider value={serviceConfig}>
+        <MemoryRouter
+          initialEntries={[{ pathname: `/measures/${measure.id}/cql-editor` }]}
+        >
+          <Routes>
+            <Route
+              path="/measures/:measureId/cql-editor"
+              element={
+                <MeasureEditor
+                  measureCanEdit={true}
+                  measureLockedBy="testuser@example.com"
+                />
+              }
+            />
+          </Routes>
+        </MemoryRouter>
+      </ApiContextProvider>
+    );
+
+    await waitFor(() => {
+      expect(
+        screen.getByText(
+          `This measure is currently edited by HARP ID testuser@example.com. You will be unable to make changes until it's saved.`
+        )
+      ).toBeInTheDocument();
+    });
+  });
+});
