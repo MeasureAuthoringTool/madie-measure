@@ -12,6 +12,7 @@ import ActionCenter, {
 } from "../../../../../../../../../common/actionCenter/ActionCenter";
 import "../../../../../styles/DataElementsTable.scss";
 import { BundleEntry } from "fhir/r4";
+import ViewHeadlineIcon from "@mui/icons-material/ViewHeadline";
 
 export interface GridDataEntry {
   title: string;
@@ -21,12 +22,14 @@ interface TestCaseSummaryGridProps {
   onRowEdit: (row: any) => void;
   onRowDelete: (row: any) => void;
   gridData: GridDataEntry[];
+  testCaseCanEdit: boolean;
 }
 
 const TestCaseSummaryGrid = ({
   gridData,
   onRowEdit,
   onRowDelete,
+  testCaseCanEdit,
 }: TestCaseSummaryGridProps) => {
   const data = React.useMemo(() => gridData ?? [], [gridData]);
 
@@ -46,6 +49,17 @@ const TestCaseSummaryGrid = ({
     [onRowEdit, onRowDelete]
   );
 
+  const viewAction = React.useMemo<ActionItemDef[]>(
+    () => [
+      {
+        name: "View",
+        icon: <ViewHeadlineIcon />,
+        onClick: (targetContext: any) => onRowEdit(targetContext),
+      },
+    ],
+    [onRowEdit]
+  );
+
   const columns = React.useMemo<ColumnDef<any>[]>(
     () => [
       {
@@ -63,7 +77,7 @@ const TestCaseSummaryGrid = ({
         id: "actions",
         cell: ({ row }) => (
           <ActionCenter
-            actions={actions}
+            actions={testCaseCanEdit ? actions : viewAction}
             testId={row.original.entry.resource.id}
             target={row.original.entry}
           />

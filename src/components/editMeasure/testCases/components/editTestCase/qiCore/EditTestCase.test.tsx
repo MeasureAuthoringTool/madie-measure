@@ -4116,3 +4116,102 @@ describe("Validation Panel", () => {
     ).not.toBeInTheDocument();
   });
 });
+
+describe("EditTestCase QICore Component - Test Case Locked By Other User", () => {
+  const testCase = {
+    id: "1234",
+    description: "Test IPP",
+    series: "SeriesA",
+    createdBy: MEASURE_CREATEDBY,
+    createdAt: "",
+    lastModifiedAt: "",
+    lastModifiedBy: "null",
+    title: "TestIPP",
+    name: "TestIPP",
+    executionStatus: "false",
+    json: null,
+    validationStatus: ValidationStatus.INVALID,
+    testCaseLock: { lockedBy: "another.user" },
+  } as unknown as TestCase;
+
+  beforeEach(() => {
+    (checkUserCanEdit as jest.Mock).mockClear().mockImplementation(() => {
+      return true;
+    });
+    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => {
+      return {
+        Locking: true,
+      };
+    });
+    mockedAxios.get.mockImplementation((args) => {
+      if (args && args.endsWith("series")) {
+        return Promise.resolve({ data: ["SeriesA"] });
+      } else if (args && args.endsWith("resources")) {
+        return Promise.resolve({
+          data: [
+            {
+              id: "qicore-adverseevent",
+              type: "AdverseEvent",
+              title: "QICore AdverseEvent",
+              category: "Clinical.Summary",
+              profile:
+                "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-adverseevent",
+            },
+            {
+              id: "qicore-medicationstatement",
+              type: "MedicationStatement",
+              title: "QICore MedicationStatement",
+              category: "Clinical.Medications",
+              profile:
+                "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-medicationstatement",
+            },
+            {
+              id: "qicore-claim",
+              type: "Claim",
+              title: "QICore Claim",
+              category: "Financial.Billing",
+              profile:
+                "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-claim",
+            },
+            {
+              id: "qicore-procedure",
+              type: "Procedure",
+              title: "QICore Procedure",
+              category: "Clinical.Summary",
+              profile:
+                "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-procedure",
+            },
+          ],
+        });
+      }
+      return Promise.resolve({ data: testCase });
+    });
+  });
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+  it("Should disable eidt", async () => {
+    const measure = {
+      ...defaultMeasure,
+      model: Model.QICORE_6_0_0,
+      testCases: [testCase],
+    };
+    renderWithRouter(
+      ["/measures/623cacebe74613783378c17b/edit/test-cases/1234"],
+      "/measures/:measureId/edit/test-cases/:id",
+      measure
+    );
+
+    const detailsTab = screen.getByRole("tab", { name: "Details tab panel" });
+    act(() => {
+      fireEvent.click(detailsTab);
+    });
+    await waitFor(() => {
+      expect(detailsTab).toHaveAttribute("aria-selected", "true");
+    });
+
+    const tcTitle = document.getElementById("test-case-title");
+    expect(tcTitle).toHaveValue(testCase.title);
+    expect(tcTitle).toHaveAttribute("readonly");
+  });
+});

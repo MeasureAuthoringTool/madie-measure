@@ -7,7 +7,11 @@ const CodesRow = ({ code }) => {
   return (
     <div className="codes-row">
       <Tooltip
-        title={`Code System Version: ${code.version ?? "not available"}`}
+        title={`Code System Version: ${
+          code.version && code.version !== "null"
+            ? code.version
+            : "not available"
+        }`}
       >
         <span>{`${code.system}: ${code.code}`}</span>
       </Tooltip>
@@ -31,9 +35,9 @@ const DataTypeCell = (props: { element: DataElement; codeSystemMap: any }) => {
         codes.map((code) => {
           if (codeSystemMap[code.system]) {
             return {
-              system: codeSystemMap[code.system].name,
+              system: codeSystemMap[code.system],
               code: code.code,
-              version: codeSystemMap[code.system].version,
+              version: code.version?.replace(/urn:hl7:version:/g, ""),
             };
           }
           return {

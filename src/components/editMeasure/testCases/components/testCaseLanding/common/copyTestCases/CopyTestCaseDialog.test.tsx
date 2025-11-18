@@ -5,6 +5,7 @@ import {
   waitFor,
   fireEvent,
   act,
+  queryByRole,
 } from "@testing-library/react";
 import * as React from "react";
 import {
@@ -25,7 +26,7 @@ import {
   useMeasureServiceApi,
   MeasureServiceApi,
 } from "@madie/madie-util";
-const { getByTestId, getByRole, findByTestId, findByRole } = screen;
+const { getByTestId, findByTestId, findByRole } = screen;
 
 const MEASURE_OWNER = "test.user";
 
@@ -453,6 +454,26 @@ describe("Copy Test Case Dialog Component", () => {
     );
   });
 
+  it("should return toast message on successful copy", async () => {
+    useTestCaseServiceMock.mockImplementation(() => {
+      return {
+        copyTestCasesToMeasure: jest.fn().mockResolvedValue({
+          copiedTestCases: testCases,
+          didClearExpectedValues: false,
+        }),
+        getTestCasesByMeasureId: getAllTestCasesFn,
+      } as unknown as TestCaseServiceApi;
+    });
+    const test = new AbortController();
+    await prepCopy(closeFn, mockSearchMeasuresByCriteriaFn);
+    await runCopy();
+    expect(closeFn).toHaveBeenCalledTimes(1);
+    expect(closeFn).toHaveBeenCalledWith(
+      "Test Cases have been successfully copied.",
+      "success"
+    );
+  });
+
   it("should return toast message indicating cleared expected values", async () => {
     useTestCaseServiceMock.mockImplementation(() => {
       return {
@@ -477,7 +498,57 @@ describe("Copy Test Case Dialog Component", () => {
     useTestCaseServiceMock.mockImplementation(() => {
       return {
         copyTestCasesToMeasure: jest.fn().mockResolvedValue({
-          copiedTestCases: [...testCases].pop(),
+          copiedTestCases: [[...testCases].pop()],
+          failedTestCases: [],
+          didClearExpectedValues: false,
+        }),
+        getTestCasesByMeasureId: getAllTestCasesFn,
+      } as unknown as TestCaseServiceApi;
+    });
+    const test = new AbortController();
+    await prepCopy(closeFn, mockSearchMeasuresByCriteriaFn);
+    await runCopy();
+    expect(closeFn).toHaveBeenCalledTimes(1);
+    expect(closeFn).toHaveBeenCalledWith(
+      "Test Cases have been successfully copied. Some Test Cases could not be copied.",
+      "warning"
+    );
+  });
+
+  it("should prevent copying test cases with titles that are too long", async () => {
+    const nameTooLongTc = [...testCases].pop() ?? testCases[0];
+    nameTooLongTc.title = "A".repeat(251);
+    useTestCaseServiceMock.mockImplementation(() => {
+      return {
+        copyTestCasesToMeasure: jest.fn().mockResolvedValue({
+          copiedTestCases: [],
+          failedTestCases: [nameTooLongTc],
+          didClearExpectedValues: false,
+        }),
+        getTestCasesByMeasureId: getAllTestCasesFn,
+      } as unknown as TestCaseServiceApi;
+    });
+    const test = new AbortController();
+    await prepCopy(closeFn, mockSearchMeasuresByCriteriaFn);
+    await runCopy();
+    expect(closeFn).toHaveBeenCalledTimes(1);
+    expect(closeFn).toHaveBeenCalledWith(
+      "0 test cases were copied successfully. The following 1 test cases could not be copied because the test cases are duplicates and the title is too long to copy.",
+      null,
+      [
+        "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA - IPP_Fail",
+      ]
+    );
+  });
+
+  it("should handle mixed results: success, failed, and failed with titles that are too long", async () => {
+    const nameTooLongTc = [...testCases].pop() ?? testCases[0];
+    nameTooLongTc.title = "A".repeat(251);
+    useTestCaseServiceMock.mockImplementation(() => {
+      return {
+        copyTestCasesToMeasure: jest.fn().mockResolvedValue({
+          copiedTestCases: [testCases[0], testCases[1]],
+          failedTestCases: [nameTooLongTc],
           didClearExpectedValues: true,
         }),
         getTestCasesByMeasureId: getAllTestCasesFn,
@@ -488,7 +559,31 @@ describe("Copy Test Case Dialog Component", () => {
     await runCopy();
     expect(closeFn).toHaveBeenCalledTimes(1);
     expect(closeFn).toHaveBeenCalledWith(
-      "Test Cases could not copied.",
+      "2 test cases have been successfully copied without expected values due to differing Population Criteria on target Measure. The following 1 test cases could not be copied because the test cases are duplicates and the title is too long to copy.",
+      null,
+      [
+        "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA - IPP_Fail",
+      ]
+    );
+  });
+
+  it("should return toast message indicating no test cases copied", async () => {
+    useTestCaseServiceMock.mockImplementation(() => {
+      return {
+        copyTestCasesToMeasure: jest.fn().mockResolvedValue({
+          copiedTestCases: [],
+          failedTestCases: [],
+          didClearExpectedValues: false,
+        }),
+        getTestCasesByMeasureId: getAllTestCasesFn,
+      } as unknown as TestCaseServiceApi;
+    });
+    const test = new AbortController();
+    await prepCopy(closeFn, mockSearchMeasuresByCriteriaFn);
+    await runCopy();
+    expect(closeFn).toHaveBeenCalledTimes(1);
+    expect(closeFn).toHaveBeenCalledWith(
+      "Test Cases could not be copied.",
       "danger"
     );
   });
@@ -629,7 +724,10 @@ describe("Copy Test Case Dialog Component", () => {
   });
 });
 
-const prepCopy = async (closeFn, testFn) => {
+const prepCopy = async (
+  closeFn: jest.Mock<any, any>,
+  testFn: jest.Mock<any, any>
+) => {
   render(
     <CopyTestCaseDialog
       open={true}
