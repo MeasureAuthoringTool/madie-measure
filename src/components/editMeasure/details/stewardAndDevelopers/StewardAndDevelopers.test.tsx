@@ -8,11 +8,7 @@ import {
 } from "@testing-library/react";
 import StewardAndDevelopers from "./StewardAndDevelopers";
 import { Measure, MeasureMetadata, Organization } from "@madie/madie-models";
-import {
-  checkUserCanEdit,
-  useMeasureServiceApi,
-  MeasureServiceApi,
-} from "@madie/madie-util";
+import { MeasureServiceApi } from "@madie/madie-util";
 
 import { act } from "react-dom/test-utils";
 
@@ -111,8 +107,12 @@ describe("Steward and Developers component", () => {
   afterEach(() => jest.clearAllMocks());
 
   it("should display readonly text if user does not have measure edit permissions", async () => {
-    (checkUserCanEdit as jest.Mock).mockReturnValue(false);
-    render(<StewardAndDevelopers setErrorMessage={setErrorMessage} />);
+    render(
+      <StewardAndDevelopers
+        setErrorMessage={setErrorMessage}
+        measureCanEdit={false}
+      />
+    );
     await waitFor(() => {
       const steward = screen.getByRole("textbox", { name: "Steward" });
       expect(steward).toHaveAttribute("readonly");
@@ -127,8 +127,12 @@ describe("Steward and Developers component", () => {
   });
 
   it("should render steward and developers form with disabled save and discard buttons", async () => {
-    checkUserCanEdit.mockImplementation(() => true);
-    render(<StewardAndDevelopers setErrorMessage={setErrorMessage} />);
+    render(
+      <StewardAndDevelopers
+        setErrorMessage={setErrorMessage}
+        measureCanEdit={true}
+      />
+    );
     expect(await screen.findByTestId("measure-steward-developers-form"));
     expect(screen.getByRole("heading")).toHaveTextContent(
       "Steward & Developers"
@@ -148,7 +152,12 @@ describe("Steward and Developers component", () => {
   });
 
   it("should render steward and developers dropdown with organization list", async () => {
-    render(<StewardAndDevelopers setErrorMessage={setErrorMessage} />);
+    render(
+      <StewardAndDevelopers
+        setErrorMessage={setErrorMessage}
+        measureCanEdit={true}
+      />
+    );
     const stewardDropDown = await screen.findByTestId("steward");
     fireEvent.keyDown(stewardDropDown, { key: "ArrowDown" });
 
@@ -177,7 +186,12 @@ describe("Steward and Developers component", () => {
       .fn()
       .mockRejectedValue(undefined);
 
-    render(<StewardAndDevelopers setErrorMessage={setErrorMessage} />);
+    render(
+      <StewardAndDevelopers
+        setErrorMessage={setErrorMessage}
+        measureCanEdit={true}
+      />
+    );
     await waitFor(() =>
       expect(setErrorMessage).toHaveBeenCalledWith(
         "Error fetching organizations"
@@ -186,8 +200,12 @@ describe("Steward and Developers component", () => {
   });
 
   it("should not disable dropdowns if the measure is shared with the user", async () => {
-    checkUserCanEdit.mockImplementationOnce(() => true);
-    render(<StewardAndDevelopers setErrorMessage={setErrorMessage} />);
+    render(
+      <StewardAndDevelopers
+        setErrorMessage={setErrorMessage}
+        measureCanEdit={true}
+      />
+    );
     const stewardAutoComplete = await screen.findByTestId("steward");
     const stewardComboBox = await within(stewardAutoComplete).findByRole(
       "combobox"
@@ -202,7 +220,12 @@ describe("Steward and Developers component", () => {
   });
 
   it("should render steward and developers fields with values from DB", async () => {
-    render(<StewardAndDevelopers setErrorMessage={setErrorMessage} />);
+    render(
+      <StewardAndDevelopers
+        setErrorMessage={setErrorMessage}
+        measureCanEdit={true}
+      />
+    );
     const stewardAutoComplete = await screen.findByTestId("steward");
     const stewardComboBox = within(stewardAutoComplete).getByRole("combobox");
     expect(stewardComboBox).toHaveValue("GE Healthcare");
@@ -219,7 +242,12 @@ describe("Steward and Developers component", () => {
   });
 
   it("should display validation error messages, if the form is dirty and no options are selected", async () => {
-    render(<StewardAndDevelopers setErrorMessage={setErrorMessage} />);
+    render(
+      <StewardAndDevelopers
+        setErrorMessage={setErrorMessage}
+        measureCanEdit={true}
+      />
+    );
 
     // verify if inline error is displayed if no steward is selected and save button is disabled
     const stewardAutoComplete = await screen.findByTestId("steward");
@@ -252,8 +280,12 @@ describe("Steward and Developers component", () => {
   });
 
   it("should enable save and discard button after updating options for steward and Developers", async () => {
-    checkUserCanEdit.mockImplementation(() => true);
-    render(<StewardAndDevelopers setErrorMessage={setErrorMessage} />);
+    render(
+      <StewardAndDevelopers
+        setErrorMessage={setErrorMessage}
+        measureCanEdit={true}
+      />
+    );
     // Note that drop down options are alphabetically sorted
     await act(async () => {
       const stewardAutoComplete = await screen.findByTestId("steward");
@@ -324,7 +356,12 @@ describe("Steward and Developers component", () => {
       .fn()
       .mockResolvedValue(organizationList);
 
-    render(<StewardAndDevelopers setErrorMessage={setErrorMessage} />);
+    render(
+      <StewardAndDevelopers
+        setErrorMessage={setErrorMessage}
+        measureCanEdit={true}
+      />
+    );
     await act(async () => {
       const stewardAutoComplete = await screen.findByTestId("steward");
       fireEvent.keyDown(stewardAutoComplete, { key: "ArrowDown" });
@@ -349,7 +386,12 @@ describe("Steward and Developers component", () => {
   });
 
   it("should discard changes by click discard changes button and continue", async () => {
-    render(<StewardAndDevelopers setErrorMessage={setErrorMessage} />);
+    render(
+      <StewardAndDevelopers
+        setErrorMessage={setErrorMessage}
+        measureCanEdit={true}
+      />
+    );
     // verifies if the fields are populated with existing data
     const stewardAutoComplete = await screen.findByTestId("steward");
     const stewardComboBox = within(stewardAutoComplete).getByRole("combobox");
@@ -379,7 +421,12 @@ describe("Steward and Developers component", () => {
   });
 
   it("should close the discard dialog on close", async () => {
-    render(<StewardAndDevelopers setErrorMessage={setErrorMessage} />);
+    render(
+      <StewardAndDevelopers
+        setErrorMessage={setErrorMessage}
+        measureCanEdit={true}
+      />
+    );
     // verifies if the fields are populated with existing data
     const stewardAutoComplete = await screen.findByTestId("steward");
     const stewardComboBox = within(stewardAutoComplete).getByRole("combobox");

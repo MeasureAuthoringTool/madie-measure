@@ -15,11 +15,7 @@ import {
   ServiceConfig,
   ApiContextProvider,
 } from "../../../../../api/ServiceContext";
-import {
-  checkUserCanEdit,
-  MeasureServiceApi,
-  useFeatureFlags,
-} from "@madie/madie-util";
+import { MeasureServiceApi, useFeatureFlags } from "@madie/madie-util";
 
 const serviceConfig = {
   measureService: {
@@ -67,7 +63,6 @@ const mockMeasureServiceApi = {
 
 jest.mock("@madie/madie-util", () => ({
   useMeasureServiceApi: jest.fn(() => mockMeasureServiceApi),
-  checkUserCanEdit: jest.fn().mockImplementation(() => true),
   useKeyPress: jest.fn(() => false),
   measureStore: {
     updateMeasure: (measure: Measure) => mockTestMeasure,
@@ -98,6 +93,7 @@ const props: RiskAdjustmentProps = {
   setAlertMessage: jest.fn,
   isTestCaseLocked: false,
   checkTestCasesLockStatus: jest.fn(),
+  measureCanEdit: true,
 };
 
 const RenderRiskAdjustment = (customProps = props) => {
@@ -129,7 +125,6 @@ describe("QdmRiskAdjustment Component", () => {
   });
 
   it("Should successfully update risk Adjustment values and save to DB on 200", async () => {
-    checkUserCanEdit.mockReturnValue(true);
     // Mocking service call to update measure
     const newRiskAdjustments = [
       {
@@ -235,8 +230,7 @@ describe("QdmRiskAdjustment Component", () => {
   });
 
   it("Should render disabled components if the user doesn't have permissions", async () => {
-    checkUserCanEdit.mockReturnValue(false);
-    RenderRiskAdjustment();
+    RenderRiskAdjustment({ ...props, measureCanEdit: false });
     const riskAdjustments = screen.getByRole("textbox", {
       name: "Definition",
     });
@@ -254,7 +248,6 @@ describe("QdmRiskAdjustment Component", () => {
   });
 
   it("Should successfully update risk Adjustment values and save to DB on 201", async () => {
-    checkUserCanEdit.mockReturnValue(true);
     // Mocking service call to update measure
     const newRiskAdjustments = [
       {
@@ -593,9 +586,6 @@ describe("QdmRiskAdjustment Component", () => {
   });
 
   it("should allow users to add and delete a value using the chip delete icon", async () => {
-    checkUserCanEdit.mockReturnValue(true);
-    // Mocking service call to update measure
-
     RenderRiskAdjustment();
 
     // Verifies if RA already loads values from store and able to add new

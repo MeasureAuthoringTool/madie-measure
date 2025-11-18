@@ -36,7 +36,6 @@ import {
   measureStore,
   routeHandlerStore,
   useDocumentTitle,
-  checkUserCanEdit,
   useMeasureServiceApi,
   useFeatureFlags,
 } from "@madie/madie-util";
@@ -148,7 +147,7 @@ export interface MeasureGroupProps {
   setAlertMessage: Function;
   isTestCaseLocked: boolean;
   checkTestCasesLockStatus: Function;
-  measureLockedByAnotherUser: boolean;
+  measureCanEdit: boolean;
 }
 
 const INITIAL_ALERT_MESSAGE = {
@@ -166,14 +165,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
   const { updateMeasure } = measureStore;
   const [measure, setMeasure] = useState<Measure>(measureStore.state);
 
-  const canEdit =
-    !props.isTestCaseLocked &&
-    checkUserCanEdit(
-      measure?.measureSet?.owner,
-      measure?.measureSet?.acls,
-      measure?.measureMetaData?.draft
-    ) &&
-    !props.measureLockedByAnotherUser;
+  const canEdit = !props.isTestCaseLocked && props.measureCanEdit;
   const measureServiceApi = useMeasureServiceApi();
   const featureFlags = useFeatureFlags();
   let location = useLocation();

@@ -25,6 +25,7 @@ import {
   routeHandlerStore,
   checkUserCanEdit,
   useMeasureServiceApi,
+  useFeatureFlags,
 } from "@madie/madie-util";
 import { Box } from "@mui/system";
 import {
@@ -57,11 +58,12 @@ interface measureInformationForm {
 
 interface MeasureInformationProps {
   setErrorMessage: Function;
-  measureLockedByAnotherUser: boolean;
+  measureCanEdit: boolean;
 }
 
 export default function MeasureInformation(props: MeasureInformationProps) {
-  const { setErrorMessage, measureLockedByAnotherUser } = props;
+  const { setErrorMessage, measureCanEdit } = props;
+  const featureFlags = useFeatureFlags();
   const measureServiceApi = useMeasureServiceApi();
   const qdmElmTranslationService = useQdmElmTranslationServiceApi();
   const fhirElmTranslationService = useFhirElmTranslationServiceApi();
@@ -266,13 +268,6 @@ export default function MeasureInformation(props: MeasureInformationProps) {
       });
   }, []);
 
-  const canEdit =
-    checkUserCanEdit(
-      measure?.measureSet?.owner,
-      measure?.measureSet?.acls,
-      measure?.measureMetaData?.draft
-    ) && !measureLockedByAnotherUser;
-
   const handleEndorserChange = (selectedValue: string) => {
     if (selectedValue === "" || selectedValue === "-") {
       selectedValue = null;
@@ -469,7 +464,7 @@ export default function MeasureInformation(props: MeasureInformationProps) {
             onFocus={() => onFocus("measureName")}
             placeholder="Measure Name"
             required
-            readOnly={!canEdit}
+            readOnly={!measureCanEdit}
             label="Measure Name"
             id="measureName"
             inputProps={{
@@ -497,7 +492,7 @@ export default function MeasureInformation(props: MeasureInformationProps) {
             onFocus={() => onFocus("cqlLibraryName")}
             placeholder="Enter CQL Library Name"
             required
-            readOnly={!canEdit}
+            readOnly={!measureCanEdit}
             label="Measure CQL Library Name"
             id="cqlLibraryName"
             data-testid="cql-library-name"
@@ -546,7 +541,7 @@ export default function MeasureInformation(props: MeasureInformationProps) {
           <TextField
             placeholder="eCQM Name"
             required
-            readOnly={!canEdit}
+            readOnly={!measureCanEdit}
             label="eCQM Abbreviated Title"
             id="ecqmTitle"
             data-testid="ecqm-text-field"
@@ -568,7 +563,7 @@ export default function MeasureInformation(props: MeasureInformationProps) {
                 measure?.measureSet?.owner,
                 [],
                 measure?.measureMetaData?.draft
-              ) && !measureLockedByAnotherUser
+              ) && !(featureFlags?.Locking && measure?.measureLock)
             }
             label="CMS ID"
             cmsId={measure?.measureSet?.cmsId}
@@ -584,7 +579,7 @@ export default function MeasureInformation(props: MeasureInformationProps) {
                 <Checkbox
                   {...formik.getFieldProps("experimental")}
                   checked={formik.values.experimental}
-                  disabled={!canEdit}
+                  disabled={!measureCanEdit}
                   name="experimental"
                   id="experimental"
                   data-testid="experimental"
@@ -601,7 +596,7 @@ export default function MeasureInformation(props: MeasureInformationProps) {
             data-testid="endorser"
             label="Endorsing Organization"
             placeholder="-"
-            readOnly={!canEdit}
+            readOnly={!measureCanEdit}
             error={formik.touched.endorsements && formik.errors["endorsements"]}
             helperText={
               formik.touched.endorsements && formik.errors["endorsements"]
@@ -619,9 +614,9 @@ export default function MeasureInformation(props: MeasureInformationProps) {
             onFocus={() => onFocus("endorsementId")}
             placeholder="-"
             required
-            readOnly={!canEdit}
+            readOnly={!measureCanEdit}
             disabled={
-              canEdit &&
+              measureCanEdit &&
               !formik.getFieldProps("endorsements").value[0]?.endorser
             }
             label="Endorsement #"
@@ -673,7 +668,7 @@ export default function MeasureInformation(props: MeasureInformationProps) {
               }}
               data-testid="intended-venue"
               value={`${formik.values?.intendedVenue}`}
-              readOnly={!canEdit}
+              readOnly={!measureCanEdit}
               size="small"
               SelectDisplayProps={{
                 "aria-required": "true",
@@ -694,7 +689,7 @@ export default function MeasureInformation(props: MeasureInformationProps) {
           </div>
         )}
       </div>
-      {canEdit && (
+      {measureCanEdit && (
         <div className="form-actions">
           <Button
             onClick={() => setDiscardDialogOpen(true)}

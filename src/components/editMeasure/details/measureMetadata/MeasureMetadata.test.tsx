@@ -8,12 +8,7 @@ import {
   screen,
 } from "@testing-library/react";
 
-import {
-  useMeasureServiceApi,
-  MeasureServiceApi,
-  checkUserCanEdit,
-  measureStore,
-} from "@madie/madie-util";
+import { useMeasureServiceApi, MeasureServiceApi } from "@madie/madie-util";
 import { Measure } from "@madie/madie-models";
 import MeasureMetadataForm from "./MeasureMetadata";
 
@@ -45,9 +40,6 @@ const mockMeasureServiceApi = {
 
 jest.mock("@madie/madie-util", () => ({
   useMeasureServiceApi: jest.fn(() => mockMeasureServiceApi),
-  checkUserCanEdit: jest.fn(() => {
-    return true;
-  }),
   measureStore: {
     updateMeasure: jest.fn((measure) => measure),
     state: null,
@@ -109,6 +101,7 @@ describe("MeasureRationale component", () => {
         <MeasureMetadataForm
           measureMetadataType=""
           setErrorMessage={setErrorMessage}
+          measureCanEdit={false}
         />
       );
       expect(queryByText("Description")).toBeNull();
@@ -119,13 +112,11 @@ describe("MeasureRationale component", () => {
     });
 
     it("Should have no Save button if user does not have measure edit permissions", () => {
-      (checkUserCanEdit as jest.Mock).mockImplementationOnce(() => {
-        return false;
-      });
       render(
         <MeasureMetadataForm
           measureMetadataType="Rationale"
           setErrorMessage={setErrorMessage}
+          measureCanEdit={false}
         />
       );
 
@@ -134,13 +125,11 @@ describe("MeasureRationale component", () => {
     });
 
     it("Should have no input field if user does not have measure edit permissions", () => {
-      (checkUserCanEdit as jest.Mock).mockImplementationOnce(() => {
-        return false;
-      });
       render(
         <MeasureMetadataForm
           measureMetadataType="Rationale"
           setErrorMessage={setErrorMessage}
+          measureCanEdit={false}
         />
       );
 
@@ -149,13 +138,11 @@ describe("MeasureRationale component", () => {
     });
 
     it("Should have Save button if the measure is shared with the user", async () => {
-      (checkUserCanEdit as jest.Mock).mockImplementationOnce(() => {
-        return false;
-      });
       render(
         <MeasureMetadataForm
           measureMetadataType="Rationale"
           setErrorMessage={setErrorMessage}
+          measureCanEdit={true}
         />
       );
 
@@ -168,6 +155,7 @@ describe("MeasureRationale component", () => {
         <MeasureMetadataForm
           measureMetadataType="Rationale"
           setErrorMessage={setErrorMessage}
+          measureCanEdit={true}
         />
       );
 
@@ -189,6 +177,7 @@ describe("MeasureRationale component", () => {
         <MeasureMetadataForm
           measureMetadataType="Rationale"
           setErrorMessage={setErrorMessage}
+          measureCanEdit={true}
         />
       );
 
@@ -211,6 +200,7 @@ describe("MeasureRationale component", () => {
         <MeasureMetadataForm
           measureMetadataType="Copyright"
           setErrorMessage={setErrorMessage}
+          measureCanEdit={true}
         />
       );
 
@@ -239,6 +229,7 @@ describe("MeasureRationale component", () => {
         <MeasureMetadataForm
           measureMetadataType="Rationale"
           setErrorMessage={setErrorMessage}
+          measureCanEdit={true}
         />
       );
 
@@ -258,6 +249,7 @@ describe("MeasureRationale component", () => {
         <MeasureMetadataForm
           measureMetadataType="Rationale"
           setErrorMessage={setErrorMessage}
+          measureCanEdit={true}
         />
       );
       const rationaleEditor = screen.getByRole("textbox");
@@ -274,6 +266,7 @@ describe("MeasureRationale component", () => {
           measureMetadataType="Clinical Recommendation Statement"
           header="Clinical Recommendation"
           setErrorMessage={setErrorMessage}
+          measureCanEdit={true}
         />
       );
 
@@ -315,6 +308,7 @@ describe("MeasureRationale component", () => {
           measureMetadataType="Clinical Recommendation Statement"
           header="Clinical Recommendation"
           setErrorMessage={setErrorMessage}
+          measureCanEdit={true}
         />
       );
 
@@ -350,13 +344,11 @@ describe("MeasureRationale component", () => {
     });
 
     it("should have no Save button if user does not have measure edit permissions", () => {
-      (checkUserCanEdit as jest.Mock).mockImplementationOnce(() => {
-        return false;
-      });
       render(
         <MeasureMetadataForm
           measureMetadataType="Rationale"
           setErrorMessage={setErrorMessage}
+          measureCanEdit={true}
         />
       );
 
@@ -365,13 +357,11 @@ describe("MeasureRationale component", () => {
     });
 
     it("should have no input field if user does not have measure edit permissions", () => {
-      (checkUserCanEdit as jest.Mock).mockImplementationOnce(() => {
-        return false;
-      });
       render(
         <MeasureMetadataForm
           measureMetadataType="Rationale"
           setErrorMessage={setErrorMessage}
+          measureCanEdit={false}
         />
       );
 
@@ -382,13 +372,11 @@ describe("MeasureRationale component", () => {
     });
 
     it("should have Save button if the measure is shared with the user", async () => {
-      (checkUserCanEdit as jest.Mock).mockImplementationOnce(() => {
-        return false;
-      });
       render(
         <MeasureMetadataForm
           measureMetadataType="Rationale"
           setErrorMessage={setErrorMessage}
+          measureCanEdit={true}
         />
       );
 
@@ -397,13 +385,11 @@ describe("MeasureRationale component", () => {
     });
 
     it("should have input field if the measure is shared with the user", async () => {
-      (checkUserCanEdit as jest.Mock).mockImplementationOnce(() => {
-        return false;
-      });
       render(
         <MeasureMetadataForm
           measureMetadataType="Rationale"
           setErrorMessage={setErrorMessage}
+          measureCanEdit={true}
         />
       );
 
@@ -412,14 +398,12 @@ describe("MeasureRationale component", () => {
     });
 
     it("Should display 'required' when required prop is passed", async () => {
-      (checkUserCanEdit as jest.Mock).mockImplementationOnce(() => {
-        return false;
-      });
       render(
         <MeasureMetadataForm
           required
           measureMetadataType="Description"
           setErrorMessage={setErrorMessage}
+          measureCanEdit={true}
         />
       );
 
