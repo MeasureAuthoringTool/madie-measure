@@ -1328,11 +1328,14 @@ describe("Measure Editor - measure locked", () => {
     );
 
     await waitFor(() => {
-      expect(
-        screen.getByText(
-          `This measure is currently edited by HARP ID testuser@example.com. You will be unable to make changes until it's saved.`
-        )
-      ).toBeInTheDocument();
+      const message = screen.getByTestId("measure-locked-popup-message");
+      expect(message).toHaveTextContent(
+        /This measure is currently edited by HARP ID/i
+      );
+      expect(message).toHaveTextContent("testuser@example.com");
+      expect(message).toHaveTextContent(
+        "You will be unable to make changes until the measure has been saved."
+      );
     });
   });
 });

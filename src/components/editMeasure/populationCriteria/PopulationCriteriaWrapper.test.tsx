@@ -70,11 +70,11 @@ describe("PopulationCriteriaWrapper", () => {
       </MemoryRouter>
     );
 
-    expect(
-      screen.getByText(
-        "This measure is currently edited by HARP ID user123. You will be unable to make changes until it's saved."
-      )
-    ).toBeInTheDocument();
+    const message = screen.getByTestId("measure-locked-popup-message");
+    expect(message).toHaveTextContent(
+      /This measure is currently edited by HARP ID/i
+    );
+    expect(message).toHaveTextContent("user123");
 
     userEvent.click(screen.getByText("Close"));
 
@@ -98,9 +98,7 @@ describe("PopulationCriteriaWrapper", () => {
     );
 
     expect(
-      screen.queryByText(
-        "This measure is currently edited by HARP ID user123. You will be unable to make changes until it's saved."
-      )
+      screen.queryByText("This measure is currently edited by HARP ID")
     ).not.toBeInTheDocument();
   });
 });

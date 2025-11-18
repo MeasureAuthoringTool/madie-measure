@@ -15,7 +15,7 @@ const MeasureLockedPopup = ({
         open: lockedMeasurePopupOpen,
       }}
       cancelButtonProps={{
-        variant: "cyan",
+        class: "qpp-c-button qpp-c-button--outline-filled",
         cancelText: "Close",
         "data-testid": "measure-locked-popup-close-button",
         maxWidth: "sm",
@@ -27,8 +27,9 @@ const MeasureLockedPopup = ({
         <div data-testid="measure-locked-popup-message">
           <Typography>
             <div>
-              This measure is currently edited by HARP ID {measureLockedBy}. You
-              will be unable to make changes until it's saved.
+              This measure is currently edited by HARP ID {measureLockedBy}.
+              <br></br>You will be unable to make changes until the measure has
+              been saved.
             </div>
           </Typography>
         </div>

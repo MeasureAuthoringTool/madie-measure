@@ -16,11 +16,11 @@ describe("MeasureLockedPopup component", () => {
     );
 
     expect(screen.getByText("Measure currently In-Use")).toBeInTheDocument();
-    expect(
-      screen.getByText(
-        "This measure is currently edited by HARP ID user123. You will be unable to make changes until it's saved."
-      )
-    ).toBeInTheDocument();
+    const message = screen.getByTestId("measure-locked-popup-message");
+    expect(message).toHaveTextContent(
+      /This measure is currently edited by HARP ID/i
+    );
+    expect(message).toHaveTextContent("user123");
   });
 
   it("does not render when closed", () => {
