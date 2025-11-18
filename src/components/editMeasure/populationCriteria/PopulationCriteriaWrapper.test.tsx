@@ -84,4 +84,23 @@ describe("PopulationCriteriaWrapper", () => {
       ).not.toBeInTheDocument();
     });
   });
+
+  it("does not render locked measure popup when displayLockedMeasurePopup is false", () => {
+    mockFeatureFlags = { Locking: true };
+    render(
+      <MemoryRouter>
+        <PopulationCriteriaWrapper
+          measureCanEdit={true}
+          measureLockedBy={"user123"}
+          displayLockedMeasurePopup={false}
+        />
+      </MemoryRouter>
+    );
+
+    expect(
+      screen.queryByText(
+        "This measure is currently edited by HARP ID user123. You will be unable to make changes until it's saved."
+      )
+    ).not.toBeInTheDocument();
+  });
 });

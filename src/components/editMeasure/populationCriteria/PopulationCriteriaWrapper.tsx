@@ -5,6 +5,7 @@ import MeasureLockedPopup from "../measureLockedPopup/MeasureLockedPopup";
 const PopulationCriteriaWrapper = ({
   measureCanEdit,
   measureLockedBy = undefined,
+  displayLockedMeasurePopup = true,
 }) => {
   const [lockedMeasurePopupOpen, setLockedMeasurePopupOpen] = useState(
     measureCanEdit && !measureLockedBy ? false : true
@@ -16,7 +17,7 @@ const PopulationCriteriaWrapper = ({
           measureCanEdit={measureCanEdit && !measureLockedBy}
         />
       </Suspense>
-      {measureCanEdit && measureLockedBy && (
+      {measureCanEdit && measureLockedBy && displayLockedMeasurePopup && (
         <MeasureLockedPopup
           measureLockedBy={measureLockedBy}
           lockedMeasurePopupOpen={lockedMeasurePopupOpen}

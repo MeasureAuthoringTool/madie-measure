@@ -674,7 +674,8 @@ export default function EditMeasure() {
                 element={
                   <PopulationCriteriaWrapper
                     measureCanEdit={measureCanEdit}
-                    measureLockedBy={isQDM ? undefined : measureLockedBy}
+                    measureLockedBy={measureLockedBy}
+                    displayLockedMeasurePopup={isQDM ? false : true}
                   />
                 }
               />
