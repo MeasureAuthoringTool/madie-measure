@@ -329,7 +329,11 @@ const Codes = ({
         {chips.map((chip) => {
           return (
             <Tooltip
-              title={`Code System Version: ${chip.version ?? "not available"}`}
+              title={`Code System Version: ${
+                chip.version && chip.version !== "null"
+                  ? chip.version
+                  : "not available"
+              }`}
               data-testid={`chip-tooltip-${chip?.id}`}
             >
               <span>
