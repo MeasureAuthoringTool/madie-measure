@@ -7,7 +7,11 @@ const CodesRow = ({ code }) => {
   return (
     <div className="codes-row">
       <Tooltip
-        title={`Code System Version: ${code.version ?? "not available"}`}
+        title={`Code System Version: ${
+          code.version && code.version !== "null"
+            ? code.version
+            : "not available"
+        }`}
       >
         <span>{`${code.system}: ${code.code}`}</span>
       </Tooltip>
