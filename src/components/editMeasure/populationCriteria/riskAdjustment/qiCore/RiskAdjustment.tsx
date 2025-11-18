@@ -49,7 +49,7 @@ export interface RiskAdjustmentProps {
   isTestCaseLocked: boolean;
   checkTestCasesLockStatus: Function;
   setAlertMessage: Function;
-  measureLockedByAnotherUser: boolean;
+  measureCanEdit: boolean;
 }
 const RiskAdjustment = (props: RiskAdjustmentProps) => {
   const [measure, setMeasure] = useState<Measure>(measureStore.state);
@@ -65,14 +65,7 @@ const RiskAdjustment = (props: RiskAdjustmentProps) => {
     };
   }, []);
 
-  const canEdit =
-    !props.isTestCaseLocked &&
-    checkUserCanEdit(
-      measure?.measureSet?.owner,
-      measure?.measureSet?.acls,
-      measure?.measureMetaData?.draft
-    ) &&
-    !props.measureLockedByAnotherUser;
+  const canEdit = !props.isTestCaseLocked && props.measureCanEdit;
 
   // Fetching definitions from CQL to populate dropdown
   useEffect(() => {

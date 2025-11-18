@@ -47,7 +47,6 @@ import {
   measureStore,
   useDocumentTitle,
   routeHandlerStore,
-  checkUserCanEdit,
   useFeatureFlags,
   useMeasureServiceApi,
 } from "@madie/madie-util";
@@ -151,15 +150,9 @@ const validateCql = (
   }
 };
 
-const MeasureEditor = ({ measureLockedByAnotherUser }) => {
+const MeasureEditor = ({ measureCanEdit }) => {
   useDocumentTitle("MADiE Edit Measure CQL");
   const [measure, setMeasure] = useState<Measure>(measureStore.state);
-  const canEdit =
-    checkUserCanEdit(
-      measure?.measureSet?.owner,
-      measure?.measureSet?.acls,
-      measure?.measureMetaData?.draft
-    ) && !measureLockedByAnotherUser;
   const [codeMap, setCodeMap] = useState<Map<string, Code>>(
     new Map<string, Code>()
   );
@@ -176,7 +169,7 @@ const MeasureEditor = ({ measureLockedByAnotherUser }) => {
       setMeasure(measure);
       validateCql(measure, setToastOpen, setToastMessage);
     });
-    if (featureFlags?.Locking && canEdit) {
+    if (featureFlags?.Locking && measureCanEdit) {
       window.addEventListener("beforeunload", handleUnload);
       measureServiceApi
         .updateMeasureLock(measureId)
@@ -187,12 +180,12 @@ const MeasureEditor = ({ measureLockedByAnotherUser }) => {
     }
     return () => {
       subscription.unsubscribe();
-      if (featureFlags?.Locking && canEdit) {
+      if (featureFlags?.Locking && measureCanEdit) {
         window.removeEventListener("beforeunload", handleUnload);
         measureServiceApi.unlockMeasure(measureId);
       }
     };
-  }, [measureServiceApi, measureId, featureFlags?.Locking, canEdit]);
+  }, [measureServiceApi, measureId, featureFlags?.Locking, measureCanEdit]);
 
   const [discardDialogOpen, setDiscardDialogOpen]: [
     boolean,
@@ -885,7 +878,7 @@ const MeasureEditor = ({ measureLockedByAnotherUser }) => {
               inboundAnnotations={elmAnnotations}
               inboundErrorMarkers={errorMarkers}
               height="calc(100% - 48px)"
-              readOnly={!canEdit}
+              readOnly={!measureCanEdit}
               setOutboundAnnotations={setOutboundAnnotations}
               measureStoreCql={measure?.cql}
               cqlMetaData={measure?.measureMetaData?.cqlMetaData}
@@ -916,7 +909,7 @@ const MeasureEditor = ({ measureLockedByAnotherUser }) => {
 
       <div className="bottom-row">
         <div className="spacer" />
-        {canEdit && (
+        {measureCanEdit && (
           <>
             <Button
               variant="outline"

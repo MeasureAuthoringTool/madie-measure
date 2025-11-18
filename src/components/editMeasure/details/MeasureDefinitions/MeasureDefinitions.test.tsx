@@ -50,7 +50,6 @@ jest.mock("@madie/madie-util", () => ({
   useOktaTokens: jest.fn(() => ({
     getAccessToken: () => "test.jwt",
   })),
-  checkUserCanEdit: jest.fn().mockImplementation(() => true),
   measureStore: {
     updateMeasure: jest.fn((measure) => measure),
     state: jest.fn().mockImplementation(() => measure),
@@ -133,7 +132,10 @@ describe("Measure Definitions Component", () => {
     render(
       <ApiContextProvider value={serviceConfig}>
         <MemoryRouter initialEntries={["/"]}>
-          <MeasureDefinitions setErrorMessage={jest.fn()} />
+          <MeasureDefinitions
+            setErrorMessage={jest.fn()}
+            measureCanEdit={false}
+          />
         </MemoryRouter>
       </ApiContextProvider>
     );
@@ -147,7 +149,10 @@ describe("Measure Definitions Component", () => {
     render(
       <ApiContextProvider value={serviceConfig}>
         <MemoryRouter initialEntries={["/"]}>
-          <MeasureDefinitions setErrorMessage={jest.fn()} />
+          <MeasureDefinitions
+            setErrorMessage={jest.fn()}
+            measureCanEdit={false}
+          />
         </MemoryRouter>
       </ApiContextProvider>
     );
@@ -160,7 +165,10 @@ describe("Measure Definitions Component", () => {
     render(
       <ApiContextProvider value={serviceConfig}>
         <MemoryRouter initialEntries={["/"]}>
-          <MeasureDefinitions setErrorMessage={jest.fn()} />
+          <MeasureDefinitions
+            setErrorMessage={jest.fn()}
+            measureCanEdit={true}
+          />
         </MemoryRouter>
       </ApiContextProvider>
     );
@@ -182,7 +190,10 @@ describe("Measure Definitions Component", () => {
     render(
       <ApiContextProvider value={serviceConfig}>
         <MemoryRouter initialEntries={["/"]}>
-          <MeasureDefinitions setErrorMessage={jest.fn()} />
+          <MeasureDefinitions
+            setErrorMessage={jest.fn()}
+            measureCanEdit={true}
+          />
         </MemoryRouter>
       </ApiContextProvider>
     );
@@ -207,7 +218,10 @@ describe("Measure Definitions Component", () => {
     render(
       <ApiContextProvider value={serviceConfig}>
         <MemoryRouter initialEntries={["/"]}>
-          <MeasureDefinitions setErrorMessage={jest.fn()} />
+          <MeasureDefinitions
+            setErrorMessage={jest.fn()}
+            measureCanEdit={true}
+          />
         </MemoryRouter>
       </ApiContextProvider>
     );
@@ -233,7 +247,10 @@ describe("Measure Definitions Component", () => {
     render(
       <ApiContextProvider value={serviceConfig}>
         <MemoryRouter initialEntries={["/"]}>
-          <MeasureDefinitions setErrorMessage={jest.fn()} />
+          <MeasureDefinitions
+            setErrorMessage={jest.fn()}
+            measureCanEdit={true}
+          />
         </MemoryRouter>
       </ApiContextProvider>
     );
@@ -257,7 +274,10 @@ describe("Measure Definitions Component", () => {
     render(
       <ApiContextProvider value={serviceConfig}>
         <MemoryRouter initialEntries={["/"]}>
-          <MeasureDefinitions setErrorMessage={jest.fn()} />
+          <MeasureDefinitions
+            setErrorMessage={jest.fn()}
+            measureCanEdit={true}
+          />
         </MemoryRouter>
       </ApiContextProvider>
     );
@@ -283,7 +303,10 @@ describe("Measure Definitions Component", () => {
     render(
       <ApiContextProvider value={serviceConfig}>
         <MemoryRouter initialEntries={["/"]}>
-          <MeasureDefinitions setErrorMessage={jest.fn()} />
+          <MeasureDefinitions
+            setErrorMessage={jest.fn()}
+            measureCanEdit={true}
+          />
         </MemoryRouter>
       </ApiContextProvider>
     );
@@ -343,7 +366,10 @@ describe("Measure Definitions Component", () => {
     render(
       <ApiContextProvider value={serviceConfig}>
         <MemoryRouter initialEntries={["/"]}>
-          <MeasureDefinitions setErrorMessage={jest.fn()} />
+          <MeasureDefinitions
+            setErrorMessage={jest.fn()}
+            measureCanEdit={true}
+          />
         </MemoryRouter>
       </ApiContextProvider>
     );
@@ -370,7 +396,10 @@ describe("Measure Definitions Component", () => {
     render(
       <ApiContextProvider value={serviceConfig}>
         <MemoryRouter initialEntries={["/"]}>
-          <MeasureDefinitions setErrorMessage={jest.fn()} />
+          <MeasureDefinitions
+            setErrorMessage={jest.fn()}
+            measureCanEdit={true}
+          />
         </MemoryRouter>
       </ApiContextProvider>
     );
@@ -406,7 +435,10 @@ describe("Measure Definitions Component", () => {
     render(
       <ApiContextProvider value={serviceConfig}>
         <MemoryRouter initialEntries={["/"]}>
-          <MeasureDefinitions setErrorMessage={jest.fn()} />
+          <MeasureDefinitions
+            setErrorMessage={jest.fn()}
+            measureCanEdit={true}
+          />
         </MemoryRouter>
       </ApiContextProvider>
     );
@@ -433,7 +465,10 @@ describe("Measure Definitions Component", () => {
     render(
       <ApiContextProvider value={serviceConfig}>
         <MemoryRouter initialEntries={["/"]}>
-          <MeasureDefinitions setErrorMessage={jest.fn()} />
+          <MeasureDefinitions
+            setErrorMessage={jest.fn()}
+            measureCanEdit={true}
+          />
         </MemoryRouter>
       </ApiContextProvider>
     );
@@ -482,7 +517,10 @@ describe("Measure Definitions Component", () => {
     render(
       <ApiContextProvider value={serviceConfig}>
         <MemoryRouter initialEntries={["/"]}>
-          <MeasureDefinitions setErrorMessage={jest.fn()} />
+          <MeasureDefinitions
+            setErrorMessage={jest.fn()}
+            measureCanEdit={true}
+          />
         </MemoryRouter>
       </ApiContextProvider>
     );

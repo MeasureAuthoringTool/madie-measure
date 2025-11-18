@@ -6,7 +6,6 @@ import MeasureEditor, {
 } from "./MeasureEditor";
 import { Measure, MeasureErrorType, Model } from "@madie/madie-models";
 import { ApiContextProvider, ServiceConfig } from "../../../api/ServiceContext";
-import axios from "../../../api/axios-instance";
 import { ElmTranslationError } from "./measureEditorUtils";
 import userEvent from "@testing-library/user-event";
 import {
@@ -16,12 +15,7 @@ import {
   isUsingEmpty,
   validateContent,
 } from "@madie/madie-editor";
-import {
-  checkUserCanEdit,
-  measureStore,
-  useMeasureServiceApi,
-  MeasureServiceApi,
-} from "@madie/madie-util";
+import { measureStore } from "@madie/madie-util";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 
 const measure = {
@@ -59,9 +53,6 @@ jest.mock("@madie/madie-util", () => ({
   useOktaTokens: jest.fn(() => ({
     getAccessToken: () => "test.jwt",
   })),
-  checkUserCanEdit: jest.fn(() => {
-    return true;
-  }),
   useFeatureFlags: () => mockUseFeatureFlags(),
   measureStore: {
     updateMeasure: jest.fn((measure) => measure),
@@ -180,7 +171,7 @@ const renderEditor = (measure) => {
           <Route
             // path="/cql-editor"
             path="/measures/:measureId/cql-editor"
-            element={<MeasureEditor />}
+            element={<MeasureEditor measureCanEdit={true} />}
           />
         </Routes>
       </MemoryRouter>
@@ -826,8 +817,21 @@ describe("map elm errors to Ace Markers", () => {
   });
 
   it("Save button and Cancel button should not show if user is not the owner of the measure", () => {
-    (checkUserCanEdit as jest.Mock).mockImplementation(() => false);
-    renderEditor(measure);
+    measureStore.state.mockImplementationOnce(() => measure);
+    render(
+      <ApiContextProvider value={serviceConfig}>
+        <MemoryRouter
+          initialEntries={[{ pathname: `/measures/${measure.id}/cql-editor` }]}
+        >
+          <Routes>
+            <Route
+              path="/measures/:measureId/cql-editor"
+              element={<MeasureEditor measureCanEdit={false} />}
+            />
+          </Routes>
+        </MemoryRouter>
+      </ApiContextProvider>
+    );
 
     const cancelButton = screen.queryByTestId("reset-cql-btn");
     expect(cancelButton).not.toBeInTheDocument();
@@ -836,7 +840,6 @@ describe("map elm errors to Ace Markers", () => {
   });
 
   it("Save button and Cancel button should show if measure is shared with the user", () => {
-    (checkUserCanEdit as jest.Mock).mockImplementation(() => true);
     renderEditor(measure);
 
     const cancelButton = screen.queryByTestId("reset-cql-btn");
