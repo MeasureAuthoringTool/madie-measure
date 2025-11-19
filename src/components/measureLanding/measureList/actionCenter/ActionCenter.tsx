@@ -30,7 +30,7 @@ interface PropTypes {
   setViewHumanReadableModal: any;
   activeTab: number;
   setTransferDialog: any;
-  openCompareVersionsDialog?: () => void;
+  setCompareVersionsDialog: any;
 }
 export default function ActionCenter(props: PropTypes) {
   const [canEdit, setCanEdit] = useState<boolean>(false);
@@ -117,10 +117,10 @@ export default function ActionCenter(props: PropTypes) {
   }, [props.setViewMeasureHistoryDialog, props.measures]);
 
   const compareVersions = useCallback(() => {
-    if (props.openCompareVersionsDialog) {
-      props.openCompareVersionsDialog();
+    if (props.measures?.length === 2) {
+      props.setCompareVersionsDialog(true);
     }
-  }, [props.openCompareVersionsDialog]);
+  }, [props.measures, props.setCompareVersionsDialog]);
 
   const isSelectedMeasureEditable = (measures) => {
     return (

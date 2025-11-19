@@ -699,14 +699,14 @@ describe("ActionCenter", () => {
     ).toBeInTheDocument();
   });
 
-  it("should call openCompareVersionsDialog when compare versions action is clicked", async () => {
+  it("should call setCompareVersionsDialog when compare versions action is clicked", async () => {
     mockCheckUserCanEdit.mockReturnValue(true);
     (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
       TransferMeasure: true,
       CompareMeasureVersions: true,
     }));
 
-    const openCompareVersionsDialog = jest.fn();
+    const setCompareVersionsDialog = jest.fn();
 
     render(
       <ActionCenter
@@ -723,7 +723,7 @@ describe("ActionCenter", () => {
         setViewMeasureHistoryDialog={jest.fn()}
         activeTab={0}
         setTransferDialog={jest.fn()}
-        openCompareVersionsDialog={openCompareVersionsDialog}
+        setCompareVersionsDialog={setCompareVersionsDialog}
       />
     );
 
@@ -733,6 +733,6 @@ describe("ActionCenter", () => {
     expect(compareButton).toBeEnabled();
     await userEvent.click(compareButton);
 
-    expect(openCompareVersionsDialog).toHaveBeenCalled();
+    expect(setCompareVersionsDialog).toHaveBeenCalled();
   });
 });
