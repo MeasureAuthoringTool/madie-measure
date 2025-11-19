@@ -304,6 +304,7 @@ export function PopulationCriteriaHome({ measureLockedByAnotherUser }) {
             setMeasureGroupNumber={setMeasureGroupNumber}
             measureId={measure?.id}
             setAlertMessage={setAlertMessage}
+            alertMessage={alertMessage}
             isTestCaseLocked={isTestCaseLocked}
             checkTestCasesLockStatus={checkTestCasesLockStatus}
             measureLockedByAnotherUser={measureLockedByAnotherUser}
