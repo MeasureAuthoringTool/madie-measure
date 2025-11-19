@@ -304,7 +304,6 @@ function UseFetchTestCases({ measureId, setErrors }) {
   return {
     testCaseService,
     testCases: sortedTestCases, //all test cases to run execution against
-    allTestCases: testCases,
     testCasePage, //all pagination required values
     removeTestCases,
     insertTestCases,
