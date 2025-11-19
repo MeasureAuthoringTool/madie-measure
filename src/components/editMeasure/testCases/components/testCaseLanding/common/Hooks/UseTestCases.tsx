@@ -285,6 +285,12 @@ function UseFetchTestCases({ measureId, setErrors }) {
     setLoadingState({ loading: false, message: "" });
   };
   const insertTestCases = (newTestCases: TestCase[]) => {
+    newTestCases.forEach((testCase: any) => {
+      // if there's no execution status, and it's an invalid resource, set it to invalid so execution will run on it.
+      if (!testCase.executionStatus) {
+        testCase.executionStatus = testCase.validResource ? "NA" : "Invalid";
+      }
+    });
     setLoadingState({ loading: true, message: "Adding Test Case" });
     const updatedTestCases = [...newTestCases, ...testCases];
     setTestCases(updatedTestCases);
