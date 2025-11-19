@@ -1397,6 +1397,12 @@ const EditTestCase = (props: EditTestCaseProps) => {
                     measure?.errors?.includes(
                       MeasureErrorType.MISMATCH_CQL_POPULATION_RETURN_TYPES
                     ) ||
+                    measure?.errors?.includes(
+                      MeasureErrorType.MISMATCH_CQL_RISK_ADJUSTMENT
+                    ) ||
+                    measure?.errors?.includes(
+                      MeasureErrorType.MISMATCH_CQL_SUPPLEMENTAL_DATA
+                    ) ||
                     _.isNil(measure?.groups) ||
                     measure?.groups.length === 0 ||
                     (!isJsonModified() &&
