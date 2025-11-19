@@ -204,6 +204,7 @@ function UseFetchTestCases({ measureId, setErrors }) {
         const canGoNext = (() => {
           return curPage < count;
         })();
+        setSortedTestCases(sortedTestCases);
         setTestCasePage({
           totalItems: filteredTestCases.length,
           visibleItems: currentSlice.length,
@@ -224,6 +225,7 @@ function UseFetchTestCases({ measureId, setErrors }) {
         const canGoNext = (() => {
           return curPage < count;
         })();
+        setSortedTestCases(sortedTestCases);
         setTestCasePage({
           totalItems: testCases.length,
           visibleItems: currentSlice.length,
@@ -239,15 +241,7 @@ function UseFetchTestCases({ measureId, setErrors }) {
         });
       }
     }
-  }, [
-    testCases,
-    sortedTestCases,
-    curPage,
-    curLimit,
-    filter,
-    searchQuery,
-    sorting,
-  ]);
+  }, [testCases, curPage, curLimit, filter, searchQuery, sorting]);
   useEffect(() => {
     getTestCasePage();
   }, [getTestCasePage]);
@@ -304,6 +298,7 @@ function UseFetchTestCases({ measureId, setErrors }) {
   return {
     testCaseService,
     testCases: sortedTestCases, //all test cases to run execution against
+    allTestCases: testCases,
     testCasePage, //all pagination required values
     removeTestCases,
     insertTestCases,
