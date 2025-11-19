@@ -42,12 +42,20 @@ const ResourceList = ({
   onClick,
   isPatientAdded,
 }: ResourceListProps) => {
+  // Load saved pagination state from localStorage
+  const resourcePageOptions = JSON.parse(
+    localStorage.getItem("resourcePageOptions")
+  ) || {
+    page: 1,
+    limit: 5,
+  };
+
   const [visibleResources, setVisibleResources] = useState(resourceIdentifiers);
   const [resourceFilter, setResourceFilter] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   // utilities for pagination
-  const [limit, setLimit] = useState(5);
-  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(resourcePageOptions.limit);
+  const [page, setPage] = useState(resourcePageOptions.page);
   const [sorting, setSorting] = React.useState<SortingState>([]);
   // add in later for sorting
   // const [hoveredHeader, setHoveredHeader] = useState<string>("");
@@ -95,6 +103,14 @@ const ResourceList = ({
       managePagination();
     }
   }, [resourceIdentifiers, page, limit, resourceFilter]);
+
+  // Save pagination state to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem(
+      "resourcePageOptions",
+      JSON.stringify({ page, limit })
+    );
+  }, [page, limit]);
 
   const columns = useMemo<ColumnDef<ResourceIdentifier>[]>(() => {
     const columnDefs = [];
