@@ -51,6 +51,7 @@ describe("TestCaseSummaryGrid", () => {
         gridData={gridData}
         onRowEdit={mockOnRowEdit}
         onRowDelete={mockOnRowDelete}
+        testCaseCanEdit={true}
       />
     );
 
@@ -86,6 +87,7 @@ describe("TestCaseSummaryGrid", () => {
         gridData={[]}
         onRowEdit={mockOnRowEdit}
         onRowDelete={mockOnRowDelete}
+        testCaseCanEdit={true}
       />
     );
 
@@ -99,6 +101,7 @@ describe("TestCaseSummaryGrid", () => {
         gridData={undefined}
         onRowEdit={mockOnRowEdit}
         onRowDelete={mockOnRowDelete}
+        testCaseCanEdit={true}
       />
     );
 
@@ -112,6 +115,7 @@ describe("TestCaseSummaryGrid", () => {
         gridData={gridData}
         onRowEdit={mockOnRowEdit}
         onRowDelete={mockOnRowDelete}
+        testCaseCanEdit={true}
       />
     );
 
@@ -133,6 +137,7 @@ describe("TestCaseSummaryGrid", () => {
         gridData={gridData}
         onRowEdit={mockOnRowEdit}
         onRowDelete={mockOnRowDelete}
+        testCaseCanEdit={true}
       />
     );
 
@@ -152,6 +157,7 @@ describe("TestCaseSummaryGrid", () => {
         gridData={gridData}
         onRowEdit={mockOnRowEdit}
         onRowDelete={mockOnRowDelete}
+        testCaseCanEdit={true}
       />
     );
 
@@ -183,5 +189,30 @@ describe("TestCaseSummaryGrid", () => {
       expect(deleteDialog).not.toBeInTheDocument();
       expect(mockOnRowDelete).toHaveBeenCalledWith(mockBundle.entry[0]);
     });
+  });
+
+  it("should render ActionCenter with View action only if test case cannot be edited", async () => {
+    render(
+      <TestCaseSummaryGrid
+        gridData={gridData}
+        onRowEdit={mockOnRowEdit}
+        onRowDelete={mockOnRowDelete}
+        testCaseCanEdit={false}
+      />
+    );
+
+    const firstActionCenterButton = screen.getByTestId(
+      "action-center-button-ec-1"
+    );
+    userEvent.click(firstActionCenterButton);
+    const viewAction = await screen.findByRole("menuitem", { name: "View" });
+    expect(viewAction).toBeInTheDocument();
+    const deleteAction = await screen.queryByRole("menuitem", {
+      name: "Delete",
+    });
+    expect(deleteAction).not.toBeInTheDocument();
+
+    userEvent.click(viewAction);
+    expect(mockOnRowEdit).toHaveBeenCalledWith(mockBundle.entry[0]);
   });
 });

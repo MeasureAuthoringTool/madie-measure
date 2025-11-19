@@ -6,7 +6,6 @@ import {
   MadieDialog,
   Pagination,
   Select,
-  TextArea,
   Toast,
   MadieDeleteDialog,
   TextField,
@@ -18,11 +17,7 @@ import {
   InputAdornment,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
-import {
-  measureStore,
-  checkUserCanEdit,
-  useMeasureServiceApi,
-} from "@madie/madie-util";
+import { measureStore, useMeasureServiceApi } from "@madie/madie-util";
 import { useFormik } from "formik";
 import useFormikResetOnEvent from "../../../common/useFormikResetOnEvent";
 import MeasureMetaDataRow from "../MeasureMetaDataRow";
@@ -37,11 +32,11 @@ import TextEditor from "../../populationCriteria/groups/TextEditor";
 
 interface MeasureReferencesProps {
   setErrorMessage: Function;
-  measureLockedByAnotherUser: boolean;
+  measureCanEdit: boolean;
 }
 
 const MeasureReferences = (props: MeasureReferencesProps) => {
-  const { setErrorMessage, measureLockedByAnotherUser } = props;
+  const { setErrorMessage, measureCanEdit } = props;
   const { search } = useLocation();
   let navigate = useNavigate();
   const measureServiceApi = useMeasureServiceApi();
@@ -92,12 +87,6 @@ const MeasureReferences = (props: MeasureReferencesProps) => {
     setToastOpen(open);
   };
   // Form utilities
-  const canEdit =
-    checkUserCanEdit(
-      measure?.measureSet?.owner,
-      measure?.measureSet?.acls,
-      measure?.measureMetaData?.draft
-    ) && !measureLockedByAnotherUser;
   const INITIAL_VALUES = {
     id: selectedReference?.id,
     referenceType:
@@ -434,7 +423,7 @@ const MeasureReferences = (props: MeasureReferencesProps) => {
                 >
                   <Button
                     id="create-reference"
-                    disabled={!canEdit}
+                    disabled={!measureCanEdit}
                     variant="outline-filled"
                     className="page-header-action-button"
                     data-testid="create-reference-button"
@@ -472,7 +461,7 @@ const MeasureReferences = (props: MeasureReferencesProps) => {
                     handleClick={handleClick}
                     id={reference.id}
                     key={`${reference.referenceType}-${index}`}
-                    canEdit={canEdit}
+                    canEdit={measureCanEdit}
                     type="reference"
                   />
                 ))
@@ -548,7 +537,7 @@ const MeasureReferences = (props: MeasureReferencesProps) => {
                 "data-testid": `measure-referenceType-input`,
               }}
               data-testid={`measure-referenceType`}
-              readOnly={!canEdit}
+              readOnly={!measureCanEdit}
               required
               SelectDisplayProps={{
                 "aria-required": "true",
@@ -562,7 +551,7 @@ const MeasureReferences = (props: MeasureReferencesProps) => {
               required
               data-testid="measure-referenceText"
               setFieldValue={formik.setFieldValue}
-              readOnly={!canEdit}
+              readOnly={!measureCanEdit}
               error={
                 formik.touched.referenceText &&
                 Boolean(formik.errors.referenceText)

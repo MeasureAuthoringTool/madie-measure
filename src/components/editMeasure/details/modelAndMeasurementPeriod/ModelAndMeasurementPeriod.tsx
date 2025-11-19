@@ -16,7 +16,6 @@ import { MeasurementPeriodValidator } from "../../../../validations/MeasurementP
 import {
   measureStore,
   routeHandlerStore,
-  checkUserCanEdit,
   useMeasureServiceApi,
 } from "@madie/madie-util";
 import { Box } from "@mui/system";
@@ -35,12 +34,12 @@ interface modelAndMeasurementPeriod {
 
 interface ModelAndMeasurementPeriodProps {
   setErrorMessage: Function;
-  measureLockedByAnotherUser: boolean;
+  measureCanEdit: boolean;
 }
 const DATE_FORMAT = "YYYY-MM-DDTHH:mm:ss";
 
 const ModelAndMeasurementPeriod = (props: ModelAndMeasurementPeriodProps) => {
-  const { setErrorMessage, measureLockedByAnotherUser } = props;
+  const { setErrorMessage, measureCanEdit } = props;
   const measureServiceApi = useMeasureServiceApi();
   const { updateMeasure } = measureStore;
   const [measure, setMeasure] = useState<any>(measureStore.state);
@@ -96,12 +95,6 @@ const ModelAndMeasurementPeriod = (props: ModelAndMeasurementPeriodProps) => {
     });
   }, [formik.dirty]);
 
-  const canEdit =
-    checkUserCanEdit(
-      measure?.measureSet?.owner,
-      measure?.measureSet?.acls,
-      measure?.measureMetaData?.draft
-    ) && !measureLockedByAnotherUser;
   const onToastClose = () => {
     setToastType("danger");
     setToastMessage("");
@@ -192,7 +185,7 @@ const ModelAndMeasurementPeriod = (props: ModelAndMeasurementPeriodProps) => {
         <Box sx={formGridStyle} data-testid="measurement-period-div">
           <DateField
             id="measurement-period-start"
-            readOnly={!canEdit}
+            readOnly={!measureCanEdit}
             required={true}
             label="Measurement Period - Start Date"
             handleDateChange={(startDate) =>
@@ -215,7 +208,7 @@ const ModelAndMeasurementPeriod = (props: ModelAndMeasurementPeriodProps) => {
           />
           <DateField
             id="measurement-period-end"
-            readOnly={!canEdit}
+            readOnly={!measureCanEdit}
             required={true}
             label="Measurement Period - End Date"
             handleDateChange={(endDate) =>
@@ -239,7 +232,7 @@ const ModelAndMeasurementPeriod = (props: ModelAndMeasurementPeriodProps) => {
           />
         </Box>
       </div>
-      {canEdit && (
+      {measureCanEdit && (
         <div className="form-actions">
           <Button
             onClick={() => setDiscardDialogOpen(true)}

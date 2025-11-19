@@ -66,12 +66,14 @@ interface createNewTestCaseDialogProps {
   open: boolean;
   onClose: (boolean) => void;
   measure?: Measure;
+  onSuccess: (testCases: TestCase[]) => void;
 }
 
 const CreateNewTestCaseDialog = ({
   open,
   onClose,
   measure,
+  onSuccess,
 }: createNewTestCaseDialogProps) => {
   let navigate = useNavigate();
   const { search } = useLocation();
@@ -190,9 +192,7 @@ const CreateNewTestCaseDialog = ({
         toastMessage: "",
       });
 
-      const event = new Event("createTestCase");
-      window.dispatchEvent(event);
-
+      onSuccess([testCase]);
       onClose(true);
     }
   }

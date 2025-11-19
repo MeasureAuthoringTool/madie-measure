@@ -190,6 +190,9 @@ const EditTestCase = () => {
     canEdit,
   ]);
 
+  const testCaseCanEdit =
+    canEdit && !(featureFlags?.Locking && currentTestCase?.testCaseLock);
+
   const handleSubmit = async (testCase: TestCase) => {
     testCase.title = sanitizeUserInput(testCase.title);
     testCase.description = sanitizeUserInput(testCase.description);
@@ -359,7 +362,7 @@ const EditTestCase = () => {
             <Allotment defaultSizes={[175, 125]} vertical={false}>
               <Allotment.Pane>
                 <LeftPanel
-                  canEdit={canEdit}
+                  canEdit={testCaseCanEdit}
                   handleTestCaseErrors={handleTestCaseErrors}
                   handleTestCaseWarnings={handleTestCaseWarnings}
                   handleMissingDataElements={handleMissingDataElements}
@@ -369,7 +372,7 @@ const EditTestCase = () => {
               </Allotment.Pane>
               <Allotment.Pane>
                 <RightPanel
-                  canEdit={canEdit}
+                  canEdit={testCaseCanEdit}
                   testCaseGroups={formik?.values?.groupPopulations}
                   isTestCaseExecuted={isTestCaseExecuted}
                   setIsTestCaseExecuted={setIsTestCaseExecuted}
@@ -417,6 +420,12 @@ const EditTestCase = () => {
                 _.isEmpty(measure?.groups) ||
                 measure?.errors?.includes(
                   MeasureErrorType.MISMATCH_CQL_POPULATION_RETURN_TYPES
+                ) ||
+                measure?.errors?.includes(
+                  MeasureErrorType.MISMATCH_CQL_RISK_ADJUSTMENT
+                ) ||
+                measure?.errors?.includes(
+                  MeasureErrorType.MISMATCH_CQL_SUPPLEMENTAL_DATA
                 ) ||
                 !formik.values?.json ||
                 !executionContextReady ||

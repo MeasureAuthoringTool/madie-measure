@@ -41,7 +41,7 @@ describe("Create New Test Case Dialog", () => {
   });
 
   const mockMeasure = { ...formikInfo, id: "test-id" };
-
+  const mockOnSuccess = jest.fn();
   test("should render all the fields in the test case creation form", async () => {
     const { findByTestId } = render(
       <MemoryRouter
@@ -49,7 +49,11 @@ describe("Create New Test Case Dialog", () => {
           `/measures/${mockMeasure.id}/edit/test-cases/list-page`,
         ]}
       >
-        <CreateNewTestCaseDialog open={true} onClose={undefined} />
+        <CreateNewTestCaseDialog
+          open={true}
+          onClose={undefined}
+          onSuccess={mockOnSuccess}
+        />
       </MemoryRouter>
     );
 
@@ -69,13 +73,18 @@ describe("Create New Test Case Dialog", () => {
   });
 
   test("Save button should not be enabled when required field is empty", async () => {
+    const mockOnSuccess = jest.fn();
     const { getByTestId } = render(
       <MemoryRouter
         initialEntries={[
           `/measures/${mockMeasure.id}/edit/test-cases/list-page`,
         ]}
       >
-        <CreateNewTestCaseDialog open={true} onClose={undefined} />
+        <CreateNewTestCaseDialog
+          open={true}
+          onClose={undefined}
+          onSuccess={mockOnSuccess}
+        />
       </MemoryRouter>
     );
 
@@ -109,6 +118,7 @@ describe("Create New Test Case Dialog", () => {
     const measure: Measure = {
       model: "QDM",
     } as unknown as Measure;
+    const mockOnSuccess = jest.fn();
     const { getByRole, getByTestId, getByText, queryByTestId } = render(
       <MemoryRouter
         initialEntries={[
@@ -118,6 +128,7 @@ describe("Create New Test Case Dialog", () => {
         <CreateNewTestCaseDialog
           open={true}
           onClose={jest.fn()}
+          onSuccess={mockOnSuccess}
           measure={measure}
         />
       </MemoryRouter>
@@ -161,6 +172,7 @@ describe("Create New Test Case Dialog", () => {
         error: { message: "server error" },
       },
     });
+    const mockOnSuccess = jest.fn();
 
     const { getByRole, getByTestId, getByText, queryByTestId } = render(
       <MemoryRouter
@@ -168,7 +180,11 @@ describe("Create New Test Case Dialog", () => {
           `/measures/${mockMeasure.id}/edit/test-cases/list-page`,
         ]}
       >
-        <CreateNewTestCaseDialog open={true} onClose={jest.fn()} />
+        <CreateNewTestCaseDialog
+          open={true}
+          onClose={jest.fn()}
+          onSuccess={mockOnSuccess}
+        />
       </MemoryRouter>
     );
 
@@ -221,6 +237,7 @@ describe("Create New Test Case Dialog", () => {
     const measure: Measure = {
       model: "QDM v5.6",
     } as unknown as Measure;
+    const mockOnSuccess = jest.fn();
     const { getByRole, getByTestId, getByText, queryByTestId } = render(
       <MemoryRouter
         initialEntries={[
@@ -230,7 +247,7 @@ describe("Create New Test Case Dialog", () => {
         <CreateNewTestCaseDialog
           open={true}
           onClose={jest.fn()}
-          measure={measure}
+          onSuccess={mockOnSuccess}
         />
       </MemoryRouter>
     );
@@ -277,6 +294,7 @@ describe("Create New Test Case Dialog", () => {
     const measure: Measure = {
       model: "QDM",
     } as unknown as Measure;
+    const mockOnSuccess = jest.fn();
     const { getByRole, getByTestId, getByText, queryByTestId } = render(
       <MemoryRouter
         initialEntries={[
@@ -286,7 +304,7 @@ describe("Create New Test Case Dialog", () => {
         <CreateNewTestCaseDialog
           open={true}
           onClose={jest.fn()}
-          measure={measure}
+          onSuccess={mockOnSuccess}
         />
       </MemoryRouter>
     );

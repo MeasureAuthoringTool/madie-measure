@@ -96,6 +96,8 @@ const TestCaseList = (props: TestCaseListProps) => {
     testCases,
     setTestCases,
     testCaseService,
+    insertTestCases,
+    removeTestCases,
     loadingState,
     setLoadingState,
     retrieveTestCases,
@@ -163,8 +165,6 @@ const TestCaseList = (props: TestCaseListProps) => {
   const [selectedPopCriteria, setSelectedPopCriteria] = useState<Group>();
 
   const [openImportDialog, setOpenImportDialog] = useState<boolean>(false);
-  const [openDeleteAllTestCasesDialog, setOpenDeleteAllTestCasesDialog] =
-    useState<boolean>(false);
   const abortController = useRef(null);
   const [createOpen, setCreateOpen] = useState<boolean>(false);
   const [deleteDialogModalOpen, setDeleteDialogModalOpen] =
@@ -236,20 +236,6 @@ const TestCaseList = (props: TestCaseListProps) => {
   }, [measure]);
 
   useEffect(() => {
-    const createTestCaseListener = () => {
-      retrieveTestCases();
-    };
-    window.addEventListener("createTestCase", createTestCaseListener, false);
-    return () => {
-      window.removeEventListener(
-        "createTestCase",
-        createTestCaseListener,
-        false
-      );
-    };
-  }, []);
-
-  useEffect(() => {
     const validTestCases = measure?.testCaseConfiguration
       ?.executeInvalidTestCases
       ? testCases
@@ -304,10 +290,10 @@ const TestCaseList = (props: TestCaseListProps) => {
     testCaseService.current
       .deleteTestCases(measureId, testCaseIds)
       .then(() => {
-        retrieveTestCases();
         setToastOpen(true);
         setToastType("success");
         setToastMessage("Test cases successfully deleted");
+        removeTestCases(testCaseIds);
       })
       .catch((err) => {
         console.error("deleteTestCases: err.message = " + err.message);
@@ -335,23 +321,6 @@ const TestCaseList = (props: TestCaseListProps) => {
         } else {
           setErrors((prevState) => [...prevState, err.message]);
         }
-      });
-  };
-
-  const deleteAllTestCases = () => {
-    const currentTestCaseIds = _.map(measure.testCases, "id");
-    testCaseService.current
-      .deleteTestCases(measureId, currentTestCaseIds)
-      .then(() => {
-        retrieveTestCases();
-        setOpenDeleteAllTestCasesDialog(false);
-        setToastOpen(true);
-        setToastType("success");
-        setToastMessage("Test cases successfully deleted");
-      })
-      .catch((err) => {
-        setOpenDeleteAllTestCasesDialog(false);
-        setErrors((prevState) => [...prevState, err?.response?.data?.message]);
       });
   };
 
@@ -572,11 +541,14 @@ const TestCaseList = (props: TestCaseListProps) => {
     clonedTestCase.title =
       clonedTestCase.title + "-" + new ObjectId().toString();
     try {
-      await testCaseService.current.createTestCase(clonedTestCase, measureId);
+      const testCase = await testCaseService.current.createTestCase(
+        clonedTestCase,
+        measureId
+      );
       setToastOpen(true);
       setToastType("success");
       setToastMessage("Test case cloned successfully");
-      retrieveTestCases();
+      insertTestCases([testCase]);
     } catch (error) {
       setToastOpen(true);
       setToastMessage(
@@ -585,12 +557,24 @@ const TestCaseList = (props: TestCaseListProps) => {
     }
   };
 
-  const onCopyTestCaseClose = (msg?: string, toastType?: string) => {
+  const onCopyTestCaseClose = (
+    msg?: string,
+    toastType?: string,
+    failedTestCaseIds?: any
+  ) => {
     setOpenCopyTestCaseDialog(false);
     if (toastType) {
       setToastType(toastType);
       setToastMessage(msg);
       setToastOpen(true);
+    } else {
+      setCustomWarningMessages([
+        {
+          message: msg,
+          details: failedTestCaseIds,
+          testDataId: "test-cases-copy-to-warning",
+        },
+      ]);
     }
   };
 
@@ -651,7 +635,11 @@ const TestCaseList = (props: TestCaseListProps) => {
                 validationPercentage={validationPercentage}
               />
             </div>
-            <CreateNewTestCaseDialog open={createOpen} onClose={handleClose} />
+            <CreateNewTestCaseDialog
+              open={createOpen}
+              onClose={handleClose}
+              onSuccess={insertTestCases}
+            />
             {activeTab === "passing" && (
               <div tw="overflow-x-auto sm:-mx-6 lg:-mx-8">
                 <div tw="py-2 inline-block min-w-full sm:px-6 lg:px-8">
@@ -769,17 +757,6 @@ const TestCaseList = (props: TestCaseListProps) => {
           <Typography color="inherit">{loadingState.message}</Typography>
         </div>
       )}
-      <MadieDeleteDialog
-        open={openDeleteAllTestCasesDialog}
-        onContinue={() => {
-          deleteAllTestCases();
-        }}
-        onClose={() => {
-          setOpenDeleteAllTestCasesDialog(false);
-        }}
-        dialogTitle="Delete All Test Cases"
-        name="All Test Cases"
-      />
       <CopyTestCaseDialog
         selectedTestCases={selectedTestCases}
         open={openCopyTestCaseDialog}

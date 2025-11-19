@@ -63,7 +63,7 @@ const TestCaseRoutes = () => {
   }, []);
 
   useEffect(() => {
-    const localErrors: Array<string> = [...errors];
+    const localErrors: Array<string> = [];
     if (measure) {
       const compareTo = _.cloneDeep(measure);
       compareTo.testCases = null;
@@ -71,7 +71,6 @@ const TestCaseRoutes = () => {
         return;
       }
       setLastMeasure(compareTo);
-      setErrors(() => []);
       if (measure.cqlErrors || !measure.elmJson) {
         localErrors.push(
           "An error exists with the measure CQL, please review the CQL Editor tab."
@@ -89,7 +88,6 @@ const TestCaseRoutes = () => {
         )
       ) {
         localErrors.push(CQL_RETURN_TYPES_MISMATCH_ERROR);
-        setErrors(localErrors);
       }
       if (measure?.testCaseConfiguration?.executeInvalidTestCases) {
         setCustomWarningMessages([
@@ -99,12 +97,8 @@ const TestCaseRoutes = () => {
             testDataId: "test-cases-in-use-warning",
           },
         ]);
-      } else {
-        setErrors(
-          localErrors.filter((s) => s !== CQL_RETURN_TYPES_MISMATCH_ERROR)
-        );
       }
-
+      setErrors([...errors, ...localErrors]);
       if (
         measure?.testCaseConfiguration?.executeInvalidTestCases ||
         !localErrors.length

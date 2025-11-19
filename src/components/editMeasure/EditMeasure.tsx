@@ -19,6 +19,7 @@ import {
   routeHandlerStore,
   useFeatureFlags,
   useMeasureServiceApi,
+  checkUserCanEdit,
 } from "@madie/madie-util";
 import CreateVersionDialog from "../common/createVersionDialog/CreateVersionDialog";
 import InvalidTestCaseDialog from "../common/invalidTestCaseDialog/InvalidTestCaseDialog";
@@ -158,8 +159,12 @@ export default function EditMeasure() {
   const [failureMessage, setFailureMessage] = useState(null);
   const abortController = useRef(null);
 
-  const measureLockedByAnotherUser =
-    featureFlags?.Locking && measure?.measureLock;
+  const measureCanEdit: boolean =
+    checkUserCanEdit(
+      measure?.measureSet?.owner,
+      measure?.measureSet?.acls,
+      measure?.measureMetaData?.draft
+    ) && !(featureFlags?.Locking && measure?.measureLock);
 
   useEffect(() => {
     const deleteListener = () => {
@@ -639,17 +644,13 @@ export default function EditMeasure() {
                     setErrorMessage={setErrorMessage}
                     isQDM={isQDM}
                     featureFlags={featureFlags}
-                    measureLockedByAnotherUser={measureLockedByAnotherUser}
+                    measureCanEdit={measureCanEdit}
                   />
                 }
               />
               <Route
                 path={`/cql-editor`}
-                element={
-                  <MeasureEditor
-                    measureLockedByAnotherUser={measureLockedByAnotherUser}
-                  />
-                }
+                element={<MeasureEditor measureCanEdit={measureCanEdit} />}
               />
               <Route
                 path={`/test-cases/*`}
@@ -662,41 +663,31 @@ export default function EditMeasure() {
               <Route
                 path={`/groups/:groupNumber`}
                 element={
-                  <PopulationCriteriaWrapper
-                    measureLockedByAnotherUser={measureLockedByAnotherUser}
-                  />
+                  <PopulationCriteriaWrapper measureCanEdit={measureCanEdit} />
                 }
               />
               <Route
                 path={`/supplemental-data`}
                 element={
-                  <PopulationCriteriaWrapper
-                    measureLockedByAnotherUser={measureLockedByAnotherUser}
-                  />
+                  <PopulationCriteriaWrapper measureCanEdit={measureCanEdit} />
                 }
               />
               <Route
                 path={`/risk-adjustment`}
                 element={
-                  <PopulationCriteriaWrapper
-                    measureLockedByAnotherUser={measureLockedByAnotherUser}
-                  />
+                  <PopulationCriteriaWrapper measureCanEdit={measureCanEdit} />
                 }
               />
               <Route
                 path={`/base-configuration`}
                 element={
-                  <PopulationCriteriaWrapper
-                    measureLockedByAnotherUser={measureLockedByAnotherUser}
-                  />
+                  <PopulationCriteriaWrapper measureCanEdit={measureCanEdit} />
                 }
               />
               <Route
                 path={`/reporting`}
                 element={
-                  <PopulationCriteriaWrapper
-                    measureLockedByAnotherUser={measureLockedByAnotherUser}
-                  />
+                  <PopulationCriteriaWrapper measureCanEdit={measureCanEdit} />
                 }
               />
               <Route path={`/review-info`} element={<ReviewInfo />} />

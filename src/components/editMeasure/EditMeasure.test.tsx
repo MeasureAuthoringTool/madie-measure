@@ -194,7 +194,7 @@ jest.mock("@madie/madie-util", () => ({
     getAccessToken: () => "test.jwt",
     getUserName: () => "test user",
   })),
-  checkUserCanEdit: jest.fn(),
+  checkUserCanEdit: jest.fn().mockImplementation(() => true),
   useFeatureFlags: jest.fn(() => ({
     TransferMeasure: true,
     Locking: false,

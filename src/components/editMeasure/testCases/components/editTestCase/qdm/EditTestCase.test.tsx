@@ -933,7 +933,7 @@ describe("EditTestCase QDM Component", () => {
         "Test Case Updated Successfully"
       );
     });
-  }, 30000);
+  });
 
   it("Should not update test case because of special characters", async () => {
     testCase.json = JSON.stringify(testCaseJson);
@@ -986,7 +986,7 @@ describe("EditTestCase QDM Component", () => {
         "Test Case Title can not contain special characters"
       );
     });
-  }, 30000);
+  });
   describe("validator", () => {
     it("should provide error for non boolean populations when value is in decimal", () => {
       const tc = {
@@ -1116,5 +1116,47 @@ describe("EditTestCase QDM Component", () => {
         "Only positive numeric values can be entered in the expected values"
       );
     });
+  });
+});
+
+describe("EditTestCase QDM Component when test case is locked by another user", () => {
+  const { getByRole } = screen;
+
+  beforeEach(() => {
+    const lockedTestCase = { ...testCase, testCaseLock: "another.user" };
+    const useTestCaseServiceMockResolved = {
+      getTestCase: jest.fn().mockResolvedValue(lockedTestCase),
+      getTestCaseSeriesForMeasure: jest
+        .fn()
+        .mockResolvedValue(["Series 1", "Series 2"]),
+      lockTestCase: jest.fn().mockResolvedValue(lockInfo),
+      unLockTestCase: jest.fn().mockResolvedValue(lockInfo),
+    } as unknown as TestCaseServiceApi;
+
+    useTestCaseServiceMock.mockImplementation(() => {
+      return useTestCaseServiceMockResolved;
+    });
+
+    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => {
+      return {
+        Locking: true,
+      };
+    });
+  });
+
+  it("should disable edit when test case is locked by another user", async () => {
+    await waitFor(() => renderEditTestCaseComponent());
+
+    const detailsTab = getByRole("tab", { name: "Details tab panel" });
+    act(() => {
+      fireEvent.click(detailsTab);
+    });
+    await waitFor(() => {
+      expect(detailsTab).toHaveAttribute("aria-selected", "true");
+    });
+
+    const tcTitle = document.getElementById("test-case-title");
+    expect(tcTitle).toHaveValue(testCase.title);
+    expect(tcTitle).toHaveAttribute("readonly");
   });
 });
