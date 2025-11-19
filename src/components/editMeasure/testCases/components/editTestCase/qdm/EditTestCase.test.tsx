@@ -882,7 +882,7 @@ describe("EditTestCase QDM Component", () => {
     });
   });
 
-  it.skip("Should render the details tab with relevant information", async () => {
+  it("Should render the details tab with relevant information", async () => {
     testCase.json = JSON.stringify(testCaseJson);
     await waitFor(() => renderEditTestCaseComponent());
 
