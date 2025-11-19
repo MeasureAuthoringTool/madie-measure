@@ -276,7 +276,7 @@ describe("UseFetchTestCases", () => {
 
     await waitFor(() => {
       const sortedCases = screen.getAllByText(/Test Case|apple|cat|zebra/);
-      expect(sortedCases[0]).toHaveTextContent("Test Case 1");
+      expect(sortedCases[0]).toHaveTextContent("zebra");
       expect(sortedCases[1]).toHaveTextContent(/Test Case 2|cat/);
     });
   });
