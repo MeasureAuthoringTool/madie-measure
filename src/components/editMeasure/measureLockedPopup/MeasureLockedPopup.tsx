@@ -28,8 +28,7 @@ const MeasureLockedPopup = ({
           <Typography>
             <div>
               This measure is currently edited by HARP ID {measureLockedBy}.
-              <br></br>You will be unable to make changes until the measure has
-              been saved.
+              <br></br>You will be unable to make changes at this time.
             </div>
           </Typography>
         </div>

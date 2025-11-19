@@ -1334,7 +1334,7 @@ describe("Measure Editor - measure locked", () => {
       );
       expect(message).toHaveTextContent("testuser@example.com");
       expect(message).toHaveTextContent(
-        "You will be unable to make changes until the measure has been saved."
+        "You will be unable to make changes at this time."
       );
     });
   });
