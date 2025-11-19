@@ -933,7 +933,7 @@ describe("EditTestCase QDM Component", () => {
         "Test Case Updated Successfully"
       );
     });
-  }, 30000);
+  });
 
   it("Should not update test case because of special characters", async () => {
     testCase.json = JSON.stringify(testCaseJson);
@@ -986,7 +986,7 @@ describe("EditTestCase QDM Component", () => {
         "Test Case Title can not contain special characters"
       );
     });
-  }, 30000);
+  });
   describe("validator", () => {
     it("should provide error for non boolean populations when value is in decimal", () => {
       const tc = {
