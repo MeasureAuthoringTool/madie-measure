@@ -120,6 +120,25 @@ describe("CompareVersionsDialog Component", () => {
     );
   });
 
+  it("shows '-' when cmsId is null", () => {
+    const measures = [
+      { ...mockMeasures[0], measureSet: { cmsId: null } },
+      { ...mockMeasures[1], measureSet: { cmsId: null } },
+    ];
+
+    render(
+      <CompareVersionsDialog
+        measures={measures}
+        open={true}
+        onClose={mockOnClose}
+      />
+    );
+
+    expect(screen.getByTestId("measure-cmsid")).toHaveTextContent(
+      "(CMS ID: -)"
+    );
+  });
+
   it("renders and switches tabs", () => {
     render(
       <CompareVersionsDialog
