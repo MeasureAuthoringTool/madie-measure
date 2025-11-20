@@ -6,7 +6,11 @@ import NotFound from "../../notfound/NotFound";
 import StatusHandler, {
   CustomWarningMessage,
 } from "../../statusHandler/StatusHandler";
-import { Measure, TestCaseImportOutcome } from "@madie/madie-models";
+import {
+  Measure,
+  MeasureErrorType,
+  TestCaseImportOutcome,
+} from "@madie/madie-models";
 import { measureStore } from "@madie/madie-util";
 import { CqmMeasure, ValueSet } from "cqm-models";
 import useCqmConversionService from "../../../api/CqmModelConversionService";
@@ -19,6 +23,7 @@ import Expansion from "../../testCaseConfiguration/expansion/Expansion";
 import TestCaseData from "../../testCaseConfiguration/testCaseData/TestCaseData";
 import RAVPage from "../../testCaseConfiguration/rav/RAVPage";
 import ExecutionOptions from "../../testCaseConfiguration/executionOptions/ExecutionOptions";
+import { CQL_RETURN_TYPES_MISMATCH_ERROR } from "../qiCore/TestCaseRoutes";
 
 const TestCaseRoutes = () => {
   const [cqmMeasureErrors, setCqmMeasureErrors] = useState<Array<string>>([]);
@@ -109,6 +114,14 @@ const TestCaseRoutes = () => {
             "No Population Criteria is associated with this measure. Please review the Population Criteria tab."
           );
         }
+        if (
+          measure?.errors?.includes(
+            MeasureErrorType.MISMATCH_CQL_POPULATION_RETURN_TYPES
+          )
+        ) {
+          localErrors.push(CQL_RETURN_TYPES_MISMATCH_ERROR);
+        }
+
         if (
           !localErrors.length ||
           measure?.testCaseConfiguration?.executeInvalidTestCases

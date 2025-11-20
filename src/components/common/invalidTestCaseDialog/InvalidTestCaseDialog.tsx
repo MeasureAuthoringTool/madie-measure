@@ -48,10 +48,6 @@ const InvalidTestCaseDialog = (props: InvalidTestCaseDialogProps) => {
               Are you sure you want to version with invalid Test Cases?
             </p>
           </section>
-          <section className="dialog-warning-action">
-            <ErrorIcon />
-            <p>Test cases cannot be edited after being versioned.</p>
-          </section>
         </div>
         <Backdrop
           sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
