@@ -32,17 +32,13 @@ import ExecutionOptions from "../../testCaseConfiguration/executionOptions/Execu
 export const TEST_CASE_EXECUTION_ERROR =
   "Test Cases cannot be executed and Valuesets from the measure CQL cannot be expanded until this is resolved.";
 export const NO_PC_ERROR =
-  "No Population Criteria is associated with this measure. Please review the Population Criteria tab. " +
-  TEST_CASE_EXECUTION_ERROR;
+  "No Population Criteria is associated with this measure. Please review the Population Criteria tab.";
 export const CQL_ERROR =
-  "An error exists with the measure CQL, please review the CQL Editor tab. " +
-  TEST_CASE_EXECUTION_ERROR;
+  "An error exists with the measure CQL, please review the CQL Editor tab.";
 export const CQL_RETURN_TYPES_MISMATCH_ERROR =
-  "One or more Population Criteria has a mismatch with CQL return types. " +
-  TEST_CASE_EXECUTION_ERROR;
+  "One or more Population Criteria has a mismatch with CQL return types. Please check the population criteria tab to update.";
 export const SDE_RAV_RETURN_TYPES_MISMATCH_ERROR =
-  "Supplemental Data Elements or Risk Adjustment Variables in the Population Criteria section are invalid. Please check and update these values. " +
-  TEST_CASE_EXECUTION_ERROR;
+  "Supplemental Data Elements or Risk Adjustment Variables in the Population Criteria section are invalid. Please check and update these values.";
 
 const TestCaseRoutes = () => {
   const [measureBundle, setMeasureBundle] = useState<Bundle>();
@@ -110,6 +106,9 @@ const TestCaseRoutes = () => {
         ) {
           localErrors.push(SDE_RAV_RETURN_TYPES_MISMATCH_ERROR);
         }
+      }
+      if (localErrors.length > 0) {
+        localErrors.push(TEST_CASE_EXECUTION_ERROR);
       }
       if (measure?.testCaseConfiguration?.executeInvalidTestCases) {
         setCustomWarningMessages([
