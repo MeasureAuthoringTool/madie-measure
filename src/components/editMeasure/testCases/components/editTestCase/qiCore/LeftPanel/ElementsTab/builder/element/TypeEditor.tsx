@@ -164,42 +164,35 @@ const TypeEditor = ({
     switch (type) {
       case "string":
       case "http://hl7.org/fhirpath/System.String":
+        const isArrayMode = showAddAttributeButton && values;
+        const lastIndex = isArrayMode ? values.length - 1 : null;
+
         return (
           <Box sx={{ display: "flex", flexDirection: "column", width: "100%" }}>
-            {showAddAttributeButton && values ? (
-              values.map((el, index) => (
+            {(isArrayMode ? values : [null]).map((el, index) => {
+              const fieldLabel = isArrayMode ? `${label}[${index}]` : label;
+
+              return (
                 <StringComponent
-                  key={index}
+                  key={index} // stable key reference to avoid loss of focus between rerenders.
                   stringOnly={label?.split(".").pop() !== "id"}
-                  label={`${label}[${index}]`}
+                  label={fieldLabel}
                   canEdit={canEdit}
-                  helperText={formikErrorHandler(`${label}[${index}]`)}
-                  error={getNestedProperty(formik.errors, `${label}[${index}]`)}
+                  helperText={formikErrorHandler(fieldLabel)}
+                  error={getNestedProperty(formik.errors, fieldLabel)}
                   fieldRequired={required}
                   showAddAttributeButton={
-                    showAddAttributeButton && index === values.length - 1
+                    showAddAttributeButton &&
+                    (!isArrayMode || index === lastIndex)
                   }
-                  showDeleteButton={index > 0}
+                  showDeleteButton={isArrayMode && index > 0}
                   handleDeleteElement={() => handleDeleteElement(index)}
                   addTitle={addTitle}
                   handleAddElement={handleAddElement}
-                  {...formik.getFieldProps(`${label}[${index}]`)}
+                  {...formik.getFieldProps(fieldLabel)}
                 />
-              ))
-            ) : (
-              <StringComponent
-                stringOnly={label?.split(".").pop() !== "id"}
-                label={label}
-                canEdit={canEdit}
-                helperText={formikErrorHandler(label)}
-                error={getNestedProperty(formik.errors, label)}
-                fieldRequired={required}
-                showAddAttributeButton={showAddAttributeButton}
-                addTitle={addTitle}
-                handleAddElement={handleAddElement}
-                {...formik.getFieldProps(label)}
-              />
-            )}
+              );
+            })}
           </Box>
         );
       case "base64Binary":
