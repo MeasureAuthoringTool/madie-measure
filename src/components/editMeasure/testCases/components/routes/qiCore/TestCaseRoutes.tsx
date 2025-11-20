@@ -38,9 +38,10 @@ export const CQL_ERROR =
   "An error exists with the measure CQL, please review the CQL Editor tab. " +
   TEST_CASE_EXECUTION_ERROR;
 export const CQL_RETURN_TYPES_MISMATCH_ERROR =
-  "One or more Population Criteria has a mismatch with CQL return types. Test Cases cannot be executed until this is resolved.";
+  "One or more Population Criteria has a mismatch with CQL return types. " +
+  TEST_CASE_EXECUTION_ERROR;
 export const SDE_RAV_RETURN_TYPES_MISMATCH_ERROR =
-  "Supplemental Data Elements or Risk Adjustment Variables in the Population Criteria section are invalid. Please check and update these values." +
+  "Supplemental Data Elements or Risk Adjustment Variables in the Population Criteria section are invalid. Please check and update these values. " +
   TEST_CASE_EXECUTION_ERROR;
 
 const TestCaseRoutes = () => {
