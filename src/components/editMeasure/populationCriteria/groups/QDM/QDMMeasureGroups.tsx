@@ -146,6 +146,7 @@ export interface MeasureGroupProps {
   setIsFormDirty?: (value: boolean) => void;
   measureId: string;
   setAlertMessage: Function;
+  alertMessage: string;
   isTestCaseLocked: boolean;
   checkTestCasesLockStatus: Function;
   measureLockedByAnotherUser: boolean;
@@ -413,7 +414,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
     return () => {
       subscription.unsubscribe();
     };
-  }, []);
+  }, [measure]);
   // We want to update layout with a cannot travel flag while this is active
   // setIsFormDirty is used for dirty check while navigating between different groups
   const { updateRouteHandlerState } = routeHandlerStore;
@@ -656,46 +657,31 @@ const MeasureGroups = (props: MeasureGroupProps) => {
 
   // sets alert message when CQL has any errors
   useEffect(() => {
-    props.setAlertMessage(() => ({ ...INITIAL_ALERT_MESSAGE }));
-    if (measure?.cql) {
-      const definitions = new CqlAntlr(measure.cql).parse()
-        .expressionDefinitions;
-      setExpressionDefinitions(definitions);
-    }
-    if (measure && (measure.cqlErrors || !measure?.cql) && !measure?.scoring) {
-      // bad cql and bad base config step
-      props.setAlertMessage(() => ({
-        type: "error",
-        message:
-          "Please complete the CQL Editor process and Base Configuration tab before continuing",
-        canClose: false,
-      }));
-    } else if (measure && (measure.cqlErrors || !measure?.cql)) {
-      // bad cql only
-      props.setAlertMessage(() => ({
-        type: "error",
-        message: "Please complete the CQL Editor process before continuing",
-        canClose: false,
-      }));
-    } else if (!measure?.scoring) {
-      // bad scoring only (added furing base configuration step)
-      props.setAlertMessage(() => ({
-        type: "error",
-        message: "Please complete the Base Configuration tab before continuing",
-        canClose: false,
-      }));
-    } else if (
-      measure &&
-      !!measure?.errors?.includes(
-        MeasureErrorType.MISMATCH_CQL_POPULATION_RETURN_TYPES
-      )
-    ) {
-      props.setAlertMessage(() => ({
-        type: "error",
-        message:
-          "One or more Population Criteria has a mismatch with CQL return types. Test Cases cannot be executed until this is resolved.",
-        canClose: false,
-      }));
+    if (measure) {
+      if (measure.cql) {
+        const definitions = new CqlAntlr(measure.cql).parse()
+          .expressionDefinitions;
+        setExpressionDefinitions(definitions);
+      }
+      if (!props.alertMessage) {
+        if ((!measure?.cql || measure.cqlErrors) && !measure?.scoring) {
+          // bad cql and bad base config step
+          props.setAlertMessage(() => ({
+            type: "error",
+            message:
+              "Please complete the CQL Editor process and Base Configuration tab before continuing",
+            canClose: false,
+          }));
+        } else if (!measure?.scoring) {
+          // bad scoring only (added during base configuration step)
+          props.setAlertMessage(() => ({
+            type: "error",
+            message:
+              "Please complete the Base Configuration tab before continuing",
+            canClose: false,
+          }));
+        }
+      }
     }
   }, [measure]);
 

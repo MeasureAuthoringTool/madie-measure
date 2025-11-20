@@ -4,6 +4,7 @@ import {
   Measure,
   GroupScoring,
   BaseConfigurationTypes,
+  MeasureErrorType,
 } from "@madie/madie-models";
 import {
   measureStore,
@@ -76,6 +77,30 @@ const BaseConfiguration = (props: BaseConfigurationProps) => {
     if (measure && measure.scoring) {
       setCurrentScoring(measure.scoring);
       setCurrentPatientBasis(measure.patientBasis);
+    }
+  }, [measure]);
+
+  useEffect(() => {
+    if (measure) {
+      if (
+        !!measure?.errors?.includes(
+          MeasureErrorType.MISMATCH_CQL_POPULATION_RETURN_TYPES
+        )
+      ) {
+        props.setAlertMessage(() => ({
+          type: "error",
+          message:
+            "One or more Population Criteria has a mismatch with CQL return types. Test Cases cannot be executed until this is resolved.",
+          canClose: false,
+        }));
+      } else if (measure.cqlErrors || !measure?.cql) {
+        // bad cql only
+        props.setAlertMessage(() => ({
+          type: "error",
+          message: "Please complete the CQL Editor process before continuing",
+          canClose: false,
+        }));
+      }
     }
   }, [measure]);
 
