@@ -152,29 +152,20 @@ const TestCaseRoutes = () => {
         contextFailure,
       }}
     >
-      {errors && errors.length > 0 && (
-        <StatusHandler
-          error={true}
-          errorMessages={errors}
-          testDataId="execution_context_loading_errors"
-        />
-      )}
-      {(warnings?.length ||
-        customWarningMessages?.length > 0 ||
-        shiftTestCaseDatesWarnings?.length > 0) && (
-        <>
-          <StatusHandler
-            warning={true}
-            warningMessages={warnings}
-            customWarningMessages={customWarningMessages}
-            shiftTestCaseDatesWarning={shiftTestCaseDatesWarnings}
-            testDataId="execution_context_loading_warning"
-          />
-        </>
-      )}
-      {importWarnings && importWarnings.length > 0 && (
-        <StatusHandler importWarnings={importWarnings} />
-      )}
+      <StatusHandler
+        error={errors?.length > 0}
+        errorMessages={errors}
+        warning={
+          warnings?.length > 0 ||
+          customWarningMessages?.length > 0 ||
+          shiftTestCaseDatesWarnings?.length > 0
+        }
+        warningMessages={warnings}
+        customWarningMessages={customWarningMessages}
+        shiftTestCaseDatesWarning={shiftTestCaseDatesWarnings}
+        importWarnings={importWarnings}
+        testDataId="test-case-alerts"
+      />
       <Routes>
         <Route path="/list-page">
           <Route
