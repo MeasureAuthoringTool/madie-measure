@@ -71,6 +71,7 @@ import applyCQLFunction, {
   editCQLFunction,
 } from "./cqlFunctionApplier";
 import { useParams } from "react-router";
+import MeasureLockedPopup from "../measureLockedPopup/MeasureLockedPopup";
 
 export const mapErrorsToAceAnnotations = (
   errors: ElmTranslationError[]
@@ -150,7 +151,10 @@ const validateCql = (
   }
 };
 
-const MeasureEditor = ({ measureCanEdit }) => {
+const MeasureEditor = ({ measureCanEdit, measureLockedBy }) => {
+  const [lockedMeasurePopupOpen, setLockedMeasurePopupOpen] = useState(
+    measureCanEdit && !measureLockedBy ? false : true
+  );
   useDocumentTitle("MADiE Edit Measure CQL");
   const [measure, setMeasure] = useState<Measure>(measureStore.state);
   const [codeMap, setCodeMap] = useState<Map<string, Code>>(
@@ -169,7 +173,7 @@ const MeasureEditor = ({ measureCanEdit }) => {
       setMeasure(measure);
       validateCql(measure, setToastOpen, setToastMessage);
     });
-    if (featureFlags?.Locking && measureCanEdit) {
+    if (featureFlags?.Locking && measureCanEdit && !measureLockedBy) {
       window.addEventListener("beforeunload", handleUnload);
       measureServiceApi
         .updateMeasureLock(measureId)
@@ -180,12 +184,18 @@ const MeasureEditor = ({ measureCanEdit }) => {
     }
     return () => {
       subscription.unsubscribe();
-      if (featureFlags?.Locking && measureCanEdit) {
+      if (featureFlags?.Locking && measureCanEdit && !measureLockedBy) {
         window.removeEventListener("beforeunload", handleUnload);
         measureServiceApi.unlockMeasure(measureId);
       }
     };
-  }, [measureServiceApi, measureId, featureFlags?.Locking, measureCanEdit]);
+  }, [
+    measureServiceApi,
+    measureId,
+    featureFlags?.Locking,
+    measureCanEdit,
+    measureLockedBy,
+  ]);
 
   const [discardDialogOpen, setDiscardDialogOpen]: [
     boolean,
@@ -878,7 +888,7 @@ const MeasureEditor = ({ measureCanEdit }) => {
               inboundAnnotations={elmAnnotations}
               inboundErrorMarkers={errorMarkers}
               height="calc(100% - 48px)"
-              readOnly={!measureCanEdit}
+              readOnly={!(measureCanEdit && !measureLockedBy)}
               setOutboundAnnotations={setOutboundAnnotations}
               measureStoreCql={measure?.cql}
               cqlMetaData={measure?.measureMetaData?.cqlMetaData}
@@ -909,7 +919,7 @@ const MeasureEditor = ({ measureCanEdit }) => {
 
       <div className="bottom-row">
         <div className="spacer" />
-        {measureCanEdit && (
+        {measureCanEdit && !measureLockedBy && (
           <>
             <Button
               variant="outline"
@@ -958,6 +968,13 @@ const MeasureEditor = ({ measureCanEdit }) => {
         }}
         onClose={() => setDiscardDialogOpen(false)}
       />
+      {measureCanEdit && measureLockedBy && (
+        <MeasureLockedPopup
+          measureLockedBy={measureLockedBy}
+          lockedMeasurePopupOpen={lockedMeasurePopupOpen}
+          setLockedMeasurePopupOpen={setLockedMeasurePopupOpen}
+        />
+      )}
     </>
   );
 };
