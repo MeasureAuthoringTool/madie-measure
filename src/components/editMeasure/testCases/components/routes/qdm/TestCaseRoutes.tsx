@@ -23,7 +23,10 @@ import Expansion from "../../testCaseConfiguration/expansion/Expansion";
 import TestCaseData from "../../testCaseConfiguration/testCaseData/TestCaseData";
 import RAVPage from "../../testCaseConfiguration/rav/RAVPage";
 import ExecutionOptions from "../../testCaseConfiguration/executionOptions/ExecutionOptions";
-import { CQL_RETURN_TYPES_MISMATCH_ERROR } from "../qiCore/TestCaseRoutes";
+import {
+  CQL_RETURN_TYPES_MISMATCH_ERROR,
+  SDE_RAV_RETURN_TYPES_MISMATCH_ERROR,
+} from "../qiCore/TestCaseRoutes";
 
 const TestCaseRoutes = () => {
   const [cqmMeasureErrors, setCqmMeasureErrors] = useState<Array<string>>([]);
@@ -114,12 +117,25 @@ const TestCaseRoutes = () => {
             "No Population Criteria is associated with this measure. Please review the Population Criteria tab."
           );
         }
-        if (
-          measure?.errors?.includes(
-            MeasureErrorType.MISMATCH_CQL_POPULATION_RETURN_TYPES
-          )
-        ) {
-          localErrors.push(CQL_RETURN_TYPES_MISMATCH_ERROR);
+        if (measure?.errors) {
+          if (
+            measure.errors?.includes(
+              MeasureErrorType.MISMATCH_CQL_POPULATION_RETURN_TYPES
+            )
+          ) {
+            localErrors.push(CQL_RETURN_TYPES_MISMATCH_ERROR);
+          }
+
+          if (
+            measure.errors?.includes(
+              MeasureErrorType.MISMATCH_CQL_RISK_ADJUSTMENT
+            ) ||
+            measure.errors.includes(
+              MeasureErrorType.MISMATCH_CQL_SUPPLEMENTAL_DATA
+            )
+          ) {
+            localErrors.push(SDE_RAV_RETURN_TYPES_MISMATCH_ERROR);
+          }
         }
 
         if (
