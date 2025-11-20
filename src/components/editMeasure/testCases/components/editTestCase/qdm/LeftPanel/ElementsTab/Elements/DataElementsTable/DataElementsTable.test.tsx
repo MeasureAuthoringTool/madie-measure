@@ -179,6 +179,42 @@ describe("DataTypeCell", () => {
     render(<DataTypeCell element={dataEl} codeSystemMap={codeSystemMap} />);
     const foundCode = await findByText("DISPLAY: code");
     expect(foundCode).toBeInTheDocument();
+    userEvent.hover(foundCode);
+
+    const tooltip = await screen.findByRole("tooltip");
+    expect(tooltip).toHaveTextContent("Code System Version: version");
+  });
+
+  test("DataType cell renders with a code null version", async () => {
+    const dataEl = new AssessmentPerformed();
+    const testCode = new Code("code", "system", null, "display");
+    const codeSystemMap = {
+      system: "DISPLAY",
+    };
+    dataEl.set("dataElementCodes", [testCode]);
+    render(<DataTypeCell element={dataEl} codeSystemMap={codeSystemMap} />);
+    const foundCode = await findByText("DISPLAY: code");
+    expect(foundCode).toBeInTheDocument();
+    userEvent.hover(foundCode);
+
+    const tooltip = await screen.findByRole("tooltip");
+    expect(tooltip).toHaveTextContent("Code System Version: not available");
+  });
+
+  test("DataType cell renders with a code string null version", async () => {
+    const dataEl = new AssessmentPerformed();
+    const testCode = new Code("code", "system", "null", "display");
+    const codeSystemMap = {
+      system: "DISPLAY",
+    };
+    dataEl.set("dataElementCodes", [testCode]);
+    render(<DataTypeCell element={dataEl} codeSystemMap={codeSystemMap} />);
+    const foundCode = await findByText("DISPLAY: code");
+    expect(foundCode).toBeInTheDocument();
+    userEvent.hover(foundCode);
+
+    const tooltip = await screen.findByRole("tooltip");
+    expect(tooltip).toHaveTextContent("Code System Version: not available");
   });
 });
 

@@ -6,7 +6,6 @@ import getInitialValues, { setMeasureMetadata } from "./MeasureMetadataHelper";
 import {
   measureStore,
   routeHandlerStore,
-  checkUserCanEdit,
   useMeasureServiceApi,
 } from "@madie/madie-util";
 import {
@@ -23,11 +22,11 @@ export interface MeasureMetadataProps {
   header?: string;
   setErrorMessage: Function;
   required?: boolean;
-  measureLockedByAnotherUser: boolean;
+  measureCanEdit: boolean;
 }
 
 export default function MeasureMetadata(props: MeasureMetadataProps) {
-  const { setErrorMessage, required, measureLockedByAnotherUser } = props;
+  const { setErrorMessage, required, measureCanEdit } = props;
   const { measureMetadataId, measureMetadataType, header } = props;
   const typeLower = _.kebabCase(measureMetadataType.toLowerCase());
   const { updateMeasure } = measureStore;
@@ -56,12 +55,6 @@ export default function MeasureMetadata(props: MeasureMetadataProps) {
     setToastOpen(open);
   };
 
-  const canEdit =
-    checkUserCanEdit(
-      measure?.measureSet?.owner,
-      measure?.measureSet?.acls,
-      measure?.measureMetaData?.draft
-    ) && !measureLockedByAnotherUser;
   const formik = useFormik({
     enableReinitialize: true,
     initialValues: { genericField: getInitialValues(measure, typeLower) },
@@ -145,12 +138,12 @@ export default function MeasureMetadata(props: MeasureMetadataProps) {
           label={measureMetadataType}
           setFieldValue={formik.setFieldValue}
           required={required}
-          readOnly={!canEdit}
+          readOnly={!measureCanEdit}
           data-testid={`measure-${_.kebabCase(measureMetadataType)}-input`}
           {...formik.getFieldProps("genericField")}
         />
       </div>
-      {canEdit && (
+      {measureCanEdit && (
         <div className="form-actions">
           <Button
             variant="outline"

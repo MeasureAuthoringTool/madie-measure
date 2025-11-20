@@ -73,13 +73,17 @@ jest.mock("@madie/madie-util", () => ({
   useFeatureFlags: jest.fn(() => ({
     Locking: false,
   })),
-  checkUserCanEdit: jest.fn(() => {
-    return true;
-  }),
 }));
 
 const useMeasureServiceApiMock =
   useMeasureServiceApi as jest.Mock<MeasureServiceApi>;
+
+const defaultProps = {
+  isTestCaseLocked: false,
+  checkTestCasesLockStatus: jest.fn(),
+  setAlertMessage: jest.fn(),
+  measureCanEdit: true,
+};
 
 describe("Base Configuration component", () => {
   const {
@@ -91,7 +95,7 @@ describe("Base Configuration component", () => {
   } = screen;
 
   test("Measure Group Scoring renders to correct options length, and defaults to empty string", async () => {
-    render(<BaseConfiguration />);
+    render(<BaseConfiguration {...defaultProps} />);
 
     const scoringSelectInput = getByTestId(
       "scoring-select-input"
@@ -110,7 +114,7 @@ describe("Base Configuration component", () => {
   });
 
   test("Change of Measure Group Scoring enables Discard button and click Discard resets the form", async () => {
-    render(<BaseConfiguration />);
+    render(<BaseConfiguration {...defaultProps} />);
 
     const scoringSelectInput = getByTestId(
       "scoring-select-input"
@@ -146,8 +150,7 @@ describe("Base Configuration component", () => {
   });
 
   test("Discard change then click Keep Working", async () => {
-    render(<BaseConfiguration />);
-
+    render(<BaseConfiguration {...defaultProps} />);
     const scoringSelectInput = getByTestId(
       "scoring-select-input"
     ) as HTMLInputElement;
@@ -183,7 +186,7 @@ describe("Base Configuration component", () => {
   });
 
   test("Changes to Base Configuration enables Save button and saving successfully displays success message", async () => {
-    render(<BaseConfiguration />);
+    render(<BaseConfiguration {...defaultProps} />);
 
     const scoringSelectInput = getByTestId(
       "scoring-select-input"
@@ -247,7 +250,7 @@ describe("Base Configuration component", () => {
     });
     useMeasureServiceApiMock.mockImplementation(() => mockMeasureServiceApi);
 
-    render(<BaseConfiguration />);
+    render(<BaseConfiguration {...defaultProps} />);
 
     const scoringSelectInput = getByTestId(
       "scoring-select-input"
@@ -313,7 +316,7 @@ describe("Base Configuration component", () => {
       .fn()
       .mockResolvedValue({ status: 200 });
 
-    render(<BaseConfiguration />);
+    render(<BaseConfiguration {...defaultProps} />);
 
     const scoringSelectInput = getByTestId(
       "scoring-select-input"
@@ -397,7 +400,7 @@ describe("Base Configuration component", () => {
   //RangeError: Maximum call stack size exceeded - error only happens with npm test -- --coverage
   //temp skip
   test.skip("click on change scoring warning dialog close button will close the dialog", async () => {
-    render(<BaseConfiguration />);
+    render(<BaseConfiguration {...defaultProps} />);
 
     const scoringSelectInput = getByTestId(
       "scoring-select-input"
@@ -485,7 +488,8 @@ describe("Base Configuration component", () => {
     mockMeasureServiceApi.updateMeasure = jest
       .fn()
       .mockResolvedValue({ status: 200 });
-    render(<BaseConfiguration />);
+
+    render(<BaseConfiguration {...defaultProps} />);
     const scoringSelectInput = getByTestId(
       "scoring-select-input"
     ) as HTMLInputElement;
@@ -571,6 +575,7 @@ describe("Base Configuration component", () => {
         isTestCaseLocked={false}
         checkTestCasesLockStatus={checkTestCasesLockStatusMock}
         setAlertMessage={setAlertMessageMock}
+        measureCanEdit={true}
       />
     );
 
@@ -627,6 +632,7 @@ describe("Base Configuration component", () => {
         isTestCaseLocked={true}
         checkTestCasesLockStatus={jest.fn()}
         setAlertMessage={jest.fn()}
+        measureCanEdit={true}
       />
     );
 

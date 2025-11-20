@@ -10,7 +10,6 @@ import {
   useMeasureServiceApi,
   measureStore,
   routeHandlerStore,
-  checkUserCanEdit,
 } from "@madie/madie-util";
 import { useFormik } from "formik";
 import useFormikResetOnEvent from "../../../common/useFormikResetOnEvent";
@@ -18,11 +17,11 @@ import TextEditor from "../../populationCriteria/groups/TextEditor";
 
 interface TransmissionFormatProps {
   setErrorMessage: Function;
-  measureLockedByAnotherUser: boolean;
+  measureCanEdit: boolean;
 }
 
 const TransmissionFormat = (props: TransmissionFormatProps) => {
-  const { setErrorMessage, measureLockedByAnotherUser } = props;
+  const { setErrorMessage, measureCanEdit } = props;
   const measureServiceApi = useMeasureServiceApi();
   const { updateMeasure } = measureStore;
   const [measure, setMeasure] = useState<any>(measureStore.state);
@@ -47,12 +46,6 @@ const TransmissionFormat = (props: TransmissionFormatProps) => {
     setToastOpen(open);
   };
   // Form utilities
-  const canEdit =
-    checkUserCanEdit(
-      measure?.measureSet?.owner,
-      measure?.measureSet?.acls,
-      measure?.measureMetaData?.draft
-    ) && !measureLockedByAnotherUser;
   const INITIAL_VALUES = {
     transmissionFormat: measure?.measureMetaData?.transmissionFormat || "",
   };
@@ -126,7 +119,7 @@ const TransmissionFormat = (props: TransmissionFormatProps) => {
             <TextEditor
               label="Description"
               setFieldValue={formik.setFieldValue}
-              readOnly={!canEdit}
+              readOnly={!measureCanEdit}
               error={
                 formik.touched.transmissionFormat &&
                 Boolean(formik.errors.transmissionFormat)

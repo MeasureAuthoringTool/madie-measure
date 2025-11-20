@@ -445,6 +445,7 @@ const CopyTestCaseDialog = ({ open, onClose, measure, selectedTestCases }) => {
       )
       .then((result) => {
         if (
+          // All copied successfully
           result?.copiedTestCases?.length ===
           selectedTestCases?.map((tc: TestCase) => tc.id).length
         ) {
@@ -454,18 +455,46 @@ const CopyTestCaseDialog = ({ open, onClose, measure, selectedTestCases }) => {
                 "success"
               )
             : onClose("Test Cases have been successfully copied.", "success");
-        } else if (result?.copiedTestCases?.length > 0) {
-          result.didClearExpectedValues
-            ? onClose(
-                "Test Cases have been successfully copied without expected values due to differing Population Criteria on target Measure. Some Test Cases could not be copied.",
-                "warning"
-              )
-            : onClose(
-                "Test Cases have been successfully copied. Some Test Cases could not be copied.",
-                "warning"
-              );
         } else {
-          onClose("Test Cases could not copied.", "danger");
+          const failedTestCases: string[] = result?.failedTestCases?.map((tc) =>
+            !tc.series ? tc.title : tc.title + " - " + tc.series
+          );
+          // Partial copy success
+          if (result?.copiedTestCases?.length > 0) {
+            if (result.didClearExpectedValues) {
+              failedTestCases?.length > 0
+                ? onClose(
+                    `${result.copiedTestCases.length} test cases have been successfully copied without expected values due to differing Population Criteria on target Measure. The following ${failedTestCases.length} test cases could not be copied because the test cases are duplicates and the title is too long to copy.`,
+                    null,
+                    failedTestCases
+                  )
+                : onClose(
+                    "Test Cases have been successfully copied without expected values due to differing Population Criteria on target Measure. Some Test Cases could not be copied.",
+                    "warning"
+                  );
+            } else {
+              failedTestCases?.length > 0
+                ? onClose(
+                    `${result.copiedTestCases.length} test cases were copied successfully. The following ${failedTestCases.length} test cases could not be copied because the test cases are duplicates and the title is too long to copy.`,
+                    null,
+                    failedTestCases
+                  )
+                : onClose(
+                    "Test Cases have been successfully copied. Some Test Cases could not be copied.",
+                    "warning"
+                  );
+            }
+            // All failed
+          } else {
+            // one or more failed due to new test case name exceeding max length of 250.
+            failedTestCases?.length > 0
+              ? onClose(
+                  `0 test cases were copied successfully. The following ${failedTestCases.length} test cases could not be copied because the test cases are duplicates and the title is too long to copy.`,
+                  null,
+                  failedTestCases
+                )
+              : onClose("Test Cases could not be copied.", "danger");
+          }
         }
       })
       .catch((e) => {

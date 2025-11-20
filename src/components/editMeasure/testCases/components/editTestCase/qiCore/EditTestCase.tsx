@@ -252,10 +252,9 @@ const EditTestCase = (props: EditTestCaseProps) => {
   const [calculationDialogOpen, setCalculationDialogOpen] = useState(false);
   const { updateMeasure } = measureStore;
 
-  const canEdit = checkUserCanEdit(
-    measure?.measureSet?.owner,
-    measure?.measureSet?.acls
-  );
+  const canEdit =
+    checkUserCanEdit(measure?.measureSet?.owner, measure?.measureSet?.acls) &&
+    !(featureFlags.Locking && testCase?.testCaseLock);
 
   const formik = useFormik({
     initialValues: { ...INITIAL_VALUES },
@@ -1396,6 +1395,12 @@ const EditTestCase = (props: EditTestCaseProps) => {
                     !!measure?.cqlErrors ||
                     measure?.errors?.includes(
                       MeasureErrorType.MISMATCH_CQL_POPULATION_RETURN_TYPES
+                    ) ||
+                    measure?.errors?.includes(
+                      MeasureErrorType.MISMATCH_CQL_RISK_ADJUSTMENT
+                    ) ||
+                    measure?.errors?.includes(
+                      MeasureErrorType.MISMATCH_CQL_SUPPLEMENTAL_DATA
                     ) ||
                     _.isNil(measure?.groups) ||
                     measure?.groups.length === 0 ||

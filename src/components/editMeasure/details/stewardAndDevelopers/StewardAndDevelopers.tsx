@@ -10,7 +10,6 @@ import {
 import {
   measureStore,
   routeHandlerStore,
-  checkUserCanEdit,
   useMeasureServiceApi,
 } from "@madie/madie-util";
 import { useFormik } from "formik";
@@ -19,21 +18,17 @@ import * as Yup from "yup";
 import { Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import { Organization } from "@madie/madie-models";
-import CheckBoxIcon from "@mui/icons-material/CheckBox";
-import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
 import MultipleSelectDropDown from "../../populationCriteria/MultipleSelectDropDown";
 
 const asterisk = { color: "#D92F2F", marginRight: 3 };
-const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
-const checkedIcon = <CheckBoxIcon fontSize="small" />;
 // Need to have a "-" as placeholder if nothing is selected, but it doesn't have to be an option
 // Need to have 2 diff sizes of buttons
 interface StewardAndDevelopersProps {
   setErrorMessage: Function;
-  measureLockedByAnotherUser: boolean;
+  measureCanEdit: boolean;
 }
 export default function StewardAndDevelopers(props: StewardAndDevelopersProps) {
-  const { setErrorMessage, measureLockedByAnotherUser } = props;
+  const { setErrorMessage, measureCanEdit } = props;
   const measureServiceApi = useMeasureServiceApi();
   const [organizations, setOrganizations] = useState<Organization[]>();
   const [measure, setMeasure] = useState<any>(measureStore.state);
@@ -54,12 +49,6 @@ export default function StewardAndDevelopers(props: StewardAndDevelopersProps) {
     setToastOpen(open);
   };
 
-  const canEdit =
-    checkUserCanEdit(
-      measure?.measureSet?.owner,
-      measure?.measureSet?.acls,
-      measure?.measureMetaData?.draft
-    ) && !measureLockedByAnotherUser;
   const formik = useFormik({
     enableReinitialize: true,
     initialValues: {
@@ -179,7 +168,7 @@ export default function StewardAndDevelopers(props: StewardAndDevelopersProps) {
                 label="Steward"
                 placeholder="-"
                 required={true}
-                readOnly={!canEdit}
+                readOnly={!measureCanEdit}
                 error={formik.touched.steward && formik.errors["steward"]}
                 helperText={formik.touched.steward && formik.errors["steward"]}
                 options={organizations.map((element) => element.name)}
@@ -200,7 +189,7 @@ export default function StewardAndDevelopers(props: StewardAndDevelopersProps) {
                 placeHolder="-"
                 defaultValue={formik.values.developers}
                 required={true}
-                readOnly={!canEdit}
+                readOnly={!measureCanEdit}
                 error={
                   formik.touched.developers && Boolean(formik.errors.developers)
                 }
@@ -217,7 +206,7 @@ export default function StewardAndDevelopers(props: StewardAndDevelopersProps) {
           </>
         )}
       </div>
-      {canEdit && (
+      {measureCanEdit && (
         <div className="form-actions">
           <Button
             variant="outline"
