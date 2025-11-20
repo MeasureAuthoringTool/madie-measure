@@ -70,7 +70,7 @@ describe("PopulationCriteriaWrapper", () => {
       </MemoryRouter>
     );
 
-    const message = screen.getByTestId("measure-locked-popup-message");
+    const message = screen.getByTestId("measure-locked-modal-message");
     expect(message).toHaveTextContent(
       /This measure is currently edited by HARP ID/i
     );

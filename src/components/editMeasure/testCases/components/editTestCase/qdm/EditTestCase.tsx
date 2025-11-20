@@ -44,6 +44,7 @@ import {
 } from "../../../util/cqlCoverageBuilder/CqlCoverageBuilder";
 import checkSpecialCharacters from "../../../util/checkSpecialCharacters";
 import { GroupPopulation } from "@madie/madie-models/dist/TestCase";
+import LockedMessageModal from "../../../../../common/lockedMessageModal/LockedMessageModal";
 
 const EditTestCase = () => {
   useDocumentTitle("MADiE Edit Measure Edit Test Case");
@@ -137,6 +138,11 @@ const EditTestCase = () => {
         .getTestCase(id, measureId, false)
         .then((tc: TestCase) => {
           const nextTc = _.cloneDeep(tc);
+          setLockedModalOpen(
+            canEdit && featureFlags.Locking && nextTc.testCaseLock
+              ? true
+              : false
+          );
           if (measure?.groups) {
             nextTc.groupPopulations = measure.groups?.map((group) => {
               const existingTestCasePC = tc.groupPopulations?.find(
@@ -192,6 +198,13 @@ const EditTestCase = () => {
 
   const testCaseCanEdit =
     canEdit && !(featureFlags?.Locking && currentTestCase?.testCaseLock);
+  const testCaseLockedBy: string =
+    featureFlags?.Locking && currentTestCase?.testCaseLock
+      ? currentTestCase?.testCaseLock?.lockedBy
+      : undefined;
+  const [lockedModalOpen, setLockedModalOpen] = useState(
+    canEdit && testCaseLockedBy ? true : false
+  );
 
   const handleSubmit = async (testCase: TestCase) => {
     testCase.title = sanitizeUserInput(testCase.title);
@@ -465,6 +478,14 @@ const EditTestCase = () => {
         onClose={() => setDiscardDialogOpen(false)}
         onContinue={discardChanges}
       />
+      {canEdit && testCaseLockedBy && (
+        <LockedMessageModal
+          lockedType={"test case"}
+          lockedBy={testCaseLockedBy}
+          lockedModalOpen={lockedModalOpen}
+          setLockedModalOpen={setLockedModalOpen}
+        />
+      )}
     </>
   );
 };

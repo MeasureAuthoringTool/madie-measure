@@ -1328,13 +1328,13 @@ describe("Measure Editor - measure locked", () => {
     );
 
     await waitFor(() => {
-      const message = screen.getByTestId("measure-locked-popup-message");
+      const message = screen.getByTestId("measure-locked-modal-message");
       expect(message).toHaveTextContent(
         /This measure is currently edited by HARP ID/i
       );
       expect(message).toHaveTextContent("testuser@example.com");
       expect(message).toHaveTextContent(
-        "You will be unable to make changes until the measure has been saved."
+        "You will be unable to make changes at this time."
       );
     });
   });
