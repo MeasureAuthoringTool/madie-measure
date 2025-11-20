@@ -7,6 +7,15 @@ import queryString from "query-string";
 import * as _ from "lodash";
 import { SortingState } from "@tanstack/react-table";
 
+export const decorateWithExecutionStatus = (testCases: TestCase[]) => {
+  testCases.forEach((testCase: any) => {
+    if (!testCase.executionStatus) {
+      testCase.executionStatus = testCase.validResource ? "NA" : "Invalid";
+    }
+  });
+  return testCases;
+};
+
 export const customSort = (a: string, b: string) => {
   if (a === null || a === undefined || a === "") {
     return 1;
@@ -285,12 +294,7 @@ function UseFetchTestCases({ measureId, setErrors }) {
     setLoadingState({ loading: false, message: "" });
   };
   const insertTestCases = (newTestCases: TestCase[]) => {
-    newTestCases.forEach((testCase: any) => {
-      // if there's no execution status, and it's an invalid resource, set it to invalid so execution will run on it.
-      if (!testCase.executionStatus) {
-        testCase.executionStatus = testCase.validResource ? "NA" : "Invalid";
-      }
-    });
+    decorateWithExecutionStatus(newTestCases);
     setLoadingState({ loading: true, message: "Adding Test Case" });
     const updatedTestCases = [...newTestCases, ...testCases];
     setTestCases(updatedTestCases);

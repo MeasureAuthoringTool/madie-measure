@@ -4,6 +4,7 @@ import { MemoryRouter } from "react-router";
 import UseFetchTestCases, {
   buildTestCaseUrl,
   sortFilteredTestCases,
+  decorateWithExecutionStatus,
 } from "./UseTestCases";
 import useTestCaseServiceApi, {
   TestCaseServiceApi,
@@ -399,5 +400,45 @@ describe("buildTestCaseUrl", () => {
       limit: ["All"],
     });
     expect(url).toBe("?filter=Title&search=searchTerm1&page=5&limit=All");
+  });
+
+  it("Should handle decoration with wexecution status", () => {
+    const newTestCases = [
+      // !executionStatus, valid false
+      {
+        id: "3",
+        description: "Invalid test case",
+        title: "WhenJsonIsInvalid",
+        series: "IPP-Fail",
+        lastModifiedAt: "2024-09-10T08:49:16.382Z",
+        validResource: false,
+        json: "{}",
+      },
+      // !executionStatus, valid true
+      {
+        id: "4",
+        description: "noExecutionStatus valid true",
+        title: "WhenJsonIsInvalid",
+        series: "IPP-Fail",
+        lastModifiedAt: "2024-09-10T08:49:16.382Z",
+        validResource: true,
+        json: "{}",
+      },
+      // executionStatus
+      {
+        id: "4",
+        description: "noExecutionStatus valid true",
+        title: "WhenJsonIsInvalid",
+        series: "IPP-Fail",
+        lastModifiedAt: "2024-09-10T08:49:16.382Z",
+        validResource: true,
+        executionStatus: "fail",
+        json: "{}",
+      },
+    ] as TestCase[];
+    const result = decorateWithExecutionStatus(newTestCases);
+    expect(result[0].executionStatus).toBe("Invalid");
+    expect(result[1].executionStatus).toBe("NA");
+    expect(result[2].executionStatus).toBe("fail");
   });
 });
