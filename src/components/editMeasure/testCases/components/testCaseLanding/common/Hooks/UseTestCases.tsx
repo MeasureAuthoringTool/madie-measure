@@ -7,6 +7,15 @@ import queryString from "query-string";
 import * as _ from "lodash";
 import { SortingState } from "@tanstack/react-table";
 
+export const decorateWithExecutionStatus = (testCases: TestCase[]) => {
+  testCases.forEach((testCase: any) => {
+    if (!testCase.executionStatus) {
+      testCase.executionStatus = testCase.validResource ? "NA" : "Invalid";
+    }
+  });
+  return testCases;
+};
+
 export const customSort = (a: string, b: string) => {
   if (a === null || a === undefined || a === "") {
     return 1;
@@ -204,6 +213,7 @@ function UseFetchTestCases({ measureId, setErrors }) {
         const canGoNext = (() => {
           return curPage < count;
         })();
+        setSortedTestCases(sortedTestCases);
         setTestCasePage({
           totalItems: filteredTestCases.length,
           visibleItems: currentSlice.length,
@@ -224,6 +234,7 @@ function UseFetchTestCases({ measureId, setErrors }) {
         const canGoNext = (() => {
           return curPage < count;
         })();
+        setSortedTestCases(sortedTestCases);
         setTestCasePage({
           totalItems: testCases.length,
           visibleItems: currentSlice.length,
@@ -239,15 +250,7 @@ function UseFetchTestCases({ measureId, setErrors }) {
         });
       }
     }
-  }, [
-    testCases,
-    sortedTestCases,
-    curPage,
-    curLimit,
-    filter,
-    searchQuery,
-    sorting,
-  ]);
+  }, [testCases, curPage, curLimit, filter, searchQuery, sorting]);
   useEffect(() => {
     getTestCasePage();
   }, [getTestCasePage]);
@@ -291,6 +294,7 @@ function UseFetchTestCases({ measureId, setErrors }) {
     setLoadingState({ loading: false, message: "" });
   };
   const insertTestCases = (newTestCases: TestCase[]) => {
+    decorateWithExecutionStatus(newTestCases);
     setLoadingState({ loading: true, message: "Adding Test Case" });
     const updatedTestCases = [...newTestCases, ...testCases];
     setTestCases(updatedTestCases);
