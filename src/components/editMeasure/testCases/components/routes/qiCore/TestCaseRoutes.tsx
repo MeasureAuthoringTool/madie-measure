@@ -30,6 +30,8 @@ import ExecutionOptions from "../../testCaseConfiguration/executionOptions/Execu
 
 export const CQL_RETURN_TYPES_MISMATCH_ERROR =
   "One or more Population Criteria has a mismatch with CQL return types. Test Cases cannot be executed until this is resolved.";
+export const SDE_RAV_RETURN_TYPES_MISMATCH_ERROR =
+  "Supplemental Data Elements or Risk Adjustment Variables in the Population Criteria section are invalid. Please check and update these values. Test cases will not execute until this issue is resolved.";
 
 const TestCaseRoutes = () => {
   const [measureBundle, setMeasureBundle] = useState<Bundle>();
@@ -82,12 +84,25 @@ const TestCaseRoutes = () => {
         );
       }
 
-      if (
-        measure?.errors?.includes(
-          MeasureErrorType.MISMATCH_CQL_POPULATION_RETURN_TYPES
-        )
-      ) {
-        localErrors.push(CQL_RETURN_TYPES_MISMATCH_ERROR);
+      if (measure?.errors) {
+        if (
+          measure.errors?.includes(
+            MeasureErrorType.MISMATCH_CQL_POPULATION_RETURN_TYPES
+          )
+        ) {
+          localErrors.push(CQL_RETURN_TYPES_MISMATCH_ERROR);
+        }
+
+        if (
+          measure.errors?.includes(
+            MeasureErrorType.MISMATCH_CQL_RISK_ADJUSTMENT
+          ) ||
+          measure.errors.includes(
+            MeasureErrorType.MISMATCH_CQL_SUPPLEMENTAL_DATA
+          )
+        ) {
+          localErrors.push(SDE_RAV_RETURN_TYPES_MISMATCH_ERROR);
+        }
       }
       if (measure?.testCaseConfiguration?.executeInvalidTestCases) {
         setCustomWarningMessages([
@@ -152,29 +167,20 @@ const TestCaseRoutes = () => {
         contextFailure,
       }}
     >
-      {errors && errors.length > 0 && (
-        <StatusHandler
-          error={true}
-          errorMessages={errors}
-          testDataId="execution_context_loading_errors"
-        />
-      )}
-      {(warnings?.length ||
-        customWarningMessages?.length > 0 ||
-        shiftTestCaseDatesWarnings?.length > 0) && (
-        <>
-          <StatusHandler
-            warning={true}
-            warningMessages={warnings}
-            customWarningMessages={customWarningMessages}
-            shiftTestCaseDatesWarning={shiftTestCaseDatesWarnings}
-            testDataId="execution_context_loading_warning"
-          />
-        </>
-      )}
-      {importWarnings && importWarnings.length > 0 && (
-        <StatusHandler importWarnings={importWarnings} />
-      )}
+      <StatusHandler
+        error={errors?.length > 0}
+        errorMessages={errors}
+        warning={
+          warnings?.length > 0 ||
+          customWarningMessages?.length > 0 ||
+          shiftTestCaseDatesWarnings?.length > 0
+        }
+        warningMessages={warnings}
+        customWarningMessages={customWarningMessages}
+        shiftTestCaseDatesWarning={shiftTestCaseDatesWarnings}
+        importWarnings={importWarnings}
+        testDataId="test-case-alerts"
+      />
       <Routes>
         <Route path="/list-page">
           <Route
