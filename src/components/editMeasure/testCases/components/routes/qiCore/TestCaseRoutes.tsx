@@ -28,10 +28,20 @@ import Expansion from "../../testCaseConfiguration/expansion/Expansion";
 import RAVPage from "../../testCaseConfiguration/rav/RAVPage";
 import ExecutionOptions from "../../testCaseConfiguration/executionOptions/ExecutionOptions";
 
+// error messages
+export const TEST_CASE_EXECUTION_ERROR =
+  "Test Cases cannot be executed and Valuesets from the measure CQL cannot be expanded until this is resolved.";
+export const NO_PC_ERROR =
+  "No Population Criteria is associated with this measure. Please review the Population Criteria tab. " +
+  TEST_CASE_EXECUTION_ERROR;
+export const CQL_ERROR =
+  "An error exists with the measure CQL, please review the CQL Editor tab. " +
+  TEST_CASE_EXECUTION_ERROR;
 export const CQL_RETURN_TYPES_MISMATCH_ERROR =
   "One or more Population Criteria has a mismatch with CQL return types. Test Cases cannot be executed until this is resolved.";
 export const SDE_RAV_RETURN_TYPES_MISMATCH_ERROR =
-  "Supplemental Data Elements or Risk Adjustment Variables in the Population Criteria section are invalid. Please check and update these values. Test cases will not execute until this issue is resolved.";
+  "Supplemental Data Elements or Risk Adjustment Variables in the Population Criteria section are invalid. Please check and update these values." +
+  TEST_CASE_EXECUTION_ERROR;
 
 const TestCaseRoutes = () => {
   const [measureBundle, setMeasureBundle] = useState<Bundle>();
@@ -74,14 +84,10 @@ const TestCaseRoutes = () => {
       }
       setLastMeasure(compareTo);
       if (measure.cqlErrors || !measure.elmJson) {
-        localErrors.push(
-          "An error exists with the measure CQL, please review the CQL Editor tab."
-        );
+        localErrors.push(CQL_ERROR);
       }
       if (!measure?.groups?.length) {
-        localErrors.push(
-          "No Population Criteria is associated with this measure. Please review the Population Criteria tab."
-        );
+        localErrors.push(NO_PC_ERROR);
       }
 
       if (measure?.errors) {
