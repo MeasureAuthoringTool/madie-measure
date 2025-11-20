@@ -30,6 +30,8 @@ import ExecutionOptions from "../../testCaseConfiguration/executionOptions/Execu
 
 export const CQL_RETURN_TYPES_MISMATCH_ERROR =
   "One or more Population Criteria has a mismatch with CQL return types. Test Cases cannot be executed until this is resolved.";
+export const SDE_RAV_RETURN_TYPES_MISMATCH_ERROR =
+  "Supplemental Data Elements or Risk Adjustment Variables in the Population Criteria section are invalid. Please check and update these values. Test cases will not execute until this issue is resolved.";
 
 const TestCaseRoutes = () => {
   const [measureBundle, setMeasureBundle] = useState<Bundle>();
@@ -82,12 +84,25 @@ const TestCaseRoutes = () => {
         );
       }
 
-      if (
-        measure?.errors?.includes(
-          MeasureErrorType.MISMATCH_CQL_POPULATION_RETURN_TYPES
-        )
-      ) {
-        localErrors.push(CQL_RETURN_TYPES_MISMATCH_ERROR);
+      if (measure?.errors) {
+        if (
+          measure.errors?.includes(
+            MeasureErrorType.MISMATCH_CQL_POPULATION_RETURN_TYPES
+          )
+        ) {
+          localErrors.push(CQL_RETURN_TYPES_MISMATCH_ERROR);
+        }
+
+        if (
+          measure.errors?.includes(
+            MeasureErrorType.MISMATCH_CQL_RISK_ADJUSTMENT
+          ) ||
+          measure.errors.includes(
+            MeasureErrorType.MISMATCH_CQL_SUPPLEMENTAL_DATA
+          )
+        ) {
+          localErrors.push(SDE_RAV_RETURN_TYPES_MISMATCH_ERROR);
+        }
       }
       if (measure?.testCaseConfiguration?.executeInvalidTestCases) {
         setCustomWarningMessages([
