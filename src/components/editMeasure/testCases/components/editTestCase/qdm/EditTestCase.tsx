@@ -452,13 +452,13 @@ const EditTestCase = () => {
               variant="cyan"
               type="submit"
               data-testid="edit-test-case-save-button"
-              disabled={!(formik.dirty && formik.isValid) || !canEdit}
+              disabled={!(formik.dirty && formik.isValid) || !testCaseCanEdit}
             >
               Save
             </Button>
             <Button
               variant="outline-filled"
-              disabled={!formik.dirty || !canEdit}
+              disabled={!formik.dirty || !testCaseCanEdit}
               onClick={() => setDiscardDialogOpen(true)}
             >
               Discard Changes
