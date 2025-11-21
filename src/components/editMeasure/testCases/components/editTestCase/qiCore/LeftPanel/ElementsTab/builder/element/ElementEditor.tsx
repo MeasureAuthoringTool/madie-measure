@@ -26,7 +26,11 @@ import {
   ResourceActionType,
 } from "../../../../../../../util/QiCorePatientProvider";
 import { useFormikContext } from "formik";
-import { Button, Toast } from "@madie/madie-design-system/dist/react";
+import {
+  Button,
+  Toast,
+  MadieSpinner,
+} from "@madie/madie-design-system/dist/react";
 import useFormikResetOnEvent from "../../../../../../../../../common/useFormikResetOnEvent";
 import { RequiredFieldsProvider } from "./RequiredFieldsContext";
 
@@ -58,6 +62,7 @@ export function simplifySnapshotElements(data) {
       id: details.id,
       label: details.label,
       type: details.type,
+      binding: details.binding,
       required: details.required,
       canBeMultipleCardinality: details.max === "*",
       max: details.max,
@@ -153,6 +158,7 @@ const ElementEditor = ({
       const canBeMultipleCardinality = child?.max === "*";
       const builtNode = {
         id: child?.id,
+        binding: child?.binding,
         value,
         type: child?.type,
         required,
@@ -173,6 +179,7 @@ const ElementEditor = ({
 
       const builtNode = {
         id: child?.id,
+        binding: child?.binding,
         value,
         type: child?.type,
         required,
@@ -350,6 +357,10 @@ const ElementEditor = ({
       </RequiredFieldsProvider>
     );
   }
-  return <div />;
+  return (
+    <div id="madie-tcbuilder-container">
+      <MadieSpinner className="madie-spinner" />
+    </div>
+  );
 };
 export default ElementEditor;
