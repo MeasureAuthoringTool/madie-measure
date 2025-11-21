@@ -1978,6 +1978,69 @@ describe("EditTestCase component", () => {
       expect(debugOutput);
     });
 
+    it("should display an error when test case update fails due to test case locked", async () => {
+      const testCase = {
+        id: "1234",
+        title: "Original Title",
+        createdBy: MEASURE_CREATEDBY,
+        description: "Test IPP",
+        json: `{"test":"test"}`,
+      } as TestCase;
+      const modifiedDescription = "modified description";
+      mockedAxios.get.mockClear().mockImplementation((args) => {
+        if (args && args.endsWith("series")) {
+          return Promise.resolve({ data: ["SeriesA"] });
+        } else if (args && args.endsWith("resources")) {
+          return Promise.resolve({
+            data: [...resourceIdentifiers],
+          });
+        }
+        return Promise.resolve({ data: testCase });
+      });
+
+      renderWithRouter(
+        ["/measures/m1234/edit/test-cases/1234"],
+        "/measures/:measureId/edit/test-cases/:id"
+      );
+
+      const axiosError: AxiosError = {
+        response: {
+          status: 423,
+          data: {
+            message:
+              "Unable to update Test Case. Test Case is locked by: another.user",
+          },
+        } as AxiosResponse,
+        toJSON: jest.fn(),
+      } as unknown as AxiosError;
+
+      mockedAxios.put.mockClear().mockRejectedValue(axiosError);
+
+      userEvent.click(screen.getByTestId("details-tab"));
+      await waitFor(() => {
+        expect(
+          screen.getByRole("button", { name: "Save" })
+        ).toBeInTheDocument();
+      });
+
+      const descriptionInput = screen.getByTestId("test-case-description");
+      expect(descriptionInput).toHaveTextContent(testCase.description);
+      userEvent.type(
+        descriptionInput,
+        `{selectall}{del}${modifiedDescription}`
+      );
+
+      await waitFor(() => {
+        expect(descriptionInput).toHaveTextContent(modifiedDescription);
+      });
+      userEvent.click(screen.getByRole("button", { name: "Save" }));
+
+      const debugOutput = await screen.findByText(
+        "Unable to update Test Case. Test Case is locked by: another.user"
+      );
+      expect(debugOutput);
+    });
+
     it("should display an error when test case update returns no data", async () => {
       const testCase = {
         id: "1234",

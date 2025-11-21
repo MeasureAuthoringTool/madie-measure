@@ -6,7 +6,11 @@ import {
   routeHandlerStore,
   useFeatureFlags,
 } from "@madie/madie-util";
-import { TestCase, MeasureErrorType } from "@madie/madie-models";
+import {
+  TestCase,
+  MeasureErrorType,
+  TestCaseLockInfo,
+} from "@madie/madie-models";
 import "../qiCore/EditTestCase.scss";
 import {
   Button,
@@ -224,6 +228,14 @@ const EditTestCase = () => {
       updateMeasureStore(updatedTestCase);
       showToast("Test Case Updated Successfully", "success");
     } catch (error) {
+      if (featureFlags.Locking && error.message.includes("is locked by:")) {
+        const splitted = error.message.trim().split(" ");
+        const lockedBy = splitted[splitted.length - 1];
+        setCurrentTestCase({
+          ...currentTestCase,
+          testCaseLock: { lockedBy: lockedBy } as unknown as TestCaseLockInfo,
+        });
+      }
       if (error instanceof MadieError) {
         showToast(
           `Error updating Test Case "${measure.measureName}": ${error.message}`,

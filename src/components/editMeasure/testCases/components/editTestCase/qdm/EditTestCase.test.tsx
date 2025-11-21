@@ -211,6 +211,21 @@ const useTestCaseServiceMockRejected = {
   lockTestCase: jest.fn().mockRejectedValueOnce(lockInfo),
   unLockTestCase: jest.fn().mockRejectedValueOnce(lockInfo),
 } as unknown as TestCaseServiceApi;
+const useTestCaseServiceMockRejected423 = {
+  getTestCase: jest.fn().mockResolvedValue(testCase),
+  getTestCaseSeriesForMeasure: jest
+    .fn()
+    .mockResolvedValue(["Series 1", "Series 2"]),
+  updateTestCase: jest
+    .fn()
+    .mockRejectedValueOnce(
+      new MadieError(
+        "Unable to update Test Case. Test Case is locked by: anotherUser"
+      )
+    ),
+  lockTestCase: jest.fn().mockRejectedValueOnce(lockInfo),
+  unLockTestCase: jest.fn().mockRejectedValueOnce(lockInfo),
+} as unknown as TestCaseServiceApi;
 const nonUniqNameData: MadieError = new MadieError("Error Msg");
 
 const useTestCaseServiceMockRejectedNonUniqueName = {
@@ -840,6 +855,46 @@ describe("EditTestCase QDM Component", () => {
         userEvent.click(closeToastBtn);
         expect(
           screen.queryByText("Error updating Test Case")
+        ).not.toBeInTheDocument();
+      },
+      { timeout: 1500 }
+    );
+  });
+
+  it("test update test case fails with failure toast for test case locked", async () => {
+    testCase.json = JSON.stringify(testCaseJson);
+    useTestCaseServiceMock.mockImplementation(() => {
+      return useTestCaseServiceMockRejected423;
+    });
+    await renderEditTestCaseComponent();
+    const saveTestCaseButton = screen.getByRole("button", {
+      name: "Save",
+    });
+
+    expect(saveTestCaseButton).toBeInTheDocument();
+    const raceSelector = screen.getByRole("combobox", { name: "Race" });
+    expect(raceSelector).toHaveTextContent("Select a Race");
+    // change the race
+    userEvent.click(raceSelector);
+    const raceOptions = await screen.findAllByRole("option");
+    expect(raceOptions.length).toBe(4);
+    userEvent.click(raceOptions[3]);
+    expect(raceSelector).toHaveTextContent("White");
+
+    expect(saveTestCaseButton).toBeEnabled();
+    userEvent.click(saveTestCaseButton);
+
+    await waitFor(
+      () => {
+        expect(screen.getByTestId("error-toast")).toHaveTextContent(
+          "Unable to update Test Case. Test Case is locked by: anotherUser"
+        );
+        const closeToastBtn = screen.getByTestId("close-toast-button");
+        userEvent.click(closeToastBtn);
+        expect(
+          screen.queryByText(
+            "Unable to update Test Case. Test Case is locked by: anotherUser"
+          )
         ).not.toBeInTheDocument();
       },
       { timeout: 1500 }
