@@ -62,6 +62,7 @@ export function simplifySnapshotElements(data) {
       id: details.id,
       label: details.label,
       type: details.type,
+      binding: details.binding,
       required: details.required,
       canBeMultipleCardinality: details.max === "*",
       max: details.max,
@@ -157,6 +158,7 @@ const ElementEditor = ({
       const canBeMultipleCardinality = child?.max === "*";
       const builtNode = {
         id: child?.id,
+        binding: child?.binding,
         value,
         type: child?.type,
         required,
@@ -177,6 +179,7 @@ const ElementEditor = ({
 
       const builtNode = {
         id: child?.id,
+        binding: child?.binding,
         value,
         type: child?.type,
         required,
