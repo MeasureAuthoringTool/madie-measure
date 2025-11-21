@@ -901,6 +901,52 @@ describe("EditTestCase QDM Component", () => {
     );
   });
 
+  it("Should display failed update toast due to a lock", async () => {
+    testCase.json = JSON.stringify(testCaseJson);
+
+    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
+      applyDefaults: mockApplyDefaults,
+      Locking: true,
+    }));
+
+    useTestCaseServiceMock.mockImplementation(() => {
+      return {
+        ...useTestCaseServiceMockResolved,
+        updateTestCase: jest.fn().mockRejectedValueOnce({
+          message:
+            "Unable to update Test Case. Test Case is locked by: another.user",
+        }),
+      } as unknown as TestCaseServiceApi;
+    });
+
+    await waitFor(() => renderEditTestCaseComponent());
+
+    const raceSelector = screen.getByRole("combobox", { name: "Race" });
+    userEvent.click(raceSelector);
+    const raceOptions = await screen.findAllByRole("option");
+    userEvent.click(raceOptions[3]);
+
+    const saveButton = screen.getByRole("button", { name: "Save" });
+    expect(saveButton).toBeEnabled();
+    userEvent.click(saveButton);
+
+    await waitFor(
+      () => {
+        expect(screen.getByTestId("error-toast")).toHaveTextContent(
+          "Unable to update Test Case. Test Case is locked by: another.user"
+        );
+        const closeToastBtn = screen.getByTestId("close-toast-button");
+        userEvent.click(closeToastBtn);
+        expect(
+          screen.queryByText(
+            "Unable to update Test Case. Test Case is locked by: another.user"
+          )
+        ).not.toBeInTheDocument();
+      },
+      { timeout: 1500 }
+    );
+  });
+
   it("RightPanel navigation works as expected.", async () => {
     renderEditTestCaseComponent();
     const highlighting = await findByText("Highlighting");

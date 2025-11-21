@@ -235,6 +235,8 @@ const EditTestCase = () => {
           ...currentTestCase,
           testCaseLock: { lockedBy: lockedBy } as unknown as TestCaseLockInfo,
         });
+        showToast(`${error.message}`, "danger");
+        return;
       }
       if (error instanceof MadieError) {
         showToast(
