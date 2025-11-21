@@ -65,46 +65,48 @@ const CompareVersionsDialog = ({
       titleBoxSx={{ padding: "20px 24px" }}
       contentSx={{ padding: 0 }}
     >
-      <div className="info-section">
-        <Typography className="measure-header">
-          <span className="measure-name" data-testid="measure-name">
-            {newMeasure.measureName}
-          </span>{" "}
-          <span className="measure-cmsid" data-testid="measure-cmsid">
-            (CMS ID: {newMeasure.measureSet?.cmsId ?? "-"})
-          </span>
-        </Typography>
-      </div>
-
-      <Divider className="divider" />
-
-      <div className="horizontal-padding">
-        <CompareVersionsNavTabs
-          activeTab={activeTab}
-          setActiveTab={setActiveTab}
-        />
-      </div>
-
-      <Divider className="divider" />
-
-      {activeTab === "cql" && (
-        <div
-          className="comparison-panels-container"
-          data-testid="tab-content-cql"
-        >
-          <MeasureComparisonPanel measure={oldMeasure} side="old" />
-          <MeasureComparisonPanel measure={newMeasure} side="new" />
+      <div className="compare-versions-dialog">
+        <div className="info-section">
+          <Typography className="measure-header">
+            <span className="measure-name" data-testid="measure-name">
+              {newMeasure.measureName}
+            </span>{" "}
+            <span className="measure-cmsid" data-testid="measure-cmsid">
+              (CMS ID: {newMeasure.measureSet?.cmsId ?? "-"})
+            </span>
+          </Typography>
         </div>
-      )}
 
-      {activeTab === "human-readable" && (
-        <div
-          className="horizontal-padding"
-          data-testid="tab-content-human-readable"
-        >
-          <Typography>Human Readable content goes here</Typography>
+        <Divider className="divider" />
+
+        <div className="horizontal-padding">
+          <CompareVersionsNavTabs
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+          />
         </div>
-      )}
+
+        <Divider className="divider" />
+
+        {activeTab === "cql" && (
+          <div
+            className="comparison-panels-container"
+            data-testid="tab-content-cql"
+          >
+            <MeasureComparisonPanel measure={oldMeasure} side="old" />
+            <MeasureComparisonPanel measure={newMeasure} side="new" />
+          </div>
+        )}
+
+        {activeTab === "human-readable" && (
+          <div
+            className="horizontal-padding"
+            data-testid="tab-content-human-readable"
+          >
+            <Typography>Human Readable content goes here</Typography>
+          </div>
+        )}
+      </div>
     </MadieDialog>
   );
 };
