@@ -134,6 +134,23 @@ const ElementSelector = ({
   newValues,
   onChange,
 }: ElementSelectorProps) => {
+  const sortedOptions = React.useMemo(() => {
+    return [...options]
+      .filter((option) => {
+        const label = getOptionLabel(option, basePath);
+        return (
+          label !== "id" &&
+          label !== "modifierExtension" &&
+          label !== "extension"
+        );
+      })
+      .sort((a, b) => {
+        const labelA = getOptionLabel(a, basePath);
+        const labelB = getOptionLabel(b, basePath);
+        return labelA.localeCompare(labelB);
+      });
+  }, [options, basePath]);
+
   return (
     <>
       <AutoComplete
@@ -166,7 +183,7 @@ const ElementSelector = ({
         fullWidth
         limitTags={2}
         id="resource-element-selector-autocomplete"
-        options={options}
+        options={sortedOptions}
         value={newValues}
         onChange={onChange}
         disableCloseOnSelect

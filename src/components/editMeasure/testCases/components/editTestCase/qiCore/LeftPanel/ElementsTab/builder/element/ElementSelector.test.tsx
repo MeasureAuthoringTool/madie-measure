@@ -73,9 +73,9 @@ describe("ElementSelector", () => {
     const input = screen.getByPlaceholderText("Attributes");
     userEvent.click(input);
 
-    const listbox = screen.getByRole("listbox");
-    const options = within(listbox).getAllByRole("option");
-    expect(options[0]).toHaveAttribute("aria-disabled", "true");
+    // Find the gender option by text and check if it's disabled
+    const genderOption = screen.getByText("gender").closest("li");
+    expect(genderOption).toHaveAttribute("aria-disabled", "true");
   });
 
   it("renders chips for selected values", () => {
@@ -266,12 +266,15 @@ describe("ElementSelector", () => {
 
       render(<ElementSelector {...props} />);
       userEvent.click(screen.getByPlaceholderText("Attributes"));
-      const options = screen.getAllByRole("option");
+
+      // Get the label of the related (second) option
+      const relatedLabel = getOptionLabel(choiceOptions[1], "Patient");
+      const relatedOption = screen.getByText(relatedLabel).closest("li");
 
       if (shouldBeDisabled) {
-        expect(options[1]).toHaveAttribute("aria-disabled", "true");
+        expect(relatedOption).toHaveAttribute("aria-disabled", "true");
       } else {
-        expect(options[1]).not.toHaveAttribute("aria-disabled", "true");
+        expect(relatedOption).not.toHaveAttribute("aria-disabled", "true");
       }
 
       cleanup();
