@@ -26,7 +26,11 @@ import {
   ResourceActionType,
 } from "../../../../../../../util/QiCorePatientProvider";
 import { useFormikContext } from "formik";
-import { Button, Toast } from "@madie/madie-design-system/dist/react";
+import {
+  Button,
+  Toast,
+  MadieSpinner,
+} from "@madie/madie-design-system/dist/react";
 import useFormikResetOnEvent from "../../../../../../../../../common/useFormikResetOnEvent";
 import { RequiredFieldsProvider } from "./RequiredFieldsContext";
 
@@ -353,6 +357,10 @@ const ElementEditor = ({
       </RequiredFieldsProvider>
     );
   }
-  return <div />;
+  return (
+    <div id="madie-tcbuilder-container">
+      <MadieSpinner className="madie-spinner" />
+    </div>
+  );
 };
 export default ElementEditor;
