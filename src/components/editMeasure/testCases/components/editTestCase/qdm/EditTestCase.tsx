@@ -6,7 +6,11 @@ import {
   routeHandlerStore,
   useFeatureFlags,
 } from "@madie/madie-util";
-import { TestCase, MeasureErrorType } from "@madie/madie-models";
+import {
+  TestCase,
+  MeasureErrorType,
+  TestCaseLockInfo,
+} from "@madie/madie-models";
 import "../qiCore/EditTestCase.scss";
 import {
   Button,
@@ -44,6 +48,7 @@ import {
 } from "../../../util/cqlCoverageBuilder/CqlCoverageBuilder";
 import checkSpecialCharacters from "../../../util/checkSpecialCharacters";
 import { GroupPopulation } from "@madie/madie-models/dist/TestCase";
+import LockedMessageModal from "../../../../../common/lockedMessageModal/LockedMessageModal";
 
 const EditTestCase = () => {
   useDocumentTitle("MADiE Edit Measure Edit Test Case");
@@ -137,6 +142,11 @@ const EditTestCase = () => {
         .getTestCase(id, measureId, false)
         .then((tc: TestCase) => {
           const nextTc = _.cloneDeep(tc);
+          setLockedModalOpen(
+            canEdit && featureFlags.Locking && nextTc.testCaseLock
+              ? true
+              : false
+          );
           if (measure?.groups) {
             nextTc.groupPopulations = measure.groups?.map((group) => {
               const existingTestCasePC = tc.groupPopulations?.find(
@@ -192,6 +202,13 @@ const EditTestCase = () => {
 
   const testCaseCanEdit =
     canEdit && !(featureFlags?.Locking && currentTestCase?.testCaseLock);
+  const testCaseLockedBy: string =
+    featureFlags?.Locking && currentTestCase?.testCaseLock
+      ? currentTestCase?.testCaseLock?.lockedBy
+      : undefined;
+  const [lockedModalOpen, setLockedModalOpen] = useState(
+    canEdit && testCaseLockedBy ? true : false
+  );
 
   const handleSubmit = async (testCase: TestCase) => {
     testCase.title = sanitizeUserInput(testCase.title);
@@ -224,6 +241,18 @@ const EditTestCase = () => {
       updateMeasureStore(updatedTestCase);
       showToast("Test Case Updated Successfully", "success");
     } catch (error) {
+      if (featureFlags.Locking && error.message.includes("is locked by:")) {
+        const splitted = error.message.trim().split(" ");
+        const lockedBy = splitted[splitted.length - 1];
+        setCurrentTestCase({
+          ...currentTestCase,
+          testCaseLock: { lockedBy: lockedBy } as unknown as TestCaseLockInfo,
+        });
+        setLockedModalOpen(true);
+        resetForm();
+        showToast(`${error.message}`, "danger");
+        return;
+      }
       if (error instanceof MadieError) {
         showToast(
           `Error updating Test Case "${measure.measureName}": ${error.message}`,
@@ -438,13 +467,13 @@ const EditTestCase = () => {
               variant="cyan"
               type="submit"
               data-testid="edit-test-case-save-button"
-              disabled={!(formik.dirty && formik.isValid) || !canEdit}
+              disabled={!(formik.dirty && formik.isValid) || !testCaseCanEdit}
             >
               Save
             </Button>
             <Button
               variant="outline-filled"
-              disabled={!formik.dirty || !canEdit}
+              disabled={!formik.dirty || !testCaseCanEdit}
               onClick={() => setDiscardDialogOpen(true)}
             >
               Discard Changes
@@ -471,6 +500,14 @@ const EditTestCase = () => {
         onClose={() => setDiscardDialogOpen(false)}
         onContinue={discardChanges}
       />
+      {canEdit && testCaseLockedBy && (
+        <LockedMessageModal
+          lockedType={"test case"}
+          lockedBy={testCaseLockedBy}
+          lockedModalOpen={lockedModalOpen}
+          setLockedModalOpen={setLockedModalOpen}
+        />
+      )}
     </>
   );
 };

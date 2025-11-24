@@ -71,7 +71,7 @@ import applyCQLFunction, {
   editCQLFunction,
 } from "./cqlFunctionApplier";
 import { useParams } from "react-router";
-import MeasureLockedPopup from "../measureLockedPopup/MeasureLockedPopup";
+import LockedMessageModal from "../../common/lockedMessageModal/LockedMessageModal";
 
 export const mapErrorsToAceAnnotations = (
   errors: ElmTranslationError[]
@@ -152,7 +152,7 @@ const validateCql = (
 };
 
 const MeasureEditor = ({ measureCanEdit, measureLockedBy }) => {
-  const [lockedMeasurePopupOpen, setLockedMeasurePopupOpen] = useState(
+  const [lockedModalOpen, setLockedModalOpen] = useState(
     measureCanEdit && !measureLockedBy ? false : true
   );
   useDocumentTitle("MADiE Edit Measure CQL");
@@ -969,10 +969,11 @@ const MeasureEditor = ({ measureCanEdit, measureLockedBy }) => {
         onClose={() => setDiscardDialogOpen(false)}
       />
       {measureCanEdit && measureLockedBy && (
-        <MeasureLockedPopup
-          measureLockedBy={measureLockedBy}
-          lockedMeasurePopupOpen={lockedMeasurePopupOpen}
-          setLockedMeasurePopupOpen={setLockedMeasurePopupOpen}
+        <LockedMessageModal
+          lockedType={"measure"}
+          lockedBy={measureLockedBy}
+          lockedModalOpen={lockedModalOpen}
+          setLockedModalOpen={setLockedModalOpen}
         />
       )}
     </>

@@ -790,4 +790,88 @@ describe("TestCaseServiceApi Tests", () => {
       expect(err).not.toBeNull();
     }
   });
+
+  it("should updateTestCase successfully", async () => {
+    const responseDto: TestCase = {
+      id: "1234",
+      title: "TestCase1",
+      validResource: false,
+    } as TestCase;
+
+    axios.put = jest.fn().mockResolvedValueOnce({ data: responseDto });
+
+    const testCase: TestCase = {
+      title: "TestCase1",
+    } as TestCase;
+
+    const response = await testCaseService.updateTestCase(testCase, "M123");
+    expect(response).toBeTruthy();
+    expect(response).toEqual(responseDto);
+  });
+
+  it("should handle updateTestCase failure 423", async () => {
+    const resp = {
+      response: {
+        status: 423,
+        data: {
+          message:
+            "Unable to update Test Case. Test Case is locked by: another.user.",
+        },
+      },
+    };
+
+    axios.put = jest.fn().mockRejectedValueOnce(resp);
+
+    const testCase: TestCase = {
+      title: "TestCase1",
+    } as TestCase;
+
+    await expect(async () => {
+      await testCaseService.updateTestCase(testCase, "M123");
+    }).rejects.toThrowError(
+      "Unable to update Test Case. Test Case is locked by: another.user."
+    );
+  });
+
+  it("should handle updateTestCase failure 400", async () => {
+    const resp = {
+      response: {
+        status: 400,
+        data: {
+          message: "Error updating Test Case.",
+        },
+      },
+    };
+
+    axios.put = jest.fn().mockRejectedValueOnce(resp);
+
+    const testCase: TestCase = {
+      title: "TestCase1",
+    } as TestCase;
+
+    await expect(async () => {
+      await testCaseService.updateTestCase(testCase, "M123");
+    }).rejects.toThrowError("Error updating Test Case.");
+  });
+
+  it("should handle other updateTestCase failure", async () => {
+    const resp = {
+      response: {
+        status: 500,
+        data: {
+          message: "Error 500 in updating Test Case.",
+        },
+      },
+    };
+
+    axios.put = jest.fn().mockRejectedValueOnce(resp);
+
+    const testCase: TestCase = {
+      title: "TestCase1",
+    } as TestCase;
+
+    await expect(async () => {
+      await testCaseService.updateTestCase(testCase, "M123");
+    }).rejects.toThrowError("Unable to update test case");
+  });
 });

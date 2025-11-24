@@ -153,6 +153,9 @@ export class TestCaseServiceApi {
       if (err?.response?.status === 400) {
         throw new MadieError(err.response.data.message);
       }
+      if (err?.response?.status === 423) {
+        throw new MadieError(err.response.data.message);
+      }
       const message = `Unable to update test case`;
       throw new Error(message);
     }
