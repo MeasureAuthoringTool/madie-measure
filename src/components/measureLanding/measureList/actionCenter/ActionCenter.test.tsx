@@ -699,14 +699,14 @@ describe("ActionCenter", () => {
     ).toBeInTheDocument();
   });
 
-  it("should call openCompareVersionsDialog when compare versions action is clicked", async () => {
+  it("should call setCompareVersionsDialog when compare versions action is clicked", async () => {
     mockCheckUserCanEdit.mockReturnValue(true);
     (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
       TransferMeasure: true,
       CompareMeasureVersions: true,
     }));
 
-    const openCompareVersionsDialog = jest.fn();
+    const setCompareVersionsDialog = jest.fn();
 
     render(
       <ActionCenter
@@ -723,7 +723,7 @@ describe("ActionCenter", () => {
         setViewMeasureHistoryDialog={jest.fn()}
         activeTab={0}
         setTransferDialog={jest.fn()}
-        openCompareVersionsDialog={openCompareVersionsDialog}
+        setCompareVersionsDialog={setCompareVersionsDialog}
       />
     );
 
@@ -733,6 +733,83 @@ describe("ActionCenter", () => {
     expect(compareButton).toBeEnabled();
     await userEvent.click(compareButton);
 
-    expect(openCompareVersionsDialog).toHaveBeenCalled();
+    expect(setCompareVersionsDialog).toHaveBeenCalled();
+  });
+
+  it("should keep compare versions button disabled when measures length !== 2", async () => {
+    mockCheckUserCanEdit.mockReturnValue(true);
+    (useFeatureFlags as jest.Mock).mockImplementation(() => ({
+      TransferMeasure: true,
+      CompareMeasureVersions: true,
+    }));
+
+    const setCompareVersionsDialog = jest.fn();
+
+    render(
+      <ActionCenter
+        measures={[qdmMeasure]}
+        associateCmsId={jest.fn()}
+        exportMeasure={jest.fn()}
+        updateTargetMeasure={jest.fn()}
+        setCreateVersionDialog={jest.fn()}
+        setDraftMeasureDialog={jest.fn()}
+        setDeleteMeasureDialog={jest.fn()}
+        setShareDialog={jest.fn()}
+        deleteMeasure={jest.fn()}
+        setViewHumanReadableModal={jest.fn()}
+        setViewMeasureHistoryDialog={jest.fn()}
+        activeTab={0}
+        setTransferDialog={jest.fn()}
+        setCompareVersionsDialog={setCompareVersionsDialog}
+      />
+    );
+
+    const compareButton = await screen.findByTestId(
+      "compare-versions-action-btn"
+    );
+
+    expect(compareButton).toBeDisabled();
+    expect(setCompareVersionsDialog).not.toHaveBeenCalled();
+  });
+
+  it("should keep compare versions button disabled when measures are from different measure sets", async () => {
+    mockCheckUserCanEdit.mockReturnValue(true);
+    (useFeatureFlags as jest.Mock).mockImplementation(() => ({
+      TransferMeasure: true,
+      CompareMeasureVersions: true,
+    }));
+
+    const setCompareVersionsDialog = jest.fn();
+
+    const measureWithDifferentMeasureSetId = {
+      ...qdmMeasureVersion,
+      measureSetId: "different-measure-set",
+    };
+
+    render(
+      <ActionCenter
+        measures={[qdmMeasure, measureWithDifferentMeasureSetId]}
+        associateCmsId={jest.fn()}
+        exportMeasure={jest.fn()}
+        updateTargetMeasure={jest.fn()}
+        setCreateVersionDialog={jest.fn()}
+        setDraftMeasureDialog={jest.fn()}
+        setDeleteMeasureDialog={jest.fn()}
+        setShareDialog={jest.fn()}
+        deleteMeasure={jest.fn()}
+        setViewHumanReadableModal={jest.fn()}
+        setViewMeasureHistoryDialog={jest.fn()}
+        activeTab={0}
+        setTransferDialog={jest.fn()}
+        setCompareVersionsDialog={setCompareVersionsDialog}
+      />
+    );
+
+    const compareButton = await screen.findByTestId(
+      "compare-versions-action-btn"
+    );
+
+    expect(compareButton).toBeDisabled();
+    expect(setCompareVersionsDialog).not.toHaveBeenCalled();
   });
 });
