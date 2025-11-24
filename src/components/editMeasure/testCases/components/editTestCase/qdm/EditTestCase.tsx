@@ -248,6 +248,8 @@ const EditTestCase = () => {
           ...currentTestCase,
           testCaseLock: { lockedBy: lockedBy } as unknown as TestCaseLockInfo,
         });
+        setLockedModalOpen(true);
+        resetForm();
         showToast(`${error.message}`, "danger");
         return;
       }
