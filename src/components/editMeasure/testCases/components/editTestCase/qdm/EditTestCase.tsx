@@ -6,7 +6,11 @@ import {
   routeHandlerStore,
   useFeatureFlags,
 } from "@madie/madie-util";
-import { TestCase, MeasureErrorType } from "@madie/madie-models";
+import {
+  TestCase,
+  MeasureErrorType,
+  TestCaseLockInfo,
+} from "@madie/madie-models";
 import "../qiCore/EditTestCase.scss";
 import {
   Button,
@@ -237,6 +241,16 @@ const EditTestCase = () => {
       updateMeasureStore(updatedTestCase);
       showToast("Test Case Updated Successfully", "success");
     } catch (error) {
+      if (featureFlags.Locking && error.message.includes("is locked by:")) {
+        const splitted = error.message.trim().split(" ");
+        const lockedBy = splitted[splitted.length - 1];
+        setCurrentTestCase({
+          ...currentTestCase,
+          testCaseLock: { lockedBy: lockedBy } as unknown as TestCaseLockInfo,
+        });
+        showToast(`${error.message}`, "danger");
+        return;
+      }
       if (error instanceof MadieError) {
         showToast(
           `Error updating Test Case "${measure.measureName}": ${error.message}`,
@@ -451,13 +465,13 @@ const EditTestCase = () => {
               variant="cyan"
               type="submit"
               data-testid="edit-test-case-save-button"
-              disabled={!(formik.dirty && formik.isValid) || !canEdit}
+              disabled={!(formik.dirty && formik.isValid) || !testCaseCanEdit}
             >
               Save
             </Button>
             <Button
               variant="outline-filled"
-              disabled={!formik.dirty || !canEdit}
+              disabled={!formik.dirty || !testCaseCanEdit}
               onClick={() => setDiscardDialogOpen(true)}
             >
               Discard Changes

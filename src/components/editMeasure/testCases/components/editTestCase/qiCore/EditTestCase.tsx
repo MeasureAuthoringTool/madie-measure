@@ -25,6 +25,7 @@ import {
   MeasureErrorType,
   Model,
   ValidationStatus,
+  TestCaseLockInfo,
 } from "@madie/madie-models";
 import useTestCaseServiceApi from "../../../api/useTestCaseServiceApi";
 import Editor from "../../editor/Editor";
@@ -625,6 +626,15 @@ const EditTestCase = (props: EditTestCaseProps) => {
       setEditorVal(updatedTc.json);
       handleTestCaseResponse(updatedTc, "update", timezoneUpdated);
     } catch (error) {
+      if (featureFlags.Locking && error.message.includes("is locked by:")) {
+        const splitted = error.message.trim().split(" ");
+        const lockedBy = splitted[splitted.length - 1];
+        setTestCase({
+          ...testCase,
+          testCaseLock: { lockedBy: lockedBy } as unknown as TestCaseLockInfo,
+        });
+      }
+
       showToast(
         error instanceof MadieError
           ? error.message
