@@ -60,6 +60,7 @@ import queryString from "query-string";
 import _ from "lodash";
 import { getTabStorageKey } from "../measureLandingUtils";
 import TransferDialog from "../../common/transferDialog/TransferDialog";
+import CompareVersionsDialog from "../../common/compareVersionsDialog/CompareVersionsDialog";
 
 const TH = tw.th`p-3 text-left text-sm font-bold capitalize`;
 
@@ -153,6 +154,8 @@ export default function MeasureList(props: {
     open: false,
     measures: [],
   });
+  const [compareVersionsDialog, setCompareVersionsDialog] =
+    useState<boolean>(false);
 
   const transFormData = (measureList): TCRow[] => {
     return measureList.map((measure) => ({
@@ -829,6 +832,10 @@ export default function MeasureList(props: {
     props.setToastOpen(toastOpen);
   };
 
+  const handleCompareVersionsDialogClose = () => {
+    setCompareVersionsDialog(false);
+  };
+
   const updateTargetMeasure = (newValue) => {
     targetMeasure.current = newValue;
   };
@@ -1147,6 +1154,7 @@ export default function MeasureList(props: {
             setViewMeasureHistoryDialog={setViewMeasureHistoryDialog}
             activeTab={props.activeTab}
             setTransferDialog={setTransferDialog}
+            setCompareVersionsDialog={setCompareVersionsDialog}
           />
         </div>
       </div>
@@ -1364,6 +1372,11 @@ export default function MeasureList(props: {
         measures={selectedMeasures}
         open={viewMeasureHistoryDialog}
         onClose={handleDialogClose}
+      />
+      <CompareVersionsDialog
+        measures={selectedMeasures}
+        open={compareVersionsDialog}
+        onClose={handleCompareVersionsDialogClose}
       />
     </div>
   );

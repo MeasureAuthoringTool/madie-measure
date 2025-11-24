@@ -11,26 +11,17 @@ import useFhirDefinitionsServiceApi from "../../../../../../../../api/useFhirDef
 import useExecutionContext from "../../../../../../../routes/qiCore/useExecutionContext";
 import { Coding, Extension, ValueSet } from "fhir/r4";
 import { getValueSetUrl } from "../../../../../../../../api/fhirDefinitionServiceUtilities";
-import useTerminologyServiceApi from "../../../../../../../../api/useTerminologyServiceApi";
-import { getOidFromString } from "@madie/madie-util";
 import AddElementButton from "../../../../../../../common/UIOnlyModelAgnostic/AddElementButton";
 
 const placeHolder = (label: string) => (
   <span style={{ color: "#717171" }}>{label}</span>
 );
 
-export const getValueSetComposeIncludeOids = (valueSet: ValueSet) => {
-  return valueSet.compose.include
-    .map((include) => include.valueSet)
-    .reduce((acc, curr) => {
-      const oid = getOidFromString(curr?.[0], "FHIR");
-      if (oid) {
-        return [...acc, oid];
-      }
-      return acc;
-    }, []);
-};
-
+enum ExpansionStatusType {
+  EXPANDING,
+  EXPANDED,
+  EXPANSION_FAILED,
+}
 const CodingComponent = ({
   canEdit,
   structureDefinition,
@@ -44,9 +35,9 @@ const CodingComponent = ({
   const [allValueSets, setAllValueSets] = useState<ValueSet[]>();
   const [selectedValueSet, setSelectedValueSet] = useState<ValueSet>();
   const [selectedConcept, setSelectedConcept] = useState<Coding>();
+  const [expansionStatus, setExpansionStatus] = useState<ExpansionStatusType>();
 
   const fhirDefinitionService = useRef(useFhirDefinitionsServiceApi());
-  const terminologyService = useRef(useTerminologyServiceApi());
   const { valueSetsState, executionContextReady } = useExecutionContext();
 
   const isBindingRequired =
@@ -89,6 +80,7 @@ const CodingComponent = ({
         const valueSetUrl = getValueSetUrl(
           structureDefinition.binding.valueSet
         );
+        setExpansionStatus(ExpansionStatusType.EXPANDING);
         fhirDefinitionService.current
           .getValueSetDefinition(valueSetUrl)
           .then((valueSet) => {
@@ -105,36 +97,11 @@ const CodingComponent = ({
                 }
                 return [valueSet];
               });
-            } else if (valueSet.compose) {
-              const valueSetOids = getValueSetComposeIncludeOids(valueSet);
-              terminologyService.current
-                .getValueSetsExpansionForOids(valueSetOids)
-                .then((expandedValueSets) => {
-                  // TODO: doesn't handle compose.exclude
-                  const concepts = expandedValueSets.reduce((acc, vs) => {
-                    if (vs.expansion?.contains) {
-                      return acc.concat(vs.expansion.contains);
-                    }
-                    return acc;
-                  }, []);
-                  valueSet.expansion = {
-                    contains: concepts,
-                    timestamp: new Date().toISOString(),
-                  };
-                  if (includePrev) {
-                    setAllValueSets((prev) => {
-                      if (prev) {
-                        return [...prev, valueSet];
-                      }
-                      return [valueSet];
-                    });
-                  } else {
-                    setAllValueSets([valueSet]);
-                  }
-                });
             }
+            setExpansionStatus(ExpansionStatusType.EXPANDED);
           })
           .catch((error) => {
+            setExpansionStatus(ExpansionStatusType.EXPANSION_FAILED);
             console.error(
               `An error occurred while fetching binding valueSet: [${valueSetUrl}]`,
               error
@@ -200,6 +167,24 @@ const CodingComponent = ({
 
   // Menu options
   const getValueSetMenuOptions = () => {
+    if (expansionStatus == ExpansionStatusType.EXPANDING) {
+      return [
+        <MenuItem value="" data-testid="value-set-option-loading">
+          Loading...
+        </MenuItem>,
+      ];
+    }
+    if (
+      expansionStatus == ExpansionStatusType.EXPANSION_FAILED &&
+      allValueSets?.length > 0
+    ) {
+      return [
+        <MenuItem value="" data-testid="value-set-option-loading">
+          Valueset failed to expand
+        </MenuItem>,
+      ];
+    }
+
     const menuOptions =
       allValueSets?.map((valueSet) => {
         return (
@@ -217,7 +202,7 @@ const CodingComponent = ({
     if (isBindingRequired && menuOptions.length > 0) {
       return menuOptions;
       // for non-required bindings, allow custom coding, binding value set and value sets used in CQL
-    } else if (executionContextReady && !isBindingRequired) {
+    } else {
       return [
         <MenuItem
           key="custom-code"
@@ -226,23 +211,7 @@ const CodingComponent = ({
         >
           Custom Code
         </MenuItem>,
-        ...(allValueSets?.map((valueSet) => {
-          return (
-            <MenuItem
-              key={valueSet?.name}
-              value={valueSet?.name}
-              data-testid={`value-set-option-${valueSet?.name}`}
-            >
-              {valueSet?.title}
-            </MenuItem>
-          );
-        }) || []),
-      ];
-    } else {
-      return [
-        <MenuItem value="" data-testid="value-set-option-loading">
-          Loading...
-        </MenuItem>,
+        ...menuOptions,
       ];
     }
   };
