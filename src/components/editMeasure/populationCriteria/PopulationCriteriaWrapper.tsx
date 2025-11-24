@@ -1,13 +1,13 @@
 import React, { Suspense, useState } from "react";
 
 import PopulationCriteriaHome from "./PopulationCriteriaHome";
-import MeasureLockedPopup from "../measureLockedPopup/MeasureLockedPopup";
+import LockedMessageModal from "../../common/lockedMessageModal/LockedMessageModal";
 const PopulationCriteriaWrapper = ({
   measureCanEdit,
   measureLockedBy = undefined,
   displayLockedMeasurePopup = true,
 }) => {
-  const [lockedMeasurePopupOpen, setLockedMeasurePopupOpen] = useState(
+  const [lockedModalOpen, setLockedModalOpen] = useState(
     measureCanEdit && !measureLockedBy ? false : true
   );
   return (
@@ -18,10 +18,11 @@ const PopulationCriteriaWrapper = ({
         />
       </Suspense>
       {measureCanEdit && measureLockedBy && displayLockedMeasurePopup && (
-        <MeasureLockedPopup
-          measureLockedBy={measureLockedBy}
-          lockedMeasurePopupOpen={lockedMeasurePopupOpen}
-          setLockedMeasurePopupOpen={setLockedMeasurePopupOpen}
+        <LockedMessageModal
+          lockedType={"measure"}
+          lockedBy={measureLockedBy}
+          lockedModalOpen={lockedModalOpen}
+          setLockedModalOpen={setLockedModalOpen}
         />
       )}
     </>

@@ -21,7 +21,7 @@ import EditMeasureDetailsSideNav from "./EditMeasureDetailsSideNav";
 import MeasureReferences from "./MeasureReferences/MeasureReferences";
 import TransmissionFormat from "./TransmissionFormat/TransmissionFormat";
 import MeasureDefinitions from "./MeasureDefinitions/MeasureDefinitions";
-import MeasureLockedPopup from "../measureLockedPopup/MeasureLockedPopup";
+import LockedMessageModal from "../../common/lockedMessageModal/LockedMessageModal";
 
 const Grid = tw.div`grid grid-cols-6 auto-cols-max gap-4 mx-8 shadow-lg rounded-md border border-slate overflow-hidden bg-white`;
 export interface RouteHandlerState {
@@ -59,7 +59,7 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
     measureCanEdit,
     measureLockedBy,
   } = props;
-  const [lockedMeasurePopupOpen, setLockedMeasurePopupOpen] = useState(
+  const [lockedModalOpen, setLockedModalOpen] = useState(
     measureCanEdit && !measureLockedBy ? false : true
   );
   const { measureId } = useParams();
@@ -480,10 +480,11 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
         </Routes>
       </Grid>
       {measureCanEdit && measureLockedBy && (
-        <MeasureLockedPopup
-          measureLockedBy={measureLockedBy}
-          lockedMeasurePopupOpen={lockedMeasurePopupOpen}
-          setLockedMeasurePopupOpen={setLockedMeasurePopupOpen}
+        <LockedMessageModal
+          lockedType={"measure"}
+          lockedBy={measureLockedBy}
+          lockedModalOpen={lockedModalOpen}
+          setLockedModalOpen={setLockedModalOpen}
         />
       )}
     </>

@@ -4186,6 +4186,26 @@ describe("EditTestCase QICore Component - Test Case Locked By Other User", () =>
       }
       return Promise.resolve({ data: testCase });
     });
+    mockedAxios.post.mockImplementation((args) => {
+      if (args && args.endsWith("lock")) {
+        return Promise.resolve({
+          data: {
+            isLocked: false,
+            locedBy: MEASURE_CREATEDBY,
+          },
+        });
+      }
+    });
+    mockedAxios.delete.mockImplementation((args) => {
+      if (args && args.endsWith("lock")) {
+        return Promise.resolve({
+          data: {
+            isLocked: false,
+            locedBy: null,
+          },
+        });
+      }
+    });
   });
   afterEach(() => {
     jest.clearAllMocks();
