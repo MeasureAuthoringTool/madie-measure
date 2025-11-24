@@ -522,7 +522,7 @@ export default function EditMeasure() {
         setCurrentMeasureId(response.data.id);
         setTimeout(() => {
           navigate(`/measures/${response.data.id}/edit${subRoute}`);
-        }, 3000);
+        }, 1000);
       })
       .catch((error) => {
         setLoading(false);
@@ -545,7 +545,7 @@ export default function EditMeasure() {
         handleToast("success", "Measure successfully deleted", true);
         setTimeout(() => {
           navigate("/measures");
-        }, 3000);
+        }, 1000);
       }
     } catch (e) {
       if (e?.response?.data) {
@@ -567,6 +567,10 @@ export default function EditMeasure() {
   } = {}) => {
     handleDialogClose();
     handleToast(toastType, toastMessage, toastOpen);
+
+    setTimeout(() => {
+      navigate("/measures");
+    }, 1000);
   };
 
   const onToastClose = () => {
