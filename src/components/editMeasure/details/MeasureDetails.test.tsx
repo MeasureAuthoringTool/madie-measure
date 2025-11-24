@@ -802,7 +802,7 @@ describe("MeasureDetails component", () => {
     );
     expect(getByText("Mock Measure Info")).toBeTruthy();
     expect(getByText("Measure currently In-Use")).toBeTruthy();
-    const closeButton = getByTestId("measure-locked-popup-close-button");
+    const closeButton = getByTestId("measure-locked-modal-close-button");
     expect(closeButton).toBeTruthy();
     fireEvent.click(closeButton);
     await waitFor(() => {
