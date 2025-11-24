@@ -657,6 +657,10 @@ describe("ResourceEditor", () => {
       </QiCoreResourceContext.Provider>
     );
 
+    // Click on the "id" tab since elements are now sorted alphabetically
+    const idTab = await screen.findByTestId("id");
+    userEvent.click(idTab);
+
     const actionCenter = await screen.findByTestId(
       "elements-action-center-actual-icon"
     );

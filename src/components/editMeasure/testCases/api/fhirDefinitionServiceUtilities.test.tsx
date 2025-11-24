@@ -76,8 +76,8 @@ describe("FhirDefinitionServiceUtilities", () => {
         type: [{ code: "boolean" }, { code: "integer" }],
       });
       const result = getTopLevelElements(mutableResource);
+      // Elements should now be sorted alphabetically and include all elements
       expect(result).toEqual([
-        { path: "Patient.name", min: 0, type: [{ code: "HumanName" }] },
         { path: "Patient.age", min: 1, type: [{ code: "integer" }] },
         {
           path: "Patient.multipleBirth[x]",
@@ -89,6 +89,7 @@ describe("FhirDefinitionServiceUtilities", () => {
           min: 1,
           type: [{ code: "integer" }],
         },
+        { path: "Patient.name", min: 0, type: [{ code: "HumanName" }] },
       ]);
     });
   });

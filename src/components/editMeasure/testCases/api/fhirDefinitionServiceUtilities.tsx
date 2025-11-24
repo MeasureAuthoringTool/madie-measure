@@ -307,6 +307,8 @@ export function getBasePath(resource: any): string {
 // we want to get only the elements at the top of the tree for the render
 export function getTopLevelElements(resource: any) {
   const elements = [...resource?.definition?.snapshot?.element];
+  const basePath = resource?.definition?.type;
+
   const elementsFiltered = elements?.filter(
     (e) =>
       e.path.split(".")?.length === 2 &&
@@ -330,6 +332,19 @@ export function getTopLevelElements(resource: any) {
       elementsFiltered.splice(elementsFiltered.indexOf(element), 1);
     }
   });
+
+  // Sort elements alphabetically by their path (after the basePath, if available)
+  if (basePath) {
+    elementsFiltered.sort((a, b) => {
+      const labelA = a.path.substring(basePath.length + 1);
+      const labelB = b.path.substring(basePath.length + 1);
+      return labelA.localeCompare(labelB);
+    });
+  } else {
+    // If no basePath, sort by full path
+    elementsFiltered.sort((a, b) => a.path.localeCompare(b.path));
+  }
+
   return elementsFiltered;
 }
 // find out who needs to be required on formik validation
