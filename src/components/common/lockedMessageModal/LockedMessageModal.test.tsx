@@ -1,35 +1,40 @@
 import * as React from "react";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import MeasureLockedPopup from "./MeasureLockedPopup";
+import LockedMessageModal from "./LockedMessageModal";
 import { MemoryRouter } from "react-router-dom";
 
-describe("MeasureLockedPopup component", () => {
+describe("LockedMessageModal component", () => {
   it("renders correctly when open", () => {
     render(
       <MemoryRouter>
-        <MeasureLockedPopup
-          measureLockedBy="user123"
-          lockedMeasurePopupOpen={true}
-          setLockedMeasurePopupOpen={jest.fn()}
+        <LockedMessageModal
+          lockedType="measure"
+          lockedBy="user123"
+          lockedModalOpen={true}
+          setLockedModalOpen={jest.fn()}
         />
       </MemoryRouter>
     );
 
     expect(screen.getByText("Measure currently In-Use")).toBeInTheDocument();
-    const message = screen.getByTestId("measure-locked-popup-message");
+    const message = screen.getByTestId("measure-locked-modal-message");
     expect(message).toHaveTextContent(
       /This measure is currently edited by HARP ID/i
     );
     expect(message).toHaveTextContent("user123");
+    expect(message).toHaveTextContent(
+      "You will be unable to make changes at this time."
+    );
   });
 
   it("does not render when closed", () => {
     render(
       <MemoryRouter>
-        <MeasureLockedPopup
-          measureLockedBy="user123"
-          lockedMeasurePopupOpen={false}
-          setLockedMeasurePopupOpen={jest.fn()}
+        <LockedMessageModal
+          lockedType="measure"
+          lockedBy="user123"
+          lockedModalOpen={false}
+          setLockedModalOpen={jest.fn()}
         />
       </MemoryRouter>
     );
@@ -43,10 +48,11 @@ describe("MeasureLockedPopup component", () => {
     const setLockedMeasurePopupOpen = jest.fn();
     render(
       <MemoryRouter>
-        <MeasureLockedPopup
-          measureLockedBy="user123"
-          lockedMeasurePopupOpen={true}
-          setLockedMeasurePopupOpen={setLockedMeasurePopupOpen}
+        <LockedMessageModal
+          lockedType="measure"
+          lockedBy="user123"
+          lockedModalOpen={true}
+          setLockedModalOpen={setLockedMeasurePopupOpen}
         />
       </MemoryRouter>
     );

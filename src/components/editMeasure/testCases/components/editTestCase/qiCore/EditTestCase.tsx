@@ -90,6 +90,7 @@ import ValidationPanel from "./ValidationPanel";
 import ValidationStatusIcon from "./ValidationStatusIcon";
 import EditorCalculator from "../calculator/EditorCalculator";
 import CalculatorDialog from "../calculator/CalculatorDialog";
+import LockedMessageModal from "../../../../../common/lockedMessageModal/LockedMessageModal";
 
 const TestCaseForm = tw.form`m-3`;
 
@@ -253,9 +254,10 @@ const EditTestCase = (props: EditTestCaseProps) => {
   const [calculationDialogOpen, setCalculationDialogOpen] = useState(false);
   const { updateMeasure } = measureStore;
 
-  const canEdit =
-    checkUserCanEdit(measure?.measureSet?.owner, measure?.measureSet?.acls) &&
-    !(featureFlags.Locking && testCase?.testCaseLock);
+  const canEdit = checkUserCanEdit(
+    measure?.measureSet?.owner,
+    measure?.measureSet?.acls
+  );
 
   const formik = useFormik({
     initialValues: { ...INITIAL_VALUES },
@@ -388,6 +390,9 @@ const EditTestCase = (props: EditTestCaseProps) => {
         const nextTc = _.cloneDeep(tc);
         nextTc.json = standardizeJson(nextTc);
         setTestCase(nextTc);
+        setLockedModalOpen(
+          canEdit && featureFlags.Locking && nextTc.testCaseLock ? true : false
+        );
         setEditorVal(nextTc.json ? nextTc.json : "");
         if (measure && measure.groups) {
           nextTc.groupPopulations = measure.groups.map((group) => {
@@ -456,7 +461,7 @@ const EditTestCase = (props: EditTestCaseProps) => {
       testCaseService.current.unlockTestCase(id);
     };
 
-    if (featureFlags?.Locking && canEdit) {
+    if (featureFlags?.Locking && testCaseCanEdit) {
       window.addEventListener("beforeunload", handleUnload);
       testCaseService.current
         .lockTestCase(measureId, id)
@@ -467,7 +472,7 @@ const EditTestCase = (props: EditTestCaseProps) => {
     }
 
     return () => {
-      if (featureFlags?.Locking && canEdit) {
+      if (featureFlags?.Locking && testCaseCanEdit) {
         window.removeEventListener("beforeunload", handleUnload);
         testCaseService.current.unlockTestCase(id);
       }
@@ -487,6 +492,16 @@ const EditTestCase = (props: EditTestCaseProps) => {
     featureFlags?.Locking,
     canEdit,
   ]);
+
+  const testCaseCanEdit =
+    canEdit && !(featureFlags.Locking && testCase?.testCaseLock);
+  const testCaseLockedBy: string =
+    featureFlags?.Locking && testCase?.testCaseLock
+      ? testCase?.testCaseLock?.lockedBy
+      : undefined;
+  const [lockedModalOpen, setLockedModalOpen] = useState(
+    canEdit && testCaseLockedBy ? true : false
+  );
 
   const handleSubmit = async (testCase: TestCase) => {
     setAlert(null);
@@ -1029,7 +1044,7 @@ const EditTestCase = (props: EditTestCaseProps) => {
                                     setInitialFormikValuesStu6
                                   }
                                   setEditorVal={setEditorVal}
-                                  canEdit={canEdit}
+                                  canEdit={testCaseCanEdit}
                                   editorVal={editorVal}
                                   testCase={testCase}
                                 />
@@ -1068,7 +1083,7 @@ const EditTestCase = (props: EditTestCaseProps) => {
                         <Editor
                           onChange={(val: string) => setEditorVal(val)}
                           value={editorVal}
-                          readOnly={!canEdit || _.isNil(testCase)}
+                          readOnly={!testCaseCanEdit || _.isNil(testCase)}
                           height="100%"
                         />
                       )}
@@ -1087,7 +1102,7 @@ const EditTestCase = (props: EditTestCaseProps) => {
                     <Editor
                       onChange={(val: string) => setEditorVal(val)}
                       value={editorVal}
-                      readOnly={!canEdit || _.isNil(testCase)}
+                      readOnly={!testCaseCanEdit || _.isNil(testCase)}
                       height="100%"
                     />
                   </>
@@ -1150,7 +1165,7 @@ const EditTestCase = (props: EditTestCaseProps) => {
                 {rightPanelActiveTab === "expectoractual" && (
                   <div className="panel-content">
                     <ExpectedActual
-                      canEdit={canEdit}
+                      canEdit={testCaseCanEdit}
                       groupPopulations={groupPopulations}
                       isTestCaseExecuted={!_.isNil(populationGroupResults)}
                       clearTestResults={() => {
@@ -1241,7 +1256,7 @@ const EditTestCase = (props: EditTestCaseProps) => {
                       <TextField
                         placeholder="Test Case Title"
                         required
-                        readOnly={!canEdit}
+                        readOnly={!testCaseCanEdit}
                         label="Title"
                         id="test-case-title"
                         inputProps={{
@@ -1263,7 +1278,7 @@ const EditTestCase = (props: EditTestCaseProps) => {
                           placeholder="Test Case Description"
                           id="test-case-description"
                           data-testid="test-case-description"
-                          readOnly={!canEdit}
+                          readOnly={!testCaseCanEdit}
                           {...formik.getFieldProps("description")}
                           label="Description"
                           required={false}
@@ -1284,7 +1299,7 @@ const EditTestCase = (props: EditTestCaseProps) => {
 
                       <div tw="mt-6">
                         <TestCaseSeries
-                          readOnly={!canEdit}
+                          readOnly={!testCaseCanEdit}
                           value={formik.values.series}
                           onChange={(nextValue) =>
                             formik.setFieldValue("series", nextValue)
@@ -1432,7 +1447,7 @@ const EditTestCase = (props: EditTestCaseProps) => {
                 >
                   Run Test Case
                 </Button>
-                {canEdit && (
+                {testCaseCanEdit && (
                   <Button
                     tw="m-2"
                     variant="cyan"
@@ -1496,6 +1511,14 @@ const EditTestCase = (props: EditTestCaseProps) => {
           }}
         />
       </TestCaseForm>
+      {canEdit && testCaseLockedBy && (
+        <LockedMessageModal
+          lockedType={"test case"}
+          lockedBy={testCaseLockedBy}
+          lockedModalOpen={lockedModalOpen}
+          setLockedModalOpen={setLockedModalOpen}
+        />
+      )}
     </>
   );
 };
