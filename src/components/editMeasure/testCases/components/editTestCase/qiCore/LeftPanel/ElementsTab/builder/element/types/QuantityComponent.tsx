@@ -119,6 +119,7 @@ const QuantityComponent = ({
               data-testid="code-input"
               readOnly={!canEdit}
               label="Unit(s)"
+              tooltipText="Enter the UCUM (Unified Code for Units of Measure) code value."
               error={!!validationResult.error}
               helperText={validationResult.helperText}
               value={code ?? ""}
