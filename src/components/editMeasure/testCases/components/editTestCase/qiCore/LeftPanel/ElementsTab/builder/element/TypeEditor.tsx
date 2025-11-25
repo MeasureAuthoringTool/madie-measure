@@ -64,9 +64,10 @@ const TypeEditor = ({
   // is multiple cardinality?
   if (structureDefinition?.max === "*") {
     // is it not already terminated with an index?
+    console.log("getIndexfrompath", label, getIndexFromPath(label));
     if (
       !getIndexFromPath(label) &&
-      !values &&
+      // !values &&
       structureDefinition.type[0].code !== "BackboneElement"
     ) {
       // we are just going to add a zero for now. could be smarter later
@@ -74,13 +75,6 @@ const TypeEditor = ({
       // something like Array.From(numOfElementsInForm, _index) =>) had a previous rendition of this guy working in 8500 pr commits
       // https://github.com/MeasureAuthoringTool/madie-measure/pull/901
       // Only add [0] for component data types, not BackboneElements which need to render their structure first
-      console.log(
-        "currentLabel",
-        label,
-        "structureDefinition.id",
-        structureDefinition.id,
-        values
-      );
       // label = `${structureDefinition.id}[0]`;
       label = `${label}[0]`;
     }
@@ -178,8 +172,15 @@ const TypeEditor = ({
         return (
           <Box sx={{ display: "flex", flexDirection: "column", width: "100%" }}>
             {(isArrayMode ? values : [null]).map((el, index) => {
-              console.log("isArrray", isArrayMode);
-              const fieldLabel = isArrayMode ? `${label}[${index}]` : label;
+              const appendedZeroAlready = getIndexFromPath(label);
+              let fieldLabel;
+              if (isArrayMode && !appendedZeroAlready) {
+                fieldLabel = `${label}[${index}]`;
+              } else if (isArrayMode && appendedZeroAlready) {
+                fieldLabel = `${label.slice(0, label.length - 3)}[${index}]`;
+              } else {
+                fieldLabel = label;
+              }
               return (
                 <StringComponent
                   key={index} // stable key reference to avoid loss of focus between rerenders.
