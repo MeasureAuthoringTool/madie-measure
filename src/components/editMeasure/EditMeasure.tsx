@@ -522,7 +522,7 @@ export default function EditMeasure() {
         setCurrentMeasureId(response.data.id);
         setTimeout(() => {
           navigate(`/measures/${response.data.id}/edit${subRoute}`);
-        }, 1000);
+        }, 3000);
       })
       .catch((error) => {
         setLoading(false);
