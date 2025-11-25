@@ -66,15 +66,23 @@ const TypeEditor = ({
     // is it not already terminated with an index?
     if (
       !getIndexFromPath(label) &&
-      !values?.length &&
-      isComponentDataType(type)
+      !values &&
+      structureDefinition.type[0].code !== "BackboneElement"
     ) {
       // we are just going to add a zero for now. could be smarter later
       // TO DO: We will eventually need to map inner elements of multiple cardinality based on how many elements are in the form
       // something like Array.From(numOfElementsInForm, _index) =>) had a previous rendition of this guy working in 8500 pr commits
       // https://github.com/MeasureAuthoringTool/madie-measure/pull/901
       // Only add [0] for component data types, not BackboneElements which need to render their structure first
-      label = `${structureDefinition.id}[0]`;
+      console.log(
+        "currentLabel",
+        label,
+        "structureDefinition.id",
+        structureDefinition.id,
+        values
+      );
+      // label = `${structureDefinition.id}[0]`;
+      label = `${label}[0]`;
     }
   }
   // Needs to be a memo instead of a useEffect that resets state. This caused a bunch of rerenders, and got stale values from mapping
@@ -170,8 +178,8 @@ const TypeEditor = ({
         return (
           <Box sx={{ display: "flex", flexDirection: "column", width: "100%" }}>
             {(isArrayMode ? values : [null]).map((el, index) => {
+              console.log("isArrray", isArrayMode);
               const fieldLabel = isArrayMode ? `${label}[${index}]` : label;
-
               return (
                 <StringComponent
                   key={index} // stable key reference to avoid loss of focus between rerenders.
