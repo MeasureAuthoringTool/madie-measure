@@ -9,6 +9,7 @@ import {
   PopulationDto,
   TestCase,
   TestCaseExcelExportDto,
+  TestCaseImportOutcome,
   TestCaseImportRequest,
 } from "@madie/madie-models";
 import { useOktaTokens } from "@madie/madie-util";
@@ -38,6 +39,16 @@ export type QrdaRequestDTO = {
 export interface ShiftDatesResponse {
   failed: string[];
   shifted: string[];
+}
+
+export interface CreateTestCasesResponse {
+  failed: string[];
+  testCases: TestCase[];
+}
+
+export interface ImportTestCasesResponse {
+  outcomes: TestCaseImportOutcome[];
+  failed: string[];
 }
 
 export interface CopyResult {
@@ -181,7 +192,7 @@ export class TestCaseServiceApi {
   async importTestCases(
     measureId: string,
     testCasesImportRequest: TestCaseImportRequest[]
-  ): Promise<AxiosResponse> {
+  ): Promise<AxiosResponse<ImportTestCasesResponse>> {
     return await axios.put(
       `${this.baseUrl}/measures/${measureId}/test-cases/imports`,
       testCasesImportRequest,
@@ -235,9 +246,9 @@ export class TestCaseServiceApi {
   async createTestCases(
     measureId: string,
     testCases: TestCase[]
-  ): Promise<TestCase[]> {
+  ): Promise<CreateTestCasesResponse> {
     try {
-      const response = await axios.post<TestCase[]>(
+      const response = await axios.post<CreateTestCasesResponse>(
         `${this.baseUrl}/measures/${measureId}/test-cases/list`,
         testCases,
         {

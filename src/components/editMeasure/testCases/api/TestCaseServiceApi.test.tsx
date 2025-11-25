@@ -122,18 +122,21 @@ describe("TestCaseServiceApi Tests", () => {
   });
 
   it("should handle successfully saving multiple test cases", async () => {
-    const responseDto: TestCase[] = [
-      {
-        id: "1234",
-        title: "TestCase1",
-        validResource: false,
-      } as TestCase,
-      {
-        id: "2345",
-        title: "TestCase2",
-        validResource: false,
-      } as TestCase,
-    ];
+    const responseDto = {
+      failed: [],
+      testCases: [
+        {
+          id: "1234",
+          title: "TestCase1",
+          validResource: false,
+        } as TestCase,
+        {
+          id: "2345",
+          title: "TestCase2",
+          validResource: false,
+        } as TestCase,
+      ],
+    };
 
     axios.post = jest.fn().mockResolvedValueOnce({ data: responseDto });
 
@@ -149,6 +152,8 @@ describe("TestCaseServiceApi Tests", () => {
     const response = await testCaseService.createTestCases("M123", testCases);
     expect(response).toBeTruthy();
     expect(response).toEqual(responseDto);
+    expect(response.testCases).toHaveLength(2);
+    expect(response.failed).toHaveLength(0);
   });
 
   it("should handle error calling saving multiple test cases", async () => {

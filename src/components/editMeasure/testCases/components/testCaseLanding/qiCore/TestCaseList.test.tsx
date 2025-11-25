@@ -484,7 +484,7 @@ const useTestCaseServiceMockResolved = {
   getTestCaseSeriesForMeasure: jest
     .fn()
     .mockResolvedValue(["Series 1", "Series 2"]),
-  createTestCases: jest.fn().mockResolvedValue([]),
+  createTestCases: jest.fn().mockResolvedValue({ failed: [], testCases: [] }),
   exportTestCase: jest.fn().mockResolvedValue(
     new Blob([JSON.stringify("exported test data")], {
       type: "application/json",
@@ -1474,12 +1474,12 @@ describe("TestCaseList component", () => {
     const mockedOutcome: TestCaseImportOutcome[] = [
       {
         patientId: patientId1,
-        message: null,
+        message: "",
         successful: true,
       },
       {
         patientId: patientId2,
-        message: null,
+        message: "",
         successful: true,
       },
     ];
@@ -1491,7 +1491,9 @@ describe("TestCaseList component", () => {
           .fn()
           .mockResolvedValue(["Series 1", "Series 2"]),
         scanImportFile: jest.fn().mockResolvedValue(mockScanResult),
-        importTestCases: jest.fn().mockResolvedValue({ data: mockedOutcome }),
+        importTestCases: jest
+          .fn()
+          .mockResolvedValue({ data: { outcomes: mockedOutcome, failed: [] } }),
       } as unknown as TestCaseServiceApi;
     });
 
@@ -1577,7 +1579,7 @@ describe("TestCaseList component", () => {
       },
       {
         patientId: patientId2,
-        message: null,
+        message: "",
         successful: true,
       },
     ];
@@ -1589,7 +1591,9 @@ describe("TestCaseList component", () => {
           .fn()
           .mockResolvedValue(["Series 1", "Series 2"]),
         scanImportFile: jest.fn().mockResolvedValue(mockScanResult),
-        importTestCases: jest.fn().mockResolvedValue({ data: mockedOutcome }),
+        importTestCases: jest
+          .fn()
+          .mockResolvedValue({ data: { outcomes: mockedOutcome, failed: [] } }),
       } as unknown as TestCaseServiceApi;
     });
 

@@ -1100,7 +1100,7 @@ const useTestCaseServiceMockResolved = {
   getTestCaseSeriesForMeasure: jest
     .fn()
     .mockResolvedValue(["Series 1", "Series 2"]),
-  createTestCases: jest.fn().mockResolvedValue([]),
+  createTestCases: jest.fn().mockResolvedValue({ failed: [], testCases: [] }),
   importTestCasesQDM: jest.fn().mockResolvedValue([]),
   exportQRDA: jest.fn().mockResolvedValue([]),
 } as unknown as TestCaseServiceApi;
