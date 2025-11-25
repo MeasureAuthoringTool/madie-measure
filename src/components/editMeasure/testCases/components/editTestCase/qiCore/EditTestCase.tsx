@@ -627,12 +627,7 @@ const EditTestCase = (props: EditTestCaseProps) => {
       handleTestCaseResponse(updatedTc, "update", timezoneUpdated);
     } catch (error) {
       if (featureFlags.Locking && error.message.includes("is locked by:")) {
-        const splitted = error.message.trim().split(" ");
-        const lockedBy = splitted[splitted.length - 1];
-        setTestCase({
-          ...testCase,
-          testCaseLock: { lockedBy: lockedBy } as unknown as TestCaseLockInfo,
-        });
+        discardChanges();
       }
 
       showToast(
