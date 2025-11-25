@@ -90,12 +90,19 @@ const TestCaseData = (props: TestCaseListProps) => {
           measure.id,
           parseInt(formik.values.shiftTestCaseDates)
         )
-        .then(() => {
-          handleToast(
-            "success",
-            `All Test Case dates successfully shifted.`,
-            true
-          );
+        .then((response) => {
+          if (response.failed.length === 0) {
+            handleToast(
+              "success",
+              `All Test Case dates successfully shifted.`,
+              true
+            );
+          } else {
+            setShiftTestCaseDatesWarnings((prevState) => [
+              ...prevState,
+              ...response.failed,
+            ]);
+          }
         })
         .catch((err) => {
           if (featureFlags?.Locking) {
@@ -113,11 +120,11 @@ const TestCaseData = (props: TestCaseListProps) => {
           measure.id,
           parseInt(formik.values.shiftTestCaseDates)
         )
-        .then((failedTestCases) => {
-          if (failedTestCases.length > 0) {
+        .then((response) => {
+          if (response.failed.length > 0) {
             setShiftTestCaseDatesWarnings((prevState) => [
               ...prevState,
-              ...failedTestCases,
+              ...response.failed,
             ]);
           } else {
             handleToast(

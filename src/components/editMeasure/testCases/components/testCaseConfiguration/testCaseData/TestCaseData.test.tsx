@@ -51,12 +51,10 @@ const measure = {
 
 const qiCoreMeasure = { ...measure, model: "QI-Core v4.1.1" } as Measure;
 
-const responseDto: TestCase[] = [
-  {
-    id: "1234",
-    json: "date2",
-  },
-] as TestCase[];
+const responseDto = {
+  failed: [],
+  shifted: ["1234"],
+};
 
 jest.mock("@madie/madie-util", () => ({
   measureStore: {
@@ -282,7 +280,7 @@ describe("TestCaseData", () => {
   it("should successfully shift all test case dates", async () => {
     const shiftAllTestCaseDatesApiMock = jest
       .fn()
-      .mockResolvedValueOnce({ data: responseDto });
+      .mockResolvedValueOnce(responseDto);
     useTestCaseServiceMock.mockImplementationOnce(() => {
       return {
         shiftAllQdmTestCaseDates: shiftAllTestCaseDatesApiMock,
@@ -406,7 +404,7 @@ describe("TestCaseData", () => {
 
     const shiftAllTestCaseDatesApiMock = jest
       .fn()
-      .mockResolvedValueOnce({ data: responseDto });
+      .mockResolvedValueOnce(responseDto);
     useTestCaseServiceMock.mockImplementationOnce(() => {
       return {
         shiftAllQiCoreTestCaseDates: shiftAllTestCaseDatesApiMock,
@@ -493,7 +491,7 @@ describe("TestCaseData", () => {
     }));
     const shiftAllTestCaseDatesApiMock = jest
       .fn()
-      .mockResolvedValueOnce({ data: responseDto });
+      .mockResolvedValueOnce(responseDto);
     useTestCaseServiceMock.mockImplementationOnce(() => {
       return {
         shiftAllQdmTestCaseDates: shiftAllTestCaseDatesApiMock,
@@ -538,9 +536,13 @@ describe("TestCaseData", () => {
     (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
       Locking: true,
     }));
+    const failedResponseDto = {
+      failed: ["1234"],
+      shifted: [],
+    };
     const shiftAllTestCaseDatesApiMock = jest
       .fn()
-      .mockResolvedValueOnce(responseDto);
+      .mockResolvedValueOnce(failedResponseDto);
     useTestCaseServiceMock.mockImplementationOnce(() => {
       return {
         shiftAllQiCoreTestCaseDates: shiftAllTestCaseDatesApiMock,

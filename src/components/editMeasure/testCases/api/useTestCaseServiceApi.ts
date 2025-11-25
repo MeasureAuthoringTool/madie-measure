@@ -35,6 +35,11 @@ export type QrdaRequestDTO = {
   groupDTOs: QrdaGroupExportDTO[];
 };
 
+export interface ShiftDatesResponse {
+  failed: string[];
+  shifted: string[];
+}
+
 export interface CopyResult {
   copiedTestCases: TestCase[];
   didClearExpectedValues: boolean;
@@ -309,7 +314,7 @@ export class TestCaseServiceApi {
     measureId: string,
     testCaseIds: string[],
     shifted: number
-  ) {
+  ): Promise<ShiftDatesResponse> {
     try {
       const response = await axios.put(
         `${this.baseUrl}/measures/${measureId}/test-cases/qdm/shift-dates`,
@@ -338,7 +343,7 @@ export class TestCaseServiceApi {
     measureId: string,
     testCaseIds: string[],
     shifted: number
-  ) {
+  ): Promise<ShiftDatesResponse> {
     try {
       const response = await axios.put(
         `${this.baseUrl}/measures/${measureId}/test-cases/qicore/shift-dates`,
@@ -363,7 +368,10 @@ export class TestCaseServiceApi {
     }
   }
 
-  async shiftAllQdmTestCaseDates(measureId: string, shifted: number) {
+  async shiftAllQdmTestCaseDates(
+    measureId: string,
+    shifted: number
+  ): Promise<ShiftDatesResponse> {
     try {
       const response = await axios.get(
         `${this.baseUrl}/measures/${measureId}/test-cases/qdm/shift-all-dates`,
@@ -390,7 +398,7 @@ export class TestCaseServiceApi {
   async shiftAllQiCoreTestCaseDates(
     measureId: string,
     shifted: number
-  ): Promise<string[]> {
+  ): Promise<ShiftDatesResponse> {
     try {
       const response = await axios.put(
         `${this.baseUrl}/measures/${measureId}/test-cases/qicore/shift-all-dates`,

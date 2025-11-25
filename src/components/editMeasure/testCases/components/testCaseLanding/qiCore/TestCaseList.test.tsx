@@ -1650,7 +1650,10 @@ describe("TestCaseList component", () => {
   });
 
   it("should attempt to shift the dates in test case when the Save button within the shift test case dates dialogue is clicked and display an error message", async () => {
-    const responseData: string[] = ["testId1", "testId2"];
+    const responseData = {
+      failed: ["testId1", "testId2"],
+      shifted: [],
+    };
 
     const shiftQiCoreTestCaseDates = jest
       .fn()
