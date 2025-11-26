@@ -7,6 +7,7 @@ import PeriodDateTimeComponent, {
   YEAR_MONTH_DAY_FORMAT,
   DATE_TIME_ZONE_FORMAT,
 } from "./PeriodDateTimeComponent";
+import dayjs from "dayjs";
 
 describe("PeriodDateTimeComponent", () => {
   test("renders with default label and both date fields", () => {
@@ -137,6 +138,58 @@ describe("PeriodDateTimeComponent", () => {
     fireEvent.change(endTimeInput, { target: { value: "14:15:00" } });
 
     expect(handleChange).toHaveBeenCalled();
+  });
+
+  it("Handles valid pasted date and updates start date", () => {
+    const onChange = jest.fn();
+    render(
+      <PeriodDateTimeComponent
+        canEdit={true}
+        fieldRequired={false}
+        value={{ end: "2024-10-01" }}
+        onChange={onChange}
+        label="DateTime"
+      />
+    );
+
+    const pasteTarget = screen.getByTestId("start-YYYY-MM-DD-field-DateTime");
+    fireEvent.paste(pasteTarget, {
+      clipboardData: {
+        getData: () => "2023-10-15T12:00:00Z",
+      },
+    });
+
+    const expectedDate = dayjs.utc("2023-10-15").hour(0).minute(0).second(0);
+    expect(onChange).toHaveBeenCalledWith({
+      start: expectedDate.format("YYYY-MM-DD"),
+      end: "2024-10-01",
+    });
+  });
+
+  it("Handles valid pasted date and updates end date", () => {
+    const onChange = jest.fn();
+    render(
+      <PeriodDateTimeComponent
+        canEdit={true}
+        fieldRequired={false}
+        value={{ start: "2023-10-15" }}
+        onChange={onChange}
+        label="DateTime"
+      />
+    );
+
+    const pasteTarget = screen.getByTestId("end-YYYY-MM-DD-field-DateTime");
+    fireEvent.paste(pasteTarget, {
+      clipboardData: {
+        getData: () => "2024-10-01T12:00:00Z",
+      },
+    });
+
+    const expectedDate = dayjs.utc("2024-10-01").hour(0).minute(0).second(0);
+    expect(onChange).toHaveBeenCalledWith({
+      start: "2023-10-15",
+      end: expectedDate.format("YYYY-MM-DD"),
+    });
   });
 });
 

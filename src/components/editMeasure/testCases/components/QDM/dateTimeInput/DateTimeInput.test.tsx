@@ -51,4 +51,29 @@ describe("DateTimeInput Component", () => {
       ).toBeInTheDocument();
     });
   });
+
+  it("Handles valid pasted date and triggers onDateTimeChange", () => {
+    render(
+      <DateTimeInput
+        label="Author Date/Time"
+        dateTime={null}
+        onDateTimeChange={onDateTimeChange}
+        canEdit={true}
+        attributeName="authorDatetime"
+      />
+    );
+
+    const input = screen.getByRole("textbox", { name: "Author Date/Time" });
+    fireEvent.paste(input, {
+      clipboardData: {
+        getData: () => "2023-10-15T12:00:00Z",
+      },
+    });
+
+    const expectedDateTime = new CQL.DateTime(2023, 10, 15, 0, 0, 0, 0, 0);
+    expect(onDateTimeChange).toHaveBeenCalledWith(
+      expectedDateTime,
+      "authorDatetime"
+    );
+  });
 });

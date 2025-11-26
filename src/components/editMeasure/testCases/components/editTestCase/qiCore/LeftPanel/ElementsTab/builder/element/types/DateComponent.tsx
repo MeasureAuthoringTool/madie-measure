@@ -139,26 +139,40 @@ const DateTimeComponent = ({
               placeHolder={{ name: "Select Format", value: "" }}
               value={format ? format : ""}
             ></Select>
-            <DateField
-              label="Date Field"
-              format={format}
-              helperText={helperText}
-              placeholder={format ? formatOptionRenderMap[format] : ""}
-              required={fieldRequired}
-              error={error}
-              value={date ? dayjs(date) : null}
-              views={format ? formatMap[format] : ["year"]}
-              disabled={!canEdit || !format || format === "Invalid Format"}
-              id={`${format || "year"}-field-${label}`}
-              onChange={(date) => {
-                if (date) {
-                  if (date.format(format) !== "Invalid Date") {
-                    onChange(date.format(format));
-                  }
+            <div
+              onPaste={(e) => {
+                const pastedValue = e.clipboardData.getData("text");
+                const parsedDate = dayjs
+                  .utc(pastedValue)
+                  .hour(0)
+                  .minute(0)
+                  .second(0);
+                if (parsedDate) {
+                  onChange(parsedDate.format(format));
                 }
               }}
-              onBlur={() => {}}
-            />
+            >
+              <DateField
+                label="Date Field"
+                format={format}
+                helperText={helperText}
+                placeholder={format ? formatOptionRenderMap[format] : ""}
+                required={fieldRequired}
+                error={error}
+                value={date ? dayjs(date) : null}
+                views={format ? formatMap[format] : ["year"]}
+                disabled={!canEdit || !format || format === "Invalid Format"}
+                id={`${format || "year"}-field-${label}`}
+                onChange={(date) => {
+                  if (date) {
+                    if (date.format(format) !== "Invalid Date") {
+                      onChange(date.format(format));
+                    }
+                  }
+                }}
+                onBlur={() => {}}
+              />
+            </div>
           </div>
         </LocalizationProvider>
       </Box>

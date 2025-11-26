@@ -180,7 +180,23 @@ const PeriodDateTimeComponent = ({
           }}
           data-testid="date-div"
         >
-          <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+          <div
+            style={{ display: "flex", flexDirection: "column", gap: 4 }}
+            onPaste={(e) => {
+              const pastedValue = e.clipboardData.getData("text");
+              const parsedDate = dayjs
+                .utc(pastedValue)
+                .hour(0)
+                .minute(0)
+                .second(0);
+              if (parsedDate) {
+                onChange({
+                  start: parsedDate.format(format),
+                  end: endDate ? endDate.format(format) : "",
+                });
+              }
+            }}
+          >
             <DateField
               label="Start Date"
               required={fieldRequired}
@@ -244,7 +260,23 @@ const PeriodDateTimeComponent = ({
             )}
           </div>
           <span style={{ alignSelf: "center", padding: "0 8px" }}>To</span>
-          <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+          <div
+            style={{ display: "flex", flexDirection: "column", gap: 4 }}
+            onPaste={(e) => {
+              const pastedValue = e.clipboardData.getData("text");
+              const parsedDate = dayjs
+                .utc(pastedValue)
+                .hour(0)
+                .minute(0)
+                .second(0);
+              if (parsedDate) {
+                onChange({
+                  start: startDate ? startDate.format(format) : "",
+                  end: parsedDate.format(format),
+                });
+              }
+            }}
+          >
             <DateField
               label="End Date"
               required={fieldRequired}
