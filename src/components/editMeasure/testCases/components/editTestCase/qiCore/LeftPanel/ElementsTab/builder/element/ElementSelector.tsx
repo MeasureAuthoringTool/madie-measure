@@ -174,6 +174,9 @@ const ElementSelector = ({
         getOptionDisabled={(option) => {
           if (value.includes(option)) return true;
           // Disable if another choice type with same base is selected
+          if (option.min === 1) {
+            return true;
+          }
           const base = getChoiceBaseLabel(option, basePath);
           if (base) {
             // if any other option with same base is selected, and this option is not selected, disable
