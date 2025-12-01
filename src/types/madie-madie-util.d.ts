@@ -35,6 +35,7 @@ declare module "@madie/madie-util" {
     Calculator: boolean;
     CompareMeasureVersions: boolean;
     ExecutionConfigurationTab: boolean;
+    ExecutionConfigurationTab: boolean;
   }
 
   export interface ServiceConfig {
