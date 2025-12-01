@@ -592,4 +592,25 @@ describe("QuantityComponent", () => {
     });
     expect(screen.queryByText("Add Quantity")).not.toBeInTheDocument();
   });
+
+  test("displays tooltip on hover for Unit(s) field", async () => {
+    renderWithFormik();
+
+    const tooltipButton = screen.getByTestId("code-input-tooltip-button");
+
+    userEvent.hover(tooltipButton);
+
+    const tooltipText = await screen.findByText(
+      "Enter the UCUM (Unified Code for Units of Measure) code value."
+    );
+
+    expect(tooltipText).toBeVisible();
+
+    userEvent.unhover(tooltipButton);
+
+    await waitFor(() => {
+      const tooltip = screen.getByTestId("code-input-tooltip");
+      expect(tooltip).toHaveClass("madie-tooltip hidden");
+    });
+  });
 });
