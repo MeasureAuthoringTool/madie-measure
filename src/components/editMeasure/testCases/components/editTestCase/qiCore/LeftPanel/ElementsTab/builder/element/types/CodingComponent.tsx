@@ -154,7 +154,7 @@ const CodingComponent = ({
         extension: [
           {
             url: "http://hl7.org/fhir/StructureDefinition/valueset-reference",
-            valueUrl: selectedValueSet.url,
+            valueUri: selectedValueSet.url,
           },
         ] as Extension[],
       } as Coding;

@@ -1,9 +1,10 @@
 import React, { useState } from "react";
-import { Box, Divider, Typography } from "@mui/material";
+import { Divider, Typography } from "@mui/material";
 import { MadieDialog } from "@madie/madie-design-system/dist/react";
 import { Measure } from "@madie/madie-models";
 import CompareVersionsNavTabs from "./CompareVersionsNavTabs";
 import "./CompareVersionsDialog.scss";
+import MeasureComparisonPanel from "./MeasureComparisonPanel";
 
 interface CompareVersionsDialogProps {
   measures: Measure[] | null | undefined;
@@ -43,7 +44,8 @@ const CompareVersionsDialog = ({
 
   if (!measures || measures.length !== 2) return null;
 
-  const newestMeasure = getNewestMeasureInstance(measures);
+  const newMeasure = getNewestMeasureInstance(measures);
+  const oldMeasure = newMeasure === measures[0] ? measures[1] : measures[0];
 
   return (
     <MadieDialog
@@ -52,7 +54,7 @@ const CompareVersionsDialog = ({
       dialogProps={{
         onClose,
         open,
-        maxWidth: "lg",
+        maxWidth: "xl",
         "data-testid": "compare-versions-dialog",
       }}
       cancelButtonProps={{
@@ -63,42 +65,48 @@ const CompareVersionsDialog = ({
       titleBoxSx={{ padding: "20px 24px" }}
       contentSx={{ padding: 0 }}
     >
-      <Box className="measure-info-container">
-        <Typography variant="h6">
-          <span className="measure-name" data-testid="measure-name">
-            {newestMeasure.measureName}
-          </span>{" "}
-          <span className="measure-cmsid" data-testid="measure-cmsid">
-            (CMS ID: {newestMeasure.measureSet?.cmsId ?? "-"})
-          </span>
-        </Typography>
-      </Box>
+      <div className="compare-versions-dialog">
+        <div className="info-section">
+          <Typography className="measure-header">
+            <span className="measure-name" data-testid="measure-name">
+              {newMeasure.measureName}
+            </span>{" "}
+            <span className="measure-cmsid" data-testid="measure-cmsid">
+              (CMS ID: {newMeasure.measureSet?.cmsId ?? "-"})
+            </span>
+          </Typography>
+        </div>
 
-      <Divider className="divider" />
+        <Divider className="divider" />
 
-      <div className="horizontal-padding">
-        <CompareVersionsNavTabs
-          activeTab={activeTab}
-          setActiveTab={setActiveTab}
-        />
+        <div className="horizontal-padding">
+          <CompareVersionsNavTabs
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+          />
+        </div>
+
+        <Divider className="divider" />
+
+        {activeTab === "cql" && (
+          <div
+            className="comparison-panels-container"
+            data-testid="tab-content-cql"
+          >
+            <MeasureComparisonPanel measure={oldMeasure} side="old" />
+            <MeasureComparisonPanel measure={newMeasure} side="new" />
+          </div>
+        )}
+
+        {activeTab === "human-readable" && (
+          <div
+            className="horizontal-padding"
+            data-testid="tab-content-human-readable"
+          >
+            <Typography>Human Readable content goes here</Typography>
+          </div>
+        )}
       </div>
-
-      <Divider className="divider" />
-
-      {activeTab === "cql" && (
-        <div className="horizontal-padding" data-testid="tab-content-cql">
-          <Typography>CQL content goes here</Typography>
-        </div>
-      )}
-
-      {activeTab === "human-readable" && (
-        <div
-          className="horizontal-padding"
-          data-testid="tab-content-human-readable"
-        >
-          <Typography>Human Readable content goes here</Typography>
-        </div>
-      )}
     </MadieDialog>
   );
 };
