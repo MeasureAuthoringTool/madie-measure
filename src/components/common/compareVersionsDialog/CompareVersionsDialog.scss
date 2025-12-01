@@ -1,30 +1,96 @@
-.measure-info-container {
-  background: #f3f3f3;
-  padding: 16px 24px;
-  border-radius: 4px;
+.compare-versions-dialog {
+  --font-family-base: "Rubik", sans-serif;
+  --color-dark: #242424;
+  --color-light: #707070;
+  --font-weight-bold: 500;
+  --font-weight-normal: 400;
 
-  .measure-name,
-  .measure-cmsid {
-    font-family: "Rubik", sans-serif;
-    font-weight: 500;
-    font-size: 18px;
-    line-height: 24px;
-    letter-spacing: 0;
+  /* Panels container */
+  .comparison-panels-container {
+    display: flex;
+
+    .comparison-panel {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+
+      &:first-child {
+        border-right: 1px solid #8c8c8c;
+      }
+
+      .cql-container {
+        padding: 16px 24px;
+      }
+    }
   }
 
-  .measure-name {
-    color: #333;
+  /* Info boxes */
+  .info-section {
+    background: #f3f3f3;
+    padding: 16px 24px;
+    outline: 1px solid #8c8c8c;
+
+    .measure-header {
+      font-family: var(--font-family-base);
+      color: var(--color-dark);
+      font-weight: var(--font-weight-bold);
+      font-size: 18px;
+      line-height: 24px;
+      margin: 0;
+
+      .measure-cmsid {
+        font-family: var(--font-family-base);
+        color: var(--color-light);
+        font-weight: var(--font-weight-normal);
+      }
+    }
+
+    .measure-name-text {
+      font-family: var(--font-family-base);
+      color: var(--color-dark);
+      font-weight: var(--font-weight-bold);
+      font-size: 14px;
+      line-height: 24px;
+    }
   }
 
-  .measure-cmsid {
-    color: #707070;
+  /* Version row */
+  .measure-version-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    .version-chip-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      .version-text {
+        font-family: var(--font-family-base);
+        color: var(--color-dark);
+        font-weight: var(--font-weight-bold);
+        font-size: 16px;
+        line-height: 24px;
+      }
+
+      .draft-chip {
+        height: 24px;
+        min-width: 55px;
+        border-radius: 16px;
+        background-color: #cbe4ff;
+        font-size: 14.4px;
+        line-height: 20px;
+        text-align: center;
+        padding: 0 8px;
+      }
+    }
+
+    .last-updated {
+      font-family: var(--font-family-base);
+      color: var(--color-light);
+      font-weight: var(--font-weight-normal);
+      font-size: 14px;
+      line-height: 24px;
+    }
   }
-}
-
-.horizontal-padding {
-  padding: 0 24px;
-}
-
-.divider {
-  border-color: #8c8c8c;
 }
