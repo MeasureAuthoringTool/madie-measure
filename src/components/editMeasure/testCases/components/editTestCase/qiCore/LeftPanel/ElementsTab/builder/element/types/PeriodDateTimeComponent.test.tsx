@@ -192,7 +192,7 @@ describe("PeriodDateTimeComponent", () => {
     });
   });
 
-  it("Does not trigger onChange when invalid date is pasted", () => {
+  it("Does not trigger onChange when invalid start date is pasted", () => {
     const onChange = jest.fn();
     render(
       <PeriodDateTimeComponent
@@ -205,6 +205,28 @@ describe("PeriodDateTimeComponent", () => {
     );
 
     const pasteTarget = screen.getByTestId("start-YYYY-MM-DD-field-DateTime");
+    fireEvent.paste(pasteTarget, {
+      clipboardData: {
+        getData: () => "invalid-date",
+      },
+    });
+
+    expect(onChange).not.toHaveBeenCalled();
+  });
+
+  it("Does not trigger onChange when invalid end date is pasted", () => {
+    const onChange = jest.fn();
+    render(
+      <PeriodDateTimeComponent
+        canEdit={true}
+        fieldRequired={false}
+        value={{ end: "2024-10-01" }}
+        onChange={onChange}
+        label="DateTime"
+      />
+    );
+
+    const pasteTarget = screen.getByTestId("end-YYYY-MM-DD-field-DateTime");
     fireEvent.paste(pasteTarget, {
       clipboardData: {
         getData: () => "invalid-date",
