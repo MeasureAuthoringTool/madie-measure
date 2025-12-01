@@ -184,17 +184,15 @@ const PeriodDateTimeComponent = ({
             style={{ display: "flex", flexDirection: "column", gap: 4 }}
             onPaste={(e) => {
               const pastedValue = e.clipboardData.getData("text");
-              const parsedDate = dayjs
-                .utc(pastedValue)
-                .hour(0)
-                .minute(0)
-                .second(0);
-              if (parsedDate) {
-                onChange({
-                  start: parsedDate.format(format),
-                  end: endDate ? endDate.format(format) : "",
-                });
+              const parsedDate = dayjs.utc(pastedValue).startOf("day");
+              if (!parsedDate.isValid()) {
+                console.error("Invalid date format pasted:", pastedValue);
+                return;
               }
+              onChange({
+                start: parsedDate.format(format),
+                end: endDate?.format(format) || "",
+              });
             }}
           >
             <DateField

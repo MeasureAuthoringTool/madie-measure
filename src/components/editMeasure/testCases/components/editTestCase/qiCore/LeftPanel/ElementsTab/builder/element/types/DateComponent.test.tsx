@@ -358,4 +358,28 @@ describe("DateComponent", () => {
     const expectedDate = dayjs.utc("2023-10-15").hour(0).minute(0).second(0);
     expect(onChange).toHaveBeenCalledWith(expectedDate.format("YYYY-MM-DD"));
   });
+
+  it("Does not trigger onChange when invalid date is pasted", () => {
+    const onChange = jest.fn();
+    render(
+      <DateComponent
+        canEdit={true}
+        fieldRequired={false}
+        value={null}
+        onChange={onChange}
+        label="birthday"
+      />
+    );
+
+    const pasteTarget = screen.getByTestId(
+      `${YEAR_MONTH_DAY_FORMAT}-field-birthday-input`
+    );
+    fireEvent.paste(pasteTarget, {
+      clipboardData: {
+        getData: () => "Invalid Date",
+      },
+    });
+
+    expect(onChange).not.toHaveBeenCalled();
+  });
 });

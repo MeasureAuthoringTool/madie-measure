@@ -142,14 +142,12 @@ const DateTimeComponent = ({
             <div
               onPaste={(e) => {
                 const pastedValue = e.clipboardData.getData("text");
-                const parsedDate = dayjs
-                  .utc(pastedValue)
-                  .hour(0)
-                  .minute(0)
-                  .second(0);
-                if (parsedDate) {
-                  onChange(parsedDate.format(format));
+                const parsedDate = dayjs.utc(pastedValue).startOf("day");
+                if (!parsedDate.isValid()) {
+                  console.error("Invalid date format pasted:", pastedValue);
+                  return;
                 }
+                onChange(parsedDate.format(format));
               }}
             >
               <DateField

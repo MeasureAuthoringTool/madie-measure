@@ -73,7 +73,7 @@ const DateTimeInput = ({
       onPaste={(e) => {
         const pastedValue = e.clipboardData.getData("text");
         const parsedDate = toDayJS(pastedValue).hour(0).minute(0).second(0);
-        if (parsedDate) {
+        if (parsedDate && parsedDate.isValid()) {
           onDateTimeChange(
             getCQLDateTime(parsedDate, !dateTime),
             attributeName

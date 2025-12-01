@@ -8,6 +8,9 @@ const testDateTime: CQL.DateTimeField = dayjs.utc("2022-04-17T15:30");
 const onDateTimeChange = jest.fn();
 
 describe("DateTimeInput Component", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
   it("Should render DateTimeInput component with appropriate data", () => {
     render(
       <DateTimeInput
@@ -75,5 +78,26 @@ describe("DateTimeInput Component", () => {
       expectedDateTime,
       "authorDatetime"
     );
+  });
+
+  it("Does not trigger onChange when invalid date is pasted", () => {
+    render(
+      <DateTimeInput
+        label="Author Date/Time"
+        dateTime={null}
+        onDateTimeChange={onDateTimeChange}
+        canEdit={true}
+        attributeName="authorDatetime"
+      />
+    );
+
+    const input = screen.getByRole("textbox", { name: "Author Date/Time" });
+    fireEvent.paste(input, {
+      clipboardData: {
+        getData: () => "Invalid Date",
+      },
+    });
+
+    expect(onDateTimeChange).not.toHaveBeenCalled();
   });
 });
