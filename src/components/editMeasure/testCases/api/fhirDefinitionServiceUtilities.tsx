@@ -314,9 +314,20 @@ export function getTopLevelElements(resource: any) {
       e.id !== "Extension.extension" &&
       e.id !== "Patient.extension" &&
       e.max !== "0" &&
-      // Exclude entries where the path contains".contained",".text",".meta",".language",".implicitRules"
-      ![".contained", ".text", ".meta", ".language", ".implicitRules"].some(
-        (attribute) => e?.path?.includes(attribute)
+      // Exclude entries where the path contains these attributes or matches these element names
+      ![
+        ".contained",
+        ".text",
+        ".meta",
+        ".language",
+        ".implicitRules",
+        "id",
+        "modifierExtension",
+        "extension",
+      ].some(
+        (attribute) =>
+          e?.path?.includes(attribute) ||
+          e.path.substring(basePath?.length + 1) === attribute
       )
   );
   //for each elementsFiltered, if type contains more than one type, duplicate the element and restrict the type to only that type
