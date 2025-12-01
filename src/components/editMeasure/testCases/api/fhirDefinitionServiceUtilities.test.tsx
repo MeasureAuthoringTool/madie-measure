@@ -92,6 +92,50 @@ describe("FhirDefinitionServiceUtilities", () => {
         { path: "Patient.name", min: 0, type: [{ code: "HumanName" }] },
       ]);
     });
+
+    it("should filter out id, modifierExtension, and extension elements", () => {
+      const resourceWithFilteredElements = {
+        definition: {
+          type: "Patient",
+          snapshot: {
+            element: [
+              { path: "Patient", min: 1, type: [{ code: "Resource" }] },
+              { path: "Patient.id", min: 0, max: "1", type: [{ code: "id" }] },
+              {
+                path: "Patient.extension",
+                min: 0,
+                max: "*",
+                type: [{ code: "Extension" }],
+              },
+              {
+                path: "Patient.modifierExtension",
+                min: 0,
+                max: "*",
+                type: [{ code: "Extension" }],
+              },
+              { path: "Patient.name", min: 0, type: [{ code: "HumanName" }] },
+              {
+                path: "Patient.gender",
+                min: 0,
+                max: "1",
+                type: [{ code: "code" }],
+              },
+            ],
+          },
+        },
+      };
+      const result = getTopLevelElements(resourceWithFilteredElements);
+      // Should only include name and gender, not id, extension, or modifierExtension
+      expect(result).toEqual([
+        {
+          path: "Patient.gender",
+          min: 0,
+          max: "1",
+          type: [{ code: "code" }],
+        },
+        { path: "Patient.name", min: 0, type: [{ code: "HumanName" }] },
+      ]);
+    });
   });
 
   describe("getRequiredElements", () => {
