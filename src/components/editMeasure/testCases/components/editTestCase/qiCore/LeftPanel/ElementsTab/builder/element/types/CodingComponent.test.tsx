@@ -268,7 +268,7 @@ describe("CodingComponent Tests", () => {
         extension: [
           {
             url: "http://hl7.org/fhir/StructureDefinition/valueset-reference",
-            valueUrl: mockBindingValueSet.url,
+            valueUri: mockBindingValueSet.url,
           },
         ],
       });
@@ -423,7 +423,7 @@ describe("CodingComponent Tests", () => {
         extension: [
           {
             url: "http://hl7.org/fhir/StructureDefinition/valueset-reference",
-            valueUrl: mockBindingValueSet.url,
+            valueUri: mockBindingValueSet.url,
           },
         ],
       });
