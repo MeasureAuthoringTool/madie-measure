@@ -35,7 +35,6 @@ declare module "@madie/madie-util" {
     Calculator: boolean;
     CompareMeasureVersions: boolean;
     ExecutionConfigurationTab: boolean;
-    ExecutionConfigurationTab: boolean;
     QICoreCompositeMeasure: boolean;
   }
 
