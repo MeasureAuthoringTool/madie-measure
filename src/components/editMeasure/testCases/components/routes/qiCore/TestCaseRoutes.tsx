@@ -28,8 +28,17 @@ import Expansion from "../../testCaseConfiguration/expansion/Expansion";
 import RAVPage from "../../testCaseConfiguration/rav/RAVPage";
 import ExecutionOptions from "../../testCaseConfiguration/executionOptions/ExecutionOptions";
 
+// error messages
+export const TEST_CASE_EXECUTION_ERROR =
+  "Test Cases cannot be executed and Valuesets from the measure CQL cannot be expanded until this is resolved.";
+export const NO_PC_ERROR =
+  "No Population Criteria is associated with this measure. Please review the Population Criteria tab.";
+export const CQL_ERROR =
+  "An error exists with the measure CQL, please review the CQL Editor tab.";
 export const CQL_RETURN_TYPES_MISMATCH_ERROR =
-  "One or more Population Criteria has a mismatch with CQL return types. Test Cases cannot be executed until this is resolved.";
+  "One or more Population Criteria has a mismatch with CQL return types. Please check the population criteria tab to update.";
+export const SDE_RAV_RETURN_TYPES_MISMATCH_ERROR =
+  "Supplemental Data Elements or Risk Adjustment Variables in the Population Criteria section are invalid. Please check and update these values.";
 
 const TestCaseRoutes = () => {
   const [measureBundle, setMeasureBundle] = useState<Bundle>();
@@ -72,22 +81,34 @@ const TestCaseRoutes = () => {
       }
       setLastMeasure(compareTo);
       if (measure.cqlErrors || !measure.elmJson) {
-        localErrors.push(
-          "An error exists with the measure CQL, please review the CQL Editor tab."
-        );
+        localErrors.push(CQL_ERROR);
       }
       if (!measure?.groups?.length) {
-        localErrors.push(
-          "No Population Criteria is associated with this measure. Please review the Population Criteria tab."
-        );
+        localErrors.push(NO_PC_ERROR);
       }
 
-      if (
-        measure?.errors?.includes(
-          MeasureErrorType.MISMATCH_CQL_POPULATION_RETURN_TYPES
-        )
-      ) {
-        localErrors.push(CQL_RETURN_TYPES_MISMATCH_ERROR);
+      if (measure?.errors) {
+        if (
+          measure.errors?.includes(
+            MeasureErrorType.MISMATCH_CQL_POPULATION_RETURN_TYPES
+          )
+        ) {
+          localErrors.push(CQL_RETURN_TYPES_MISMATCH_ERROR);
+        }
+
+        if (
+          measure.errors?.includes(
+            MeasureErrorType.MISMATCH_CQL_RISK_ADJUSTMENT
+          ) ||
+          measure.errors.includes(
+            MeasureErrorType.MISMATCH_CQL_SUPPLEMENTAL_DATA
+          )
+        ) {
+          localErrors.push(SDE_RAV_RETURN_TYPES_MISMATCH_ERROR);
+        }
+      }
+      if (localErrors.length > 0) {
+        localErrors.push(TEST_CASE_EXECUTION_ERROR);
       }
       if (measure?.testCaseConfiguration?.executeInvalidTestCases) {
         setCustomWarningMessages([
@@ -152,29 +173,20 @@ const TestCaseRoutes = () => {
         contextFailure,
       }}
     >
-      {errors && errors.length > 0 && (
-        <StatusHandler
-          error={true}
-          errorMessages={errors}
-          testDataId="execution_context_loading_errors"
-        />
-      )}
-      {(warnings?.length ||
-        customWarningMessages?.length > 0 ||
-        shiftTestCaseDatesWarnings?.length > 0) && (
-        <>
-          <StatusHandler
-            warning={true}
-            warningMessages={warnings}
-            customWarningMessages={customWarningMessages}
-            shiftTestCaseDatesWarning={shiftTestCaseDatesWarnings}
-            testDataId="execution_context_loading_warning"
-          />
-        </>
-      )}
-      {importWarnings && importWarnings.length > 0 && (
-        <StatusHandler importWarnings={importWarnings} />
-      )}
+      <StatusHandler
+        error={errors?.length > 0}
+        errorMessages={errors}
+        warning={
+          warnings?.length > 0 ||
+          customWarningMessages?.length > 0 ||
+          shiftTestCaseDatesWarnings?.length > 0
+        }
+        warningMessages={warnings}
+        customWarningMessages={customWarningMessages}
+        shiftTestCaseDatesWarning={shiftTestCaseDatesWarnings}
+        importWarnings={importWarnings}
+        testDataId="test-case-alerts"
+      />
       <Routes>
         <Route path="/list-page">
           <Route

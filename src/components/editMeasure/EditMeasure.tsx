@@ -159,12 +159,15 @@ export default function EditMeasure() {
   const [failureMessage, setFailureMessage] = useState(null);
   const abortController = useRef(null);
 
-  const measureCanEdit: boolean =
-    checkUserCanEdit(
-      measure?.measureSet?.owner,
-      measure?.measureSet?.acls,
-      measure?.measureMetaData?.draft
-    ) && !(featureFlags?.Locking && measure?.measureLock);
+  const measureCanEdit: boolean = checkUserCanEdit(
+    measure?.measureSet?.owner,
+    measure?.measureSet?.acls,
+    measure?.measureMetaData?.draft
+  );
+  const measureLockedBy: string =
+    featureFlags?.Locking && measure?.measureLock
+      ? measure?.measureLock?.lockedBy
+      : undefined;
 
   useEffect(() => {
     const deleteListener = () => {
@@ -542,7 +545,7 @@ export default function EditMeasure() {
         handleToast("success", "Measure successfully deleted", true);
         setTimeout(() => {
           navigate("/measures");
-        }, 3000);
+        }, 1000);
       }
     } catch (e) {
       if (e?.response?.data) {
@@ -564,6 +567,10 @@ export default function EditMeasure() {
   } = {}) => {
     handleDialogClose();
     handleToast(toastType, toastMessage, toastOpen);
+
+    setTimeout(() => {
+      navigate("/measures");
+    }, 1000);
   };
 
   const onToastClose = () => {
@@ -645,12 +652,18 @@ export default function EditMeasure() {
                     isQDM={isQDM}
                     featureFlags={featureFlags}
                     measureCanEdit={measureCanEdit}
+                    measureLockedBy={measureLockedBy}
                   />
                 }
               />
               <Route
                 path={`/cql-editor`}
-                element={<MeasureEditor measureCanEdit={measureCanEdit} />}
+                element={
+                  <MeasureEditor
+                    measureCanEdit={measureCanEdit}
+                    measureLockedBy={measureLockedBy}
+                  />
+                }
               />
               <Route
                 path={`/test-cases/*`}
@@ -663,31 +676,44 @@ export default function EditMeasure() {
               <Route
                 path={`/groups/:groupNumber`}
                 element={
-                  <PopulationCriteriaWrapper measureCanEdit={measureCanEdit} />
+                  <PopulationCriteriaWrapper
+                    measureCanEdit={measureCanEdit}
+                    measureLockedBy={measureLockedBy}
+                    displayLockedMeasurePopup={isQDM ? false : true}
+                  />
                 }
               />
               <Route
                 path={`/supplemental-data`}
                 element={
-                  <PopulationCriteriaWrapper measureCanEdit={measureCanEdit} />
+                  <PopulationCriteriaWrapper
+                    measureCanEdit={measureCanEdit && !measureLockedBy}
+                  />
                 }
               />
               <Route
                 path={`/risk-adjustment`}
                 element={
-                  <PopulationCriteriaWrapper measureCanEdit={measureCanEdit} />
+                  <PopulationCriteriaWrapper
+                    measureCanEdit={measureCanEdit && !measureLockedBy}
+                  />
                 }
               />
               <Route
                 path={`/base-configuration`}
                 element={
-                  <PopulationCriteriaWrapper measureCanEdit={measureCanEdit} />
+                  <PopulationCriteriaWrapper
+                    measureCanEdit={measureCanEdit}
+                    measureLockedBy={measureLockedBy}
+                  />
                 }
               />
               <Route
                 path={`/reporting`}
                 element={
-                  <PopulationCriteriaWrapper measureCanEdit={measureCanEdit} />
+                  <PopulationCriteriaWrapper
+                    measureCanEdit={measureCanEdit && !measureLockedBy}
+                  />
                 }
               />
               <Route path={`/review-info`} element={<ReviewInfo />} />

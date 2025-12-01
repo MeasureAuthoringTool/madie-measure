@@ -211,6 +211,21 @@ const useTestCaseServiceMockRejected = {
   lockTestCase: jest.fn().mockRejectedValueOnce(lockInfo),
   unLockTestCase: jest.fn().mockRejectedValueOnce(lockInfo),
 } as unknown as TestCaseServiceApi;
+const useTestCaseServiceMockRejected423 = {
+  getTestCase: jest.fn().mockResolvedValue(testCase),
+  getTestCaseSeriesForMeasure: jest
+    .fn()
+    .mockResolvedValue(["Series 1", "Series 2"]),
+  updateTestCase: jest
+    .fn()
+    .mockRejectedValueOnce(
+      new MadieError(
+        "Unable to update Test Case. Test Case is locked by: anotherUser"
+      )
+    ),
+  lockTestCase: jest.fn().mockRejectedValueOnce(lockInfo),
+  unLockTestCase: jest.fn().mockRejectedValueOnce(lockInfo),
+} as unknown as TestCaseServiceApi;
 const nonUniqNameData: MadieError = new MadieError("Error Msg");
 
 const useTestCaseServiceMockRejectedNonUniqueName = {
@@ -846,6 +861,92 @@ describe("EditTestCase QDM Component", () => {
     );
   });
 
+  it("test update test case fails with failure toast for test case locked", async () => {
+    testCase.json = JSON.stringify(testCaseJson);
+    useTestCaseServiceMock.mockImplementation(() => {
+      return useTestCaseServiceMockRejected423;
+    });
+    await renderEditTestCaseComponent();
+    const saveTestCaseButton = screen.getByRole("button", {
+      name: "Save",
+    });
+
+    expect(saveTestCaseButton).toBeInTheDocument();
+    const raceSelector = screen.getByRole("combobox", { name: "Race" });
+    expect(raceSelector).toHaveTextContent("Select a Race");
+    // change the race
+    userEvent.click(raceSelector);
+    const raceOptions = await screen.findAllByRole("option");
+    expect(raceOptions.length).toBe(4);
+    userEvent.click(raceOptions[3]);
+    expect(raceSelector).toHaveTextContent("White");
+
+    expect(saveTestCaseButton).toBeEnabled();
+    userEvent.click(saveTestCaseButton);
+
+    await waitFor(
+      () => {
+        expect(screen.getByTestId("error-toast")).toHaveTextContent(
+          "Unable to update Test Case. Test Case is locked by: anotherUser"
+        );
+        const closeToastBtn = screen.getByTestId("close-toast-button");
+        userEvent.click(closeToastBtn);
+        expect(
+          screen.queryByText(
+            "Unable to update Test Case. Test Case is locked by: anotherUser"
+          )
+        ).not.toBeInTheDocument();
+      },
+      { timeout: 1500 }
+    );
+  });
+
+  it("Should display failed update toast due to a lock", async () => {
+    testCase.json = JSON.stringify(testCaseJson);
+
+    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
+      applyDefaults: mockApplyDefaults,
+      Locking: true,
+    }));
+
+    useTestCaseServiceMock.mockImplementation(() => {
+      return {
+        ...useTestCaseServiceMockResolved,
+        updateTestCase: jest.fn().mockRejectedValueOnce({
+          message:
+            "Unable to update Test Case. Test Case is locked by: another.user",
+        }),
+      } as unknown as TestCaseServiceApi;
+    });
+
+    await waitFor(() => renderEditTestCaseComponent());
+
+    const raceSelector = screen.getByRole("combobox", { name: "Race" });
+    userEvent.click(raceSelector);
+    const raceOptions = await screen.findAllByRole("option");
+    userEvent.click(raceOptions[3]);
+
+    const saveButton = screen.getByRole("button", { name: "Save" });
+    expect(saveButton).toBeEnabled();
+    userEvent.click(saveButton);
+
+    await waitFor(
+      () => {
+        expect(screen.getByTestId("error-toast")).toHaveTextContent(
+          "Unable to update Test Case. Test Case is locked by: another.user"
+        );
+        const closeToastBtn = screen.getByTestId("close-toast-button");
+        userEvent.click(closeToastBtn);
+        expect(
+          screen.queryByText(
+            "Unable to update Test Case. Test Case is locked by: another.user"
+          )
+        ).not.toBeInTheDocument();
+      },
+      { timeout: 1500 }
+    );
+  });
+
   it("RightPanel navigation works as expected.", async () => {
     renderEditTestCaseComponent();
     const highlighting = await findByText("Highlighting");
@@ -933,7 +1034,7 @@ describe("EditTestCase QDM Component", () => {
         "Test Case Updated Successfully"
       );
     });
-  }, 30000);
+  });
 
   it("Should not update test case because of special characters", async () => {
     testCase.json = JSON.stringify(testCaseJson);
@@ -986,7 +1087,7 @@ describe("EditTestCase QDM Component", () => {
         "Test Case Title can not contain special characters"
       );
     });
-  }, 30000);
+  });
   describe("validator", () => {
     it("should provide error for non boolean populations when value is in decimal", () => {
       const tc = {

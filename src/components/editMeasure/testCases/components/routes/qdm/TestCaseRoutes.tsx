@@ -6,7 +6,11 @@ import NotFound from "../../notfound/NotFound";
 import StatusHandler, {
   CustomWarningMessage,
 } from "../../statusHandler/StatusHandler";
-import { Measure, TestCaseImportOutcome } from "@madie/madie-models";
+import {
+  Measure,
+  MeasureErrorType,
+  TestCaseImportOutcome,
+} from "@madie/madie-models";
 import { measureStore } from "@madie/madie-util";
 import { CqmMeasure, ValueSet } from "cqm-models";
 import useCqmConversionService from "../../../api/CqmModelConversionService";
@@ -19,6 +23,10 @@ import Expansion from "../../testCaseConfiguration/expansion/Expansion";
 import TestCaseData from "../../testCaseConfiguration/testCaseData/TestCaseData";
 import RAVPage from "../../testCaseConfiguration/rav/RAVPage";
 import ExecutionOptions from "../../testCaseConfiguration/executionOptions/ExecutionOptions";
+import {
+  CQL_RETURN_TYPES_MISMATCH_ERROR,
+  SDE_RAV_RETURN_TYPES_MISMATCH_ERROR,
+} from "../qiCore/TestCaseRoutes";
 
 const TestCaseRoutes = () => {
   const [cqmMeasureErrors, setCqmMeasureErrors] = useState<Array<string>>([]);
@@ -109,6 +117,27 @@ const TestCaseRoutes = () => {
             "No Population Criteria is associated with this measure. Please review the Population Criteria tab."
           );
         }
+        if (measure?.errors) {
+          if (
+            measure.errors?.includes(
+              MeasureErrorType.MISMATCH_CQL_POPULATION_RETURN_TYPES
+            )
+          ) {
+            localErrors.push(CQL_RETURN_TYPES_MISMATCH_ERROR);
+          }
+
+          if (
+            measure.errors?.includes(
+              MeasureErrorType.MISMATCH_CQL_RISK_ADJUSTMENT
+            ) ||
+            measure.errors.includes(
+              MeasureErrorType.MISMATCH_CQL_SUPPLEMENTAL_DATA
+            )
+          ) {
+            localErrors.push(SDE_RAV_RETURN_TYPES_MISMATCH_ERROR);
+          }
+        }
+
         if (
           !localErrors.length ||
           measure?.testCaseConfiguration?.executeInvalidTestCases
@@ -198,35 +227,20 @@ const TestCaseRoutes = () => {
         contextFailure,
       }}
     >
-      {cqmMeasureErrors && cqmMeasureErrors.length > 0 && (
-        <StatusHandler
-          error={true}
-          errorMessages={cqmMeasureErrors}
-          testDataId="execution_context_loading_errors"
-        />
-      )}
-      {importErrors && importErrors.length > 0 && (
-        <StatusHandler
-          error={true}
-          errorMessages={importErrors}
-          testDataId="import-error-messages"
-        />
-      )}
-      {(warnings?.length || customWarningMessages?.length > 0) && (
-        <StatusHandler
-          warning={true}
-          shiftTestCaseDatesWarning={shiftTestCaseDatesWarnings}
-          customWarningMessages={customWarningMessages}
-          testDataId="execution_context_loading_warning"
-        />
-      )}
-
-      {importWarnings && importWarnings.length > 0 && (
-        <StatusHandler
-          importWarnings={importWarnings}
-          testDataId="import-warning-messages"
-        />
-      )}
+      <StatusHandler
+        error={cqmMeasureErrors?.length > 0 || importErrors?.length > 0}
+        errorMessages={[...(cqmMeasureErrors || []), ...(importErrors || [])]}
+        warning={
+          warnings?.length > 0 ||
+          customWarningMessages?.length > 0 ||
+          shiftTestCaseDatesWarnings?.length > 0
+        }
+        warningMessages={warnings}
+        customWarningMessages={customWarningMessages}
+        shiftTestCaseDatesWarning={shiftTestCaseDatesWarnings}
+        importWarnings={importWarnings}
+        testDataId="test-case-alerts"
+      />
       <Routes>
         <Route path="/list-page">
           <Route

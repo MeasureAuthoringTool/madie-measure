@@ -181,6 +181,7 @@ export interface MeasureGroupProps {
   setIsFormDirty?: (value: boolean) => void;
   measureId?: string;
   setAlertMessage: Function;
+  alertMessage: string;
   isTestCaseLocked: boolean;
   checkTestCasesLockStatus: Function;
   measureCanEdit: boolean;

@@ -296,6 +296,7 @@ export function PopulationCriteriaHome({ measureCanEdit }) {
             setMeasureGroupNumber={setMeasureGroupNumber}
             measureId={measure?.id}
             setAlertMessage={setAlertMessage}
+            alertMessage={alertMessage}
             isTestCaseLocked={isTestCaseLocked}
             checkTestCasesLockStatus={checkTestCasesLockStatus}
             measureCanEdit={measureCanEdit}

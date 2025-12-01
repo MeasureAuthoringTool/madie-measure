@@ -1,6 +1,6 @@
 import "@testing-library/jest-dom";
 import * as React from "react";
-import { screen, render, waitFor } from "@testing-library/react";
+import { screen, render, waitFor, fireEvent } from "@testing-library/react";
 import { MemoryRouter } from "react-router";
 import { Route, Routes } from "react-router-dom";
 import MeasureDetails from "./MeasureDetails";
@@ -174,6 +174,7 @@ describe("MeasureDetails component", () => {
                   isQDM={false}
                   featureFlags={mockUseFeatureFlags()}
                   measureCanEdit={false}
+                  measureLockedBy=""
                 />
               }
             />
@@ -199,6 +200,7 @@ describe("MeasureDetails component", () => {
                   featureFlags={mockUseFeatureFlags()}
                   isQDM={false}
                   measureCanEdit={false}
+                  measureLockedBy=""
                 />
               }
             />
@@ -224,6 +226,7 @@ describe("MeasureDetails component", () => {
                   featureFlags={mockUseFeatureFlags()}
                   isQDM={false}
                   measureCanEdit={false}
+                  measureLockedBy=""
                 />
               }
             />
@@ -257,6 +260,7 @@ describe("MeasureDetails component", () => {
                   featureFlags={mockUseFeatureFlags()}
                   isQDM={false}
                   measureCanEdit={false}
+                  measureLockedBy=""
                 />
               }
             />
@@ -292,6 +296,7 @@ describe("MeasureDetails component", () => {
                   featureFlags={mockUseFeatureFlags()}
                   isQDM={false}
                   measureCanEdit={false}
+                  measureLockedBy=""
                 />
               }
             />
@@ -325,6 +330,7 @@ describe("MeasureDetails component", () => {
                   featureFlags={mockUseFeatureFlags()}
                   isQDM={false}
                   measureCanEdit={false}
+                  measureLockedBy=""
                 />
               }
             />
@@ -358,6 +364,7 @@ describe("MeasureDetails component", () => {
                   featureFlags={mockUseFeatureFlags()}
                   isQDM={false}
                   measureCanEdit={false}
+                  measureLockedBy=""
                 />
               }
             />
@@ -394,6 +401,7 @@ describe("MeasureDetails component", () => {
                   featureFlags={mockUseFeatureFlags()}
                   isQDM={false}
                   measureCanEdit={false}
+                  measureLockedBy=""
                 />
               }
             />
@@ -429,6 +437,7 @@ describe("MeasureDetails component", () => {
                   featureFlags={mockUseFeatureFlags()}
                   isQDM={true}
                   measureCanEdit={false}
+                  measureLockedBy=""
                 />
               }
             />
@@ -455,6 +464,7 @@ describe("MeasureDetails component", () => {
                   featureFlags={mockUseFeatureFlags()}
                   isQDM={true}
                   measureCanEdit={false}
+                  measureLockedBy=""
                 />
               }
             />
@@ -481,6 +491,7 @@ describe("MeasureDetails component", () => {
                   featureFlags={mockUseFeatureFlags()}
                   isQDM={true}
                   measureCanEdit={true}
+                  measureLockedBy=""
                 />
               }
             />
@@ -511,6 +522,7 @@ describe("MeasureDetails component", () => {
                   featureFlags={mockUseFeatureFlags()}
                   isQDM={true}
                   measureCanEdit={true}
+                  measureLockedBy=""
                 />
               }
             />
@@ -536,6 +548,7 @@ describe("MeasureDetails component", () => {
                   featureFlags={mockUseFeatureFlags()}
                   isQDM={false}
                   measureCanEdit={true}
+                  measureLockedBy=""
                 />
               }
             />
@@ -566,6 +579,7 @@ describe("MeasureDetails component", () => {
                   featureFlags={mockUseFeatureFlags()}
                   isQDM={true}
                   measureCanEdit={true}
+                  measureLockedBy=""
                 />
               }
             />
@@ -631,6 +645,7 @@ describe("MeasureDetails component", () => {
                   featureFlags={mockUseFeatureFlags()}
                   isQDM={true}
                   measureCanEdit={true}
+                  measureLockedBy=""
                 />
               }
             />
@@ -678,6 +693,7 @@ describe("MeasureDetails component", () => {
                   setErrorMessage={setErrorMessage}
                   isQDM={true}
                   measureCanEdit={true}
+                  measureLockedBy=""
                 />
               }
             />
@@ -722,6 +738,7 @@ describe("MeasureDetails component", () => {
                   setErrorMessage={setErrorMessage}
                   isQDM={true}
                   measureCanEdit={true}
+                  measureLockedBy=""
                 />
               }
             />
@@ -751,6 +768,7 @@ describe("MeasureDetails component", () => {
                   isQDM={false}
                   featureFlags={mockUseFeatureFlags()}
                   measureCanEdit={true}
+                  measureLockedBy="another-user"
                 />
               }
             />
@@ -759,5 +777,38 @@ describe("MeasureDetails component", () => {
       </ApiContextProvider>
     );
     expect(getByText("Mock Measure Info")).toBeTruthy();
+  });
+
+  it("should render MeasureInformation component with measureLockedByAnotherUser as true", async () => {
+    render(
+      <ApiContextProvider value={serviceConfig}>
+        <MemoryRouter initialEntries={[{ pathname: "/foo" }]}>
+          <Routes>
+            <Route
+              path="/foo"
+              element={
+                <MeasureDetails
+                  setErrorMessage={setErrorMessage}
+                  isQDM={false}
+                  featureFlags={{ Locking: true }}
+                  measureCanEdit={true}
+                  measureLockedBy="another-user"
+                />
+              }
+            />
+          </Routes>
+        </MemoryRouter>
+      </ApiContextProvider>
+    );
+    expect(getByText("Mock Measure Info")).toBeTruthy();
+    expect(getByText("Measure currently In-Use")).toBeTruthy();
+    const closeButton = getByTestId("measure-locked-modal-close-button");
+    expect(closeButton).toBeTruthy();
+    fireEvent.click(closeButton);
+    await waitFor(() => {
+      expect(
+        screen.queryByText("Measure currently In-Use")
+      ).not.toBeInTheDocument();
+    });
   });
 });
