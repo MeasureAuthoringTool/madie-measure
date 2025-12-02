@@ -113,6 +113,7 @@ const TestCaseList = (props: TestCaseListProps) => {
   const {
     testCases,
     setTestCases,
+    sortedTestCases,
     insertTestCases,
     removeTestCases,
     testCaseService,
@@ -255,8 +256,8 @@ const TestCaseList = (props: TestCaseListProps) => {
   useEffect(() => {
     const validTestCases = measure?.testCaseConfiguration
       ?.executeInvalidTestCases
-      ? testCases
-      : testCases?.filter((tc) => tc.validResource);
+      ? sortedTestCases
+      : sortedTestCases?.filter((tc) => tc.validResource);
     if (validTestCases && calculationOutput && selectedPopCriteria) {
       const executionResults: CqmExecutionResultsByPatient = calculationOutput;
       // calculation output only contains valid testcases already.
@@ -280,7 +281,7 @@ const TestCaseList = (props: TestCaseListProps) => {
       });
       setExecuteAllTestCases(true);
       const { passPercentage, passFailRatio } =
-        calculation.current.getPassingPercentageForTestCases(testCases);
+        calculation.current.getPassingPercentageForTestCases(sortedTestCases);
       setTestCasePassFailStats({
         passPercentage: passPercentage,
         passFailRatio: passFailRatio,
@@ -450,8 +451,8 @@ const TestCaseList = (props: TestCaseListProps) => {
 
     const testCasesToExecute = measure?.testCaseConfiguration
       ?.executeInvalidTestCases
-      ? testCases
-      : testCases?.filter((tc) => tc.validResource);
+      ? sortedTestCases
+      : sortedTestCases?.filter((tc) => tc.validResource);
 
     if (testCasesToExecute && testCasesToExecute.length > 0 && cqmMeasure) {
       setExecuting(true);
