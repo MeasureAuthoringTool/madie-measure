@@ -8,6 +8,9 @@ const testDateTime: CQL.DateTimeField = dayjs.utc("2022-04-17T15:30");
 const onDateTimeChange = jest.fn();
 
 describe("DateTimeInput Component", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
   it("Should render DateTimeInput component with appropriate data", () => {
     render(
       <DateTimeInput
@@ -50,5 +53,51 @@ describe("DateTimeInput Component", () => {
         screen.getByDisplayValue("04/17/2023 08:00 AM")
       ).toBeInTheDocument();
     });
+  });
+
+  it("Handles valid pasted date and triggers onDateTimeChange", () => {
+    render(
+      <DateTimeInput
+        label="Author Date/Time"
+        dateTime={null}
+        onDateTimeChange={onDateTimeChange}
+        canEdit={true}
+        attributeName="authorDatetime"
+      />
+    );
+
+    const input = screen.getByRole("textbox", { name: "Author Date/Time" });
+    fireEvent.paste(input, {
+      clipboardData: {
+        getData: () => "2023-10-15T12:00:00Z",
+      },
+    });
+
+    const expectedDateTime = new CQL.DateTime(2023, 10, 15, 0, 0, 0, 0, 0);
+    expect(onDateTimeChange).toHaveBeenCalledWith(
+      expectedDateTime,
+      "authorDatetime"
+    );
+  });
+
+  it("Does not trigger onChange when invalid date is pasted", () => {
+    render(
+      <DateTimeInput
+        label="Author Date/Time"
+        dateTime={null}
+        onDateTimeChange={onDateTimeChange}
+        canEdit={true}
+        attributeName="authorDatetime"
+      />
+    );
+
+    const input = screen.getByRole("textbox", { name: "Author Date/Time" });
+    fireEvent.paste(input, {
+      clipboardData: {
+        getData: () => "Invalid Date",
+      },
+    });
+
+    expect(onDateTimeChange).not.toHaveBeenCalled();
   });
 });

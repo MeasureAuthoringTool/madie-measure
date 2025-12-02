@@ -191,32 +191,45 @@ const DateTimeComponent = ({
               ></Select>
             </div>
 
-            <DateField
-              label="Date Field"
-              required={fieldRequired}
-              error={error}
-              helperText={helperText}
-              value={date}
-              views={format ? formatMap[format] : ["year"]}
-              disabled={!canEdit || !format || format === "Invalid Format"}
-              format={format}
-              placeholder={format ? formatOptionRenderMap[format] : ""}
-              id={`${format || "year"}-field-${label}`}
-              onChange={(newDate) => {
-                if (!newDate) return;
-                const dateUTC = dayjs.utc(newDate);
-                if (
-                  format === DATE_TIME_ZONE_FORMAT &&
-                  isValidFormattedDate(dateUTC.format(format))
-                ) {
-                  onChange(dateUTC.format(format));
-                } else if (dateUTC.format(format) !== "Invalid Date") {
-                  onChange(dateUTC.format(format));
+            <div
+              onPaste={(e) => {
+                const pastedValue = e.clipboardData.getData("text");
+                const parsedDate = dayjs.utc(pastedValue).startOf("day");
+                if (!parsedDate.isValid()) {
+                  console.error("Invalid date format pasted:", pastedValue);
+                  return;
                 }
-                setDate(dateUTC);
+                onChange(parsedDate.format(format));
               }}
-              onBlur={() => {}}
-            />
+            >
+              <DateField
+                label="Date Field"
+                required={fieldRequired}
+                error={error}
+                helperText={helperText}
+                value={date}
+                views={format ? formatMap[format] : ["year"]}
+                disabled={!canEdit || !format || format === "Invalid Format"}
+                format={format}
+                placeholder={format ? formatOptionRenderMap[format] : ""}
+                id={`${format || "year"}-field-${label}`}
+                onChange={(newDate) => {
+                  if (!newDate) return;
+                  const dateUTC = dayjs.utc(newDate);
+                  if (
+                    format === DATE_TIME_ZONE_FORMAT &&
+                    isValidFormattedDate(dateUTC.format(format))
+                  ) {
+                    onChange(dateUTC.format(format));
+                  } else if (dateUTC.format(format) !== "Invalid Date") {
+                    onChange(dateUTC.format(format));
+                  }
+                  setDate(dateUTC);
+                }}
+                // onPaste={}
+                onBlur={() => {}}
+              />
+            </div>
             {format === DATE_TIME_ZONE_FORMAT && (
               <div>
                 <TimeField

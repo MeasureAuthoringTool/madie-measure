@@ -7,6 +7,7 @@ import DateTimeComponent, {
   YEAR_MONTH_DAY_FORMAT,
   DATE_TIME_ZONE_FORMAT,
 } from "./DateTimeComponent";
+import dayjs from "dayjs";
 
 describe("DateTimeComponent", () => {
   test("renders with default label", () => {
@@ -226,5 +227,54 @@ describe("DateTimeComponent", () => {
     );
 
     expect(screen.queryByText(/Add/)).not.toBeInTheDocument();
+  });
+
+  it("Handles pasted date and resets time to 00:00:00", () => {
+    const onChange = jest.fn();
+    render(
+      <DateTimeComponent
+        canEdit={true}
+        fieldRequired={false}
+        value={null}
+        onChange={onChange}
+        label="birthday"
+      />
+    );
+
+    const pasteTarget = screen.getByTestId(
+      `${YEAR_MONTH_DAY_FORMAT}-field-birthday-input`
+    );
+    fireEvent.paste(pasteTarget, {
+      clipboardData: {
+        getData: () => "2023-10-15T12:00:00Z",
+      },
+    });
+
+    const expectedDate = dayjs.utc("2023-10-15").hour(0).minute(0).second(0);
+    expect(onChange).toHaveBeenCalledWith(expectedDate.format("YYYY-MM-DD"));
+  });
+
+  it("Does not trigger onChange when invalid date is pasted", () => {
+    const onChange = jest.fn();
+    render(
+      <DateTimeComponent
+        canEdit={true}
+        fieldRequired={false}
+        value={null}
+        onChange={onChange}
+        label="birthday"
+      />
+    );
+
+    const pasteTarget = screen.getByTestId(
+      `${YEAR_MONTH_DAY_FORMAT}-field-birthday-input`
+    );
+    fireEvent.paste(pasteTarget, {
+      clipboardData: {
+        getData: () => "Invalid Date",
+      },
+    });
+
+    expect(onChange).not.toHaveBeenCalled();
   });
 });
