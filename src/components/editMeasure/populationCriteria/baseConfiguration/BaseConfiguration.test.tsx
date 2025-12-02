@@ -311,6 +311,82 @@ describe("Base Configuration component", () => {
     });
   });
 
+  test("Save measure scoring with failure will display 423 error message", async () => {
+    (useFeatureFlags as jest.Mock).mockClear().mockImplementationOnce(() => ({
+      Locking: true,
+    }));
+    mockMeasureServiceApi.updateMeasure = jest.fn().mockRejectedValueOnce({
+      status: 423,
+      response: {
+        data: {
+          message:
+            "Unable to update measure. Measure is locked by another user.",
+        },
+      },
+    });
+    useMeasureServiceApiMock.mockImplementation(() => mockMeasureServiceApi);
+
+    render(<BaseConfiguration {...defaultProps} />);
+
+    const scoringSelectInput = getByTestId(
+      "scoring-select-input"
+    ) as HTMLInputElement;
+
+    const scoringSelect = getByTestId("scoring-select");
+    const scoringSelectDropdown = within(scoringSelect).getByRole(
+      "combobox"
+    ) as HTMLInputElement;
+    userEvent.click(scoringSelectDropdown);
+
+    fireEvent.change(scoringSelectInput, {
+      target: { value: "Cohort" },
+    });
+    expect(scoringSelectInput.value).toBe("Cohort");
+
+    const baseConfigurationTypesSelect = getByTestId(
+      "base-configuration-types-dropdown"
+    );
+    expect(baseConfigurationTypesSelect).toBeInTheDocument();
+    const baseConfigurationTypesButton = within(
+      baseConfigurationTypesSelect
+    ).getByTitle("Open");
+
+    userEvent.click(baseConfigurationTypesButton);
+
+    expect(getByText("Structure")).toBeInTheDocument();
+    const target = getByText("Structure");
+
+    userEvent.click(target);
+
+    // setting patient basis to false
+    userEvent.click(getByLabelText("No"));
+
+    const saveButton = getByTestId("measure-Base Configuration-save");
+    expect(saveButton).toBeInTheDocument();
+    await waitFor(() => expect(saveButton).toBeEnabled());
+    fireEvent.click(saveButton);
+    await waitFor(() =>
+      expect(mockMeasureServiceApi.updateMeasure).toBeCalledWith({
+        ...measure,
+        scoring: "Cohort",
+        baseConfigurationTypes: ["Structure"],
+        patientBasis: false,
+      })
+    );
+
+    expect(
+      await getByText(
+        "Error updating Measure Base Configuration: Unable to update measure. Measure is locked by another user."
+      )
+    ).toBeInTheDocument();
+    const toastCloseButton = await findByTestId("close-error-button");
+    expect(toastCloseButton).toBeInTheDocument();
+    fireEvent.click(toastCloseButton);
+    await waitFor(() => {
+      expect(toastCloseButton).not.toBeInTheDocument();
+    });
+  });
+
   test("change measure scoring will prompt warning dialog", async () => {
     mockMeasureServiceApi.updateMeasure = jest
       .fn()

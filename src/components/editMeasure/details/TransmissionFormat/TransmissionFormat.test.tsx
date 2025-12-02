@@ -234,4 +234,50 @@ describe("Transmission Format page", () => {
       expect(toastCloseButton).not.toBeInTheDocument();
     });
   });
+
+  it("Should handle 423 failure of updating a measure", async () => {
+    mockMeasureServiceApi.updateMeasure = jest.fn().mockRejectedValueOnce({
+      status: 423,
+      response: {
+        data: {
+          message:
+            "Unable to update measure. Measure is locked by another user.",
+        },
+      },
+    });
+
+    render(
+      <ApiContextProvider value={serviceConfig}>
+        <MemoryRouter initialEntries={["/"]}>
+          <TransmissionFormat
+            setErrorMessage={jest.fn()}
+            measureCanEdit={true}
+            lockingFeatureEnabled={true}
+          />
+        </MemoryRouter>
+      </ApiContextProvider>
+    );
+    const editor = screen.getByRole("textbox");
+    expect(editor).toHaveTextContent("");
+    fireEvent.change(editor, {
+      target: { innerHTML: "transmission format example" },
+    });
+    expect(editor).toHaveTextContent("transmission format example");
+    const submitButton = screen.getByTestId("save-button");
+    await waitFor(() => {
+      expect(submitButton).toBeEnabled();
+    });
+    fireEvent.click(submitButton);
+    expect(
+      await screen.findByTestId("measure-transmission-format-error")
+    ).toHaveTextContent(
+      `Unable to update measure. Measure is locked by another user.`
+    );
+    const toastCloseButton = await screen.findByTestId("close-error-button");
+    expect(toastCloseButton).toBeInTheDocument();
+    fireEvent.click(toastCloseButton);
+    await waitFor(() => {
+      expect(toastCloseButton).not.toBeInTheDocument();
+    });
+  });
 });

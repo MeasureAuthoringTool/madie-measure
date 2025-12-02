@@ -19,6 +19,7 @@ import {
   Measure,
   MeasureReportType,
   SupplementalData as SupplementalDataModel,
+  MeasureLock,
 } from "@madie/madie-models";
 import MetaDataWrapper from "../../../details/MetaDataWrapper";
 import MultipleSelectDropDown from "../../MultipleSelectDropDown";
@@ -128,7 +129,20 @@ const SupplementalData = (props: SupplementalDataProps) => {
         }
       })
       .catch((reason) => {
-        const message = `Error updating measure "${modifiedMeasure.measureName}": ${reason}`;
+        let message = `Error updating measure "${modifiedMeasure.measureName}": ${reason}`;
+        if (featureFlags?.Locking && reason?.status === 423) {
+          updateMeasure({
+            ...measure,
+            measureLock: {
+              lockedBy: reason?.response?.data?.message?.replace(
+                "Unable to update measure. Measure is locked by ",
+                ""
+              ),
+            } as unknown as MeasureLock,
+          });
+          formik.resetForm();
+          message = reason?.response?.data?.message.toString();
+        }
         handleToast("danger", message, true);
       });
   };

@@ -15,7 +15,7 @@ import {
   isUsingEmpty,
   validateContent,
 } from "@madie/madie-editor";
-import { measureStore } from "@madie/madie-util";
+import { measureStore, useFeatureFlags } from "@madie/madie-util";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 
 const measure = {
@@ -570,6 +570,51 @@ describe("MeasureEditor component", () => {
       const error = getByTestId("generic-error-text-header");
       expect(error.textContent).toEqual("Errors were found within the CQL");
     });
+  });
+
+  it("reports 423 error when save cql fails", async () => {
+    mockUseFeatureFlags.mockReturnValue({ Locking: true });
+    mockMeasureServiceApi.updateMeasureLock.mockResolvedValueOnce({
+      isLocked: true,
+      lockedBy: "testuser@example.com",
+    });
+    mockMeasureServiceApi.updateMeasure.mockRejectedValueOnce({
+      status: 423,
+      data: {
+        message: "Unable to update measure. Measure is locked by another user.",
+      },
+    });
+
+    (validateContent as jest.Mock).mockClear().mockImplementation(() => {
+      return Promise.resolve({
+        errors: [],
+        translation: { library: {} },
+      });
+    });
+
+    (synchingEditorCqlContent as jest.Mock)
+      .mockClear()
+      .mockImplementation(() => {
+        return {
+          cql: "",
+        };
+      });
+    const { getByTestId } = renderEditor(measure);
+    const editorContainer = getByTestId("measure-editor") as HTMLInputElement;
+    expect(measure.cql).toEqual(editorContainer.value);
+    fireEvent.change(getByTestId("measure-editor"), {
+      target: {
+        value: "test cql",
+      },
+    });
+    fireEvent.click(getByTestId("save-cql-btn"));
+    await waitFor(
+      () => {
+        const error = getByTestId("generic-error-text-header");
+        expect(error).toBeInTheDocument();
+      },
+      { timeout: 3000 }
+    );
   });
 
   it("runs ELM translation on initial load of component and generate annotations", async () => {

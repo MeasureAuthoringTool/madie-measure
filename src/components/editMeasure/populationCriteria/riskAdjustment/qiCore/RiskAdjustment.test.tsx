@@ -147,7 +147,7 @@ describe("QiCore RiskAdjustment Component", () => {
     }
   });
 
-  it.skip("Should successfully update risk Adjustment values and save to DB on 200", async () => {
+  it("Should successfully update risk Adjustment values and save to DB on 200", async () => {
     const newRiskAdjustments = [
       {
         definition: "Initial Population",
@@ -266,7 +266,7 @@ describe("QiCore RiskAdjustment Component", () => {
     );
   });
 
-  it.skip("Should successfully update risk Adjustment values and save to DB on 201", async () => {
+  it("Should successfully update risk Adjustment values and save to DB on 201", async () => {
     const newRiskAdjustments = [
       {
         definition: "Initial Population",
@@ -371,7 +371,7 @@ describe("QiCore RiskAdjustment Component", () => {
     );
   });
 
-  it.skip("Should fail an update to risk adjustment values because of unexpected internal server issues", async () => {
+  it("Should fail an update to risk adjustment values because of unexpected internal server issues", async () => {
     (mockMeasureServiceApi.updateMeasure as jest.Mock).mockRejectedValue({
       status: 500,
       data: null,
@@ -645,6 +645,85 @@ describe("QiCore RiskAdjustment Component", () => {
       expect(errorToast).toHaveTextContent(
         "This measure cannot be saved because changes to the Population Criteria will update test cases and one or more test cases are locked by another user."
       );
+    });
+  });
+
+  it("Should fail an update to risk adjustment values because of 423 error", async () => {
+    (useFeatureFlags as jest.Mock).mockClear().mockImplementationOnce(() => ({
+      Locking: true,
+    }));
+    (mockMeasureServiceApi.updateMeasure as jest.Mock).mockRejectedValue({
+      status: 423,
+      response: {
+        data: {
+          message:
+            "Unable to update measure. Measure is locked by another user.",
+        },
+      },
+    });
+
+    RenderRiskAdjustment();
+
+    // Verifies if RA description already loads values from store and able to update
+    const descriptionEditor = screen.getByTestId(
+      "risk-adjustment-description-rich-text-editor"
+    );
+    expect(descriptionEditor).toBeInTheDocument();
+
+    const editableContent = within(descriptionEditor).getByRole("textbox");
+    expect(editableContent).toHaveAttribute("contenteditable", "true");
+
+    await act(async () => {
+      fireEvent.focus(editableContent);
+      editableContent.innerHTML = "Updated test description";
+      fireEvent.input(editableContent, {
+        target: { innerHTML: "Updated test description" },
+      });
+      fireEvent.blur(editableContent);
+    });
+
+    // Wait for debounced update to take effect (250ms delay from TextEditor component)
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 350));
+    });
+
+    // Wait for save button to be enabled
+    await waitFor(
+      () => {
+        const saveButton = screen.getByRole("button", { name: "Save" });
+        expect(saveButton).toBeEnabled();
+      },
+      { timeout: 1000 }
+    );
+
+    expect(editableContent).toHaveTextContent("Updated test description");
+
+    // save button
+    const saveButton = screen.getByRole("button", { name: "Save" });
+    expect(saveButton).toBeEnabled();
+    userEvent.click(saveButton);
+
+    // Should call service with updated data
+    await waitFor(() =>
+      expect(mockMeasureServiceApi.updateMeasure).toBeCalledWith({
+        ...mockTestMeasure,
+        riskAdjustmentDescription: "<p>Updated test description</p>",
+      })
+    );
+
+    // verifies if error toast message is displayed because of service failure
+    await waitFor(
+      () =>
+        expect(screen.getByTestId("risk-adjustment-error")).toBeInTheDocument(),
+      {
+        timeout: 5000,
+      }
+    );
+    const toastCloseButton = await screen.findByTestId("close-error-button");
+    expect(toastCloseButton).toBeInTheDocument();
+    fireEvent.click(toastCloseButton);
+    await waitFor(() => {
+      expect(toastCloseButton).not.toBeInTheDocument();
     });
   });
 });
