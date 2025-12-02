@@ -134,18 +134,6 @@ const ElementSelector = ({
   newValues,
   onChange,
 }: ElementSelectorProps) => {
-  // Filter out id, modifierExtension, and extension from the options
-  // These elements are already rendered and shouldn't be in the "Add Attribute" dialog
-  // The sorting is already done by getTopLevelElements
-  const filteredOptions = React.useMemo(() => {
-    return options.filter((option) => {
-      const label = getOptionLabel(option, basePath);
-      return (
-        label !== "id" && label !== "modifierExtension" && label !== "extension"
-      );
-    });
-  }, [options, basePath]);
-
   return (
     <>
       <AutoComplete
@@ -178,7 +166,7 @@ const ElementSelector = ({
         fullWidth
         limitTags={2}
         id="resource-element-selector-autocomplete"
-        options={filteredOptions}
+        options={options}
         value={newValues}
         onChange={onChange}
         disableCloseOnSelect
