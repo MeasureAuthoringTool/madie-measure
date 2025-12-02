@@ -28,7 +28,7 @@ jest.mock("react-router-dom", () => ({
 }));
 
 const MockComponent = ({ measureId, setErrors }) => {
-  const { testCases, loadingState, setSorting } = UseFetchTestCases({
+  const { sortedTestCases, loadingState, setSorting } = UseFetchTestCases({
     measureId,
     setErrors,
   });
@@ -39,8 +39,8 @@ const MockComponent = ({ measureId, setErrors }) => {
 
   return (
     <div data-testId="tc-list">
-      {testCases ? (
-        testCases.map((testCase, index) => (
+      {sortedTestCases ? (
+        sortedTestCases.map((testCase, index) => (
           <div key={index}>{testCase.title}</div>
         ))
       ) : (

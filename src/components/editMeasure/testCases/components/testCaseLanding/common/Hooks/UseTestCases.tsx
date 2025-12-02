@@ -307,11 +307,13 @@ function UseFetchTestCases({ measureId, setErrors }) {
 
   return {
     testCaseService,
-    testCases: sortedTestCases, //all test cases to run execution against
+    testCases, //all test cases to run execution against
+    setTestCases, // updates truth source
+    sortedTestCases, //sorted test cases for display
+    setSortedTestCases,
     testCasePage, //all pagination required values
     removeTestCases,
     insertTestCases,
-    setTestCases,
     loadingState,
     setLoadingState,
     retrieveTestCases,
