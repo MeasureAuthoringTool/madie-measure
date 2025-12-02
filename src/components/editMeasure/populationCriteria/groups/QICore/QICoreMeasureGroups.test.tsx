@@ -1177,7 +1177,7 @@ describe("Measure Groups Page", () => {
   });
 
   test("Should display 423 error when measure is locked", async () => {
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementationOnce(() => ({
+    useFeatureFlags.mockImplementation(() => ({
       Locking: true,
     }));
     mockMeasureServiceApi.updateGroup = jest.fn().mockRejectedValueOnce({
@@ -1188,6 +1188,22 @@ describe("Measure Groups Page", () => {
     group.measureGroupTypes = [MeasureGroupTypes.PROCESS];
     group.populationBasis = "MedicationAdministration";
     measure.groups = [group];
+
+    const props: MeasureGroupProps = {
+      measureGroupNumber: 0,
+      setMeasureGroupNumber: jest.fn,
+      setIsFormDirty: jest.fn,
+      measureId: "testMeasureId",
+      setAlertMessage: jest.fn,
+      checkTestCasesLockStatus: jest.fn().mockResolvedValueOnce(false),
+      isTestCaseLocked: true,
+      measureCanEdit: false,
+    } as unknown as MeasureGroupProps;
+    const customProps: MeasureGroupProps = {
+      ...props,
+      isTestCaseLocked: false,
+      measureCanEdit: true,
+    };
     renderMeasureGroupComponent(customProps);
 
     const definitionToUpdate =

@@ -312,7 +312,7 @@ describe("Base Configuration component", () => {
   });
 
   test("Save measure scoring with failure will display 423 error message", async () => {
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementationOnce(() => ({
+    useFeatureFlags.mockImplementation(() => ({
       Locking: true,
     }));
     mockMeasureServiceApi.updateMeasure = jest.fn().mockRejectedValueOnce({
