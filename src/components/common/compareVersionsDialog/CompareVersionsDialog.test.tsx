@@ -172,6 +172,21 @@ describe("CompareVersionsDialog Component", () => {
 
     expect(mockOnClose).toHaveBeenCalledTimes(1);
   });
+
+  it("renders MeasureComparisonPanel for old and new measures in CQL tab", () => {
+    render(
+      <CompareVersionsDialog
+        measures={mockMeasures}
+        open={true}
+        onClose={mockOnClose}
+      />
+    );
+
+    expect(screen.getByTestId("tab-content-cql")).toBeInTheDocument();
+
+    expect(screen.getByTestId("measure-panel-old")).toBeInTheDocument();
+    expect(screen.getByTestId("measure-panel-new")).toBeInTheDocument();
+  });
 });
 
 describe("getNewestMeasureInstance", () => {

@@ -627,12 +627,7 @@ const EditTestCase = (props: EditTestCaseProps) => {
       handleTestCaseResponse(updatedTc, "update", timezoneUpdated);
     } catch (error) {
       if (featureFlags.Locking && error.message.includes("is locked by:")) {
-        const splitted = error.message.trim().split(" ");
-        const lockedBy = splitted[splitted.length - 1];
-        setTestCase({
-          ...testCase,
-          testCaseLock: { lockedBy: lockedBy } as unknown as TestCaseLockInfo,
-        });
+        discardChanges();
       }
 
       showToast(
@@ -751,6 +746,11 @@ const EditTestCase = (props: EditTestCaseProps) => {
             </div>,
             "warning"
           );
+        } else if (testCase.bundleTypeUpdated) {
+          showToast(
+            "The test case has been saved successfully. Please note that the bundle type has been updated to Collection, as the Test Case Builder supports editing only collection bundles.",
+            "success"
+          );
         } else {
           showToast(
             `Test case ${action}d successfully!${
@@ -775,6 +775,11 @@ const EditTestCase = (props: EditTestCaseProps) => {
             </div>,
             "warning"
           );
+        } else if (testCase.bundleTypeUpdated) {
+          showToast(
+            "The test case has been saved successfully. Please note that the bundle type has been updated to Collection, as the Test Case Builder supports editing only collection bundles.",
+            "success"
+          );
         } else {
           showToast(`Test case ${action}d successfully!`, "success");
         }
@@ -795,6 +800,13 @@ const EditTestCase = (props: EditTestCaseProps) => {
                 consistency.
               </ul>
             )}
+            {testCase.bundleTypeUpdated && (
+              <ul>
+                The test case has been saved successfully. Please note that the
+                bundle type has been updated to Collection, as the Test Case
+                Builder supports editing only collection bundles.
+              </ul>
+            )}
             <ul>{valErrors}</ul>
           </div>
         ) : (
@@ -810,6 +822,13 @@ const EditTestCase = (props: EditTestCaseProps) => {
                   otherwise timezone offsets are removed or set to UTC for
                   consistency.
                 </li>
+              </ul>
+            )}
+            {testCase.bundleTypeUpdated && (
+              <ul>
+                The test case has been saved successfully. Please note that the
+                bundle type has been updated to Collection, as the Test Case
+                Builder supports editing only collection bundles.
               </ul>
             )}
           </div>
