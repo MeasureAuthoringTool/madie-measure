@@ -321,7 +321,6 @@ export function getTopLevelElements(resource: any) {
         ".meta",
         ".language",
         ".implicitRules",
-        "id",
         "modifierExtension",
         "extension",
       ].some(

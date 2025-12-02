@@ -232,7 +232,6 @@ describe("ResourceEditor", () => {
       expect(screen.getByText("*identifier")).toBeInTheDocument();
       expect(screen.getByText("*name")).toBeInTheDocument();
       expect(screen.getByText("*gender")).toBeInTheDocument();
-      expect(screen.getByText("id")).toBeInTheDocument();
       expect(screen.getByText("active")).toBeInTheDocument();
       expect(screen.getByText("birthDate")).toBeInTheDocument();
       expect(screen.getByText("address")).toBeInTheDocument();
@@ -558,6 +557,7 @@ describe("ResourceEditor", () => {
       getResourceTree: jest
         .fn()
         .mockResolvedValue(mockClaimResponseStructuredDef),
+      getValueSetDefinition: jest.fn().mockResolvedValue(mockValueSetsState),
     } as unknown as FhirDefinitionsServiceApi;
     useFhirDefinitionsServiceApiMock.mockImplementation(
       () => fhirDefinitionsServiceApiMock
@@ -614,6 +614,7 @@ describe("ResourceEditor", () => {
       getResourceTree: jest
         .fn()
         .mockResolvedValue(mockClaimResponseStructuredDef),
+      getValueSetDefinition: jest.fn().mockResolvedValue(mockValueSetsState),
     } as unknown as FhirDefinitionsServiceApi;
     useFhirDefinitionsServiceApiMock.mockImplementation(
       () => fhirDefinitionsServiceApiMock
@@ -644,17 +645,26 @@ describe("ResourceEditor", () => {
     delete expectedPayload?.payload?.resource?.id;
 
     render(
-      <QiCoreResourceContext.Provider
-        value={{ state: localMockResourceState, dispatch: mockDispatch }}
+      <ExecutionContextProvider
+        value={{
+          valueSetsState: localMockckValueSetsState,
+          executionContextReady: true,
+        }}
       >
-        <ResourceEditor
-          selectedResourceID="6fb9d817-76c5-4b68-ba06-92c7429e6b5c"
-          setValidationSchema={mockSetValidationSchema}
-          setInitialFormikValuesStu6={mockSetInitialFormikValuesStu6}
-          onCancel={mockOnCancel}
-          canEdit={true}
-        />
-      </QiCoreResourceContext.Provider>
+        <ApiContextProvider value={mockConfig}>
+          <QiCoreResourceContext.Provider
+            value={{ state: localMockResourceState, dispatch: mockDispatch }}
+          >
+            <ResourceEditor
+              selectedResourceID="6fb9d817-76c5-4b68-ba06-92c7429e6b5c"
+              setValidationSchema={mockSetValidationSchema}
+              setInitialFormikValuesStu6={mockSetInitialFormikValuesStu6}
+              onCancel={mockOnCancel}
+              canEdit={true}
+            />
+          </QiCoreResourceContext.Provider>
+        </ApiContextProvider>
+      </ExecutionContextProvider>
     );
 
     // Click on the "id" tab since elements are now sorted alphabetically
