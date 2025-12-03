@@ -1678,7 +1678,7 @@ describe("TypeEditor Component", () => {
     expect(valueSetSelector).toHaveTextContent("- Select -");
   });
 
-  test("Should filter out excluded child types for '[x]' definitions", () => {
+  test("Should filter out excluded child types for '[x]' definitions", async () => {
     render(
       <FormikProvider value={mockFormik}>
         <RequiredFieldsProvider
@@ -1716,6 +1716,10 @@ describe("TypeEditor Component", () => {
     );
     expect(filteredChildDef).toBeInTheDocument();
     expect(filteredChildDef.value).toBe("");
+    const valueInput = (await screen.findByTestId(
+      "string-field-SomeResource.value[x]"
+    )) as HTMLInputElement;
+    await userEvent.type(valueInput, "250");
   });
 
   test("Should render PeriodDateTimeComponent when label ends with .period and childDefs contain .start and .end", () => {

@@ -40,7 +40,10 @@ export const getOptionLabel = (option: ElementDefinition, basePath: string) => {
 };
 
 //helper to get the base label for choice types
-const getChoiceBaseLabel = (option: ElementDefinition, basePath: string) => {
+export const getChoiceBaseLabel = (
+  option: ElementDefinition,
+  basePath: string
+) => {
   const label = option.path?.substring(basePath.length + 1);
 
   // If this is an original choice type definition with [x]
