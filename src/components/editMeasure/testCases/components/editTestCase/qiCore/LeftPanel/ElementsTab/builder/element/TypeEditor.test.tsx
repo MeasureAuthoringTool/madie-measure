@@ -1678,7 +1678,7 @@ describe("TypeEditor Component", () => {
     expect(valueSetSelector).toHaveTextContent("- Select -");
   });
 
-  test("Should filter out excluded child types for '[x]' definitions", () => {
+  test("Should filter out excluded child types for '[x]' definitions", async () => {
     render(
       <FormikProvider value={mockFormik}>
         <RequiredFieldsProvider
@@ -1716,6 +1716,10 @@ describe("TypeEditor Component", () => {
     );
     expect(filteredChildDef).toBeInTheDocument();
     expect(filteredChildDef.value).toBe("");
+    const valueInput = (await screen.findByTestId(
+      "string-field-SomeResource.value[x]"
+    )) as HTMLInputElement;
+    await userEvent.type(valueInput, "250");
   });
 
   test("Should render PeriodDateTimeComponent when label ends with .period and childDefs contain .start and .end", () => {
@@ -2095,6 +2099,108 @@ describe("TypeEditor Component", () => {
                 path: "Observation.valueQuantity",
                 min: 0,
                 max: "1",
+                type: [{ code: "Quantity" }],
+              }}
+              label="Observation.valueQuantity"
+              canEdit={true}
+              parentStructureDefinition={null}
+            />
+          </RequiredFieldsProvider>
+        </FormikProvider>
+      </ExecutionContextProvider>
+    );
+
+    // Comparator
+    const comparator = await screen.findByLabelText("Comparator");
+    expect(comparator).toBeInTheDocument();
+
+    // Value input
+    const valueInput = await screen.findByTestId("decimal-input-field-Value");
+    expect(valueInput).toBeInTheDocument();
+
+    // Code input
+    const codeInput = await screen.findByTestId("code-input-input");
+    expect(codeInput).toBeInTheDocument();
+  });
+  test("renders QuantityComponent fields correctly with multiple cardinality", async () => {
+    useFhirDefinitionsServiceApiMock.mockImplementation(
+      () =>
+        ({
+          getValueSetDefinition: jest.fn().mockResolvedValue({
+            resourceType: "ValueSet",
+            url: "http://hl7.org/fhir/ValueSet/quantity-comparator",
+            expansion: {
+              contains: [
+                {
+                  system: "http://hl7.org/fhir/quantity-comparator",
+                  code: "<",
+                  display: "Less than",
+                },
+                {
+                  system: "http://hl7.org/fhir/quantity-comparator",
+                  code: "<=",
+                  display: "Less or Equal to",
+                },
+                {
+                  system: "http://hl7.org/fhir/quantity-comparator",
+                  code: ">=",
+                  display: "Greater or Equal to",
+                },
+                {
+                  system: "http://hl7.org/fhir/quantity-comparator",
+                  code: ">",
+                  display: "Greater than",
+                },
+              ],
+            },
+          }),
+        } as unknown as FhirDefinitionsServiceApi)
+    );
+
+    const mockFormikQuantity: FormikContextType<any> = {
+      values: {
+        "Observation.valueQuantity": {
+          comparator: ">",
+          value: 10,
+          code: "mg",
+          unit: "milligram",
+          system: "http://unitsofmeasure.org",
+        },
+      },
+      touched: {},
+      getFieldProps: (label) => {
+        const value = getNestedProperty(mockFormikQuantity.values, label);
+        return { value, name: label, onChange: jest.fn(), onBlur: jest.fn() };
+      },
+      handleChange: () => {},
+      setFieldValue: jest.fn(),
+      setFieldTouched: jest.fn(),
+    };
+
+    render(
+      <ExecutionContextProvider
+        value={{
+          measureState: [null, jest.fn()],
+          bundleState: [null, jest.fn()],
+          valueSetsState: [[], jest.fn()],
+          executionContextReady: true,
+          executing: false,
+          setExecuting: jest.fn(),
+          contextFailure: false,
+        }}
+      >
+        <FormikProvider value={mockFormikQuantity}>
+          <RequiredFieldsProvider
+            requiredFields={mockRequiredFields}
+            formInfo={mockFormInfo}
+          >
+            <TypeEditor
+              resource={null}
+              structureDefinition={{
+                id: "Observation.valueQuantity",
+                path: "Observation.valueQuantity",
+                min: 0,
+                max: "*",
                 type: [{ code: "Quantity" }],
               }}
               label="Observation.valueQuantity"
@@ -3728,5 +3834,109 @@ describe("TypeEditor Component", () => {
     // Click a delete button
     userEvent.click(deleteButtons[0]);
     expect(booleanArrayFormik.setFieldValue).toHaveBeenCalled();
+  });
+
+  // trigger multiple cardinality code blocks
+  test("Should render Integer components as array when multiple cardinality", () => {
+    //@ts-ignore
+    const integerArrayFormik = {
+      ...mockFormik,
+      values: {
+        Claim: {
+          item: [
+            {
+              careTeamSequence: [1],
+            },
+          ],
+        },
+      },
+      getFieldProps: (label: string) => {
+        const match = label.match(/careTeamSequence\[(\d+)]/);
+        if (match) {
+          const index = parseInt(match[1]);
+          return {
+            value: [1, 2, 3][index],
+            name: label,
+            onChange: jest.fn(),
+            onBlur: jest.fn(),
+          };
+        }
+        return {
+          value: "",
+          name: label,
+          onChange: jest.fn(),
+          onBlur: jest.fn(),
+        };
+      },
+    };
+
+    render(
+      //@ts-ignore
+      <FormikProvider value={integerArrayFormik}>
+        <RequiredFieldsProvider
+          requiredFields={mockRequiredFields}
+          formInfo={mockFormInfo}
+        >
+          <TypeEditor
+            resource={null}
+            structureDefinition={{
+              id: "Claim.item.careTeamSequence",
+              path: "Claim.item.careTeamSequence",
+              min: 0,
+              max: "*",
+              type: [
+                {
+                  code: "positiveInt",
+                },
+              ],
+            }}
+            label="Claim.item[0].careTeamSequence"
+            canEdit={true}
+            parentStructureDefinition={null}
+          />
+        </RequiredFieldsProvider>
+      </FormikProvider>
+    );
+
+    // Check that all three integer inputs are rendered
+    expect(
+      screen.getByTestId(
+        "integer-field-input-Claim.item[0].careTeamSequence[0]"
+      )
+    ).toBeInTheDocument();
+  });
+
+  test("Should render DateTime component, multiple cardinality", () => {
+    render(
+      <FormikProvider value={mockFormik}>
+        <RequiredFieldsProvider
+          requiredFields={mockRequiredFields}
+          formInfo={mockFormInfo}
+        >
+          <TypeEditor
+            structureDefinition={{
+              id: "ClaimResponse.date",
+              path: "ClaimResponse.date",
+              min: 0,
+              max: "*",
+              type: [
+                {
+                  code: "http://hl7.org/fhirpath/System.DateTime",
+                },
+              ],
+            }}
+            resource={null}
+            label="ClaimResponse.date"
+            canEdit={true}
+            parentStructureDefinition={null}
+          />
+        </RequiredFieldsProvider>
+      </FormikProvider>
+    );
+
+    const inputDate = screen.getByTestId(
+      `date-time-format-selector-field-ClaimResponse.date[0]`
+    );
+    expect(inputDate).toBeInTheDocument();
   });
 });
