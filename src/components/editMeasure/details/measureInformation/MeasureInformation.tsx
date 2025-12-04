@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "twin.macro";
-import { Endorsement, Measure, Model } from "@madie/madie-models";
+import { Endorsement, Measure, Model, MeasureLock } from "@madie/madie-models";
 import "styled-components/macro";
 import {
   AutoComplete,
@@ -399,6 +399,18 @@ export default function MeasureInformation(props: MeasureInformationProps) {
         })
         // update to alert
         .catch((err) => {
+          if (featureFlags?.Locking && err?.status === 423) {
+            updateMeasure({
+              ...measure,
+              measureLock: {
+                lockedBy: err?.response?.data?.message?.replace(
+                  "Unable to update measure. Measure is locked by ",
+                  ""
+                ),
+              } as unknown as MeasureLock,
+            });
+            resetForm();
+          }
           setErrorMessage(err?.response?.data?.message?.toString());
         });
     }

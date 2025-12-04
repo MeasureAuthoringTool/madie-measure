@@ -13,7 +13,10 @@ import { Measure } from "@madie/madie-models";
 import MeasureMetadataForm from "./MeasureMetadata";
 
 import userEvent from "@testing-library/user-event";
-
+// for error: TypeError: (intermediate value)(intermediate value)(intermediate value).elementFromPoint is not a function
+if (!document.elementFromPoint) {
+  document.elementFromPoint = () => null;
+}
 const setErrorMessage = jest.fn();
 const testUser = "john doe";
 const mockMetaData = {
@@ -411,6 +414,39 @@ describe("MeasureRationale component", () => {
       await waitFor(() => expect(input).toBeInTheDocument());
       const requiredText = await screen.findByText("Indicates required field");
       expect(requiredText).toBeInTheDocument();
+    });
+
+    it("should render 423 error message if the measure cannot be saved", async () => {
+      serviceApiMock.updateMeasure = jest.fn().mockRejectedValueOnce({
+        status: 423,
+        response: {
+          data: {
+            message:
+              "Unable to update measure. Measure is locked by another user",
+          },
+        },
+      });
+
+      render(
+        <MeasureMetadataForm
+          measureMetadataType="Rationale"
+          setErrorMessage={setErrorMessage}
+          measureCanEdit={true}
+          lockingFeatureEnabled={true}
+        />
+      );
+      const rationaleEditor = screen.getByRole("textbox");
+      // Use userEvent.type to simulate real user input
+      await userEvent.type(rationaleEditor, "NEWVALUE");
+      const saveButton = screen.getByRole("button", { name: "Save" });
+      expect(saveButton).toBeInTheDocument();
+      await waitFor(() => expect(saveButton).toBeEnabled());
+      userEvent.click(saveButton);
+      await waitFor(() =>
+        expect(setErrorMessage).toHaveBeenCalledWith(
+          "Unable to update measure. Measure is locked by another user"
+        )
+      );
     });
   });
 });
