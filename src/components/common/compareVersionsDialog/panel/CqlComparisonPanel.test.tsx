@@ -1,7 +1,7 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
 import { Measure } from "@madie/madie-models";
-import MeasureComparisonPanel from "./MeasureComparisonPanel";
+import CqlComparisonPanel from "./CqlComparisonPanel";
 
 const mockMeasures: Measure[] = [
   {
@@ -22,41 +22,35 @@ const mockMeasures: Measure[] = [
   } as any,
 ];
 
-describe("MeasureComparisonPanel", () => {
+describe("CqlComparisonPanel component", () => {
   it("renders the old measure correctly", () => {
-    render(<MeasureComparisonPanel measure={mockMeasures[0]} side="old" />);
+    render(<CqlComparisonPanel measure={mockMeasures[0]} side="old" />);
 
-    expect(screen.getByTestId("measure-panel-old")).toBeInTheDocument();
-    expect(screen.getByTestId("version-section-old")).toHaveTextContent(
+    expect(screen.getByTestId("comparison-panel-old")).toBeInTheDocument();
+    expect(screen.getByTestId("version-text-old")).toHaveTextContent(
       `Version ${mockMeasures[0].version}`
     );
     expect(screen.queryByTestId("draft-chip-old")).not.toBeInTheDocument();
     expect(screen.getByTestId("last-updated-old")).toHaveTextContent(
       "Last updated on 11/20/2025"
     );
-    expect(screen.getByTestId("measure-name-section-old")).toHaveTextContent(
-      `Measure Name: ${mockMeasures[0].measureName}`
-    );
-    expect(screen.getByTestId("cql-container-old")).toHaveTextContent(
+    expect(screen.getByTestId("panel-content-old")).toHaveTextContent(
       "CQL coming soon"
     );
   });
 
   it("renders the new measure (draft) correctly", () => {
-    render(<MeasureComparisonPanel measure={mockMeasures[1]} side="new" />);
+    render(<CqlComparisonPanel measure={mockMeasures[1]} side="new" />);
 
-    expect(screen.getByTestId("measure-panel-new")).toBeInTheDocument();
-    expect(screen.getByTestId("version-section-new")).toHaveTextContent(
+    expect(screen.getByTestId("comparison-panel-new")).toBeInTheDocument();
+    expect(screen.getByTestId("version-text-new")).toHaveTextContent(
       `Version ${mockMeasures[1].version}`
     );
     expect(screen.getByTestId("draft-chip-new")).toBeInTheDocument();
     expect(screen.getByTestId("last-updated-new")).toHaveTextContent(
       "Last updated on 11/21/2025"
     );
-    expect(screen.getByTestId("measure-name-section-new")).toHaveTextContent(
-      `Measure Name: ${mockMeasures[1].measureName}`
-    );
-    expect(screen.getByTestId("cql-container-new")).toHaveTextContent(
+    expect(screen.getByTestId("panel-content-new")).toHaveTextContent(
       "CQL coming soon"
     );
   });
