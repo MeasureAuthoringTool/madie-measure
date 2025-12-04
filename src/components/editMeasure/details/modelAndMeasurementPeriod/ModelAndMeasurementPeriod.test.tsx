@@ -603,4 +603,61 @@ describe("Model and Measurement Period component", () => {
       expect(queryByText("You have unsaved changes.")).not.toBeVisible();
     });
   });
+
+  it("should set 423 error message when update measure fails", async () => {
+    mockMeasureServiceApi.updateMeasure = jest.fn().mockRejectedValueOnce({
+      status: 423,
+      response: {
+        data: {
+          message:
+            "Unable to update measure. Measure is locked by another user.",
+        },
+      },
+    }) as unknown as MeasureServiceApi;
+
+    // Reset to empty strings to avoid type issues
+    measure.measurementPeriodStart = "";
+    measure.measurementPeriodEnd = "";
+
+    render(
+      <ModelAndMeasurementPeriod
+        setErrorMessage={setErrorMessage}
+        measureCanEdit={true}
+        lockingFeatureEnabled={true}
+      />
+    );
+
+    const measurementPeriodStartNode = screen.getByTestId(
+      "measurement-period-start"
+    );
+    const measurementPeriodStartInput = within(
+      measurementPeriodStartNode
+    ).getByRole("textbox") as HTMLInputElement;
+    userEvent.type(measurementPeriodStartInput, "12/07/2009");
+    await waitFor(() =>
+      expect(measurementPeriodStartInput.value).toBe("12/07/2009")
+    );
+
+    const measurementPeriodEndNode = screen.getByTestId(
+      "measurement-period-end"
+    );
+    const measurementPeriodEndInput = within(
+      measurementPeriodEndNode
+    ).getByRole("textbox") as HTMLInputElement;
+    userEvent.type(measurementPeriodEndInput, "12/07/2020");
+    await waitFor(() =>
+      expect(measurementPeriodEndInput.value).toBe("12/07/2020")
+    );
+
+    // Wait for the button to become enabled
+    const saveBtn = screen.getByTestId("model-and-measurement-save-button");
+    await waitFor(() => expect(saveBtn).toBeEnabled());
+
+    act(() => {
+      fireEvent.click(saveBtn);
+    });
+    await waitFor(() => expect(setErrorMessage).toHaveBeenCalled(), {
+      timeout: 5000,
+    });
+  });
 });

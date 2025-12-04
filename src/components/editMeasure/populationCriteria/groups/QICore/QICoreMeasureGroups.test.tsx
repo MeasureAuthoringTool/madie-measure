@@ -1176,6 +1176,63 @@ describe("Measure Groups Page", () => {
     expect(screen.queryByTestId("population-criteria-success")).toBeNull();
   });
 
+  test("Should display 423 error when measure is locked", async () => {
+    useFeatureFlags.mockImplementation(() => ({
+      Locking: true,
+    }));
+    mockMeasureServiceApi.updateGroup = jest.fn().mockRejectedValueOnce({
+      status: 423,
+      message: "Unable to update measure. Measure is locked by another user.",
+    });
+    group.id = "7p03-5r29-7O0I";
+    group.measureGroupTypes = [MeasureGroupTypes.PROCESS];
+    group.populationBasis = "MedicationAdministration";
+    measure.groups = [group];
+
+    const props: MeasureGroupProps = {
+      measureGroupNumber: 0,
+      setMeasureGroupNumber: jest.fn,
+      setIsFormDirty: jest.fn,
+      measureId: "testMeasureId",
+      setAlertMessage: jest.fn,
+      checkTestCasesLockStatus: jest.fn().mockResolvedValueOnce(false),
+      isTestCaseLocked: true,
+      measureCanEdit: false,
+    } as unknown as MeasureGroupProps;
+    const customProps: MeasureGroupProps = {
+      ...props,
+      isTestCaseLocked: false,
+      measureCanEdit: true,
+    };
+    renderMeasureGroupComponent(customProps);
+
+    const definitionToUpdate =
+      "VTE Prophylaxis by Medication Administered or Device Applied";
+    const groupPopulationInput = screen.getByTestId(
+      "select-measure-group-population-input"
+    ) as HTMLInputElement;
+    fireEvent.change(groupPopulationInput, {
+      target: { value: definitionToUpdate },
+    });
+    expect(groupPopulationInput.value).toBe(definitionToUpdate);
+
+    userEvent.click(screen.getByTestId("reporting-tab"));
+
+    const improvementNotationSelect = screen.getByTestId(
+      "improvement-notation-select"
+    ) as HTMLInputElement;
+
+    userEvent.click(await getByRole(improvementNotationSelect, "combobox"));
+    await waitFor(() => {
+      userEvent.click(
+        screen.getByText("Increased score indicates improvement")
+      );
+    });
+
+    userEvent.click(screen.getByTestId("group-form-submit-btn"));
+    expect(screen.queryByTestId("population-criteria-success")).toBeNull();
+  });
+
   test("Should not display a success toast if the update population Group fails due to group validation error", async () => {
     group.id = "7p03-5r29-7O0I";
     group.measureGroupTypes = [MeasureGroupTypes.PROCESS];

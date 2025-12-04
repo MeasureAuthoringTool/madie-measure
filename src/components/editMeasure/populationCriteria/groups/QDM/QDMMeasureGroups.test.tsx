@@ -1216,6 +1216,71 @@ describe("Cohort Population Criteria validations", () => {
     expect(submitBtn).toBeDisabled();
   });
 
+  //temporarily skipping as 423 error is not being returned from mock api
+  test("Should not be able to save if there is 423 error", async () => {
+    jest.clearAllMocks();
+    cohortMeasure.scoring = "Cohort";
+    cohortMeasure.patientBasis = false;
+    group.populationBasis = "MedicationAdministration";
+    group.groupDescription = "Test Description";
+    cohortMeasure.groups = [group];
+    mockMeasureServiceApi.getReturnTypesForAllCqlFunctions = jest
+      .fn()
+      .mockReturnValue({ fun: "Encounter" });
+    mockMeasureServiceApi.getReturnTypesForAllCqlDefinitions = jest
+      .fn()
+      .mockReturnValue({
+        patient: "NA",
+        sdeEthnicity: "Coding",
+        boolIpp: "xxx",
+        sdePayer: "NA",
+        sdeRace: "Coding",
+        sdeSex: "Code",
+        vteProphylaxisByMedicationAdministeredOrDeviceApplied:
+          "MedicalAdministration",
+      });
+    mockMeasureServiceApi.fetchMeasure = jest
+      .fn()
+      .mockResolvedValue(cohortMeasure);
+    mockMeasureServiceApi.updateMeasure = jest
+      .fn()
+      .mockResolvedValueOnce({ status: 200 });
+    (useFeatureFlags as jest.Mock).mockClear().mockImplementationOnce(() => ({
+      Locking: true,
+    }));
+    mockMeasureServiceApi.updateGroup = jest.fn().mockRejectedValueOnce({
+      status: 423,
+      message: "Unable to update measure. Measure is locked by another user.",
+    });
+    mockMeasureServiceApi.deleteMeasureGroup = jest.fn().mockResolvedValue({});
+
+    renderMeasureGroupComponent();
+
+    // setting initial population from dropdown
+    const definitionToUpdate =
+      "VTE Prophylaxis by Medication Administered or Device Applied";
+    const groupPopulationInput = screen.getByTestId(
+      "select-measure-group-population-input"
+    ) as HTMLInputElement;
+    fireEvent.change(groupPopulationInput, {
+      target: { value: definitionToUpdate },
+    });
+    expect(groupPopulationInput.value).toBe(definitionToUpdate);
+
+    const submitButton = screen.getByTestId("group-form-submit-btn");
+    expect(submitButton).toBeEnabled();
+    userEvent.click(submitButton);
+
+    await waitFor(
+      () => {
+        expect(screen.queryByTestId("population-criteria-success")).toBeNull();
+        const submitBtn = screen.getByTestId("group-form-submit-btn");
+        expect(submitBtn).toBeDisabled();
+      },
+      { timeout: 3000 }
+    );
+  });
+
   test("Should not be able to save if non-patient based but return types are different", async () => {
     cohortMeasure.patientBasis = false;
     cohortMeasure.scoring = "Ratio";

@@ -22,10 +22,11 @@ import { useFormik } from "formik";
 import useFormikResetOnEvent from "../../../common/useFormikResetOnEvent";
 import MeasureMetaDataRow from "../MeasureMetaDataRow";
 import { MeasureReferencesValidator } from "./MeasureReferencesValidator";
-import { Measure, Model, Reference } from "@madie/madie-models";
+import { Measure, Model, Reference, MeasureLock } from "@madie/madie-models";
 import SearchIcon from "@mui/icons-material/Search";
 
 import ClearIcon from "@mui/icons-material/Clear";
+import _ from "lodash";
 
 import "../MeasureMetaDataTable.scss";
 import TextEditor from "../../populationCriteria/groups/TextEditor";
@@ -33,10 +34,11 @@ import TextEditor from "../../populationCriteria/groups/TextEditor";
 interface MeasureReferencesProps {
   setErrorMessage: Function;
   measureCanEdit: boolean;
+  lockingFeatureEnabled?: boolean;
 }
 
 const MeasureReferences = (props: MeasureReferencesProps) => {
-  const { setErrorMessage, measureCanEdit } = props;
+  const { setErrorMessage, measureCanEdit, lockingFeatureEnabled } = props;
   const { search } = useLocation();
   let navigate = useNavigate();
   const measureServiceApi = useMeasureServiceApi();
@@ -107,6 +109,7 @@ const MeasureReferences = (props: MeasureReferencesProps) => {
   }, [setMeasureReferences, measure]);
 
   const handleSubmit = (values: Reference) => {
+    const originalMeasure = _.cloneDeep(measure);
     //  we want to first sort by referenceType then by referenceText
     const sortByTypeThenReferences = (references: Reference[]): Reference[] => {
       const sorterFunction = (a: Reference, b: Reference) => {
@@ -174,6 +177,20 @@ const MeasureReferences = (props: MeasureReferencesProps) => {
       })
       .catch((reason) => {
         let message = `Error updating measure "${measure.measureName}"`;
+        if (lockingFeatureEnabled && reason?.status === 423) {
+          message = reason?.response?.data?.message;
+          updateMeasure({
+            ...originalMeasure,
+            measureLock: {
+              lockedBy: reason?.response?.data?.message?.replace(
+                "Unable to update measure. Measure is locked by ",
+                ""
+              ),
+            } as unknown as MeasureLock,
+          });
+          setOpen(false);
+          formik.resetForm();
+        }
         measureReferences.map((reference) => {
           if (!reference.referenceType && message.slice(-1) != ".")
             message += ": All References must have a type.";
@@ -339,7 +356,21 @@ const MeasureReferences = (props: MeasureReferencesProps) => {
         }
       })
       .catch((reason) => {
-        const message = `Error updating measure "${measure.measureName}"`;
+        let message = `Error updating measure "${measure.measureName}"`;
+        if (reason?.status === 423) {
+          message = reason?.response?.data?.message;
+          updateMeasure({
+            ...measure,
+            measureLock: {
+              lockedBy: reason?.response?.data?.message?.replace(
+                "Unable to update measure. Measure is locked by ",
+                ""
+              ),
+            } as unknown as MeasureLock,
+          });
+          setDeleteDialogModalOpen(false);
+          formik.resetForm();
+        }
         handleToast("danger", message, true);
         setErrorMessage(message);
       });

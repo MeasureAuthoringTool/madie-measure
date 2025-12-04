@@ -17,7 +17,7 @@ import useFormikResetOnEvent from "../../../common/useFormikResetOnEvent";
 import * as Yup from "yup";
 import { Typography } from "@mui/material";
 import { Box } from "@mui/system";
-import { Organization } from "@madie/madie-models";
+import { Organization, MeasureLock } from "@madie/madie-models";
 import MultipleSelectDropDown from "../../populationCriteria/MultipleSelectDropDown";
 
 const asterisk = { color: "#D92F2F", marginRight: 3 };
@@ -26,9 +26,10 @@ const asterisk = { color: "#D92F2F", marginRight: 3 };
 interface StewardAndDevelopersProps {
   setErrorMessage: Function;
   measureCanEdit: boolean;
+  lockingFeatureEnabled?: boolean;
 }
 export default function StewardAndDevelopers(props: StewardAndDevelopersProps) {
-  const { setErrorMessage, measureCanEdit } = props;
+  const { setErrorMessage, measureCanEdit, lockingFeatureEnabled } = props;
   const measureServiceApi = useMeasureServiceApi();
   const [organizations, setOrganizations] = useState<Organization[]>();
   const [measure, setMeasure] = useState<any>(measureStore.state);
@@ -91,8 +92,21 @@ export default function StewardAndDevelopers(props: StewardAndDevelopersProps) {
         );
         updateMeasure(submitMeasure);
       })
-      .catch(() => {
-        const message = `Error updating measure "${measure.measureName}"`;
+      .catch((err) => {
+        let message = `Error updating measure "${measure.measureName}"`;
+        if (lockingFeatureEnabled && err?.status === 423) {
+          message = err?.response?.data?.message.toString();
+          updateMeasure({
+            ...measure,
+            measureLock: {
+              lockedBy: err?.response?.data?.message?.replace(
+                "Unable to update measure. Measure is locked by ",
+                ""
+              ),
+            } as unknown as MeasureLock,
+          });
+          resetForm();
+        }
         setErrorMessage(message);
       });
   };
