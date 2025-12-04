@@ -14,7 +14,7 @@ import {
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import queryString from "query-string";
 import calculationService from "../../../api/CalculationService";
-import { checkUserCanEdit } from "@madie/madie-util";
+import { checkUserCanEdit, measureStore } from "@madie/madie-util";
 import CreateCodeCoverageNavTabs from "./CreateCodeCoverageNavTabs";
 import CreateNewTestCaseDialog from "../../createTestCase/CreateNewTestCaseDialog";
 import {
@@ -113,6 +113,7 @@ const TestCaseList = (props: TestCaseListProps) => {
   const {
     testCases,
     setTestCases,
+    sortedTestCases,
     insertTestCases,
     removeTestCases,
     testCaseService,
@@ -153,6 +154,8 @@ const TestCaseList = (props: TestCaseListProps) => {
   const excelExportService = useRef(useExcelExportService());
   const calculation = useRef(calculationService());
   const qdmCalculation = useRef(qdmCalculationService());
+  const { updateMeasure } = measureStore;
+
   const [canEdit, setCanEdit] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<string>("passing");
   const [calculationOutput, setCalculationOutput] =
@@ -191,6 +194,12 @@ const TestCaseList = (props: TestCaseListProps) => {
   // const [callstackMap, setCallstackMap] = useState<CqlDefinitionCallstack>();
   // callStackMap is used for generating Excel Export
   useEffect(() => {}, [measure?.cql]);
+  useEffect(() => {
+    if (testCases?.length != measure?.testCases?.length) {
+      const newMeasure = { ...measure, testCases };
+      updateMeasure(newMeasure);
+    }
+  }, [testCases]);
 
   const [groupCoverageResult, setGroupCoverageResult] = useState([]);
   useState<GroupCoverageResult>();
@@ -255,8 +264,8 @@ const TestCaseList = (props: TestCaseListProps) => {
   useEffect(() => {
     const validTestCases = measure?.testCaseConfiguration
       ?.executeInvalidTestCases
-      ? testCases
-      : testCases?.filter((tc) => tc.validResource);
+      ? sortedTestCases
+      : sortedTestCases?.filter((tc) => tc.validResource);
     if (validTestCases && calculationOutput && selectedPopCriteria) {
       const executionResults: CqmExecutionResultsByPatient = calculationOutput;
       // calculation output only contains valid testcases already.
@@ -280,7 +289,7 @@ const TestCaseList = (props: TestCaseListProps) => {
       });
       setExecuteAllTestCases(true);
       const { passPercentage, passFailRatio } =
-        calculation.current.getPassingPercentageForTestCases(testCases);
+        calculation.current.getPassingPercentageForTestCases(sortedTestCases);
       setTestCasePassFailStats({
         passPercentage: passPercentage,
         passFailRatio: passFailRatio,
@@ -450,9 +459,8 @@ const TestCaseList = (props: TestCaseListProps) => {
 
     const testCasesToExecute = measure?.testCaseConfiguration
       ?.executeInvalidTestCases
-      ? testCases
-      : testCases?.filter((tc) => tc.validResource);
-
+      ? sortedTestCases
+      : sortedTestCases?.filter((tc) => tc.validResource);
     if (testCasesToExecute && testCasesToExecute.length > 0 && cqmMeasure) {
       setExecuting(true);
       try {
@@ -487,7 +495,7 @@ const TestCaseList = (props: TestCaseListProps) => {
     }
   }, [
     measure,
-    testCases,
+    sortedTestCases,
     cqmMeasure,
     qdmCalculation,
     setExecuting,
