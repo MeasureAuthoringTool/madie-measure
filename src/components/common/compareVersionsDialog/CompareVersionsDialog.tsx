@@ -1,11 +1,12 @@
 import React, { useState } from "react";
-import { Divider, Typography } from "@mui/material";
+import { Typography } from "@mui/material";
 import { MadieDialog } from "@madie/madie-design-system/dist/react";
 import { Measure } from "@madie/madie-models";
 import CompareVersionsNavTabs from "./CompareVersionsNavTabs";
+import CqlComparisonPanel from "./panel/CqlComparisonPanel";
+import HrComparisonPanel from "./panel/HrComparisonPanel";
+import { Allotment } from "allotment";
 import "./CompareVersionsDialog.scss";
-import MeasureComparisonPanel from "./MeasureComparisonPanel";
-
 interface CompareVersionsDialogProps {
   measures: Measure[] | null | undefined;
   open: boolean;
@@ -49,12 +50,11 @@ const CompareVersionsDialog = ({
 
   return (
     <MadieDialog
-      form
       title="Compare Measure Versions"
       dialogProps={{
         onClose,
         open,
-        maxWidth: "xl",
+        maxWidth: "xxl",
         "data-testid": "compare-versions-dialog",
       }}
       cancelButtonProps={{
@@ -66,7 +66,7 @@ const CompareVersionsDialog = ({
       contentSx={{ padding: 0 }}
     >
       <div className="compare-versions-dialog">
-        <div className="info-section">
+        <div className="dialog-header">
           <Typography className="measure-header">
             <span className="measure-name" data-testid="measure-name">
               {newMeasure.measureName}
@@ -77,33 +77,52 @@ const CompareVersionsDialog = ({
           </Typography>
         </div>
 
-        <Divider className="divider" />
-
-        <div className="horizontal-padding">
+        <div className="tabs-container">
           <CompareVersionsNavTabs
             activeTab={activeTab}
             setActiveTab={setActiveTab}
           />
         </div>
 
-        <Divider className="divider" />
-
         {activeTab === "cql" && (
           <div
             className="comparison-panels-container"
             data-testid="tab-content-cql"
           >
-            <MeasureComparisonPanel measure={oldMeasure} side="old" />
-            <MeasureComparisonPanel measure={newMeasure} side="new" />
+            <CqlComparisonPanel measure={oldMeasure} side="old" />
+            <CqlComparisonPanel measure={newMeasure} side="new" />
           </div>
         )}
 
         {activeTab === "human-readable" && (
-          <div
-            className="horizontal-padding"
-            data-testid="tab-content-human-readable"
-          >
-            <Typography>Human Readable content goes here</Typography>
+          <div className="allotment-container">
+            <Allotment vertical defaultSizes={[75, 25]}>
+              <Allotment.Pane>
+                <div
+                  className="comparison-panels-container"
+                  data-testid="tab-content-human-readable"
+                >
+                  <div className="comparison-panel">
+                    <HrComparisonPanel measure={oldMeasure} side="old" />
+                  </div>
+
+                  <div className="comparison-panel">
+                    <HrComparisonPanel measure={newMeasure} side="new" />
+                  </div>
+                </div>
+              </Allotment.Pane>
+
+              <Allotment.Pane>
+                <div
+                  className="differences-section"
+                  data-testid="differences-section"
+                >
+                  <Typography variant="h6" className="differences-header">
+                    Differences
+                  </Typography>
+                </div>
+              </Allotment.Pane>
+            </Allotment>
           </div>
         )}
       </div>
