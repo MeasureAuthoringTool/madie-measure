@@ -40,7 +40,10 @@ export const getOptionLabel = (option: ElementDefinition, basePath: string) => {
 };
 
 //helper to get the base label for choice types
-const getChoiceBaseLabel = (option: ElementDefinition, basePath: string) => {
+export const getChoiceBaseLabel = (
+  option: ElementDefinition,
+  basePath: string
+) => {
   const label = option.path?.substring(basePath.length + 1);
 
   // If this is an original choice type definition with [x]
@@ -174,6 +177,9 @@ const ElementSelector = ({
         getOptionDisabled={(option) => {
           if (value.includes(option)) return true;
           // Disable if another choice type with same base is selected
+          if (option.min === 1) {
+            return true;
+          }
           const base = getChoiceBaseLabel(option, basePath);
           if (base) {
             // if any other option with same base is selected, and this option is not selected, disable
