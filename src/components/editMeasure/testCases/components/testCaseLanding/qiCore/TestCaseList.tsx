@@ -538,7 +538,7 @@ const TestCaseList = (props: TestCaseListProps) => {
   };
 
   const handleQiCloneTestCase = async (testCase: TestCase) => {
-    const clonedTestCase = testCase;
+    const clonedTestCase = _.cloneDeep(testCase);
     clonedTestCase.title =
       clonedTestCase.title + "-" + new ObjectId().toString();
     try {

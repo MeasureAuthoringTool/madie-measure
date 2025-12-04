@@ -461,7 +461,6 @@ const TestCaseList = (props: TestCaseListProps) => {
       ?.executeInvalidTestCases
       ? sortedTestCases
       : sortedTestCases?.filter((tc) => tc.validResource);
-
     if (testCasesToExecute && testCasesToExecute.length > 0 && cqmMeasure) {
       setExecuting(true);
       try {
@@ -496,7 +495,7 @@ const TestCaseList = (props: TestCaseListProps) => {
     }
   }, [
     measure,
-    testCases,
+    sortedTestCases,
     cqmMeasure,
     qdmCalculation,
     setExecuting,
