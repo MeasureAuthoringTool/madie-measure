@@ -23,6 +23,7 @@ interface TestCaseSummaryGridProps {
   onRowDelete: (row: any) => void;
   gridData: GridDataEntry[];
   testCaseCanEdit: boolean;
+  selectedRowId?: string;
 }
 
 const TestCaseSummaryGrid = ({
@@ -30,6 +31,7 @@ const TestCaseSummaryGrid = ({
   onRowEdit,
   onRowDelete,
   testCaseCanEdit,
+  selectedRowId,
 }: TestCaseSummaryGridProps) => {
   const data = React.useMemo(() => gridData ?? [], [gridData]);
 
@@ -118,7 +120,15 @@ const TestCaseSummaryGrid = ({
           {table.getRowModel().rows.map((row) => (
             <tr key={row.id}>
               {row.getVisibleCells().map((cell) => (
-                <td key={cell.id}>
+                <td
+                  key={cell.id}
+                  style={{
+                    backgroundColor:
+                      row.original.entry.resource.id === selectedRowId
+                        ? "#f8f8f8"
+                        : "inherit",
+                  }}
+                >
                   {flexRender(cell.column.columnDef.cell, cell.getContext())}
                 </td>
               ))}
