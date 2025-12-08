@@ -18,7 +18,7 @@ import { Typography, IconButton, InputAdornment } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import { measureStore, useMeasureServiceApi } from "@madie/madie-util";
 import { useFormik } from "formik";
-import { MeasureDefinition, Measure } from "@madie/madie-models";
+import { MeasureDefinition, Measure, MeasureLock } from "@madie/madie-models";
 import useFormikResetOnEvent from "../../../common/useFormikResetOnEvent";
 import MeasureMetaDataRow from "../MeasureMetaDataRow";
 import { MeasureDefinitionValidator } from "./MeasureDefinitionValidator";
@@ -28,10 +28,11 @@ import TextEditor from "../../populationCriteria/groups/TextEditor";
 interface MeasureDefinitionsProps {
   setErrorMessage: Function;
   measureCanEdit: boolean;
+  lockingFeatureEnabled?: boolean;
 }
 
 const MeasureDefinitions = (props: MeasureDefinitionsProps) => {
-  const { setErrorMessage, measureCanEdit } = props;
+  const { setErrorMessage, measureCanEdit, lockingFeatureEnabled } = props;
   const { search } = useLocation();
   let navigate = useNavigate();
   const measureServiceApi = useMeasureServiceApi();
@@ -175,6 +176,19 @@ const MeasureDefinitions = (props: MeasureDefinitionsProps) => {
       })
       .catch((reason) => {
         let message = `Error updating measure "${measure.measureName}"`;
+        if (lockingFeatureEnabled && reason?.status === 423) {
+          message = reason?.response?.data?.message;
+          updateMeasure({
+            ...measure,
+            measureLock: {
+              lockedBy: reason?.response?.data?.message?.replace(
+                "Unable to update measure. Measure is locked by ",
+                ""
+              ),
+            } as unknown as MeasureLock,
+          });
+          formik.resetForm();
+        }
         handleToast("danger", message, true);
         setErrorMessage(message);
       });

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Measure } from "@madie/madie-models";
+import { Measure, MeasureLock } from "@madie/madie-models";
 import "styled-components/macro";
 import {
   Button,
@@ -35,11 +35,12 @@ interface modelAndMeasurementPeriod {
 interface ModelAndMeasurementPeriodProps {
   setErrorMessage: Function;
   measureCanEdit: boolean;
+  lockingFeatureEnabled?: boolean;
 }
 const DATE_FORMAT = "YYYY-MM-DDTHH:mm:ss";
 
 const ModelAndMeasurementPeriod = (props: ModelAndMeasurementPeriodProps) => {
-  const { setErrorMessage, measureCanEdit } = props;
+  const { setErrorMessage, measureCanEdit, lockingFeatureEnabled } = props;
   const measureServiceApi = useMeasureServiceApi();
   const { updateMeasure } = measureStore;
   const [measure, setMeasure] = useState<any>(measureStore.state);
@@ -135,6 +136,18 @@ const ModelAndMeasurementPeriod = (props: ModelAndMeasurementPeriodProps) => {
       .catch((err) => {
         // alert here.
         setErrorMessage(err?.response?.data?.message.toString());
+        if (lockingFeatureEnabled && err?.status === 423) {
+          updateMeasure({
+            ...measure,
+            measureLock: {
+              lockedBy: err?.response?.data?.message?.replace(
+                "Unable to update measure. Measure is locked by ",
+                ""
+              ),
+            } as unknown as MeasureLock,
+          });
+          resetForm();
+        }
       });
   };
 

@@ -15,6 +15,7 @@ import {
 } from "@madie/madie-design-system/dist/react";
 import _ from "lodash";
 import TextEditor from "../../populationCriteria/groups/TextEditor";
+import { MeasureLock } from "@madie/madie-models";
 
 export interface MeasureMetadataProps {
   measureMetadataId?: string;
@@ -23,10 +24,12 @@ export interface MeasureMetadataProps {
   setErrorMessage: Function;
   required?: boolean;
   measureCanEdit: boolean;
+  lockingFeatureEnabled?: boolean;
 }
 
 export default function MeasureMetadata(props: MeasureMetadataProps) {
-  const { setErrorMessage, required, measureCanEdit } = props;
+  const { setErrorMessage, required, measureCanEdit, lockingFeatureEnabled } =
+    props;
   const { measureMetadataId, measureMetadataType, header } = props;
   const typeLower = _.kebabCase(measureMetadataType.toLowerCase());
   const { updateMeasure } = measureStore;
@@ -89,6 +92,7 @@ export default function MeasureMetadata(props: MeasureMetadataProps) {
 
   const { resetForm } = formik;
   const submitForm = (genericField: string) => {
+    const originalMeasure = _.cloneDeep(measure);
     measure.measureMetaData = { ...measureMetaData };
     setMeasureMetadata(measure, typeLower, genericField);
 
@@ -103,7 +107,20 @@ export default function MeasureMetadata(props: MeasureMetadataProps) {
         updateMeasure(measure);
       })
       .catch((reason) => {
-        const message = `Error updating measure "${measure.measureName}"`;
+        let message = `Error updating measure "${measure.measureName}"`;
+        if (lockingFeatureEnabled && reason?.status === 423) {
+          message = reason?.response?.data?.message;
+          updateMeasure({
+            ...originalMeasure,
+            measureLock: {
+              lockedBy: reason?.response?.data?.message?.replace(
+                "Unable to update measure. Measure is locked by ",
+                ""
+              ),
+            } as unknown as MeasureLock,
+          });
+          resetForm();
+        }
         setErrorMessage(message);
       });
   };

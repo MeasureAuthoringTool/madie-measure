@@ -34,6 +34,7 @@ import {
   CqlMetaData,
   CodeSystem,
   Model,
+  MeasureLock,
 } from "@madie/madie-models";
 
 import {
@@ -511,6 +512,19 @@ const MeasureEditor = ({ measureCanEdit, measureLockedBy }) => {
             if (callback) callback();
           })
           .catch((reason) => {
+            if (featureFlags?.Locking && reason?.status === 423) {
+              setErrorMessage(reason?.response?.data?.message);
+              updateMeasure({
+                ...measure,
+                measureLock: {
+                  lockedBy: reason?.response?.data?.message?.replace(
+                    "Unable to update measure. Measure is locked by ",
+                    ""
+                  ),
+                } as unknown as MeasureLock,
+              });
+              resetCql();
+            }
             // inner failure
             console.error(reason);
             setError(true);

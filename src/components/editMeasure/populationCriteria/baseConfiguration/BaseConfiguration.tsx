@@ -5,6 +5,7 @@ import {
   GroupScoring,
   BaseConfigurationTypes,
   MeasureErrorType,
+  MeasureLock,
 } from "@madie/madie-models";
 import {
   measureStore,
@@ -197,6 +198,18 @@ const BaseConfiguration = (props: BaseConfigurationProps) => {
       })
       // update to alert
       .catch((err) => {
+        if (featureFlags?.Locking && err?.status === 423) {
+          updateMeasure({
+            ...measure,
+            measureLock: {
+              lockedBy: err?.response?.data?.message?.replace(
+                "Unable to update measure. Measure is locked by ",
+                ""
+              ),
+            } as unknown as MeasureLock,
+          });
+          resetForm();
+        }
         handleToast(
           "danger",
           "Error updating Measure Base Configuration: " +

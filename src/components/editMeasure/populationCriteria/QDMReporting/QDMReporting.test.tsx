@@ -612,6 +612,83 @@ describe("QDMReporting component", () => {
       );
     });
   });
+
+  test("Save with 423 failure will display error message", async () => {
+    (useFeatureFlags as jest.Mock).mockClear().mockImplementationOnce(() => ({
+      Locking: true,
+    }));
+    (mockMeasureServiceApi.updateMeasure as jest.Mock).mockRejectedValueOnce({
+      status: 423,
+      response: {
+        data: {
+          message:
+            "Unable to update measure. Measure is locked by another user.",
+        },
+      },
+    });
+
+    render(
+      <QDMReporting
+        isTestCaseLocked={false}
+        checkTestCasesLockStatus={jest.fn()}
+        setAlertMessage={jest.fn()}
+        measureCanEdit={true}
+      />
+    );
+
+    const descriptionEditor = screen.getByTestId(
+      "rate-aggregation-rich-text-editor"
+    );
+    expect(descriptionEditor).toBeInTheDocument();
+
+    const editableContent = within(descriptionEditor).getByRole("textbox");
+    expect(editableContent).toHaveAttribute("contenteditable", "true");
+
+    await act(async () => {
+      fireEvent.focus(editableContent);
+      editableContent.innerHTML = "Test";
+      fireEvent.input(editableContent, {
+        target: { innerHTML: "Test" },
+      });
+      fireEvent.blur(editableContent);
+    });
+
+    // Wait for debounced update to take effect (250ms delay from TextEditor component)
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 350));
+    });
+
+    await selectAnOptionForImprovementNotation(decreasedNotation);
+
+    const saveButton = getByRole("button", {
+      name: "Save",
+    });
+    expect(saveButton).toBeInTheDocument();
+    await waitFor(() => expect(saveButton).toBeEnabled());
+    fireEvent.click(saveButton);
+    await waitFor(() =>
+      expect(mockMeasureServiceApi.updateMeasure).toBeCalledWith({
+        ...measure,
+        rateAggregation: "<p>Test</p>",
+        improvementNotation: "Decreased score indicates improvement",
+        improvementNotationDescription: "",
+      })
+    );
+
+    expect(
+      await getByText(
+        "Error updating Measure Reporting: Unable to update measure. Measure is locked by another user."
+      )
+    ).toBeInTheDocument();
+    const toastCloseButton = await getByRole("button", {
+      name: "",
+    });
+    expect(toastCloseButton).toBeInTheDocument();
+    fireEvent.click(toastCloseButton);
+    await waitFor(() => {
+      expect(toastCloseButton).not.toBeInTheDocument();
+    });
+  });
 });
 
 const selectAnOptionForImprovementNotation = async (notationValue) => {

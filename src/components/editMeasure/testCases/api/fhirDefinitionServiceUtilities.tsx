@@ -198,17 +198,23 @@ export function buildSchemaRecursive(formInfo, path) {
 
   // Case has a validation
   if (node.validation && children.length === 0) {
+    if (node.max === "*") {
+      return Yup.array().of(node.validation);
+    }
     return node.validation;
   }
 
   // Array case
-  if (node.max === "*" && children.length > 0) {
+  if (
+    node.max === "*" &&
+    children.length > 0 &&
+    node.id.split(".").length > 1
+  ) {
     const shape = {};
     children.forEach(([id]) => {
       const lastKey = id.split(".").pop();
       shape[lastKey] = buildSchemaRecursive(formInfo, id);
     });
-
     return Yup.array().of(Yup.object().shape(shape));
   }
 
@@ -219,11 +225,9 @@ export function buildSchemaRecursive(formInfo, path) {
       const lastKey = id.split(".").pop();
       shape[lastKey] = buildSchemaRecursive(formInfo, id);
     });
-
     return Yup.object().shape(shape);
   }
 
-  // Fallback
   return Yup.mixed();
 }
 

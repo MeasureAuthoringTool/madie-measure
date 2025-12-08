@@ -377,15 +377,22 @@ describe("Measure References Component", () => {
   it("should show error message when delete measure reference page fails", async () => {
     measureStore.state.mockImplementation(() => measureWithNineItems);
     measureStore.initialState.mockImplementation(() => measureWithNineItems);
-    mockMeasureServiceApi.updateMeasure = jest
-      .fn()
-      .mockRejectedValueOnce({ data: {} });
+    mockMeasureServiceApi.updateMeasure = jest.fn().mockRejectedValueOnce({
+      status: 423,
+      response: {
+        data: {
+          message:
+            "Unable to update measure. Measure is locked by another user.",
+        },
+      },
+    });
     render(
       <ApiContextProvider value={serviceConfig}>
         <MemoryRouter initialEntries={["/"]}>
           <MeasureReferences
             setErrorMessage={jest.fn()}
             measureCanEdit={true}
+            lockingFeatureEnabled={true}
           />
         </MemoryRouter>
       </ApiContextProvider>
@@ -407,7 +414,7 @@ describe("Measure References Component", () => {
     fireEvent.click(screen.getByTestId("delete-dialog-continue-button"));
     const toastMessage = await screen.findByTestId("measure-references-error");
     expect(toastMessage).toHaveTextContent(
-      `Error updating measure "measureName"`
+      `Unable to update measure. Measure is locked by another user.`
     );
     expect(screen.queryByTestId("delete-dialog-body")).toBeNull();
   });
@@ -841,5 +848,83 @@ describe("Measure References Component", () => {
     });
 
     expect(referenceEditor).toHaveTextContent("text 2");
+  });
+
+  it("Should handle 423 error.", async () => {
+    const reference: Reference = {
+      id: "id-1",
+      referenceType: "Citation",
+      referenceText: "original reference text",
+    };
+    const testMeasure = {
+      ...measure,
+      measureMetaData: { references: [reference] },
+    };
+    measureStore.state.mockImplementation(() => testMeasure);
+    measureStore.initialState.mockImplementation(() => testMeasure);
+
+    const updatedReference: Reference = {
+      ...reference,
+      referenceText: "updated reference text",
+    };
+    const updatedMeasure = {
+      ...testMeasure,
+      measureMetaData: { references: [updatedReference] },
+    };
+    mockMeasureServiceApi.updateMeasure = jest.fn().mockRejectedValueOnce({
+      status: 423,
+      response: {
+        data: {
+          message:
+            "Unable to update measure. Measure is locked by another user.",
+        },
+      },
+    });
+
+    render(
+      <ApiContextProvider value={serviceConfig}>
+        <MemoryRouter initialEntries={["/"]}>
+          <MeasureReferences
+            setErrorMessage={jest.fn()}
+            measureCanEdit={true}
+            lockingFeatureEnabled={true}
+          />
+        </MemoryRouter>
+      </ApiContextProvider>
+    );
+
+    const editButton = await screen.findByTestId("edit-measure-reference-id-1");
+    expect(editButton).toBeInTheDocument();
+
+    userEvent.click(editButton);
+    await waitFor(() => {
+      expect(screen.getByTestId("dialog-form")).toBeInTheDocument();
+    });
+
+    const typeInput = screen.getByTestId(
+      "measure-referenceType-input"
+    ) as HTMLInputElement;
+    expect(typeInput.value).toBe("Citation");
+
+    const referenceEditor = screen.getByRole("textbox");
+    expect(referenceEditor).toBeInTheDocument();
+    expect(referenceEditor).toHaveTextContent("original reference text");
+
+    act(() => {
+      fireEvent.input(referenceEditor, {
+        target: { textContent: "updated reference text" },
+      });
+    });
+    fireEvent.blur(referenceEditor);
+
+    const saveButton = screen.getByTestId("save-button");
+    await waitFor(() => expect(saveButton).toBeEnabled());
+    fireEvent.click(saveButton);
+
+    expect(
+      await screen.findByTestId("measure-references-error")
+    ).toHaveTextContent(
+      "Unable to update measure. Measure is locked by another user."
+    );
   });
 });
