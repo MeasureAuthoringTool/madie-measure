@@ -5,6 +5,8 @@ import {
   SIGNED_MINIMUM,
   INTEGER_MAXIMUM,
 } from "./FhirNumbers";
+import { validate } from "../../../../../../../common/quantityInput/validate";
+import { notEmptyHtml } from "../../../../../../../../../../../validations/ReadOnlyValidator";
 
 export const INSTANT_REGEX =
   /([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])T([01][0-9]|2[0-3]):[0-5][0-9]:([0-5][0-9]|60)(\.[0-9]{1,9})?(Z|(\+|-)((0[0-9]|1[0-3]):[0-5][0-9]|14:00))$/;
@@ -234,6 +236,25 @@ export const getInstantValidator = (required: boolean) => {
   return baseValidator;
 };
 
+export const getQuantityValidator = (required) => {
+  const baseValidator = Yup.object().shape({
+    code: Yup.string().test(
+      "validate-quantity",
+      "Invalid quantity unit",
+      (value) => {
+        if (!value) return !required; // If not required, allow empty values
+        const validationResult = validate(value);
+        return !validationResult.error; // Return true if valid, false otherwise
+      }
+    ),
+  });
+
+  if (required) {
+    return baseValidator.required("This field is required");
+  }
+  return baseValidator;
+};
+
 /*
   This object will hold all references to validations with keys for type matching up against a validation
   We can then use the lookup to see if it exists, if it does, we return the validation function, we pass in the required value attached,
@@ -256,6 +277,7 @@ export const validationLookup = {
   time: getTimeValidator,
   instant: getInstantValidator,
   base64Binary: getBinaryValidator,
+  Quantity: getQuantityValidator,
 };
 
 export const getValidation = (type, required, label?) => {
