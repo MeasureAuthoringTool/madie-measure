@@ -138,13 +138,18 @@ const ElementSelector = ({
   onChange,
 }: ElementSelectorProps) => {
   // Create a Set of disabled element IDs for efficient lookup
-  const disabledIds = useMemo(
-    () => new Set(value.map((v) => `${v.id}|${v.path}`)),
-    [value]
-  );
+  const disabledIds = useMemo(() => {
+    const idSet = new Set<string>();
+    value.forEach((v) => {
+      if (v.id) idSet.add(v.id);
+      if (v.path) idSet.add(v.path);
+    });
+    return idSet;
+  }, [value, value.length]);
 
   const isInValue = (option: ElementDefinition) =>
-    disabledIds.has(`${option.id}|${option.path}`);
+    (option.id && disabledIds.has(option.id)) ||
+    (option.path && disabledIds.has(option.path));
 
   return (
     <>
