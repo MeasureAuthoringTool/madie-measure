@@ -24,6 +24,7 @@ import {
   checkUserCanEdit,
   measureStore,
   MeasureServiceApi,
+  UserServiceApi,
   useFeatureFlags,
 } from "@madie/madie-util";
 
@@ -103,8 +104,13 @@ const mockMeasureServiceApi = {
   createCmsId: jest.fn(),
   updateMeasure: jest.fn().mockResolvedValue({ status: 200 }),
 } as unknown as MeasureServiceApi;
+
+const mockUserServiceApi = {
+  getMeasureOwnerDetails: jest.fn().mockResolvedValue({}),
+} as unknown as UserServiceApi;
 jest.mock("@madie/madie-util", () => ({
   useMeasureServiceApi: jest.fn(() => mockMeasureServiceApi),
+  useUserServiceApi: jest.fn(() => mockUserServiceApi),
   useFeatureFlags: jest.fn().mockReturnValue({
     Locking: true,
   }),

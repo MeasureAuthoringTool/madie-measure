@@ -25,6 +25,7 @@ import {
   routeHandlerStore,
   checkUserCanEdit,
   useMeasureServiceApi,
+  useUserServiceApi,
   useFeatureFlags,
 } from "@madie/madie-util";
 import { Box } from "@mui/system";
@@ -65,6 +66,7 @@ export default function MeasureInformation(props: MeasureInformationProps) {
   const { setErrorMessage, measureCanEdit } = props;
   const featureFlags = useFeatureFlags();
   const measureServiceApi = useMeasureServiceApi();
+  const userServiceApi = useUserServiceApi();
   const qdmElmTranslationService = useQdmElmTranslationServiceApi();
   const fhirElmTranslationService = useFhirElmTranslationServiceApi();
 
@@ -72,6 +74,7 @@ export default function MeasureInformation(props: MeasureInformationProps) {
   const { updateMeasure } = measureStore;
   const [measure, setMeasure] = useState<any>(measureStore.state);
   const [translatorVersion, setTranslatorVersion] = useState("");
+  const [measureOwner, setMeasureOwner] = useState("-");
 
   const getTranslatorVersion = async (model, draft) => {
     if (model.includes("QDM")) {
@@ -94,6 +97,21 @@ export default function MeasureInformation(props: MeasureInformationProps) {
         });
     }
   };
+
+  useEffect(() => {
+    if (measure?.measureSet?.owner) {
+      userServiceApi
+        .getMeasureOwnerDetails(measure?.measureSet?.owner)
+        .then((response) => {
+          const ownerName = `${response?.firstName} ${response?.lastName}`;
+          setMeasureOwner(ownerName);
+        })
+        .catch(() => {
+          setMeasureOwner("-");
+        });
+    }
+  }, [measure?.measureSet?.owner]);
+
   useEffect(() => {
     // if we have a measure loaded
     if (measure?.model) {
@@ -566,6 +584,17 @@ export default function MeasureInformation(props: MeasureInformationProps) {
             error={formik.touched.ecqmTitle && Boolean(formik.errors.ecqmTitle)}
             {...formik.getFieldProps("ecqmTitle")}
             maxLength={32}
+          />
+
+          <ReadOnlyTextField
+            value={measureOwner}
+            label={"Measure Owner"}
+            tabIndex={0}
+            placeholder="Measure Owner"
+            id="measure-owner-label"
+            data-testid="measure-owner-text-field"
+            inputProps={{ "data-testid": "measure-owner-input" }}
+            size="small"
           />
 
           <CmsIdentifier
