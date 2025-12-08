@@ -6,6 +6,8 @@ import UriComponent from "./UriComponent";
 import PeriodDateTimeComponent from "./PeriodDateTimeComponent";
 import CodeableConceptComponent from "./CodeableConceptComponent";
 import CodesComponent from "./CodesComponent";
+import { formikErrorHandler } from "../TypeEditor";
+import { getNestedProperty } from "../../../../../../../../api/fhirDefinitionServiceUtilities";
 
 const IdentifierComponent = ({
   label,
@@ -41,7 +43,7 @@ const IdentifierComponent = ({
         canEdit={canEdit}
         fieldRequired={fieldRequired}
       />
-
+      {/* clears out on it's own.. */}
       <CodeableConceptComponent
         label="Type"
         canEdit={canEdit}
@@ -62,20 +64,20 @@ const IdentifierComponent = ({
       />
 
       <UriComponent
-        label="System"
+        label={label + ".system"}
         fieldRequired={fieldRequired}
         canEdit={canEdit}
-        helperText={helperText}
-        error={error}
+        helperText={formikErrorHandler(label + ".system", formik)}
+        error={getNestedProperty(formik.errors, label + ".system")}
         {...formik.getFieldProps(`${label}.system`)}
       />
 
       <StringComponent
-        label="Value"
+        label={label + ".value"}
         fieldRequired={fieldRequired}
         canEdit={canEdit}
-        helperText={helperText}
-        error={error}
+        helperText={formikErrorHandler(label + ".value", formik)}
+        error={getNestedProperty(formik.errors, label + ".value")}
         {...formik.getFieldProps(`${label}.value`)}
       />
 
@@ -88,8 +90,8 @@ const IdentifierComponent = ({
           formik.setFieldTouched(`${label}.period`);
           formik.setFieldValue(`${label}.period`, value);
         }}
-        helperText={helperText}
-        error={error}
+        helperText={formikErrorHandler(label + ".period", formik)}
+        error={getNestedProperty(formik.errors, label + ".period")}
       />
 
       <StringComponent

@@ -39,6 +39,13 @@ import TimingComponent from "./types/TimingComponent";
 import RangeComponent from "./types/RangeComponent";
 import ReferenceComponent from "./types/ReferenceComponent";
 
+export const formikErrorHandler = (name: string, formik) => {
+  const touched = getNestedProperty(formik.touched, name);
+  const errors = getNestedProperty(formik.errors, name);
+  if (touched && errors) {
+    return errors;
+  }
+};
 // onChange is being deprecated as no updates to the resource are tracked.
 // Changes directly to the json should be done with a dispatch, this propagates downstream changes in formik.
 // any temporary form state should be done through formik.
@@ -64,7 +71,8 @@ const TypeEditor = ({
   // is multiple cardinality?
   if (structureDefinition?.max === "*") {
     // is it not already terminated with an index?
-    if (!getIndexFromPath(label) && type !== "BackboneElement") {
+    // if (!getIndexFromPath(label) && type !== "BackboneElement") {
+    if (!getIndexFromPath(label)) {
       // we are just going to add a zero for now. could be smarter later
       // TO DO: We will eventually need to map inner elements of multiple cardinality based on how many elements are in the form
       // something like Array.From(numOfElementsInForm, _index) =>) had a previous rendition of this guy working in 8500 pr commits
@@ -144,14 +152,6 @@ const TypeEditor = ({
     formik.setFieldValue(rootLabel, updatedValues);
   };
 
-  const formikErrorHandler = (name: string) => {
-    const touched = getNestedProperty(formik.touched, name);
-    const errors = getNestedProperty(formik.errors, name);
-    if (touched && errors) {
-      return errors;
-    }
-  };
-
   const isRoot = structureDefinition?.id?.split?.(".")?.length === 2;
   const canBeMultipleCardinality = structureDefinition?.max === "*";
   const addTitle = structureDefinition?.id
@@ -182,7 +182,7 @@ const TypeEditor = ({
                   stringOnly={label?.split(".").pop() !== "id"}
                   label={fieldLabel}
                   canEdit={canEdit}
-                  helperText={formikErrorHandler(fieldLabel)}
+                  helperText={formikErrorHandler(fieldLabel, formik)}
                   error={getNestedProperty(formik.errors, fieldLabel)}
                   fieldRequired={required}
                   showAddAttributeButton={
@@ -208,7 +208,7 @@ const TypeEditor = ({
               stringOnly={false}
               label={label}
               canEdit={canEdit}
-              helperText={formikErrorHandler(label)}
+              helperText={formikErrorHandler(label, formik)}
               error={getNestedProperty(formik.errors, label)}
               fieldRequired={required}
               showAddAttributeButton={showAddAttributeButton}
@@ -228,7 +228,7 @@ const TypeEditor = ({
               stringOnly={false}
               label={label}
               canEdit={canEdit}
-              helperText={formikErrorHandler(label)}
+              helperText={formikErrorHandler(label, formik)}
               error={getNestedProperty(formik.errors, label)}
               showAddAttributeButton={showAddAttributeButton}
               addTitle={addTitle}
@@ -300,7 +300,7 @@ const TypeEditor = ({
                   key={index}
                   label={fieldLabel}
                   canEdit={canEdit}
-                  helperText={formikErrorHandler(fieldLabel)}
+                  helperText={formikErrorHandler(fieldLabel, formik)}
                   error={getNestedProperty(formik.errors, fieldLabel)}
                   fieldRequired={required}
                   showAddAttributeButton={
@@ -345,7 +345,7 @@ const TypeEditor = ({
                   canEdit={canEdit}
                   fieldRequired={required}
                   label={fieldLabel}
-                  helperText={formikErrorHandler(fieldLabel)}
+                  helperText={formikErrorHandler(fieldLabel, formik)}
                   error={getNestedProperty(formik.errors, fieldLabel)}
                   showAddAttributeButton={
                     showAddAttributeButton &&
@@ -370,7 +370,7 @@ const TypeEditor = ({
             name={label}
             label={label}
             required={required}
-            helperText={formikErrorHandler(label)}
+            helperText={formikErrorHandler(label, formik)}
             error={getNestedProperty(formik.errors, label)}
             handleDateTimeChange={(value) => {
               formik.setFieldTouched(label);
@@ -408,7 +408,7 @@ const TypeEditor = ({
                   canEdit={canEdit}
                   fieldRequired={required}
                   label={fieldLabel}
-                  helperText={formikErrorHandler(fieldLabel)}
+                  helperText={formikErrorHandler(fieldLabel, formik)}
                   error={getNestedProperty(formik.errors, fieldLabel)}
                   integerType={
                     type === "unsignedInt"
@@ -440,7 +440,7 @@ const TypeEditor = ({
             structureDefinition={structureDefinition}
             fieldRequired={false}
             error={getNestedProperty(formik.errors, label)}
-            helperText={formikErrorHandler(label)}
+            helperText={formikErrorHandler(label, formik)}
           />
         );
       case "http://hl7.org/fhirpath/System.Boolean":
@@ -463,7 +463,7 @@ const TypeEditor = ({
                   canEdit={canEdit}
                   fieldRequired={required}
                   label={fieldLabel}
-                  helperText={formikErrorHandler(fieldLabel)}
+                  helperText={formikErrorHandler(fieldLabel, formik)}
                   error={getNestedProperty(formik.errors, fieldLabel)}
                   showAddAttributeButton={
                     showAddAttributeButton &&
@@ -501,7 +501,7 @@ const TypeEditor = ({
                   structureDefinition={structureDefinition}
                   fieldRequired={required}
                   label={fieldLabel}
-                  helperText={formikErrorHandler(fieldLabel)}
+                  helperText={formikErrorHandler(fieldLabel, formik)}
                   error={getNestedProperty(formik.errors, fieldLabel)}
                   showAddAttributeButton={
                     showAddAttributeButton &&
@@ -544,7 +544,7 @@ const TypeEditor = ({
                   structureDefinition={structureDefinition}
                   fieldRequired={required}
                   label={fieldLabel}
-                  helperText={formikErrorHandler(fieldLabel)}
+                  helperText={formikErrorHandler(fieldLabel, formik)}
                   error={getNestedProperty(formik.errors, fieldLabel)}
                   showAddAttributeButton={
                     showAddAttributeButton &&
@@ -567,7 +567,7 @@ const TypeEditor = ({
           <DateComponent
             label={label}
             canEdit={canEdit}
-            helperText={formikErrorHandler(label)}
+            helperText={formikErrorHandler(label, formik)}
             error={getNestedProperty(formik.errors, label)}
             fieldRequired={required}
             showAddAttributeButton={showAddAttributeButton}
@@ -605,7 +605,7 @@ const TypeEditor = ({
                     structureDefinition={structureDefinition}
                     fieldRequired={required}
                     label={fieldLabel}
-                    helperText={formikErrorHandler(fieldLabel)}
+                    helperText={formikErrorHandler(fieldLabel, formik)}
                     error={getNestedProperty(formik.errors, fieldLabel)}
                     showAddAttributeButton={
                       showAddAttributeButton &&
@@ -697,7 +697,7 @@ const TypeEditor = ({
             label={label}
             canEdit={canEdit}
             required={required}
-            helperText={formikErrorHandler(label)}
+            helperText={formikErrorHandler(label, formik)}
             error={getNestedProperty(formik.errors, label)}
             showAddAttributeButton={showAddAttributeButton}
             addTitle={addTitle}
@@ -873,7 +873,7 @@ const TypeEditor = ({
         <PeriodDateTimeComponent
           label={label}
           canEdit={canEdit}
-          helperText={formikErrorHandler(label)}
+          helperText={formikErrorHandler(label, formik)}
           error={getNestedProperty(formik.errors, label)}
           fieldRequired={required}
           {...formik.getFieldProps(label)}
