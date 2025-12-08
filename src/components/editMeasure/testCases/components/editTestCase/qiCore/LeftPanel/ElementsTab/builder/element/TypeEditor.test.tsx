@@ -1868,8 +1868,12 @@ describe("TypeEditor Component", () => {
     expect(
       await screen.findByLabelText("Value Set / Direct Reference Code")
     ).toBeInTheDocument();
-    expect(await screen.findByLabelText("System")).toBeInTheDocument();
-    expect(await screen.findByLabelText("Value")).toBeInTheDocument();
+    expect(
+      await screen.findByLabelText("MedicationRequest.identifier[0].system")
+    ).toBeInTheDocument();
+    expect(
+      await screen.findByLabelText("MedicationRequest.identifier[0].value")
+    ).toBeInTheDocument();
     expect(await screen.findByLabelText("Start Date")).toBeInTheDocument();
     expect(await screen.findByLabelText("End Date")).toBeInTheDocument();
     expect(await screen.findByLabelText("Assigner")).toBeInTheDocument();
