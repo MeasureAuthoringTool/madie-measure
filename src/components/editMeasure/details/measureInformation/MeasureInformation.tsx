@@ -567,50 +567,67 @@ export default function MeasureInformation(props: MeasureInformationProps) {
           />
         </Box>
 
-        <Box sx={formRowGapped}>
-          <TextField
-            placeholder="eCQM Name"
-            required
-            readOnly={!measureCanEdit}
-            label="eCQM Abbreviated Title"
-            id="ecqmTitle"
-            data-testid="ecqm-text-field"
-            inputProps={{
-              "data-testid": "ecqm-input",
-              "aria-required": "true",
-            }}
-            helperText={formikErrorHandler("ecqmTitle", true)}
-            size="small"
-            error={formik.touched.ecqmTitle && Boolean(formik.errors.ecqmTitle)}
-            {...formik.getFieldProps("ecqmTitle")}
-            maxLength={32}
-          />
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "row",
+            width: "100%",
+            ...formRowGapped,
+          }}
+        >
+          <Box sx={{ flex: 1 }}>
+            <TextField
+              placeholder="eCQM Name"
+              required
+              readOnly={!measureCanEdit}
+              label="eCQM Abbreviated Title"
+              id="ecqmTitle"
+              data-testid="ecqm-text-field"
+              inputProps={{
+                "data-testid": "ecqm-input",
+                "aria-required": "true",
+              }}
+              helperText={formikErrorHandler("ecqmTitle", true)}
+              size="small"
+              error={
+                formik.touched.ecqmTitle && Boolean(formik.errors.ecqmTitle)
+              }
+              {...formik.getFieldProps("ecqmTitle")}
+              maxLength={32}
+            />
+          </Box>
 
-          <ReadOnlyTextField
-            value={measureOwner}
-            label={"Measure Owner"}
-            tabIndex={0}
-            placeholder="Measure Owner"
-            id="measure-owner-label"
-            data-testid="measure-owner-text-field"
-            inputProps={{ "data-testid": "measure-owner-input" }}
-            size="small"
-          />
-
-          <CmsIdentifier
-            //cannot generate id if shared, only owner can
-            canEdit={
-              checkUserCanEdit(
-                measure?.measureSet?.owner,
-                [],
-                measure?.measureMetaData?.draft
-              ) && !(featureFlags?.Locking && measure?.measureLock)
-            }
-            label="CMS ID"
-            cmsId={measure?.measureSet?.cmsId}
-            model={measure?.model}
-            onClick={() => setCmsIdDialogOpen(true)}
-          />
+          <Box
+            sx={{ flex: 1, display: "flex", flexDirection: "row", gap: "8px" }}
+          >
+            <Box sx={{ flex: 1 }}>
+              <ReadOnlyTextField
+                value={measureOwner}
+                label={"Measure Owner"}
+                tabIndex={0}
+                placeholder="Measure Owner"
+                id="measure-owner-label"
+                data-testid="measure-owner-text-field"
+                inputProps={{ "data-testid": "measure-owner-input" }}
+                size="small"
+              />
+            </Box>
+            <Box sx={{ flex: 1 }}>
+              <CmsIdentifier
+                canEdit={
+                  checkUserCanEdit(
+                    measure?.measureSet?.owner,
+                    [],
+                    measure?.measureMetaData?.draft
+                  ) && !(featureFlags?.Locking && measure?.measureLock)
+                }
+                label="CMS ID"
+                cmsId={measure?.measureSet?.cmsId}
+                model={measure?.model}
+                onClick={() => setCmsIdDialogOpen(true)}
+              />
+            </Box>
+          </Box>
         </Box>
 
         {measure?.model !== Model.QDM_5_6 && (
