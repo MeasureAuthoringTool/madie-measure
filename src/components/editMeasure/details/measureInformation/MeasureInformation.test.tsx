@@ -1523,4 +1523,37 @@ describe("MeasureInformation component", () => {
       timeout: 5000,
     });
   });
+
+  it("sets measureOwner to the fetched owner name on success", async () => {
+    mockUserServiceApi.getMeasureOwnerDetails.mockResolvedValueOnce({
+      firstName: "Jane",
+      lastName: "Doe",
+    });
+
+    const { getByTestId } = render(
+      <MeasureInformation setErrorMessage={jest.fn()} measureCanEdit={true} />
+    );
+
+    await waitFor(() => {
+      expect(
+        (getByTestId("measure-owner-text-field") as HTMLInputElement).value
+      ).toBe("Jane Doe");
+    });
+  });
+
+  it("sets measureOwner to '-' on fetch failure", async () => {
+    mockUserServiceApi.getMeasureOwnerDetails.mockRejectedValueOnce(
+      new Error("fail")
+    );
+
+    const { getByTestId } = render(
+      <MeasureInformation setErrorMessage={jest.fn()} measureCanEdit={true} />
+    );
+
+    await waitFor(() => {
+      expect(
+        (getByTestId("measure-owner-text-field") as HTMLInputElement).value
+      ).toBe("-");
+    });
+  });
 });
