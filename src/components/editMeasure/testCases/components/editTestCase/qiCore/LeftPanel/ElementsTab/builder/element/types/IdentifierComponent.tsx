@@ -43,7 +43,7 @@ const IdentifierComponent = ({
         canEdit={canEdit}
         fieldRequired={fieldRequired}
       />
-
+      {/* clears out on it's own.. */}
       <CodeableConceptComponent
         label="Type"
         canEdit={canEdit}
