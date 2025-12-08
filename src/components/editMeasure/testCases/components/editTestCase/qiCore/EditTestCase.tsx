@@ -281,7 +281,6 @@ const EditTestCase = (props: EditTestCaseProps) => {
     onSubmit: () => {},
   });
   useFormikResetOnEvent(formikStu6Context);
-
   const [shouldPoll, setShouldPoll] = useState(false);
 
   const isQiCoreV6 = measure?.model === "QI-Core v6.0.0";
