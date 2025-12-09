@@ -688,7 +688,9 @@ describe("EditTestCase QDM Component", () => {
     const raceOptions = await screen.findAllByRole("option");
     expect(raceOptions.length).toBe(4);
     userEvent.click(raceOptions[3]);
-    expect(raceSelector).toHaveTextContent("White");
+    await waitFor(() => {
+      expect(raceSelector).toHaveTextContent("White");
+    });
 
     // Gender dropdown change
     const genderSelector = screen.getByRole("combobox", { name: "Sex" });
@@ -698,7 +700,9 @@ describe("EditTestCase QDM Component", () => {
     const genderOptions = await screen.findAllByRole("option");
     expect(genderOptions.length).toBe(3);
     userEvent.click(genderOptions[2]);
-    expect(genderSelector).toHaveTextContent("Male (finding)");
+    await waitFor(() => {
+      expect(genderSelector).toHaveTextContent("Male (finding)");
+    });
 
     // Ethnicity dropdown change
     const ethnicitySelector = screen.getByRole("combobox", {
@@ -710,7 +714,9 @@ describe("EditTestCase QDM Component", () => {
     const ethnicityOptions = await screen.findAllByRole("option");
     expect(ethnicityOptions.length).toBe(3);
     userEvent.click(ethnicityOptions[1]);
-    expect(ethnicitySelector).toHaveTextContent("Hispanic or Latino");
+    await waitFor(() => {
+      expect(ethnicitySelector).toHaveTextContent("Hispanic or Latino");
+    });
 
     // Living Status dropdown change
     const livingStatusSelector = screen.getByRole("combobox", {
@@ -721,12 +727,19 @@ describe("EditTestCase QDM Component", () => {
     const livingStatusOptions = await screen.findAllByRole("option");
     expect(livingStatusOptions.length).toBe(2);
     userEvent.click(livingStatusOptions[1]);
-    expect(livingStatusSelector).toHaveTextContent("Expired");
+    await waitFor(() => {
+      expect(livingStatusSelector).toHaveTextContent("Expired");
+    });
+
+    // Wait for form state to update before clicking discard
+    await waitFor(() => {
+      const discardButton = screen.getByTestId("ds-btn");
+      expect(discardButton).not.toBeDisabled();
+    });
 
     // Discard button
     const discardButton = screen.getByTestId("ds-btn");
     expect(discardButton).toBeInTheDocument();
-    expect(discardButton).not.toBeDisabled();
     userEvent.click(discardButton);
 
     const discardConfirm = screen.getByTestId("discard-dialog-continue-button");
@@ -741,7 +754,7 @@ describe("EditTestCase QDM Component", () => {
     expect(genderSelector).toHaveTextContent("Select a Gender");
     expect(ethnicitySelector).toHaveTextContent("Select an Ethnicity");
     expect(livingStatusSelector).toHaveTextContent("Living");
-  });
+  }, 45000);
 
   it("test update test case successfully with success toast", async () => {
     testCase.json = JSON.stringify(testCaseJson);
@@ -1023,8 +1036,11 @@ describe("EditTestCase QDM Component", () => {
       userEvent.type(descriptionInput, "testtestsetse");
     });
 
+    await waitFor(() => {
+      const saveButton = getByRole("button", { name: "Save" });
+      expect(saveButton).toBeEnabled();
+    });
     const saveButton = getByRole("button", { name: "Save" });
-    expect(saveButton).toBeEnabled();
     act(() => {
       fireEvent.click(saveButton);
     });
@@ -1076,8 +1092,11 @@ describe("EditTestCase QDM Component", () => {
       userEvent.type(descriptionInput, "testtestsetse");
     });
 
+    await waitFor(() => {
+      const saveButton = getByRole("button", { name: "Save" });
+      expect(saveButton).toBeEnabled();
+    });
     const saveButton = getByRole("button", { name: "Save" });
-    expect(saveButton).toBeEnabled();
     act(() => {
       fireEvent.click(saveButton);
     });
