@@ -17,7 +17,6 @@ export default function CmsIdentifier({
   return (
     <div
       style={{
-        width: 1,
         display: "flex",
         flexDirection: "column",
         flexGrow: 1,

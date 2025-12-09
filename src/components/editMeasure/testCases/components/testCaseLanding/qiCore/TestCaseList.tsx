@@ -508,7 +508,9 @@ const TestCaseList = (props: TestCaseListProps) => {
         measureId,
         testCaseImportRequest
       );
-      const testCaseImportOutcome: TestCaseImportOutcome[] = response.data;
+      const importResponse = response.data;
+      const testCaseImportOutcome: TestCaseImportOutcome[] =
+        importResponse.outcomes;
       const failedImports = testCaseImportOutcome.filter((outcome) => {
         if (outcome.message) return outcome;
       });
