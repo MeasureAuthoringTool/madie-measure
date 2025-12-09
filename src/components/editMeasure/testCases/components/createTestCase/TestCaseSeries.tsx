@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { AutoComplete } from "@madie/madie-design-system/dist/react";
+import { AutoComplete, TextField } from "@madie/madie-design-system/dist/react";
 import * as _ from "lodash";
 
 export interface TestCaseSeriesProps {
@@ -8,6 +8,8 @@ export interface TestCaseSeriesProps {
   onChange: (nextValue: string) => void;
   seriesOptions?: string[];
   sx: any;
+  error?: boolean;
+  helperText?: string;
 }
 
 const TestCaseSeries = ({
@@ -16,6 +18,8 @@ const TestCaseSeries = ({
   onChange,
   seriesOptions = [],
   sx,
+  error,
+  helperText,
 }: TestCaseSeriesProps) => {
   const maxLength = 250;
   const [inputLength, setInputLength] = useState(value?.length || 0);
@@ -88,16 +92,15 @@ const TestCaseSeries = ({
       </li>
     );
   };
-
   return (
     <div
       style={{ position: "relative" }}
       data-testid="test-case-series-container"
+      id="test-case-series-container"
     >
       <AutoComplete
         id="test-case-series"
         dataTestId="test-case-series"
-        label="Group"
         readOnly={readOnly}
         placeholder="Start typing or select"
         options={getOptions()}
@@ -111,12 +114,22 @@ const TestCaseSeries = ({
           "data-testid": "test-case-series-input",
           value: inputValue || value,
         }}
+        error={error}
         onInputChange={(event, newInputValue) => {
           if (event) {
             setInputValue(newInputValue);
             setInputLength(newInputValue.length || 0);
           }
         }}
+        renderInput={(params) => (
+          <TextField
+            {...params}
+            helperText={helperText}
+            placeholder="Enter Group"
+            error={error}
+            label="Group"
+          />
+        )}
       />
       {!readOnly && (
         <span
