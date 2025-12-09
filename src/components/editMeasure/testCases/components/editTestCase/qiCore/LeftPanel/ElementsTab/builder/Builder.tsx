@@ -270,6 +270,7 @@ const Builder = ({
               }
               onRowDelete={(row) => handleRowDelete(row, dispatch)}
               testCaseCanEdit={canEdit}
+              selectedRowId={selectedResourceID}
             />
           </>
         )}

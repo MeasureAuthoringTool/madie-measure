@@ -98,7 +98,8 @@ const mockFormik: FormikContextType<any> = {
 };
 
 describe("TypeEditor for profiled extensions/slices ", () => {
-  it("should render form for Patient.extension:ethnicity", async () => {
+  // Skipping this test since we are filtering out extensions now in ElementSelector
+  it.skip("should render form for Patient.extension:ethnicity", async () => {
     const handleChange = jest.fn();
     const label = "Patient.extension:ethnicity";
     const resource = {

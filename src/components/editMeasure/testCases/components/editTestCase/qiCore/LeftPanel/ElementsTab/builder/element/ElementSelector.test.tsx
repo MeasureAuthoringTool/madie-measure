@@ -1,7 +1,10 @@
 import React from "react";
 import { render, screen, within, cleanup } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import ElementSelector, { getOptionLabel } from "./ElementSelector";
+import ElementSelector, {
+  getOptionLabel,
+  getChoiceBaseLabel,
+} from "./ElementSelector";
 import { ElementDefinition } from "fhir/r4";
 
 const mockOptions: ElementDefinition[] = [
@@ -73,9 +76,9 @@ describe("ElementSelector", () => {
     const input = screen.getByPlaceholderText("Attributes");
     userEvent.click(input);
 
-    const listbox = screen.getByRole("listbox");
-    const options = within(listbox).getAllByRole("option");
-    expect(options[0]).toHaveAttribute("aria-disabled", "true");
+    // Find the gender option by text and check if it's disabled
+    const genderOption = screen.getByText("gender").closest("li");
+    expect(genderOption).toHaveAttribute("aria-disabled", "true");
   });
 
   it("renders chips for selected values", () => {
@@ -170,6 +173,17 @@ describe("ElementSelector", () => {
     expect(label).toBe("extension:race");
   });
 
+  it("should return label when sliceName is already included in label", () => {
+    const basePath = "Observation";
+    const option = {
+      path: "Observation.extension:race",
+      sliceName: "race",
+      type: [{ code: "string" }],
+    };
+
+    expect(getOptionLabel(option, basePath)).toBe("extension:race");
+  });
+
   it("getOptionLabel returns the right label when path has [x]", () => {
     const eleDefinition = {
       path: "Patient.multipleBirth[x]",
@@ -196,6 +210,11 @@ describe("ElementSelector", () => {
       { path: "Patient.multipleBirthInteger", min: 0, max: "1" },
       { path: "Patient.valueString", min: 0, max: "1" },
       { path: "Patient.valueQuantity", min: 0, max: "1" },
+      {
+        path: "Patient.unrelatedpath",
+        min: 1,
+        max: "1",
+      },
     ];
 
     const props = {
@@ -221,6 +240,11 @@ describe("ElementSelector", () => {
       "true"
     );
 
+    const unrelatedPathOption = screen.getByText("unrelatedpath");
+    expect(unrelatedPathOption.closest("li")).toHaveAttribute(
+      "aria-disabled",
+      "true"
+    );
     cleanup();
 
     const propsWithMultipleBirth = {
@@ -266,12 +290,15 @@ describe("ElementSelector", () => {
 
       render(<ElementSelector {...props} />);
       userEvent.click(screen.getByPlaceholderText("Attributes"));
-      const options = screen.getAllByRole("option");
+
+      // Get the label of the related (second) option
+      const relatedLabel = getOptionLabel(choiceOptions[1], "Patient");
+      const relatedOption = screen.getByText(relatedLabel).closest("li");
 
       if (shouldBeDisabled) {
-        expect(options[1]).toHaveAttribute("aria-disabled", "true");
+        expect(relatedOption).toHaveAttribute("aria-disabled", "true");
       } else {
-        expect(options[1]).not.toHaveAttribute("aria-disabled", "true");
+        expect(relatedOption).not.toHaveAttribute("aria-disabled", "true");
       }
 
       cleanup();
@@ -294,5 +321,54 @@ describe("ElementSelector", () => {
       true
     );
     testChoiceDisabling("Patient.valueString", "Patient.onsetAge", false);
+  });
+});
+
+describe("getChoiceBaseLabel", () => {
+  const basePath = "Observation";
+
+  it("should return label without [x] when label ends with [x]", () => {
+    const option = { path: "Observation.value[x]" };
+    expect(getChoiceBaseLabel(option, basePath)).toBe("value");
+  });
+
+  it("should strip FHIR datatype suffix when present", () => {
+    const option = { path: "Observation.valueString" };
+    expect(getChoiceBaseLabel(option, basePath)).toBe("value");
+  });
+
+  it("should handle complex FHIR datatype suffix", () => {
+    const option = { path: "Observation.valueCodeableConcept" };
+    expect(getChoiceBaseLabel(option, basePath)).toBe("value");
+  });
+
+  it("should return null if label cannot be determined", () => {
+    const option = { path: "Observation" }; // same as basePath
+    expect(getChoiceBaseLabel(option, basePath)).toBeNull();
+  });
+
+  it("should handle unknown datatype by splitting camelCase", () => {
+    const option = { path: "Observation.valueCustomType" };
+    expect(getChoiceBaseLabel(option, basePath)).toBe("valueCustom");
+  });
+
+  it("should handle multiple camelCase humps and return up to last lowercase", () => {
+    const option = { path: "Observation.someVeryCustomType" };
+    expect(getChoiceBaseLabel(option, basePath)).toBe("someVeryCustom");
+  });
+
+  it("should return null if no camelCase boundary and no datatype match", () => {
+    const option = { path: "Observation.valuecustomtype" };
+    expect(getChoiceBaseLabel(option, basePath)).toBeNull();
+  });
+
+  it("should handle label shorter than datatype (edge case)", () => {
+    const option = { path: "Observation.Boolean" }; // label = 'Boolean'
+    expect(getChoiceBaseLabel(option, basePath)).toBeNull();
+  });
+
+  it("should handle datatype match but label length equals type length (edge case)", () => {
+    const option = { path: "Observation.String" }; // label = 'String'
+    expect(getChoiceBaseLabel(option, basePath)).toBeNull();
   });
 });

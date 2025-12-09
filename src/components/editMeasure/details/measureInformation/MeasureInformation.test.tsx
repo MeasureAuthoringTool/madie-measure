@@ -1477,4 +1477,44 @@ describe("MeasureInformation component", () => {
       expect(translatorVersionText).toBeInTheDocument();
     });
   });
+
+  it("should display 423 error message when updating failed", async () => {
+    mockMeasureServiceApi.updateMeasure = jest.fn().mockRejectedValueOnce({
+      status: 423,
+      response: {
+        data: {
+          message:
+            "Unable to update measure. Measure is locked by another user.",
+        },
+      },
+    });
+    mockMeasureServiceApi.getAllEndorsers = jest
+      .fn()
+      .mockResolvedValue(endorserList);
+
+    measure.measureName = "";
+    render(
+      <MeasureInformation
+        setErrorMessage={setErrorMessage}
+        measureCanEdit={true}
+      />
+    );
+
+    await act(async () => {
+      const input = await findByTestId("measure-name-input");
+      fireEvent.change(input, {
+        target: { value: "new value" },
+      });
+
+      const createBtn = getByTestId("measurement-information-save-button");
+      expect(createBtn).toBeEnabled();
+      act(() => {
+        fireEvent.click(createBtn);
+      });
+    });
+
+    await waitFor(() => expect(setErrorMessage).toHaveBeenCalled(), {
+      timeout: 5000,
+    });
+  });
 });

@@ -95,6 +95,7 @@ const TestCaseList = (props: TestCaseListProps) => {
   const {
     testCases,
     setTestCases,
+    sortedTestCases,
     testCaseService,
     insertTestCases,
     removeTestCases,
@@ -238,8 +239,8 @@ const TestCaseList = (props: TestCaseListProps) => {
   useEffect(() => {
     const validTestCases = measure?.testCaseConfiguration
       ?.executeInvalidTestCases
-      ? testCases
-      : testCases?.filter((tc) => tc.validResource);
+      ? sortedTestCases
+      : sortedTestCases?.filter((tc) => tc.validResource);
     if (validTestCases && calculationOutput?.results && selectedPopCriteria) {
       // Pull Clause Coverage from coverage HTML
       setCoveragePercentage(
@@ -270,7 +271,7 @@ const TestCaseList = (props: TestCaseListProps) => {
       });
       setExecuteAllTestCases(true);
       const { passPercentage, passFailRatio } =
-        calculation.current.getPassingPercentageForTestCases(testCases);
+        calculation.current.getPassingPercentageForTestCases(sortedTestCases);
       setTestCasePassFailStats({
         passPercentage: passPercentage,
         passFailRatio: passFailRatio,
@@ -434,8 +435,8 @@ const TestCaseList = (props: TestCaseListProps) => {
 
     const testCasesToExecute = measure?.testCaseConfiguration
       ?.executeInvalidTestCases
-      ? testCases
-      : testCases?.filter((tc) => tc.validResource);
+      ? sortedTestCases
+      : sortedTestCases?.filter((tc) => tc.validResource);
 
     if (testCasesToExecute && testCasesToExecute.length > 0 && measureBundle) {
       setExecuting(true);
@@ -539,7 +540,7 @@ const TestCaseList = (props: TestCaseListProps) => {
   };
 
   const handleQiCloneTestCase = async (testCase: TestCase) => {
-    const clonedTestCase = testCase;
+    const clonedTestCase = _.cloneDeep(testCase);
     clonedTestCase.title =
       clonedTestCase.title + "-" + new ObjectId().toString();
     try {

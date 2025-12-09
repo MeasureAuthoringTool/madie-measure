@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import tw from "twin.macro";
 import { useFormik } from "formik";
-import { Measure } from "@madie/madie-models";
+import { Measure, MeasureLock } from "@madie/madie-models";
 import {
   measureStore,
   routeHandlerStore,
@@ -145,6 +145,18 @@ const QDMReporting = (props: ReportingProps) => {
       })
       // update to alert
       .catch((err) => {
+        if (featureFlags?.Locking && err?.status === 423) {
+          updateMeasure({
+            ...measure,
+            measureLock: {
+              lockedBy: err?.response?.data?.message?.replace(
+                "Unable to update measure. Measure is locked by ",
+                ""
+              ),
+            } as unknown as MeasureLock,
+          });
+          formik.resetForm();
+        }
         handleToast(
           "danger",
           "Error updating Measure Reporting: " +

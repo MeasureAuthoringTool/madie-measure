@@ -22,6 +22,7 @@ import {
   Measure,
   MeasureReportType,
   RiskAdjustment as RiskAdjustmentModel,
+  MeasureLock,
 } from "@madie/madie-models";
 import * as Yup from "yup";
 import * as _ from "lodash";
@@ -128,7 +129,20 @@ const RiskAdjustment = (props: RiskAdjustmentProps) => {
         }
       })
       .catch((reason) => {
-        const message = `Error updating measure "${modifiedMeasure.measureName}": ${reason}`;
+        let message = `Error updating measure "${modifiedMeasure.measureName}": ${reason}`;
+        if (featureFlags?.Locking && reason?.status === 423) {
+          updateMeasure({
+            ...measure,
+            measureLock: {
+              lockedBy: reason?.response?.data?.message?.replace(
+                "Unable to update measure. Measure is locked by ",
+                ""
+              ),
+            } as unknown as MeasureLock,
+          });
+          formik.resetForm();
+          message = reason?.response?.data?.message.toString();
+        }
         handleToast("danger", message, true);
       });
   };

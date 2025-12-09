@@ -145,7 +145,7 @@ describe("CodeableConceptComponent Tests", () => {
             extension: [
               {
                 url: "http://hl7.org/fhir/StructureDefinition/valueset-reference",
-                valueUrl: mockBindingValueSet.url,
+                valueUri: mockBindingValueSet.url,
               },
             ],
           },

@@ -281,7 +281,6 @@ const EditTestCase = (props: EditTestCaseProps) => {
     onSubmit: () => {},
   });
   useFormikResetOnEvent(formikStu6Context);
-
   const [shouldPoll, setShouldPoll] = useState(false);
 
   const isQiCoreV6 = measure?.model === "QI-Core v6.0.0";
@@ -746,6 +745,11 @@ const EditTestCase = (props: EditTestCaseProps) => {
             </div>,
             "warning"
           );
+        } else if (testCase.bundleTypeUpdated) {
+          showToast(
+            "The test case has been saved successfully. Please note that the bundle type has been updated to Collection, as the Test Case Builder supports editing only collection bundles.",
+            "success"
+          );
         } else {
           showToast(
             `Test case ${action}d successfully!${
@@ -770,6 +774,11 @@ const EditTestCase = (props: EditTestCaseProps) => {
             </div>,
             "warning"
           );
+        } else if (testCase.bundleTypeUpdated) {
+          showToast(
+            "The test case has been saved successfully. Please note that the bundle type has been updated to Collection, as the Test Case Builder supports editing only collection bundles.",
+            "success"
+          );
         } else {
           showToast(`Test case ${action}d successfully!`, "success");
         }
@@ -790,6 +799,13 @@ const EditTestCase = (props: EditTestCaseProps) => {
                 consistency.
               </ul>
             )}
+            {testCase.bundleTypeUpdated && (
+              <ul>
+                The test case has been saved successfully. Please note that the
+                bundle type has been updated to Collection, as the Test Case
+                Builder supports editing only collection bundles.
+              </ul>
+            )}
             <ul>{valErrors}</ul>
           </div>
         ) : (
@@ -805,6 +821,13 @@ const EditTestCase = (props: EditTestCaseProps) => {
                   otherwise timezone offsets are removed or set to UTC for
                   consistency.
                 </li>
+              </ul>
+            )}
+            {testCase.bundleTypeUpdated && (
+              <ul>
+                The test case has been saved successfully. Please note that the
+                bundle type has been updated to Collection, as the Test Case
+                Builder supports editing only collection bundles.
               </ul>
             )}
           </div>

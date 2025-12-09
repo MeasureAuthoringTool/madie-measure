@@ -498,4 +498,65 @@ describe("SupplementalData Component QDM", () => {
       );
     });
   });
+
+  it("Should fail an update to supplemental data values due to 423 error", async () => {
+    (useFeatureFlags as jest.Mock).mockClear().mockImplementationOnce(() => ({
+      Locking: true,
+    }));
+    mockMeasureServiceApi.updateMeasure = jest.fn().mockRejectedValueOnce({
+      status: 423,
+      response: {
+        data: {
+          message:
+            "Unable to update measure. Measure is locked by another user.",
+        },
+      },
+    });
+
+    RenderSupplementalElements();
+
+    // Add a new supplemental data element
+    const supplementalDataDropdown = screen.getByTestId(
+      "supplemental-data-dropdown"
+    );
+    expect(supplementalDataDropdown).toBeInTheDocument();
+    const openButton = within(supplementalDataDropdown).getByTitle("Open");
+    userEvent.click(openButton);
+
+    const ethnicityOption = screen.getByText("SDE Ethnicity");
+    expect(ethnicityOption).toBeInTheDocument();
+    userEvent.click(ethnicityOption);
+
+    let editor = within(
+      screen.getByTestId("supplemental-data-description-rich-text-editor")
+    ).getByRole("textbox");
+    expect(editor).toBeInTheDocument();
+    expect(editor).toHaveAttribute("contenteditable", "true");
+    fireEvent.input(editor, {
+      target: { textContent: "Updated test description" },
+    });
+
+    expect(editor).toHaveTextContent("Updated test description");
+
+    // Wait for save button to be enabled
+    await waitFor(() => {
+      const saveButton = screen.getByRole("button", { name: "Save" });
+      expect(saveButton).toBeEnabled();
+    });
+
+    // Save changes
+    const saveButton = screen.getByRole("button", { name: "Save" });
+    await act(async () => {
+      userEvent.click(saveButton);
+    });
+
+    // Verify error toast appears
+    await waitFor(() => {
+      const errorToast = screen.getByTestId("supplemental-data-error");
+      expect(errorToast).toBeInTheDocument();
+      expect(errorToast).toHaveTextContent(
+        `Unable to update measure. Measure is locked by another user.`
+      );
+    });
+  });
 });
