@@ -3387,5 +3387,89 @@ describe("Measure lock functionality", () => {
       expect(ownerCell).toBeInTheDocument();
       expect(ownerCell).toHaveTextContent("-");
     });
+
+    it("should sort by Owner column when column header is clicked", async () => {
+      (useFeatureFlags as jest.Mock).mockReturnValue({
+        ...mockUseFeatureFlagsApi,
+        MeasureSearch: true,
+        DisplayOwner: true,
+      });
+
+      // Create measures with different owners for sorting
+      const measuresForSorting = [
+        {
+          ...measures[0],
+          measureSet: {
+            ...measures[0].measureSet,
+            owner: "Zulu Owner",
+          },
+        },
+        {
+          ...measures[1],
+          measureSet: {
+            ...measures[1].measureSet,
+            owner: "Alpha Owner",
+          },
+        },
+        {
+          ...measures[2],
+          measureSet: {
+            ...measures[2].measureSet,
+            owner: null, // null owner should sort to bottom
+          },
+        },
+      ];
+
+      render(
+        <ServiceContext.Provider value={serviceConfig}>
+          <MeasureList
+            measureList={measuresForSorting}
+            setMeasureList={setMeasureListMock}
+            setTotalPages={setTotalPagesMock}
+            setTotalItems={setTotalItemsMock}
+            setVisibleItems={setVisibleItemsMock}
+            setOffset={setOffsetMock}
+            setLoading={setLoadingMock}
+            activeTab={1}
+            searchCriteria={null}
+            setSearchCriteria={setSearchCriteriaMock}
+            currentLimit={10}
+            currentPage={0}
+            setErrMsg={setErrMsgMock}
+            currentSort="lastModifiedAt"
+            currentDirection="DESC"
+            setCurrentSort={setCurrentSortMock}
+            setCurrentDirection={setCurrentDirectionMock}
+            handlePageChange={handlePageChangeMock}
+            search=""
+            toastOpen={false}
+            toastMessage=""
+            toastType="danger"
+            setToastOpen={setToastOpenMock}
+            setToastMessage={setToastMessageMock}
+            setToastType={setToastTypeMock}
+            onToastClose={onToastCloseMock}
+          />
+        </ServiceContext.Provider>
+      );
+
+      // Wait for table to render
+      const measureName = await screen.findByText(
+        measuresForSorting[0].measureName
+      );
+      expect(measureName).toBeInTheDocument();
+
+      // Find and click the Owner column header to trigger sorting
+      const ownerHeader = screen.getByText("Owner");
+      expect(ownerHeader).toBeInTheDocument();
+
+      // Click to sort (this will trigger the customSort function)
+      fireEvent.click(ownerHeader.closest("button"));
+
+      // Verify the sort was triggered by checking setCurrentSort was called
+      // The actual sorting happens on the backend, but clicking the header
+      // exercises the sortingFn callback which uses customSort
+      expect(setCurrentSortMock).toHaveBeenCalled();
+    });
   });
 });
