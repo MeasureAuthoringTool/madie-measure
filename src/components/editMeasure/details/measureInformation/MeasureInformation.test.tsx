@@ -113,6 +113,7 @@ jest.mock("@madie/madie-util", () => ({
   useUserServiceApi: jest.fn(() => mockUserServiceApi),
   useFeatureFlags: jest.fn().mockReturnValue({
     Locking: true,
+    DisplayOwner: true,
   }),
   useOktaTokens: jest.fn(() => ({
     getAccessToken: () => "test.jwt",

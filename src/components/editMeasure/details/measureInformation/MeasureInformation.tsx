@@ -600,18 +600,21 @@ export default function MeasureInformation(props: MeasureInformationProps) {
           <Box
             sx={{ flex: 1, display: "flex", flexDirection: "row", gap: "8px" }}
           >
-            <Box sx={{ flex: 1 }}>
-              <ReadOnlyTextField
-                value={measureOwner}
-                label={"Measure Owner"}
-                tabIndex={0}
-                placeholder="Measure Owner"
-                id="measure-owner-label"
-                data-testid="measure-owner-text-field"
-                inputProps={{ "data-testid": "measure-owner-input" }}
-                size="small"
-              />
-            </Box>
+            {featureFlags?.DisplayOwner && (
+              <Box sx={{ flex: 1 }}>
+                <ReadOnlyTextField
+                  value={measureOwner}
+                  label={"Measure Owner"}
+                  tabIndex={0}
+                  placeholder="Measure Owner"
+                  id="measure-owner-label"
+                  data-testid="measure-owner-text-field"
+                  inputProps={{ "data-testid": "measure-owner-input" }}
+                  size="small"
+                />
+              </Box>
+            )}
+
             <Box sx={{ flex: 1 }}>
               <CmsIdentifier
                 canEdit={
