@@ -175,6 +175,7 @@ declare module "@madie/madie-util" {
   }
 
   export function useMeasureServiceApi(): MeasureServiceApi;
+  export function useUserServiceApi(): UserServiceApi;
   export function useDocumentTitle(
     title: string,
     prevailOnMount?: boolean
