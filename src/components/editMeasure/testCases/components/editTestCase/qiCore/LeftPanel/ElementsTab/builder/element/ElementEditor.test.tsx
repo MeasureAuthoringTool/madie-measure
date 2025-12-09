@@ -299,4 +299,90 @@ describe("ElementEditor Component", () => {
       expect(screen.getByText("ElementEditorChildren")).toBeInTheDocument();
     });
   });
+
+  it("Disables the apply button when formik errors exist for the resource path", async () => {
+    const mockFormikValues = {
+      ClaimResponse: {
+        disposition: "test",
+      },
+    };
+    mockFormikObj.values = mockFormikValues;
+    mockFormikObj.errors = {
+      ClaimResponse: {
+        disposition: "Required field",
+      },
+    };
+    mockFormikObj.dirty = true;
+
+    const mockedElementDefinition = {
+      id: "ClaimResponse.disposition",
+      path: "ClaimResponse.disposition",
+    };
+
+    renderElementEditor(
+      mockSelectedResource,
+      mockResource,
+      mockedElementDefinition,
+      "ClaimResponse",
+      mockOnChange,
+      true,
+      mockDisplayedElementsTree,
+      jest.fn(),
+      jest.fn(),
+      jest.fn()
+    );
+
+    await waitFor(() =>
+      expect(mockFhirDefinitionsService.getResourceTree).toHaveBeenCalled()
+    );
+
+    const elementEditorChildrenMock = await screen.findByText(
+      "ElementEditorChildren"
+    );
+    expect(elementEditorChildrenMock).toBeInTheDocument();
+
+    const submitButton = screen.getByTestId("element-editor-submit-button");
+    expect(submitButton).toBeDisabled();
+  });
+
+  it("Enables the apply button when no formik errors exist for the resource path", async () => {
+    const mockFormikValues = {
+      ClaimResponse: {
+        disposition: "test",
+      },
+    };
+    mockFormikObj.values = mockFormikValues;
+    mockFormikObj.errors = {};
+    mockFormikObj.dirty = true;
+
+    const mockedElementDefinition = {
+      id: "ClaimResponse.disposition",
+      path: "ClaimResponse.disposition",
+    };
+
+    renderElementEditor(
+      mockSelectedResource,
+      mockResource,
+      mockedElementDefinition,
+      "ClaimResponse",
+      mockOnChange,
+      true,
+      mockDisplayedElementsTree,
+      jest.fn(),
+      jest.fn(),
+      jest.fn()
+    );
+
+    await waitFor(() =>
+      expect(mockFhirDefinitionsService.getResourceTree).toHaveBeenCalled()
+    );
+
+    const elementEditorChildrenMock = await screen.findByText(
+      "ElementEditorChildren"
+    );
+    expect(elementEditorChildrenMock).toBeInTheDocument();
+
+    const submitButton = screen.getByTestId("element-editor-submit-button");
+    expect(submitButton).toBeEnabled();
+  });
 });

@@ -236,23 +236,41 @@ export const getInstantValidator = (required: boolean) => {
   return baseValidator;
 };
 
-export const getQuantityValidator = (required) => {
-  const baseValidator = Yup.object().shape({
-    code: Yup.string().test(
-      "validate-quantity",
-      "Invalid quantity unit",
-      (value) => {
-        if (!value) return !required; // If not required, allow empty values
-        const validationResult = validate(value);
-        return !validationResult.error; // Return true if valid, false otherwise
-      }
-    ),
-  });
+export const getQuantityValidator = (required: boolean) => {
+  const codeSchema = Yup.string()
+    .when([], {
+      is: () => required,
+      then: (s) => s.required("Code is required"),
+      otherwise: (s) => s.notRequired(),
+    })
+    .test("validate-quantity", "Invalid quantity unit", (value) => {
+      if (!value) return !required; // allow empty when not required
+      const res = validate(value); // your UCUM validator
+      return !res?.error;
+    });
 
-  if (required) {
-    return baseValidator.required("This field is required");
-  }
-  return baseValidator;
+  // If you validate the whole Quantity, do it like this:
+  const quantitySchema = Yup.object({
+    value: Yup.number().when([], {
+      is: () => required,
+      then: (s) =>
+        s.typeError("Value must be a number").required("Value is required"),
+      otherwise: (s) => s.notRequired(),
+    }),
+    system: Yup.string()
+      .default("http://unitsofmeasure.org")
+      .when([], {
+        is: () => required,
+        then: (s) => s.required("System is required"),
+        otherwise: (s) => s.notRequired(),
+      }),
+    code: codeSchema,
+    unit: Yup.string().notRequired(),
+  }).nullable();
+
+  return required
+    ? quantitySchema.required("This field is required")
+    : quantitySchema;
 };
 
 /*
