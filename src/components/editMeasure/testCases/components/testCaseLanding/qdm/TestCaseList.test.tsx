@@ -1100,7 +1100,7 @@ const useTestCaseServiceMockResolved = {
   getTestCaseSeriesForMeasure: jest
     .fn()
     .mockResolvedValue(["Series 1", "Series 2"]),
-  createTestCases: jest.fn().mockResolvedValue([]),
+  createTestCases: jest.fn().mockResolvedValue({ failed: [], testCases: [] }),
   importTestCasesQDM: jest.fn().mockResolvedValue([]),
   exportQRDA: jest.fn().mockResolvedValue([]),
 } as unknown as TestCaseServiceApi;
@@ -1723,7 +1723,10 @@ describe("TestCaseList component", () => {
   });
 
   it("should attempt to shift the dates in test case when the Save button within the shift test case dates dialogue is clicked and display an error message", async () => {
-    const responseData: string[] = ["testId1", "testId2"];
+    const responseData = {
+      failed: ["testId1", "testId2"],
+      shifted: [],
+    };
 
     const shiftQdmTestCaseDates = jest.fn().mockResolvedValueOnce(responseData);
 

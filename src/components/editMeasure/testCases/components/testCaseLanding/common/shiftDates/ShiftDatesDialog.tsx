@@ -55,14 +55,14 @@ const ShiftDatesDialog = ({
           value.shiftDatesInput
         )
         .then((response) => {
-          if (response.length === 0) {
+          if (response.failed.length === 0) {
             setToastOpen(true);
             setToastType("success");
             setToastMessage(`All Test Case dates successfully shifted.`);
           } else {
             setShiftTestCaseDatesWarnings((prevState) => [
               ...prevState,
-              ...response,
+              ...response.failed,
             ]);
           }
         })
@@ -79,14 +79,14 @@ const ShiftDatesDialog = ({
           value.shiftDatesInput
         )
         .then((response) => {
-          if (response.length === 0) {
+          if (response.failed.length === 0) {
             setToastOpen(true);
             setToastType("success");
             setToastMessage(`All Test Case dates successfully shifted.`);
           } else {
             setShiftTestCaseDatesWarnings((prevState) => [
               ...prevState,
-              ...response,
+              ...response.failed,
             ]);
           }
         })
