@@ -36,6 +36,7 @@ declare module "@madie/madie-util" {
     CompareMeasureVersions: boolean;
     ExecutionConfigurationTab: boolean;
     QICoreCompositeMeasure: boolean;
+    DisplayOwner: boolean;
   }
 
   export interface ServiceConfig {
