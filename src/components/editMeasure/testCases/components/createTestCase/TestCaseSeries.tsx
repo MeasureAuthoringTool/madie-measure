@@ -103,6 +103,8 @@ const TestCaseSeries = ({
         dataTestId="test-case-series"
         readOnly={readOnly}
         placeholder="Start typing or select"
+        label="Group"
+        helperText={helperText}
         options={getOptions()}
         freeSolo={true}
         value={value}
@@ -121,15 +123,6 @@ const TestCaseSeries = ({
             setInputLength(newInputValue.length || 0);
           }
         }}
-        renderInput={(params) => (
-          <TextField
-            {...params}
-            helperText={helperText}
-            placeholder="Enter Group"
-            error={error}
-            label="Group"
-          />
-        )}
       />
       {!readOnly && (
         <span

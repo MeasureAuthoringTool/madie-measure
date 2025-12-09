@@ -8,3 +8,12 @@
     overflow-x: auto !important;
   }
 }
+
+// Styling for the Test Case Series Autocomplete component
+#test-case-series-container {
+  margin-top: 12px;
+
+  .MuiAutocomplete-root {
+    margin-top: 8px;
+  }
+}
