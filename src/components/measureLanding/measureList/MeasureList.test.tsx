@@ -3105,4 +3105,287 @@ describe("Measure lock functionality", () => {
       within(actionButton).queryByTestId("LockOutlinedIcon")
     ).not.toBeInTheDocument();
   });
+
+  describe("Owner Column", () => {
+    const measuresWithOwner = measures.map((m) => ({
+      ...m,
+      measureSet: {
+        ...m.measureSet,
+        owner: `Owner of ${m.measureName}`,
+      },
+    }));
+
+    it("should display Owner column on Shared Measures tab when DisplayOwner flag is enabled", async () => {
+      (useFeatureFlags as jest.Mock).mockReturnValue({
+        ...mockUseFeatureFlagsApi,
+        MeasureSearch: true,
+        DisplayOwner: true,
+      });
+
+      render(
+        <ServiceContext.Provider value={serviceConfig}>
+          <MeasureList
+            measureList={measuresWithOwner}
+            setMeasureList={setMeasureListMock}
+            setTotalPages={setTotalPagesMock}
+            setTotalItems={setTotalItemsMock}
+            setVisibleItems={setVisibleItemsMock}
+            setOffset={setOffsetMock}
+            setLoading={setLoadingMock}
+            activeTab={1}
+            searchCriteria={null}
+            setSearchCriteria={setSearchCriteriaMock}
+            currentLimit={10}
+            currentPage={0}
+            setErrMsg={setErrMsgMock}
+            currentSort="lastModifiedAt"
+            currentDirection="DESC"
+            setCurrentSort={setCurrentSortMock}
+            setCurrentDirection={setCurrentDirectionMock}
+            handlePageChange={handlePageChangeMock}
+            search=""
+            toastOpen={false}
+            toastMessage=""
+            toastType="danger"
+            setToastOpen={setToastOpenMock}
+            setToastMessage={setToastMessageMock}
+            setToastType={setToastTypeMock}
+            onToastClose={onToastCloseMock}
+          />
+        </ServiceContext.Provider>
+      );
+
+      // Wait for measure data to render by finding measure name
+      const measureName = await screen.findByText(
+        measuresWithOwner[0].measureName
+      );
+      expect(measureName).toBeInTheDocument();
+
+      // Check that Owner column header exists
+      const ownerHeader = screen.getByText("Owner");
+      expect(ownerHeader).toBeInTheDocument();
+
+      // Check that owner values are displayed
+      const ownerCell = screen.getByTestId(
+        `measure-owner-${measuresWithOwner[0].id}-content`
+      );
+      expect(ownerCell).toBeInTheDocument();
+      expect(ownerCell).toHaveTextContent(
+        measuresWithOwner[0].measureSet.owner
+      );
+    });
+
+    it("should display Owner column on All Measures tab when DisplayOwner flag is enabled", async () => {
+      (useFeatureFlags as jest.Mock).mockReturnValue({
+        ...mockUseFeatureFlagsApi,
+        MeasureSearch: true,
+        DisplayOwner: true,
+      });
+
+      render(
+        <ServiceContext.Provider value={serviceConfig}>
+          <MeasureList
+            measureList={measuresWithOwner}
+            setMeasureList={setMeasureListMock}
+            setTotalPages={setTotalPagesMock}
+            setTotalItems={setTotalItemsMock}
+            setVisibleItems={setVisibleItemsMock}
+            setOffset={setOffsetMock}
+            setLoading={setLoadingMock}
+            activeTab={2}
+            searchCriteria={null}
+            setSearchCriteria={setSearchCriteriaMock}
+            currentLimit={10}
+            currentPage={0}
+            setErrMsg={setErrMsgMock}
+            currentSort="lastModifiedAt"
+            currentDirection="DESC"
+            setCurrentSort={setCurrentSortMock}
+            setCurrentDirection={setCurrentDirectionMock}
+            handlePageChange={handlePageChangeMock}
+            search=""
+            toastOpen={false}
+            toastMessage=""
+            toastType="danger"
+            setToastOpen={setToastOpenMock}
+            setToastMessage={setToastMessageMock}
+            setToastType={setToastTypeMock}
+            onToastClose={onToastCloseMock}
+          />
+        </ServiceContext.Provider>
+      );
+
+      // Wait for measure data to render by finding measure name
+      const measureName = await screen.findByText(
+        measuresWithOwner[0].measureName
+      );
+      expect(measureName).toBeInTheDocument();
+
+      // Check that Owner column header exists
+      const ownerHeader = screen.getByText("Owner");
+      expect(ownerHeader).toBeInTheDocument();
+
+      // Check that owner values are displayed
+      const ownerCell = screen.getByTestId(
+        `measure-owner-${measuresWithOwner[0].id}-content`
+      );
+      expect(ownerCell).toBeInTheDocument();
+      expect(ownerCell).toHaveTextContent(
+        measuresWithOwner[0].measureSet.owner
+      );
+    });
+
+    it("should NOT display Owner column on My Measures tab even when DisplayOwner flag is enabled", async () => {
+      (useFeatureFlags as jest.Mock).mockReturnValue({
+        ...mockUseFeatureFlagsApi,
+        MeasureSearch: true,
+        DisplayOwner: true,
+      });
+
+      render(
+        <ServiceContext.Provider value={serviceConfig}>
+          <MeasureList
+            measureList={measuresWithOwner}
+            setMeasureList={setMeasureListMock}
+            setTotalPages={setTotalPagesMock}
+            setTotalItems={setTotalItemsMock}
+            setVisibleItems={setVisibleItemsMock}
+            setOffset={setOffsetMock}
+            setLoading={setLoadingMock}
+            activeTab={0}
+            searchCriteria={null}
+            setSearchCriteria={setSearchCriteriaMock}
+            currentLimit={10}
+            currentPage={0}
+            setErrMsg={setErrMsgMock}
+            currentSort="lastModifiedAt"
+            currentDirection="DESC"
+            setCurrentSort={setCurrentSortMock}
+            setCurrentDirection={setCurrentDirectionMock}
+            handlePageChange={handlePageChangeMock}
+            search=""
+            toastOpen={false}
+            toastMessage=""
+            toastType="danger"
+            setToastOpen={setToastOpenMock}
+            setToastMessage={setToastMessageMock}
+            setToastType={setToastTypeMock}
+            onToastClose={onToastCloseMock}
+          />
+        </ServiceContext.Provider>
+      );
+
+      // Check that Owner column header does NOT exist
+      expect(screen.queryByText("Owner")).not.toBeInTheDocument();
+    });
+
+    it("should NOT display Owner column when DisplayOwner flag is disabled", async () => {
+      (useFeatureFlags as jest.Mock).mockReturnValue({
+        ...mockUseFeatureFlagsApi,
+        MeasureSearch: true,
+        DisplayOwner: false,
+      });
+
+      render(
+        <ServiceContext.Provider value={serviceConfig}>
+          <MeasureList
+            measureList={measuresWithOwner}
+            setMeasureList={setMeasureListMock}
+            setTotalPages={setTotalPagesMock}
+            setTotalItems={setTotalItemsMock}
+            setVisibleItems={setVisibleItemsMock}
+            setOffset={setOffsetMock}
+            setLoading={setLoadingMock}
+            activeTab={1}
+            searchCriteria={null}
+            setSearchCriteria={setSearchCriteriaMock}
+            currentLimit={10}
+            currentPage={0}
+            setErrMsg={setErrMsgMock}
+            currentSort="lastModifiedAt"
+            currentDirection="DESC"
+            setCurrentSort={setCurrentSortMock}
+            setCurrentDirection={setCurrentDirectionMock}
+            handlePageChange={handlePageChangeMock}
+            search=""
+            toastOpen={false}
+            toastMessage=""
+            toastType="danger"
+            setToastOpen={setToastOpenMock}
+            setToastMessage={setToastMessageMock}
+            setToastType={setToastTypeMock}
+            onToastClose={onToastCloseMock}
+          />
+        </ServiceContext.Provider>
+      );
+
+      // Check that Owner column header does NOT exist
+      expect(screen.queryByText("Owner")).not.toBeInTheDocument();
+    });
+
+    it("should display '-' when measure has no owner", async () => {
+      (useFeatureFlags as jest.Mock).mockReturnValue({
+        ...mockUseFeatureFlagsApi,
+        MeasureSearch: true,
+        DisplayOwner: true,
+      });
+
+      const measuresWithoutOwner = measures.map((m) => ({
+        ...m,
+        measureSet: {
+          ...m.measureSet,
+          owner: null,
+        },
+      }));
+      render(
+        <ServiceContext.Provider value={serviceConfig}>
+          <MeasureList
+            measureList={measuresWithoutOwner}
+            setMeasureList={setMeasureListMock}
+            setTotalPages={setTotalPagesMock}
+            setTotalItems={setTotalItemsMock}
+            setVisibleItems={setVisibleItemsMock}
+            setOffset={setOffsetMock}
+            setLoading={setLoadingMock}
+            activeTab={1}
+            searchCriteria={null}
+            setSearchCriteria={setSearchCriteriaMock}
+            currentLimit={10}
+            currentPage={0}
+            setErrMsg={setErrMsgMock}
+            currentSort="lastModifiedAt"
+            currentDirection="DESC"
+            setCurrentSort={setCurrentSortMock}
+            setCurrentDirection={setCurrentDirectionMock}
+            handlePageChange={handlePageChangeMock}
+            search=""
+            toastOpen={false}
+            toastMessage=""
+            toastType="danger"
+            setToastOpen={setToastOpenMock}
+            setToastMessage={setToastMessageMock}
+            setToastType={setToastTypeMock}
+            onToastClose={onToastCloseMock}
+          />
+        </ServiceContext.Provider>
+      );
+
+      // Wait for measure data to render by finding measure name
+      const measureName = await screen.findByText(
+        measuresWithoutOwner[0].measureName
+      );
+      expect(measureName).toBeInTheDocument();
+
+      // Check that Owner column header exists
+      const ownerHeader = screen.getByText("Owner");
+      expect(ownerHeader).toBeInTheDocument();
+
+      // Check that owner cell displays '-'
+      const ownerCell = screen.getByTestId(
+        `measure-owner-${measuresWithoutOwner[0].id}-content`
+      );
+      expect(ownerCell).toBeInTheDocument();
+      expect(ownerCell).toHaveTextContent("-");
+    });
+  });
 });
