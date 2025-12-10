@@ -330,7 +330,12 @@ const ElementEditor = ({
               variant="submit"
               id="element-editor-submit-button"
               data-testId="element-editor-submit-button"
-              disabled={!formik.dirty}
+              disabled={
+                !formik.dirty ||
+                !!formik.errors[resourcePath]?.[
+                  elementDefinition?.path.split(".")[1]
+                ]
+              }
               onClick={handleIndividualElementApplyButtonClick}
             >
               Apply
