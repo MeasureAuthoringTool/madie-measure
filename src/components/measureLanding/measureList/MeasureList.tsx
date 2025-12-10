@@ -64,6 +64,20 @@ import CompareVersionsDialog from "../../common/compareVersionsDialog/CompareVer
 
 const TH = tw.th`p-3 text-left text-sm font-bold capitalize`;
 
+// Export customSort for testing purposes
+export function customSort(a: string, b: string) {
+  if (a === undefined || a === "") {
+    return 1;
+  } else if (b === undefined || b === "") {
+    return -1;
+  }
+  const aComp = a.trim().toLocaleLowerCase();
+  const bComp = b.trim().toLocaleLowerCase();
+  if (aComp < bComp) return -1;
+  if (aComp > bComp) return 1;
+  return 0;
+}
+
 export default function MeasureList(props: {
   retrieveMeasures?: (
     tab: number,
@@ -177,19 +191,6 @@ export default function MeasureList(props: {
     actions: any;
     hasAssociatedMeasures: boolean;
   };
-
-  function customSort(a: string, b: string) {
-    if (a === undefined || a === "") {
-      return 1;
-    } else if (b === undefined || b === "") {
-      return -1;
-    }
-    const aComp = a.trim().toLocaleLowerCase();
-    const bComp = b.trim().toLocaleLowerCase();
-    if (aComp < bComp) return -1;
-    if (aComp > bComp) return 1;
-    return 0;
-  }
 
   const [data, setData] = useState<TCRow[]>([]);
   const [expandedSectionData, setExpandedSectionData] = useState<TCRow[]>([]);
@@ -455,6 +456,28 @@ export default function MeasureList(props: {
       ),
       accessorKey: "measureSet.cmsId",
     },
+    // Do not display Owner column in My Measures tab
+    ...(featureFlags?.DisplayOwner &&
+    (props.activeTab === 1 || props.activeTab === 2)
+      ? [
+          {
+            header: "Owner",
+            cell: (info) => (
+              <TruncateText
+                text={info.row.original.actions?.measureSet?.owner || "-"}
+                maxLength={120}
+                dataTestId={`measure-owner-${info.row.original.id}`}
+              />
+            ),
+            accessorKey: "measureSet.owner",
+            sortingFn: (rowA, rowB) =>
+              customSort(
+                rowA.original.actions?.measureSet?.owner,
+                rowB.original.actions?.measureSet?.owner
+              ),
+          },
+        ]
+      : []),
     {
       header: "Updated",
       cell: (info) => (
@@ -630,7 +653,13 @@ export default function MeasureList(props: {
       });
     }
     return t;
-  }, [featureFlags?.MeasureSearch, selectedIdForExpansion, isRowExpanded]);
+  }, [
+    featureFlags?.MeasureSearch,
+    selectedIdForExpansion,
+    isRowExpanded,
+    featureFlags?.DisplayOwner,
+    props.activeTab,
+  ]);
 
   const expandedcolumns = useMemo<ColumnDef<TCRow>[]>(() => {
     return [
@@ -670,7 +699,12 @@ export default function MeasureList(props: {
         accessorKey: "",
       },
     ];
-  }, [selectedExpandedMeasuresIds, isRowExpanded]);
+  }, [
+    selectedExpandedMeasuresIds,
+    isRowExpanded,
+    featureFlags?.DisplayOwner,
+    props.activeTab,
+  ]);
 
   const handleRowClick = async (actions) => {
     if (!isRowExpanded || selectedIdForExpansion !== actions?.measureSetId) {
