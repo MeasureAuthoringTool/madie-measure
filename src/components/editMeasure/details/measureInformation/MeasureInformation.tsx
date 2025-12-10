@@ -101,7 +101,7 @@ export default function MeasureInformation(props: MeasureInformationProps) {
   useEffect(() => {
     if (measure?.measureSet?.owner) {
       userServiceApi
-        .getMeasureOwnerDetails(measure?.measureSet?.owner)
+        .getOwnerDetails(measure?.measureSet?.owner)
         .then((response) => {
           const ownerName = `${response?.firstName} ${response?.lastName}`;
           setMeasureOwner(ownerName);
