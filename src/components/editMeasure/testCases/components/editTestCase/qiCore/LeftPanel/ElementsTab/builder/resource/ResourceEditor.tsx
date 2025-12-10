@@ -47,6 +47,8 @@ interface ResourceEditorProps {
   setInitialFormikValuesStu6: Dispatch<SetStateAction<Object>>;
   setValidationSchema: Dispatch<SetStateAction<Object>>;
   selectedResourceID: string;
+  applyLoading: boolean;
+  setApplyLoading: Dispatch<SetStateAction<boolean>>;
 }
 
 // Determines the resource name to display based on the title and base resource name
@@ -72,6 +74,8 @@ const ResourceEditor = ({
   canEdit,
   setInitialFormikValuesStu6,
   setValidationSchema,
+  applyLoading,
+  setApplyLoading,
 }: ResourceEditorProps) => {
   const fhirDefinitionsService = useRef(useFhirDefinitionsServiceApi());
   const { dispatch, state } = useQiCoreResource();
@@ -407,6 +411,8 @@ const ResourceEditor = ({
               resource={editingResource}
               resourcePath={resourceBasePath}
               displayedElementsTree={displayedElementsTree}
+              applyLoading={applyLoading}
+              setApplyLoading={setApplyLoading}
               onChange={(path, value) => {
                 const nextEntry = _.cloneDeep(selectedResource.bundleEntry);
                 _.set(nextEntry.resource, path, value);
