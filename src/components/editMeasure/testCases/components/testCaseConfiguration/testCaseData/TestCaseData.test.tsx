@@ -51,12 +51,10 @@ const measure = {
 
 const qiCoreMeasure = { ...measure, model: "QI-Core v4.1.1" } as Measure;
 
-const responseDto: TestCase[] = [
-  {
-    id: "1234",
-    json: "date2",
-  },
-] as TestCase[];
+const responseDto = {
+  failed: [],
+  shifted: ["1234"],
+};
 
 jest.mock("@madie/madie-util", () => ({
   measureStore: {
@@ -282,7 +280,7 @@ describe("TestCaseData", () => {
   it("should successfully shift all test case dates", async () => {
     const shiftAllTestCaseDatesApiMock = jest
       .fn()
-      .mockResolvedValueOnce({ data: responseDto });
+      .mockResolvedValueOnce(responseDto);
     useTestCaseServiceMock.mockImplementationOnce(() => {
       return {
         shiftAllQdmTestCaseDates: shiftAllTestCaseDatesApiMock,
@@ -406,7 +404,7 @@ describe("TestCaseData", () => {
 
     const shiftAllTestCaseDatesApiMock = jest
       .fn()
-      .mockResolvedValueOnce({ data: responseDto });
+      .mockResolvedValueOnce(responseDto);
     useTestCaseServiceMock.mockImplementationOnce(() => {
       return {
         shiftAllQiCoreTestCaseDates: shiftAllTestCaseDatesApiMock,
@@ -493,7 +491,7 @@ describe("TestCaseData", () => {
     }));
     const shiftAllTestCaseDatesApiMock = jest
       .fn()
-      .mockResolvedValueOnce({ data: responseDto });
+      .mockResolvedValueOnce(responseDto);
     useTestCaseServiceMock.mockImplementationOnce(() => {
       return {
         shiftAllQdmTestCaseDates: shiftAllTestCaseDatesApiMock,
@@ -538,9 +536,13 @@ describe("TestCaseData", () => {
     (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
       Locking: true,
     }));
+    const failedResponseDto = {
+      failed: ["1234"],
+      shifted: [],
+    };
     const shiftAllTestCaseDatesApiMock = jest
       .fn()
-      .mockResolvedValueOnce(responseDto);
+      .mockResolvedValueOnce(failedResponseDto);
     useTestCaseServiceMock.mockImplementationOnce(() => {
       return {
         shiftAllQiCoreTestCaseDates: shiftAllTestCaseDatesApiMock,
@@ -669,6 +671,77 @@ describe("TestCaseData", () => {
       expect(
         screen.getByTestId("shift-all-test-case-dates-generic-error-text")
       ).toHaveTextContent(SHIFT_TEST_CASE_DATES_ERROR_TEST_CASE_LOCKED)
+    );
+  });
+
+  it("should handle QDM response with failed test cases", async () => {
+    const failedResponseDto = {
+      failed: ["Test case 1 failed to shift", "Test case 2 failed to shift"],
+      shifted: ["1234"],
+    };
+    const shiftAllTestCaseDatesApiMock = jest
+      .fn()
+      .mockResolvedValueOnce(failedResponseDto);
+    useTestCaseServiceMock.mockImplementationOnce(() => {
+      return {
+        shiftAllQdmTestCaseDates: shiftAllTestCaseDatesApiMock,
+      } as unknown as TestCaseServiceApi;
+    });
+
+    renderTestCaseDataComponent();
+    const shiftTestCaseDatesInput = screen.getByRole("spinbutton", {
+      name: "Shift Test Case Dates",
+    }) as HTMLInputElement;
+    const saveButton = screen.getByRole("button", { name: "Save" });
+
+    userEvent.type(shiftTestCaseDatesInput, "5");
+    expect(saveButton).toBeEnabled();
+
+    act(() => {
+      fireEvent.click(saveButton);
+    });
+
+    await waitFor(() =>
+      expect(mockShiftTestCaseDatesWarning.mock.calls).toHaveLength(1)
+    );
+    expect(mockShiftTestCaseDatesWarning).toHaveBeenCalledWith(
+      expect.any(Function)
+    );
+  });
+
+  it("should handle QI-Core response with failed test cases", async () => {
+    measureStore.state.mockImplementationOnce(() => qiCoreMeasure);
+    const failedResponseDto = {
+      failed: ["Test case 1 failed to shift", "Test case 2 failed to shift"],
+      shifted: ["1234"],
+    };
+    const shiftAllTestCaseDatesApiMock = jest
+      .fn()
+      .mockResolvedValueOnce(failedResponseDto);
+    useTestCaseServiceMock.mockImplementationOnce(() => {
+      return {
+        shiftAllQiCoreTestCaseDates: shiftAllTestCaseDatesApiMock,
+      } as unknown as TestCaseServiceApi;
+    });
+
+    renderTestCaseDataComponent();
+    const shiftTestCaseDatesInput = screen.getByRole("spinbutton", {
+      name: "Shift Test Case Dates",
+    }) as HTMLInputElement;
+    const saveButton = screen.getByRole("button", { name: "Save" });
+
+    userEvent.type(shiftTestCaseDatesInput, "5");
+    expect(saveButton).toBeEnabled();
+
+    act(() => {
+      fireEvent.click(saveButton);
+    });
+
+    await waitFor(() =>
+      expect(mockShiftTestCaseDatesWarning.mock.calls).toHaveLength(1)
+    );
+    expect(mockShiftTestCaseDatesWarning).toHaveBeenCalledWith(
+      expect.any(Function)
     );
   });
 });
