@@ -106,7 +106,7 @@ const mockMeasureServiceApi = {
 } as unknown as MeasureServiceApi;
 
 const mockUserServiceApi = {
-  getMeasureOwnerDetails: jest.fn().mockResolvedValue({}),
+  getOwnerDetails: jest.fn().mockResolvedValue({}),
 } as unknown as UserServiceApi;
 jest.mock("@madie/madie-util", () => ({
   useMeasureServiceApi: jest.fn(() => mockMeasureServiceApi),
@@ -1526,7 +1526,7 @@ describe("MeasureInformation component", () => {
   });
 
   it("sets measureOwner to the fetched owner name on success", async () => {
-    mockUserServiceApi.getMeasureOwnerDetails.mockResolvedValueOnce({
+    mockUserServiceApi.getOwnerDetails.mockResolvedValueOnce({
       firstName: "Jane",
       lastName: "Doe",
     });
@@ -1543,9 +1543,7 @@ describe("MeasureInformation component", () => {
   });
 
   it("sets measureOwner to '-' on fetch failure", async () => {
-    mockUserServiceApi.getMeasureOwnerDetails.mockRejectedValueOnce(
-      new Error("fail")
-    );
+    mockUserServiceApi.getOwnerDetails.mockRejectedValueOnce(new Error("fail"));
 
     const { getByTestId } = render(
       <MeasureInformation setErrorMessage={jest.fn()} measureCanEdit={true} />
