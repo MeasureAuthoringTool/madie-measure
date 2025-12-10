@@ -24,6 +24,7 @@ import {
   checkUserCanEdit,
   measureStore,
   MeasureServiceApi,
+  UserServiceApi,
   useFeatureFlags,
 } from "@madie/madie-util";
 
@@ -103,10 +104,16 @@ const mockMeasureServiceApi = {
   createCmsId: jest.fn(),
   updateMeasure: jest.fn().mockResolvedValue({ status: 200 }),
 } as unknown as MeasureServiceApi;
+
+const mockUserServiceApi = {
+  getMeasureOwnerDetails: jest.fn().mockResolvedValue({}),
+} as unknown as UserServiceApi;
 jest.mock("@madie/madie-util", () => ({
   useMeasureServiceApi: jest.fn(() => mockMeasureServiceApi),
+  useUserServiceApi: jest.fn(() => mockUserServiceApi),
   useFeatureFlags: jest.fn().mockReturnValue({
     Locking: true,
+    DisplayOwner: true,
   }),
   useOktaTokens: jest.fn(() => ({
     getAccessToken: () => "test.jwt",
@@ -1515,6 +1522,39 @@ describe("MeasureInformation component", () => {
 
     await waitFor(() => expect(setErrorMessage).toHaveBeenCalled(), {
       timeout: 5000,
+    });
+  });
+
+  it("sets measureOwner to the fetched owner name on success", async () => {
+    mockUserServiceApi.getMeasureOwnerDetails.mockResolvedValueOnce({
+      firstName: "Jane",
+      lastName: "Doe",
+    });
+
+    const { getByTestId } = render(
+      <MeasureInformation setErrorMessage={jest.fn()} measureCanEdit={true} />
+    );
+
+    await waitFor(() => {
+      expect(
+        (getByTestId("measure-owner-text-field") as HTMLInputElement).value
+      ).toBe("Jane Doe");
+    });
+  });
+
+  it("sets measureOwner to '-' on fetch failure", async () => {
+    mockUserServiceApi.getMeasureOwnerDetails.mockRejectedValueOnce(
+      new Error("fail")
+    );
+
+    const { getByTestId } = render(
+      <MeasureInformation setErrorMessage={jest.fn()} measureCanEdit={true} />
+    );
+
+    await waitFor(() => {
+      expect(
+        (getByTestId("measure-owner-text-field") as HTMLInputElement).value
+      ).toBe("-");
     });
   });
 });

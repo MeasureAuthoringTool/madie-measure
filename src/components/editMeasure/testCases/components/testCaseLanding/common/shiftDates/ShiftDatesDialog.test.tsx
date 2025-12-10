@@ -89,7 +89,7 @@ describe("Shift Test Case Dates Dialog", () => {
   });
 
   test("Should shift dates for qdm measure and shows success toast", async () => {
-    const responseData: string[] = [];
+    const responseData = { failed: [], shifted: [] };
     const shiftQdmTestCaseDates = jest.fn().mockResolvedValueOnce(responseData);
     useTestCaseServiceMock.mockImplementationOnce(() => {
       return {
@@ -145,9 +145,10 @@ describe("Shift Test Case Dates Dialog", () => {
   });
 
   test("Should shift dates for qdm measure and shows warning", async () => {
-    const responseData: string[] = [
-      "Warning: Test Case 1 dates could not be shifted.",
-    ];
+    const responseData = {
+      failed: ["Warning: Test Case 1 dates could not be shifted."],
+      shifted: [],
+    };
     const shiftQdmTestCaseDates = jest.fn().mockResolvedValueOnce(responseData);
     useTestCaseServiceMock.mockImplementationOnce(() => {
       return {
@@ -261,8 +262,8 @@ describe("Shift Test Case Dates Dialog", () => {
     });
   });
 
-  test("Should shift dates for qicore measure and show success toast", async () => {
-    const responseData: string[] = [];
+  test("Should shift dates for qi-core measure and shows success toast", async () => {
+    const responseData = { failed: [], shifted: [] };
     const shiftQiCoreTestCaseDates = jest
       .fn()
       .mockResolvedValueOnce(responseData);
@@ -319,10 +320,11 @@ describe("Shift Test Case Dates Dialog", () => {
     });
   });
 
-  test("Should shift dates for qicore measure and show warning", async () => {
-    const responseData: string[] = [
-      "Warning: Test Case 1 dates could not be shifted.",
-    ];
+  test("Should shift dates for qi-core measure and shows warning", async () => {
+    const responseData = {
+      failed: ["Warning: Test Case 1 dates could not be shifted."],
+      shifted: [],
+    };
     const shiftQiCoreTestCaseDates = jest
       .fn()
       .mockResolvedValueOnce(responseData);
@@ -442,7 +444,9 @@ describe("Shift Test Case Dates Dialog", () => {
     (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
       Locking: true,
     }));
-    const shiftTestCaseDatesApiMock = jest.fn().mockResolvedValueOnce([]);
+    const shiftTestCaseDatesApiMock = jest
+      .fn()
+      .mockResolvedValueOnce({ failed: [], shifted: [] });
     useTestCaseServiceMock.mockImplementationOnce(() => {
       return {
         shiftQdmTestCaseDates: shiftTestCaseDatesApiMock,
