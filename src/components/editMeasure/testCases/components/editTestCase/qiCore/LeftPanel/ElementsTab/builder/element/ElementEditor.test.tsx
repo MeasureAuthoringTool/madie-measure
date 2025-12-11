@@ -137,16 +137,19 @@ describe("ElementEditor Component", () => {
   };
 
   const renderElementEditor = (
-    selectedResource,
-    resource,
-    elementDefinition,
-    resourcePath,
-    onChange,
-    canEdit,
-    displayedElementsTree,
-    setValidationSchema,
-    setInitialFormikValuesStu6,
-    dispatch
+    selectedResource: any,
+    resource: any,
+    elementDefinition: any,
+    resourcePath: any,
+    onChange: any,
+    canEdit: any,
+    displayedElementsTree: any,
+    setValidationSchema: any,
+    setInitialFormikValuesStu6: any,
+    dispatch: any,
+    setLastAddedElemPath = jest.fn(),
+    applyLoading = false,
+    setApplyLoading = jest.fn()
   ) => {
     render(
       <QiCoreResourceContext.Provider
@@ -163,13 +166,18 @@ describe("ElementEditor Component", () => {
           onChange={onChange}
           canEdit={canEdit}
           displayedElementsTree={displayedElementsTree}
+          setLastAddedElemPath={setLastAddedElemPath}
+          applyLoading={applyLoading}
+          setApplyLoading={setApplyLoading}
         />
       </QiCoreResourceContext.Provider>
     );
   };
 
   beforeEach(() => {
-    useFhirDefinitionsServiceApi.mockReturnValue(mockFhirDefinitionsService);
+    (useFhirDefinitionsServiceApi as jest.Mock).mockReturnValue(
+      mockFhirDefinitionsService
+    );
   });
 
   test("renders without crashing when elementDefinition is provided. buttons disabled", async () => {
