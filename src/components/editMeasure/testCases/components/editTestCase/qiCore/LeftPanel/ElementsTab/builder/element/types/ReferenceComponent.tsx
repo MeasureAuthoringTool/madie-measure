@@ -22,55 +22,76 @@ export default function ReferenceComponent({
   const formikContext = useFormikContext();
   // First dropdown Utilities
   const allResourceProfiles = useContext(ResourceContext); // get all profiles loaded from builder
+
   const targetProfiles =
     structureDefinition.type?.find(
       (type: { code: string }) => type.code === "Reference"
-    )?.targetProfile || []; // get the profiles available in the structure definition
+    )?.targetProfile || []; // get the profiles declared in the structure definition
+
   const resourceProfileOptions =
     allResourceProfiles
       ?.filter((r) => targetProfiles.includes(r.profile))
       .map((resourceProfile) => ({
         label: resourceProfile.title,
         value: resourceProfile.type,
+        profile: resourceProfile.profile,
       })) || [];
+
   const [selectedReferenceType, setSelectedReferenceType] = useState<string>(
     value?.reference?.split("/")?.[0] || ""
   ); // will need to default to something if editing existing element
-  // SecondDropdown Utilities
-  const resourcesOfSpecifiedType = state.bundle.entry.filter((entry) => {
-    // When a resource type has been selected, we need to populate the second dropdown with resources of that type in the json, if they exist
-    return selectedReferenceType === entry.resource.resourceType;
-  });
 
   const emptyOption = [
     { label: "ID Not Present (Add New)", value: "add_new_id" },
   ]; // If no resources of that type exist, we need to show a message in the dropdown
-  const selectableResourceOptions = resourcesOfSpecifiedType.map((res) => ({
-    label: `${selectedReferenceType}/${res.resource.id}`,
-    value: `${selectedReferenceType}/${res.resource.id}`,
-  }));
-  // our business logic is that we do not allow multiple patients. cannot create new if one exists.
-  const getFinalOptions = (
-    selectedReferenceType,
-    selectableResourceOptions
-  ) => {
-    // we concat only if there's no selecatble resource options
-    if (
-      selectedReferenceType === "Patient" &&
-      selectableResourceOptions.length
-    ) {
-      return selectableResourceOptions;
-    } else {
-      return selectableResourceOptions.concat(emptyOption);
-    }
-  };
 
-  // const finalOptions = selectableResourceOptions.concat(emptyOption);
-  const finalOptions = getFinalOptions(
-    selectedReferenceType,
-    selectableResourceOptions
+  // Store selected profile URL instead of just type
+  const [selectedProfileUrl, setSelectedProfileUrl] = useState<string>(
+    value?.referenceProfileUrl || ""
   );
 
+  // Helper function to determine profile match type and hierarchy
+  const getProfileMatchTypes = (profileUrl) => {
+    if (profileUrl.includes("/fhir/us/qicore")) return ["/fhir/us/qicore"];
+    if (profileUrl.includes("/fhir/us/core"))
+      return ["/fhir/us/core", "/fhir/us/qicore"];
+    if (profileUrl.includes("/fhir/StructureDefinition/"))
+      return [
+        "/fhir/StructureDefinition/",
+        "/fhir/us/core/",
+        "/fhir/us/qicore/",
+      ];
+    return [];
+  };
+
+  // Updated getFinalOptions to filter by resourceType and meta.profile hierarchy
+  const getFinalOptions = (
+    selectedReferenceType,
+    selectedProfileUrl,
+    bundleEntries
+  ) => {
+    if (!selectedReferenceType || !selectedProfileUrl) return emptyOption;
+    const matchTypes = getProfileMatchTypes(selectedProfileUrl);
+    const filtered = bundleEntries.filter((entry) => {
+      if (entry.resource.resourceType !== selectedReferenceType) return false;
+      const profiles = entry.resource.meta?.profile || [];
+      return profiles.some((url) =>
+        matchTypes.some((type) => url.includes(type))
+      );
+    });
+    if (filtered.length === 0) return emptyOption;
+    return filtered.map((res) => ({
+      label: `${selectedReferenceType}/${res.resource.id}`,
+      value: `${selectedReferenceType}/${res.resource.id}`,
+    }));
+  };
+
+  // Use new getFinalOptions logic
+  const finalOptions = getFinalOptions(
+    selectedReferenceType,
+    selectedProfileUrl,
+    state.bundle.entry
+  );
   const [selectedReferenceId, setSelectedReferenceId] = useState<string>(
     value?.reference || ""
   ); // will need to default to something if editing existing element
@@ -82,10 +103,10 @@ export default function ReferenceComponent({
     setSelectedReferenceType(newType);
     // if the earmark is present, we do not want to update our local state.
     if (!formikContext.values["add_new_resource"]) {
-      // This is the instance that we're adding a new resource. Right now, we have an id for a resource that doesn't exist. We want it to instead display add new
       setSelectedReferenceId(newId);
     }
-  }, [value, formikContext.values["add_new_resource"]]);
+  }, [value, formikContext.values]); // Use formikContext.values for dependency
+
   return (
     <>
       {/* Select a reference type from all available profiles */}
@@ -102,9 +123,9 @@ export default function ReferenceComponent({
           }}
           options={resourceProfileOptions.map((opt, i) => (
             <MenuItem
-              key={`${opt.label}-${opt.value}-${i}`}
-              data-testid={`${opt.value}-option`}
-              value={opt.value}
+              key={`${opt.label}-${opt.profile}-${i}`}
+              data-testid={`${opt.label}-option`}
+              value={opt.profile}
             >
               {opt.label}
             </MenuItem>
@@ -113,11 +134,22 @@ export default function ReferenceComponent({
             name: "Select",
             value: "",
           }}
+          value={selectedProfileUrl}
+          renderValue={(selected) => {
+            const item = resourceProfileOptions.find(
+              (item) => item.profile === selected
+            );
+            return item?.label || "Select";
+          }}
           onChange={(e) => {
-            setSelectedReferenceType(e.target.value);
+            setSelectedProfileUrl(e.target.value);
+            // Find the resource type for the selected profile URL
+            const selectedProfile = resourceProfileOptions.find(
+              (opt) => opt.profile === e.target.value
+            );
+            setSelectedReferenceType(selectedProfile?.value || "");
             setSelectedReferenceId("");
           }}
-          value={selectedReferenceType}
           helperText={helperText}
           error={error}
         />
