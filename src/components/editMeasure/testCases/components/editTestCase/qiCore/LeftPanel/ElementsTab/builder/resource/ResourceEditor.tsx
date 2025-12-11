@@ -81,6 +81,10 @@ const ResourceEditor = ({
   const { dispatch, state } = useQiCoreResource();
   const { dirty, resetForm, values } = useFormikContext();
   const [activeTab, setActiveTab] = useState(0);
+  // Reset activeTab to 0 whenever a new resource is selected
+  useEffect(() => {
+    setActiveTab(0);
+  }, [selectedResourceID]);
   const [pendingTab, setPendingTab] = useState(0);
   const onContinue = () => {
     setDialogOpen(false);

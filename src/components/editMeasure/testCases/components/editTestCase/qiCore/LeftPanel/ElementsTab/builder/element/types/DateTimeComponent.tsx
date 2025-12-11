@@ -57,7 +57,7 @@ export const isFormatLessComplex = (format: string, currentFormat: string) => {
 };
 
 const dateRegex =
-  /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{3})?[+-]\d{2}:\d{2}$/;
+  /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{3})?([+-]\d{2}:\d{2}|Z)$/;
 const isValidFormattedDate = (dateString: string) => {
   if (!dateRegex.test(dateString)) return false;
   const parsedDate = dayjs.tz(dateString);
