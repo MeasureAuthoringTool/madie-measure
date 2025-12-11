@@ -1319,9 +1319,12 @@ const EditTestCase = (props: EditTestCaseProps) => {
                         <TestCaseSeries
                           readOnly={!testCaseCanEdit}
                           value={formik.values.series}
-                          onChange={(nextValue) =>
-                            formik.setFieldValue("series", nextValue)
-                          }
+                          onChange={(nextValue) => {
+                            formik.setFieldTouched("series", true);
+                            formik.setFieldValue("series", nextValue, true);
+                          }}
+                          error={Boolean(formik.errors.series)}
+                          helperText={formikErrorHandler("series")}
                           seriesOptions={seriesState.series}
                           sx={testCaseSeriesStyles}
                         />
