@@ -51,8 +51,44 @@ const mockOktaTokenApi = {
   getUserName: jest.fn().mockReturnValue("test user"),
 };
 
+const mockUserServiceApi = {
+  getOwnerDetails: jest.fn().mockResolvedValue({}),
+  getBulkUserDetails: jest.fn().mockResolvedValue({}),
+};
+
+const mockMeasureServiceApi = {
+  searchMeasuresByCriteria: jest.fn().mockResolvedValue(oneItemResponse),
+  fetchMeasures: jest.fn().mockResolvedValue(oneItemResponse),
+  createVersion: jest.fn().mockResolvedValue({}),
+  deleteMeasure: jest.fn().mockResolvedValue({}),
+  checkNextVersionNumber: jest.fn().mockReturnValue("1.0.000"),
+  checkValidVersion: jest.fn().mockResolvedValue({}),
+  fetchMeasure: jest.fn().mockResolvedValue(oneItemResponse),
+  fetchMeasureDraftStatuses: jest.fn().mockResolvedValue({
+    "1": true,
+    "2": true,
+    "3": true,
+  }),
+  getMeasureExport: jest
+    .fn()
+    .mockResolvedValue({ size: 635581, type: "application/octet-stream" }),
+  getSharedMeasures: jest.fn().mockResolvedValue({
+    measureId1: ["userId1"],
+    measureId2: ["userId1", "userId2"],
+  }),
+  getMeasuresByMeasureSetId: jest
+    .fn()
+    .mockResolvedValue([{ model: Model.QICORE }, { model: Model.QICORE }]),
+  transferMeasures: jest.fn().mockResolvedValue({
+    status: 200,
+    data: [],
+  }),
+  unshareMeasures: jest.fn().mockResolvedValue({ measureId1: [] }),
+} as unknown as MeasureServiceApi;
+
 jest.mock("@madie/madie-util", () => ({
   useMeasureServiceApi: jest.fn(() => mockMeasureServiceApi),
+  useUserServiceApi: jest.fn(() => mockUserServiceApi),
   useOktaTokens: () => mockOktaTokenApi,
   checkUserCanEdit: jest.fn().mockImplementation(() => true),
   checkUserCanDelete: jest.fn().mockImplementation(() => true),
@@ -310,36 +346,6 @@ const mockUseFeatureFlagsApi = {
   TransferMeasure: jest.fn().mockResolvedValue(false),
 };
 
-const mockMeasureServiceApi = {
-  searchMeasuresByCriteria: jest.fn().mockResolvedValue(oneItemResponse),
-  fetchMeasures: mockFetchMeasures,
-  createVersion: mockCreateVersion,
-  deleteMeasure: jest.fn().mockResolvedValue({}),
-  checkNextVersionNumber: jest.fn().mockReturnValue("1.0.000"),
-  checkValidVersion: mockCheckValidVersion,
-  fetchMeasure: mockFetchMeasure,
-  fetchMeasureDraftStatuses: jest.fn().mockResolvedValue({
-    "1": true,
-    "2": true,
-    "3": true,
-  }),
-  getMeasureExport: jest
-    .fn()
-    .mockResolvedValue({ size: 635581, type: "application/octet-stream" }),
-  getSharedMeasures: jest.fn().mockResolvedValue({
-    measureId1: ["userId1"],
-    measureId2: ["userId1", "userId2"],
-  }),
-  getMeasuresByMeasureSetId: jest
-    .fn()
-    .mockResolvedValue([{ model: Model.QICORE }, { model: Model.QICORE }]),
-  transferMeasures: jest.fn().mockResolvedValue({
-    status: 200,
-    data: [],
-  }),
-  unshareMeasures: jest.fn().mockResolvedValue({ measureId1: [] }),
-} as unknown as MeasureServiceApi;
-
 describe("Measure List component", () => {
   beforeEach(() => {
     jest.resetModules();
@@ -349,33 +355,6 @@ describe("Measure List component", () => {
 
     // Reset all mocks before each test
     jest.clearAllMocks();
-    mockMeasureServiceApi.fetchMeasures = mockFetchMeasures;
-    mockMeasureServiceApi.searchMeasuresByCriteria = jest
-      .fn()
-      .mockResolvedValue(oneItemResponse);
-    mockMeasureServiceApi.createVersion = mockCreateVersion;
-    mockMeasureServiceApi.deleteMeasure = jest.fn().mockResolvedValue({});
-    mockMeasureServiceApi.checkNextVersionNumber = jest
-      .fn()
-      .mockReturnValue("1.0.000");
-    mockMeasureServiceApi.checkValidVersion = mockCheckValidVersion;
-    mockMeasureServiceApi.fetchMeasure = mockFetchMeasure;
-    mockMeasureServiceApi.fetchMeasureDraftStatuses = jest
-      .fn()
-      .mockResolvedValue({ "1": true, "2": true, "3": true });
-    mockMeasureServiceApi.getMeasureExport = jest
-      .fn()
-      .mockResolvedValue({ size: 635581, type: "application/octet-stream" });
-    mockMeasureServiceApi.getSharedMeasures = jest.fn().mockResolvedValue({
-      measureId1: ["userId1"],
-      measureId2: ["userId1", "userId2"],
-    });
-    (mockMeasureServiceApi.getMeasuresByMeasureSetId = jest
-      .fn()
-      .mockResolvedValue([{ model: Model.QICORE }, { model: Model.QICORE }])),
-      (mockMeasureServiceApi.transferMeasures = jest
-        .fn()
-        .mockResolvedValue({ data: true }));
   });
 
   afterEach(() => {
@@ -3137,12 +3116,12 @@ describe("Measure lock functionality", () => {
             setSearchCriteria={setSearchCriteriaMock}
             currentLimit={10}
             currentPage={0}
-            setErrMsg={setErrMsgMock}
             currentSort="lastModifiedAt"
             currentDirection="DESC"
             setCurrentSort={setCurrentSortMock}
             setCurrentDirection={setCurrentDirectionMock}
             handlePageChange={handlePageChangeMock}
+            setStatusHandler={jest.fn()}
             search=""
             toastOpen={false}
             toastMessage=""
@@ -3156,10 +3135,13 @@ describe("Measure lock functionality", () => {
       );
 
       // Wait for measure data to render by finding measure name
-      const measureName = await screen.findByText(
-        measuresWithOwner[0].measureName
-      );
-      expect(measureName).toBeInTheDocument();
+      // Need waitFor because getBulkUserDetails is async and triggers re-render
+      await waitFor(async () => {
+        const measureName = await screen.findByText(
+          measuresWithOwner[0].measureName
+        );
+        expect(measureName).toBeInTheDocument();
+      });
 
       // Check that Owner column header exists
       const ownerHeader = screen.getByText("Owner");
@@ -3197,12 +3179,12 @@ describe("Measure lock functionality", () => {
             setSearchCriteria={setSearchCriteriaMock}
             currentLimit={10}
             currentPage={0}
-            setErrMsg={setErrMsgMock}
             currentSort="lastModifiedAt"
             currentDirection="DESC"
             setCurrentSort={setCurrentSortMock}
             setCurrentDirection={setCurrentDirectionMock}
             handlePageChange={handlePageChangeMock}
+            setStatusHandler={jest.fn()}
             search=""
             toastOpen={false}
             toastMessage=""
@@ -3216,10 +3198,13 @@ describe("Measure lock functionality", () => {
       );
 
       // Wait for measure data to render by finding measure name
-      const measureName = await screen.findByText(
-        measuresWithOwner[0].measureName
-      );
-      expect(measureName).toBeInTheDocument();
+      // Need waitFor because getBulkUserDetails is async and triggers re-render
+      await waitFor(async () => {
+        const measureName = await screen.findByText(
+          measuresWithOwner[0].measureName
+        );
+        expect(measureName).toBeInTheDocument();
+      });
 
       // Check that Owner column header exists
       const ownerHeader = screen.getByText("Owner");
@@ -3257,12 +3242,12 @@ describe("Measure lock functionality", () => {
             setSearchCriteria={setSearchCriteriaMock}
             currentLimit={10}
             currentPage={0}
-            setErrMsg={setErrMsgMock}
             currentSort="lastModifiedAt"
             currentDirection="DESC"
             setCurrentSort={setCurrentSortMock}
             setCurrentDirection={setCurrentDirectionMock}
             handlePageChange={handlePageChangeMock}
+            setStatusHandler={jest.fn()}
             search=""
             toastOpen={false}
             toastMessage=""
@@ -3301,12 +3286,12 @@ describe("Measure lock functionality", () => {
             setSearchCriteria={setSearchCriteriaMock}
             currentLimit={10}
             currentPage={0}
-            setErrMsg={setErrMsgMock}
             currentSort="lastModifiedAt"
             currentDirection="DESC"
             setCurrentSort={setCurrentSortMock}
             setCurrentDirection={setCurrentDirectionMock}
             handlePageChange={handlePageChangeMock}
+            setStatusHandler={jest.fn()}
             search=""
             toastOpen={false}
             toastMessage=""
@@ -3352,12 +3337,12 @@ describe("Measure lock functionality", () => {
             setSearchCriteria={setSearchCriteriaMock}
             currentLimit={10}
             currentPage={0}
-            setErrMsg={setErrMsgMock}
             currentSort="lastModifiedAt"
             currentDirection="DESC"
             setCurrentSort={setCurrentSortMock}
             setCurrentDirection={setCurrentDirectionMock}
             handlePageChange={handlePageChangeMock}
+            setStatusHandler={jest.fn()}
             search=""
             toastOpen={false}
             toastMessage=""
@@ -3435,12 +3420,12 @@ describe("Measure lock functionality", () => {
             setSearchCriteria={setSearchCriteriaMock}
             currentLimit={10}
             currentPage={0}
-            setErrMsg={setErrMsgMock}
             currentSort="lastModifiedAt"
             currentDirection="DESC"
             setCurrentSort={setCurrentSortMock}
             setCurrentDirection={setCurrentDirectionMock}
             handlePageChange={handlePageChangeMock}
+            setStatusHandler={jest.fn()}
             search=""
             toastOpen={false}
             toastMessage=""
@@ -3454,10 +3439,13 @@ describe("Measure lock functionality", () => {
       );
 
       // Wait for table to render
-      const measureName = await screen.findByText(
-        measuresForSorting[0].measureName
-      );
-      expect(measureName).toBeInTheDocument();
+      // Need waitFor because getBulkUserDetails is async and triggers re-render
+      await waitFor(async () => {
+        const measureName = await screen.findByText(
+          measuresForSorting[0].measureName
+        );
+        expect(measureName).toBeInTheDocument();
+      });
 
       // Find and click the Owner column header to trigger sorting
       const ownerHeader = screen.getByText("Owner");
@@ -3538,12 +3526,12 @@ describe("Measure lock functionality", () => {
             setSearchCriteria={setSearchCriteriaMock}
             currentLimit={10}
             currentPage={0}
-            setErrMsg={setErrMsgMock}
             currentSort=""
             currentDirection=""
             setCurrentSort={setCurrentSortMock}
             setCurrentDirection={setCurrentDirectionMock}
             handlePageChange={handlePageChangeMock}
+            setStatusHandler={jest.fn()}
             search=""
             toastOpen={false}
             toastMessage=""
@@ -3598,12 +3586,12 @@ describe("Measure lock functionality", () => {
             setSearchCriteria={setSearchCriteriaMock}
             currentLimit={10}
             currentPage={0}
-            setErrMsg={setErrMsgMock}
             currentSort=""
             currentDirection=""
             setCurrentSort={setCurrentSortMock}
             setCurrentDirection={setCurrentDirectionMock}
             handlePageChange={handlePageChangeMock}
+            setStatusHandler={jest.fn()}
             search=""
             toastOpen={false}
             toastMessage=""

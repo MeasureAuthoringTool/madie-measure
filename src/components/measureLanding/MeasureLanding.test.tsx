@@ -43,18 +43,37 @@ const serviceConfig = {
 const abortController = new AbortController();
 const mockUser = "TestUser1";
 
+const mockMeasureServiceApi = {
+  searchMeasuresByCriteria: jest.fn().mockResolvedValue(oneItemResponse),
+  getMeasureCounts: jest.fn().mockResolvedValue({
+    ownedMeasures: 5,
+    sharedMeasures: 3,
+    allMeasures: 10,
+  }),
+  transferMeasures: jest.fn().mockResolvedValue({
+    status: 200,
+    data: [],
+  }),
+} as unknown as MeasureServiceApi;
+
+const mockUserServiceApi = {
+  getOwnerDetails: jest.fn().mockResolvedValue({}),
+  getBulkUserDetails: jest.fn().mockResolvedValue({}),
+};
+
+const mockOktaTokens = {
+  getAccessToken: () => "test.jwt",
+  getUserName: () => mockUser,
+};
+
 jest.mock("@madie/madie-util", () => ({
-  useDocumentTitle: jest.fn(),
-  useOktaTokens: () => ({
-    getUserName: () => mockUser,
-  }),
-  checkUserCanEdit: jest.fn(() => {
-    return true;
-  }),
-  checkUserCanDelete: jest.fn(() => {
-    return true;
-  }),
+  useMeasureServiceApi: jest.fn(() => mockMeasureServiceApi),
+  useUserServiceApi: jest.fn(() => mockUserServiceApi),
+  useOktaTokens: jest.fn(() => mockOktaTokens),
+  checkUserCanEdit: jest.fn().mockImplementation(() => true),
+  checkUserCanDelete: jest.fn().mockImplementation(() => true),
   useFeatureFlags: jest.fn(),
+  useDocumentTitle: jest.fn(),
   measureStore: {
     updateMeasure: jest.fn((measure) => measure),
     state: jest.fn().mockImplementation(() => null),
@@ -70,39 +89,6 @@ const mockedUsedNavigate = jest.fn();
 jest.mock("react-router-dom", () => ({
   ...(jest.requireActual("react-router-dom") as any),
   useNavigate: () => mockedUsedNavigate,
-}));
-
-const mockMeasureServiceApi = {
-  searchMeasuresByCriteria: jest.fn().mockResolvedValue(oneItemResponse),
-  getMeasureCounts: jest.fn().mockResolvedValue({
-    ownedMeasures: 5,
-    sharedMeasures: 3,
-    allMeasures: 10,
-  }),
-  transferMeasures: jest.fn().mockResolvedValue({
-    status: 200,
-    data: [],
-  }),
-} as unknown as MeasureServiceApi;
-
-jest.mock("@madie/madie-util", () => ({
-  useMeasureServiceApi: jest.fn(() => mockMeasureServiceApi),
-  useOktaTokens: jest.fn(() => ({
-    getAccessToken: () => "test.jwt",
-    getUserName: () => mockUser,
-  })),
-  checkUserCanEdit: jest.fn().mockImplementation(() => true),
-  checkUserCanDelete: jest.fn().mockImplementation(() => true),
-  useFeatureFlags: jest.fn(),
-  useDocumentTitle: jest.fn(),
-  measureStore: {
-    updateMeasure: jest.fn((measure) => measure),
-    state: jest.fn().mockImplementation(() => null),
-    initialState: jest.fn().mockImplementation(() => null),
-    subscribe: () => {
-      return { unsubscribe: () => null };
-    },
-  },
 }));
 
 // Custom render function to test MeasureLanding component directly

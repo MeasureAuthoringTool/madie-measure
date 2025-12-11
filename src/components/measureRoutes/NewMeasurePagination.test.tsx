@@ -9,21 +9,26 @@ import { mockPaginationResponses } from "../__mocks__/mockMeasureResponses";
 import { describe, expect, test } from "@jest/globals";
 import userEvent from "@testing-library/user-event";
 
+const mockUser = "TestUser1";
+
+// Create stable mock objects before jest.mock() to prevent hoisting issues
+const mockUserServiceApi = {
+  getOwnerDetails: jest.fn().mockResolvedValue({}),
+  getBulkUserDetails: jest.fn().mockResolvedValue({}),
+};
+
+const mockMeasureServiceApi = {
+  searchMeasuresByCriteria: jest.fn(mockPaginationResponses),
+} as unknown as MeasureServiceApi;
+
 jest.mock("react-router-dom", () => ({
   ...(jest.requireActual("react-router-dom") as any),
   useNavigate: jest.fn(() => jest.fn()), // Mock navigate as a function
 }));
 
-const serviceConfig = {
-  fhirElmTranslationService: { baseUrl: "fhir/services" },
-  qdmElmTranslationService: { baseUrl: "qdm/services" },
-  terminologyService: { baseUrl: "example-service-url" },
-  measureService: { baseUrl: "example-service-url" },
-} as ServiceConfig;
-
-const mockUser = "TestUser1";
 jest.mock("@madie/madie-util", () => ({
   useMeasureServiceApi: jest.fn(() => mockMeasureServiceApi),
+  useUserServiceApi: jest.fn(() => mockUserServiceApi),
   useDocumentTitle: jest.fn(),
   useOktaTokens: () => ({
     getAccessToken: () => "test.jwt",
@@ -42,9 +47,12 @@ jest.mock("@madie/madie-util", () => ({
   },
 }));
 
-const mockMeasureServiceApi = {
-  searchMeasuresByCriteria: jest.fn(mockPaginationResponses),
-} as unknown as MeasureServiceApi;
+const serviceConfig = {
+  fhirElmTranslationService: { baseUrl: "fhir/services" },
+  qdmElmTranslationService: { baseUrl: "qdm/services" },
+  terminologyService: { baseUrl: "example-service-url" },
+  measureService: { baseUrl: "example-service-url" },
+} as ServiceConfig;
 
 const { findAllByTestId, findByTestId, queryByTestId } = screen;
 

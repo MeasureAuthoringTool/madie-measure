@@ -55,8 +55,53 @@ const mockOktaTokenApi = {
   getUserName: jest.fn().mockReturnValue("test user"),
 };
 
+const mockFetchMeasures = jest.fn().mockResolvedValue(oneItemResponse);
+const mockFetchMeasure = jest.fn().mockResolvedValue(oneItemResponse);
+const mockCreateVersion = jest.fn().mockResolvedValue({});
+const mockCheckValidVersion = jest.fn().mockResolvedValue({});
+
+const mockUseFeatureFlagsApi = {
+  enableQdmRepeatTransfer: jest.fn().mockResolvedValue(false),
+  TransferMeasure: jest.fn().mockResolvedValue(false),
+};
+
+const mockMeasureServiceApi = {
+  searchMeasuresByCriteria: jest.fn().mockResolvedValue(oneItemResponse),
+  fetchMeasures: mockFetchMeasures,
+  createVersion: mockCreateVersion,
+  deleteMeasure: jest.fn().mockResolvedValue({}),
+  checkNextVersionNumber: jest.fn().mockReturnValue("1.0.000"),
+  checkValidVersion: mockCheckValidVersion,
+  fetchMeasure: mockFetchMeasure,
+  fetchMeasureDraftStatuses: jest.fn().mockResolvedValue({
+    "1": true,
+    "2": true,
+    "3": true,
+  }),
+  getMeasureExport: jest
+    .fn()
+    .mockResolvedValue({ size: 635581, type: "application/octet-stream" }),
+  getSharedMeasures: jest.fn().mockResolvedValue({
+    measureId1: ["userId1"],
+    measureId2: ["userId1", "userId2"],
+  }),
+  getMeasuresByMeasureSetId: jest
+    .fn()
+    .mockResolvedValue([{ model: Model.QICORE }, { model: Model.QICORE }]),
+  transferMeasures: jest.fn().mockResolvedValue({
+    status: 200,
+    data: [],
+  }),
+} as unknown as MeasureServiceApi;
+
+const mockUserServiceApi = {
+  getOwnerDetails: jest.fn().mockResolvedValue({}),
+  getBulkUserDetails: jest.fn().mockResolvedValue({}),
+};
+
 jest.mock("@madie/madie-util", () => ({
   useMeasureServiceApi: jest.fn(() => mockMeasureServiceApi),
+  useUserServiceApi: jest.fn(() => mockUserServiceApi),
   useOktaTokens: () => mockOktaTokenApi,
   checkUserCanEdit: jest.fn().mockImplementation(() => true),
   checkUserCanDelete: jest.fn().mockImplementation(() => true),
@@ -306,43 +351,6 @@ const baseProps = {
   retrieveMeasures: retrieveMeasuresMock,
   setStatusHandler: setStatusHandlerMock,
 };
-const mockFetchMeasures = jest.fn().mockResolvedValue(oneItemResponse);
-const mockFetchMeasure = jest.fn().mockResolvedValue(oneItemResponse);
-const mockCreateVersion = jest.fn().mockResolvedValue({});
-const mockCheckValidVersion = jest.fn().mockResolvedValue({});
-
-const mockUseFeatureFlagsApi = {
-  enableQdmRepeatTransfer: jest.fn().mockResolvedValue(false),
-  TransferMeasure: jest.fn().mockResolvedValue(false),
-};
-const mockMeasureServiceApi = {
-  searchMeasuresByCriteria: jest.fn().mockResolvedValue(oneItemResponse),
-  fetchMeasures: mockFetchMeasures,
-  createVersion: mockCreateVersion,
-  deleteMeasure: jest.fn().mockResolvedValue({}),
-  checkNextVersionNumber: jest.fn().mockReturnValue("1.0.000"),
-  checkValidVersion: mockCheckValidVersion,
-  fetchMeasure: mockFetchMeasure,
-  fetchMeasureDraftStatuses: jest.fn().mockResolvedValue({
-    "1": true,
-    "2": true,
-    "3": true,
-  }),
-  getMeasureExport: jest
-    .fn()
-    .mockResolvedValue({ size: 635581, type: "application/octet-stream" }),
-  getSharedMeasures: jest.fn().mockResolvedValue({
-    measureId1: ["userId1"],
-    measureId2: ["userId1", "userId2"],
-  }),
-  getMeasuresByMeasureSetId: jest
-    .fn()
-    .mockResolvedValue([{ model: Model.QICORE }, { model: Model.QICORE }]),
-  transferMeasures: jest.fn().mockResolvedValue({
-    status: 200,
-    data: [],
-  }),
-} as unknown as MeasureServiceApi;
 
 describe("Action Center Tests", () => {
   beforeEach(() => {
