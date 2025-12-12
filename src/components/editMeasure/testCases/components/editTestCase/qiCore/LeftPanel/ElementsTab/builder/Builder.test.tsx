@@ -72,6 +72,13 @@ jest.mock("../../../../../../api/useFhirDefinitionsService", () => {
         profile:
           "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-encounter",
       },
+      {
+        id: "ChargeItem",
+        title: "ChargeItem",
+        type: "ChargeItem",
+        category: "Financial.General",
+        profile: "http://hl7.org/fhir/StructureDefinition/ChargeItem",
+      },
     ],
   });
 });
