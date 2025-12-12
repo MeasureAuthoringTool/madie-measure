@@ -9,6 +9,7 @@ import {
   PopulationDto,
   TestCase,
   TestCaseExcelExportDto,
+  TestCaseImportOutcome,
   TestCaseImportRequest,
 } from "@madie/madie-models";
 import { useOktaTokens } from "@madie/madie-util";
@@ -34,6 +35,21 @@ export type QrdaRequestDTO = {
   measure: Measure;
   groupDTOs: QrdaGroupExportDTO[];
 };
+
+export interface ShiftDatesResponse {
+  failed: string[];
+  shifted: string[];
+}
+
+export interface CreateTestCasesResponse {
+  failed: string[];
+  testCases: TestCase[];
+}
+
+export interface ImportTestCasesResponse {
+  outcomes: TestCaseImportOutcome[];
+  failed: string[];
+}
 
 export interface CopyResult {
   copiedTestCases: TestCase[];
@@ -176,7 +192,7 @@ export class TestCaseServiceApi {
   async importTestCases(
     measureId: string,
     testCasesImportRequest: TestCaseImportRequest[]
-  ): Promise<AxiosResponse> {
+  ): Promise<AxiosResponse<ImportTestCasesResponse>> {
     return await axios.put(
       `${this.baseUrl}/measures/${measureId}/test-cases/imports`,
       testCasesImportRequest,
@@ -230,9 +246,9 @@ export class TestCaseServiceApi {
   async createTestCases(
     measureId: string,
     testCases: TestCase[]
-  ): Promise<TestCase[]> {
+  ): Promise<CreateTestCasesResponse> {
     try {
-      const response = await axios.post<TestCase[]>(
+      const response = await axios.post<CreateTestCasesResponse>(
         `${this.baseUrl}/measures/${measureId}/test-cases/list`,
         testCases,
         {
@@ -309,7 +325,7 @@ export class TestCaseServiceApi {
     measureId: string,
     testCaseIds: string[],
     shifted: number
-  ) {
+  ): Promise<ShiftDatesResponse> {
     try {
       const response = await axios.put(
         `${this.baseUrl}/measures/${measureId}/test-cases/qdm/shift-dates`,
@@ -338,7 +354,7 @@ export class TestCaseServiceApi {
     measureId: string,
     testCaseIds: string[],
     shifted: number
-  ) {
+  ): Promise<ShiftDatesResponse> {
     try {
       const response = await axios.put(
         `${this.baseUrl}/measures/${measureId}/test-cases/qicore/shift-dates`,
@@ -363,7 +379,10 @@ export class TestCaseServiceApi {
     }
   }
 
-  async shiftAllQdmTestCaseDates(measureId: string, shifted: number) {
+  async shiftAllQdmTestCaseDates(
+    measureId: string,
+    shifted: number
+  ): Promise<ShiftDatesResponse> {
     try {
       const response = await axios.get(
         `${this.baseUrl}/measures/${measureId}/test-cases/qdm/shift-all-dates`,
@@ -390,7 +409,7 @@ export class TestCaseServiceApi {
   async shiftAllQiCoreTestCaseDates(
     measureId: string,
     shifted: number
-  ): Promise<string[]> {
+  ): Promise<ShiftDatesResponse> {
     try {
       const response = await axios.put(
         `${this.baseUrl}/measures/${measureId}/test-cases/qicore/shift-all-dates`,

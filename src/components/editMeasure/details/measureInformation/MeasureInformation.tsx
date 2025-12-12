@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "twin.macro";
-import { Endorsement, Measure, Model } from "@madie/madie-models";
+import { Endorsement, Measure, Model, MeasureLock } from "@madie/madie-models";
 import "styled-components/macro";
 import {
   AutoComplete,
@@ -25,6 +25,7 @@ import {
   routeHandlerStore,
   checkUserCanEdit,
   useMeasureServiceApi,
+  useUserServiceApi,
   useFeatureFlags,
 } from "@madie/madie-util";
 import { Box } from "@mui/system";
@@ -65,6 +66,7 @@ export default function MeasureInformation(props: MeasureInformationProps) {
   const { setErrorMessage, measureCanEdit } = props;
   const featureFlags = useFeatureFlags();
   const measureServiceApi = useMeasureServiceApi();
+  const userServiceApi = useUserServiceApi();
   const qdmElmTranslationService = useQdmElmTranslationServiceApi();
   const fhirElmTranslationService = useFhirElmTranslationServiceApi();
 
@@ -72,6 +74,7 @@ export default function MeasureInformation(props: MeasureInformationProps) {
   const { updateMeasure } = measureStore;
   const [measure, setMeasure] = useState<any>(measureStore.state);
   const [translatorVersion, setTranslatorVersion] = useState("");
+  const [measureOwner, setMeasureOwner] = useState("-");
 
   const getTranslatorVersion = async (model, draft) => {
     if (model.includes("QDM")) {
@@ -94,6 +97,21 @@ export default function MeasureInformation(props: MeasureInformationProps) {
         });
     }
   };
+
+  useEffect(() => {
+    if (measure?.measureSet?.owner) {
+      userServiceApi
+        .getOwnerDetails(measure?.measureSet?.owner)
+        .then((response) => {
+          const ownerName = `${response?.firstName} ${response?.lastName}`;
+          setMeasureOwner(ownerName);
+        })
+        .catch(() => {
+          setMeasureOwner("-");
+        });
+    }
+  }, [measure?.measureSet?.owner]);
+
   useEffect(() => {
     // if we have a measure loaded
     if (measure?.model) {
@@ -399,6 +417,18 @@ export default function MeasureInformation(props: MeasureInformationProps) {
         })
         // update to alert
         .catch((err) => {
+          if (featureFlags?.Locking && err?.status === 423) {
+            updateMeasure({
+              ...measure,
+              measureLock: {
+                lockedBy: err?.response?.data?.message?.replace(
+                  "Unable to update measure. Measure is locked by ",
+                  ""
+                ),
+              } as unknown as MeasureLock,
+            });
+            resetForm();
+          }
           setErrorMessage(err?.response?.data?.message?.toString());
         });
     }
@@ -537,39 +567,70 @@ export default function MeasureInformation(props: MeasureInformationProps) {
           />
         </Box>
 
-        <Box sx={formRowGapped}>
-          <TextField
-            placeholder="eCQM Name"
-            required
-            readOnly={!measureCanEdit}
-            label="eCQM Abbreviated Title"
-            id="ecqmTitle"
-            data-testid="ecqm-text-field"
-            inputProps={{
-              "data-testid": "ecqm-input",
-              "aria-required": "true",
-            }}
-            helperText={formikErrorHandler("ecqmTitle", true)}
-            size="small"
-            error={formik.touched.ecqmTitle && Boolean(formik.errors.ecqmTitle)}
-            {...formik.getFieldProps("ecqmTitle")}
-            maxLength={32}
-          />
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "row",
+            width: "100%",
+            ...formRowGapped,
+          }}
+        >
+          <Box sx={{ flex: 1 }}>
+            <TextField
+              placeholder="eCQM Name"
+              required
+              readOnly={!measureCanEdit}
+              label="eCQM Abbreviated Title"
+              id="ecqmTitle"
+              data-testid="ecqm-text-field"
+              inputProps={{
+                "data-testid": "ecqm-input",
+                "aria-required": "true",
+              }}
+              helperText={formikErrorHandler("ecqmTitle", true)}
+              size="small"
+              error={
+                formik.touched.ecqmTitle && Boolean(formik.errors.ecqmTitle)
+              }
+              {...formik.getFieldProps("ecqmTitle")}
+              maxLength={32}
+            />
+          </Box>
 
-          <CmsIdentifier
-            //cannot generate id if shared, only owner can
-            canEdit={
-              checkUserCanEdit(
-                measure?.measureSet?.owner,
-                [],
-                measure?.measureMetaData?.draft
-              ) && !(featureFlags?.Locking && measure?.measureLock)
-            }
-            label="CMS ID"
-            cmsId={measure?.measureSet?.cmsId}
-            model={measure?.model}
-            onClick={() => setCmsIdDialogOpen(true)}
-          />
+          <Box
+            sx={{ flex: 1, display: "flex", flexDirection: "row", gap: "8px" }}
+          >
+            {featureFlags?.DisplayOwner && (
+              <Box sx={{ flex: 1 }}>
+                <ReadOnlyTextField
+                  value={measureOwner}
+                  label={"Measure Owner"}
+                  tabIndex={0}
+                  placeholder="Measure Owner"
+                  id="measure-owner-label"
+                  data-testid="measure-owner-text-field"
+                  inputProps={{ "data-testid": "measure-owner-input" }}
+                  size="small"
+                />
+              </Box>
+            )}
+
+            <Box sx={{ flex: 1 }}>
+              <CmsIdentifier
+                canEdit={
+                  checkUserCanEdit(
+                    measure?.measureSet?.owner,
+                    [],
+                    measure?.measureMetaData?.draft
+                  ) && !(featureFlags?.Locking && measure?.measureLock)
+                }
+                label="CMS ID"
+                cmsId={measure?.measureSet?.cmsId}
+                model={measure?.model}
+                onClick={() => setCmsIdDialogOpen(true)}
+              />
+            </Box>
+          </Box>
         </Box>
 
         {measure?.model !== Model.QDM_5_6 && (

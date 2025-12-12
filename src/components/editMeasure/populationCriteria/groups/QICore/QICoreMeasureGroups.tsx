@@ -12,6 +12,7 @@ import {
   MeasureGroupTypes,
   MeasureScoring,
   Population,
+  MeasureLock,
 } from "@madie/madie-models";
 import {
   MenuItem as MuiMenuItem,
@@ -590,6 +591,25 @@ const MeasureGroups = (props: MeasureGroupProps) => {
           setActiveTab("populations");
         })
         .catch((error) => {
+          if (
+            featureFlags?.Locking &&
+            error?.message.includes(
+              "Unable to update measure. Measure is locked by"
+            )
+          ) {
+            updateMeasure({
+              ...measure,
+              measureLock: {
+                lockedBy: error?.message
+                  ?.replace(
+                    "Unable to update measure. Measure is locked by",
+                    ""
+                  )
+                  .trim(),
+              } as unknown as MeasureLock,
+            });
+            resetForm();
+          }
           props.setAlertMessage({
             type: "error",
             message: error.message,

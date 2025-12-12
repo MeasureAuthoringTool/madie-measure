@@ -24,6 +24,7 @@ import {
   checkUserCanEdit,
   measureStore,
   MeasureServiceApi,
+  UserServiceApi,
   useFeatureFlags,
 } from "@madie/madie-util";
 
@@ -103,10 +104,16 @@ const mockMeasureServiceApi = {
   createCmsId: jest.fn(),
   updateMeasure: jest.fn().mockResolvedValue({ status: 200 }),
 } as unknown as MeasureServiceApi;
+
+const mockUserServiceApi = {
+  getOwnerDetails: jest.fn().mockResolvedValue({}),
+} as unknown as UserServiceApi;
 jest.mock("@madie/madie-util", () => ({
   useMeasureServiceApi: jest.fn(() => mockMeasureServiceApi),
+  useUserServiceApi: jest.fn(() => mockUserServiceApi),
   useFeatureFlags: jest.fn().mockReturnValue({
     Locking: true,
+    DisplayOwner: true,
   }),
   useOktaTokens: jest.fn(() => ({
     getAccessToken: () => "test.jwt",
@@ -1475,6 +1482,77 @@ describe("MeasureInformation component", () => {
         "Versioned with CQL to ELM Translator Version"
       );
       expect(translatorVersionText).toBeInTheDocument();
+    });
+  });
+
+  it("should display 423 error message when updating failed", async () => {
+    mockMeasureServiceApi.updateMeasure = jest.fn().mockRejectedValueOnce({
+      status: 423,
+      response: {
+        data: {
+          message:
+            "Unable to update measure. Measure is locked by another user.",
+        },
+      },
+    });
+    mockMeasureServiceApi.getAllEndorsers = jest
+      .fn()
+      .mockResolvedValue(endorserList);
+
+    measure.measureName = "";
+    render(
+      <MeasureInformation
+        setErrorMessage={setErrorMessage}
+        measureCanEdit={true}
+      />
+    );
+
+    await act(async () => {
+      const input = await findByTestId("measure-name-input");
+      fireEvent.change(input, {
+        target: { value: "new value" },
+      });
+
+      const createBtn = getByTestId("measurement-information-save-button");
+      expect(createBtn).toBeEnabled();
+      act(() => {
+        fireEvent.click(createBtn);
+      });
+    });
+
+    await waitFor(() => expect(setErrorMessage).toHaveBeenCalled(), {
+      timeout: 5000,
+    });
+  });
+
+  it("sets measureOwner to the fetched owner name on success", async () => {
+    mockUserServiceApi.getOwnerDetails.mockResolvedValueOnce({
+      firstName: "Jane",
+      lastName: "Doe",
+    });
+
+    const { getByTestId } = render(
+      <MeasureInformation setErrorMessage={jest.fn()} measureCanEdit={true} />
+    );
+
+    await waitFor(() => {
+      expect(
+        (getByTestId("measure-owner-text-field") as HTMLInputElement).value
+      ).toBe("Jane Doe");
+    });
+  });
+
+  it("sets measureOwner to '-' on fetch failure", async () => {
+    mockUserServiceApi.getOwnerDetails.mockRejectedValueOnce(new Error("fail"));
+
+    const { getByTestId } = render(
+      <MeasureInformation setErrorMessage={jest.fn()} measureCanEdit={true} />
+    );
+
+    await waitFor(() => {
+      expect(
+        (getByTestId("measure-owner-text-field") as HTMLInputElement).value
+      ).toBe("-");
     });
   });
 });

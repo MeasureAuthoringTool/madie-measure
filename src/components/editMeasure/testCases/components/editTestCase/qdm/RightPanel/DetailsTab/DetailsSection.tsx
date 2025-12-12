@@ -96,11 +96,14 @@ const DetailsSection = (props: DetailsSectionProps) => {
           />
           <div>
             <TestCaseSeries
-              readOnly={!canEdit}
               value={formik?.values?.series || ""} // this additional check is needed since formik is blank and undefined breaks update
-              onChange={(nextValue) =>
-                formik.setFieldValue("series", nextValue)
-              }
+              error={Boolean(formik.errors.series)}
+              helperText={formikErrorHandler("series")}
+              readOnly={!canEdit}
+              onChange={(nextValue) => {
+                formik.setFieldTouched("series", true);
+                formik.setFieldValue("series", nextValue, true);
+              }}
               seriesOptions={seriesState.series}
               sx={seriesStyles}
             />

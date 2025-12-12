@@ -17,7 +17,7 @@ import {
   MadieDiscardDialog,
   Toast,
 } from "@madie/madie-design-system/dist/react";
-import { Measure } from "@madie/madie-models";
+import { Measure, MeasureLock } from "@madie/madie-models";
 import TextEditor from "../../groups/TextEditor";
 
 export interface RiskAdjustmentProps {
@@ -103,7 +103,20 @@ const RiskAdjustment = (props: RiskAdjustmentProps) => {
         }
       })
       .catch((reason) => {
-        const message = `Error updating measure "${modifiedMeasure.measureName}": ${reason}`;
+        let message = `Error updating measure "${modifiedMeasure.measureName}": ${reason}`;
+        if (featureFlags?.Locking && reason?.status === 423) {
+          updateMeasure({
+            ...measure,
+            measureLock: {
+              lockedBy: reason?.response?.data?.message?.replace(
+                "Unable to update measure. Measure is locked by ",
+                ""
+              ),
+            } as unknown as MeasureLock,
+          });
+          formik.resetForm();
+          message = reason?.response?.data?.message.toString();
+        }
         handleToast("danger", message, true);
       });
   };

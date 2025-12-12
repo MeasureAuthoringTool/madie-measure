@@ -46,7 +46,7 @@ export const isFormatLessComplex = (format: string, currentFormat: string) => {
 };
 
 const dateRegex =
-  /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{3})?[+-]\d{2}:\d{2}$/;
+  /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{3})?([+-]\d{2}:\d{2}|Z)$/;
 const isValidFormattedDate = (dateString: string) => {
   if (!dateRegex.test(dateString)) return false;
   const parsedDate = dayjs.tz(dateString);
@@ -180,7 +180,21 @@ const PeriodDateTimeComponent = ({
           }}
           data-testid="date-div"
         >
-          <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+          <div
+            style={{ display: "flex", flexDirection: "column", gap: 4 }}
+            onPaste={(e) => {
+              const pastedValue = e.clipboardData.getData("text");
+              const parsedDate = dayjs.utc(pastedValue).startOf("day");
+              if (!parsedDate.isValid()) {
+                console.error("Invalid date format pasted:", pastedValue);
+                return;
+              }
+              onChange({
+                start: parsedDate.format(format),
+                end: endDate?.format(format) || "",
+              });
+            }}
+          >
             <DateField
               label="Start Date"
               required={fieldRequired}
@@ -244,7 +258,21 @@ const PeriodDateTimeComponent = ({
             )}
           </div>
           <span style={{ alignSelf: "center", padding: "0 8px" }}>To</span>
-          <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+          <div
+            style={{ display: "flex", flexDirection: "column", gap: 4 }}
+            onPaste={(e) => {
+              const pastedValue = e.clipboardData.getData("text");
+              const parsedDate = dayjs.utc(pastedValue).startOf("day");
+              if (!parsedDate.isValid()) {
+                console.error("Invalid date format pasted:", pastedValue);
+                return;
+              }
+              onChange({
+                start: startDate ? startDate.format(format) : "",
+                end: parsedDate.format(format),
+              });
+            }}
+          >
             <DateField
               label="End Date"
               required={fieldRequired}

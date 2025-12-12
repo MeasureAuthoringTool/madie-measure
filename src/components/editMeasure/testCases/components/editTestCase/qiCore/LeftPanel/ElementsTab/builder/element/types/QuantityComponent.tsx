@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { Dispatch, SetStateAction, useMemo } from "react";
 import * as ucum from "@lhncbc/ucum-lhc";
 import { TextField, InputLabel } from "@madie/madie-design-system/dist/react/";
 import "twin.macro";
@@ -15,6 +15,7 @@ import "./QuantityComponent.scss";
 import AddElementButton from "../../../../../../../common/UIOnlyModelAgnostic/AddElementButton";
 import { IconButton, Tooltip } from "@mui/material";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import { set as lodashSet } from "lodash";
 
 export interface QuantityComponentProps extends TypeComponentProps {
   showLabel?: boolean;
@@ -36,9 +37,14 @@ const QuantityComponent = ({
   const formik = useFormikContext();
 
   const updateQuantityCode = (code: string, unit: string, system: string) => {
-    formik.setFieldValue(`${label}.code`, code);
-    formik.setFieldValue(`${label}.unit`, unit);
-    formik.setFieldValue(`${label}.system`, system);
+    formik.setValues((prev) => {
+      const next = { ...prev };
+      lodashSet(next, `${label}.code`, code);
+      lodashSet(next, `${label}.unit`, unit);
+      lodashSet(next, `${label}.system`, system);
+      return next;
+    });
+    formik.validateForm();
   };
 
   /*
@@ -119,6 +125,7 @@ const QuantityComponent = ({
               data-testid="code-input"
               readOnly={!canEdit}
               label="Unit(s)"
+              tooltipText="Enter the UCUM (Unified Code for Units of Measure) code value."
               error={!!validationResult.error}
               helperText={validationResult.helperText}
               value={code ?? ""}

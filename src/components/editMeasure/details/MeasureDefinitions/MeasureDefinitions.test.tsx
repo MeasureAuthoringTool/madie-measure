@@ -553,4 +553,83 @@ describe("Measure Definitions Component", () => {
 
     expect(definitionEditor).toHaveTextContent("definition 1");
   });
+
+  it("test edit measure definition fails due to locked 423 error", async () => {
+    measureStore.state.mockImplementation(() => measureWithNineItems);
+    measureStore.initialState.mockImplementation(() => measureWithNineItems);
+
+    mockMeasureServiceApi = {
+      updateMeasure: jest.fn().mockRejectedValueOnce({
+        status: 423,
+        response: {
+          data: {
+            message:
+              "Unable to update measure. Measure is locked by another user.",
+          },
+        },
+      }),
+    } as unknown as MeasureServiceApi;
+
+    render(
+      <ApiContextProvider value={serviceConfig}>
+        <MemoryRouter initialEntries={["/"]}>
+          <MeasureDefinitions
+            setErrorMessage={jest.fn()}
+            measureCanEdit={true}
+            lockingFeatureEnabled={true}
+          />
+        </MemoryRouter>
+      </ApiContextProvider>
+    );
+    await checkRows(9);
+
+    const editButton = getByTestId(`edit-measure-definition-id 1`);
+    expect(editButton).toBeInTheDocument();
+
+    const deleteButton = getByTestId(`delete-measure-definition-id 1`);
+    expect(deleteButton).toBeInTheDocument();
+
+    userEvent.click(editButton);
+
+    await waitFor(() => {
+      expect(getByTestId("dialog-form")).toBeInTheDocument();
+    });
+
+    const termInput = getByTestId(
+      "measure-definition-term-input"
+    ) as HTMLInputElement;
+    expect(termInput.value).toBe("term 1");
+    const definitionInput = within(
+      screen.getByTestId("definition-rich-text-editor")
+    ).getByRole("textbox");
+    expect(definitionInput).toHaveTextContent("definition 1");
+
+    fireEvent.change(termInput, {
+      target: { value: "term 111" },
+    });
+    expect(termInput.value).toBe("term 111");
+
+    act(() => {
+      fireEvent.input(definitionInput, {
+        target: { textContent: "definition 111" },
+      });
+    });
+    fireEvent.blur(definitionInput);
+    expect(definitionInput).toHaveTextContent("definition 111");
+    const submitButton = getByTestId("save-button");
+    expect(submitButton).toHaveProperty("disabled", false);
+    fireEvent.click(submitButton);
+
+    expect(
+      await screen.findByTestId("measure-definitions-error")
+    ).toHaveTextContent(
+      "Unable to update measure. Measure is locked by another user."
+    );
+    const toastCloseButton = await findByTestId("close-error-button");
+    expect(toastCloseButton).toBeInTheDocument();
+    fireEvent.click(toastCloseButton);
+    await waitFor(() => {
+      expect(toastCloseButton).not.toBeInTheDocument();
+    });
+  });
 });

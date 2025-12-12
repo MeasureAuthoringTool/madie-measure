@@ -66,10 +66,10 @@ const AddElementDialog = (props: AddElementDialogProps) => {
       continueButtonProps={{
         id: "saveBtn",
         "data-testid": "add-element-button-2",
-        "aria-label": "save button",
+        "aria-label": "apply button",
         variant: "primary",
         onClick: handleSave,
-        continueText: "Save",
+        continueText: "Apply",
       }}
       sx={{
         display: "flex",

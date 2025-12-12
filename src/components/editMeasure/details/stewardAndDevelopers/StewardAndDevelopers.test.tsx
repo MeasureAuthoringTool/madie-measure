@@ -457,4 +457,43 @@ describe("Steward and Developers component", () => {
       expect(screen.queryByText("You have unsaved changes.")).not.toBeVisible();
     });
   });
+
+  it("should set 423 error message when update measure fails", async () => {
+    mockMeasureServiceApi.updateMeasure = jest.fn().mockRejectedValueOnce({
+      status: 423,
+      response: {
+        data: {
+          message:
+            "Unable to update measure. Measure is locked by another user.",
+        },
+      },
+    });
+    mockMeasureServiceApi.getAllOrganizations = jest
+      .fn()
+      .mockResolvedValue(organizationList);
+
+    render(
+      <StewardAndDevelopers
+        setErrorMessage={setErrorMessage}
+        measureCanEdit={true}
+        lockingFeatureEnabled={true}
+      />
+    );
+    await act(async () => {
+      const stewardAutoComplete = await screen.findByTestId("steward");
+      fireEvent.keyDown(stewardAutoComplete, { key: "ArrowDown" });
+      // selects 2nd option
+      const stewardOptions = await screen.findAllByRole("option");
+      fireEvent.click(stewardOptions[1]);
+      // verifies if the option is selected
+      const stewardComboBox = within(stewardAutoComplete).getByRole("combobox");
+      expect(stewardComboBox).toHaveValue("Joint Commission");
+
+      const saveButton = await screen.findByRole("button", { name: "Save" });
+      expect(saveButton).toBeEnabled();
+      fireEvent.click(saveButton);
+    });
+
+    expect(setErrorMessage).toHaveBeenCalled();
+  });
 });

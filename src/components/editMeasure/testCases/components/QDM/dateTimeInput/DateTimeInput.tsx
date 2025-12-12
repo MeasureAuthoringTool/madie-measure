@@ -69,13 +69,26 @@ const DateTimeInput = ({
     onDateTimeChange(getCQLDateTime(newValue, !dateTime), attributeName);
   };
   return (
-    <DateTimeField
-      id={kebabCase(label)}
-      readOnly={!canEdit}
-      label={label}
-      handleDateTimeChange={handleDateTimeChange}
-      dateTimeValue={toDayJS(dateTime)}
-    />
+    <div
+      onPaste={(e) => {
+        const pastedValue = e.clipboardData.getData("text");
+        const parsedDate = toDayJS(pastedValue).hour(0).minute(0).second(0);
+        if (parsedDate && parsedDate.isValid()) {
+          onDateTimeChange(
+            getCQLDateTime(parsedDate, !dateTime),
+            attributeName
+          );
+        }
+      }}
+    >
+      <DateTimeField
+        id={kebabCase(label)}
+        readOnly={!canEdit}
+        label={label}
+        handleDateTimeChange={handleDateTimeChange}
+        dateTimeValue={toDayJS(dateTime)}
+      />
+    </div>
   );
 };
 

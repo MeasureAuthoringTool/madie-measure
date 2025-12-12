@@ -5,6 +5,7 @@ import {
   getBinaryValidator,
   getUnsignedIntegerValidator,
   getPositiveIntegerValidator,
+  getQuantityValidator,
 } from "./fhirR4Validations";
 
 describe("Validation Functions", () => {
@@ -278,6 +279,58 @@ describe("Validation Functions", () => {
     await expect(validator.validate("")).rejects.toThrow(
       "Invalid Binary format"
     );
+  });
+
+  it("Validates quantity with all required fields provided", () => {
+    const schema = getQuantityValidator(true);
+    const validQuantity = {
+      value: 10,
+      system: "http://unitsofmeasure.org",
+      code: "mg",
+      unit: "milligram",
+    };
+
+    expect(schema.isValidSync(validQuantity)).toBe(true);
+  });
+
+  it("Fails validation when required fields are missing", () => {
+    const schema = getQuantityValidator(true);
+    const invalidQuantity = {
+      value: 10,
+      unit: "milligram",
+    };
+
+    expect(schema.isValidSync(invalidQuantity)).toBe(false);
+  });
+
+  it("Allows empty quantity when not required", () => {
+    const schema = getQuantityValidator(false);
+    const emptyQuantity = null;
+
+    expect(schema.isValidSync(emptyQuantity)).toBe(true);
+  });
+
+  it("Fails validation for invalid quantity code", () => {
+    const schema = getQuantityValidator(true);
+    const invalidQuantity = {
+      value: 10,
+      system: "http://unitsofmeasure.org",
+      code: "invalid-code",
+      unit: "milligram",
+    };
+
+    expect(schema.isValidSync(invalidQuantity)).toBe(false);
+  });
+
+  it("Validates quantity with default system when system is not provided", () => {
+    const schema = getQuantityValidator(true);
+    const validQuantity = {
+      value: 10,
+      code: "mg",
+      unit: "milligram",
+    };
+
+    expect(schema.cast(validQuantity).system).toBe("http://unitsofmeasure.org");
   });
 });
 describe("OID & UUID Validation Functions", () => {

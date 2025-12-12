@@ -5,6 +5,22 @@ import CompareVersionsDialog, {
 } from "./CompareVersionsDialog";
 import { Measure } from "@madie/madie-models";
 
+const mockMeasureServiceApi = {
+  fetchHumanReadable: jest.fn(
+    async (id: string) => `<div>HR content for ${id}</div>`
+  ),
+};
+
+jest.mock("@madie/madie-util", () => ({
+  useMeasureServiceApi: jest.fn(() => mockMeasureServiceApi),
+}));
+
+global.ResizeObserver = jest.fn().mockImplementation(() => ({
+  observe: jest.fn(),
+  unobserve: jest.fn(),
+  disconnect: jest.fn(),
+}));
+
 const mockOnClose = jest.fn();
 
 const mockMeasures: Measure[] = [
@@ -24,7 +40,7 @@ const mockMeasures: Measure[] = [
   } as any,
 ];
 
-describe("CompareVersionsDialog Component", () => {
+describe("CompareVersionsDialog component", () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -172,6 +188,21 @@ describe("CompareVersionsDialog Component", () => {
 
     expect(mockOnClose).toHaveBeenCalledTimes(1);
   });
+
+  it("renders CqlComparisonPanel for old and new measures in CQL tab", () => {
+    render(
+      <CompareVersionsDialog
+        measures={mockMeasures}
+        open={true}
+        onClose={mockOnClose}
+      />
+    );
+
+    expect(screen.getByTestId("tab-content-cql")).toBeInTheDocument();
+
+    expect(screen.getByTestId("panel-content-old")).toBeInTheDocument();
+    expect(screen.getByTestId("comparison-panel-new")).toBeInTheDocument();
+  });
 });
 
 describe("getNewestMeasureInstance", () => {
@@ -238,5 +269,21 @@ describe("getNewestMeasureInstance", () => {
       baseMeasure("2", false, "1.0.002"),
     ];
     expect(getNewestMeasureInstance(measures)).toBe(measures[1]);
+  });
+
+  it("renders the Differences section in Human Readable tab", () => {
+    render(
+      <CompareVersionsDialog
+        measures={mockMeasures}
+        open={true}
+        onClose={mockOnClose}
+      />
+    );
+
+    const hrTab = screen.getByTestId("human-readable-tab");
+    fireEvent.click(hrTab);
+
+    expect(screen.getByTestId("differences-section")).toBeInTheDocument();
+    expect(screen.getByText("Differences")).toBeInTheDocument();
   });
 });

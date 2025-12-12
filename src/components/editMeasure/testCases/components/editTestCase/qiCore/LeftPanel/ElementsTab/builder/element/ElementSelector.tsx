@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { AutoComplete } from "@madie/madie-design-system/dist/react";
 import { Checkbox, TextField, Chip } from "@mui/material";
 import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
@@ -40,7 +40,10 @@ export const getOptionLabel = (option: ElementDefinition, basePath: string) => {
 };
 
 //helper to get the base label for choice types
-const getChoiceBaseLabel = (option: ElementDefinition, basePath: string) => {
+export const getChoiceBaseLabel = (
+  option: ElementDefinition,
+  basePath: string
+) => {
   const label = option.path?.substring(basePath.length + 1);
 
   // If this is an original choice type definition with [x]
@@ -134,6 +137,20 @@ const ElementSelector = ({
   newValues,
   onChange,
 }: ElementSelectorProps) => {
+  // Create a Set of disabled element IDs for efficient lookup
+  const disabledIds = useMemo(() => {
+    const idSet = new Set<string>();
+    value.forEach((v) => {
+      if (v.id) idSet.add(v.id);
+      if (v.path) idSet.add(v.path);
+    });
+    return idSet;
+  }, [value, value.length]);
+
+  const isInValue = (option: ElementDefinition) =>
+    (option.id && disabledIds.has(option.id)) ||
+    (option.path && disabledIds.has(option.path));
+
   return (
     <>
       <AutoComplete
@@ -148,14 +165,15 @@ const ElementSelector = ({
               "& .MuiAutocomplete-option[aria-disabled='true']": {
                 opacity: "1 !important",
                 backgroundColor: "#FFF !important",
-                color: "#767676 !important",
+                color: "#5b5b5b !important",
                 "& .MuiCheckbox-root": {
-                  color: "#767676 !important",
+                  color: "#5b5b5b !important",
                 },
               },
-              "& .MuiAutocomplete-option[aria-selected='true']": {
-                backgroundColor: "#FFF !important",
-              },
+              "& .MuiAutocomplete-option[aria-disabled='true'][aria-selected='true']":
+                {
+                  backgroundColor: "#FFF !important",
+                },
             },
           },
         }}
@@ -163,6 +181,7 @@ const ElementSelector = ({
         multiple
         open={true}
         label="Attribute Selector"
+        helperText="To delete attributes, use the Attribute Action Center located within the Attribute Edit Card."
         fullWidth
         limitTags={2}
         id="resource-element-selector-autocomplete"
@@ -172,8 +191,11 @@ const ElementSelector = ({
         disableCloseOnSelect
         getOptionLabel={(option) => getOptionLabel(option, basePath)}
         getOptionDisabled={(option) => {
-          if (value.includes(option)) return true;
+          if (isInValue(option)) return true;
           // Disable if another choice type with same base is selected
+          if (option.min === 1) {
+            return true;
+          }
           const base = getChoiceBaseLabel(option, basePath);
           if (base) {
             // if any other option with same base is selected, and this option is not selected, disable
@@ -190,13 +212,39 @@ const ElementSelector = ({
           style: { height: "40vh", maxHeight: "700px" },
         }}
         renderOption={(props, option, { selected }) => {
+          const isDisabled = isInValue(option);
+          const isChecked = selected || isDisabled;
           return (
-            <li {...props}>
+            <li
+              {...props}
+              style={{
+                ...props.style,
+                color: isDisabled ? "#5b5b5b" : undefined,
+                opacity: isDisabled ? 1 : undefined,
+              }}
+              aria-label={
+                isDisabled
+                  ? `${getOptionLabel(
+                      option,
+                      basePath
+                    )} - previously saved and cannot be modified`
+                  : undefined
+              }
+            >
               <Checkbox
                 icon={icon}
                 checkedIcon={checkedIcon}
                 style={{ marginRight: 8 }}
-                checked={selected}
+                checked={isChecked}
+                disabled={isDisabled}
+                aria-label={
+                  isDisabled
+                    ? `${getOptionLabel(
+                        option,
+                        basePath
+                      )} checkbox - already selected`
+                    : undefined
+                }
               />
               {getOptionLabel(option, basePath)}
             </li>
@@ -205,7 +253,7 @@ const ElementSelector = ({
         renderTags={(tagValue, getTagProps) =>
           tagValue.map((option, index) => {
             const { key, ...tagProps } = getTagProps({ index }); // Remove onDelete from destructuring
-            const isDisabled = value.includes(option);
+            const isDisabled = isInValue(option);
             return (
               <Chip
                 sx={
@@ -239,7 +287,7 @@ const ElementSelector = ({
                 newValues.length > 0
               ) {
                 const lastChip = newValues[newValues.length - 1];
-                if (value.includes(lastChip)) {
+                if (isInValue(lastChip)) {
                   e.preventDefault();
                   e.stopPropagation();
                 }
