@@ -9,7 +9,9 @@ export const TestCaseValidator = Yup.object().shape({
   description: Yup.string()
     .max(250, "Test Case Description cannot be more than 250 characters.")
     .nullable(),
-  series: Yup.string().nullable(),
+  series: Yup.string()
+    .max(250, "Test Case Group cannot be more than 250 characters.")
+    .nullable(),
   groupPopulations: Yup.array()
     .of(
       Yup.object()
