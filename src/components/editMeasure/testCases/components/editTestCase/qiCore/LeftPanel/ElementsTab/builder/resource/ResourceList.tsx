@@ -151,9 +151,6 @@ const ResourceList = ({
                   sx={{ color: isDisabled ? "#BDBDBD" : "#0073C8" }}
                 />
               </IconButton>
-              <IconButton>
-                <EditIcon color="#0073C8" />
-              </IconButton>
             </>
           );
         },
