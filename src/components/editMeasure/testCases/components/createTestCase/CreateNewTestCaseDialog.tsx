@@ -30,7 +30,7 @@ interface navigationParams {
 }
 
 const testCaseSeriesStyles = {
-  width: "50%",
+  width: "100%",
   // remove weird line break from legend
   "& .MuiOutlinedInput-notchedOutline": {
     borderColor: "#8c8c8c",
@@ -202,7 +202,6 @@ const CreateNewTestCaseDialog = ({
       return `${formik.errors[name]}`;
     }
   }
-
   return (
     <div data-testid="create-test-case-dialog">
       <MadieDialog
@@ -315,24 +314,14 @@ const CreateNewTestCaseDialog = ({
               maxLength={250}
             />
           </Box>
-
-          <InputLabel
-            style={{
-              marginTop: "23px",
-              textTransform: "capitalize",
-              fontFamily: "Rubik",
-              fontSize: "14px",
-              fontWeight: 500,
-              color: "rgb(51, 51, 51)",
-            }}
-            htmlFor="test-case-series"
-          >
-            Test Case Group
-          </InputLabel>
-
           <TestCaseSeries
             value={formik.values.series}
-            onChange={(nextValue) => formik.setFieldValue("series", nextValue)}
+            error={Boolean(formik.errors.series)}
+            onChange={(nextValue) => {
+              formik.setFieldTouched("series", true);
+              formik.setFieldValue("series", nextValue, true);
+            }}
+            helperText={formikErrorHandler("series")}
             seriesOptions={seriesState.series}
             sx={testCaseSeriesStyles}
           />
