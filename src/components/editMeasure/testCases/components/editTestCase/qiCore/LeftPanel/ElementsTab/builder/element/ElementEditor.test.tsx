@@ -393,4 +393,259 @@ describe("ElementEditor Component", () => {
     const submitButton = screen.getByTestId("element-editor-submit-button");
     expect(submitButton).toBeEnabled();
   });
+
+  it("calls setApplyLoading with true when apply button is clicked", async () => {
+    jest.useFakeTimers();
+    const setApplyLoading = jest.fn();
+    const setInitialFormikValuesStu6 = jest.fn();
+    const setValidationSchema = jest.fn();
+    const dispatch = jest.fn();
+    mockFormikObj.dirty = true;
+    const mockFormikValues = {
+      ClaimResponse: {
+        id: "test",
+      },
+    };
+    mockFormikObj.values = mockFormikValues;
+
+    renderElementEditor(
+      mockSelectedResource,
+      mockResource,
+      mockElementDefinition,
+      "ClaimResponse",
+      mockOnChange,
+      true,
+      mockDisplayedElementsTree,
+      setValidationSchema,
+      setInitialFormikValuesStu6,
+      dispatch,
+      jest.fn(),
+      false,
+      setApplyLoading
+    );
+
+    await waitFor(() =>
+      expect(mockFhirDefinitionsService.getResourceTree).toHaveBeenCalled()
+    );
+
+    const submitButton = screen.getByTestId("element-editor-submit-button");
+    expect(submitButton).toBeEnabled();
+
+    userEvent.click(submitButton);
+
+    await waitFor(() => {
+      expect(setApplyLoading).toHaveBeenCalledWith(true);
+    });
+
+    jest.runAllTimers();
+    jest.useRealTimers();
+  });
+
+  it("calls setApplyLoading with false after apply completes successfully", async () => {
+    jest.useFakeTimers();
+    const setApplyLoading = jest.fn();
+    const setInitialFormikValuesStu6 = jest.fn();
+    const setValidationSchema = jest.fn();
+    const dispatch = jest.fn();
+    mockFormikObj.dirty = true;
+    const mockFormikValues = {
+      ClaimResponse: {
+        id: "test",
+      },
+    };
+    mockFormikObj.values = mockFormikValues;
+
+    renderElementEditor(
+      mockSelectedResource,
+      mockResource,
+      mockElementDefinition,
+      "ClaimResponse",
+      mockOnChange,
+      true,
+      mockDisplayedElementsTree,
+      setValidationSchema,
+      setInitialFormikValuesStu6,
+      dispatch,
+      jest.fn(),
+      false,
+      setApplyLoading
+    );
+
+    await waitFor(() =>
+      expect(mockFhirDefinitionsService.getResourceTree).toHaveBeenCalled()
+    );
+
+    const submitButton = screen.getByTestId("element-editor-submit-button");
+    userEvent.click(submitButton);
+
+    await waitFor(() => {
+      expect(setApplyLoading).toHaveBeenCalledWith(true);
+    });
+
+    // Fast-forward through the initial delay
+    jest.advanceTimersByTime(100);
+
+    await waitFor(() => {
+      expect(dispatch).toHaveBeenCalled();
+    });
+
+    // Fast-forward through the final delay
+    jest.advanceTimersByTime(150);
+
+    await waitFor(() => {
+      expect(setApplyLoading).toHaveBeenCalledWith(false);
+    });
+
+    jest.useRealTimers();
+  });
+
+  it("does not call setApplyLoading if formik is not dirty", async () => {
+    const setApplyLoading = jest.fn();
+    const setInitialFormikValuesStu6 = jest.fn();
+    const setValidationSchema = jest.fn();
+    const dispatch = jest.fn();
+    mockFormikObj.dirty = false;
+    const mockFormikValues = {
+      ClaimResponse: {
+        id: "test",
+      },
+    };
+    mockFormikObj.values = mockFormikValues;
+
+    renderElementEditor(
+      mockSelectedResource,
+      mockResource,
+      mockElementDefinition,
+      "ClaimResponse",
+      mockOnChange,
+      true,
+      mockDisplayedElementsTree,
+      setValidationSchema,
+      setInitialFormikValuesStu6,
+      dispatch,
+      jest.fn(),
+      false,
+      setApplyLoading
+    );
+
+    await waitFor(() =>
+      expect(mockFhirDefinitionsService.getResourceTree).toHaveBeenCalled()
+    );
+
+    const submitButton = screen.getByTestId("element-editor-submit-button");
+    expect(submitButton).toBeDisabled();
+
+    userEvent.click(submitButton);
+
+    await waitFor(() => {
+      expect(setApplyLoading).not.toHaveBeenCalled();
+      expect(dispatch).not.toHaveBeenCalled();
+    });
+  });
+
+  it("dispatches ADD_RESOURCE_BY_REFERENCE when add_new_resource is present", async () => {
+    jest.useFakeTimers();
+    const setApplyLoading = jest.fn();
+    const setInitialFormikValuesStu6 = jest.fn();
+    const setValidationSchema = jest.fn();
+    const dispatch = jest.fn();
+    mockFormikObj.dirty = true;
+    const mockFormikValues = {
+      ClaimResponse: {
+        id: "test",
+      },
+      add_new_resource: { type: "Encounter", reference: "test-ref" },
+    };
+    mockFormikObj.values = mockFormikValues;
+
+    renderElementEditor(
+      mockSelectedResource,
+      mockResource,
+      mockElementDefinition,
+      "ClaimResponse",
+      mockOnChange,
+      true,
+      mockDisplayedElementsTree,
+      setValidationSchema,
+      setInitialFormikValuesStu6,
+      dispatch,
+      jest.fn(),
+      false,
+      setApplyLoading
+    );
+
+    await waitFor(() =>
+      expect(mockFhirDefinitionsService.getResourceTree).toHaveBeenCalled()
+    );
+
+    const submitButton = screen.getByTestId("element-editor-submit-button");
+    userEvent.click(submitButton);
+
+    jest.advanceTimersByTime(100);
+
+    await waitFor(() => {
+      expect(dispatch).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: "ADD_RESOURCE_BY_REFERENCE",
+          payload: expect.objectContaining({
+            bundleEntry: expect.any(Object),
+            add_new_resource: mockFormikValues.add_new_resource,
+          }),
+        })
+      );
+    });
+
+    jest.useRealTimers();
+  });
+
+  it("dispatches MODIFY_BUNDLE_ENTRY when add_new_resource is not present", async () => {
+    jest.useFakeTimers();
+    const setApplyLoading = jest.fn();
+    const setInitialFormikValuesStu6 = jest.fn();
+    const setValidationSchema = jest.fn();
+    const dispatch = jest.fn();
+    mockFormikObj.dirty = true;
+    const mockFormikValues = {
+      ClaimResponse: {
+        id: "test",
+      },
+    };
+    mockFormikObj.values = mockFormikValues;
+
+    renderElementEditor(
+      mockSelectedResource,
+      mockResource,
+      mockElementDefinition,
+      "ClaimResponse",
+      mockOnChange,
+      true,
+      mockDisplayedElementsTree,
+      setValidationSchema,
+      setInitialFormikValuesStu6,
+      dispatch,
+      jest.fn(),
+      false,
+      setApplyLoading
+    );
+
+    await waitFor(() =>
+      expect(mockFhirDefinitionsService.getResourceTree).toHaveBeenCalled()
+    );
+
+    const submitButton = screen.getByTestId("element-editor-submit-button");
+    userEvent.click(submitButton);
+
+    jest.advanceTimersByTime(100);
+
+    await waitFor(() => {
+      expect(dispatch).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: "ModifyBundleEntry",
+          payload: expect.any(Object),
+        })
+      );
+    });
+
+    jest.useRealTimers();
+  });
 });

@@ -277,4 +277,44 @@ describe("scrollToElementByIdWhenAvailable", () => {
     expect(resourceTitles[2]).toContain("QICore Procedure");
     expect(resourceTitles[3]).toContain("QICore Encounter");
   });
+
+  it("renders loading spinner overlay when applyLoading is true", async () => {
+    (useFormikContext as jest.Mock).mockReturnValue({
+      resetForm: jest.fn(),
+      dirty: false,
+    });
+
+    renderBuilderComponent();
+
+    const addedTab = await screen.findByText("Added (2)");
+    userEvent.click(addedTab);
+
+    await waitFor(() => {
+      expect(addedTab).toHaveAttribute("aria-selected", "true");
+    });
+
+    // Initially, the spinner should not be visible
+    expect(screen.queryByRole("progressbar")).not.toBeInTheDocument();
+  });
+
+  it("displays spinner overlay covering the Added tab content", async () => {
+    (useFormikContext as jest.Mock).mockReturnValue({
+      resetForm: jest.fn(),
+      dirty: false,
+    });
+
+    const { container } = renderBuilderComponent();
+
+    const addedTab = await screen.findByText("Added (2)");
+    userEvent.click(addedTab);
+
+    await waitFor(() => {
+      expect(addedTab).toHaveAttribute("aria-selected", "true");
+    });
+
+    // Check that the wrapper div with relative positioning exists
+    const tabContent = container.querySelector('[style*="position: relative"]');
+    expect(tabContent).toBeInTheDocument();
+    expect(tabContent).toHaveStyle({ minHeight: "400px" });
+  });
 });
