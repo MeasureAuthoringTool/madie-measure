@@ -197,6 +197,7 @@ const PeriodDateTimeComponent = ({
           >
             <DateField
               label="Start Date"
+              format={format}
               required={fieldRequired}
               error={error.start}
               helperText={helperText.start}
@@ -207,24 +208,27 @@ const PeriodDateTimeComponent = ({
               id={`start-${format || "year"}-field-${label}`}
               onChange={(newDate) => {
                 if (!newDate) return;
-                const dateUTC = dayjs.utc(newDate);
-                setStartDate(dateUTC);
-                if (format === DATE_TIME_ZONE_FORMAT && startTime) {
-                  // Merge date and time
-                  const merged = dateUTC
-                    .hour(startTime.hour())
-                    .minute(startTime.minute())
-                    .second(startTime.second());
-                  setStartDate(merged);
-                  onChange({
-                    start: merged.format(format),
-                    end: endDate ? endDate.format(format) : "",
-                  });
-                } else {
-                  onChange({
-                    start: dateUTC.format(format),
-                    end: endDate ? endDate.format(format) : "",
-                  });
+
+                if (newDate.format(format) !== "Invalid Date") {
+                  const dateUTC = dayjs.utc(newDate);
+                  setStartDate(dateUTC);
+                  if (format === DATE_TIME_ZONE_FORMAT && startTime) {
+                    // Merge date and time
+                    const merged = dateUTC
+                      .hour(startTime.hour())
+                      .minute(startTime.minute())
+                      .second(startTime.second());
+                    setStartDate(merged);
+                    onChange({
+                      start: merged.format(format),
+                      end: endDate ? endDate.format(format) : "",
+                    });
+                  } else {
+                    onChange({
+                      start: dateUTC.format(format),
+                      end: endDate ? endDate.format(format) : "",
+                    });
+                  }
                 }
               }}
               onBlur={() => {}}
@@ -275,6 +279,7 @@ const PeriodDateTimeComponent = ({
           >
             <DateField
               label="End Date"
+              format={format}
               required={fieldRequired}
               error={error.end}
               helperText={helperText.end}
@@ -285,24 +290,27 @@ const PeriodDateTimeComponent = ({
               id={`end-${format || "year"}-field-${label}`}
               onChange={(newDate) => {
                 if (!newDate) return;
-                const dateUTC = dayjs.utc(newDate);
-                setEndDate(dateUTC);
-                if (format === DATE_TIME_ZONE_FORMAT && endTime) {
-                  // Merge date and time
-                  const merged = dateUTC
-                    .hour(endTime.hour())
-                    .minute(endTime.minute())
-                    .second(endTime.second());
-                  setEndDate(merged);
-                  onChange({
-                    start: startDate ? startDate.format(format) : "",
-                    end: merged.format(format),
-                  });
-                } else {
-                  onChange({
-                    start: startDate ? startDate.format(format) : "",
-                    end: dateUTC.format(format),
-                  });
+
+                if (newDate.format(format) !== "Invalid Date") {
+                  const dateUTC = dayjs.utc(newDate);
+                  setEndDate(dateUTC);
+                  if (format === DATE_TIME_ZONE_FORMAT && endTime) {
+                    // Merge date and time
+                    const merged = dateUTC
+                      .hour(endTime.hour())
+                      .minute(endTime.minute())
+                      .second(endTime.second());
+                    setEndDate(merged);
+                    onChange({
+                      start: startDate ? startDate.format(format) : "",
+                      end: merged.format(format),
+                    });
+                  } else {
+                    onChange({
+                      start: startDate ? startDate.format(format) : "",
+                      end: dateUTC.format(format),
+                    });
+                  }
                 }
               }}
               onBlur={() => {}}
