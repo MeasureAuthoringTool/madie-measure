@@ -13,6 +13,8 @@ import ActionCenter, {
 import "../../../../../styles/DataElementsTable.scss";
 import { BundleEntry } from "fhir/r4";
 import ViewHeadlineIcon from "@mui/icons-material/ViewHeadline";
+import Tooltip from "@mui/material/Tooltip";
+import Typography from "@mui/material/Typography";
 
 export interface GridDataEntry {
   title: string;
@@ -62,12 +64,53 @@ const TestCaseSummaryGrid = ({
     [onRowEdit]
   );
 
+  // Utility to check if a profile is supported
+  const isSupportedProfile = (entry: BundleEntry) => {
+    const profiles = entry?.resource?.meta?.profile || [];
+    return profiles.some((url: string) =>
+      ["/fhir/us/qicore/", "/fhir/us/core", "/fhir/StructureDefinition/"].some(
+        (substr) => url.includes(substr)
+      )
+    );
+  };
+
   const columns = React.useMemo<ColumnDef<any>[]>(
     () => [
       {
         header: "Profile",
         id: "resourceType",
-        cell: ({ row }) => <div>{row.original.title}</div>,
+        cell: ({ row }) => {
+          const entry = row.original.entry;
+          const supported = isSupportedProfile(entry);
+          return (
+            <div>
+              <div>{row.original.title}</div>
+              {!supported && (
+                <Tooltip
+                  title="This profile is unsupported in the UI builder. You can utilize the JSON workspace to edit it. Please contact the help desk if you have additional questions."
+                  placement="bottom-start"
+                  arrow
+                  enterTouchDelay={0}
+                  aria-label="Unsupported profile tooltip"
+                >
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      color: "#D92F2F",
+                      fontWeight: 500,
+                      display: "block",
+                      mt: 0.5,
+                    }}
+                    tabIndex={0}
+                    aria-label="Unsupported Profile"
+                  >
+                    Unsupported Profile
+                  </Typography>
+                </Tooltip>
+              )}
+            </div>
+          );
+        },
       },
       {
         header: "ID",
@@ -77,16 +120,32 @@ const TestCaseSummaryGrid = ({
       {
         header: "",
         id: "actions",
-        cell: ({ row }) => (
-          <ActionCenter
-            actions={testCaseCanEdit ? actions : viewAction}
-            testId={row.original.entry.resource.id}
-            target={row.original.entry}
-          />
-        ),
+        cell: ({ row }) => {
+          const entry = row.original.entry;
+          const supported = isSupportedProfile(entry);
+          // For edit action, disable if unsupported
+          const rowActions = testCaseCanEdit
+            ? actions.map((action) =>
+                action.name === "Edit"
+                  ? {
+                      ...action,
+                      disabled: !supported,
+                      tooltip: !supported ? "Unsupported Profile" : undefined,
+                    }
+                  : action
+              )
+            : viewAction;
+          return (
+            <ActionCenter
+              actions={rowActions}
+              testId={row.original.entry.resource.id}
+              target={row.original.entry}
+            />
+          );
+        },
       },
     ],
-    [actions]
+    [actions, testCaseCanEdit, viewAction]
   );
 
   const table = useReactTable({
@@ -101,7 +160,7 @@ const TestCaseSummaryGrid = ({
         <thead>
           {table.getHeaderGroups().map((headerGroup) => (
             <tr key={headerGroup.id}>
-              {headerGroup.headers.map((header, idx) => (
+              {headerGroup.headers.map((header) => (
                 <th
                   key={header.id}
                   colSpan={header.colSpan}
