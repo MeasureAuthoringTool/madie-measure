@@ -222,7 +222,7 @@ export default function MeasureList(props: {
                 const fullName = `${firstName} ${lastName}`.trim();
 
                 // If we have at least first or last name, use it; otherwise fallback to HARP ID
-                nameMap[harpId] = fullName || harpId;
+                nameMap[harpId] = fullName || "-";
               }
             );
             setOwnerNameMap(nameMap);
