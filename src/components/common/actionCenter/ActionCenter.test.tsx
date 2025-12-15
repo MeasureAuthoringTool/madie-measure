@@ -172,12 +172,6 @@ describe("ActionCenter", () => {
     );
     expect(disabledBtn).toBeInTheDocument();
     expect(disabledBtn).toHaveAttribute("aria-disabled", "true");
-
-    // Verify tooltip is present (part of the component logic)
-    // interacting with tooltip might be tricky, but we can check if it exists in the DOM if rendered always,
-    // or we can skip strictly checking the tooltip via user interactions if it's handled by MUI Tooltip.
-    // The component code: title: action.disabled && action.tooltip ? action.tooltip : action.name
-    // So for disabled action, title should be "This is disabled".
     expect(disabledBtn).toHaveAttribute("aria-label", "This is disabled");
 
     await userEvent.click(disabledBtn);

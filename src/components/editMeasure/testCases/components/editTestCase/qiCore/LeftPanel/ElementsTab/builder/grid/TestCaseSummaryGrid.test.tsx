@@ -156,11 +156,6 @@ describe("TestCaseSummaryGrid", () => {
     userEvent.click(actionCenterButton);
 
     // Edit should be disabled.
-    // The name might be "Unsupported Profile" due to tooltip logic in ActionCenter
-    // or checks against aria-label.
-    // Based on ActionCenter implementation:
-    // title: action.disabled && action.tooltip ? action.tooltip : action.name
-    // If SpeedDialAction uses title for aria-label/name, then we look for "Unsupported Profile".
     const editAction = await screen.findByTestId("action-center-pd-1_Edit");
     expect(editAction).toBeInTheDocument();
     expect(editAction).toHaveAttribute("aria-disabled", "true");
