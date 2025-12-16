@@ -14,7 +14,6 @@ import {
   useMeasureServiceApi,
   checkUserCanEdit,
   useFeatureFlags,
-  useUserServiceApi,
 } from "@madie/madie-util";
 import { useNavigate } from "react-router-dom";
 import { Chip, Tooltip } from "@mui/material";
@@ -120,9 +119,7 @@ export default function MeasureList(props: {
 }) {
   const { searchCriteria, setSearchCriteria, retrieveMeasures } = { ...props };
   const measureServiceApi = useRef(useMeasureServiceApi()).current; //needs to be ref or triggers jest. throws warn
-  const userServiceApi = useUserServiceApi();
   const [hoveredHeader, setHoveredHeader] = useState<string>("");
-  const [ownerNameMap, setOwnerNameMap] = useState<Record<string, string>>({});
 
   const navigate = useNavigate();
   // Popover utilities
@@ -197,43 +194,6 @@ export default function MeasureList(props: {
 
   const [data, setData] = useState<TCRow[]>([]);
   const [expandedSectionData, setExpandedSectionData] = useState<TCRow[]>([]);
-
-  // Fetch user details for all measure owners
-  useEffect(() => {
-    const displayOwner = featureFlags?.DisplayOwner || false;
-
-    if (displayOwner && props.measureList && userServiceApi) {
-      // Collect unique owner HARP IDs from measures
-      const ownerIds = props.measureList
-        .map((measure) => measure?.measureSet?.owner)
-        .filter((owner) => owner != null && owner !== "") // Filter out null/undefined/empty
-        .filter((owner, index, self) => self.indexOf(owner) === index); // Get unique values
-
-      if (ownerIds.length > 0) {
-        userServiceApi
-          .getBulkUserDetails(ownerIds)
-          .then((response) => {
-            // Create mapping of HARP ID to formatted name
-            const nameMap: Record<string, string> = {};
-            Object.entries(response).forEach(
-              ([harpId, userDetails]: [string, any]) => {
-                const firstName = userDetails?.firstName || "";
-                const lastName = userDetails?.lastName || "";
-                const fullName = `${firstName} ${lastName}`.trim();
-
-                // If we have at least first or last name, use it; otherwise fallback to HARP ID
-                nameMap[harpId] = fullName || "-";
-              }
-            );
-            setOwnerNameMap(nameMap);
-          })
-          .catch((error) => {
-            console.error("Failed to fetch user details:", error);
-            // Keep empty map on error - will display HARP IDs as fallback
-          });
-      }
-    }
-  }, [props.measureList, userServiceApi, featureFlags]);
 
   useEffect(() => {
     if (props.measureList && measureServiceApi) {
@@ -502,12 +462,23 @@ export default function MeasureList(props: {
     (props.activeTab === 1 || props.activeTab === 2)
       ? [
           {
-            header: "Owner",
+            id: "measureSet.owner",
+            header: () => (
+              <button tabIndex={0} aria-label="Owner">
+                Owner
+              </button>
+            ),
             cell: (info) => {
-              const ownerId = info.row.original.actions?.measureSet?.owner;
-              const displayName = ownerId
-                ? ownerNameMap[ownerId] || ownerId
-                : "-";
+              const measure = info.row.original.actions;
+              const firstName = measure?.ownerFirstName || "";
+              const lastName = measure?.ownerLastName || "";
+              const harpId = measure?.measureSet?.owner || "";
+
+              // Show name if available, otherwise show harpId, or '-' if no owner info
+              const displayName =
+                firstName || lastName
+                  ? `${firstName} ${lastName}`.trim()
+                  : harpId || "-";
 
               return (
                 <TruncateText
@@ -518,14 +489,7 @@ export default function MeasureList(props: {
               );
             },
             accessorKey: "measureSet.owner",
-            sortingFn: (rowA, rowB) => {
-              const ownerA = rowA.original.actions?.measureSet?.owner;
-              const ownerB = rowB.original.actions?.measureSet?.owner;
-              // Sort by display name (formatted name or HARP ID)
-              const displayA = ownerA ? ownerNameMap[ownerA] || ownerA : "";
-              const displayB = ownerB ? ownerNameMap[ownerB] || ownerB : "";
-              return customSort(displayA, displayB);
-            },
+            enableSorting: true,
           },
         ]
       : []),
@@ -710,7 +674,6 @@ export default function MeasureList(props: {
     isRowExpanded,
     featureFlags?.DisplayOwner,
     props.activeTab,
-    ownerNameMap,
   ]);
 
   const expandedcolumns = useMemo<ColumnDef<TCRow>[]>(() => {
