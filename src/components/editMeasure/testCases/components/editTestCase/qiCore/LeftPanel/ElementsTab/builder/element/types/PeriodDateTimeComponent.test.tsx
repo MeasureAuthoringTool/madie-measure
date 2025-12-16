@@ -235,6 +235,46 @@ describe("PeriodDateTimeComponent", () => {
 
     expect(onChange).not.toHaveBeenCalled();
   });
+
+  it("does not trigger onChange when user types an invalid start date and blurs", async () => {
+    const onChange = jest.fn();
+    render(
+      <PeriodDateTimeComponent
+        canEdit={true}
+        fieldRequired={false}
+        value={{ end: "2024-10-01" }}
+        onChange={onChange}
+        label="DateTime"
+      />
+    );
+
+    const startInputWrapper = screen.getByTestId(
+      "start-YYYY-MM-DD-field-DateTime"
+    );
+    const startInput = startInputWrapper.querySelector("input");
+    fireEvent.change(startInput, { target: { value: "invalid-date" } });
+    fireEvent.blur(startInput);
+    expect(onChange).not.toHaveBeenCalled();
+  });
+
+  it("does not trigger onChange when user types an invalid end date and blurs", async () => {
+    const onChange = jest.fn();
+    render(
+      <PeriodDateTimeComponent
+        canEdit={true}
+        fieldRequired={false}
+        value={{ end: "2024-10-01" }}
+        onChange={onChange}
+        label="DateTime"
+      />
+    );
+
+    const endInputWrapper = screen.getByTestId("end-YYYY-MM-DD-field-DateTime");
+    const endInput = endInputWrapper.querySelector("input");
+    fireEvent.change(endInput, { target: { value: "invalid-date" } });
+    fireEvent.blur(endInput);
+    expect(onChange).not.toHaveBeenCalled();
+  });
 });
 
 describe("PeriodDateTimeComponent useEffect", () => {
