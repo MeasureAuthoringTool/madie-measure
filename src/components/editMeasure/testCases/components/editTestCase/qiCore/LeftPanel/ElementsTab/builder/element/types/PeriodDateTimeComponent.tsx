@@ -197,6 +197,7 @@ const PeriodDateTimeComponent = ({
           >
             <DateField
               label="Start Date"
+              format={format}
               required={fieldRequired}
               error={error.start}
               helperText={helperText.start}
@@ -206,7 +207,10 @@ const PeriodDateTimeComponent = ({
               placeholder={format ? formatOptionRenderMap[format] : ""}
               id={`start-${format || "year"}-field-${label}`}
               onChange={(newDate) => {
-                if (!newDate) return;
+                if (!newDate || newDate.format(format) === "Invalid Date") {
+                  return;
+                }
+
                 const dateUTC = dayjs.utc(newDate);
                 setStartDate(dateUTC);
                 if (format === DATE_TIME_ZONE_FORMAT && startTime) {
@@ -275,6 +279,7 @@ const PeriodDateTimeComponent = ({
           >
             <DateField
               label="End Date"
+              format={format}
               required={fieldRequired}
               error={error.end}
               helperText={helperText.end}
@@ -284,7 +289,10 @@ const PeriodDateTimeComponent = ({
               placeholder={format ? formatOptionRenderMap[format] : ""}
               id={`end-${format || "year"}-field-${label}`}
               onChange={(newDate) => {
-                if (!newDate) return;
+                if (!newDate || newDate.format(format) === "Invalid Date") {
+                  return;
+                }
+
                 const dateUTC = dayjs.utc(newDate);
                 setEndDate(dateUTC);
                 if (format === DATE_TIME_ZONE_FORMAT && endTime) {
