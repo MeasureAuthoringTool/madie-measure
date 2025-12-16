@@ -3147,14 +3147,12 @@ describe("Measure lock functionality", () => {
       const ownerHeader = screen.getByText("Owner");
       expect(ownerHeader).toBeInTheDocument();
 
-      // Check that owner values are displayed
+      // Check that owner values are displayed as "-" when no firstName/lastName
       const ownerCell = screen.getByTestId(
         `measure-owner-${measuresWithOwner[0].id}-content`
       );
       expect(ownerCell).toBeInTheDocument();
-      expect(ownerCell).toHaveTextContent(
-        measuresWithOwner[0].measureSet.owner
-      );
+      expect(ownerCell).toHaveTextContent("-");
     });
 
     it("should display Owner column on All Measures tab when DisplayOwner flag is enabled", async () => {
@@ -3210,14 +3208,12 @@ describe("Measure lock functionality", () => {
       const ownerHeader = screen.getByText("Owner");
       expect(ownerHeader).toBeInTheDocument();
 
-      // Check that owner values are displayed
+      // Check that owner values are displayed as "-" when no firstName/lastName
       const ownerCell = screen.getByTestId(
         `measure-owner-${measuresWithOwner[0].id}-content`
       );
       expect(ownerCell).toBeInTheDocument();
-      expect(ownerCell).toHaveTextContent(
-        measuresWithOwner[0].measureSet.owner
-      );
+      expect(ownerCell).toHaveTextContent("-");
     });
 
     it("should NOT display Owner column on My Measures tab even when DisplayOwner flag is enabled", async () => {

@@ -476,9 +476,7 @@ export default function MeasureList(props: {
 
               // Show name if available, otherwise show harpId, or '-' if no owner info
               const displayName =
-                firstName || lastName
-                  ? `${firstName} ${lastName}`.trim()
-                  : harpId || "-";
+                firstName || lastName ? `${firstName} ${lastName}`.trim() : "-";
 
               return (
                 <TruncateText
