@@ -41,6 +41,11 @@
 }
 
 #status-handler {
+  h3 {
+    line-height: normal;
+    margin-bottom: 0;
+  }
+
   ul {
     list-style: disc !important;
     list-style-position: inside !important;

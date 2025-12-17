@@ -207,6 +207,7 @@ const setMeasure = jest.fn();
 const setMeasureBundle = jest.fn();
 const setValueSets = jest.fn();
 const setError = jest.fn();
+const setCustomWarningMessages = jest.fn();
 // Need this for our drag windows to work
 global.ResizeObserver = jest.fn().mockImplementation(() => ({
   observe: jest.fn(),
@@ -236,7 +237,13 @@ const renderWithRouter = (
           <Routes>
             <Route
               path={routePath}
-              element={<EditTestCase errors={[]} setErrors={setError} />}
+              element={
+                <EditTestCase
+                  errors={[]}
+                  setErrors={setError}
+                  setCustomWarningMessages={setCustomWarningMessages}
+                />
+              }
             />
           </Routes>
         </ExecutionContextProvider>
@@ -695,9 +702,9 @@ describe("EditTestCase component", () => {
       expect(debugOutput).toHaveTextContent(
         "Test case updated successfully with errors in JSON"
       );
-      expect(debugOutput).toHaveTextContent(
-        "Timezone offsets have been added when hours are present, otherwise timezone offsets are removed or set to UTC for consistency."
-      );
+      expect(setError).toHaveBeenCalledWith([
+        "Timezone offsets have been added when hours are present, otherwise timezone offsets are removed or set to UTC for consistency.",
+      ]);
     });
 
     it("should alert for updated datetime without hours", async () => {
@@ -780,9 +787,9 @@ describe("EditTestCase component", () => {
       expect(debugOutput).toHaveTextContent(
         "Test case updated successfully with errors in JSON"
       );
-      expect(debugOutput).toHaveTextContent(
-        "Timezone offsets have been added when hours are present, otherwise timezone offsets are removed or set to UTC for consistency."
-      );
+      expect(setError).toHaveBeenCalledWith([
+        "Timezone offsets have been added when hours are present, otherwise timezone offsets are removed or set to UTC for consistency.",
+      ]);
     });
 
     it("should alert for updated datetime with only hours", async () => {
@@ -865,9 +872,9 @@ describe("EditTestCase component", () => {
       expect(debugOutput).toHaveTextContent(
         "Test case updated successfully with errors in JSON"
       );
-      expect(debugOutput).toHaveTextContent(
-        "Timezone offsets have been added when hours are present, otherwise timezone offsets are removed or set to UTC for consistency."
-      );
+      expect(setError).toHaveBeenCalledWith([
+        "Timezone offsets have been added when hours are present, otherwise timezone offsets are removed or set to UTC for consistency.",
+      ]);
     });
 
     it("should alert for test validation status", async () => {
@@ -1009,9 +1016,15 @@ describe("EditTestCase component", () => {
       expect(debugOutput).toHaveTextContent(
         "Test case updated successfully! Test case validation has started running, please continue working in MADiE."
       );
-      expect(debugOutput).toHaveTextContent(
-        "Timezone offsets have been added when hours are present, otherwise timezone offsets are removed or set to UTC for consistency."
-      );
+      expect(setCustomWarningMessages).toHaveBeenCalledWith([
+        {
+          message: "Test case updated successfully!",
+          details: [
+            "Timezone offsets have been added when hours are present, otherwise timezone offsets are removed or set to UTC for consistency.",
+          ],
+          testDataId: "test-case-timezone-warning",
+        },
+      ]);
     });
 
     it("should display isQICore6 validation running message in toast when test case is created and isQICore6 is true", async () => {
@@ -1153,9 +1166,9 @@ describe("EditTestCase component", () => {
       expect(debugOutput).toHaveTextContent(
         "Test case updated successfully with errors in JSON"
       );
-      expect(debugOutput).toHaveTextContent(
-        "Timezone offsets have been added when hours are present, otherwise timezone offsets are removed or set to UTC for consistency."
-      );
+      expect(setError).toHaveBeenCalledWith([
+        "Timezone offsets have been added when hours are present, otherwise timezone offsets are removed or set to UTC for consistency.",
+      ]);
     });
 
     it("should save the cql with errros and shouldn't perform datetime conversion when cql cannot be parsed", async () => {

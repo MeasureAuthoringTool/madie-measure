@@ -91,6 +91,7 @@ import ValidationStatusIcon from "./ValidationStatusIcon";
 import EditorCalculator from "../calculator/EditorCalculator";
 import CalculatorDialog from "../calculator/CalculatorDialog";
 import LockedMessageModal from "../../../../../common/lockedMessageModal/LockedMessageModal";
+import { CustomWarningMessage } from "../../statusHandler/StatusHandler";
 
 const TestCaseForm = tw.form`m-3`;
 
@@ -184,6 +185,7 @@ const INITIAL_VALUES = {
 export interface EditTestCaseProps {
   errors: Array<string>;
   setErrors: (value: Array<string>) => void;
+  setCustomWarningMessages: Dispatch<SetStateAction<CustomWarningMessage[]>>;
 }
 
 const EditTestCase = (props: EditTestCaseProps) => {
@@ -737,14 +739,18 @@ const EditTestCase = (props: EditTestCaseProps) => {
                 Test case {action}d successfully! Test case validation has
                 started running, please continue working in MADiE.
               </h3>
-              <ul>
-                Timezone offsets have been added when hours are present,
-                otherwise timezone offsets are removed or set to UTC for
-                consistency.
-              </ul>
             </div>,
-            "warning"
+            "success"
           );
+          props.setCustomWarningMessages([
+            {
+              message: `Test case ${action}d successfully!`,
+              details: [
+                "Timezone offsets have been added when hours are present, otherwise timezone offsets are removed or set to UTC for consistency.",
+              ],
+              testDataId: "test-case-timezone-warning",
+            },
+          ]);
         } else if (testCase.bundleTypeUpdated) {
           showToast(
             "The test case has been saved successfully. Please note that the bundle type has been updated to Collection, as the Test Case Builder supports editing only collection bundles.",
@@ -766,14 +772,18 @@ const EditTestCase = (props: EditTestCaseProps) => {
           showToast(
             <div>
               <h3>Test case {action}d successfully!</h3>
-              <ul>
-                Timezone offsets have been added when hours are present,
-                otherwise timezone offsets are removed or set to UTC for
-                consistency.
-              </ul>
             </div>,
-            "warning"
+            "success"
           );
+          props.setCustomWarningMessages([
+            {
+              message: `Test case ${action}d successfully!`,
+              details: [
+                "Timezone offsets have been added when hours are present, otherwise timezone offsets are removed or set to UTC for consistency.",
+              ],
+              testDataId: "test-case-timezone-warning",
+            },
+          ]);
         } else if (testCase.bundleTypeUpdated) {
           showToast(
             "The test case has been saved successfully. Please note that the bundle type has been updated to Collection, as the Test Case Builder supports editing only collection bundles.",
@@ -783,61 +793,58 @@ const EditTestCase = (props: EditTestCaseProps) => {
           showToast(`Test case ${action}d successfully!`, "success");
         }
       } else {
-        const valErrors = validationErrors?.map((error) => (
-          <li>{error.diagnostics}</li>
-        ));
-        const message: ReactNode = testCaseAlertToast ? (
-          <div>
-            <h3>
-              Changes {action}d successfully but the following{" "}
-              {severityOfValidationErrors(validationErrors)}(s) were found
-            </h3>
-            {timezoneUpdated && (
-              <ul>
-                Timezone offsets have been added when hours are present,
-                otherwise timezone offsets are removed or set to UTC for
-                consistency.
-              </ul>
-            )}
-            {testCase.bundleTypeUpdated && (
-              <ul>
-                The test case has been saved successfully. Please note that the
-                bundle type has been updated to Collection, as the Test Case
-                Builder supports editing only collection bundles.
-              </ul>
-            )}
-            <ul>{valErrors}</ul>
-          </div>
-        ) : (
+        const valErrors = validationErrors?.map((error) => error.diagnostics);
+        const message: ReactNode = testCaseAlertToast
+          ? [
+              ...(timezoneUpdated
+                ? [
+                    "Timezone offsets have been added when hours are present, otherwise timezone offsets are removed or set to UTC for consistency.",
+                  ]
+                : []),
+              ...(testCase.bundleTypeUpdated
+                ? [
+                    "The test case has been saved successfully. Please note that the bundle type has been updated to Collection, as the Test Case Builder supports editing only collection bundles.",
+                  ]
+                : []),
+              ...valErrors,
+            ]
+          : [
+              ...(timezoneUpdated
+                ? [
+                    "Timezone offsets have been added when hours are present, otherwise timezone offsets are removed or set to UTC for consistency.",
+                  ]
+                : []),
+              ...(testCase.bundleTypeUpdated
+                ? [
+                    "The test case has been saved successfully. Please note that the bundle type has been updated to Collection, as the Test Case Builder supports editing only collection bundles.",
+                  ]
+                : []),
+            ];
+        let severity = severityOfValidationErrors(validationErrors);
+        if (severity === "error") {
+          severity = "danger";
+          // @ts-ignore
+          setErrors([...errors, ...message]);
+        } else {
+          props.setCustomWarningMessages([
+            {
+              message: `Test case ${action}d successfully!`,
+              details: [...message],
+              testDataId: "test-case-validation-warning",
+            },
+          ]);
+        }
+        // @ts-ignore
+        showToast(
           <div>
             <h3>
               Test case updated successfully with{" "}
               {severityOfValidationErrors(validationErrors)}s in JSON
             </h3>
-            {timezoneUpdated && (
-              <ul style={{ listStyle: "inside" }}>
-                <li>
-                  Timezone offsets have been added when hours are present,
-                  otherwise timezone offsets are removed or set to UTC for
-                  consistency.
-                </li>
-              </ul>
-            )}
-            {testCase.bundleTypeUpdated && (
-              <ul>
-                The test case has been saved successfully. Please note that the
-                bundle type has been updated to Collection, as the Test Case
-                Builder supports editing only collection bundles.
-              </ul>
-            )}
-          </div>
+          </div>,
+          // @ts-ignore
+          severity
         );
-        let severity = severityOfValidationErrors(validationErrors);
-        if (severity === "error") {
-          severity = "danger";
-        }
-        //@ts-ignore
-        showToast(message, severity);
         handleHapiOutcome(testCase.hapiOperationOutcome);
       }
       updateMeasureStore(action, testCase);
