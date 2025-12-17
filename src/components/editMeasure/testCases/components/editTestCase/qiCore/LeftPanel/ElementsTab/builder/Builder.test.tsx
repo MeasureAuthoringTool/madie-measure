@@ -204,6 +204,54 @@ describe("Builder Component", () => {
       ).getByText("QICore Encounter")
     ).toBeInTheDocument();
   });
+
+  it("should not render Available tab when canEdit is false", async () => {
+    (useFormikContext as jest.Mock).mockReturnValue({
+      resetForm,
+      dirty: false,
+    });
+
+    render(
+      <ApiContextProvider value={serviceConfig}>
+        <ExecutionContextProvider
+          value={{
+            measureState: [mockMeasure, jest.fn()],
+            bundleState: [null, jest.fn()] as any,
+            valueSetsState: [null, jest.fn()] as any,
+            executionContextReady: true,
+            executing: false,
+            setExecuting: jest.fn(),
+            contextFailure: false,
+          }}
+        >
+          <QiCoreResourceContext.Provider
+            value={{
+              state: { bundle: mockBundle },
+              dispatch: jest.fn(),
+            }}
+          >
+            <Builder
+              canEdit={false}
+              testCase={{} as TestCase}
+              setInitialFormikValuesStu6={jest.fn()}
+              setValidationSchema={jest.fn()}
+            />
+          </QiCoreResourceContext.Provider>
+        </ExecutionContextProvider>
+      </ApiContextProvider>
+    );
+
+    // Available tab should not be present
+    expect(screen.queryByText("Available")).not.toBeInTheDocument();
+
+    // Added tab should still be present and selected by default
+    const addedTab = await screen.findByText("Added (2)");
+    expect(addedTab).toBeInTheDocument();
+    expect(addedTab).toHaveAttribute("aria-selected", "true");
+
+    // Grid content should be visible
+    expect(screen.getByText("Profile")).toBeInTheDocument();
+  });
 });
 
 describe("scrollToElementByIdWhenAvailable", () => {
