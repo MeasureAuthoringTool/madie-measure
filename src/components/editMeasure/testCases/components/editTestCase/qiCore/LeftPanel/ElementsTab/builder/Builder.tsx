@@ -97,7 +97,9 @@ const Builder = ({
 
   // track form dirty and an intermediate tab to know what the discard dialog should nav to
   const { dirty, resetForm } = useFormikContext();
-  const [activeTab, setActiveTab] = useState<string>("Available");
+  const [activeTab, setActiveTab] = useState<string>(
+    canEdit ? "Available" : "Added"
+  );
   const [pendingTab, setPendingTab] = useState<string>(activeTab);
   const [dialogOpen, setDialogOpen] = useState<boolean>(false);
   const onContinue = () => {
@@ -182,14 +184,16 @@ const Builder = ({
           type="B"
           orientation="horizontal"
         >
-          <Tab
-            type="B"
-            tabIndex={0}
-            aria-label="Available elements tab panel"
-            label={"Available"}
-            data-testid="available-tab"
-            value="Available"
-          />
+          {canEdit && (
+            <Tab
+              type="B"
+              tabIndex={0}
+              aria-label="Available elements tab panel"
+              label={"Available"}
+              data-testid="available-tab"
+              value="Available"
+            />
+          )}
           <Tab
             type="B"
             tabIndex={0}
