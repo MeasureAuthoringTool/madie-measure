@@ -194,6 +194,7 @@ export default function MeasureList(props: {
 
   const [data, setData] = useState<TCRow[]>([]);
   const [expandedSectionData, setExpandedSectionData] = useState<TCRow[]>([]);
+
   useEffect(() => {
     if (props.measureList && measureServiceApi) {
       setData(transFormData(props.measureList));
@@ -461,20 +462,32 @@ export default function MeasureList(props: {
     (props.activeTab === 1 || props.activeTab === 2)
       ? [
           {
-            header: "Owner",
-            cell: (info) => (
-              <TruncateText
-                text={info.row.original.actions?.measureSet?.owner || "-"}
-                maxLength={120}
-                dataTestId={`measure-owner-${info.row.original.id}`}
-              />
+            id: "measureSet.owner",
+            header: () => (
+              <button tabIndex={0} aria-label="Owner">
+                Owner
+              </button>
             ),
+            cell: (info) => {
+              const measure = info.row.original.actions;
+              const firstName = measure?.ownerFirstName || "";
+              const lastName = measure?.ownerLastName || "";
+              const harpId = measure?.measureSet?.owner || "";
+
+              // Show name if available, otherwise show harpId, or '-' if no owner info
+              const displayName =
+                firstName || lastName ? `${firstName} ${lastName}`.trim() : "-";
+
+              return (
+                <TruncateText
+                  text={displayName}
+                  maxLength={120}
+                  dataTestId={`measure-owner-${info.row.original.id}`}
+                />
+              );
+            },
             accessorKey: "measureSet.owner",
-            sortingFn: (rowA, rowB) =>
-              customSort(
-                rowA.original.actions?.measureSet?.owner,
-                rowB.original.actions?.measureSet?.owner
-              ),
+            enableSorting: true,
           },
         ]
       : []),

@@ -71,3 +71,8 @@ export const routeHandlerStore = {
   subscribe: () => null, // needs to return an object with key subscribe
   unsubscribe: () => null,
 };
+
+export const useUserServiceApi = () => ({
+  getOwnerDetails: jest.fn().mockResolvedValue({}),
+  getBulkUserDetails: jest.fn().mockResolvedValue({}),
+});
