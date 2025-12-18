@@ -23,6 +23,7 @@ import {
   Tabs,
   Tab,
   MadieDiscardDialog,
+  MadieSpinner,
 } from "@madie/madie-design-system/dist/react";
 import { useFormikContext } from "formik";
 import { handleCancel, handleRowDelete, handleRowEdit } from "./BuilderUtils";
@@ -113,6 +114,7 @@ const Builder = ({
   const [resources, setResources] = useState<ResourceIdentifier[]>(null);
   const addedResources = state?.bundle?.entry?.length || 0;
   const [savedGridID, setSavedGridID] = useState(null);
+  const [applyLoading, setApplyLoading] = useState(false);
   useEffect(() => {
     const fetchResources = async () => {
       const resourceIdentifiers =
@@ -250,33 +252,55 @@ const Builder = ({
           />
         )}
         {activeTab === "Added" && (
-          <>
-            {selectedResourceID && (
-              <ResourceContextProvider value={resourceIdentifiers}>
-                <ResourceEditor
-                  selectedResourceID={selectedResourceID}
-                  setValidationSchema={setValidationSchema}
-                  setInitialFormikValuesStu6={setInitialFormikValuesStu6}
-                  onCancel={() =>
-                    handleCancel(setSelectedResourceId, savedGridID)
-                  }
-                  canEdit={canEdit}
-                />
-              </ResourceContextProvider>
+          <div style={{ position: "relative", minHeight: "400px" }}>
+            {applyLoading && (
+              <div
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  backgroundColor: "rgba(255, 255, 255, 0.8)",
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  zIndex: 1000,
+                }}
+              >
+                <MadieSpinner style={{ height: 50, width: 50 }} />
+              </div>
             )}
-            <TestCaseSummaryGrid
-              gridData={prepareSummaryGridData(
-                state?.bundle?.entry,
-                resourceIdentifiers
+            <>
+              {selectedResourceID && (
+                <ResourceContextProvider value={resourceIdentifiers}>
+                  <ResourceEditor
+                    selectedResourceID={selectedResourceID}
+                    setValidationSchema={setValidationSchema}
+                    setInitialFormikValuesStu6={setInitialFormikValuesStu6}
+                    onCancel={() =>
+                      handleCancel(setSelectedResourceId, savedGridID)
+                    }
+                    canEdit={canEdit}
+                    applyLoading={applyLoading}
+                    setApplyLoading={setApplyLoading}
+                  />
+                </ResourceContextProvider>
               )}
-              onRowEdit={(row) =>
-                handleRowEdit(row, setSelectedResourceId, setSavedGridID)
-              }
-              onRowDelete={(row) => handleRowDelete(row, dispatch)}
-              testCaseCanEdit={canEdit}
-              selectedRowId={selectedResourceID}
-            />
-          </>
+              <TestCaseSummaryGrid
+                gridData={prepareSummaryGridData(
+                  state?.bundle?.entry,
+                  resourceIdentifiers
+                )}
+                onRowEdit={(row) =>
+                  handleRowEdit(row, setSelectedResourceId, setSavedGridID)
+                }
+                onRowDelete={(row) => handleRowDelete(row, dispatch)}
+                testCaseCanEdit={canEdit}
+                selectedRowId={selectedResourceID}
+              />
+            </>
+          </div>
         )}
       </div>
       <MadieDiscardDialog
