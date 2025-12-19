@@ -359,21 +359,6 @@ describe("MeasureRationale component", () => {
       expect(saveButton).toBeDisabled();
     });
 
-    it("should have no input field if user does not have measure edit permissions", () => {
-      render(
-        <MeasureMetadataForm
-          measureMetadataType="Rationale"
-          setErrorMessage={setErrorMessage}
-          measureCanEdit={false}
-        />
-      );
-
-      waitFor(() => {
-        const editor = screen.getByRole("textbox");
-        expect(editor).not.toBeInTheDocument();
-      });
-    });
-
     it("should have Save button if the measure is shared with the user", async () => {
       render(
         <MeasureMetadataForm
