@@ -476,7 +476,7 @@ describe("ActionCenter Component", () => {
         });
       });
 
-      it("should not display Make JSON Match UI button when feature flag is off", () => {
+      it("should not display button when feature flag is off", () => {
         (useFeatureFlags as jest.Mock).mockReturnValue({
           MakeJSONMatchUI: false,
         });
@@ -499,7 +499,7 @@ describe("ActionCenter Component", () => {
         ).not.toBeInTheDocument();
       });
 
-      it("should not display Make JSON Match UI button when user does not have edit access", () => {
+      it("should not display button when user does not have edit access", () => {
         render(
           <MemoryRouter>
             <ActionCenter
@@ -518,7 +518,7 @@ describe("ActionCenter Component", () => {
         ).not.toBeInTheDocument();
       });
 
-      it("should not display Make JSON Match UI button for QDM measures", () => {
+      it("should not display button for QDM measures", () => {
         render(
           <MemoryRouter>
             <ActionCenter
@@ -537,8 +537,84 @@ describe("ActionCenter Component", () => {
         ).not.toBeInTheDocument();
       });
 
-      it("should display Make JSON Match UI button for QI-Core measures when feature flag is enabled and user has edit access", () => {
-        render(
+      it("should be enabled when test cases are selected and disabled when none selected", () => {
+        const { rerender } = render(
+          <MemoryRouter>
+            <ActionCenter
+              selectedTestCases={[
+                { id: "1", validResource: true, title: "Test Case 1" },
+              ]}
+              canEdit={true}
+              isQDM={false}
+              isDraft={true}
+            />
+          </MemoryRouter>
+        );
+
+        const makeJsonMatchUiBtn = screen.getByTestId(
+          "make-json-match-ui-action-btn"
+        );
+        expect(makeJsonMatchUiBtn).toBeInTheDocument();
+        expect(makeJsonMatchUiBtn).toBeEnabled();
+
+        rerender(
+          <MemoryRouter>
+            <ActionCenter
+              selectedTestCases={[]}
+              canEdit={true}
+              isQDM={false}
+              isDraft={true}
+            />
+          </MemoryRouter>
+        );
+
+        expect(makeJsonMatchUiBtn).toBeDisabled();
+      });
+
+      it("should show appropriate tooltips based on selection state", async () => {
+        const { rerender } = render(
+          <MemoryRouter>
+            <ActionCenter
+              selectedTestCases={[]}
+              canEdit={true}
+              isQDM={false}
+              isDraft={true}
+            />
+          </MemoryRouter>
+        );
+
+        const disabledTooltip = await screen.findByTestId(
+          "make-json-match-ui-tooltip"
+        );
+        expect(disabledTooltip).toHaveAttribute(
+          "aria-label",
+          "Select a test case to make JSON (family/given) match UI (group/title)"
+        );
+
+        rerender(
+          <MemoryRouter>
+            <ActionCenter
+              selectedTestCases={[
+                { id: "1", validResource: true, title: "Test Case 1" },
+              ]}
+              canEdit={true}
+              isQDM={false}
+              isDraft={true}
+            />
+          </MemoryRouter>
+        );
+
+        const enabledTooltip = await screen.findByTestId(
+          "make-json-match-ui-tooltip"
+        );
+        expect(enabledTooltip).toHaveAttribute(
+          "aria-label",
+          "Make JSON (family/given) match UI (group/title)"
+        );
+      });
+
+      it("should work on both draft and versioned measures", () => {
+        const { rerender } = render(
           <MemoryRouter>
             <ActionCenter
               selectedTestCases={[
@@ -553,130 +629,9 @@ describe("ActionCenter Component", () => {
 
         expect(
           screen.getByTestId("make-json-match-ui-action-btn")
-        ).toBeInTheDocument();
-      });
+        ).toBeEnabled();
 
-      it("should enable Make JSON Match UI button when one test case is selected", () => {
-        render(
-          <MemoryRouter>
-            <ActionCenter
-              selectedTestCases={[
-                { id: "1", validResource: true, title: "Test Case 1" },
-              ]}
-              canEdit={true}
-              isQDM={false}
-              isDraft={true}
-            />
-          </MemoryRouter>
-        );
-
-        const makeJsonMatchUiBtn = screen.getByTestId(
-          "make-json-match-ui-action-btn"
-        );
-        expect(makeJsonMatchUiBtn).toBeEnabled();
-      });
-
-      it("should enable Make JSON Match UI button when multiple test cases are selected", () => {
-        render(
-          <MemoryRouter>
-            <ActionCenter
-              selectedTestCases={[
-                { id: "1", validResource: true, title: "Test Case 1" },
-                { id: "2", validResource: true, title: "Test Case 2" },
-              ]}
-              canEdit={true}
-              isQDM={false}
-              isDraft={true}
-            />
-          </MemoryRouter>
-        );
-
-        const makeJsonMatchUiBtn = screen.getByTestId(
-          "make-json-match-ui-action-btn"
-        );
-        expect(makeJsonMatchUiBtn).toBeEnabled();
-      });
-
-      it("should disable Make JSON Match UI button when no test cases are selected", () => {
-        render(
-          <MemoryRouter>
-            <ActionCenter
-              selectedTestCases={[]}
-              canEdit={true}
-              isQDM={false}
-              isDraft={true}
-            />
-          </MemoryRouter>
-        );
-
-        const makeJsonMatchUiBtn = screen.getByTestId(
-          "make-json-match-ui-action-btn"
-        );
-        expect(makeJsonMatchUiBtn).toBeDisabled();
-      });
-
-      it("should show disabled tooltip when no test cases are selected", async () => {
-        render(
-          <MemoryRouter>
-            <ActionCenter
-              selectedTestCases={[]}
-              canEdit={true}
-              isQDM={false}
-              isDraft={true}
-            />
-          </MemoryRouter>
-        );
-
-        const tooltip = await screen.findByTestId("make-json-match-ui-tooltip");
-        expect(tooltip).toHaveAttribute(
-          "aria-label",
-          "Select a test case to make JSON (family/given) match UI (group/title)"
-        );
-      });
-
-      it("should show enabled tooltip when test cases are selected", async () => {
-        render(
-          <MemoryRouter>
-            <ActionCenter
-              selectedTestCases={[
-                { id: "1", validResource: true, title: "Test Case 1" },
-              ]}
-              canEdit={true}
-              isQDM={false}
-              isDraft={true}
-            />
-          </MemoryRouter>
-        );
-
-        const tooltip = await screen.findByTestId("make-json-match-ui-tooltip");
-        expect(tooltip).toHaveAttribute(
-          "aria-label",
-          "Make JSON (family/given) match UI (group/title)"
-        );
-      });
-
-      it("should work on draft measures", () => {
-        render(
-          <MemoryRouter>
-            <ActionCenter
-              selectedTestCases={[
-                { id: "1", validResource: true, title: "Test Case 1" },
-              ]}
-              canEdit={true}
-              isQDM={false}
-              isDraft={true}
-            />
-          </MemoryRouter>
-        );
-
-        const makeJsonMatchUiBtn = screen.getByTestId(
-          "make-json-match-ui-action-btn"
-        );
-        expect(makeJsonMatchUiBtn).toBeEnabled();
-      });
-
-      it("should work on versioned measures", () => {
-        render(
+        rerender(
           <MemoryRouter>
             <ActionCenter
               selectedTestCases={[
@@ -689,10 +644,9 @@ describe("ActionCenter Component", () => {
           </MemoryRouter>
         );
 
-        const makeJsonMatchUiBtn = screen.getByTestId(
-          "make-json-match-ui-action-btn"
-        );
-        expect(makeJsonMatchUiBtn).toBeEnabled();
+        expect(
+          screen.getByTestId("make-json-match-ui-action-btn")
+        ).toBeEnabled();
       });
     });
   });
