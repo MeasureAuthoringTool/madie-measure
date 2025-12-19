@@ -32,14 +32,17 @@ const mockManifestList = [
     fullUrl:
       "https://cts.nlm.nih.gov/fhir/Library/cms-pre-rulemaking-ecqm-2019-08-30",
     id: "cms-pre-rulemaking-ecqm-2019-08-30",
+    title: "CMS Pre-rulemaking eCQM 2019-08-30",
   },
   {
     fullUrl: "https://cts.nlm.nih.gov/fhir/Library/mu2-update-2012-10-25",
     id: "mu2-update-2012-10-25",
+    title: "MU2 Update 2012-10-25",
   },
   {
     fullUrl: "https://cts.nlm.nih.gov/fhir/Library/mu2-update-2012-12-21",
     id: "mu2-update-2012-12-21",
+    title: "MU2 Update 2012-12-21",
   },
 ];
 
@@ -61,8 +64,9 @@ const measureWithTestCaseConfiguration = {
     id: "test-case-config-id",
     sdeIncluded: false,
     manifestExpansion: {
-      fullUrl: "https://cts.nlm.nih.gov/fhir/Library/ecqm-update-4q2017-eh",
-      id: "ecqm-update-4q2017-eh",
+      fullUrl:
+        "https://cts.nlm.nih.gov/fhir/Library/cms-pre-rulemaking-ecqm-2019-08-30",
+      id: "cms-pre-rulemaking-ecqm-2019-08-30",
     },
   },
 };
@@ -175,7 +179,7 @@ describe("Expansion component", () => {
     await waitFor(() => {
       const manifestSelectInput = screen.getByTestId("manifest-select-input");
       expect(manifestSelectInput).toHaveValue(
-        "cms-pre-rulemaking-ecqm-2019-08-30"
+        "CMS Pre-rulemaking eCQM 2019-08-30"
       );
       expect(saveButton).toBeEnabled();
       userEvent.click(saveButton);
@@ -242,7 +246,7 @@ describe("Expansion component", () => {
     await waitFor(() => {
       const manifestSelectInput = screen.getByTestId("manifest-select-input");
       expect(manifestSelectInput).toHaveValue(
-        "cms-pre-rulemaking-ecqm-2019-08-30"
+        "CMS Pre-rulemaking eCQM 2019-08-30"
       );
       expect(saveButton).toBeEnabled();
     });
@@ -300,11 +304,21 @@ describe("Expansion component", () => {
     );
   });
 
-  it("Should display previously selected values from measure store", () => {
+  it("Should display previously selected values from measure store", async () => {
     measureStore.state.mockImplementation(
       () => measureWithTestCaseConfiguration
     );
-
+    mockedAxios.get.mockImplementation((args) => {
+      if (
+        args &&
+        args.startsWith(mockServiceConfig.terminologyService.baseUrl)
+      ) {
+        return Promise.resolve({
+          data: mockManifestList,
+          status: 200,
+        });
+      }
+    });
     renderExpansionComponent();
     const latestRadioInput = screen.getByLabelText(
       "Latest"
@@ -316,8 +330,14 @@ describe("Expansion component", () => {
     expect(latestRadioInput).not.toBeChecked();
     expect(manifestRadioInput).toBeChecked();
 
-    const manifestSelectInput = screen.getByTestId("manifest-select-input");
-    expect(manifestSelectInput).toHaveValue("ecqm-update-4q2017-eh");
+    const manifestSelectInput = await screen.findByTestId(
+      "manifest-select-input"
+    );
+    await waitFor(() => {
+      expect(manifestSelectInput).toHaveValue(
+        "CMS Pre-rulemaking eCQM 2019-08-30"
+      );
+    });
   });
 
   it("Should discard changes", async () => {
