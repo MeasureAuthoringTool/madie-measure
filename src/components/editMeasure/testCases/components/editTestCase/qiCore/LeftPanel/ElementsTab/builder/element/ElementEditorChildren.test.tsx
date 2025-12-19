@@ -83,4 +83,24 @@ describe("ElementEditorChildren", () => {
       "Patient.name"
     );
   });
+
+  it("does not render ElementEditorActionCenter when canEdit is false", () => {
+    const dispatch = jest.fn();
+
+    render(
+      <FormikProvider value={{}}>
+        <QiCoreResourceContext.Provider
+          value={{ state: mockPatientState, dispatch }}
+        >
+          <ElementEditorChildren {...defaultProps} canEdit={false} />
+        </QiCoreResourceContext.Provider>
+      </FormikProvider>
+    );
+
+    expect(screen.getByText("*name")).toBeInTheDocument();
+    expect(screen.getByTestId("type-editor")).toBeInTheDocument();
+    expect(
+      screen.queryByTestId("elements-action-center-actual-icon")
+    ).not.toBeInTheDocument();
+  });
 });

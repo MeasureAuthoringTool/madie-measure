@@ -648,4 +648,41 @@ describe("ElementEditor Component", () => {
 
     jest.useRealTimers();
   });
+
+  it("does not render Undo and Apply buttons when canEdit is false", async () => {
+    const setInitialFormikValuesStu6 = jest.fn();
+    const setValidationSchema = jest.fn();
+    const dispatch = jest.fn();
+    mockFormikObj.dirty = true;
+    const mockFormikValues = {
+      ClaimResponse: {
+        id: "test",
+      },
+    };
+    mockFormikObj.values = mockFormikValues;
+
+    renderElementEditor(
+      mockSelectedResource,
+      mockResource,
+      mockElementDefinition,
+      "ClaimResponse",
+      mockOnChange,
+      false, // canEdit is false
+      mockDisplayedElementsTree,
+      setValidationSchema,
+      setInitialFormikValuesStu6,
+      dispatch
+    );
+
+    await waitFor(() =>
+      expect(mockFhirDefinitionsService.getResourceTree).toHaveBeenCalled()
+    );
+
+    expect(
+      screen.queryByTestId("element-editor-undo-button")
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId("element-editor-submit-button")
+    ).not.toBeInTheDocument();
+  });
 });
