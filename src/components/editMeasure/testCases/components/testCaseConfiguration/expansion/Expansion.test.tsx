@@ -2,13 +2,11 @@ import * as React from "react";
 import { screen, render, waitFor } from "@testing-library/react";
 import { Measure } from "@madie/madie-models";
 import userEvent from "@testing-library/user-event";
-
 // @ts-ignore
 import {
   checkUserCanEdit,
   measureStore,
   MeasureServiceApi,
-  useMeasureServiceApi,
 } from "@madie/madie-util";
 import Expansion from "./Expansion";
 import { QdmExecutionContextProvider } from "../../routes/qdm/QdmExecutionContext";
@@ -184,7 +182,7 @@ describe("Expansion component", () => {
       expect(saveButton).toBeEnabled();
       userEvent.click(saveButton);
     });
-    await expect(
+    expect(
       screen.getByTestId("manifest-expansion-success-text")
     ).toHaveTextContent("Expansion details Updated Successfully");
     expect(
