@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext } from "react";
 import {
   useReactTable,
   getCoreRowModel,
@@ -15,6 +15,7 @@ import { BundleEntry } from "fhir/r4";
 import ViewHeadlineIcon from "@mui/icons-material/ViewHeadline";
 import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
+import ResourceContext from "../ResourceContext";
 
 export interface GridDataEntry {
   title: string;
@@ -35,6 +36,8 @@ const TestCaseSummaryGrid = ({
   testCaseCanEdit,
   selectedRowId,
 }: TestCaseSummaryGridProps) => {
+  const allResourceProfiles = useContext(ResourceContext); // get all profiles loaded from builder
+
   const data = React.useMemo(() => gridData ?? [], [gridData]);
 
   const actions = React.useMemo<ActionItemDef[]>(
@@ -64,13 +67,10 @@ const TestCaseSummaryGrid = ({
     [onRowEdit]
   );
 
-  // Utility to check if a profile is supported
   const isSupportedProfile = (entry: BundleEntry) => {
     const profiles = entry?.resource?.meta?.profile || [];
     return profiles.some((url: string) =>
-      ["/fhir/us/qicore/", "/fhir/us/core", "/fhir/StructureDefinition/"].some(
-        (substr) => url.includes(substr)
-      )
+      allResourceProfiles?.some((profileObj: any) => profileObj.profile === url)
     );
   };
 

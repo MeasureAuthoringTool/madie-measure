@@ -3,6 +3,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import TestCaseSummaryGrid, { GridDataEntry } from "./TestCaseSummaryGrid";
 import { within } from "@testing-library/dom";
 import userEvent from "@testing-library/user-event";
+import ResourceContext from "../ResourceContext";
 
 export const mockBundle = {
   entry: [
@@ -35,6 +36,27 @@ const gridData = [
   },
 ] as GridDataEntry[];
 
+// Mock resourceIdentifiers for ResourceContext
+const resourceIdentifiers = [
+  {
+    id: "qicore-encounter",
+    title: "QICore Encounter",
+    type: "Encounter",
+    category: "Clinical",
+    profile:
+      "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-encounter",
+  },
+  // No Procedure profile, so Procedure is unsupported
+];
+
+// Helper to wrap with ResourceContext
+const renderWithResourceContext = (ui: React.ReactElement) =>
+  render(
+    <ResourceContext.Provider value={resourceIdentifiers}>
+      {ui}
+    </ResourceContext.Provider>
+  );
+
 describe("TestCaseSummaryGrid", () => {
   const mockOnRowEdit = jest.fn();
   const mockOnRowDelete = jest.fn();
@@ -44,7 +66,7 @@ describe("TestCaseSummaryGrid", () => {
   });
 
   it("should render the table with correct headers and data from the bundle", () => {
-    render(
+    renderWithResourceContext(
       <TestCaseSummaryGrid
         gridData={gridData}
         onRowEdit={mockOnRowEdit}
@@ -87,7 +109,7 @@ describe("TestCaseSummaryGrid", () => {
   });
 
   it("should render the table with no data", () => {
-    render(
+    renderWithResourceContext(
       <TestCaseSummaryGrid
         gridData={[]}
         onRowEdit={mockOnRowEdit}
@@ -101,7 +123,7 @@ describe("TestCaseSummaryGrid", () => {
   });
 
   it("should render the table with undefined, no data", () => {
-    render(
+    renderWithResourceContext(
       <TestCaseSummaryGrid
         gridData={undefined}
         onRowEdit={mockOnRowEdit}
@@ -115,7 +137,7 @@ describe("TestCaseSummaryGrid", () => {
   });
 
   it("should render ActionCenter with correct actions for Supported Profile", async () => {
-    render(
+    renderWithResourceContext(
       <TestCaseSummaryGrid
         gridData={gridData}
         onRowEdit={mockOnRowEdit}
@@ -142,7 +164,7 @@ describe("TestCaseSummaryGrid", () => {
   });
 
   it("should render ActionCenter with disabled Edit action for Unsupported Profile", async () => {
-    render(
+    renderWithResourceContext(
       <TestCaseSummaryGrid
         gridData={gridData}
         onRowEdit={mockOnRowEdit}
@@ -173,7 +195,7 @@ describe("TestCaseSummaryGrid", () => {
   });
 
   it("should call onRowEdit when Edit action is clicked (Supported)", async () => {
-    render(
+    renderWithResourceContext(
       <TestCaseSummaryGrid
         gridData={gridData}
         onRowEdit={mockOnRowEdit}
@@ -193,7 +215,7 @@ describe("TestCaseSummaryGrid", () => {
   });
 
   it("should call onRowDelete when Delete action is clicked", async () => {
-    render(
+    renderWithResourceContext(
       <TestCaseSummaryGrid
         gridData={gridData}
         onRowEdit={mockOnRowEdit}
@@ -233,7 +255,7 @@ describe("TestCaseSummaryGrid", () => {
   });
 
   it("should render ActionCenter with View action only if test case cannot be edited", async () => {
-    render(
+    renderWithResourceContext(
       <TestCaseSummaryGrid
         gridData={gridData}
         onRowEdit={mockOnRowEdit}
