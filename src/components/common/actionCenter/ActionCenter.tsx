@@ -12,6 +12,8 @@ export interface ActionItemDef {
   name: string;
   icon: any;
   onClick: (target: any) => void;
+  disabled?: boolean;
+  tooltip?: string;
 }
 
 const ActionCenter = ({ actions, testId, target }: PropTypes) => {
@@ -67,10 +69,20 @@ const ActionCenter = ({ actions, testId, target }: PropTypes) => {
           actions?.map((action) => (
             <SpeedDialAction
               key={action.name}
-              icon={action.icon}
+              icon={
+                action.disabled && React.isValidElement(action.icon)
+                  ? React.cloneElement(action.icon as any, {
+                      color: "#8C8C8C",
+                      htmlColor: "#8C8C8C",
+                    })
+                  : action.icon
+              }
               slotProps={{
                 tooltip: {
-                  title: action.name,
+                  title:
+                    action.disabled && action.tooltip
+                      ? action.tooltip
+                      : action.name,
                 },
               }}
               data-testid={`action-center-${testId}_${action.name.replace(
@@ -78,6 +90,7 @@ const ActionCenter = ({ actions, testId, target }: PropTypes) => {
                 ""
               )}`}
               onClick={() => {
+                if (action.disabled) return;
                 setOpen(false);
                 if (action.name === "Delete") {
                   setOpenConfirmDialog(true);
@@ -92,7 +105,14 @@ const ActionCenter = ({ actions, testId, target }: PropTypes) => {
                 margin: 0,
                 marginRight: 1,
                 transitionDelay: "0s",
+                ...(action.disabled && {
+                  opacity: 0.5,
+                  backgroundColor: "#F5F5F5",
+                  border: "1px solid #8C8C8C",
+                  color: "#8C8C8C",
+                }),
               }}
+              aria-disabled={action.disabled ? true : undefined}
             />
           ))}
       </SpeedDial>
