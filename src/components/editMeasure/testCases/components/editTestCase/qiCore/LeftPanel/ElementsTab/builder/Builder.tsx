@@ -272,8 +272,8 @@ const Builder = ({
               </div>
             )}
             <>
-              {selectedResourceID && (
-                <ResourceContextProvider value={resourceIdentifiers}>
+              <ResourceContextProvider value={resourceIdentifiers}>
+                {selectedResourceID && (
                   <ResourceEditor
                     selectedResourceID={selectedResourceID}
                     setValidationSchema={setValidationSchema}
@@ -285,20 +285,20 @@ const Builder = ({
                     applyLoading={applyLoading}
                     setApplyLoading={setApplyLoading}
                   />
-                </ResourceContextProvider>
-              )}
-              <TestCaseSummaryGrid
-                gridData={prepareSummaryGridData(
-                  state?.bundle?.entry,
-                  resourceIdentifiers
                 )}
-                onRowEdit={(row) =>
-                  handleRowEdit(row, setSelectedResourceId, setSavedGridID)
-                }
-                onRowDelete={(row) => handleRowDelete(row, dispatch)}
-                testCaseCanEdit={canEdit}
-                selectedRowId={selectedResourceID}
-              />
+                <TestCaseSummaryGrid
+                  gridData={prepareSummaryGridData(
+                    state?.bundle?.entry,
+                    resourceIdentifiers
+                  )}
+                  onRowEdit={(row) =>
+                    handleRowEdit(row, setSelectedResourceId, setSavedGridID)
+                  }
+                  onRowDelete={(row) => handleRowDelete(row, dispatch)}
+                  testCaseCanEdit={canEdit}
+                  selectedRowId={selectedResourceID}
+                />
+              </ResourceContextProvider>
             </>
           </div>
         )}
