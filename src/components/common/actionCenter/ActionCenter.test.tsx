@@ -149,4 +149,32 @@ describe("ActionCenter", () => {
       expect(mockActions[1].onClick).toHaveBeenCalledWith(mockTarget);
     });
   });
+
+  it("renders disabled action correctly and prevents click", async () => {
+    const disabledAction = {
+      name: "Disabled Action",
+      icon: <AddIcon />,
+      onClick: jest.fn(),
+      disabled: true,
+      tooltip: "This is disabled",
+    };
+    const actions = [...mockActions, disabledAction];
+
+    render(
+      <ActionCenter actions={actions} testId={testId} target={mockTarget} />
+    );
+
+    const button = await screen.findByTestId(`action-center-button-${testId}`);
+    await userEvent.click(button);
+
+    const disabledBtn = await screen.findByTestId(
+      "action-center-test-component_DisabledAction"
+    );
+    expect(disabledBtn).toBeInTheDocument();
+    expect(disabledBtn).toHaveAttribute("aria-disabled", "true");
+    expect(disabledBtn).toHaveAttribute("aria-label", "This is disabled");
+
+    await userEvent.click(disabledBtn);
+    expect(disabledAction.onClick).not.toHaveBeenCalled();
+  });
 });

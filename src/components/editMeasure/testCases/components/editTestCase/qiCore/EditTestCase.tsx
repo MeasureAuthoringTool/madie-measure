@@ -292,8 +292,8 @@ const EditTestCase = (props: EditTestCaseProps) => {
     onUpdate: (updatedTc: TestCase) => {
       const nextTc = _.cloneDeep(updatedTc);
       handleHapiOutcome(nextTc?.hapiOperationOutcome);
+      nextTc.json = standardizeJson(nextTc);
       setTestCase(nextTc);
-      setEditorVal(nextTc.json ? nextTc.json : "");
     },
     validateTest: !isQiCoreV6,
     onError: (error) => {

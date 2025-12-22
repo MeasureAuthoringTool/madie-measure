@@ -48,6 +48,8 @@ interface ElementEditorProps {
   setValidationSchema: Dispatch<SetStateAction<Object>>;
   deleteElement?: (path: string, element: any, elementName: string) => void;
   setLastAddedElemPath: (string) => void;
+  applyLoading: boolean;
+  setApplyLoading: Dispatch<SetStateAction<boolean>>;
 }
 /*
   TO DO: We have too many copies of state.
@@ -82,6 +84,8 @@ const ElementEditor = ({
   setInitialFormikValuesStu6,
   setValidationSchema,
   deleteElement,
+  applyLoading,
+  setApplyLoading,
 }: ElementEditorProps) => {
   const [toastOpen, setToastOpen] = useState<boolean>(false);
   const [toastMessage, setToastMessage] = useState<string>("");
@@ -261,30 +265,44 @@ const ElementEditor = ({
     e.preventDefault();
 
     if (formik.values && formik.dirty) {
-      const { type } = selectedResource?.definition;
-      const { bundleEntry } = selectedResource;
-      const formikCleanedValues = removeUndefinedAndEmptyObjects(formik.values);
-      // need type to access formik values, as well as append to to the resource object so it is not lost.
-      bundleEntry.resource = formikCleanedValues[type];
-      bundleEntry.resource.resourceType = type;
-      // @ts-ignore
-      const { add_new_resource } = formik.values;
-      if (add_new_resource) {
-        dispatch({
-          type: ResourceActionType.ADD_RESOURCE_BY_REFERENCE,
-          payload: { bundleEntry, add_new_resource },
-        });
-      } else {
-        dispatch({
-          type: ResourceActionType.MODIFY_BUNDLE_ENTRY,
-          payload: bundleEntry,
-        });
-      }
-      setToastType("success");
-      setToastMessage(
-        `${type} has successfully been applied to the test case. To save your changes please click 'Save'.`
-      );
-      setToastOpen(true);
+      setApplyLoading(true);
+
+      // Use setTimeout to allow the spinner to render before processing
+      setTimeout(() => {
+        try {
+          const { type } = selectedResource?.definition;
+          const { bundleEntry } = selectedResource;
+          const formikCleanedValues = removeUndefinedAndEmptyObjects(
+            formik.values
+          );
+          // need type to access formik values, as well as append to to the resource object so it is not lost.
+          bundleEntry.resource = formikCleanedValues[type];
+          bundleEntry.resource.resourceType = type;
+          // @ts-ignore
+          const { add_new_resource } = formik.values;
+          if (add_new_resource) {
+            dispatch({
+              type: ResourceActionType.ADD_RESOURCE_BY_REFERENCE,
+              payload: { bundleEntry, add_new_resource },
+            });
+          } else {
+            dispatch({
+              type: ResourceActionType.MODIFY_BUNDLE_ENTRY,
+              payload: bundleEntry,
+            });
+          }
+          setToastType("success");
+          setToastMessage(
+            `${type} has successfully been applied to the test case. To save your changes please click 'Save'.`
+          );
+          setToastOpen(true);
+        } finally {
+          // Add a small delay to ensure UI updates before re-enabling the button
+          setTimeout(() => {
+            setApplyLoading(false);
+          }, 150);
+        }
+      }, 100);
     }
   };
   if (_.isNil(elementDefinition)) {
@@ -334,7 +352,8 @@ const ElementEditor = ({
                 !formik.dirty ||
                 !!formik.errors[resourcePath]?.[
                   elementDefinition?.path.split(".")[1]
-                ]
+                ] ||
+                applyLoading
               }
               onClick={handleIndividualElementApplyButtonClick}
             >
