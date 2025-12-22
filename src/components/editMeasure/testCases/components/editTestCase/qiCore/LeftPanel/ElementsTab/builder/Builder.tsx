@@ -165,8 +165,6 @@ const Builder = ({
     (e) => e.resource?.resourceType === "Patient"
   );
 
-  console.log("resourceIdentifiers", resourceIdentifiers);
-
   return (
     <Box
       sx={{ mr: 2 }}
