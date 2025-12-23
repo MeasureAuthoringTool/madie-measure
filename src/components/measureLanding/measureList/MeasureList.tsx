@@ -179,6 +179,7 @@ export default function MeasureList(props: {
       model: measure?.model,
       actions: measure,
       hasAssociatedMeasures: measure?.hasAssociatedMeasures,
+      ownerDisplayName: measure?.ownerDisplayName,
     }));
   };
 
@@ -190,6 +191,7 @@ export default function MeasureList(props: {
     model: string;
     actions: any;
     hasAssociatedMeasures: boolean;
+    ownerDisplayName?: string;
   };
 
   const [data, setData] = useState<TCRow[]>([]);
@@ -456,25 +458,21 @@ export default function MeasureList(props: {
       ),
       accessorKey: "measureSet.cmsId",
     },
-    // Do not display Owner column in My Measures tab
-    ...(featureFlags?.DisplayOwner &&
-    (props.activeTab === 1 || props.activeTab === 2)
+    // Do not display Owner column in My Measures tab or when DisplayOwner flag is disabled
+    ...((props.activeTab === 1 || props.activeTab === 2) &&
+    featureFlags?.DisplayOwner
       ? [
           {
             header: "Owner",
             cell: (info) => (
               <TruncateText
-                text={info.row.original.actions?.measureSet?.owner || "-"}
+                text={info.row.original.ownerDisplayName || "-"}
                 maxLength={120}
                 dataTestId={`measure-owner-${info.row.original.id}`}
               />
             ),
-            accessorKey: "measureSet.owner",
-            sortingFn: (rowA, rowB) =>
-              customSort(
-                rowA.original.actions?.measureSet?.owner,
-                rowB.original.actions?.measureSet?.owner
-              ),
+            accessorKey: "ownerDisplayName",
+            enableSorting: false,
           },
         ]
       : []),
