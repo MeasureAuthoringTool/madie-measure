@@ -1691,6 +1691,13 @@ describe("TypeEditor Component", () => {
         setFieldTouched: jest.fn(),
         setFieldValue: jest.fn(),
       }),
+      values: {
+        Observation: {
+          test: {
+            code: [{}],
+          },
+        },
+      },
     } as unknown as FormikProps<any>;
 
     render(
@@ -1707,11 +1714,11 @@ describe("TypeEditor Component", () => {
       >
         <FormikProvider value={mockFormik}>
           <RequiredFieldsProvider
-            requiredFields={{ "Observation.test.code[0]": true }}
+            requiredFields={{ "Observation.test.code": true }}
             formInfo={[
               "Observation.test.code",
               {
-                id: "Observation.code[0]",
+                id: "Observation.code",
                 required: true,
                 canBeMultipleCardinality: false,
               },
@@ -1719,7 +1726,7 @@ describe("TypeEditor Component", () => {
           >
             <TypeEditor
               structureDefinition={{
-                id: "Observation.test.code[0]",
+                id: "Observation.test.code",
                 path: "Observation.code",
                 min: 1,
                 max: "*",
@@ -1730,7 +1737,7 @@ describe("TypeEditor Component", () => {
                 ],
               }}
               resource={null}
-              label="Observation.test.code[0]"
+              label="Observation.test.code"
               canEdit={true}
               parentStructureDefinition={null}
             />
