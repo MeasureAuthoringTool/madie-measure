@@ -1707,9 +1707,9 @@ describe("TypeEditor Component", () => {
       >
         <FormikProvider value={mockFormik}>
           <RequiredFieldsProvider
-            requiredFields={{ "Observation.code": true }}
+            requiredFields={{ "Observation.test.code[0]": true }}
             formInfo={[
-              "Observation.code",
+              "Observation.test.code",
               {
                 id: "Observation.code[0]",
                 required: true,
@@ -1719,7 +1719,7 @@ describe("TypeEditor Component", () => {
           >
             <TypeEditor
               structureDefinition={{
-                id: "Observation.code",
+                id: "Observation.test.code[0]",
                 path: "Observation.code",
                 min: 1,
                 max: "*",
@@ -1730,7 +1730,7 @@ describe("TypeEditor Component", () => {
                 ],
               }}
               resource={null}
-              label="Observation.code[0]"
+              label="Observation.test.code[0]"
               canEdit={true}
               parentStructureDefinition={null}
             />
