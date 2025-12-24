@@ -669,9 +669,6 @@ const TypeEditor = ({
               } else {
                 fieldLabel = label;
               }
-              console.log("fieldLabel", fieldLabel);
-              console.log("isArrayMode", isArrayMode);
-              console.log("appendedZeroAlready", appendedZeroAlready);
               return (
                 <CodeableConceptComponent
                   key={index}
