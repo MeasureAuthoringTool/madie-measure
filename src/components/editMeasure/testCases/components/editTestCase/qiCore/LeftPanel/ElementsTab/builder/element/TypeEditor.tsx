@@ -662,9 +662,7 @@ const TypeEditor = ({
           <>
             {(isArrayMode ? values : [null]).map((el, index) => {
               let fieldLabel;
-              if (isArrayMode && !appendedZeroAlready) {
-                fieldLabel = `${label}[${index}]`;
-              } else if (isArrayMode && appendedZeroAlready) {
+              if (isArrayMode && appendedZeroAlready) {
                 fieldLabel = `${label.slice(0, label.length - 3)}[${index}]`;
               } else {
                 fieldLabel = label;
