@@ -17,6 +17,7 @@ const IdentifierComponent = ({
   fieldRequired,
   helperText,
   error,
+  handleAddElement,
 }: TypeComponentProps) => {
   const formik = useFormikContext();
 
@@ -57,6 +58,7 @@ const IdentifierComponent = ({
         showAddAttributeButton={false}
         addTitle={null}
         value={getIn(formik.values, `${label}.type`)}
+        handleAddElement={handleAddElement}
         onChange={(value) => {
           formik.setFieldTouched(`${label}.type`);
           formik.setFieldValue(`${label}.type`, value);

@@ -1678,6 +1678,80 @@ describe("TypeEditor Component", () => {
     expect(valueSetSelector).toHaveTextContent("- Select -");
   });
 
+  test("Should render CodeableConcept component under multiple cardinality conditions", async () => {
+    const onChange = jest.fn();
+    const setFieldTouched = jest.fn();
+    const mockFormik = {
+      setFieldTouched: setFieldTouched,
+      setFieldValue: onChange,
+      getFieldProps: () => ({
+        label: "Observation.code",
+        name: "Observation.code",
+        value: undefined,
+        setFieldTouched: jest.fn(),
+        setFieldValue: jest.fn(),
+      }),
+      values: {
+        Observation: {
+          test: {
+            code: [{}],
+          },
+        },
+      },
+    } as unknown as FormikProps<any>;
+
+    render(
+      <ExecutionContextProvider
+        value={{
+          measureState: [null, jest.fn()],
+          bundleState: [null, jest.fn()],
+          valueSetsState: [null, jest.fn()],
+          executionContextReady: true,
+          executing: false,
+          setExecuting: jest.fn(),
+          contextFailure: false,
+        }}
+      >
+        <FormikProvider value={mockFormik}>
+          <RequiredFieldsProvider
+            requiredFields={{ "Observation.test.code": true }}
+            formInfo={[
+              "Observation.test.code",
+              {
+                id: "Observation.code",
+                required: true,
+                canBeMultipleCardinality: false,
+              },
+            ]}
+          >
+            <TypeEditor
+              structureDefinition={{
+                id: "Observation.test.code",
+                path: "Observation.code",
+                min: 1,
+                max: "*",
+                type: [
+                  {
+                    code: "CodeableConcept",
+                  },
+                ],
+              }}
+              resource={null}
+              label="Observation.test.code"
+              canEdit={true}
+              parentStructureDefinition={null}
+            />
+          </RequiredFieldsProvider>
+        </FormikProvider>
+      </ExecutionContextProvider>
+    );
+
+    const valueSetSelector = screen.getByRole("combobox", {
+      name: "Value Set / Direct Reference Code",
+    });
+    expect(valueSetSelector).toHaveTextContent("- Select -");
+  });
+
   test("Should filter out excluded child types for '[x]' definitions", async () => {
     render(
       <FormikProvider value={mockFormik}>
