@@ -390,6 +390,7 @@ const TimingComponent = ({
 
         {/* Code */}
         <CodeableConceptComponent
+          handleAddElement={handleAddElement}
           label="Code"
           canEdit={canEdit}
           structureDefinition={{
