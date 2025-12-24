@@ -682,10 +682,6 @@ const TypeEditor = ({
                     showAddAttributeButton &&
                     (!isArrayMode || index === lastIndex)
                   }
-                  // showDeleteButton={isArrayMode && index > 0}
-                  // handleDeleteElement={() =>
-                  //   handleDeleteElement(index, fieldLabel)
-                  // }
                   addTitle={addTitle}
                   handleAddElement={handleAddElement}
                   {...formik.getFieldProps(fieldLabel)}
