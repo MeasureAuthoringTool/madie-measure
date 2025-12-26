@@ -33,6 +33,19 @@ export const isTestCasePopulationObservation = (
   );
 };
 
+const getBoolean = (value: string | boolean | null | undefined): boolean => {
+  if (typeof value === "boolean") return value;
+  if (!value) return false;
+  return value.toString().trim().toLowerCase() === "true";
+};
+
+export const isDebugMode = () => {
+  return (
+    getBoolean(localStorage.getItem("madieDebug")) ||
+    getBoolean((window as any).madieDebug)
+  );
+};
+
 export class MadieError extends Error {
   constructor(message: string) {
     super(message);
