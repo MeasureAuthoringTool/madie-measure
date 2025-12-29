@@ -334,32 +334,34 @@ const ElementEditor = ({
             canEdit={canEdit}
             deleteElement={deleteElement}
           />
-          <div className="element-editor-submission">
-            <Button
-              variant="outline"
-              id="element-editor-undo-button"
-              data-testId="element-editor-undo-button"
-              disabled={!formik.dirty}
-              onClick={formik.resetForm}
-            >
-              Undo
-            </Button>
-            <Button
-              variant="submit"
-              id="element-editor-submit-button"
-              data-testId="element-editor-submit-button"
-              disabled={
-                !formik.dirty ||
-                !!formik.errors[resourcePath]?.[
-                  elementDefinition?.path.split(".")[1]
-                ] ||
-                applyLoading
-              }
-              onClick={handleIndividualElementApplyButtonClick}
-            >
-              Apply
-            </Button>
-          </div>
+          {canEdit && (
+            <div className="element-editor-submission">
+              <Button
+                variant="outline"
+                id="element-editor-undo-button"
+                data-testId="element-editor-undo-button"
+                disabled={!formik.dirty}
+                onClick={formik.resetForm}
+              >
+                Undo
+              </Button>
+              <Button
+                variant="submit"
+                id="element-editor-submit-button"
+                data-testId="element-editor-submit-button"
+                disabled={
+                  !formik.dirty ||
+                  !!formik.errors[resourcePath]?.[
+                    elementDefinition?.path.split(".")[1]
+                  ] ||
+                  applyLoading
+                }
+                onClick={handleIndividualElementApplyButtonClick}
+              >
+                Apply
+              </Button>
+            </div>
+          )}
         </Box>
         <Toast
           toastKey="testcase-attribute-toast"

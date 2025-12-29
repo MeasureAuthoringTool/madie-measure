@@ -435,6 +435,7 @@ const TypeEditor = ({
         return (
           <IdentifierComponent
             label={label}
+            handleAddElement={handleAddElement}
             canEdit={canEdit}
             resource={resource}
             structureDefinition={structureDefinition}
@@ -597,7 +598,6 @@ const TypeEditor = ({
               }
               return (
                 <>
-                  Codes component
                   {/* Observation.category , AuditEvent.type 0..*, but base fhir only. Revisit this render once base fhir is supported. */}
                   <CodesComponent
                     key={index}
@@ -643,6 +643,7 @@ const TypeEditor = ({
       case "Coding":
         return (
           <CodingComponent
+            handleAddElement={handleAddElement}
             label={label}
             canEdit={canEdit}
             structureDefinition={structureDefinition}
@@ -658,18 +659,31 @@ const TypeEditor = ({
         );
       case "CodeableConcept":
         return (
-          <CodeableConceptComponent
-            label={label}
-            canEdit={canEdit}
-            structureDefinition={structureDefinition}
-            showAddAttributeButton={showAddAttributeButton}
-            addTitle={addTitle}
-            {...formik.getFieldProps(label)}
-            onChange={(value) => {
-              formik.setFieldTouched(label);
-              formik.setFieldValue(label, value);
-            }}
-          />
+          <>
+            {(isArrayMode ? values : [null]).map((el, index) => {
+              let fieldLabel;
+              if (isArrayMode && appendedZeroAlready) {
+                fieldLabel = `${label.slice(0, label.length - 3)}[${index}]`;
+              } else {
+                fieldLabel = label;
+              }
+              return (
+                <CodeableConceptComponent
+                  key={index}
+                  canEdit={canEdit}
+                  structureDefinition={structureDefinition}
+                  label={fieldLabel}
+                  showAddAttributeButton={
+                    showAddAttributeButton &&
+                    (!isArrayMode || index === lastIndex)
+                  }
+                  addTitle={addTitle}
+                  handleAddElement={handleAddElement}
+                  {...formik.getFieldProps(fieldLabel)}
+                />
+              );
+            })}
+          </>
         );
       case "Money":
         return (
