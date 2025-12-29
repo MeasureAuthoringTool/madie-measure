@@ -20,6 +20,7 @@ import * as Yup from "yup";
 import useTerminologyServiceApi from "../../../api/useTerminologyServiceApi";
 import useFormikResetOnEvent from "../../../../../common/useFormikResetOnEvent";
 
+// The Expansion component now displays the manifest 'title' in the dropdown and as the selected value, but stores the 'id' in DB.
 const Expansion = () => {
   const [measure, setMeasure] = useState<Measure>(measureStore.state);
   const [manifestOptions, setManifestOptions] = useState<ManifestExpansion[]>(
@@ -204,7 +205,17 @@ const Expansion = () => {
               data-testid="manifest-select"
               inputProps={{ "data-testid": "manifest-select-input" }}
               name="manifest"
-              {...formik.getFieldProps("manifestExpansionId")}
+              value={
+                manifestOptions?.find(
+                  (option) => option.id === formik.values.manifestExpansionId
+                )?.title || ""
+              }
+              onChange={(e) => {
+                const selected = manifestOptions.find(
+                  (option) => option.title === e.target.value
+                );
+                formik.setFieldValue("manifestExpansionId", selected?.id || "");
+              }}
               SelectDisplayProps={{
                 "aria-required": "true",
               }}
@@ -222,10 +233,10 @@ const Expansion = () => {
                 return (
                   <MenuItem
                     key={manifestOption.id}
-                    value={manifestOption.id}
+                    value={manifestOption.title}
                     data-testid={`manifest-option-${manifestOption.id}`}
                   >
-                    {manifestOption.id}
+                    {manifestOption.title}
                   </MenuItem>
                 );
               })}

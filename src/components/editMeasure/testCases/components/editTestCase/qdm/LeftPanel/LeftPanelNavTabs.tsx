@@ -1,15 +1,17 @@
 import React, { useEffect, useState } from "react";
 import { Tabs, Tab } from "@madie/madie-design-system/dist/react";
 import { useFeatureFlags } from "@madie/madie-util";
+import { isDebugMode } from "../../../../util/Utils";
 
 export interface NavTabProps {
   activeTab: string;
   setActiveTab: (value: string) => void;
 }
 
-export default function RightPanelNavTabs(props: NavTabProps) {
+export default function LeftPanelNavTabs(props: NavTabProps) {
   const { activeTab, setActiveTab } = props;
   const featureFlags = useFeatureFlags();
+  const debugMode = isDebugMode();
 
   return (
     <Tabs
@@ -28,7 +30,7 @@ export default function RightPanelNavTabs(props: NavTabProps) {
         data-testid="elements-tab"
         value="elements"
       />
-      {!featureFlags?.qdmHideJson && (
+      {(!featureFlags?.qdmHideJson || debugMode) && (
         <Tab
           tabIndex={0}
           aria-label="JSON tab panel"
