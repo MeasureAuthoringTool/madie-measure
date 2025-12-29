@@ -79,16 +79,18 @@ const EditMeasureNav = ({ isQDM }) => {
             component={NavLink}
             onKeyDown={handleSpaceSelect}
           />
-          <Tab
-            value="cql-editor"
-            to={`cql-editor`}
-            data-testid="cql-editor-tab"
-            type="A"
-            size="standard"
-            label="CQL Editor"
-            component={NavLink}
-            onKeyDown={handleSpaceSelect}
-          />
+          {!measure?.measureMetaData?.composite && (
+            <Tab
+              value="cql-editor"
+              to={`cql-editor`}
+              data-testid="cql-editor-tab"
+              type="A"
+              size="standard"
+              label="CQL Editor"
+              component={NavLink}
+              onKeyDown={handleSpaceSelect}
+            />
+          )}
           <Tab
             value={isQDM ? `base-configuration` : `groups`}
             to={isQDM ? `base-configuration` : `groups/1`}
