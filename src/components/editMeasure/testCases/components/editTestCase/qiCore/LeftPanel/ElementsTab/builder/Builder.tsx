@@ -117,8 +117,13 @@ const Builder = ({
   const [applyLoading, setApplyLoading] = useState(false);
   useEffect(() => {
     const fetchResources = async () => {
-      const resourceIdentifiers =
-        await fhirDefinitionsService.current.getResources();
+      // we want to filter out base fhir resources, by checking if the id does not start with qicore or us-core
+      const resourceIdentifiers = (
+        await fhirDefinitionsService.current.getResources()
+      ).filter(
+        (res) => res.id.startsWith("qicore") || res.id.startsWith("us-core")
+      );
+
       setResourceIdentifiers(resourceIdentifiers);
       abortController.current = new AbortController();
       fhirElmTranslationService.current
@@ -272,8 +277,8 @@ const Builder = ({
               </div>
             )}
             <>
-              {selectedResourceID && (
-                <ResourceContextProvider value={resourceIdentifiers}>
+              <ResourceContextProvider value={resourceIdentifiers}>
+                {selectedResourceID && (
                   <ResourceEditor
                     selectedResourceID={selectedResourceID}
                     setValidationSchema={setValidationSchema}
@@ -285,20 +290,20 @@ const Builder = ({
                     applyLoading={applyLoading}
                     setApplyLoading={setApplyLoading}
                   />
-                </ResourceContextProvider>
-              )}
-              <TestCaseSummaryGrid
-                gridData={prepareSummaryGridData(
-                  state?.bundle?.entry,
-                  resourceIdentifiers
                 )}
-                onRowEdit={(row) =>
-                  handleRowEdit(row, setSelectedResourceId, setSavedGridID)
-                }
-                onRowDelete={(row) => handleRowDelete(row, dispatch)}
-                testCaseCanEdit={canEdit}
-                selectedRowId={selectedResourceID}
-              />
+                <TestCaseSummaryGrid
+                  gridData={prepareSummaryGridData(
+                    state?.bundle?.entry,
+                    resourceIdentifiers
+                  )}
+                  onRowEdit={(row) =>
+                    handleRowEdit(row, setSelectedResourceId, setSavedGridID)
+                  }
+                  onRowDelete={(row) => handleRowDelete(row, dispatch)}
+                  testCaseCanEdit={canEdit}
+                  selectedRowId={selectedResourceID}
+                />
+              </ResourceContextProvider>
             </>
           </div>
         )}

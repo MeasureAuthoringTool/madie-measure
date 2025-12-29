@@ -31,6 +31,7 @@ const CodingComponent = ({
   showAddAttributeButton,
   addTitle,
   includePrev = true,
+  handleAddElement,
 }) => {
   const [allValueSets, setAllValueSets] = useState<ValueSet[]>();
   const [selectedValueSet, setSelectedValueSet] = useState<ValueSet>();
@@ -275,7 +276,7 @@ const CodingComponent = ({
           onChange={(e) => handleValueSetChange(e.target.value)}
         />
         {showAddAttributeButton && addTitle && (
-          <AddElementButton name={addTitle} />
+          <AddElementButton name={addTitle} onClick={handleAddElement} />
         )}
       </div>
       {selectedValueSet && (
