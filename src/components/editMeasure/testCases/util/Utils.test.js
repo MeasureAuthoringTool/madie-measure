@@ -1,4 +1,4 @@
-import { sanitizeUserInput, truncateInput } from "./Utils.ts";
+import { sanitizeUserInput, truncateInput, isDebugMode } from "./Utils.ts";
 
 describe("Utils tests", () => {
   it("sanitizeUserInput Should remove script", () => {
@@ -45,5 +45,62 @@ describe("Utils tests", () => {
 
   it("truncateInput Should truncate original value", () => {
     expect(truncateInput("test test", 4)).toBe("test");
+  });
+
+  describe("isDebugMode", () => {
+    beforeEach(() => {
+      // // Remove window.madieDebug by default
+      delete window.madieDebug;
+    });
+
+    const cases = [
+      ["true", undefined, true],
+      ["TRUE", undefined, true],
+      ["True", undefined, true],
+      ["false", undefined, false],
+      ["FALSE", undefined, false],
+      ["False", undefined, false],
+      ["", undefined, false],
+      [null, undefined, false],
+      [undefined, undefined, false],
+      [true, undefined, true],
+      [false, undefined, false],
+      [undefined, "true", true],
+      [undefined, "TRUE", true],
+      [undefined, "True", true],
+      [undefined, "false", false],
+      [undefined, "FALSE", false],
+      [undefined, "False", false],
+      [undefined, "", false],
+      [undefined, null, false],
+      [undefined, undefined, false],
+      [undefined, true, true],
+      [undefined, false, false],
+      ["true", "false", true],
+      ["false", "true", true],
+      ["false", "false", false],
+      ["true", "true", true],
+      [null, null, false],
+      ["", "", false],
+      [true, false, true],
+      [false, true, true],
+      [false, false, false],
+      [true, true, true],
+    ];
+
+    test.each(cases)(
+      "localStorage: %p, window: %p => isDebugMode: %p",
+      (localVal, winVal, expected) => {
+        if (localVal !== undefined) {
+          if (localVal === null) window.localStorage.removeItem("madieDebug");
+          else window.localStorage.setItem("madieDebug", localVal);
+        } else {
+          window.localStorage.removeItem("madieDebug");
+        }
+        if (winVal !== undefined) window.madieDebug = winVal;
+        else delete window.madieDebug;
+        expect(isDebugMode()).toBe(expected);
+      }
+    );
   });
 });
