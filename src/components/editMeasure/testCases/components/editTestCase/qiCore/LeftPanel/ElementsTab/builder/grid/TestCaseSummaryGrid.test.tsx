@@ -225,9 +225,7 @@ describe("TestCaseSummaryGrid", () => {
       />
     );
 
-    const firstActionCenterButton = screen.getByTestId(
-      "view-test-case-ec-1"
-    );
+    const firstActionCenterButton = screen.getByTestId("view-test-case-ec-1");
     userEvent.click(firstActionCenterButton);
     expect(mockOnRowEdit).toHaveBeenCalledWith(mockBundle.entry[0]);
   });

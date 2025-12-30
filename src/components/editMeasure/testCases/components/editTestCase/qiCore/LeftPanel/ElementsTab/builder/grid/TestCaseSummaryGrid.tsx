@@ -38,7 +38,6 @@ const TestCaseSummaryGrid = ({
   selectedRowId,
   readOnly,
 }: TestCaseSummaryGridProps) => {
-
   const allResourceProfiles = useContext(ResourceContext); // get all profiles loaded from builder
 
   const data = React.useMemo(() => gridData ?? [], [gridData]);
