@@ -157,8 +157,10 @@ const TypeEditor = ({
   const addTitle = structureDefinition?.id
     ? _.startCase(getLastPart(structureDefinition.id))
     : "";
-  const showAddAttributeButton = Boolean(!isRoot && canBeMultipleCardinality);
-  const isArrayMode = showAddAttributeButton && values;
+  const showAddAttributeButton = Boolean(
+    !isRoot && canBeMultipleCardinality && canEdit
+  );
+  let isArrayMode = showAddAttributeButton && values;
   const lastIndex = isArrayMode ? values.length - 1 : null;
   const appendedZeroAlready = getIndexFromPath(label);
   if (isComponentDataType(type)) {
