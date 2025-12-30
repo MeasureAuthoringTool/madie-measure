@@ -42,6 +42,7 @@ import FileSaver from "file-saver";
 import TestCaseImportDialog from "../common/import/TestCaseImportDialog";
 import ActionCenter from "../common/ActionCenter/ActionCenter";
 import CopyTestCaseDialog from "../common/copyTestCases/CopyTestCaseDialog";
+import MakeJsonMatchUiDialog from "../../common/MakeJsonMatchUiDialog/MakeJsonMatchUiDialog";
 import { generateQiCoreReport } from "../../../util/OverlappingCodesUtils";
 import OverlappingCodesDialog from "../common/overLappingCodes/OverlappingCodesDialog";
 import getModelFamily from "../../../../../../utils/measureModelHelpers";
@@ -173,6 +174,8 @@ const TestCaseList = (props: TestCaseListProps) => {
   const [shiftDatesDialogModalOpen, setShiftDatesDialogModalOpen] =
     useState<boolean>(false);
   const [exportOptionsOpen, setExportOptionsOpen] = useState<boolean>(false);
+  const [makeJsonMatchUiDialogOpen, setMakeJsonMatchUiDialogOpen] =
+    useState<boolean>(false);
 
   const [overlappingCodes, setOverlappingCodes] = useState<
     OverlappingCodeDto[]
@@ -675,6 +678,9 @@ const TestCaseList = (props: TestCaseListProps) => {
                         setShiftDatesDialogModalOpen={
                           setShiftDatesDialogModalOpen
                         }
+                        setMakeJsonMatchUiDialogOpen={
+                          setMakeJsonMatchUiDialogOpen
+                        }
                         onCloneTestCase={handleQiCloneTestCase}
                         exportTestCases={exportTestCases}
                         exportOptionsOpen={exportOptionsOpen}
@@ -780,6 +786,15 @@ const TestCaseList = (props: TestCaseListProps) => {
         handleClose={() => setOpenOverlappingCodesDialog(false)}
         overlappingCodes={overlappingCodes}
         measure={measure}
+      />
+
+      <MakeJsonMatchUiDialog
+        open={makeJsonMatchUiDialogOpen}
+        onClose={() => setMakeJsonMatchUiDialogOpen(false)}
+        onContinue={() => {
+          // Out of scope for this story (MAT-8723)
+        }}
+        selectedTestCaseCount={selectedTestCases?.length || 0}
       />
     </div>
   );
