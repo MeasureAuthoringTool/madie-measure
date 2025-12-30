@@ -16,7 +16,7 @@ import ViewHeadlineIcon from "@mui/icons-material/ViewHeadline";
 import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
 import ResourceContext from "../ResourceContext";
-
+import { Button } from "@madie/madie-design-system/dist/react";
 export interface GridDataEntry {
   title: string;
   entry: BundleEntry;
@@ -27,6 +27,7 @@ interface TestCaseSummaryGridProps {
   gridData: GridDataEntry[];
   testCaseCanEdit: boolean;
   selectedRowId?: string;
+  readOnly: boolean;
 }
 
 const TestCaseSummaryGrid = ({
@@ -35,7 +36,9 @@ const TestCaseSummaryGrid = ({
   onRowDelete,
   testCaseCanEdit,
   selectedRowId,
+  readOnly,
 }: TestCaseSummaryGridProps) => {
+
   const allResourceProfiles = useContext(ResourceContext); // get all profiles loaded from builder
 
   const data = React.useMemo(() => gridData ?? [], [gridData]);
@@ -135,7 +138,20 @@ const TestCaseSummaryGrid = ({
                   : action
               )
             : viewAction;
-          return (
+          return readOnly ? (
+            <Button
+              variant="outline-filled"
+              data-testid={`view-test-case-${row.original.entry.resource.id}`}
+              onClick={() => {
+                onRowEdit(row.original.entry);
+              }}
+              tabIndex={0}
+              role="button"
+              aria-label={`View test case ${row.original.title} id ${row.original.entry.resource.id}`}
+            >
+              View
+            </Button>
+          ) : (
             <ActionCenter
               actions={rowActions}
               testId={row.original.entry.resource.id}
