@@ -214,6 +214,22 @@ describe("TestCaseSummaryGrid", () => {
     expect(mockOnRowEdit).toHaveBeenCalledWith(mockBundle.entry[0]);
   });
 
+  it("should call onRowEdit when view is clicked ", async () => {
+    renderWithResourceContext(
+      <TestCaseSummaryGrid
+        gridData={gridData}
+        onRowEdit={mockOnRowEdit}
+        onRowDelete={mockOnRowDelete}
+        testCaseCanEdit={true}
+        readOnly={true}
+      />
+    );
+
+    const firstActionCenterButton = screen.getByTestId("view-test-case-ec-1");
+    userEvent.click(firstActionCenterButton);
+    expect(mockOnRowEdit).toHaveBeenCalledWith(mockBundle.entry[0]);
+  });
+
   it("should call onRowDelete when Delete action is clicked", async () => {
     renderWithResourceContext(
       <TestCaseSummaryGrid
