@@ -407,8 +407,8 @@ describe("TypeEditor Component", () => {
           <TypeEditor
             resource={null}
             structureDefinition={{
-              id: "ClaimResponse.instantiatesCanonical",
-              path: "ClaimResponse.instantiatesCanonical",
+              id: "ClaimResponse.preAuthPeriod",
+              path: "ClaimResponse.preAuthPeriod",
               min: 0,
               max: "1",
               type: [
@@ -418,15 +418,15 @@ describe("TypeEditor Component", () => {
               ],
             }}
             canEdit={true}
-            label="instantiatesCanonical"
+            label="preAuthPeriod"
             parentStructureDefinition={null}
           />
         </RequiredFieldsProvider>
       </FormikProvider>
     );
 
-    expect(screen.getByText("start")).toBeInTheDocument();
-    expect(screen.getByText("End")).toBeInTheDocument();
+    expect(screen.getByText("Start Date")).toBeInTheDocument();
+    expect(screen.getByText("End Date")).toBeInTheDocument();
   });
 
   test("Should render DateTime component", () => {
@@ -1840,8 +1840,8 @@ describe("TypeEditor Component", () => {
       </FormikProvider>
     );
 
-    expect(screen.getByText("start")).toBeInTheDocument();
-    expect(screen.getByText("End")).toBeInTheDocument();
+    expect(screen.getByText("Start Date")).toBeInTheDocument();
+    expect(screen.getByText("End Date")).toBeInTheDocument();
   });
 
   test("Should render PeriodDateTimeComponent for ClaimResponse.period with time format", () => {
@@ -1885,9 +1885,9 @@ describe("TypeEditor Component", () => {
       </FormikProvider>
     );
 
-    expect(screen.getByText("start")).toBeInTheDocument();
-    expect(screen.getByText("End")).toBeInTheDocument();
-    const timeInputs = screen.getAllByPlaceholderText("MM/DD/YYYY hh:mm aa");
+    expect(screen.getByText("Start Date")).toBeInTheDocument();
+    expect(screen.getByText("End Date")).toBeInTheDocument();
+    const timeInputs = screen.getAllByPlaceholderText("MM-DD-YYYYTHH:mm:ssZ");
     expect(timeInputs.length).toBeGreaterThanOrEqual(2);
   });
 

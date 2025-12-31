@@ -69,6 +69,7 @@ export function simplifySnapshotElements(data) {
       canBeMultipleCardinality: details.max === "*",
       max: details.max,
       min: details.min,
+      contentReference: details.contentReference,
     },
   ]);
 }
@@ -116,7 +117,7 @@ const ElementEditor = ({
     const type = child?.type?.[0]?.code;
     if (!isComponentDataType(type)) {
       // Fetch the resource tree asynchronously
-      // nesting these ifs to avoid a crash in deeply nested Claimresponse.item. Might cause issue elsewhere.
+      // nesting these ifs to avoid a crash in deeply nested ClaimResponse.item. Might cause issue elsewhere.
       if (type) {
         const def = await fhirDefinitionsService.current.getResourceTree(type);
         if (def) {
@@ -170,6 +171,7 @@ const ElementEditor = ({
         canBeMultipleCardinality,
         max: child.max,
         min: child.min,
+        contentReference: child.contentReference,
       };
       return nodeList.concat(builtNode);
     } else {
