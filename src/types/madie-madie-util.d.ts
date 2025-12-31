@@ -31,6 +31,7 @@ declare module "@madie/madie-util" {
     CompareMeasureVersions: boolean;
     QICoreCompositeMeasure: boolean;
     DisplayOwner: boolean;
+    MakeJSONMatchUI: boolean;
   }
 
   export interface ServiceConfig {
