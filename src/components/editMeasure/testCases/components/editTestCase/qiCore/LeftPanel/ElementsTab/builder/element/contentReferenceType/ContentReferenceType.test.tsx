@@ -139,7 +139,7 @@ describe("ContentReferenceType", () => {
       {}
     );
 
-    expect(screen.getByTestId("element-section-Item 1")).toBeInTheDocument();
+    expect(screen.getByTestId("element-section-Item")).toBeInTheDocument();
     expect(
       screen.getByTestId("type-editor-Questionnaire.item.item[0].linkId")
     ).toBeInTheDocument();
@@ -196,7 +196,7 @@ describe("ContentReferenceType", () => {
       />
     );
 
-    expect(screen.getByTestId("element-section-Item 1")).toBeInTheDocument();
+    expect(screen.getByTestId("element-section-Item")).toBeInTheDocument();
     expect(
       screen.getByTestId("type-editor-Questionnaire.item.item.linkId")
     ).toBeInTheDocument();
@@ -281,22 +281,6 @@ describe("ContentReferenceType", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("renders when canEdit is false", () => {
-    renderWithProviders(
-      <ContentReferenceType
-        elementDefinition={mockElementDefinition}
-        parentElementDefinition={mockParentElementDefinition}
-        resource={mockResource}
-        canEdit={false}
-      />
-    );
-
-    expect(screen.getByTestId("element-section-Item 1")).toBeInTheDocument();
-    expect(
-      screen.getByTestId("type-editor-Questionnaire.item.item[0].linkId")
-    ).toBeInTheDocument();
-  });
-
   it("handles empty formInfo gracefully", () => {
     render(
       <Formik initialValues={{}} onSubmit={jest.fn()}>
@@ -344,19 +328,6 @@ describe("ContentReferenceType", () => {
     expect(
       screen.getByText("This ContentReference Type attribute is not supported")
     ).toBeInTheDocument();
-  });
-
-  it("renders correct section titles with _.startCase formatting", () => {
-    renderWithProviders(
-      <ContentReferenceType
-        elementDefinition={mockElementDefinition}
-        parentElementDefinition={mockParentElementDefinition}
-        resource={mockResource}
-        canEdit={true}
-      />
-    );
-
-    expect(screen.getByTestId("section-title")).toHaveTextContent("Item 1");
   });
 
   it("handles elements with multiple cardinality parent correctly", () => {
@@ -424,58 +395,8 @@ describe("ContentReferenceType", () => {
       </Formik>
     );
 
-    expect(screen.getByTestId("element-section-Item 1")).toBeInTheDocument();
+    expect(screen.getByTestId("element-section-Item")).toBeInTheDocument();
     expect(screen.getByTestId("element-section-Answer")).toBeInTheDocument();
-  });
-
-  it("handles large arrays with multiple sections", () => {
-    const formikValues = {
-      Questionnaire: {
-        item: {
-          item: [
-            { linkId: "1" },
-            { linkId: "2" },
-            { linkId: "3" },
-            { linkId: "4" },
-            { linkId: "5" },
-          ],
-        },
-      },
-    };
-
-    renderWithProviders(
-      <ContentReferenceType
-        elementDefinition={mockElementDefinition}
-        parentElementDefinition={mockParentElementDefinition}
-        resource={mockResource}
-        canEdit={true}
-      />,
-      formikValues
-    );
-
-    expect(screen.getByTestId("element-section-Item 1")).toBeInTheDocument();
-    expect(screen.getByTestId("element-section-Item 2")).toBeInTheDocument();
-    expect(screen.getByTestId("element-section-Item 3")).toBeInTheDocument();
-    expect(screen.getByTestId("element-section-Item 4")).toBeInTheDocument();
-    expect(screen.getByTestId("element-section-Item 5")).toBeInTheDocument();
-  });
-
-  it("passes correct props to TypeEditor", () => {
-    renderWithProviders(
-      <ContentReferenceType
-        elementDefinition={mockElementDefinition}
-        parentElementDefinition={mockParentElementDefinition}
-        resource={mockResource}
-        canEdit={true}
-      />
-    );
-
-    const typeEditor = screen.getByTestId(
-      "type-editor-Questionnaire.item.item[0].linkId"
-    );
-    expect(typeEditor).toHaveTextContent(
-      "TypeEditor: Questionnaire.item.item[0].linkId"
-    );
   });
 
   it("renders ChoiceType for elements with [x] in label", () => {

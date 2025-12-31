@@ -257,7 +257,9 @@ const ContentReferenceType = ({
         return (
           <ElementSection
             key={`${elementDefinition.id}[${index}]`}
-            title={_.startCase(`${sectionLabel} ${index + 1}`)}
+            title={_.startCase(
+              `${sectionLabel} ${values.length > 1 ? index + 1 : ""}`
+            )}
             startOpen={false}
             children={
               <Box style={NESTED_BOX_STYLE}>
