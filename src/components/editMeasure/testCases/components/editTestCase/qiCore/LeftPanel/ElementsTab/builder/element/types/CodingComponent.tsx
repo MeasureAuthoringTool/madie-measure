@@ -392,12 +392,14 @@ const CodingComponent = ({
               />
             </div>
           </div>
-          <div
-            tw="mt-3 text-sm text-red-500"
-            data-testid={`select-valueset-warning-${value.code}`}
-          >
-            To update code system or code please select a valid value set.
-          </div>
+          {canEdit && (
+            <div
+              tw="mt-3 text-sm text-red-500"
+              data-testid={`select-valueset-warning-${value.code}`}
+            >
+              To update code system or code please select a valid value set.
+            </div>
+          )}
         </>
       )}
     </div>
