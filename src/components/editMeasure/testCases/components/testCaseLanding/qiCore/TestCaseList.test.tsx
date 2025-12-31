@@ -1734,20 +1734,7 @@ describe("TestCaseList component", () => {
     ).toBeInTheDocument();
   });
 
-  it("Should not display valid test case percentage for QiCore v6 measures when feature flag is off", async () => {
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-      stu6TestCaseValidation: false,
-    }));
-    mockMeasure.model = Model.QICORE_6_0_0;
-    renderTestCaseListComponent();
-    const tabElement = await screen.queryByTestId("validation-tab");
-    expect(tabElement).not.toBeInTheDocument();
-  });
-
   it("Should display valid test case percentage for QiCore v6 measures", async () => {
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-      stu6TestCaseValidation: true,
-    }));
     mockMeasure.model = Model.QICORE_6_0_0;
     renderTestCaseListComponent();
     const tabElement = await screen.findByTestId("validation-tab");

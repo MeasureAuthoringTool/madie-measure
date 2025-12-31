@@ -9,7 +9,6 @@ import "twin.macro";
 import "styled-components/macro";
 import EditorSearch from "../editTestCase/qiCore/LeftPanel/EditorSearch";
 import EditorCalculator from "../editTestCase/calculator/EditorCalculator";
-import { useFeatureFlags } from "@madie/madie-util";
 
 export interface NavTabProps {
   leftPanelActiveTab: string;
@@ -25,7 +24,6 @@ export default function CreateTestCaseNavTabs(props: NavTabProps) {
     dirty,
     setCalculationDialogOpen,
   } = props;
-  const featureFlags = useFeatureFlags();
   const [pendingPanel, setPendingPanel] = useState(leftPanelActiveTab);
 
   const isQICore6 = props.isQICore6;
@@ -72,11 +70,7 @@ export default function CreateTestCaseNavTabs(props: NavTabProps) {
             </Tabs>
           </div>
           <div tw="ml-auto mr-8 flex">
-            {featureFlags?.Calculator && (
-              <EditorCalculator
-                onClick={() => setCalculationDialogOpen(true)}
-              />
-            )}
+            <EditorCalculator onClick={() => setCalculationDialogOpen(true)} />
             {leftPanelActiveTab === "json" && <EditorSearch />}
           </div>
           {isQICore6 && (

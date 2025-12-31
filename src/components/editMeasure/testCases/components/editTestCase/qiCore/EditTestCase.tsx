@@ -761,7 +761,6 @@ const EditTestCase = (props: EditTestCaseProps) => {
           );
         }
       } else if (hasValidHapiOutcome(testCase)) {
-        // TODO: Remove if-check once the stu6TestCaseValidation flag is removed
         if (timezoneUpdated) {
           showToast(
             <div>
@@ -989,34 +988,6 @@ const EditTestCase = (props: EditTestCaseProps) => {
   }, [measure?.groups]);
   return (
     <>
-      {isQICore6 && !featureFlags?.stu6TestCaseValidation && (
-        <div id="status-handler">
-          <MadieAlert
-            type="warning"
-            content={
-              <div
-                aria-live="polite"
-                role="alert"
-                data-testid={"terminology-validation-warning"}
-              >
-                <strong>Warning: </strong>
-                Validations for QI-Core STU6 are Disabled. No validations will
-                be displayed. Validation of your Test Case JSON can be performed
-                using an alternative tool, such as the{" "}
-                <a
-                  href={"https://validator.fhir.org/"}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  HL7 FHIR Validator
-                </a>{" "}
-                with the US-Core and QI-Core IGs selected.
-              </div>
-            }
-            canClose={false}
-          />
-        </div>
-      )}
       <TestCaseForm
         data-testid="create-test-case-form"
         id="edit-test-case-qi-core"
@@ -1110,11 +1081,9 @@ const EditTestCase = (props: EditTestCaseProps) => {
                 ) : (
                   <>
                     <div tw="float-right mr-4">
-                      {featureFlags?.Calculator && (
-                        <EditorCalculator
-                          onClick={() => setCalculationDialogOpen(true)}
-                        />
-                      )}
+                      <EditorCalculator
+                        onClick={() => setCalculationDialogOpen(true)}
+                      />
                       <EditorSearch />
                     </div>
                     <Editor
@@ -1382,9 +1351,6 @@ const EditTestCase = (props: EditTestCaseProps) => {
                         testCase={testCase}
                         validationErrors={validationErrors}
                         isQiCoreV6={isQICore6}
-                        stu6TestCaseValidationFeatureFlag={
-                          featureFlags?.stu6TestCaseValidation
-                        }
                       />
                     </div>
                   </>

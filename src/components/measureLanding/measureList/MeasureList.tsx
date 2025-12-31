@@ -233,145 +233,6 @@ export default function MeasureList(props: {
 
   const columnsToBeAdded = [
     {
-      header: () => (
-        <button tabIndex={0} aria-label="Measure Name">
-          Measure Name
-        </button>
-      ),
-      cell: (info) => (
-        <TruncateText
-          text={info.row.original.measureName}
-          maxLength={120}
-          dataTestId={`measure-name-${info.row.original.id}`}
-        />
-      ),
-      accessorKey: "measureName",
-      sortingFn: (rowA, rowB) =>
-        customSort(rowA.original.measureName, rowB.original.measureName),
-    },
-    {
-      header: () => (
-        <button tabIndex={0} aria-label="Version">
-          Version
-        </button>
-      ),
-      cell: (info) => (
-        <>
-          <TruncateText
-            text={info.row.original.version}
-            maxLength={60}
-            dataTestId={`measure-version-${info.row.original.id}`}
-          />
-
-          {`${info.row.original.actions.measureMetaData?.draft}` === "true" && (
-            <Chip tw="ml-6" className="chip-draft" label="Draft" />
-          )}
-        </>
-      ),
-      accessorKey: "version",
-      sortingFn: (rowA, rowB) =>
-        customSort(rowA.original.version, rowB.original.version),
-    },
-    {
-      header: () => (
-        <button tabIndex={0} aria-label="Model">
-          Model
-        </button>
-      ),
-      cell: (info) => (
-        <TruncateText
-          text={info.row.original.model}
-          maxLength={120}
-          dataTestId={`measure-model-${info.row.original.id}`}
-        />
-      ),
-      accessorKey: "model",
-      sortingFn: (rowA, rowB) =>
-        customSort(rowA.original.model, rowB.original.model),
-    },
-    {
-      // Use tabIndex={0} for accessibility, and make sure it's not inside a button.
-      header: () => (
-        <button
-          tabIndex={0}
-          aria-label="Edit or View Measure"
-          style={{ marginLeft: "-16px" }}
-        >
-          Action
-        </button>
-      ),
-      cell: (info) => {
-        const canEdit =
-          checkUserCanEdit(
-            info.row.original.actions?.measureSet?.owner,
-            info.row.original.actions?.measureSet?.acls
-          ) && info.row.original.actions.measureMetaData?.draft;
-        const isLockedByOther =
-          featureFlags?.Locking &&
-          canEdit &&
-          !!info.row.original.actions?.measureLock;
-
-        const buttonText = isLockedByOther ? "View" : canEdit ? "Edit" : "View";
-
-        const buttonElement = (
-          <Button
-            variant="outline-filled"
-            data-testid={`measure-action-${info.row.original.id}`}
-            aria-label={`${buttonText} Measure ${
-              info.row.original.measureName
-            } ${info.row.original.version}${
-              info.row.original.actions.measureMetaData?.draft ? " Draft" : ""
-            }${
-              isLockedByOther
-                ? ` (Locked by ${info.row.original.actions.measureLock.lockedBy})`
-                : ""
-            }`}
-            onClick={() => {
-              navigate(`/measures/${info.row.original.id}/edit/details/`);
-            }}
-            role="button"
-            tabIndex={0}
-          >
-            {isLockedByOther && (
-              <LockOutlinedIcon sx={{ fontSize: 16, marginRight: 0.5 }} />
-            )}
-            {buttonText}
-          </Button>
-        );
-
-        if (isLockedByOther) {
-          return (
-            <Tooltip
-              title={
-                <>
-                  Locked while being edited by
-                  <br />
-                  {info.row.original.actions.measureLock.lockedBy}
-                </>
-              }
-              arrow
-              slotProps={{
-                tooltip: {
-                  sx: {
-                    maxWidth: "none",
-                    whiteSpace: "nowrap",
-                  },
-                },
-              }}
-            >
-              <span>{buttonElement}</span>
-            </Tooltip>
-          );
-        }
-
-        return buttonElement;
-      },
-      accessorKey: "actions",
-      enableSorting: false,
-    },
-  ];
-  const columnsBehindFlag = [
-    {
       header: "Measure",
       cell: (info) => (
         <>
@@ -604,55 +465,54 @@ export default function MeasureList(props: {
           );
         },
       },
-      ...(featureFlags?.MeasureSearch ? columnsBehindFlag : columnsToBeAdded),
+      ...columnsToBeAdded,
     ];
-    if (featureFlags?.MeasureSearch) {
-      t.push({
-        header: () => <span aria-label="expandArrow"></span>,
-        cell: (info) => {
-          if (info.row.original?.hasAssociatedMeasures) {
-            const handleKeyDown = (e) => {
-              if (e.key === "Enter" || e.key === " ") {
+
+    t.push({
+      header: () => <span aria-label="expandArrow"></span>,
+      cell: (info) => {
+        if (info.row.original?.hasAssociatedMeasures) {
+          const handleKeyDown = (e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              setSelectedExpandedMeasuresIds([]);
+              handleRowClick(info.row.original.actions);
+            }
+          };
+          return (
+            <span
+              role="button"
+              tabIndex={0}
+              onClick={() => {
                 setSelectedExpandedMeasuresIds([]);
                 handleRowClick(info.row.original.actions);
-              }
-            };
-            return (
-              <span
-                role="button"
-                tabIndex={0}
-                onClick={() => {
-                  setSelectedExpandedMeasuresIds([]);
-                  handleRowClick(info.row.original.actions);
-                }}
-                onKeyDown={handleKeyDown}
-                style={{
-                  cursor: "pointer",
-                  display: "inline-flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                {isRowExpanded &&
-                selectedIdForExpansion ===
-                  info.row.original.actions?.measureSetId ? (
-                  <CollapseIcon />
-                ) : (
-                  <ExpandIcon />
-                )}
-              </span>
-            );
-          } else {
-            return <></>;
-          }
-        },
-        accessorKey: "expandArrow",
-        enableSorting: false,
-      });
-    }
+              }}
+              onKeyDown={handleKeyDown}
+              style={{
+                cursor: "pointer",
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              {isRowExpanded &&
+              selectedIdForExpansion ===
+                info.row.original.actions?.measureSetId ? (
+                <CollapseIcon />
+              ) : (
+                <ExpandIcon />
+              )}
+            </span>
+          );
+        } else {
+          return <></>;
+        }
+      },
+      accessorKey: "expandArrow",
+      enableSorting: false,
+    });
+
     return t;
   }, [
-    featureFlags?.MeasureSearch,
     selectedIdForExpansion,
     isRowExpanded,
     featureFlags?.DisplayOwner,
@@ -690,7 +550,7 @@ export default function MeasureList(props: {
           );
         },
       },
-      ...(featureFlags?.MeasureSearch ? columnsBehindFlag : columnsToBeAdded),
+      ...columnsToBeAdded,
       {
         header: "",
         cell: (info) => <></>,
@@ -1224,10 +1084,7 @@ export default function MeasureList(props: {
                             ? "cursor-pointer select-none header-button"
                             : "header-button"
                         }
-                        disabled={
-                          !featureFlags?.MeasureSearch ||
-                          !header.column.getCanSort()
-                        }
+                        disabled={!header.column.getCanSort()}
                         onClick={() => handleSort(header.id.replace("_", "."))}
                         data-testid={`header-${header.id.replace("_", ".")}`}
                         title={
@@ -1310,8 +1167,7 @@ export default function MeasureList(props: {
                   </td>
                 ))}
               </tr>
-              {featureFlags?.MeasureSearch &&
-                selectedIdForExpansion === row.original.actions?.measureSetId &&
+              {selectedIdForExpansion === row.original.actions?.measureSetId &&
                 expandedSectionData?.map((subRow) => (
                   <tr key={subRow.id} className="expanded-row">
                     {expandedcolumns.map((column: any) =>

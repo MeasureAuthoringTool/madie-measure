@@ -196,7 +196,6 @@ jest.mock("@madie/madie-util", () => ({
   })),
   checkUserCanEdit: jest.fn().mockImplementation(() => true),
   useFeatureFlags: jest.fn(() => ({
-    TransferMeasure: true,
     Locking: false,
   })),
   measureStore: {
@@ -958,7 +957,6 @@ describe("EditMeasure Component", () => {
 
   test("Renders in read-only mode when measure is locked", async () => {
     useFeatureFlags.mockImplementation(() => ({
-      TransferMeasure: true,
       Locking: true,
     }));
     const lockedMeasure = {
