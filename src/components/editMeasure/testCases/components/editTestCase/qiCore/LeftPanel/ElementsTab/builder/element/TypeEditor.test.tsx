@@ -4017,4 +4017,65 @@ describe("TypeEditor Component", () => {
     );
     expect(inputDate).toBeInTheDocument();
   });
+
+  test("Should render ContentReferenceType when childDef has contentReference", () => {
+    const mockFormInfo = [
+      [
+        "QuestionnaireResponse.item",
+        {
+          id: "QuestionnaireResponse.item",
+          type: [{ code: "BackboneElement" }],
+          max: "*",
+          min: 0,
+          canBeMultipleCardinality: true,
+        },
+      ],
+      [
+        "QuestionnaireResponse.item.linkId",
+        {
+          id: "QuestionnaireResponse.item.linkId",
+          type: [{ code: "string" }],
+          max: "1",
+          min: 1,
+          canBeMultipleCardinality: false,
+        },
+      ],
+      [
+        "QuestionnaireResponse.item.item",
+        {
+          id: "QuestionnaireResponse.item.item",
+          max: "*",
+          min: "1",
+          canBeMultipleCardinality: true,
+          contentReference: "#QuestionnaireResponse.item",
+        },
+      ],
+    ];
+    // Override the global mock to return false for this test
+    const fhirUtils = require("../../../../../../../api/fhirDefinitionServiceUtilities");
+    jest.spyOn(fhirUtils, "isComponentDataType").mockReturnValue(false);
+
+    render(
+      <FormikProvider value={mockFormik}>
+        <RequiredFieldsProvider requiredFields={{}} formInfo={mockFormInfo}>
+          <TypeEditor
+            resource={{ resourceType: "QuestionnaireResponse" }}
+            structureDefinition={{
+              id: "QuestionnaireResponse.item",
+              path: "QuestionnaireResponse.item",
+              type: [{ code: "BackboneElement" }],
+            }}
+            label="QuestionnaireResponse.item"
+            canEdit={true}
+            parentStructureDefinition={null}
+          />
+        </RequiredFieldsProvider>
+      </FormikProvider>
+    );
+
+    // The component will render an ElementSection with "Item 1" title
+    expect(screen.queryByText("Item 1")).toBeInTheDocument();
+    // Restore the original mock
+    jest.restoreAllMocks();
+  });
 });
