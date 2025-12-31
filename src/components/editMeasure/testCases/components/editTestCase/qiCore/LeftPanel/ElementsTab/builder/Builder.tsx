@@ -24,6 +24,7 @@ import {
   Tab,
   MadieDiscardDialog,
   MadieSpinner,
+  MadieAlert,
 } from "@madie/madie-design-system/dist/react";
 import { useFormikContext } from "formik";
 import { handleCancel, handleRowDelete, handleRowEdit } from "./BuilderUtils";
@@ -165,12 +166,35 @@ const Builder = ({
     };
   }, [measure]);
 
-  // check if patient resource is already added
-  const isPatientAdded = !!state?.bundle?.entry?.some(
+  const numberOfPatientsAdded = state?.bundle?.entry?.filter(
     (e) => e.resource?.resourceType === "Patient"
-  );
-
-  return (
+  )?.length;
+  const isPatientAdded = numberOfPatientsAdded > 0;
+  return numberOfPatientsAdded > 1 ? (
+    <div style={{ margin: "-16px", marginTop: "-32px", marginRight: 0 }}>
+      <MadieAlert
+        minimizeAlerts={false}
+        type="error"
+        content={
+          <div
+            aria-live="polite"
+            role="alert"
+            data-testid="json-error-alert-multiple-patients"
+            style={{
+              paddingTop: "10px",
+              paddingBottom: "8px",
+            }}
+          >
+            <h3>JSON Failing</h3>
+            Builder disabled. Builder is designed to work with a single patient
+            resource. Please remove the extra patient(s) from the JSON to enable
+            Builder support.
+          </div>
+        }
+        canClose={false}
+      />
+    </div>
+  ) : (
     <Box
       sx={{ mr: 2 }}
       id="qi-core-test-case-builder"
