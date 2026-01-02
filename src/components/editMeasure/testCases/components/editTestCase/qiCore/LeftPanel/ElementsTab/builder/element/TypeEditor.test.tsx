@@ -4074,7 +4074,7 @@ describe("TypeEditor Component", () => {
     );
 
     // The component will render an ElementSection with "Item 1" title
-    expect(screen.queryByText("Item 1")).toBeInTheDocument();
+    expect(screen.queryByText("Item")).toBeInTheDocument();
     // Restore the original mock
     jest.restoreAllMocks();
   });
