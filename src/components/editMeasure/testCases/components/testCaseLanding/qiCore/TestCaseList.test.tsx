@@ -565,18 +565,17 @@ describe("TestCaseList component", () => {
   function renderTestCaseListComponent(
     errors: string[] = [],
     warnings: string[] = ["test"],
-    contextFailure = false
+    contextFailure = false,
+    measure = mockMeasure
   ) {
     return render(
       <MemoryRouter
-        initialEntries={[
-          `/measures/${mockMeasure.id}/edit/test-cases/list-page`,
-        ]}
+        initialEntries={[`/measures/${measure.id}/edit/test-cases/list-page`]}
       >
         <ApiContextProvider value={serviceConfig}>
           <ExecutionContextProvider
             value={{
-              measureState: [mockMeasure, setMeasure],
+              measureState: [measure, setMeasure],
               bundleState: [measureBundle, setMeasureBundle],
               valueSetsState: [valueSets, setValueSets],
               executionContextReady: true,
@@ -1754,6 +1753,35 @@ describe("TestCaseList component", () => {
     expect(tabElement).toBeInTheDocument();
     expect(tabElement).toHaveAttribute("aria-label", "Validation tab panel");
     expect(tabElement).toHaveTextContent("66%");
+    expect(tabElement).toHaveTextContent("Valid(2/3)");
+  });
+
+  it("Should display `0` when there are no test cases", async () => {
+    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
+      stu6TestCaseValidation: true,
+    }));
+    mockGetPassingPercentageForTestCases.mockClear();
+    mockGetPassingPercentageForTestCases.mockReturnValue({
+      passPercentage: 0,
+      passFailRatio: "0/0",
+    });
+
+    const measure = {
+      ...mockMeasure,
+      model: Model.QICORE_6_0_0,
+      testCases: undefined,
+    };
+    // Also mock the test case service to return an empty array
+    useTestCaseServiceMock.mockImplementation(() => ({
+      ...useTestCaseServiceMockResolved,
+      getTestCasesByMeasureId: jest.fn().mockResolvedValue([]),
+    }));
+
+    renderTestCaseListComponent([], ["test"], false, measure);
+    const tabElement = await screen.findByTestId("validation-tab");
+    expect(tabElement).toBeInTheDocument();
+    expect(tabElement).toHaveAttribute("aria-label", "Validation tab panel");
+    expect(tabElement).toHaveTextContent("Valid(0)");
   });
 
   it("Should not display valid test case percentage for QiCore v4 measures", async () => {
