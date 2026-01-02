@@ -39,6 +39,7 @@ export interface NavTabProps {
   onGenerateOverlappingCodesReport: () => void;
   showReportOptions: boolean;
   setShowReportOptions: (show: boolean) => void;
+  validationPercentageFraction: string;
 }
 
 const defaultStyle = {
@@ -70,6 +71,7 @@ export default function CreateCodeCoverageNavTabs(props: NavTabProps) {
     exportTestCases,
     validationPercentage,
     onGenerateOverlappingCodesReport,
+    validationPercentageFraction,
   } = props;
   const [optionsOpen, setOptionsOpen] = useState<boolean>(false);
   const [anchorEl, setAnchorEl] = useState(null);
@@ -98,10 +100,20 @@ export default function CreateCodeCoverageNavTabs(props: NavTabProps) {
   const getValidationResultsDisplay = (label: string) => {
     return (
       <div>
-        <div style={{ fontSize: "29px", fontWeight: "600" }}>
+        <div
+          style={{ fontSize: "29px", fontWeight: "600" }}
+          aria-label={`Validation percentage: ${
+            validationPercentage ? validationPercentage + "%" : "not available"
+          }`}
+        >
           {validationPercentage ? validationPercentage + "%" : "-"}
         </div>
-        <div style={{ fontSize: "19px" }}>{label}</div>
+        <div
+          style={{ fontSize: "19px" }}
+          aria-label={`Validation Percentage Fraction: ${validationPercentageFraction}`}
+        >
+          {label}({validationPercentageFraction})
+        </div>
       </div>
     );
   };
