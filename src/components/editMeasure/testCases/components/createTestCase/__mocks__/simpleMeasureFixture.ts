@@ -72,4 +72,5 @@ export const simpleMeasureFixture: Measure = {
     copyright: null,
     disclaimer: null,
   },
+  testCaseConfiguration: { executeInvalidTestCases: false },
 };

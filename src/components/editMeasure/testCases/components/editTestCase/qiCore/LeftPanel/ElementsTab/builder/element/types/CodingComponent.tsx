@@ -137,6 +137,7 @@ const CodingComponent = ({
 
   const handleCodeChange = (code: string) => {
     let coding: Coding;
+    debugger
     if (selectedValueSet.title === "Custom Code") {
       coding = {
         system: selectedConcept?.system,

@@ -3187,23 +3187,6 @@ describe("EditTestCase component", () => {
     });
 
     it("executes a test case and shows the errors for invalid test case json", async () => {
-      mockedAxios.post.mockResolvedValue({
-        data: {
-          code: 200,
-          message: null,
-          successful: true,
-          outcomeResponse: {
-            resourceType: "OperationOutcome",
-            issue: [
-              {
-                severity: "informational",
-                code: "processing",
-                diagnostics: "No issues!",
-              },
-            ],
-          },
-        },
-      });
       const testCase = {
         id: "1234",
         description: "Test IPP",
@@ -3218,14 +3201,7 @@ describe("EditTestCase component", () => {
         json: '{ "resourceType": "Bundle", "type": "collection", "entry": [] }',
       } as TestCase;
       mockedAxios.get.mockClear().mockImplementation((args) => {
-        if (args && args.endsWith("/bundle")) {
-          return Promise.resolve({
-            data: buildMeasureBundle(simpleMeasureFixture),
-          });
-        } else if (
-          args &&
-          args.startsWith(serviceConfig.measureService.baseUrl)
-        ) {
+        if (args && args.startsWith(serviceConfig.measureService.baseUrl)) {
           return Promise.resolve({ data: simpleMeasureFixture });
         } else if (args && args.endsWith("series")) {
           return Promise.resolve({ data: ["DENOM_Pass", "NUMER_Pass"] });
