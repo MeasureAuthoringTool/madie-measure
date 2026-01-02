@@ -653,7 +653,6 @@ const TypeEditor = ({
             addTitle={addTitle}
             {...formik.getFieldProps(label)}
             onChange={(value) => {
-              debugger
               formik.setFieldTouched(label);
               formik.setFieldValue(label, value);
             }}
