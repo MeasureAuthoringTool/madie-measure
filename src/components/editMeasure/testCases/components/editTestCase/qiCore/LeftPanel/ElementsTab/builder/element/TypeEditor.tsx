@@ -3,7 +3,6 @@ import * as _ from "lodash";
 import { Box, Divider } from "@mui/material";
 
 import StringComponent from "./types/StringComponent";
-import PeriodComponent from "./types/PeriodComponent";
 import DateTimeComponent from "./types/DateTimeComponent";
 import BooleanComponent from "./types/BooleanComponent";
 import UriComponent from "./types/UriComponent";
@@ -38,6 +37,7 @@ import MoneyComponent from "./types/MoneyComponent";
 import TimingComponent from "./types/TimingComponent";
 import RangeComponent from "./types/RangeComponent";
 import ReferenceComponent from "./types/ReferenceComponent";
+import ContentReferenceType from "./contentReferenceType/ContentReferenceType";
 
 export const formikErrorHandler = (name: string, formik) => {
   const touched = getNestedProperty(formik.touched, name);
@@ -157,8 +157,10 @@ const TypeEditor = ({
   const addTitle = structureDefinition?.id
     ? _.startCase(getLastPart(structureDefinition.id))
     : "";
-  const showAddAttributeButton = Boolean(!isRoot && canBeMultipleCardinality);
-  const isArrayMode = showAddAttributeButton && values;
+  const showAddAttributeButton = Boolean(
+    !isRoot && canBeMultipleCardinality && canEdit
+  );
+  let isArrayMode = showAddAttributeButton && values;
   const lastIndex = isArrayMode ? values.length - 1 : null;
   const appendedZeroAlready = getIndexFromPath(label);
   if (isComponentDataType(type)) {
@@ -273,13 +275,17 @@ const TypeEditor = ({
         );
       case "Period":
         return (
-          <PeriodComponent
+          <PeriodDateTimeComponent
             label={label}
             canEdit={canEdit}
-            structureDefinition={structureDefinition}
-            showAddAttributeButton={showAddAttributeButton}
-            addTitle={addTitle}
+            helperText={formikErrorHandler(label, formik)}
+            error={getNestedProperty(formik.errors, label)}
             fieldRequired={required}
+            {...formik.getFieldProps(label)}
+            onChange={(value) => {
+              formik.setFieldTouched(label);
+              formik.setFieldValue(label, value);
+            }}
           />
         );
       case "dateTime":
@@ -435,6 +441,7 @@ const TypeEditor = ({
         return (
           <IdentifierComponent
             label={label}
+            handleAddElement={handleAddElement}
             canEdit={canEdit}
             resource={resource}
             structureDefinition={structureDefinition}
@@ -597,7 +604,6 @@ const TypeEditor = ({
               }
               return (
                 <>
-                  Codes component
                   {/* Observation.category , AuditEvent.type 0..*, but base fhir only. Revisit this render once base fhir is supported. */}
                   <CodesComponent
                     key={index}
@@ -643,6 +649,7 @@ const TypeEditor = ({
       case "Coding":
         return (
           <CodingComponent
+            handleAddElement={handleAddElement}
             label={label}
             canEdit={canEdit}
             structureDefinition={structureDefinition}
@@ -658,18 +665,31 @@ const TypeEditor = ({
         );
       case "CodeableConcept":
         return (
-          <CodeableConceptComponent
-            label={label}
-            canEdit={canEdit}
-            structureDefinition={structureDefinition}
-            showAddAttributeButton={showAddAttributeButton}
-            addTitle={addTitle}
-            {...formik.getFieldProps(label)}
-            onChange={(value) => {
-              formik.setFieldTouched(label);
-              formik.setFieldValue(label, value);
-            }}
-          />
+          <>
+            {(isArrayMode ? values : [null]).map((el, index) => {
+              let fieldLabel;
+              if (isArrayMode && appendedZeroAlready) {
+                fieldLabel = `${label.slice(0, label.length - 3)}[${index}]`;
+              } else {
+                fieldLabel = label;
+              }
+              return (
+                <CodeableConceptComponent
+                  key={index}
+                  canEdit={canEdit}
+                  structureDefinition={structureDefinition}
+                  label={fieldLabel}
+                  showAddAttributeButton={
+                    showAddAttributeButton &&
+                    (!isArrayMode || index === lastIndex)
+                  }
+                  addTitle={addTitle}
+                  handleAddElement={handleAddElement}
+                  {...formik.getFieldProps(fieldLabel)}
+                />
+              );
+            })}
+          </>
         );
       case "Money":
         return (
@@ -926,13 +946,19 @@ const TypeEditor = ({
                 resource={resource}
                 parentStructureDefinition={parentStructureDefinition}
                 canEdit={canEdit}
-                label={label}
+                label={filteredChildDef.id}
+              />
+            );
+          } else if (childDef.contentReference) {
+            return (
+              <ContentReferenceType
+                elementDefinition={childDef}
+                parentElementDefinition={structureDefinition}
+                resource={resource}
+                canEdit={canEdit}
               />
             );
           } else if (!isComponentDataType(childDef?.type?.[0]?.code)) {
-            // add additional check for if the type exists because I have no idea what ClaimResponse.item.detail.adjudication is but it has no type.
-            // TODO Figure out whats up with ClaimResponse.item.detail.adjudication. Doesn't appear to have children, but a backbone el
-            // TODO probably have to map these multiple cardinality elements against the length of the formik.values[propertyPath] if multiple and add index like done in elementEditorChildren.
             return (
               <ElementSection
                 title={childDef.id}

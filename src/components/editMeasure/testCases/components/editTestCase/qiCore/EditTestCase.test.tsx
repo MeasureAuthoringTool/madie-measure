@@ -2426,10 +2426,12 @@ describe("EditTestCase component", () => {
                 {
                   severity: "error",
                   diagnostics: "Patient.name is a required field",
+                  location: ["Location 1"],
                 },
                 {
                   severity: "error",
                   diagnostics: "Patient.identifier is a required field",
+                  location: ["Location 2"],
                 },
               ],
             },
@@ -2469,14 +2471,19 @@ describe("EditTestCase component", () => {
         "json-validation-errors-list"
       );
       expect(errorList).toBeInTheDocument();
-      expect(
-        within(errorList).getByText("Error: Patient.name is a required field")
-      ).toBeInTheDocument();
-      expect(
-        within(errorList).getByText(
-          "Error: Patient.identifier is a required field"
-        )
-      ).toBeInTheDocument();
+
+      const patientNameError = await screen.findByTestId("validation-card-0");
+      expect(patientNameError).toBeInTheDocument();
+      expect(patientNameError).toHaveTextContent(
+        `Error: Resource ID: Location 1 | Patient.name is a required field`
+      );
+      const patientIdentifierError = await screen.findByTestId(
+        "validation-card-1"
+      );
+      expect(patientIdentifierError).toBeInTheDocument();
+      expect(patientIdentifierError).toHaveTextContent(
+        `Error: Resource ID: Location 2 | Patient.identifier is a required field`
+      );
 
       jest.useRealTimers();
     });
@@ -2588,10 +2595,12 @@ describe("EditTestCase component", () => {
                 {
                   severity: "error",
                   diagnostics: "Patient.name is a required field",
+                  location: ["Location 1"],
                 },
                 {
                   severity: "error",
                   diagnostics: "Patient.identifier is a required field",
+                  location: ["Location 2"],
                 },
               ],
             },
@@ -2629,14 +2638,20 @@ describe("EditTestCase component", () => {
         "json-validation-errors-list"
       );
       expect(validationErrorsList).toBeInTheDocument();
-      const patientNameError = await within(validationErrorsList).findByText(
-        "Error: Patient.name is a required field"
-      );
+
+      const patientNameError = await screen.findByTestId("validation-card-0");
       expect(patientNameError).toBeInTheDocument();
-      const patientIdentifierError = within(validationErrorsList).getByText(
-        "Error: Patient.identifier is a required field"
+      expect(patientNameError).toHaveTextContent(
+        `Error: Resource ID: Location 1 | Patient.name is a required field`
+      );
+
+      const patientIdentifierError = await screen.findByTestId(
+        "validation-card-1"
       );
       expect(patientIdentifierError).toBeInTheDocument();
+      expect(patientIdentifierError).toHaveTextContent(
+        `Error: Resource ID: Location 2 | Patient.identifier is a required field`
+      );
     });
 
     it("should alert for HAPI FHIR errors", async () => {
@@ -2697,6 +2712,7 @@ describe("EditTestCase component", () => {
               {
                 severity: "error",
                 diagnostics: "Bad things happened",
+                location: ["Location 1"],
               },
             ],
           },
@@ -2743,10 +2759,12 @@ describe("EditTestCase component", () => {
         "json-validation-errors-list"
       );
       expect(validationErrorsList).toBeInTheDocument();
-      const noErrors = await within(validationErrorsList).findByText(
-        data.hapiOperationOutcome.outcomeResponse.text
+
+      const error = await screen.findByTestId("validation-card-0");
+      expect(error).toBeInTheDocument();
+      expect(error).toHaveTextContent(
+        `Error: Resource ID: Location 1 | Bad things happened`
       );
-      expect(noErrors).toBeInTheDocument();
 
       const closeValidationErrorsBtn = await screen.findByRole("button", {
         name: "Close Panel",

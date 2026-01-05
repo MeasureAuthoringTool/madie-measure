@@ -31,6 +31,7 @@ const CodingComponent = ({
   showAddAttributeButton,
   addTitle,
   includePrev = true,
+  handleAddElement,
 }) => {
   const [allValueSets, setAllValueSets] = useState<ValueSet[]>();
   const [selectedValueSet, setSelectedValueSet] = useState<ValueSet>();
@@ -275,7 +276,7 @@ const CodingComponent = ({
           onChange={(e) => handleValueSetChange(e.target.value)}
         />
         {showAddAttributeButton && addTitle && (
-          <AddElementButton name={addTitle} />
+          <AddElementButton name={addTitle} onClick={handleAddElement} />
         )}
       </div>
       {selectedValueSet && (
@@ -391,12 +392,14 @@ const CodingComponent = ({
               />
             </div>
           </div>
-          <div
-            tw="mt-3 text-sm text-red-500"
-            data-testid={`select-valueset-warning-${value.code}`}
-          >
-            To update code system or code please select a valid value set.
-          </div>
+          {canEdit && (
+            <div
+              tw="mt-3 text-sm text-red-500"
+              data-testid={`select-valueset-warning-${value.code}`}
+            >
+              To update code system or code please select a valid value set.
+            </div>
+          )}
         </>
       )}
     </div>

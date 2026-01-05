@@ -23,6 +23,8 @@ import {
   Tabs,
   Tab,
   MadieDiscardDialog,
+  MadieSpinner,
+  MadieAlert,
 } from "@madie/madie-design-system/dist/react";
 import { useFormikContext } from "formik";
 import { handleCancel, handleRowDelete, handleRowEdit } from "./BuilderUtils";
@@ -113,10 +115,16 @@ const Builder = ({
   const [resources, setResources] = useState<ResourceIdentifier[]>(null);
   const addedResources = state?.bundle?.entry?.length || 0;
   const [savedGridID, setSavedGridID] = useState(null);
+  const [applyLoading, setApplyLoading] = useState(false);
   useEffect(() => {
     const fetchResources = async () => {
-      const resourceIdentifiers =
-        await fhirDefinitionsService.current.getResources();
+      // we want to filter out base fhir resources, by checking if the id does not start with qicore or us-core
+      const resourceIdentifiers = (
+        await fhirDefinitionsService.current.getResources()
+      ).filter(
+        (res) => res.id.startsWith("qicore") || res.id.startsWith("us-core")
+      );
+
       setResourceIdentifiers(resourceIdentifiers);
       abortController.current = new AbortController();
       fhirElmTranslationService.current
@@ -158,12 +166,35 @@ const Builder = ({
     };
   }, [measure]);
 
-  // check if patient resource is already added
-  const isPatientAdded = !!state?.bundle?.entry?.some(
+  const numberOfPatientsAdded = state?.bundle?.entry?.filter(
     (e) => e.resource?.resourceType === "Patient"
-  );
-
-  return (
+  )?.length;
+  const isPatientAdded = numberOfPatientsAdded > 0;
+  return numberOfPatientsAdded > 1 ? (
+    <div style={{ margin: "-16px", marginTop: "-32px", marginRight: 0 }}>
+      <MadieAlert
+        minimizeAlerts={false}
+        type="error"
+        content={
+          <div
+            aria-live="polite"
+            role="alert"
+            data-testid="json-error-alert-multiple-patients"
+            style={{
+              paddingTop: "10px",
+              paddingBottom: "8px",
+            }}
+          >
+            <h3>JSON Failing</h3>
+            Builder disabled. Builder is designed to work with a single patient
+            resource. Please remove the extra patient(s) from the JSON to enable
+            Builder support.
+          </div>
+        }
+        canClose={false}
+      />
+    </div>
+  ) : (
     <Box
       sx={{ mr: 2 }}
       id="qi-core-test-case-builder"
@@ -250,33 +281,56 @@ const Builder = ({
           />
         )}
         {activeTab === "Added" && (
-          <>
-            {selectedResourceID && (
+          <div style={{ position: "relative", minHeight: "400px" }}>
+            {applyLoading && (
+              <div
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  backgroundColor: "rgba(255, 255, 255, 0.8)",
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  zIndex: 1000,
+                }}
+              >
+                <MadieSpinner style={{ height: 50, width: 50 }} />
+              </div>
+            )}
+            <>
               <ResourceContextProvider value={resourceIdentifiers}>
-                <ResourceEditor
-                  selectedResourceID={selectedResourceID}
-                  setValidationSchema={setValidationSchema}
-                  setInitialFormikValuesStu6={setInitialFormikValuesStu6}
-                  onCancel={() =>
-                    handleCancel(setSelectedResourceId, savedGridID)
+                {selectedResourceID && (
+                  <ResourceEditor
+                    selectedResourceID={selectedResourceID}
+                    setValidationSchema={setValidationSchema}
+                    setInitialFormikValuesStu6={setInitialFormikValuesStu6}
+                    onCancel={() =>
+                      handleCancel(setSelectedResourceId, savedGridID)
+                    }
+                    canEdit={canEdit}
+                    applyLoading={applyLoading}
+                    setApplyLoading={setApplyLoading}
+                  />
+                )}
+                <TestCaseSummaryGrid
+                  gridData={prepareSummaryGridData(
+                    state?.bundle?.entry,
+                    resourceIdentifiers
+                  )}
+                  onRowEdit={(row) =>
+                    handleRowEdit(row, setSelectedResourceId, setSavedGridID)
                   }
-                  canEdit={canEdit}
+                  onRowDelete={(row) => handleRowDelete(row, dispatch)}
+                  testCaseCanEdit={canEdit}
+                  selectedRowId={selectedResourceID}
+                  readOnly={!canEdit}
                 />
               </ResourceContextProvider>
-            )}
-            <TestCaseSummaryGrid
-              gridData={prepareSummaryGridData(
-                state?.bundle?.entry,
-                resourceIdentifiers
-              )}
-              onRowEdit={(row) =>
-                handleRowEdit(row, setSelectedResourceId, setSavedGridID)
-              }
-              onRowDelete={(row) => handleRowDelete(row, dispatch)}
-              testCaseCanEdit={canEdit}
-              selectedRowId={selectedResourceID}
-            />
-          </>
+            </>
+          </div>
         )}
       </div>
       <MadieDiscardDialog

@@ -47,6 +47,8 @@ interface ResourceEditorProps {
   setInitialFormikValuesStu6: Dispatch<SetStateAction<Object>>;
   setValidationSchema: Dispatch<SetStateAction<Object>>;
   selectedResourceID: string;
+  applyLoading: boolean;
+  setApplyLoading: Dispatch<SetStateAction<boolean>>;
 }
 
 // Determines the resource name to display based on the title and base resource name
@@ -72,6 +74,8 @@ const ResourceEditor = ({
   canEdit,
   setInitialFormikValuesStu6,
   setValidationSchema,
+  applyLoading,
+  setApplyLoading,
 }: ResourceEditorProps) => {
   const fhirDefinitionsService = useRef(useFhirDefinitionsServiceApi());
   const { dispatch, state } = useQiCoreResource();
@@ -340,24 +344,26 @@ const ResourceEditor = ({
           <div className="resource-body">
             <div className="side-bar">
               <Box sx={{ p: 1, borderRight: "1px solid #8C8C8C" }}>
-                <IconButton
-                  onClick={() => setAddDialogOpen(true)}
-                  sx={{
-                    width: "100%",
-                    fontSize: "0.875rem",
-                    textTransform: "none",
-                    fontFamily: "'Roboto', 'Helvetica', 'Arial', sans-serif",
-                    "&:hover": {
-                      backgroundColor: "transparent",
-                    },
-                    padding: 0,
-                    color: "#3171C2",
-                  }}
-                  data-testid="add-attribute-dialog-button"
-                >
-                  <AddCircleOutlineIcon sx={{ marginRight: 1 }} />
-                  <div>Add Attribute(s)</div>
-                </IconButton>
+                {canEdit && (
+                  <IconButton
+                    onClick={() => setAddDialogOpen(true)}
+                    sx={{
+                      width: "100%",
+                      fontSize: "0.875rem",
+                      textTransform: "none",
+                      fontFamily: "'Roboto', 'Helvetica', 'Arial', sans-serif",
+                      "&:hover": {
+                        backgroundColor: "transparent",
+                      },
+                      padding: 0,
+                      color: "#3171C2",
+                    }}
+                    data-testid="add-attribute-dialog-button"
+                  >
+                    <AddCircleOutlineIcon sx={{ marginRight: 1 }} />
+                    <div>Add Attribute(s)</div>
+                  </IconButton>
+                )}
               </Box>
               <div className={"outer-wrapper"}>
                 <InnerWrapper
@@ -411,6 +417,8 @@ const ResourceEditor = ({
               resource={editingResource}
               resourcePath={resourceBasePath}
               displayedElementsTree={displayedElementsTree}
+              applyLoading={applyLoading}
+              setApplyLoading={setApplyLoading}
               onChange={(path, value) => {
                 const nextEntry = _.cloneDeep(selectedResource.bundleEntry);
                 _.set(nextEntry.resource, path, value);

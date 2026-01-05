@@ -14,6 +14,7 @@ const CodeableConceptComponent = ({
   onChange,
   showAddAttributeButton,
   addTitle,
+  handleAddElement,
 }) => {
   const handleChange = useCallback(
     (value: Coding) => {
@@ -25,6 +26,7 @@ const CodeableConceptComponent = ({
     <Box sx={{ display: "flex", flexDirection: "column" }}>
       <InputLabel>{label}</InputLabel>
       <CodingComponent
+        handleAddElement={handleAddElement}
         addTitle={addTitle}
         showAddAttributeButton={showAddAttributeButton}
         label={label}
