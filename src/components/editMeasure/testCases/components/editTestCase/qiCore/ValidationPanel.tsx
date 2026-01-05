@@ -11,6 +11,23 @@ interface AlertProps {
   message?: any;
 }
 
+export function extractResourceId(inputString) {
+  // Regular expression to find the content between / and */
+  // \*\/ : Matches the closing '*/' sequence literally.
+  // e.g. Bundle.entry[0].resource/*Patient/11ddb0b4-893f-46a2-a58a-f99c5f78ed5b*/
+  // or: Bundle.entry[1].resource/*Encounter/NUMERStrat2Pass-TimeToTx61Min01*/.location[0].period
+  const regex = /\/\*.*?\/(.*?)\*\//;
+
+  const match = inputString.match(regex);
+
+  // If a match is found, the captured group (index 1) contains the desired string.
+  if (match && match.length > 1) {
+    return match[1]; // Returns "Encounter/NUMERStrat2Pass-TimeToTx61Min01"
+  } else {
+    return inputString; // Return inputString as an appropriate fallback if no match is found
+  }
+}
+
 /*
 previous color system based off of tw.
 success #249A5B vs #A4FAA8, 3:1 fail dark green to light green
@@ -94,6 +111,7 @@ const ValidationPanel = ({
               error.severity.slice(1) +
               ": "
             : ""}
+          Resource ID: {extractResourceId(error.location?.[0])} |{" "}
           {error.diagnostics}
         </ValidationAlertCard>
       ));
