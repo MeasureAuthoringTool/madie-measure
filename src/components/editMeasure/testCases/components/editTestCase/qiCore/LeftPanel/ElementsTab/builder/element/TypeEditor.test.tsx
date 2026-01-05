@@ -407,8 +407,8 @@ describe("TypeEditor Component", () => {
           <TypeEditor
             resource={null}
             structureDefinition={{
-              id: "ClaimResponse.instantiatesCanonical",
-              path: "ClaimResponse.instantiatesCanonical",
+              id: "ClaimResponse.preAuthPeriod",
+              path: "ClaimResponse.preAuthPeriod",
               min: 0,
               max: "1",
               type: [
@@ -418,15 +418,15 @@ describe("TypeEditor Component", () => {
               ],
             }}
             canEdit={true}
-            label="instantiatesCanonical"
+            label="preAuthPeriod"
             parentStructureDefinition={null}
           />
         </RequiredFieldsProvider>
       </FormikProvider>
     );
 
-    expect(screen.getByText("start")).toBeInTheDocument();
-    expect(screen.getByText("End")).toBeInTheDocument();
+    expect(screen.getByText("Start Date")).toBeInTheDocument();
+    expect(screen.getByText("End Date")).toBeInTheDocument();
   });
 
   test("Should render DateTime component", () => {
@@ -1840,8 +1840,8 @@ describe("TypeEditor Component", () => {
       </FormikProvider>
     );
 
-    expect(screen.getByText("start")).toBeInTheDocument();
-    expect(screen.getByText("End")).toBeInTheDocument();
+    expect(screen.getByText("Start Date")).toBeInTheDocument();
+    expect(screen.getByText("End Date")).toBeInTheDocument();
   });
 
   test("Should render PeriodDateTimeComponent for ClaimResponse.period with time format", () => {
@@ -1885,9 +1885,9 @@ describe("TypeEditor Component", () => {
       </FormikProvider>
     );
 
-    expect(screen.getByText("start")).toBeInTheDocument();
-    expect(screen.getByText("End")).toBeInTheDocument();
-    const timeInputs = screen.getAllByPlaceholderText("MM/DD/YYYY hh:mm aa");
+    expect(screen.getByText("Start Date")).toBeInTheDocument();
+    expect(screen.getByText("End Date")).toBeInTheDocument();
+    const timeInputs = screen.getAllByPlaceholderText("MM-DD-YYYYTHH:mm:ssZ");
     expect(timeInputs.length).toBeGreaterThanOrEqual(2);
   });
 
@@ -4016,5 +4016,66 @@ describe("TypeEditor Component", () => {
       `date-time-format-selector-field-ClaimResponse.date[0]`
     );
     expect(inputDate).toBeInTheDocument();
+  });
+
+  test("Should render ContentReferenceType when childDef has contentReference", () => {
+    const mockFormInfo = [
+      [
+        "QuestionnaireResponse.item",
+        {
+          id: "QuestionnaireResponse.item",
+          type: [{ code: "BackboneElement" }],
+          max: "*",
+          min: 0,
+          canBeMultipleCardinality: true,
+        },
+      ],
+      [
+        "QuestionnaireResponse.item.linkId",
+        {
+          id: "QuestionnaireResponse.item.linkId",
+          type: [{ code: "string" }],
+          max: "1",
+          min: 1,
+          canBeMultipleCardinality: false,
+        },
+      ],
+      [
+        "QuestionnaireResponse.item.item",
+        {
+          id: "QuestionnaireResponse.item.item",
+          max: "*",
+          min: "1",
+          canBeMultipleCardinality: true,
+          contentReference: "#QuestionnaireResponse.item",
+        },
+      ],
+    ];
+    // Override the global mock to return false for this test
+    const fhirUtils = require("../../../../../../../api/fhirDefinitionServiceUtilities");
+    jest.spyOn(fhirUtils, "isComponentDataType").mockReturnValue(false);
+
+    render(
+      <FormikProvider value={mockFormik}>
+        <RequiredFieldsProvider requiredFields={{}} formInfo={mockFormInfo}>
+          <TypeEditor
+            resource={{ resourceType: "QuestionnaireResponse" }}
+            structureDefinition={{
+              id: "QuestionnaireResponse.item",
+              path: "QuestionnaireResponse.item",
+              type: [{ code: "BackboneElement" }],
+            }}
+            label="QuestionnaireResponse.item"
+            canEdit={true}
+            parentStructureDefinition={null}
+          />
+        </RequiredFieldsProvider>
+      </FormikProvider>
+    );
+
+    // The component will render an ElementSection with "Item 1" title
+    expect(screen.queryByText("Item")).toBeInTheDocument();
+    // Restore the original mock
+    jest.restoreAllMocks();
   });
 });

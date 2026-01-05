@@ -592,6 +592,8 @@ const TestCaseList = (props: TestCaseListProps) => {
     totalTestCases > 0
       ? Math.floor((validTestCasesCount / totalTestCases) * 100)
       : 0;
+  const validationPercentageFraction =
+    totalTestCases > 0 ? `${validTestCasesCount}/${totalTestCases}` : `0`;
 
   return (
     <div>
@@ -639,6 +641,7 @@ const TestCaseList = (props: TestCaseListProps) => {
                 showReportOptions={showReportOptions}
                 setShowReportOptions={setShowReportOptions}
                 validationPercentage={validationPercentage}
+                validationPercentageFraction={validationPercentageFraction}
               />
             </div>
             <CreateNewTestCaseDialog
