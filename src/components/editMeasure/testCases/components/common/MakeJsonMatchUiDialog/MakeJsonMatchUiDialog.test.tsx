@@ -40,15 +40,13 @@ describe("MakeJsonMatchUiDialog", () => {
       )
     ).toBeInTheDocument();
     expect(
-      screen.getByText(
-        'Set all "family" fields in the JSON to the group value that was entered in the UI'
-      )
+      screen.getByText(/Set all "family" fields in the JSON to the/)
     ).toBeInTheDocument();
+    expect(screen.getByText("group")).toBeInTheDocument();
     expect(
-      screen.getByText(
-        'Set all "given" fields in the JSON to the title value that was entered in the UI'
-      )
+      screen.getByText(/Set all "given" fields in the JSON to the/)
     ).toBeInTheDocument();
+    expect(screen.getByText("title")).toBeInTheDocument();
   });
 
   it("should call onClose when Cancel button is clicked", async () => {
