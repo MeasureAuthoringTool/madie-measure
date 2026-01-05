@@ -1,7 +1,7 @@
 import * as React from "react";
 
 import { render } from "@testing-library/react";
-import ValidationPanel from "./ValidationPanel";
+import ValidationPanel, { extractResourceId } from "./ValidationPanel";
 import {
   HapiOperationOutcome,
   TestCase,
@@ -170,7 +170,7 @@ describe("ValidationPanel component", () => {
     expect(getByTestId("validation-card-0")).toHaveTextContent("Error");
     expect(getByTestId("validation-card-1")).toBeInTheDocument();
     expect(getByTestId("validation-card-1")).toHaveTextContent(
-      "Warning: Validation warning"
+      "Warning: Resource ID: location 1 | Validation warning."
     );
   });
 
@@ -243,7 +243,9 @@ describe("ValidationPanel component", () => {
     );
     const card = getByTestId("validation-card-5");
     expect(card).toBeInTheDocument();
-    expect(card).toHaveTextContent("Warning: This is a warning.");
+    expect(card).toHaveTextContent(
+      "Warning: Resource ID: location 1 | This is a warning."
+    );
   });
 
   it("should render no errors present text when no errors and feature flag is true for valid status and isQiCoreV6", () => {
@@ -292,5 +294,20 @@ describe("ValidationPanel component", () => {
       />
     );
     expect(getByText("Nothing to see here!")).toBeInTheDocument();
+  });
+
+  describe("extractString function", () => {
+    it("should extract the correct string from the input", () => {
+      const input =
+        "Bundle.entry[1].resource/*Encounter/NUMERStrat2Pass-TimeToTx61Min01*/.location[0].period";
+      const result = extractResourceId(input);
+      expect(result).toBe("NUMERStrat2Pass-TimeToTx61Min01");
+    });
+
+    it("should return original text if no match is found", () => {
+      const input = "Location 1";
+      const result = extractResourceId(input);
+      expect(result).toBe("Location 1");
+    });
   });
 });
