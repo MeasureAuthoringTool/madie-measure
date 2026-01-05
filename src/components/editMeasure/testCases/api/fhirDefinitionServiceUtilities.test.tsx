@@ -30,6 +30,7 @@ import {
   modifySliceNameForReadability,
   extractNameWithoutIndex,
   filterUnusedExtensionsFromElements,
+  getParentPath,
 } from "./fhirDefinitionServiceUtilities";
 
 describe("FhirDefinitionServiceUtilities", () => {
@@ -874,5 +875,27 @@ describe("filterUnusedExtensionsFromElements", () => {
       allDisplayedElements
     );
     expect(result.length).toBe(1);
+  });
+});
+
+describe("getParentPath", () => {
+  it("returns parent path for deeply nested path", () => {
+    const result = getParentPath("Patient.name.given.text");
+    expect(result).toBe("Patient.name.given");
+  });
+
+  it("returns parent path for two-level path", () => {
+    const result = getParentPath("Patient.name");
+    expect(result).toBe("Patient");
+  });
+
+  it("returns null for single-level path", () => {
+    const result = getParentPath("Patient");
+    expect(result).toBeNull();
+  });
+
+  it("returns null for null or undefined input", () => {
+    expect(getParentPath(null)).toBeNull();
+    expect(getParentPath(undefined)).toBeNull();
   });
 });
