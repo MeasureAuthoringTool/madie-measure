@@ -314,24 +314,24 @@ export function getTopLevelElements(resource: any) {
   const basePath = resource?.definition?.type;
   const elementsFiltered = elements?.filter(
     (e) =>
-      e.path.split(".")?.length === 2 &&
-      e.id !== "Extension.extension" &&
-      e.id !== "Patient.extension" &&
-      e.max !== "0" &&
-      // Exclude entries where the path contains these attributes or matches these element names
-      ![
-        ".contained",
-        ".text",
-        ".meta",
-        ".language",
-        ".implicitRules",
-        "modifierExtension",
-        "extension",
-      ].some(
-        (attribute) =>
-          e?.path?.includes(attribute) ||
-          e.path.substring(basePath?.length + 1) === attribute
-      )
+      (e.path.split(".")?.length === 2 &&
+        e.id !== "Extension.extension" &&
+        e.id !== "Patient.extension" &&
+        e.max !== "0" &&
+        // Exclude entries where the path contains these attributes or matches these element names
+        ![
+          ".contained",
+          ".text",
+          ".meta",
+          ".language",
+          ".implicitRules",
+          "modifierExtension",
+        ].some(
+          (attribute) =>
+            e?.path?.includes(attribute) ||
+            e.path.substring(basePath?.length + 1) === attribute
+        )) ||
+      (e?.path?.includes("extension") && e?.id.includes(":"))
   );
   //for each elementsFiltered, if type contains more than one type, duplicate the element and restrict the type to only that type
 
