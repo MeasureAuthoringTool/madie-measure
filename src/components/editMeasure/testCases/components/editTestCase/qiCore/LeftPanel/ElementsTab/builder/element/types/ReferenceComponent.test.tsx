@@ -1,6 +1,8 @@
 import * as React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
-import ReferenceComponent from "./ReferenceComponent";
+import ReferenceComponent, {
+  getReferenceComponentLabel,
+} from "./ReferenceComponent";
 import ResourceContext from "../../ResourceContext";
 import { useQiCoreResource } from "../../../../../../../../util/QiCorePatientProvider";
 import userEvent from "@testing-library/user-event";
@@ -390,5 +392,28 @@ describe("ReferenceComponent", () => {
       options.some((opt) => opt.textContent?.includes("ID Not Present"))
     ).toBe(true);
     expect(screen.getByTestId("reference-label")).toHaveTextContent("Label");
+  });
+
+  describe("test getReferenceComponentLabel", () => {
+    it("should return the correct label for a given reference", () => {
+      const result = getReferenceComponentLabel(
+        "ClaimResponse.addItem[0].provider[0]"
+      );
+      expect(result).toBe("Provider");
+    });
+
+    it("should handle labels without array indices", () => {
+      const result = getReferenceComponentLabel("ClaimResponse.provider");
+      expect(result).toBe("Provider");
+    });
+    it("should return an empty string for an empty label", () => {
+      const result = getReferenceComponentLabel("");
+      expect(result).toBe("");
+    });
+
+    it("should handle input that does not have .", () => {
+      const result = getReferenceComponentLabel("provider[0]");
+      expect(result).toBe("Provider");
+    });
   });
 });
