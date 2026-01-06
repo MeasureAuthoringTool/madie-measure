@@ -117,7 +117,39 @@ jest.mock("formik", () => ({
   useFormikContext: jest.fn(),
 }));
 
-const renderBuilderComponent = () => {
+const mockBundleWithMultiplePatients = {
+  entry: [
+    {
+      fullUrl:
+        "https://madie.cms.gov/Patient/f62fc126-f694-4c7e-88d1-8d7c88671476",
+      resource: {
+        id: "f62fc126-f694-4c7e-88d1-8d7c88671476",
+        resourceType: "Patient",
+        meta: {
+          profile: [
+            "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient",
+          ],
+        },
+      },
+    },
+    {
+      fullUrl:
+        "https://madie.cms.gov/Patient/f62fc126-f694-4c7e-88d1-8d7c88671476",
+      resource: {
+        id: "f62fc126-f694-4c7e-88d1-8d7c88671476",
+        resourceType: "Patient",
+        meta: {
+          profile: [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient",
+          ],
+        },
+      },
+    },
+  ],
+};
+const renderBuilderComponent = (
+  bundleToAdd = mockBundleWithMultiplePatients
+) => {
   return render(
     <ApiContextProvider value={serviceConfig}>
       <ExecutionContextProvider
@@ -133,7 +165,7 @@ const renderBuilderComponent = () => {
       >
         <QiCoreResourceContext.Provider
           value={{
-            state: { bundle: mockBundle },
+            state: { bundle: bundleToAdd },
             dispatch: jest.fn(),
           }}
         >
@@ -159,7 +191,7 @@ describe("Builder Component", () => {
   it("renders the component correctly", async () => {
     (useFormikContext as jest.Mock).mockReturnValue({ resetForm, dirty: true });
 
-    renderBuilderComponent();
+    renderBuilderComponent(mockBundle);
     const addedTab = screen.getByText("Added (2)");
 
     userEvent.click(addedTab);
@@ -190,7 +222,7 @@ describe("Builder Component", () => {
       dirty: false,
     });
 
-    renderBuilderComponent();
+    renderBuilderComponent(mockBundle);
 
     const availableTab = await screen.findByText("Available");
     const addedTab = await screen.findByText("Added (2)");
@@ -212,7 +244,7 @@ describe("Builder Component", () => {
     ).toBeInTheDocument();
   });
 
-  it("should not render Available tab when canEdit is false", async () => {
+  it("should not render Available tab when canEdit is false", async (bundleToAdd = mockBundle) => {
     (useFormikContext as jest.Mock).mockReturnValue({
       resetForm,
       dirty: false,
@@ -233,7 +265,7 @@ describe("Builder Component", () => {
         >
           <QiCoreResourceContext.Provider
             value={{
-              state: { bundle: mockBundle },
+              state: { bundle: bundleToAdd },
               dispatch: jest.fn(),
             }}
           >
@@ -313,7 +345,7 @@ describe("scrollToElementByIdWhenAvailable", () => {
       dirty: false,
     });
 
-    renderBuilderComponent();
+    renderBuilderComponent(mockBundle);
 
     const availableTab = await screen.findByText("Available");
     expect(availableTab).toBeInTheDocument();
@@ -339,7 +371,7 @@ describe("scrollToElementByIdWhenAvailable", () => {
       dirty: false,
     });
 
-    renderBuilderComponent();
+    renderBuilderComponent(mockBundle);
 
     const addedTab = await screen.findByText("Added (2)");
     userEvent.click(addedTab);
@@ -358,7 +390,7 @@ describe("scrollToElementByIdWhenAvailable", () => {
       dirty: false,
     });
 
-    const { container } = renderBuilderComponent();
+    const { container } = renderBuilderComponent(mockBundle);
 
     const addedTab = await screen.findByText("Added (2)");
     userEvent.click(addedTab);
@@ -381,7 +413,7 @@ describe("scrollToElementByIdWhenAvailable", () => {
       dirty: false,
     });
 
-    renderBuilderComponent();
+    renderBuilderComponent(mockBundle);
 
     // Verify the builder component renders successfully
     expect(screen.getByTestId("qi-core-test-case-builder")).toBeInTheDocument();
@@ -393,7 +425,7 @@ describe("scrollToElementByIdWhenAvailable", () => {
       dirty: false,
     });
 
-    const { container } = renderBuilderComponent();
+    const { container } = renderBuilderComponent(mockBundle);
 
     const addedTab = await screen.findByText("Added (2)");
     userEvent.click(addedTab);
@@ -406,5 +438,18 @@ describe("scrollToElementByIdWhenAvailable", () => {
     // Verify the wrapper structure that contains ResourceEditor
     const wrapperDiv = container.querySelector('[style*="position: relative"]');
     expect(wrapperDiv).toBeInTheDocument();
+  });
+
+  it("Shows a JSON error when too many patients are added", async () => {
+    (useFormikContext as jest.Mock).mockReturnValue({
+      resetForm: jest.fn(),
+      dirty: false,
+    });
+
+    renderBuilderComponent(mockBundleWithMultiplePatients);
+    const madieErrorAlert = await screen.findByTestId(
+      "json-error-alert-multiple-patients"
+    );
+    expect(madieErrorAlert).toBeInTheDocument();
   });
 });
