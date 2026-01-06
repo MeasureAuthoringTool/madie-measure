@@ -131,9 +131,6 @@ export default function ReferenceComponent({
       </div>
       {/* Select a reference type from all available profiles */}
       <div className="element-editor-add-row reference double-row">
-        {/* <div style={{ display: "flex", flexDirection: "row" }}>
-                    <InputLabel aria-labelledby="cms-id">{label}</InputLabel>
-                    </div> */}
         <Select
           label={"Reference Type"}
           id={"reference-type-select"}
