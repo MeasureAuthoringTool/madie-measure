@@ -4,8 +4,6 @@ import { MemoryRouter } from "react-router-dom";
 import TestCaseListSideBarNav from "./TestCaseListSideBarNav";
 import { Group } from "@madie/madie-models";
 import userEvent from "@testing-library/user-event";
-// @ts-ignore
-import { useFeatureFlags } from "@madie/madie-util";
 
 const groups: Group[] = [
   {
@@ -21,11 +19,6 @@ const groups: Group[] = [
     stratifications: [],
   },
 ];
-jest.mock("@madie/madie-util", () => ({
-  useFeatureFlags: jest.fn(() => ({
-    ExecutionConfigurationTab: true,
-  })),
-}));
 describe("TestCase component", () => {
   afterEach(() => {
     jest.clearAllMocks();
@@ -221,35 +214,5 @@ describe("TestCase component", () => {
 
     fireEvent.click(screen.getByTestId("test-case-sidebar-collapse-icon"));
     expect(setIsCollapsed).toHaveBeenCalledWith(true);
-  });
-
-  it("should not render execution option tab for QI Core measures when execution configuration feature flag is off", async () => {
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-      ExecutionConfigurationTab: false,
-    }));
-    render(
-      <MemoryRouter>
-        <TestCaseListSideBarNav {...defaultProps} qdm={false} />
-      </MemoryRouter>
-    );
-
-    expect(
-      screen.queryByRole("tab", { name: "Execution Options" })
-    ).not.toBeInTheDocument();
-  });
-
-  it("should not render execution option tab for QDM measures when execution configuration feature flag is off", async () => {
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-      ExecutionConfigurationTab: false,
-    }));
-    render(
-      <MemoryRouter>
-        <TestCaseListSideBarNav {...defaultProps} qdm={true} />
-      </MemoryRouter>
-    );
-
-    expect(
-      screen.queryByRole("tab", { name: "Execution Options" })
-    ).not.toBeInTheDocument();
   });
 });

@@ -157,9 +157,7 @@ const CopyTestCaseDialog = ({ open, onClose, measure, selectedTestCases }) => {
         "lastModifiedAt",
         "DESC",
         searchCriteria,
-        abortController.current,
-        // TODO Remove parameter when either measureSearch or EditTestsOnVersionedMeasure is removed.
-        "testCase"
+        abortController.current
       )
       .then((response) => {
         const {

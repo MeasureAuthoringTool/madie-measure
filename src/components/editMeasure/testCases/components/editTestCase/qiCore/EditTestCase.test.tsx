@@ -123,7 +123,6 @@ jest.mock("@madie/madie-util", () => {
         applyDefaults: mockApplyDefaults,
         qiCoreElementsTab: true,
         Locking: true,
-        Calculator: true,
       };
     }),
     measureStore: {
@@ -3703,7 +3702,7 @@ describe("EditTestCase component", () => {
       expect(runButton).toBeDisabled();
     });
 
-    it("should render calculator button when Calculator flag is true", async () => {
+    it("should render calculator button", async () => {
       renderWithRouter(
         ["/measures/m1234/edit/test-cases"],
         "/measures/:measureId/edit/test-cases"
@@ -3727,24 +3726,6 @@ describe("EditTestCase component", () => {
           screen.queryByTestId("calculation-dialog")
         ).not.toBeInTheDocument()
       );
-    });
-
-    it("should not render calculator button when Calculator flag is false", async () => {
-      (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => {
-        return {
-          Calculator: false,
-        };
-      });
-      renderWithRouter(
-        ["/measures/m1234/edit/test-cases"],
-        "/measures/:measureId/edit/test-cases"
-      );
-
-      expect(screen.getByTestId("test-case-json-editor")).toBeInTheDocument();
-      expect(screen.getByTestId("test-case-cql-editor")).toBeInTheDocument();
-      expect(
-        screen.queryByTestId("editor-calculator-button")
-      ).not.toBeInTheDocument();
     });
   });
 

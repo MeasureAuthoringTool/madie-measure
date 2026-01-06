@@ -44,6 +44,11 @@ jest.mock("@madie/madie-util", () => ({
 
 const mockMeasureServiceApi = {
   searchMeasuresByCriteria: jest.fn(mockPaginationResponses),
+  getMeasureCounts: jest.fn().mockResolvedValue({
+    ownedMeasures: 5,
+    sharedMeasures: 3,
+    allMeasures: 10,
+  }),
 } as unknown as MeasureServiceApi;
 
 const { findAllByTestId, findByTestId, queryByTestId } = screen;

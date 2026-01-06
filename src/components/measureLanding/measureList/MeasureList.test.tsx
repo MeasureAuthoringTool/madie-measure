@@ -307,7 +307,6 @@ const mockCheckValidVersion = jest.fn().mockResolvedValue({});
 
 const mockUseFeatureFlagsApi = {
   enableQdmRepeatTransfer: jest.fn().mockResolvedValue(false),
-  TransferMeasure: jest.fn().mockResolvedValue(false),
 };
 
 const mockMeasureServiceApi = {
@@ -2502,18 +2501,12 @@ describe("Measure List component", () => {
   });
 });
 
-describe("Measure List with MeasureSearch enabled", () => {
-  beforeEach(() => {
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-      MeasureSearch: true,
-    }));
-  });
-
+describe("Measure List", () => {
   afterEach(() => {
     jest.clearAllMocks();
   });
 
-  it("should display all columns when MeasureSearch is enabled on Owned Measures tab", async () => {
+  it("should display all columns on Owned Measures tab", async () => {
     const { getByText } = render(
       <ServiceContext.Provider value={serviceConfig}>
         <MeasureList
@@ -2553,7 +2546,7 @@ describe("Measure List with MeasureSearch enabled", () => {
     expect(getByText("Updated")).toBeInTheDocument();
   });
 
-  it("should display all columns (except Shared column) when MeasureSearch is enabled on Shared Measures tab", async () => {
+  it("should display all columns (except Shared column) on Shared Measures tab", async () => {
     const { getByText, queryByText } = render(
       <ServiceContext.Provider value={serviceConfig}>
         <MeasureList
@@ -2593,7 +2586,7 @@ describe("Measure List with MeasureSearch enabled", () => {
     expect(getByText("Updated")).toBeInTheDocument();
   });
 
-  it("should display all columns when MeasureSearch is enabled on All Measures tab", async () => {
+  it("should display all columns on All Measures tab", async () => {
     const { getByText } = render(
       <ServiceContext.Provider value={serviceConfig}>
         <MeasureList
@@ -2633,7 +2626,7 @@ describe("Measure List with MeasureSearch enabled", () => {
     expect(getByText("Updated")).toBeInTheDocument();
   });
 
-  it("should enable sortable columns when MeasureSearch is enabled", async () => {
+  it("should enable sortable columns", async () => {
     const { getByText } = render(
       <ServiceContext.Provider value={serviceConfig}>
         <MeasureList
@@ -3115,7 +3108,6 @@ describe("Measure lock functionality", () => {
     it("should display Owner column on Shared Measures tab when DisplayOwner flag is enabled", async () => {
       (useFeatureFlags as jest.Mock).mockReturnValue({
         ...mockUseFeatureFlagsApi,
-        MeasureSearch: true,
         DisplayOwner: true,
       });
 
@@ -3175,7 +3167,6 @@ describe("Measure lock functionality", () => {
     it("should display Owner column on All Measures tab when DisplayOwner flag is enabled", async () => {
       (useFeatureFlags as jest.Mock).mockReturnValue({
         ...mockUseFeatureFlagsApi,
-        MeasureSearch: true,
         DisplayOwner: true,
       });
 
@@ -3235,7 +3226,6 @@ describe("Measure lock functionality", () => {
     it("should NOT display Owner column on My Measures tab even when DisplayOwner flag is enabled", async () => {
       (useFeatureFlags as jest.Mock).mockReturnValue({
         ...mockUseFeatureFlagsApi,
-        MeasureSearch: true,
         DisplayOwner: true,
       });
 
@@ -3279,7 +3269,6 @@ describe("Measure lock functionality", () => {
     it("should NOT display Owner column when DisplayOwner flag is disabled", async () => {
       (useFeatureFlags as jest.Mock).mockReturnValue({
         ...mockUseFeatureFlagsApi,
-        MeasureSearch: true,
         DisplayOwner: false,
       });
 
@@ -3323,7 +3312,6 @@ describe("Measure lock functionality", () => {
     it("should display '-' when measure has no owner", async () => {
       (useFeatureFlags as jest.Mock).mockReturnValue({
         ...mockUseFeatureFlagsApi,
-        MeasureSearch: true,
         DisplayOwner: true,
       });
 
@@ -3388,7 +3376,6 @@ describe("Measure lock functionality", () => {
     it("should display dash when ownerDisplayName is missing or empty", async () => {
       (useFeatureFlags as jest.Mock).mockReturnValue({
         ...mockUseFeatureFlagsApi,
-        MeasureSearch: true,
         DisplayOwner: true,
       });
 
@@ -3467,7 +3454,6 @@ describe("Measure lock functionality", () => {
     it("should display owner display names correctly", async () => {
       (useFeatureFlags as jest.Mock).mockReturnValue({
         ...mockUseFeatureFlagsApi,
-        MeasureSearch: true,
         DisplayOwner: true,
       });
 
@@ -3543,7 +3529,6 @@ describe("Measure lock functionality", () => {
     it("should not allow sorting on Owner column", async () => {
       (useFeatureFlags as jest.Mock).mockReturnValue({
         ...mockUseFeatureFlagsApi,
-        MeasureSearch: true,
         DisplayOwner: true,
       });
 

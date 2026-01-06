@@ -8,7 +8,6 @@ import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import ExpansionIcon from "@mui/icons-material/KeyboardTabOutlined";
 import IconButton from "@mui/material/IconButton";
 import "../../../../../../styles/VerticalSideBarNav.scss";
-import { useFeatureFlags } from "@madie/madie-util";
 
 const InnerWrapper = tw.div`flex flex-grow flex-col`;
 
@@ -33,7 +32,6 @@ const TestCaseListSideBarNav = ({
 
   let location = useLocation();
   const { pathname } = location;
-  const featureFlags = useFeatureFlags();
 
   const [showConfigTabs, setShowConfigTabs] = useState<boolean>(true);
   const [showPopulationCriteriaTabs, setShowPopulationCriteriaTabs] =
@@ -205,16 +203,14 @@ const TestCaseListSideBarNav = ({
                     orientation="vertical"
                     onChange={handleChange}
                   />
-                  {featureFlags?.ExecutionConfigurationTab && (
-                    <Tab
-                      label="Execution Options"
-                      value="execution-options"
-                      data-testid="nav-link-execution-options"
-                      type="C"
-                      orientation="vertical"
-                      onChange={handleChange}
-                    />
-                  )}
+                  <Tab
+                    label="Execution Options"
+                    value="execution-options"
+                    data-testid="nav-link-execution-options"
+                    type="C"
+                    orientation="vertical"
+                    onChange={handleChange}
+                  />
 
                   <Tab
                     label="Test Case Data"
