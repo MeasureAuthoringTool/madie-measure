@@ -1026,6 +1026,258 @@ describe("EditTestCase component", () => {
       ]);
     });
 
+    it("should alert for test valid status updated datetime", async () => {
+      const testCase = {
+        id: "1234",
+        description: "Test IPP",
+        series: "SeriesA",
+        createdBy: MEASURE_CREATEDBY,
+        createdAt: "",
+        lastModifiedAt: "",
+        lastModifiedBy: "null",
+        title: "TestIPP",
+        name: "TestIPP",
+        executionStatus: "false",
+        json: null,
+        validationStatus: ValidationStatus.PENDING,
+      } as unknown as TestCase;
+      mockedAxios.get.mockClear().mockImplementation((args) => {
+        if (args && args.endsWith("series")) {
+          return Promise.resolve({ data: [] });
+        } else if (args && args.endsWith("resources")) {
+          return Promise.resolve({
+            data: [...resourceIdentifiers],
+          });
+        }
+        return Promise.resolve({
+          data: testCase,
+        });
+      });
+      renderWithRouter(
+        ["/measures/m1234/edit/test-cases/1234"],
+        "/measures/:measureId/edit/test-cases/:id"
+      );
+
+      const testCaseDescription = "TestCase123";
+      const testCaseTitle = "TestTitle";
+      const testCaseJson = JSON.stringify({
+        resourceType: "Bundle",
+        id: "43",
+        date: "2025-10-06T12:00:00+04:00",
+      });
+
+      mockedAxios.put.mockResolvedValue({
+        data: {
+          ...testCase,
+          createdBy: MEASURE_CREATEDBY,
+          description: testCaseDescription,
+          title: testCaseTitle,
+          json: testCaseJson,
+          hapiOperationOutcome: hapiOperationSuccessOutcome,
+          validationStatus: ValidationStatus.VALID,
+        },
+      });
+
+      const editor = screen.getByTestId("test-case-json-editor");
+      await waitFor(() => expect(editor).toHaveValue(""));
+      userEvent.paste(editor, testCaseJson);
+      expect(editor).toHaveValue(testCaseJson);
+      userEvent.click(screen.getByTestId("details-tab"));
+
+      await testTitle("TC1", true);
+
+      const createBtn = await screen.findByRole("button", {
+        name: "Save",
+      });
+      userEvent.click(createBtn);
+
+      const debugOutput = await screen.findByTestId("success-toast");
+      //here
+      expect(debugOutput).toHaveTextContent("Test case updated successfully!");
+      expect(setCustomWarningMessages).toHaveBeenCalledWith([
+        {
+          message: "Test case updated successfully!",
+          details: [
+            "Timezone offsets have been added when hours are present, otherwise timezone offsets are removed or set to UTC for consistency.",
+          ],
+          testDataId: "test-case-timezone-warning",
+        },
+      ]);
+    });
+
+    it("should alert for test valid status bundleTypeUpdated is true", async () => {
+      const testCase = {
+        id: "1234",
+        description: "Test IPP",
+        series: "SeriesA",
+        createdBy: MEASURE_CREATEDBY,
+        createdAt: "",
+        lastModifiedAt: "",
+        lastModifiedBy: "null",
+        title: "TestIPP",
+        name: "TestIPP",
+        executionStatus: "false",
+        json: null,
+        validationStatus: ValidationStatus.PENDING,
+      } as unknown as TestCase;
+      mockedAxios.get.mockClear().mockImplementation((args) => {
+        if (args && args.endsWith("series")) {
+          return Promise.resolve({ data: [] });
+        } else if (args && args.endsWith("resources")) {
+          return Promise.resolve({
+            data: [...resourceIdentifiers],
+          });
+        }
+        return Promise.resolve({
+          data: testCase,
+        });
+      });
+      renderWithRouter(
+        ["/measures/m1234/edit/test-cases/1234"],
+        "/measures/:measureId/edit/test-cases/:id"
+      );
+
+      mockedAxios.put.mockResolvedValue({
+        data: {
+          ...testCase,
+          validationStatus: ValidationStatus.VALID,
+          bundleTypeUpdated: true,
+        },
+      });
+
+      const editor = screen.getByTestId("test-case-json-editor");
+      await waitFor(() => expect(editor).toHaveValue(""));
+      userEvent.click(screen.getByTestId("details-tab"));
+
+      await testTitle("TC1", true);
+
+      const createBtn = await screen.findByRole("button", {
+        name: "Save",
+      });
+      userEvent.click(createBtn);
+
+      const debugOutput = await screen.findByTestId("success-toast");
+      //here
+      expect(debugOutput).toHaveTextContent(
+        "The test case has been saved successfully. Please note that the bundle type has been updated to Collection, as the Test Case Builder supports editing only collection bundles."
+      );
+    });
+
+    it("should alert for bundleTypeUpdated Pending status", async () => {
+      const testCase = {
+        id: "1234",
+        description: "Test IPP",
+        series: "SeriesA",
+        createdBy: MEASURE_CREATEDBY,
+        createdAt: "",
+        lastModifiedAt: "",
+        lastModifiedBy: "null",
+        title: "TestIPP",
+        name: "TestIPP",
+        executionStatus: "false",
+        json: null,
+        validationStatus: ValidationStatus.PENDING,
+      } as unknown as TestCase;
+      mockedAxios.get.mockClear().mockImplementation((args) => {
+        if (args && args.endsWith("series")) {
+          return Promise.resolve({ data: [] });
+        } else if (args && args.endsWith("resources")) {
+          return Promise.resolve({
+            data: [...resourceIdentifiers],
+          });
+        }
+        return Promise.resolve({
+          data: testCase,
+        });
+      });
+      renderWithRouter(
+        ["/measures/m1234/edit/test-cases/1234"],
+        "/measures/:measureId/edit/test-cases/:id"
+      );
+
+      mockedAxios.put.mockResolvedValue({
+        data: {
+          ...testCase,
+          bundleTypeUpdated: true,
+        },
+      });
+
+      const editor = screen.getByTestId("test-case-json-editor");
+      await waitFor(() => expect(editor).toHaveValue(""));
+      userEvent.click(screen.getByTestId("details-tab"));
+
+      await testTitle("TC1", true);
+
+      const createBtn = await screen.findByRole("button", {
+        name: "Save",
+      });
+      userEvent.click(createBtn);
+
+      const debugOutput = await screen.findByTestId("success-toast");
+      //here
+      expect(debugOutput).toHaveTextContent(
+        "The test case has been saved successfully. Please note that the bundle type has been updated to Collection, as the Test Case Builder supports editing only collection bundles."
+      );
+    });
+
+    it("should alert for bundleTypeUpdated Validating status", async () => {
+      const testCase = {
+        id: "1234",
+        description: "Test IPP",
+        series: "SeriesA",
+        createdBy: MEASURE_CREATEDBY,
+        createdAt: "",
+        lastModifiedAt: "",
+        lastModifiedBy: "null",
+        title: "TestIPP",
+        name: "TestIPP",
+        executionStatus: "false",
+        json: null,
+        validationStatus: ValidationStatus.PENDING,
+      } as unknown as TestCase;
+      mockedAxios.get.mockClear().mockImplementation((args) => {
+        if (args && args.endsWith("series")) {
+          return Promise.resolve({ data: [] });
+        } else if (args && args.endsWith("resources")) {
+          return Promise.resolve({
+            data: [...resourceIdentifiers],
+          });
+        }
+        return Promise.resolve({
+          data: testCase,
+        });
+      });
+      renderWithRouter(
+        ["/measures/m1234/edit/test-cases/1234"],
+        "/measures/:measureId/edit/test-cases/:id"
+      );
+
+      mockedAxios.put.mockResolvedValue({
+        data: {
+          ...testCase,
+          bundleTypeUpdated: true,
+          validationStatus: ValidationStatus.VALIDATING,
+        },
+      });
+
+      const editor = screen.getByTestId("test-case-json-editor");
+      await waitFor(() => expect(editor).toHaveValue(""));
+      userEvent.click(screen.getByTestId("details-tab"));
+
+      await testTitle("TC1", true);
+
+      const createBtn = await screen.findByRole("button", {
+        name: "Save",
+      });
+      userEvent.click(createBtn);
+
+      const debugOutput = await screen.findByTestId("success-toast");
+      //here
+      expect(debugOutput).toHaveTextContent(
+        "The test case has been saved successfully. Please note that the bundle type has been updated to Collection, as the Test Case Builder supports editing only collection bundles."
+      );
+    });
+
     it("should display isQICore6 validation running message in toast when test case is created and isQICore6 is true", async () => {
       const testCase = {
         id: "1234",
