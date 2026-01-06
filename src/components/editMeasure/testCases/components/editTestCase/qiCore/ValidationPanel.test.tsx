@@ -1,6 +1,6 @@
 import * as React from "react";
 
-import { render } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import ValidationPanel, { extractResourceId } from "./ValidationPanel";
 import {
   HapiOperationOutcome,
@@ -213,7 +213,7 @@ describe("ValidationPanel component", () => {
         severity: "error",
         code: "processing",
         diagnostics: "Validation failed.",
-        location: ["location 2"],
+        // location: ["location 2"],
         key: 4,
       },
     ];
@@ -221,7 +221,10 @@ describe("ValidationPanel component", () => {
       <ValidationPanel testCase={testCase} validationErrors={errors} />
     );
     expect(queryByTestId("validation-card-3")).not.toBeInTheDocument();
-    expect(queryByTestId("validation-card-4")).toBeInTheDocument();
+    const validationCard = queryByTestId("validation-card-4");
+    expect(validationCard).toBeInTheDocument();
+    expect(validationCard).toHaveTextContent("Error: Validation failed.");
+    expect(validationCard).not.toHaveTextContent("Resource ID:");
   });
 
   it("should render warning validation error with correct styling and text", () => {
@@ -308,6 +311,11 @@ describe("ValidationPanel component", () => {
       const input = "Location 1";
       const result = extractResourceId(input);
       expect(result).toBe("Location 1");
+    });
+
+    it("should return undefined for undefined input", () => {
+      const result = extractResourceId(undefined);
+      expect(result).toBeUndefined();
     });
   });
 });
