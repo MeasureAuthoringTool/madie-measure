@@ -55,14 +55,12 @@ interface ValidationPanelProps {
   testCase: TestCase;
   validationErrors: any[];
   isQiCoreV6: boolean;
-  stu6TestCaseValidationFeatureFlag: boolean;
 }
 
 const ValidationPanel = ({
   testCase,
   validationErrors,
   isQiCoreV6,
-  stu6TestCaseValidationFeatureFlag,
 }: ValidationPanelProps) => {
   const renderSkeleton = () => (
     <Box
@@ -131,10 +129,9 @@ const ValidationPanel = ({
     ValidationStatus.VALIDATING,
   ].includes(testCase?.validationStatus);
   const hasErrors = validationErrors && validationErrors.length > 0;
-  const showNoErrors = stu6TestCaseValidationFeatureFlag
-    ? (testCase?.validationStatus === ValidationStatus.VALID && isQiCoreV6) ||
-      !isQiCoreV6
-    : true;
+  const showNoErrors =
+    (testCase?.validationStatus === ValidationStatus.VALID && isQiCoreV6) ||
+    !isQiCoreV6;
 
   return (
     <>
