@@ -694,6 +694,30 @@ describe("ActionCenter Component", () => {
         );
         expect(makeJsonMatchUiBtn).toBeEnabled();
       });
+
+      it("should call setMakeJsonMatchUiDialogOpen when clicking Make JSON Match UI button", async () => {
+        const mockSetMakeJsonMatchUiDialogOpen = jest.fn();
+        render(
+          <MemoryRouter>
+            <ActionCenter
+              selectedTestCases={[
+                { id: "1", validResource: true, title: "Test Case 1" },
+              ]}
+              canEdit={true}
+              isQDM={false}
+              isDraft={true}
+              setMakeJsonMatchUiDialogOpen={mockSetMakeJsonMatchUiDialogOpen}
+            />
+          </MemoryRouter>
+        );
+
+        const makeJsonMatchUiBtn = screen.getByTestId(
+          "make-json-match-ui-action-btn"
+        );
+        await userEvent.click(makeJsonMatchUiBtn);
+
+        expect(mockSetMakeJsonMatchUiDialogOpen).toHaveBeenCalledWith(true);
+      });
     });
   });
 });

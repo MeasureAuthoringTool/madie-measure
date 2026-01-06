@@ -30,6 +30,7 @@ interface ActionCenterProps {
   isQDM: boolean;
   setDeleteDialogModalOpen?: Function;
   setShiftDatesDialogModalOpen?: Function;
+  setMakeJsonMatchUiDialogOpen?: Function;
   onCloneTestCase?: (testCase: TestCase) => void;
   exportTestCases?: Function;
   onExportQRDA?: Function;
@@ -52,6 +53,7 @@ export default function ActionCenter(props: ActionCenterProps) {
     onCloneTestCase,
     setDeleteDialogModalOpen,
     setShiftDatesDialogModalOpen,
+    setMakeJsonMatchUiDialogOpen,
     exportTestCases,
     onExportQRDA,
     onExportExcel,
@@ -395,7 +397,9 @@ export default function ActionCenter(props: ActionCenterProps) {
                 >
                   <span>
                     <IconButton
-                      onClick={() => {}}
+                      onClick={() => {
+                        setMakeJsonMatchUiDialogOpen(true);
+                      }}
                       disabled={disableMakeJsonMatchUiBtn}
                       data-testid="make-json-match-ui-action-btn"
                     >

@@ -1,7 +1,7 @@
 import * as React from "react";
 
 import { render } from "@testing-library/react";
-import ValidationPanel from "./ValidationPanel";
+import ValidationPanel, { extractResourceId } from "./ValidationPanel";
 import {
   HapiOperationOutcome,
   TestCase,
@@ -170,7 +170,7 @@ describe("ValidationPanel component", () => {
     expect(getByTestId("validation-card-0")).toHaveTextContent("Error");
     expect(getByTestId("validation-card-1")).toBeInTheDocument();
     expect(getByTestId("validation-card-1")).toHaveTextContent(
-      "Warning: Validation warning"
+      "Warning: Resource ID: location 1 | Validation warning."
     );
   });
 
@@ -213,7 +213,6 @@ describe("ValidationPanel component", () => {
         severity: "error",
         code: "processing",
         diagnostics: "Validation failed.",
-        location: ["location 2"],
         key: 4,
       },
     ];
@@ -221,7 +220,10 @@ describe("ValidationPanel component", () => {
       <ValidationPanel testCase={testCase} validationErrors={errors} />
     );
     expect(queryByTestId("validation-card-3")).not.toBeInTheDocument();
-    expect(queryByTestId("validation-card-4")).toBeInTheDocument();
+    const validationCard = queryByTestId("validation-card-4");
+    expect(validationCard).toBeInTheDocument();
+    expect(validationCard).toHaveTextContent("Error: Validation failed.");
+    expect(validationCard).not.toHaveTextContent("Resource ID:");
   });
 
   it("should render warning validation error with correct styling and text", () => {
@@ -243,7 +245,9 @@ describe("ValidationPanel component", () => {
     );
     const card = getByTestId("validation-card-5");
     expect(card).toBeInTheDocument();
-    expect(card).toHaveTextContent("Warning: This is a warning.");
+    expect(card).toHaveTextContent(
+      "Warning: Resource ID: location 1 | This is a warning."
+    );
   });
 
   it("should render no errors present text when no errors (valid validation status and isQiCoreV6)", () => {
@@ -274,5 +278,25 @@ describe("ValidationPanel component", () => {
       />
     );
     expect(getByText("Nothing to see here!")).toBeInTheDocument();
+  });
+
+  describe("extractString function", () => {
+    it("should extract the correct string from the input", () => {
+      const input =
+        "Bundle.entry[1].resource/*Encounter/NUMERStrat2Pass-TimeToTx61Min01*/.location[0].period";
+      const result = extractResourceId(input);
+      expect(result).toBe("NUMERStrat2Pass-TimeToTx61Min01");
+    });
+
+    it("should return original text if no match is found", () => {
+      const input = "Location 1";
+      const result = extractResourceId(input);
+      expect(result).toBe("Location 1");
+    });
+
+    it("should return undefined for undefined input", () => {
+      const result = extractResourceId(undefined);
+      expect(result).toBeUndefined();
+    });
   });
 });

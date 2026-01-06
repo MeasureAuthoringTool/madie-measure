@@ -3,7 +3,6 @@ import * as _ from "lodash";
 import { Box, Divider } from "@mui/material";
 
 import StringComponent from "./types/StringComponent";
-import PeriodComponent from "./types/PeriodComponent";
 import DateTimeComponent from "./types/DateTimeComponent";
 import BooleanComponent from "./types/BooleanComponent";
 import UriComponent from "./types/UriComponent";
@@ -38,6 +37,7 @@ import MoneyComponent from "./types/MoneyComponent";
 import TimingComponent from "./types/TimingComponent";
 import RangeComponent from "./types/RangeComponent";
 import ReferenceComponent from "./types/ReferenceComponent";
+import ContentReferenceType from "./contentReferenceType/ContentReferenceType";
 
 export const formikErrorHandler = (name: string, formik) => {
   const touched = getNestedProperty(formik.touched, name);
@@ -275,13 +275,17 @@ const TypeEditor = ({
         );
       case "Period":
         return (
-          <PeriodComponent
+          <PeriodDateTimeComponent
             label={label}
             canEdit={canEdit}
-            structureDefinition={structureDefinition}
-            showAddAttributeButton={showAddAttributeButton}
-            addTitle={addTitle}
+            helperText={formikErrorHandler(label, formik)}
+            error={getNestedProperty(formik.errors, label)}
             fieldRequired={required}
+            {...formik.getFieldProps(label)}
+            onChange={(value) => {
+              formik.setFieldTouched(label);
+              formik.setFieldValue(label, value);
+            }}
           />
         );
       case "dateTime":
@@ -942,13 +946,19 @@ const TypeEditor = ({
                 resource={resource}
                 parentStructureDefinition={parentStructureDefinition}
                 canEdit={canEdit}
-                label={label}
+                label={filteredChildDef.id}
+              />
+            );
+          } else if (childDef.contentReference) {
+            return (
+              <ContentReferenceType
+                elementDefinition={childDef}
+                parentElementDefinition={structureDefinition}
+                resource={resource}
+                canEdit={canEdit}
               />
             );
           } else if (!isComponentDataType(childDef?.type?.[0]?.code)) {
-            // add additional check for if the type exists because I have no idea what ClaimResponse.item.detail.adjudication is but it has no type.
-            // TODO Figure out whats up with ClaimResponse.item.detail.adjudication. Doesn't appear to have children, but a backbone el
-            // TODO probably have to map these multiple cardinality elements against the length of the formik.values[propertyPath] if multiple and add index like done in elementEditorChildren.
             return (
               <ElementSection
                 title={childDef.id}

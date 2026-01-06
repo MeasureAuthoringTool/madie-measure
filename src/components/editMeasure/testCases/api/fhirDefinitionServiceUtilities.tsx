@@ -474,6 +474,18 @@ export function getLastPart(path: string): string {
   return parts[parts?.length - 1];
 }
 
+// gets the parent path by removing last part in the path.
+// e.g. QuestionerResponse.item.answer -> QuestionerResponse.item
+// e.g. QuestionerResponse.item -> QuestionerResponse
+export function getParentPath(path: string): string {
+  const parts = path?.split(".");
+  parts?.pop();
+  if (parts && parts.length > 0) {
+    return parts.join(".");
+  }
+  return null;
+}
+
 // removes all indexes from path
 export function removeIndicesFromPath(path) {
   return path.replace(/\[\d+\]/g, "");
@@ -593,6 +605,7 @@ export function isComponentDataType(datatype) {
     case "reference":
     case "quantity":
     case "range":
+    case "period":
       return true;
     default:
       return false;

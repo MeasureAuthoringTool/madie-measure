@@ -65,7 +65,7 @@ describe("ChoiceType", () => {
     renderWithFormik(
       {
         childDef: getChildDef(),
-        label: "Observation.component[0]",
+        label: "Observation.component[0].value[x]",
         canEdit: true,
       },
       {}
@@ -82,7 +82,7 @@ describe("ChoiceType", () => {
       renderWithFormik(
         {
           childDef: getChildDef(),
-          label: "Observation.component[0]",
+          label: "Observation.component[0].value[x]",
           canEdit: true,
         },
         getFormikValues("boolean", true)
@@ -99,7 +99,7 @@ describe("ChoiceType", () => {
     renderWithFormik(
       {
         childDef: getChildDef(),
-        label: "Observation.component[0]",
+        label: "Observation.component[0].value[x]",
         canEdit: true,
       },
       getFormikValues("boolean", true)
@@ -126,14 +126,16 @@ describe("ChoiceType", () => {
     renderWithFormik(
       {
         childDef: getChildDef(),
-        label: "Observation.component[0]",
+        label: "Observation.component[0].value[x]",
         canEdit: false,
       },
       getFormikValues()
     );
 
     // When canEdit is false, the select is rendered as a readonly textarea
-    const select = screen.getByTestId("choice-type-Observation.component[0]");
+    const select = screen.getByTestId(
+      "choice-type-Observation.component[0].valueBoolean"
+    );
     expect(select).toHaveAttribute("readonly");
   });
 });
