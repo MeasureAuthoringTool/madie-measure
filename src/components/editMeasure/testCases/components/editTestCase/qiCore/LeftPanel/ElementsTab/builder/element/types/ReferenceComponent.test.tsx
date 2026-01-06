@@ -75,6 +75,7 @@ describe("ReferenceComponent", () => {
             error={false}
             showAddAttributeButton={false}
             addTitle=""
+            label="ClaimResponse.addItem[0].provider[0]"
           />
         </FormikProvider>
       </ResourceContext.Provider>
@@ -87,6 +88,12 @@ describe("ReferenceComponent", () => {
       screen.getByTestId("Encounter (US Core)-option")
     ).toBeInTheDocument();
     expect(screen.getByTestId("Encounter (QICore)-option")).toBeInTheDocument();
+    expect(screen.getByTestId("reference-label")).toBeInTheDocument();
+    expect(screen.getByTestId("reference-label")).toHaveAttribute(
+      "aria-labelledby",
+      "reference-label"
+    );
+    expect(screen.getByTestId("reference-label")).toHaveTextContent("Provider");
   });
 
   it("shows all FHIR, US Core, QICore resources for FHIR base profile", async () => {
@@ -142,6 +149,7 @@ describe("ReferenceComponent", () => {
             error={false}
             showAddAttributeButton={false}
             addTitle=""
+            label="test.label"
           />
         </FormikProvider>
       </ResourceContext.Provider>
@@ -167,6 +175,7 @@ describe("ReferenceComponent", () => {
     expect(
       options.some((opt) => opt.textContent?.includes("encounter-qicore-1"))
     ).toBe(true);
+    expect(screen.getByTestId("reference-label")).toHaveTextContent("Label");
   });
 
   it("shows only US Core and QICore resources for US Core profile", async () => {
@@ -222,6 +231,7 @@ describe("ReferenceComponent", () => {
             error={false}
             showAddAttributeButton={false}
             addTitle=""
+            label="test.label"
           />
         </FormikProvider>
       </ResourceContext.Provider>
@@ -246,6 +256,7 @@ describe("ReferenceComponent", () => {
     expect(
       options.some((opt) => opt.textContent?.includes("encounter-fhir-1"))
     ).toBe(false);
+    expect(screen.getByTestId("reference-label")).toHaveTextContent("Label");
   });
 
   it("shows only QICore resources for QICore profile", async () => {
@@ -301,6 +312,7 @@ describe("ReferenceComponent", () => {
             error={false}
             showAddAttributeButton={false}
             addTitle=""
+            label="test.label"
           />
         </FormikProvider>
       </ResourceContext.Provider>
@@ -325,6 +337,8 @@ describe("ReferenceComponent", () => {
     expect(
       options.some((opt) => opt.textContent?.includes("encounter-fhir-1"))
     ).toBe(false);
+
+    expect(screen.getByTestId("reference-label")).toHaveTextContent("Label");
   });
 
   it("shows 'ID Not Present' when no matching profile entries exist", async () => {
@@ -356,6 +370,7 @@ describe("ReferenceComponent", () => {
             error={false}
             showAddAttributeButton={false}
             addTitle=""
+            label="test.label"
           />
         </FormikProvider>
       </ResourceContext.Provider>
@@ -374,5 +389,6 @@ describe("ReferenceComponent", () => {
     expect(
       options.some((opt) => opt.textContent?.includes("ID Not Present"))
     ).toBe(true);
+    expect(screen.getByTestId("reference-label")).toHaveTextContent("Label");
   });
 });
