@@ -885,17 +885,17 @@ const EditTestCase = (props: EditTestCaseProps) => {
           //   ]
           // :
           [
-              ...(timezoneUpdated
-                ? [
-                    "Timezone offsets have been added when hours are present, otherwise timezone offsets are removed or set to UTC for consistency.",
-                  ]
-                : []),
-              ...(testCase.bundleTypeUpdated
-                ? [
-                    "The test case has been saved successfully. Please note that the bundle type has been updated to Collection, as the Test Case Builder supports editing only collection bundles.",
-                  ]
-                : []),
-            ];
+            ...(timezoneUpdated
+              ? [
+                  "Timezone offsets have been added when hours are present, otherwise timezone offsets are removed or set to UTC for consistency.",
+                ]
+              : []),
+            ...(testCase.bundleTypeUpdated
+              ? [
+                  "The test case has been saved successfully. Please note that the bundle type has been updated to Collection, as the Test Case Builder supports editing only collection bundles.",
+                ]
+              : []),
+          ];
         let severity = severityOfValidationErrors(validationErrors);
         if (severity === "error") {
           severity = "danger";
@@ -1282,7 +1282,7 @@ const EditTestCase = (props: EditTestCaseProps) => {
 
                 {rightPanelActiveTab === "details" && (
                   <div className="panel-content">
-                    {alert &&
+                    {alert && (
                       // (testCaseAlertToast ? (
                       //   <MadieAlert
                       //     type={alert?.status}
@@ -1295,25 +1295,25 @@ const EditTestCase = (props: EditTestCaseProps) => {
                       //     }}
                       //   />
                       // ) : (
-                        <Alert
-                          status={alert?.status}
-                          role="alert"
-                          aria-label="Create Alert"
-                          data-testid="create-test-case-alert"
+                      <Alert
+                        status={alert?.status}
+                        role="alert"
+                        aria-label="Create Alert"
+                        data-testid="create-test-case-alert"
+                      >
+                        {alert?.message}
+                        <button
+                          data-testid="close-create-test-case-alert"
+                          type="button"
+                          tw="box-content h-4 p-1 ml-3 mb-1.5"
+                          data-bs-dismiss="alert"
+                          aria-label="Close Alert"
+                          onClick={() => setAlert(null)}
                         >
-                          {alert?.message}
-                          <button
-                            data-testid="close-create-test-case-alert"
-                            type="button"
-                            tw="box-content h-4 p-1 ml-3 mb-1.5"
-                            data-bs-dismiss="alert"
-                            aria-label="Close Alert"
-                            onClick={() => setAlert(null)}
-                          >
-                            <FontAwesomeIcon icon={faTimes} />
-                          </button>
-                        </Alert>
-                      }
+                          <FontAwesomeIcon icon={faTimes} />
+                        </button>
+                      </Alert>
+                    )}
 
                     {/* TODO Replace with re-usable form component
                label, input, and error => single input control component */}
