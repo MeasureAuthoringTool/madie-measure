@@ -18,6 +18,7 @@ import { TestCasesPassingDetailsProps } from "../common/interfaces";
 import { useQdmExecutionContext } from "../../routes/qdm/QdmExecutionContext";
 import LoadingButtonWithMenu from "../common/loadingButton/LoadingButtonWithMenu";
 import LoadingButton from "../common/loadingButton/LoadingButton";
+import { Tooltip } from "@mui/material";
 
 import classNames from "classnames";
 import "./CreateCodeCoverageNavTabs.scss";
@@ -42,6 +43,7 @@ export interface NavTabProps {
   onGenerateOverlappingCodesReport: () => void;
   showReportOptions: boolean;
   setShowReportOptions: (show: boolean) => void;
+  clauseResults?: { total: number; covered: number } | null;
 }
 
 const defaultStyle = {
@@ -74,6 +76,7 @@ export default function CreateCodeCoverageNavTabs(props: NavTabProps) {
     optionsOpen,
     setOptionsOpen,
     onGenerateOverlappingCodesReport,
+    clauseResults,
   } = props;
   const [activeTip, setActiveTip] = useState<boolean>(false);
   const toolTipClass = classNames("madie-tooltip", {
@@ -184,7 +187,21 @@ export default function CreateCodeCoverageNavTabs(props: NavTabProps) {
             tabIndex={0}
             aria-label="Coverage tab panel"
             sx={defaultStyle}
-            label={executionResultsDisplayTemplate("Coverage")}
+            label={
+              <Tooltip
+                data-testid={`action-center-tooltip-`}
+                title={
+                  open
+                    ? `${clauseResults?.covered}/${clauseResults?.total} logical clauses in your CQL are covered`
+                    : "More"
+                }
+                placement="top"
+                arrow
+                disableHoverListener={!clauseResults}
+              >
+                {executionResultsDisplayTemplate("Coverage")}
+              </Tooltip>
+            }
             data-testid="coverage-tab"
             value="coverage"
           />
