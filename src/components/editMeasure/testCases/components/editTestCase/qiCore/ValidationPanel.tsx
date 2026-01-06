@@ -12,6 +12,7 @@ interface AlertProps {
 }
 
 export function extractResourceId(inputString) {
+  if (!inputString) return undefined;
   // Regular expression to find the content between / and */
   // \*\/ : Matches the closing '*/' sequence literally.
   // e.g. Bundle.entry[0].resource/*Patient/11ddb0b4-893f-46a2-a58a-f99c5f78ed5b*/
@@ -111,7 +112,12 @@ const ValidationPanel = ({
               error.severity.slice(1) +
               ": "
             : ""}
-          Resource ID: {extractResourceId(error.location?.[0])} |{" "}
+          {extractResourceId(error.location?.[0]) !== undefined
+            ? "Resource ID: "
+            : ""}
+          {extractResourceId(error.location?.[0]) !== undefined
+            ? extractResourceId(error.location?.[0]) + " | "
+            : ""}
           {error.diagnostics}
         </ValidationAlertCard>
       ));
