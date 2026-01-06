@@ -70,7 +70,6 @@ export const getTotalAndCoveredClauses = (
   calculationOutput,
   displayId
 ): { total: number; covered: number } => {
-
   let allClaueses = [];
   calculationOutput.results.forEach((result) => {
     const targetResult = result.detailedResults.find(
