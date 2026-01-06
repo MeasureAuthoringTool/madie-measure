@@ -378,7 +378,7 @@ const EditTestCase = (props: EditTestCaseProps) => {
   });
 
   //needs to be added to feature flag config once the feature flags are moved to Util
-  const testCaseAlertToast = false;
+  // const testCaseAlertToast = false;
   useEffect(() => {
     if (_.isNil(populationGroupResults) || _.isEmpty(populationGroupResults)) {
       setGroupPopulations(_.cloneDeep(formik.values.groupPopulations));
@@ -868,21 +868,23 @@ const EditTestCase = (props: EditTestCaseProps) => {
         }
       } else {
         const valErrors = validationErrors?.map((error) => error.diagnostics);
-        const message: ReactNode = testCaseAlertToast
-          ? [
-              ...(timezoneUpdated
-                ? [
-                    "Timezone offsets have been added when hours are present, otherwise timezone offsets are removed or set to UTC for consistency.",
-                  ]
-                : []),
-              ...(testCase.bundleTypeUpdated
-                ? [
-                    "The test case has been saved successfully. Please note that the bundle type has been updated to Collection, as the Test Case Builder supports editing only collection bundles.",
-                  ]
-                : []),
-              ...valErrors,
-            ]
-          : [
+        const message: ReactNode =
+          // testCaseAlertToast
+          // ? [
+          //     ...(timezoneUpdated
+          //       ? [
+          //           "Timezone offsets have been added when hours are present, otherwise timezone offsets are removed or set to UTC for consistency.",
+          //         ]
+          //       : []),
+          //     ...(testCase.bundleTypeUpdated
+          //       ? [
+          //           "The test case has been saved successfully. Please note that the bundle type has been updated to Collection, as the Test Case Builder supports editing only collection bundles.",
+          //         ]
+          //       : []),
+          //     ...valErrors,
+          //   ]
+          // :
+          [
               ...(timezoneUpdated
                 ? [
                     "Timezone offsets have been added when hours are present, otherwise timezone offsets are removed or set to UTC for consistency.",
@@ -1281,18 +1283,18 @@ const EditTestCase = (props: EditTestCaseProps) => {
                 {rightPanelActiveTab === "details" && (
                   <div className="panel-content">
                     {alert &&
-                      (testCaseAlertToast ? (
-                        <MadieAlert
-                          type={alert?.status}
-                          content={alert?.message}
-                          alertProps={{
-                            "data-testid": "create-test-case-alert",
-                          }}
-                          closeButtonProps={{
-                            "data-testid": "close-create-test-case-alert",
-                          }}
-                        />
-                      ) : (
+                      // (testCaseAlertToast ? (
+                      //   <MadieAlert
+                      //     type={alert?.status}
+                      //     content={alert?.message}
+                      //     alertProps={{
+                      //       "data-testid": "create-test-case-alert",
+                      //     }}
+                      //     closeButtonProps={{
+                      //       "data-testid": "close-create-test-case-alert",
+                      //     }}
+                      //   />
+                      // ) : (
                         <Alert
                           status={alert?.status}
                           role="alert"
@@ -1311,7 +1313,7 @@ const EditTestCase = (props: EditTestCaseProps) => {
                             <FontAwesomeIcon icon={faTimes} />
                           </button>
                         </Alert>
-                      ))}
+                      }
 
                     {/* TODO Replace with re-usable form component
                label, input, and error => single input control component */}
