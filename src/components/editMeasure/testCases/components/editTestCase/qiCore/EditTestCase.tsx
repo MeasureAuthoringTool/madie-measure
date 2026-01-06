@@ -727,42 +727,9 @@ const EditTestCase = (props: EditTestCaseProps) => {
     }
     setValidationErrors(() => []);
     let modifiedTestCase = { ...testCase };
-    // validate the JSON iff executeInvalidTestCases is false and JSON has been modified
-    if (
-      !measure?.testCaseConfiguration?.executeInvalidTestCases &&
-      isJsonModified()
-    ) {
+    // Update the test case JSON if it has been modified
+    if (isJsonModified()) {
       modifiedTestCase.json = editorVal;
-      try {
-        // Validate test case JSON prior to execution
-        const validationResult =
-          await testCaseService.current.validateTestCaseBundle(
-            JSON.parse(editorVal),
-            measure.model
-          );
-        const errors = handleHapiOutcome(validationResult);
-        if (
-          !_.isNil(errors) &&
-          errors.length > 0 &&
-          hasValidationErrorSeverity(errors)
-        ) {
-          setCalculationErrors({
-            status: "warning",
-            message:
-              "Test case execution was aborted due to errors with the test case JSON.",
-          });
-          return;
-        }
-      } catch (error) {
-        setCalculationErrors({
-          status: "error",
-          message:
-            "Test case execution was aborted because JSON could not be validated. If this error persists, please contact the help desk.",
-        });
-        return;
-      } finally {
-        setExecuting(false);
-      }
     }
 
     try {
