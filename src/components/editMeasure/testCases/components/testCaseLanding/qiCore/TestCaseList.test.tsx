@@ -1744,9 +1744,6 @@ describe("TestCaseList component", () => {
   });
 
   it("Should display `0` when there are no test cases", async () => {
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-      stu6TestCaseValidation: true,
-    }));
     mockGetPassingPercentageForTestCases.mockClear();
     mockGetPassingPercentageForTestCases.mockReturnValue({
       passPercentage: 0,
