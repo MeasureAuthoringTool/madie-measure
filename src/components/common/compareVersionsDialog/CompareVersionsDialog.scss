@@ -4,13 +4,11 @@
   --color-light: #707070;
   --font-weight-bold: 500;
   --font-weight-normal: 400;
-
   .dialog-header,
   .panel-header {
     background: #f3f3f3;
     padding: 16px 24px;
     border-bottom: 1px solid #8c8c8c;
-
     .measure-header {
       font-family: var(--font-family-base);
       color: var(--color-dark);
@@ -18,79 +16,67 @@
       font-size: 18px;
       line-height: 24px;
       margin: 0;
-
       .measure-cmsid {
+        font-family: var(--font-family-base);
         color: var(--color-light);
         font-weight: var(--font-weight-normal);
       }
     }
   }
-
-  .comparison-panels-container {
+  .cql-comparison-panels-container {
     display: flex;
     width: 100%;
     height: 100%;
     overflow: auto;
-  }
-
-  .comparison-panel {
-    flex: 1;
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-
-    .panel-header {
-      border-top: 1px solid #8c8c8c;
-    }
-  }
-
-  .cql-comparison-panels-container {
-    @extend .comparison-panels-container;
-
     .comparison-panel {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
       .panel-header {
-        border-right: 1px solid #8c8c8c;
+        border-top: 1px solid #8c8c8c;
       }
     }
   }
-
   .hr-comparison-panels-container {
-    @extend .comparison-panels-container;
-
+    display: flex;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
     .comparison-panel {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
       .panel-header {
+        border-top: 1px solid #8c8c8c;
         border-right: 1px solid #8c8c8c;
       }
-
       .panel-content {
         padding: 16px 24px;
         overflow: auto;
       }
     }
   }
-
   .tabs-container {
     padding: 0 24px;
   }
-
   .allotment-container {
     height: 60vh;
-
     .comparison-panels-container,
     .differences-section {
       width: 100%;
       height: 100%;
       overflow: auto;
     }
-
     .sash-vertical,
     .sash-horizontal {
       position: relative;
       background-color: #ddd;
       height: 24px;
       width: 100%;
-
       &::before,
       &::after {
         content: "";
@@ -102,22 +88,18 @@
         transform: translateX(-50%);
         border-radius: 1px;
       }
-
       &::before {
         top: 50%;
         transform: translate(-50%, -2px);
       }
-
       &::after {
         top: 50%;
         transform: translate(-50%, 2px);
       }
     }
-
     .differences-section {
       padding: 16px 24px;
       margin-top: 30px;
-
       .differences-header {
         font-family: var(--font-family-base);
         font-weight: var(--font-weight-bold);
@@ -128,17 +110,14 @@
       }
     }
   }
-
   .measure-version-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
-
     .version-chip-row {
       display: flex;
       align-items: center;
       gap: 8px;
-
       .version-text {
         font-family: var(--font-family-base);
         color: var(--color-dark);
@@ -146,7 +125,6 @@
         font-size: 16px;
         line-height: 24px;
       }
-
       .draft-chip {
         height: 24px;
         min-width: 55px;
@@ -158,7 +136,6 @@
         padding: 0 8px;
       }
     }
-
     .last-updated {
       font-family: var(--font-family-base);
       color: var(--color-light);
