@@ -213,7 +213,6 @@ describe("ValidationPanel component", () => {
         severity: "error",
         code: "processing",
         diagnostics: "Validation failed.",
-        // location: ["location 2"],
         key: 4,
       },
     ];
