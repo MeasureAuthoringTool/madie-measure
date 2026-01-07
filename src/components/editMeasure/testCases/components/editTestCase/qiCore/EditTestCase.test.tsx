@@ -1157,7 +1157,7 @@ describe("EditTestCase component", () => {
       userEvent.click(createBtn);
 
       const debugOutput = await screen.findByTestId("success-toast");
-      //here
+
       expect(debugOutput).toHaveTextContent(
         "The test case has been saved successfully. Please note that the bundle type has been updated to Collection, as the Test Case Builder supports editing only collection bundles."
       );
@@ -1214,7 +1214,7 @@ describe("EditTestCase component", () => {
       userEvent.click(createBtn);
 
       const debugOutput = await screen.findByTestId("success-toast");
-      //here
+
       expect(debugOutput).toHaveTextContent(
         "The test case has been saved successfully. Please note that the bundle type has been updated to Collection, as the Test Case Builder supports editing only collection bundles."
       );
@@ -1257,6 +1257,20 @@ describe("EditTestCase component", () => {
           ...testCase,
           bundleTypeUpdated: true,
           validationStatus: ValidationStatus.VALIDATING,
+          hapiOperationOutcome: {
+            code: 500,
+            message: "An unknown error occurred with HAPI FHIR",
+            outcomeResponse: {
+              resourceType: "OperationOutcome",
+              text: "Error: Bad things happened",
+              issue: [
+                {
+                  severity: "warning",
+                  diagnostics: "Bad things happened",
+                },
+              ],
+            },
+          },
         },
       });
 
@@ -1272,10 +1286,19 @@ describe("EditTestCase component", () => {
       userEvent.click(createBtn);
 
       const debugOutput = await screen.findByTestId("success-toast");
-      //here
+
       expect(debugOutput).toHaveTextContent(
-        "The test case has been saved successfully. Please note that the bundle type has been updated to Collection, as the Test Case Builder supports editing only collection bundles."
+        "Test case updated successfully with warnings in JSON"
       );
+      expect(setCustomWarningMessages).toHaveBeenCalledWith([
+        {
+          message: "Test case updated successfully!",
+          details: [
+            "The test case has been saved successfully. Please note that the bundle type has been updated to Collection, as the Test Case Builder supports editing only collection bundles.",
+          ],
+          testDataId: "test-case-validation-warning",
+        },
+      ]);
     });
 
     it("should display isQICore6 validation running message in toast when test case is created and isQICore6 is true", async () => {
