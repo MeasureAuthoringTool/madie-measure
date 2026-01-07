@@ -303,7 +303,13 @@ const TestCaseRoutes = () => {
         <Route
           path=":id"
           index
-          element={<EditTestCase errors={errors} setErrors={setErrors} />}
+          element={
+            <EditTestCase
+              errors={errors}
+              setErrors={setErrors}
+              setCustomWarningMessages={setCustomWarningMessages}
+            />
+          }
         />
         <Route path="*" element={<NotFound />} />
       </Routes>
