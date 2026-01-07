@@ -112,16 +112,18 @@ const MakeJsonMatchUiDialog = ({
           }}
         >
           <li>
-            Set all "family" fields in the JSON to the group value that was
-            entered in the UI
+            Set all "family" fields in the JSON to the <b>group</b> value that
+            was entered in the UI
           </li>
           <li>
-            Set all "given" fields in the JSON to the title value that was
-            entered in the UI
+            Set all "given" fields in the JSON to the <b>title</b> value that
+            was entered in the UI
           </li>
         </ul>
         <hr style={{ margin: "16px 0", borderColor: "#8c8c8c" }} />
-        <p>Are you sure you want to proceed?</p>
+        <p>
+          <b>Are you sure you want to proceed?</b>
+        </p>
       </div>
     </MadieDialog>
   );

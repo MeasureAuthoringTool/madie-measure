@@ -26,15 +26,9 @@ declare module "@madie/madie-util" {
     enableQdmRepeatTransfer: boolean;
     qiCoreElementsTab: boolean;
     qdmHideJson: boolean;
-    stu6TestCaseValidation: boolean;
-    MeasureSearch: boolean;
     Locking: boolean;
     qiCore7: boolean;
-    TransferMeasure: boolean;
-    MeasureHistory: boolean;
-    Calculator: boolean;
     CompareMeasureVersions: boolean;
-    ExecutionConfigurationTab: boolean;
     QICoreCompositeMeasure: boolean;
     DisplayOwner: boolean;
     MakeJSONMatchUI: boolean;
@@ -117,8 +111,7 @@ declare module "@madie/madie-util" {
       sort: string,
       direction: string,
       searchCriteria: MeasureSearchCriteria,
-      abortController: AbortController,
-      invocationSource?: string
+      abortController: AbortController
     ): Promise<any>;
 
     createVersion(id: string, versionType: string): Promise<any>;

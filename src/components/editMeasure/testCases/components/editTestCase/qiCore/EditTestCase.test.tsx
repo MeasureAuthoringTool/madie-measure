@@ -123,7 +123,6 @@ jest.mock("@madie/madie-util", () => {
         applyDefaults: mockApplyDefaults,
         qiCoreElementsTab: true,
         Locking: true,
-        Calculator: true,
       };
     }),
     measureStore: {
@@ -3205,23 +3204,6 @@ describe("EditTestCase component", () => {
     });
 
     it("executes a test case and shows the errors for invalid test case json", async () => {
-      mockedAxios.post.mockResolvedValue({
-        data: {
-          code: 200,
-          message: null,
-          successful: true,
-          outcomeResponse: {
-            resourceType: "OperationOutcome",
-            issue: [
-              {
-                severity: "informational",
-                code: "processing",
-                diagnostics: "No issues!",
-              },
-            ],
-          },
-        },
-      });
       const testCase = {
         id: "1234",
         description: "Test IPP",
@@ -3236,14 +3218,7 @@ describe("EditTestCase component", () => {
         json: '{ "resourceType": "Bundle", "type": "collection", "entry": [] }',
       } as TestCase;
       mockedAxios.get.mockClear().mockImplementation((args) => {
-        if (args && args.endsWith("/bundle")) {
-          return Promise.resolve({
-            data: buildMeasureBundle(simpleMeasureFixture),
-          });
-        } else if (
-          args &&
-          args.startsWith(serviceConfig.measureService.baseUrl)
-        ) {
+        if (args && args.startsWith(serviceConfig.measureService.baseUrl)) {
           return Promise.resolve({ data: simpleMeasureFixture });
         } else if (args && args.endsWith("series")) {
           return Promise.resolve({ data: ["DENOM_Pass", "NUMER_Pass"] });
@@ -3714,7 +3689,7 @@ describe("EditTestCase component", () => {
       expect(runButton).toBeDisabled();
     });
 
-    it("should render calculator button when Calculator flag is true", async () => {
+    it("should render calculator button", async () => {
       renderWithRouter(
         ["/measures/m1234/edit/test-cases"],
         "/measures/:measureId/edit/test-cases"
@@ -3738,24 +3713,6 @@ describe("EditTestCase component", () => {
           screen.queryByTestId("calculation-dialog")
         ).not.toBeInTheDocument()
       );
-    });
-
-    it("should not render calculator button when Calculator flag is false", async () => {
-      (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => {
-        return {
-          Calculator: false,
-        };
-      });
-      renderWithRouter(
-        ["/measures/m1234/edit/test-cases"],
-        "/measures/:measureId/edit/test-cases"
-      );
-
-      expect(screen.getByTestId("test-case-json-editor")).toBeInTheDocument();
-      expect(screen.getByTestId("test-case-cql-editor")).toBeInTheDocument();
-      expect(
-        screen.queryByTestId("editor-calculator-button")
-      ).not.toBeInTheDocument();
     });
   });
 

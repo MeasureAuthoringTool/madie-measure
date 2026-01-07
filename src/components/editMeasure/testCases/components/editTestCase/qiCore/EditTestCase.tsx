@@ -25,7 +25,7 @@ import {
   MeasureErrorType,
   Model,
   ValidationStatus,
-  TestCaseLockInfo,
+  Measure,
 } from "@madie/madie-models";
 import useTestCaseServiceApi from "../../../api/useTestCaseServiceApi";
 import Editor from "../../editor/Editor";
@@ -159,6 +159,79 @@ export function isEmptyTestCaseJsonString(
   } catch (error) {
     return true;
   }
+}
+
+/**
+ * Checks if validation errors contain any errors with "error" severity.
+ * @param validationErrors - Array of validation errors to check
+ * @returns true if any error has severity "error", false otherwise
+ */
+export function hasValidationErrorSeverity(validationErrors: any[]): boolean {
+  return validationErrors?.some(
+    (validationError) => validationError.severity === "error"
+  );
+}
+
+/**
+ * Determines whether the "Run Test Case" button should be disabled.
+ *
+ * The button is disabled when:
+ * - Measure has CQL errors or specific measure errors
+ * - Measure has no groups defined
+ * - Test case has validation errors (unless executeInvalidTestCases is enabled)
+ * - Test case JSON is empty
+ * - Execution context is not ready
+ * - Test case is currently executing
+ *
+ * @param params - Object containing all the parameters needed for the check
+ * @returns true if the button should be disabled, false otherwise
+ */
+export function shouldDisableRunTestCaseButton(params: {
+  measure: Measure | undefined;
+  validationErrors: any[];
+  editorVal: string;
+  executionContextReady: boolean;
+  executing: boolean;
+}): boolean {
+  const {
+    measure,
+    validationErrors,
+    editorVal,
+    executionContextReady,
+    executing,
+  } = params;
+
+  const hasCqlErrors = !!measure?.cqlErrors;
+
+  const hasMeasureErrors =
+    measure?.errors?.includes(
+      MeasureErrorType.MISMATCH_CQL_POPULATION_RETURN_TYPES
+    ) ||
+    measure?.errors?.includes(MeasureErrorType.MISMATCH_CQL_RISK_ADJUSTMENT) ||
+    measure?.errors?.includes(MeasureErrorType.MISMATCH_CQL_SUPPLEMENTAL_DATA);
+
+  const hasNoGroups = _.isNil(measure?.groups) || measure?.groups.length === 0;
+
+  const canExecuteInvalidTestCases =
+    measure?.testCaseConfiguration?.executeInvalidTestCases;
+
+  // do not check for validation errors if invalid test cases execution is enabled
+  const hasValidationErrors = canExecuteInvalidTestCases
+    ? false
+    : hasValidationErrorSeverity(validationErrors);
+
+  const isEmptyJson = isEmptyTestCaseJsonString(editorVal);
+
+  const isNotReady = !executionContextReady || executing;
+
+  return (
+    hasCqlErrors ||
+    hasMeasureErrors ||
+    hasNoGroups ||
+    hasValidationErrors ||
+    isEmptyJson ||
+    isNotReady
+  );
 }
 
 export function findEpisodeActualValue(
@@ -653,9 +726,12 @@ const EditTestCase = (props: EditTestCaseProps) => {
       return;
     }
     setValidationErrors(() => []);
-    let modifiedTestCase = { ...testCase };
-    if (isJsonModified()) {
-      modifiedTestCase.json = editorVal;
+    let modifiedTestCase = { ...testCase, json: editorVal };
+    // validate the JSON iff executeInvalidTestCases is false and JSON has been modified
+    if (
+      !measure?.testCaseConfiguration?.executeInvalidTestCases &&
+      isJsonModified()
+    ) {
       try {
         // Validate test case JSON prior to execution
         const validationResult =
@@ -664,7 +740,11 @@ const EditTestCase = (props: EditTestCaseProps) => {
             measure.model
           );
         const errors = handleHapiOutcome(validationResult);
-        if (!_.isNil(errors) && errors.length > 0 && hasErrorSeverity(errors)) {
+        if (
+          !_.isNil(errors) &&
+          errors.length > 0 &&
+          hasValidationErrorSeverity(errors)
+        ) {
           setCalculationErrors({
             status: "warning",
             message:
@@ -694,12 +774,6 @@ const EditTestCase = (props: EditTestCaseProps) => {
         );
 
       const executionResults = calculationOutput.results;
-      const validationResult =
-        await testCaseService.current.validateTestCaseBundle(
-          JSON.parse(editorVal),
-          measure.model
-        );
-      handleHapiOutcome(validationResult);
       setCalculationErrors(undefined);
       setPopulationGroupResults(
         executionResults[0].detailedResults as DetailedPopulationGroupResult[]
@@ -761,7 +835,6 @@ const EditTestCase = (props: EditTestCaseProps) => {
           );
         }
       } else if (hasValidHapiOutcome(testCase)) {
-        // TODO: Remove if-check once the stu6TestCaseValidation flag is removed
         if (timezoneUpdated) {
           showToast(
             <div>
@@ -928,14 +1001,6 @@ const EditTestCase = (props: EditTestCaseProps) => {
       : !isEmptyTestCaseJsonString(editorVal);
   }
 
-  const hasErrorSeverity = (validationErrors) => {
-    return (
-      validationErrors.filter(
-        (validationError) => validationError.severity === "error"
-      ).length > 0
-    );
-  };
-
   // An empty string is also considered to be valid, as it is not malformed
   // and allows a user to edit for the first time
   const isValidJson = (str) => {
@@ -961,7 +1026,10 @@ const EditTestCase = (props: EditTestCaseProps) => {
         /^information/.exec(validationError.severity) === null
     ).length;
     if (nonInformationalErrors > 0) {
-      if (hasErrorSeverity(validationErrors) || errorsWithNoSeverity > 0) {
+      if (
+        hasValidationErrorSeverity(validationErrors) ||
+        errorsWithNoSeverity > 0
+      ) {
         return "error";
       }
       return "warning";
@@ -989,34 +1057,6 @@ const EditTestCase = (props: EditTestCaseProps) => {
   }, [measure?.groups]);
   return (
     <>
-      {isQICore6 && !featureFlags?.stu6TestCaseValidation && (
-        <div id="status-handler">
-          <MadieAlert
-            type="warning"
-            content={
-              <div
-                aria-live="polite"
-                role="alert"
-                data-testid={"terminology-validation-warning"}
-              >
-                <strong>Warning: </strong>
-                Validations for QI-Core STU6 are Disabled. No validations will
-                be displayed. Validation of your Test Case JSON can be performed
-                using an alternative tool, such as the{" "}
-                <a
-                  href={"https://validator.fhir.org/"}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  HL7 FHIR Validator
-                </a>{" "}
-                with the US-Core and QI-Core IGs selected.
-              </div>
-            }
-            canClose={false}
-          />
-        </div>
-      )}
       <TestCaseForm
         data-testid="create-test-case-form"
         id="edit-test-case-qi-core"
@@ -1110,11 +1150,9 @@ const EditTestCase = (props: EditTestCaseProps) => {
                 ) : (
                   <>
                     <div tw="float-right mr-4">
-                      {featureFlags?.Calculator && (
-                        <EditorCalculator
-                          onClick={() => setCalculationDialogOpen(true)}
-                        />
-                      )}
+                      <EditorCalculator
+                        onClick={() => setCalculationDialogOpen(true)}
+                      />
                       <EditorSearch />
                     </div>
                     <Editor
@@ -1382,9 +1420,6 @@ const EditTestCase = (props: EditTestCaseProps) => {
                         testCase={testCase}
                         validationErrors={validationErrors}
                         isQiCoreV6={isQICore6}
-                        stu6TestCaseValidationFeatureFlag={
-                          featureFlags?.stu6TestCaseValidation
-                        }
                       />
                     </div>
                   </>
@@ -1437,33 +1472,13 @@ const EditTestCase = (props: EditTestCaseProps) => {
                   tw="m-2"
                   type="button"
                   onClick={calculate}
-                  disabled={
-                    !!measure?.cqlErrors ||
-                    measure?.errors?.includes(
-                      MeasureErrorType.MISMATCH_CQL_POPULATION_RETURN_TYPES
-                    ) ||
-                    measure?.errors?.includes(
-                      MeasureErrorType.MISMATCH_CQL_RISK_ADJUSTMENT
-                    ) ||
-                    measure?.errors?.includes(
-                      MeasureErrorType.MISMATCH_CQL_SUPPLEMENTAL_DATA
-                    ) ||
-                    _.isNil(measure?.groups) ||
-                    measure?.groups.length === 0 ||
-                    (!isJsonModified() &&
-                    measure?.testCaseConfiguration?.executeInvalidTestCases
-                      ? false
-                      : hasErrorSeverity(validationErrors)) ||
-                    (measure?.testCaseConfiguration?.executeInvalidTestCases
-                      ? false
-                      : isEmptyTestCaseJsonString(editorVal)) ||
-                    !executionContextReady ||
-                    executing
-                  }
-                  /*
-                  if new test case
-                    enable run button if json modified, regardless of errors
-                 */
+                  disabled={shouldDisableRunTestCaseButton({
+                    measure,
+                    validationErrors,
+                    editorVal,
+                    executionContextReady,
+                    executing,
+                  })}
                   data-testid="run-test-case-button"
                 >
                   Run Test Case

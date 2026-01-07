@@ -196,16 +196,12 @@ export default function ActionCenter(props: PropTypes) {
         canEdit={canEdit}
       />
       <ViewHRAction measures={props.measures} onClick={viewHumanReadable} />
-      {featureFlags?.TransferMeasure && (
-        <TransferAction
-          measures={props.measures}
-          onClick={transferMeasure}
-          activeTab={props?.activeTab}
-        />
-      )}
-      {featureFlags?.MeasureHistory && (
-        <HistoryAction measures={props.measures} onClick={viewMeasureHistory} />
-      )}
+      <TransferAction
+        measures={props.measures}
+        onClick={transferMeasure}
+        activeTab={props?.activeTab}
+      />
+      <HistoryAction measures={props.measures} onClick={viewMeasureHistory} />
       {featureFlags?.CompareMeasureVersions && (
         <CompareVersionsAction
           measures={props.measures}
