@@ -25,7 +25,6 @@ import {
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { ELM_JSON, MeasureCQL } from "../../../../common/MeasureCQL";
 import userEvent from "@testing-library/user-event";
-import axios from "../../../../../api/axios-instance";
 import { getPopulationsForScoring } from "../../PopulationHelper";
 import * as _ from "lodash";
 // @ts-ignore
@@ -35,7 +34,6 @@ import {
   useFeatureFlags,
 } from "@madie/madie-util";
 import { InitialPopulationAssociationType } from "../groupPopulations/GroupPopulation";
-import { addAPIProvider } from "@iconify-icon/react/dist/iconify.mjs";
 // fix error about window.scrollto
 global.scrollTo = jest.fn();
 
@@ -513,7 +511,9 @@ describe("Measure Groups Page", () => {
         createdBy: MEASURE_CREATEDBY,
         groups: [],
       };
-      userEvent.click(screen.getByTestId("delete-measure-group-modal-agree-btn"));
+      userEvent.click(
+        screen.getByTestId("delete-measure-group-modal-agree-btn")
+      );
     });
 
     test("Navigating between the tabs in measure groups page", async () => {
@@ -643,6 +643,7 @@ describe("Measure Groups Page", () => {
                     isTestCaseLocked={false}
                     checkTestCasesLockStatus={jest.fn}
                     measureCanEdit={true}
+                    alertMessage=""
                   />
                 }
               ></Route>
@@ -734,7 +735,8 @@ describe("Measure Groups Page", () => {
       group.scoringPrecision = "2";
       group.populationBasis = populationBasis;
       measure.groups = [group];
-      const { getByTestId, getByText } = renderMeasureGroupComponent(customProps);
+      const { getByTestId, getByText } =
+        renderMeasureGroupComponent(customProps);
       // initial population before update
       const groupPopulationInput = screen.getByTestId(
         "select-measure-group-population-input"
@@ -1034,7 +1036,9 @@ describe("Measure Groups Page", () => {
       const initialPopulationInput = screen.getByTestId(
         "select-measure-group-population-input"
       ) as HTMLInputElement;
-      expect(initialPopulationInput.value).toBe(group.populations[0].definition);
+      expect(initialPopulationInput.value).toBe(
+        group.populations[0].definition
+      );
 
       // update initial population from dropdown
       const definitionToUpdate =
@@ -1513,7 +1517,8 @@ describe("Measure Groups Page", () => {
       group.groupDescription = "testDescription";
       group.populationBasis = "Encounter";
       measure.groups = [group];
-      const { getByTestId, getByText } = renderMeasureGroupComponent(customProps);
+      const { getByTestId, getByText } =
+        renderMeasureGroupComponent(customProps);
 
       const measureGroupTypeSelect = getByTestId("measure-group-type-dropdown");
       await act(async () => {
@@ -1632,12 +1637,12 @@ describe("Measure Groups Page", () => {
       ).toBeInTheDocument();
 
       // no more IP1 & IP2 in the document
-      expect(screen.queryByTestId("population-select-initial-population-1")).toBe(
-        null
-      );
-      expect(screen.queryByTestId("population-select-initial-population-2")).toBe(
-        null
-      );
+      expect(
+        screen.queryByTestId("population-select-initial-population-1")
+      ).toBe(null);
+      expect(
+        screen.queryByTestId("population-select-initial-population-2")
+      ).toBe(null);
     });
 
     test("Stratifications cannot be save when cql definition is not provided", async () => {
@@ -2205,7 +2210,9 @@ describe("Measure Groups Page", () => {
       fireEvent.click(ip1NumerAssociation);
       await waitFor(() => {
         expect((ip1NumerAssociation as HTMLInputElement).checked).toEqual(true);
-        expect((ip1DenomAssociation as HTMLInputElement).checked).toEqual(false);
+        expect((ip1DenomAssociation as HTMLInputElement).checked).toEqual(
+          false
+        );
       });
 
       // delete the IP2
@@ -2224,7 +2231,9 @@ describe("Measure Groups Page", () => {
         userEvent.click(addIpLink);
       });
       await waitFor(() => {
-        expect((ip1DenomAssociation as HTMLInputElement).checked).toEqual(false);
+        expect((ip1DenomAssociation as HTMLInputElement).checked).toEqual(
+          false
+        );
         expect((ip1NumerAssociation as HTMLInputElement).checked).toEqual(true);
       });
     });
@@ -2237,7 +2246,9 @@ describe("Measure Groups Page", () => {
         "group-description-rich-text-editor"
       );
       expect(descriptionEditor).toBeInTheDocument();
-      const scoringSelectInput = screen.getByRole("textbox", { name: "Scoring" });
+      const scoringSelectInput = screen.getByRole("textbox", {
+        name: "Scoring",
+      });
       expect(scoringSelectInput).toHaveAttribute("readonly");
       expect(scoringSelectInput).toHaveValue("-");
       const measureType = screen.getByRole("textbox", { name: "Measure Type" });
@@ -2536,6 +2547,9 @@ describe("Measure Groups Page", () => {
       });
       expect(componentTab).toBeInTheDocument();
       expect(componentTab).toHaveAttribute("aria-selected", "true");
+      expect(screen.getByTestId("components")).toHaveTextContent(
+        "Coming soon..."
+      );
 
       // populations tab is not present
       const populationTab = screen.queryByRole("tab", {
