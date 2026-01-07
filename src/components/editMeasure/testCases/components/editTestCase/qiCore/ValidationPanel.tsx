@@ -18,7 +18,7 @@ export function extractResourceId(inputString) {
   // or: Bundle.entry[1].resource/*Encounter/NUMERStrat2Pass-TimeToTx61Min01*/.location[0].period
   const regex = /\/\*.*?\/(.*?)\*\//;
 
-  const match = inputString.match(regex);
+  const match = inputString?.match(regex);
 
   // If a match is found, the captured group (index 1) contains the desired string.
   if (match && match.length > 1) {

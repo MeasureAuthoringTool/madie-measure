@@ -10,6 +10,7 @@ import {
   createImportMessage,
   createMissingDataElementMessage,
   createShiftTestCaseDatesWarningMessage,
+  createUpdateQiCoreJsonWithGroupAndTitleWarningMessage,
   createWarningMessage,
 } from "./StatusHandlerMessage";
 
@@ -28,6 +29,7 @@ interface StatusHandlerProps {
   testDataId?: string;
   importWarnings?: TestCaseImportOutcome[];
   shiftTestCaseDatesWarning?: Array<string>;
+  updateQiCoreJsonWithGroupAndTitleWarning?: Array<string>;
   missingDataElements?: Array<string>;
 }
 
@@ -39,6 +41,7 @@ const StatusHandler = ({
   testDataId,
   importWarnings,
   shiftTestCaseDatesWarning,
+  updateQiCoreJsonWithGroupAndTitleWarning,
   missingDataElements,
   customWarningMessages,
 }: StatusHandlerProps) => {
@@ -106,17 +109,29 @@ const StatusHandler = ({
   }
 
   // TODO: Replace scenario specific warning path with generic customWarningMessages
-  if (warning && shiftTestCaseDatesWarning) {
+  if (warning && shiftTestCaseDatesWarning.length > 0) {
     const withoutDuplicates = [...new Set(shiftTestCaseDatesWarning)];
     if (withoutDuplicates.length > 0) {
       alerts.push(
         createShiftTestCaseDatesWarningMessage(withoutDuplicates, testDataId)
       );
     }
-  } else if (warning && warningMessages) {
+  } else if (warning && warningMessages.length > 0) {
     const withoutDuplicates = [...new Set(warningMessages)];
     if (withoutDuplicates.length > 0) {
       alerts.push(createWarningMessage(withoutDuplicates, testDataId));
+    }
+  } else if (warning && updateQiCoreJsonWithGroupAndTitleWarning.length > 0) {
+    const withoutDuplicates = [
+      ...new Set(updateQiCoreJsonWithGroupAndTitleWarning),
+    ];
+    if (withoutDuplicates.length > 0) {
+      alerts.push(
+        createUpdateQiCoreJsonWithGroupAndTitleWarningMessage(
+          withoutDuplicates,
+          testDataId
+        )
+      );
     }
   }
 

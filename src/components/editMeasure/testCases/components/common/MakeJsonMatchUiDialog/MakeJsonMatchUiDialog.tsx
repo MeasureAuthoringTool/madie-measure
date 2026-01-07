@@ -1,19 +1,84 @@
-import React from "react";
+import React, { useRef } from "react";
 import { MadieDialog } from "@madie/madie-design-system/dist/react";
+import { TestCase } from "@madie/madie-models";
+import _ from "lodash";
+import useTestCaseServiceApi from "../../../api/useTestCaseServiceApi";
 
 interface MakeJsonMatchUiDialogProps {
   open: boolean;
   onClose: () => void;
-  onContinue: () => void;
+  selectedTestCases: TestCase[];
+  measureId: string;
   selectedTestCaseCount: number;
+  setUpdateQiCoreJsonWithGroupAndTitleWarning: Function;
+  setWarnings: Function;
+  setToastMessage: (msg: string) => void;
+  setToastType: (type: string) => void;
+  setToastOpen: (open: boolean) => void;
 }
 
 const MakeJsonMatchUiDialog = ({
   open,
   onClose,
-  onContinue,
+  selectedTestCases,
+  measureId,
   selectedTestCaseCount,
+  setUpdateQiCoreJsonWithGroupAndTitleWarning,
+  setToastMessage,
+  setToastType,
+  setToastOpen,
 }: MakeJsonMatchUiDialogProps) => {
+  const testCaseService = useRef(useTestCaseServiceApi());
+
+  const makeJsonMatchUi = async (
+    selectedTestCases: TestCase[],
+    measureId: string
+  ) => {
+    if (_.size(selectedTestCases) > 0) {
+      const selectedTestCaseIds = selectedTestCases?.map(
+        (testCase: TestCase) => testCase.id
+      );
+
+      try {
+        const response =
+          await testCaseService.current.updateQiCoreJsonWithGroupAndTitle(
+            selectedTestCaseIds,
+            measureId
+          );
+        const { failed = [], updated = [] } = response;
+        const total = selectedTestCaseIds.length;
+
+        if (failed.length === 0 && updated.length === total) {
+          setToastType("success");
+          setToastMessage(
+            "All family and given fields have been set for the selected test cases"
+          );
+          setUpdateQiCoreJsonWithGroupAndTitleWarning([]);
+          setToastOpen(true);
+        } else if (failed.length > 0 && updated.length > 0) {
+          setUpdateQiCoreJsonWithGroupAndTitleWarning((prevState) => [
+            ...prevState,
+            ...response.failed,
+          ]);
+        } else if (failed.length === total) {
+          setToastType("danger");
+          setToastMessage(
+            "The operation could not be completed on the selected test cases.  Review the JSON to make changes manually."
+          );
+          setToastOpen(true);
+        }
+      } catch (error) {
+        setToastType("danger");
+        setToastMessage(
+          "not be completed on the selected test cases.  Review the JSON to make changes manually."
+        );
+        setToastOpen(true);
+      } finally {
+        onClose();
+      }
+    }
+  };
+
   return (
     <MadieDialog
       title="Are you sure?"
@@ -29,7 +94,7 @@ const MakeJsonMatchUiDialog = ({
       }}
       continueButtonProps={{
         variant: "cyan",
-        onClick: onContinue,
+        onClick: () => makeJsonMatchUi(selectedTestCases, measureId),
         continueText: "Yes, Make JSON Match UI",
         "data-testid": "make-json-match-ui-continue-button",
       }}

@@ -157,3 +157,29 @@ export function createImportMessage(
     canClose: false,
   };
 }
+
+export function createUpdateQiCoreJsonWithGroupAndTitleWarningMessage(
+  withoutDuplicates: string[],
+  testDataId: string
+) {
+  return {
+    type: "warning",
+    copyButton: true,
+    content: (
+      <div aria-live="polite" role="alert" data-testid={testDataId}>
+        <div data-testid="warn-title">
+          Some test cases were updated successfully, but the following could not
+          be updated due to errors or because they are locked by another user.
+          Review the JSON to make changes manually:
+          <ul>
+            {withoutDuplicates.map((tc, index) => (
+              <li key={index}>{tc}</li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    ),
+    canClose: false,
+    alertProps: { "data-testid": testDataId },
+  };
+}
