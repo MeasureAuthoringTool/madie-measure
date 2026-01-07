@@ -11,6 +11,7 @@ interface MakeJsonMatchUiDialogProps {
   measureId: string;
   selectedTestCaseCount: number;
   setUpdateQiCoreJsonWithGroupAndTitleWarning: Function;
+  setShiftTestCaseDatesWarnings: Function;
   setWarnings: Function;
   setToastMessage: (msg: string) => void;
   setToastType: (type: string) => void;
@@ -24,6 +25,7 @@ const MakeJsonMatchUiDialog = ({
   measureId,
   selectedTestCaseCount,
   setUpdateQiCoreJsonWithGroupAndTitleWarning,
+  setShiftTestCaseDatesWarnings,
   setToastMessage,
   setToastType,
   setToastOpen,
@@ -56,6 +58,7 @@ const MakeJsonMatchUiDialog = ({
           setUpdateQiCoreJsonWithGroupAndTitleWarning([]);
           setToastOpen(true);
         } else if (failed.length > 0 && updated.length > 0) {
+          setShiftTestCaseDatesWarnings([]);
           setUpdateQiCoreJsonWithGroupAndTitleWarning((prevState) => [
             ...prevState,
             ...response.failed,

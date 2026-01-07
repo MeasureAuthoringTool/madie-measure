@@ -801,6 +801,7 @@ const TestCaseList = (props: TestCaseListProps) => {
         setUpdateQiCoreJsonWithGroupAndTitleWarning={
           setUpdateQiCoreJsonWithGroupAndTitleWarning
         }
+        setShiftTestCaseDatesWarnings={setShiftTestCaseDatesWarnings}
         setWarnings={setWarnings}
         setToastMessage={setToastMessage}
         setToastType={setToastType}
