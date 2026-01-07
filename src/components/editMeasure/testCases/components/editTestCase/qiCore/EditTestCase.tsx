@@ -726,13 +726,12 @@ const EditTestCase = (props: EditTestCaseProps) => {
       return;
     }
     setValidationErrors(() => []);
-    let modifiedTestCase = { ...testCase };
+    let modifiedTestCase = { ...testCase, json: editorVal };
     // validate the JSON iff executeInvalidTestCases is false and JSON has been modified
     if (
       !measure?.testCaseConfiguration?.executeInvalidTestCases &&
       isJsonModified()
     ) {
-      modifiedTestCase.json = editorVal;
       try {
         // Validate test case JSON prior to execution
         const validationResult =
