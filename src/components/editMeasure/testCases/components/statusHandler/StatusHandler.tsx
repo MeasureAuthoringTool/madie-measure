@@ -109,23 +109,23 @@ const StatusHandler = ({
   }
 
   // TODO: Replace scenario specific warning path with generic customWarningMessages
-  if (warning && shiftTestCaseDatesWarning.length > 0) {
+  if (warning && shiftTestCaseDatesWarning?.length > 0) {
     const withoutDuplicates = [...new Set(shiftTestCaseDatesWarning)];
-    if (withoutDuplicates.length > 0) {
+    if (withoutDuplicates?.length > 0) {
       alerts.push(
         createShiftTestCaseDatesWarningMessage(withoutDuplicates, testDataId)
       );
     }
-  } else if (warning && warningMessages.length > 0) {
+  } else if (warning && warningMessages?.length > 0) {
     const withoutDuplicates = [...new Set(warningMessages)];
-    if (withoutDuplicates.length > 0) {
+    if (withoutDuplicates?.length > 0) {
       alerts.push(createWarningMessage(withoutDuplicates, testDataId));
     }
-  } else if (warning && updateQiCoreJsonWithGroupAndTitleWarning.length > 0) {
+  } else if (warning && updateQiCoreJsonWithGroupAndTitleWarning?.length > 0) {
     const withoutDuplicates = [
       ...new Set(updateQiCoreJsonWithGroupAndTitleWarning),
     ];
-    if (withoutDuplicates.length > 0) {
+    if (withoutDuplicates?.length > 0) {
       alerts.push(
         createUpdateQiCoreJsonWithGroupAndTitleWarningMessage(
           withoutDuplicates,

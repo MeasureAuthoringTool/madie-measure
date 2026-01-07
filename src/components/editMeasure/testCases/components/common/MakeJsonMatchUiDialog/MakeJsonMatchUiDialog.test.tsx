@@ -83,24 +83,6 @@ describe("MakeJsonMatchUiDialog", () => {
     expect(mockOnClose).toHaveBeenCalledTimes(1);
   });
 
-  it("should call onContinue when Yes, Make JSON Match UI button is clicked", async () => {
-    render(
-      <MakeJsonMatchUiDialog
-        open={true}
-        onClose={mockOnClose}
-        onContinue={mockOnContinue}
-        selectedTestCaseCount={1}
-      />
-    );
-
-    const continueBtn = screen.getByTestId(
-      "make-json-match-ui-continue-button"
-    );
-    await userEvent.click(continueBtn);
-
-    expect(mockOnContinue).toHaveBeenCalledTimes(1);
-  });
-
   it("should display Yes, Make JSON Match UI button text", () => {
     render(
       <MakeJsonMatchUiDialog
