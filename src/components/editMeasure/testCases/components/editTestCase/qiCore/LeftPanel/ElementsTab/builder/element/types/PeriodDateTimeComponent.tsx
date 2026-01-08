@@ -8,7 +8,11 @@ import timezone from "dayjs/plugin/timezone";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import advancedFormat from "dayjs/plugin/advancedFormat";
-import { Select, TimeField } from "@madie/madie-design-system/dist/react";
+import {
+  Select,
+  TimeField,
+  ReadOnlyTextField,
+} from "@madie/madie-design-system/dist/react";
 import DateField from "./DateField";
 import { formatOptionRenderMap } from "./DateTimeComponent";
 
@@ -133,12 +137,16 @@ const PeriodDateTimeComponent = ({
 
     setUserSelectedFormat(false);
   }, [value]);
-
+  // When the Select switches to readOnly, prevent the resulting ReadOnlyTextField's style from being overwritten
+  const selectProps: any = {};
+  if (canEdit) {
+    selectProps.style = { height: "38.125px", marginBottom: "2px" };
+  }
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
       <div style={{ marginBottom: "16px", maxWidth: 220 }}>
         <Select
-          style={{ height: "38.125px", marginBottom: "2px" }}
+          readOnly={!canEdit}
           required={fieldRequired}
           id={`date-time-format-selector-${label}`}
           label="Date Precision Level"
@@ -147,7 +155,6 @@ const PeriodDateTimeComponent = ({
             "aria-describedby": `date-time-format-selector-input-field-helper-text-${label}`,
           }}
           data-testid={`date-time-format-selector-field-${label}`}
-          readOnly={!canEdit}
           SelectDisplayProps={{
             "aria-required": "true",
           }}
@@ -167,6 +174,7 @@ const PeriodDateTimeComponent = ({
           }}
           placeHolder={{ name: "Select Format", value: "" }}
           value={format ? format : ""}
+          {...selectProps}
         />
       </div>
 
@@ -198,6 +206,7 @@ const PeriodDateTimeComponent = ({
             <DateField
               label="Start Date"
               format={format}
+              readOnly={!canEdit}
               required={fieldRequired}
               error={error.start}
               helperText={helperText.start}
@@ -233,33 +242,48 @@ const PeriodDateTimeComponent = ({
               }}
               onBlur={() => {}}
             />
-            {format === DATE_TIME_ZONE_FORMAT && (
-              <TimeField
-                disabled={!canEdit || !startDate}
-                required={fieldRequired}
-                label="Start Time"
-                id={`start-time-field-${label}`}
-                seconds
-                views={["hours", "minutes", "seconds"]}
-                data-testid="start-time-input"
-                handleTimeChange={(time) => {
-                  if (!startDate) return;
-                  const utcTime = dayjs.utc(time);
-                  setStartTime(utcTime);
-                  // Merge date and time
-                  const merged = startDate
-                    .hour(utcTime.hour())
-                    .minute(utcTime.minute())
-                    .second(utcTime.second());
-                  setStartDate(merged);
-                  onChange({
-                    start: merged.format(format),
-                    end: endDate ? endDate.format(format) : "",
-                  });
-                }}
-                value={startTime || startDate}
-              />
-            )}
+            {format === DATE_TIME_ZONE_FORMAT &&
+              (canEdit ? (
+                <TimeField
+                  disabled={!canEdit || !startDate}
+                  readOnly={!canEdit}
+                  required={fieldRequired}
+                  label="Start Time"
+                  id={`start-time-field-${label}`}
+                  seconds
+                  views={["hours", "minutes", "seconds"]}
+                  data-testid="start-time-input"
+                  handleTimeChange={(time) => {
+                    if (!startDate) return;
+                    const utcTime = dayjs.utc(time);
+                    setStartTime(utcTime);
+                    // Merge date and time
+                    const merged = startDate
+                      .hour(utcTime.hour())
+                      .minute(utcTime.minute())
+                      .second(utcTime.second());
+                    setStartDate(merged);
+                    onChange({
+                      start: merged.format(format),
+                      end: endDate ? endDate.format(format) : "",
+                    });
+                  }}
+                  value={startTime || startDate}
+                />
+              ) : (
+                <ReadOnlyTextField
+                  required={fieldRequired}
+                  label={label}
+                  id={`start-time-field-${label}`}
+                  data-testid={`start-time-field-${label}`}
+                  size="small"
+                  value={
+                    startTime || startDate
+                      ? (startTime || startDate).format("HH:mm:ss a")
+                      : "-"
+                  }
+                />
+              ))}
           </div>
           <span style={{ alignSelf: "center", padding: "0 8px" }}>To</span>
           <div
@@ -281,6 +305,7 @@ const PeriodDateTimeComponent = ({
               label="End Date"
               format={format}
               required={fieldRequired}
+              readOnly={!canEdit}
               error={error.end}
               helperText={helperText.end}
               value={endDate}
@@ -315,33 +340,47 @@ const PeriodDateTimeComponent = ({
               }}
               onBlur={() => {}}
             />
-            {format === DATE_TIME_ZONE_FORMAT && (
-              <TimeField
-                disabled={!canEdit || !endDate}
-                required={fieldRequired}
-                label="End Time"
-                id={`end-time-field-${label}`}
-                seconds
-                views={["hours", "minutes", "seconds"]}
-                data-testid="end-time-input"
-                handleTimeChange={(time) => {
-                  if (!endDate) return;
-                  const utcTime = dayjs.utc(time);
-                  setEndTime(utcTime);
-                  // Merge date and time
-                  const merged = endDate
-                    .hour(utcTime.hour())
-                    .minute(utcTime.minute())
-                    .second(utcTime.second());
-                  setEndDate(merged);
-                  onChange({
-                    start: startDate ? startDate.format(format) : "",
-                    end: merged.format(format),
-                  });
-                }}
-                value={endTime || endDate}
-              />
-            )}
+            {format === DATE_TIME_ZONE_FORMAT &&
+              (canEdit ? (
+                <TimeField
+                  disabled={!canEdit || !endDate}
+                  required={fieldRequired}
+                  label="End Time"
+                  id={`end-time-field-${label}`}
+                  seconds
+                  views={["hours", "minutes", "seconds"]}
+                  data-testid="end-time-input"
+                  handleTimeChange={(time) => {
+                    if (!endDate) return;
+                    const utcTime = dayjs.utc(time);
+                    setEndTime(utcTime);
+                    // Merge date and time
+                    const merged = endDate
+                      .hour(utcTime.hour())
+                      .minute(utcTime.minute())
+                      .second(utcTime.second());
+                    setEndDate(merged);
+                    onChange({
+                      start: startDate ? startDate.format(format) : "",
+                      end: merged.format(format),
+                    });
+                  }}
+                  value={endTime || endDate}
+                />
+              ) : (
+                <ReadOnlyTextField
+                  required={fieldRequired}
+                  label={label}
+                  id={`end-time-field-${label}`}
+                  data-testid={`end-time-field-${label}`}
+                  size="small"
+                  value={
+                    endTime || endDate
+                      ? (endTime || endDate).format("HH:mm:ss a")
+                      : "-"
+                  }
+                />
+              ))}
           </div>
         </div>
       </LocalizationProvider>

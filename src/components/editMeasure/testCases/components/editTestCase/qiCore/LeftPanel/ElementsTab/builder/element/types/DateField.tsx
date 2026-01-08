@@ -1,6 +1,9 @@
 import React, { useRef, useState } from "react";
 import PropTypes from "prop-types";
-import { TextField } from "@madie/madie-design-system/dist/react";
+import {
+  ReadOnlyTextField,
+  TextField,
+} from "@madie/madie-design-system/dist/react";
 import { Box } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import dayjs from "dayjs";
@@ -45,6 +48,7 @@ const DateField = ({
   label,
   value,
   disabled,
+  readOnly = false,
   error,
   helperText,
   required = false,
@@ -65,41 +69,53 @@ const DateField = ({
   })(format);
   return (
     <Box sx={{ ...containerSx }}>
-      <DatePicker
-        emptyLabel="custom label"
-        value={value}
-        onChange={onChange}
-        views={views}
-        disabled={disabled}
-        onClose={() => rest?.onBlur()}
-        // need this to false to prevent MUI from adding their own format masking that conflicts with ours
-        disableMaskedInput={false}
-        // i only want to apply format if updatedFormat is not undefined
-        format={updatedFormat ? updatedFormat : undefined}
-        slotProps={{
-          textField: (params) => {
-            const { InputProps } = params;
-            InputProps["data-testid"] = id;
-            InputProps["aria-required"] = required;
-            return {
-              id: id,
-              label,
-              sx: { ...dateTextFieldStyle, ...textFieldSx },
-              placeholder,
-              error: error,
-              helperText: helperText,
-              onBlur: rest?.onBlur,
-            };
-          },
-          openPickerButton: {
-            id: `${id}-open-picker-button`,
-            //@ts-ignore
-            dataTestId: `${id}-open-picker-button`,
-          },
-        }}
-        slots={{ textField: TextField }}
-        {...rest}
-      />
+      {readOnly ? (
+        <ReadOnlyTextField
+          required={required}
+          label={label}
+          id={id}
+          size="small"
+          data-testid={id}
+          {...rest}
+          value={value ? dayjs.utc(value).format(updatedFormat) : "-"}
+        />
+      ) : (
+        <DatePicker
+          emptyLabel="custom label"
+          value={value}
+          onChange={onChange}
+          views={views}
+          disabled={disabled}
+          onClose={() => rest?.onBlur()}
+          // need this to false to prevent MUI from adding their own format masking that conflicts with ours
+          disableMaskedInput={false}
+          // Only apply format if updatedFormat is not undefined
+          format={updatedFormat ? updatedFormat : undefined}
+          slotProps={{
+            textField: (params) => {
+              const { InputProps } = params;
+              InputProps["data-testid"] = id;
+              InputProps["aria-required"] = required;
+              return {
+                id: id,
+                label,
+                sx: { ...dateTextFieldStyle, ...textFieldSx },
+                placeholder,
+                error: error,
+                helperText: helperText,
+                onBlur: rest?.onBlur,
+              };
+            },
+            openPickerButton: {
+              id: `${id}-open-picker-button`,
+              //@ts-ignore
+              dataTestId: `${id}-open-picker-button`,
+            },
+          }}
+          slots={{ textField: TextField }}
+          {...rest}
+        />
+      )}
     </Box>
   );
 };
