@@ -870,7 +870,7 @@ const TypeEditor = ({
               {...formik.getFieldProps(label)}
               onChange={() => {}}
               formikHandleChange={formik.handleChange}
-              // Being depcreated for a formik handleChange
+              // Being deprecated for a formik handleChange
               // label={label} // label will be needed later to hook up to formik.
               fhirResource={resource}
               elementDefinition={structureDefinition} // id is patient.identifier[0].extension    ;

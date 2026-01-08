@@ -135,7 +135,11 @@ const DateTimeComponent = ({
       setDate(null);
     }
   }, [value]);
-
+  // When the Select switches to readOnly, prevent the resulting ReadOnlyTextField's style from being overwritten
+  const selectProps: any = {};
+  if (canEdit) {
+    selectProps.style = { height: "38.125px", marginBottom: "2px" };
+  }
   return (
     <div className="element-editor-add-row">
       <Box sx={{ display: "flex", flexDirection: "column" }}>
@@ -155,7 +159,6 @@ const DateTimeComponent = ({
             {/* select a format and render a picker */}
             <div>
               <Select
-                style={{ height: "38.125px", marginBottom: "2px" }}
                 required={fieldRequired}
                 id={`date-time-format-selector-${label}`}
                 label="Date Precision Level"
@@ -188,6 +191,7 @@ const DateTimeComponent = ({
                 }}
                 placeHolder={{ name: "Select Format", value: "" }}
                 value={format ? format : ""}
+                {...selectProps}
               ></Select>
             </div>
 
@@ -210,6 +214,7 @@ const DateTimeComponent = ({
                 value={date}
                 views={format ? formatMap[format] : ["year"]}
                 disabled={!canEdit || !format || format === "Invalid Format"}
+                readOnly={!canEdit}
                 format={format}
                 placeholder={format ? formatOptionRenderMap[format] : ""}
                 id={`${format || "year"}-field-${label}`}
