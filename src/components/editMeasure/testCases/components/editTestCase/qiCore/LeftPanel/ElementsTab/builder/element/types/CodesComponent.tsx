@@ -10,7 +10,7 @@ import useTerminologyServiceApi from "../../../../../../../../api/useTerminology
 import AddElementButton from "../../../../../../../common/UIOnlyModelAgnostic/AddElementButton";
 import "./CodesComponent.scss";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
-
+import { getMultipleCardinalityLabel } from "./TypeUtil";
 const CodesComponent = ({
   canEdit,
   structureDefinition,
@@ -143,7 +143,7 @@ const CodesComponent = ({
       <div className="element-editor-add-row">
         <div className="codes-select-container">
           <Select
-            label={label}
+            label={getMultipleCardinalityLabel(label)}
             id={`code-selector-${sanitizedId}`}
             inputProps={{
               "data-testid": `code-selector-input-${sanitizedId}`,
