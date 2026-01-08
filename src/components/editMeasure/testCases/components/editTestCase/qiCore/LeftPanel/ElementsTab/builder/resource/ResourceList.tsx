@@ -25,8 +25,6 @@ import { IconButton, InputAdornment } from "@mui/material";
 // import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore";
 // import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 // import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
-import { customSort } from "../../../../../../testCaseLanding/common/Hooks/UseTestCases";
-import EditIcon from "../../../../../../../../../common/EditIcon";
 import { ClearIcon } from "@mui/x-date-pickers";
 import "./ResourceList.scss";
 
@@ -42,6 +40,12 @@ const ResourceList = ({
   onClick,
   isPatientAdded,
 }: ResourceListProps) => {
+  if (resourceIdentifiers) {
+    resourceIdentifiers = resourceIdentifiers.filter(
+      (res) => res.id.startsWith("qicore") || res.id.startsWith("us-core")
+    );
+  }
+
   // Load saved pagination state from localStorage
   const resourcePageOptions = JSON.parse(
     localStorage.getItem("resourcePageOptions")

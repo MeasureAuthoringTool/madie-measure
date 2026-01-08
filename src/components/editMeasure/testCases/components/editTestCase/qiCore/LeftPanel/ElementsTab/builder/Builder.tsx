@@ -119,12 +119,8 @@ const Builder = ({
   useEffect(() => {
     const fetchResources = async () => {
       // we want to filter out base fhir resources, by checking if the id does not start with qicore or us-core
-      const resourceIdentifiers = (
-        await fhirDefinitionsService.current.getResources()
-      ).filter(
-        (res) => res.id.startsWith("qicore") || res.id.startsWith("us-core")
-      );
-
+      const resourceIdentifiers =
+        await fhirDefinitionsService.current.getResources();
       setResourceIdentifiers(resourceIdentifiers);
       abortController.current = new AbortController();
       fhirElmTranslationService.current
