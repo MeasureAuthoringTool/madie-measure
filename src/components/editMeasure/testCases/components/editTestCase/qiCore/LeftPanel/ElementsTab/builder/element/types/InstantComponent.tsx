@@ -4,7 +4,7 @@ import { Instant } from "@madie/madie-design-system/dist/react";
 import dayjs from "dayjs";
 import { INSTANT_REGEX } from "../typesValidations/fhirR4Validations";
 import AddElementButton from "../../../../../../../common/UIOnlyModelAgnostic/AddElementButton";
-
+import { getMultipleCardinalityLabel } from "./TypeUtil";
 const isValidInstant = (instantString: string) => {
   if (!INSTANT_REGEX.test(instantString)) return false;
   return dayjs(instantString).isValid();
@@ -48,7 +48,7 @@ const InstantComponent = ({
         id={`${label}_instant`}
         placeholder={isValid ? "MM/DD/YYYY" : "Invalid"}
         name={name}
-        label={label}
+        label={getMultipleCardinalityLabel(label)}
         required={required}
         handleDateTimeChange={handleDateTimeChange}
         dateTimeValue={dateTime}
