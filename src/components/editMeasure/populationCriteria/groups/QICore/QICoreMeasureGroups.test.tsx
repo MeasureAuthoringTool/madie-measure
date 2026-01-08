@@ -2558,28 +2558,16 @@ describe("Measure Groups Page", () => {
       expect(populationTab).not.toBeInTheDocument();
     });
 
-    test("should display Composite scoring and disable the dropdown when measure is composite", async () => {
+    test("should display Composite scoring as readonly and not allow changing when measure is composite", async () => {
       measure.measureMetaData.composite = true;
       renderMeasureGroupComponent(customProps);
 
-      // Verify scoring dropdown shows "Composite" as readonly textarea
+      // Verify scoring is displayed as a readonly textarea showing "Composite"
       const scoringSelect = screen.getByTestId("scoring-select");
       expect(scoringSelect).toBeInTheDocument();
       expect(scoringSelect.tagName.toLowerCase()).toBe("textarea");
       expect(scoringSelect).toHaveAttribute("readonly");
       expect(scoringSelect).toHaveTextContent("Composite");
-    });
-
-    test("should not allow changing scoring when measure is composite", async () => {
-      measure.measureMetaData.composite = true;
-      renderMeasureGroupComponent(customProps);
-
-      // Verify scoring element is readonly and displays Composite
-      const scoringSelect = screen.getByTestId("scoring-select");
-      expect(scoringSelect).toHaveAttribute("readonly");
-      expect(scoringSelect).toHaveTextContent("Composite");
-
-      // Verify no dropdown options are rendered since it's readonly
       const compositeOption = screen.queryByTestId(
         "group-scoring-option-COMPOSITE"
       );
