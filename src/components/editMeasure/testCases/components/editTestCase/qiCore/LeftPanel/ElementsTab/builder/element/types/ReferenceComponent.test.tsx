@@ -75,7 +75,7 @@ describe("ReferenceComponent", () => {
             required={false}
             helperText="Select a reference"
             error={false}
-            showAddAttributeButton={false}
+            showAddAttributeButton={true}
             addTitle=""
             label="ClaimResponse.addItem[0].provider[0]"
           />
