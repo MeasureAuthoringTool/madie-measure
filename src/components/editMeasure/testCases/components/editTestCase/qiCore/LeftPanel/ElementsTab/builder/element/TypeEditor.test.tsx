@@ -1237,7 +1237,7 @@ describe("TypeEditor Component", () => {
         </RequiredFieldsProvider>
       </FormikProvider>
     );
-    expect(screen.getByText("ClaimResponse.order[0]")).toBeInTheDocument();
+    expect(screen.getByText("Order 1")).toBeInTheDocument();
   });
   test("Should render unsignedInt component with [0]", () => {
     render(
@@ -1266,7 +1266,7 @@ describe("TypeEditor Component", () => {
         </RequiredFieldsProvider>
       </FormikProvider>
     );
-    expect(screen.getByText("ClaimResponse.order[0]")).toBeInTheDocument();
+    expect(screen.getByText("Order 1")).toBeInTheDocument();
   });
 
   test("Should display unsupported", () => {

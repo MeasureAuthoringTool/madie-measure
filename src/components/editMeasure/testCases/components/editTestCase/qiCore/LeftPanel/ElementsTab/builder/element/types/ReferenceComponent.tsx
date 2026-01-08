@@ -141,6 +141,7 @@ export default function ReferenceComponent({
             id: `reference-type-input-select`,
             required: required,
           }}
+          readOnly={!canEdit}
           options={resourceProfileOptions.map((opt, i) => (
             <MenuItem
               key={`${opt.label}-${opt.profile}-${i}`}
@@ -198,6 +199,7 @@ export default function ReferenceComponent({
               id: `reference-select-input`,
               required: required,
             }}
+            readOnly={!canEdit}
             options={finalOptions.map((opt, i) => (
               <MenuItem
                 key={`${opt.label}-${opt.value}-${i}`}
