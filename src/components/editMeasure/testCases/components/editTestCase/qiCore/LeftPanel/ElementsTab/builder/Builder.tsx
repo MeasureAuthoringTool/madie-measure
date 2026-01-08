@@ -112,7 +112,7 @@ const Builder = ({
 
   const [selectedResourceID, setSelectedResourceId] = useState<string>(null); // one single source of truth.
   const [resourceIdentifiers, setResourceIdentifiers] = useState([]);
-  const [resources, setResources] = useState<ResourceIdentifier[]>(null);
+  const [resources, setResources] = useState<ResourceIdentifier[]>([]);
   const addedResources = state?.bundle?.entry?.length || 0;
   const [savedGridID, setSavedGridID] = useState(null);
   const [applyLoading, setApplyLoading] = useState(false);
@@ -235,7 +235,10 @@ const Builder = ({
         {/* available elements that we don't want to display when a resource is selected */}
         {activeTab === "Available" && canEdit && (
           <ResourceList
-            resourceIdentifiers={resources}
+            resourceIdentifiers={resources.filter(
+              (res) =>
+                res.id.startsWith("qicore") || res.id.startsWith("us-core")
+            )}
             onClick={async (resourceIdentifier: ResourceIdentifier) => {
               const newEntry =
                 buildMadieResourceFromResourceIdentifier(resourceIdentifier);

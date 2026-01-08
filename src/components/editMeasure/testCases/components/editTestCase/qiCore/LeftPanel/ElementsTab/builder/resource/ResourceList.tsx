@@ -40,12 +40,6 @@ const ResourceList = ({
   onClick,
   isPatientAdded,
 }: ResourceListProps) => {
-  if (resourceIdentifiers) {
-    resourceIdentifiers = resourceIdentifiers.filter(
-      (res) => res.id.startsWith("qicore") || res.id.startsWith("us-core")
-    );
-  }
-
   // Load saved pagination state from localStorage
   const resourcePageOptions = JSON.parse(
     localStorage.getItem("resourcePageOptions")
