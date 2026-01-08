@@ -94,6 +94,16 @@ export const getCoverageValueFromHtml = (
   return isNaN(coverageValue) ? 0 : coverageValue;
 };
 
+export const getTotalAndCoveredClauses = (
+  uniqRelevantClausesCount,
+  allRelevantClausesCount
+) => {
+  return {
+    covered: uniqRelevantClausesCount,
+    total: allRelevantClausesCount,
+  };
+};
+
 const TestCaseList = (props: TestCaseListProps) => {
   let navigate = useNavigate();
   const { search } = useLocation();
@@ -190,7 +200,10 @@ const TestCaseList = (props: TestCaseListProps) => {
   const [openOverlappingCodesDialog, setOpenOverlappingCodesDialog] =
     useState<boolean>(false);
   const [showReportOptions, setShowReportOptions] = useState(false);
-
+  const [clauseResults, setClauseResults] = useState<{
+    total: number;
+    covered: number;
+  } | null>(null);
   // const [callstackMap, setCallstackMap] = useState<CqlDefinitionCallstack>();
   // callStackMap is used for generating Excel Export
   useEffect(() => {}, [measure?.cql]);
@@ -352,6 +365,9 @@ const TestCaseList = (props: TestCaseListProps) => {
     const coveredClauses = _.uniqWith(
       allRelevantClauses.filter((clause) => clause.final === "TRUE"),
       (c1, c2) => c1.libraryName === c2.libraryName && c1.localId === c2.localId
+    );
+    setClauseResults(
+      getTotalAndCoveredClauses(coveredClauses.length, allUniqueClauses.length)
     );
     // set onto window for any environment debug purposes
     if (localStorage.getItem("madieDebug") || (window as any).madieDebug) {
@@ -726,6 +742,7 @@ const TestCaseList = (props: TestCaseListProps) => {
                 setOptionsOpen={setOptionsOpen}
                 showReportOptions={showReportOptions}
                 setShowReportOptions={setShowReportOptions}
+                clauseResults={clauseResults}
               />
             </div>
             <CreateNewTestCaseDialog
