@@ -67,7 +67,7 @@ const ExtensionComponent = ({
     elementDefinition?.id
   ); // get reference from SD.snap
 
-  // TODO: modify this from a use effect later. Currently we haven't found and multiple cohice choicetypes to test the change.
+  // TODO: modify this from a use effect later. Currently we haven't found and multiple choice choicetypes to test the change.
   useEffect(() => {
     if (valueElement) {
       setSelectedValueType(valueElement.type[0].code);
@@ -103,7 +103,7 @@ const ExtensionComponent = ({
             SelectDisplayProps={{
               "aria-required": "true",
             }}
-            readOnly={false}
+            readOnly={true}
             required={valueElement?.min > 0}
             options={[
               <MenuItem
@@ -138,7 +138,7 @@ const ExtensionComponent = ({
       <div data-testid={idPrefix}>
         <div className="element-editor-add-row">
           <UriComponent
-            canEdit={!urlElement?.fixedUri} // disable if this is fixed value
+            canEdit={canEdit}
             fieldRequired={urlElement?.min > 0}
             label={`${elementDefinition.id}.url`}
             structureDefinition={null}
@@ -151,6 +151,7 @@ const ExtensionComponent = ({
         </div>
         <Select
           label={`${elementDefinition.id}.value[x]`}
+          readOnly={!canEdit}
           inputProps={{
             "data-testid": `${idPrefix}-type-selector-input`,
           }}
