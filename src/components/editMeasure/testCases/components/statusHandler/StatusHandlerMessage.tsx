@@ -40,8 +40,8 @@ export function createWarningMessage(
     content: (
       <div aria-live="polite" role="alert" data-testid={testDataId}>
         <div data-testid="warn-title">
-          {message ? message + " " : ""}
-          {withoutDuplicates.length === 1 ? (
+          <h3>{message ? message + " " : ""}</h3>
+          {withoutDuplicates.length === 1 && !message ? (
             withoutDuplicates[0]
           ) : (
             <ul>
