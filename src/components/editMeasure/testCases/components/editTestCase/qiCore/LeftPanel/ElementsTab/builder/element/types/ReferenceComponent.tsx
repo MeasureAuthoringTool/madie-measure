@@ -6,6 +6,7 @@ import { useQiCoreResource } from "../../../../../../../../util/QiCorePatientPro
 import AddElementButton from "../../../../../../../common/UIOnlyModelAgnostic/AddElementButton";
 import { useFormikContext } from "formik";
 import { buildMadieResourceFromResourceIdentifier } from "../../../../../../../../api/fhirDefinitionServiceUtilities";
+import * as _ from "lodash";
 
 export const getReferenceComponentLabel = (label: string) => {
   //e.g. for label = ClaimResponse.addItem[0].provider[0] return Provider
@@ -13,9 +14,7 @@ export const getReferenceComponentLabel = (label: string) => {
     .split(".")
     ?.pop()
     ?.replace(/\[.*\]$/, "");
-  return componentLabel
-    ? componentLabel.charAt(0).toUpperCase() + componentLabel.slice(1)
-    : "";
+  return componentLabel ? _.startCase(componentLabel) : "";
 };
 
 export default function ReferenceComponent({
@@ -125,6 +124,7 @@ export default function ReferenceComponent({
           aria-labelledby="reference-label"
           required={required}
           data-testid="reference-label"
+          style={showAddAttributeButton ? { marginBottom: -8 } : undefined}
         >
           {getReferenceComponentLabel(label)}
         </InputLabel>
