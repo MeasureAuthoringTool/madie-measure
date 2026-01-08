@@ -32,6 +32,9 @@ const MakeJsonMatchUiDialog = ({
 }: MakeJsonMatchUiDialogProps) => {
   const testCaseService = useRef(useTestCaseServiceApi());
 
+  const JSON_UPDATE_FAILED_ERROR_MESSAGE =
+    "The operation could not be completed on the selected test cases. Review the JSON to make changes manually.";
+
   const makeJsonMatchUi = async (
     selectedTestCases: TestCase[],
     measureId: string
@@ -41,6 +44,7 @@ const MakeJsonMatchUiDialog = ({
         (testCase: TestCase) => testCase.id
       );
 
+      setUpdateQiCoreJsonWithGroupAndTitleWarning([]);
       try {
         const response =
           await testCaseService.current.updateQiCoreJsonWithGroupAndTitle(
@@ -65,16 +69,12 @@ const MakeJsonMatchUiDialog = ({
           ]);
         } else if (failed.length === total) {
           setToastType("danger");
-          setToastMessage(
-            "The operation could not be completed on the selected test cases.  Review the JSON to make changes manually."
-          );
+          setToastMessage(JSON_UPDATE_FAILED_ERROR_MESSAGE);
           setToastOpen(true);
         }
       } catch (error) {
         setToastType("danger");
-        setToastMessage(
-          "not be completed on the selected test cases.  Review the JSON to make changes manually."
-        );
+        setToastMessage(JSON_UPDATE_FAILED_ERROR_MESSAGE);
         setToastOpen(true);
       } finally {
         onClose();

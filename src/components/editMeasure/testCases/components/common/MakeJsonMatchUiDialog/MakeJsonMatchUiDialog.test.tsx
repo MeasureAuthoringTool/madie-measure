@@ -157,7 +157,7 @@ describe("MakeJsonMatchUiDialog", () => {
     await waitFor(() => {
       expect(mockSetToastType).toHaveBeenCalledWith("danger");
       expect(mockSetToastMessage).toHaveBeenCalledWith(
-        "The operation could not be completed on the selected test cases.  Review the JSON to make changes manually."
+        "The operation could not be completed on the selected test cases. Review the JSON to make changes manually."
       );
       expect(mockSetToastOpen).toHaveBeenCalledWith(true);
       expect(mockOnClose).toHaveBeenCalled();
@@ -179,7 +179,7 @@ describe("MakeJsonMatchUiDialog", () => {
     await waitFor(() => {
       expect(mockSetToastType).toHaveBeenCalledWith("danger");
       expect(mockSetToastMessage).toHaveBeenCalledWith(
-        "not be completed on the selected test cases.  Review the JSON to make changes manually."
+        "The operation could not be completed on the selected test cases. Review the JSON to make changes manually."
       );
       expect(mockSetToastOpen).toHaveBeenCalledWith(true);
       expect(mockOnClose).toHaveBeenCalled();
