@@ -6,7 +6,7 @@ import dayjs from "dayjs";
 import AddElementButton from "../../../../../../../common/UIOnlyModelAgnostic/AddElementButton";
 import { IconButton, Tooltip } from "@mui/material";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
-
+import { getMultipleCardinalityLabel } from "./TypeUtil";
 dayjs.extend(timezone);
 
 const TimeComponent = ({
@@ -33,7 +33,7 @@ const TimeComponent = ({
           required={fieldRequired}
           disabled={!canEdit}
           id={`time-field-${label}`}
-          label={label}
+          label={getMultipleCardinalityLabel(label)}
           seconds
           views={["hours", "minutes", "seconds"]}
           data-testid={`time-field-${label}`}
@@ -50,7 +50,7 @@ const TimeComponent = ({
           <IconButton
             onClick={handleDeleteElement}
             data-testid={`delete-button-${label}`}
-            aria-label={`delete ${label}`}
+            aria-label={`delete ${getMultipleCardinalityLabel(label)}`}
             size="small"
           >
             <DeleteOutlineIcon fontSize="small" />

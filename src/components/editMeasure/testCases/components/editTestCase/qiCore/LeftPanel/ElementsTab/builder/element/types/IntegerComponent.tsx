@@ -10,6 +10,7 @@ import {
 import AddElementButton from "../../../../../../../common/UIOnlyModelAgnostic/AddElementButton";
 import { IconButton, Tooltip } from "@mui/material";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import { getMultipleCardinalityLabel } from "./TypeUtil";
 export enum IntegerType {
   UNSIGNED = "Unsigned",
   SIGNED = "Signed",
@@ -41,7 +42,7 @@ const IntegerComponent = ({
         required={fieldRequired}
         readOnly={!canEdit}
         id={`integer-field-${label}`}
-        label={label}
+        label={getMultipleCardinalityLabel(label)}
         inputProps={{
           "data-testid": `integer-field-input-${label}`,
           "aria-describedby": `integer-field-input-helper-text-${label}`,
