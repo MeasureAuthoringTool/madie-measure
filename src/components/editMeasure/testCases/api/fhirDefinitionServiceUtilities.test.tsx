@@ -46,6 +46,19 @@ describe("FhirDefinitionServiceUtilities", () => {
             min: 0,
             type: [{ code: "string" }],
           },
+          {
+            path: "Patient.extension",
+            id: "Patient.extension:race",
+            min: 0,
+            type: [
+              {
+                code: "Extension",
+                profile: [
+                  "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race",
+                ],
+              },
+            ],
+          },
         ],
       },
     },
@@ -57,7 +70,7 @@ describe("FhirDefinitionServiceUtilities", () => {
       expect(result).toBe("Patient");
     });
 
-    it("Should remove indeces from path", () => {
+    it("Should remove indices from path", () => {
       const result = removeIndicesFromPath("Patient.name[0]");
       expect(result).toBe("Patient.name");
     });
@@ -80,6 +93,19 @@ describe("FhirDefinitionServiceUtilities", () => {
       // Elements should now be sorted alphabetically and include all elements
       expect(result).toEqual([
         { path: "Patient.age", min: 1, type: [{ code: "integer" }] },
+        {
+          path: "Patient.extension",
+          id: "Patient.extension:race",
+          min: 0,
+          type: [
+            {
+              code: "Extension",
+              profile: [
+                "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race",
+              ],
+            },
+          ],
+        },
         {
           path: "Patient.multipleBirth[x]",
           min: 1,
@@ -123,6 +149,19 @@ describe("FhirDefinitionServiceUtilities", () => {
         { path: "Patient.name", min: 0, type: [{ code: "HumanName" }] },
         { path: "Patient.age", min: 1, type: [{ code: "integer" }] },
         { path: "Patient.address.street", min: 0, type: [{ code: "string" }] },
+        {
+          path: "Patient.extension",
+          id: "Patient.extension:race",
+          min: 0,
+          type: [
+            {
+              code: "Extension",
+              profile: [
+                "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race",
+              ],
+            },
+          ],
+        },
       ]);
     });
 
