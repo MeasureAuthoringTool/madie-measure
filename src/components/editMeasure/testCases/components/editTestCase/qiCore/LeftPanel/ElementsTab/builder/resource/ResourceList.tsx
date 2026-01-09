@@ -25,8 +25,6 @@ import { IconButton, InputAdornment } from "@mui/material";
 // import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore";
 // import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 // import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
-import { customSort } from "../../../../../../testCaseLanding/common/Hooks/UseTestCases";
-import EditIcon from "../../../../../../../../../common/EditIcon";
 import { ClearIcon } from "@mui/x-date-pickers";
 import "./ResourceList.scss";
 
