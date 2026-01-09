@@ -2557,5 +2557,23 @@ describe("Measure Groups Page", () => {
       });
       expect(populationTab).not.toBeInTheDocument();
     });
+
+    test("should display Composite scoring as readonly and not allow changing when measure is composite", async () => {
+      measure.measureMetaData.composite = true;
+      renderMeasureGroupComponent(customProps);
+
+      // Verify scoring is displayed as a readonly textarea showing "Composite"
+      const scoringSelect = screen.getByTestId("scoring-select");
+      expect(scoringSelect).toBeInTheDocument();
+      expect(scoringSelect.tagName.toLowerCase()).toBe("textarea");
+      expect(scoringSelect).toHaveAttribute("readonly");
+      expect(scoringSelect).toHaveTextContent("Composite");
+      const compositeOption = screen.queryByTestId(
+        "group-scoring-option-COMPOSITE"
+      );
+      const cohortOption = screen.queryByTestId("group-scoring-option-COHORT");
+      expect(compositeOption).not.toBeInTheDocument();
+      expect(cohortOption).not.toBeInTheDocument();
+    });
   });
 });
