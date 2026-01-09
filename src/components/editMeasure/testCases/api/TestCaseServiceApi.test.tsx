@@ -59,6 +59,10 @@ const mockMeasure = {
 
 describe("TestCaseServiceApi Tests", () => {
   let testCaseService: TestCaseServiceApi;
+  const baseUrl = "test.url";
+  const measureId = "measure-123";
+  const testCaseIds = ["tc1", "tc2", "tc3"];
+
   beforeEach(() => {
     const getAccessToken = jest.fn();
     testCaseService = new TestCaseServiceApi("test.url", getAccessToken);
@@ -863,5 +867,58 @@ describe("TestCaseServiceApi Tests", () => {
     await expect(async () => {
       await testCaseService.updateTestCase(testCase, "M123");
     }).rejects.toThrowError("Unable to update test case");
+  });
+
+  it("should return updated and failed arrays on success", async () => {
+    const responseData = {
+      failed: ["tc2"],
+      updated: ["tc1", "tc3"],
+    };
+    axios.put = jest.fn().mockResolvedValueOnce({ data: responseData });
+
+    const result = await testCaseService.updateQiCoreJsonWithGroupAndTitle(
+      testCaseIds,
+      measureId
+    );
+
+    expect(result).toEqual(responseData);
+  });
+
+  it("should return all updated when no failures", async () => {
+    const responseData = {
+      failed: [],
+      updated: ["tc1", "tc2", "tc3"],
+    };
+    axios.put = jest.fn().mockResolvedValueOnce({ data: responseData });
+
+    const result = await testCaseService.updateQiCoreJsonWithGroupAndTitle(
+      testCaseIds,
+      measureId
+    );
+
+    expect(result).toEqual(responseData);
+  });
+
+  it("should return all failed when no updates", async () => {
+    const responseData = {
+      failed: ["tc1", "tc2", "tc3"],
+      updated: [],
+    };
+    axios.put = jest.fn().mockResolvedValueOnce({ data: responseData });
+
+    const result = await testCaseService.updateQiCoreJsonWithGroupAndTitle(
+      testCaseIds,
+      measureId
+    );
+
+    expect(result).toEqual(responseData);
+  });
+
+  it("should throw error when axios.put rejects", async () => {
+    axios.put = jest.fn().mockRejectedValueOnce(new Error("Network error"));
+
+    await expect(
+      testCaseService.updateQiCoreJsonWithGroupAndTitle(testCaseIds, measureId)
+    ).rejects.toThrow("Unable to match JSON with UI values.");
   });
 });
