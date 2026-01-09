@@ -1,11 +1,21 @@
 import React, { useContext, useEffect, useState } from "react";
 import ResourceContext from "../../ResourceContext";
-import { Select } from "@madie/madie-design-system/dist/react";
+import { Select, InputLabel } from "@madie/madie-design-system/dist/react";
 import { MenuItem } from "@mui/material";
 import { useQiCoreResource } from "../../../../../../../../util/QiCorePatientProvider";
 import AddElementButton from "../../../../../../../common/UIOnlyModelAgnostic/AddElementButton";
 import { useFormikContext } from "formik";
 import { buildMadieResourceFromResourceIdentifier } from "../../../../../../../../api/fhirDefinitionServiceUtilities";
+import * as _ from "lodash";
+
+export const getReferenceComponentLabel = (label: string) => {
+  //e.g. for label = ClaimResponse.addItem[0].provider[0] return Provider
+  const componentLabel = label
+    .split(".")
+    ?.pop()
+    ?.replace(/\[.*\]$/, "");
+  return componentLabel ? _.startCase(componentLabel) : "";
+};
 
 export default function ReferenceComponent({
   structureDefinition,
@@ -109,6 +119,16 @@ export default function ReferenceComponent({
 
   return (
     <>
+      <div className="element-editor-add-row reference">
+        <InputLabel
+          aria-labelledby="reference-label"
+          required={required}
+          data-testid="reference-label"
+          style={showAddAttributeButton ? { marginBottom: -8 } : undefined}
+        >
+          {getReferenceComponentLabel(label)}
+        </InputLabel>
+      </div>
       {/* Select a reference type from all available profiles */}
       <div className="element-editor-add-row reference double-row">
         <Select
