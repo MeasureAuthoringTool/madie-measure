@@ -15,5 +15,8 @@ export interface TestCaseListProps {
   setWarnings?: Dispatch<SetStateAction<Array<string>>>;
   setImportWarnings?: Dispatch<SetStateAction<TestCaseImportOutcome[]>>;
   setShiftTestCaseDatesWarnings?: Dispatch<SetStateAction<Array<string>>>;
+  setUpdateQiCoreJsonWithGroupAndTitleWarning?: Dispatch<
+    SetStateAction<Array<string>>
+  >;
   setCustomWarningMessages?: Dispatch<SetStateAction<CustomWarningMessage[]>>;
 }

@@ -114,6 +114,7 @@ const TestCaseList = (props: TestCaseListProps) => {
     setWarnings,
     setImportWarnings,
     setShiftTestCaseDatesWarnings,
+    setUpdateQiCoreJsonWithGroupAndTitleWarning,
     setCustomWarningMessages,
   } = props;
   const { measureId, criteriaId } = useParams<{
@@ -830,10 +831,17 @@ const TestCaseList = (props: TestCaseListProps) => {
       <MakeJsonMatchUiDialog
         open={makeJsonMatchUiDialogOpen}
         onClose={() => setMakeJsonMatchUiDialogOpen(false)}
-        onContinue={() => {
-          // Out of scope for this story (MAT-8723)
-        }}
+        selectedTestCases={selectedTestCases}
+        measureId={measure?.id}
         selectedTestCaseCount={selectedTestCases?.length || 0}
+        setUpdateQiCoreJsonWithGroupAndTitleWarning={
+          setUpdateQiCoreJsonWithGroupAndTitleWarning
+        }
+        setShiftTestCaseDatesWarnings={setShiftTestCaseDatesWarnings}
+        setWarnings={setWarnings}
+        setToastMessage={setToastMessage}
+        setToastType={setToastType}
+        setToastOpen={setToastOpen}
       />
     </div>
   );
