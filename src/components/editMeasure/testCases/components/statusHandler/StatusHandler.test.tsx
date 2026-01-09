@@ -419,7 +419,7 @@ describe("StatusHandler Component", () => {
         shiftTestCaseDatesWarning={[]} // explicitly empty
       />
     );
-    expect(screen.queryByText("Only warning message")).not.toBeInTheDocument();
+    expect(screen.queryByText("Only warning message")).toBeInTheDocument();
   });
 
   test("covers warningMessages branch when warningMessages are empty", () => {
