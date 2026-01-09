@@ -2,6 +2,7 @@ import * as React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
 import ReferenceComponent, {
   getReferenceComponentLabel,
+  getHighestPriorityResourceList,
 } from "./ReferenceComponent";
 import ResourceContext from "../../ResourceContext";
 import { useQiCoreResource } from "../../../../../../../../util/QiCorePatientProvider";
@@ -415,5 +416,40 @@ describe("ReferenceComponent", () => {
       const result = getReferenceComponentLabel("provider[0]");
       expect(result).toBe("Provider");
     });
+  });
+  it("getHighestPriorityResourceList returns correct profile based on priority", () => {
+    const qiCoreProfiles = [
+      {
+        id: "encounter-qicore",
+        profile:
+          "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-encounter",
+      },
+    ];
+    const usCoreProfiles = [
+      {
+        id: "encounter-uscore",
+        profile:
+          "http://hl7.org/fhir/us/core/StructureDefinition/us-core-encounter",
+      },
+    ];
+    const baseFhirProfiles = [
+      {
+        id: "encounter-base",
+        profile: "http://hl7.org/fhir/StructureDefinition/Encounter",
+      },
+    ];
+    expect(
+      getHighestPriorityResourceList(
+        qiCoreProfiles,
+        usCoreProfiles,
+        baseFhirProfiles
+      )
+    ).toBe(qiCoreProfiles[0]);
+    expect(
+      getHighestPriorityResourceList([], usCoreProfiles, baseFhirProfiles)
+    ).toBe(usCoreProfiles[0]);
+    expect(getHighestPriorityResourceList([], [], baseFhirProfiles)).toBe(
+      baseFhirProfiles[0]
+    );
   });
 });
