@@ -1077,7 +1077,8 @@ const EditTestCase = (props: EditTestCaseProps) => {
           lockingEnabled={featureFlags?.Locking}
           canEdit={canEdit}
         />
-        <div className="allotment-wrapper">
+        {/* this needs to have a conditional class depending if qi-core 6 or 4, otherwise it qi-core4 will become fouled. */}
+        <div className={`allotment-wrapper ${isQICore6 ? "fullvh" : ""}`}>
           <Allotment
             ref={allotmentRef}
             defaultSizes={[48, 48, 4]}
