@@ -1012,16 +1012,14 @@ describe("EditTestCase component", () => {
 
       const debugOutput = await screen.findByTestId("success-toast");
       //here
-      expect(debugOutput).toHaveTextContent(
-        "Test case updated successfully! Test case validation has started running, please continue working in MADiE."
-      );
+      expect(debugOutput).toHaveTextContent("Test case updated successfully!");
       expect(setCustomWarningMessages).toHaveBeenCalledWith([
         {
           message: "Test case updated successfully!",
           details: [
             "Timezone offsets have been added when hours are present, otherwise timezone offsets are removed or set to UTC for consistency.",
           ],
-          testDataId: "test-case-timezone-warning",
+          testDataId: "test-case-validation-warning",
         },
       ]);
     });
@@ -1100,7 +1098,7 @@ describe("EditTestCase component", () => {
           details: [
             "Timezone offsets have been added when hours are present, otherwise timezone offsets are removed or set to UTC for consistency.",
           ],
-          testDataId: "test-case-timezone-warning",
+          testDataId: "test-case-validation-warning",
         },
       ]);
     });
@@ -1158,9 +1156,16 @@ describe("EditTestCase component", () => {
 
       const debugOutput = await screen.findByTestId("success-toast");
 
-      expect(debugOutput).toHaveTextContent(
-        "The test case has been saved successfully. Please note that the bundle type has been updated to Collection, as the Test Case Builder supports editing only collection bundles."
-      );
+      expect(debugOutput).toHaveTextContent("Test case updated successfully!");
+      expect(setCustomWarningMessages).toHaveBeenCalledWith([
+        {
+          message: "Test case updated successfully!",
+          details: [
+            "Please note that the bundle type has been updated to Collection, as the Test Case Builder supports editing only collection bundles.",
+          ],
+          testDataId: "test-case-validation-warning",
+        },
+      ]);
     });
 
     it("should alert for bundleTypeUpdated Pending status", async () => {
@@ -1215,9 +1220,16 @@ describe("EditTestCase component", () => {
 
       const debugOutput = await screen.findByTestId("success-toast");
 
-      expect(debugOutput).toHaveTextContent(
-        "The test case has been saved successfully. Please note that the bundle type has been updated to Collection, as the Test Case Builder supports editing only collection bundles."
-      );
+      expect(debugOutput).toHaveTextContent("Test case updated successfully!");
+      expect(setCustomWarningMessages).toHaveBeenCalledWith([
+        {
+          message: "Test case updated successfully!",
+          details: [
+            "Please note that the bundle type has been updated to Collection, as the Test Case Builder supports editing only collection bundles.",
+          ],
+          testDataId: "test-case-validation-warning",
+        },
+      ]);
     });
 
     it("should alert for bundleTypeUpdated Validating status", async () => {
@@ -1294,7 +1306,7 @@ describe("EditTestCase component", () => {
         {
           message: "Test case updated successfully!",
           details: [
-            "The test case has been saved successfully. Please note that the bundle type has been updated to Collection, as the Test Case Builder supports editing only collection bundles.",
+            "Please note that the bundle type has been updated to Collection, as the Test Case Builder supports editing only collection bundles.",
           ],
           testDataId: "test-case-validation-warning",
         },
