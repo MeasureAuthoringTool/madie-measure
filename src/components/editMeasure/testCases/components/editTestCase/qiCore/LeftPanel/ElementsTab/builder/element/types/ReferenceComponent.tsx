@@ -1,7 +1,8 @@
 import React, { useContext, useEffect, useState } from "react";
 import ResourceContext from "../../ResourceContext";
 import { Select } from "@madie/madie-design-system/dist/react";
-import { MenuItem } from "@mui/material";
+import { IconButton, MenuItem, Tooltip } from "@mui/material";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import { useQiCoreResource } from "../../../../../../../../util/QiCorePatientProvider";
 import AddElementButton from "../../../../../../../common/UIOnlyModelAgnostic/AddElementButton";
 import { useFormikContext } from "formik";
@@ -17,6 +18,10 @@ export default function ReferenceComponent({
   addTitle,
   label,
   value,
+  index = 0,
+  handleAddElement,
+  handleDeleteElement,
+  showDeleteButton = false,
 }: any) {
   const { state } = useQiCoreResource();
   const formikContext = useFormikContext();
@@ -113,12 +118,12 @@ export default function ReferenceComponent({
       <div className="element-editor-add-row reference double-row">
         <Select
           label={"Reference Type"}
-          id={"reference-type-select"}
-          data-testid={"reference-type-select"}
+          id={`reference-type-select-${index}`}
+          data-testid={`reference-type-select-${index}`}
           inputProps={{
-            "data-testid": `reference-type-select-input`,
-            "aria-describedby": `reference-type-helper-text-reference-type`,
-            id: `reference-type-input-select`,
+            "data-testid": `reference-type-select-input-${index}`,
+            "aria-describedby": `reference-type-helper-text-reference-type-${index}`,
+            id: `reference-type-input-select-${index}`,
             required: required,
           }}
           readOnly={!canEdit}
@@ -154,8 +159,20 @@ export default function ReferenceComponent({
           helperText={helperText}
           error={error}
         />
+        {showDeleteButton && canEdit && (
+          <Tooltip title="Delete" placement="top" arrow>
+            <IconButton
+              onClick={handleDeleteElement}
+              data-testid={`delete-button-${label}`}
+              aria-label={`delete ${label}`}
+              size="small"
+            >
+              <DeleteOutlineIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+        )}
         {showAddAttributeButton && addTitle && (
-          <AddElementButton name={addTitle} />
+          <AddElementButton name={addTitle} onClick={handleAddElement} />
         )}
       </div>
       {/* Select a specific resource from the selected reference type, from tc json */}
@@ -168,15 +185,15 @@ export default function ReferenceComponent({
                 (opt) => opt.value === selectedReferenceType
               )?.label
             }`}
-            id={"reference-select"}
+            id={`reference-select-${index}`}
             disabled={!canEdit}
             required={required}
             name={`${label}.reference`}
-            data-testid={"reference-select"}
+            data-testid={`reference-select-${index}`}
             inputProps={{
-              "data-testid": `reference-select-input`,
-              "aria-describedby": `reference-helper-text-reference`,
-              id: `reference-select-input`,
+              "data-testid": `reference-select-input-${index}`,
+              "aria-describedby": `reference-helper-text-reference-${index}`,
+              id: `reference-select-input-${index}`,
               required: required,
             }}
             readOnly={!canEdit}
