@@ -133,6 +133,7 @@ declare module "@madie/madie-util" {
     updateMeasureLock(measureId: string): Promise<any>;
     fetchHumanReadable(id: string): Promise<string>;
     fetchMeasureDraftStatuses(measureSetIds: string[]): Promise<any>;
+    getCqlDiff(oldMeasureId, newMeasureId): Promise<any>;
     getRecentMeasuresByMeasureSetId(measureSetIds: string[]): Promise<any>;
     getSharedMeasures(measureIds: string[]): Promise<any>;
     shareMeasures(measureUserIdMap: Map<string, string[]>): Promise<any>;

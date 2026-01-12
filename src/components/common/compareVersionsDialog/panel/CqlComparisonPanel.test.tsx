@@ -23,7 +23,7 @@ const mockMeasures: Measure[] = [
 ];
 
 describe("CqlComparisonPanel component", () => {
-  it("renders the old measure correctly", () => {
+  it("renders the old measure header row correctly", () => {
     render(<CqlComparisonPanel measure={mockMeasures[0]} side="old" />);
 
     expect(screen.getByTestId("comparison-panel-old")).toBeInTheDocument();
@@ -34,12 +34,9 @@ describe("CqlComparisonPanel component", () => {
     expect(screen.getByTestId("last-updated-old")).toHaveTextContent(
       "Last updated on 11/20/2025"
     );
-    expect(screen.getByTestId("panel-content-old")).toHaveTextContent(
-      "CQL coming soon"
-    );
   });
 
-  it("renders the new measure (draft) correctly", () => {
+  it("renders the new measure (draft) header row correctly", () => {
     render(<CqlComparisonPanel measure={mockMeasures[1]} side="new" />);
 
     expect(screen.getByTestId("comparison-panel-new")).toBeInTheDocument();
@@ -49,9 +46,6 @@ describe("CqlComparisonPanel component", () => {
     expect(screen.getByTestId("draft-chip-new")).toBeInTheDocument();
     expect(screen.getByTestId("last-updated-new")).toHaveTextContent(
       "Last updated on 11/21/2025"
-    );
-    expect(screen.getByTestId("panel-content-new")).toHaveTextContent(
-      "CQL coming soon"
     );
   });
 });
