@@ -38,9 +38,21 @@ describe("FhirDefinitionServiceUtilities", () => {
     definition: {
       snapshot: {
         element: [
-          { path: "Patient", min: 1, type: [{ code: "Resource" }] },
-          { path: "Patient.name", min: 0, type: [{ code: "HumanName" }] },
-          { path: "Patient.age", min: 1, type: [{ code: "integer" }] },
+          {
+            path: "Patient",
+            min: 1,
+            type: [{ code: "Resource" }],
+          },
+          {
+            path: "Patient.name",
+            min: 0,
+            type: [{ code: "HumanName" }],
+          },
+          {
+            path: "Patient.age",
+            min: 1,
+            type: [{ code: "integer" }],
+          },
           {
             path: "Patient.address.street",
             min: 0,
@@ -118,6 +130,89 @@ describe("FhirDefinitionServiceUtilities", () => {
         },
         { path: "Patient.name", min: 0, type: [{ code: "HumanName" }] },
       ]);
+    });
+
+    it("should filter out non-extension sliced elements", () => {
+      const resourceWithSlices = _.cloneDeep(mockResource);
+      resourceWithSlices.definition.snapshot.element.push(
+        {
+          path: "Patient",
+          id: "resourceWithSlices",
+          min: 1,
+          type: [{ code: "Resource" }],
+        },
+        {
+          id: "Condition.category:us-core",
+          path: "Condition.category",
+          min: 0,
+          type: [{ code: "CodeableConcept" }],
+        },
+        {
+          id: "Observation.code:laboratory",
+          path: "Observation.code",
+          min: 0,
+          type: [{ code: "CodeableConcept" }],
+        }
+      );
+      const result = getTopLevelElements(resourceWithSlices);
+
+      // Non-extension slices should be filtered out
+      expect(
+        result.find((el) => el.id === "Condition.category:us-core")
+      ).toBeUndefined();
+      expect(
+        result.find((el) => el.id === "Observation.code:laboratory")
+      ).toBeUndefined();
+      // Extension slices should remain
+      expect(
+        result.find((el) => el.id === "Patient.extension:race")
+      ).toBeDefined();
+    });
+
+    it("should keep extension slices but filter non-extension slices", () => {
+      const resourceWithMixedSlices = _.cloneDeep(mockResource);
+      resourceWithMixedSlices.definition.snapshot.element.push(
+        {
+          id: "Patient.extension:ethnicity",
+          path: "Patient.extension",
+          min: 0,
+          type: [
+            {
+              code: "Extension",
+              profile: [
+                "http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethnicity",
+              ],
+            },
+          ],
+        },
+        {
+          id: "Condition.category:encounter-diagnosis",
+          path: "Condition.category",
+          min: 0,
+          type: [{ code: "CodeableConcept" }],
+        }
+      );
+      const result = getTopLevelElements(resourceWithMixedSlices);
+
+      // Extension slices should be kept
+      expect(
+        result.find((el) => el.id === "Patient.extension:race")
+      ).toBeDefined();
+      expect(
+        result.find((el) => el.id === "Patient.extension:ethnicity")
+      ).toBeDefined();
+      // Non-extension slice should be filtered out
+      expect(
+        result.find((el) => el.id === "Condition.category:encounter-diagnosis")
+      ).toBeUndefined();
+    });
+
+    it("should handle elements without colons normally", () => {
+      const result = getTopLevelElements(mockResource);
+
+      // Regular elements without colons should be present
+      expect(result.find((el) => el.path === "Patient.name")).toBeDefined();
+      expect(result.find((el) => el.path === "Patient.age")).toBeDefined();
     });
   });
 
@@ -908,7 +1003,6 @@ describe("filterUnusedExtensionsFromElements", () => {
         },
       },
     };
-    // Result should
     const result = filterUnusedExtensionsFromElements(
       selectedResource,
       allDisplayedElements
