@@ -161,7 +161,7 @@ describe("ReferenceComponent", () => {
     fireEvent.mouseDown(screen.getByLabelText("Reference Type"));
     userEvent.click(await screen.findByText("Encounter"));
     // Wait for the second dropdown to be present
-    const referenceSelect = await screen.findByTestId("reference-select");
+    const referenceSelect = await screen.findByTestId("reference-select-0");
     const combo = screen.getByRole("combobox", { name: /specify encounter/i });
     fireEvent.mouseDown(combo);
     userEvent.click(referenceSelect);
@@ -246,7 +246,7 @@ describe("ReferenceComponent", () => {
     // Wait for the second dropdown to be present
     const combo = screen.getByRole("combobox", { name: /specify encounter/i });
     fireEvent.mouseDown(combo);
-    userEvent.click(await screen.findByTestId("reference-select"));
+    userEvent.click(await screen.findByTestId("reference-select-0"));
 
     const options = await screen.findAllByRole("option");
     expect(options.length).toBe(2);
@@ -327,7 +327,7 @@ describe("ReferenceComponent", () => {
     // Wait for the second dropdown to be present
     const combo = screen.getByRole("combobox", { name: /specify encounter/i });
     fireEvent.mouseDown(combo);
-    userEvent.click(await screen.findByTestId("reference-select"));
+    userEvent.click(await screen.findByTestId("reference-select-0"));
 
     const options = await screen.findAllByRole("option");
     expect(options.length).toBe(1);
@@ -385,7 +385,7 @@ describe("ReferenceComponent", () => {
     // Wait for the second dropdown to be present
     const combo = screen.getByRole("combobox", { name: /specify encounter/i });
     fireEvent.mouseDown(combo);
-    userEvent.click(await screen.findByTestId("reference-select"));
+    userEvent.click(await screen.findByTestId("reference-select-0"));
 
     const options = await screen.findAllByRole("option");
     expect(options.length).toBe(1);
@@ -451,5 +451,172 @@ describe("ReferenceComponent", () => {
     expect(getHighestPriorityResourceList([], [], baseFhirProfiles)).toBe(
       baseFhirProfiles[0]
     );
+  });
+
+  describe("Multiple Cardinality Support", () => {
+    it("displays add button when showAddAttributeButton is true and canEdit is true", () => {
+      (useQiCoreResource as jest.Mock).mockReturnValue({
+        state: { bundle: { entry: [] } },
+      });
+      const mockHandleAddElement = jest.fn();
+      render(
+        <ResourceContext.Provider value={baseProfiles}>
+          <FormikProvider value={mockFormik}>
+            <ReferenceComponent
+              structureDefinition={structureDefinition}
+              canEdit={true}
+              required={false}
+              helperText="Select a reference"
+              error={false}
+              showAddAttributeButton={true}
+              addTitle="Provider"
+              handleAddElement={mockHandleAddElement}
+              label="ClaimResponse.addItem[0].provider[0]"
+            />
+          </FormikProvider>
+        </ResourceContext.Provider>
+      );
+
+      const addButtons = screen.getAllByTestId("add-element-Provider");
+      expect(addButtons.length).toBeGreaterThan(0);
+      // Click the button element (not the container)
+      const addButton =
+        addButtons.find((el) => el.tagName === "BUTTON") || addButtons[0];
+      fireEvent.click(addButton);
+      expect(mockHandleAddElement).toHaveBeenCalled();
+    });
+
+    it("does not display add button when showAddAttributeButton is false", () => {
+      (useQiCoreResource as jest.Mock).mockReturnValue({
+        state: { bundle: { entry: [] } },
+      });
+      render(
+        <ResourceContext.Provider value={baseProfiles}>
+          <FormikProvider value={mockFormik}>
+            <ReferenceComponent
+              structureDefinition={structureDefinition}
+              canEdit={true}
+              required={false}
+              helperText="Select a reference"
+              error={false}
+              showAddAttributeButton={false}
+              addTitle="Provider"
+              label="ClaimResponse.addItem[0].provider[0]"
+            />
+          </FormikProvider>
+        </ResourceContext.Provider>
+      );
+
+      expect(
+        screen.queryByTestId("add-element-Provider")
+      ).not.toBeInTheDocument();
+    });
+
+    it("displays delete button when showDeleteButton is true and canEdit is true", () => {
+      (useQiCoreResource as jest.Mock).mockReturnValue({
+        state: { bundle: { entry: [] } },
+      });
+      const mockHandleDeleteElement = jest.fn();
+      render(
+        <ResourceContext.Provider value={baseProfiles}>
+          <FormikProvider value={mockFormik}>
+            <ReferenceComponent
+              structureDefinition={structureDefinition}
+              canEdit={true}
+              required={false}
+              helperText="Select a reference"
+              error={false}
+              showAddAttributeButton={false}
+              addTitle=""
+              showDeleteButton={true}
+              handleDeleteElement={mockHandleDeleteElement}
+              label="ClaimResponse.addItem[0].provider[1]"
+            />
+          </FormikProvider>
+        </ResourceContext.Provider>
+      );
+
+      const deleteButton = screen.getByTestId(
+        "delete-button-ClaimResponse.addItem[0].provider[1]"
+      );
+      expect(deleteButton).toBeInTheDocument();
+      fireEvent.click(deleteButton);
+      expect(mockHandleDeleteElement).toHaveBeenCalled();
+    });
+
+    it("does not display delete button when canEdit is false", () => {
+      (useQiCoreResource as jest.Mock).mockReturnValue({
+        state: { bundle: { entry: [] } },
+      });
+      render(
+        <ResourceContext.Provider value={baseProfiles}>
+          <FormikProvider value={mockFormik}>
+            <ReferenceComponent
+              structureDefinition={structureDefinition}
+              canEdit={false}
+              required={false}
+              helperText="Select a reference"
+              error={false}
+              showAddAttributeButton={false}
+              addTitle=""
+              showDeleteButton={true}
+              handleDeleteElement={jest.fn()}
+              label="ClaimResponse.addItem[0].provider[1]"
+            />
+          </FormikProvider>
+        </ResourceContext.Provider>
+      );
+
+      expect(
+        screen.queryByTestId(
+          "delete-button-ClaimResponse.addItem[0].provider[1]"
+        )
+      ).not.toBeInTheDocument();
+    });
+
+    it("renders multiple reference instances with unique indexes", () => {
+      (useQiCoreResource as jest.Mock).mockReturnValue({
+        state: { bundle: { entry: [] } },
+      });
+      const { rerender } = render(
+        <ResourceContext.Provider value={baseProfiles}>
+          <FormikProvider value={mockFormik}>
+            <ReferenceComponent
+              structureDefinition={structureDefinition}
+              canEdit={true}
+              required={false}
+              helperText="Select a reference"
+              error={false}
+              showAddAttributeButton={false}
+              addTitle=""
+              index={0}
+              label="ClaimResponse.addItem[0].provider[0]"
+            />
+          </FormikProvider>
+        </ResourceContext.Provider>
+      );
+
+      expect(screen.getByTestId("reference-type-select-0")).toBeInTheDocument();
+
+      rerender(
+        <ResourceContext.Provider value={baseProfiles}>
+          <FormikProvider value={mockFormik}>
+            <ReferenceComponent
+              structureDefinition={structureDefinition}
+              canEdit={true}
+              required={false}
+              helperText="Select a reference"
+              error={false}
+              showAddAttributeButton={false}
+              addTitle=""
+              index={1}
+              label="ClaimResponse.addItem[0].provider[1]"
+            />
+          </FormikProvider>
+        </ResourceContext.Provider>
+      );
+
+      expect(screen.getByTestId("reference-type-select-1")).toBeInTheDocument();
+    });
   });
 });
