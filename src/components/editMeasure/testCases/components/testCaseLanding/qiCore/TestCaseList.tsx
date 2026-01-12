@@ -66,6 +66,33 @@ export const removeHtmlCoverageHeader = (
   return groupCoverage;
 };
 
+export const getTotalAndCoveredClauses = (
+  calculationOutput,
+  displayId
+): { total: number; covered: number } => {
+  let allClaueses = [];
+  calculationOutput.results.forEach((result) => {
+    const targetResult = result.detailedResults.find(
+      (res) => res.groupId === displayId
+    );
+    const clauseResults = targetResult.clauseResults;
+    const filteredClauses = clauseResults.filter(
+      (clause) => clause.final !== "NA"
+    );
+    allClaueses.push(filteredClauses);
+  });
+
+  const allClaueses_uniq = _.uniqBy(allClaueses, "id")[0];
+  const coveredClausesNumber = allClaueses_uniq.filter(
+    (clause) => clause.final !== "FALSE"
+  ).length;
+  const clauesResults = {
+    total: allClaueses_uniq.length,
+    covered: coveredClausesNumber,
+  };
+  return clauesResults;
+};
+
 export const getCoverageValueFromHtml = (
   coverageHtml: Record<string, string>,
   groupId: string,
@@ -87,6 +114,7 @@ const TestCaseList = (props: TestCaseListProps) => {
     setWarnings,
     setImportWarnings,
     setShiftTestCaseDatesWarnings,
+    setUpdateQiCoreJsonWithGroupAndTitleWarning,
     setCustomWarningMessages,
   } = props;
   const { measureId, criteriaId } = useParams<{
@@ -183,14 +211,16 @@ const TestCaseList = (props: TestCaseListProps) => {
   const [openOverlappingCodesDialog, setOpenOverlappingCodesDialog] =
     useState<boolean>(false);
   const [showReportOptions, setShowReportOptions] = useState(false);
-
+  const [clauseResults, setClauseResults] = useState<{
+    total: number;
+    covered: number;
+  } | null>(null);
   useEffect(() => {
     if (testCases?.length != measure?.testCases?.length) {
       const newMeasure = { ...measure, testCases };
       updateMeasure(newMeasure);
     }
   }, [testCases]);
-
   useEffect(() => {
     setExecuteAllTestCases(false);
     if (
@@ -250,6 +280,12 @@ const TestCaseList = (props: TestCaseListProps) => {
         getCoverageValueFromHtml(
           calculationOutput["groupClauseCoverageHTML"],
           selectedPopCriteria.id,
+          selectedPopCriteria.displayId
+        )
+      );
+      setClauseResults(
+        getTotalAndCoveredClauses(
+          calculationOutput,
           selectedPopCriteria.displayId
         )
       );
@@ -642,6 +678,7 @@ const TestCaseList = (props: TestCaseListProps) => {
                 setShowReportOptions={setShowReportOptions}
                 validationPercentage={validationPercentage}
                 validationPercentageFraction={validationPercentageFraction}
+                clauseResults={clauseResults}
               />
             </div>
             <CreateNewTestCaseDialog
@@ -794,10 +831,17 @@ const TestCaseList = (props: TestCaseListProps) => {
       <MakeJsonMatchUiDialog
         open={makeJsonMatchUiDialogOpen}
         onClose={() => setMakeJsonMatchUiDialogOpen(false)}
-        onContinue={() => {
-          // Out of scope for this story (MAT-8723)
-        }}
+        selectedTestCases={selectedTestCases}
+        measureId={measure?.id}
         selectedTestCaseCount={selectedTestCases?.length || 0}
+        setUpdateQiCoreJsonWithGroupAndTitleWarning={
+          setUpdateQiCoreJsonWithGroupAndTitleWarning
+        }
+        setShiftTestCaseDatesWarnings={setShiftTestCaseDatesWarnings}
+        setWarnings={setWarnings}
+        setToastMessage={setToastMessage}
+        setToastType={setToastType}
+        setToastOpen={setToastOpen}
       />
     </div>
   );

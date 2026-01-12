@@ -403,4 +403,42 @@ describe("PeriodDateTimeComponent useEffect", () => {
     );
     expect((selector as HTMLSelectElement).value).toBe("YYYY-MM-DD");
   });
+
+  test("renders in read-only mode when canEdit is false", async () => {
+    render(
+      <PeriodDateTimeComponent
+        canEdit={false}
+        fieldRequired={false}
+        value={{
+          start: "2024-09-26T12:00:00+00:00",
+          end: "2024-09-27T14:00:00+00:00",
+        }}
+        onChange={jest.fn()}
+      />
+    );
+
+    // Verify that the date format selector is read-only
+    const formatSelector = await screen.findByTestId(
+      `date-time-format-selector-field-DateTime`
+    );
+    expect(formatSelector).toHaveAttribute("readonly");
+
+    // Verify that the start and end date fields are read-only
+    const startDateField = await screen.findByTestId(
+      "start-YYYY-MM-DDTHH:mm:ssZ-field-DateTime"
+    );
+    const endDateField = await screen.findByTestId(
+      "end-YYYY-MM-DDTHH:mm:ssZ-field-DateTime"
+    );
+    expect(startDateField).toHaveAttribute("readonly");
+    expect(endDateField).toHaveAttribute("readonly");
+
+    // Verify that time fields are also read-only
+    const startTimeInput = await screen.findByTestId(
+      "start-time-field-DateTime"
+    );
+    const endTimeInput = await screen.findByTestId("end-time-field-DateTime");
+    expect(startTimeInput).toHaveAttribute("readonly");
+    expect(endTimeInput).toHaveAttribute("readonly");
+  });
 });

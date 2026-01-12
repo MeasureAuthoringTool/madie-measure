@@ -563,6 +563,10 @@ const MeasureGroups = (props: MeasureGroupProps) => {
 
   const submitForm = (group: Group) => {
     group.displayId = "Group_" + (measureGroupNumber + 1);
+    // If measure is composite, ensure scoring is set to "Composite"
+    if (isCompositeMeasure) {
+      group.scoring = GroupScoring.COMPOSITE;
+    }
     if (group.stratifications) {
       group.stratifications = group.stratifications.filter(
         (strat) =>
@@ -938,10 +942,15 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                     }}
                     data-testid="scoring-select"
                     {...formik.getFieldProps("scoring")}
+                    value={
+                      isCompositeMeasure
+                        ? GroupScoring.COMPOSITE
+                        : formik.values.scoring
+                    }
                     error={
                       formik.touched.scoring && Boolean(formik.errors.scoring)
                     }
-                    readOnly={!canEdit}
+                    readOnly={!canEdit || isCompositeMeasure}
                     helperText={
                       formik.touched.scoring &&
                       Boolean(formik.errors.scoring) &&
@@ -973,17 +982,31 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                       formik.setFieldValue("stratifications", []);
                       setActiveTab(defaultActiveTab);
                     }}
-                    options={Object.keys(GroupScoring).map((scoring) => {
-                      return (
-                        <MuiMenuItem
-                          key={scoring}
-                          value={GroupScoring[scoring]}
-                          data-testid={`group-scoring-option-${scoring}`}
-                        >
-                          {GroupScoring[scoring]}
-                        </MuiMenuItem>
-                      );
-                    })}
+                    options={
+                      isCompositeMeasure
+                        ? [
+                            <MuiMenuItem
+                              key="COMPOSITE"
+                              value={GroupScoring.COMPOSITE}
+                              data-testid="group-scoring-option-COMPOSITE"
+                            >
+                              {GroupScoring.COMPOSITE}
+                            </MuiMenuItem>,
+                          ]
+                        : Object.keys(GroupScoring)
+                            .filter((scoring) => scoring !== "COMPOSITE")
+                            .map((scoring) => {
+                              return (
+                                <MuiMenuItem
+                                  key={scoring}
+                                  value={GroupScoring[scoring]}
+                                  data-testid={`group-scoring-option-${scoring}`}
+                                >
+                                  {GroupScoring[scoring]}
+                                </MuiMenuItem>
+                              );
+                            })
+                    }
                   />
                   {/* no longer capable of errors */}
                   <MeasureGroupScoringUnit
