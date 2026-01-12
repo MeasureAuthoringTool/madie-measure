@@ -3617,45 +3617,38 @@ describe("TypeEditor Component", () => {
       expect(addButtons).toHaveLength(0);
     });
 
-    test("Should render Reference components as array when multiple cardinality", () => {
-      const mockBundle = {
-        entry: [
-          { resource: { resourceType: "Practitioner", id: "pract-1" } },
-          { resource: { resourceType: "Practitioner", id: "pract-2" } },
-        ],
-      };
-
+    // Helper for Reference array tests
+    const renderReferenceTypeEditor = (
+      label: string,
+      providerValues: any[],
+      setFieldValueMock = jest.fn()
+    ) => {
       (useQiCoreResource as jest.Mock).mockReturnValue({
-        state: { bundle: mockBundle },
+        state: {
+          bundle: {
+            entry: [
+              { resource: { resourceType: "Practitioner", id: "pract-1" } },
+              { resource: { resourceType: "Practitioner", id: "pract-2" } },
+            ],
+          },
+        },
         loading: false,
         error: null,
       });
 
-      const referenceArrayFormik = {
+      const referenceFormik = {
         ...mockFormik,
-        values: {
-          ClaimResponse: {
-            addItem: [
-              {
-                provider: [
-                  { reference: "Practitioner/pract-1" },
-                  { reference: "Practitioner/pract-2" },
-                ],
-              },
-            ],
-          },
-        },
-        getFieldProps: (label: string) => {
-          return {
-            value: { reference: "Practitioner/pract-1" },
-            name: label,
-            onChange: jest.fn(),
-            onBlur: jest.fn(),
-          };
-        },
+        values: { ClaimResponse: { addItem: [{ provider: providerValues }] } },
+        setFieldValue: setFieldValueMock,
+        getFieldProps: () => ({
+          value: { reference: "Practitioner/pract-1" },
+          name: label,
+          onChange: jest.fn(),
+          onBlur: jest.fn(),
+        }),
       } as unknown as FormikProps<any>;
 
-      render(
+      return render(
         <ExecutionContextProvider
           value={{
             measureState: [null, jest.fn()],
@@ -3667,17 +3660,13 @@ describe("TypeEditor Component", () => {
             contextFailure: false,
           }}
         >
-          <FormikProvider value={referenceArrayFormik}>
+          <FormikProvider value={referenceFormik}>
             <RequiredFieldsProvider
               requiredFields={{}}
               formInfo={[
                 [
                   "ClaimResponse.addItem.provider",
-                  {
-                    id: "ClaimResponse.addItem.provider",
-                    max: "*",
-                    min: 0,
-                  },
+                  { id: "ClaimResponse.addItem.provider", max: "*", min: 0 },
                 ],
               ]}
             >
@@ -3696,7 +3685,7 @@ describe("TypeEditor Component", () => {
                     },
                   ],
                 }}
-                label="ClaimResponse.addItem[0].provider"
+                label={label}
                 canEdit={true}
                 parentStructureDefinition={null}
               />
@@ -3704,202 +3693,43 @@ describe("TypeEditor Component", () => {
           </FormikProvider>
         </ExecutionContextProvider>
       );
+    };
 
+    test("Should render Reference components as array when multiple cardinality", () => {
+      renderReferenceTypeEditor("ClaimResponse.addItem[0].provider", [
+        { reference: "Practitioner/pract-1" },
+        { reference: "Practitioner/pract-2" },
+      ]);
       expect(screen.getByTestId("reference-type-select-0")).toBeInTheDocument();
       expect(screen.getByTestId("reference-type-select-1")).toBeInTheDocument();
     });
 
     test("Should render Reference with replaced trailing index when label already has index", () => {
-      const mockBundle = {
-        entry: [
-          { resource: { resourceType: "Practitioner", id: "pract-1" } },
-          { resource: { resourceType: "Practitioner", id: "pract-2" } },
+      // Nested array to simulate label with trailing index resolving to array
+      renderReferenceTypeEditor("ClaimResponse.addItem[0].provider[0]", [
+        [
+          { reference: "Practitioner/pract-1" },
+          { reference: "Practitioner/pract-2" },
         ],
-      };
-
-      (useQiCoreResource as jest.Mock).mockReturnValue({
-        state: { bundle: mockBundle },
-        loading: false,
-        error: null,
-      });
-
-      const referenceArrayFormik = {
-        ...mockFormik,
-        values: {
-          ClaimResponse: {
-            addItem: [
-              {
-                provider: [
-                  [
-                    { reference: "Practitioner/pract-1" },
-                    { reference: "Practitioner/pract-2" },
-                  ],
-                ],
-              },
-            ],
-          },
-        },
-        getFieldProps: (label: string) => {
-          return {
-            value: { reference: "Practitioner/pract-1" },
-            name: label,
-            onChange: jest.fn(),
-            onBlur: jest.fn(),
-          };
-        },
-      } as unknown as FormikProps<any>;
-
-      render(
-        <ExecutionContextProvider
-          value={{
-            measureState: [null, jest.fn()],
-            bundleState: [null, jest.fn()],
-            valueSetsState: [null, jest.fn()],
-            executionContextReady: true,
-            executing: false,
-            setExecuting: jest.fn(),
-            contextFailure: false,
-          }}
-        >
-          <FormikProvider value={referenceArrayFormik}>
-            <RequiredFieldsProvider
-              requiredFields={{}}
-              formInfo={[
-                [
-                  "ClaimResponse.addItem.provider",
-                  {
-                    id: "ClaimResponse.addItem.provider",
-                    max: "*",
-                    min: 0,
-                  },
-                ],
-              ]}
-            >
-              <TypeEditor
-                structureDefinition={{
-                  id: "ClaimResponse.addItem.provider",
-                  path: "ClaimResponse.addItem.provider",
-                  min: 0,
-                  max: "*",
-                  type: [
-                    {
-                      code: "Reference",
-                      targetProfile: [
-                        "http://hl7.org/fhir/StructureDefinition/Practitioner",
-                      ],
-                    },
-                  ],
-                }}
-                label="ClaimResponse.addItem[0].provider[0]"
-                canEdit={true}
-                parentStructureDefinition={null}
-              />
-            </RequiredFieldsProvider>
-          </FormikProvider>
-        </ExecutionContextProvider>
-      );
-
+      ]);
       expect(screen.getByTestId("reference-type-select-0")).toBeInTheDocument();
       expect(screen.getByTestId("reference-type-select-1")).toBeInTheDocument();
     });
 
     test("Should handle clicking delete button for Reference arrays", async () => {
-      const mockBundle = {
-        entry: [
-          { resource: { resourceType: "Practitioner", id: "pract-1" } },
-          { resource: { resourceType: "Practitioner", id: "pract-2" } },
-        ],
-      };
-
-      (useQiCoreResource as jest.Mock).mockReturnValue({
-        state: { bundle: mockBundle },
-        loading: false,
-        error: null,
-      });
-
       const setFieldValueMock = jest.fn();
-
-      const referenceArrayFormik = {
-        ...mockFormik,
-        values: {
-          ClaimResponse: {
-            addItem: [
-              {
-                provider: [
-                  { reference: "Practitioner/pract-1" },
-                  { reference: "Practitioner/pract-2" },
-                ],
-              },
-            ],
-          },
-        },
-        setFieldValue: setFieldValueMock,
-        getFieldProps: (label: string) => {
-          return {
-            value: { reference: "Practitioner/pract-1" },
-            name: label,
-            onChange: jest.fn(),
-            onBlur: jest.fn(),
-          };
-        },
-      } as unknown as FormikProps<any>;
-
-      render(
-        <ExecutionContextProvider
-          value={{
-            measureState: [null, jest.fn()],
-            bundleState: [null, jest.fn()],
-            valueSetsState: [null, jest.fn()],
-            executionContextReady: true,
-            executing: false,
-            setExecuting: jest.fn(),
-            contextFailure: false,
-          }}
-        >
-          <FormikProvider value={referenceArrayFormik}>
-            <RequiredFieldsProvider
-              requiredFields={{}}
-              formInfo={[
-                [
-                  "ClaimResponse.addItem.provider",
-                  {
-                    id: "ClaimResponse.addItem.provider",
-                    max: "*",
-                    min: 0,
-                  },
-                ],
-              ]}
-            >
-              <TypeEditor
-                structureDefinition={{
-                  id: "ClaimResponse.addItem.provider",
-                  path: "ClaimResponse.addItem.provider",
-                  min: 0,
-                  max: "*",
-                  type: [
-                    {
-                      code: "Reference",
-                      targetProfile: [
-                        "http://hl7.org/fhir/StructureDefinition/Practitioner",
-                      ],
-                    },
-                  ],
-                }}
-                label="ClaimResponse.addItem[0].provider"
-                canEdit={true}
-                parentStructureDefinition={null}
-              />
-            </RequiredFieldsProvider>
-          </FormikProvider>
-        </ExecutionContextProvider>
+      renderReferenceTypeEditor(
+        "ClaimResponse.addItem[0].provider",
+        [
+          { reference: "Practitioner/pract-1" },
+          { reference: "Practitioner/pract-2" },
+        ],
+        setFieldValueMock
       );
 
-      const deleteButton = screen.getByTestId(
-        "delete-button-ClaimResponse.addItem[0].provider[1]"
+      await userEvent.click(
+        screen.getByTestId("delete-button-ClaimResponse.addItem[0].provider[1]")
       );
-      expect(deleteButton).toBeInTheDocument();
-
-      await userEvent.click(deleteButton);
 
       expect(setFieldValueMock).toHaveBeenCalledWith(
         "ClaimResponse.addItem[0].provider",
