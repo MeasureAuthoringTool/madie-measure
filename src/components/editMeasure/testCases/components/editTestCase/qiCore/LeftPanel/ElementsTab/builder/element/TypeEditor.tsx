@@ -39,6 +39,7 @@ import TimingComponent from "./types/TimingComponent";
 import RangeComponent from "./types/RangeComponent";
 import ReferenceComponent from "./types/ReferenceComponent";
 import ContentReferenceType from "./contentReferenceType/ContentReferenceType";
+import DecimalComponent from "./types/DecimalComponent";
 
 export const formikErrorHandler = (name: string, formik) => {
   const touched = getNestedProperty(formik.touched, name);
@@ -172,9 +173,7 @@ const TypeEditor = ({
           <Box sx={{ display: "flex", flexDirection: "column", width: "100%" }}>
             {(isArrayMode ? values : [null]).map((el, index) => {
               let fieldLabel;
-              if (isArrayMode && !appendedZeroAlready) {
-                fieldLabel = `${label}[${index}]`;
-              } else if (isArrayMode && appendedZeroAlready) {
+              if (isArrayMode && appendedZeroAlready) {
                 fieldLabel = `${label.slice(0, label.length - 3)}[${index}]`;
               } else {
                 fieldLabel = label;
@@ -224,6 +223,56 @@ const TypeEditor = ({
             />
           </Box>
         );
+      /*
+        Decimal most commonly appears as a child of different complex types 
+        that we want to handle inside of different TypeEditor rendered components,
+        since they have different rules about information that needs to be supplied aside of a single number.
+        Examples:
+        Quantity,  -> implemented
+        Money, -> implemented
+        Timing -> implementedp
+        Duration, not supported type
+        Range, not supported type
+        Ratio, not supported type
+        Count, not supported type
+        Age, not supported type
+        */
+      case "decimal":
+        // ClaimResponse.attItem[0].factor. This is our primitive case.
+        return (
+          // primitive multiple cardinality decimal fields are extremely rare, but we're going to cover it anyway.
+          <Box sx={{ display: "flex", flexDirection: "column", width: "100%" }}>
+            {(isArrayMode ? values : [null]).map((el, index) => {
+              let fieldLabel;
+              if (isArrayMode && appendedZeroAlready) {
+                fieldLabel = `${label.slice(0, label.length - 3)}[${index}]`;
+              } else {
+                fieldLabel = label;
+              }
+              return (
+                <DecimalComponent
+                  key={`${fieldLabel}-${index}`}
+                  label={fieldLabel}
+                  canEdit={canEdit}
+                  helperText={formikErrorHandler(fieldLabel, formik)}
+                  error={Boolean(getNestedProperty(formik.errors, fieldLabel))}
+                  required={required}
+                  showAddAttributeButton={
+                    showAddAttributeButton &&
+                    (!isArrayMode || index === lastIndex)
+                  }
+                  showDeleteButton={isArrayMode && index > 0}
+                  handleDeleteElement={() =>
+                    handleDeleteElement(index, fieldLabel)
+                  }
+                  addTitle={addTitle}
+                  handleAddElement={handleAddElement}
+                  {...formik.getFieldProps(fieldLabel)}
+                />
+              );
+            })}
+          </Box>
+        );
       case "markdown":
         return (
           <Box sx={{ display: "flex", flexDirection: "column", width: "100%" }}>
@@ -245,9 +294,7 @@ const TypeEditor = ({
           <>
             {(isArrayMode ? values : [null]).map((el, index) => {
               let fieldLabel;
-              if (isArrayMode && !appendedZeroAlready) {
-                fieldLabel = `${label}[${index}]`;
-              } else if (isArrayMode && appendedZeroAlready) {
+              if (isArrayMode && appendedZeroAlready) {
                 fieldLabel = `${label.slice(0, label.length - 3)}[${index}]`;
               } else {
                 fieldLabel = label;
@@ -295,9 +342,7 @@ const TypeEditor = ({
           <>
             {(isArrayMode ? values : [null]).map((el, index) => {
               let fieldLabel;
-              if (isArrayMode && !appendedZeroAlready) {
-                fieldLabel = `${label}[${index}]`;
-              } else if (isArrayMode && appendedZeroAlready) {
+              if (isArrayMode && appendedZeroAlready) {
                 fieldLabel = `${label.slice(0, label.length - 3)}[${index}]`;
               } else {
                 fieldLabel = label;
@@ -340,9 +385,7 @@ const TypeEditor = ({
           <>
             {(isArrayMode ? values : [null]).map((el, index) => {
               let fieldLabel;
-              if (isArrayMode && !appendedZeroAlready) {
-                fieldLabel = `${label}[${index}]`;
-              } else if (isArrayMode && appendedZeroAlready) {
+              if (isArrayMode && appendedZeroAlready) {
                 fieldLabel = `${label.slice(0, label.length - 3)}[${index}]`;
               } else {
                 fieldLabel = label;
@@ -401,9 +444,7 @@ const TypeEditor = ({
           <>
             {(isArrayMode ? values : [null]).map((el, index) => {
               let fieldLabel;
-              if (isArrayMode && !appendedZeroAlready) {
-                fieldLabel = `${label}[${index}]`;
-              } else if (isArrayMode && appendedZeroAlready) {
+              if (isArrayMode && appendedZeroAlready) {
                 fieldLabel = `${label.slice(0, label.length - 3)}[${index}]`;
               } else {
                 fieldLabel = label;
@@ -457,9 +498,7 @@ const TypeEditor = ({
           <>
             {(isArrayMode ? values : [null]).map((el, index) => {
               let fieldLabel;
-              if (isArrayMode && !appendedZeroAlready) {
-                fieldLabel = `${label}[${index}]`;
-              } else if (isArrayMode && appendedZeroAlready) {
+              if (isArrayMode && appendedZeroAlready) {
                 fieldLabel = `${label.slice(0, label.length - 3)}[${index}]`;
               } else {
                 fieldLabel = label;
@@ -495,9 +534,7 @@ const TypeEditor = ({
           <>
             {(isArrayMode ? values : [null]).map((el, index) => {
               let fieldLabel;
-              if (isArrayMode && !appendedZeroAlready) {
-                fieldLabel = `${label}[${index}]`;
-              } else if (isArrayMode && appendedZeroAlready) {
+              if (isArrayMode && appendedZeroAlready) {
                 fieldLabel = `${label.slice(0, label.length - 3)}[${index}]`;
               } else {
                 fieldLabel = label;
@@ -538,9 +575,7 @@ const TypeEditor = ({
           <>
             {(isArrayMode ? values : [null]).map((el, index) => {
               let fieldLabel;
-              if (isArrayMode && !appendedZeroAlready) {
-                fieldLabel = `${label}[${index}]`;
-              } else if (isArrayMode && appendedZeroAlready) {
+              if (isArrayMode && appendedZeroAlready) {
                 fieldLabel = `${label.slice(0, label.length - 3)}[${index}]`;
               } else {
                 fieldLabel = label;
@@ -596,9 +631,7 @@ const TypeEditor = ({
           <>
             {(isArrayMode ? values : [null]).map((el, index) => {
               let fieldLabel;
-              if (isArrayMode && !appendedZeroAlready) {
-                fieldLabel = `${label}[${index}]`;
-              } else if (isArrayMode && appendedZeroAlready) {
+              if (isArrayMode && appendedZeroAlready) {
                 fieldLabel = `${label.slice(0, label.length - 3)}[${index}]`;
               } else {
                 fieldLabel = label;

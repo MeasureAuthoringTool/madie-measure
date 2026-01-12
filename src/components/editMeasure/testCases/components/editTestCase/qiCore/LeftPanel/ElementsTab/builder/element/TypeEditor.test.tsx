@@ -1,5 +1,11 @@
 import * as React from "react";
-import { render, screen, act, waitFor, within } from "@testing-library/react";
+import {
+  render,
+  screen,
+  act,
+  waitFor,
+  fireEvent,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import TypeEditor from "./TypeEditor";
@@ -358,6 +364,138 @@ describe("TypeEditor Component", () => {
 
     userEvent.type(inputField, "1234-abcd-ABCD-5678");
     expect(onChange).toHaveBeenCalled();
+  });
+  test("Should render Decimal component", async () => {
+    const setFieldValue = jest.fn();
+    const setFieldTouched = jest.fn();
+    const onChange = jest.fn();
+    const decimalFormik = {
+      ...mockFormik,
+      setFieldTouched: setFieldTouched,
+      setFieldValue: setFieldValue,
+      getFieldProps: () => ({
+        label: "ClaimResponse.addItem[0].factor",
+        name: "ClaimResponse.addItem[0].factor",
+        value: undefined,
+        onChange,
+        onBlur: jest.fn(),
+      }),
+    };
+
+    render(
+      <FormikProvider value={decimalFormik}>
+        <RequiredFieldsProvider
+          requiredFields={mockRequiredFields}
+          formInfo={mockFormInfo}
+        >
+          <TypeEditor
+            resource={null}
+            structureDefinition={{
+              id: "ClaimResponse.addItem[0].factor",
+              path: "ClaimResponse.addItem[0].factor",
+              min: 1,
+              max: "1",
+              type: [
+                {
+                  extension: [
+                    {
+                      url: "http://hl7.org/fhir/StructureDefinition/structuredefinition-fhir-type",
+                      valueUrl: "test",
+                    },
+                  ],
+                  code: "decimal",
+                },
+              ],
+            }}
+            label={"ClaimResponse.addItem[0].factor"}
+            canEdit={true}
+            parentStructureDefinition={null}
+          />
+        </RequiredFieldsProvider>
+      </FormikProvider>
+    );
+    const inputField = screen.getByTestId(
+      "decimal-field-input-ClaimResponse.addItem[0].factor"
+    ) as HTMLInputElement;
+    expect(inputField).toBeInTheDocument();
+    expect(inputField.value).toBe("");
+
+    await userEvent.type(inputField, "1.234");
+    expect(onChange).toHaveBeenCalled();
+    await userEvent.type(inputField, "{backspace}".repeat(4));
+    expect(inputField.value).toBe("");
+    await userEvent.type(inputField, "abcdef");
+    expect(inputField.value).toBe("");
+    fireEvent.wheel(inputField);
+    expect(inputField).not.toHaveFocus();
+  });
+
+  test("Should render Decimal multiple cardinality, when values present", async () => {
+    const formik = {
+      handleChange: jest.fn(),
+      setFieldValue: jest.fn(),
+      setFieldTouched: jest.fn(),
+    };
+    const arrayDecimalFormik = {
+      ...formik,
+      values: {
+        ClaimResponse: {
+          addItem: [
+            {
+              factor: [1.5, 2.5],
+            },
+          ],
+        },
+      },
+      getFieldProps: (label: string) => {
+        const match = label.match(/factor\[(\d+)]/);
+        if (match) {
+          const index = parseInt(match[1]);
+          return {
+            value: [1.5, 2.5][index],
+            name: label,
+            onChange: jest.fn(),
+            onBlur: jest.fn(),
+          };
+        }
+      },
+    };
+    render(
+      <FormikProvider value={arrayDecimalFormik}>
+        <RequiredFieldsProvider
+          requiredFields={mockRequiredFields}
+          formInfo={mockFormInfo}
+        >
+          <TypeEditor
+            resource={null}
+            structureDefinition={{
+              id: "ClaimResponse.addItem[0].factor",
+              path: "ClaimResponse.addItem[0].factor",
+              min: 0,
+              max: "*",
+              type: [
+                {
+                  code: "decimal",
+                },
+              ],
+            }}
+            label={"ClaimResponse.addItem[0].factor"}
+            canEdit={true}
+            parentStructureDefinition={null}
+          />
+        </RequiredFieldsProvider>
+      </FormikProvider>
+    );
+    const input1 = screen.getByTestId(
+      "decimal-field-input-ClaimResponse.addItem[0].factor[0]"
+    ) as HTMLInputElement;
+    expect(input1).toBeInTheDocument();
+    expect(input1.value).toBe("1.5");
+    const input2 = screen.getByTestId(
+      "decimal-field-input-ClaimResponse.addItem[0].factor[1]"
+    ) as HTMLInputElement;
+    expect(input2).toBeInTheDocument();
+    expect(input2.value).toBe("2.5");
   });
 
   test("String field should display errors and helper text", () => {
