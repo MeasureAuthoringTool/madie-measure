@@ -201,7 +201,6 @@ const TestCaseList = (props: TestCaseListProps) => {
     useState<boolean>(false);
   const [shiftDatesDialogModalOpen, setShiftDatesDialogModalOpen] =
     useState<boolean>(false);
-  const [exportOptionsOpen, setExportOptionsOpen] = useState<boolean>(false);
   const [makeJsonMatchUiDialogOpen, setMakeJsonMatchUiDialogOpen] =
     useState<boolean>(false);
 
@@ -402,7 +401,6 @@ const TestCaseList = (props: TestCaseListProps) => {
   };
 
   const exportTestCases = async (bundleType: string) => {
-    setExportOptionsOpen(false);
     try {
       abortController.current = new AbortController();
       const { ecqmTitle, model, version } = measure ?? {};
@@ -723,8 +721,6 @@ const TestCaseList = (props: TestCaseListProps) => {
                         }
                         onCloneTestCase={handleQiCloneTestCase}
                         exportTestCases={exportTestCases}
-                        exportOptionsOpen={exportOptionsOpen}
-                        setExportOptionsOpen={setExportOptionsOpen}
                         displayTestCaseCopyDialog={() =>
                           setOpenCopyTestCaseDialog(true)
                         }

@@ -265,11 +265,10 @@ describe("ActionCenter Component", () => {
       expect(onCloneTestCase).toBeCalled();
     });
 
-    it("should export transaction bundle for QI-Core", () => {
+    it("should export transaction bundle for QI-Core", async () => {
       const selectedTestCase = [
         { id: "1", validResource: true, title: "Test Case 1" },
       ];
-      const setExportOptionsOpen = jest.fn();
       const exportTestCases = jest.fn();
 
       render(
@@ -279,29 +278,26 @@ describe("ActionCenter Component", () => {
             canEdit={true}
             isQDM={false}
             exportTestCases={exportTestCases}
-            exportOptionsOpen={true}
-            setExportOptionsOpen={setExportOptionsOpen}
           />
         </MemoryRouter>
       );
 
-      const exportActionBtn = screen.getByTestId("export-action-icon");
+      const exportActionBtn = screen.getByTestId("export-action-btn");
       expect(exportActionBtn).toBeInTheDocument();
       userEvent.click(exportActionBtn);
 
-      const exportTransactBundle = screen.getByTestId(
+      const exportTransactBundle = await screen.findByTestId(
         "export-transaction-bundle"
       );
       expect(exportTransactBundle).toBeInTheDocument();
       userEvent.click(exportTransactBundle);
-      expect(exportTestCases).toBeCalled();
+      expect(exportTestCases).toHaveBeenCalledWith("TRANSACTION");
     });
 
-    it("should export collection bundle for QI-Core", () => {
+    it("should export collection bundle for QI-Core", async () => {
       const selectedTestCase = [
         { id: "1", validResource: true, title: "Test Case 1" },
       ];
-      const setExportOptionsOpen = jest.fn();
       const exportTestCases = jest.fn();
       render(
         <MemoryRouter>
@@ -310,29 +306,26 @@ describe("ActionCenter Component", () => {
             canEdit={true}
             isQDM={false}
             exportTestCases={exportTestCases}
-            exportOptionsOpen={true}
-            setExportOptionsOpen={setExportOptionsOpen}
           />
         </MemoryRouter>
       );
 
-      const exportActionBtn = screen.getByTestId("export-action-icon");
+      const exportActionBtn = screen.getByTestId("export-action-btn");
       expect(exportActionBtn).toBeInTheDocument();
       userEvent.click(exportActionBtn);
 
-      const exportCollectBundle = screen.getByTestId(
+      const exportCollectBundle = await screen.findByTestId(
         "export-collection-bundle"
       );
       expect(exportCollectBundle).toBeInTheDocument();
       userEvent.click(exportCollectBundle);
-      expect(exportTestCases).toBeCalled();
+      expect(exportTestCases).toHaveBeenCalledWith("COLLECTION");
     });
 
-    it("should export QRDA for QDM", () => {
+    it("should export QRDA for QDM", async () => {
       const selectedTestCase = [
         { id: "1", validResource: true, title: "Test Case 1" },
       ];
-      const setExportOptionsOpen = jest.fn();
       const onExportQRDA = jest.fn();
       render(
         <MemoryRouter>
@@ -342,28 +335,25 @@ describe("ActionCenter Component", () => {
             isQDM={true}
             onExportQRDA={onExportQRDA}
             measureId="1"
-            exportOptionsOpen={true}
-            setExportOptionsOpen={setExportOptionsOpen}
             executeAllTestCases={true}
           />
         </MemoryRouter>
       );
 
-      const exportActionBtn = screen.getByTestId("export-action-icon");
+      const exportActionBtn = screen.getByTestId("export-action-btn");
       expect(exportActionBtn).toBeInTheDocument();
       userEvent.click(exportActionBtn);
 
-      const exportQrda = screen.getByTestId("export-qrda-1");
+      const exportQrda = await screen.findByTestId("export-qrda-1");
       expect(exportQrda).toBeInTheDocument();
       userEvent.click(exportQrda);
-      expect(onExportQRDA).toBeCalled();
+      expect(onExportQRDA).toHaveBeenCalled();
     });
 
-    it("should export Excel for QDM", () => {
+    it("should export Excel for QDM", async () => {
       const selectedTestCase = [
         { id: "1", validResource: true, title: "Test Case 1" },
       ];
-      const setExportOptionsOpen = jest.fn();
       const onExportExcel = jest.fn();
       render(
         <MemoryRouter>
@@ -373,28 +363,25 @@ describe("ActionCenter Component", () => {
             isQDM={true}
             onExportExcel={onExportExcel}
             measureId="1"
-            exportOptionsOpen={true}
-            setExportOptionsOpen={setExportOptionsOpen}
             executeAllTestCases={true}
           />
         </MemoryRouter>
       );
 
-      const exportActionBtn = screen.getByTestId("export-action-icon");
+      const exportActionBtn = screen.getByTestId("export-action-btn");
       expect(exportActionBtn).toBeInTheDocument();
       userEvent.click(exportActionBtn);
 
-      const exportExcel = screen.getByTestId("export-excel-1");
+      const exportExcel = await screen.findByTestId("export-excel-1");
       expect(exportExcel).toBeInTheDocument();
       userEvent.click(exportExcel);
-      expect(onExportExcel).toBeCalled();
+      expect(onExportExcel).toHaveBeenCalled();
     });
 
     it("should disable export button if execution status is NA for QDM", async () => {
       const selectedTestCase = [
         { id: "1", executionStatus: "NA", title: "Test Case 1" },
       ];
-      const setExportOptionsOpen = jest.fn();
       const onExportExcel = jest.fn();
       render(
         <MemoryRouter>
@@ -404,14 +391,12 @@ describe("ActionCenter Component", () => {
             isQDM={true}
             onExportExcel={onExportExcel}
             measureId="1"
-            exportOptionsOpen={false}
-            setExportOptionsOpen={setExportOptionsOpen}
             executeAllTestCases={false}
           />
         </MemoryRouter>
       );
 
-      const exportActionBtn = screen.getByTestId("export-action-icon");
+      const exportActionBtn = screen.getByTestId("export-action-btn");
       expect(exportActionBtn).toBeInTheDocument();
 
       const exportTooltip = await screen.findByTestId("export-tooltip");

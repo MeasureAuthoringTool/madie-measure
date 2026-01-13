@@ -1,12 +1,18 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import "twin.macro";
 import "styled-components/macro";
-import { IconButton, MenuItem, Tooltip, InputAdornment } from "@mui/material";
 import {
-  Select,
-  TextField,
-  Popover,
-} from "@madie/madie-design-system/dist/react";
+  ClickAwayListener,
+  Grow,
+  IconButton,
+  MenuItem,
+  MenuList,
+  Paper,
+  Popper,
+  Tooltip,
+  InputAdornment,
+} from "@mui/material";
+import { Select, TextField } from "@madie/madie-design-system/dist/react";
 import SearchIcon from "@mui/icons-material/Search";
 
 import ClearIcon from "@mui/icons-material/Clear";
@@ -36,8 +42,6 @@ interface ActionCenterProps {
   onExportQRDA?: Function;
   onExportExcel?: Function;
   measureId?: string;
-  exportOptionsOpen?: boolean;
-  setExportOptionsOpen?: Function;
   displayTestCaseCopyDialog?: Function;
   executeAllTestCases?: boolean;
   isDraft?;
@@ -58,13 +62,12 @@ export default function ActionCenter(props: ActionCenterProps) {
     onExportQRDA,
     onExportExcel,
     measureId,
-    exportOptionsOpen,
-    setExportOptionsOpen,
     displayTestCaseCopyDialog,
     executeAllTestCases,
     isDraft,
   } = props;
 
+  const [exportMenuOpen, setExportMenuOpen] = useState<boolean>(false);
   const [disableDeleteBtn, setDisableDeleteBtn] = useState<boolean>(true);
   const [disableShiftDatesBtn, setDisableShiftDatesBtn] =
     useState<boolean>(true);
@@ -224,11 +227,20 @@ export default function ActionCenter(props: ActionCenterProps) {
     }
   };
 
-  const [anchorEl, setAnchorEl] = useState(null);
+  const anchorRef = useRef<HTMLButtonElement>(null);
   const handleClose = () => {
-    setExportOptionsOpen(false);
-    setAnchorEl(null);
+    setExportMenuOpen(false);
   };
+
+  function handleListKeyDown(event: React.KeyboardEvent) {
+    if (event.key === "Tab") {
+      event.preventDefault();
+      setExportMenuOpen(false);
+    }
+    if (event.key === "Escape") {
+      setExportMenuOpen(false);
+    }
+  }
 
   return (
     <form onSubmit={formik.handleSubmit}>
@@ -458,62 +470,89 @@ export default function ActionCenter(props: ActionCenterProps) {
               <IconButton
                 disabled={disableExportBtn}
                 data-testid="export-action-btn"
+                ref={anchorRef}
+                onClick={() => {
+                  if (!disableExportBtn) {
+                    setExportMenuOpen(true);
+                  }
+                }}
               >
-                <FileUploadOutlinedIcon
-                  data-testid={`export-action-icon`}
-                  onClick={(event) => {
-                    event.preventDefault();
-                    setAnchorEl(event.currentTarget);
-                    setExportOptionsOpen(true);
-                  }}
-                />
-                {!isQDM && (
-                  <Popover
-                    optionsOpen={exportOptionsOpen}
-                    anchorEl={anchorEl}
-                    handleClose={handleClose}
-                    canEdit={canEdit}
-                    additionalSelectOptionProps={[
-                      {
-                        label: "Transaction Bundle",
-                        dataTestId: `export-transaction-bundle`,
-                        toImplementFunction: () => {
-                          exportTestCases("TRANSACTION");
-                        },
-                      },
-                      {
-                        label: "Collection Bundle",
-                        dataTestId: `export-collection-bundle`,
-                        toImplementFunction: () => {
-                          exportTestCases("COLLECTION");
-                        },
-                      },
-                    ]}
-                  />
-                )}
-                {isQDM && (
-                  <Popover
-                    optionsOpen={exportOptionsOpen}
-                    anchorEl={anchorEl}
-                    handleClose={handleClose}
-                    canEdit={canEdit}
-                    additionalSelectOptionProps={[
-                      {
-                        label: "QRDA",
-                        toImplementFunction: onExportQRDA,
-                        dataTestId: `export-qrda-${measureId}`,
-                      },
-                      {
-                        label: "Excel",
-                        toImplementFunction: onExportExcel,
-                        dataTestId: `export-excel-${measureId}`,
-                      },
-                    ]}
-                  />
-                )}
+                <FileUploadOutlinedIcon data-testid="export-action-icon" />
               </IconButton>
             </span>
           </Tooltip>
+
+          <Popper
+            open={exportMenuOpen}
+            anchorEl={anchorRef.current}
+            role={undefined}
+            placement="bottom-end"
+            transition
+          >
+            {({ TransitionProps }) => (
+              <Grow
+                {...TransitionProps}
+                style={{
+                  transformOrigin: "right top",
+                }}
+              >
+                <Paper>
+                  <ClickAwayListener onClickAway={handleClose}>
+                    <MenuList
+                      autoFocusItem={exportMenuOpen}
+                      id="export-menu"
+                      onKeyDown={handleListKeyDown}
+                    >
+                      {!isQDM && [
+                        <MenuItem
+                          key="transaction-bundle"
+                          data-testid="export-transaction-bundle"
+                          onClick={() => {
+                            exportTestCases("TRANSACTION");
+                            handleClose();
+                          }}
+                        >
+                          Transaction Bundle
+                        </MenuItem>,
+                        <MenuItem
+                          key="collection-bundle"
+                          data-testid="export-collection-bundle"
+                          onClick={() => {
+                            exportTestCases("COLLECTION");
+                            handleClose();
+                          }}
+                        >
+                          Collection Bundle
+                        </MenuItem>,
+                      ]}
+                      {isQDM && [
+                        <MenuItem
+                          key="qrda"
+                          data-testid={`export-qrda-${measureId}`}
+                          onClick={() => {
+                            onExportQRDA();
+                            handleClose();
+                          }}
+                        >
+                          QRDA
+                        </MenuItem>,
+                        <MenuItem
+                          key="excel"
+                          data-testid={`export-excel-${measureId}`}
+                          onClick={() => {
+                            onExportExcel();
+                            handleClose();
+                          }}
+                        >
+                          Excel
+                        </MenuItem>,
+                      ]}
+                    </MenuList>
+                  </ClickAwayListener>
+                </Paper>
+              </Grow>
+            )}
+          </Popper>
         </div>
       </div>
     </form>
