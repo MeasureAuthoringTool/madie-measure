@@ -727,7 +727,6 @@ const EditTestCase = (props: EditTestCaseProps) => {
       });
       return;
     }
-    setValidationErrors(() => []);
     let modifiedTestCase = { ...testCase, json: editorVal };
     // validate the JSON iff executeInvalidTestCases is false and JSON has been modified
     if (
