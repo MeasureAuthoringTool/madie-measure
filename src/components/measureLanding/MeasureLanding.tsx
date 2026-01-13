@@ -20,11 +20,7 @@ import {
   Toast,
 } from "@madie/madie-design-system/dist/react";
 import "./MeasureLanding.scss";
-import {
-  useDocumentTitle,
-  useFeatureFlags,
-  useMeasureServiceApi,
-} from "@madie/madie-util";
+import { useDocumentTitle, useMeasureServiceApi } from "@madie/madie-util";
 import StatusHandler, {
   INITIAL_STATUS_HANDLER,
 } from "../editMeasure/editor/StatusHandler";
@@ -81,7 +77,6 @@ export default function MeasureLanding() {
   const abortController = useRef<AbortController | null>(null);
   // Incrementing id to identify the latest in-flight request; prevents stale requests
   const requestIdRef = useRef(0);
-  const featureFlags = useFeatureFlags();
 
   // Toast state and handlers
   const [toastOpen, setToastOpen] = useState<boolean>(false);
@@ -131,7 +126,6 @@ export default function MeasureLanding() {
   const currentSortRef = useRef(currentSort);
   const currentDirectionRef = useRef(currentDirection);
   const curLimitRef = useRef(curLimit);
-  const featureFlagMeasureSearchRef = useRef(featureFlags.MeasureSearch);
   // requestIdRef declared earlier; avoid duplicate.
   useEffect(() => {
     searchCriteriaRef.current = searchCriteria;
@@ -145,9 +139,6 @@ export default function MeasureLanding() {
   useEffect(() => {
     curLimitRef.current = curLimit;
   }, [curLimit]);
-  useEffect(() => {
-    featureFlagMeasureSearchRef.current = featureFlags.MeasureSearch;
-  }, [featureFlags.MeasureSearch]);
 
   const setMeasureCounts = useCallback(() => {
     measureServiceApi
@@ -164,12 +155,10 @@ export default function MeasureLanding() {
       });
   }, [measureServiceApi]);
 
-  // Get the count when component mounts or when featureFlag changes
+  // Get the count when component mounts
   useEffect(() => {
-    if (featureFlags.MeasureSearch) {
-      setMeasureCounts();
-    }
-  }, [featureFlags.MeasureSearch, setMeasureCounts]);
+    setMeasureCounts();
+  }, [setMeasureCounts]);
 
   const retrieveMeasures = useCallback(
     async (
@@ -211,7 +200,7 @@ export default function MeasureLanding() {
 
         if (currentRequestId === requestIdRef.current) {
           setPageProps(data);
-          if (doUpdateMeasureCount && featureFlagMeasureSearchRef.current) {
+          if (doUpdateMeasureCount) {
             setMeasureCounts();
           }
         }
@@ -390,11 +379,7 @@ export default function MeasureLanding() {
             <Tabs value={activeTab} onChange={handleTabChange} type="B">
               <Tab
                 type="B"
-                label={
-                  featureFlags?.MeasureSearch
-                    ? "Owned Measures (" + ownedMeasuresCount + ")"
-                    : "Owned Measures"
-                }
+                label={"Owned Measures (" + ownedMeasuresCount + ")"}
                 data-testid="owned-measures-tab"
                 onClick={() => {
                   setCurrentPage(0);
@@ -402,11 +387,7 @@ export default function MeasureLanding() {
               />
               <Tab
                 type="B"
-                label={
-                  featureFlags?.MeasureSearch
-                    ? "Shared Measures (" + sharedMeasuresCount + ")"
-                    : "Shared Measures"
-                }
+                label={"Shared Measures (" + sharedMeasuresCount + ")"}
                 data-testid="shared-measures-tab"
                 onClick={() => {
                   setCurrentPage(0);
@@ -415,11 +396,7 @@ export default function MeasureLanding() {
               <Tab
                 tabIndex={0}
                 type="B"
-                label={
-                  featureFlags?.MeasureSearch
-                    ? "All Measures (" + allMeasuresCount + ")"
-                    : "All Measures"
-                }
+                label={"All Measures (" + allMeasuresCount + ")"}
                 data-testid="all-measures-tab"
                 onClick={() => {
                   setCurrentPage(0);

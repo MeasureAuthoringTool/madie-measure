@@ -4,7 +4,7 @@ import { TextField } from "@madie/madie-design-system/dist/react";
 import AddElementButton from "../../../../../../../common/UIOnlyModelAgnostic/AddElementButton";
 import { IconButton, Tooltip } from "@mui/material";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
-
+import { getMultipleCardinalityLabel } from "./TypeUtil";
 /*
   String component is either going to need to be very smart, or we're going to have to provide validations ahead of time. 
   We should figure out how to provide different validations depending on what type of string we're looking at, (UUID, Markdown?)
@@ -26,6 +26,7 @@ const StringComponent = ({
   name,
   ...props
 }: TypeComponentProps) => {
+  const formattedLabel = getMultipleCardinalityLabel(label);
   const testIdBase = name && name.includes("[") ? name : label;
 
   function isRootLabel(label) {
@@ -38,8 +39,8 @@ const StringComponent = ({
       <TextField
         required={fieldRequired}
         readOnly={!canEdit}
-        id={`string-field-${testIdBase}`}
-        label={label}
+        id={`string-field-${formattedLabel}`}
+        label={formattedLabel}
         helperText={helperText}
         labelColor="#1976d2"
         inputProps={{

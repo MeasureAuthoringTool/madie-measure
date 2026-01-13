@@ -294,7 +294,7 @@ describe("TypeEditor Component", () => {
       </FormikProvider>
     );
     const inputField = screen.getByTestId(
-      "string-field-input-Id"
+      "string-field-input-ClaimResponse.id"
     ) as HTMLInputElement;
     expect(inputField).toBeInTheDocument();
     expect(inputField.value).toBe("test");
@@ -398,7 +398,9 @@ describe("TypeEditor Component", () => {
         </RequiredFieldsProvider>
       </FormikProvider>
     );
-    const inputField = screen.getByTestId("string-field-input-Id");
+    const inputField = screen.getByTestId(
+      "string-field-input-ClaimResponse.id"
+    );
     expect(inputField).toBeInTheDocument();
     const errorText = screen.getByText("This field is required");
     expect(errorText).toBeInTheDocument();
@@ -794,7 +796,9 @@ describe("TypeEditor Component", () => {
         </RequiredFieldsProvider>
       </FormikProvider>
     );
-    const inputField = screen.getByTestId("uri-input-field-Uri");
+    const inputField = screen.getByTestId(
+      "uri-input-field-DiagnosticReport.presentedForm.uri"
+    );
     expect(inputField).toBeInTheDocument();
     await act(async () => {
       userEvent.type(inputField, "urn:oid:AA");
@@ -1142,7 +1146,7 @@ describe("TypeEditor Component", () => {
       </FormikProvider>
     );
     const inputField = screen.getByTestId(
-      "integer-field-input-Order"
+      "integer-field-input-ClaimResponse.order"
     ) as HTMLInputElement;
     expect(inputField.value).toBe("1234");
   });
@@ -1176,7 +1180,7 @@ describe("TypeEditor Component", () => {
     );
 
     const inputField = screen.getByTestId(
-      "integer-field-input-Order"
+      "integer-field-input-ClaimResponse.order"
     ) as HTMLInputElement;
     expect(inputField.value).toBe("1234");
   });
@@ -1210,7 +1214,7 @@ describe("TypeEditor Component", () => {
     );
 
     const inputField = screen.getByTestId(
-      "integer-field-input-Order"
+      "integer-field-input-ClaimResponse.order"
     ) as HTMLInputElement;
     expect(inputField.value).toBe("1234");
   });
@@ -1242,7 +1246,7 @@ describe("TypeEditor Component", () => {
         </RequiredFieldsProvider>
       </FormikProvider>
     );
-    expect(screen.getByText("Order[0]")).toBeInTheDocument();
+    expect(screen.getByText("Order 1")).toBeInTheDocument();
   });
   test("Should render unsignedInt component with [0]", () => {
     render(
@@ -1271,7 +1275,7 @@ describe("TypeEditor Component", () => {
         </RequiredFieldsProvider>
       </FormikProvider>
     );
-    expect(screen.getByText("Order[0]")).toBeInTheDocument();
+    expect(screen.getByText("Order 1")).toBeInTheDocument();
   });
 
   test("Should display unsupported", () => {
@@ -1593,7 +1597,7 @@ describe("TypeEditor Component", () => {
     );
 
     const codeSelects = screen.getByRole("combobox", {
-      name: "Patient.extension[2].value[x]",
+      name: "Value[x]",
     });
     expect(codeSelects).toBeInTheDocument();
     expect(screen.getByDisplayValue("M")).toBeInTheDocument();
@@ -2005,22 +2009,18 @@ describe("TypeEditor Component", () => {
     );
     expect(await screen.findByText("Event[0]")).toBeInTheDocument();
     expect(await screen.findByLabelText("Repeat.Bounds")).toBeInTheDocument();
-    expect(await screen.findByLabelText("Repeat.Count")).toBeInTheDocument();
-    expect(await screen.findByLabelText("Repeat.CountMax")).toBeInTheDocument();
+    expect(await screen.findByLabelText("Count")).toBeInTheDocument();
+    expect(await screen.findByLabelText("Count Max")).toBeInTheDocument();
     expect(await screen.findByLabelText("Repeat.Duration")).toBeInTheDocument();
     expect(
       await screen.findByLabelText("Repeat.DurationMax")
     ).toBeInTheDocument();
 
-    const repeatUnits = screen.getAllByLabelText("Repeat.Unit(s)");
+    const repeatUnits = screen.getAllByLabelText("Unit(s)");
     expect(repeatUnits.length).toBe(2);
 
-    expect(
-      await screen.findByLabelText("Repeat.Frequency")
-    ).toBeInTheDocument();
-    expect(
-      await screen.findByLabelText("Repeat.FrequencyMax")
-    ).toBeInTheDocument();
+    expect(await screen.findByLabelText("Frequency")).toBeInTheDocument();
+    expect(await screen.findByLabelText("Frequency Max")).toBeInTheDocument();
     expect(await screen.findByLabelText("Repeat.Period")).toBeInTheDocument();
     expect(
       await screen.findByLabelText("Repeat.PeriodMax")
@@ -2032,7 +2032,7 @@ describe("TypeEditor Component", () => {
       await screen.findByText("Repeat.Time of Day[0]")
     ).toBeInTheDocument();
     expect(await screen.findByLabelText("Repeat.When[0]")).toBeInTheDocument();
-    expect(await screen.findByLabelText("Repeat.Offset")).toBeInTheDocument();
+    expect(await screen.findByLabelText("Offset")).toBeInTheDocument();
     expect(await screen.findByText("Code")).toBeInTheDocument();
   });
 
@@ -2089,13 +2089,13 @@ describe("TypeEditor Component", () => {
 
     // Verify mocked QuantityComponents for Low and High
     const lowComponent = await screen.findByTestId(
-      "quantity-component-Age.low"
+      "quantity-component-Observation.referenceRange[0].age.low"
     );
     expect(lowComponent).toBeInTheDocument();
     expect(lowComponent).toHaveTextContent("QuantityComponent Mock");
 
     const highComponent = await screen.findByTestId(
-      "quantity-component-Age.high"
+      "quantity-component-Observation.referenceRange[0].age.high"
     );
     expect(highComponent).toBeInTheDocument();
     expect(highComponent).toHaveTextContent("QuantityComponent Mock");
@@ -2196,7 +2196,7 @@ describe("TypeEditor Component", () => {
 
     // Verify the mocked QuantityComponent is rendered
     const quantityComponent = await screen.findByTestId(
-      "quantity-component-Value Quantity"
+      "quantity-component-Observation.valueQuantity"
     );
     expect(quantityComponent).toBeInTheDocument();
     expect(quantityComponent).toHaveTextContent("QuantityComponent Mock");
@@ -2293,7 +2293,7 @@ describe("TypeEditor Component", () => {
 
     // Verify the mocked QuantityComponent is rendered
     const quantityComponent = await screen.findByTestId(
-      "quantity-component-Value Quantity[0]"
+      "quantity-component-Observation.valueQuantity[0]"
     );
     expect(quantityComponent).toBeInTheDocument();
     expect(quantityComponent).toHaveTextContent("QuantityComponent Mock");
@@ -2399,7 +2399,7 @@ describe("TypeEditor Component", () => {
 
     // Verify the mocked QuantityComponent is rendered for SimpleQuantity
     const quantityComponent = await screen.findByTestId(
-      "quantity-component-Simple Quantity"
+      "quantity-component-Observation.simpleQuantity"
     );
     expect(quantityComponent).toBeInTheDocument();
     expect(quantityComponent).toHaveTextContent("QuantityComponent Mock");
@@ -2501,7 +2501,9 @@ describe("TypeEditor Component", () => {
     );
 
     // Verify the mocked MoneyComponent is rendered
-    const moneyComponent = await screen.findByTestId("money-component-Total");
+    const moneyComponent = await screen.findByTestId(
+      "money-component-Claim.total"
+    );
     expect(moneyComponent).toBeInTheDocument();
     expect(moneyComponent).toHaveTextContent("MoneyComponent Mock");
   });
@@ -3515,13 +3517,13 @@ describe("TypeEditor Component", () => {
 
       // Verify the mocked QuantityComponents are rendered (2 elements in array)
       const quantityComponent0 = await screen.findByTestId(
-        "quantity-component-Value Quantity[0]"
+        "quantity-component-Device.property.valueQuantity[0]"
       );
       expect(quantityComponent0).toBeInTheDocument();
       expect(quantityComponent0).toHaveTextContent("QuantityComponent Mock");
 
       const quantityComponent1 = await screen.findByTestId(
-        "quantity-component-Value Quantity[1]"
+        "quantity-component-Device.property.valueQuantity[1]"
       );
       expect(quantityComponent1).toBeInTheDocument();
       expect(quantityComponent1).toHaveTextContent("QuantityComponent Mock");

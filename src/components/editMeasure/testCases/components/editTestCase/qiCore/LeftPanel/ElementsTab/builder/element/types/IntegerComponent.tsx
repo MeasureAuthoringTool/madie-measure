@@ -10,6 +10,7 @@ import {
 import AddElementButton from "../../../../../../../common/UIOnlyModelAgnostic/AddElementButton";
 import { IconButton, Tooltip } from "@mui/material";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import { getMultipleCardinalityLabel } from "./TypeUtil";
 export enum IntegerType {
   UNSIGNED = "Unsigned",
   SIGNED = "Signed",
@@ -36,7 +37,8 @@ const IntegerComponent = ({
   name,
   ...props
 }: IntegerComponentProps) => {
-  // Use name for test IDs in array scenarios (when it contains '['), otherwise use formatted label
+  // Use name for test IDs in array scenarios (when it contains '['), otherwise use original label
+  const formattedLabel = getMultipleCardinalityLabel(label);
   const testIdBase = name && name.includes("[") ? name : label;
 
   return (
@@ -44,8 +46,8 @@ const IntegerComponent = ({
       <TextField
         required={fieldRequired}
         readOnly={!canEdit}
-        id={`integer-field-${testIdBase}`}
-        label={label}
+        id={`integer-field-${formattedLabel}`}
+        label={formattedLabel}
         inputProps={{
           "data-testid": `integer-field-input-${testIdBase}`,
           "aria-describedby": `integer-field-input-helper-text-${testIdBase}`,

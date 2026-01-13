@@ -5,7 +5,7 @@ import { IconButton, Tooltip } from "@mui/material";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import { TextField } from "@madie/madie-design-system/dist/react/";
 import AddElementButton from "../../../../../../../common/UIOnlyModelAgnostic/AddElementButton";
-
+import { getMultipleCardinalityLabel } from "./TypeUtil";
 const UriComponent = ({
   canEdit,
   fieldRequired,
@@ -19,6 +19,7 @@ const UriComponent = ({
   name,
   ...props
 }: TypeComponentProps) => {
+  const formattedLabel = getMultipleCardinalityLabel(label);
   const testIdBase = name && name.includes("[") ? name : label;
   const { value } = props;
   return (
@@ -29,8 +30,8 @@ const UriComponent = ({
       <TextField
         required={fieldRequired}
         readOnly={!canEdit}
-        id={`uri-field-${testIdBase}`}
-        label={`${label}`}
+        id={`uri-field-${formattedLabel}`}
+        label={formattedLabel}
         labelColor="#1976d2"
         placeholder={label}
         inputProps={{

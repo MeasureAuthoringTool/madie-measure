@@ -46,7 +46,6 @@ import {
   measureStore,
   routeHandlerStore,
   useDocumentTitle,
-  checkUserCanEdit,
   useFeatureFlags,
   useMeasureServiceApi,
 } from "@madie/madie-util";
@@ -213,6 +212,9 @@ const MeasureGroups = (props: MeasureGroupProps) => {
   const canEdit = !props.isTestCaseLocked && props.measureCanEdit;
   const measureServiceApi = useMeasureServiceApi();
   const featureFlags = useFeatureFlags();
+  const isCompositeMeasure = measure?.measureMetaData?.composite;
+  const defaultActiveTab = isCompositeMeasure ? "components" : "populations";
+  const [activeTab, setActiveTab] = useState<string>();
   let location = useLocation();
   const { pathname } = location;
 
@@ -249,7 +251,6 @@ const MeasureGroups = (props: MeasureGroupProps) => {
 
   const groupsBaseUrl = "/measures/" + props.measureId + "/edit/groups";
   let navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<string>("populations");
   const measureGroupNumber =
     props.measureGroupNumber - 1 < 0 ? 0 : props.measureGroupNumber;
   const [group, setGroup] = useState<Group>();
@@ -383,8 +384,9 @@ const MeasureGroups = (props: MeasureGroupProps) => {
         });
       }
     }
-    setActiveTab("populations");
-  }, [measureGroupNumber, measure?.groups]);
+    // Set default tab based on whether the measure is composite
+    setActiveTab(defaultActiveTab);
+  }, [measureGroupNumber, measure?.groups, isCompositeMeasure]);
 
   const formik = useFormik({
     initialValues: {
@@ -561,6 +563,10 @@ const MeasureGroups = (props: MeasureGroupProps) => {
 
   const submitForm = (group: Group) => {
     group.displayId = "Group_" + (measureGroupNumber + 1);
+    // If measure is composite, ensure scoring is set to "Composite"
+    if (isCompositeMeasure) {
+      group.scoring = GroupScoring.COMPOSITE;
+    }
     if (group.stratifications) {
       group.stratifications = group.stratifications.filter(
         (strat) =>
@@ -588,7 +594,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
             true
           );
           formik.resetForm();
-          setActiveTab("populations");
+          setActiveTab(defaultActiveTab);
         })
         .catch((error) => {
           if (
@@ -727,7 +733,11 @@ const MeasureGroups = (props: MeasureGroupProps) => {
         .expressionDefinitions;
       setExpressionDefinitions(definitions);
     }
-    if (measure && (measure.cqlErrors || !measure?.cql)) {
+    if (
+      measure &&
+      !isCompositeMeasure &&
+      (measure.cqlErrors || !measure?.cql)
+    ) {
       props.setAlertMessage(() => ({
         type: "error",
         message: "Please complete the CQL Editor process before continuing",
@@ -932,10 +942,15 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                     }}
                     data-testid="scoring-select"
                     {...formik.getFieldProps("scoring")}
+                    value={
+                      isCompositeMeasure
+                        ? GroupScoring.COMPOSITE
+                        : formik.values.scoring
+                    }
                     error={
                       formik.touched.scoring && Boolean(formik.errors.scoring)
                     }
-                    readOnly={!canEdit}
+                    readOnly={!canEdit || isCompositeMeasure}
                     helperText={
                       formik.touched.scoring &&
                       Boolean(formik.errors.scoring) &&
@@ -965,19 +980,33 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                       );
                       formik.setFieldValue("measureObservations", observations);
                       formik.setFieldValue("stratifications", []);
-                      setActiveTab("populations");
+                      setActiveTab(defaultActiveTab);
                     }}
-                    options={Object.keys(GroupScoring).map((scoring) => {
-                      return (
-                        <MuiMenuItem
-                          key={scoring}
-                          value={GroupScoring[scoring]}
-                          data-testid={`group-scoring-option-${scoring}`}
-                        >
-                          {GroupScoring[scoring]}
-                        </MuiMenuItem>
-                      );
-                    })}
+                    options={
+                      isCompositeMeasure
+                        ? [
+                            <MuiMenuItem
+                              key="COMPOSITE"
+                              value={GroupScoring.COMPOSITE}
+                              data-testid="group-scoring-option-COMPOSITE"
+                            >
+                              {GroupScoring.COMPOSITE}
+                            </MuiMenuItem>,
+                          ]
+                        : Object.keys(GroupScoring)
+                            .filter((scoring) => scoring !== "COMPOSITE")
+                            .map((scoring) => {
+                              return (
+                                <MuiMenuItem
+                                  key={scoring}
+                                  value={GroupScoring[scoring]}
+                                  data-testid={`group-scoring-option-${scoring}`}
+                                >
+                                  {GroupScoring[scoring]}
+                                </MuiMenuItem>
+                              );
+                            })
+                    }
                   />
                   {/* no longer capable of errors */}
                   <MeasureGroupScoringUnit
@@ -1020,21 +1049,33 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                 <div>
                   <MenuItemContainer style={{ borderColor: "#8c8c8c" }}>
                     <Tabs value={activeTab} type="B" size="large">
-                      <Tab
-                        value="populations"
-                        type="B"
-                        data-testid="populations-tab"
-                        label={
-                          <CompletionIndicator
-                            label="Populations"
-                            hasErrors={formik.errors.populations}
-                            displayIcon={Boolean(formik.values.scoring)}
-                          />
-                        }
-                        onClick={() => {
-                          setActiveTab("populations");
-                        }}
-                      />
+                      {isCompositeMeasure ? (
+                        <Tab
+                          value="components"
+                          type="B"
+                          data-testid="components-tab"
+                          label="Components"
+                          onClick={() => {
+                            setActiveTab("components");
+                          }}
+                        />
+                      ) : (
+                        <Tab
+                          value="populations"
+                          type="B"
+                          data-testid="populations-tab"
+                          label={
+                            <CompletionIndicator
+                              label="Populations"
+                              hasErrors={formik.errors.populations}
+                              displayIcon={Boolean(formik.values.scoring)}
+                            />
+                          }
+                          onClick={() => {
+                            setActiveTab("populations");
+                          }}
+                        />
+                      )}
                       <Tab
                         tabIndex={0}
                         label={
@@ -1199,6 +1240,11 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                       </div>
                     )}
                   />
+                )}
+                {activeTab === "components" && (
+                  <Typography data-testid="components">
+                    Coming soon...
+                  </Typography>
                 )}
                 {activeTab === "stratification" && (
                   <FieldArray
@@ -1503,21 +1549,23 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                   >
                     Delete
                   </Button>
-                  <ButtonSpacer>
-                    <span
-                      tw="text-sm"
-                      style={{ color: "#717171" }}
-                      data-testid="save-measure-group-validation-message"
-                      aria-live="polite" //this triggers every time the user is there.. this intended?
-                    >
-                      {measureGroupSchemaValidator(
-                        cqlDefinitionDataTypes,
-                        cqlFunctionDataTypes
-                      ).isValidSync(formik.values)
-                        ? ""
-                        : "You must set all required Populations."}
-                    </span>
-                  </ButtonSpacer>
+                  {!isCompositeMeasure && (
+                    <ButtonSpacer>
+                      <span
+                        tw="text-sm"
+                        style={{ color: "#717171" }}
+                        data-testid="save-measure-group-validation-message"
+                        aria-live="polite" //this triggers every time the user is there.. this intended?
+                      >
+                        {measureGroupSchemaValidator(
+                          cqlDefinitionDataTypes,
+                          cqlFunctionDataTypes
+                        ).isValidSync(formik.values)
+                          ? ""
+                          : "You must set all required Populations."}
+                      </span>
+                    </ButtonSpacer>
+                  )}
                   <div tw="lg:col-start-4 flex">
                     <Button
                       tw="mx-2"

@@ -108,6 +108,7 @@ const mockMeasure = {
       id: "1",
       scoring: MeasureScoring.PROPORTION,
       populationBasis: "boolean",
+      displayId: "Group_1",
       populations: [
         {
           id: "id-1",
@@ -183,7 +184,84 @@ const executionResults = {
       patientId: "1",
       detailedResults: [
         {
-          groupId: "1",
+          groupId: "Group_2",
+          clauseResults: [
+            {
+              raw: undefined,
+              statementName: "SomeStatement",
+              libraryName: "SomeLibraryname",
+              localId: "200",
+              final: "NA",
+            },
+            {
+              raw: undefined,
+              statementName: "SomeStatement",
+              libraryName: "SomeLibraryname",
+              localId: "201",
+              final: false,
+            },
+            {
+              raw: undefined,
+              statementName: "SomeStatement",
+              libraryName: "SomeLibraryname",
+              localId: "202",
+              final: true,
+            },
+            {
+              raw: undefined,
+              statementName: "SomeStatement",
+              libraryName: "SomeLibraryname",
+              localId: "203",
+              final: true,
+            },
+          ],
+          populationResults: [
+            {
+              populationType: "initial-population",
+              result: false,
+            },
+            {
+              populationType: "denominator",
+              result: false,
+            },
+            {
+              populationType: "numerator",
+              result: false,
+            },
+          ],
+        },
+        {
+          groupId: "Group_1",
+          clauseResults: [
+            {
+              raw: undefined,
+              statementName: "SomeStatement",
+              libraryName: "SomeLibraryname",
+              localId: "200",
+              final: "NA",
+            },
+            {
+              raw: undefined,
+              statementName: "SomeStatement",
+              libraryName: "SomeLibraryname",
+              localId: "201",
+              final: false,
+            },
+            {
+              raw: undefined,
+              statementName: "SomeStatement",
+              libraryName: "SomeLibraryname",
+              localId: "202",
+              final: true,
+            },
+            {
+              raw: undefined,
+              statementName: "SomeStatement",
+              libraryName: "SomeLibraryname",
+              localId: "203",
+              final: true,
+            },
+          ],
           populationResults: [
             {
               populationType: "initial-population",
@@ -205,7 +283,37 @@ const executionResults = {
       patientId: "2",
       detailedResults: [
         {
-          groupId: "2",
+          groupId: "Group_2",
+          clauseResults: [
+            {
+              raw: undefined,
+              statementName: "SomeStatement",
+              libraryName: "SomeLibraryname",
+              localId: "200",
+              final: "NA",
+            },
+            {
+              raw: undefined,
+              statementName: "SomeStatement",
+              libraryName: "SomeLibraryname",
+              localId: "201",
+              final: false,
+            },
+            {
+              raw: undefined,
+              statementName: "SomeStatement",
+              libraryName: "SomeLibraryname",
+              localId: "202",
+              final: true,
+            },
+            {
+              raw: undefined,
+              statementName: "SomeStatement",
+              libraryName: "SomeLibraryname",
+              localId: "203",
+              final: true,
+            },
+          ],
           populationResults: [
             {
               populationType: "initial-population",
@@ -218,6 +326,53 @@ const executionResults = {
             {
               populationType: "numerator",
               result: false,
+            },
+          ],
+        },
+        {
+          groupId: "Group_1",
+          clauseResults: [
+            {
+              raw: undefined,
+              statementName: "SomeStatement",
+              libraryName: "SomeLibraryname",
+              localId: "200",
+              final: "NA",
+            },
+            {
+              raw: undefined,
+              statementName: "SomeStatement",
+              libraryName: "SomeLibraryname",
+              localId: "201",
+              final: false,
+            },
+            {
+              raw: undefined,
+              statementName: "SomeStatement",
+              libraryName: "SomeLibraryname",
+              localId: "202",
+              final: true,
+            },
+            {
+              raw: undefined,
+              statementName: "SomeStatement",
+              libraryName: "SomeLibraryname",
+              localId: "203",
+              final: true,
+            },
+          ],
+          populationResults: [
+            {
+              populationType: "initial-population",
+              result: true,
+            },
+            {
+              populationType: "denominator",
+              result: false,
+            },
+            {
+              populationType: "numerator",
+              result: true,
             },
           ],
         },
@@ -637,6 +792,80 @@ describe("TestCaseList component", () => {
     );
   }
 
+  it("updates all results when pop criteria tab is changed", async () => {
+    mockMeasure.cqlErrors = false;
+    mockMeasure.groups = [
+      ...mockMeasure.groups,
+      {
+        id: "2",
+        scoring: MeasureScoring.COHORT,
+        displayId: "Group_2",
+        populationBasis: "boolean",
+        populations: [
+          {
+            id: "id-1",
+            name: PopulationType.INITIAL_POPULATION,
+            definition: "ipp",
+          },
+        ],
+        measureGroupTypes: [],
+      },
+    ];
+    renderTestCaseListComponent();
+
+    // wait for pop criteria to load
+    await waitFor(() => {
+      expect(screen.getByText("Population Criteria 1")).toBeInTheDocument();
+      expect(screen.getAllByText("N/A").length).toEqual(2);
+    });
+
+    // wait for execution context to be ready
+    const executeButton = screen.getByRole("button", {
+      name: "Run Test(s)",
+    });
+
+    await waitFor(() => expect(executeButton).not.toBeDisabled());
+
+    userEvent.click(executeButton);
+
+    await waitFor(() => expect(screen.getByText("75%")).toBeInTheDocument()); //here
+    const table = await screen.findByTestId("test-case-tbl");
+    const tableRows = table.querySelectorAll("tbody tr");
+    await waitFor(() => {
+      expect(tableRows[2]).toHaveTextContent("Pass");
+      expect(tableRows[1]).toHaveTextContent("Fail");
+      expect(tableRows[0]).toHaveTextContent("Invalid");
+    });
+
+    mockProcessTestCaseResults
+      .mockClear()
+      .mockImplementation((testCase, groups, results) => {
+        return {
+          ...failingTestCaseResults.find((tc) => tc.id === testCase.id),
+          executionStatus: "pass",
+        };
+      });
+
+    mockGetPassingPercentageForTestCases
+      .mockClear()
+      .mockReturnValue({ passPercentage: 66, passFailRatio: "2/3" });
+
+    const popCriteria2 = screen.getByText("Population Criteria 2");
+    expect(popCriteria2).toBeInTheDocument();
+    userEvent.click(popCriteria2);
+
+    const table2 = await screen.findByTestId("test-case-tbl");
+    const tableRows2 = table2.querySelectorAll("tbody tr");
+    await waitFor(() => {
+      expect(tableRows2[2]).toHaveTextContent("Pass");
+      expect(tableRows2[1]).toHaveTextContent("Fail");
+      expect(tableRows2[0]).toHaveTextContent("Invalid");
+    });
+
+    expect(screen.getByText("Passing (2/3)")).toBeInTheDocument();
+    expect(screen.getByText("100%")).toBeInTheDocument();
+    expect(screen.getByTestId("sr-div")).toBeInTheDocument();
+  });
   it("should enable reports button for QICore tests, if execution context is ready", async () => {
     (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
       OverlappingValueSets: true,
@@ -1188,79 +1417,6 @@ describe("TestCaseList component", () => {
     });
   });
 
-  it("updates all results when pop criteria tab is changed", async () => {
-    mockMeasure.cqlErrors = false;
-    mockMeasure.groups = [
-      ...mockMeasure.groups,
-      {
-        id: "2",
-        scoring: MeasureScoring.COHORT,
-        populationBasis: "boolean",
-        populations: [
-          {
-            id: "id-1",
-            name: PopulationType.INITIAL_POPULATION,
-            definition: "ipp",
-          },
-        ],
-        measureGroupTypes: [],
-      },
-    ];
-    renderTestCaseListComponent();
-
-    // wait for pop criteria to load
-    await waitFor(() => {
-      expect(screen.getByText("Population Criteria 1")).toBeInTheDocument();
-      expect(screen.getAllByText("N/A").length).toEqual(2);
-    });
-
-    // wait for execution context to be ready
-    const executeButton = screen.getByRole("button", {
-      name: "Run Test(s)",
-    });
-
-    await waitFor(() => expect(executeButton).not.toBeDisabled());
-
-    userEvent.click(executeButton);
-    await waitFor(() => expect(screen.getByText("75%")).toBeInTheDocument());
-    const table = await screen.findByTestId("test-case-tbl");
-    const tableRows = table.querySelectorAll("tbody tr");
-    await waitFor(() => {
-      expect(tableRows[2]).toHaveTextContent("Pass");
-      expect(tableRows[1]).toHaveTextContent("Fail");
-      expect(tableRows[0]).toHaveTextContent("Invalid");
-    });
-
-    mockProcessTestCaseResults
-      .mockClear()
-      .mockImplementation((testCase, groups, results) => {
-        return {
-          ...failingTestCaseResults.find((tc) => tc.id === testCase.id),
-          executionStatus: "pass",
-        };
-      });
-
-    mockGetPassingPercentageForTestCases
-      .mockClear()
-      .mockReturnValue({ passPercentage: 66, passFailRatio: "2/3" });
-
-    const popCriteria2 = screen.getByText("Population Criteria 2");
-    expect(popCriteria2).toBeInTheDocument();
-    userEvent.click(popCriteria2);
-
-    const table2 = await screen.findByTestId("test-case-tbl");
-    const tableRows2 = table2.querySelectorAll("tbody tr");
-    await waitFor(() => {
-      expect(tableRows2[2]).toHaveTextContent("Pass");
-      expect(tableRows2[1]).toHaveTextContent("Fail");
-      expect(tableRows2[0]).toHaveTextContent("Invalid");
-    });
-
-    expect(screen.getByText("Passing (2/3)")).toBeInTheDocument();
-    expect(screen.getByText("100%")).toBeInTheDocument();
-    expect(screen.getByTestId("sr-div")).toBeInTheDocument();
-  });
-
   it("should disable execute button if CQL Return type mismatch error exists on measure", async () => {
     mockMeasure.createdBy = MEASURE_CREATEDBY;
     mockMeasure.errors = [
@@ -1733,20 +1889,7 @@ describe("TestCaseList component", () => {
     ).toBeInTheDocument();
   });
 
-  it("Should not display valid test case percentage for QiCore v6 measures when feature flag is off", async () => {
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-      stu6TestCaseValidation: false,
-    }));
-    mockMeasure.model = Model.QICORE_6_0_0;
-    renderTestCaseListComponent();
-    const tabElement = await screen.queryByTestId("validation-tab");
-    expect(tabElement).not.toBeInTheDocument();
-  });
-
   it("Should display valid test case percentage for QiCore v6 measures", async () => {
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-      stu6TestCaseValidation: true,
-    }));
     mockMeasure.model = Model.QICORE_6_0_0;
     renderTestCaseListComponent();
     const tabElement = await screen.findByTestId("validation-tab");
@@ -1757,9 +1900,6 @@ describe("TestCaseList component", () => {
   });
 
   it("Should display `0` when there are no test cases", async () => {
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-      stu6TestCaseValidation: true,
-    }));
     mockGetPassingPercentageForTestCases.mockClear();
     mockGetPassingPercentageForTestCases.mockReturnValue({
       passPercentage: 0,

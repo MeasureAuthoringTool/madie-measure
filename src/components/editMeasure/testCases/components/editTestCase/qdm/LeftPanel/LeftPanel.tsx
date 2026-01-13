@@ -37,9 +37,7 @@ const LeftPanel = (props: {
       <div className="tab-container">
         <LeftPanelNavTabs activeTab={activeTab} setActiveTab={setActiveTab} />
         <div tw="ml-auto mr-2">
-          {featureFlags?.Calculator && (
-            <EditorCalculator onClick={() => setCalculationDialogOpen(true)} />
-          )}
+          <EditorCalculator onClick={() => setCalculationDialogOpen(true)} />
         </div>
       </div>
       <div className="panel-content">

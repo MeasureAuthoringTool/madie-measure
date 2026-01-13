@@ -291,8 +291,7 @@ describe("TimingComponent", () => {
 
     // Duration Repeat.Unit(s)
     const durationContainer = screen.getByTestId("repeat-duration-unit");
-    const durationUnit =
-      within(durationContainer).getByLabelText("Repeat.Unit(s)");
+    const durationUnit = within(durationContainer).getByLabelText("Unit(s)");
     userEvent.click(durationUnit);
     const minuteOption = await screen.findByText("minute");
     userEvent.click(minuteOption);
@@ -343,7 +342,7 @@ describe("TimingComponent", () => {
 
     // Period Repeat.Unit(s)
     const periodContainer = screen.getByTestId("repeat-period-unit");
-    const periodUnit = within(periodContainer).getByLabelText("Repeat.Unit(s)");
+    const periodUnit = within(periodContainer).getByLabelText("Unit(s)");
     userEvent.click(periodUnit);
     const hourOption = await screen.findByText("hour");
     userEvent.click(hourOption);

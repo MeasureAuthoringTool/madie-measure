@@ -16,6 +16,7 @@ import AddElementButton from "../../../../../../../common/UIOnlyModelAgnostic/Ad
 import { IconButton, Tooltip } from "@mui/material";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import { set as lodashSet } from "lodash";
+import { getMultipleCardinalityLabel } from "./TypeUtil";
 
 export interface QuantityComponentProps extends TypeComponentProps {
   showLabel?: boolean;
@@ -35,6 +36,7 @@ const QuantityComponent = ({
   showDeleteButton = false,
   handleDeleteElement,
 }: QuantityComponentProps) => {
+  const formattedLabel = getMultipleCardinalityLabel(label);
   const testIdBase = name && name.includes("[") ? name : label;
   const formik = useFormikContext();
 
@@ -79,7 +81,7 @@ const QuantityComponent = ({
   return (
     <div className="element-editor-add-row">
       <div className="quantity-component">
-        {showLabel && <InputLabel>{label}</InputLabel>}
+        {showLabel && <InputLabel>{formattedLabel}</InputLabel>}
 
         <div className="quantity-fields">
           {/* Comparator field */}

@@ -26,15 +26,9 @@ declare module "@madie/madie-util" {
     enableQdmRepeatTransfer: boolean;
     qiCoreElementsTab: boolean;
     qdmHideJson: boolean;
-    stu6TestCaseValidation: boolean;
-    MeasureSearch: boolean;
     Locking: boolean;
     qiCore7: boolean;
-    TransferMeasure: boolean;
-    MeasureHistory: boolean;
-    Calculator: boolean;
     CompareMeasureVersions: boolean;
-    ExecutionConfigurationTab: boolean;
     QICoreCompositeMeasure: boolean;
     DisplayOwner: boolean;
     MakeJSONMatchUI: boolean;
@@ -117,8 +111,7 @@ declare module "@madie/madie-util" {
       sort: string,
       direction: string,
       searchCriteria: MeasureSearchCriteria,
-      abortController: AbortController,
-      invocationSource?: string
+      abortController: AbortController
     ): Promise<any>;
 
     createVersion(id: string, versionType: string): Promise<any>;
@@ -140,6 +133,7 @@ declare module "@madie/madie-util" {
     updateMeasureLock(measureId: string): Promise<any>;
     fetchHumanReadable(id: string): Promise<string>;
     fetchMeasureDraftStatuses(measureSetIds: string[]): Promise<any>;
+    getCqlDiff(oldMeasureId, newMeasureId): Promise<any>;
     getRecentMeasuresByMeasureSetId(measureSetIds: string[]): Promise<any>;
     getSharedMeasures(measureIds: string[]): Promise<any>;
     shareMeasures(measureUserIdMap: Map<string, string[]>): Promise<any>;

@@ -10,7 +10,7 @@ import useTerminologyServiceApi from "../../../../../../../../api/useTerminology
 import AddElementButton from "../../../../../../../common/UIOnlyModelAgnostic/AddElementButton";
 import "./CodesComponent.scss";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
-
+import { getMultipleCardinalityLabel } from "./TypeUtil";
 const CodesComponent = ({
   canEdit,
   structureDefinition,
@@ -31,6 +31,7 @@ const CodesComponent = ({
   const [codeValue, setCodeValue] = useState(value);
 
   // Use hybrid test ID: prefer complete path from name when in array mode
+  const formattedLabel = getMultipleCardinalityLabel(label);
   const testIdBase = name && name.includes("[") ? name : label;
   // Replace spaces with underscores to ensure a valid HTML id/data-testid
   const sanitizedId = testIdBase.replace(/\s+/g, "_");
@@ -146,7 +147,7 @@ const CodesComponent = ({
       <div className="element-editor-add-row">
         <div className="codes-select-container">
           <Select
-            label={label}
+            label={formattedLabel}
             id={`code-selector-${sanitizedId}`}
             inputProps={{
               "data-testid": `code-selector-input-${sanitizedId}`,

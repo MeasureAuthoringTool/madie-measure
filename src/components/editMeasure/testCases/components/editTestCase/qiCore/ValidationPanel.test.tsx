@@ -213,7 +213,6 @@ describe("ValidationPanel component", () => {
         severity: "error",
         code: "processing",
         diagnostics: "Validation failed.",
-        location: ["location 2"],
         key: 4,
       },
     ];
@@ -221,7 +220,10 @@ describe("ValidationPanel component", () => {
       <ValidationPanel testCase={testCase} validationErrors={errors} />
     );
     expect(queryByTestId("validation-card-3")).not.toBeInTheDocument();
-    expect(queryByTestId("validation-card-4")).toBeInTheDocument();
+    const validationCard = queryByTestId("validation-card-4");
+    expect(validationCard).toBeInTheDocument();
+    expect(validationCard).toHaveTextContent("Error: Validation failed.");
+    expect(validationCard).not.toHaveTextContent("Resource ID:");
   });
 
   it("should render warning validation error with correct styling and text", () => {
@@ -248,7 +250,7 @@ describe("ValidationPanel component", () => {
     );
   });
 
-  it("should render no errors present text when no errors and feature flag is true for valid status and isQiCoreV6", () => {
+  it("should render no errors present text when no errors (valid validation status and isQiCoreV6)", () => {
     const validTestCase = {
       ...testcase,
       validationStatus: ValidationStatus.VALID,
@@ -258,13 +260,12 @@ describe("ValidationPanel component", () => {
         testCase={validTestCase}
         validationErrors={[]}
         isQiCoreV6={true}
-        stu6TestCaseValidationFeatureFlag={true}
       />
     );
     expect(getByText("Nothing to see here!")).toBeInTheDocument();
   });
 
-  it("should render no errors present text when no errors and feature flag is true for valid status and not isQiCoreV6", () => {
+  it("should render no errors present text when no errors (valid validation status and not isQiCoreV6)", () => {
     const validTestCase = {
       ...testcase,
       validationStatus: ValidationStatus.VALID,
@@ -274,23 +275,6 @@ describe("ValidationPanel component", () => {
         testCase={validTestCase}
         validationErrors={[]}
         isQiCoreV6={false}
-        stu6TestCaseValidationFeatureFlag={true}
-      />
-    );
-    expect(getByText("Nothing to see here!")).toBeInTheDocument();
-  });
-
-  it("should render no errors present text when no errors and feature flag is false", () => {
-    const validTestCase = {
-      ...testcase,
-      validationStatus: ValidationStatus.VALID,
-    };
-    const { getByText } = render(
-      <ValidationPanel
-        testCase={validTestCase}
-        validationErrors={[]}
-        isQiCoreV6={true}
-        stu6TestCaseValidationFeatureFlag={false}
       />
     );
     expect(getByText("Nothing to see here!")).toBeInTheDocument();
@@ -308,6 +292,11 @@ describe("ValidationPanel component", () => {
       const input = "Location 1";
       const result = extractResourceId(input);
       expect(result).toBe("Location 1");
+    });
+
+    it("should return undefined for undefined input", () => {
+      const result = extractResourceId(undefined);
+      expect(result).toBeUndefined();
     });
   });
 });

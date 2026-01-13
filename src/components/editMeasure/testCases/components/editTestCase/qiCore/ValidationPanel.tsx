@@ -12,13 +12,14 @@ interface AlertProps {
 }
 
 export function extractResourceId(inputString) {
+  if (!inputString) return undefined;
   // Regular expression to find the content between / and */
   // \*\/ : Matches the closing '*/' sequence literally.
   // e.g. Bundle.entry[0].resource/*Patient/11ddb0b4-893f-46a2-a58a-f99c5f78ed5b*/
   // or: Bundle.entry[1].resource/*Encounter/NUMERStrat2Pass-TimeToTx61Min01*/.location[0].period
   const regex = /\/\*.*?\/(.*?)\*\//;
 
-  const match = inputString.match(regex);
+  const match = inputString?.match(regex);
 
   // If a match is found, the captured group (index 1) contains the desired string.
   if (match && match.length > 1) {
@@ -54,14 +55,12 @@ interface ValidationPanelProps {
   testCase: TestCase;
   validationErrors: any[];
   isQiCoreV6: boolean;
-  stu6TestCaseValidationFeatureFlag: boolean;
 }
 
 const ValidationPanel = ({
   testCase,
   validationErrors,
   isQiCoreV6,
-  stu6TestCaseValidationFeatureFlag,
 }: ValidationPanelProps) => {
   const renderSkeleton = () => (
     <Box
@@ -111,7 +110,12 @@ const ValidationPanel = ({
               error.severity.slice(1) +
               ": "
             : ""}
-          Resource ID: {extractResourceId(error.location?.[0])} |{" "}
+          {extractResourceId(error.location?.[0]) !== undefined
+            ? "Resource ID: "
+            : ""}
+          {extractResourceId(error.location?.[0]) !== undefined
+            ? extractResourceId(error.location?.[0]) + " | "
+            : ""}
           {error.diagnostics}
         </ValidationAlertCard>
       ));
@@ -125,10 +129,9 @@ const ValidationPanel = ({
     ValidationStatus.VALIDATING,
   ].includes(testCase?.validationStatus);
   const hasErrors = validationErrors && validationErrors.length > 0;
-  const showNoErrors = stu6TestCaseValidationFeatureFlag
-    ? (testCase?.validationStatus === ValidationStatus.VALID && isQiCoreV6) ||
-      !isQiCoreV6
-    : true;
+  const showNoErrors =
+    (testCase?.validationStatus === ValidationStatus.VALID && isQiCoreV6) ||
+    !isQiCoreV6;
 
   return (
     <>

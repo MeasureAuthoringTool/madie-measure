@@ -4,7 +4,7 @@ import { Select } from "@madie/madie-design-system/dist/react";
 import { TypeComponentProps } from "./TypeComponentProps";
 import AddElementButton from "../../../../../../../common/UIOnlyModelAgnostic/AddElementButton";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
-
+import { getMultipleCardinalityLabel } from "./TypeUtil";
 const BooleanComponent = ({
   canEdit,
   fieldRequired,
