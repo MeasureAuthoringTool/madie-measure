@@ -3977,6 +3977,71 @@ describe("EditTestCase component", () => {
       expect(runButton).toBeDisabled();
     });
 
+    it("displays existing validation errors when test case is executed irrespective of execution config setting", async () => {
+      const validationOutcome = {
+        code: 200,
+        message: null,
+        successful: false,
+        outcomeResponse: {
+          resourceType: "OperationOutcome",
+          issue: [
+            {
+              severity: "error",
+              code: "processing",
+              diagnostics: "Major issue on line 1!",
+            },
+          ],
+        },
+      };
+      mockedAxios.get.mockClear().mockImplementation((args) => {
+        if (args && args.endsWith("series")) {
+          return Promise.resolve({ data: ["DENOM_Pass", "NUMER_Pass"] });
+        } else if (args && args.endsWith("resources")) {
+          return Promise.resolve({
+            data: [...resourceIdentifiers],
+          });
+        }
+        return Promise.resolve({
+          data: {
+            ...testCaseFixture,
+            createdBy: MEASURE_CREATEDBY,
+            hapiOperationOutcome: validationOutcome,
+          },
+        });
+      });
+      const measure = { ...simpleMeasureFixture, createdBy: MEASURE_CREATEDBY };
+      measure.testCaseConfiguration.executeInvalidTestCases = true;
+      renderWithRouter(
+        [
+          "/measures/623cacebe74613783378c17b/edit/test-cases/623cacffe74613783378c17c",
+        ],
+        "/measures/:measureId/edit/test-cases/:id",
+        measure
+      );
+
+      const editor = screen.getByTestId(
+        "test-case-json-editor"
+      ) as HTMLInputElement;
+      await waitFor(() => expect(editor.value).not.toBe("Loading...")); // wait for load to complete as editor is read-only
+
+      const runButton = await screen.findByRole("button", {
+        name: "Run Test Case",
+      });
+      await waitFor(() => userEvent.click(runButton));
+
+      const sideButton = await screen.findByTestId(
+        "show-json-validation-errors-button"
+      );
+      userEvent.click(sideButton);
+
+      const validationErrorsList = await screen.findByTestId(
+        "json-validation-errors-list"
+      );
+      expect(validationErrorsList).toHaveTextContent(
+        validationOutcome.outcomeResponse.issue[0].diagnostics
+      );
+    });
+
     it("should render calculator button", async () => {
       renderWithRouter(
         ["/measures/m1234/edit/test-cases"],
