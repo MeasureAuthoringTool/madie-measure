@@ -25,6 +25,7 @@ export interface QuantityComponentProps extends TypeComponentProps {
 const QuantityComponent = ({
   canEdit,
   label,
+  name,
   showLabel = true,
   valueFieldLabel = "Value",
   structureDefinition,
@@ -34,6 +35,7 @@ const QuantityComponent = ({
   showDeleteButton = false,
   handleDeleteElement,
 }: QuantityComponentProps) => {
+  const testIdBase = name && name.includes("[") ? name : label;
   const formik = useFormikContext();
 
   const updateQuantityCode = (code: string, unit: string, system: string) => {
@@ -165,8 +167,8 @@ const QuantityComponent = ({
             <Tooltip title="Delete" placement="top" arrow>
               <IconButton
                 onClick={handleDeleteElement}
-                data-testid={`delete-button-${label}`}
-                aria-label={`delete ${label}`}
+                data-testid={`delete-button-${testIdBase}`}
+                aria-label={`delete ${testIdBase}`}
                 size="small"
               >
                 <DeleteOutlineIcon fontSize="small" />

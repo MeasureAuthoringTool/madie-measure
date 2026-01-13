@@ -18,6 +18,7 @@ const CodesComponent = ({
   value,
   onChange,
   resource,
+  name,
   showAddAttributeButton,
   addTitle,
   handleAddElement,
@@ -29,8 +30,10 @@ const CodesComponent = ({
   const terminologyService = useRef(useTerminologyServiceApi());
   const [codeValue, setCodeValue] = useState(value);
 
-  // Replace spaces with underscores to ensure a valid HTML id/data-testid,
-  const sanitizedId = label.replace(/\s+/g, "_");
+  // Use hybrid test ID: prefer complete path from name when in array mode
+  const testIdBase = name && name.includes("[") ? name : label;
+  // Replace spaces with underscores to ensure a valid HTML id/data-testid
+  const sanitizedId = testIdBase.replace(/\s+/g, "_");
 
   const getAndSetCodeValueFromResource = () => {
     // ["Patient", "extension[2]", "value[x]"]
@@ -180,8 +183,8 @@ const CodesComponent = ({
           <Tooltip title="Delete" placement="top" arrow>
             <IconButton
               onClick={handleDeleteElement}
-              data-testid={`delete-button-${label}`}
-              aria-label={`delete ${label}`}
+              data-testid={`delete-button-${sanitizedId}`}
+              aria-label={`delete ${sanitizedId}`}
               size="small"
             >
               <DeleteOutlineIcon fontSize="small" />

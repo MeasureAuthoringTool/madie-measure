@@ -105,7 +105,9 @@ const DateTimeComponent = ({
   addTitle,
   showDeleteButton = false,
   handleDeleteElement,
+  name,
 }: TypeComponentProps) => {
+  const testIdBase = name || label; // Always use name (complete path) if available
   const [format, setFormat] = useState<string>(null);
   const [date, setDate] = useState<any>(null); // dayjs obj
   /*
@@ -157,13 +159,13 @@ const DateTimeComponent = ({
               <Select
                 style={{ height: "38.125px", marginBottom: "2px" }}
                 required={fieldRequired}
-                id={`date-time-format-selector-${label}`}
+                id={`date-time-format-selector-${testIdBase}`}
                 label="Date Precision Level"
                 inputProps={{
-                  "data-testid": `date-time-format-selector-input-field-${label}`,
-                  "aria-describedby": `date-time-format-selector-input-field-helper-text-${label}`,
+                  "data-testid": `date-time-format-selector-input-field-${testIdBase}`,
+                  "aria-describedby": `date-time-format-selector-input-field-helper-text-${testIdBase}`,
                 }}
-                data-testid={`date-time-format-selector-field-${label}`}
+                data-testid={`date-time-format-selector-field-${testIdBase}`}
                 readOnly={!canEdit}
                 SelectDisplayProps={{
                   "aria-required": "true",
@@ -212,7 +214,7 @@ const DateTimeComponent = ({
                 disabled={!canEdit || !format || format === "Invalid Format"}
                 format={format}
                 placeholder={format ? formatOptionRenderMap[format] : ""}
-                id={`${format || "year"}-field-${label}`}
+                id={`${format || "year"}-field-${testIdBase}`}
                 onChange={(newDate) => {
                   if (!newDate) return;
                   const dateUTC = dayjs.utc(newDate);
@@ -236,7 +238,7 @@ const DateTimeComponent = ({
                   disabled={!canEdit || !date}
                   required={fieldRequired}
                   label="Time Field"
-                  id={`time-field-${label}`}
+                  id={`time-field-${testIdBase}`}
                   seconds
                   views={["hours", "minutes", "seconds"]}
                   data-testid="time-input"
@@ -262,8 +264,8 @@ const DateTimeComponent = ({
         <Tooltip title="Delete" placement="top" arrow>
           <IconButton
             onClick={handleDeleteElement}
-            data-testid={`delete-button-${label}`}
-            aria-label={`delete ${label}`}
+            data-testid={`delete-button-${testIdBase}`}
+            aria-label={`delete ${testIdBase}`}
             size="small"
           >
             <DeleteOutlineIcon fontSize="small" />

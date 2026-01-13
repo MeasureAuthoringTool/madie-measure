@@ -46,6 +46,55 @@ export function modifySliceNameForReadability(sliceName) {
   return sliceSplit.join(" ");
 }
 
+/**
+ * Formats an attribute path into a human-friendly label for display.
+ * Strips resource names, path segments, and formats the terminal attribute to Title Case.
+ * For paths ending with array indices, formats the segment before the index and appends the index.
+ *
+ * @param {string} path - The full FHIR path (e.g., "ClaimResponse.item[0].itemSequence")
+ * @returns {string} - Human-friendly label (e.g., "Item Sequence")
+ *
+ * Examples:
+ *   "ClaimResponse.item[0].itemSequence" -> "Item Sequence" (formats final attribute)
+ *   "ClaimResponse.item[0]" -> "Item[0]" (formats segment before array index)
+ *   "ClaimResponse.itemSequence[0]" -> "Item Sequence[0]" (handles camelCase with index)
+ *   "Patient.name.family" -> "Family"
+ *   "Claim.procedure.procedureCodeableConcept" -> "Procedure Codeable Concept"
+ *   "Encounter.period.start" -> "Start"
+ */
+export function formatAttributeLabel(path: string): string {
+  if (!path) {
+    return path;
+  }
+
+  // Check if path ends with array index like "ClaimResponse.item[0]"
+  const arrayIndexMatch = path.match(/\.([^\.\[]+)(\[\d+\])$/);
+
+  if (arrayIndexMatch) {
+    // Extract the segment before the array index and the index itself
+    const segment = arrayIndexMatch[1];
+    const index = arrayIndexMatch[2];
+    // Format the segment and append the array index
+    return _.startCase(segment) + index;
+  }
+
+  // Check if path has array index followed by property like "Patient.photo[0].data"
+  const arrayWithPropertyMatch = path.match(/\[\d+\]\.([^\.]+)$/);
+
+  if (arrayWithPropertyMatch) {
+    // Extract just the property name after the array index
+    const propertyName = arrayWithPropertyMatch[1];
+    // Format just the property name
+    return _.startCase(propertyName);
+  }
+
+  // Extract the last segment after the final dot
+  const lastSegment = path.split(".").pop() || path;
+
+  // Convert to Title Case with spaces (handles camelCase and choice types)
+  return _.startCase(lastSegment);
+}
+
 export function getElementName(
   element: ElementDefinition,
   basePath: string,
@@ -78,9 +127,10 @@ export function getElementName(
       basePath
     )}${_.upperFirst(element.type[0].code)}`;
   }
-  const result = `${requiredIndicator}${stripAllIndexes(
-    element.id.substring(basePath.length + 1)
-  )}${index}`;
+  const pathAfterBase = element.id.substring(basePath.length + 1);
+  const strippedPath = stripAllIndexes(pathAfterBase);
+  const formattedLabel = formatAttributeLabel(strippedPath);
+  const result = `${requiredIndicator}${formattedLabel}${index}`;
   return result;
 }
 

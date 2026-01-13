@@ -179,11 +179,13 @@ describe("TimingComponent", () => {
     );
     // Event
     const formatSelector = screen.getByTestId(
-      "date-time-format-selector-input-field-Event[0]"
+      "date-time-format-selector-input-field-MedicationRequest.dosageInstruction[0].timing.event[0]"
     );
     fireEvent.change(formatSelector, { target: { value: "YYYY" } });
 
-    const input = screen.getByTestId(`${YEAR_FORMAT}-field-Event[0]-input`);
+    const input = screen.getByTestId(
+      `${YEAR_FORMAT}-field-MedicationRequest.dosageInstruction[0].timing.event[0]-input`
+    );
     userEvent.type(input, "2022");
     expect(setFieldValueMock).toHaveBeenLastCalledWith(
       "MedicationRequest.dosageInstruction[0].timing.event[0]",
@@ -247,7 +249,9 @@ describe("TimingComponent", () => {
     });
 
     // Repeat.Count
-    const countInput = screen.getByTestId("integer-field-input-Repeat.Count");
+    const countInput = screen.getByTestId(
+      "integer-field-input-MedicationRequest.dosageInstruction[0].timing.repeat.count"
+    );
     userEvent.type(countInput, "5");
     expect(setFieldValueMock).toHaveBeenLastCalledWith(
       "MedicationRequest.dosageInstruction[0].timing.repeat.count",
@@ -256,7 +260,7 @@ describe("TimingComponent", () => {
 
     // Repeat.CountMax
     const countMaxInput = screen.getByTestId(
-      "integer-field-input-Repeat.CountMax"
+      "integer-field-input-MedicationRequest.dosageInstruction[0].timing.repeat.countMax"
     );
     userEvent.type(countMaxInput, "8");
     expect(setFieldValueMock).toHaveBeenLastCalledWith(
@@ -301,7 +305,7 @@ describe("TimingComponent", () => {
 
     // Repeat.Frequency
     const frequencyInput = screen.getByTestId(
-      "integer-field-input-Repeat.Frequency"
+      "integer-field-input-MedicationRequest.dosageInstruction[0].timing.repeat.frequency"
     );
     userEvent.type(frequencyInput, "3");
     expect(setFieldValueMock).toHaveBeenLastCalledWith(
@@ -311,7 +315,7 @@ describe("TimingComponent", () => {
 
     // Repeat.FrequencyMax
     const frequencyMaxInput = screen.getByTestId(
-      "integer-field-input-Repeat.FrequencyMax"
+      "integer-field-input-MedicationRequest.dosageInstruction[0].timing.repeat.frequencyMax"
     );
     userEvent.type(frequencyMaxInput, "6");
     expect(setFieldValueMock).toHaveBeenLastCalledWith(
@@ -386,7 +390,9 @@ describe("TimingComponent", () => {
     });
 
     // Repeat.Offset
-    const offsetInput = screen.getByTestId("integer-field-input-Repeat.Offset");
+    const offsetInput = screen.getByTestId(
+      "integer-field-input-MedicationRequest.dosageInstruction[0].timing.repeat.offset"
+    );
     userEvent.type(offsetInput, "5");
     expect(setFieldValueMock).toHaveBeenLastCalledWith(
       "MedicationRequest.dosageInstruction[0].timing.repeat.offset",

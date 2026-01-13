@@ -32,23 +32,27 @@ const IntegerComponent = ({
   handleAddElement,
   showDeleteButton = false,
   handleDeleteElement,
+  value,
+  name,
   ...props
 }: IntegerComponentProps) => {
-  const { value } = props;
+  // Use name for test IDs in array scenarios (when it contains '['), otherwise use formatted label
+  const testIdBase = name && name.includes("[") ? name : label;
+
   return (
     <div className="element-editor-add-row">
       <TextField
         required={fieldRequired}
         readOnly={!canEdit}
-        id={`integer-field-${label}`}
+        id={`integer-field-${testIdBase}`}
         label={label}
         inputProps={{
-          "data-testid": `integer-field-input-${label}`,
-          "aria-describedby": `integer-field-input-helper-text-${label}`,
+          "data-testid": `integer-field-input-${testIdBase}`,
+          "aria-describedby": `integer-field-input-helper-text-${testIdBase}`,
           required: fieldRequired,
           "aria-required": fieldRequired,
         }}
-        data-testid={`integer-field-${label}`}
+        data-testid={`integer-field-${testIdBase}`}
         size="small"
         fullWidth
         onKeyPress={(e) => {
@@ -81,8 +85,8 @@ const IntegerComponent = ({
         <Tooltip title="Delete" placement="top" arrow>
           <IconButton
             onClick={handleDeleteElement}
-            data-testid={`delete-button-${label}`}
-            aria-label={`delete ${label}`}
+            data-testid={`delete-button-${testIdBase}`}
+            aria-label={`delete ${testIdBase}`}
             size="small"
           >
             <DeleteOutlineIcon fontSize="small" />

@@ -24,6 +24,7 @@ import {
   getNestedProperty,
   getIndexFromPath,
   getLastPart,
+  formatAttributeLabel,
 } from "../../../../../../../api/fhirDefinitionServiceUtilities";
 import CodingComponent from "./types/CodingComponent";
 import { useRequiredFields } from "./RequiredFieldsContext";
@@ -182,7 +183,7 @@ const TypeEditor = ({
                 <StringComponent
                   key={index}
                   stringOnly={label?.split(".").pop() !== "id"}
-                  label={fieldLabel}
+                  label={formatAttributeLabel(fieldLabel)}
                   canEdit={canEdit}
                   helperText={formikErrorHandler(fieldLabel, formik)}
                   error={getNestedProperty(formik.errors, fieldLabel)}
@@ -208,7 +209,7 @@ const TypeEditor = ({
           <Box sx={{ display: "flex", flexDirection: "column", width: "100%" }}>
             <StringComponent
               stringOnly={false}
-              label={label}
+              label={formatAttributeLabel(label)}
               canEdit={canEdit}
               helperText={formikErrorHandler(label, formik)}
               error={getNestedProperty(formik.errors, label)}
@@ -228,7 +229,7 @@ const TypeEditor = ({
           <Box sx={{ display: "flex", flexDirection: "column", width: "100%" }}>
             <StringComponent
               stringOnly={false}
-              label={label}
+              label={formatAttributeLabel(label)}
               canEdit={canEdit}
               helperText={formikErrorHandler(label, formik)}
               error={getNestedProperty(formik.errors, label)}
@@ -255,7 +256,7 @@ const TypeEditor = ({
                 <QuantityComponent
                   key={index}
                   canEdit={canEdit}
-                  label={fieldLabel}
+                  label={formatAttributeLabel(fieldLabel)}
                   structureDefinition={structureDefinition}
                   fieldRequired={required}
                   showAddAttributeButton={
@@ -276,7 +277,7 @@ const TypeEditor = ({
       case "Period":
         return (
           <PeriodDateTimeComponent
-            label={label}
+            label={formatAttributeLabel(label)}
             canEdit={canEdit}
             helperText={formikErrorHandler(label, formik)}
             error={getNestedProperty(formik.errors, label)}
@@ -304,7 +305,7 @@ const TypeEditor = ({
               return (
                 <DateTimeComponent
                   key={index}
-                  label={fieldLabel}
+                  label={formatAttributeLabel(fieldLabel)}
                   canEdit={canEdit}
                   helperText={formikErrorHandler(fieldLabel, formik)}
                   error={getNestedProperty(formik.errors, fieldLabel)}
@@ -350,7 +351,7 @@ const TypeEditor = ({
                 <TimeComponent
                   canEdit={canEdit}
                   fieldRequired={required}
-                  label={fieldLabel}
+                  label={formatAttributeLabel(fieldLabel)}
                   helperText={formikErrorHandler(fieldLabel, formik)}
                   error={getNestedProperty(formik.errors, fieldLabel)}
                   showAddAttributeButton={
@@ -374,7 +375,7 @@ const TypeEditor = ({
         return (
           <InstantComponent
             name={label}
-            label={label}
+            label={formatAttributeLabel(label)}
             required={required}
             helperText={formikErrorHandler(label, formik)}
             error={getNestedProperty(formik.errors, label)}
@@ -413,7 +414,7 @@ const TypeEditor = ({
                   structureDefinition={undefined}
                   canEdit={canEdit}
                   fieldRequired={required}
-                  label={fieldLabel}
+                  label={formatAttributeLabel(fieldLabel)}
                   helperText={formikErrorHandler(fieldLabel, formik)}
                   error={getNestedProperty(formik.errors, fieldLabel)}
                   integerType={
@@ -440,7 +441,7 @@ const TypeEditor = ({
       case "Identifier":
         return (
           <IdentifierComponent
-            label={label}
+            label={formatAttributeLabel(label)}
             handleAddElement={handleAddElement}
             canEdit={canEdit}
             resource={resource}
@@ -469,7 +470,7 @@ const TypeEditor = ({
                   structureDefinition={undefined}
                   canEdit={canEdit}
                   fieldRequired={required}
-                  label={fieldLabel}
+                  label={formatAttributeLabel(fieldLabel)}
                   helperText={formikErrorHandler(fieldLabel, formik)}
                   error={getNestedProperty(formik.errors, fieldLabel)}
                   showAddAttributeButton={
@@ -507,7 +508,7 @@ const TypeEditor = ({
                   canEdit={canEdit}
                   structureDefinition={structureDefinition}
                   fieldRequired={required}
-                  label={fieldLabel}
+                  label={formatAttributeLabel(fieldLabel)}
                   helperText={formikErrorHandler(fieldLabel, formik)}
                   error={getNestedProperty(formik.errors, fieldLabel)}
                   showAddAttributeButton={
@@ -550,7 +551,7 @@ const TypeEditor = ({
                   canEdit={canEdit}
                   structureDefinition={structureDefinition}
                   fieldRequired={required}
-                  label={fieldLabel}
+                  label={formatAttributeLabel(fieldLabel)}
                   helperText={formikErrorHandler(fieldLabel, formik)}
                   error={getNestedProperty(formik.errors, fieldLabel)}
                   showAddAttributeButton={
@@ -572,7 +573,7 @@ const TypeEditor = ({
       case "date":
         return (
           <DateComponent
-            label={label}
+            label={formatAttributeLabel(label)}
             canEdit={canEdit}
             helperText={formikErrorHandler(label, formik)}
             error={getNestedProperty(formik.errors, label)}
@@ -610,7 +611,7 @@ const TypeEditor = ({
                     canEdit={canEdit}
                     structureDefinition={structureDefinition}
                     fieldRequired={required}
-                    label={fieldLabel}
+                    label={formatAttributeLabel(fieldLabel)}
                     helperText={formikErrorHandler(fieldLabel, formik)}
                     error={getNestedProperty(formik.errors, fieldLabel)}
                     showAddAttributeButton={
@@ -641,7 +642,7 @@ const TypeEditor = ({
         return (
           <RangeComponent
             canEdit={canEdit}
-            label={label}
+            label={formatAttributeLabel(label)}
             structureDefinition={structureDefinition}
             fieldRequired={false}
           />
@@ -650,7 +651,7 @@ const TypeEditor = ({
         return (
           <CodingComponent
             handleAddElement={handleAddElement}
-            label={label}
+            label={formatAttributeLabel(label)}
             canEdit={canEdit}
             structureDefinition={structureDefinition}
             showAddAttributeButton={showAddAttributeButton}
@@ -678,7 +679,7 @@ const TypeEditor = ({
                   key={index}
                   canEdit={canEdit}
                   structureDefinition={structureDefinition}
-                  label={fieldLabel}
+                  label={formatAttributeLabel(fieldLabel)}
                   showAddAttributeButton={
                     showAddAttributeButton &&
                     (!isArrayMode || index === lastIndex)
@@ -694,7 +695,7 @@ const TypeEditor = ({
       case "Money":
         return (
           <MoneyComponent
-            label={label}
+            label={formatAttributeLabel(label)}
             canEdit={canEdit}
             resource={resource}
             fieldRequired={false}
@@ -705,7 +706,7 @@ const TypeEditor = ({
           <TimingComponent
             resource={resource}
             structureDefinition={structureDefinition}
-            label={label}
+            label={formatAttributeLabel(label)}
             canEdit={canEdit}
             fieldRequired={false}
           />
@@ -714,7 +715,7 @@ const TypeEditor = ({
         return (
           <ReferenceComponent
             structureDefinition={structureDefinition}
-            label={label}
+            label={formatAttributeLabel(label)}
             canEdit={canEdit}
             required={required}
             helperText={formikErrorHandler(label, formik)}
@@ -865,7 +866,7 @@ const TypeEditor = ({
             <ExtensionComponent
               showAddAttributeButton={showAddAttributeButton}
               addTitle={addTitle}
-              label={label}
+              label={formatAttributeLabel(label)}
               canEdit={canEdit}
               {...formik.getFieldProps(label)}
               onChange={() => {}}
@@ -891,7 +892,7 @@ const TypeEditor = ({
     if (isPeriodParent && hasStart && hasEnd) {
       return (
         <PeriodDateTimeComponent
-          label={label}
+          label={formatAttributeLabel(label)}
           canEdit={canEdit}
           helperText={formikErrorHandler(label, formik)}
           error={getNestedProperty(formik.errors, label)}
@@ -961,7 +962,7 @@ const TypeEditor = ({
           } else if (!isComponentDataType(childDef?.type?.[0]?.code)) {
             return (
               <ElementSection
-                title={childDef.id}
+                title={formatAttributeLabel(childDef.id)}
                 startOpen={false}
                 children={
                   <Box

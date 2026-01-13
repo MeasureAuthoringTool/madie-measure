@@ -23,8 +23,11 @@ const StringComponent = ({
   handleAddElement,
   showDeleteButton = false,
   handleDeleteElement,
+  name,
   ...props
 }: TypeComponentProps) => {
+  const testIdBase = name && name.includes("[") ? name : label;
+
   function isRootLabel(label) {
     const parts = label.split(".");
     return parts.length === 2 && parts[1] === "id";
@@ -35,18 +38,18 @@ const StringComponent = ({
       <TextField
         required={fieldRequired}
         readOnly={!canEdit}
-        id={`string-field-${label}`}
+        id={`string-field-${testIdBase}`}
         label={label}
         helperText={helperText}
         labelColor="#1976d2"
         inputProps={{
-          "data-testid": `string-field-input-${label}`,
-          "aria-describedby": `string-field-input-helper-text-${label}`,
+          "data-testid": `string-field-input-${testIdBase}`,
+          "aria-describedby": `string-field-input-helper-text-${testIdBase}`,
           required: fieldRequired,
           "aria-required": fieldRequired,
           readOnly: isRootLabel(label),
         }}
-        data-testid={`string-field-${label}`}
+        data-testid={`string-field-${testIdBase}`}
         size="small"
         fullWidth
         onKeyPress={
@@ -66,8 +69,8 @@ const StringComponent = ({
         <Tooltip title="Delete" placement="top" arrow>
           <IconButton
             onClick={handleDeleteElement}
-            data-testid={`delete-button-${label}`}
-            aria-label={`delete ${label}`}
+            data-testid={`delete-button-${testIdBase}`}
+            aria-label={`delete ${testIdBase}`}
             size="small"
           >
             <DeleteOutlineIcon fontSize="small" />

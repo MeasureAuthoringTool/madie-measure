@@ -15,12 +15,14 @@ const TimeComponent = ({
   value,
   onChange,
   label = "Time",
+  name,
   showAddAttributeButton,
   addTitle,
   handleAddElement,
   showDeleteButton = false,
   handleDeleteElement,
 }: TypeComponentProps) => {
+  const testIdBase = name && name.includes("[") ? name : label;
   const TIME_FORMAT = "HH:mm:ss";
   const [time, setTime] = React.useState(
     value ? dayjs(value, TIME_FORMAT) : ""
@@ -32,11 +34,11 @@ const TimeComponent = ({
         <TimeField
           required={fieldRequired}
           disabled={!canEdit}
-          id={`time-field-${label}`}
+          id={`time-field-${testIdBase}`}
           label={label}
           seconds
           views={["hours", "minutes", "seconds"]}
-          data-testid={`time-field-${label}`}
+          data-testid={`time-field-${testIdBase}`}
           handleTimeChange={(time) => {
             const formatted = time?.format(TIME_FORMAT);
             setTime(time);
@@ -49,8 +51,8 @@ const TimeComponent = ({
         <Tooltip title="Delete" placement="top" arrow>
           <IconButton
             onClick={handleDeleteElement}
-            data-testid={`delete-button-${label}`}
-            aria-label={`delete ${label}`}
+            data-testid={`delete-button-${testIdBase}`}
+            aria-label={`delete ${testIdBase}`}
             size="small"
           >
             <DeleteOutlineIcon fontSize="small" />

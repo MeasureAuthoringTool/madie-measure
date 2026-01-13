@@ -16,22 +16,24 @@ const BooleanComponent = ({
   handleAddElement,
   showDeleteButton = false,
   handleDeleteElement,
+  name,
   ...props
 }: TypeComponentProps) => {
+  const testIdBase = name && name.includes("[") ? name : label;
   const { value } = props;
   const booleanOptions = [
     <MuiMenuItem
-      key={`boolean-True-${label}`}
+      key={`boolean-True-${testIdBase}`}
       value={`true`}
-      data-testid={`boolean-True-${label}`}
+      data-testid={`boolean-True-${testIdBase}`}
       defaultValue={`true`}
     >
       true
     </MuiMenuItem>,
     <MuiMenuItem
-      key={`boolean-False-${label}`}
+      key={`boolean-False-${testIdBase}`}
       value={`false`}
-      data-testid={`boolean-False-${label}`}
+      data-testid={`boolean-False-${testIdBase}`}
     >
       false
     </MuiMenuItem>,
@@ -39,13 +41,13 @@ const BooleanComponent = ({
   return (
     <div className="element-editor-add-row">
       <Select
-        id={`boolean-selector-${label}`}
+        id={`boolean-selector-${testIdBase}`}
         label={label}
         inputProps={{
-          "data-testid": `boolean-input-field-${label}`,
-          "aria-describedby": `boolean-input-field-helper-text-${label}`,
+          "data-testid": `boolean-input-field-${testIdBase}`,
+          "aria-describedby": `boolean-input-field-helper-text-${testIdBase}`,
         }}
-        data-testid={`boolean-field-${label}`}
+        data-testid={`boolean-field-${testIdBase}`}
         readOnly={!canEdit}
         SelectDisplayProps={{
           "aria-required": "true",
@@ -60,8 +62,8 @@ const BooleanComponent = ({
         <Tooltip title="Delete" placement="top" arrow>
           <IconButton
             onClick={handleDeleteElement}
-            data-testid={`delete-button-${label}`}
-            aria-label={`delete ${label}`}
+            data-testid={`delete-button-${testIdBase}`}
+            aria-label={`delete ${testIdBase}`}
             size="small"
           >
             <DeleteOutlineIcon fontSize="small" />
