@@ -51,11 +51,11 @@ const CodingComponent = ({
   useEffect(() => {
     if (value && allValueSets && selectedValueSet?.name !== "Custom Code") {
       const valueSet = allValueSets.find(
-        (vs) => vs.url === value?.extension?.[0]?.valueUrl
+        (vs) => vs.url === value?.extension?.[0]?.valueUri
       );
       if (valueSet?.name !== selectedValueSet?.name) {
         setSelectedValueSet(
-          allValueSets.find((vs) => vs.url === value?.extension?.[0]?.valueUrl)
+          allValueSets.find((vs) => vs.url === value?.extension?.[0]?.valueUri)
         );
       }
     }
