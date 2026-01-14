@@ -1,5 +1,5 @@
 import * as React from "react";
-import { render, screen } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import ActionCenter from "./ActionCenter";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router";
@@ -376,6 +376,64 @@ describe("ActionCenter Component", () => {
       expect(exportExcel).toBeInTheDocument();
       userEvent.click(exportExcel);
       expect(onExportExcel).toHaveBeenCalled();
+    });
+
+    it("should close export menu when Tab key is pressed", async () => {
+      const selectedTestCase = [
+        { id: "1", validResource: true, title: "Test Case 1" },
+      ];
+      render(
+        <MemoryRouter>
+          <ActionCenter
+            selectedTestCases={selectedTestCase}
+            canEdit={true}
+            isQDM={true}
+            measureId="1"
+            executeAllTestCases={true}
+          />
+        </MemoryRouter>
+      );
+
+      const exportActionBtn = screen.getByTestId("export-action-btn");
+      userEvent.click(exportActionBtn);
+
+      const exportMenu = await screen.findByRole("menu");
+      expect(exportMenu).toBeInTheDocument();
+
+      fireEvent.keyDown(exportMenu, { key: "Tab" });
+
+      await waitFor(() => {
+        expect(screen.queryByRole("menu")).not.toBeInTheDocument();
+      });
+    });
+
+    it("should close export menu when Escape key is pressed", async () => {
+      const selectedTestCase = [
+        { id: "1", validResource: true, title: "Test Case 1" },
+      ];
+      render(
+        <MemoryRouter>
+          <ActionCenter
+            selectedTestCases={selectedTestCase}
+            canEdit={true}
+            isQDM={true}
+            measureId="1"
+            executeAllTestCases={true}
+          />
+        </MemoryRouter>
+      );
+
+      const exportActionBtn = screen.getByTestId("export-action-btn");
+      userEvent.click(exportActionBtn);
+
+      const exportMenu = await screen.findByRole("menu");
+      expect(exportMenu).toBeInTheDocument();
+
+      fireEvent.keyDown(exportMenu, { key: "Escape" });
+
+      await waitFor(() => {
+        expect(screen.queryByRole("menu")).not.toBeInTheDocument();
+      });
     });
 
     it("should disable export button if execution status is NA for QDM", async () => {
