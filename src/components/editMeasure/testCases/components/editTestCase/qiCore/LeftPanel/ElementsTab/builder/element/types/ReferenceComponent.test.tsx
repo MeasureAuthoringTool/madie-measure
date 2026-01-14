@@ -1,5 +1,5 @@
 import * as React from "react";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import ReferenceComponent, {
   getReferenceComponentLabel,
   getHighestPriorityResourceList,
@@ -63,7 +63,7 @@ describe("ReferenceComponent", () => {
     ],
   };
 
-  it("renders reference type dropdown with correct options", () => {
+  it("renders reference type dropdown with correct options", async () => {
     (useQiCoreResource as jest.Mock).mockReturnValue({
       state: { bundle: { entry: [] } },
     });
@@ -85,7 +85,7 @@ describe("ReferenceComponent", () => {
     );
     const referenceTypeSelect = screen.getByLabelText("Reference Type");
     expect(referenceTypeSelect).toBeInTheDocument();
-    fireEvent.mouseDown(referenceTypeSelect);
+    await userEvent.click(referenceTypeSelect);
     expect(screen.getByTestId("Encounter-option")).toBeInTheDocument();
     expect(
       screen.getByTestId("Encounter (US Core)-option")
@@ -158,13 +158,13 @@ describe("ReferenceComponent", () => {
       </ResourceContext.Provider>
     );
 
-    fireEvent.mouseDown(screen.getByLabelText("Reference Type"));
-    userEvent.click(await screen.findByText("Encounter"));
+    await userEvent.click(screen.getByLabelText("Reference Type"));
+    await userEvent.click(await screen.findByText("Encounter"));
     // Wait for the second dropdown to be present
     const referenceSelect = await screen.findByTestId("reference-select-0");
     const combo = screen.getByRole("combobox", { name: /specify encounter/i });
-    fireEvent.mouseDown(combo);
-    userEvent.click(referenceSelect);
+    await userEvent.click(combo);
+    await userEvent.click(referenceSelect);
 
     const options = await screen.findAllByRole("option");
     expect(
@@ -240,13 +240,13 @@ describe("ReferenceComponent", () => {
       </ResourceContext.Provider>
     );
 
-    fireEvent.mouseDown(screen.getByLabelText("Reference Type"));
-    userEvent.click(screen.getByTestId("Encounter (US Core)-option"));
+    await userEvent.click(screen.getByLabelText("Reference Type"));
+    await userEvent.click(screen.getByTestId("Encounter (US Core)-option"));
 
     // Wait for the second dropdown to be present
     const combo = screen.getByRole("combobox", { name: /specify encounter/i });
-    fireEvent.mouseDown(combo);
-    userEvent.click(await screen.findByTestId("reference-select-0"));
+    await userEvent.click(combo);
+    await userEvent.click(await screen.findByTestId("reference-select-0"));
 
     const options = await screen.findAllByRole("option");
     expect(options.length).toBe(2);
@@ -321,13 +321,13 @@ describe("ReferenceComponent", () => {
       </ResourceContext.Provider>
     );
 
-    fireEvent.mouseDown(screen.getByLabelText("Reference Type"));
-    userEvent.click(screen.getByTestId("Encounter (QICore)-option"));
+    await userEvent.click(screen.getByLabelText("Reference Type"));
+    await userEvent.click(screen.getByTestId("Encounter (QICore)-option"));
 
     // Wait for the second dropdown to be present
     const combo = screen.getByRole("combobox", { name: /specify encounter/i });
-    fireEvent.mouseDown(combo);
-    userEvent.click(await screen.findByTestId("reference-select-0"));
+    await userEvent.click(combo);
+    await userEvent.click(await screen.findByTestId("reference-select-0"));
 
     const options = await screen.findAllByRole("option");
     expect(options.length).toBe(1);
@@ -379,13 +379,13 @@ describe("ReferenceComponent", () => {
       </ResourceContext.Provider>
     );
 
-    fireEvent.mouseDown(screen.getByLabelText("Reference Type"));
-    userEvent.click(screen.getByTestId("Encounter (US Core)-option"));
+    await userEvent.click(screen.getByLabelText("Reference Type"));
+    await userEvent.click(screen.getByTestId("Encounter (US Core)-option"));
 
     // Wait for the second dropdown to be present
     const combo = screen.getByRole("combobox", { name: /specify encounter/i });
-    fireEvent.mouseDown(combo);
-    userEvent.click(await screen.findByTestId("reference-select-0"));
+    await userEvent.click(combo);
+    await userEvent.click(await screen.findByTestId("reference-select-0"));
 
     const options = await screen.findAllByRole("option");
     expect(options.length).toBe(1);
@@ -454,7 +454,7 @@ describe("ReferenceComponent", () => {
   });
 
   describe("Multiple Cardinality Support", () => {
-    it("displays add button when showAddAttributeButton is true and canEdit is true", () => {
+    it("displays add button when showAddAttributeButton is true and canEdit is true", async () => {
       (useQiCoreResource as jest.Mock).mockReturnValue({
         state: { bundle: { entry: [] } },
       });
@@ -482,7 +482,7 @@ describe("ReferenceComponent", () => {
       // Click the button element (not the container)
       const addButton =
         addButtons.find((el) => el.tagName === "BUTTON") || addButtons[0];
-      fireEvent.click(addButton);
+      await userEvent.click(addButton);
       expect(mockHandleAddElement).toHaveBeenCalled();
     });
 
@@ -512,7 +512,7 @@ describe("ReferenceComponent", () => {
       ).not.toBeInTheDocument();
     });
 
-    it("displays delete button when showDeleteButton is true and canEdit is true", () => {
+    it("displays delete button when showDeleteButton is true and canEdit is true", async () => {
       (useQiCoreResource as jest.Mock).mockReturnValue({
         state: { bundle: { entry: [] } },
       });
@@ -540,7 +540,7 @@ describe("ReferenceComponent", () => {
         "delete-button-ClaimResponse.addItem[0].provider[1]"
       );
       expect(deleteButton).toBeInTheDocument();
-      fireEvent.click(deleteButton);
+      await userEvent.click(deleteButton);
       expect(mockHandleDeleteElement).toHaveBeenCalled();
     });
 
