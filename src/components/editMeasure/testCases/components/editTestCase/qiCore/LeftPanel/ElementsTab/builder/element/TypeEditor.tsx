@@ -718,35 +718,25 @@ const TypeEditor = ({
         return (
           <>
             {(isArrayMode ? values : [null]).map((el, index) => {
-              let fieldLabel;
-              if (isArrayMode && !appendedZeroAlready) {
-                fieldLabel = `${label}[${index}]`;
-              } else if (isArrayMode && appendedZeroAlready) {
-                fieldLabel = `${label.slice(0, label.length - 3)}[${index}]`;
-              } else {
-                fieldLabel = label;
-              }
               return (
                 <ReferenceComponent
                   key={index}
                   index={index}
                   structureDefinition={structureDefinition}
-                  label={fieldLabel}
+                  label={label}
                   canEdit={canEdit}
                   required={required}
-                  helperText={formikErrorHandler(fieldLabel, formik)}
-                  error={getNestedProperty(formik.errors, fieldLabel)}
+                  helperText={formikErrorHandler(label, formik)}
+                  error={getNestedProperty(formik.errors, label)}
                   showAddAttributeButton={
                     showAddAttributeButton &&
                     (!isArrayMode || index === lastIndex)
                   }
                   showDeleteButton={isArrayMode && index > 0}
-                  handleDeleteElement={() =>
-                    handleDeleteElement(index, fieldLabel)
-                  }
+                  handleDeleteElement={() => handleDeleteElement(index, label)}
                   addTitle={addTitle}
                   handleAddElement={handleAddElement}
-                  {...formik.getFieldProps(fieldLabel)}
+                  {...formik.getFieldProps(label)}
                 />
               );
             })}
