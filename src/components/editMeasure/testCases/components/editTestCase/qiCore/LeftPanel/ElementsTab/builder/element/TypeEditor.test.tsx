@@ -1611,27 +1611,51 @@ describe("TypeEditor Component", () => {
     });
   });
 
-  test("Should render CodeableConcept component", async () => {
+  test("Should render CodeableConcept component and handle onChange", async () => {
     const onChange = jest.fn();
     const setFieldTouched = jest.fn();
     const mockFormik = {
       setFieldTouched: setFieldTouched,
       setFieldValue: onChange,
       getFieldProps: () => ({
-        label: "Observation.code",
-        name: "Observation.code",
+        label: "Encounter.type[0]",
+        name: "Encounter.type[0]",
         value: undefined,
         setFieldTouched: jest.fn(),
         setFieldValue: jest.fn(),
       }),
     } as unknown as FormikProps<any>;
 
+    const valueSets = [
+      [
+        {
+          resourceType: "ValueSet",
+          id: "2.16.840.1.113762.1.4.1111.143",
+          url: "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1111.143",
+          name: "ObservationServices",
+          title: "Observation Services",
+          status: "active",
+          expansion: {
+            identifier: "urn:uuid:8e6b5ea2-6181-4679-8e85-e681aca3b914",
+            contains: [
+              {
+                system: "http://snomed.info/sct",
+                inactive: false,
+                version: "http://snomed.info/sct/731000124108/version/20250901",
+                code: "448951000124107",
+                display: "Admission to observation unit (procedure)",
+              },
+            ],
+          },
+        },
+      ],
+    ];
     render(
       <ExecutionContextProvider
         value={{
           measureState: [null, jest.fn()],
           bundleState: [null, jest.fn()],
-          valueSetsState: [null, jest.fn()],
+          valueSetsState: [valueSets, jest.fn()],
           executionContextReady: true,
           executing: false,
           setExecuting: jest.fn(),
@@ -1640,11 +1664,11 @@ describe("TypeEditor Component", () => {
       >
         <FormikProvider value={mockFormik}>
           <RequiredFieldsProvider
-            requiredFields={{ "Observation.code": true }}
+            requiredFields={{ "Encounter.type[0]": true }}
             formInfo={[
-              "Observation.code",
+              "Encounter.type[0]",
               {
-                id: "Observation.code",
+                id: "Encounter.type[0]",
                 required: true,
                 canBeMultipleCardinality: false,
               },
@@ -1652,10 +1676,10 @@ describe("TypeEditor Component", () => {
           >
             <TypeEditor
               structureDefinition={{
-                id: "Observation.code",
-                path: "Observation.code",
+                id: "Encounter.type[0]",
+                path: "Encounter.type",
                 min: 1,
-                max: "1",
+                max: "*",
                 type: [
                   {
                     code: "CodeableConcept",
@@ -1663,7 +1687,7 @@ describe("TypeEditor Component", () => {
                 ],
               }}
               resource={null}
-              label="Observation.code"
+              label="Encounter.type[0]"
               canEdit={true}
               parentStructureDefinition={null}
             />
@@ -1676,6 +1700,32 @@ describe("TypeEditor Component", () => {
       name: "Value Set / Direct Reference Code",
     });
     expect(valueSetSelector).toHaveTextContent("- Select -");
+    userEvent.click(valueSetSelector);
+    const options = await screen.findAllByRole("option");
+    expect(options).toHaveLength(2); // Including the default "- Select -" option
+
+    userEvent.click(options[0]);
+
+    expect(valueSetSelector).toHaveTextContent("Custom Code");
+
+    const codeSystem = screen.getByTestId("custom-code-system-input");
+    userEvent.type(codeSystem, "http://snomed.info/sct");
+    expect(codeSystem).toHaveValue("http://snomed.info/sct");
+    userEvent.tab();
+    const codeValue = screen.getByTestId("custom-code-input");
+    userEvent.type(codeValue, "448951000124107");
+    expect(codeValue).toHaveValue("448951000124107");
+    userEvent.tab();
+
+    expect(onChange).toHaveBeenLastCalledWith("Encounter.type[0]", {
+      coding: [
+        {
+          code: "448951000124107",
+          display: "448951000124107",
+          system: "http://snomed.info/sct",
+        },
+      ],
+    });
   });
 
   test("Should render CodeableConcept component under multiple cardinality conditions", async () => {

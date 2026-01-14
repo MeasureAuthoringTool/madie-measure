@@ -8,6 +8,7 @@ import HrComparisonPanel from "./panel/HrComparisonPanel";
 import { Allotment } from "allotment";
 import "./CompareVersionsDialog.scss";
 import CqlDiffViewer from "./CqlDiffViewer";
+import MeasureNameDiff from "./MeasureNameDiff";
 
 interface CompareVersionsDialogProps {
   measures: Measure[] | null | undefined;
@@ -71,7 +72,10 @@ const CompareVersionsDialog = ({
         <div className="dialog-header">
           <Typography className="measure-header">
             <span className="measure-name" data-testid="measure-name">
-              {newMeasure.measureName}
+              <MeasureNameDiff
+                oldMeasureName={oldMeasure.measureName}
+                newMeasureName={newMeasure.measureName}
+              />
             </span>{" "}
             <span className="measure-cmsid" data-testid="measure-cmsid">
               (CMS ID: {newMeasure.measureSet?.cmsId ?? "-"})
