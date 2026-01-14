@@ -686,6 +686,10 @@ const TypeEditor = ({
                   addTitle={addTitle}
                   handleAddElement={handleAddElement}
                   {...formik.getFieldProps(fieldLabel)}
+                  onChange={(value) => {
+                    formik.setFieldTouched(fieldLabel);
+                    formik.setFieldValue(fieldLabel, value);
+                  }}
                 />
               );
             })}
