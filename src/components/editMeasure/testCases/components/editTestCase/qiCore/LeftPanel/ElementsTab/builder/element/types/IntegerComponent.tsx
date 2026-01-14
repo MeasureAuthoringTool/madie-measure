@@ -33,13 +33,12 @@ const IntegerComponent = ({
   handleAddElement,
   showDeleteButton = false,
   handleDeleteElement,
-  value,
-  name,
   ...props
 }: IntegerComponentProps) => {
   // Use name for test IDs in array scenarios (when it contains '['), otherwise use original label
   const formattedLabel = getMultipleCardinalityLabel(label);
-  const testIdBase = name && name.includes("[") ? name : label;
+  const testIdBase =
+    props.name && props.name.includes("[") ? props.name : label;
 
   return (
     <div className="element-editor-add-row">
@@ -59,7 +58,7 @@ const IntegerComponent = ({
         fullWidth
         onKeyPress={(e) => {
           const inputValue = e.target.value;
-
+          // Allow control keys (backspace, delete, arrows, etc.)
           // Allow all characters, but validate the input later
           if (integerType === IntegerType.SIGNED) {
             if (
@@ -81,7 +80,6 @@ const IntegerComponent = ({
         error={error}
         helperText={error}
         {...props}
-        value={value || ""}
       />
       {showDeleteButton && canEdit && (
         <Tooltip title="Delete" placement="top" arrow>

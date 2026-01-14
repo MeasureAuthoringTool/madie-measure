@@ -16,12 +16,11 @@ const UriComponent = ({
   handleAddElement,
   showDeleteButton,
   handleDeleteElement,
-  name,
   ...props
 }: TypeComponentProps) => {
   const formattedLabel = getMultipleCardinalityLabel(label);
-  const testIdBase = name && name.includes("[") ? name : label;
-  const { value } = props;
+  const testIdBase =
+    props.name && props.name.includes("[") ? props.name : label;
   return (
     <div
       className="element-editor-add-row"
@@ -44,7 +43,6 @@ const UriComponent = ({
         size="small"
         fullWidth
         {...props}
-        value={value || ""}
       />
       {showDeleteButton && canEdit && (
         <Tooltip title="Delete" arrow>

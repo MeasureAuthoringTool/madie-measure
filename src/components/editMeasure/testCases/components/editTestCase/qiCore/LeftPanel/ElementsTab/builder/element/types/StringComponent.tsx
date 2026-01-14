@@ -23,17 +23,16 @@ const StringComponent = ({
   handleAddElement,
   showDeleteButton = false,
   handleDeleteElement,
-  name,
   ...props
 }: TypeComponentProps) => {
   const formattedLabel = getMultipleCardinalityLabel(label);
-  const testIdBase = name && name.includes("[") ? name : label;
+  const testIdBase =
+    props.name && props.name.includes("[") ? props.name : label;
 
   function isRootLabel(label) {
     const parts = label.split(".");
     return parts.length === 2 && parts[1] === "id";
   }
-  const { value } = props;
   return (
     <div className="element-editor-add-row">
       <TextField
@@ -64,7 +63,6 @@ const StringComponent = ({
             : undefined
         }
         {...props}
-        value={value || ""}
       />
       {showDeleteButton && canEdit && (
         <Tooltip title="Delete" placement="top" arrow>
