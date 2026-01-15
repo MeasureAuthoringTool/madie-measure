@@ -18,7 +18,6 @@ const MoneyComponent = ({
 
   const valuePath = `${label}.value`;
   const currencyPath = `${label}.currency`;
-  console.log("valuepath", valuePath);
   return (
     <Box className="money-component" data-component-type="MoneyComponent">
       {/* Value field */}
