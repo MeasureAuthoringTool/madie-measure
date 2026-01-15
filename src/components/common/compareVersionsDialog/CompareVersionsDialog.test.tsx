@@ -130,7 +130,7 @@ describe("CompareVersionsDialog component", () => {
     );
 
     expect(screen.getByTestId("measure-name")).toHaveTextContent(
-      "Newer Measure (Draft)"
+      "-- Older ++ Newer Measure ++ (Draft)"
     );
     expect(screen.getByTestId("measure-cmsid")).toHaveTextContent(
       "(CMS ID: 100)"

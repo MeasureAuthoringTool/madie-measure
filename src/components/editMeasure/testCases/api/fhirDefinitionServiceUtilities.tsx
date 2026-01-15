@@ -98,6 +98,7 @@ export const filterUnusedExtensionsFromElements = (
       const extUrl = el.type?.[0]?.profile?.[0];
       return extensions.some((ext) => ext.url === extUrl);
     }
+
     return true;
   });
 
@@ -309,6 +310,7 @@ export function getBasePath(resource: any): string {
 
 // For ClaimResponse.item.adjudication
 // we want to get only the elements at the top of the tree for the render
+// This function also filters out non-extension sliced elements (id contains ':') except for extension slices (extension:xxx)
 export function getTopLevelElements(resource: any) {
   const elements = [...resource?.definition?.snapshot?.element];
   const basePath = resource?.definition?.type;
@@ -333,30 +335,49 @@ export function getTopLevelElements(resource: any) {
         )) ||
       (e?.path?.includes("extension") && e?.id.includes(":"))
   );
+
+  // Filter out sliced elements (id contains ':') except extension slices
+  const filteredWithoutSlices = elementsFiltered.filter((e) => {
+    if (e.id?.includes(":")) {
+      const parts = e.id.split(":");
+      const beforeColon = parts[0];
+
+      // Keep extension slices (e.g., "Patient.extension:ethnicity")
+      if (beforeColon.endsWith(".extension")) {
+        return true;
+      }
+
+      // Filter out non-extension slices (e.g., "Condition.category:us-core")
+      return false;
+    }
+
+    return true;
+  });
+
   //for each elementsFiltered, if type contains more than one type, duplicate the element and restrict the type to only that type
 
-  elementsFiltered.forEach((element) => {
+  filteredWithoutSlices.forEach((element) => {
     if (element?.type?.length > 1) {
       element?.type?.forEach((type, index) => {
         const newElement = { ...element };
         newElement.type = [type];
-        elementsFiltered.push(newElement);
+        filteredWithoutSlices.push(newElement);
       });
-      elementsFiltered.splice(elementsFiltered.indexOf(element), 1);
+      filteredWithoutSlices.splice(filteredWithoutSlices.indexOf(element), 1);
     }
   });
   // Sort elements alphabetically by their path (after the basePath, if available)
   if (basePath) {
-    elementsFiltered.sort((a, b) => {
+    filteredWithoutSlices.sort((a, b) => {
       const labelA = a.path.substring(basePath.length + 1);
       const labelB = b.path.substring(basePath.length + 1);
       return labelA.localeCompare(labelB);
     });
   } else {
     // If no basePath, sort by full path
-    elementsFiltered.sort((a, b) => a.path.localeCompare(b.path));
+    filteredWithoutSlices.sort((a, b) => a.path.localeCompare(b.path));
   }
-  return elementsFiltered;
+  return filteredWithoutSlices;
 }
 // find out who needs to be required on formik validation
 export function getRequiredElements(resource: any) {
