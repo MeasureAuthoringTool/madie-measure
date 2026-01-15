@@ -1,5 +1,5 @@
 import * as React from "react";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import ActionCenter from "./ActionCenter";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router";
@@ -400,7 +400,7 @@ describe("ActionCenter Component", () => {
       const exportMenu = await screen.findByRole("menu");
       expect(exportMenu).toBeInTheDocument();
 
-      fireEvent.keyDown(exportMenu, { key: "Tab" });
+      await userEvent.keyboard("{Tab}");
 
       await waitFor(() => {
         expect(screen.queryByRole("menu")).not.toBeInTheDocument();
@@ -429,7 +429,7 @@ describe("ActionCenter Component", () => {
       const exportMenu = await screen.findByRole("menu");
       expect(exportMenu).toBeInTheDocument();
 
-      fireEvent.keyDown(exportMenu, { key: "Escape" });
+      await userEvent.keyboard("{Escape}");
 
       await waitFor(() => {
         expect(screen.queryByRole("menu")).not.toBeInTheDocument();
