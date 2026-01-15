@@ -6,12 +6,13 @@ import {
   Select,
   TextField,
 } from "@madie/madie-design-system/dist/react";
-import { MenuItem } from "@mui/material";
+import { IconButton, MenuItem, Tooltip } from "@mui/material";
 import useFhirDefinitionsServiceApi from "../../../../../../../../api/useFhirDefinitionsService";
 import useExecutionContext from "../../../../../../../routes/qiCore/useExecutionContext";
 import { Coding, Extension, ValueSet } from "fhir/r4";
 import { getValueSetUrl } from "../../../../../../../../api/fhirDefinitionServiceUtilities";
 import AddElementButton from "../../../../../../../common/UIOnlyModelAgnostic/AddElementButton";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 
 const placeHolder = (label: string) => (
   <span style={{ color: "#717171" }}>{label}</span>
@@ -32,6 +33,8 @@ const CodingComponent = ({
   addTitle,
   includePrev = true,
   handleAddElement,
+  showDeleteButton = false,
+  handleDeleteElement,
 }) => {
   const [allValueSets, setAllValueSets] = useState<ValueSet[]>();
   const [selectedValueSet, setSelectedValueSet] = useState<ValueSet>();
@@ -257,26 +260,44 @@ const CodingComponent = ({
   return (
     <div style={{ display: "flex", flexDirection: "column" }}>
       <div className="element-editor-add-row">
-        <Select
-          label="Value Set / Direct Reference Code"
-          id={`value-set-selector-${label}`}
-          inputProps={{
-            "data-testid": `value-set-selector-input-${label}`,
-          }}
-          data-testid={`value-set-${label}`}
-          readOnly={!canEdit}
-          options={getValueSetMenuOptions()}
-          value={selectedValueSet ? selectedValueSet?.name : ""}
-          renderValue={(value) => {
-            if (value === "") {
-              return placeHolder("- Select -");
-            }
-            return selectedValueSet?.title;
-          }}
-          onChange={(e) => handleValueSetChange(e.target.value)}
-        />
-        {showAddAttributeButton && addTitle && (
-          <AddElementButton name={addTitle} onClick={handleAddElement} />
+        <div tw="w-3/4">
+          <Select
+            label="Value Set / Direct Reference Code"
+            id={`value-set-selector-${label}`}
+            inputProps={{
+              "data-testid": `value-set-selector-input-${label}`,
+            }}
+            data-testid={`value-set-${label}`}
+            readOnly={!canEdit}
+            options={getValueSetMenuOptions()}
+            value={selectedValueSet ? selectedValueSet?.name : ""}
+            renderValue={(value) => {
+              if (value === "") {
+                return placeHolder("- Select -");
+              }
+              return selectedValueSet?.title;
+            }}
+            onChange={(e) => handleValueSetChange(e.target.value)}
+          />
+        </div>
+        {canEdit && (
+          <div tw="mt-5 flex items-center">
+            {showDeleteButton && (
+              <Tooltip title="Delete" placement="top" arrow>
+                <IconButton
+                  onClick={handleDeleteElement}
+                  data-testid={`delete-button-${label}`}
+                  aria-label={`delete ${label}`}
+                  size="small"
+                >
+                  <DeleteOutlineIcon fontSize="small" color="error" />
+                </IconButton>
+              </Tooltip>
+            )}
+            {showAddAttributeButton && (
+              <AddElementButton name="Coding" onClick={handleAddElement} />
+            )}
+          </div>
         )}
       </div>
       {selectedValueSet && (

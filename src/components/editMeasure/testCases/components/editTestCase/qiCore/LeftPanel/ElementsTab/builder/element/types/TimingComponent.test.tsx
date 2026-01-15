@@ -416,18 +416,16 @@ describe("TimingComponent", () => {
     expect(code).toBeInTheDocument();
     userEvent.type(code, "C1");
 
-    expect(setFieldValueMock).toHaveBeenCalledWith(
-      "MedicationRequest.dosageInstruction[0].timing.code",
-      {
-        coding: [
-          {
-            code: "C1",
-            display: "C1",
-            system: "http://example.com/custom-system",
-          },
-        ],
-      }
-    );
+    await waitFor(() => {
+      expect(setFieldValueMock).toHaveBeenCalledWith(
+        "MedicationRequest.dosageInstruction[0].timing.code.coding[0]",
+        {
+          code: "C1",
+          display: "C1",
+          system: "http://example.com/custom-system",
+        }
+      );
+    });
 
     // Add buttons
     userEvent.click(screen.getByText("Add Repeat.When"));

@@ -1717,14 +1717,10 @@ describe("TypeEditor Component", () => {
     expect(codeValue).toHaveValue("448951000124107");
     userEvent.tab();
 
-    expect(onChange).toHaveBeenLastCalledWith("Encounter.type[0]", {
-      coding: [
-        {
-          code: "448951000124107",
-          display: "448951000124107",
-          system: "http://snomed.info/sct",
-        },
-      ],
+    expect(onChange).toHaveBeenLastCalledWith("Encounter.type[0].coding[0]", {
+      code: "448951000124107",
+      display: "448951000124107",
+      system: "http://snomed.info/sct",
     });
   });
 
@@ -2082,7 +2078,9 @@ describe("TypeEditor Component", () => {
     ).toBeInTheDocument();
     expect(await screen.findByLabelText("Repeat.When[0]")).toBeInTheDocument();
     expect(await screen.findByLabelText("Repeat.Offset")).toBeInTheDocument();
-    expect(await screen.findByText("Code")).toBeInTheDocument();
+    expect(
+      await screen.findByText("MedicationRequest.timing[0].code")
+    ).toBeInTheDocument();
   });
 
   test("Should render Range component", async () => {
