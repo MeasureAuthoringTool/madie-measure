@@ -1,12 +1,35 @@
 import React, { useContext, useEffect, useState } from "react";
 import ResourceContext from "../../ResourceContext";
-import { Select } from "@madie/madie-design-system/dist/react";
+import { Select, InputLabel } from "@madie/madie-design-system/dist/react";
 import { MenuItem } from "@mui/material";
 import { useQiCoreResource } from "../../../../../../../../util/QiCorePatientProvider";
 import AddElementButton from "../../../../../../../common/UIOnlyModelAgnostic/AddElementButton";
 import { useFormikContext } from "formik";
 import { buildMadieResourceFromResourceIdentifier } from "../../../../../../../../api/fhirDefinitionServiceUtilities";
+import * as _ from "lodash";
 
+export const getReferenceComponentLabel = (label: string) => {
+  //e.g. for label = ClaimResponse.addItem[0].provider[0] return Provider
+  const componentLabel = label
+    .split(".")
+    ?.pop()
+    ?.replace(/\[.*\]$/, "");
+  return componentLabel ? _.startCase(componentLabel) : "";
+};
+
+export const getHighestPriorityResourceList = (
+  qiCoreProfiles,
+  usCoreProfiles,
+  baseFhirProfiles
+) => {
+  if (qiCoreProfiles.length > 0) {
+    return qiCoreProfiles[0];
+  } else if (usCoreProfiles.length > 0) {
+    return usCoreProfiles[0];
+  } else {
+    return baseFhirProfiles[0];
+  }
+};
 export default function ReferenceComponent({
   structureDefinition,
   canEdit,
@@ -27,7 +50,6 @@ export default function ReferenceComponent({
     structureDefinition.type?.find(
       (type: { code: string }) => type.code === "Reference"
     )?.targetProfile || []; // get the profiles declared in the structure definition
-
   const resourceProfileOptions =
     allResourceProfiles
       ?.filter((r) => targetProfiles.includes(r.profile))
@@ -40,7 +62,30 @@ export default function ReferenceComponent({
   const [selectedReferenceType, setSelectedReferenceType] = useState<string>(
     value?.reference?.split("/")?.[0] || ""
   ); // will need to default to something if editing existing element
+  const possibleResourceOptionsForAddNew = allResourceProfiles
+    ? allResourceProfiles.filter((r) => {
+        return r.type === selectedReferenceType;
+      })
+    : [];
+  // For now we're going to return lists of each and select index 0. Future story to allow user to pick between them if multiple exist. Observation.
+  const qiCoreProfiles = possibleResourceOptionsForAddNew.filter((rp) =>
+    rp.profile.includes("qicore")
+  );
+  const usCoreProfiles = possibleResourceOptionsForAddNew.filter((rp) =>
+    rp.profile.includes("us-core")
+  );
+  const baseFhirProfiles = possibleResourceOptionsForAddNew.filter(
+    (rp) =>
+      rp.profile.includes("fhir/StructureDefinition") &&
+      !rp.profile.includes("/us/")
+  );
 
+  let finalResourceOptionForAddNew;
+  finalResourceOptionForAddNew = getHighestPriorityResourceList(
+    qiCoreProfiles,
+    usCoreProfiles,
+    baseFhirProfiles
+  );
   const emptyOption = [
     { label: "ID Not Present (Add New)", value: "add_new_id" },
   ]; // If no resources of that type exist, we need to show a message in the dropdown
@@ -109,6 +154,16 @@ export default function ReferenceComponent({
 
   return (
     <>
+      <div className="element-editor-add-row reference">
+        <InputLabel
+          aria-labelledby="reference-label"
+          required={required}
+          data-testid="reference-label"
+          style={showAddAttributeButton ? { marginBottom: -8 } : undefined}
+        >
+          {getReferenceComponentLabel(label)}
+        </InputLabel>
+      </div>
       {/* Select a reference type from all available profiles */}
       <div className="element-editor-add-row reference double-row">
         <Select
@@ -195,12 +250,9 @@ export default function ReferenceComponent({
             }}
             onChange={(e) => {
               if (e.target.value === "add_new_id") {
-                const selectedResourceIdentifier = allResourceProfiles.find(
-                  (r) => r.type === selectedReferenceType
-                );
                 const newMadieResource =
                   buildMadieResourceFromResourceIdentifier(
-                    selectedResourceIdentifier
+                    finalResourceOptionForAddNew
                   );
                 formikContext.setFieldValue(
                   "add_new_resource",

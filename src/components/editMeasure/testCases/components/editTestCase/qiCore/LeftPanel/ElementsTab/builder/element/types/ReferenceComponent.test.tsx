@@ -1,6 +1,9 @@
 import * as React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
-import ReferenceComponent from "./ReferenceComponent";
+import ReferenceComponent, {
+  getReferenceComponentLabel,
+  getHighestPriorityResourceList,
+} from "./ReferenceComponent";
 import ResourceContext from "../../ResourceContext";
 import { useQiCoreResource } from "../../../../../../../../util/QiCorePatientProvider";
 import userEvent from "@testing-library/user-event";
@@ -73,8 +76,9 @@ describe("ReferenceComponent", () => {
             required={false}
             helperText="Select a reference"
             error={false}
-            showAddAttributeButton={false}
+            showAddAttributeButton={true}
             addTitle=""
+            label="ClaimResponse.addItem[0].provider[0]"
           />
         </FormikProvider>
       </ResourceContext.Provider>
@@ -87,6 +91,12 @@ describe("ReferenceComponent", () => {
       screen.getByTestId("Encounter (US Core)-option")
     ).toBeInTheDocument();
     expect(screen.getByTestId("Encounter (QICore)-option")).toBeInTheDocument();
+    expect(screen.getByTestId("reference-label")).toBeInTheDocument();
+    expect(screen.getByTestId("reference-label")).toHaveAttribute(
+      "aria-labelledby",
+      "reference-label"
+    );
+    expect(screen.getByTestId("reference-label")).toHaveTextContent("Provider");
   });
 
   it("shows all FHIR, US Core, QICore resources for FHIR base profile", async () => {
@@ -142,6 +152,7 @@ describe("ReferenceComponent", () => {
             error={false}
             showAddAttributeButton={false}
             addTitle=""
+            label="test.label"
           />
         </FormikProvider>
       </ResourceContext.Provider>
@@ -167,6 +178,7 @@ describe("ReferenceComponent", () => {
     expect(
       options.some((opt) => opt.textContent?.includes("encounter-qicore-1"))
     ).toBe(true);
+    expect(screen.getByTestId("reference-label")).toHaveTextContent("Label");
   });
 
   it("shows only US Core and QICore resources for US Core profile", async () => {
@@ -222,6 +234,7 @@ describe("ReferenceComponent", () => {
             error={false}
             showAddAttributeButton={false}
             addTitle=""
+            label="test.label"
           />
         </FormikProvider>
       </ResourceContext.Provider>
@@ -246,6 +259,7 @@ describe("ReferenceComponent", () => {
     expect(
       options.some((opt) => opt.textContent?.includes("encounter-fhir-1"))
     ).toBe(false);
+    expect(screen.getByTestId("reference-label")).toHaveTextContent("Label");
   });
 
   it("shows only QICore resources for QICore profile", async () => {
@@ -301,6 +315,7 @@ describe("ReferenceComponent", () => {
             error={false}
             showAddAttributeButton={false}
             addTitle=""
+            label="test.label"
           />
         </FormikProvider>
       </ResourceContext.Provider>
@@ -325,6 +340,8 @@ describe("ReferenceComponent", () => {
     expect(
       options.some((opt) => opt.textContent?.includes("encounter-fhir-1"))
     ).toBe(false);
+
+    expect(screen.getByTestId("reference-label")).toHaveTextContent("Label");
   });
 
   it("shows 'ID Not Present' when no matching profile entries exist", async () => {
@@ -356,6 +373,7 @@ describe("ReferenceComponent", () => {
             error={false}
             showAddAttributeButton={false}
             addTitle=""
+            label="test.label"
           />
         </FormikProvider>
       </ResourceContext.Provider>
@@ -374,5 +392,64 @@ describe("ReferenceComponent", () => {
     expect(
       options.some((opt) => opt.textContent?.includes("ID Not Present"))
     ).toBe(true);
+    expect(screen.getByTestId("reference-label")).toHaveTextContent("Label");
+  });
+
+  describe("test getReferenceComponentLabel", () => {
+    it("should return the correct label for a given reference", () => {
+      const result = getReferenceComponentLabel(
+        "ClaimResponse.addItem[0].provider[0]"
+      );
+      expect(result).toBe("Provider");
+    });
+
+    it("should handle labels without array indices", () => {
+      const result = getReferenceComponentLabel("ClaimResponse.provider");
+      expect(result).toBe("Provider");
+    });
+    it("should return an empty string for an empty label", () => {
+      const result = getReferenceComponentLabel("");
+      expect(result).toBe("");
+    });
+
+    it("should handle input that does not have .", () => {
+      const result = getReferenceComponentLabel("provider[0]");
+      expect(result).toBe("Provider");
+    });
+  });
+  it("getHighestPriorityResourceList returns correct profile based on priority", () => {
+    const qiCoreProfiles = [
+      {
+        id: "encounter-qicore",
+        profile:
+          "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-encounter",
+      },
+    ];
+    const usCoreProfiles = [
+      {
+        id: "encounter-uscore",
+        profile:
+          "http://hl7.org/fhir/us/core/StructureDefinition/us-core-encounter",
+      },
+    ];
+    const baseFhirProfiles = [
+      {
+        id: "encounter-base",
+        profile: "http://hl7.org/fhir/StructureDefinition/Encounter",
+      },
+    ];
+    expect(
+      getHighestPriorityResourceList(
+        qiCoreProfiles,
+        usCoreProfiles,
+        baseFhirProfiles
+      )
+    ).toBe(qiCoreProfiles[0]);
+    expect(
+      getHighestPriorityResourceList([], usCoreProfiles, baseFhirProfiles)
+    ).toBe(usCoreProfiles[0]);
+    expect(getHighestPriorityResourceList([], [], baseFhirProfiles)).toBe(
+      baseFhirProfiles[0]
+    );
   });
 });

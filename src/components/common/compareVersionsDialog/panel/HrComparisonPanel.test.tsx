@@ -3,11 +3,24 @@ import { render, screen, waitFor } from "@testing-library/react";
 import HrComparisonPanel from "./HrComparisonPanel";
 import { Measure } from "@madie/madie-models";
 
-const mockMeasure: Measure = {
-  id: "TestMeasureId",
-  measureName: "Test Measure",
-  measureSetId: "MeasureSetId1",
-} as Measure;
+const mockMeasures: Measure[] = [
+  {
+    id: "1",
+    measureName: "Older Measure",
+    version: "1.0.001",
+    lastModifiedAt: "2025-11-20T10:00:00Z",
+    measureSet: { cmsId: "100" },
+    measureMetaData: { draft: false },
+  } as any,
+  {
+    id: "2",
+    measureName: "Newer Measure (Draft)",
+    version: "1.1.001",
+    lastModifiedAt: "2025-11-21T12:00:00Z",
+    measureSet: { cmsId: "100" },
+    measureMetaData: { draft: true },
+  } as any,
+];
 
 const mockMeasureServiceApi = {
   fetchHumanReadable: jest.fn(
@@ -25,17 +38,43 @@ describe("HrComparisonPanel component", () => {
     jest.clearAllMocks();
   });
 
+  it("renders the old measure header row correctly", () => {
+    render(<HrComparisonPanel measure={mockMeasures[0]} side="old" />);
+
+    expect(screen.getByTestId("comparison-panel-old")).toBeInTheDocument();
+    expect(screen.getByTestId("version-text-old")).toHaveTextContent(
+      `Version ${mockMeasures[0].version}`
+    );
+    expect(screen.queryByTestId("draft-chip-old")).not.toBeInTheDocument();
+    expect(screen.getByTestId("last-updated-old")).toHaveTextContent(
+      "Last updated on 11/20/2025"
+    );
+  });
+
+  it("renders the new measure (draft) header row correctly", () => {
+    render(<HrComparisonPanel measure={mockMeasures[1]} side="new" />);
+
+    expect(screen.getByTestId("comparison-panel-new")).toBeInTheDocument();
+    expect(screen.getByTestId("version-text-new")).toHaveTextContent(
+      `Version ${mockMeasures[1].version}`
+    );
+    expect(screen.getByTestId("draft-chip-new")).toBeInTheDocument();
+    expect(screen.getByTestId("last-updated-new")).toHaveTextContent(
+      "Last updated on 11/21/2025"
+    );
+  });
+
   it("renders human readable content when fetchHumanReadable succeeds", async () => {
-    render(<HrComparisonPanel measure={mockMeasure} side="old" />);
+    render(<HrComparisonPanel measure={mockMeasures[0]} side="old" />);
 
     const content = await screen.findByText(
-      `HR content for ${mockMeasure.id}`,
+      `HR content for ${mockMeasures[0].id}`,
       { exact: false }
     );
 
     expect(content).toBeInTheDocument();
     expect(mockMeasureServiceApi.fetchHumanReadable).toHaveBeenCalledWith(
-      mockMeasure.id
+      mockMeasures[0].id
     );
   });
 
@@ -46,7 +85,7 @@ describe("HrComparisonPanel component", () => {
       .fn()
       .mockRejectedValue(new Error(errorMessage));
 
-    render(<HrComparisonPanel measure={mockMeasure} side="old" />);
+    render(<HrComparisonPanel measure={mockMeasures[0]} side="old" />);
 
     await waitFor(() =>
       expect(
@@ -55,7 +94,7 @@ describe("HrComparisonPanel component", () => {
     );
 
     expect(mockMeasureServiceApi.fetchHumanReadable).toHaveBeenCalledWith(
-      mockMeasure.id
+      mockMeasures[0].id
     );
   });
 });

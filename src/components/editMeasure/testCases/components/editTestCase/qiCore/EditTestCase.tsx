@@ -378,7 +378,6 @@ const EditTestCase = (props: EditTestCaseProps) => {
   });
 
   //needs to be added to feature flag config once the feature flags are moved to Util
-  // const testCaseAlertToast = false;
   useEffect(() => {
     if (_.isNil(populationGroupResults) || _.isEmpty(populationGroupResults)) {
       setGroupPopulations(_.cloneDeep(formik.values.groupPopulations));
@@ -727,7 +726,6 @@ const EditTestCase = (props: EditTestCaseProps) => {
       });
       return;
     }
-    setValidationErrors(() => []);
     let modifiedTestCase = { ...testCase, json: editorVal };
     // validate the JSON iff executeInvalidTestCases is false and JSON has been modified
     if (
@@ -802,128 +800,7 @@ const EditTestCase = (props: EditTestCaseProps) => {
     action: "create" | "update",
     timezoneUpdated: boolean
   ) {
-    if (testCase && testCase.id) {
-      const validationErrors =
-        testCase?.hapiOperationOutcome?.outcomeResponse?.issue;
-      if (testCase.validationStatus === ValidationStatus.PENDING) {
-        if (timezoneUpdated) {
-          showToast(
-            <div>
-              <h3>
-                Test case {action}d successfully! Test case validation has
-                started running, please continue working in MADiE.
-              </h3>
-            </div>,
-            "success"
-          );
-          props.setCustomWarningMessages([
-            {
-              message: `Test case ${action}d successfully!`,
-              details: [
-                "Timezone offsets have been added when hours are present, otherwise timezone offsets are removed or set to UTC for consistency.",
-              ],
-              testDataId: "test-case-timezone-warning",
-            },
-          ]);
-        } else if (testCase.bundleTypeUpdated) {
-          showToast(
-            "The test case has been saved successfully. Please note that the bundle type has been updated to Collection, as the Test Case Builder supports editing only collection bundles.",
-            "success"
-          );
-        } else {
-          showToast(
-            `Test case ${action}d successfully!${
-              isQICore6
-                ? " Test case validation has started running, please continue working in MADiE."
-                : ""
-            }`,
-            "success"
-          );
-        }
-      } else if (hasValidHapiOutcome(testCase)) {
-        if (timezoneUpdated) {
-          showToast(
-            <div>
-              <h3>Test case {action}d successfully!</h3>
-            </div>,
-            "success"
-          );
-          props.setCustomWarningMessages([
-            {
-              message: `Test case ${action}d successfully!`,
-              details: [
-                "Timezone offsets have been added when hours are present, otherwise timezone offsets are removed or set to UTC for consistency.",
-              ],
-              testDataId: "test-case-timezone-warning",
-            },
-          ]);
-        } else if (testCase.bundleTypeUpdated) {
-          showToast(
-            "The test case has been saved successfully. Please note that the bundle type has been updated to Collection, as the Test Case Builder supports editing only collection bundles.",
-            "success"
-          );
-        } else {
-          showToast(`Test case ${action}d successfully!`, "success");
-        }
-      } else {
-        const valErrors = validationErrors?.map((error) => error.diagnostics);
-        const message: ReactNode =
-          // testCaseAlertToast
-          // ? [
-          //     ...(timezoneUpdated
-          //       ? [
-          //           "Timezone offsets have been added when hours are present, otherwise timezone offsets are removed or set to UTC for consistency.",
-          //         ]
-          //       : []),
-          //     ...(testCase.bundleTypeUpdated
-          //       ? [
-          //           "The test case has been saved successfully. Please note that the bundle type has been updated to Collection, as the Test Case Builder supports editing only collection bundles.",
-          //         ]
-          //       : []),
-          //     ...valErrors,
-          //   ]
-          // :
-          [
-            ...(timezoneUpdated
-              ? [
-                  "Timezone offsets have been added when hours are present, otherwise timezone offsets are removed or set to UTC for consistency.",
-                ]
-              : []),
-            ...(testCase.bundleTypeUpdated
-              ? [
-                  "The test case has been saved successfully. Please note that the bundle type has been updated to Collection, as the Test Case Builder supports editing only collection bundles.",
-                ]
-              : []),
-          ];
-        let severity = severityOfValidationErrors(validationErrors);
-        if (severity === "error") {
-          severity = "danger";
-          // @ts-ignore
-          setErrors([...errors, ...message]);
-        } else {
-          props.setCustomWarningMessages([
-            {
-              message: `Test case ${action}d successfully!`,
-              details: [...message],
-              testDataId: "test-case-validation-warning",
-            },
-          ]);
-        }
-        // @ts-ignore
-        showToast(
-          <div>
-            <h3>
-              Test case updated successfully with{" "}
-              {severityOfValidationErrors(validationErrors)}s in JSON
-            </h3>
-          </div>,
-          // @ts-ignore
-          severity
-        );
-        handleHapiOutcome(testCase.hapiOperationOutcome);
-      }
-      updateMeasureStore(action, testCase);
-    } else {
+    if (!testCase || !testCase.id) {
       showToast(
         `An error occurred - ${action} did not return the expected successful result.`,
         "danger"
@@ -932,7 +809,62 @@ const EditTestCase = (props: EditTestCaseProps) => {
         ...errors,
         `An error occurred - ${action} did not return the expected successful result.`,
       ]);
+      return;
     }
+
+    const validationErrors =
+      testCase?.hapiOperationOutcome?.outcomeResponse?.issue;
+    const customMessage = [];
+
+    if (timezoneUpdated) {
+      customMessage.push(
+        "Timezone offsets have been added when hours are present, otherwise timezone offsets are removed or set to UTC for consistency."
+      );
+    }
+
+    if (testCase.bundleTypeUpdated) {
+      customMessage.push(
+        "Please note that the bundle type has been updated to Collection, as the Test Case Builder supports editing only collection bundles."
+      );
+    }
+
+    if (testCase.validationStatus === ValidationStatus.PENDING) {
+      showToast(
+        `Test case ${action}d successfully!${
+          isQICore6
+            ? " Test case validation has started running, please continue working in MADiE."
+            : ""
+        }`,
+        "success"
+      );
+    } else if (hasValidHapiOutcome(testCase)) {
+      showToast(`Test case ${action}d successfully!`, "success");
+    } else {
+      const severity = severityOfValidationErrors(validationErrors);
+      if (severity === "error") {
+        setErrors([...errors, ...customMessage]);
+      }
+
+      showToast(
+        <div>
+          <h3>Test case updated successfully with {severity}s in JSON</h3>
+        </div>,
+        severity === "error" ? "danger" : severity
+      );
+      handleHapiOutcome(testCase.hapiOperationOutcome);
+    }
+
+    if (customMessage.length > 0) {
+      props.setCustomWarningMessages([
+        {
+          message: `Test case ${action}d successfully!`,
+          details: [...customMessage],
+          testDataId: "test-case-validation-warning",
+        },
+      ]);
+    }
+
+    updateMeasureStore(action, testCase);
   }
 
   // we need to update measure store with created/updated test case to avoid stale state,
@@ -1077,7 +1009,8 @@ const EditTestCase = (props: EditTestCaseProps) => {
           lockingEnabled={featureFlags?.Locking}
           canEdit={canEdit}
         />
-        <div className="allotment-wrapper">
+        {/* this needs to have a conditional class depending if qi-core 6 or 4, otherwise it qi-core4 will become fouled. */}
+        <div className={`allotment-wrapper ${isQICore6 ? "fullvh" : ""}`}>
           <Allotment
             ref={allotmentRef}
             defaultSizes={[48, 48, 4]}
@@ -1282,18 +1215,6 @@ const EditTestCase = (props: EditTestCaseProps) => {
                 {rightPanelActiveTab === "details" && (
                   <div className="panel-content">
                     {alert && (
-                      // (testCaseAlertToast ? (
-                      //   <MadieAlert
-                      //     type={alert?.status}
-                      //     content={alert?.message}
-                      //     alertProps={{
-                      //       "data-testid": "create-test-case-alert",
-                      //     }}
-                      //     closeButtonProps={{
-                      //       "data-testid": "close-create-test-case-alert",
-                      //     }}
-                      //   />
-                      // ) : (
                       <Alert
                         status={alert?.status}
                         role="alert"

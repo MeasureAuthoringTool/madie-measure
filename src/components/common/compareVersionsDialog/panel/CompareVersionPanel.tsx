@@ -4,7 +4,7 @@ import { Measure } from "@madie/madie-models";
 
 interface CompareVersionPanelProps {
   measure: Measure;
-  children: ReactNode;
+  children?: ReactNode;
   side: "old" | "new";
 }
 
