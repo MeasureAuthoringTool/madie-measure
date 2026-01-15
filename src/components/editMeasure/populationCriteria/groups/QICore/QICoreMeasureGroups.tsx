@@ -72,6 +72,7 @@ import {
   MenuItemContainer,
 } from "../../../../../styles/editMeasure/populationCriteria/groups/index";
 import CompletionIndicator from "../CompletionIndicator";
+import CompositeScoring from "./CompositeScoring";
 
 interface ColSpanPopulationsType {
   isExclusionPop?: boolean;
@@ -192,6 +193,25 @@ const INITIAL_ALERT_MESSAGE = {
   message: undefined,
   canClose: false,
 };
+
+export const compositeScoringOptions = [
+  {
+    label: "-",
+    value: null,
+  },
+  {
+    label: "Opportunity",
+    value: "Opportunity",
+  },
+  {
+    label: "All-or-nothing",
+    value: "All-or-nothing",
+  },
+  {
+    label: "Linear",
+    value: "Linear",
+  },
+];
 
 const MeasureGroups = (props: MeasureGroupProps) => {
   useDocumentTitle("MADiE Edit Measure Population Criteria");
@@ -355,6 +375,8 @@ const MeasureGroups = (props: MeasureGroupProps) => {
               .improvementNotationDescription || "",
           rateAggregation:
             measure?.groups[measureGroupNumber].rateAggregation || "",
+          compositeScoring:
+            measure?.groups[measureGroupNumber]?.compositeScoring || "",
         },
       });
       setVisibleStrats(
@@ -380,6 +402,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
             populationBasis: defaultPopulationBasis,
             scoringUnit: "",
             scoringPrecision: "",
+            compositeScoring: "",
           },
         });
       }
@@ -408,11 +431,12 @@ const MeasureGroups = (props: MeasureGroupProps) => {
       populationBasis: group?.populationBasis || defaultPopulationBasis,
       scoringUnit: group?.scoringUnit || null, // autocomplete can't init with string
       scoringPrecision: group?.scoringPrecision || null,
+      compositeScoring: group?.compositeScoring || "",
     } as Group,
-    validationSchema: measureGroupSchemaValidator(
-      cqlDefinitionDataTypes,
-      cqlFunctionDataTypes
-    ),
+    // validationSchema: measureGroupSchemaValidator(
+    //   cqlDefinitionDataTypes,
+    //   cqlFunctionDataTypes
+    // ),
     // enableReinitialize: true,
     onSubmit: async (group: Group) => {
       window.scrollTo(0, 0);
@@ -575,6 +599,10 @@ const MeasureGroups = (props: MeasureGroupProps) => {
       );
     }
 
+    // if(!isCompositeMeasure){
+    //    group.compositeScoring = null
+    // }
+
     if (measure?.groups && !(measureGroupNumber >= measure?.groups?.length)) {
       group.id = measure?.groups[measureGroupNumber].id;
       measureServiceApi
@@ -716,7 +744,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
   useEffect(() => {
     if (formik.values.scoring) {
       setStratAssociation(
-        associationSelect[formik.values.scoring].filter((name) =>
+        associationSelect[formik.values.scoring]?.filter((name) =>
           formik.values.populations
             .filter((population) => population.definition)
             .map((population) => population.name)
@@ -806,6 +834,9 @@ const MeasureGroups = (props: MeasureGroupProps) => {
 
   const isImprovementNotationRequired = () =>
     formik.values.scoring !== GroupScoring.COHORT;
+
+  console.log(formik.isValid);
+  console.log(formik.dirty || associationChanged);
 
   return (
     <div tw="lg:col-span-5 pl-2 pr-2" data-testid="qi-core-groups">
@@ -1243,7 +1274,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                 )}
                 {activeTab === "components" && (
                   <Typography data-testid="components">
-                    Coming soon...
+                    <CompositeScoring canEdit={canEdit} formik={formik} />
                   </Typography>
                 )}
                 {activeTab === "stratification" && (
