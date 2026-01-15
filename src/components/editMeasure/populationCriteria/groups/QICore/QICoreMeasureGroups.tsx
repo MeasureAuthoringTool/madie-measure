@@ -816,11 +816,6 @@ const MeasureGroups = (props: MeasureGroupProps) => {
   const isImprovementNotationRequired = () =>
     formik.values.scoring !== GroupScoring.COHORT;
 
-  console.log(formik.isValid);
-  console.log(formik.dirty || associationChanged);
-
-  console.log(stratAssociation);
-
   return (
     <div tw="lg:col-span-5 pl-2 pr-2" data-testid="qi-core-groups">
       <FormikProvider value={formik}>
