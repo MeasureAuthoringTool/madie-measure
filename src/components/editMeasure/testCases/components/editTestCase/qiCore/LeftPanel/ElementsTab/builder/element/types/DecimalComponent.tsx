@@ -21,7 +21,7 @@ interface DecimalComponentProps {
 }
 
 const DecimalComponent = ({
-  label,
+  label = "value",
   canEdit,
   helperText,
   error,
@@ -39,7 +39,7 @@ const DecimalComponent = ({
     <>
       <TextField
         className="decimal-component"
-        value={value ?? ""}
+        value={!canEdit && !value ? "-" : value ?? ""}
         readOnly={!canEdit}
         required={required}
         error={error}
@@ -47,13 +47,13 @@ const DecimalComponent = ({
         type="number"
         inputMode="decimal"
         min="0"
-        label={label}
+        label={label.split(".").pop()}
         placeholder={`Enter ${label.split(".").pop()}`}
-        id={`decimal-field-${label}`}
-        data-testid={`decimal-field-${label}`}
+        id={`decimal-field-${rest.name}`}
+        data-testid={`decimal-field-${rest.name}`}
         inputProps={{
-          "data-testid": `decimal-field-input-${label}`,
-          "aria-describedby": `decimal-field-input-helper-text-${label}`,
+          "data-testid": `decimal-field-input-${rest.name}`,
+          "aria-describedby": `decimal-field-input-helper-text-${rest.name}`,
           required: required,
           "aria-required": required,
         }}

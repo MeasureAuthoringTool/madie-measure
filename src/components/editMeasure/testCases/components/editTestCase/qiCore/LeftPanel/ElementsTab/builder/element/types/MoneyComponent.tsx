@@ -1,11 +1,11 @@
 import React from "react";
 import { getIn, useFormikContext } from "formik";
 import { TypeComponentProps } from "./TypeComponentProps";
-import DecimalInput from "../../../../../../../common/DecimalInput/DecimalInput";
 import CodesComponent from "./CodesComponent";
 import Box from "@mui/material/Box";
 import "./MoneyComponent.scss";
 import { getMultipleCardinalityLabel } from "./TypeUtil";
+import DecimalComponent from "./DecimalComponent";
 
 const MoneyComponent = ({
   label,
@@ -18,22 +18,18 @@ const MoneyComponent = ({
 
   const valuePath = `${label}.value`;
   const currencyPath = `${label}.currency`;
-
+  console.log("valuepath", valuePath);
   return (
     <Box className="money-component" data-component-type="MoneyComponent">
       {/* Value field */}
       <div className="decimal-input">
-        <DecimalInput
-          label="Value"
-          value={getIn(formik.values, valuePath)}
-          handleChange={(val) =>
-            formik.setFieldValue(valuePath, val !== "" ? parseFloat(val) : null)
-          }
+        <DecimalComponent
+          label={valuePath}
+          {...formik.getFieldProps(valuePath)}
           canEdit={canEdit}
           required={false}
         />
       </div>
-
       {/* Currency field */}
       <div className="currency-input">
         <CodesComponent
