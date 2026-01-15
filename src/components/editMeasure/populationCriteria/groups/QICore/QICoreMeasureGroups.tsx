@@ -194,25 +194,6 @@ const INITIAL_ALERT_MESSAGE = {
   canClose: false,
 };
 
-export const compositeScoringOptions = [
-  {
-    label: "-",
-    value: null,
-  },
-  {
-    label: "Opportunity",
-    value: "Opportunity",
-  },
-  {
-    label: "All-or-nothing",
-    value: "All-or-nothing",
-  },
-  {
-    label: "Linear",
-    value: "Linear",
-  },
-];
-
 const MeasureGroups = (props: MeasureGroupProps) => {
   useDocumentTitle("MADiE Edit Measure Population Criteria");
   const defaultPopulationBasis = "boolean";
@@ -838,6 +819,8 @@ const MeasureGroups = (props: MeasureGroupProps) => {
   console.log(formik.isValid);
   console.log(formik.dirty || associationChanged);
 
+  console.log(stratAssociation);
+
   return (
     <div tw="lg:col-span-5 pl-2 pr-2" data-testid="qi-core-groups">
       <FormikProvider value={formik}>
@@ -1407,9 +1390,13 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                                           )}
                                           readOnly={!canEdit}
                                           options={
-                                            ["Select All"].concat(
-                                              Object.values(stratAssociation)
-                                            ) // add Select All as an option and then modify render logic tot toggle all on click.
+                                            stratAssociation
+                                              ? ["Select All"].concat(
+                                                  Object.values(
+                                                    stratAssociation
+                                                  )
+                                                )
+                                              : []
                                           }
                                           multipleSelect={true}
                                           handleToggleSelectAll={() => {

@@ -2,7 +2,25 @@ import React from "react";
 import _ from "lodash";
 import { Select } from "@madie/madie-design-system/dist/react";
 import { MenuItem } from "@mui/material";
-import { compositeScoringOptions } from "./QICoreMeasureGroups";
+
+export const compositeScoringOptions = [
+  {
+    label: "-",
+    value: null,
+  },
+  {
+    label: "Opportunity",
+    value: "Opportunity",
+  },
+  {
+    label: "All-or-nothing",
+    value: "All-or-nothing",
+  },
+  {
+    label: "Linear",
+    value: "Linear",
+  },
+];
 
 const CompositeScoring = ({ canEdit, formik }) => {
   return (
