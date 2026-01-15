@@ -53,6 +53,7 @@ const CompareVersionsDialog = ({
 
   return (
     <MadieDialog
+      form
       title="Compare Measure Versions"
       dialogProps={{
         onClose,
