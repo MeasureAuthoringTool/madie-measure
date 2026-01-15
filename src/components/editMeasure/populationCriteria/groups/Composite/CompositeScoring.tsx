@@ -30,6 +30,7 @@ const CompositeScoring = ({ canEdit, formik }) => {
           name: "Select Composite Scoring",
           value: "",
         }}
+        required={true}
         label="Composite Scoring"
         id="composite-scoring"
         inputProps={{

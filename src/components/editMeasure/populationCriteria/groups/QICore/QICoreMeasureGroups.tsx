@@ -72,7 +72,7 @@ import {
   MenuItemContainer,
 } from "../../../../../styles/editMeasure/populationCriteria/groups/index";
 import CompletionIndicator from "../CompletionIndicator";
-import CompositeScoring from "./CompositeScoring";
+import CompositeScoring from "../Composite/CompositeScoring";
 
 interface ColSpanPopulationsType {
   isExclusionPop?: boolean;
@@ -356,8 +356,9 @@ const MeasureGroups = (props: MeasureGroupProps) => {
               .improvementNotationDescription || "",
           rateAggregation:
             measure?.groups[measureGroupNumber].rateAggregation || "",
-          compositeScoring:
-            measure?.groups[measureGroupNumber]?.compositeScoring || "",
+          compositeScoring: isCompositeMeasure
+            ? measure?.groups[measureGroupNumber]?.compositeScoring || ""
+            : null,
         },
       });
       setVisibleStrats(
@@ -383,7 +384,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
             populationBasis: defaultPopulationBasis,
             scoringUnit: "",
             scoringPrecision: "",
-            compositeScoring: "",
+            compositeScoring: isCompositeMeasure ? "" : null,
           },
         });
       }
@@ -412,12 +413,15 @@ const MeasureGroups = (props: MeasureGroupProps) => {
       populationBasis: group?.populationBasis || defaultPopulationBasis,
       scoringUnit: group?.scoringUnit || null, // autocomplete can't init with string
       scoringPrecision: group?.scoringPrecision || null,
-      compositeScoring: group?.compositeScoring || "",
+      compositeScoring: isCompositeMeasure
+        ? group?.compositeScoring || ""
+        : null,
     } as Group,
-    // validationSchema: measureGroupSchemaValidator(
-    //   cqlDefinitionDataTypes,
-    //   cqlFunctionDataTypes
-    // ),
+    validationSchema: measureGroupSchemaValidator(
+      cqlDefinitionDataTypes,
+      cqlFunctionDataTypes,
+      isCompositeMeasure
+    ),
     // enableReinitialize: true,
     onSubmit: async (group: Group) => {
       window.scrollTo(0, 0);
@@ -579,10 +583,6 @@ const MeasureGroups = (props: MeasureGroupProps) => {
           strat.description !== deleteToken
       );
     }
-
-    // if(!isCompositeMeasure){
-    //    group.compositeScoring = null
-    // }
 
     if (measure?.groups && !(measureGroupNumber >= measure?.groups?.length)) {
       group.id = measure?.groups[measureGroupNumber].id;
