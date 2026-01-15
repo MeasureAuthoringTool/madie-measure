@@ -117,6 +117,19 @@ export const measureGroupSchemaValidator = (
       : Yup.string()
           .oneOf(Object.values(GroupScoring))
           .required("Group Scoring is required."),
+    compositeScoring: Yup.string()
+      .nullable()
+      .test(
+        "composite-scoring-required",
+        "Composite Scoring is required.",
+        function (value) {
+          const { scoring } = this.parent;
+          if (scoring === GroupScoring.COMPOSITE) {
+            return value !== null && value !== "";
+          }
+          return true;
+        }
+      ),
     scoringPrecision: Yup.number()
       .positive("Scoring Precision must be a positive integer")
       .nullable(),

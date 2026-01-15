@@ -46,6 +46,8 @@ const CompositeScoring = ({ canEdit, formik }) => {
         onChange={(e) => {
           formik.setFieldValue("compositeScoring", e.target.value);
         }}
+        error={Boolean(formik.errors.compositeScoring)}
+        helperText={formik.errors.compositeScoring}
         options={compositeScoringOptions.map((option, i) => (
           <MenuItem
             key={`${option.label}-${i}`}
