@@ -172,11 +172,9 @@ const TypeEditor = ({
         return (
           <Box sx={{ display: "flex", flexDirection: "column", width: "100%" }}>
             {(isArrayMode ? values : [null]).map((el, index) => {
-              let fieldLabel;
+              let fieldLabel = label;
               if (isArrayMode && appendedZeroAlready) {
                 fieldLabel = `${label.slice(0, label.length - 3)}[${index}]`;
-              } else {
-                fieldLabel = label;
               }
               return (
                 <StringComponent
@@ -243,11 +241,9 @@ const TypeEditor = ({
           // primitive multiple cardinality decimal fields are extremely rare, but we're going to cover it anyway.
           <Box sx={{ display: "flex", flexDirection: "column", width: "100%" }}>
             {(isArrayMode ? values : [null]).map((el, index) => {
-              let fieldLabel;
+              let fieldLabel = label;
               if (isArrayMode && appendedZeroAlready) {
                 fieldLabel = `${label.slice(0, label.length - 3)}[${index}]`;
-              } else {
-                fieldLabel = label;
               }
               return (
                 <DecimalComponent
@@ -293,11 +289,9 @@ const TypeEditor = ({
         return (
           <>
             {(isArrayMode ? values : [null]).map((el, index) => {
-              let fieldLabel;
+              let fieldLabel = label;
               if (isArrayMode && appendedZeroAlready) {
                 fieldLabel = `${label.slice(0, label.length - 3)}[${index}]`;
-              } else {
-                fieldLabel = label;
               }
               return (
                 <QuantityComponent
@@ -341,11 +335,9 @@ const TypeEditor = ({
         return (
           <>
             {(isArrayMode ? values : [null]).map((el, index) => {
-              let fieldLabel;
+              let fieldLabel = label;
               if (isArrayMode && appendedZeroAlready) {
                 fieldLabel = `${label.slice(0, label.length - 3)}[${index}]`;
-              } else {
-                fieldLabel = label;
               }
               return (
                 <DateTimeComponent
@@ -384,11 +376,9 @@ const TypeEditor = ({
         return (
           <>
             {(isArrayMode ? values : [null]).map((el, index) => {
-              let fieldLabel;
+              let fieldLabel = label;
               if (isArrayMode && appendedZeroAlready) {
                 fieldLabel = `${label.slice(0, label.length - 3)}[${index}]`;
-              } else {
-                fieldLabel = label;
               }
               return (
                 <TimeComponent
@@ -443,11 +433,9 @@ const TypeEditor = ({
         return (
           <>
             {(isArrayMode ? values : [null]).map((el, index) => {
-              let fieldLabel;
+              let fieldLabel = label;
               if (isArrayMode && appendedZeroAlready) {
                 fieldLabel = `${label.slice(0, label.length - 3)}[${index}]`;
-              } else {
-                fieldLabel = label;
               }
               return (
                 <IntegerComponent
@@ -497,11 +485,9 @@ const TypeEditor = ({
         return (
           <>
             {(isArrayMode ? values : [null]).map((el, index) => {
-              let fieldLabel;
+              let fieldLabel = label;
               if (isArrayMode && appendedZeroAlready) {
                 fieldLabel = `${label.slice(0, label.length - 3)}[${index}]`;
-              } else {
-                fieldLabel = label;
               }
               return (
                 <BooleanComponent
@@ -533,11 +519,9 @@ const TypeEditor = ({
         return (
           <>
             {(isArrayMode ? values : [null]).map((el, index) => {
-              let fieldLabel;
+              let fieldLabel = label;
               if (isArrayMode && appendedZeroAlready) {
                 fieldLabel = `${label.slice(0, label.length - 3)}[${index}]`;
-              } else {
-                fieldLabel = label;
               }
               return (
                 <UriComponent
@@ -574,11 +558,9 @@ const TypeEditor = ({
         return (
           <>
             {(isArrayMode ? values : [null]).map((el, index) => {
-              let fieldLabel;
+              let fieldLabel = label;
               if (isArrayMode && appendedZeroAlready) {
                 fieldLabel = `${label.slice(0, label.length - 3)}[${index}]`;
-              } else {
-                fieldLabel = label;
               }
               return (
                 <UrlComponent
@@ -630,11 +612,9 @@ const TypeEditor = ({
         return (
           <>
             {(isArrayMode ? values : [null]).map((el, index) => {
-              let fieldLabel;
+              let fieldLabel = label;
               if (isArrayMode && appendedZeroAlready) {
                 fieldLabel = `${label.slice(0, label.length - 3)}[${index}]`;
-              } else {
-                fieldLabel = label;
               }
               return (
                 <>
@@ -703,11 +683,9 @@ const TypeEditor = ({
         return (
           <>
             {(isArrayMode ? values : [null]).map((el, index) => {
-              let fieldLabel;
+              let fieldLabel = label;
               if (isArrayMode && appendedZeroAlready) {
                 fieldLabel = `${label.slice(0, label.length - 3)}[${index}]`;
-              } else {
-                fieldLabel = label;
               }
               return (
                 <CodeableConceptComponent
