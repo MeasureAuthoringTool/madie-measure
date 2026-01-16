@@ -372,7 +372,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
           values: {
             id: null,
             displayId: null,
-            scoring: "",
+            scoring: isCompositeMeasure ? GroupScoring.COMPOSITE : "",
             populations: [],
             measureObservations: null,
             groupDescription: "",
@@ -539,7 +539,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
           id: null,
           displayId: null,
           groupDescription: "",
-          scoring: "",
+          scoring: isCompositeMeasure ? GroupScoring.COMPOSITE : "",
           measureGroupTypes: [],
           rateAggregation: "",
           improvementNotation: "",
@@ -814,7 +814,8 @@ const MeasureGroups = (props: MeasureGroupProps) => {
   }, [ucum, ucumUnits]);
 
   const isImprovementNotationRequired = () =>
-    formik.values.scoring !== GroupScoring.COHORT;
+    formik.values.scoring !== GroupScoring.COHORT &&
+    formik.values.scoring !== GroupScoring.COMPOSITE;
 
   return (
     <div tw="lg:col-span-5 pl-2 pr-2" data-testid="qi-core-groups">
@@ -1132,8 +1133,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                             displayIcon={
                               formik.values.improvementNotation
                                 ? true
-                                : formik.values.scoring !==
-                                  MeasureScoring.COHORT
+                                : isImprovementNotationRequired()
                             }
                           />
                         }
