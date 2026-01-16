@@ -35,7 +35,7 @@ const CodeableConceptComponent: React.FC<CodeableConceptComponentProps> = ({
    */
   const handleAddCoding = useCallback(() => {
     const currentValue = _.get(formik.values, label) as CodeableConcept;
-    const currentCoding = currentValue?.coding || [];
+    const currentCoding = currentValue?.coding || [undefined];
 
     const updatedValue: CodeableConcept = {
       ...currentValue,
@@ -51,8 +51,6 @@ const CodeableConceptComponent: React.FC<CodeableConceptComponentProps> = ({
   const handleDeleteElement = useCallback(
     (index: number) => {
       const currentValue = _.get(formik.values, label) as CodeableConcept;
-
-      if (!currentValue?.coding) return;
 
       // Filter out deleted coding
       const updatedCoding = currentValue.coding.filter((_, i) => i !== index);
