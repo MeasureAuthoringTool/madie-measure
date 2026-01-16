@@ -43,6 +43,7 @@ const MeasureNameDiff = ({
                 aria-label="Added text"
                 data-testid={`diff-added-${index}`}
               >
+                {" "}
                 ++ <span>{part.value}</span>
               </span>
             );

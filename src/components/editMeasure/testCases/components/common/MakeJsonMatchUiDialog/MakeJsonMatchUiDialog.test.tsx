@@ -18,6 +18,8 @@ describe("MakeJsonMatchUiDialog", () => {
   const mockSetToastMessage = jest.fn();
   const mockSetToastType = jest.fn();
   const mockSetToastOpen = jest.fn();
+  const mockSetOpenMakeJsonMatchUiDialog = jest.fn();
+  const mockSetOpenMakeJsonMatchUiSpinner = jest.fn();
 
   const mockTestCases: TestCase[] = [
     { id: "tc1", title: "Test 1" } as TestCase,
@@ -48,6 +50,8 @@ describe("MakeJsonMatchUiDialog", () => {
         setToastMessage={mockSetToastMessage}
         setToastType={mockSetToastType}
         setToastOpen={mockSetToastOpen}
+        setMakeJsonMatchUiDialogOpen={mockSetOpenMakeJsonMatchUiDialog}
+        setOpenMakeJsonMatchUiSpinner={mockSetOpenMakeJsonMatchUiSpinner}
         {...props}
       />
     );
