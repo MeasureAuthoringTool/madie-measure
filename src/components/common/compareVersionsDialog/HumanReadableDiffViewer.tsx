@@ -18,7 +18,7 @@ const HumanReadableDiffViewer = ({
 }: HumanReadableDiffViewerProps) => {
   const measureServiceApi = useRef(useMeasureServiceApi()).current;
 
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [humanReadableDiffResult, setHumanReadableDiffResult] =
     useState<any>(null);
   const [error, setError] = useState<string>("");
@@ -66,8 +66,8 @@ const HumanReadableDiffViewer = ({
                 Field
               </th>
               <th aria-labelledby="old-version-header" tabIndex={0}>
-                Version {oldMeasure.version}{" "}
-                {oldMeasure.measureMetaData?.draft && (
+                Version {oldMeasure?.version}{" "}
+                {oldMeasure?.measureMetaData?.draft && (
                   <Chip
                     label="Draft"
                     className="draft-chip"
@@ -76,9 +76,9 @@ const HumanReadableDiffViewer = ({
                 )}
               </th>
               <th aria-labelledby="new-version-header" tabIndex={0}>
-                Version {newMeasure.version}
+                Version {newMeasure?.version}
                 {"   "}
-                {newMeasure.measureMetaData?.draft && (
+                {newMeasure?.measureMetaData?.draft && (
                   <Chip
                     label="Draft"
                     className="draft-chip"
