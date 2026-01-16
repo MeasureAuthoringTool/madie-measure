@@ -2220,7 +2220,7 @@ describe("TypeEditor Component", () => {
     expect(await screen.findByText("Code")).toBeInTheDocument();
   });
 
-  test.only("Should render Range component", async () => {
+  test("Should render Range component", async () => {
     const mockFormik: FormikContextType<any> = {
       values: {
         "Observation.referenceRange[0].age": {
@@ -2647,22 +2647,22 @@ describe("TypeEditor Component", () => {
       total: { value: 100, currency: "USD" },
     };
 
-    // const mockFormik: FormikContextType<any> = {
-    //   values: { Claim: claimResource },
-    //   touched: {},
-    //   getFieldProps: (label) => {
-    //     const value = getNestedProperty(mockFormik.values, label);
-    //     return {
-    //       value,
-    //       name: label,
-    //       onChange: jest.fn(),
-    //       onBlur: jest.fn(),
-    //     };
-    //   },
-    //   handleChange: () => {},
-    //   setFieldValue: jest.fn(),
-    //   setFieldTouched: jest.fn(),
-    // };
+    const mockFormik: FormikContextType<any> = {
+      values: { Claim: claimResource },
+      touched: {},
+      getFieldProps: (label) => {
+        const value = getNestedProperty(mockFormik.values, label);
+        return {
+          value,
+          name: label,
+          onChange: jest.fn(),
+          onBlur: jest.fn(),
+        };
+      },
+      handleChange: () => {},
+      setFieldValue: jest.fn(),
+      setFieldTouched: jest.fn(),
+    };
 
     render(
       <ExecutionContextProvider
@@ -2702,12 +2702,11 @@ describe("TypeEditor Component", () => {
         </FormikProvider>
       </ExecutionContextProvider>
     );
-
     const valueInput = (await screen.findByTestId(
       "decimal-field-input-Claim.total.value"
     )) as HTMLInputElement;
     expect(valueInput).toBeInTheDocument();
-    expect(valueInput.value).toBe("");
+    expect(valueInput.value).toBe("100");
 
     await userEvent.clear(valueInput);
     await userEvent.type(valueInput, "250");
