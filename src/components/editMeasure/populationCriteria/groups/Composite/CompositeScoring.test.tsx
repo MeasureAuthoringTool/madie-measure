@@ -1,6 +1,7 @@
 import React from "react";
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import CompositeScoring from "./CompositeScoring";
+import userEvent from "@testing-library/user-event";
 
 const mockFormik = {
   values: {
@@ -99,5 +100,26 @@ describe("CompositeScoring Component", () => {
 
     const label = screen.getByText("Composite Scoring");
     expect(label).toBeInTheDocument();
+  });
+
+  it("calls setFieldValue when an option is selected", async () => {
+    render(<CompositeScoring canEdit={true} formik={mockFormik} />);
+
+    const selectTrigger = screen.getByRole("combobox");
+    await userEvent.click(selectTrigger);
+
+    await waitFor(() => {
+      expect(screen.getByTestId("opportunity-option")).toBeInTheDocument();
+    });
+
+    const opportunityOption = screen.getByTestId("opportunity-option");
+    await userEvent.click(opportunityOption);
+
+    await waitFor(() => {
+      expect(mockFormik.setFieldValue).toHaveBeenCalledWith(
+        "compositeScoring",
+        "Opportunity"
+      );
+    });
   });
 });
