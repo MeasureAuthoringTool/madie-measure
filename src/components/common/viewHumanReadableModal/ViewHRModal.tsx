@@ -5,7 +5,7 @@ import {
 } from "@madie/madie-design-system/dist/react";
 import { useMeasureServiceApi } from "@madie/madie-util";
 import { DialogContent, Typography, Backdrop } from "@mui/material";
-
+import "./ViewHRModal.scss";
 interface ModalProps {
   open;
   onClose;
