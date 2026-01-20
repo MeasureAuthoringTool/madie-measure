@@ -61,12 +61,14 @@ const DateTimeComponent = ({
   value,
   onChange,
   label = "Date",
+  name,
   error,
   helperText,
   setTouched,
   showAddAttributeButton,
   addTitle,
 }: TypeComponentProps) => {
+  const testIdBase = name || label; // Always use name (complete path) if available
   const [format, setFormat] = useState<string>(null);
   const [date, setDate] = useState<any>(null);
   useEffect(() => {
@@ -110,13 +112,13 @@ const DateTimeComponent = ({
             {/* select a format and render a picker */}
             <Select
               required={fieldRequired}
-              id={`date-format-selector-${label}`}
+              id={`date-format-selector-${testIdBase}`}
               label="Date Precision Level"
               inputProps={{
-                "data-testid": `date-format-selector-input-field-${label}`,
-                "aria-describedby": `date-format-selector-input-field-helper-text-${label}`,
+                "data-testid": `date-format-selector-input-field-${testIdBase}`,
+                "aria-describedby": `date-format-selector-input-field-helper-text-${testIdBase}`,
               }}
-              data-testid={`date-format-selector-field-${label}`}
+              data-testid={`date-format-selector-field-${testIdBase}`}
               readOnly={!canEdit}
               SelectDisplayProps={{
                 "aria-required": "true",
@@ -165,7 +167,7 @@ const DateTimeComponent = ({
                 value={date ? dayjs(date) : null}
                 views={format ? formatMap[format] : ["year"]}
                 disabled={!canEdit || !format || format === "Invalid Format"}
-                id={`${format || "year"}-field-${label}`}
+                id={`${format || "year"}-field-${testIdBase}`}
                 onChange={(date) => {
                   if (date) {
                     if (date.format(format) !== "Invalid Date") {

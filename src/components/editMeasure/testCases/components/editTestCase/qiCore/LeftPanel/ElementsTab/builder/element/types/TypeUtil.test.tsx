@@ -32,9 +32,15 @@ describe("getMultipleCardinalityLabel", () => {
     expect(getMultipleCardinalityLabel(input)).toEqual(expectedOutput);
   });
 
-  it("should return the original label if no match is found", () => {
+  it("should format property after array index", () => {
     const input = "ClaimResponse.addItem[0].itemSequence";
-    const expectedOutput = input;
+    const expectedOutput = "Item Sequence";
+    expect(getMultipleCardinalityLabel(input)).toEqual(expectedOutput);
+  });
+
+  it("should format nested array property", () => {
+    const input = "ClaimResponse.item[0].adjudication[0].category";
+    const expectedOutput = "Category";
     expect(getMultipleCardinalityLabel(input)).toEqual(expectedOutput);
   });
 });
