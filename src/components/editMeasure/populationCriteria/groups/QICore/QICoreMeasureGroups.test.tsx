@@ -2547,9 +2547,7 @@ describe("Measure Groups Page", () => {
       });
       expect(componentTab).toBeInTheDocument();
       expect(componentTab).toHaveAttribute("aria-selected", "true");
-      expect(screen.getByTestId("components")).toHaveTextContent(
-        "Coming soon..."
-      );
+      expect(screen.getByTestId("composite-scoring")).toBeInTheDocument();
 
       // populations tab is not present
       const populationTab = screen.queryByRole("tab", {
