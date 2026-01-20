@@ -57,11 +57,11 @@ const ElementEditorChildren = ({
         style={{ cursor: "default", border: "none", marginBottom: 24 }}
       >
         <h4 className="header">
-          {getElementName(
+          {`${getElementName(
             rootDefinition,
             resourcePath,
             getNestedProperty(values, stripAllIndexes(rootDefinition.id))
-          )}
+          )}`}
         </h4>
         {canEdit && (
           <div style={{ position: "relative", top: "-7px" }}>
@@ -72,11 +72,11 @@ const ElementEditorChildren = ({
                   ? elementValue.length
                   : 1
               }
-              elementName={getElementName(
+              elementName={`${getElementName(
                 rootDefinition,
                 resourcePath,
                 getNestedProperty(values, stripAllIndexes(rootDefinition.id))
-              )}
+              )}`}
               elementValue={elementValue}
               addElementOfMultipleCardinality={addElementOfMultipleCardinality}
               rootDefinition={rootDefinition}

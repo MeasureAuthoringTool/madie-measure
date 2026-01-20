@@ -65,7 +65,7 @@ describe("ElementEditorChildren", () => {
       </FormikProvider>
     );
 
-    expect(screen.getByText("*name")).toBeInTheDocument(); // header from rootDefinition.id
+    expect(screen.getByText("*Name")).toBeInTheDocument(); // header from rootDefinition.id
     expect(screen.getByTestId("type-editor")).toBeInTheDocument();
     userEvent.click(screen.getByTestId("elements-action-center-actual-icon"));
 
@@ -97,7 +97,7 @@ describe("ElementEditorChildren", () => {
       </FormikProvider>
     );
 
-    expect(screen.getByText("*name")).toBeInTheDocument();
+    expect(screen.getByText("*Name")).toBeInTheDocument();
     expect(screen.getByTestId("type-editor")).toBeInTheDocument();
     expect(
       screen.queryByTestId("elements-action-center-actual-icon")
