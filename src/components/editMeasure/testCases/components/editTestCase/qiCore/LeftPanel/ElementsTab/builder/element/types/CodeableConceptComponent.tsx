@@ -23,7 +23,10 @@ const CodeableConceptComponent = ({
     [onChange]
   );
   return (
-    <Box sx={{ display: "flex", flexDirection: "column" }}>
+    <Box
+      sx={{ display: "flex", flexDirection: "column" }}
+      data-component-type="CodeableConceptComponent"
+    >
       <InputLabel>{getMultipleCardinalityLabel(label)}</InputLabel>
       <CodingComponent
         handleAddElement={handleAddElement}

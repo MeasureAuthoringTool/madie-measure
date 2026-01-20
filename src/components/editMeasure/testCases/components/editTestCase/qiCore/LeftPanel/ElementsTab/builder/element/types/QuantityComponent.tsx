@@ -79,7 +79,10 @@ const QuantityComponent = ({
   const validationResult = useMemo(() => validate(code), [code]);
 
   return (
-    <div className="element-editor-add-row">
+    <div
+      className="element-editor-add-row"
+      data-component-type="QuantityComponent"
+    >
       <div className="quantity-component">
         {showLabel && <InputLabel>{formattedLabel}</InputLabel>}
 

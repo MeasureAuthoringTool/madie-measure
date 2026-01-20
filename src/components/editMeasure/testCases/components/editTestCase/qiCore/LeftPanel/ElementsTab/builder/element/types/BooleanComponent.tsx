@@ -38,11 +38,15 @@ const BooleanComponent = ({
       false
     </MuiMenuItem>,
   ];
+  const formattedLabel = getMultipleCardinalityLabel(label);
   return (
-    <div className="element-editor-add-row">
+    <div
+      className="element-editor-add-row"
+      data-component-type="BooleanComponent"
+    >
       <Select
         id={`boolean-selector-${testIdBase}`}
-        label={label}
+        label={formattedLabel}
         inputProps={{
           "data-testid": `boolean-input-field-${testIdBase}`,
           "aria-describedby": `boolean-input-field-helper-text-${testIdBase}`,
