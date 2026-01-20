@@ -3,18 +3,20 @@ import { InputLabel } from "@madie/madie-design-system/dist/react/";
 import { TypeComponentProps } from "./TypeComponentProps";
 import "./RangeComponent.scss";
 import QuantityComponent from "./QuantityComponent";
+import { getMultipleCardinalityLabel } from "./TypeUtil";
 
 const RangeComponent = ({
   canEdit,
   label,
   structureDefinition,
 }: TypeComponentProps) => {
+  const formattedLabel = getMultipleCardinalityLabel(label);
   const lowPath = `${label}.low`;
   const highPath = `${label}.high`;
 
   return (
     <div className="range-component">
-      <InputLabel>{label}</InputLabel>
+      <InputLabel>{formattedLabel}</InputLabel>
 
       <div className="quantity-row">
         {/* Low field */}

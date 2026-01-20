@@ -5,6 +5,7 @@ import DecimalInput from "../../../../../../../common/DecimalInput/DecimalInput"
 import CodesComponent from "./CodesComponent";
 import Box from "@mui/material/Box";
 import "./MoneyComponent.scss";
+import { getMultipleCardinalityLabel } from "./TypeUtil";
 
 const MoneyComponent = ({
   label,
@@ -13,6 +14,7 @@ const MoneyComponent = ({
   fieldRequired,
 }: TypeComponentProps) => {
   const formik = useFormikContext();
+  const formattedLabel = getMultipleCardinalityLabel(label);
 
   const valuePath = `${label}.value`;
   const currencyPath = `${label}.currency`;

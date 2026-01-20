@@ -31,6 +31,7 @@ import {
   extractNameWithoutIndex,
   filterUnusedExtensionsFromElements,
   getParentPath,
+  formatAttributeLabel,
 } from "./fhirDefinitionServiceUtilities";
 
 describe("FhirDefinitionServiceUtilities", () => {
@@ -402,7 +403,7 @@ describe("getElementName", () => {
       min: 0,
       path: "some.path",
     };
-    expect(getElementName(element, "some", [])).toBe("path");
+    expect(getElementName(element, "some", [])).toBe("Path");
   });
   it("should handles not a number index", () => {
     const element = {
@@ -411,7 +412,7 @@ describe("getElementName", () => {
     } as any;
     const basePath = "Patient";
     const result = getElementName(element, basePath, [{}, {}]);
-    expect(result).toBe(" *name[asdf]");
+    expect(result).toBe(" *Name Asdf");
   });
 
   it("should handle retrievedIndex and Number(retrievedIndex) > 0 to add correct index", () => {
@@ -421,7 +422,7 @@ describe("getElementName", () => {
     } as any;
     const basePath = "Patient";
     const result = getElementName(element, basePath, [{}, {}]);
-    expect(result).toBe(" *name 2 ");
+    expect(result).toBe(" *Name 2 ");
   });
 
   it("should format for ChoiceType elements correctly", () => {
@@ -444,17 +445,17 @@ describe("getElementName", () => {
     } as any;
     const basePath = "Patient";
     const result = getElementName(element, basePath, [{}, {}]);
-    expect(result).toBe("name 1 ");
+    expect(result).toBe("Name 1 ");
   });
 
   it("returns path minus base", () => {
     const element = { id: "some.path", min: 0, path: "some.path" };
-    expect(getElementName(element, "some", [])).toBe("path");
+    expect(getElementName(element, "some", [])).toBe("Path");
   });
 
   it("Should add required indicator when the attribute is required", () => {
     const element = { id: "some.path", min: 1, path: "some.path" };
-    expect(getElementName(element, "some", null)).toBe(" *path");
+    expect(getElementName(element, "some", null)).toBe(" *Path");
   });
 
   it("adds required indicator", () => {
@@ -463,7 +464,7 @@ describe("getElementName", () => {
       min: 1,
       path: "some.path",
     };
-    expect(getElementName(element, "some", {})).toBe(" *path");
+    expect(getElementName(element, "some", {})).toBe(" *Path");
   });
   it("returns sliceName with index and requiredIndicator if sliceName exists", () => {
     const element = {
@@ -480,17 +481,17 @@ describe("getElementName", () => {
   it("returns path without basePath and indexes if no sliceName", () => {
     const element = { id: "Patient.name[0].family", min: 0 };
     const nameFamily = getElementName(element as any, "Patient", []);
-    expect(nameFamily).toBe("name.family");
+    expect(nameFamily).toBe("Family");
   });
 
   it("handles no index correctly", () => {
     const element = { id: "Patient.birthDate", min: 0 };
-    expect(getElementName(element as any, "Patient", [])).toBe("birthDate");
+    expect(getElementName(element as any, "Patient", [])).toBe("Birth Date");
   });
 
   it("adds required indicator if min > 0", () => {
     const element = { id: "Patient.gender", min: 1 };
-    expect(getElementName(element as any, "Patient", [])).toBe(" *gender");
+    expect(getElementName(element as any, "Patient", [])).toBe(" *Gender");
   });
 });
 
@@ -1030,5 +1031,64 @@ describe("getParentPath", () => {
   it("returns null for null or undefined input", () => {
     expect(getParentPath(null)).toBeNull();
     expect(getParentPath(undefined)).toBeNull();
+  });
+});
+
+describe("formatAttributeLabel", () => {
+  it("formats paths ending with array indices", () => {
+    expect(formatAttributeLabel("ClaimResponse.item[0]")).toBe("Item[0]");
+    expect(formatAttributeLabel("Patient.name[1]")).toBe("Name[1]");
+    expect(formatAttributeLabel("Claim.item[2]")).toBe("Item[2]");
+    expect(formatAttributeLabel("ClaimResponse.itemSequence[0]")).toBe(
+      "Item Sequence[0]"
+    );
+  });
+
+  it("formats final attribute even when array indices exist earlier in path", () => {
+    expect(formatAttributeLabel("ClaimResponse.item[0].itemSequence")).toBe(
+      "Item Sequence"
+    );
+    expect(formatAttributeLabel("Patient.name[1].family")).toBe("Family");
+    expect(formatAttributeLabel("Claim.item[0].careTeamSequence")).toBe(
+      "Care Team Sequence"
+    );
+    expect(formatAttributeLabel("Patient.photo[0].data")).toBe("Data");
+    expect(formatAttributeLabel("Patient.photo[1].hash")).toBe("Hash");
+  });
+
+  it("formats simple attribute paths to Title Case", () => {
+    expect(formatAttributeLabel("Patient.name.family")).toBe("Family");
+    expect(formatAttributeLabel("Encounter.period.start")).toBe("Start");
+    expect(formatAttributeLabel("Observation.status")).toBe("Status");
+  });
+
+  it("formats camelCase choice types to Title Case", () => {
+    expect(
+      formatAttributeLabel("Claim.procedure.procedureCodeableConcept")
+    ).toBe("Procedure Codeable Concept");
+    expect(formatAttributeLabel("Observation.valueQuantity")).toBe(
+      "Value Quantity"
+    );
+    expect(
+      formatAttributeLabel("MedicationRequest.medicationCodeableConcept")
+    ).toBe("Medication Codeable Concept");
+  });
+
+  it("handles single-segment paths", () => {
+    expect(formatAttributeLabel("Patient")).toBe("Patient");
+    expect(formatAttributeLabel("itemSequence")).toBe("Item Sequence");
+  });
+
+  it("handles null and undefined inputs", () => {
+    expect(formatAttributeLabel(null)).toBe(null);
+    expect(formatAttributeLabel(undefined)).toBe(undefined);
+    expect(formatAttributeLabel("")).toBe("");
+  });
+
+  it("formats complex nested paths", () => {
+    expect(formatAttributeLabel("Patient.contact.name.given")).toBe("Given");
+    expect(formatAttributeLabel("ClaimResponse.addItem.noteNumber")).toBe(
+      "Note Number"
+    );
   });
 });

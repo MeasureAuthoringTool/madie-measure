@@ -151,9 +151,7 @@ describe("IdentifierComponent", () => {
     );
 
     // System
-    const systemInput = await screen.findByLabelText(
-      "MedicationRequest.identifier[0].system"
-    );
+    const systemInput = await screen.findByLabelText("System");
     fireEvent.change(systemInput, { target: { value: "urn:oid:1.2.3.4" } });
 
     await waitFor(() => {
@@ -164,9 +162,7 @@ describe("IdentifierComponent", () => {
     });
 
     // Value
-    const valueInput = await screen.findByLabelText(
-      "MedicationRequest.identifier[0].value"
-    );
+    const valueInput = await screen.findByLabelText("Value");
     fireEvent.change(valueInput, { target: { value: "12345" } });
 
     await waitFor(() => {

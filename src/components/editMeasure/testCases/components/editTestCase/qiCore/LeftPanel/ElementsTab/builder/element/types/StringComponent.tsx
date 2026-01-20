@@ -25,28 +25,31 @@ const StringComponent = ({
   handleDeleteElement,
   ...props
 }: TypeComponentProps) => {
+  const formattedLabel = getMultipleCardinalityLabel(label);
+  const testIdBase =
+    props.name && props.name.includes("[") ? props.name : label;
+
   function isRootLabel(label) {
     const parts = label.split(".");
     return parts.length === 2 && parts[1] === "id";
   }
-  const { value } = props;
   return (
     <div className="element-editor-add-row">
       <TextField
         required={fieldRequired}
         readOnly={!canEdit}
-        id={`string-field-${label}`}
-        label={getMultipleCardinalityLabel(label)}
+        id={`string-field-${formattedLabel}`}
+        label={formattedLabel}
         helperText={helperText}
         labelColor="#1976d2"
         inputProps={{
-          "data-testid": `string-field-input-${label}`,
-          "aria-describedby": `string-field-input-helper-text-${label}`,
+          "data-testid": `string-field-input-${testIdBase}`,
+          "aria-describedby": `string-field-input-helper-text-${testIdBase}`,
           required: fieldRequired,
           "aria-required": fieldRequired,
           readOnly: isRootLabel(label),
         }}
-        data-testid={`string-field-${label}`}
+        data-testid={`string-field-${testIdBase}`}
         size="small"
         fullWidth
         onKeyPress={
@@ -60,14 +63,13 @@ const StringComponent = ({
             : undefined
         }
         {...props}
-        value={value || ""}
       />
       {showDeleteButton && canEdit && (
         <Tooltip title="Delete" placement="top" arrow>
           <IconButton
             onClick={handleDeleteElement}
-            data-testid={`delete-button-${label}`}
-            aria-label={`delete ${label}`}
+            data-testid={`delete-button-${testIdBase}`}
+            aria-label={`delete ${testIdBase}`}
             size="small"
           >
             <DeleteOutlineIcon fontSize="small" />
