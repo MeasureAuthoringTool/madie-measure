@@ -152,7 +152,8 @@ export default function ReferenceComponent({
     const newId = value?.reference || "";
     setSelectedReferenceType(newType);
     // if the earmark is present, we do not want to update our local state.
-    if (!formikContext.values["add_new_resource"]) {
+    const addNewResources = formikContext.values["add_new_resources"] || [];
+    if (addNewResources.length === 0) {
       setSelectedReferenceId(newId);
     }
   }, [value, formikContext.values]); // Use formikContext.values for dependency
@@ -274,10 +275,13 @@ export default function ReferenceComponent({
                   buildMadieResourceFromResourceIdentifier(
                     finalResourceOptionForAddNew
                   );
-                formikContext.setFieldValue(
-                  "add_new_resource",
-                  newMadieResource
-                );
+                // Append to array instead of overwriting - supports multiple "Add New" references
+                const existingResources =
+                  formikContext.values["add_new_resources"] || [];
+                formikContext.setFieldValue("add_new_resources", [
+                  ...existingResources,
+                  newMadieResource,
+                ]);
                 formikContext.setFieldValue(
                   `${label}.reference`,
                   `${selectedReferenceType}/${newMadieResource.resource.id}`
@@ -288,7 +292,20 @@ export default function ReferenceComponent({
                 formikContext.setFieldValue(label, {
                   reference: e.target.value,
                 });
-                formikContext.setFieldValue("add_new_resource", undefined);
+                // Remove from add_new_resources if it was previously added as "Add New"
+                const existingResources =
+                  formikContext.values["add_new_resources"] || [];
+                // Filter out any resource that matches this label's reference pattern
+                const filteredResources = existingResources.filter(
+                  (res) =>
+                    !label.includes(
+                      `${res.resource?.resourceType}/${res.resource?.id}`
+                    )
+                );
+                formikContext.setFieldValue(
+                  "add_new_resources",
+                  filteredResources.length > 0 ? filteredResources : undefined
+                );
                 setSelectedReferenceId(e.target.value);
               }
             }}

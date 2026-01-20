@@ -59,7 +59,7 @@ const TestComponent = () => {
         onClick={() =>
           handleDispatch(ResourceActionType.ADD_RESOURCE_BY_REFERENCE, {
             bundleEntry: { resource: { id: "res-1", modified: true } },
-            add_new_resource: { resource: { id: "res-2" } },
+            add_new_resources: [{ resource: { id: "res-2" } }],
           })
         }
       >
@@ -71,7 +71,7 @@ const TestComponent = () => {
             bundleEntry: {
               resource: { id: "res-1", modified: true, modifiedAgain: true },
             },
-            add_new_resource: { resource: { id: "res-2" } },
+            add_new_resources: [{ resource: { id: "res-2" } }],
           })
         }
       >
@@ -83,7 +83,7 @@ const TestComponent = () => {
             bundleEntry: {
               resource: { id: "res-1", modified: true, modifiedAgain: true },
             },
-            add_new_resource: { resource: { id: "res-2" } },
+            add_new_resources: [{ resource: { id: "res-2" } }],
           })
         }
       >

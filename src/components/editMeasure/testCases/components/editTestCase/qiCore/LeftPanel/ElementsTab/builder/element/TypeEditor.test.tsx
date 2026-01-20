@@ -3748,7 +3748,7 @@ describe("TypeEditor Component", () => {
       );
 
       await userEvent.click(
-        screen.getByTestId("delete-button-ClaimResponse.addItem[0].provider[0]")
+        screen.getByTestId("delete-button-ClaimResponse.addItem[0].provider[1]")
       );
 
       expect(setFieldValueMock).toHaveBeenCalledWith(
