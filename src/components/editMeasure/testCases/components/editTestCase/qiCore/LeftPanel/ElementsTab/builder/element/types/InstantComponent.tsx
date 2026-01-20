@@ -25,6 +25,8 @@ const InstantComponent = ({
 }) => {
   const [dateTime, setDateTime] = useState();
   const [isValid, setValid] = useState(false);
+  const formattedLabel = getMultipleCardinalityLabel(label);
+  const testIdBase = name && name.includes("[") ? name : label;
 
   useEffect(() => {
     setValid(true);
@@ -45,10 +47,10 @@ const InstantComponent = ({
     <div className="element-editor-add-row">
       <Instant
         disabled={false}
-        id={`${label}_instant`}
+        id={`${formattedLabel}_instant`}
         placeholder={isValid ? "MM/DD/YYYY" : "Invalid"}
         name={name}
-        label={getMultipleCardinalityLabel(label)}
+        label={formattedLabel}
         required={required}
         handleDateTimeChange={handleDateTimeChange}
         dateTimeValue={dateTime}
