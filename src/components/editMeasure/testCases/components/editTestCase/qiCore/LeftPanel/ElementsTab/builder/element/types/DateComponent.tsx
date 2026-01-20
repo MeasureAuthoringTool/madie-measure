@@ -18,6 +18,7 @@ import {
   formatOptionRenderMap,
 } from "./DateTimeComponent";
 import AddElementButton from "../../../../../../../common/UIOnlyModelAgnostic/AddElementButton";
+import { getMultipleCardinalityLabel } from "./TypeUtil";
 dayjs.extend(utc);
 dayjs.extend(timezone);
 dayjs.extend(advancedFormat);
@@ -94,9 +95,11 @@ const DateTimeComponent = ({
     selectProps.style = { height: "38.125px", marginBottom: "2px" };
   }
   return (
-    <div className="element-editor-add-row">
+    <div className="element-editor-add-row" data-component-type="DateComponent">
       <Box sx={{ display: "flex", flexDirection: "column" }}>
-        <InputLabel required={fieldRequired}>{label}</InputLabel>
+        <InputLabel required={fieldRequired}>
+          {getMultipleCardinalityLabel(label)}
+        </InputLabel>
         <LocalizationProvider dateAdapter={AdapterDayjs}>
           <div
             style={{

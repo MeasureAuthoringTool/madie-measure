@@ -41,7 +41,10 @@ const IntegerComponent = ({
     props.name && props.name.includes("[") ? props.name : label;
 
   return (
-    <div className="element-editor-add-row">
+    <div
+      className="element-editor-add-row"
+      data-component-type="IntegerComponent"
+    >
       <TextField
         required={fieldRequired}
         readOnly={!canEdit}
