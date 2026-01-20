@@ -22,6 +22,7 @@ const UrlComponent = ({
   return (
     <div
       className="element-editor-add-row"
+      data-component-type="UrlComponent"
       style={{ display: "flex", alignItems: "center", gap: "8px" }}
     >
       <TextField

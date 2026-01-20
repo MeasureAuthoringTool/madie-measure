@@ -14,6 +14,7 @@ import {
   InputLabel,
 } from "@madie/madie-design-system/dist/react";
 import DateField from "./DateField";
+import { getMultipleCardinalityLabel } from "./TypeUtil";
 import AddElementButton from "../../../../../../../common/UIOnlyModelAgnostic/AddElementButton";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 
@@ -142,10 +143,14 @@ const DateTimeComponent = ({
   if (canEdit) {
     selectProps.style = { height: "38.125px", marginBottom: "2px" };
   }
+  const formattedLabel = getMultipleCardinalityLabel(label);
   return (
-    <div className="element-editor-add-row">
+    <div
+      className="element-editor-add-row"
+      data-component-type="DateTimeComponent"
+    >
       <Box sx={{ display: "flex", flexDirection: "column" }}>
-        <InputLabel required={fieldRequired}>{label}</InputLabel>
+        <InputLabel required={fieldRequired}>{formattedLabel}</InputLabel>
         <LocalizationProvider dateAdapter={AdapterDayjs}>
           <div
             style={{

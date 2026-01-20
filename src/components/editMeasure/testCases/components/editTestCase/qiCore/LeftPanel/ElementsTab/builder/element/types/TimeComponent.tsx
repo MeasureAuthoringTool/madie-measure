@@ -29,7 +29,7 @@ const TimeComponent = ({
   );
 
   return (
-    <div className="element-editor-add-row">
+    <div className="element-editor-add-row" data-component-type="TimeComponent">
       <div className="time-field-container">
         <TimeField
           required={fieldRequired}
