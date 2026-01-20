@@ -814,8 +814,10 @@ const MeasureGroups = (props: MeasureGroupProps) => {
   }, [ucum, ucumUnits]);
 
   const isImprovementNotationRequired = () =>
-    formik.values.scoring !== GroupScoring.COHORT &&
-    formik.values.scoring !== GroupScoring.COMPOSITE;
+    !(
+      formik.values.scoring === GroupScoring.COHORT ||
+      formik.values.scoring === GroupScoring.COMPOSITE
+    );
 
   return (
     <div tw="lg:col-span-5 pl-2 pr-2" data-testid="qi-core-groups">
@@ -1251,9 +1253,9 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                   />
                 )}
                 {activeTab === "components" && (
-                  <Typography data-testid="components">
+                  <div data-testid="components">
                     <CompositeScoring canEdit={canEdit} formik={formik} />
-                  </Typography>
+                  </div>
                 )}
                 {activeTab === "stratification" && (
                   <FieldArray
