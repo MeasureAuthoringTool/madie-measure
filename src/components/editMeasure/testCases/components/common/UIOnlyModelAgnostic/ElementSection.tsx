@@ -34,7 +34,7 @@ const ElementSection = (props: ElementSectionProps) => {
           }
         }}
       >
-        <h4 className="header">{props.title}</h4>
+        <h4 className="header">{`${props.title}`}</h4>
         <ChevronRightIcon className={chevronClass} />
       </div>
 
