@@ -35,26 +35,30 @@ const IntegerComponent = ({
   handleDeleteElement,
   ...props
 }: IntegerComponentProps) => {
-  const { value } = props;
+  // Use name for test IDs in array scenarios (when it contains '['), otherwise use original label
+  const formattedLabel = getMultipleCardinalityLabel(label);
+  const testIdBase =
+    props.name && props.name.includes("[") ? props.name : label;
+
   return (
     <div className="element-editor-add-row">
       <TextField
         required={fieldRequired}
         readOnly={!canEdit}
-        id={`integer-field-${label}`}
-        label={getMultipleCardinalityLabel(label)}
+        id={`integer-field-${formattedLabel}`}
+        label={formattedLabel}
         inputProps={{
-          "data-testid": `integer-field-input-${label}`,
-          "aria-describedby": `integer-field-input-helper-text-${label}`,
+          "data-testid": `integer-field-input-${testIdBase}`,
+          "aria-describedby": `integer-field-input-helper-text-${testIdBase}`,
           required: fieldRequired,
           "aria-required": fieldRequired,
         }}
-        data-testid={`integer-field-${label}`}
+        data-testid={`integer-field-${testIdBase}`}
         size="small"
         fullWidth
         onKeyPress={(e) => {
           const inputValue = e.target.value;
-
+          // Allow control keys (backspace, delete, arrows, etc.)
           // Allow all characters, but validate the input later
           if (integerType === IntegerType.SIGNED) {
             if (
@@ -76,14 +80,13 @@ const IntegerComponent = ({
         error={error}
         helperText={error}
         {...props}
-        value={value || ""}
       />
       {showDeleteButton && canEdit && (
         <Tooltip title="Delete" placement="top" arrow>
           <IconButton
             onClick={handleDeleteElement}
-            data-testid={`delete-button-${label}`}
-            aria-label={`delete ${label}`}
+            data-testid={`delete-button-${testIdBase}`}
+            aria-label={`delete ${testIdBase}`}
             size="small"
           >
             <DeleteOutlineIcon fontSize="small" />

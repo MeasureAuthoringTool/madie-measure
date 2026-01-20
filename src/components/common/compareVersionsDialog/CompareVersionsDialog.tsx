@@ -9,6 +9,7 @@ import { Allotment } from "allotment";
 import "./CompareVersionsDialog.scss";
 import CqlDiffViewer from "./CqlDiffViewer";
 import MeasureNameDiff from "./MeasureNameDiff";
+import HumanReadableDiffViewer from "./HumanReadableDiffViewer";
 
 interface CompareVersionsDialogProps {
   measures: Measure[] | null | undefined;
@@ -45,6 +46,7 @@ const CompareVersionsDialog = ({
   onClose,
 }: CompareVersionsDialogProps) => {
   const [activeTab, setActiveTab] = useState<string>("cql");
+  const [differences, setDifferences] = useState<number>(0);
 
   if (!measures || measures.length !== 2) return null;
 
@@ -53,6 +55,7 @@ const CompareVersionsDialog = ({
 
   return (
     <MadieDialog
+      form
       title="Compare Measure Versions"
       dialogProps={{
         onClose,
@@ -121,10 +124,20 @@ const CompareVersionsDialog = ({
                 <div
                   className="differences-section"
                   data-testid="differences-section"
+                  aria-labelledby={`differences-${differences}`}
                 >
-                  <Typography variant="h6" className="differences-header">
-                    Differences
+                  <Typography
+                    variant="h6"
+                    className="differences-header"
+                    tabIndex={0}
+                  >
+                    Differences ({differences})
                   </Typography>
+                  <HumanReadableDiffViewer
+                    oldMeasure={oldMeasure}
+                    newMeasure={newMeasure}
+                    setDifferences={setDifferences}
+                  />
                 </div>
               </Allotment.Pane>
             </Allotment>

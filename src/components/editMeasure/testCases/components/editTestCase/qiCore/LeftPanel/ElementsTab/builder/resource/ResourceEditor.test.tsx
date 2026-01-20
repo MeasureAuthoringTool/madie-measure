@@ -229,12 +229,12 @@ describe("ResourceEditor", () => {
       expect(
         screen.getByTestId("add-attribute-dialog-button")
       ).toBeInTheDocument();
-      expect(screen.getByText("*identifier")).toBeInTheDocument();
-      expect(screen.getByText("*name")).toBeInTheDocument();
-      expect(screen.getByText("*gender")).toBeInTheDocument();
-      expect(screen.getByText("active")).toBeInTheDocument();
-      expect(screen.getByText("birthDate")).toBeInTheDocument();
-      expect(screen.getByText("address")).toBeInTheDocument();
+      expect(screen.getByText("*Identifier")).toBeInTheDocument();
+      expect(screen.getByText("*Name")).toBeInTheDocument();
+      expect(screen.getByText("*Gender")).toBeInTheDocument();
+      expect(screen.getByText("Active")).toBeInTheDocument();
+      expect(screen.getByText("Birth Date")).toBeInTheDocument();
+      expect(screen.getByText("Address")).toBeInTheDocument();
 
       // const idBtn = screen.getByTestId("id");
       // expect(idBtn).toBeInTheDocument();
@@ -698,7 +698,7 @@ describe("ResourceEditor", () => {
     );
 
     // Click on the "id" tab since elements are now sorted alphabetically
-    const idTab = await screen.findByTestId("id");
+    const idTab = await screen.findByTestId("Id");
     userEvent.click(idTab);
 
     const actionCenter = await screen.findByTestId(

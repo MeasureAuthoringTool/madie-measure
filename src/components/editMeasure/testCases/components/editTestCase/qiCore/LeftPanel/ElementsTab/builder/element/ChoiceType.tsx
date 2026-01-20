@@ -5,6 +5,7 @@ import { Select } from "@madie/madie-design-system/dist/react";
 import * as _ from "lodash";
 import TypeEditor from "./TypeEditor";
 import { useFormikContext } from "formik";
+import { formatAttributeLabel } from "../../../../../../../api/fhirDefinitionServiceUtilities";
 
 interface ChoiceTypePropsInterface {
   childDef: any;
@@ -41,7 +42,7 @@ export const ChoiceType = (props: ChoiceTypePropsInterface) => {
   return (
     <Box sx={{ mb: 2 }}>
       <Select
-        label={updatedLabel}
+        label={formatAttributeLabel(updatedLabel)}
         id={`choice-type-selector-${updatedLabel}`}
         required="true"
         inputProps={{

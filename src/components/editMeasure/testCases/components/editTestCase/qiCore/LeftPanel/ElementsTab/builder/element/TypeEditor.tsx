@@ -24,6 +24,7 @@ import {
   getNestedProperty,
   getIndexFromPath,
   getLastPart,
+  formatAttributeLabel,
 } from "../../../../../../../api/fhirDefinitionServiceUtilities";
 import CodingComponent from "./types/CodingComponent";
 import { useRequiredFields } from "./RequiredFieldsContext";
@@ -716,17 +717,31 @@ const TypeEditor = ({
         );
       case "Reference":
         return (
-          <ReferenceComponent
-            structureDefinition={structureDefinition}
-            label={label}
-            canEdit={canEdit}
-            required={required}
-            helperText={formikErrorHandler(label, formik)}
-            error={getNestedProperty(formik.errors, label)}
-            showAddAttributeButton={showAddAttributeButton}
-            addTitle={addTitle}
-            {...formik.getFieldProps(label)}
-          />
+          <>
+            {(isArrayMode ? values : [null]).map((el, index) => {
+              return (
+                <ReferenceComponent
+                  key={index}
+                  index={index}
+                  structureDefinition={structureDefinition}
+                  label={label}
+                  canEdit={canEdit}
+                  required={required}
+                  helperText={formikErrorHandler(label, formik)}
+                  error={getNestedProperty(formik.errors, label)}
+                  showAddAttributeButton={
+                    showAddAttributeButton &&
+                    (!isArrayMode || index === lastIndex)
+                  }
+                  showDeleteButton={isArrayMode && index > 0}
+                  handleDeleteElement={() => handleDeleteElement(index, label)}
+                  addTitle={addTitle}
+                  handleAddElement={handleAddElement}
+                  {...formik.getFieldProps(label)}
+                />
+              );
+            })}
+          </>
         );
       case "Extension":
         // This case is hit when we're on a complex extension like race, gender that has children inputs
@@ -965,7 +980,7 @@ const TypeEditor = ({
           } else if (!isComponentDataType(childDef?.type?.[0]?.code)) {
             return (
               <ElementSection
-                title={childDef.id}
+                title={formatAttributeLabel(childDef.id)}
                 startOpen={false}
                 children={
                   <Box
