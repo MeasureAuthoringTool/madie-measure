@@ -20,7 +20,7 @@ const MoneyComponent = ({
   const currencyPath = `${label}.currency`;
 
   return (
-    <Box className="money-component">
+    <Box className="money-component" data-component-type="MoneyComponent">
       {/* Value field */}
       <div className="decimal-input">
         <DecimalInput

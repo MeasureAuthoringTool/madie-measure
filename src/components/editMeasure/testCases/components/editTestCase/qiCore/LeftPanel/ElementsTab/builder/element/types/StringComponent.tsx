@@ -34,7 +34,10 @@ const StringComponent = ({
     return parts.length === 2 && parts[1] === "id";
   }
   return (
-    <div className="element-editor-add-row">
+    <div
+      className="element-editor-add-row"
+      data-component-type="StringComponent"
+    >
       <TextField
         required={fieldRequired}
         readOnly={!canEdit}

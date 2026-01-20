@@ -143,7 +143,10 @@ const PeriodDateTimeComponent = ({
     selectProps.style = { height: "38.125px", marginBottom: "2px" };
   }
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+    <Box
+      sx={{ display: "flex", flexDirection: "column", gap: 2 }}
+      data-component-type="PeriodDateTimeComponent"
+    >
       <div style={{ marginBottom: "16px", maxWidth: 220 }}>
         <Select
           readOnly={!canEdit}
