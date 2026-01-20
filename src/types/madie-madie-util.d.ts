@@ -168,6 +168,7 @@ declare module "@madie/madie-util" {
       measureId: String,
       abortController: AbortController
     ): Promise<Response>;
+    getHumanReadableDiff(oldMeasureId, newMeasureId): Promise<any>;
   }
 
   export function useMeasureServiceApi(): MeasureServiceApi;
