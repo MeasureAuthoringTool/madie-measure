@@ -18,7 +18,7 @@ describe("Base64BinaryComponent", () => {
       />
     );
 
-    expect(screen.getByText("Base64BinaryComponent")).toBeInTheDocument();
+    expect(screen.getByText("Base64 Binary Component")).toBeInTheDocument();
     expect(
       screen.getByTestId("field-input-Base64BinaryComponent")
     ).toBeInTheDocument();

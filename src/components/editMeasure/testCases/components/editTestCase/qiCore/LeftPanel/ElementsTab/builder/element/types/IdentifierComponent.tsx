@@ -60,7 +60,7 @@ const IdentifierComponent = ({
       />
 
       <UriComponent
-        label={label + ".system"}
+        label="System"
         fieldRequired={fieldRequired}
         canEdit={canEdit}
         helperText={formikErrorHandler(label + ".system", formik)}
@@ -69,7 +69,7 @@ const IdentifierComponent = ({
       />
 
       <StringComponent
-        label={label + ".value"}
+        label="Value"
         fieldRequired={fieldRequired}
         canEdit={canEdit}
         helperText={formikErrorHandler(label + ".value", formik)}
