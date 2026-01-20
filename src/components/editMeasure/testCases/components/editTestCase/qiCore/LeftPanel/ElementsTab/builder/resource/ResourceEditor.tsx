@@ -496,14 +496,32 @@ export function deleteMultipleCardinalityElement(
   path: string,
   dispatch: React.Dispatch<any>
 ) {
-  const idx: number = parseInt(elementName.split(" ")[2]) - 1;
+  // Extract the index number from elementName (e.g., "performer 1 ", " *name 2 ")
+  const match = elementName.match(/(\d+)\s*$/);
+  let idx: number;
 
-  if (!isNaN(idx) && idx >= 0 && idx < element.length) {
-    // Remove the element at the index
-    element.splice(idx, 1);
-    // Update the resource with the modified array
+  if (match) {
+    idx = parseInt(match[1]) - 1; // Convert 1-based to 0-based
+  } else if (element.length === 1) {
+    idx = 0; // Single element arrays don't show index in name
+  } else {
+    console.error(`Unable to parse index from element name: ${elementName}`);
+    return;
+  }
+
+  if (idx >= 0 && idx < element.length) {
+    const updatedElement = element.filter((_, i) => i !== idx);
     const nextEntry = _.cloneDeep(selectedResource.bundleEntry);
-    _.set(nextEntry.resource, path, element);
+    const strippedPath = path.includes(".")
+      ? path.substring(path.indexOf(".") + 1)
+      : path;
+
+    if (updatedElement.length === 0) {
+      _.unset(nextEntry.resource, strippedPath);
+    } else {
+      _.set(nextEntry.resource, strippedPath, updatedElement);
+    }
+
     dispatch({
       type: ResourceActionType.MODIFY_BUNDLE_ENTRY,
       payload: nextEntry,
