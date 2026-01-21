@@ -145,7 +145,10 @@ const measure = {
   model: "QI-Core v4.1.1",
   testCases: testCases,
   measureSetId: "MeasureSetId1",
-} as Measure;
+  measureMetaData: {
+    composite: false,
+  },
+} as unknown as Measure;
 
 const mockMeasureServiceApi = {
   searchMeasuresByMeasureNameOrEcqmTitle: jest
@@ -196,7 +199,6 @@ jest.mock("@madie/madie-util", () => ({
   })),
   checkUserCanEdit: jest.fn().mockImplementation(() => true),
   useFeatureFlags: jest.fn(() => ({
-    TransferMeasure: true,
     Locking: false,
   })),
   measureStore: {
@@ -958,7 +960,6 @@ describe("EditMeasure Component", () => {
 
   test("Renders in read-only mode when measure is locked", async () => {
     useFeatureFlags.mockImplementation(() => ({
-      TransferMeasure: true,
       Locking: true,
     }));
     const lockedMeasure = {
@@ -977,6 +978,25 @@ describe("EditMeasure Component", () => {
 
     const detailsLink = await findByText("Details");
     expect(detailsLink).toBeInTheDocument();
+    await waitFor(() => {
+      expect(detailsLink).toHaveAttribute("aria-selected", "true");
+    });
+  });
+
+  it("shouldn't render CQL Editor tab when it is a composite measure", async () => {
+    measureStore.state.mockImplementation(() => measure);
+    if (!measure.measureMetaData) {
+      measure.measureMetaData = {};
+    }
+    measure.measureMetaData.composite = true;
+    renderRouter();
+    expect(await findByText("Details")).toBeInTheDocument();
+    expect(await screen.queryByText("CQL Editor")).not.toBeInTheDocument();
+    expect(await findByText("Population Criteria")).toBeInTheDocument();
+    expect(
+      await findByText(`Test Cases (${measure?.testCases?.length})`)
+    ).toBeInTheDocument();
+    const detailsLink = await findByText("Details");
     await waitFor(() => {
       expect(detailsLink).toHaveAttribute("aria-selected", "true");
     });

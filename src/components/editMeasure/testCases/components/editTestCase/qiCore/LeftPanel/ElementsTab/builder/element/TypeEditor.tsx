@@ -3,7 +3,6 @@ import * as _ from "lodash";
 import { Box, Divider } from "@mui/material";
 
 import StringComponent from "./types/StringComponent";
-import PeriodComponent from "./types/PeriodComponent";
 import DateTimeComponent from "./types/DateTimeComponent";
 import BooleanComponent from "./types/BooleanComponent";
 import UriComponent from "./types/UriComponent";
@@ -25,6 +24,7 @@ import {
   getNestedProperty,
   getIndexFromPath,
   getLastPart,
+  formatAttributeLabel,
 } from "../../../../../../../api/fhirDefinitionServiceUtilities";
 import CodingComponent from "./types/CodingComponent";
 import { useRequiredFields } from "./RequiredFieldsContext";
@@ -38,6 +38,7 @@ import MoneyComponent from "./types/MoneyComponent";
 import TimingComponent from "./types/TimingComponent";
 import RangeComponent from "./types/RangeComponent";
 import ReferenceComponent from "./types/ReferenceComponent";
+import ContentReferenceType from "./contentReferenceType/ContentReferenceType";
 
 export const formikErrorHandler = (name: string, formik) => {
   const touched = getNestedProperty(formik.touched, name);
@@ -157,8 +158,10 @@ const TypeEditor = ({
   const addTitle = structureDefinition?.id
     ? _.startCase(getLastPart(structureDefinition.id))
     : "";
-  const showAddAttributeButton = Boolean(!isRoot && canBeMultipleCardinality);
-  const isArrayMode = showAddAttributeButton && values;
+  const showAddAttributeButton = Boolean(
+    !isRoot && canBeMultipleCardinality && canEdit
+  );
+  let isArrayMode = showAddAttributeButton && values;
   const lastIndex = isArrayMode ? values.length - 1 : null;
   const appendedZeroAlready = getIndexFromPath(label);
   if (isComponentDataType(type)) {
@@ -273,13 +276,17 @@ const TypeEditor = ({
         );
       case "Period":
         return (
-          <PeriodComponent
+          <PeriodDateTimeComponent
             label={label}
             canEdit={canEdit}
-            structureDefinition={structureDefinition}
-            showAddAttributeButton={showAddAttributeButton}
-            addTitle={addTitle}
+            helperText={formikErrorHandler(label, formik)}
+            error={getNestedProperty(formik.errors, label)}
             fieldRequired={required}
+            {...formik.getFieldProps(label)}
+            onChange={(value) => {
+              formik.setFieldTouched(label);
+              formik.setFieldValue(label, value);
+            }}
           />
         );
       case "dateTime":
@@ -435,6 +442,7 @@ const TypeEditor = ({
         return (
           <IdentifierComponent
             label={label}
+            handleAddElement={handleAddElement}
             canEdit={canEdit}
             resource={resource}
             structureDefinition={structureDefinition}
@@ -597,7 +605,6 @@ const TypeEditor = ({
               }
               return (
                 <>
-                  Codes component
                   {/* Observation.category , AuditEvent.type 0..*, but base fhir only. Revisit this render once base fhir is supported. */}
                   <CodesComponent
                     key={index}
@@ -643,6 +650,7 @@ const TypeEditor = ({
       case "Coding":
         return (
           <CodingComponent
+            handleAddElement={handleAddElement}
             label={label}
             canEdit={canEdit}
             structureDefinition={structureDefinition}
@@ -658,18 +666,35 @@ const TypeEditor = ({
         );
       case "CodeableConcept":
         return (
-          <CodeableConceptComponent
-            label={label}
-            canEdit={canEdit}
-            structureDefinition={structureDefinition}
-            showAddAttributeButton={showAddAttributeButton}
-            addTitle={addTitle}
-            {...formik.getFieldProps(label)}
-            onChange={(value) => {
-              formik.setFieldTouched(label);
-              formik.setFieldValue(label, value);
-            }}
-          />
+          <>
+            {(isArrayMode ? values : [null]).map((el, index) => {
+              let fieldLabel;
+              if (isArrayMode && appendedZeroAlready) {
+                fieldLabel = `${label.slice(0, label.length - 3)}[${index}]`;
+              } else {
+                fieldLabel = label;
+              }
+              return (
+                <CodeableConceptComponent
+                  key={index}
+                  canEdit={canEdit}
+                  structureDefinition={structureDefinition}
+                  label={fieldLabel}
+                  showAddAttributeButton={
+                    showAddAttributeButton &&
+                    (!isArrayMode || index === lastIndex)
+                  }
+                  addTitle={addTitle}
+                  handleAddElement={handleAddElement}
+                  {...formik.getFieldProps(fieldLabel)}
+                  onChange={(value) => {
+                    formik.setFieldTouched(fieldLabel);
+                    formik.setFieldValue(fieldLabel, value);
+                  }}
+                />
+              );
+            })}
+          </>
         );
       case "Money":
         return (
@@ -692,17 +717,31 @@ const TypeEditor = ({
         );
       case "Reference":
         return (
-          <ReferenceComponent
-            structureDefinition={structureDefinition}
-            label={label}
-            canEdit={canEdit}
-            required={required}
-            helperText={formikErrorHandler(label, formik)}
-            error={getNestedProperty(formik.errors, label)}
-            showAddAttributeButton={showAddAttributeButton}
-            addTitle={addTitle}
-            {...formik.getFieldProps(label)}
-          />
+          <>
+            {(isArrayMode ? values : [null]).map((el, index) => {
+              return (
+                <ReferenceComponent
+                  key={index}
+                  index={index}
+                  structureDefinition={structureDefinition}
+                  label={label}
+                  canEdit={canEdit}
+                  required={required}
+                  helperText={formikErrorHandler(label, formik)}
+                  error={getNestedProperty(formik.errors, label)}
+                  showAddAttributeButton={
+                    showAddAttributeButton &&
+                    (!isArrayMode || index === lastIndex)
+                  }
+                  showDeleteButton={isArrayMode && index > 0}
+                  handleDeleteElement={() => handleDeleteElement(index, label)}
+                  addTitle={addTitle}
+                  handleAddElement={handleAddElement}
+                  {...formik.getFieldProps(label)}
+                />
+              );
+            })}
+          </>
         );
       case "Extension":
         // This case is hit when we're on a complex extension like race, gender that has children inputs
@@ -850,7 +889,7 @@ const TypeEditor = ({
               {...formik.getFieldProps(label)}
               onChange={() => {}}
               formikHandleChange={formik.handleChange}
-              // Being depcreated for a formik handleChange
+              // Being deprecated for a formik handleChange
               // label={label} // label will be needed later to hook up to formik.
               fhirResource={resource}
               elementDefinition={structureDefinition} // id is patient.identifier[0].extension    ;
@@ -926,16 +965,22 @@ const TypeEditor = ({
                 resource={resource}
                 parentStructureDefinition={parentStructureDefinition}
                 canEdit={canEdit}
-                label={label}
+                label={filteredChildDef.id}
+              />
+            );
+          } else if (childDef.contentReference) {
+            return (
+              <ContentReferenceType
+                elementDefinition={childDef}
+                parentElementDefinition={structureDefinition}
+                resource={resource}
+                canEdit={canEdit}
               />
             );
           } else if (!isComponentDataType(childDef?.type?.[0]?.code)) {
-            // add additional check for if the type exists because I have no idea what ClaimResponse.item.detail.adjudication is but it has no type.
-            // TODO Figure out whats up with ClaimResponse.item.detail.adjudication. Doesn't appear to have children, but a backbone el
-            // TODO probably have to map these multiple cardinality elements against the length of the formik.values[propertyPath] if multiple and add index like done in elementEditorChildren.
             return (
               <ElementSection
-                title={childDef.id}
+                title={formatAttributeLabel(childDef.id)}
                 startOpen={false}
                 children={
                   <Box

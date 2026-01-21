@@ -4,7 +4,7 @@ import { TypeComponentProps } from "./TypeComponentProps";
 import { TextField } from "@madie/madie-design-system/dist/react";
 import _ from "lodash";
 import AddElementButton from "../../../../../../../common/UIOnlyModelAgnostic/AddElementButton";
-
+import { getMultipleCardinalityLabel } from "./TypeUtil";
 const OidComponent = ({
   canEdit,
   fieldRequired,
@@ -29,9 +29,9 @@ const OidComponent = ({
     }
   };
   return (
-    <div className="element-editor-add-row">
+    <div className="element-editor-add-row" data-component-type="OidComponent">
       <TextField
-        label={`${label}`}
+        label={`${getMultipleCardinalityLabel(label)}`}
         required={fieldRequired}
         readOnly={!canEdit}
         inputProps={{

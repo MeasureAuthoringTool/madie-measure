@@ -57,30 +57,33 @@ const ElementEditorChildren = ({
         style={{ cursor: "default", border: "none", marginBottom: 24 }}
       >
         <h4 className="header">
-          {getElementName(
+          {`${getElementName(
             rootDefinition,
             resourcePath,
             getNestedProperty(values, stripAllIndexes(rootDefinition.id))
-          )}
+          )}`}
         </h4>
-        <div style={{ position: "relative", top: "-7px" }}>
-          <ElementEditorActionCenter
-            numElements={
-              Object.prototype.toString.call(elementValue) === "[object Array]"
-                ? elementValue.length
-                : 1
-            }
-            elementName={getElementName(
-              rootDefinition,
-              resourcePath,
-              getNestedProperty(values, stripAllIndexes(rootDefinition.id))
-            )}
-            elementValue={elementValue}
-            addElementOfMultipleCardinality={addElementOfMultipleCardinality}
-            rootDefinition={rootDefinition}
-            handleDelete={deleteElement}
-          />
-        </div>
+        {canEdit && (
+          <div style={{ position: "relative", top: "-7px" }}>
+            <ElementEditorActionCenter
+              numElements={
+                Object.prototype.toString.call(elementValue) ===
+                "[object Array]"
+                  ? elementValue.length
+                  : 1
+              }
+              elementName={`${getElementName(
+                rootDefinition,
+                resourcePath,
+                getNestedProperty(values, stripAllIndexes(rootDefinition.id))
+              )}`}
+              elementValue={elementValue}
+              addElementOfMultipleCardinality={addElementOfMultipleCardinality}
+              rootDefinition={rootDefinition}
+              handleDelete={deleteElement}
+            />
+          </div>
+        )}
       </div>
       <Box>
         <TypeEditor

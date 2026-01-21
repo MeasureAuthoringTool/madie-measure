@@ -106,17 +106,36 @@ const returnTypeFunctionCheckOptions = (populationBasis, functionDataTypes) => {
 };
 export const measureGroupSchemaValidator = (
   definitionDataTypes: CqlDefineDataTypes,
-  functionDataTypes: CqlFunctionDataTypes
+  functionDataTypes: CqlFunctionDataTypes,
+  isCompositeMeasure: boolean = false
 ) => {
   return Yup.object().shape({
     scoring: Yup.string()
       .oneOf(Object.values(GroupScoring))
       .required("Group Scoring is required."),
+    compositeScoring: isCompositeMeasure
+      ? Yup.string()
+          .nullable()
+          .test(
+            "composite-scoring-required",
+            "Composite Scoring is required.",
+            function (value) {
+              const { scoring } = this.parent;
+              if (scoring === GroupScoring.COMPOSITE) {
+                return !_.isNil(value) && !_.isEmpty(value);
+              }
+              return true;
+            }
+          )
+      : Yup.mixed().notRequired(),
     scoringPrecision: Yup.number()
       .positive("Scoring Precision must be a positive integer")
       .nullable(),
     improvementNotation: Yup.string().when("scoring", (scoring, schema) => {
-      if (scoring !== GroupScoring.COHORT) {
+      if (
+        scoring !== GroupScoring.COHORT &&
+        scoring !== GroupScoring.COMPOSITE
+      ) {
         return schema.required("Improvement Notation is required.");
       }
       return schema;

@@ -285,6 +285,31 @@ export class TestCaseServiceApi {
     }
   }
 
+  /**
+   * Updates the JSON of selected test cases to match the UI values.
+   * Sets all "family" fields in the JSON to the group value entered in the UI,
+   * and all "given" fields to the title value entered in the UI.
+   */
+  async updateQiCoreJsonWithGroupAndTitle(
+    selectedTestCaseIds: string[],
+    measureId: string
+  ) {
+    try {
+      const response = await axios.put(
+        `${this.baseUrl}/measures/${measureId}/test-cases/update-json-metadata`,
+        selectedTestCaseIds,
+        {
+          headers: {
+            Authorization: `Bearer ${this.getAccessToken()}`,
+          },
+        }
+      );
+      return response.data;
+    } catch (err) {
+      throw new Error("Unable to match JSON with UI values.");
+    }
+  }
+
   async exportQRDA(
     measureId: string,
     requestDto: QrdaRequestDTO

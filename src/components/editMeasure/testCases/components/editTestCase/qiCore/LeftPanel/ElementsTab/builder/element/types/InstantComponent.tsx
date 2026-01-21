@@ -4,7 +4,7 @@ import { Instant } from "@madie/madie-design-system/dist/react";
 import dayjs from "dayjs";
 import { INSTANT_REGEX } from "../typesValidations/fhirR4Validations";
 import AddElementButton from "../../../../../../../common/UIOnlyModelAgnostic/AddElementButton";
-
+import { getMultipleCardinalityLabel } from "./TypeUtil";
 const isValidInstant = (instantString: string) => {
   if (!INSTANT_REGEX.test(instantString)) return false;
   return dayjs(instantString).isValid();
@@ -25,6 +25,8 @@ const InstantComponent = ({
 }) => {
   const [dateTime, setDateTime] = useState();
   const [isValid, setValid] = useState(false);
+  const formattedLabel = getMultipleCardinalityLabel(label);
+  const testIdBase = name && name.includes("[") ? name : label;
 
   useEffect(() => {
     setValid(true);
@@ -42,13 +44,16 @@ const InstantComponent = ({
   }, [dateTimeValue]);
 
   return (
-    <div className="element-editor-add-row">
+    <div
+      className="element-editor-add-row"
+      data-component-type="InstantComponent"
+    >
       <Instant
         disabled={false}
-        id={`${label}_instant`}
+        id={`${formattedLabel}_instant`}
         placeholder={isValid ? "MM/DD/YYYY" : "Invalid"}
         name={name}
-        label={label}
+        label={formattedLabel}
         required={required}
         handleDateTimeChange={handleDateTimeChange}
         dateTimeValue={dateTime}

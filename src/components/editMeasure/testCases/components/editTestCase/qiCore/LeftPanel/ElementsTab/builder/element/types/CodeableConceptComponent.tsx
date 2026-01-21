@@ -5,7 +5,7 @@ import { Coding } from "fhir/r4";
 import CodingComponent from "./CodingComponent";
 import { Box } from "@mui/system";
 import { InputLabel } from "@madie/madie-design-system/dist/react";
-
+import { getMultipleCardinalityLabel } from "./TypeUtil";
 const CodeableConceptComponent = ({
   canEdit,
   structureDefinition,
@@ -14,6 +14,7 @@ const CodeableConceptComponent = ({
   onChange,
   showAddAttributeButton,
   addTitle,
+  handleAddElement,
 }) => {
   const handleChange = useCallback(
     (value: Coding) => {
@@ -22,9 +23,13 @@ const CodeableConceptComponent = ({
     [onChange]
   );
   return (
-    <Box sx={{ display: "flex", flexDirection: "column" }}>
-      <InputLabel>{label}</InputLabel>
+    <Box
+      sx={{ display: "flex", flexDirection: "column" }}
+      data-component-type="CodeableConceptComponent"
+    >
+      <InputLabel>{getMultipleCardinalityLabel(label)}</InputLabel>
       <CodingComponent
+        handleAddElement={handleAddElement}
         addTitle={addTitle}
         showAddAttributeButton={showAddAttributeButton}
         label={label}

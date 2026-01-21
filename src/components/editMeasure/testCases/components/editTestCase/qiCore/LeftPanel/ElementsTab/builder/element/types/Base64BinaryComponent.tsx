@@ -4,6 +4,7 @@ import { TypeComponentProps } from "./TypeComponentProps";
 import { TextField } from "@madie/madie-design-system/dist/react";
 import _ from "lodash";
 import AddElementButton from "../../../../../../../common/UIOnlyModelAgnostic/AddElementButton";
+import { getMultipleCardinalityLabel } from "./TypeUtil";
 
 const isBase64 = (str) => {
   try {
@@ -35,9 +36,12 @@ const Base64BinaryComponent = ({
     }
   };
   return (
-    <div className="element-editor-add-row">
+    <div
+      className="element-editor-add-row"
+      data-component-type="Base64BinaryComponent"
+    >
       <TextField
-        label={`${label}`}
+        label={`${getMultipleCardinalityLabel(label)}`}
         required={fieldRequired}
         readOnly={!canEdit}
         inputProps={{

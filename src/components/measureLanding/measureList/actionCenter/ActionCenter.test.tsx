@@ -82,7 +82,7 @@ describe("ActionCenter", () => {
       mockCheckUserCanDelete
     );
     (useFeatureFlags as jest.Mock).mockImplementation(() => ({
-      TransferMeasure: true,
+      CompareMeasureVersions: false,
     }));
   });
 
@@ -533,47 +533,8 @@ describe("ActionCenter", () => {
     expect(setShareDialog).not.toHaveBeenCalledWith(true);
   });
 
-  it("should not render transfer action if feature flag is not on", () => {
-    mockCheckUserCanEdit.mockReturnValue(true);
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-      TransferMeasure: false,
-    }));
-
-    render(
-      <ActionCenter
-        measures={[qdmMeasure]}
-        associateCmsId={jest.fn()}
-        exportMeasure={jest.fn()}
-        updateTargetMeasure={jest.fn()}
-        setCreateVersionDialog={jest.fn()}
-        setDraftMeasureDialog={jest.fn()}
-        setDeleteMeasureDialog={jest.fn()}
-        setShareDialog={jest.fn}
-        deleteMeasure={jest.fn()}
-        setViewHumanReadableModal={jest.fn()}
-        activeTab={0}
-        setTransferDialog={jest.fn()}
-      />
-    );
-
-    expect(screen.getByTestId("action-center")).toBeInTheDocument();
-    expect(screen.getByTestId("delete-action-btn")).toBeInTheDocument();
-    expect(screen.getByTestId("share-action-btn")).toBeInTheDocument();
-    expect(screen.getByTestId("export-action-btn")).toBeInTheDocument();
-    expect(screen.getByTestId("draft-action-btn")).toBeInTheDocument();
-    expect(screen.getByTestId("version-action-btn")).toBeInTheDocument();
-    expect(
-      screen.getByTestId("associate-cms-id-action-btn")
-    ).toBeInTheDocument();
-    expect(screen.getByTestId("view-hr-action-btn")).toBeInTheDocument();
-    expect(screen.queryByTestId("transfer-action-btn")).not.toBeInTheDocument();
-  });
-
   it("should call setTransferDialog", async () => {
     mockCheckUserCanEdit.mockReturnValue(true);
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-      TransferMeasure: true,
-    }));
 
     const setTransferDialog = jest.fn();
 
@@ -605,9 +566,6 @@ describe("ActionCenter", () => {
 
   it("should not call setTransferDialog when no measures passed in", async () => {
     mockCheckUserCanEdit.mockReturnValue(true);
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-      TransferMeasure: true,
-    }));
 
     const setTransferDialog = jest.fn();
 
@@ -639,10 +597,6 @@ describe("ActionCenter", () => {
 
   it("should not render compare versions action if feature flag is not on", () => {
     mockCheckUserCanEdit.mockReturnValue(true);
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-      TransferMeasure: true,
-      CompareMeasureVersions: false,
-    }));
 
     render(
       <ActionCenter
@@ -671,7 +625,6 @@ describe("ActionCenter", () => {
   it("should render compare versions action if feature flag is on", () => {
     mockCheckUserCanEdit.mockReturnValue(true);
     (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-      TransferMeasure: true,
       CompareMeasureVersions: true,
     }));
 
@@ -702,7 +655,6 @@ describe("ActionCenter", () => {
   it("should call setCompareVersionsDialog when compare versions action is clicked", async () => {
     mockCheckUserCanEdit.mockReturnValue(true);
     (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-      TransferMeasure: true,
       CompareMeasureVersions: true,
     }));
 
@@ -739,7 +691,6 @@ describe("ActionCenter", () => {
   it("should keep compare versions button disabled when measures length !== 2", async () => {
     mockCheckUserCanEdit.mockReturnValue(true);
     (useFeatureFlags as jest.Mock).mockImplementation(() => ({
-      TransferMeasure: true,
       CompareMeasureVersions: true,
     }));
 
@@ -775,7 +726,6 @@ describe("ActionCenter", () => {
   it("should keep compare versions button disabled when measures are from different measure sets", async () => {
     mockCheckUserCanEdit.mockReturnValue(true);
     (useFeatureFlags as jest.Mock).mockImplementation(() => ({
-      TransferMeasure: true,
       CompareMeasureVersions: true,
     }));
 

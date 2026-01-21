@@ -7,6 +7,10 @@ import CqlComparisonPanel from "./panel/CqlComparisonPanel";
 import HrComparisonPanel from "./panel/HrComparisonPanel";
 import { Allotment } from "allotment";
 import "./CompareVersionsDialog.scss";
+import CqlDiffViewer from "./CqlDiffViewer";
+import MeasureNameDiff from "./MeasureNameDiff";
+import HumanReadableDiffViewer from "./HumanReadableDiffViewer";
+
 interface CompareVersionsDialogProps {
   measures: Measure[] | null | undefined;
   open: boolean;
@@ -42,6 +46,7 @@ const CompareVersionsDialog = ({
   onClose,
 }: CompareVersionsDialogProps) => {
   const [activeTab, setActiveTab] = useState<string>("cql");
+  const [differences, setDifferences] = useState<number>(0);
 
   if (!measures || measures.length !== 2) return null;
 
@@ -50,6 +55,7 @@ const CompareVersionsDialog = ({
 
   return (
     <MadieDialog
+      form
       title="Compare Measure Versions"
       dialogProps={{
         onClose,
@@ -69,7 +75,10 @@ const CompareVersionsDialog = ({
         <div className="dialog-header">
           <Typography className="measure-header">
             <span className="measure-name" data-testid="measure-name">
-              {newMeasure.measureName}
+              <MeasureNameDiff
+                oldMeasureName={oldMeasure.measureName}
+                newMeasureName={newMeasure.measureName}
+              />
             </span>{" "}
             <span className="measure-cmsid" data-testid="measure-cmsid">
               (CMS ID: {newMeasure.measureSet?.cmsId ?? "-"})
@@ -85,13 +94,17 @@ const CompareVersionsDialog = ({
         </div>
 
         {activeTab === "cql" && (
-          <div
-            className="comparison-panels-container"
-            data-testid="tab-content-cql"
-          >
-            <CqlComparisonPanel measure={oldMeasure} side="old" />
-            <CqlComparisonPanel measure={newMeasure} side="new" />
-          </div>
+          <>
+            <div
+              className="cql-comparison-panels-container"
+              data-testid="tab-content-cql"
+            >
+              <CqlComparisonPanel measure={oldMeasure} side="old" />
+              <CqlComparisonPanel measure={newMeasure} side="new" />
+            </div>
+
+            <CqlDiffViewer oldMeasure={oldMeasure} newMeasure={newMeasure} />
+          </>
         )}
 
         {activeTab === "human-readable" && (
@@ -99,16 +112,11 @@ const CompareVersionsDialog = ({
             <Allotment vertical defaultSizes={[75, 25]}>
               <Allotment.Pane>
                 <div
-                  className="comparison-panels-container"
+                  className="hr-comparison-panels-container"
                   data-testid="tab-content-human-readable"
                 >
-                  <div className="comparison-panel">
-                    <HrComparisonPanel measure={oldMeasure} side="old" />
-                  </div>
-
-                  <div className="comparison-panel">
-                    <HrComparisonPanel measure={newMeasure} side="new" />
-                  </div>
+                  <HrComparisonPanel measure={oldMeasure} side="old" />
+                  <HrComparisonPanel measure={newMeasure} side="new" />
                 </div>
               </Allotment.Pane>
 
@@ -116,10 +124,20 @@ const CompareVersionsDialog = ({
                 <div
                   className="differences-section"
                   data-testid="differences-section"
+                  aria-labelledby={`differences-${differences}`}
                 >
-                  <Typography variant="h6" className="differences-header">
-                    Differences
+                  <Typography
+                    variant="h6"
+                    className="differences-header"
+                    tabIndex={0}
+                  >
+                    Differences ({differences})
                   </Typography>
+                  <HumanReadableDiffViewer
+                    oldMeasure={oldMeasure}
+                    newMeasure={newMeasure}
+                    setDifferences={setDifferences}
+                  />
                 </div>
               </Allotment.Pane>
             </Allotment>

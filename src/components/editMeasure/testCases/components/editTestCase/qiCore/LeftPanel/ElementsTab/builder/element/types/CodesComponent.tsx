@@ -10,7 +10,7 @@ import useTerminologyServiceApi from "../../../../../../../../api/useTerminology
 import AddElementButton from "../../../../../../../common/UIOnlyModelAgnostic/AddElementButton";
 import "./CodesComponent.scss";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
-
+import { getMultipleCardinalityLabel } from "./TypeUtil";
 const CodesComponent = ({
   canEdit,
   structureDefinition,
@@ -18,6 +18,7 @@ const CodesComponent = ({
   value,
   onChange,
   resource,
+  name,
   showAddAttributeButton,
   addTitle,
   handleAddElement,
@@ -29,8 +30,11 @@ const CodesComponent = ({
   const terminologyService = useRef(useTerminologyServiceApi());
   const [codeValue, setCodeValue] = useState(value);
 
-  // Replace spaces with underscores to ensure a valid HTML id/data-testid,
-  const sanitizedId = label.replace(/\s+/g, "_");
+  // Use hybrid test ID: prefer complete path from name when in array mode
+  const formattedLabel = getMultipleCardinalityLabel(label);
+  const testIdBase = name && name.includes("[") ? name : label;
+  // Replace spaces with underscores to ensure a valid HTML id/data-testid
+  const sanitizedId = testIdBase.replace(/\s+/g, "_");
 
   const getAndSetCodeValueFromResource = () => {
     // ["Patient", "extension[2]", "value[x]"]
@@ -140,10 +144,13 @@ const CodesComponent = ({
 
   return (
     <Box>
-      <div className="element-editor-add-row">
+      <div
+        className="element-editor-add-row"
+        data-component-type="CodesComponent"
+      >
         <div className="codes-select-container">
           <Select
-            label={label}
+            label={formattedLabel}
             id={`code-selector-${sanitizedId}`}
             inputProps={{
               "data-testid": `code-selector-input-${sanitizedId}`,
@@ -180,8 +187,8 @@ const CodesComponent = ({
           <Tooltip title="Delete" placement="top" arrow>
             <IconButton
               onClick={handleDeleteElement}
-              data-testid={`delete-button-${label}`}
-              aria-label={`delete ${label}`}
+              data-testid={`delete-button-${sanitizedId}`}
+              aria-label={`delete ${sanitizedId}`}
               size="small"
             >
               <DeleteOutlineIcon fontSize="small" />

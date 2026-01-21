@@ -46,6 +46,55 @@ export function modifySliceNameForReadability(sliceName) {
   return sliceSplit.join(" ");
 }
 
+/**
+ * Formats an attribute path into a human-friendly label for display.
+ * Strips resource names, path segments, and formats the terminal attribute to Title Case.
+ * For paths ending with array indices, formats the segment before the index and appends the index.
+ *
+ * @param {string} path - The full FHIR path (e.g., "ClaimResponse.item[0].itemSequence")
+ * @returns {string} - Human-friendly label (e.g., "Item Sequence")
+ *
+ * Examples:
+ *   "ClaimResponse.item[0].itemSequence" -> "Item Sequence" (formats final attribute)
+ *   "ClaimResponse.item[0]" -> "Item[0]" (formats segment before array index)
+ *   "ClaimResponse.itemSequence[0]" -> "Item Sequence[0]" (handles camelCase with index)
+ *   "Patient.name.family" -> "Family"
+ *   "Claim.procedure.procedureCodeableConcept" -> "Procedure Codeable Concept"
+ *   "Encounter.period.start" -> "Start"
+ */
+export function formatAttributeLabel(path: string): string {
+  if (!path) {
+    return path;
+  }
+
+  // Check if path ends with array index like "ClaimResponse.item[0]"
+  const arrayIndexMatch = path.match(/\.([^\.\[]+)(\[\d+\])$/);
+
+  if (arrayIndexMatch) {
+    // Extract the segment before the array index and the index itself
+    const segment = arrayIndexMatch[1];
+    const index = arrayIndexMatch[2];
+    // Format the segment and append the array index
+    return _.startCase(segment) + index;
+  }
+
+  // Check if path has array index followed by property like "Patient.photo[0].data"
+  const arrayWithPropertyMatch = path.match(/\[\d+\]\.([^\.]+)$/);
+
+  if (arrayWithPropertyMatch) {
+    // Extract just the property name after the array index
+    const propertyName = arrayWithPropertyMatch[1];
+    // Format just the property name
+    return _.startCase(propertyName);
+  }
+
+  // Extract the last segment after the final dot
+  const lastSegment = path.split(".").pop() || path;
+
+  // Convert to Title Case with spaces (handles camelCase and choice types)
+  return _.startCase(lastSegment);
+}
+
 export function getElementName(
   element: ElementDefinition,
   basePath: string,
@@ -78,9 +127,10 @@ export function getElementName(
       basePath
     )}${_.upperFirst(element.type[0].code)}`;
   }
-  const result = `${requiredIndicator}${stripAllIndexes(
-    element.id.substring(basePath.length + 1)
-  )}${index}`;
+  const pathAfterBase = element.id.substring(basePath.length + 1);
+  const strippedPath = stripAllIndexes(pathAfterBase);
+  const formattedLabel = formatAttributeLabel(strippedPath);
+  const result = `${requiredIndicator}${formattedLabel}${index}`;
   return result;
 }
 
@@ -98,6 +148,7 @@ export const filterUnusedExtensionsFromElements = (
       const extUrl = el.type?.[0]?.profile?.[0];
       return extensions.some((ext) => ext.url === extUrl);
     }
+
     return true;
   });
 
@@ -309,54 +360,74 @@ export function getBasePath(resource: any): string {
 
 // For ClaimResponse.item.adjudication
 // we want to get only the elements at the top of the tree for the render
+// This function also filters out non-extension sliced elements (id contains ':') except for extension slices (extension:xxx)
 export function getTopLevelElements(resource: any) {
   const elements = [...resource?.definition?.snapshot?.element];
   const basePath = resource?.definition?.type;
   const elementsFiltered = elements?.filter(
     (e) =>
-      e.path.split(".")?.length === 2 &&
-      e.id !== "Extension.extension" &&
-      e.id !== "Patient.extension" &&
-      e.max !== "0" &&
-      // Exclude entries where the path contains these attributes or matches these element names
-      ![
-        ".contained",
-        ".text",
-        ".meta",
-        ".language",
-        ".implicitRules",
-        "modifierExtension",
-        "extension",
-      ].some(
-        (attribute) =>
-          e?.path?.includes(attribute) ||
-          e.path.substring(basePath?.length + 1) === attribute
-      )
+      (e.path.split(".")?.length === 2 &&
+        e.id !== "Extension.extension" &&
+        e.id !== "Patient.extension" &&
+        e.max !== "0" &&
+        // Exclude entries where the path contains these attributes or matches these element names
+        ![
+          ".contained",
+          ".text",
+          ".meta",
+          ".language",
+          ".implicitRules",
+          "modifierExtension",
+        ].some(
+          (attribute) =>
+            e?.path?.includes(attribute) ||
+            e.path.substring(basePath?.length + 1) === attribute
+        )) ||
+      (e?.path?.includes("extension") && e?.id.includes(":"))
   );
+
+  // Filter out sliced elements (id contains ':') except extension slices
+  const filteredWithoutSlices = elementsFiltered.filter((e) => {
+    if (e.id?.includes(":")) {
+      const parts = e.id.split(":");
+      const beforeColon = parts[0];
+
+      // Keep extension slices (e.g., "Patient.extension:ethnicity")
+      if (beforeColon.endsWith(".extension")) {
+        return true;
+      }
+
+      // Filter out non-extension slices (e.g., "Condition.category:us-core")
+      return false;
+    }
+
+    return true;
+  });
+
   //for each elementsFiltered, if type contains more than one type, duplicate the element and restrict the type to only that type
 
-  elementsFiltered.forEach((element) => {
+  filteredWithoutSlices.forEach((element) => {
     if (element?.type?.length > 1) {
       element?.type?.forEach((type, index) => {
         const newElement = { ...element };
         newElement.type = [type];
-        elementsFiltered.push(newElement);
+        filteredWithoutSlices.push(newElement);
       });
-      elementsFiltered.splice(elementsFiltered.indexOf(element), 1);
+      filteredWithoutSlices.splice(filteredWithoutSlices.indexOf(element), 1);
     }
   });
   // Sort elements alphabetically by their path (after the basePath, if available)
   if (basePath) {
-    elementsFiltered.sort((a, b) => {
+    filteredWithoutSlices.sort((a, b) => {
       const labelA = a.path.substring(basePath.length + 1);
       const labelB = b.path.substring(basePath.length + 1);
       return labelA.localeCompare(labelB);
     });
   } else {
     // If no basePath, sort by full path
-    elementsFiltered.sort((a, b) => a.path.localeCompare(b.path));
+    filteredWithoutSlices.sort((a, b) => a.path.localeCompare(b.path));
   }
-  return elementsFiltered;
+  return filteredWithoutSlices;
 }
 // find out who needs to be required on formik validation
 export function getRequiredElements(resource: any) {
@@ -472,6 +543,18 @@ export function getIndexFromPath(path) {
 export function getLastPart(path: string): string {
   const parts = path?.split(".");
   return parts[parts?.length - 1];
+}
+
+// gets the parent path by removing last part in the path.
+// e.g. QuestionerResponse.item.answer -> QuestionerResponse.item
+// e.g. QuestionerResponse.item -> QuestionerResponse
+export function getParentPath(path: string): string {
+  const parts = path?.split(".");
+  parts?.pop();
+  if (parts && parts.length > 0) {
+    return parts.join(".");
+  }
+  return null;
 }
 
 // removes all indexes from path
@@ -593,6 +676,7 @@ export function isComponentDataType(datatype) {
     case "reference":
     case "quantity":
     case "range":
+    case "period":
       return true;
     default:
       return false;

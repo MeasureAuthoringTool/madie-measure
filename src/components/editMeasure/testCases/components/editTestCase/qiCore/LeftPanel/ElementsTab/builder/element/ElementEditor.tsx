@@ -69,6 +69,7 @@ export function simplifySnapshotElements(data) {
       canBeMultipleCardinality: details.max === "*",
       max: details.max,
       min: details.min,
+      contentReference: details.contentReference,
     },
   ]);
 }
@@ -116,7 +117,7 @@ const ElementEditor = ({
     const type = child?.type?.[0]?.code;
     if (!isComponentDataType(type)) {
       // Fetch the resource tree asynchronously
-      // nesting these ifs to avoid a crash in deeply nested Claimresponse.item. Might cause issue elsewhere.
+      // nesting these ifs to avoid a crash in deeply nested ClaimResponse.item. Might cause issue elsewhere.
       if (type) {
         const def = await fhirDefinitionsService.current.getResourceTree(type);
         if (def) {
@@ -170,6 +171,7 @@ const ElementEditor = ({
         canBeMultipleCardinality,
         max: child.max,
         min: child.min,
+        contentReference: child.contentReference,
       };
       return nodeList.concat(builtNode);
     } else {
@@ -334,32 +336,34 @@ const ElementEditor = ({
             canEdit={canEdit}
             deleteElement={deleteElement}
           />
-          <div className="element-editor-submission">
-            <Button
-              variant="outline"
-              id="element-editor-undo-button"
-              data-testId="element-editor-undo-button"
-              disabled={!formik.dirty}
-              onClick={formik.resetForm}
-            >
-              Undo
-            </Button>
-            <Button
-              variant="submit"
-              id="element-editor-submit-button"
-              data-testId="element-editor-submit-button"
-              disabled={
-                !formik.dirty ||
-                !!formik.errors[resourcePath]?.[
-                  elementDefinition?.path.split(".")[1]
-                ] ||
-                applyLoading
-              }
-              onClick={handleIndividualElementApplyButtonClick}
-            >
-              Apply
-            </Button>
-          </div>
+          {canEdit && (
+            <div className="element-editor-submission">
+              <Button
+                variant="outline"
+                id="element-editor-undo-button"
+                data-testId="element-editor-undo-button"
+                disabled={!formik.dirty}
+                onClick={formik.resetForm}
+              >
+                Undo
+              </Button>
+              <Button
+                variant="submit"
+                id="element-editor-submit-button"
+                data-testId="element-editor-submit-button"
+                disabled={
+                  !formik.dirty ||
+                  !!formik.errors[resourcePath]?.[
+                    elementDefinition?.path.split(".")[1]
+                  ] ||
+                  applyLoading
+                }
+                onClick={handleIndividualElementApplyButtonClick}
+              >
+                Apply
+              </Button>
+            </div>
+          )}
         </Box>
         <Toast
           toastKey="testcase-attribute-toast"

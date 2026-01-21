@@ -65,7 +65,7 @@ describe("ElementEditorChildren", () => {
       </FormikProvider>
     );
 
-    expect(screen.getByText("*name")).toBeInTheDocument(); // header from rootDefinition.id
+    expect(screen.getByText("*Name")).toBeInTheDocument(); // header from rootDefinition.id
     expect(screen.getByTestId("type-editor")).toBeInTheDocument();
     userEvent.click(screen.getByTestId("elements-action-center-actual-icon"));
 
@@ -82,5 +82,25 @@ describe("ElementEditorChildren", () => {
     expect(defaultProps.setLastAddedElemPath).toHaveBeenCalledWith(
       "Patient.name"
     );
+  });
+
+  it("does not render ElementEditorActionCenter when canEdit is false", () => {
+    const dispatch = jest.fn();
+
+    render(
+      <FormikProvider value={{}}>
+        <QiCoreResourceContext.Provider
+          value={{ state: mockPatientState, dispatch }}
+        >
+          <ElementEditorChildren {...defaultProps} canEdit={false} />
+        </QiCoreResourceContext.Provider>
+      </FormikProvider>
+    );
+
+    expect(screen.getByText("*Name")).toBeInTheDocument();
+    expect(screen.getByTestId("type-editor")).toBeInTheDocument();
+    expect(
+      screen.queryByTestId("elements-action-center-actual-icon")
+    ).not.toBeInTheDocument();
   });
 });

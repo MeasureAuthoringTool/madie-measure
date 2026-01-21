@@ -17,6 +17,9 @@ const TestCaseLanding = (props: TestCaseListProps) => {
           setWarnings={props.setWarnings}
           setImportWarnings={props.setImportWarnings}
           setShiftTestCaseDatesWarnings={props.setShiftTestCaseDatesWarnings}
+          setUpdateQiCoreJsonWithGroupAndTitleWarning={
+            props.setUpdateQiCoreJsonWithGroupAndTitleWarning
+          }
           setCustomWarningMessages={props.setCustomWarningMessages}
         />
       </section>

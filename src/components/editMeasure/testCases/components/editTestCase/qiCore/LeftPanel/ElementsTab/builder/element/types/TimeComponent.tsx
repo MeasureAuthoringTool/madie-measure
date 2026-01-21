@@ -6,7 +6,7 @@ import dayjs from "dayjs";
 import AddElementButton from "../../../../../../../common/UIOnlyModelAgnostic/AddElementButton";
 import { IconButton, Tooltip } from "@mui/material";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
-
+import { getMultipleCardinalityLabel } from "./TypeUtil";
 dayjs.extend(timezone);
 
 const TimeComponent = ({
@@ -15,28 +15,30 @@ const TimeComponent = ({
   value,
   onChange,
   label = "Time",
+  name,
   showAddAttributeButton,
   addTitle,
   handleAddElement,
   showDeleteButton = false,
   handleDeleteElement,
 }: TypeComponentProps) => {
+  const testIdBase = name && name.includes("[") ? name : label;
   const TIME_FORMAT = "HH:mm:ss";
   const [time, setTime] = React.useState(
     value ? dayjs(value, TIME_FORMAT) : ""
   );
 
   return (
-    <div className="element-editor-add-row">
+    <div className="element-editor-add-row" data-component-type="TimeComponent">
       <div className="time-field-container">
         <TimeField
           required={fieldRequired}
           disabled={!canEdit}
           id={`time-field-${label}`}
-          label={label}
+          label={getMultipleCardinalityLabel(label)}
           seconds
           views={["hours", "minutes", "seconds"]}
-          data-testid={`time-field-${label}`}
+          data-testid={`time-field-${testIdBase}`}
           handleTimeChange={(time) => {
             const formatted = time?.format(TIME_FORMAT);
             setTime(time);
@@ -50,7 +52,7 @@ const TimeComponent = ({
           <IconButton
             onClick={handleDeleteElement}
             data-testid={`delete-button-${label}`}
-            aria-label={`delete ${label}`}
+            aria-label={`delete ${getMultipleCardinalityLabel(label)}`}
             size="small"
           >
             <DeleteOutlineIcon fontSize="small" />

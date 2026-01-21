@@ -24,6 +24,7 @@ import {
   Tab,
   MadieDiscardDialog,
   MadieSpinner,
+  MadieAlert,
 } from "@madie/madie-design-system/dist/react";
 import { useFormikContext } from "formik";
 import { handleCancel, handleRowDelete, handleRowEdit } from "./BuilderUtils";
@@ -111,12 +112,13 @@ const Builder = ({
 
   const [selectedResourceID, setSelectedResourceId] = useState<string>(null); // one single source of truth.
   const [resourceIdentifiers, setResourceIdentifiers] = useState([]);
-  const [resources, setResources] = useState<ResourceIdentifier[]>(null);
+  const [resources, setResources] = useState<ResourceIdentifier[]>([]);
   const addedResources = state?.bundle?.entry?.length || 0;
   const [savedGridID, setSavedGridID] = useState(null);
   const [applyLoading, setApplyLoading] = useState(false);
   useEffect(() => {
     const fetchResources = async () => {
+      // we want to filter out base fhir resources, by checking if the id does not start with qicore or us-core
       const resourceIdentifiers =
         await fhirDefinitionsService.current.getResources();
       setResourceIdentifiers(resourceIdentifiers);
@@ -160,12 +162,35 @@ const Builder = ({
     };
   }, [measure]);
 
-  // check if patient resource is already added
-  const isPatientAdded = !!state?.bundle?.entry?.some(
+  const numberOfPatientsAdded = state?.bundle?.entry?.filter(
     (e) => e.resource?.resourceType === "Patient"
-  );
-
-  return (
+  )?.length;
+  const isPatientAdded = numberOfPatientsAdded > 0;
+  return numberOfPatientsAdded > 1 ? (
+    <div style={{ margin: "-16px", marginTop: "-32px", marginRight: 0 }}>
+      <MadieAlert
+        minimizeAlerts={false}
+        type="error"
+        content={
+          <div
+            aria-live="polite"
+            role="alert"
+            data-testid="json-error-alert-multiple-patients"
+            style={{
+              paddingTop: "10px",
+              paddingBottom: "8px",
+            }}
+          >
+            <h3>JSON Failing</h3>
+            Builder disabled. Builder is designed to work with a single patient
+            resource. Please remove the extra patient(s) from the JSON to enable
+            Builder support.
+          </div>
+        }
+        canClose={false}
+      />
+    </div>
+  ) : (
     <Box
       sx={{ mr: 2 }}
       id="qi-core-test-case-builder"
@@ -210,7 +235,10 @@ const Builder = ({
         {/* available elements that we don't want to display when a resource is selected */}
         {activeTab === "Available" && canEdit && (
           <ResourceList
-            resourceIdentifiers={resources}
+            resourceIdentifiers={resources.filter(
+              (res) =>
+                res.id.startsWith("qicore") || res.id.startsWith("us-core")
+            )}
             onClick={async (resourceIdentifier: ResourceIdentifier) => {
               const newEntry =
                 buildMadieResourceFromResourceIdentifier(resourceIdentifier);
@@ -272,8 +300,8 @@ const Builder = ({
               </div>
             )}
             <>
-              {selectedResourceID && (
-                <ResourceContextProvider value={resourceIdentifiers}>
+              <ResourceContextProvider value={resourceIdentifiers}>
+                {selectedResourceID && (
                   <ResourceEditor
                     selectedResourceID={selectedResourceID}
                     setValidationSchema={setValidationSchema}
@@ -285,20 +313,21 @@ const Builder = ({
                     applyLoading={applyLoading}
                     setApplyLoading={setApplyLoading}
                   />
-                </ResourceContextProvider>
-              )}
-              <TestCaseSummaryGrid
-                gridData={prepareSummaryGridData(
-                  state?.bundle?.entry,
-                  resourceIdentifiers
                 )}
-                onRowEdit={(row) =>
-                  handleRowEdit(row, setSelectedResourceId, setSavedGridID)
-                }
-                onRowDelete={(row) => handleRowDelete(row, dispatch)}
-                testCaseCanEdit={canEdit}
-                selectedRowId={selectedResourceID}
-              />
+                <TestCaseSummaryGrid
+                  gridData={prepareSummaryGridData(
+                    state?.bundle?.entry,
+                    resourceIdentifiers
+                  )}
+                  onRowEdit={(row) =>
+                    handleRowEdit(row, setSelectedResourceId, setSavedGridID)
+                  }
+                  onRowDelete={(row) => handleRowDelete(row, dispatch)}
+                  testCaseCanEdit={canEdit}
+                  selectedRowId={selectedResourceID}
+                  readOnly={!canEdit}
+                />
+              </ResourceContextProvider>
             </>
           </div>
         )}

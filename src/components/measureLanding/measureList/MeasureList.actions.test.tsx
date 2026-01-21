@@ -29,7 +29,6 @@ import ServiceContext, {
 import { Simulate } from "react-dom/test-utils";
 // @ts-ignore
 import {
-  useFeatureFlags,
   checkUserCanEdit,
   MeasureServiceApi,
   ServiceConfig,
@@ -313,7 +312,6 @@ const mockCheckValidVersion = jest.fn().mockResolvedValue({});
 
 const mockUseFeatureFlagsApi = {
   enableQdmRepeatTransfer: jest.fn().mockResolvedValue(false),
-  TransferMeasure: jest.fn().mockResolvedValue(false),
 };
 const mockMeasureServiceApi = {
   searchMeasuresByCriteria: jest.fn().mockResolvedValue(oneItemResponse),
@@ -460,10 +458,7 @@ describe("Action Center Tests", () => {
     expect(mockPush).toHaveBeenCalledWith("/measures/IDIDID1/edit/details/");
   });
 
-  it("should trigger navigate when featureFlags?.MeasureSearch is true", async () => {
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementationOnce(() => ({
-      MeasureSearch: true,
-    }));
+  it("should trigger navigate", async () => {
     render(
       <ServiceContext.Provider value={serviceConfig}>
         <MeasureList
@@ -741,10 +736,6 @@ describe("Action Center Tests", () => {
   });
 
   it("should display transfer dialog on clicking transfer action button and default toast values on cancel", async () => {
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-      TransferMeasure: true,
-    }));
-
     const { unmount } = render(
       <ServiceContext.Provider value={serviceConfig}>
         <MeasureList

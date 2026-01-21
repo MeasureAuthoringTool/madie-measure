@@ -290,17 +290,19 @@ const BaseConfiguration = (props: BaseConfigurationProps) => {
                 const nextScoring = e.target.value;
                 formik.setFieldValue("scoring", nextScoring);
               }}
-              options={Object.keys(GroupScoring).map((scoring) => {
-                return (
-                  <MuiMenuItem
-                    key={scoring}
-                    value={GroupScoring[scoring]}
-                    data-testid={`scoring-option-${scoring}`}
-                  >
-                    {GroupScoring[scoring]}
-                  </MuiMenuItem>
-                );
-              })}
+              options={Object.keys(GroupScoring)
+                .filter((scoring) => scoring !== "COMPOSITE")
+                .map((scoring) => {
+                  return (
+                    <MuiMenuItem
+                      key={scoring}
+                      value={GroupScoring[scoring]}
+                      data-testid={`scoring-option-${scoring}`}
+                    >
+                      {GroupScoring[scoring]}
+                    </MuiMenuItem>
+                  );
+                })}
             />
           </div>
           <div className="right">

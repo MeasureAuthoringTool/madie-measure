@@ -51,6 +51,10 @@ const TestCaseRoutes = () => {
   const [shiftTestCaseDatesWarnings, setShiftTestCaseDatesWarnings] = useState<
     Array<string>
   >([]);
+  const [
+    updateQiCoreJsonWithGroupAndTitleWarning,
+    setUpdateQiCoreJsonWithGroupAndTitleWarning,
+  ] = useState<Array<string>>([]);
   const [importWarnings, setImportWarnings] = useState<TestCaseImportOutcome[]>(
     []
   );
@@ -179,11 +183,15 @@ const TestCaseRoutes = () => {
         warning={
           warnings?.length > 0 ||
           customWarningMessages?.length > 0 ||
-          shiftTestCaseDatesWarnings?.length > 0
+          shiftTestCaseDatesWarnings?.length > 0 ||
+          updateQiCoreJsonWithGroupAndTitleWarning?.length > 0
         }
         warningMessages={warnings}
         customWarningMessages={customWarningMessages}
         shiftTestCaseDatesWarning={shiftTestCaseDatesWarnings}
+        updateQiCoreJsonWithGroupAndTitleWarning={
+          updateQiCoreJsonWithGroupAndTitleWarning
+        }
         importWarnings={importWarnings}
         testDataId="test-case-alerts"
       />
@@ -203,6 +211,9 @@ const TestCaseRoutes = () => {
                     setWarnings={setWarnings}
                     setShiftTestCaseDatesWarnings={
                       setShiftTestCaseDatesWarnings
+                    }
+                    setUpdateQiCoreJsonWithGroupAndTitleWarning={
+                      setUpdateQiCoreJsonWithGroupAndTitleWarning
                     }
                     setCustomWarningMessages={setCustomWarningMessages}
                   />
@@ -224,6 +235,9 @@ const TestCaseRoutes = () => {
                     setWarnings={setWarnings}
                     setShiftTestCaseDatesWarnings={
                       setShiftTestCaseDatesWarnings
+                    }
+                    setUpdateQiCoreJsonWithGroupAndTitleWarning={
+                      setUpdateQiCoreJsonWithGroupAndTitleWarning
                     }
                     setCustomWarningMessages={setCustomWarningMessages}
                   />
@@ -303,7 +317,13 @@ const TestCaseRoutes = () => {
         <Route
           path=":id"
           index
-          element={<EditTestCase errors={errors} setErrors={setErrors} />}
+          element={
+            <EditTestCase
+              errors={errors}
+              setErrors={setErrors}
+              setCustomWarningMessages={setCustomWarningMessages}
+            />
+          }
         />
         <Route path="*" element={<NotFound />} />
       </Routes>

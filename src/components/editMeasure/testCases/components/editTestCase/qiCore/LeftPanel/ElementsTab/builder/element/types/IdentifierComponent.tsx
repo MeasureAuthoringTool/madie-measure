@@ -17,11 +17,13 @@ const IdentifierComponent = ({
   fieldRequired,
   helperText,
   error,
+  handleAddElement,
 }: TypeComponentProps) => {
   const formik = useFormikContext();
 
   return (
     <div
+      data-component-type="IdentifierComponent"
       style={{
         display: "flex",
         flexDirection: "column",
@@ -57,6 +59,7 @@ const IdentifierComponent = ({
         showAddAttributeButton={false}
         addTitle={null}
         value={getIn(formik.values, `${label}.type`)}
+        handleAddElement={handleAddElement}
         onChange={(value) => {
           formik.setFieldTouched(`${label}.type`);
           formik.setFieldValue(`${label}.type`, value);
@@ -64,7 +67,7 @@ const IdentifierComponent = ({
       />
 
       <UriComponent
-        label={label + ".system"}
+        label="System"
         fieldRequired={fieldRequired}
         canEdit={canEdit}
         helperText={formikErrorHandler(label + ".system", formik)}
@@ -73,7 +76,7 @@ const IdentifierComponent = ({
       />
 
       <StringComponent
-        label={label + ".value"}
+        label="Value"
         fieldRequired={fieldRequired}
         canEdit={canEdit}
         helperText={formikErrorHandler(label + ".value", formik)}

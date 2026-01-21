@@ -342,7 +342,7 @@ describe("CodingComponent Tests", () => {
       extension: [
         {
           url: "http://hl7.org/fhir/StructureDefinition/valueset-reference",
-          valueUrl: mockBindingValueSet.url,
+          valueUri: mockBindingValueSet.url,
         },
       ],
     };
@@ -482,12 +482,71 @@ describe("CodingComponent Tests", () => {
     expect(code).toHaveTextContent(`${coding.code} - ${coding.display}`);
     expect(code).toHaveAttribute("readonly");
 
+    expect(
+      screen.getByTestId("select-valueset-warning-B1")
+    ).toBeInTheDocument();
     // verify note
     expect(
       screen.getByText(
         "To update code system or code please select a valid value set."
       )
     ).toBeInTheDocument();
+  });
+
+  it("should not display warning message if canEdit is undefined", async () => {
+    const coding = {
+      ...mockBindingValueSet.expansion?.contains[0],
+    };
+    mockedAxios.get.mockResolvedValue({
+      data: mockBindingValueSet,
+    });
+
+    render(
+      <ApiContextProvider value={mockConfig}>
+        <ExecutionContextProvider
+          value={{
+            measureState: [null, jest.fn()],
+            bundleState: [null, jest.fn()],
+            valueSetsState: [null, jest.fn()],
+            executionContextReady: true,
+            executing: false,
+            setExecuting: jest.fn(),
+            contextFailure: false,
+          }}
+        >
+          <CodingComponent
+            canEdit={undefined}
+            structureDefinition={mockStructureDefinition}
+            label="test-label"
+            value={coding}
+            onChange={mockOnChange}
+          />
+        </ExecutionContextProvider>
+      </ApiContextProvider>
+    );
+
+    // verify code system
+    const codeSystem = screen.getByRole("textbox", {
+      name: "Code System",
+    });
+    expect(codeSystem).toHaveTextContent(coding.system);
+    expect(codeSystem).toHaveAttribute("readonly");
+
+    // verify code
+    const code = screen.getByRole("textbox", {
+      name: "Code",
+    });
+    expect(code).toHaveTextContent(`${coding.code} - ${coding.display}`);
+    expect(code).toHaveAttribute("readonly");
+    expect(
+      screen.queryByTestId("select-valueset-warning-B1")
+    ).not.toBeInTheDocument();
+    // verify note
+    expect(
+      screen.queryByText(
+        "To update code system or code please select a valid value set."
+      )
+    ).not.toBeInTheDocument();
   });
 
   it("display existing code from a value set in readonly mode if the coding extension and code display is missing", async () => {

@@ -1,12 +1,36 @@
 import React, { useContext, useEffect, useState } from "react";
 import ResourceContext from "../../ResourceContext";
 import { Select } from "@madie/madie-design-system/dist/react";
-import { MenuItem } from "@mui/material";
+import { IconButton, MenuItem, Tooltip, InputLabel } from "@mui/material";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import { useQiCoreResource } from "../../../../../../../../util/QiCorePatientProvider";
 import AddElementButton from "../../../../../../../common/UIOnlyModelAgnostic/AddElementButton";
 import { useFormikContext } from "formik";
 import { buildMadieResourceFromResourceIdentifier } from "../../../../../../../../api/fhirDefinitionServiceUtilities";
+import * as _ from "lodash";
 
+export const getReferenceComponentLabel = (label: string) => {
+  //e.g. for label = ClaimResponse.addItem[0].provider[0] return Provider
+  const componentLabel = label
+    .split(".")
+    ?.pop()
+    ?.replace(/\[.*\]$/, "");
+  return componentLabel ? _.startCase(componentLabel) : "";
+};
+
+export const getHighestPriorityResourceList = (
+  qiCoreProfiles,
+  usCoreProfiles,
+  baseFhirProfiles
+) => {
+  if (qiCoreProfiles.length > 0) {
+    return qiCoreProfiles[0];
+  } else if (usCoreProfiles.length > 0) {
+    return usCoreProfiles[0];
+  } else {
+    return baseFhirProfiles[0];
+  }
+};
 export default function ReferenceComponent({
   structureDefinition,
   canEdit,
@@ -17,6 +41,10 @@ export default function ReferenceComponent({
   addTitle,
   label,
   value,
+  index = 0,
+  handleAddElement,
+  handleDeleteElement,
+  showDeleteButton = false,
 }: any) {
   const { state } = useQiCoreResource();
   const formikContext = useFormikContext();
@@ -27,7 +55,6 @@ export default function ReferenceComponent({
     structureDefinition.type?.find(
       (type: { code: string }) => type.code === "Reference"
     )?.targetProfile || []; // get the profiles declared in the structure definition
-
   const resourceProfileOptions =
     allResourceProfiles
       ?.filter((r) => targetProfiles.includes(r.profile))
@@ -40,7 +67,30 @@ export default function ReferenceComponent({
   const [selectedReferenceType, setSelectedReferenceType] = useState<string>(
     value?.reference?.split("/")?.[0] || ""
   ); // will need to default to something if editing existing element
+  const possibleResourceOptionsForAddNew = allResourceProfiles
+    ? allResourceProfiles.filter((r) => {
+        return r.type === selectedReferenceType;
+      })
+    : [];
+  // For now we're going to return lists of each and select index 0. Future story to allow user to pick between them if multiple exist. Observation.
+  const qiCoreProfiles = possibleResourceOptionsForAddNew.filter((rp) =>
+    rp.profile.includes("qicore")
+  );
+  const usCoreProfiles = possibleResourceOptionsForAddNew.filter((rp) =>
+    rp.profile.includes("us-core")
+  );
+  const baseFhirProfiles = possibleResourceOptionsForAddNew.filter(
+    (rp) =>
+      rp.profile.includes("fhir/StructureDefinition") &&
+      !rp.profile.includes("/us/")
+  );
 
+  let finalResourceOptionForAddNew;
+  finalResourceOptionForAddNew = getHighestPriorityResourceList(
+    qiCoreProfiles,
+    usCoreProfiles,
+    baseFhirProfiles
+  );
   const emptyOption = [
     { label: "ID Not Present (Add New)", value: "add_new_id" },
   ]; // If no resources of that type exist, we need to show a message in the dropdown
@@ -109,18 +159,32 @@ export default function ReferenceComponent({
 
   return (
     <>
+      <div
+        className="element-editor-add-row reference"
+        data-component-type="ReferenceComponent"
+      >
+        <InputLabel
+          aria-labelledby="reference-label"
+          required={required}
+          data-testid="reference-label"
+          style={showAddAttributeButton ? { marginBottom: -8 } : undefined}
+        >
+          {getReferenceComponentLabel(label)}
+        </InputLabel>
+      </div>
       {/* Select a reference type from all available profiles */}
       <div className="element-editor-add-row reference double-row">
         <Select
           label={"Reference Type"}
-          id={"reference-type-select"}
-          data-testid={"reference-type-select"}
+          id={`reference-type-select-${index}`}
+          data-testid={`reference-type-select-${index}`}
           inputProps={{
-            "data-testid": `reference-type-select-input`,
-            "aria-describedby": `reference-type-helper-text-reference-type`,
-            id: `reference-type-input-select`,
+            "data-testid": `reference-type-select-input-${index}`,
+            "aria-describedby": `reference-type-helper-text-reference-type-${index}`,
+            id: `reference-type-input-select-${index}`,
             required: required,
           }}
+          readOnly={!canEdit}
           options={resourceProfileOptions.map((opt, i) => (
             <MenuItem
               key={`${opt.label}-${opt.profile}-${i}`}
@@ -153,8 +217,20 @@ export default function ReferenceComponent({
           helperText={helperText}
           error={error}
         />
+        {showDeleteButton && canEdit && (
+          <Tooltip title="Delete" placement="top" arrow>
+            <IconButton
+              onClick={handleDeleteElement}
+              data-testid={`delete-button-${label}`}
+              aria-label={`delete ${label}`}
+              size="small"
+            >
+              <DeleteOutlineIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+        )}
         {showAddAttributeButton && addTitle && (
-          <AddElementButton name={addTitle} />
+          <AddElementButton name={addTitle} onClick={handleAddElement} />
         )}
       </div>
       {/* Select a specific resource from the selected reference type, from tc json */}
@@ -167,17 +243,18 @@ export default function ReferenceComponent({
                 (opt) => opt.value === selectedReferenceType
               )?.label
             }`}
-            id={"reference-select"}
+            id={`reference-select-${index}`}
             disabled={!canEdit}
             required={required}
             name={`${label}.reference`}
-            data-testid={"reference-select"}
+            data-testid={`reference-select-${index}`}
             inputProps={{
-              "data-testid": `reference-select-input`,
-              "aria-describedby": `reference-helper-text-reference`,
-              id: `reference-select-input`,
+              "data-testid": `reference-select-input-${index}`,
+              "aria-describedby": `reference-helper-text-reference-${index}`,
+              id: `reference-select-input-${index}`,
               required: required,
             }}
+            readOnly={!canEdit}
             options={finalOptions.map((opt, i) => (
               <MenuItem
                 key={`${opt.label}-${opt.value}-${i}`}
@@ -193,12 +270,9 @@ export default function ReferenceComponent({
             }}
             onChange={(e) => {
               if (e.target.value === "add_new_id") {
-                const selectedResourceIdentifier = allResourceProfiles.find(
-                  (r) => r.type === selectedReferenceType
-                );
                 const newMadieResource =
                   buildMadieResourceFromResourceIdentifier(
-                    selectedResourceIdentifier
+                    finalResourceOptionForAddNew
                   );
                 formikContext.setFieldValue(
                   "add_new_resource",

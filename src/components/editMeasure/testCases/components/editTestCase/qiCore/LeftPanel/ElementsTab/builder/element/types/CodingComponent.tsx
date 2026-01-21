@@ -31,6 +31,7 @@ const CodingComponent = ({
   showAddAttributeButton,
   addTitle,
   includePrev = true,
+  handleAddElement,
 }) => {
   const [allValueSets, setAllValueSets] = useState<ValueSet[]>();
   const [selectedValueSet, setSelectedValueSet] = useState<ValueSet>();
@@ -50,11 +51,11 @@ const CodingComponent = ({
   useEffect(() => {
     if (value && allValueSets && selectedValueSet?.name !== "Custom Code") {
       const valueSet = allValueSets.find(
-        (vs) => vs.url === value?.extension?.[0]?.valueUrl
+        (vs) => vs.url === value?.extension?.[0]?.valueUri
       );
       if (valueSet?.name !== selectedValueSet?.name) {
         setSelectedValueSet(
-          allValueSets.find((vs) => vs.url === value?.extension?.[0]?.valueUrl)
+          allValueSets.find((vs) => vs.url === value?.extension?.[0]?.valueUri)
         );
       }
     }
@@ -254,7 +255,10 @@ const CodingComponent = ({
     );
   };
   return (
-    <div style={{ display: "flex", flexDirection: "column" }}>
+    <div
+      style={{ display: "flex", flexDirection: "column" }}
+      data-component-type="CodingComponent"
+    >
       <div className="element-editor-add-row">
         <Select
           label="Value Set / Direct Reference Code"
@@ -275,7 +279,7 @@ const CodingComponent = ({
           onChange={(e) => handleValueSetChange(e.target.value)}
         />
         {showAddAttributeButton && addTitle && (
-          <AddElementButton name={addTitle} />
+          <AddElementButton name={addTitle} onClick={handleAddElement} />
         )}
       </div>
       {selectedValueSet && (
@@ -391,12 +395,14 @@ const CodingComponent = ({
               />
             </div>
           </div>
-          <div
-            tw="mt-3 text-sm text-red-500"
-            data-testid={`select-valueset-warning-${value.code}`}
-          >
-            To update code system or code please select a valid value set.
-          </div>
+          {canEdit && (
+            <div
+              tw="mt-3 text-sm text-red-500"
+              data-testid={`select-valueset-warning-${value.code}`}
+            >
+              To update code system or code please select a valid value set.
+            </div>
+          )}
         </>
       )}
     </div>

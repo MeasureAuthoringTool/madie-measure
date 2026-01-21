@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import {
   Button,
-  Tabs,
-  Tab,
   Popover,
+  Tab,
+  Tabs,
 } from "@madie/madie-design-system/dist/react";
 import AddIcon from "@mui/icons-material/Add";
 import FileUploadIcon from "@mui/icons-material/FileUpload";
@@ -21,6 +21,7 @@ import "twin.macro";
 import "styled-components/macro";
 import LoadingButton from "../common/loadingButton/LoadingButton";
 import LoadingButtonWithMenu from "../common/loadingButton/LoadingButtonWithMenu";
+import { Tooltip } from "@mui/material";
 
 export interface NavTabProps {
   activeTab: string;
@@ -39,6 +40,8 @@ export interface NavTabProps {
   onGenerateOverlappingCodesReport: () => void;
   showReportOptions: boolean;
   setShowReportOptions: (show: boolean) => void;
+  validationPercentageFraction: string;
+  clauseResults?: { total: number; covered: number } | null;
 }
 
 const defaultStyle = {
@@ -70,6 +73,8 @@ export default function CreateCodeCoverageNavTabs(props: NavTabProps) {
     exportTestCases,
     validationPercentage,
     onGenerateOverlappingCodesReport,
+    validationPercentageFraction,
+    clauseResults,
   } = props;
   const [optionsOpen, setOptionsOpen] = useState<boolean>(false);
   const [anchorEl, setAnchorEl] = useState(null);
@@ -98,10 +103,20 @@ export default function CreateCodeCoverageNavTabs(props: NavTabProps) {
   const getValidationResultsDisplay = (label: string) => {
     return (
       <div>
-        <div style={{ fontSize: "29px", fontWeight: "600" }}>
+        <div
+          style={{ fontSize: "29px", fontWeight: "600" }}
+          aria-label={`Validation percentage: ${
+            validationPercentage ? validationPercentage + "%" : "not available"
+          }`}
+        >
           {validationPercentage ? validationPercentage + "%" : "-"}
         </div>
-        <div style={{ fontSize: "19px" }}>{label}</div>
+        <div
+          style={{ fontSize: "19px" }}
+          aria-label={`Validation Percentage Fraction: ${validationPercentageFraction}`}
+        >
+          {label}({validationPercentageFraction})
+        </div>
       </div>
     );
   };
@@ -154,27 +169,42 @@ export default function CreateCodeCoverageNavTabs(props: NavTabProps) {
           data-testid="passing-tab"
           value="passing"
         />
+
         <Tab
           type="B"
           tabIndex={0}
           aria-label="Coverage tab panel"
           sx={defaultStyle}
-          label={executionResultsDisplayTemplate("Coverage")}
+          label={
+            <Tooltip
+              data-testid={`action-center-tooltip-`}
+              //@ts-ignore
+              title={
+                open
+                  ? `${clauseResults?.covered}/${clauseResults?.total} logical clauses in your CQL are covered`
+                  : "More"
+              }
+              placement="top"
+              arrow
+              disableHoverListener={!clauseResults}
+            >
+              {executionResultsDisplayTemplate("Coverage")}
+            </Tooltip>
+          }
           data-testid="coverage-tab"
           value="coverage"
         />
-        {_.isEqual(measure?.model, Model.QICORE_6_0_0) &&
-          featureFlags?.stu6TestCaseValidation && (
-            <Tab
-              type="B"
-              tabIndex={0}
-              aria-label="Validation tab panel"
-              sx={defaultStyle}
-              label={getValidationResultsDisplay("Valid")}
-              data-testid="validation-tab"
-              value="validation"
-            />
-          )}
+        {_.isEqual(measure?.model, Model.QICORE_6_0_0) && (
+          <Tab
+            type="B"
+            tabIndex={0}
+            aria-label="Validation tab panel"
+            sx={defaultStyle}
+            label={getValidationResultsDisplay("Valid")}
+            data-testid="validation-tab"
+            value="validation"
+          />
+        )}
       </Tabs>
       <div tw="flex flex-wrap space-x-4 justify-end h-10">
         <LoadingButtonWithMenu

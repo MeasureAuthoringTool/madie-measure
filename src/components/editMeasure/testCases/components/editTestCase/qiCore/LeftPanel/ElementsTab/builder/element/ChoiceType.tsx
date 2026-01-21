@@ -5,6 +5,7 @@ import { Select } from "@madie/madie-design-system/dist/react";
 import * as _ from "lodash";
 import TypeEditor from "./TypeEditor";
 import { useFormikContext } from "formik";
+import { formatAttributeLabel } from "../../../../../../../api/fhirDefinitionServiceUtilities";
 
 interface ChoiceTypePropsInterface {
   childDef: any;
@@ -21,11 +22,11 @@ export const ChoiceType = (props: ChoiceTypePropsInterface) => {
   const [updatedLabel, setUpdatedLabel] = useState<string>();
   const value = _.get(formik.values, label);
   // get path of choice type attribute e.g. Observation.commentType[0].value
-  const choiceBase = childDef.id.replace(/\[x]/, "");
+  const choiceBase = label.replace(/\[x]/, "");
 
   useEffect(() => {
     // get the display label and choice type from value
-    if (childDef?.type?.length > 0 && value) {
+    if (childDef?.type?.length > 0 && formik.values) {
       const type = childDef?.type.find((type: { code: string }) =>
         _.has(formik.values, choiceBase + _.upperFirst(type.code))
       );
@@ -41,13 +42,13 @@ export const ChoiceType = (props: ChoiceTypePropsInterface) => {
   return (
     <Box sx={{ mb: 2 }}>
       <Select
-        label={updatedLabel}
-        id={`choice-type-selector-${label}`}
+        label={formatAttributeLabel(updatedLabel)}
+        id={`choice-type-selector-${updatedLabel}`}
         required="true"
         inputProps={{
-          "data-testid": `choice-type-input-${label}`,
+          "data-testid": `choice-type-input-${updatedLabel}`,
         }}
-        data-testid={`choice-type-${label}`}
+        data-testid={`choice-type-${updatedLabel}`}
         readOnly={!canEdit}
         options={childDef?.type?.map((ref) => (
           <MenuItem

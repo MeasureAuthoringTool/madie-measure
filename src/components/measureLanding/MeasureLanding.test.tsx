@@ -20,11 +20,7 @@ import userEvent from "@testing-library/user-event";
 import { oneItemResponse } from "../__mocks__/mockMeasureResponses";
 import { within } from "@testing-library/dom";
 // @ts-ignore
-import {
-  useFeatureFlags,
-  MeasureServiceApi,
-  useMeasureServiceApi,
-} from "@madie/madie-util";
+import { MeasureServiceApi, useMeasureServiceApi } from "@madie/madie-util";
 import MeasureLanding from "./MeasureLanding";
 import {
   TRANSFER_MEASURE_SUCCESS,
@@ -123,10 +119,6 @@ describe("Measure Page", () => {
     jest.clearAllMocks();
   });
   beforeEach(() => {
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-      MeasureSearch: true,
-      TransferMeasure: true,
-    }));
     localStorage.clear();
   });
   const renderRouter = (initialEntries) => {

@@ -229,12 +229,12 @@ describe("ResourceEditor", () => {
       expect(
         screen.getByTestId("add-attribute-dialog-button")
       ).toBeInTheDocument();
-      expect(screen.getByText("*identifier")).toBeInTheDocument();
-      expect(screen.getByText("*name")).toBeInTheDocument();
-      expect(screen.getByText("*gender")).toBeInTheDocument();
-      expect(screen.getByText("active")).toBeInTheDocument();
-      expect(screen.getByText("birthDate")).toBeInTheDocument();
-      expect(screen.getByText("address")).toBeInTheDocument();
+      expect(screen.getByText("*Identifier")).toBeInTheDocument();
+      expect(screen.getByText("*Name")).toBeInTheDocument();
+      expect(screen.getByText("*Gender")).toBeInTheDocument();
+      expect(screen.getByText("Active")).toBeInTheDocument();
+      expect(screen.getByText("Birth Date")).toBeInTheDocument();
+      expect(screen.getByText("Address")).toBeInTheDocument();
 
       // const idBtn = screen.getByTestId("id");
       // expect(idBtn).toBeInTheDocument();
@@ -463,6 +463,36 @@ describe("ResourceEditor", () => {
     });
   });
 
+  it("does NOT render the Add Attribute(s) button when canEdit is false", async () => {
+    (useFormikContext as jest.Mock).mockReturnValue(localMockFormikObj);
+    const mockDispatch = jest.fn();
+    render(
+      <ExecutionContextProvider
+        value={{
+          valueSetsState: mockValueSetsState,
+          executionContextReady: true,
+        }}
+      >
+        <ApiContextProvider value={mockConfig}>
+          <QiCoreResourceContext.Provider
+            value={{ state: mockResourceState, dispatch: jest.fn() }}
+          >
+            <ResourceEditor
+              selectedResourceID="446b20b5-dd46-415e-9b9f-9eba6b260743"
+              setValidationSchema={mockSetValidationSchema}
+              setInitialFormikValuesStu6={mockSetInitialFormikValuesStu6}
+              onCancel={mockOnCancel}
+              canEdit={false}
+              applyLoading={false}
+              setApplyLoading={jest.fn()}
+            />
+          </QiCoreResourceContext.Provider>
+        </ApiContextProvider>
+      </ExecutionContextProvider>
+    );
+    expect(screen.queryByTestId("add-attribute-dialog-button")).toBeNull();
+  });
+
   it("handles invalid selectedResource - this will never happen", () => {
     (useFormikContext as jest.Mock).mockReturnValue(localMockFormikObj);
 
@@ -668,7 +698,7 @@ describe("ResourceEditor", () => {
     );
 
     // Click on the "id" tab since elements are now sorted alphabetically
-    const idTab = await screen.findByTestId("id");
+    const idTab = await screen.findByTestId("Id");
     userEvent.click(idTab);
 
     const actionCenter = await screen.findByTestId(

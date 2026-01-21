@@ -123,7 +123,6 @@ jest.mock("@madie/madie-util", () => {
         applyDefaults: mockApplyDefaults,
         qiCoreElementsTab: true,
         Locking: true,
-        Calculator: true,
       };
     }),
     measureStore: {
@@ -207,6 +206,7 @@ const setMeasure = jest.fn();
 const setMeasureBundle = jest.fn();
 const setValueSets = jest.fn();
 const setError = jest.fn();
+const setCustomWarningMessages = jest.fn();
 // Need this for our drag windows to work
 global.ResizeObserver = jest.fn().mockImplementation(() => ({
   observe: jest.fn(),
@@ -236,7 +236,13 @@ const renderWithRouter = (
           <Routes>
             <Route
               path={routePath}
-              element={<EditTestCase errors={[]} setErrors={setError} />}
+              element={
+                <EditTestCase
+                  errors={[]}
+                  setErrors={setError}
+                  setCustomWarningMessages={setCustomWarningMessages}
+                />
+              }
             />
           </Routes>
         </ExecutionContextProvider>
@@ -695,9 +701,9 @@ describe("EditTestCase component", () => {
       expect(debugOutput).toHaveTextContent(
         "Test case updated successfully with errors in JSON"
       );
-      expect(debugOutput).toHaveTextContent(
-        "Timezone offsets have been added when hours are present, otherwise timezone offsets are removed or set to UTC for consistency."
-      );
+      expect(setError).toHaveBeenCalledWith([
+        "Timezone offsets have been added when hours are present, otherwise timezone offsets are removed or set to UTC for consistency.",
+      ]);
     });
 
     it("should alert for updated datetime without hours", async () => {
@@ -780,9 +786,9 @@ describe("EditTestCase component", () => {
       expect(debugOutput).toHaveTextContent(
         "Test case updated successfully with errors in JSON"
       );
-      expect(debugOutput).toHaveTextContent(
-        "Timezone offsets have been added when hours are present, otherwise timezone offsets are removed or set to UTC for consistency."
-      );
+      expect(setError).toHaveBeenCalledWith([
+        "Timezone offsets have been added when hours are present, otherwise timezone offsets are removed or set to UTC for consistency.",
+      ]);
     });
 
     it("should alert for updated datetime with only hours", async () => {
@@ -865,9 +871,9 @@ describe("EditTestCase component", () => {
       expect(debugOutput).toHaveTextContent(
         "Test case updated successfully with errors in JSON"
       );
-      expect(debugOutput).toHaveTextContent(
-        "Timezone offsets have been added when hours are present, otherwise timezone offsets are removed or set to UTC for consistency."
-      );
+      expect(setError).toHaveBeenCalledWith([
+        "Timezone offsets have been added when hours are present, otherwise timezone offsets are removed or set to UTC for consistency.",
+      ]);
     });
 
     it("should alert for test validation status", async () => {
@@ -1006,12 +1012,305 @@ describe("EditTestCase component", () => {
 
       const debugOutput = await screen.findByTestId("success-toast");
       //here
-      expect(debugOutput).toHaveTextContent(
-        "Test case updated successfully! Test case validation has started running, please continue working in MADiE."
+      expect(debugOutput).toHaveTextContent("Test case updated successfully!");
+      expect(setCustomWarningMessages).toHaveBeenCalledWith([
+        {
+          message: "Test case updated successfully!",
+          details: [
+            "Timezone offsets have been added when hours are present, otherwise timezone offsets are removed or set to UTC for consistency.",
+          ],
+          testDataId: "test-case-validation-warning",
+        },
+      ]);
+    });
+
+    it("should alert for test valid status updated datetime", async () => {
+      const testCase = {
+        id: "1234",
+        description: "Test IPP",
+        series: "SeriesA",
+        createdBy: MEASURE_CREATEDBY,
+        createdAt: "",
+        lastModifiedAt: "",
+        lastModifiedBy: "null",
+        title: "TestIPP",
+        name: "TestIPP",
+        executionStatus: "false",
+        json: null,
+        validationStatus: ValidationStatus.PENDING,
+      } as unknown as TestCase;
+      mockedAxios.get.mockClear().mockImplementation((args) => {
+        if (args && args.endsWith("series")) {
+          return Promise.resolve({ data: [] });
+        } else if (args && args.endsWith("resources")) {
+          return Promise.resolve({
+            data: [...resourceIdentifiers],
+          });
+        }
+        return Promise.resolve({
+          data: testCase,
+        });
+      });
+      renderWithRouter(
+        ["/measures/m1234/edit/test-cases/1234"],
+        "/measures/:measureId/edit/test-cases/:id"
       );
-      expect(debugOutput).toHaveTextContent(
-        "Timezone offsets have been added when hours are present, otherwise timezone offsets are removed or set to UTC for consistency."
+
+      const testCaseDescription = "TestCase123";
+      const testCaseTitle = "TestTitle";
+      const testCaseJson = JSON.stringify({
+        resourceType: "Bundle",
+        id: "43",
+        date: "2025-10-06T12:00:00+04:00",
+      });
+
+      mockedAxios.put.mockResolvedValue({
+        data: {
+          ...testCase,
+          createdBy: MEASURE_CREATEDBY,
+          description: testCaseDescription,
+          title: testCaseTitle,
+          json: testCaseJson,
+          hapiOperationOutcome: hapiOperationSuccessOutcome,
+          validationStatus: ValidationStatus.VALID,
+        },
+      });
+
+      const editor = screen.getByTestId("test-case-json-editor");
+      await waitFor(() => expect(editor).toHaveValue(""));
+      userEvent.paste(editor, testCaseJson);
+      expect(editor).toHaveValue(testCaseJson);
+      userEvent.click(screen.getByTestId("details-tab"));
+
+      await testTitle("TC1", true);
+
+      const createBtn = await screen.findByRole("button", {
+        name: "Save",
+      });
+      userEvent.click(createBtn);
+
+      const debugOutput = await screen.findByTestId("success-toast");
+      //here
+      expect(debugOutput).toHaveTextContent("Test case updated successfully!");
+      expect(setCustomWarningMessages).toHaveBeenCalledWith([
+        {
+          message: "Test case updated successfully!",
+          details: [
+            "Timezone offsets have been added when hours are present, otherwise timezone offsets are removed or set to UTC for consistency.",
+          ],
+          testDataId: "test-case-validation-warning",
+        },
+      ]);
+    });
+
+    it("should alert for test valid status bundleTypeUpdated is true", async () => {
+      const testCase = {
+        id: "1234",
+        description: "Test IPP",
+        series: "SeriesA",
+        createdBy: MEASURE_CREATEDBY,
+        createdAt: "",
+        lastModifiedAt: "",
+        lastModifiedBy: "null",
+        title: "TestIPP",
+        name: "TestIPP",
+        executionStatus: "false",
+        json: null,
+        validationStatus: ValidationStatus.PENDING,
+      } as unknown as TestCase;
+      mockedAxios.get.mockClear().mockImplementation((args) => {
+        if (args && args.endsWith("series")) {
+          return Promise.resolve({ data: [] });
+        } else if (args && args.endsWith("resources")) {
+          return Promise.resolve({
+            data: [...resourceIdentifiers],
+          });
+        }
+        return Promise.resolve({
+          data: testCase,
+        });
+      });
+      renderWithRouter(
+        ["/measures/m1234/edit/test-cases/1234"],
+        "/measures/:measureId/edit/test-cases/:id"
       );
+
+      mockedAxios.put.mockResolvedValue({
+        data: {
+          ...testCase,
+          validationStatus: ValidationStatus.VALID,
+          bundleTypeUpdated: true,
+        },
+      });
+
+      const editor = screen.getByTestId("test-case-json-editor");
+      await waitFor(() => expect(editor).toHaveValue(""));
+      userEvent.click(screen.getByTestId("details-tab"));
+
+      await testTitle("TC1", true);
+
+      const createBtn = await screen.findByRole("button", {
+        name: "Save",
+      });
+      userEvent.click(createBtn);
+
+      const debugOutput = await screen.findByTestId("success-toast");
+
+      expect(debugOutput).toHaveTextContent("Test case updated successfully!");
+      expect(setCustomWarningMessages).toHaveBeenCalledWith([
+        {
+          message: "Test case updated successfully!",
+          details: [
+            "Please note that the bundle type has been updated to Collection, as the Test Case Builder supports editing only collection bundles.",
+          ],
+          testDataId: "test-case-validation-warning",
+        },
+      ]);
+    });
+
+    it("should alert for bundleTypeUpdated Pending status", async () => {
+      const testCase = {
+        id: "1234",
+        description: "Test IPP",
+        series: "SeriesA",
+        createdBy: MEASURE_CREATEDBY,
+        createdAt: "",
+        lastModifiedAt: "",
+        lastModifiedBy: "null",
+        title: "TestIPP",
+        name: "TestIPP",
+        executionStatus: "false",
+        json: null,
+        validationStatus: ValidationStatus.PENDING,
+      } as unknown as TestCase;
+      mockedAxios.get.mockClear().mockImplementation((args) => {
+        if (args && args.endsWith("series")) {
+          return Promise.resolve({ data: [] });
+        } else if (args && args.endsWith("resources")) {
+          return Promise.resolve({
+            data: [...resourceIdentifiers],
+          });
+        }
+        return Promise.resolve({
+          data: testCase,
+        });
+      });
+      renderWithRouter(
+        ["/measures/m1234/edit/test-cases/1234"],
+        "/measures/:measureId/edit/test-cases/:id"
+      );
+
+      mockedAxios.put.mockResolvedValue({
+        data: {
+          ...testCase,
+          bundleTypeUpdated: true,
+        },
+      });
+
+      const editor = screen.getByTestId("test-case-json-editor");
+      await waitFor(() => expect(editor).toHaveValue(""));
+      userEvent.click(screen.getByTestId("details-tab"));
+
+      await testTitle("TC1", true);
+
+      const createBtn = await screen.findByRole("button", {
+        name: "Save",
+      });
+      userEvent.click(createBtn);
+
+      const debugOutput = await screen.findByTestId("success-toast");
+
+      expect(debugOutput).toHaveTextContent("Test case updated successfully!");
+      expect(setCustomWarningMessages).toHaveBeenCalledWith([
+        {
+          message: "Test case updated successfully!",
+          details: [
+            "Please note that the bundle type has been updated to Collection, as the Test Case Builder supports editing only collection bundles.",
+          ],
+          testDataId: "test-case-validation-warning",
+        },
+      ]);
+    });
+
+    it("should alert for bundleTypeUpdated Validating status", async () => {
+      const testCase = {
+        id: "1234",
+        description: "Test IPP",
+        series: "SeriesA",
+        createdBy: MEASURE_CREATEDBY,
+        createdAt: "",
+        lastModifiedAt: "",
+        lastModifiedBy: "null",
+        title: "TestIPP",
+        name: "TestIPP",
+        executionStatus: "false",
+        json: null,
+        validationStatus: ValidationStatus.PENDING,
+      } as unknown as TestCase;
+      mockedAxios.get.mockClear().mockImplementation((args) => {
+        if (args && args.endsWith("series")) {
+          return Promise.resolve({ data: [] });
+        } else if (args && args.endsWith("resources")) {
+          return Promise.resolve({
+            data: [...resourceIdentifiers],
+          });
+        }
+        return Promise.resolve({
+          data: testCase,
+        });
+      });
+      renderWithRouter(
+        ["/measures/m1234/edit/test-cases/1234"],
+        "/measures/:measureId/edit/test-cases/:id"
+      );
+
+      mockedAxios.put.mockResolvedValue({
+        data: {
+          ...testCase,
+          bundleTypeUpdated: true,
+          validationStatus: ValidationStatus.VALIDATING,
+          hapiOperationOutcome: {
+            code: 500,
+            message: "An unknown error occurred with HAPI FHIR",
+            outcomeResponse: {
+              resourceType: "OperationOutcome",
+              text: "Error: Bad things happened",
+              issue: [
+                {
+                  severity: "warning",
+                  diagnostics: "Bad things happened",
+                },
+              ],
+            },
+          },
+        },
+      });
+
+      const editor = screen.getByTestId("test-case-json-editor");
+      await waitFor(() => expect(editor).toHaveValue(""));
+      userEvent.click(screen.getByTestId("details-tab"));
+
+      await testTitle("TC1", true);
+
+      const createBtn = await screen.findByRole("button", {
+        name: "Save",
+      });
+      userEvent.click(createBtn);
+
+      const debugOutput = await screen.findByTestId("success-toast");
+
+      expect(debugOutput).toHaveTextContent(
+        "Test case updated successfully with warnings in JSON"
+      );
+      expect(setCustomWarningMessages).toHaveBeenCalledWith([
+        {
+          message: "Test case updated successfully!",
+          details: [
+            "Please note that the bundle type has been updated to Collection, as the Test Case Builder supports editing only collection bundles.",
+          ],
+          testDataId: "test-case-validation-warning",
+        },
+      ]);
     });
 
     it("should display isQICore6 validation running message in toast when test case is created and isQICore6 is true", async () => {
@@ -1153,9 +1452,9 @@ describe("EditTestCase component", () => {
       expect(debugOutput).toHaveTextContent(
         "Test case updated successfully with errors in JSON"
       );
-      expect(debugOutput).toHaveTextContent(
-        "Timezone offsets have been added when hours are present, otherwise timezone offsets are removed or set to UTC for consistency."
-      );
+      expect(setError).toHaveBeenCalledWith([
+        "Timezone offsets have been added when hours are present, otherwise timezone offsets are removed or set to UTC for consistency.",
+      ]);
     });
 
     it("should save the cql with errros and shouldn't perform datetime conversion when cql cannot be parsed", async () => {
@@ -2413,10 +2712,12 @@ describe("EditTestCase component", () => {
                 {
                   severity: "error",
                   diagnostics: "Patient.name is a required field",
+                  location: ["Location 1"],
                 },
                 {
                   severity: "error",
                   diagnostics: "Patient.identifier is a required field",
+                  location: ["Location 2"],
                 },
               ],
             },
@@ -2456,14 +2757,19 @@ describe("EditTestCase component", () => {
         "json-validation-errors-list"
       );
       expect(errorList).toBeInTheDocument();
-      expect(
-        within(errorList).getByText("Error: Patient.name is a required field")
-      ).toBeInTheDocument();
-      expect(
-        within(errorList).getByText(
-          "Error: Patient.identifier is a required field"
-        )
-      ).toBeInTheDocument();
+
+      const patientNameError = await screen.findByTestId("validation-card-0");
+      expect(patientNameError).toBeInTheDocument();
+      expect(patientNameError).toHaveTextContent(
+        `Error: Resource ID: Location 1 | Patient.name is a required field`
+      );
+      const patientIdentifierError = await screen.findByTestId(
+        "validation-card-1"
+      );
+      expect(patientIdentifierError).toBeInTheDocument();
+      expect(patientIdentifierError).toHaveTextContent(
+        `Error: Resource ID: Location 2 | Patient.identifier is a required field`
+      );
 
       jest.useRealTimers();
     });
@@ -2575,10 +2881,12 @@ describe("EditTestCase component", () => {
                 {
                   severity: "error",
                   diagnostics: "Patient.name is a required field",
+                  location: ["Location 1"],
                 },
                 {
                   severity: "error",
                   diagnostics: "Patient.identifier is a required field",
+                  location: ["Location 2"],
                 },
               ],
             },
@@ -2616,14 +2924,20 @@ describe("EditTestCase component", () => {
         "json-validation-errors-list"
       );
       expect(validationErrorsList).toBeInTheDocument();
-      const patientNameError = await within(validationErrorsList).findByText(
-        "Error: Patient.name is a required field"
-      );
+
+      const patientNameError = await screen.findByTestId("validation-card-0");
       expect(patientNameError).toBeInTheDocument();
-      const patientIdentifierError = within(validationErrorsList).getByText(
-        "Error: Patient.identifier is a required field"
+      expect(patientNameError).toHaveTextContent(
+        `Error: Resource ID: Location 1 | Patient.name is a required field`
+      );
+
+      const patientIdentifierError = await screen.findByTestId(
+        "validation-card-1"
       );
       expect(patientIdentifierError).toBeInTheDocument();
+      expect(patientIdentifierError).toHaveTextContent(
+        `Error: Resource ID: Location 2 | Patient.identifier is a required field`
+      );
     });
 
     it("should alert for HAPI FHIR errors", async () => {
@@ -2684,6 +2998,7 @@ describe("EditTestCase component", () => {
               {
                 severity: "error",
                 diagnostics: "Bad things happened",
+                location: ["Location 1"],
               },
             ],
           },
@@ -2730,10 +3045,12 @@ describe("EditTestCase component", () => {
         "json-validation-errors-list"
       );
       expect(validationErrorsList).toBeInTheDocument();
-      const noErrors = await within(validationErrorsList).findByText(
-        data.hapiOperationOutcome.outcomeResponse.text
+
+      const error = await screen.findByTestId("validation-card-0");
+      expect(error).toBeInTheDocument();
+      expect(error).toHaveTextContent(
+        `Error: Resource ID: Location 1 | Bad things happened`
       );
-      expect(noErrors).toBeInTheDocument();
 
       const closeValidationErrorsBtn = await screen.findByRole("button", {
         name: "Close Panel",
@@ -3187,23 +3504,6 @@ describe("EditTestCase component", () => {
     });
 
     it("executes a test case and shows the errors for invalid test case json", async () => {
-      mockedAxios.post.mockResolvedValue({
-        data: {
-          code: 200,
-          message: null,
-          successful: true,
-          outcomeResponse: {
-            resourceType: "OperationOutcome",
-            issue: [
-              {
-                severity: "informational",
-                code: "processing",
-                diagnostics: "No issues!",
-              },
-            ],
-          },
-        },
-      });
       const testCase = {
         id: "1234",
         description: "Test IPP",
@@ -3218,14 +3518,7 @@ describe("EditTestCase component", () => {
         json: '{ "resourceType": "Bundle", "type": "collection", "entry": [] }',
       } as TestCase;
       mockedAxios.get.mockClear().mockImplementation((args) => {
-        if (args && args.endsWith("/bundle")) {
-          return Promise.resolve({
-            data: buildMeasureBundle(simpleMeasureFixture),
-          });
-        } else if (
-          args &&
-          args.startsWith(serviceConfig.measureService.baseUrl)
-        ) {
+        if (args && args.startsWith(serviceConfig.measureService.baseUrl)) {
           return Promise.resolve({ data: simpleMeasureFixture });
         } else if (args && args.endsWith("series")) {
           return Promise.resolve({ data: ["DENOM_Pass", "NUMER_Pass"] });
@@ -3696,7 +3989,72 @@ describe("EditTestCase component", () => {
       expect(runButton).toBeDisabled();
     });
 
-    it("should render calculator button when Calculator flag is true", async () => {
+    it("displays existing validation errors when test case is executed irrespective of execution config setting", async () => {
+      const validationOutcome = {
+        code: 200,
+        message: null,
+        successful: false,
+        outcomeResponse: {
+          resourceType: "OperationOutcome",
+          issue: [
+            {
+              severity: "error",
+              code: "processing",
+              diagnostics: "Major issue on line 1!",
+            },
+          ],
+        },
+      };
+      mockedAxios.get.mockClear().mockImplementation((args) => {
+        if (args && args.endsWith("series")) {
+          return Promise.resolve({ data: ["DENOM_Pass", "NUMER_Pass"] });
+        } else if (args && args.endsWith("resources")) {
+          return Promise.resolve({
+            data: [...resourceIdentifiers],
+          });
+        }
+        return Promise.resolve({
+          data: {
+            ...testCaseFixture,
+            createdBy: MEASURE_CREATEDBY,
+            hapiOperationOutcome: validationOutcome,
+          },
+        });
+      });
+      const measure = { ...simpleMeasureFixture, createdBy: MEASURE_CREATEDBY };
+      measure.testCaseConfiguration.executeInvalidTestCases = true;
+      renderWithRouter(
+        [
+          "/measures/623cacebe74613783378c17b/edit/test-cases/623cacffe74613783378c17c",
+        ],
+        "/measures/:measureId/edit/test-cases/:id",
+        measure
+      );
+
+      const editor = screen.getByTestId(
+        "test-case-json-editor"
+      ) as HTMLInputElement;
+      await waitFor(() => expect(editor.value).not.toBe("Loading...")); // wait for load to complete as editor is read-only
+
+      const runButton = await screen.findByRole("button", {
+        name: "Run Test Case",
+      });
+      await waitFor(() => userEvent.click(runButton));
+
+      const sideButton = await screen.findByTestId(
+        "show-json-validation-errors-button"
+      );
+      userEvent.click(sideButton);
+
+      const validationErrorsList = await screen.findByTestId(
+        "json-validation-errors-list"
+      );
+      expect(validationErrorsList).toHaveTextContent(
+        validationOutcome.outcomeResponse.issue[0].diagnostics
+      );
+    });
+
+    it("should render calculator button", async () => {
       renderWithRouter(
         ["/measures/m1234/edit/test-cases"],
         "/measures/:measureId/edit/test-cases"
@@ -3720,24 +4078,6 @@ describe("EditTestCase component", () => {
           screen.queryByTestId("calculation-dialog")
         ).not.toBeInTheDocument()
       );
-    });
-
-    it("should not render calculator button when Calculator flag is false", async () => {
-      (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => {
-        return {
-          Calculator: false,
-        };
-      });
-      renderWithRouter(
-        ["/measures/m1234/edit/test-cases"],
-        "/measures/:measureId/edit/test-cases"
-      );
-
-      expect(screen.getByTestId("test-case-json-editor")).toBeInTheDocument();
-      expect(screen.getByTestId("test-case-cql-editor")).toBeInTheDocument();
-      expect(
-        screen.queryByTestId("editor-calculator-button")
-      ).not.toBeInTheDocument();
     });
   });
 

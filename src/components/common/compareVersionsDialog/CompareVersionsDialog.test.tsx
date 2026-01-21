@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import CompareVersionsDialog, {
   getNewestMeasureInstance,
 } from "./CompareVersionsDialog";
@@ -9,6 +9,7 @@ const mockMeasureServiceApi = {
   fetchHumanReadable: jest.fn(
     async (id: string) => `<div>HR content for ${id}</div>`
   ),
+  getHumanReadableDiff: jest.fn(),
 };
 
 jest.mock("@madie/madie-util", () => ({
@@ -129,7 +130,7 @@ describe("CompareVersionsDialog component", () => {
     );
 
     expect(screen.getByTestId("measure-name")).toHaveTextContent(
-      "Newer Measure (Draft)"
+      "-- Older ++ Newer Measure ++ (Draft)"
     );
     expect(screen.getByTestId("measure-cmsid")).toHaveTextContent(
       "(CMS ID: 100)"
@@ -203,6 +204,59 @@ describe("CompareVersionsDialog component", () => {
     expect(screen.getByTestId("panel-content-old")).toBeInTheDocument();
     expect(screen.getByTestId("comparison-panel-new")).toBeInTheDocument();
   });
+
+  it("renders the Differences section in Human Readable tab", () => {
+    render(
+      <CompareVersionsDialog
+        measures={mockMeasures}
+        open={true}
+        onClose={mockOnClose}
+      />
+    );
+
+    const hrTab = screen.getByTestId("human-readable-tab");
+    fireEvent.click(hrTab);
+
+    expect(screen.getByTestId("differences-section")).toBeInTheDocument();
+    expect(screen.getByText("Differences (0)")).toBeInTheDocument();
+  });
+
+  it("detects differences when human readable content differs", async () => {
+    const mockHrDiffResponse = {
+      oldHtml: "<div>Old Content</div>",
+      newHtml: "<div>New Content</div>",
+      differences: [
+        {
+          field: "Version Number",
+          oldValue: "0.3.002",
+          newValue: "0.3.003",
+        },
+      ],
+    };
+
+    mockMeasureServiceApi.getHumanReadableDiff.mockResolvedValue(
+      mockHrDiffResponse
+    );
+
+    const measures = [
+      { ...mockMeasures[1], id: "1" },
+      { ...mockMeasures[0], id: "2" },
+    ];
+    render(
+      <CompareVersionsDialog
+        measures={measures}
+        open={true}
+        onClose={mockOnClose}
+      />
+    );
+
+    const hrTab = screen.getByTestId("human-readable-tab");
+    fireEvent.click(hrTab);
+
+    expect(mockMeasureServiceApi.fetchHumanReadable).toHaveBeenCalledTimes(2);
+    expect(mockMeasureServiceApi.getHumanReadableDiff).toHaveBeenCalledTimes(1);
+    expect(await screen.findByText("Differences (1)")).toBeInTheDocument();
+  });
 });
 
 describe("getNewestMeasureInstance", () => {
@@ -269,21 +323,5 @@ describe("getNewestMeasureInstance", () => {
       baseMeasure("2", false, "1.0.002"),
     ];
     expect(getNewestMeasureInstance(measures)).toBe(measures[1]);
-  });
-
-  it("renders the Differences section in Human Readable tab", () => {
-    render(
-      <CompareVersionsDialog
-        measures={mockMeasures}
-        open={true}
-        onClose={mockOnClose}
-      />
-    );
-
-    const hrTab = screen.getByTestId("human-readable-tab");
-    fireEvent.click(hrTab);
-
-    expect(screen.getByTestId("differences-section")).toBeInTheDocument();
-    expect(screen.getByText("Differences")).toBeInTheDocument();
   });
 });

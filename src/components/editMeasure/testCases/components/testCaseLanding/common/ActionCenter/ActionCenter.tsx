@@ -21,6 +21,7 @@ import { useFeatureFlags } from "@madie/madie-util";
 import { blue, grey, red } from "@mui/material/colors";
 import { TestCase } from "@madie/madie-models";
 import { Icon } from "@iconify-icon/react";
+import { MakeJsonMatchUiIcon } from "./MakeJsonMatchUiIcon";
 
 interface ActionCenterProps {
   onSubmit?: any;
@@ -29,6 +30,7 @@ interface ActionCenterProps {
   isQDM: boolean;
   setDeleteDialogModalOpen?: Function;
   setShiftDatesDialogModalOpen?: Function;
+  setMakeJsonMatchUiDialogOpen?: Function;
   onCloneTestCase?: (testCase: TestCase) => void;
   exportTestCases?: Function;
   onExportQRDA?: Function;
@@ -51,6 +53,7 @@ export default function ActionCenter(props: ActionCenterProps) {
     onCloneTestCase,
     setDeleteDialogModalOpen,
     setShiftDatesDialogModalOpen,
+    setMakeJsonMatchUiDialogOpen,
     exportTestCases,
     onExportQRDA,
     onExportExcel,
@@ -68,12 +71,18 @@ export default function ActionCenter(props: ActionCenterProps) {
   const [disableCloneBtn, setDisableCloneBtn] = useState<boolean>(true);
   const [disableExportBtn, setDisableExportBtn] = useState<boolean>(true);
   const [disableCopyBtn, setDisableCopyBtn] = useState<boolean>(true);
+  const [disableMakeJsonMatchUiBtn, setDisableMakeJsonMatchUiBtn] =
+    useState<boolean>(true);
   const [disabledDeleteBtnMessage, setDisabledDeleteBtnMessage] = useState<
     string | undefined
   >();
   const [cloneTooltipBtnMessage, setCloneTooltipBtnMessage] = useState<string>(
     "Select a valid test case to clone"
   );
+  const [makeJsonMatchUiTooltipMessage, setMakeJsonMatchUiTooltipMessage] =
+    useState<string>(
+      "Select a test case to make JSON (family/given) match UI (group/title)"
+    );
 
   useEffect(() => {
     deleteButtonCheck();
@@ -81,6 +90,7 @@ export default function ActionCenter(props: ActionCenterProps) {
     cloneButtonCheck();
     exportButtonCheck();
     copyButtonCheck();
+    makeJsonMatchUiButtonCheck();
   }, [selectedTestCases, canEdit, isQDM]);
 
   const { search } = useLocation();
@@ -197,6 +207,20 @@ export default function ActionCenter(props: ActionCenterProps) {
       setDisableCopyBtn(false);
     } else {
       setDisableCopyBtn(true);
+    }
+  };
+
+  const makeJsonMatchUiButtonCheck = () => {
+    if (selectedTestCases?.length >= 1) {
+      setDisableMakeJsonMatchUiBtn(false);
+      setMakeJsonMatchUiTooltipMessage(
+        "Make JSON (family/given) match UI (group/title)"
+      );
+    } else {
+      setDisableMakeJsonMatchUiBtn(true);
+      setMakeJsonMatchUiTooltipMessage(
+        "Select a test case to make JSON (family/given) match UI (group/title)"
+      );
     }
   };
 
@@ -363,6 +387,29 @@ export default function ActionCenter(props: ActionCenterProps) {
                   </IconButton>
                 </span>
               </Tooltip>
+
+              {featureFlags?.MakeJSONMatchUI && !isQDM && (
+                <Tooltip
+                  data-testid="make-json-match-ui-tooltip"
+                  title={makeJsonMatchUiTooltipMessage}
+                  placement="top"
+                  arrow
+                >
+                  <span>
+                    <IconButton
+                      onClick={() => {
+                        setMakeJsonMatchUiDialogOpen(true);
+                      }}
+                      disabled={disableMakeJsonMatchUiBtn}
+                      data-testid="make-json-match-ui-action-btn"
+                    >
+                      <MakeJsonMatchUiIcon
+                        disabled={disableMakeJsonMatchUiBtn}
+                      />
+                    </IconButton>
+                  </span>
+                </Tooltip>
+              )}
             </div>
           )}
 

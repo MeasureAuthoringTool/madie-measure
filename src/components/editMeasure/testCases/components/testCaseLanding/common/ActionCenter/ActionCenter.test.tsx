@@ -468,5 +468,256 @@ describe("ActionCenter Component", () => {
       );
       expect(screen.getByTestId("delete-action-btn")).toBeDisabled();
     });
+
+    describe("Make JSON Match UI Button", () => {
+      beforeEach(() => {
+        (useFeatureFlags as jest.Mock).mockReturnValue({
+          MakeJSONMatchUI: true,
+        });
+      });
+
+      it("should not display Make JSON Match UI button when feature flag is off", () => {
+        (useFeatureFlags as jest.Mock).mockReturnValue({
+          MakeJSONMatchUI: false,
+        });
+
+        render(
+          <MemoryRouter>
+            <ActionCenter
+              selectedTestCases={[
+                { id: "1", validResource: true, title: "Test Case 1" },
+              ]}
+              canEdit={true}
+              isQDM={false}
+              isDraft={true}
+            />
+          </MemoryRouter>
+        );
+
+        expect(
+          screen.queryByTestId("make-json-match-ui-action-btn")
+        ).not.toBeInTheDocument();
+      });
+
+      it("should not display Make JSON Match UI button when user does not have edit access", () => {
+        render(
+          <MemoryRouter>
+            <ActionCenter
+              selectedTestCases={[
+                { id: "1", validResource: true, title: "Test Case 1" },
+              ]}
+              canEdit={false}
+              isQDM={false}
+              isDraft={true}
+            />
+          </MemoryRouter>
+        );
+
+        expect(
+          screen.queryByTestId("make-json-match-ui-action-btn")
+        ).not.toBeInTheDocument();
+      });
+
+      it("should not display Make JSON Match UI button for QDM measures", () => {
+        render(
+          <MemoryRouter>
+            <ActionCenter
+              selectedTestCases={[
+                { id: "1", validResource: true, title: "Test Case 1" },
+              ]}
+              canEdit={true}
+              isQDM={true}
+              isDraft={true}
+            />
+          </MemoryRouter>
+        );
+
+        expect(
+          screen.queryByTestId("make-json-match-ui-action-btn")
+        ).not.toBeInTheDocument();
+      });
+
+      it("should display Make JSON Match UI button for QI-Core measures when feature flag is enabled and user has edit access", () => {
+        render(
+          <MemoryRouter>
+            <ActionCenter
+              selectedTestCases={[
+                { id: "1", validResource: true, title: "Test Case 1" },
+              ]}
+              canEdit={true}
+              isQDM={false}
+              isDraft={true}
+            />
+          </MemoryRouter>
+        );
+
+        expect(
+          screen.getByTestId("make-json-match-ui-action-btn")
+        ).toBeInTheDocument();
+      });
+
+      it("should enable Make JSON Match UI button when one test case is selected", () => {
+        render(
+          <MemoryRouter>
+            <ActionCenter
+              selectedTestCases={[
+                { id: "1", validResource: true, title: "Test Case 1" },
+              ]}
+              canEdit={true}
+              isQDM={false}
+              isDraft={true}
+            />
+          </MemoryRouter>
+        );
+
+        const makeJsonMatchUiBtn = screen.getByTestId(
+          "make-json-match-ui-action-btn"
+        );
+        expect(makeJsonMatchUiBtn).toBeEnabled();
+      });
+
+      it("should enable Make JSON Match UI button when multiple test cases are selected", () => {
+        render(
+          <MemoryRouter>
+            <ActionCenter
+              selectedTestCases={[
+                { id: "1", validResource: true, title: "Test Case 1" },
+                { id: "2", validResource: true, title: "Test Case 2" },
+              ]}
+              canEdit={true}
+              isQDM={false}
+              isDraft={true}
+            />
+          </MemoryRouter>
+        );
+
+        const makeJsonMatchUiBtn = screen.getByTestId(
+          "make-json-match-ui-action-btn"
+        );
+        expect(makeJsonMatchUiBtn).toBeEnabled();
+      });
+
+      it("should disable Make JSON Match UI button when no test cases are selected", () => {
+        render(
+          <MemoryRouter>
+            <ActionCenter
+              selectedTestCases={[]}
+              canEdit={true}
+              isQDM={false}
+              isDraft={true}
+            />
+          </MemoryRouter>
+        );
+
+        const makeJsonMatchUiBtn = screen.getByTestId(
+          "make-json-match-ui-action-btn"
+        );
+        expect(makeJsonMatchUiBtn).toBeDisabled();
+      });
+
+      it("should show disabled tooltip when no test cases are selected", async () => {
+        render(
+          <MemoryRouter>
+            <ActionCenter
+              selectedTestCases={[]}
+              canEdit={true}
+              isQDM={false}
+              isDraft={true}
+            />
+          </MemoryRouter>
+        );
+
+        const tooltip = await screen.findByTestId("make-json-match-ui-tooltip");
+        expect(tooltip).toHaveAttribute(
+          "aria-label",
+          "Select a test case to make JSON (family/given) match UI (group/title)"
+        );
+      });
+
+      it("should show enabled tooltip when test cases are selected", async () => {
+        render(
+          <MemoryRouter>
+            <ActionCenter
+              selectedTestCases={[
+                { id: "1", validResource: true, title: "Test Case 1" },
+              ]}
+              canEdit={true}
+              isQDM={false}
+              isDraft={true}
+            />
+          </MemoryRouter>
+        );
+
+        const tooltip = await screen.findByTestId("make-json-match-ui-tooltip");
+        expect(tooltip).toHaveAttribute(
+          "aria-label",
+          "Make JSON (family/given) match UI (group/title)"
+        );
+      });
+
+      it("should work on draft measures", () => {
+        render(
+          <MemoryRouter>
+            <ActionCenter
+              selectedTestCases={[
+                { id: "1", validResource: true, title: "Test Case 1" },
+              ]}
+              canEdit={true}
+              isQDM={false}
+              isDraft={true}
+            />
+          </MemoryRouter>
+        );
+
+        const makeJsonMatchUiBtn = screen.getByTestId(
+          "make-json-match-ui-action-btn"
+        );
+        expect(makeJsonMatchUiBtn).toBeEnabled();
+      });
+
+      it("should work on versioned measures", () => {
+        render(
+          <MemoryRouter>
+            <ActionCenter
+              selectedTestCases={[
+                { id: "1", validResource: true, title: "Test Case 1" },
+              ]}
+              canEdit={true}
+              isQDM={false}
+              isDraft={false}
+            />
+          </MemoryRouter>
+        );
+
+        const makeJsonMatchUiBtn = screen.getByTestId(
+          "make-json-match-ui-action-btn"
+        );
+        expect(makeJsonMatchUiBtn).toBeEnabled();
+      });
+
+      it("should call setMakeJsonMatchUiDialogOpen when clicking Make JSON Match UI button", async () => {
+        const mockSetMakeJsonMatchUiDialogOpen = jest.fn();
+        render(
+          <MemoryRouter>
+            <ActionCenter
+              selectedTestCases={[
+                { id: "1", validResource: true, title: "Test Case 1" },
+              ]}
+              canEdit={true}
+              isQDM={false}
+              isDraft={true}
+              setMakeJsonMatchUiDialogOpen={mockSetMakeJsonMatchUiDialogOpen}
+            />
+          </MemoryRouter>
+        );
+
+        const makeJsonMatchUiBtn = screen.getByTestId(
+          "make-json-match-ui-action-btn"
+        );
+        await userEvent.click(makeJsonMatchUiBtn);
+
+        expect(mockSetMakeJsonMatchUiDialogOpen).toHaveBeenCalledWith(true);
+      });
+    });
   });
 });

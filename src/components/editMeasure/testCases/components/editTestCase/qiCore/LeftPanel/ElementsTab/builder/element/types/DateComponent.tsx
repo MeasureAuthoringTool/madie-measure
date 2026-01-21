@@ -18,6 +18,7 @@ import {
   formatOptionRenderMap,
 } from "./DateTimeComponent";
 import AddElementButton from "../../../../../../../common/UIOnlyModelAgnostic/AddElementButton";
+import { getMultipleCardinalityLabel } from "./TypeUtil";
 dayjs.extend(utc);
 dayjs.extend(timezone);
 dayjs.extend(advancedFormat);
@@ -61,12 +62,14 @@ const DateTimeComponent = ({
   value,
   onChange,
   label = "Date",
+  name,
   error,
   helperText,
   setTouched,
   showAddAttributeButton,
   addTitle,
 }: TypeComponentProps) => {
+  const testIdBase = name || label; // Always use name (complete path) if available
   const [format, setFormat] = useState<string>(null);
   const [date, setDate] = useState<any>(null);
   useEffect(() => {
@@ -86,11 +89,17 @@ const DateTimeComponent = ({
       setDate(null);
     }
   }, [value]);
-
+  // When the Select switches to readOnly, prevent the resulting ReadOnlyTextField's style from being overwritten
+  const selectProps: any = {};
+  if (canEdit) {
+    selectProps.style = { height: "38.125px", marginBottom: "2px" };
+  }
   return (
-    <div className="element-editor-add-row">
+    <div className="element-editor-add-row" data-component-type="DateComponent">
       <Box sx={{ display: "flex", flexDirection: "column" }}>
-        <InputLabel required={fieldRequired}>{label}</InputLabel>
+        <InputLabel required={fieldRequired}>
+          {getMultipleCardinalityLabel(label)}
+        </InputLabel>
         <LocalizationProvider dateAdapter={AdapterDayjs}>
           <div
             style={{
@@ -105,15 +114,14 @@ const DateTimeComponent = ({
           >
             {/* select a format and render a picker */}
             <Select
-              style={{ height: "38.125px", marginBottim: "2px" }}
               required={fieldRequired}
-              id={`date-format-selector-${label}`}
+              id={`date-format-selector-${testIdBase}`}
               label="Date Precision Level"
               inputProps={{
-                "data-testid": `date-format-selector-input-field-${label}`,
-                "aria-describedby": `date-format-selector-input-field-helper-text-${label}`,
+                "data-testid": `date-format-selector-input-field-${testIdBase}`,
+                "aria-describedby": `date-format-selector-input-field-helper-text-${testIdBase}`,
               }}
-              data-testid={`date-format-selector-field-${label}`}
+              data-testid={`date-format-selector-field-${testIdBase}`}
               readOnly={!canEdit}
               SelectDisplayProps={{
                 "aria-required": "true",
@@ -138,6 +146,7 @@ const DateTimeComponent = ({
               }}
               placeHolder={{ name: "Select Format", value: "" }}
               value={format ? format : ""}
+              {...selectProps}
             ></Select>
             <div
               onPaste={(e) => {
@@ -156,11 +165,12 @@ const DateTimeComponent = ({
                 helperText={helperText}
                 placeholder={format ? formatOptionRenderMap[format] : ""}
                 required={fieldRequired}
+                readOnly={!canEdit}
                 error={error}
                 value={date ? dayjs(date) : null}
                 views={format ? formatMap[format] : ["year"]}
                 disabled={!canEdit || !format || format === "Invalid Format"}
-                id={`${format || "year"}-field-${label}`}
+                id={`${format || "year"}-field-${testIdBase}`}
                 onChange={(date) => {
                   if (date) {
                     if (date.format(format) !== "Invalid Date") {

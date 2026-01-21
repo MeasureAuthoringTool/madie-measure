@@ -307,7 +307,6 @@ const mockCheckValidVersion = jest.fn().mockResolvedValue({});
 
 const mockUseFeatureFlagsApi = {
   enableQdmRepeatTransfer: jest.fn().mockResolvedValue(false),
-  TransferMeasure: jest.fn().mockResolvedValue(false),
 };
 
 const mockMeasureServiceApi = {
@@ -2502,18 +2501,12 @@ describe("Measure List component", () => {
   });
 });
 
-describe("Measure List with MeasureSearch enabled", () => {
-  beforeEach(() => {
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-      MeasureSearch: true,
-    }));
-  });
-
+describe("Measure List", () => {
   afterEach(() => {
     jest.clearAllMocks();
   });
 
-  it("should display all columns when MeasureSearch is enabled on Owned Measures tab", async () => {
+  it("should display all columns on Owned Measures tab", async () => {
     const { getByText } = render(
       <ServiceContext.Provider value={serviceConfig}>
         <MeasureList
@@ -2553,7 +2546,7 @@ describe("Measure List with MeasureSearch enabled", () => {
     expect(getByText("Updated")).toBeInTheDocument();
   });
 
-  it("should display all columns (except Shared column) when MeasureSearch is enabled on Shared Measures tab", async () => {
+  it("should display all columns (except Shared column) on Shared Measures tab", async () => {
     const { getByText, queryByText } = render(
       <ServiceContext.Provider value={serviceConfig}>
         <MeasureList
@@ -2593,7 +2586,7 @@ describe("Measure List with MeasureSearch enabled", () => {
     expect(getByText("Updated")).toBeInTheDocument();
   });
 
-  it("should display all columns when MeasureSearch is enabled on All Measures tab", async () => {
+  it("should display all columns on All Measures tab", async () => {
     const { getByText } = render(
       <ServiceContext.Provider value={serviceConfig}>
         <MeasureList
@@ -2633,7 +2626,7 @@ describe("Measure List with MeasureSearch enabled", () => {
     expect(getByText("Updated")).toBeInTheDocument();
   });
 
-  it("should enable sortable columns when MeasureSearch is enabled", async () => {
+  it("should enable sortable columns", async () => {
     const { getByText } = render(
       <ServiceContext.Provider value={serviceConfig}>
         <MeasureList
@@ -3109,16 +3102,12 @@ describe("Measure lock functionality", () => {
   describe("Owner Column", () => {
     const measuresWithOwner = measures.map((m) => ({
       ...m,
-      measureSet: {
-        ...m.measureSet,
-        owner: `Owner of ${m.measureName}`,
-      },
+      ownerDisplayName: `Owner of ${m.measureName}`,
     }));
 
     it("should display Owner column on Shared Measures tab when DisplayOwner flag is enabled", async () => {
       (useFeatureFlags as jest.Mock).mockReturnValue({
         ...mockUseFeatureFlagsApi,
-        MeasureSearch: true,
         DisplayOwner: true,
       });
 
@@ -3171,14 +3160,13 @@ describe("Measure lock functionality", () => {
       );
       expect(ownerCell).toBeInTheDocument();
       expect(ownerCell).toHaveTextContent(
-        measuresWithOwner[0].measureSet.owner
+        measuresWithOwner[0].ownerDisplayName
       );
     });
 
     it("should display Owner column on All Measures tab when DisplayOwner flag is enabled", async () => {
       (useFeatureFlags as jest.Mock).mockReturnValue({
         ...mockUseFeatureFlagsApi,
-        MeasureSearch: true,
         DisplayOwner: true,
       });
 
@@ -3231,14 +3219,13 @@ describe("Measure lock functionality", () => {
       );
       expect(ownerCell).toBeInTheDocument();
       expect(ownerCell).toHaveTextContent(
-        measuresWithOwner[0].measureSet.owner
+        measuresWithOwner[0].ownerDisplayName
       );
     });
 
     it("should NOT display Owner column on My Measures tab even when DisplayOwner flag is enabled", async () => {
       (useFeatureFlags as jest.Mock).mockReturnValue({
         ...mockUseFeatureFlagsApi,
-        MeasureSearch: true,
         DisplayOwner: true,
       });
 
@@ -3282,7 +3269,6 @@ describe("Measure lock functionality", () => {
     it("should NOT display Owner column when DisplayOwner flag is disabled", async () => {
       (useFeatureFlags as jest.Mock).mockReturnValue({
         ...mockUseFeatureFlagsApi,
-        MeasureSearch: true,
         DisplayOwner: false,
       });
 
@@ -3326,7 +3312,6 @@ describe("Measure lock functionality", () => {
     it("should display '-' when measure has no owner", async () => {
       (useFeatureFlags as jest.Mock).mockReturnValue({
         ...mockUseFeatureFlagsApi,
-        MeasureSearch: true,
         DisplayOwner: true,
       });
 
@@ -3388,42 +3373,32 @@ describe("Measure lock functionality", () => {
       expect(ownerCell).toHaveTextContent("-");
     });
 
-    it("should sort by Owner column when column header is clicked", async () => {
+    it("should display dash when ownerDisplayName is missing or empty", async () => {
       (useFeatureFlags as jest.Mock).mockReturnValue({
         ...mockUseFeatureFlagsApi,
-        MeasureSearch: true,
         DisplayOwner: true,
       });
 
-      // Create measures with different owners for sorting
-      const measuresForSorting = [
+      // Create measures with missing/null owner display names
+      const measuresWithMissingOwner = [
         {
           ...measures[0],
-          measureSet: {
-            ...measures[0].measureSet,
-            owner: "Zulu Owner",
-          },
+          ownerDisplayName: null,
         },
         {
           ...measures[1],
-          measureSet: {
-            ...measures[1].measureSet,
-            owner: "Alpha Owner",
-          },
+          ownerDisplayName: "",
         },
         {
           ...measures[2],
-          measureSet: {
-            ...measures[2].measureSet,
-            owner: null, // null owner should sort to bottom
-          },
+          ownerDisplayName: undefined,
         },
       ];
 
       render(
         <ServiceContext.Provider value={serviceConfig}>
           <MeasureList
-            measureList={measuresForSorting}
+            measureList={measuresWithMissingOwner}
             setMeasureList={setMeasureListMock}
             setTotalPages={setTotalPagesMock}
             setTotalItems={setTotalItemsMock}
@@ -3455,78 +3430,59 @@ describe("Measure lock functionality", () => {
 
       // Wait for table to render
       const measureName = await screen.findByText(
-        measuresForSorting[0].measureName
+        measuresWithMissingOwner[0].measureName
       );
       expect(measureName).toBeInTheDocument();
 
-      // Find and click the Owner column header to trigger sorting
-      const ownerHeader = screen.getByText("Owner");
-      expect(ownerHeader).toBeInTheDocument();
+      // Verify all owner cells display "-" when ownerDisplayName is missing
+      const ownerCell0 = screen.getByTestId(
+        `measure-owner-${measuresWithMissingOwner[0].id}-content`
+      );
+      expect(ownerCell0).toHaveTextContent("-");
 
-      // Click to sort (this will trigger the customSort function)
-      fireEvent.click(ownerHeader.closest("button"));
+      const ownerCell1 = screen.getByTestId(
+        `measure-owner-${measuresWithMissingOwner[1].id}-content`
+      );
+      expect(ownerCell1).toHaveTextContent("-");
 
-      // Verify the sort was triggered by checking setCurrentSort was called
-      // The actual sorting happens on the backend, but clicking the header
-      // exercises the sortingFn callback which uses customSort
-      expect(setCurrentSortMock).toHaveBeenCalled();
+      const ownerCell2 = screen.getByTestId(
+        `measure-owner-${measuresWithMissingOwner[2].id}-content`
+      );
+      expect(ownerCell2).toHaveTextContent("-");
     });
 
-    it("should properly sort Owner column with customSort function", async () => {
-      // Reset mocks
-      setCurrentSortMock.mockReset();
-      setCurrentDirectionMock.mockReset();
-
+    it("should display owner display names correctly", async () => {
       (useFeatureFlags as jest.Mock).mockReturnValue({
         ...mockUseFeatureFlagsApi,
-        MeasureSearch: true,
         DisplayOwner: true,
       });
 
-      // Create measures with varied owners to test sorting logic
-      const measuresForSorting = [
+      // Create measures with different owner display names
+      const measuresWithOwners = [
         {
           ...measures[0],
           id: "ID1",
           measureName: "Measure One",
-          measureSet: {
-            ...measures[0].measureSet,
-            owner: "Zulu", // Should be last when sorted ASC
-          },
+          ownerDisplayName: "John Doe",
         },
         {
           ...measures[1],
           id: "ID2",
           measureName: "Measure Two",
-          measureSet: {
-            ...measures[1].measureSet,
-            owner: "Alpha", // Should be first when sorted ASC
-          },
+          ownerDisplayName: "Jane Smith",
         },
         {
           ...measures[2],
           id: "ID3",
           measureName: "Measure Three",
-          measureSet: {
-            ...measures[2].measureSet,
-            owner: "", // Empty string should be last (after Zulu)
-          },
-        },
-        {
-          ...measures[3],
-          id: "ID4",
-          measureName: "Measure Four",
-          measureSet: {
-            ...measures[3].measureSet,
-            owner: null, // Null should be last (after empty string)
-          },
+          ownerDisplayName: "Bob Johnson",
         },
       ];
 
       render(
         <ServiceContext.Provider value={serviceConfig}>
           <MeasureList
-            measureList={measuresForSorting}
+            measureList={measuresWithOwners}
             setMeasureList={setMeasureListMock}
             setTotalPages={setTotalPagesMock}
             setTotalItems={setTotalItemsMock}
@@ -3559,31 +3515,24 @@ describe("Measure lock functionality", () => {
       // Wait for measures to render
       await screen.findByText("Measure One");
 
-      // Get the Owner column header button
-      const ownerHeader = screen.getByText("Owner");
-      const sortButton = ownerHeader.closest("button");
-      expect(sortButton).toBeInTheDocument();
+      // Verify owner display names are shown correctly
+      const ownerCell1 = screen.getByTestId(`measure-owner-ID1-content`);
+      expect(ownerCell1).toHaveTextContent("John Doe");
 
-      // Click once to sort ascending - this triggers the sortingFn at line 473-476
-      fireEvent.click(sortButton);
+      const ownerCell2 = screen.getByTestId(`measure-owner-ID2-content`);
+      expect(ownerCell2).toHaveTextContent("Jane Smith");
 
-      // Verify sort was triggered
-      await waitFor(() => {
-        expect(setCurrentSortMock).toHaveBeenCalledWith("measureSet.owner");
-      });
-
-      // The sortingFn with customSort is now exercised because
-      // TanStack Table calls it to compare rows during sorting
+      const ownerCell3 = screen.getByTestId(`measure-owner-ID3-content`);
+      expect(ownerCell3).toHaveTextContent("Bob Johnson");
     });
 
-    it("should have customSort function in Owner column sortingFn", async () => {
+    it("should not allow sorting on Owner column", async () => {
       (useFeatureFlags as jest.Mock).mockReturnValue({
         ...mockUseFeatureFlagsApi,
-        MeasureSearch: true,
         DisplayOwner: true,
       });
 
-      const { container } = render(
+      render(
         <ServiceContext.Provider value={serviceConfig}>
           <MeasureList
             measureList={measuresWithOwner}
@@ -3619,41 +3568,14 @@ describe("Measure lock functionality", () => {
       // Wait for table to render
       await screen.findByText(measuresWithOwner[0].measureName);
 
-      // Verify Owner column header exists (which means the column with sortingFn was created)
+      // Verify Owner column header exists
       const ownerHeader = screen.getByText("Owner");
       expect(ownerHeader).toBeInTheDocument();
 
-      // The sortingFn is defined in the column configuration at line 473-476
-      // This test ensures the column is rendered, which requires the sortingFn
-      // to be properly defined (even if not executed due to server-side sorting)
-      expect(ownerHeader.closest("button")).toBeInTheDocument();
-    });
-
-    // Note: Lines 473-476 (sortingFn callback) are not covered by tests because
-    // with manualPagination: true, the table uses server-side sorting and
-    // TanStack Table never invokes the sortingFn callback during tests.
-    // The sortingFn uses the customSort function (lines 180-192) which is tested below.
-
-    it("should correctly handle customSort logic for Owner column sorting", () => {
-      // This test validates the customSort function logic used by the sortingFn
-      // at line 473-476: customSort(rowA.original.actions?.measureSet?.owner, rowB.original.actions?.measureSet?.owner)
-
-      // Test undefined values sort to end
-      expect(customSort(undefined, "Alice")).toBe(1);
-      expect(customSort("Alice", undefined)).toBe(-1);
-
-      // Test empty strings sort to end
-      expect(customSort("", "Alice")).toBe(1);
-      expect(customSort("Alice", "")).toBe(-1);
-
-      // Test case-insensitive sorting
-      expect(customSort("alice", "Bob")).toBeLessThan(0);
-      expect(customSort("Bob", "alice")).toBeGreaterThan(0);
-      expect(customSort("Alice", "alice")).toBe(0);
-
-      // Test normal alphabetical order
-      expect(customSort("Alpha", "Zulu")).toBeLessThan(0);
-      expect(customSort("Zulu", "Alpha")).toBeGreaterThan(0);
+      // Owner column should not have a sort button (enableSorting: false)
+      // The header exists but should not be clickable for sorting
+      const headerCell = ownerHeader.closest("th");
+      expect(headerCell).toBeInTheDocument();
     });
   });
 });
