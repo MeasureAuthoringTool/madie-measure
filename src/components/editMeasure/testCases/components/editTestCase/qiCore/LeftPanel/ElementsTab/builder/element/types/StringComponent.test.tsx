@@ -16,8 +16,6 @@ describe("StringComponent", () => {
       />
     );
 
-    const stringField = screen.getByTestId("string-field-String");
-    expect(stringField).toBeInTheDocument();
     const stringFieldInput = screen.getByTestId(
       "string-field-input-String"
     ) as HTMLInputElement;
@@ -38,8 +36,6 @@ describe("StringComponent", () => {
       />
     );
 
-    const stringField = screen.getByTestId("string-field-String");
-    expect(stringField).toBeInTheDocument();
     const stringFieldInput = screen.getByTestId(
       "string-field-input-String"
     ) as HTMLInputElement;
@@ -75,8 +71,6 @@ describe("StringComponent", () => {
       />
     );
 
-    const stringField = screen.getByTestId("string-field-VALUE");
-    expect(stringField).toBeInTheDocument();
     const stringFieldInput = screen.getByTestId(
       "string-field-input-VALUE"
     ) as HTMLInputElement;
@@ -139,5 +133,73 @@ describe("StringComponent", () => {
     const addButton = screen.getByText("Add String");
     fireEvent.click(addButton);
     expect(handleAddElement).toHaveBeenCalled();
+  });
+
+  test("filters non-letter input when stringOnly is true", () => {
+    const handleChange = jest.fn();
+    render(
+      <StringComponent
+        value=""
+        label="String"
+        canEdit={true}
+        fieldRequired={false}
+        onChange={handleChange}
+        structureDefinition={null}
+        stringOnly={true}
+      />
+    );
+    const input = screen.getByTestId("string-field-input-String");
+    //const preventDefault = jest.fn();
+    const preventDefaultSpy = jest.spyOn(
+      window.Event.prototype,
+      "preventDefault"
+    );
+    fireEvent.keyPress(input, { key: "1", charCode: 49, preventDefaultSpy });
+    expect(preventDefaultSpy).toHaveBeenCalled();
+    preventDefaultSpy.mockRestore();
+  });
+
+  test("does not filter letter input when stringOnly is true", () => {
+    const handleChange = jest.fn();
+    render(
+      <StringComponent
+        value=""
+        label="String"
+        canEdit={true}
+        fieldRequired={false}
+        onChange={handleChange}
+        structureDefinition={null}
+        stringOnly={true}
+      />
+    );
+    const input = screen.getByTestId("string-field-input-String");
+    //const preventDefault = jest.fn();
+    const preventDefaultSpy = jest.spyOn(
+      window.Event.prototype,
+      "preventDefault"
+    );
+    fireEvent.keyPress(input, { key: "a", charCode: 97, preventDefaultSpy });
+    expect(preventDefaultSpy).not.toHaveBeenCalled();
+    preventDefaultSpy.mockRestore();
+  });
+
+  test("renders delete button only when showDeleteButton and canEdit are true", () => {
+    const handleDeleteElement = jest.fn();
+    render(
+      <StringComponent
+        value="test"
+        label="UniqueLabel"
+        canEdit={true}
+        fieldRequired={false}
+        onChange={jest.fn()}
+        structureDefinition={null}
+        showDeleteButton={true}
+        handleDeleteElement={handleDeleteElement}
+      />
+    );
+    const deleteButton = screen.getByTestId("delete-button-UniqueLabel");
+    expect(deleteButton).toBeInTheDocument();
+    fireEvent.click(deleteButton);
+    expect(handleDeleteElement).toHaveBeenCalled();
   });
 });

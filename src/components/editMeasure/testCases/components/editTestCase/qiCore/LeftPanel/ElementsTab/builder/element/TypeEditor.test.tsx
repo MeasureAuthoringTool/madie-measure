@@ -1846,7 +1846,7 @@ describe("TypeEditor Component", () => {
     expect(filteredChildDef).toBeInTheDocument();
     expect(filteredChildDef.value).toBe("");
     const valueInput = (await screen.findByTestId(
-      "string-field-SomeResource.value[x]"
+      "string-field-input-SomeResource.value[x]"
     )) as HTMLInputElement;
     await userEvent.type(valueInput, "250");
   });
