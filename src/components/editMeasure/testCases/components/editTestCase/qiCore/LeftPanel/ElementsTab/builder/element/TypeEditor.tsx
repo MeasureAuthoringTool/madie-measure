@@ -60,9 +60,9 @@ const TypeEditor = ({
   const formik = useFormikContext();
   // Ref to track pending values for use in closures (prevents stale state issues when rapidly clicking Add)
   // We use a deep clone to avoid mutating formik.values directly
-  const pendingValuesRef = useRef(_.cloneDeep(formik.values));
+  const pendingValuesRef = useRef<object>(_.cloneDeep(formik.values) as object);
   // Sync ref with formik.values on each render (after formik has processed updates)
-  pendingValuesRef.current = _.cloneDeep(formik.values);
+  pendingValuesRef.current = _.cloneDeep(formik.values) as object;
 
   const { requiredFields, formInfo } = useRequiredFields();
   let required = getRequired(requiredFields, stripAllIndexes(label));
