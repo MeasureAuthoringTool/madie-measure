@@ -70,13 +70,13 @@ jest.mock("@madie/madie-util", () => ({
   }),
 }));
 
-jest.mock("./types/MoneyComponent", () => ({ label }: any) => (
-  <div data-testid={`money-component-${label}`}>MoneyComponent Mock</div>
-));
+// jest.mock("./types/MoneyComponent", () => ({ label }: any) => (
+//   <div data-testid={`money-component-${label}`}>MoneyComponent Mock</div>
+// ));
 
-jest.mock("./types/QuantityComponent", () => ({ label }: any) => (
-  <div data-testid={`quantity-component-${label}`}>QuantityComponent Mock</div>
-));
+// jest.mock("./types/QuantityComponent", () => ({ label }: any) => (
+//   <div data-testid={`quantity-component-${label}`}>QuantityComponent Mock</div>
+// ));
 
 const codingDef = {
   path: "Coding",
@@ -2273,16 +2273,14 @@ describe("TypeEditor Component", () => {
 
     // Verify mocked QuantityComponents for Low and High
     const lowComponent = await screen.findByTestId(
-      "quantity-component-Observation.referenceRange[0].age.low"
+      "decimal-field-Observation.referenceRange[0].age.low.value"
     );
     expect(lowComponent).toBeInTheDocument();
-    expect(lowComponent).toHaveTextContent("QuantityComponent Mock");
 
     const highComponent = await screen.findByTestId(
-      "quantity-component-Observation.referenceRange[0].age.high"
+      "decimal-field-Observation.referenceRange[0].age.high.value"
     );
     expect(highComponent).toBeInTheDocument();
-    expect(highComponent).toHaveTextContent("QuantityComponent Mock");
 
     // Assert Comparator is NOT present
     expect(screen.queryByLabelText(/Comparator/i)).not.toBeInTheDocument();
@@ -3691,15 +3689,7 @@ describe("TypeEditor Component", () => {
         setFieldValue: jest.fn(),
         setFieldTouched: jest.fn(),
         handleChange: jest.fn(),
-        getFieldProps: (label) => {
-          const value = getNestedProperty(quantityValues, label);
-          return {
-            value,
-            name: label,
-            onChange: jest.fn(),
-            onBlur: jest.fn(),
-          };
-        },
+        getFieldProps: jest.fn(),
       };
 
       mockFormikQuantity.getFieldProps.mockImplementation((path) => {
