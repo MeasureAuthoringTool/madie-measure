@@ -1726,14 +1726,10 @@ describe("TypeEditor Component", () => {
     expect(codeValue).toHaveValue("448951000124107");
     userEvent.tab();
 
-    expect(onChange).toHaveBeenLastCalledWith("Encounter.type[0]", {
-      coding: [
-        {
-          code: "448951000124107",
-          display: "448951000124107",
-          system: "http://snomed.info/sct",
-        },
-      ],
+    expect(onChange).toHaveBeenLastCalledWith("Encounter.type[0].coding[0]", {
+      code: "448951000124107",
+      display: "448951000124107",
+      system: "http://snomed.info/sct",
     });
   });
 
