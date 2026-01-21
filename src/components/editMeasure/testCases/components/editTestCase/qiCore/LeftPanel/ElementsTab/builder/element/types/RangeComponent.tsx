@@ -15,7 +15,7 @@ const RangeComponent = ({
   const highPath = `${label}.high`;
 
   return (
-    <div className="range-component">
+    <div className="range-component" data-component-type="RangeComponent">
       <InputLabel>{formattedLabel}</InputLabel>
 
       <div className="quantity-row">

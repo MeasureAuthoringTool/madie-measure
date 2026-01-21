@@ -72,6 +72,7 @@ import {
   MenuItemContainer,
 } from "../../../../../styles/editMeasure/populationCriteria/groups/index";
 import CompletionIndicator from "../CompletionIndicator";
+import CompositeScoring from "../Composite/CompositeScoring";
 
 interface ColSpanPopulationsType {
   isExclusionPop?: boolean;
@@ -355,6 +356,9 @@ const MeasureGroups = (props: MeasureGroupProps) => {
               .improvementNotationDescription || "",
           rateAggregation:
             measure?.groups[measureGroupNumber].rateAggregation || "",
+          compositeScoring: isCompositeMeasure
+            ? measure?.groups[measureGroupNumber]?.compositeScoring || ""
+            : null,
         },
       });
       setVisibleStrats(
@@ -368,7 +372,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
           values: {
             id: null,
             displayId: null,
-            scoring: "",
+            scoring: isCompositeMeasure ? GroupScoring.COMPOSITE : "",
             populations: [],
             measureObservations: null,
             groupDescription: "",
@@ -380,6 +384,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
             populationBasis: defaultPopulationBasis,
             scoringUnit: "",
             scoringPrecision: "",
+            compositeScoring: isCompositeMeasure ? "" : null,
           },
         });
       }
@@ -408,10 +413,14 @@ const MeasureGroups = (props: MeasureGroupProps) => {
       populationBasis: group?.populationBasis || defaultPopulationBasis,
       scoringUnit: group?.scoringUnit || null, // autocomplete can't init with string
       scoringPrecision: group?.scoringPrecision || null,
+      compositeScoring: isCompositeMeasure
+        ? group?.compositeScoring || ""
+        : null,
     } as Group,
     validationSchema: measureGroupSchemaValidator(
       cqlDefinitionDataTypes,
-      cqlFunctionDataTypes
+      cqlFunctionDataTypes,
+      isCompositeMeasure
     ),
     // enableReinitialize: true,
     onSubmit: async (group: Group) => {
@@ -530,7 +539,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
           id: null,
           displayId: null,
           groupDescription: "",
-          scoring: "",
+          scoring: isCompositeMeasure ? GroupScoring.COMPOSITE : "",
           measureGroupTypes: [],
           rateAggregation: "",
           improvementNotation: "",
@@ -716,7 +725,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
   useEffect(() => {
     if (formik.values.scoring) {
       setStratAssociation(
-        associationSelect[formik.values.scoring].filter((name) =>
+        associationSelect[formik.values.scoring]?.filter((name) =>
           formik.values.populations
             .filter((population) => population.definition)
             .map((population) => population.name)
@@ -805,7 +814,10 @@ const MeasureGroups = (props: MeasureGroupProps) => {
   }, [ucum, ucumUnits]);
 
   const isImprovementNotationRequired = () =>
-    formik.values.scoring !== GroupScoring.COHORT;
+    !(
+      formik.values.scoring === GroupScoring.COHORT ||
+      formik.values.scoring === GroupScoring.COMPOSITE
+    );
 
   return (
     <div tw="lg:col-span-5 pl-2 pr-2" data-testid="qi-core-groups">
@@ -1123,8 +1135,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                             displayIcon={
                               formik.values.improvementNotation
                                 ? true
-                                : formik.values.scoring !==
-                                  MeasureScoring.COHORT
+                                : isImprovementNotationRequired()
                             }
                           />
                         }
@@ -1242,9 +1253,9 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                   />
                 )}
                 {activeTab === "components" && (
-                  <Typography data-testid="components">
-                    Coming soon...
-                  </Typography>
+                  <div data-testid="components">
+                    <CompositeScoring canEdit={canEdit} formik={formik} />
+                  </div>
                 )}
                 {activeTab === "stratification" && (
                   <FieldArray
@@ -1376,9 +1387,13 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                                           )}
                                           readOnly={!canEdit}
                                           options={
-                                            ["Select All"].concat(
-                                              Object.values(stratAssociation)
-                                            ) // add Select All as an option and then modify render logic tot toggle all on click.
+                                            stratAssociation
+                                              ? ["Select All"].concat(
+                                                  Object.values(
+                                                    stratAssociation
+                                                  )
+                                                )
+                                              : []
                                           }
                                           multipleSelect={true}
                                           handleToggleSelectAll={() => {
