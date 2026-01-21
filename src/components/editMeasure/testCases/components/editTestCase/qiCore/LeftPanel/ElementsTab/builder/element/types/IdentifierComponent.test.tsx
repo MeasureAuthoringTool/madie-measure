@@ -138,22 +138,16 @@ describe("IdentifierComponent", () => {
     userEvent.type(code, "C1");
 
     expect(setFieldValueMock).toHaveBeenCalledWith(
-      "MedicationRequest.identifier[0].type",
+      "MedicationRequest.identifier[0].type.coding[0]",
       {
-        coding: [
-          {
-            code: "C1",
-            display: "C1",
-            system: "http://example.com/custom-system",
-          },
-        ],
+        code: "C1",
+        display: "C1",
+        system: "http://example.com/custom-system",
       }
     );
 
     // System
-    const systemInput = await screen.findByLabelText(
-      "MedicationRequest.identifier[0].system"
-    );
+    const systemInput = await screen.findByLabelText("System");
     fireEvent.change(systemInput, { target: { value: "urn:oid:1.2.3.4" } });
 
     await waitFor(() => {
@@ -164,9 +158,7 @@ describe("IdentifierComponent", () => {
     });
 
     // Value
-    const valueInput = await screen.findByLabelText(
-      "MedicationRequest.identifier[0].value"
-    );
+    const valueInput = await screen.findByLabelText("Value");
     fireEvent.change(valueInput, { target: { value: "12345" } });
 
     await waitFor(() => {

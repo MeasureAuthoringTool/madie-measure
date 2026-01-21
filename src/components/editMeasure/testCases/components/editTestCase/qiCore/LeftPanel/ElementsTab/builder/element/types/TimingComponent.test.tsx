@@ -179,11 +179,13 @@ describe("TimingComponent", () => {
     );
     // Event
     const formatSelector = screen.getByTestId(
-      "date-time-format-selector-input-field-Event[0]"
+      "date-time-format-selector-input-field-MedicationRequest.dosageInstruction[0].timing.event[0]"
     );
     fireEvent.change(formatSelector, { target: { value: "YYYY" } });
 
-    const input = screen.getByTestId(`${YEAR_FORMAT}-field-Event[0]-input`);
+    const input = screen.getByTestId(
+      `${YEAR_FORMAT}-field-MedicationRequest.dosageInstruction[0].timing.event[0]-input`
+    );
     userEvent.type(input, "2022");
     expect(setFieldValueMock).toHaveBeenLastCalledWith(
       "MedicationRequest.dosageInstruction[0].timing.event[0]",
@@ -247,7 +249,9 @@ describe("TimingComponent", () => {
     });
 
     // Repeat.Count
-    const countInput = screen.getByTestId("integer-field-input-Repeat.Count");
+    const countInput = screen.getByTestId(
+      "integer-field-input-MedicationRequest.dosageInstruction[0].timing.repeat.count"
+    );
     userEvent.type(countInput, "5");
     expect(setFieldValueMock).toHaveBeenLastCalledWith(
       "MedicationRequest.dosageInstruction[0].timing.repeat.count",
@@ -256,7 +260,7 @@ describe("TimingComponent", () => {
 
     // Repeat.CountMax
     const countMaxInput = screen.getByTestId(
-      "integer-field-input-Repeat.CountMax"
+      "integer-field-input-MedicationRequest.dosageInstruction[0].timing.repeat.countMax"
     );
     userEvent.type(countMaxInput, "8");
     expect(setFieldValueMock).toHaveBeenLastCalledWith(
@@ -287,8 +291,7 @@ describe("TimingComponent", () => {
 
     // Duration Repeat.Unit(s)
     const durationContainer = screen.getByTestId("repeat-duration-unit");
-    const durationUnit =
-      within(durationContainer).getByLabelText("Repeat.Unit(s)");
+    const durationUnit = within(durationContainer).getByLabelText("Unit(s)");
     userEvent.click(durationUnit);
     const minuteOption = await screen.findByText("minute");
     userEvent.click(minuteOption);
@@ -301,7 +304,7 @@ describe("TimingComponent", () => {
 
     // Repeat.Frequency
     const frequencyInput = screen.getByTestId(
-      "integer-field-input-Repeat.Frequency"
+      "integer-field-input-MedicationRequest.dosageInstruction[0].timing.repeat.frequency"
     );
     userEvent.type(frequencyInput, "3");
     expect(setFieldValueMock).toHaveBeenLastCalledWith(
@@ -311,7 +314,7 @@ describe("TimingComponent", () => {
 
     // Repeat.FrequencyMax
     const frequencyMaxInput = screen.getByTestId(
-      "integer-field-input-Repeat.FrequencyMax"
+      "integer-field-input-MedicationRequest.dosageInstruction[0].timing.repeat.frequencyMax"
     );
     userEvent.type(frequencyMaxInput, "6");
     expect(setFieldValueMock).toHaveBeenLastCalledWith(
@@ -339,7 +342,7 @@ describe("TimingComponent", () => {
 
     // Period Repeat.Unit(s)
     const periodContainer = screen.getByTestId("repeat-period-unit");
-    const periodUnit = within(periodContainer).getByLabelText("Repeat.Unit(s)");
+    const periodUnit = within(periodContainer).getByLabelText("Unit(s)");
     userEvent.click(periodUnit);
     const hourOption = await screen.findByText("hour");
     userEvent.click(hourOption);
@@ -386,7 +389,9 @@ describe("TimingComponent", () => {
     });
 
     // Repeat.Offset
-    const offsetInput = screen.getByTestId("integer-field-input-Repeat.Offset");
+    const offsetInput = screen.getByTestId(
+      "integer-field-input-MedicationRequest.dosageInstruction[0].timing.repeat.offset"
+    );
     userEvent.type(offsetInput, "5");
     expect(setFieldValueMock).toHaveBeenLastCalledWith(
       "MedicationRequest.dosageInstruction[0].timing.repeat.offset",
@@ -416,18 +421,16 @@ describe("TimingComponent", () => {
     expect(code).toBeInTheDocument();
     userEvent.type(code, "C1");
 
-    expect(setFieldValueMock).toHaveBeenCalledWith(
-      "MedicationRequest.dosageInstruction[0].timing.code",
-      {
-        coding: [
-          {
-            code: "C1",
-            display: "C1",
-            system: "http://example.com/custom-system",
-          },
-        ],
-      }
-    );
+    await waitFor(() => {
+      expect(setFieldValueMock).toHaveBeenCalledWith(
+        "MedicationRequest.dosageInstruction[0].timing.code.coding[0]",
+        {
+          code: "C1",
+          display: "C1",
+          system: "http://example.com/custom-system",
+        }
+      );
+    });
 
     // Add buttons
     userEvent.click(screen.getByText("Add Repeat.When"));

@@ -73,7 +73,7 @@ const TimingComponent = ({
 
   return (
     <ElementSection title={"Timing"} startOpen={false}>
-      <div id="timing-component">
+      <div id="timing-component" data-component-type="TimingComponent">
         {/* Event */}
         {eventValues.map((_, index) => (
           <DateTimeComponent
@@ -390,8 +390,7 @@ const TimingComponent = ({
 
         {/* Code */}
         <CodeableConceptComponent
-          handleAddElement={handleAddElement}
-          label="Code"
+          label={codePath}
           canEdit={canEdit}
           structureDefinition={{
             path: label,
@@ -400,13 +399,8 @@ const TimingComponent = ({
               strength: "preferred",
             },
           }}
-          showAddAttributeButton={false}
           addTitle={null}
           value={getIn(formik.values, codePath)}
-          onChange={(value) => {
-            formik.setFieldTouched(codePath);
-            formik.setFieldValue(codePath, value);
-          }}
         />
       </div>
     </ElementSection>

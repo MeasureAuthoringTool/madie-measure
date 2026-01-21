@@ -23,6 +23,7 @@ const IdentifierComponent = ({
 
   return (
     <div
+      data-component-type="IdentifierComponent"
       style={{
         display: "flex",
         flexDirection: "column",
@@ -46,7 +47,7 @@ const IdentifierComponent = ({
       />
       {/* clears out on it's own.. */}
       <CodeableConceptComponent
-        label="Type"
+        label={`${label}.type`}
         canEdit={canEdit}
         structureDefinition={{
           path: label,
@@ -55,18 +56,12 @@ const IdentifierComponent = ({
             strength: "extensible",
           },
         }}
-        showAddAttributeButton={false}
         addTitle={null}
         value={getIn(formik.values, `${label}.type`)}
-        handleAddElement={handleAddElement}
-        onChange={(value) => {
-          formik.setFieldTouched(`${label}.type`);
-          formik.setFieldValue(`${label}.type`, value);
-        }}
       />
 
       <UriComponent
-        label={label + ".system"}
+        label="System"
         fieldRequired={fieldRequired}
         canEdit={canEdit}
         helperText={formikErrorHandler(label + ".system", formik)}
@@ -75,7 +70,7 @@ const IdentifierComponent = ({
       />
 
       <StringComponent
-        label={label + ".value"}
+        label="Value"
         fieldRequired={fieldRequired}
         canEdit={canEdit}
         helperText={formikErrorHandler(label + ".value", formik)}

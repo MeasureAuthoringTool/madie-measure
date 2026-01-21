@@ -18,39 +18,41 @@ const UriComponent = ({
   handleDeleteElement,
   ...props
 }: TypeComponentProps) => {
-  const { value } = props;
+  const formattedLabel = getMultipleCardinalityLabel(label);
+  const testIdBase =
+    props.name && props.name.includes("[") ? props.name : label;
   return (
     <div
       className="element-editor-add-row"
+      data-component-type="UriComponent"
       style={{ display: "flex", alignItems: "center", gap: "8px" }}
     >
       <TextField
         required={fieldRequired}
         readOnly={!canEdit}
-        id={`uri-field-${label}`}
-        label={`${getMultipleCardinalityLabel(label)}`}
+        id={`uri-field-${formattedLabel}`}
+        label={formattedLabel}
         labelColor="#1976d2"
         placeholder={label}
         inputProps={{
-          "data-testid": `uri-input-field-${label}`,
-          "aria-describedby": `uri-input-field-helper-text-${label}`,
+          "data-testid": `uri-input-field-${testIdBase}`,
+          "aria-describedby": `uri-input-field-helper-text-${testIdBase}`,
           required: fieldRequired,
           "aria-required": fieldRequired,
         }}
-        data-testid={`uri-field-${label}`}
+        data-testid={`uri-field-${testIdBase}`}
         size="small"
         fullWidth
         {...props}
-        value={value || ""}
       />
       {showDeleteButton && canEdit && (
         <Tooltip title="Delete" arrow>
           <IconButton
             onClick={handleDeleteElement}
-            data-testid={`delete-button-${label}`}
+            data-testid={`delete-button-${testIdBase}`}
             size="small"
             color="error"
-            aria-label="delete element"
+            aria-label={`delete ${testIdBase}`}
           >
             <DeleteOutlineIcon fontSize="small" />
           </IconButton>
