@@ -1,6 +1,6 @@
 import React from "react";
 import { TypeComponentProps } from "./TypeComponentProps";
-import { TextField } from "@madie/madie-design-system/dist/react";
+import { TextArea } from "@madie/madie-design-system/dist/react";
 import AddElementButton from "../../../../../../../common/UIOnlyModelAgnostic/AddElementButton";
 import { IconButton, Tooltip } from "@mui/material";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
@@ -17,7 +17,7 @@ const StringComponent = ({
   helperText,
   label = "VALUE",
   structureDefinition,
-  stringOnly = true,
+  stringOnly = false,
   showAddAttributeButton = false,
   addTitle,
   handleAddElement,
@@ -32,7 +32,7 @@ const StringComponent = ({
   const { value } = props;
   return (
     <div className="element-editor-add-row">
-      <TextField
+      <TextArea
         required={fieldRequired}
         readOnly={!canEdit}
         id={`string-field-${label}`}
@@ -46,7 +46,6 @@ const StringComponent = ({
           "aria-required": fieldRequired,
           readOnly: isRootLabel(label),
         }}
-        data-testid={`string-field-${label}`}
         size="small"
         fullWidth
         onKeyPress={
@@ -59,6 +58,9 @@ const StringComponent = ({
               }
             : undefined
         }
+        maxRows={4}
+        minRows={1}
+        maxLength={500}
         {...props}
         value={value || ""}
       />
