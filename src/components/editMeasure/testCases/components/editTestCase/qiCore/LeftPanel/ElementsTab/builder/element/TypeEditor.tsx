@@ -656,11 +656,13 @@ const TypeEditor = ({
       case "Coding":
         return (
           <CodingComponent
+            handleDeleteElement={handleDeleteElement}
             handleAddElement={handleAddElement}
             label={label}
             canEdit={canEdit}
             structureDefinition={structureDefinition}
             showAddAttributeButton={showAddAttributeButton}
+            showDeleteButton={showAddAttributeButton}
             addTitle={addTitle}
             {...formik.getFieldProps(label)}
             onChange={(value) => {
@@ -693,10 +695,6 @@ const TypeEditor = ({
                   addTitle={addTitle}
                   handleAddElement={handleAddElement}
                   {...formik.getFieldProps(fieldLabel)}
-                  onChange={(value) => {
-                    formik.setFieldTouched(fieldLabel);
-                    formik.setFieldValue(fieldLabel, value);
-                  }}
                 />
               );
             })}
