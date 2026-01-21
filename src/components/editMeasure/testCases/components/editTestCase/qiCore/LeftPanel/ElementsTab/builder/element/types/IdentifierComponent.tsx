@@ -23,6 +23,7 @@ const IdentifierComponent = ({
 
   return (
     <div
+      data-component-type="IdentifierComponent"
       style={{
         display: "flex",
         flexDirection: "column",

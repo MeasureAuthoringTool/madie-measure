@@ -73,7 +73,7 @@ const TimingComponent = ({
 
   return (
     <ElementSection title={"Timing"} startOpen={false}>
-      <div id="timing-component">
+      <div id="timing-component" data-component-type="TimingComponent">
         {/* Event */}
         {eventValues.map((_, index) => (
           <DateTimeComponent

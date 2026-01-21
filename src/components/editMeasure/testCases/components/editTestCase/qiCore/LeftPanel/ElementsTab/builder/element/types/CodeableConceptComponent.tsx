@@ -74,7 +74,10 @@ const CodeableConceptComponent: React.FC<CodeableConceptComponentProps> = ({
   }, [value?.coding]);
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "column" }}>
+    <Box
+      sx={{ display: "flex", flexDirection: "column" }}
+      data-component-type="CodeableConceptComponent"
+    >
       <InputLabel>{getMultipleCardinalityLabel(label)}</InputLabel>
       {codings.map((coding: Coding, index: number) => {
         const codingLabel = `${label}.coding[${index}]`;

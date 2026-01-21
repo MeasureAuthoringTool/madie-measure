@@ -159,7 +159,10 @@ export default function ReferenceComponent({
 
   return (
     <>
-      <div className="element-editor-add-row reference">
+      <div
+        className="element-editor-add-row reference"
+        data-component-type="ReferenceComponent"
+      >
         <InputLabel
           aria-labelledby="reference-label"
           required={required}

@@ -258,7 +258,10 @@ const CodingComponent = ({
     );
   };
   return (
-    <div style={{ display: "flex", flexDirection: "column" }}>
+    <div
+      style={{ display: "flex", flexDirection: "column" }}
+      data-component-type="CodingComponent"
+    >
       <div className="element-editor-add-row">
         <div tw="w-3/4">
           <Select

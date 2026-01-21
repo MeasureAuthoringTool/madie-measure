@@ -26,7 +26,7 @@ const UuidComponent = ({
     }
   };
   return (
-    <div className="element-editor-add-row">
+    <div className="element-editor-add-row" data-component-type="UuidComponent">
       <TextField
         required={fieldRequired}
         readOnly={!canEdit}
