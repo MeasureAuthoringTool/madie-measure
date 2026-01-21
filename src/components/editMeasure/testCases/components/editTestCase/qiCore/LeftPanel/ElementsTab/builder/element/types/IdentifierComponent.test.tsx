@@ -138,15 +138,11 @@ describe("IdentifierComponent", () => {
     userEvent.type(code, "C1");
 
     expect(setFieldValueMock).toHaveBeenCalledWith(
-      "MedicationRequest.identifier[0].type",
+      "MedicationRequest.identifier[0].type.coding[0]",
       {
-        coding: [
-          {
-            code: "C1",
-            display: "C1",
-            system: "http://example.com/custom-system",
-          },
-        ],
+        code: "C1",
+        display: "C1",
+        system: "http://example.com/custom-system",
       }
     );
 

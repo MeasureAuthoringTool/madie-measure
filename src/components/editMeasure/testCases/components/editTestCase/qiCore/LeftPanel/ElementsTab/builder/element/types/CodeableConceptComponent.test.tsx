@@ -9,10 +9,13 @@ import {
   ServiceConfig,
 } from "../../../../../../../../../../../api/ServiceContext";
 import CodeableConceptComponent from "./CodeableConceptComponent";
+import { FormikProvider, FormikContextType } from "formik";
 
 jest.mock("../../../../../../../../../../../api/axios-instance");
+
 const mockedAxios = axios as jest.Mocked<typeof axios>;
-const mockOnChange = jest.fn();
+const mockSetFieldValue = jest.fn();
+const mockSetFieldTouched = jest.fn();
 
 const mockConfig = {
   fhirService: {
@@ -48,7 +51,26 @@ const mockStructureDefinition = {
   },
 } as ElementDefinition;
 
+/**
+ * Creates a mock Formik context with the given values
+ */
+const createMockFormik = (values: any): FormikContextType<any> =>
+  ({
+    values,
+    touched: {},
+    errors: {},
+    setFieldValue: mockSetFieldValue,
+    setFieldTouched: mockSetFieldTouched,
+    getFieldProps: jest.fn(),
+    dirty: false,
+    isValid: true,
+  } as unknown as FormikContextType<any>);
+
 describe("CodeableConceptComponent Tests", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it("render and update codeable concept", async () => {
     const value = {
       coding: [
@@ -63,6 +85,9 @@ describe("CodeableConceptComponent Tests", () => {
         },
       ],
     };
+
+    const mockFormik = createMockFormik({ "test-label": value });
+
     mockedAxios.get.mockResolvedValue({
       data: mockBindingValueSet,
     });
@@ -80,19 +105,20 @@ describe("CodeableConceptComponent Tests", () => {
             contextFailure: false,
           }}
         >
-          <CodeableConceptComponent
-            canEdit={true}
-            structureDefinition={mockStructureDefinition}
-            label="test-label"
-            value={value}
-            onChange={mockOnChange}
-            addTitle={"Codeable"}
-            showAddAttributeButton={true}
-          />
+          <FormikProvider value={mockFormik}>
+            <CodeableConceptComponent
+              canEdit={true}
+              structureDefinition={mockStructureDefinition}
+              label="test-label"
+              value={value}
+              addTitle={"Codeable"}
+            />
+          </FormikProvider>
         </ExecutionContextProvider>
       </ApiContextProvider>
     );
-    expect(screen.getByText("Add Codeable")).toBeInTheDocument();
+
+    expect(screen.getByText("Add Coding")).toBeInTheDocument();
 
     // verify value set
     const valueSetSelect = screen.getByRole("combobox", {
@@ -135,19 +161,151 @@ describe("CodeableConceptComponent Tests", () => {
     userEvent.click(codeSelect);
     const codeOptions = screen.getAllByRole("option");
     userEvent.click(codeOptions[0]);
+
+    // Verify Formik setFieldValue was called with the coding path (not the whole CodeableConcept)
     await waitFor(() => {
-      expect(mockOnChange).toHaveBeenCalledWith({
+      expect(mockSetFieldValue).toHaveBeenCalledWith("test-label.coding[0]", {
+        code: mockBindingValueSet.expansion?.contains[1].code,
+        system: mockBindingValueSet.expansion?.contains[1].system,
+        display: mockBindingValueSet.expansion?.contains[1].display,
+        extension: [
+          {
+            url: "http://hl7.org/fhir/StructureDefinition/valueset-reference",
+            valueUri: mockBindingValueSet.url,
+          },
+        ],
+      });
+    });
+  });
+
+  it("adds a new coding element when add button is clicked", async () => {
+    const value = {
+      coding: [
+        {
+          code: "B1",
+          system: "http://example.com/system1",
+          display: "B1 Code",
+        },
+      ],
+    };
+
+    const mockFormik = createMockFormik({ "test-label": value });
+
+    mockedAxios.get.mockResolvedValue({
+      data: mockBindingValueSet,
+    });
+
+    render(
+      <ApiContextProvider value={mockConfig}>
+        <ExecutionContextProvider
+          value={{
+            measureState: [null, jest.fn()],
+            bundleState: [null, jest.fn()],
+            valueSetsState: [null, jest.fn()],
+            executionContextReady: true,
+            executing: false,
+            setExecuting: jest.fn(),
+            contextFailure: false,
+          }}
+        >
+          <FormikProvider value={mockFormik}>
+            <CodeableConceptComponent
+              canEdit={true}
+              structureDefinition={mockStructureDefinition}
+              label="test-label"
+              value={value}
+              addTitle={"Codeable"}
+            />
+          </FormikProvider>
+        </ExecutionContextProvider>
+      </ApiContextProvider>
+    );
+
+    const addButton = screen.getByText("Add Coding");
+    userEvent.click(addButton);
+
+    await waitFor(() => {
+      expect(mockSetFieldValue).toHaveBeenCalledWith("test-label", {
         coding: [
           {
-            code: mockBindingValueSet.expansion?.contains[1].code,
-            system: mockBindingValueSet.expansion?.contains[1].system,
-            display: mockBindingValueSet.expansion?.contains[1].display,
-            extension: [
-              {
-                url: "http://hl7.org/fhir/StructureDefinition/valueset-reference",
-                valueUri: mockBindingValueSet.url,
-              },
-            ],
+            code: "B1",
+            system: "http://example.com/system1",
+            display: "B1 Code",
+          },
+          undefined,
+        ],
+      });
+    });
+  });
+
+  it("deletes a coding element when delete button is clicked", async () => {
+    const value = {
+      coding: [
+        {
+          code: "B1",
+          system: "http://example.com/system1",
+          display: "B1 Code",
+        },
+        {
+          code: "B2",
+          system: "http://example.com/system2",
+          display: "B2 Code",
+        },
+      ],
+    };
+
+    const mockFormik = createMockFormik({ "test-label": value });
+
+    mockedAxios.get.mockResolvedValue({
+      data: mockBindingValueSet,
+    });
+
+    render(
+      <ApiContextProvider value={mockConfig}>
+        <ExecutionContextProvider
+          value={{
+            measureState: [null, jest.fn()],
+            bundleState: [null, jest.fn()],
+            valueSetsState: [null, jest.fn()],
+            executionContextReady: true,
+            executing: false,
+            setExecuting: jest.fn(),
+            contextFailure: false,
+          }}
+        >
+          <FormikProvider value={mockFormik}>
+            <CodeableConceptComponent
+              canEdit={true}
+              structureDefinition={mockStructureDefinition}
+              label="test-label"
+              value={value}
+              addTitle={"Codeable"}
+            />
+          </FormikProvider>
+        </ExecutionContextProvider>
+      </ApiContextProvider>
+    );
+
+    // Find and click the delete button for the first coding
+    const deleteButton0 = screen.getByTestId(
+      "delete-button-test-label.coding[0]"
+    );
+    const deleteButton1 = screen.getByTestId(
+      "delete-button-test-label.coding[1]"
+    );
+
+    expect(deleteButton0).toBeInTheDocument();
+    expect(deleteButton1).toBeInTheDocument();
+
+    userEvent.click(deleteButton0);
+
+    await waitFor(() => {
+      expect(mockSetFieldValue).toHaveBeenCalledWith("test-label", {
+        coding: [
+          {
+            code: "B2",
+            system: "http://example.com/system2",
+            display: "B2 Code",
           },
         ],
       });
