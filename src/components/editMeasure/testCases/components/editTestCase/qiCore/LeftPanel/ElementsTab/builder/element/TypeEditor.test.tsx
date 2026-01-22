@@ -3752,6 +3752,29 @@ describe("TypeEditor Component", () => {
         [{ reference: "Practitioner/pract-1" }]
       );
     });
+
+    test("Should handle clicking Add button for Reference arrays", async () => {
+      const setFieldValueMock = jest.fn();
+      renderReferenceTypeEditor(
+        "ClaimResponse.addItem[0].provider",
+        [{ reference: "Practitioner/pract-1" }],
+        setFieldValueMock
+      );
+
+      // Find and click the Add Provider button
+      const addButton = screen.getByRole("button", { name: /add provider/i });
+      expect(addButton).toBeInTheDocument();
+      await userEvent.click(addButton);
+
+      // setFieldValue should be called with the array path and new array with empty object
+      expect(setFieldValueMock).toHaveBeenCalledWith(
+        "ClaimResponse.addItem[0].provider",
+        expect.arrayContaining([
+          expect.objectContaining({ reference: "Practitioner/pract-1" }),
+          expect.objectContaining({}),
+        ])
+      );
+    });
   });
   test("Should render a reference component", () => {
     const mockBundle = {
