@@ -152,7 +152,7 @@ const ElementSelector = ({
     if (!option.id || !selectedOptions.has(option.id)) {
       return false;
     }
-    // for choice types multiple types can share the same id, therefore need to check type as well
+    // for choice types, multiple choices share the same id, therefore need to check type as well
     if (option.id.includes("[x]")) {
       const selectedOption = selectedOptions.get(option.id);
       return selectedOption?.type === option?.type;
