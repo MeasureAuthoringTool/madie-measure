@@ -9,7 +9,7 @@ const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
 
 // Comprehensive list of FHIR datatypes that can appear in choice types
-const CHOICE_TYPE_ALLOWED = [
+const CHOICE_TYPES_ALLOWED = [
   // Primitive types
   "Boolean",
   "Integer",
@@ -100,7 +100,7 @@ export const getChoiceBaseLabel = (
     return label.substring(0, label.length - 3);
   }
 
-  for (const type of CHOICE_TYPE_ALLOWED) {
+  for (const type of CHOICE_TYPES_ALLOWED) {
     if (label.endsWith(type) && label.length > type.length) {
       return label.substring(0, label.length - type.length);
     }
