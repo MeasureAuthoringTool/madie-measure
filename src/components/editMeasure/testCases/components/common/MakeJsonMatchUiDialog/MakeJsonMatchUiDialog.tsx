@@ -16,6 +16,8 @@ interface MakeJsonMatchUiDialogProps {
   setToastMessage: (msg: string) => void;
   setToastType: (type: string) => void;
   setToastOpen: (open: boolean) => void;
+  setMakeJsonMatchUiDialogOpen: (open: boolean) => void;
+  setOpenMakeJsonMatchUiSpinner: (open: boolean) => void;
 }
 
 const MakeJsonMatchUiDialog = ({
@@ -29,6 +31,8 @@ const MakeJsonMatchUiDialog = ({
   setToastMessage,
   setToastType,
   setToastOpen,
+  setMakeJsonMatchUiDialogOpen,
+  setOpenMakeJsonMatchUiSpinner,
 }: MakeJsonMatchUiDialogProps) => {
   const testCaseService = useRef(useTestCaseServiceApi());
 
@@ -39,6 +43,9 @@ const MakeJsonMatchUiDialog = ({
     selectedTestCases: TestCase[],
     measureId: string
   ) => {
+    setMakeJsonMatchUiDialogOpen(false);
+    setOpenMakeJsonMatchUiSpinner(true);
+
     if (_.size(selectedTestCases) > 0) {
       const selectedTestCaseIds = selectedTestCases?.map(
         (testCase: TestCase) => testCase.id
@@ -79,6 +86,7 @@ const MakeJsonMatchUiDialog = ({
       } finally {
         onClose();
       }
+      setOpenMakeJsonMatchUiSpinner(false);
     }
   };
 

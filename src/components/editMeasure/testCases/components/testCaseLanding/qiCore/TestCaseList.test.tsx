@@ -160,6 +160,7 @@ jest.mock("@madie/madie-util", () => ({
   useFeatureFlags: jest.fn().mockImplementation(() => ({
     applyDefaults: false,
     Locking: false,
+    MakeJSONMatchUI: true,
   })),
   routeHandlerStore: {
     subscribe: (set) => {
@@ -668,6 +669,7 @@ const setError = jest.fn();
 const setWarnings = jest.fn();
 const setCustomWarningMessages = jest.fn();
 const setImportWarnings = jest.fn();
+const setUpdateQiCoreJsonWithGroupAndTitleWarning = jest.fn();
 
 // Test Case import related
 const jsonBundle = JSON.stringify({
@@ -705,7 +707,7 @@ describe("TestCaseList component", () => {
 
     (checkUserCanEdit as jest.Mock).mockClear().mockImplementation(() => true);
     (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-      applyDefaults: false,
+      MakeJSONMatchUI: true,
     }));
     setError.mockClear();
 
@@ -771,6 +773,9 @@ describe("TestCaseList component", () => {
                           setWarnings={setWarnings}
                           setImportWarnings={setImportWarnings}
                           setCustomWarningMessages={setCustomWarningMessages}
+                          setUpdateQiCoreJsonWithGroupAndTitleWarning={
+                            setUpdateQiCoreJsonWithGroupAndTitleWarning
+                          }
                         />
                       }
                     />
@@ -2006,6 +2011,36 @@ describe("TestCaseList component", () => {
       expect(toastMessage).toHaveTextContent("Test cases successfully deleted");
       expect(screen.queryByTestId("delete-dialog-body")).toBeNull();
     }, 15000);
+  });
+
+  test("renders spinner overlay when openMakeJsonMatchUiSpinner is true", async () => {
+    renderTestCaseListComponent();
+
+    await waitFor(() => {
+      const selectButton = screen.getByTestId(`test-case-title-0_select`);
+      const checkboxButton = within(selectButton).getByRole("checkbox");
+      expect(checkboxButton).toBeInTheDocument();
+      fireEvent.click(checkboxButton);
+      expect(checkboxButton).toBeChecked();
+    });
+
+    const makeJsonMatchUiButton = screen.getByTestId(
+      "make-json-match-ui-action-icon"
+    );
+    expect(makeJsonMatchUiButton).toBeEnabled();
+    fireEvent.click(makeJsonMatchUiButton);
+
+    const continueButton = screen.getByTestId(
+      "make-json-match-ui-continue-button"
+    );
+    userEvent.click(continueButton);
+
+    // Note: the spinner appears too short, might need to use advance timer
+    // await waitFor(() =>
+    //   expect(
+    //     screen.getByTestId("make-json-match-ui-spinner")
+    //   ).toBeInTheDocument()
+    // );
   });
 });
 

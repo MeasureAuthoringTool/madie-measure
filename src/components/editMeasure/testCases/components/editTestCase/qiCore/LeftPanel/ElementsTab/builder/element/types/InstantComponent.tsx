@@ -44,7 +44,10 @@ const InstantComponent = ({
   }, [dateTimeValue]);
 
   return (
-    <div className="element-editor-add-row">
+    <div
+      className="element-editor-add-row"
+      data-component-type="InstantComponent"
+    >
       <Instant
         disabled={false}
         id={`${formattedLabel}_instant`}
