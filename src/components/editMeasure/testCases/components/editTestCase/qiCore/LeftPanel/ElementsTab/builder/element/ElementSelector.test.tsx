@@ -97,7 +97,7 @@ describe("ElementSelector", () => {
     const genderOption = screen.getByText("gender").closest("li");
     expect(genderOption).toHaveAttribute("aria-disabled", "true");
 
-    // Find the gender option by text and check if it's disabled
+    // Find the deceasedBoolean option from deceased[x] choice type and check if it's disabled
     const deceasedOption = screen.getByText("deceasedBoolean").closest("li");
     expect(deceasedOption).toHaveAttribute("aria-disabled", "true");
   });
