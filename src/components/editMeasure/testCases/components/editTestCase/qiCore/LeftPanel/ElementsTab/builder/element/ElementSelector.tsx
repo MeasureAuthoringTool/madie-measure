@@ -8,6 +8,55 @@ import * as _ from "lodash";
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
 
+// Comprehensive list of FHIR datatypes that can appear in choice types
+const CHOICE_TYPE_ALLOWED = [
+  // Primitive types
+  "Boolean",
+  "Integer",
+  "String",
+  "Decimal",
+  "Uri",
+  "Url",
+  "Canonical",
+  "Base64Binary",
+  "Instant",
+  "Date",
+  "DateTime",
+  "Time",
+  "Code",
+  "Oid",
+  "Id",
+  "Markdown",
+  "UnsignedInt",
+  "PositiveInt",
+  "Uuid",
+
+  // Complex types
+  "Quantity",
+  "Money",
+  "SimpleQuantity",
+  "Distance",
+  "Duration",
+  "Count",
+  "Age",
+  "Range",
+  "Period",
+  "Ratio",
+  "Reference",
+  "CodeableConcept",
+  "Coding",
+  "Identifier",
+  "HumanName",
+  "Address",
+  "ContactPoint",
+  "Timing",
+  "Signature",
+  "Annotation",
+  "SampledData",
+  "Attachment",
+  "Extension",
+];
+
 interface ElementSelectorProps {
   basePath: string;
   options: ElementDefinition[];
@@ -51,56 +100,7 @@ export const getChoiceBaseLabel = (
     return label.substring(0, label.length - 3);
   }
 
-  // Comprehensive list of FHIR datatypes that can appear in choice types
-  const fhirDatatypes = [
-    // Primitive types
-    "Boolean",
-    "Integer",
-    "String",
-    "Decimal",
-    "Uri",
-    "Url",
-    "Canonical",
-    "Base64Binary",
-    "Instant",
-    "Date",
-    "DateTime",
-    "Time",
-    "Code",
-    "Oid",
-    "Id",
-    "Markdown",
-    "UnsignedInt",
-    "PositiveInt",
-    "Uuid",
-
-    // Complex types
-    "Quantity",
-    "Money",
-    "SimpleQuantity",
-    "Distance",
-    "Duration",
-    "Count",
-    "Age",
-    "Range",
-    "Period",
-    "Ratio",
-    "Reference",
-    "CodeableConcept",
-    "Coding",
-    "Identifier",
-    "HumanName",
-    "Address",
-    "ContactPoint",
-    "Timing",
-    "Signature",
-    "Annotation",
-    "SampledData",
-    "Attachment",
-    "Extension",
-  ];
-
-  for (const type of fhirDatatypes) {
+  for (const type of CHOICE_TYPE_ALLOWED) {
     if (label.endsWith(type) && label.length > type.length) {
       return label.substring(0, label.length - type.length);
     }
@@ -137,19 +137,28 @@ const ElementSelector = ({
   newValues,
   onChange,
 }: ElementSelectorProps) => {
-  // Create a Set of disabled element IDs for efficient lookup
-  const disabledIds = useMemo(() => {
-    const idSet = new Set<string>();
+  // Create a map of selected element IDs for efficient lookup
+  const selectedOptions = useMemo(() => {
+    const ids = new Map<string, ElementDefinition>();
     value.forEach((v) => {
-      if (v.id) idSet.add(v.id);
-      if (v.path) idSet.add(v.path);
+      if (v.id) {
+        ids.set(v.id, v);
+      }
     });
-    return idSet;
-  }, [value, value.length]);
+    return ids;
+  }, [value]);
 
-  const isInValue = (option: ElementDefinition) =>
-    (option.id && disabledIds.has(option.id)) ||
-    (option.path && disabledIds.has(option.path));
+  const isInValue = (option: ElementDefinition) => {
+    if (!option.id || !selectedOptions.has(option.id)) {
+      return false;
+    }
+    // for choice types multiple types can share the same id, therefore need to check type as well
+    if (option.id.includes("[x]")) {
+      const selectedOption = selectedOptions.get(option.id);
+      return selectedOption?.type === option?.type;
+    }
+    return true;
+  };
 
   return (
     <>
