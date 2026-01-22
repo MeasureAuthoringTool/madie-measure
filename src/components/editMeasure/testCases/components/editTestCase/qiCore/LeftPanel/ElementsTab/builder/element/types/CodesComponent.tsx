@@ -144,7 +144,10 @@ const CodesComponent = ({
 
   return (
     <Box>
-      <div className="element-editor-add-row">
+      <div
+        className="element-editor-add-row"
+        data-component-type="CodesComponent"
+      >
         <div className="codes-select-container">
           <Select
             label={formattedLabel}

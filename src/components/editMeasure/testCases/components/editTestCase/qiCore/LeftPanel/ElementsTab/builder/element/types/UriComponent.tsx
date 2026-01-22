@@ -24,6 +24,7 @@ const UriComponent = ({
   return (
     <div
       className="element-editor-add-row"
+      data-component-type="UriComponent"
       style={{ display: "flex", alignItems: "center", gap: "8px" }}
     >
       <TextField
