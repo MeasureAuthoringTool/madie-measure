@@ -182,7 +182,6 @@ const TypeEditor = ({
               return (
                 <StringComponent
                   key={index}
-                  stringOnly={label?.split(".").pop() !== "id"}
                   label={fieldLabel}
                   canEdit={canEdit}
                   helperText={formikErrorHandler(fieldLabel, formik)}
@@ -208,7 +207,6 @@ const TypeEditor = ({
         return (
           <Box sx={{ display: "flex", flexDirection: "column", width: "100%" }}>
             <StringComponent
-              stringOnly={false}
               label={label}
               canEdit={canEdit}
               helperText={formikErrorHandler(label, formik)}
@@ -228,7 +226,6 @@ const TypeEditor = ({
         return (
           <Box sx={{ display: "flex", flexDirection: "column", width: "100%" }}>
             <StringComponent
-              stringOnly={false}
               label={label}
               canEdit={canEdit}
               helperText={formikErrorHandler(label, formik)}
