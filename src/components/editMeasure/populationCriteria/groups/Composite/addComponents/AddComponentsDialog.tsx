@@ -16,7 +16,7 @@ import "styled-components/macro";
 
 const TH = tw.th`p-3 text-left text-sm font-bold capitalize`;
 
-export default function AddComponentsDialog({ open, onClose }) {
+export default function AddComponentsDialog({ open, onClose, data = [] }) {
   const columns = useMemo<ColumnDef<Measure>[]>(() => {
     const columnDefs = [
       {
@@ -71,7 +71,7 @@ export default function AddComponentsDialog({ open, onClose }) {
   }, []);
 
   const table = useReactTable({
-    data: [],
+    data,
     columns,
     getRowId: (row) => row.id,
     defaultColumn: {

@@ -74,4 +74,33 @@ describe("AddComponentsDialog", () => {
     );
     expect(container).toBeEmptyDOMElement();
   });
+
+  it("renders TruncateText for all columns when data is provided", () => {
+    const data = [
+      {
+        id: "1",
+        measureName: "Test Measure",
+        version: "1.0.0",
+        measureSet: { cmsId: "CMS123" },
+        lastModifiedAt: "2024-01-01",
+      },
+    ];
+
+    render(
+      <AddComponentsDialog open={true} onClose={onCloseMock} data={data} />
+    );
+
+    expect(screen.getByTestId("measure-name-1-content")).toHaveTextContent(
+      "Test Measure"
+    );
+    expect(screen.getByTestId("measure-version-1-content")).toHaveTextContent(
+      "1.0.0"
+    );
+    expect(screen.getByTestId("measure-cmsId-1-content")).toHaveTextContent(
+      "CMS123"
+    );
+    expect(
+      screen.getByTestId("measure-lastModifiedAt-1-content")
+    ).toBeInTheDocument();
+  });
 });
