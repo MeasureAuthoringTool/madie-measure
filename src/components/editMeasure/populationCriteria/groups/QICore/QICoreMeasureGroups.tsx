@@ -72,7 +72,7 @@ import {
   MenuItemContainer,
 } from "../../../../../styles/editMeasure/populationCriteria/groups/index";
 import CompletionIndicator from "../CompletionIndicator";
-import CompositeScoring from "../Composite/CompositeScoring";
+import CompositeScoring from "../Composite/compositeScoring/CompositeScoring";
 
 interface ColSpanPopulationsType {
   isExclusionPop?: boolean;
