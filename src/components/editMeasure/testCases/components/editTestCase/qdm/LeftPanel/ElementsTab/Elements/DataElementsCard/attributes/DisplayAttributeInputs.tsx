@@ -209,7 +209,6 @@ const DisplayAttributeInputs = ({
         return (
           <QdmEntity
             setAttributeValue={setAttributeValue}
-            attributeValue={attributeValue}
             attributeType={attributeType}
             valueSets={cqmMeasure?.value_sets}
           />

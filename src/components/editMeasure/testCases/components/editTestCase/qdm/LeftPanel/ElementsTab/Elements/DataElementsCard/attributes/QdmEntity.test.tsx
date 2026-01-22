@@ -76,7 +76,6 @@ describe("QdmEntity Component", () => {
     render(
       <QdmEntity
         attributeType={undefined}
-        attributeValue={undefined}
         setAttributeValue={mockHandleChange}
         valueSets={valueSets}
       />
@@ -100,13 +99,15 @@ describe("QdmEntity Component", () => {
     render(
       <QdmEntity
         attributeType="PatientEntity"
-        attributeValue=""
         setAttributeValue={mockHandleChange}
         valueSets={valueSets}
       />
     );
 
-    expect(mockHandleChange).toHaveBeenCalledTimes(0);
+    expect(mockHandleChange).toHaveBeenCalledTimes(1);
+    expect(
+      mockHandleChange.mock.calls[0][0] instanceof PatientEntity
+    ).toBeTruthy();
 
     const namingSystemInput = screen.getByRole("textbox", {
       name: "Naming System",
@@ -118,20 +119,13 @@ describe("QdmEntity Component", () => {
     userEvent.paste(valueInput, "test value");
     const idInput = screen.getByTestId("string-field-id-input");
     userEvent.paste(idInput, "test id");
-    expect(
-      mockHandleChange.mock.calls[0][0] instanceof PatientEntity
-    ).toBeTruthy();
-    expect(mockHandleChange.mock.calls[0][0]?.identifier?.namingSystem).toEqual(
-      "test naming system"
-    );
-    expect(mockHandleChange.mock.calls[0][0]?.identifier?.value).toEqual(
-      "test value"
-    );
-    expect(mockHandleChange.mock.calls[0][0]?.id).toEqual("test id");
-    expect(mockHandleChange).toHaveBeenCalledTimes(1);
 
-    userEvent.paste(valueInput, "test value2");
-    expect(mockHandleChange).toHaveBeenCalledTimes(2);
+    const latestCall = mockHandleChange.mock.lastCall?.[0];
+
+    expect(latestCall instanceof PatientEntity).toBeTruthy();
+    expect(latestCall.identifier?.namingSystem).toEqual("test naming system");
+    expect(latestCall.identifier?.value).toEqual("test value");
+    expect(latestCall.id).toEqual("test id");
   });
 
   test("Practitioner attributeType", async () => {
@@ -139,13 +133,15 @@ describe("QdmEntity Component", () => {
     render(
       <QdmEntity
         attributeType="Practitioner"
-        attributeValue=""
         setAttributeValue={mockHandleChange}
         valueSets={valueSets}
       />
     );
 
-    expect(mockHandleChange).toHaveBeenCalledTimes(0);
+    expect(mockHandleChange).toHaveBeenCalledTimes(1);
+    expect(
+      mockHandleChange.mock.calls[0][0] instanceof Practitioner
+    ).toBeTruthy();
 
     userEvent.paste(
       screen.getByRole("textbox", {
@@ -160,7 +156,6 @@ describe("QdmEntity Component", () => {
       "test value"
     );
     userEvent.paste(screen.getByTestId("string-field-id-input"), "test id");
-    expect(mockHandleChange).toHaveBeenCalledTimes(0);
 
     //Role
     const valueSetsInputs = screen.getAllByTestId(
@@ -209,7 +204,6 @@ describe("QdmEntity Component", () => {
       "305686008 - Seen by palliative care physician (finding)"
     );
     userEvent.click(codeOptions[0]);
-    expect(mockHandleChange).toHaveBeenCalledTimes(0);
 
     //Specialty
     const valueSetDropdown2 = within(valueSetSelectors[1]).getByRole(
@@ -248,7 +242,6 @@ describe("QdmEntity Component", () => {
       "305686008 - Seen by palliative care physician (finding)"
     );
     userEvent.click(codeOptions2[0]);
-    expect(mockHandleChange).toHaveBeenCalledTimes(0);
 
     //Qualification
     const valueSetDropdown3 = within(valueSetSelectors[2]).getByRole(
@@ -287,11 +280,34 @@ describe("QdmEntity Component", () => {
       "305686008 - Seen by palliative care physician (finding)"
     );
     userEvent.click(codeOptions3[0]);
-    expect(mockHandleChange).toHaveBeenCalledTimes(1);
 
-    expect(
-      mockHandleChange.mock.calls[0][0] instanceof Practitioner
-    ).toBeTruthy();
+    const latestCall = mockHandleChange.mock.lastCall?.[0];
+
+    expect(latestCall instanceof Practitioner).toBeTruthy();
+    expect(latestCall.identifier?.namingSystem).toEqual("test naming system");
+    expect(latestCall.identifier?.value).toEqual("test value");
+    expect(latestCall.id).toEqual("test id");
+
+    expect(latestCall.role?.code).toEqual("183452005");
+    expect(latestCall.role?.display).toEqual(
+      "Snomed Emergency hospital admission (procedure)"
+    );
+    expect(latestCall.role?.system).toEqual("1.2.3");
+    expect(latestCall.role?.version).toEqual(null);
+
+    expect(latestCall.specialty?.code).toEqual("183452005");
+    expect(latestCall.specialty?.display).toEqual(
+      "Snomed Emergency hospital admission (procedure)"
+    );
+    expect(latestCall.specialty?.system).toEqual("1.2.3");
+    expect(latestCall.specialty?.version).toEqual(null);
+
+    expect(latestCall.qualification?.code).toEqual("183452005");
+    expect(latestCall.qualification?.display).toEqual(
+      "Snomed Emergency hospital admission (procedure)"
+    );
+    expect(latestCall.qualification?.system).toEqual("1.2.3");
+    expect(latestCall.qualification?.version).toEqual(null);
   });
 
   test("Location attributeType", async () => {
@@ -299,13 +315,15 @@ describe("QdmEntity Component", () => {
     render(
       <QdmEntity
         attributeType="Location"
-        attributeValue=""
         setAttributeValue={mockHandleChange}
         valueSets={valueSets}
       />
     );
 
-    expect(mockHandleChange).toHaveBeenCalledTimes(0);
+    expect(mockHandleChange).toHaveBeenCalledTimes(1);
+    expect(
+      mockHandleChange.mock.lastCall?.[0] instanceof Location
+    ).toBeTruthy();
 
     userEvent.paste(
       screen.getByRole("textbox", {
@@ -320,7 +338,6 @@ describe("QdmEntity Component", () => {
       "test value"
     );
     userEvent.paste(screen.getByTestId("string-field-id-input"), "test id");
-    expect(mockHandleChange).toHaveBeenCalledTimes(0);
 
     const valueSetsInput = screen.getByTestId(
       "value-set-selector-input"
@@ -367,8 +384,19 @@ describe("QdmEntity Component", () => {
       "305686008 - Seen by palliative care physician (finding)"
     );
     userEvent.click(codeOptions[0]);
-    expect(mockHandleChange).toHaveBeenCalledTimes(1);
-    expect(mockHandleChange.mock.calls[0][0] instanceof Location).toBeTruthy();
+
+    const latestCall = mockHandleChange.mock.lastCall?.[0];
+    expect(latestCall instanceof Location).toBeTruthy();
+    expect(latestCall.identifier?.namingSystem).toEqual("test naming system");
+    expect(latestCall.identifier?.value).toEqual("test value");
+    expect(latestCall.id).toEqual("test id");
+
+    expect(latestCall.locationType?.code).toEqual("183452005");
+    expect(latestCall.locationType?.display).toEqual(
+      "Snomed Emergency hospital admission (procedure)"
+    );
+    expect(latestCall.locationType?.system).toEqual("1.2.3");
+    expect(latestCall.locationType?.version).toEqual(null);
   });
 
   test("CarePartner attributeType", async () => {
@@ -376,19 +404,21 @@ describe("QdmEntity Component", () => {
     render(
       <QdmEntity
         attributeType="CarePartner"
-        attributeValue=""
         setAttributeValue={mockHandleChange}
         valueSets={valueSets}
       />
     );
 
-    expect(mockHandleChange).toHaveBeenCalledTimes(0);
+    expect(mockHandleChange).toHaveBeenCalledTimes(1);
+    expect(
+      mockHandleChange.mock.calls[0][0] instanceof CarePartner
+    ).toBeTruthy();
 
     userEvent.paste(
       screen.getByRole("textbox", {
         name: "Naming System",
       }),
-      "ValueSet"
+      "test naming system"
     );
     userEvent.paste(
       screen.getByRole("textbox", {
@@ -397,7 +427,6 @@ describe("QdmEntity Component", () => {
       "test value"
     );
     userEvent.paste(screen.getByTestId("string-field-id-input"), "test id");
-    expect(mockHandleChange).toHaveBeenCalledTimes(0);
 
     const valueSetsInput = screen.getByTestId(
       "value-set-selector-input"
@@ -445,9 +474,18 @@ describe("QdmEntity Component", () => {
     );
     userEvent.click(codeOptions[0]);
 
-    expect(
-      mockHandleChange.mock.calls[0][0] instanceof CarePartner
-    ).toBeTruthy();
+    const latestCall = mockHandleChange.mock.lastCall?.[0];
+    expect(latestCall instanceof CarePartner).toBeTruthy();
+    expect(latestCall.identifier?.namingSystem).toEqual("test naming system");
+    expect(latestCall.identifier?.value).toEqual("test value");
+    expect(latestCall.id).toEqual("test id");
+
+    expect(latestCall.relationship?.code).toEqual("183452005");
+    expect(latestCall.relationship?.display).toEqual(
+      "Snomed Emergency hospital admission (procedure)"
+    );
+    expect(latestCall.relationship?.system).toEqual("1.2.3");
+    expect(latestCall.relationship?.version).toEqual(null);
   });
 
   test("Organization attributeType", async () => {
@@ -455,19 +493,21 @@ describe("QdmEntity Component", () => {
     render(
       <QdmEntity
         attributeType="Organization"
-        attributeValue=""
         setAttributeValue={mockHandleChange}
         valueSets={valueSets}
       />
     );
 
-    expect(mockHandleChange).toHaveBeenCalledTimes(0);
+    expect(mockHandleChange).toHaveBeenCalledTimes(1);
+    expect(
+      mockHandleChange.mock.calls[0][0] instanceof Organization
+    ).toBeTruthy();
 
     userEvent.paste(
       screen.getByRole("textbox", {
         name: "Naming System",
       }),
-      "ValueSet"
+      "test naming system"
     );
     userEvent.paste(
       screen.getByRole("textbox", {
@@ -476,7 +516,6 @@ describe("QdmEntity Component", () => {
       "test value"
     );
     userEvent.paste(screen.getByTestId("string-field-id-input"), "test id");
-    expect(mockHandleChange).toHaveBeenCalledTimes(0);
 
     const valueSetsInput = screen.getByTestId(
       "value-set-selector-input"
@@ -524,9 +563,19 @@ describe("QdmEntity Component", () => {
     );
     userEvent.click(codeOptions[0]);
 
-    expect(
-      mockHandleChange.mock.calls[0][0] instanceof Organization
-    ).toBeTruthy();
+    const latestCall = mockHandleChange.mock.lastCall?.[0];
+
+    expect(latestCall instanceof Organization).toBeTruthy();
+    expect(latestCall.identifier?.namingSystem).toEqual("test naming system");
+    expect(latestCall.identifier?.value).toEqual("test value");
+    expect(latestCall.id).toEqual("test id");
+
+    expect(latestCall.organizationType?.code).toEqual("183452005");
+    expect(latestCall.organizationType?.display).toEqual(
+      "Snomed Emergency hospital admission (procedure)"
+    );
+    expect(latestCall.organizationType?.system).toEqual("1.2.3");
+    expect(latestCall.organizationType?.version).toEqual(null);
   });
 
   test("change in attributeType", async () => {
@@ -534,19 +583,21 @@ describe("QdmEntity Component", () => {
     const { rerender } = render(
       <QdmEntity
         attributeType="PatientEntity"
-        attributeValue=""
         setAttributeValue={mockHandleChange}
         valueSets={valueSets}
       />
     );
 
-    expect(mockHandleChange).toHaveBeenCalledTimes(0);
+    expect(mockHandleChange).toHaveBeenCalledTimes(1);
+    expect(
+      mockHandleChange.mock.calls[0][0] instanceof PatientEntity
+    ).toBeTruthy();
 
     userEvent.paste(
       screen.getByRole("textbox", {
         name: "Naming System",
       }),
-      "ValueSet"
+      "test naming system"
     );
     userEvent.paste(
       screen.getByRole("textbox", {
@@ -562,13 +613,10 @@ describe("QdmEntity Component", () => {
     rerender(
       <QdmEntity
         attributeType="CarePartner"
-        attributeValue=""
         setAttributeValue={mockHandleChange}
         valueSets={valueSets}
       />
     );
-
-    expect(mockHandleChange).toHaveBeenCalledTimes(1);
 
     const valueSetsInput = screen.getByTestId(
       "value-set-selector-input"
@@ -615,9 +663,20 @@ describe("QdmEntity Component", () => {
       "305686008 - Seen by palliative care physician (finding)"
     );
     userEvent.click(codeOptions[0]);
-    expect(
-      mockHandleChange.mock.calls[1][0] instanceof CarePartner
-    ).toBeTruthy();
+
+    let latestCall = mockHandleChange.mock.lastCall?.[0];
+
+    expect(latestCall instanceof CarePartner).toBeTruthy();
+    expect(latestCall.identifier?.namingSystem).toEqual("test naming system");
+    expect(latestCall.identifier?.value).toEqual("test value");
+    expect(latestCall.id).toEqual("test id");
+
+    expect(latestCall.relationship?.code).toEqual("183452005");
+    expect(latestCall.relationship?.display).toEqual(
+      "Snomed Emergency hospital admission (procedure)"
+    );
+    expect(latestCall.relationship?.system).toEqual("1.2.3");
+    expect(latestCall.relationship?.version).toBeNull();
   });
 
   test("change in attributeType between location and practitioner", async () => {
@@ -625,19 +684,19 @@ describe("QdmEntity Component", () => {
     const { rerender } = render(
       <QdmEntity
         attributeType="Location"
-        attributeValue=""
         setAttributeValue={mockHandleChange}
         valueSets={valueSets}
       />
     );
 
-    expect(mockHandleChange).toHaveBeenCalledTimes(0);
+    expect(mockHandleChange).toHaveBeenCalledTimes(1);
+    expect(mockHandleChange.mock.calls[0][0] instanceof Location).toBeTruthy();
 
     userEvent.paste(
       screen.getByRole("textbox", {
         name: "Naming System",
       }),
-      "ValueSet"
+      "test naming system"
     );
     userEvent.paste(
       screen.getByRole("textbox", {
@@ -646,19 +705,18 @@ describe("QdmEntity Component", () => {
       "test value"
     );
     userEvent.paste(screen.getByTestId("string-field-id-input"), "test id");
-    expect(mockHandleChange).toHaveBeenCalledTimes(0);
 
-    const valueSetsInput = screen.getByTestId(
+    let valueSetsInput = screen.getByTestId(
       "value-set-selector-input"
     ) as HTMLInputElement;
     expect(valueSetsInput.value).toBe("");
-    const valueSetSelector = screen.getByTestId("value-set-selector");
-    const valueSetDropdown = within(valueSetSelector).getByRole("combobox", {
+    let valueSetSelector = screen.getByTestId("value-set-selector");
+    let valueSetDropdown = within(valueSetSelector).getByRole("combobox", {
       name: "Value Set / Direct Reference Code",
     }) as HTMLInputElement;
     userEvent.click(valueSetDropdown);
 
-    const valueSetOptions = await screen.findAllByRole("option");
+    let valueSetOptions = await screen.findAllByRole("option");
     expect(valueSetOptions).toHaveLength(3);
     // by default code system and code dropdown is not displayed unless user choose value set
     expect(
@@ -667,24 +725,23 @@ describe("QdmEntity Component", () => {
     userEvent.click(valueSetOptions[1]);
 
     // select the code system
-    const codeSystemSelector = screen.getByTestId("code-system-selector");
-    const codeSystemDropdown = within(codeSystemSelector).getByRole(
-      "combobox",
-      { name: "Code System" }
-    );
+    let codeSystemSelector = screen.getByTestId("code-system-selector");
+    let codeSystemDropdown = within(codeSystemSelector).getByRole("combobox", {
+      name: "Code System",
+    });
     userEvent.click(codeSystemDropdown);
-    const codeSystemOptions = await screen.findAllByRole("option");
+    let codeSystemOptions = await screen.findAllByRole("option");
     expect(codeSystemOptions[0]).toHaveTextContent("SNOMEDCT");
     expect(codeSystemOptions[1]).toHaveTextContent("ICD10CM");
     userEvent.click(codeSystemOptions[0]);
 
     // select the code
-    const codeSelector = screen.getByTestId("code-selector");
-    const codeDropdown = within(codeSelector).getByRole("combobox", {
+    let codeSelector = screen.getByTestId("code-selector");
+    let codeDropdown = within(codeSelector).getByRole("combobox", {
       name: "Code",
     });
     userEvent.click(codeDropdown);
-    const codeOptions = await screen.findAllByRole("option");
+    let codeOptions = await screen.findAllByRole("option");
     expect(codeOptions).toHaveLength(2);
     expect(codeOptions[0]).toHaveTextContent(
       "183452005 - Snomed Emergency hospital admission (procedure)"
@@ -693,24 +750,81 @@ describe("QdmEntity Component", () => {
       "305686008 - Seen by palliative care physician (finding)"
     );
     userEvent.click(codeOptions[0]);
-    expect(mockHandleChange).toHaveBeenCalledTimes(1);
-    expect(mockHandleChange.mock.calls[0][0] instanceof Location).toBeTruthy();
+
+    let latestCall = mockHandleChange.mock.lastCall?.[0];
+    expect(latestCall instanceof Location).toBeTruthy();
+    expect(latestCall.identifier?.namingSystem).toEqual("test naming system");
+    expect(latestCall.identifier?.value).toEqual("test value");
+    expect(latestCall.id).toEqual("test id");
+
+    expect(latestCall.locationType?.code).toEqual("183452005");
+    expect(latestCall.locationType?.display).toEqual(
+      "Snomed Emergency hospital admission (procedure)"
+    );
+    expect(latestCall.locationType?.system).toEqual("1.2.3");
+    expect(latestCall.locationType?.version).toEqual(null);
+
+    mockHandleChange.mockClear();
 
     rerender(
       <QdmEntity
         attributeType="Practitioner"
-        attributeValue=""
         setAttributeValue={mockHandleChange}
         valueSets={valueSets}
       />
     );
 
+    expect(mockHandleChange).toHaveBeenCalledTimes(1);
+    expect(
+      mockHandleChange.mock.calls[0][0] instanceof Practitioner
+    ).toBeTruthy();
+
+    //Role
     const valueSetsInputs = screen.getAllByTestId(
       "value-set-selector-input"
     ) as HTMLInputElement[];
-    expect(valueSetsInputs.length).toBe(3);
+    expect(valueSetsInputs[0].value).toBe("");
     const valueSetSelectors = screen.getAllByTestId("value-set-selector");
-    expect(valueSetSelectors.length).toBe(3);
+    const valueSetDropdown1 = within(valueSetSelectors[0]).getByRole(
+      "combobox",
+      { name: "Value Set / Direct Reference Code" }
+    ) as HTMLInputElement;
+    userEvent.click(valueSetDropdown1);
+
+    valueSetOptions = await screen.findAllByRole("option");
+    expect(valueSetOptions).toHaveLength(3);
+    // by default code system and code dropdown is not displayed unless user choose value set
+    expect(
+      screen.queryByTestId("code-system-selector")
+    ).not.toBeInTheDocument();
+    userEvent.click(valueSetOptions[1]);
+
+    // select the code system
+    codeSystemSelector = screen.getByTestId("code-system-selector");
+    codeSystemDropdown = within(codeSystemSelector).getByRole("combobox", {
+      name: "Code System",
+    });
+    userEvent.click(codeSystemDropdown);
+    codeSystemOptions = await screen.findAllByRole("option");
+    expect(codeSystemOptions[0]).toHaveTextContent("SNOMEDCT");
+    expect(codeSystemOptions[1]).toHaveTextContent("ICD10CM");
+    userEvent.click(codeSystemOptions[0]);
+
+    // select the code
+    codeSelector = screen.getByTestId("code-selector");
+    codeDropdown = within(codeSelector).getByRole("combobox", {
+      name: "Code",
+    });
+    userEvent.click(codeDropdown);
+    codeOptions = await screen.findAllByRole("option");
+    expect(codeOptions).toHaveLength(2);
+    expect(codeOptions[0]).toHaveTextContent(
+      "183452005 - Snomed Emergency hospital admission (procedure)"
+    );
+    expect(codeOptions[1]).toHaveTextContent(
+      "305686008 - Seen by palliative care physician (finding)"
+    );
+    userEvent.click(codeOptions[0]);
 
     //Specialty
     const valueSetDropdown2 = within(valueSetSelectors[1]).getByRole(
@@ -749,7 +863,6 @@ describe("QdmEntity Component", () => {
       "305686008 - Seen by palliative care physician (finding)"
     );
     userEvent.click(codeOptions2[0]);
-    expect(mockHandleChange).toHaveBeenCalledTimes(1);
 
     //Qualification
     const valueSetDropdown3 = within(valueSetSelectors[2]).getByRole(
@@ -789,49 +902,32 @@ describe("QdmEntity Component", () => {
     );
     userEvent.click(codeOptions3[0]);
 
-    expect(mockHandleChange).toHaveBeenCalledTimes(1);
-  });
+    latestCall = mockHandleChange.mock.lastCall?.[0];
 
-  test("setAttributeValue receives updated identifier value on entity", () => {
-    const mockHandleChange = jest.fn();
-    const patientEntity = new PatientEntity();
-    render(
-      <QdmEntity
-        attributeType="PatientEntity"
-        attributeValue={patientEntity}
-        setAttributeValue={mockHandleChange}
-        valueSets={valueSets}
-      />
+    expect(latestCall instanceof Practitioner).toBeTruthy();
+    expect(latestCall.identifier?.namingSystem).toEqual("test naming system");
+    expect(latestCall.identifier?.value).toEqual("test value");
+    expect(latestCall.id).toEqual("test id");
+
+    expect(latestCall.role?.code).toEqual("183452005");
+    expect(latestCall.role?.display).toEqual(
+      "Snomed Emergency hospital admission (procedure)"
     );
+    expect(latestCall.role?.system).toEqual("1.2.3");
+    expect(latestCall.role?.version).toEqual(null);
 
-    expect(mockHandleChange).toHaveBeenCalledTimes(0);
-
-    userEvent.paste(
-      screen.getByRole("textbox", {
-        name: "Naming System",
-      }),
-      "ValueSet"
+    expect(latestCall.specialty?.code).toEqual("183452005");
+    expect(latestCall.specialty?.display).toEqual(
+      "Snomed Emergency hospital admission (procedure)"
     );
-    userEvent.paste(
-      screen.getByRole("textbox", {
-        name: "Value",
-      }),
-      "test value"
-    );
-    userEvent.paste(screen.getByTestId("string-field-id-input"), "test id");
+    expect(latestCall.specialty?.system).toEqual("1.2.3");
+    expect(latestCall.specialty?.version).toEqual(null);
 
-    expect(mockHandleChange).toHaveBeenCalledTimes(1);
-
-    expect(
-      mockHandleChange.mock.calls[0][0] instanceof PatientEntity
-    ).toBeTruthy();
-
-    expect(mockHandleChange.mock.calls[0][0]?.identifier?.namingSystem).toEqual(
-      "ValueSet"
+    expect(latestCall.qualification?.code).toEqual("183452005");
+    expect(latestCall.qualification?.display).toEqual(
+      "Snomed Emergency hospital admission (procedure)"
     );
-    expect(mockHandleChange.mock.calls[0][0]?.identifier?.value).toEqual(
-      "test value"
-    );
-    expect(mockHandleChange.mock.calls[0][0]?.id).toEqual("test id");
+    expect(latestCall.qualification?.system).toEqual("1.2.3");
+    expect(latestCall.qualification?.version).toEqual(null);
   });
 });
