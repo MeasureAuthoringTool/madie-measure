@@ -58,6 +58,10 @@ export default function ReferenceComponent({
   const resourceProfileOptions =
     allResourceProfiles
       ?.filter((r) => targetProfiles.includes(r.profile))
+      .filter(
+        (r, index, self) =>
+          index === self.findIndex((t) => t.profile === r.profile)
+      )
       .map((resourceProfile) => ({
         label: resourceProfile.title,
         value: resourceProfile.type,
