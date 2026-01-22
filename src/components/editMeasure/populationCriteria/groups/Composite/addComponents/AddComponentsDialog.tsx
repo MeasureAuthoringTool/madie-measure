@@ -14,9 +14,9 @@ import * as _ from "lodash";
 import tw from "twin.macro";
 import "styled-components/macro";
 
-export default function AddComponentsDialog({ open, onClose }) {
-  const TH = tw.th`p-3 text-left text-sm font-bold capitalize`;
+const TH = tw.th`p-3 text-left text-sm font-bold capitalize`;
 
+export default function AddComponentsDialog({ open, onClose }) {
   const columns = useMemo<ColumnDef<Measure>[]>(() => {
     const columnDefs = [
       {
