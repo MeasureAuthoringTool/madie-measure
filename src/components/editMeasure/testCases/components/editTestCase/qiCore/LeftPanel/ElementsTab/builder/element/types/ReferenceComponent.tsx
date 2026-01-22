@@ -288,24 +288,10 @@ export default function ReferenceComponent({
                 );
                 setSelectedReferenceId("add_new_id");
               } else {
-                // when selecting a known value we need to blank the add_new_id
+                // Selecting an existing resource - just update the reference
                 formikContext.setFieldValue(label, {
                   reference: e.target.value,
                 });
-                // Remove from add_new_resources if it was previously added as "Add New"
-                const existingResources =
-                  formikContext.values["add_new_resources"] || [];
-                // Filter out any resource that matches this label's reference pattern
-                const filteredResources = existingResources.filter(
-                  (res) =>
-                    !label.includes(
-                      `${res.resource?.resourceType}/${res.resource?.id}`
-                    )
-                );
-                formikContext.setFieldValue(
-                  "add_new_resources",
-                  filteredResources.length > 0 ? filteredResources : undefined
-                );
                 setSelectedReferenceId(e.target.value);
               }
             }}
