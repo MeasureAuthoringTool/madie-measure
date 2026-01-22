@@ -41,15 +41,23 @@ describe("AddComponentsDialog", () => {
 
   it("renders table headers correctly", () => {
     render(<AddComponentsDialog open={true} onClose={onCloseMock} />);
-    expect(screen.getByText("Measure Name")).toBeInTheDocument();
-    expect(screen.getByText("Version")).toBeInTheDocument();
-    expect(screen.getByText("CMS ID")).toBeInTheDocument();
-    expect(screen.getByText("Updated")).toBeInTheDocument();
+    expect(
+      screen.getByRole("columnheader", { name: /measure name/i })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("columnheader", { name: /version/i })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("columnheader", { name: /cms id/i })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("columnheader", { name: /updated/i })
+    ).toBeInTheDocument();
   });
 
-  it("does not render any table rows when data is empty", () => {
+  it("does not render table rows when data is empty", () => {
     render(<AddComponentsDialog open={true} onClose={onCloseMock} />);
-    const rows = screen.getAllByRole("row");
+    const rows = screen.queryAllByRole("row");
     expect(rows.length).toBe(1);
   });
 
@@ -58,5 +66,12 @@ describe("AddComponentsDialog", () => {
     expect(
       screen.queryByText("Select Composite Measure Components")
     ).not.toBeInTheDocument();
+  });
+
+  it("does not render dialog when open is false", () => {
+    const { container } = render(
+      <AddComponentsDialog open={false} onClose={onCloseMock} />
+    );
+    expect(container).toBeEmptyDOMElement();
   });
 });

@@ -116,23 +116,32 @@ export default function AddComponentsDialog({ open, onClose }) {
         <thead tw="bg-slate">
           {table.getHeaderGroups().map((headerGroup) => (
             <tr key={headerGroup.id}>
-              {headerGroup.headers.map((header) => {
-                return (
-                  <TH key={header.id} scope="col" className="header-cell">
-                    {header.isPlaceholder ? null : (
-                      <button className={"header-button"}>
-                        {flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
-                      </button>
-                    )}
-                  </TH>
-                );
-              })}
+              {headerGroup.headers.map((header) => (
+                <TH key={header.id} scope="col" className="header-cell">
+                  {header.isPlaceholder ? null : (
+                    <button className={"header-button"}>
+                      {flexRender(
+                        header.column.columnDef.header,
+                        header.getContext()
+                      )}
+                    </button>
+                  )}
+                </TH>
+              ))}
             </tr>
           ))}
         </thead>
+        <tbody>
+          {table.getRowModel().rows.map((row) => (
+            <tr key={row.id}>
+              {row.getVisibleCells().map((cell) => (
+                <td key={cell.id}>
+                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
       </table>
     </MadieDialog>
   );
