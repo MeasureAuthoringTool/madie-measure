@@ -109,7 +109,6 @@ export default function AddComponentsDialog({ open, onClose }) {
 
   const handleDialogSubmit = (e) => {
     e.preventDefault();
-    console.log("here");
   };
 
   return (
