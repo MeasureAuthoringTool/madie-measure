@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   TruncateText,
   MadieDialog,
@@ -17,8 +17,67 @@ import "styled-components/macro";
 const TH = tw.th`p-3 text-left text-sm font-bold capitalize`;
 
 export default function AddComponentsDialog({ open, onClose, data = [] }) {
+  const IndeterminateCheckbox = ({ indeterminate, checked, ...rest }: any) => {
+    const ref = React.useRef<HTMLInputElement>(null);
+
+    useEffect(() => {
+      if (ref.current) {
+        ref.current.indeterminate = indeterminate;
+      }
+    }, [indeterminate]);
+
+    return <input type="checkbox" ref={ref} checked={checked} {...rest} />;
+  };
+
   const columns = useMemo<ColumnDef<Measure>[]>(() => {
     const columnDefs = [
+      {
+        id: "select",
+        header: ({ table }) => {
+          const visibleRows = table.getRowModel().rows;
+
+          const allVisibleSelected = visibleRows.every((row) =>
+            row.getIsSelected()
+          );
+          const someVisibleSelected = visibleRows.some((row) =>
+            row.getIsSelected()
+          );
+
+          const toggleVisibleRows = () => {
+            const shouldSelectAll = !allVisibleSelected;
+            visibleRows.forEach((row) => row.toggleSelected(shouldSelectAll));
+          };
+
+          return (
+            <IndeterminateCheckbox
+              checked={allVisibleSelected}
+              indeterminate={!allVisibleSelected && someVisibleSelected}
+              onChange={toggleVisibleRows}
+              aria-label="Test Case Selection"
+              tabIndex={0}
+            />
+          );
+        },
+
+        cell: (info) => (
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "row",
+              gap: 16,
+            }}
+          >
+            <div className="px-1">
+              <IndeterminateCheckbox
+                checked={info.row.getIsSelected()}
+                disabled={!info.row.getCanSelect()}
+                indeterminate={info.row.getIsSomeSelected()}
+                onChange={info.row.getToggleSelectedHandler()}
+              />
+            </div>
+          </div>
+        ),
+      },
       {
         header: "Measure Name",
         cell: (info) => (

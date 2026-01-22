@@ -6,6 +6,23 @@ import AddComponentsDialog from "./AddComponentsDialog";
 describe("AddComponentsDialog", () => {
   const onCloseMock = jest.fn();
 
+  const data = [
+    {
+      id: "1",
+      measureName: "Test Measure",
+      version: "1.0.0",
+      measureSet: { cmsId: "CMS123" },
+      lastModifiedAt: "2024-01-01",
+    },
+    {
+      id: "2",
+      measureName: "Another Measure",
+      version: "2.0.0",
+      measureSet: { cmsId: "CMS456" },
+      lastModifiedAt: "2024-02-01",
+    },
+  ];
+
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -76,16 +93,6 @@ describe("AddComponentsDialog", () => {
   });
 
   it("renders TruncateText for all columns when data is provided", () => {
-    const data = [
-      {
-        id: "1",
-        measureName: "Test Measure",
-        version: "1.0.0",
-        measureSet: { cmsId: "CMS123" },
-        lastModifiedAt: "2024-01-01",
-      },
-    ];
-
     render(
       <AddComponentsDialog open={true} onClose={onCloseMock} data={data} />
     );
@@ -102,5 +109,48 @@ describe("AddComponentsDialog", () => {
     expect(
       screen.getByTestId("measure-lastModifiedAt-1-content")
     ).toBeInTheDocument();
+  });
+
+  it("renders select column checkboxes for each row", () => {
+    render(
+      <AddComponentsDialog open={true} onClose={onCloseMock} data={data} />
+    );
+
+    const rowCheckboxes = screen.getAllByRole("checkbox", {
+      name: "",
+    });
+    expect(rowCheckboxes.length).toBeGreaterThanOrEqual(2);
+  });
+
+  it("renders header select checkbox and toggles all rows", async () => {
+    render(
+      <AddComponentsDialog open={true} onClose={onCloseMock} data={data} />
+    );
+
+    const headerCheckbox = screen.getByRole("checkbox", {
+      name: "Test Case Selection",
+    });
+    expect(headerCheckbox).toBeInTheDocument();
+
+    await userEvent.click(headerCheckbox);
+
+    const rowCheckboxes = screen.getAllByRole("checkbox", { name: "" });
+    rowCheckboxes.forEach((checkbox) => {
+      expect(checkbox).toBeChecked();
+    });
+  });
+
+  it("renders row checkbox as indeterminate when some rows are selected", async () => {
+    render(
+      <AddComponentsDialog open={true} onClose={onCloseMock} data={data} />
+    );
+
+    const rowCheckboxes = screen.getAllByRole("checkbox", { name: "" });
+    await userEvent.click(rowCheckboxes[1]);
+
+    const headerCheckbox = screen.getByRole("checkbox", {
+      name: "Test Case Selection",
+    });
+    expect((headerCheckbox as HTMLInputElement).indeterminate).toBe(true);
   });
 });
