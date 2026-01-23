@@ -39,7 +39,7 @@ const CompositeScoring = ({ canEdit, formik }) => {
   };
 
   return (
-    <div className="composite-component">
+    <>
       <Box sx={{ display: "flex", gap: 2, alignItems: "flex-start" }}>
         <Box sx={{ width: "23.5%" }}>
           <Select
@@ -99,7 +99,7 @@ const CompositeScoring = ({ canEdit, formik }) => {
         open={openAddComponentsDialog}
         onClose={onAddComponentsClose}
       />
-    </div>
+    </>
   );
 };
 

@@ -2547,6 +2547,7 @@ describe("Measure Groups Page", () => {
       });
       expect(componentTab).toBeInTheDocument();
       expect(componentTab).toHaveAttribute("aria-selected", "true");
+      expect(screen.getByTestId("composite-component")).toBeInTheDocument();
       expect(screen.getByTestId("composite-scoring")).toBeInTheDocument();
 
       // populations tab is not present

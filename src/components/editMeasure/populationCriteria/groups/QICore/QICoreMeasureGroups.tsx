@@ -73,6 +73,7 @@ import {
 } from "../../../../../styles/editMeasure/populationCriteria/groups/index";
 import CompletionIndicator from "../CompletionIndicator";
 import CompositeScoring from "../Composite/compositeScoring/CompositeScoring";
+import CompositeComponent from "../Composite/CompositeComponent";
 
 interface ColSpanPopulationsType {
   isExclusionPop?: boolean;
@@ -1254,7 +1255,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                 )}
                 {activeTab === "components" && (
                   <div data-testid="components">
-                    <CompositeScoring canEdit={canEdit} formik={formik} />
+                    <CompositeComponent canEdit={canEdit} formik={formik} />
                   </div>
                 )}
                 {activeTab === "stratification" && (
