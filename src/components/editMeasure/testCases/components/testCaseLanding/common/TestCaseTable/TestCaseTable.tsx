@@ -135,7 +135,6 @@ const TestCaseTable = (props: TestCaseTableProps) => {
     setShiftDatesDialogModalOpen,
     setShiftTestCaseDatesWarnings,
   } = props;
-  const viewOrEdit = canEdit ? "edit" : "view";
   const [toastOpen, setToastOpen] = useState<boolean>(false);
   const [toastMessage, setToastMessage] = useState<string>("");
   const [toastType, setToastType] = useState<string>("danger");
@@ -450,7 +449,7 @@ const TestCaseTable = (props: TestCaseTableProps) => {
         enableSorting: false,
       },
     ];
-  }, [testCases]);
+  }, [testCases, featureFlags?.Locking]);
 
   const table = useReactTable({
     data,
