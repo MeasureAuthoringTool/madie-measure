@@ -49,6 +49,7 @@ export const formikErrorHandler = (name: string, formik) => {
 };
 
 const getContentReferencePath = (refUrl: string) => refUrl.split("#").pop();
+
 export const getContentReferenceType = (refUrl: string, formInfo: any) => {
   if (_.isNil(refUrl) || _.isEmpty(refUrl)) {
     return null;
