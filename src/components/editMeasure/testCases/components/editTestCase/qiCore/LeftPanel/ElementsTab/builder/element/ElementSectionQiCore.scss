@@ -1,6 +1,6 @@
 $blue-60: #0073c8;
 $blue-70: #125496;
-$grey-19: #dddddd;
+$grey-19: #ddd;
 
 .test-case-tab-headinq-qi-core {
   display: flex;
@@ -35,6 +35,7 @@ $grey-19: #dddddd;
         }
       }
     }
+
     flex-direction: column;
 
     &.open {
