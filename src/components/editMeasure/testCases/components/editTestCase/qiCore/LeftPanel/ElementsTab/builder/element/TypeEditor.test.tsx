@@ -2,7 +2,7 @@ import * as React from "react";
 import { render, screen, act, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
-import TypeEditor from "./TypeEditor";
+import TypeEditor, { getContentReferenceType } from "./TypeEditor";
 import useFhirDefinitionsServiceApi, {
   FhirDefinitionsServiceApi,
 } from "../../../../../../../api/useFhirDefinitionsService";
@@ -4154,6 +4154,73 @@ describe("TypeEditor Component", () => {
     expect(inputDate).toBeInTheDocument();
   });
 
+  test("Should render first level ContentReferenceType attribute", () => {
+    const adjudicationElementDef = {
+      id: "ClaimResponse.adjudication",
+      type: [],
+      max: "*",
+      min: 0,
+      canBeMultipleCardinality: true,
+      contentReference: "#ClaimResponse.item.adjudication",
+    };
+    const mockFormInfo = [
+      ["ClaimResponse.adjudication", adjudicationElementDef],
+      [
+        "ClaimResponse.item.adjudication",
+        {
+          id: "ClaimResponse.item.adjudication",
+          type: [{ code: "BackboneElement" }],
+          max: "1",
+          min: 1,
+          canBeMultipleCardinality: false,
+        },
+      ],
+      [
+        "ClaimResponse.item.adjudication.category",
+        {
+          id: "ClaimResponse.item.adjudication.category",
+          type: [{ code: "CodeableConcept" }],
+          max: "1",
+          min: 1,
+          canBeMultipleCardinality: false,
+        },
+      ],
+      [
+        "ClaimResponse.item.adjudication.reason",
+        {
+          id: "ClaimResponse.item.adjudication.reason",
+          type: [{ code: "CodeableConcept" }],
+          max: "1",
+          min: 0,
+          canBeMultipleCardinality: false,
+        },
+      ],
+    ];
+    // Override the global mock to return false for this test
+    const fhirUtils = require("../../../../../../../api/fhirDefinitionServiceUtilities");
+    jest.spyOn(fhirUtils, "isComponentDataType").mockReturnValue(false);
+
+    render(
+      <FormikProvider value={mockFormik}>
+        <RequiredFieldsProvider requiredFields={{}} formInfo={mockFormInfo}>
+          <TypeEditor
+            resource={{ resourceType: "ClaimResponse" }}
+            structureDefinition={adjudicationElementDef}
+            label="ClaimResponse.adjudication"
+            canEdit={true}
+            parentStructureDefinition={null}
+          />
+        </RequiredFieldsProvider>
+      </FormikProvider>
+    );
+
+    // "Category" and "Reason" elements from the referenced definition must be rendered
+    expect(screen.queryByText("Category")).toBeInTheDocument();
+    expect(screen.queryByText("Reason")).toBeInTheDocument();
+    // Restore the original mock
+    jest.restoreAllMocks();
+  });
+
   test("Should render ContentReferenceType when childDef has contentReference", () => {
     const mockFormInfo = [
       [
@@ -4213,5 +4280,70 @@ describe("TypeEditor Component", () => {
     expect(screen.queryByText("Item")).toBeInTheDocument();
     // Restore the original mock
     jest.restoreAllMocks();
+  });
+});
+
+describe("getContentReferenceType utility function", () => {
+  it("returns null when refUrl is null", () => {
+    const result = getContentReferenceType(null, []);
+    expect(result).toBeNull();
+  });
+
+  it("returns null when refUrl is undefined", () => {
+    const result = getContentReferenceType(undefined, []);
+    expect(result).toBeNull();
+  });
+
+  it("returns null when refUrl is empty string", () => {
+    const result = getContentReferenceType("", []);
+    expect(result).toBeNull();
+  });
+
+  it("returns null when refUrl has no hash fragment", () => {
+    const formInfo = [
+      ["QuestionnaireResponse.item", { type: [{ code: "BackboneElement" }] }],
+    ];
+    const result = getContentReferenceType("invalidReference", formInfo);
+    expect(result).toBeNull();
+  });
+
+  it("returns null when contentReference is not found in formInfo", () => {
+    const formInfo = [
+      ["QuestionnaireResponse.item", { type: [{ code: "BackboneElement" }] }],
+    ];
+    const result = getContentReferenceType(
+      "#QuestionnaireResponse.notFound",
+      formInfo
+    );
+    expect(result).toBeNull();
+  });
+
+  it("returns type code when valid contentReference is found", () => {
+    const formInfo = [
+      ["QuestionnaireResponse.item", { type: [{ code: "BackboneElement" }] }],
+    ];
+    const result = getContentReferenceType(
+      "#QuestionnaireResponse.item",
+      formInfo
+    );
+    expect(result).toBe("BackboneElement");
+  });
+
+  it("returns null when formInfo entry has no type array", () => {
+    const formInfo = [["QuestionnaireResponse.item", {}]];
+    const result = getContentReferenceType(
+      "#QuestionnaireResponse.item",
+      formInfo
+    );
+    expect(result).toBeUndefined();
+  });
+
+  it("returns null when formInfo entry type array is empty", () => {
+    const formInfo = [["QuestionnaireResponse.item", { type: [] }]];
+    const result = getContentReferenceType(
+      "#QuestionnaireResponse.item",
+      formInfo
+    );
+    expect(result).toBeUndefined();
   });
 });

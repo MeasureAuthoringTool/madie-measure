@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo, useRef } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import * as _ from "lodash";
 import { Box, Divider } from "@mui/material";
 
@@ -16,15 +16,15 @@ import { useFormikContext } from "formik";
 import ExtensionComponent from "./types/ExtensionComponent";
 import useFhirDefinitionsServiceApi from "../../../../../../../api/useFhirDefinitionsService";
 import {
-  isComponentDataType,
-  stripAllIndexes,
-  getRequired,
-  getTopLevelElements,
+  formatAttributeLabel,
   getFirstChildren,
-  getNestedProperty,
   getIndexFromPath,
   getLastPart,
-  formatAttributeLabel,
+  getNestedProperty,
+  getRequired,
+  getTopLevelElements,
+  isComponentDataType,
+  stripAllIndexes,
 } from "../../../../../../../api/fhirDefinitionServiceUtilities";
 import CodingComponent from "./types/CodingComponent";
 import { useRequiredFields } from "./RequiredFieldsContext";
@@ -47,6 +47,20 @@ export const formikErrorHandler = (name: string, formik) => {
     return errors;
   }
 };
+
+const getContentReferencePath = (refUrl: string) => refUrl.split("#").pop();
+export const getContentReferenceType = (refUrl: string, formInfo: any) => {
+  if (_.isNil(refUrl) || _.isEmpty(refUrl)) {
+    return null;
+  }
+  const contentReference = getContentReferencePath(refUrl);
+  const reference = formInfo.find(([key]) => key === contentReference);
+  if (reference) {
+    return reference[1].type?.[0]?.code;
+  }
+  return null;
+};
+
 // onChange is being deprecated as no updates to the resource are tracked.
 // Changes directly to the json should be done with a dispatch, this propagates downstream changes in formik.
 // any temporary form state should be done through formik.
@@ -62,12 +76,21 @@ const TypeEditor = ({
   let required = getRequired(requiredFields, stripAllIndexes(label));
   const fhirDefinitionsService = useRef(useFhirDefinitionsServiceApi());
 
-  let type: string = structureDefinition?.type?.find((t) =>
-    _.toLower(label).includes(_.toLower(t.code))
-  )?.code;
-  if (!type) {
-    type = structureDefinition?.type?.[0]?.code;
+  let type: string;
+  if (structureDefinition?.contentReference) {
+    type = getContentReferenceType(
+      structureDefinition.contentReference,
+      formInfo
+    );
+  } else {
+    type = structureDefinition?.type?.find((t) =>
+      _.toLower(label).includes(_.toLower(t.code))
+    )?.code;
+    if (!type) {
+      type = structureDefinition?.type?.[0]?.code;
+    }
   }
+
   const values = _.get(formik.values, label);
   // is multiple cardinality?
   if (structureDefinition?.max === "*") {
@@ -90,18 +113,23 @@ const TypeEditor = ({
   // DiagnosticReport.presentedForm comes in without the index. We need to map it for multiple cardinality to test stuff.
   const childDefs = useMemo(() => {
     if (!isComponentDataType(type)) {
-      const elements = getFirstChildren(stripAllIndexes(label), formInfo);
+      let strippedLabel = stripAllIndexes(label);
+      if (structureDefinition?.contentReference) {
+        strippedLabel = getContentReferencePath(
+          structureDefinition.contentReference
+        );
+      }
+      const elements = getFirstChildren(strippedLabel, formInfo);
       if (elements?.length) {
-        const updatedElements = elements.map((el) => {
+        return elements.map((el) => {
           const lastPart = el.id.split(".").pop();
           const updatedId = `${label}.${lastPart}`;
           return { ...el, id: updatedId };
         });
-        return updatedElements; //previously filtered out type === BackboneElement
       }
     }
     return [];
-  }, [type, label, getFirstChildren]);
+  }, [type, label, structureDefinition, formInfo]);
 
   // Given structureDefinition.type[{ code: "sometype", profiles: ["strings", "of", "profiles"]}]
   // we need to look at the get use the profile list to get resource trees so we can render all the children in case Extension.
