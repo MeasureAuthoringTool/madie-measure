@@ -12,6 +12,7 @@ import React, { useMemo } from "react";
 import TypeEditor from "../TypeEditor";
 import ChoiceType from "../ChoiceType";
 import { ElementDefinition, Resource } from "fhir/r4";
+import ElementSectionQiCore from "../ElementSectionQiCore";
 
 export type ExtendedElementDefinition = ElementDefinition & {
   canBeMultipleCardinality?: boolean;
@@ -136,7 +137,7 @@ const MultiCardinalityElement = ({
 }: MultiCardinalityElementProps) => {
   const values = _.get(formikValues, parentPathMap.path) || [1];
   return (
-    <ElementSection
+    <ElementSectionQiCore
       title={_.startCase(getLastPart(parentPath))}
       startOpen={false}
       children={
@@ -255,7 +256,7 @@ const ContentReferenceType = ({
           : elementDefinition.id;
 
         return (
-          <ElementSection
+          <ElementSectionQiCore
             key={`${elementDefinition.id}[${index}]`}
             title={_.startCase(
               `${sectionLabel} ${values.length > 1 ? index + 1 : ""}`
