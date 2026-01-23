@@ -2026,6 +2026,9 @@ describe("TestCaseList component", () => {
       return useTestCaseServiceMockReject;
     });
 
+    mockMeasure.cqlErrors = false;
+    mockMeasure.errors = [];
+    mockMeasure.testCases = testCases;
     renderTestCaseListComponent();
     await screen.findByTestId("test-case-tbl");
     const executeAllTestCasesButton = screen.getByRole("button", {
@@ -2041,19 +2044,23 @@ describe("TestCaseList component", () => {
       ).toHaveBeenCalled();
     });
 
+    const selectButton = await screen.findByTestId(`test-case-title-0_select`);
+    const checkboxButton = within(selectButton).getByRole("checkbox");
+    expect(checkboxButton).toBeInTheDocument();
+    fireEvent.click(checkboxButton);
     await waitFor(() => {
-      const selectButton = screen.getByTestId(`test-case-title-0_select`);
-      const checkboxButton = within(selectButton).getByRole("checkbox");
-      expect(checkboxButton).toBeInTheDocument();
-      fireEvent.click(checkboxButton);
       expect(checkboxButton).toBeChecked();
     });
 
-    const exportButton = screen.getByTestId("export-action-icon");
-    expect(exportButton).toBeEnabled();
+    const exportButton = await screen.findByTestId("export-action-btn");
+    await waitFor(() => {
+      expect(exportButton).toBeEnabled();
+    });
     fireEvent.click(exportButton);
 
-    const exportQrda = screen.getByTestId(`export-qrda-${mockMeasure.id}`);
+    const exportQrda = await screen.findByRole("menuitem", {
+      name: "QRDA",
+    });
     expect(exportQrda).toBeInTheDocument();
     fireEvent.click(exportQrda);
     await waitFor(() => {
@@ -2095,24 +2102,30 @@ describe("TestCaseList component", () => {
       ).toHaveBeenCalled();
     });
 
+    const selectButton = await screen.findByTestId(`test-case-title-0_select`);
+    const checkboxButton = within(selectButton).getByRole("checkbox");
+    expect(checkboxButton).toBeInTheDocument();
+    fireEvent.click(checkboxButton);
     await waitFor(() => {
-      const selectButton = screen.getByTestId(`test-case-title-0_select`);
-      const checkboxButton = within(selectButton).getByRole("checkbox");
-      expect(checkboxButton).toBeInTheDocument();
-      fireEvent.click(checkboxButton);
       expect(checkboxButton).toBeChecked();
     });
 
-    const exportButton = screen.getByTestId("export-action-icon");
-    expect(exportButton).toBeEnabled();
+    const exportButton = await screen.findByTestId("export-action-btn");
+    await waitFor(() => {
+      expect(exportButton).toBeEnabled();
+    });
     fireEvent.click(exportButton);
 
-    const exportExcel = screen.getByTestId(`export-excel-${mockMeasure.id}`);
+    const exportExcel = await screen.findByRole("menuitem", {
+      name: "Excel",
+    });
     expect(exportExcel).toBeInTheDocument();
     fireEvent.click(exportExcel);
 
     await waitFor(() => {
-      expect(screen.queryByTestId("export-excel-1")).not.toBeVisible();
+      expect(
+        screen.queryByRole("menuitem", { name: "Excel" })
+      ).not.toBeInTheDocument();
     });
   });
 
@@ -2162,7 +2175,7 @@ describe("TestCaseList component", () => {
     expect(exportButton).toBeEnabled();
     fireEvent.click(exportButton);
 
-    const exportExcel = screen.getByRole("button", {
+    const exportExcel = await screen.findByRole("menuitem", {
       name: "Excel",
     });
     expect(exportExcel).toBeInTheDocument();
@@ -2230,7 +2243,7 @@ describe("TestCaseList component", () => {
     expect(exportButton).toBeEnabled();
     fireEvent.click(exportButton);
 
-    const exportExcel = screen.getByRole("button", {
+    const exportExcel = await screen.findByRole("menuitem", {
       name: "Excel",
     });
     expect(exportExcel).toBeInTheDocument();
@@ -2305,7 +2318,9 @@ describe("TestCaseList component", () => {
     expect(exportButton).toBeEnabled();
     fireEvent.click(exportButton);
 
-    const exportExcel = screen.getByTestId(`export-excel-${mockMeasure.id}`);
+    const exportExcel = await screen.findByTestId(
+      `export-excel-${mockMeasure.id}`
+    );
     expect(exportExcel).toBeInTheDocument();
     fireEvent.click(exportExcel);
     await waitFor(() => {
@@ -2372,7 +2387,9 @@ describe("TestCaseList component", () => {
     expect(exportButton).toBeEnabled();
     fireEvent.click(exportButton);
 
-    const exportQrda = screen.getByTestId(`export-qrda-${mockMeasure.id}`);
+    const exportQrda = await screen.findByTestId(
+      `export-qrda-${mockMeasure.id}`
+    );
     expect(exportQrda).toBeInTheDocument();
     fireEvent.click(exportQrda);
     await waitFor(() => expect(setErrorMock2).toHaveBeenCalled());
