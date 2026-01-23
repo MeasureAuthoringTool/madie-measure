@@ -1,5 +1,5 @@
-import React from "react";
-import { render, screen, within, cleanup } from "@testing-library/react";
+import * as React from "react";
+import { render, screen, cleanup } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import ElementSelector, {
   getOptionLabel,
@@ -9,20 +9,37 @@ import { ElementDefinition } from "fhir/r4";
 
 const mockOptions: ElementDefinition[] = [
   {
+    id: "Patient.gender",
     path: "Patient.gender",
     min: 0,
     max: "1",
   },
   {
+    id: "Patient.birthDate",
     path: "Patient.birthDate",
     min: 0,
     max: "1",
   },
   {
+    id: "Patient.extension",
     path: "Patient.extension",
     sliceName: "race",
     min: 0,
     max: "1",
+  },
+  {
+    id: "Patient.deceased[x]",
+    path: "Patient.deceased[x]",
+    min: 0,
+    max: "1",
+    type: [{ code: "boolean" }],
+  },
+  {
+    id: "Patient.deceased[x]",
+    path: "Patient.deceased[x]",
+    min: 0,
+    max: "1",
+    type: [{ code: "dateTime" }],
   },
 ];
 
@@ -68,7 +85,7 @@ describe("ElementSelector", () => {
   it("disables already selected options", () => {
     const props = {
       ...defaultProps,
-      value: [mockOptions[0]],
+      value: [mockOptions[0], mockOptions[3]],
     };
 
     render(<ElementSelector {...props} />);
@@ -79,6 +96,10 @@ describe("ElementSelector", () => {
     // Find the gender option by text and check if it's disabled
     const genderOption = screen.getByText("gender").closest("li");
     expect(genderOption).toHaveAttribute("aria-disabled", "true");
+
+    // Find the deceasedBoolean option from deceased[x] choice type and check if it's disabled
+    const deceasedOption = screen.getByText("deceasedBoolean").closest("li");
+    expect(deceasedOption).toHaveAttribute("aria-disabled", "true");
   });
 
   it("renders chips for selected values", () => {

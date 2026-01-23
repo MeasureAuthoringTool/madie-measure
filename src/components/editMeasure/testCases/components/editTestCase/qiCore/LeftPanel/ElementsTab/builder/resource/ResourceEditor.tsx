@@ -477,7 +477,7 @@ const ResourceEditor = ({
         open={addDialogOpen}
         basePath={resourceBasePath}
         options={allElements}
-        value={displayedElements.filter((el) => !el.id.includes("[x]"))} // avoid adding empty choice elements.
+        value={displayedElements}
         saveElements={saveElements}
         onClose={() => setAddDialogOpen(false)}
       />
