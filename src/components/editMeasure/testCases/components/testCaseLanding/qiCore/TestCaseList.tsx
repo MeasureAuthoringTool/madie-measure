@@ -215,6 +215,8 @@ const TestCaseList = (props: TestCaseListProps) => {
     total: number;
     covered: number;
   } | null>(null);
+  const [openMakeJsonMatchUiSpinner, setOpenMakeJsonMatchUiSpinner] =
+    useState<boolean>(false);
   useEffect(() => {
     if (testCases?.length != measure?.testCases?.length) {
       const newMeasure = { ...measure, testCases };
@@ -842,7 +844,30 @@ const TestCaseList = (props: TestCaseListProps) => {
         setToastMessage={setToastMessage}
         setToastType={setToastType}
         setToastOpen={setToastOpen}
+        setMakeJsonMatchUiDialogOpen={setMakeJsonMatchUiDialogOpen}
+        setOpenMakeJsonMatchUiSpinner={setOpenMakeJsonMatchUiSpinner}
       />
+
+      {openMakeJsonMatchUiSpinner && (
+        <div
+          data-testid="make-json-match-ui-spinner"
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100vw",
+            height: "100vh",
+            zIndex: 1300, // higher than other content
+            background: "rgba(255,255,255,0.7)", // optional: semi-transparent overlay
+            display: "flex",
+            flexDirection: "row",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <MadieSpinner style={{ height: 40, width: 40 }} />
+        </div>
+      )}
     </div>
   );
 };

@@ -1726,14 +1726,10 @@ describe("TypeEditor Component", () => {
     expect(codeValue).toHaveValue("448951000124107");
     userEvent.tab();
 
-    expect(onChange).toHaveBeenLastCalledWith("Encounter.type[0]", {
-      coding: [
-        {
-          code: "448951000124107",
-          display: "448951000124107",
-          system: "http://snomed.info/sct",
-        },
-      ],
+    expect(onChange).toHaveBeenLastCalledWith("Encounter.type[0].coding[0]", {
+      code: "448951000124107",
+      display: "448951000124107",
+      system: "http://snomed.info/sct",
     });
   });
 
@@ -1850,7 +1846,7 @@ describe("TypeEditor Component", () => {
     expect(filteredChildDef).toBeInTheDocument();
     expect(filteredChildDef.value).toBe("");
     const valueInput = (await screen.findByTestId(
-      "string-field-SomeResource.value[x]"
+      "string-field-input-SomeResource.value[x]"
     )) as HTMLInputElement;
     await userEvent.type(valueInput, "250");
   });
