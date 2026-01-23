@@ -48,14 +48,18 @@ export const formikErrorHandler = (name: string, formik) => {
   }
 };
 
-const getContentReferencePath = (refUrl: string) => refUrl.split("#").pop();
+const getContentReferencePath = (referenceUrl: string) =>
+  referenceUrl.split("#").pop();
 
-export const getContentReferenceType = (refUrl: string, formInfo: any) => {
-  if (_.isNil(refUrl) || _.isEmpty(refUrl)) {
+export const getContentReferenceType = (
+  referenceUrl: string,
+  formInfo: any
+) => {
+  if (_.isNil(referenceUrl) || _.isEmpty(referenceUrl)) {
     return null;
   }
-  const contentReference = getContentReferencePath(refUrl);
-  const reference = formInfo.find(([key]) => key === contentReference);
+  const referencePath = getContentReferencePath(referenceUrl);
+  const reference = formInfo.find(([key]) => key === referencePath);
   if (reference) {
     return reference[1].type?.[0]?.code;
   }
