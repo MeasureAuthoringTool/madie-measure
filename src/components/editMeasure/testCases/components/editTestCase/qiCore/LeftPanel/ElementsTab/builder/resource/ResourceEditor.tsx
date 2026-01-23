@@ -504,9 +504,6 @@ export function deleteMultipleCardinalityElement(
     idx = parseInt(match[1]) - 1; // Convert 1-based to 0-based
   } else if (element.length === 1) {
     idx = 0; // Single element arrays don't show index in name
-  } else {
-    console.error(`Unable to parse index from element name: ${elementName}`);
-    return;
   }
 
   if (idx >= 0 && idx < element.length) {
