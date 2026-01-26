@@ -1,22 +1,18 @@
-import React, { Dispatch, SetStateAction, useMemo } from "react";
-import * as ucum from "@lhncbc/ucum-lhc";
+import React, { useMemo } from "react";
 import { TextField, InputLabel } from "@madie/madie-design-system/dist/react/";
 import "twin.macro";
 import "styled-components/macro";
-import {
-  ValidationResult,
-  validate,
-} from "../../../../../../../common/quantityInput/validate";
+import { validate } from "../../../../../../../common/quantityInput/validate";
 import { TypeComponentProps } from "./TypeComponentProps";
 import { getIn, useFormikContext } from "formik";
 import CodesComponent from "./CodesComponent";
-import DecimalInput from "../../../../../../../common/DecimalInput/DecimalInput";
 import "./QuantityComponent.scss";
 import AddElementButton from "../../../../../../../common/UIOnlyModelAgnostic/AddElementButton";
 import { IconButton, Tooltip } from "@mui/material";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import { set as lodashSet } from "lodash";
 import { getMultipleCardinalityLabel } from "./TypeUtil";
+import DecimalComponent from "./DecimalComponent";
 
 export interface QuantityComponentProps extends TypeComponentProps {
   showLabel?: boolean;
@@ -28,7 +24,7 @@ const QuantityComponent = ({
   label,
   name,
   showLabel = true,
-  valueFieldLabel = "Value",
+  valueFieldLabel,
   structureDefinition,
   showAddAttributeButton = false,
   addTitle = "",
@@ -66,13 +62,10 @@ const QuantityComponent = ({
         "http://hl7.org/fhir/StructureDefinition/SimpleQuantity"
       )
   );
-
   const comparatorPath = `${label}.comparator`;
   const comparator = getIn(formik.values, comparatorPath);
 
   const valuePath = `${label}.value`;
-  const value = getIn(formik.values, valuePath);
-
   const codePath = `${label}.code`;
   const code = getIn(formik.values, codePath);
 
@@ -110,18 +103,11 @@ const QuantityComponent = ({
 
           {/* Value field */}
           <div className="value-input">
-            <DecimalInput
+            <DecimalComponent
               label={valueFieldLabel}
-              value={value ?? ""}
-              handleChange={(val) =>
-                formik.setFieldValue(
-                  valuePath,
-                  val !== "" ? parseFloat(val) : null
-                )
-              }
+              {...formik.getFieldProps(valuePath)}
               canEdit={canEdit}
               required={false}
-              placeholder=""
             />
           </div>
 
@@ -129,7 +115,7 @@ const QuantityComponent = ({
           <div className="code-input">
             <TextField
               id={"code-input"}
-              data-testid="code-input"
+              data-testid={`code-input-${label}`}
               readOnly={!canEdit}
               label="Unit(s)"
               tooltipText="Enter the UCUM (Unified Code for Units of Measure) code value."
