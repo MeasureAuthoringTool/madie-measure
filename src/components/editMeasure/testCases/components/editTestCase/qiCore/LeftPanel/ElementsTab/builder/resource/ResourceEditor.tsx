@@ -432,11 +432,7 @@ const ResourceEditor = ({
                 element: any,
                 elementName: string
               ) => {
-                //So.. if element is an array, we can remove the element at the index of elementName
-
                 if (Array.isArray(element)) {
-                  //This is because the name seems to be " *name 2 ".. got a getter way to get the index?
-                  //index is 1-based while array is 0-based,
                   deleteMultipleCardinalityElement(
                     elementName,
                     element,
@@ -477,7 +473,7 @@ const ResourceEditor = ({
         open={addDialogOpen}
         basePath={resourceBasePath}
         options={allElements}
-        value={displayedElements}
+        value={displayedElements.filter((el) => !el.id.includes("[x]"))} // avoid adding empty choice elements.
         saveElements={saveElements}
         onClose={() => setAddDialogOpen(false)}
       />
@@ -496,7 +492,22 @@ export function deleteMultipleCardinalityElement(
   path: string,
   dispatch: React.Dispatch<any>
 ) {
-  // Extract the index number from elementName (e.g., "performer 1 ", " *name 2 ")
+  const nextEntry = _.cloneDeep(selectedResource.bundleEntry);
+  const strippedPath = path.includes(".")
+    ? path.substring(path.indexOf(".") + 1)
+    : path;
+
+  // If array is empty, just remove the property entirely
+  if (element.length === 0) {
+    _.unset(nextEntry.resource, strippedPath);
+    dispatch({
+      type: ResourceActionType.MODIFY_BUNDLE_ENTRY,
+      payload: nextEntry,
+    });
+    return;
+  }
+
+  // Extract index from elementName (e.g., "performer 1 ", " *name 2 ")
   const match = elementName.match(/(\d+)\s*$/);
   let idx: number;
 
@@ -508,10 +519,6 @@ export function deleteMultipleCardinalityElement(
 
   if (idx >= 0 && idx < element.length) {
     const updatedElement = element.filter((_, i) => i !== idx);
-    const nextEntry = _.cloneDeep(selectedResource.bundleEntry);
-    const strippedPath = path.includes(".")
-      ? path.substring(path.indexOf(".") + 1)
-      : path;
 
     if (updatedElement.length === 0) {
       _.unset(nextEntry.resource, strippedPath);
