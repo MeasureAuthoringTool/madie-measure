@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { getIn, useFormikContext } from "formik";
 import { TypeComponentProps } from "./TypeComponentProps";
-import DecimalInput from "../../../../../../../common/DecimalInput/DecimalInput";
 import CodesComponent from "./CodesComponent";
 import IntegerComponent, { IntegerType } from "./IntegerComponent";
 import { camelCase } from "lodash";
@@ -15,6 +14,7 @@ import "./TimingComponent.scss";
 import RangeComponent from "./RangeComponent";
 import ElementSection from "../../../../../../../common/UIOnlyModelAgnostic/ElementSection";
 import CodeableConceptComponent from "./CodeableConceptComponent";
+import DecimalComponent from "./DecimalComponent";
 
 const GROUP_GAP = "1.5rem";
 const boundsOptions = ["-", "Duration", "Range", "Period"];
@@ -183,34 +183,20 @@ const TimingComponent = ({
           {/* Duration + Duration Max + Unit(s) row */}
           <div style={{ display: "flex" }}>
             <div className="decimal-input">
-              <DecimalInput
+              <DecimalComponent
                 label="Repeat.Duration"
-                value={getIn(formik.values, durationPath)}
-                handleChange={(val) =>
-                  formik.setFieldValue(
-                    durationPath,
-                    val !== "" ? parseFloat(val) : null
-                  )
-                }
+                {...formik.getFieldProps(durationPath)}
                 canEdit={canEdit}
                 required={false}
-                placeholder=""
               />
             </div>
 
             <div className="decimal-input">
-              <DecimalInput
+              <DecimalComponent
                 label="Repeat.DurationMax"
-                value={getIn(formik.values, durationMaxPath)}
-                handleChange={(val) =>
-                  formik.setFieldValue(
-                    durationMaxPath,
-                    val !== "" ? parseFloat(val) : null
-                  )
-                }
+                {...formik.getFieldProps(durationMaxPath)}
                 canEdit={canEdit}
                 required={false}
-                placeholder=""
               />
             </div>
 
@@ -261,33 +247,19 @@ const TimingComponent = ({
           {/* Period + Period Max + Unit(s) row */}
           <div style={{ display: "flex" }}>
             <div className="decimal-input">
-              <DecimalInput
+              <DecimalComponent
                 label="Repeat.Period"
-                value={getIn(formik.values, periodPath)}
-                handleChange={(val) =>
-                  formik.setFieldValue(
-                    periodPath,
-                    val !== "" ? parseFloat(val) : null
-                  )
-                }
+                {...formik.getFieldProps(periodPath)}
                 canEdit={canEdit}
                 required={false}
-                placeholder=""
               />
             </div>
             <div className="decimal-input">
-              <DecimalInput
+              <DecimalComponent
                 label="Repeat.PeriodMax"
-                value={getIn(formik.values, periodMaxPath)}
-                handleChange={(val) =>
-                  formik.setFieldValue(
-                    periodMaxPath,
-                    val !== "" ? parseFloat(val) : null
-                  )
-                }
+                {...formik.getFieldProps(periodMaxPath)}
                 canEdit={canEdit}
                 required={false}
-                placeholder=""
               />
             </div>
             <div className="repeat-unit" data-testid="repeat-period-unit">
