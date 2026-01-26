@@ -72,7 +72,10 @@ import {
 } from "@madie/madie-design-system/dist/react";
 import { Allotment } from "allotment";
 import ElementsTab from "./LeftPanel/ElementsTab/ElementsTab";
-import { QiCoreResourceProvider } from "../../../util/QiCorePatientProvider";
+import {
+  QiCoreResourceProvider,
+  useQiCoreResource,
+} from "../../../util/QiCorePatientProvider";
 import { CqlDefinitionCallstack } from "../groupCoverage/QiCoreGroupCoverage";
 import useFhirCqlParsingService from "../../../api/cqlElmTranslationService/useFhirCqlParsingService";
 import checkSpecialCharacters from "../../../util/checkSpecialCharacters";
@@ -255,6 +258,122 @@ const INITIAL_VALUES = {
   groupPopulations: [],
 } as TestCase;
 
+// An empty string is also considered to be valid, as it is not malformed
+// and allows a user to edit for the first time
+const isValidJson = (str) => {
+  if (!_.isEmpty(str) && "Loading..." !== str) {
+    try {
+      JSON.parse(str);
+      return true;
+    } catch (error) {
+      return false;
+    }
+  }
+  return true;
+};
+
+interface LeftPanelContentProps {
+  leftPanelActiveTab: string;
+  setLeftPanelActiveTab: (value: string) => void;
+  isQICore6: boolean;
+  dirty: boolean;
+  setCalculationDialogOpen: (value: boolean) => void;
+  testCaseCanEdit: boolean;
+  editorVal: string;
+  setEditorVal: Dispatch<SetStateAction<string>>;
+  testCase: TestCase;
+  formikStu6Context: any;
+  setValidationSchema: Dispatch<SetStateAction<Object>>;
+  setInitialFormikValuesStu6: Dispatch<SetStateAction<Object>>;
+}
+
+const LeftPanelContent = ({
+  leftPanelActiveTab,
+  setLeftPanelActiveTab,
+  isQICore6,
+  dirty,
+  setCalculationDialogOpen,
+  testCaseCanEdit,
+  editorVal,
+  setEditorVal,
+  testCase,
+  formikStu6Context,
+  setValidationSchema,
+  setInitialFormikValuesStu6,
+}: LeftPanelContentProps) => {
+  const { state } = useQiCoreResource();
+  const addedCount = state?.bundle?.entry?.length || 0;
+  const isBuilderTab =
+    leftPanelActiveTab === "available" || leftPanelActiveTab === "added";
+
+  return (
+    <>
+      <div className="tab-container">
+        <CreateTestCaseLeftPanelNavTabs
+          leftPanelActiveTab={leftPanelActiveTab}
+          setLeftPanelActiveTab={setLeftPanelActiveTab}
+          isQICore6={isQICore6}
+          dirty={dirty}
+          setCalculationDialogOpen={setCalculationDialogOpen}
+          canEdit={testCaseCanEdit}
+          addedCount={addedCount}
+        />
+      </div>
+      {isBuilderTab && isValidJson(editorVal) && (
+        <div className="panel-content">
+          <div data-testid="elements-content" id="elements-content">
+            <FormikProvider value={formikStu6Context}>
+              <ElementsTab
+                setValidationSchema={setValidationSchema}
+                setInitialFormikValuesStu6={setInitialFormikValuesStu6}
+                setEditorVal={setEditorVal}
+                canEdit={testCaseCanEdit}
+                editorVal={editorVal}
+                testCase={testCase}
+                activeTab={leftPanelActiveTab}
+              />
+            </FormikProvider>
+          </div>
+        </div>
+      )}
+      {isBuilderTab && !isValidJson(editorVal) && (
+        <div style={{ width: "98%" }}>
+          <MadieAlert
+            type="error"
+            content={
+              <div
+                aria-live="polite"
+                role="alert"
+                data-testid="json-error-alert-div"
+                style={{
+                  paddingTop: "10px",
+                  paddingBottom: "8px",
+                }}
+              >
+                <h3>JSON Failing</h3>
+                All JSON errors must be cleared before the UI Builder can be
+                used.
+              </div>
+            }
+            alertProps={{
+              "data-testid": "json-error-alert",
+            }}
+            canClose={false}
+          />
+        </div>
+      )}
+      {leftPanelActiveTab === "json" && (
+        <Editor
+          onChange={(val: string) => setEditorVal(val)}
+          value={editorVal}
+          readOnly={!testCaseCanEdit || _.isNil(testCase)}
+          height="100%"
+        />
+      )}
+    </>
+  );
+};
+
 export interface EditTestCaseProps {
   errors: Array<string>;
   setErrors: (value: Array<string>) => void;
@@ -307,17 +426,11 @@ const EditTestCase = (props: EditTestCaseProps) => {
   const [calculationErrors, setCalculationErrors] = useState<AlertProps>();
   const [rightPanelActiveTab, setRightPanelActiveTab] =
     useState<string>("measurecql");
-  const [leftPanelActiveTab, setLeftPanelActiveTab] =
-    useState<string>("elements");
+  const [leftPanelActiveTab, setLeftPanelActiveTab] = useState<string>("added");
   const [groupPopulations, setGroupPopulations] = useState<GroupPopulation[]>(
     []
   );
   const [callstackMap, setCallstackMap] = useState<CqlDefinitionCallstack>();
-
-  // whenever we nav using the breadcrumbs, this file doesn't fully rerender, but we need to blank the results for the right panel coverage, and actual.
-  useEffect(() => {
-    setPopulationGroupResults(undefined);
-  }, [id]);
 
   const {
     measureState,
@@ -580,6 +693,15 @@ const EditTestCase = (props: EditTestCaseProps) => {
   const [lockedModalOpen, setLockedModalOpen] = useState(
     canEdit && testCaseLockedBy ? true : false
   );
+
+  // Set initial tab based on edit permissions
+  const initialTabSet = useRef(false);
+  useEffect(() => {
+    if (!initialTabSet.current && testCaseCanEdit !== undefined) {
+      setLeftPanelActiveTab(testCaseCanEdit ? "available" : "added");
+      initialTabSet.current = true;
+    }
+  }, [testCaseCanEdit]);
 
   const handleSubmit = async (testCase: TestCase) => {
     setAlert(null);
@@ -947,20 +1069,6 @@ const EditTestCase = (props: EditTestCaseProps) => {
       : !isEmptyTestCaseJsonString(editorVal);
   }
 
-  // An empty string is also considered to be valid, as it is not malformed
-  // and allows a user to edit for the first time
-  const isValidJson = (str) => {
-    if (!_.isEmpty(str) && "Loading..." !== str) {
-      try {
-        JSON.parse(str);
-        return true;
-      } catch (error) {
-        return false;
-      }
-    }
-    return true;
-  };
-
   const isQICore6 = measure?.model === Model.QICORE_6_0_0;
 
   const severityOfValidationErrors = (validationErrors) => {
@@ -1025,73 +1133,21 @@ const EditTestCase = (props: EditTestCaseProps) => {
               <div className="nav-panel">
                 {featureFlags?.qiCoreElementsTab && isQICore6 ? (
                   <>
-                    <div className="tab-container">
-                      <CreateTestCaseLeftPanelNavTabs
+                    <QiCoreResourceProvider>
+                      <LeftPanelContent
                         leftPanelActiveTab={leftPanelActiveTab}
                         setLeftPanelActiveTab={setLeftPanelActiveTab}
                         isQICore6={isQICore6}
                         dirty={formikStu6Context.dirty}
                         setCalculationDialogOpen={setCalculationDialogOpen}
+                        testCaseCanEdit={testCaseCanEdit}
+                        editorVal={editorVal}
+                        setEditorVal={setEditorVal}
+                        testCase={testCase}
+                        formikStu6Context={formikStu6Context}
+                        setValidationSchema={setValidationSchema}
+                        setInitialFormikValuesStu6={setInitialFormikValuesStu6}
                       />
-                    </div>
-                    <QiCoreResourceProvider>
-                      {leftPanelActiveTab === "elements" &&
-                        isValidJson(editorVal) && (
-                          <div className="panel-content">
-                            <div
-                              data-testid="elements-content"
-                              id="elements-content"
-                            >
-                              <FormikProvider value={formikStu6Context}>
-                                <ElementsTab
-                                  setValidationSchema={setValidationSchema}
-                                  setInitialFormikValuesStu6={
-                                    setInitialFormikValuesStu6
-                                  }
-                                  setEditorVal={setEditorVal}
-                                  canEdit={testCaseCanEdit}
-                                  editorVal={editorVal}
-                                  testCase={testCase}
-                                />
-                              </FormikProvider>
-                            </div>
-                          </div>
-                        )}
-                      {leftPanelActiveTab === "elements" &&
-                        !isValidJson(editorVal) && (
-                          <div style={{ width: "98%" }}>
-                            <MadieAlert
-                              type="error"
-                              content={
-                                <div
-                                  aria-live="polite"
-                                  role="alert"
-                                  data-testid="json-error-alert-div"
-                                  style={{
-                                    paddingTop: "10px",
-                                    paddingBottom: "8px",
-                                  }}
-                                >
-                                  <h3>JSON Failing</h3>
-                                  All JSON errors must be cleared before the UI
-                                  Builder can be used.
-                                </div>
-                              }
-                              alertProps={{
-                                "data-testid": "json-error-alert",
-                              }}
-                              canClose={false}
-                            />
-                          </div>
-                        )}
-                      {leftPanelActiveTab === "json" && (
-                        <Editor
-                          onChange={(val: string) => setEditorVal(val)}
-                          value={editorVal}
-                          readOnly={!testCaseCanEdit || _.isNil(testCase)}
-                          height="100%"
-                        />
-                      )}
                     </QiCoreResourceProvider>
                   </>
                 ) : (

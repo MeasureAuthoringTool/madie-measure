@@ -13,6 +13,7 @@ const ElementsTab = ({
   testCase,
   setValidationSchema,
   setInitialFormikValuesStu6,
+  activeTab,
 }) => {
   const { state, dispatch } = useQiCoreResource();
   const lastJsonRef = useRef(null);
@@ -46,6 +47,7 @@ const ElementsTab = ({
         canEdit={canEdit}
         setInitialFormikValuesStu6={setInitialFormikValuesStu6}
         setValidationSchema={setValidationSchema}
+        activeTab={activeTab}
       />
     </>
   );
