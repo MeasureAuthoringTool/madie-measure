@@ -190,7 +190,6 @@ const TestCaseList = (props: TestCaseListProps) => {
   const [exportExecuting, setExportExecuting] = useState(false);
   const [optionsOpen, setOptionsOpen] = useState<boolean>(false);
   const qdmCqlParsingService = useRef(useQdmCqlParsingService());
-  const [exportOptionsOpen, setExportOptionsOpen] = useState<boolean>(false);
   const [openCopyTestCaseDialog, setOpenCopyTestCaseDialog] =
     useState<boolean>(false);
 
@@ -543,7 +542,6 @@ const TestCaseList = (props: TestCaseListProps) => {
 
     setExportExecuting(true);
     setOptionsOpen(false);
-    setExportOptionsOpen(false);
 
     try {
       callstack = await qdmCqlParsingService.current.getDefinitionCallstacks(
@@ -605,7 +603,6 @@ const TestCaseList = (props: TestCaseListProps) => {
     }
     setExportExecuting(true);
     setOptionsOpen(false);
-    setExportOptionsOpen(false);
     const localMeasure = _.cloneDeep(measure);
     const executionResults: CqmExecutionResultsByPatient = calculationOutput;
     const groupExportDTOs: QrdaGroupExportDTO[] = [];
@@ -787,8 +784,6 @@ const TestCaseList = (props: TestCaseListProps) => {
                         }
                         onExportQRDA={exportQRDA}
                         measureId={measureId}
-                        exportOptionsOpen={exportOptionsOpen}
-                        setExportOptionsOpen={setExportOptionsOpen}
                         displayTestCaseCopyDialog={() =>
                           setOpenCopyTestCaseDialog(true)
                         }

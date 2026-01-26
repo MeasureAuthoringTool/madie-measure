@@ -122,4 +122,49 @@ describe("CompositeScoring Component", () => {
       );
     });
   });
+
+  it("disables Add Components button when composite scoring is not selected", () => {
+    render(<CompositeScoring canEdit={true} formik={mockFormik} />);
+    const addButton = screen.getByTestId("add-components-btn");
+    expect(addButton).toBeDisabled();
+  });
+
+  it("enables Add Components button when composite scoring is selected", () => {
+    const formikWithValue = {
+      ...mockFormik,
+      values: {
+        compositeScoring: "Opportunity",
+      },
+    };
+    render(<CompositeScoring canEdit={true} formik={formikWithValue} />);
+    const addButton = screen.getByTestId("add-components-btn");
+    expect(addButton).toBeEnabled();
+  });
+
+  it("disables Add Components button when canEdit is false", () => {
+    const formikWithValue = {
+      ...mockFormik,
+      values: {
+        compositeScoring: "Opportunity",
+      },
+    };
+    render(<CompositeScoring canEdit={false} formik={formikWithValue} />);
+    const addButton = screen.getByTestId("add-components-btn");
+    expect(addButton).toBeDisabled();
+  });
+
+  it("opens AddComponentsDialog when Add Components button is clicked", async () => {
+    const formikWithValue = {
+      ...mockFormik,
+      values: {
+        compositeScoring: "Opportunity",
+      },
+    };
+    render(<CompositeScoring canEdit={true} formik={formikWithValue} />);
+    const addButton = screen.getByTestId("add-components-btn");
+    await userEvent.click(addButton);
+    expect(
+      await screen.findByText("Select Composite Measure Components")
+    ).toBeInTheDocument();
+  });
 });
