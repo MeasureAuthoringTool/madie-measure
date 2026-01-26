@@ -47,7 +47,7 @@ export function PopulationCriteriaHome({ measureCanEdit }) {
     }
     return false;
   };
-
+  const [alertMessage, setAlertMessage] = useState(null);
   useEffect(() => {
     checkTestCasesLockStatus().then((isLocked) => {
       if (isLocked) {
@@ -59,7 +59,7 @@ export function PopulationCriteriaHome({ measureCanEdit }) {
         });
       }
     });
-  }, [measureServiceApi, measureId, featureFlags.Locking]);
+  }, [measureServiceApi, measureId, featureFlags.Locking, pathname]);
 
   useEffect(() => {
     // Subscribe to store
@@ -93,7 +93,6 @@ export function PopulationCriteriaHome({ measureCanEdit }) {
   const [measureGroupNumber, setMeasureGroupNumber] = useState<number>(null);
   const [sideNavLinks, setSideNavLinks] = useState<Array<any>>();
   const [isFormDirty, setIsFormDirty] = useState<boolean>(false);
-  const [alertMessage, setAlertMessage] = useState(null);
 
   const groupsBaseUrl = "/measures/" + measure?.id + "/edit/groups";
 
