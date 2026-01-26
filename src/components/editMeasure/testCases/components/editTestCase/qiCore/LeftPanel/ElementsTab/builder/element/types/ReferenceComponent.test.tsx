@@ -99,6 +99,79 @@ describe("ReferenceComponent", () => {
     expect(screen.getByTestId("reference-label")).toHaveTextContent("Provider");
   });
 
+  it("filters out duplicate profiles and shows only unique options", async () => {
+    (useQiCoreResource as jest.Mock).mockReturnValue({
+      state: { bundle: { entry: [] } },
+    });
+
+    // Create profiles with duplicates
+    const profilesWithDuplicates = [
+      {
+        id: "encounter-base",
+        title: "Encounter",
+        type: "Encounter",
+        profile: "http://hl7.org/fhir/StructureDefinition/Encounter",
+        category: "TestCategory",
+      },
+      {
+        id: "encounter-base-duplicate",
+        title: "Encounter",
+        type: "Encounter",
+        profile: "http://hl7.org/fhir/StructureDefinition/Encounter",
+        category: "TestCategory",
+      },
+      {
+        id: "encounter-qicore",
+        title: "Encounter (QICore)",
+        type: "Encounter",
+        profile:
+          "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-encounter",
+        category: "TestCategory",
+      },
+      {
+        id: "encounter-qicore-duplicate",
+        title: "Encounter (QICore)",
+        type: "Encounter",
+        profile:
+          "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-encounter",
+        category: "TestCategory",
+      },
+    ];
+
+    render(
+      <ResourceContext.Provider value={profilesWithDuplicates}>
+        <FormikProvider value={mockFormik}>
+          <ReferenceComponent
+            structureDefinition={structureDefinition}
+            canEdit={true}
+            required={false}
+            helperText="Select a reference"
+            error={false}
+            showAddAttributeButton={true}
+            addTitle=""
+            label="ClaimResponse.addItem[0].provider[0]"
+          />
+        </FormikProvider>
+      </ResourceContext.Provider>
+    );
+
+    const referenceTypeSelect = screen.getByLabelText("Reference Type");
+    await userEvent.click(referenceTypeSelect);
+
+    // Should only show 2 unique options, not 4
+    const options = screen.getAllByRole("option");
+    expect(options).toHaveLength(2);
+
+    // Verify the unique options are present
+    expect(screen.getByTestId("Encounter-option")).toBeInTheDocument();
+    expect(screen.getByTestId("Encounter (QICore)-option")).toBeInTheDocument();
+
+    // Verify no duplicate options exist by checking all option text content
+    const optionTexts = options.map((opt) => opt.textContent);
+    const uniqueOptionTexts = Array.from(new Set(optionTexts));
+    expect(optionTexts.length).toBe(uniqueOptionTexts.length);
+  });
+
   it("shows all FHIR, US Core, QICore resources for FHIR base profile", async () => {
     (useQiCoreResource as jest.Mock).mockReturnValue({
       state: {
