@@ -2,7 +2,7 @@ import * as React from "react";
 import { render, screen, act, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
-import TypeEditor, { getContentReferenceType } from "./TypeEditor";
+import TypeEditor from "./TypeEditor";
 import useFhirDefinitionsServiceApi, {
   FhirDefinitionsServiceApi,
 } from "../../../../../../../api/useFhirDefinitionsService";
@@ -4280,70 +4280,5 @@ describe("TypeEditor Component", () => {
     expect(screen.queryByText("Item")).toBeInTheDocument();
     // Restore the original mock
     jest.restoreAllMocks();
-  });
-});
-
-describe("getContentReferenceType utility function", () => {
-  it("returns null when refUrl is null", () => {
-    const result = getContentReferenceType(null, []);
-    expect(result).toBeNull();
-  });
-
-  it("returns null when refUrl is undefined", () => {
-    const result = getContentReferenceType(undefined, []);
-    expect(result).toBeNull();
-  });
-
-  it("returns null when refUrl is empty string", () => {
-    const result = getContentReferenceType("", []);
-    expect(result).toBeNull();
-  });
-
-  it("returns null when refUrl has no hash fragment", () => {
-    const formInfo = [
-      ["QuestionnaireResponse.item", { type: [{ code: "BackboneElement" }] }],
-    ];
-    const result = getContentReferenceType("invalidReference", formInfo);
-    expect(result).toBeNull();
-  });
-
-  it("returns null when contentReference is not found in formInfo", () => {
-    const formInfo = [
-      ["QuestionnaireResponse.item", { type: [{ code: "BackboneElement" }] }],
-    ];
-    const result = getContentReferenceType(
-      "#QuestionnaireResponse.notFound",
-      formInfo
-    );
-    expect(result).toBeNull();
-  });
-
-  it("returns type code when valid contentReference is found", () => {
-    const formInfo = [
-      ["QuestionnaireResponse.item", { type: [{ code: "BackboneElement" }] }],
-    ];
-    const result = getContentReferenceType(
-      "#QuestionnaireResponse.item",
-      formInfo
-    );
-    expect(result).toBe("BackboneElement");
-  });
-
-  it("returns null when formInfo entry has no type array", () => {
-    const formInfo = [["QuestionnaireResponse.item", {}]];
-    const result = getContentReferenceType(
-      "#QuestionnaireResponse.item",
-      formInfo
-    );
-    expect(result).toBeUndefined();
-  });
-
-  it("returns null when formInfo entry type array is empty", () => {
-    const formInfo = [["QuestionnaireResponse.item", { type: [] }]];
-    const result = getContentReferenceType(
-      "#QuestionnaireResponse.item",
-      formInfo
-    );
-    expect(result).toBeUndefined();
   });
 });

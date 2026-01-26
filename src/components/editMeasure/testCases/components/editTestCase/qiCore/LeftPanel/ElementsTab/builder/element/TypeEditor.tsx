@@ -51,21 +51,6 @@ export const formikErrorHandler = (name: string, formik) => {
 const getContentReferencePath = (referenceUrl: string) =>
   referenceUrl.split("#").pop();
 
-export const getContentReferenceType = (
-  referenceUrl: string,
-  formInfo: any
-) => {
-  if (_.isNil(referenceUrl) || _.isEmpty(referenceUrl)) {
-    return null;
-  }
-  const referencePath = getContentReferencePath(referenceUrl);
-  const reference = formInfo.find(([key]) => key === referencePath);
-  if (reference) {
-    return reference[1].type?.[0]?.code;
-  }
-  return null;
-};
-
 // onChange is being deprecated as no updates to the resource are tracked.
 // Changes directly to the json should be done with a dispatch, this propagates downstream changes in formik.
 // any temporary form state should be done through formik.
@@ -81,19 +66,11 @@ const TypeEditor = ({
   let required = getRequired(requiredFields, stripAllIndexes(label));
   const fhirDefinitionsService = useRef(useFhirDefinitionsServiceApi());
 
-  let type: string;
-  if (structureDefinition?.contentReference) {
-    type = getContentReferenceType(
-      structureDefinition.contentReference,
-      formInfo
-    );
-  } else {
-    type = structureDefinition?.type?.find((t) =>
-      _.toLower(label).includes(_.toLower(t.code))
-    )?.code;
-    if (!type) {
-      type = structureDefinition?.type?.[0]?.code;
-    }
+  let type = structureDefinition?.type?.find((t) =>
+    _.toLower(label).includes(_.toLower(t.code))
+  )?.code;
+  if (!type) {
+    type = structureDefinition?.type?.[0]?.code;
   }
 
   const values = _.get(formik.values, label);
