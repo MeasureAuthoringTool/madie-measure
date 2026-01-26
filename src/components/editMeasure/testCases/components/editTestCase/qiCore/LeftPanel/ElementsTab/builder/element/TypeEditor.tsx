@@ -58,11 +58,9 @@ const TypeEditor = ({
   label,
 }) => {
   const formik = useFormikContext();
-  // Ref to track pending values for use in closures (prevents stale state issues when rapidly clicking Add)
-  // We use a deep clone to avoid mutating formik.values directly
-  const pendingValuesRef = useRef<object>(_.cloneDeep(formik.values) as object);
-  // Sync ref with formik.values on each render (after formik has processed updates)
-  pendingValuesRef.current = _.cloneDeep(formik.values) as object;
+  // Ref to track formik.values for use in closures (prevents stale state issues when rapidly clicking Add)
+  const valuesRef = useRef<object>(formik.values as object);
+  valuesRef.current = formik.values as object;
 
   const { requiredFields, formInfo } = useRequiredFields();
   let required = getRequired(requiredFields, stripAllIndexes(label));
@@ -750,16 +748,14 @@ const TypeEditor = ({
                   handleAddElement={() => {
                     // Get the base path without trailing index for adding new elements
                     const basePath = fieldLabel.replace(/\[\d+\]$/, "");
-                    // Read current values from pendingValuesRef to get the latest values
+                    // Read current values from valuesRef to get the latest values
                     // This avoids stale closure issues when clicking Add multiple times rapidly
                     const currentValues = _.get(
-                      pendingValuesRef.current,
+                      valuesRef.current,
                       basePath,
                       []
                     );
                     const newValues = [...currentValues, {}];
-                    // Update the ref immediately so subsequent rapid clicks see the updated value
-                    _.set(pendingValuesRef.current, basePath, newValues);
                     formik.setFieldValue(basePath, newValues);
                   }}
                   {...formik.getFieldProps(fieldLabel)}
