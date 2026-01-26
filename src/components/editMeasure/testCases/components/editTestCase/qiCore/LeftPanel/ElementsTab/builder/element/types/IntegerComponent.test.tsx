@@ -1,423 +1,149 @@
-import React from "react";
-import { render, screen, fireEvent } from "@testing-library/react";
-import IntegerComponent, { IntegerType } from "./IntegerComponent";
-import userEvent from "@testing-library/user-event";
+import * as React from "react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { FormikProvider, FormikContextType } from "formik";
+import { ExecutionContextProvider } from "../../../../../../../routes/qiCore/ExecutionContext";
+import IntegerComponent from "./IntegerComponent";
+import { IntegerType } from "../typesValidations/FhirNumbers";
 
-describe("IntegerComponent", () => {
-  describe("Unsigned IntegerComponent", () => {
-    test("Should render Unsigned IntegerComponent", () => {
-      const { rerender } = render(
-        <IntegerComponent
-          label="Coverage.class.value"
-          canEdit={true}
-          fieldRequired={false}
-          integerType={IntegerType.UNSIGNED}
-        />
-      );
+let setFieldValueMock: jest.Mock;
 
-      const integerField = screen.getByTestId(
-        "integer-field-Coverage.class.value"
-      );
-      expect(integerField).toBeInTheDocument();
-      const integerFieldInput = screen.getByTestId(
-        "integer-field-input-Coverage.class.value"
-      );
-      expect(integerFieldInput).toBeInTheDocument();
-      screen.debug();
+const FormikWrapper = ({
+  children,
+  initialValue,
+}: {
+  children: React.ReactNode;
+  initialValue: number | string | null;
+}) => {
+  const [values, setValues] = React.useState({
+    testUnsigned: initialValue,
+  });
+
+  const setFieldValueRef = React.useRef<jest.Mock>();
+
+  if (!setFieldValueRef.current) {
+    setFieldValueRef.current = jest.fn((field: string, value: any) => {
+      setValues((prev) => ({ ...prev, [field]: value }));
     });
+  }
 
-    test("Should validate Unsigned IntegerComponent", () => {
-      render(
+  setFieldValueMock = setFieldValueRef.current;
+
+  const mockFormik: FormikContextType<any> = {
+    values,
+    setFieldValue: setFieldValueMock,
+    handleChange: jest.fn(),
+    handleBlur: jest.fn(),
+    getFieldProps: jest.fn(),
+  } as unknown as FormikContextType<any>;
+
+  return <FormikProvider value={mockFormik}>{children}</FormikProvider>;
+};
+
+const renderWithFormik = (initialValue?: number | string | null) =>
+  render(
+    <ExecutionContextProvider
+      value={{
+        measureState: [null, jest.fn()],
+        bundleState: [null, jest.fn()],
+        valueSetsState: [[], jest.fn()],
+        executionContextReady: true,
+        executing: false,
+        setExecuting: jest.fn(),
+        contextFailure: false,
+      }}
+    >
+      <FormikWrapper initialValue={initialValue ?? 42}>
         <IntegerComponent
-          value={1}
-          label=""
-          canEdit={true}
+          label="Test Unsigned"
+          name="testUnsigned"
+          canEdit
           fieldRequired={false}
           integerType={IntegerType.UNSIGNED}
         />
-      );
+      </FormikWrapper>
+    </ExecutionContextProvider>
+  );
 
-      const integerField = screen.getByTestId("integer-field-");
-      expect(integerField).toBeInTheDocument();
-      const integerFieldInput = screen.getByTestId("integer-field-input-");
-      expect(integerFieldInput).toBeInTheDocument();
-      expect(integerFieldInput.value).toBe("1");
+describe("IntegerComponent with Formik", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
 
-      fireEvent.keyPress(integerFieldInput, {
-        target: { value: "2147483647" },
-      });
-    });
+  test("onChange empty string sets null", async () => {
+    renderWithFormik(42);
 
-    test("should ignore . and - keys", () => {
-      render(
-        <IntegerComponent
-          value={null}
-          label=""
-          canEdit={true}
-          fieldRequired={false}
-          integerType={IntegerType.UNSIGNED}
-        />
-      );
-      const integerField = screen.getByTestId("integer-field-");
-      expect(integerField).toBeInTheDocument();
-      const integerFieldInput = screen.getByTestId("integer-field-input-");
-      expect(integerFieldInput).toBeInTheDocument();
-      expect(integerFieldInput.value).toBe("");
-      userEvent.type(integerFieldInput, "-");
-    });
+    const input = screen.getByTestId(
+      "integer-field-input-Test Unsigned"
+    ) as HTMLInputElement;
 
-    test("Test on key press of negative sign causes prevent default for Unsigned IntegerComponent", () => {
-      render(
-        <IntegerComponent
-          value={null}
-          label=""
-          canEdit={true}
-          fieldRequired={false}
-          integerType={IntegerType.UNSIGNED}
-        />
-      );
-      const integerField = screen.getByTestId("integer-field-");
-      expect(integerField).toBeInTheDocument();
-      const integerFieldInput = screen.getByTestId("integer-field-input-");
-      expect(integerFieldInput).toBeInTheDocument();
-      expect(integerFieldInput.value).toBe("");
-      fireEvent.keyPress(integerFieldInput, { key: "-", charCode: 173 });
-      expect(integerFieldInput.value).toBe("");
-    });
+    fireEvent.change(input, { target: { value: "" } });
 
-    test("Test on key press of valid Unsigned IntegerComponent", () => {
-      render(
-        <IntegerComponent
-          value={null}
-          canEdit={true}
-          fieldRequired={false}
-          integerType={IntegerType.UNSIGNED}
-        />
-      );
-      const integerField = screen.getByTestId("integer-field-Integer");
-      expect(integerField).toBeInTheDocument();
-      const integerFieldInput = screen.getByTestId(
-        "integer-field-input-Integer"
-      );
-      expect(integerFieldInput).toBeInTheDocument();
-      expect(integerFieldInput.value).toBe("");
-
-      fireEvent.keyPress(integerFieldInput, { key: "8", charCode: 56 });
-      expect(
-        screen.queryByText("Unsigned integer range is [0 to 2147483647]")
-      ).not.toBeInTheDocument();
-    });
-
-    test("Test on key press of number reaching maximum causes prevent default for Unsigned IntegerComponent", () => {
-      render(
-        <IntegerComponent
-          value={null}
-          label="Unsigned"
-          canEdit={true}
-          fieldRequired={false}
-          integerType={IntegerType.UNSIGNED}
-        />
-      );
-      const integerField = screen.getByTestId("integer-field-Unsigned");
-      expect(integerField).toBeInTheDocument();
-      const integerFieldInput = screen.getByTestId(
-        "integer-field-input-Unsigned"
-      );
-      expect(integerFieldInput).toBeInTheDocument();
-      expect(integerFieldInput.value).toBe("");
-
-      fireEvent.keyPress(integerFieldInput, { target: { value: "214748364" } });
-      expect(integerFieldInput.value).toBe("214748364");
-
-      fireEvent.keyPress(integerFieldInput, { key: "8", charCode: 56 });
-      expect(integerFieldInput.value).toBe("214748364");
-    });
-
-    test("Test on key press of number reaching minimum causes prevent default for Unsigned IntegerComponent", () => {
-      render(
-        <IntegerComponent
-          value={null}
-          label=""
-          canEdit={true}
-          fieldRequired={false}
-          integerType={IntegerType.UNSIGNED}
-        />
-      );
-      const integerField = screen.getByTestId("integer-field-");
-      expect(integerField).toBeInTheDocument();
-      const integerFieldInput = screen.getByTestId("integer-field-input-");
-      expect(integerFieldInput).toBeInTheDocument();
-      expect(integerFieldInput.value).toBe("");
-
-      fireEvent.keyPress(integerFieldInput, { target: { value: "0" } });
-      expect(integerFieldInput.value).toBe("0");
-
-      fireEvent.keyPress(integerFieldInput, { key: "-", charCode: 173 });
-      expect(integerFieldInput.value).toBe("0");
+    await waitFor(() => {
+      expect(setFieldValueMock).toHaveBeenLastCalledWith("testUnsigned", null);
     });
   });
 
-  describe("PositiveInt IntegerComponent", () => {
-    test("Should render PositiveInt IntegerComponent", () => {
-      render(
-        <IntegerComponent
-          value={2147483647}
-          label=""
-          canEdit={true}
-          fieldRequired={false}
-          integerType={IntegerType.POSITIVE_INT}
-        />
-      );
+  test("onChange valid number sets numeric value", async () => {
+    renderWithFormik(42);
 
-      const integerField = screen.getByTestId("integer-field-");
-      expect(integerField).toBeInTheDocument();
-      const integerFieldInput = screen.getByTestId("integer-field-input-");
-      expect(integerFieldInput).toBeInTheDocument();
-      expect(integerFieldInput.value).toBe("2147483647");
-    });
+    const input = screen.getByTestId(
+      "integer-field-input-Test Unsigned"
+    ) as HTMLInputElement;
 
-    test("Should validate PositiveInt IntegerComponent", () => {
-      render(
-        <IntegerComponent
-          value={1}
-          label=""
-          canEdit={true}
-          fieldRequired={false}
-          integerType={IntegerType.POSITIVE_INT}
-        />
-      );
-      const integerField = screen.getByTestId("integer-field-");
-      expect(integerField).toBeInTheDocument();
-      const integerFieldInput = screen.getByTestId("integer-field-input-");
-      expect(integerFieldInput).toBeInTheDocument();
-      expect(integerFieldInput.value).toBe("1");
+    fireEvent.change(input, { target: { value: "10" } });
 
-      fireEvent.keyPress(integerFieldInput, { target: { value: "10" } });
-    });
-
-    test("Test 1 on key press of non-numeric causes prevent default for PositiveInt IntegerComponent", () => {
-      render(
-        <IntegerComponent
-          value={null}
-          label=""
-          canEdit={true}
-          fieldRequired={false}
-          integerType={IntegerType.POSITIVE_INT}
-        />
-      );
-      const integerField = screen.getByTestId("integer-field-");
-      expect(integerField).toBeInTheDocument();
-      const integerFieldInput = screen.getByTestId("integer-field-input-");
-      expect(integerFieldInput).toBeInTheDocument();
-      expect(integerFieldInput.value).toBe("");
-
-      fireEvent.keyPress(integerFieldInput, { key: "a", charCode: 97 });
-      expect(integerFieldInput.value).toBe("");
-    });
-
-    test("Test 4 on key press of reaching maximum number causes prevent default for PositiveInt IntegerComponent", () => {
-      render(
-        <IntegerComponent
-          value={null}
-          label=""
-          canEdit={true}
-          fieldRequired={false}
-          integerType={IntegerType.POSITIVE_INT}
-        />
-      );
-      const integerField = screen.getByTestId("integer-field-");
-      expect(integerField).toBeInTheDocument();
-      const integerFieldInput = screen.getByTestId("integer-field-input-");
-      expect(integerFieldInput).toBeInTheDocument();
-      expect(integerFieldInput.value).toBe("");
-
-      fireEvent.keyPress(integerFieldInput, { target: { value: "214748364" } });
-      expect(integerFieldInput.value).toBe("214748364");
-      fireEvent.keyPress(integerFieldInput, { key: "8", charCode: 56 });
-      expect(integerFieldInput.value).toBe("214748364");
-    });
-
-    test("Test on key press of valid PositiveInt IntegerComponent", () => {
-      render(
-        <IntegerComponent
-          value={null}
-          canEdit={true}
-          fieldRequired={false}
-          integerType={IntegerType.POSITIVE_INT}
-        />
-      );
-      const integerField = screen.getByTestId("integer-field-Integer");
-      expect(integerField).toBeInTheDocument();
-      const integerFieldInput = screen.getByTestId(
-        "integer-field-input-Integer"
-      );
-      expect(integerFieldInput).toBeInTheDocument();
-      expect(integerFieldInput.value).toBe("");
-
-      fireEvent.keyPress(integerFieldInput, { target: { value: "214748364" } });
-      expect(integerFieldInput.value).toBe("214748364");
+    await waitFor(() => {
+      expect(setFieldValueMock).toHaveBeenLastCalledWith("testUnsigned", 10);
     });
   });
 
-  describe("Signed IntegerComponent", () => {
-    test("Should render Signed IntegerComponent", () => {
-      render(
-        <IntegerComponent
-          value={-2147483649}
-          label=""
-          canEdit={true}
-          fieldRequired={false}
-          integerType={IntegerType.SIGNED}
-        />
-      );
+  test("onChange invalid input stores raw string", async () => {
+    renderWithFormik(42);
 
-      const integerField = screen.getByTestId("integer-field-");
-      expect(integerField).toBeInTheDocument();
-      const integerFieldInput = screen.getByTestId("integer-field-input-");
-      expect(integerFieldInput).toBeInTheDocument();
-      expect(integerFieldInput.value).toBe("-2147483649");
+    const input = screen.getByTestId(
+      "integer-field-input-Test Unsigned"
+    ) as HTMLInputElement;
+
+    fireEvent.change(input, { target: { value: "abc" } });
+
+    await waitFor(() => {
+      expect(setFieldValueMock).toHaveBeenLastCalledWith("testUnsigned", "abc");
     });
+  });
 
-    test("Should validate Signed IntegerComponent", () => {
-      render(
-        <IntegerComponent
-          value={1}
-          label=""
-          canEdit={true}
-          fieldRequired={false}
-          integerType={IntegerType.SIGNED}
-        />
-      );
+  test('SIGNED integer allows "-" to be entered', async () => {
+    render(
+      <ExecutionContextProvider
+        value={{
+          measureState: [null, jest.fn()],
+          bundleState: [null, jest.fn()],
+          valueSetsState: [[], jest.fn()],
+          executionContextReady: true,
+          executing: false,
+          setExecuting: jest.fn(),
+          contextFailure: false,
+        }}
+      >
+        <FormikWrapper initialValue={null}>
+          <IntegerComponent
+            label="Test Signed"
+            name="testSigned"
+            canEdit
+            fieldRequired={false}
+            integerType={IntegerType.SIGNED}
+          />
+        </FormikWrapper>
+      </ExecutionContextProvider>
+    );
 
-      const integerField = screen.getByTestId("integer-field-");
-      expect(integerField).toBeInTheDocument();
-      const integerFieldInput = screen.getByTestId("integer-field-input-");
-      expect(integerFieldInput).toBeInTheDocument();
-      expect(integerFieldInput.value).toBe("1");
+    const input = screen.getByTestId(
+      "integer-field-input-Test Signed"
+    ) as HTMLInputElement;
 
-      fireEvent.keyPress(integerFieldInput, {
-        target: { value: "2147483647" },
-      });
-    });
+    fireEvent.change(input, { target: { value: "-" } });
 
-    test("Test 2 on key press of duplicate minus signs causes prevent default for Signed IntegerComponent", () => {
-      render(
-        <IntegerComponent
-          value={null}
-          label=""
-          canEdit={true}
-          fieldRequired={false}
-          integerType={IntegerType.SIGNED}
-        />
-      );
-      const integerField = screen.getByTestId("integer-field-");
-      expect(integerField).toBeInTheDocument();
-      const integerFieldInput = screen.getByTestId("integer-field-input-");
-      expect(integerFieldInput).toBeInTheDocument();
-      expect(integerFieldInput.value).toBe("");
-
-      fireEvent.keyPress(integerFieldInput, { key: "a", charCode: 97 });
-      expect(integerFieldInput.value).toBe("");
-
-      fireEvent.keyPress(integerFieldInput, { target: { value: "-1" } });
-      expect(integerFieldInput.value).toBe("-1");
-      fireEvent.keyPress(integerFieldInput, { key: "-", charCode: 173 });
-      expect(integerFieldInput.value).toBe("-1");
-    });
-
-    test("Test 3 on key press of minus sign with a positive number causes prevent default for Signed IntegerComponent", () => {
-      render(
-        <IntegerComponent
-          value={null}
-          label=""
-          canEdit={true}
-          fieldRequired={false}
-          integerType={IntegerType.SIGNED}
-        />
-      );
-      const integerField = screen.getByTestId("integer-field-");
-      expect(integerField).toBeInTheDocument();
-      const integerFieldInput = screen.getByTestId("integer-field-input-");
-      expect(integerFieldInput).toBeInTheDocument();
-      expect(integerFieldInput.value).toBe("");
-
-      fireEvent.keyPress(integerFieldInput, { target: { value: "1" } });
-      expect(integerFieldInput.value).toBe("1");
-      fireEvent.keyPress(integerFieldInput, { key: "-", charCode: 173 });
-      expect(integerFieldInput.value).toBe("1");
-    });
-
-    test("Test 4 on key press of reaching maximum number causes prevent default for Signed IntegerComponent", () => {
-      render(
-        <IntegerComponent
-          value={null}
-          label=""
-          canEdit={true}
-          fieldRequired={false}
-          integerType={IntegerType.SIGNED}
-        />
-      );
-      const integerField = screen.getByTestId("integer-field-");
-      expect(integerField).toBeInTheDocument();
-      const integerFieldInput = screen.getByTestId("integer-field-input-");
-      expect(integerFieldInput).toBeInTheDocument();
-      expect(integerFieldInput.value).toBe("");
-
-      fireEvent.keyPress(integerFieldInput, { target: { value: "214748364" } });
-      expect(integerFieldInput.value).toBe("214748364");
-      fireEvent.keyPress(integerFieldInput, { key: "8", charCode: 56 });
-      expect(integerFieldInput.value).toBe("214748364");
-    });
-
-    test("Test 4 on key press of reaching maximum number causes prevent default for PositiveInt IntegerComponent", () => {
-      render(
-        <IntegerComponent
-          value={null}
-          label=""
-          canEdit={true}
-          fieldRequired={false}
-          integerType={IntegerType.POSITIVE_INT}
-        />
-      );
-      const integerField = screen.getByTestId("integer-field-");
-      expect(integerField).toBeInTheDocument();
-      const integerFieldInput = screen.getByTestId("integer-field-input-");
-      expect(integerFieldInput).toBeInTheDocument();
-      expect(integerFieldInput.value).toBe("");
-
-      fireEvent.keyPress(integerFieldInput, { target: { value: "214748364" } });
-      expect(integerFieldInput.value).toBe("214748364");
-      //Adding an 8 to that value with be MAX_INTEGER + 1 and should not change
-      fireEvent.keyPress(integerFieldInput, { key: "8", charCode: 56 });
-      expect(integerFieldInput.value).toBe("214748364");
-    });
-
-    test("Test on key press of valid Signed IntegerComponent", () => {
-      render(
-        <IntegerComponent
-          value={null}
-          canEdit={true}
-          fieldRequired={false}
-          integerType={IntegerType.SIGNED}
-          addTitle={"Integer"}
-          showAddAttributeButton={true}
-        />
-      );
-      expect(screen.getByText("Add Integer")).toBeInTheDocument();
-      const integerField = screen.getByTestId("integer-field-Integer");
-      expect(integerField).toBeInTheDocument();
-      const integerFieldInput = screen.getByTestId(
-        "integer-field-input-Integer"
-      );
-      expect(integerFieldInput).toBeInTheDocument();
-      expect(integerFieldInput.value).toBe("");
-
-      fireEvent.keyPress(integerFieldInput, { key: "8", charCode: 56 });
-      expect(
-        screen.queryByText(
-          "Signed integer range is [-2147483648 to 2147483647]"
-        )
-      ).not.toBeInTheDocument();
+    await waitFor(() => {
+      expect(setFieldValueMock).toHaveBeenLastCalledWith("testSigned", "-");
     });
   });
 });

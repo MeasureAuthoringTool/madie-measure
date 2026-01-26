@@ -8,7 +8,7 @@ import BooleanComponent from "./types/BooleanComponent";
 import UriComponent from "./types/UriComponent";
 import UrlComponent from "./types/UrlComponent";
 import DateComponent from "./types/DateComponent";
-import IntegerComponent, { IntegerType } from "./types/IntegerComponent";
+import IntegerComponent from "./types/IntegerComponent";
 import CodesComponent from "./types/CodesComponent";
 import InstantComponent from "./types/InstantComponent";
 import TimeComponent from "./types/TimeComponent";
@@ -40,6 +40,7 @@ import RangeComponent from "./types/RangeComponent";
 import ReferenceComponent from "./types/ReferenceComponent";
 import ContentReferenceType from "./contentReferenceType/ContentReferenceType";
 import DecimalComponent from "./types/DecimalComponent";
+import { IntegerType } from "./typesValidations/FhirNumbers";
 
 export const formikErrorHandler = (name: string, formik) => {
   const touched = getNestedProperty(formik.touched, name);
@@ -426,6 +427,15 @@ const TypeEditor = ({
       case "integer":
       case "positiveInt":
       case "unsignedInt":
+        let integerType: IntegerType;
+
+        if (type === "unsignedInt") {
+          integerType = IntegerType.UNSIGNED;
+        } else if (type === "positiveInt") {
+          integerType = IntegerType.POSITIVE_INT;
+        } else {
+          integerType = IntegerType.SIGNED;
+        }
         // Example of multiple cardinality ClaimResponse.item.noteNumber
         return (
           <>
@@ -443,11 +453,7 @@ const TypeEditor = ({
                   label={fieldLabel}
                   helperText={formikErrorHandler(fieldLabel, formik)}
                   error={getNestedProperty(formik.errors, fieldLabel)}
-                  integerType={
-                    type === "unsignedInt"
-                      ? IntegerType.UNSIGNED
-                      : IntegerType.POSITIVE_INT
-                  }
+                  integerType={integerType}
                   showAddAttributeButton={
                     showAddAttributeButton &&
                     (!isArrayMode || index === lastIndex)
@@ -506,6 +512,9 @@ const TypeEditor = ({
                   addTitle={addTitle}
                   handleAddElement={handleAddElement}
                   {...formik.getFieldProps(fieldLabel)}
+                  onChange={(e) => {
+                    formik.setFieldValue(fieldLabel, e.target.value === "true");
+                  }}
                 />
               );
             })}

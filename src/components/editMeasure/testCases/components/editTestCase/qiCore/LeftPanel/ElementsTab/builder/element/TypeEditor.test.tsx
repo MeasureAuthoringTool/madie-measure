@@ -29,7 +29,7 @@ const getNestedProperty = (obj, path) => {
 const claimResponseValues = {
   ClaimResponse: {
     id: "test",
-    order: "1234",
+    order: 12,
     time: "01:23:45",
     Coding: {
       code: "",
@@ -46,9 +46,7 @@ const mockSetFieldValue = jest.fn();
 
 //@ts-ignore
 const mockFormik: FormikContextType<any> = {
-  values: {
-    claimResponseValues,
-  },
+  values: claimResponseValues,
   touched: {},
   getFieldProps: (label) => {
     const value = getNestedProperty(claimResponseValues, label);
@@ -866,6 +864,62 @@ describe("TypeEditor Component", () => {
     ).toBeInTheDocument();
   });
 
+  test("Should update Boolean component value", async () => {
+    const setFieldValue = jest.fn();
+
+    const updatedMockFormik = {
+      ...mockFormik,
+      setFieldValue,
+      getFieldProps: () => ({
+        label: "MedicationAbsent.meta",
+        name: "MedicationAbsent.meta",
+        value: "true",
+        onChange: jest.fn(),
+        onBlur: jest.fn(),
+      }),
+    };
+
+    render(
+      <FormikProvider value={updatedMockFormik}>
+        <RequiredFieldsProvider
+          requiredFields={mockRequiredFields}
+          formInfo={mockFormInfo}
+        >
+          <TypeEditor
+            structureDefinition={{
+              id: "MedicationAbsent.meta",
+              path: "MedicationAbsent.meta",
+              min: 0,
+              max: "1",
+              type: [{ code: "boolean" }],
+            }}
+            label="MedicationAbsent.meta"
+            resource={null}
+            canEdit={true}
+            parentStructureDefinition={null}
+          />
+        </RequiredFieldsProvider>
+      </FormikProvider>
+    );
+
+    const selectField = screen.getByRole("combobox", {
+      name: "Meta",
+    });
+    expect(selectField).toBeInTheDocument();
+
+    userEvent.click(selectField);
+
+    const falseOption = screen.getByRole("option", { name: "false" });
+    userEvent.click(falseOption);
+    expect(setFieldValue).toHaveBeenCalledWith("MedicationAbsent.meta", false);
+
+    userEvent.click(selectField);
+
+    const trueOption = screen.getByRole("option", { name: "true" });
+    userEvent.click(trueOption);
+    expect(setFieldValue).toHaveBeenCalledWith("MedicationAbsent.meta", true);
+  });
+
   test("Should render URI component", () => {
     const updatedMockFormik = {
       ...mockFormik,
@@ -1286,7 +1340,7 @@ describe("TypeEditor Component", () => {
     const inputField = screen.getByTestId(
       "integer-field-input-ClaimResponse.order"
     ) as HTMLInputElement;
-    expect(inputField.value).toBe("1234");
+    expect(inputField.value).toBe("12");
   });
 
   test("Should render unsignedInt component", () => {
@@ -1320,7 +1374,7 @@ describe("TypeEditor Component", () => {
     const inputField = screen.getByTestId(
       "integer-field-input-ClaimResponse.order"
     ) as HTMLInputElement;
-    expect(inputField.value).toBe("1234");
+    expect(inputField.value).toBe("12");
   });
 
   test("Should render unsignedInt component", () => {
@@ -1354,7 +1408,7 @@ describe("TypeEditor Component", () => {
     const inputField = screen.getByTestId(
       "integer-field-input-ClaimResponse.order"
     ) as HTMLInputElement;
-    expect(inputField.value).toBe("1234");
+    expect(inputField.value).toBe("12");
   });
 
   test("Should render unsignedInt component with and without [0] already added", () => {

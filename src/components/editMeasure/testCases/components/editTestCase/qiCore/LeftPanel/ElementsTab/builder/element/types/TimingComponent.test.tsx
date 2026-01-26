@@ -255,7 +255,7 @@ describe("TimingComponent", () => {
     userEvent.type(countInput, "5");
     expect(setFieldValueMock).toHaveBeenLastCalledWith(
       "MedicationRequest.dosageInstruction[0].timing.repeat.count",
-      "5"
+      5
     );
 
     // Repeat.CountMax
@@ -265,7 +265,7 @@ describe("TimingComponent", () => {
     await userEvent.type(countMaxInput, "8");
     expect(setFieldValueMock).toHaveBeenCalledWith(
       "MedicationRequest.dosageInstruction[0].timing.repeat.countMax",
-      "8"
+      8
     );
     const durationInput = screen.getByTestId(
       "decimal-field-input-MedicationRequest.dosageInstruction[0].timing.repeat.duration"
@@ -307,7 +307,7 @@ describe("TimingComponent", () => {
     userEvent.type(frequencyInput, "3");
     expect(setFieldValueMock).toHaveBeenLastCalledWith(
       "MedicationRequest.dosageInstruction[0].timing.repeat.frequency",
-      "3"
+      3
     );
 
     // Repeat.FrequencyMax
@@ -317,7 +317,7 @@ describe("TimingComponent", () => {
     userEvent.type(frequencyMaxInput, "6");
     expect(setFieldValueMock).toHaveBeenLastCalledWith(
       "MedicationRequest.dosageInstruction[0].timing.repeat.frequencyMax",
-      "6"
+      6
     );
 
     // Repeat.Period
@@ -395,7 +395,7 @@ describe("TimingComponent", () => {
     userEvent.type(offsetInput, "5");
     expect(setFieldValueMock).toHaveBeenLastCalledWith(
       "MedicationRequest.dosageInstruction[0].timing.repeat.offset",
-      "5"
+      5
     );
 
     const valueSetSelect = screen.getByRole("combobox", {

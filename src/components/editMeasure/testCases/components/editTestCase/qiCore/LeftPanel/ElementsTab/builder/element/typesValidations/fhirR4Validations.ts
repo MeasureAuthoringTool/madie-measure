@@ -53,20 +53,22 @@ export const getBooleanValidator = (required) => {
 // Any positive integer in the range 1..2,147,483,647
 export const getPositiveIntegerValidator = (required) => {
   const integerReg = /^[0-9]+$/;
-  const baseValidator = Yup.string().test(
-    "range",
-    `Only the following numerical range of values are allowed: [${POSITIVEINT_MINIMUM} to ${INTEGER_MAXIMUM}]`,
-    (val) => {
-      if (val && val.length > 0) {
-        if (!integerReg.test(val)) {
-          return false;
+  const baseValidator = Yup.string()
+    .nullable()
+    .test(
+      "range",
+      `Only the following numerical range of values are allowed: [${POSITIVEINT_MINIMUM} to ${INTEGER_MAXIMUM}]`,
+      (val) => {
+        if (val && val.length > 0) {
+          if (!integerReg.test(val)) {
+            return false;
+          }
+          const num = Number(val);
+          return num >= POSITIVEINT_MINIMUM && num <= INTEGER_MAXIMUM;
         }
-        const num = Number(val);
-        return num >= POSITIVEINT_MINIMUM && num <= INTEGER_MAXIMUM;
+        return true;
       }
-      return true;
-    }
-  );
+    );
 
   if (required) {
     return baseValidator.required("This field is required");
@@ -77,29 +79,33 @@ export const getPositiveIntegerValidator = (required) => {
 // Any non-negative integer in the range 0..2,147,483,647
 export const getUnsignedIntegerValidator = (required) => {
   const integerReg = /^(0|[1-9][0-9]*)$/;
-  const baseValidator = Yup.string().test(
-    "range",
-    `Only the following numerical range of values are allowed: [0 to ${INTEGER_MAXIMUM}]`,
-    (val) => {
-      if (val && val.length > 0) {
-        if (!integerReg.test(val)) {
-          return false;
+  const baseValidator = Yup.string()
+    .nullable()
+    .test(
+      "range",
+      `Only the following numerical range of values are allowed: [0 to ${INTEGER_MAXIMUM}]`,
+      (val) => {
+        if (val && val.length > 0) {
+          if (!integerReg.test(val)) {
+            return false;
+          }
+          const num = Number(val);
+          return num >= 0 && num <= INTEGER_MAXIMUM;
         }
-        const num = Number(val);
-        return num >= 0 && num <= INTEGER_MAXIMUM;
+        return true;
       }
-      return true;
-    }
-  );
+    );
   if (required) {
     return baseValidator.required("This field is required");
   }
   return baseValidator;
 };
 
+// Any integer in the range -2,147,483,648..2,147,483,647
 export const getSignedIntegerValidator = (required) => {
   const integerReg = /[0]|[-+]?[1-9][0-9]*/;
   const baseValidator = Yup.string()
+    .nullable()
     .matches(integerReg, "Invalid Integer format")
     .test(
       "len",
@@ -281,8 +287,9 @@ export const getQuantityValidator = (required: boolean) => {
 
 export const validationLookup = {
   "http://hl7.org/fhirpath/System.Integer": getSignedIntegerValidator,
-  positiveInt: getPositiveIntegerValidator,
+  integer: getSignedIntegerValidator,
   unsignedInt: getUnsignedIntegerValidator,
+  positiveInt: getPositiveIntegerValidator,
   boolean: getBooleanValidator,
   "http://hl7.org/fhirpath/System.String": getStringValidator,
   string: getStringValidator,

@@ -1,21 +1,14 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { TextField } from "@madie/madie-design-system/dist/react/";
 import "twin.macro";
 import "styled-components/macro";
 import { TypeComponentProps } from "./TypeComponentProps";
-import {
-  SIGNED_MINIMUM,
-  INTEGER_MAXIMUM,
-} from "../typesValidations/FhirNumbers";
 import AddElementButton from "../../../../../../../common/UIOnlyModelAgnostic/AddElementButton";
 import { IconButton, Tooltip } from "@mui/material";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import { getMultipleCardinalityLabel } from "./TypeUtil";
-export enum IntegerType {
-  UNSIGNED = "Unsigned",
-  SIGNED = "Signed",
-  POSITIVE_INT = "PositiveInt",
-}
+import { getIn, useFormikContext } from "formik";
+import { IntegerType } from "../typesValidations/FhirNumbers";
 
 interface IntegerComponentProps extends TypeComponentProps {
   integerType: IntegerType;
@@ -35,10 +28,14 @@ const IntegerComponent = ({
   handleDeleteElement,
   ...props
 }: IntegerComponentProps) => {
+  const { name } = props;
+
+  const formik = useFormikContext();
+  const value = getIn(formik.values, name);
+
   // Use name for test IDs in array scenarios (when it contains '['), otherwise use original label
   const formattedLabel = getMultipleCardinalityLabel(label);
-  const testIdBase =
-    props.name && props.name.includes("[") ? props.name : label;
+  const testIdBase = name && name.includes("[") ? name : label;
 
   return (
     <div
@@ -59,30 +56,34 @@ const IntegerComponent = ({
         data-testid={`integer-field-${testIdBase}`}
         size="small"
         fullWidth
-        onKeyPress={(e) => {
-          const inputValue = e.target.value;
-          // Allow control keys (backspace, delete, arrows, etc.)
-          // Allow all characters, but validate the input later
-          if (integerType === IntegerType.SIGNED) {
-            if (
-              Number(inputValue + e.key) < SIGNED_MINIMUM ||
-              Number(inputValue + e.key) > INTEGER_MAXIMUM
-            ) {
-              e.preventDefault();
-            }
-          } else if (integerType === IntegerType.UNSIGNED) {
-            if (Number(inputValue + e.key) > INTEGER_MAXIMUM) {
-              e.preventDefault();
-            }
-          } else if (integerType === IntegerType.POSITIVE_INT) {
-            if (Number(inputValue + e.key) > INTEGER_MAXIMUM) {
-              e.preventDefault();
-            }
-          }
-        }}
         error={error}
         helperText={error}
-        {...props}
+        onChange={(e) => {
+          const value = e.target.value;
+
+          // Allow clearing the field
+          if (value === "") {
+            formik.setFieldValue(name, null);
+            return;
+          }
+
+          // Signed integers: allow "-" to be entered
+          if (integerType === IntegerType.SIGNED && value === "-") {
+            formik.setFieldValue(name, value);
+            return;
+          }
+
+          // Convert to number
+          const numericValue = Number(value);
+
+          // For invalid input (like letters), store raw string and form validation will catch
+          if (Number.isNaN(numericValue)) {
+            formik.setFieldValue(name, value);
+          } else {
+            formik.setFieldValue(name, numericValue);
+          }
+        }}
+        value={value ?? ""}
       />
       {showDeleteButton && canEdit && (
         <Tooltip title="Delete" placement="top" arrow>
