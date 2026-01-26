@@ -103,7 +103,9 @@ const CompareVersionsDialog = ({
               <CqlComparisonPanel measure={newMeasure} side="new" />
             </div>
 
-            <CqlDiffViewer oldMeasure={oldMeasure} newMeasure={newMeasure} />
+            <div className="cql-diff-viewer">
+              <CqlDiffViewer oldMeasure={oldMeasure} newMeasure={newMeasure} />
+            </div>
           </>
         )}
 

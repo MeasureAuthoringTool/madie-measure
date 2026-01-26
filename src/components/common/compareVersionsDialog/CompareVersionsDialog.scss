@@ -24,6 +24,11 @@
     }
   }
 
+  .cql-diff-viewer {
+    max-height: calc(100vh - 500px);
+    overflow-y: auto;
+  }
+
   .cql-comparison-panels-container {
     display: flex;
     width: 100%;
