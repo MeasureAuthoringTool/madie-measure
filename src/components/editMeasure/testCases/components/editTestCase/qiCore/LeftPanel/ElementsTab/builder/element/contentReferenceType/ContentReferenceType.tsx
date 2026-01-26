@@ -7,7 +7,7 @@ import { useRequiredFields } from "../RequiredFieldsContext";
 import * as _ from "lodash";
 import { useFormikContext } from "formik";
 import ElementSection from "../../../../../../../common/UIOnlyModelAgnostic/ElementSection";
-import { Box } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import React, { useMemo } from "react";
 import TypeEditor from "../TypeEditor";
 import ChoiceType from "../ChoiceType";
@@ -262,46 +262,61 @@ const ContentReferenceType = ({
             )}
             startOpen={false}
             children={
-              <Box style={NESTED_BOX_STYLE}>
-                {elements.map((element) => {
-                  const idPart = getLastPart(element.id);
-                  const parentPath = getParentPath(element.id);
-                  const parentPathMap = pathMap[`${parentPath}_${index}`];
+              <>
+                <Typography
+                  style={{
+                    fontSize: 14,
+                    fontWeight: 400,
+                    color: "#717171",
+                    paddingBottom: "20px",
+                    marginTop: "-10px",
+                  }}
+                >
+                  Test Case Builder only supports one level of ContentReference
+                  Nesting. Please use the JSON editor if you need more levels of
+                  nesting.
+                </Typography>
+                <Box style={NESTED_BOX_STYLE}>
+                  {elements.map((element) => {
+                    const idPart = getLastPart(element.id);
+                    const parentPath = getParentPath(element.id);
+                    const parentPathMap = pathMap[`${parentPath}_${index}`];
 
-                  // Handle elements with parent that allows multiple cardinality
-                  if (parentPathMap?.allowsMany) {
+                    // Handle elements with parent that allows multiple cardinality
+                    if (parentPathMap?.allowsMany) {
+                      return (
+                        <MultiCardinalityElement
+                          key={element.id}
+                          element={element}
+                          parentPathMap={parentPathMap}
+                          idPart={idPart}
+                          parentPath={parentPath}
+                          canEdit={canEdit}
+                          parentElementDefinition={parentElementDefinition}
+                          resource={resource}
+                          formikValues={formik.values}
+                        />
+                      );
+                    }
+
+                    // Calculate label for single cardinality elements
+                    const label = parentPathMap
+                      ? `${parentPathMap.path}.${idPart}`
+                      : `${prefix}.${idPart}`;
+
                     return (
-                      <MultiCardinalityElement
-                        key={element.id}
+                      <ElementRenderer
+                        key={label}
                         element={element}
-                        parentPathMap={parentPathMap}
-                        idPart={idPart}
-                        parentPath={parentPath}
+                        label={label}
                         canEdit={canEdit}
                         parentElementDefinition={parentElementDefinition}
                         resource={resource}
-                        formikValues={formik.values}
                       />
                     );
-                  }
-
-                  // Calculate label for single cardinality elements
-                  const label = parentPathMap
-                    ? `${parentPathMap.path}.${idPart}`
-                    : `${prefix}.${idPart}`;
-
-                  return (
-                    <ElementRenderer
-                      key={label}
-                      element={element}
-                      label={label}
-                      canEdit={canEdit}
-                      parentElementDefinition={parentElementDefinition}
-                      resource={resource}
-                    />
-                  );
-                })}
-              </Box>
+                  })}
+                </Box>
+              </>
             }
           />
         );
