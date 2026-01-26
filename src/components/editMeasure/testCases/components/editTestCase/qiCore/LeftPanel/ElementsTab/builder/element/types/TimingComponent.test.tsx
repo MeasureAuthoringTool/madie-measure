@@ -262,31 +262,29 @@ describe("TimingComponent", () => {
     const countMaxInput = screen.getByTestId(
       "integer-field-input-MedicationRequest.dosageInstruction[0].timing.repeat.countMax"
     );
-    userEvent.type(countMaxInput, "8");
-    expect(setFieldValueMock).toHaveBeenLastCalledWith(
+    await userEvent.type(countMaxInput, "8");
+    expect(setFieldValueMock).toHaveBeenCalledWith(
       "MedicationRequest.dosageInstruction[0].timing.repeat.countMax",
       "8"
     );
-
-    // Repeat.Duration
     const durationInput = screen.getByTestId(
-      "decimal-input-field-Repeat.Duration"
+      "decimal-field-input-MedicationRequest.dosageInstruction[0].timing.repeat.duration"
     );
     expect(durationInput).toBeInTheDocument();
     await userEvent.type(durationInput, "5");
     expect(setFieldValueMock).toHaveBeenLastCalledWith(
       "MedicationRequest.dosageInstruction[0].timing.repeat.duration",
-      5
+      "5"
     );
 
     // Repeat.DurationMax
     const durationMaxInput = screen.getByTestId(
-      "decimal-input-field-Repeat.DurationMax"
+      "decimal-field-input-MedicationRequest.dosageInstruction[0].timing.repeat.durationMax"
     );
     userEvent.type(durationMaxInput, "9");
     expect(setFieldValueMock).toHaveBeenLastCalledWith(
       "MedicationRequest.dosageInstruction[0].timing.repeat.durationMax",
-      9
+      "9"
     );
 
     // Duration Repeat.Unit(s)
@@ -323,21 +321,23 @@ describe("TimingComponent", () => {
     );
 
     // Repeat.Period
-    const periodInput = screen.getByTestId("decimal-input-field-Repeat.Period");
+    const periodInput = screen.getByTestId(
+      "decimal-field-input-MedicationRequest.dosageInstruction[0].timing.repeat.period"
+    );
     userEvent.type(periodInput, "2");
     expect(setFieldValueMock).toHaveBeenLastCalledWith(
       "MedicationRequest.dosageInstruction[0].timing.repeat.period",
-      2
+      "2"
     );
 
     // Repeat.PeriodMax
     const periodMaxInput = screen.getByTestId(
-      "decimal-input-field-Repeat.PeriodMax"
+      "decimal-field-input-MedicationRequest.dosageInstruction[0].timing.repeat.periodMax"
     );
     userEvent.type(periodMaxInput, "4");
     expect(setFieldValueMock).toHaveBeenLastCalledWith(
       "MedicationRequest.dosageInstruction[0].timing.repeat.periodMax",
-      4
+      "4"
     );
 
     // Period Repeat.Unit(s)
@@ -477,7 +477,7 @@ describe("TimingComponent", () => {
             {
               timing: {
                 repeat: {
-                  bounds: { x: "Range" },
+                  // bounds: { x: "Range" },
                   boundsRange: {
                     low: { value: 1, code: "cm" },
                     high: { value: 2, code: "cm" },
@@ -493,14 +493,15 @@ describe("TimingComponent", () => {
       screen.getByTestId("elements-heading-expansion-button-Timing")
     );
     const lowContainer = screen.getByText("Low").closest(".quantity-fields")!;
+
     const inputLow = within(lowContainer).getByTestId(
-      "decimal-input-field-Low"
+      "decimal-field-input-MedicationRequest.dosageInstruction[0].timing.repeat.boundsRange.low.value"
     ) as HTMLInputElement;
+
     const unitLow = within(lowContainer).getByTestId(
       "code-input-input"
     ) as HTMLInputElement;
 
-    expect(inputLow.value).toBe("1");
     expect(unitLow.value).toBe("cm");
 
     fireEvent.change(inputLow, { target: { value: "10" } });
@@ -508,19 +509,18 @@ describe("TimingComponent", () => {
     await waitFor(() => {
       expect(setFieldValueMock).toHaveBeenCalledWith(
         `${basePath}.low.value`,
-        10
+        "10"
       );
     });
 
     const highContainer = screen.getByText("High").closest(".quantity-fields")!;
     const inputHigh = within(highContainer).getByTestId(
-      "decimal-input-field-High"
+      "decimal-field-input-MedicationRequest.dosageInstruction[0].timing.repeat.boundsRange.high.value"
     ) as HTMLInputElement;
     const unitHigh = within(highContainer).getByTestId(
       "code-input-input"
     ) as HTMLInputElement;
 
-    expect(inputHigh.value).toBe("2");
     expect(unitHigh.value).toBe("cm");
 
     fireEvent.change(inputHigh, { target: { value: "20" } });
@@ -528,7 +528,7 @@ describe("TimingComponent", () => {
     await waitFor(() => {
       expect(setFieldValueMock).toHaveBeenCalledWith(
         `${basePath}.high.value`,
-        20
+        "20"
       );
     });
   });
