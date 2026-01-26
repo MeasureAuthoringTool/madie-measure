@@ -1,149 +1,98 @@
 import * as React from "react";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import { FormikProvider, FormikContextType } from "formik";
-import { ExecutionContextProvider } from "../../../../../../../routes/qiCore/ExecutionContext";
+import { FormikProvider } from "formik";
 import IntegerComponent from "./IntegerComponent";
 import { IntegerType } from "../typesValidations/FhirNumbers";
 
-let setFieldValueMock: jest.Mock;
+const setFieldValue = jest.fn();
+const setFieldTouched = jest.fn();
+const onChange = jest.fn();
 
-const FormikWrapper = ({
-  children,
-  initialValue,
-}: {
-  children: React.ReactNode;
-  initialValue: number | string | null;
-}) => {
-  const [values, setValues] = React.useState({
-    testUnsigned: initialValue,
-  });
-
-  const setFieldValueRef = React.useRef<jest.Mock>();
-
-  if (!setFieldValueRef.current) {
-    setFieldValueRef.current = jest.fn((field: string, value: any) => {
-      setValues((prev) => ({ ...prev, [field]: value }));
-    });
-  }
-
-  setFieldValueMock = setFieldValueRef.current;
-
-  const mockFormik: FormikContextType<any> = {
-    values,
-    setFieldValue: setFieldValueMock,
-    handleChange: jest.fn(),
-    handleBlur: jest.fn(),
-    getFieldProps: jest.fn(),
-  } as unknown as FormikContextType<any>;
-
-  return <FormikProvider value={mockFormik}>{children}</FormikProvider>;
+const mockFormik = {
+  setFieldTouched,
+  setFieldValue,
+  getFieldProps: () => ({
+    label: "MedicationRequest.dispenseRequest.numberOfRepeatsAllowed",
+    name: "MedicationRequest.dispenseRequest.numberOfRepeatsAllowed",
+    value: 23,
+    onChange,
+    onBlur: jest.fn(),
+  }),
 };
 
-const renderWithFormik = (initialValue?: number | string | null) =>
+const renderIntegerComponent = () =>
   render(
-    <ExecutionContextProvider
-      value={{
-        measureState: [null, jest.fn()],
-        bundleState: [null, jest.fn()],
-        valueSetsState: [[], jest.fn()],
-        executionContextReady: true,
-        executing: false,
-        setExecuting: jest.fn(),
-        contextFailure: false,
-      }}
-    >
-      <FormikWrapper initialValue={initialValue ?? 42}>
-        <IntegerComponent
-          label="Test Unsigned"
-          name="testUnsigned"
-          canEdit
-          fieldRequired={false}
-          integerType={IntegerType.UNSIGNED}
-        />
-      </FormikWrapper>
-    </ExecutionContextProvider>
+    <FormikProvider value={mockFormik}>
+      <IntegerComponent
+        label="MedicationRequest.dispenseRequest.numberOfRepeatsAllowed"
+        name="MedicationRequest.dispenseRequest.numberOfRepeatsAllowed"
+        canEdit
+        fieldRequired={false}
+        integerType={IntegerType.SIGNED}
+        value={23}
+      />
+    </FormikProvider>
   );
 
-describe("IntegerComponent with Formik", () => {
+const getInput = () =>
+  screen.getByTestId(
+    "integer-field-input-MedicationRequest.dispenseRequest.numberOfRepeatsAllowed"
+  ) as HTMLInputElement;
+
+describe("IntegerComponent", () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   test("onChange empty string sets null", async () => {
-    renderWithFormik(42);
+    renderIntegerComponent();
 
-    const input = screen.getByTestId(
-      "integer-field-input-Test Unsigned"
-    ) as HTMLInputElement;
-
-    fireEvent.change(input, { target: { value: "" } });
+    fireEvent.change(getInput(), { target: { value: "" } });
 
     await waitFor(() => {
-      expect(setFieldValueMock).toHaveBeenLastCalledWith("testUnsigned", null);
+      expect(setFieldValue).toHaveBeenLastCalledWith(
+        "MedicationRequest.dispenseRequest.numberOfRepeatsAllowed",
+        null
+      );
     });
   });
 
   test("onChange valid number sets numeric value", async () => {
-    renderWithFormik(42);
+    renderIntegerComponent();
 
-    const input = screen.getByTestId(
-      "integer-field-input-Test Unsigned"
-    ) as HTMLInputElement;
-
-    fireEvent.change(input, { target: { value: "10" } });
+    fireEvent.change(getInput(), { target: { value: "10" } });
 
     await waitFor(() => {
-      expect(setFieldValueMock).toHaveBeenLastCalledWith("testUnsigned", 10);
+      expect(setFieldValue).toHaveBeenLastCalledWith(
+        "MedicationRequest.dispenseRequest.numberOfRepeatsAllowed",
+        10
+      );
     });
   });
 
   test("onChange invalid input stores raw string", async () => {
-    renderWithFormik(42);
+    renderIntegerComponent();
 
-    const input = screen.getByTestId(
-      "integer-field-input-Test Unsigned"
-    ) as HTMLInputElement;
-
-    fireEvent.change(input, { target: { value: "abc" } });
+    fireEvent.change(getInput(), { target: { value: "abc" } });
 
     await waitFor(() => {
-      expect(setFieldValueMock).toHaveBeenLastCalledWith("testUnsigned", "abc");
+      expect(setFieldValue).toHaveBeenLastCalledWith(
+        "MedicationRequest.dispenseRequest.numberOfRepeatsAllowed",
+        "abc"
+      );
     });
   });
 
-  test('SIGNED integer allows "-" to be entered', async () => {
-    render(
-      <ExecutionContextProvider
-        value={{
-          measureState: [null, jest.fn()],
-          bundleState: [null, jest.fn()],
-          valueSetsState: [[], jest.fn()],
-          executionContextReady: true,
-          executing: false,
-          setExecuting: jest.fn(),
-          contextFailure: false,
-        }}
-      >
-        <FormikWrapper initialValue={null}>
-          <IntegerComponent
-            label="Test Signed"
-            name="testSigned"
-            canEdit
-            fieldRequired={false}
-            integerType={IntegerType.SIGNED}
-          />
-        </FormikWrapper>
-      </ExecutionContextProvider>
-    );
+  test("SIGNED integer allows '-' to be entered", async () => {
+    renderIntegerComponent();
 
-    const input = screen.getByTestId(
-      "integer-field-input-Test Signed"
-    ) as HTMLInputElement;
-
-    fireEvent.change(input, { target: { value: "-" } });
+    fireEvent.change(getInput(), { target: { value: "-" } });
 
     await waitFor(() => {
-      expect(setFieldValueMock).toHaveBeenLastCalledWith("testSigned", "-");
+      expect(setFieldValue).toHaveBeenLastCalledWith(
+        "MedicationRequest.dispenseRequest.numberOfRepeatsAllowed",
+        "-"
+      );
     });
   });
 });

@@ -7,7 +7,7 @@ import AddElementButton from "../../../../../../../common/UIOnlyModelAgnostic/Ad
 import { IconButton, Tooltip } from "@mui/material";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import { getMultipleCardinalityLabel } from "./TypeUtil";
-import { getIn, useFormikContext } from "formik";
+import { useFormikContext } from "formik";
 import { IntegerType } from "../typesValidations/FhirNumbers";
 
 interface IntegerComponentProps extends TypeComponentProps {
@@ -28,11 +28,9 @@ const IntegerComponent = ({
   handleDeleteElement,
   ...props
 }: IntegerComponentProps) => {
-  const { name } = props;
+  const { name, value } = props;
 
   const formik = useFormikContext();
-  const value = getIn(formik.values, name);
-
   // Use name for test IDs in array scenarios (when it contains '['), otherwise use original label
   const formattedLabel = getMultipleCardinalityLabel(label);
   const testIdBase = name && name.includes("[") ? name : label;
@@ -59,26 +57,26 @@ const IntegerComponent = ({
         error={error}
         helperText={error}
         onChange={(e) => {
-          const value = e.target.value;
+          const inputValue = e.target.value;
 
           // Allow clearing the field
-          if (value === "") {
+          if (inputValue === "") {
             formik.setFieldValue(name, null);
             return;
           }
 
           // Signed integers: allow "-" to be entered
-          if (integerType === IntegerType.SIGNED && value === "-") {
-            formik.setFieldValue(name, value);
+          if (integerType === IntegerType.SIGNED && inputValue === "-") {
+            formik.setFieldValue(name, inputValue);
             return;
           }
 
           // Convert to number
-          const numericValue = Number(value);
+          const numericValue = Number(inputValue);
 
           // For invalid input (like letters), store raw string and form validation will catch
           if (Number.isNaN(numericValue)) {
-            formik.setFieldValue(name, value);
+            formik.setFieldValue(name, inputValue);
           } else {
             formik.setFieldValue(name, numericValue);
           }
