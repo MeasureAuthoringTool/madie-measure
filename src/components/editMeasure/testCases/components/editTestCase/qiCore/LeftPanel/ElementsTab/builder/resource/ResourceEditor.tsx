@@ -432,7 +432,10 @@ const ResourceEditor = ({
                 element: any,
                 elementName: string
               ) => {
+                //So.. if element is an array, we can remove the element at the index of elementName
                 if (Array.isArray(element)) {
+                  //This is because the name seems to be " *name 2 ".. got a getter way to get the index?
+                  //index is 1-based while array is 0-based,
                   deleteMultipleCardinalityElement(
                     elementName,
                     element,
