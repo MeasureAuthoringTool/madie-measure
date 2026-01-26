@@ -4354,6 +4354,73 @@ describe("TypeEditor Component", () => {
     expect(inputDate).toBeInTheDocument();
   });
 
+  test("Should render first level ContentReferenceType attribute", () => {
+    const adjudicationElementDef = {
+      id: "ClaimResponse.adjudication",
+      type: [],
+      max: "*",
+      min: 0,
+      canBeMultipleCardinality: true,
+      contentReference: "#ClaimResponse.item.adjudication",
+    };
+    const mockFormInfo = [
+      ["ClaimResponse.adjudication", adjudicationElementDef],
+      [
+        "ClaimResponse.item.adjudication",
+        {
+          id: "ClaimResponse.item.adjudication",
+          type: [{ code: "BackboneElement" }],
+          max: "1",
+          min: 1,
+          canBeMultipleCardinality: false,
+        },
+      ],
+      [
+        "ClaimResponse.item.adjudication.category",
+        {
+          id: "ClaimResponse.item.adjudication.category",
+          type: [{ code: "CodeableConcept" }],
+          max: "1",
+          min: 1,
+          canBeMultipleCardinality: false,
+        },
+      ],
+      [
+        "ClaimResponse.item.adjudication.reason",
+        {
+          id: "ClaimResponse.item.adjudication.reason",
+          type: [{ code: "CodeableConcept" }],
+          max: "1",
+          min: 0,
+          canBeMultipleCardinality: false,
+        },
+      ],
+    ];
+    // Override the global mock to return false for this test
+    const fhirUtils = require("../../../../../../../api/fhirDefinitionServiceUtilities");
+    jest.spyOn(fhirUtils, "isComponentDataType").mockReturnValue(false);
+
+    render(
+      <FormikProvider value={mockFormik}>
+        <RequiredFieldsProvider requiredFields={{}} formInfo={mockFormInfo}>
+          <TypeEditor
+            resource={{ resourceType: "ClaimResponse" }}
+            structureDefinition={adjudicationElementDef}
+            label="ClaimResponse.adjudication"
+            canEdit={true}
+            parentStructureDefinition={null}
+          />
+        </RequiredFieldsProvider>
+      </FormikProvider>
+    );
+
+    // "Category" and "Reason" elements from the referenced definition must be rendered
+    expect(screen.queryByText("Category")).toBeInTheDocument();
+    expect(screen.queryByText("Reason")).toBeInTheDocument();
+    // Restore the original mock
+    jest.restoreAllMocks();
+  });
+
   test("Should render ContentReferenceType when childDef has contentReference", () => {
     const mockFormInfo = [
       [
