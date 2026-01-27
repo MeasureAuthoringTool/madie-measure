@@ -28,7 +28,6 @@ import {
 } from "../../../../../../../api/fhirDefinitionServiceUtilities";
 import CodingComponent from "./types/CodingComponent";
 import { useRequiredFields } from "./RequiredFieldsContext";
-import ElementSection from "../../../../../../common/UIOnlyModelAgnostic/ElementSection";
 import CodeableConceptComponent from "./types/CodeableConceptComponent";
 import PeriodDateTimeComponent from "./types/PeriodDateTimeComponent";
 import ChoiceType from "./ChoiceType";
@@ -41,6 +40,7 @@ import ReferenceComponent from "./types/ReferenceComponent";
 import ContentReferenceType from "./contentReferenceType/ContentReferenceType";
 import DecimalComponent from "./types/DecimalComponent";
 import { IntegerType } from "./typesValidations/FhirNumbers";
+import ElementSectionQiCore from "./ElementSectionQiCore";
 
 export const formikErrorHandler = (name: string, formik) => {
   const touched = getNestedProperty(formik.touched, name);
@@ -1004,7 +1004,7 @@ const TypeEditor = ({
             );
           } else if (!isComponentDataType(childDef?.type?.[0]?.code)) {
             return (
-              <ElementSection
+              <ElementSectionQiCore
                 title={formatAttributeLabel(childDef.id)}
                 startOpen={false}
                 children={
