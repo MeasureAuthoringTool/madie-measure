@@ -331,8 +331,11 @@ export function removeUndefinedAndEmptyObjects(obj) {
     const cleanedArray = obj
       .map((item) => removeUndefinedAndEmptyObjects(item))
       .filter((item) => {
-        // Remove null, undefined, empty values
-        return !(_.isNil(item) || _.isEmpty(item));
+        // Remove null, undefined, empty values (if string type)
+        return !(
+          _.isNil(item) ||
+          (typeof item === "string" && _.isEmpty(item))
+        );
       });
     return cleanedArray.length > 0 ? cleanedArray : undefined;
   }

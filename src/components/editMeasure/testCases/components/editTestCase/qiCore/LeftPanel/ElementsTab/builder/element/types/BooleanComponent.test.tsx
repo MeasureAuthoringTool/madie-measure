@@ -3,76 +3,60 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import BooleanComponent from "./BooleanComponent";
 
 describe("BooleanComponent Component", () => {
-  test("Should render BooleanComponent component", () => {
-    const handleChange = jest.fn();
+  test("renders BooleanComponent", () => {
     render(
       <BooleanComponent
-        value={`True`}
+        value={true}
         canEdit={true}
         fieldRequired={false}
-        onChange={handleChange}
         label="MyBoolean"
-        structureDefinition={null}
       />
     );
 
-    const booleanField = screen.getByTestId("boolean-field-MyBoolean");
-    expect(booleanField).toBeInTheDocument();
-    const booleanFieldInput = screen.getByTestId(
-      "boolean-input-field-MyBoolean"
-    );
-    expect(booleanFieldInput).toBeInTheDocument();
+    expect(screen.getByTestId("boolean-field-MyBoolean")).toBeInTheDocument();
+
+    expect(
+      screen.getByTestId("boolean-input-field-MyBoolean")
+    ).toBeInTheDocument();
   });
 
-  test("Test change of value", () => {
+  test("changes value from false to true", () => {
     const handleChange = jest.fn();
-    const { rerender } = render(
+
+    render(
       <BooleanComponent
         canEdit={true}
-        value={`False`}
+        value={false}
         fieldRequired={false}
         onChange={handleChange}
-        structureDefinition={null}
         label="BodyStructure.active"
       />
     );
 
-    const booleanField = screen.getByTestId(
-      "boolean-field-BodyStructure.active"
-    );
-    expect(booleanField).toBeInTheDocument();
-    const booleanFieldInput = screen.getByTestId(
+    const select = screen.getByTestId(
       "boolean-input-field-BodyStructure.active"
     ) as HTMLInputElement;
-    expect(booleanFieldInput).toBeInTheDocument();
-    expect(booleanFieldInput.value).toBe("False");
-    fireEvent.change(booleanFieldInput, { target: { value: "True" } });
-    rerender(
-      <BooleanComponent
-        value={`True`}
-        canEdit={true}
-        fieldRequired={false}
-        onChange={handleChange}
-        structureDefinition={null}
-      />
-    );
-    expect(booleanFieldInput.value).toBe("True");
+
+    // false should render as "false"
+    expect(select.value).toBe("false");
+
+    fireEvent.change(select, { target: { value: "true" } });
+
+    expect(handleChange).toHaveBeenCalled();
   });
 
-  test("Should render an add button", () => {
-    const handleChange = jest.fn();
+  test("renders add button", () => {
     render(
       <BooleanComponent
-        value={`True`}
+        value={true}
         canEdit={true}
         fieldRequired={false}
-        onChange={handleChange}
         label="MyBoolean"
-        structureDefinition={null}
         addTitle="Active"
         showAddAttributeButton={true}
       />
     );
+
     expect(screen.getByText("Add Active")).toBeInTheDocument();
   });
 });
