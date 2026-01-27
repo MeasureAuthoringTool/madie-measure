@@ -16,7 +16,7 @@ import {
 } from "../../../../../../../util/QiCorePatientProvider";
 import Box from "@mui/material/Box";
 import { useFormikContext } from "formik";
-import { root } from "postcss";
+import "../../../../../../common/UIOnlyModelAgnostic/ElementSection.scss";
 
 const ElementEditorChildren = ({
   setLastAddedElemPath,
