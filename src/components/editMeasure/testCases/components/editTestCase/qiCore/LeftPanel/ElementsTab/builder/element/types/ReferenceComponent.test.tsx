@@ -48,50 +48,6 @@ describe("ReferenceComponent", () => {
       "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-encounter-alt",
     category: "TestCategory",
   };
-  const QICORE_OBS_2 = {
-    title: "QICore Observation Alt",
-    type: "Observation",
-    profile:
-      "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-observation-clinical",
-  };
-  const USCORE_OBS = {
-    title: "US Core Observation",
-    type: "Observation",
-    profile:
-      "http://hl7.org/fhir/us/core/StructureDefinition/us-core-observation-lab",
-  };
-  const BASE_OBS = {
-    title: "Observation (Base)",
-    type: "Observation",
-    profile: "http://hl7.org/fhir/StructureDefinition/Observation",
-  };
-
-  function renderWithProviders(
-    resourceProfiles: any[],
-    opts?: { valueReference?: string }
-  ) {
-    (useQiCoreResource as jest.Mock).mockReturnValue({
-      state: { bundle: { entry: [] } },
-    });
-
-    return render(
-      <ResourceContext.Provider value={resourceProfiles}>
-        <FormikProvider value={mockFormik}>
-          <ReferenceComponent
-            structureDefinition={structureDefinition}
-            canEdit={true}
-            required={false}
-            helperText="Select a reference"
-            error={false}
-            showAddAttributeButton={false}
-            addTitle=""
-            label="ClaimResponse.addItem[0].provider[0]"
-            value={{ reference: opts?.valueReference ?? "" }}
-          />
-        </FormikProvider>
-      </ResourceContext.Provider>
-    );
-  }
 
   const baseProfiles = [
     {
