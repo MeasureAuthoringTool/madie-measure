@@ -26,8 +26,8 @@ export default function CreateTestCaseNavTabs(props: NavTabProps) {
     isQICore6,
     dirty,
     setCalculationDialogOpen,
-    canEdit = true,
-    addedCount = 0,
+    canEdit,
+    addedCount,
   } = props;
   const [pendingPanel, setPendingPanel] = useState(leftPanelActiveTab);
   const [discardDialogOpen, setDiscardDialogOpen] = useState(false);
