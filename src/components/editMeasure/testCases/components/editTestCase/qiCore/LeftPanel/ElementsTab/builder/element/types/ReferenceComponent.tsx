@@ -8,6 +8,7 @@ import AddElementButton from "../../../../../../../common/UIOnlyModelAgnostic/Ad
 import { useFormikContext } from "formik";
 import { buildMadieResourceFromResourceIdentifier } from "../../../../../../../../api/fhirDefinitionServiceUtilities";
 import * as _ from "lodash";
+import "./ReferenceComponent.scss";
 
 export const getReferenceComponentLabel = (label: string) => {
   //e.g. for label = ClaimResponse.addItem[0].provider[0] return Provider
@@ -350,7 +351,7 @@ export default function ReferenceComponent({
             setSelectedReferenceId("add_new_id");
             setOpen(false);
           },
-          maxWidth: "md",
+          maxWidth: "sm",
           fullWidth: true,
         }}
         cancelButtonProps={{
@@ -366,11 +367,7 @@ export default function ReferenceComponent({
           continueText: "Save",
         }}
       >
-        <div
-          data-testid="add-new-profile-ref"
-          id="add-new-profile-ref"
-          // className="shift-dates-grid"
-        >
+        <div data-testid="add-new-profile-ref" id="add-new-profile-ref">
           <Select
             label="Reference"
             name="Reference"
