@@ -1,0 +1,45 @@
+$blue-60: #0073c8;
+$blue-70: #125496;
+$grey-19: #ddd;
+
+.test-case-tab-headinq-qi-core {
+  display: flex;
+  flex-direction: column;
+
+  > .heading-row {
+    display: flex;
+    border-bottom: solid 1px #8c8c8c;
+    flex-direction: row;
+    flex-grow: 1;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+  }
+
+  > .growing-div-qi-core {
+    > .info-row {
+      margin-top: 12px;
+      margin-bottom: 12px;
+
+      > .header {
+        color: $blue-70;
+        line-height: normal;
+      }
+
+      button > .chevron-display {
+        color: #676767;
+        transition: all 0.2s ease;
+
+        &.open {
+          transform: rotate(90deg);
+        }
+      }
+    }
+
+    flex-direction: column;
+
+    &.open {
+      margin-bottom: 12px;
+    }
+  }
+}

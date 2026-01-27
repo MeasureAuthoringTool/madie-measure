@@ -12,9 +12,9 @@ import StringComponent from "./StringComponent";
 import PeriodDateTimeComponent from "./PeriodDateTimeComponent";
 import "./TimingComponent.scss";
 import RangeComponent from "./RangeComponent";
-import ElementSection from "../../../../../../../common/UIOnlyModelAgnostic/ElementSection";
 import CodeableConceptComponent from "./CodeableConceptComponent";
 import DecimalComponent from "./DecimalComponent";
+import ElementSectionQiCore from "../ElementSectionQiCore";
 
 const GROUP_GAP = "1.5rem";
 const boundsOptions = ["-", "Duration", "Range", "Period"];
@@ -72,7 +72,7 @@ const TimingComponent = ({
   });
 
   return (
-    <ElementSection title={"Timing"} startOpen={false}>
+    <ElementSectionQiCore title={"Timing"} startOpen={false}>
       <div id="timing-component" data-component-type="TimingComponent">
         {/* Event */}
         {eventValues.map((_, index) => (
@@ -375,7 +375,7 @@ const TimingComponent = ({
           value={getIn(formik.values, codePath)}
         />
       </div>
-    </ElementSection>
+    </ElementSectionQiCore>
   );
 };
 

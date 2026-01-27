@@ -19,17 +19,12 @@ jest.mock("../ChoiceType", () => (props: any) => (
   </div>
 ));
 
-jest.mock(
-  "../../../../../../../common/UIOnlyModelAgnostic/ElementSection",
-  () =>
-    ({ title, children }: any) =>
-      (
-        <div data-testid={`element-section-${title}`}>
-          <div data-testid="section-title">{title}</div>
-          {children}
-        </div>
-      )
-);
+jest.mock("../ElementSectionQiCore", () => ({ title, children }: any) => (
+  <div data-testid={`element-section-${title}`}>
+    <div data-testid="section-title">{title}</div>
+    {children}
+  </div>
+));
 
 const mockFormInfo = [
   [
