@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { getIn, useFormikContext } from "formik";
 import { TypeComponentProps } from "./TypeComponentProps";
 import CodesComponent from "./CodesComponent";
-import IntegerComponent, { IntegerType } from "./IntegerComponent";
+import IntegerComponent from "./IntegerComponent";
 import { camelCase } from "lodash";
 import TimeComponent from "./TimeComponent";
 import DateTimeComponent from "./DateTimeComponent";
@@ -14,6 +14,9 @@ import "./TimingComponent.scss";
 import RangeComponent from "./RangeComponent";
 import CodeableConceptComponent from "./CodeableConceptComponent";
 import DecimalComponent from "./DecimalComponent";
+import { IntegerType } from "../typesValidations/FhirNumbers";
+import { formikErrorHandler } from "../TypeEditor";
+import { getNestedProperty } from "../../../../../../../../api/fhirDefinitionServiceUtilities";
 import ElementSectionQiCore from "../ElementSectionQiCore";
 
 const GROUP_GAP = "1.5rem";
@@ -165,6 +168,8 @@ const TimingComponent = ({
                 canEdit={canEdit}
                 integerType={IntegerType.POSITIVE_INT}
                 fieldRequired={false}
+                helperText={formikErrorHandler(countPath, formik)}
+                error={getNestedProperty(formik.errors, countPath)}
                 {...formik.getFieldProps(countPath)}
               />
             </div>
@@ -175,6 +180,8 @@ const TimingComponent = ({
                 canEdit={canEdit}
                 integerType={IntegerType.POSITIVE_INT}
                 fieldRequired={false}
+                helperText={formikErrorHandler(countMaxPath, formik)}
+                error={getNestedProperty(formik.errors, countMaxPath)}
                 {...formik.getFieldProps(countMaxPath)}
               />
             </div>
@@ -229,6 +236,8 @@ const TimingComponent = ({
                 canEdit={canEdit}
                 integerType={IntegerType.POSITIVE_INT}
                 fieldRequired={false}
+                helperText={formikErrorHandler(frequencyPath, formik)}
+                error={getNestedProperty(formik.errors, frequencyPath)}
                 {...formik.getFieldProps(frequencyPath)}
               />
             </div>
@@ -239,6 +248,8 @@ const TimingComponent = ({
                 canEdit={canEdit}
                 integerType={IntegerType.POSITIVE_INT}
                 fieldRequired={false}
+                helperText={formikErrorHandler(frequencyMaxPath, formik)}
+                error={getNestedProperty(formik.errors, frequencyMaxPath)}
                 {...formik.getFieldProps(frequencyMaxPath)}
               />
             </div>
@@ -356,6 +367,8 @@ const TimingComponent = ({
             canEdit={canEdit}
             integerType={IntegerType.UNSIGNED}
             fieldRequired={false}
+            helperText={formikErrorHandler(offsetPath, formik)}
+            error={getNestedProperty(formik.errors, offsetPath)}
             {...formik.getFieldProps(offsetPath)}
           />
         </div>
