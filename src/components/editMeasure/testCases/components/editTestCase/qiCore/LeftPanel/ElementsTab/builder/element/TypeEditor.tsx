@@ -64,6 +64,10 @@ const TypeEditor = ({
   label,
 }) => {
   const formik = useFormikContext();
+  // Ref to track formik.values for use in closures (prevents stale state issues when rapidly clicking Add)
+  const valuesRef = useRef<object>(formik.values as object);
+  valuesRef.current = formik.values as object;
+
   const { requiredFields, formInfo } = useRequiredFields();
   let required = getRequired(requiredFields, stripAllIndexes(label));
   const fhirDefinitionsService = useRef(useFhirDefinitionsServiceApi());
@@ -744,25 +748,47 @@ const TypeEditor = ({
         return (
           <>
             {(isArrayMode ? values : [null]).map((el, index) => {
+              let fieldLabel;
+              if (isArrayMode && !appendedZeroAlready) {
+                fieldLabel = `${label}[${index}]`;
+              } else if (isArrayMode && appendedZeroAlready) {
+                fieldLabel = `${label.slice(0, label.length - 3)}[${index}]`;
+              } else {
+                fieldLabel = label;
+              }
               return (
                 <ReferenceComponent
                   key={index}
                   index={index}
                   structureDefinition={structureDefinition}
-                  label={label}
+                  label={fieldLabel}
                   canEdit={canEdit}
                   required={required}
-                  helperText={formikErrorHandler(label, formik)}
-                  error={getNestedProperty(formik.errors, label)}
+                  helperText={formikErrorHandler(fieldLabel, formik)}
+                  error={getNestedProperty(formik.errors, fieldLabel)}
                   showAddAttributeButton={
                     showAddAttributeButton &&
                     (!isArrayMode || index === lastIndex)
                   }
                   showDeleteButton={isArrayMode && index > 0}
-                  handleDeleteElement={() => handleDeleteElement(index, label)}
+                  handleDeleteElement={() =>
+                    handleDeleteElement(index, fieldLabel)
+                  }
                   addTitle={addTitle}
-                  handleAddElement={handleAddElement}
-                  {...formik.getFieldProps(label)}
+                  handleAddElement={() => {
+                    // Get the base path without trailing index for adding new elements
+                    const basePath = fieldLabel.replace(/\[\d+\]$/, "");
+                    // Read current values from valuesRef to get the latest values
+                    // This avoids stale closure issues when clicking Add multiple times rapidly
+                    const currentValues = _.get(
+                      valuesRef.current,
+                      basePath,
+                      []
+                    );
+                    const newValues = [...currentValues, {}];
+                    formik.setFieldValue(basePath, newValues);
+                  }}
+                  {...formik.getFieldProps(fieldLabel)}
                 />
               );
             })}

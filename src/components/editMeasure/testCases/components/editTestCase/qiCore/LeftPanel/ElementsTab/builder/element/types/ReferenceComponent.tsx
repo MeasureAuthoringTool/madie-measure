@@ -156,7 +156,8 @@ export default function ReferenceComponent({
     const newId = value?.reference || "";
     setSelectedReferenceType(newType);
     // if the earmark is present, we do not want to update our local state.
-    if (!formikContext.values["add_new_resource"]) {
+    const addNewResources = formikContext.values["add_new_resources"] || [];
+    if (addNewResources.length === 0) {
       setSelectedReferenceId(newId);
     }
   }, [value, formikContext.values]); // Use formikContext.values for dependency
@@ -278,21 +279,23 @@ export default function ReferenceComponent({
                   buildMadieResourceFromResourceIdentifier(
                     finalResourceOptionForAddNew
                   );
-                formikContext.setFieldValue(
-                  "add_new_resource",
-                  newMadieResource
-                );
+                // Append to array instead of overwriting - supports multiple "Add New" references
+                const existingResources =
+                  formikContext.values["add_new_resources"] || [];
+                formikContext.setFieldValue("add_new_resources", [
+                  ...existingResources,
+                  newMadieResource,
+                ]);
                 formikContext.setFieldValue(
                   `${label}.reference`,
                   `${selectedReferenceType}/${newMadieResource.resource.id}`
                 );
                 setSelectedReferenceId("add_new_id");
               } else {
-                // when selecting a known value we need to blank the add_new_id
+                // Selecting an existing resource - just update the reference
                 formikContext.setFieldValue(label, {
                   reference: e.target.value,
                 });
-                formikContext.setFieldValue("add_new_resource", undefined);
                 setSelectedReferenceId(e.target.value);
               }
             }}
