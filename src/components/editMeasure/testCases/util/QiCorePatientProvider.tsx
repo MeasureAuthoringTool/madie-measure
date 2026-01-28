@@ -76,10 +76,10 @@ export function resourceReducer(state, action: QiCoreResourceAction) {
       }
       return { ...state, bundle };
     }
-    // In this case, we want to not only do MODIFY_BUNDLE_ENTRY logic, but also append a new resource to the entrylist.
-    // We do this in the instance that a user wants to add a reference to a resource that doesn't exist yet. So we build it.
+    // In this case, we want to not only do MODIFY_BUNDLE_ENTRY logic, but also append new resources to the entrylist.
+    // We do this in the instance that a user wants to add references to resources that don't exist yet. So we build them.
     case ResourceActionType.ADD_RESOURCE_BY_REFERENCE: {
-      const { bundleEntry, add_new_resource } = action.payload;
+      const { bundleEntry, add_new_resources } = action.payload;
       let bundle = _.isNil(state.bundle)
         ? { id: uuidv4(), ...INITIAL_BUNDLE }
         : state.bundle;
@@ -92,7 +92,12 @@ export function resourceReducer(state, action: QiCoreResourceAction) {
           return entry;
         });
       }
-      bundle.entry.push(add_new_resource);
+      // Add all new resources from the array
+      if (add_new_resources && Array.isArray(add_new_resources)) {
+        for (const newResource of add_new_resources) {
+          bundle.entry.push(newResource);
+        }
+      }
       return { ...state, bundle };
     }
     default: {

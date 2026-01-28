@@ -281,11 +281,11 @@ const ElementEditor = ({
           bundleEntry.resource = formikCleanedValues[type];
           bundleEntry.resource.resourceType = type;
           // @ts-ignore
-          const { add_new_resource } = formik.values;
-          if (add_new_resource) {
+          const { add_new_resources } = formik.values;
+          if (add_new_resources && add_new_resources.length > 0) {
             dispatch({
               type: ResourceActionType.ADD_RESOURCE_BY_REFERENCE,
-              payload: { bundleEntry, add_new_resource },
+              payload: { bundleEntry, add_new_resources },
             });
           } else {
             dispatch({
