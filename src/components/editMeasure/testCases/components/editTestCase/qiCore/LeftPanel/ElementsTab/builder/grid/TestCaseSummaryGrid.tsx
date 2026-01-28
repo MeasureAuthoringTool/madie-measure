@@ -142,7 +142,6 @@ const TestCaseSummaryGrid = ({
         id: "resourceType",
         cell: ({ row }) => {
           const validationResult = row.original.validationResult;
-          // const validationResult = validateProfiles(entry, allResourceProfiles);
           return (
             <div>
               <div>{row.original.title}</div>
@@ -184,8 +183,6 @@ const TestCaseSummaryGrid = ({
         cell: ({ row }) => {
           const entry = row.original.entry;
           const validationResult = row.original.validationResult;
-          // const validationResult = validateProfiles(entry, allResourceProfiles);
-
           // For edit action, disable if unsupported
           const rowActions = testCaseCanEdit
             ? actions.map((action) =>
