@@ -2,8 +2,8 @@ import * as React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import TestCaseSummaryGrid, {
   GridDataEntry,
-  RESOURCE_TYPE_MISMATCH_MESSAGE,
-  UNSUPPORTED_PROFILE_MESSAGE,
+  RESOURCE_TYPE_MISMATCH_ERROR,
+  UNSUPPORTED_PROFILE_ERROR,
 } from "./TestCaseSummaryGrid";
 import { within } from "@testing-library/dom";
 import userEvent from "@testing-library/user-event";
@@ -126,7 +126,7 @@ describe("TestCaseSummaryGrid", () => {
     // Verify unsupported message/tooltip is present for unsupported profile
     expect(
       within(rows[2].querySelector("td:nth-child(1)")).getByText(
-        UNSUPPORTED_PROFILE_MESSAGE
+        UNSUPPORTED_PROFILE_ERROR
       )
     ).toBeInTheDocument();
   });
@@ -258,9 +258,7 @@ describe("TestCaseSummaryGrid", () => {
     });
     expect(deleteAction).toBeInTheDocument();
     expect(deleteAction).not.toHaveAttribute("aria-disabled", "true");
-    expect(
-      screen.getByText(RESOURCE_TYPE_MISMATCH_MESSAGE)
-    ).toBeInTheDocument();
+    expect(screen.getByText(RESOURCE_TYPE_MISMATCH_ERROR)).toBeInTheDocument();
 
     // Ensure clicking it does NOT call edit
     userEvent.click(editAction);

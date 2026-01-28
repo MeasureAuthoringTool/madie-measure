@@ -19,18 +19,18 @@ import ResourceContext from "../ResourceContext";
 import { Button } from "@madie/madie-design-system/dist/react";
 import { ResourceIdentifier } from "../../../../../../../api/models/ResourceIdentifier";
 
-export const UNSUPPORTED_PROFILE_MESSAGE = "Unsupported Profile";
-export const UNSUPPORTED_PROFILE_REASON =
+export const UNSUPPORTED_PROFILE_ERROR = "Unsupported Profile";
+export const UNSUPPORTED_PROFILE_MESSAGE =
   "This profile is unsupported in the UI builder. You can utilize the JSON workspace to edit it. Please contact the help desk if you have additional questions.";
-export const RESOURCE_TYPE_MISMATCH_MESSAGE =
+export const RESOURCE_TYPE_MISMATCH_ERROR =
   "Profile and Resource Type do not match";
-export const RESOURCE_TYPE_MISMATCH_REASON =
+export const RESOURCE_TYPE_MISMATCH_MESSAGE =
   "Profile and Resource Type do not match. Fixing this in the UI builder is unsupported. You can utilize the JSON workspace to edit it. Please contact the help desk if you have additional questions.";
 
 interface ProfileValidationResult {
   isValid: boolean;
+  error: string;
   message: string;
-  reason: string;
 }
 
 export interface GridDataEntry {
@@ -70,8 +70,8 @@ export const validateProfiles = (
   ) {
     return {
       isValid: false,
+      error: UNSUPPORTED_PROFILE_ERROR,
       message: UNSUPPORTED_PROFILE_MESSAGE,
-      reason: UNSUPPORTED_PROFILE_REASON,
     };
   }
 
@@ -82,11 +82,11 @@ export const validateProfiles = (
   if (!resourceTypeMatch) {
     return {
       isValid: false,
+      error: RESOURCE_TYPE_MISMATCH_ERROR,
       message: RESOURCE_TYPE_MISMATCH_MESSAGE,
-      reason: RESOURCE_TYPE_MISMATCH_REASON,
     };
   }
-  return { message: "", reason: "", isValid: true };
+  return { error: "", message: "", isValid: true };
 };
 
 const TestCaseSummaryGrid = ({
@@ -148,7 +148,7 @@ const TestCaseSummaryGrid = ({
               <div>{row.original.title}</div>
               {validationResult && !validationResult.isValid && (
                 <Tooltip
-                  title={validationResult.reason}
+                  title={validationResult.message}
                   placement="bottom-start"
                   arrow
                   enterTouchDelay={0}
@@ -163,9 +163,9 @@ const TestCaseSummaryGrid = ({
                       mt: 0.5,
                     }}
                     tabIndex={0}
-                    aria-label={`Unsupported Profile: ${validationResult.reason}`}
+                    aria-label={validationResult.error}
                   >
-                    {validationResult.message}
+                    {validationResult.error}
                   </Typography>
                 </Tooltip>
               )}
@@ -194,7 +194,7 @@ const TestCaseSummaryGrid = ({
                       ...action,
                       disabled: !validationResult.isValid,
                       tooltip: !validationResult.isValid
-                        ? validationResult.reason
+                        ? validationResult.message
                         : undefined,
                     }
                   : action
