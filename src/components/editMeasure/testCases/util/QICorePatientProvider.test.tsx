@@ -59,7 +59,7 @@ const TestComponent = () => {
         onClick={() =>
           handleDispatch(ResourceActionType.ADD_RESOURCE_BY_REFERENCE, {
             bundleEntry: { resource: { id: "res-1", modified: true } },
-            add_new_resource: { resource: { id: "res-2" } },
+            add_new_resources: [{ resource: { id: "res-2" } }],
           })
         }
       >
@@ -71,7 +71,7 @@ const TestComponent = () => {
             bundleEntry: {
               resource: { id: "res-1", modified: true, modifiedAgain: true },
             },
-            add_new_resource: { resource: { id: "res-2" } },
+            add_new_resources: [{ resource: { id: "res-2" } }],
           })
         }
       >
@@ -79,11 +79,26 @@ const TestComponent = () => {
       </button>
       <button
         onClick={() =>
+          handleDispatch(ResourceActionType.ADD_RESOURCE_BY_REFERENCE, {
+            bundleEntry: {
+              resource: { id: "res-1", multipleAdded: true },
+            },
+            add_new_resources: [
+              { resource: { id: "res-3" } },
+              { resource: { id: "res-4" } },
+            ],
+          })
+        }
+      >
+        Add Multiple Resources by Reference
+      </button>
+      <button
+        onClick={() =>
           handleDispatch("IDK", {
             bundleEntry: {
               resource: { id: "res-1", modified: true, modifiedAgain: true },
             },
-            add_new_resource: { resource: { id: "res-2" } },
+            add_new_resources: [{ resource: { id: "res-2" } }],
           })
         }
       >
@@ -143,6 +158,38 @@ describe("QiCoreResourceContext", () => {
       screen.getByText("Add Resource by Reference").click();
     });
     expect(bundleDisplay.textContent).toContain("res-2");
+  });
+
+  it("handles ADD_RESOURCE_BY_REFERENCE with multiple resources in add_new_resources array", () => {
+    render(
+      <QiCoreResourceProvider>
+        <TestComponent />
+      </QiCoreResourceProvider>
+    );
+
+    const bundleDisplay = screen.getByTestId("bundle");
+
+    // Load bundle first
+    act(() => {
+      screen.getByText("Load Bundle").click();
+    });
+
+    // Add initial entry
+    act(() => {
+      screen.getByText("Add Entry").click();
+    });
+    expect(bundleDisplay.textContent).toContain("res-1");
+
+    // Add multiple resources at once
+    act(() => {
+      screen.getByText("Add Multiple Resources by Reference").click();
+    });
+
+    // Both new resources should be added
+    expect(bundleDisplay.textContent).toContain("res-3");
+    expect(bundleDisplay.textContent).toContain("res-4");
+    // The bundle entry should be modified
+    expect(bundleDisplay.textContent).toContain("multipleAdded");
   });
 
   test("throws error on unhandled action type", () => {
