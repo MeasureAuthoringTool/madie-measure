@@ -240,7 +240,6 @@ describe("TestCaseSummaryGrid", () => {
       />
     );
 
-    // pd-1 is Unsupported
     const actionCenterButton = screen.getByTestId(
       "action-center-button-patient-1"
     );
@@ -256,7 +255,6 @@ describe("TestCaseSummaryGrid", () => {
     const deleteAction = await screen.findByRole("menuitem", {
       name: "Delete",
     });
-    expect(deleteAction).toBeInTheDocument();
     expect(deleteAction).not.toHaveAttribute("aria-disabled", "true");
     expect(screen.getByText(RESOURCE_TYPE_MISMATCH_ERROR)).toBeInTheDocument();
 
