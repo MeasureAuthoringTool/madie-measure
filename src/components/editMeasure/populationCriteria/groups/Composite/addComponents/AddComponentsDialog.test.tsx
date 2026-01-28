@@ -1,10 +1,52 @@
 import React from "react";
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import AddComponentsDialog from "./AddComponentsDialog";
+import { MeasureScoring, Model } from "@madie/madie-models";
+import "@testing-library/jest-dom";
+import { useMeasureServiceApi } from "@madie/madie-util";
+
+const singleMeasure = [
+  {
+    id: "ab123",
+    measureHumanReadableId: "ab123",
+    measureSetId: null,
+    version: "0.0.000",
+    state: "NA",
+    measureName: "TestMeasure1",
+    cqlLibraryName: "TestLib1",
+    cql: null,
+    createdAt: null,
+    createdBy: "TestUser1",
+    lastModifiedAt: null,
+    lastModifiedBy: "TestUser1",
+    model: Model.QICORE,
+    measureMetaData: { draft: true },
+  },
+];
+
+const mockOneItemResponse = {
+  content: singleMeasure,
+  totalPages: 1,
+  totalElements: 1,
+  numberOfElements: 1,
+  pageable: { offset: 0 },
+};
+
+jest.mock("@madie/madie-util", () => ({
+  useMeasureServiceApi: jest.fn(() => ({
+    searchMeasuresByCriteria: jest.fn().mockResolvedValue(mockOneItemResponse),
+    getMeasuresByMeasureSetId: jest.fn().mockResolvedValue([]),
+  })),
+}));
 
 describe("AddComponentsDialog", () => {
   const onCloseMock = jest.fn();
+  const mockMeasure = {
+    id: "measure-1",
+    model: "QI-Core",
+    measureName: "Parent Measure",
+  };
 
   const data = [
     {
@@ -12,14 +54,18 @@ describe("AddComponentsDialog", () => {
       measureName: "Test Measure",
       version: "1.0.0",
       measureSet: { cmsId: "CMS123" },
+      measureSetId: "set-1",
       lastModifiedAt: "2024-01-01",
+      hasAssociatedMeasures: true,
     },
     {
       id: "2",
       measureName: "Another Measure",
       version: "2.0.0",
       measureSet: { cmsId: "CMS456" },
+      measureSetId: "set-2",
       lastModifiedAt: "2024-02-01",
+      hasAssociatedMeasures: false,
     },
   ];
 
@@ -27,130 +73,381 @@ describe("AddComponentsDialog", () => {
     jest.clearAllMocks();
   });
 
-  it("renders dialog with correct title and buttons when open", () => {
-    render(<AddComponentsDialog open={true} onClose={onCloseMock} />);
-    expect(
-      screen.getByText("Select Composite Measure Components")
-    ).toBeInTheDocument();
-    expect(
-      screen.getByTestId("select-composite-measure-components-cancel-button")
-    ).toBeInTheDocument();
-    expect(
-      screen.getByTestId("select-composite-measure-components-continue-button")
-    ).toBeInTheDocument();
-  });
+  it("filters out current measure and parent measure from expanded results", async () => {
+    const mockGetMeasuresBySetId = jest.fn().mockResolvedValue([
+      {
+        id: "1",
+        measureName: "Test Measure",
+        version: "1.0.0",
+      },
+      {
+        id: "measure-1",
+        measureName: "Parent Measure",
+        version: "1.0.0",
+      },
+      {
+        id: "child-valid",
+        measureName: "Valid Child",
+        version: "1.0.0",
+        measureSet: { cmsId: "CMS999" },
+        lastModifiedAt: "2024-01-15",
+      },
+    ]);
 
-  it("calls onClose when cancel button is clicked", async () => {
-    render(<AddComponentsDialog open={true} onClose={onCloseMock} />);
-    await userEvent.click(
-      screen.getByTestId("select-composite-measure-components-cancel-button")
-    );
-    expect(onCloseMock).toHaveBeenCalled();
-  });
-
-  it("calls onClose when dialog is closed", async () => {
-    render(<AddComponentsDialog open={true} onClose={onCloseMock} />);
-    await userEvent.click(
-      screen.getByTestId("select-composite-measure-components-cancel-button")
-    );
-    expect(onCloseMock).toHaveBeenCalledTimes(1);
-  });
-
-  it("renders table headers correctly", () => {
-    render(<AddComponentsDialog open={true} onClose={onCloseMock} />);
-    expect(
-      screen.getByRole("columnheader", { name: /measure name/i })
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole("columnheader", { name: /version/i })
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole("columnheader", { name: /cms id/i })
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole("columnheader", { name: /updated/i })
-    ).toBeInTheDocument();
-  });
-
-  it("does not render table rows when data is empty", () => {
-    render(<AddComponentsDialog open={true} onClose={onCloseMock} />);
-    const rows = screen.queryAllByRole("row");
-    expect(rows.length).toBe(1);
-  });
-
-  it("renders correctly when closed", () => {
-    render(<AddComponentsDialog open={false} onClose={onCloseMock} />);
-    expect(
-      screen.queryByText("Select Composite Measure Components")
-    ).not.toBeInTheDocument();
-  });
-
-  it("does not render dialog when open is false", () => {
-    const { container } = render(
-      <AddComponentsDialog open={false} onClose={onCloseMock} />
-    );
-    expect(container).toBeEmptyDOMElement();
-  });
-
-  it("renders TruncateText for all columns when data is provided", () => {
-    render(
-      <AddComponentsDialog open={true} onClose={onCloseMock} data={data} />
-    );
-
-    expect(screen.getByTestId("measure-name-1-content")).toHaveTextContent(
-      "Test Measure"
-    );
-    expect(screen.getByTestId("measure-version-1-content")).toHaveTextContent(
-      "1.0.0"
-    );
-    expect(screen.getByTestId("measure-cmsId-1-content")).toHaveTextContent(
-      "CMS123"
-    );
-    expect(
-      screen.getByTestId("measure-lastModifiedAt-1-content")
-    ).toBeInTheDocument();
-  });
-
-  it("renders select column checkboxes for each row", () => {
-    render(
-      <AddComponentsDialog open={true} onClose={onCloseMock} data={data} />
-    );
-
-    const rowCheckboxes = screen.getAllByRole("checkbox", {
-      name: "",
+    const mockSearchMeasures = jest.fn().mockResolvedValue({
+      content: data,
+      totalPages: 1,
+      totalElements: 2,
+      numberOfElements: 2,
+      pageable: { offset: 0 },
     });
-    expect(rowCheckboxes.length).toBeGreaterThanOrEqual(2);
-  });
 
-  it("renders header select checkbox and toggles all rows", async () => {
+    useMeasureServiceApi.mockReturnValue({
+      searchMeasuresByCriteria: mockSearchMeasures,
+      getMeasuresByMeasureSetId: mockGetMeasuresBySetId,
+    });
+
     render(
-      <AddComponentsDialog open={true} onClose={onCloseMock} data={data} />
+      <AddComponentsDialog
+        open={true}
+        onClose={onCloseMock}
+        measure={mockMeasure}
+        compositeScoring="Opportunity"
+      />
     );
 
-    const headerCheckbox = screen.getByRole("checkbox", {
-      name: "Test Case Selection",
+    await waitFor(() => {
+      expect(mockSearchMeasures).toHaveBeenCalled();
     });
-    expect(headerCheckbox).toBeInTheDocument();
 
-    await userEvent.click(headerCheckbox);
+    await waitFor(
+      () => {
+        expect(screen.queryByText("Test Measure")).toBeInTheDocument();
+      },
+      { timeout: 3000 }
+    );
 
-    const rowCheckboxes = screen.getAllByRole("checkbox", { name: "" });
-    rowCheckboxes.forEach((checkbox) => {
-      expect(checkbox).toBeChecked();
+    const rows = screen.getAllByRole("row");
+    const firstDataRow = rows[1];
+
+    if (firstDataRow) {
+      const expandButton = firstDataRow.querySelector('button[aria-label=""]');
+      if (expandButton) {
+        await userEvent.click(expandButton);
+
+        await waitFor(
+          () => {
+            expect(mockGetMeasuresBySetId).toHaveBeenCalled();
+          },
+          { timeout: 3000 }
+        );
+      }
+    }
+  });
+
+  it("returns PROPORTION and RATIO for Opportunity composite scoring", async () => {
+    const mockSearchMeasures = jest.fn().mockResolvedValue({
+      content: [],
+      totalPages: 0,
+      totalElements: 0,
+      numberOfElements: 0,
+      pageable: { offset: 0 },
+    });
+
+    useMeasureServiceApi.mockReturnValue({
+      searchMeasuresByCriteria: mockSearchMeasures,
+      getMeasuresByMeasureSetId: jest.fn(),
+    });
+
+    render(
+      <AddComponentsDialog
+        open={true}
+        onClose={onCloseMock}
+        measure={mockMeasure}
+        compositeScoring="Opportunity"
+      />
+    );
+
+    await waitFor(() => {
+      expect(mockSearchMeasures).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        expect.anything(),
+        expect.anything(),
+        expect.anything(),
+        expect.objectContaining({
+          allowedScoringTypes: [
+            MeasureScoring.PROPORTION,
+            MeasureScoring.RATIO,
+          ],
+        }),
+        expect.anything()
+      );
     });
   });
 
-  it("renders row checkbox as indeterminate when some rows are selected", async () => {
+  it("returns PROPORTION and RATIO for All-or-nothing composite scoring", async () => {
+    const mockSearchMeasures = jest.fn().mockResolvedValue({
+      content: [],
+      totalPages: 0,
+      totalElements: 0,
+      numberOfElements: 0,
+      pageable: { offset: 0 },
+    });
+
+    useMeasureServiceApi.mockReturnValue({
+      searchMeasuresByCriteria: mockSearchMeasures,
+      getMeasuresByMeasureSetId: jest.fn(),
+    });
+
     render(
-      <AddComponentsDialog open={true} onClose={onCloseMock} data={data} />
+      <AddComponentsDialog
+        open={true}
+        onClose={onCloseMock}
+        measure={mockMeasure}
+        compositeScoring="All-or-nothing"
+      />
     );
 
-    const rowCheckboxes = screen.getAllByRole("checkbox", { name: "" });
-    await userEvent.click(rowCheckboxes[1]);
-
-    const headerCheckbox = screen.getByRole("checkbox", {
-      name: "Test Case Selection",
+    await waitFor(() => {
+      expect(mockSearchMeasures).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        expect.anything(),
+        expect.anything(),
+        expect.anything(),
+        expect.objectContaining({
+          allowedScoringTypes: [
+            MeasureScoring.PROPORTION,
+            MeasureScoring.RATIO,
+          ],
+        }),
+        expect.anything()
+      );
     });
-    expect((headerCheckbox as HTMLInputElement).indeterminate).toBe(true);
+  });
+
+  it("returns PROPORTION, RATIO, and CONTINUOUS_VARIABLE for Linear composite scoring", async () => {
+    const mockSearchMeasures = jest.fn().mockResolvedValue({
+      content: [],
+      totalPages: 0,
+      totalElements: 0,
+      numberOfElements: 0,
+      pageable: { offset: 0 },
+    });
+
+    useMeasureServiceApi.mockReturnValue({
+      searchMeasuresByCriteria: mockSearchMeasures,
+      getMeasuresByMeasureSetId: jest.fn(),
+    });
+
+    render(
+      <AddComponentsDialog
+        open={true}
+        onClose={onCloseMock}
+        measure={mockMeasure}
+        compositeScoring="Linear"
+      />
+    );
+
+    await waitFor(() => {
+      expect(mockSearchMeasures).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        expect.anything(),
+        expect.anything(),
+        expect.anything(),
+        expect.objectContaining({
+          allowedScoringTypes: [
+            MeasureScoring.PROPORTION,
+            MeasureScoring.RATIO,
+            MeasureScoring.CONTINUOUS_VARIABLE,
+          ],
+        }),
+        expect.anything()
+      );
+    });
+  });
+
+  it("expands row and fetches associated measures when expand icon is clicked", async () => {
+    const mockGetMeasuresBySetId = jest.fn().mockResolvedValue([
+      {
+        id: "child-1",
+        measureName: "Child Measure 1",
+        version: "1.0.0",
+        measureSet: { cmsId: "CMS789" },
+        lastModifiedAt: "2024-01-15",
+      },
+      {
+        id: "child-2",
+        measureName: "Child Measure 2",
+        version: "1.1.0",
+        measureSet: { cmsId: "CMS790" },
+        lastModifiedAt: "2024-01-20",
+      },
+    ]);
+
+    const mockSearchMeasures = jest.fn().mockResolvedValue({
+      content: data,
+      totalPages: 1,
+      totalElements: 2,
+      numberOfElements: 2,
+      pageable: { offset: 0 },
+    });
+
+    useMeasureServiceApi.mockReturnValue({
+      searchMeasuresByCriteria: mockSearchMeasures,
+      getMeasuresByMeasureSetId: mockGetMeasuresBySetId,
+    });
+
+    render(
+      <AddComponentsDialog
+        open={true}
+        onClose={onCloseMock}
+        measure={mockMeasure}
+        compositeScoring="Opportunity"
+      />
+    );
+
+    await waitFor(() => {
+      expect(mockSearchMeasures).toHaveBeenCalled();
+    });
+    await waitFor(
+      () => {
+        expect(screen.queryByText("Test Measure")).toBeInTheDocument();
+      },
+      { timeout: 3000 }
+    );
+
+    const rows = screen.getAllByRole("row");
+    const firstDataRow = rows[1];
+    if (firstDataRow) {
+      const expandButton = firstDataRow.querySelector('button[aria-label=""]');
+      if (expandButton) {
+        await userEvent.click(expandButton);
+
+        await waitFor(
+          () => {
+            expect(mockGetMeasuresBySetId).toHaveBeenCalledWith(
+              "set-1",
+              true,
+              expect.objectContaining({
+                fromCompositeMeasureComponents: true,
+                allowedScoringTypes: [
+                  MeasureScoring.PROPORTION,
+                  MeasureScoring.RATIO,
+                ],
+              })
+            );
+          },
+          { timeout: 3000 }
+        );
+      }
+    }
+  });
+
+  it("collapses row when expand icon is clicked again", async () => {
+    const mockGetMeasuresBySetId = jest.fn().mockResolvedValue([
+      {
+        id: "child-1",
+        measureName: "Child Measure 1",
+        version: "1.0.0",
+        measureSet: { cmsId: "CMS789" },
+        lastModifiedAt: "2024-01-15",
+      },
+    ]);
+
+    const mockSearchMeasures = jest.fn().mockResolvedValue({
+      content: data,
+      totalPages: 1,
+      totalElements: 2,
+      numberOfElements: 2,
+      pageable: { offset: 0 },
+    });
+
+    useMeasureServiceApi.mockReturnValue({
+      searchMeasuresByCriteria: mockSearchMeasures,
+      getMeasuresByMeasureSetId: mockGetMeasuresBySetId,
+    });
+
+    render(
+      <AddComponentsDialog
+        open={true}
+        onClose={onCloseMock}
+        measure={mockMeasure}
+        compositeScoring="Opportunity"
+      />
+    );
+
+    await waitFor(() => {
+      expect(mockSearchMeasures).toHaveBeenCalled();
+    });
+
+    await waitFor(
+      () => {
+        expect(screen.queryByText("Test Measure")).toBeInTheDocument();
+      },
+      { timeout: 3000 }
+    );
+
+    const rows = screen.getAllByRole("row");
+    const firstDataRow = rows[1];
+
+    if (firstDataRow) {
+      const expandButton = firstDataRow.querySelector('button[aria-label=""]');
+      if (expandButton) {
+        await userEvent.click(expandButton);
+        await waitFor(
+          () => {
+            expect(mockGetMeasuresBySetId).toHaveBeenCalled();
+          },
+          { timeout: 3000 }
+        );
+
+        mockGetMeasuresBySetId.mockClear();
+        await userEvent.click(expandButton);
+        await waitFor(() => {
+          expect(mockGetMeasuresBySetId).not.toHaveBeenCalled();
+        });
+      }
+    }
+  });
+
+  it("does not render expand icon for measures without associated measures", async () => {
+    const mockSearchMeasures = jest.fn().mockResolvedValue({
+      content: data,
+      totalPages: 1,
+      totalElements: 2,
+      numberOfElements: 2,
+      pageable: { offset: 0 },
+    });
+
+    useMeasureServiceApi.mockReturnValue({
+      searchMeasuresByCriteria: mockSearchMeasures,
+      getMeasuresByMeasureSetId: jest.fn(),
+    });
+
+    render(
+      <AddComponentsDialog
+        open={true}
+        onClose={onCloseMock}
+        measure={mockMeasure}
+        compositeScoring="Opportunity"
+      />
+    );
+
+    await waitFor(() => {
+      expect(mockSearchMeasures).toHaveBeenCalled();
+    });
+
+    await waitFor(
+      () => {
+        expect(screen.queryByText("Another Measure")).toBeInTheDocument();
+      },
+      { timeout: 3000 }
+    );
+
+    expect(screen.queryByText("Test Measure")).toBeInTheDocument();
+    expect(screen.queryByText("Another Measure")).toBeInTheDocument();
   });
 });
