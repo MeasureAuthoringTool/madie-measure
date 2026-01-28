@@ -332,7 +332,7 @@ describe("AddComponentsDialog", () => {
               "set-1",
               true,
               expect.objectContaining({
-                fromCompositeMeasureComponents: true,
+                fromCompositeMeasureComponent: true,
                 allowedScoringTypes: [
                   MeasureScoring.PROPORTION,
                   MeasureScoring.RATIO,

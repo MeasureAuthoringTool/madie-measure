@@ -97,7 +97,7 @@ export default function AddComponentsDialog({
       setSelectedIdForExpansion(actions?.measureSetId);
 
       const searchCriteria: any = {
-        fromCompositeMeasureComponents: true,
+        fromCompositeMeasureComponent: true,
         allowedScoringTypes: getAllowedScoringTypes(compositeScoring),
       };
 
@@ -285,7 +285,7 @@ export default function AddComponentsDialog({
       excludeByMeasureIds: [measure.id],
       optionalSearchProperties,
       draft: false,
-      fromCompositeMeasureComponents: true,
+      fromCompositeMeasureComponent: true,
       allowedScoringTypes: getAllowedScoringTypes(compositeScoring),
     };
 
