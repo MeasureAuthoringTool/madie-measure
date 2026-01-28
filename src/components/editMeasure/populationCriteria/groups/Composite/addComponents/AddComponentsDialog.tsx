@@ -291,7 +291,7 @@ export default function AddComponentsDialog({
 
     measureServiceApi
       .searchMeasuresByCriteria(
-        [OwnershipType.OWNED, OwnershipType.SHARED],
+        [OwnershipType.ALL],
         limit,
         page,
         "lastModifiedAt",
@@ -459,8 +459,7 @@ export default function AddComponentsDialog({
               ) : _.isEmpty(measureList) ? (
                 <tr>
                   <td colSpan={columns.length} tw="text-center p-2">
-                    You don't have any other measures that you own or are shared
-                    with you, belonging to the same model.
+                    There are no measures that belongs to the same model.
                   </td>
                 </tr>
               ) : (
