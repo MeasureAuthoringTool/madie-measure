@@ -33,6 +33,14 @@ const mockOneItemResponse = {
   pageable: { offset: 0 },
 };
 
+const zeroItemResponse = {
+  content: [],
+  totalPages: 0,
+  totalElements: 0,
+  numberOfElements: 0,
+  pageable: { offset: 0 },
+};
+
 jest.mock("@madie/madie-util", () => ({
   useMeasureServiceApi: jest.fn(() => ({
     searchMeasuresByCriteria: jest.fn().mockResolvedValue(mockOneItemResponse),
@@ -119,7 +127,6 @@ describe("AddComponentsDialog", () => {
     await waitFor(() => {
       expect(mockSearchMeasures).toHaveBeenCalled();
     });
-
     await waitFor(
       () => {
         expect(screen.queryByText("Test Measure")).toBeInTheDocument();
@@ -129,7 +136,6 @@ describe("AddComponentsDialog", () => {
 
     const rows = screen.getAllByRole("row");
     const firstDataRow = rows[1];
-
     if (firstDataRow) {
       const expandButton = firstDataRow.querySelector('button[aria-label=""]');
       if (expandButton) {
@@ -146,13 +152,7 @@ describe("AddComponentsDialog", () => {
   });
 
   it("returns PROPORTION and RATIO for Opportunity composite scoring", async () => {
-    const mockSearchMeasures = jest.fn().mockResolvedValue({
-      content: [],
-      totalPages: 0,
-      totalElements: 0,
-      numberOfElements: 0,
-      pageable: { offset: 0 },
-    });
+    const mockSearchMeasures = jest.fn().mockResolvedValue(zeroItemResponse);
 
     useMeasureServiceApi.mockReturnValue({
       searchMeasuresByCriteria: mockSearchMeasures,
@@ -187,13 +187,7 @@ describe("AddComponentsDialog", () => {
   });
 
   it("returns PROPORTION and RATIO for All-or-nothing composite scoring", async () => {
-    const mockSearchMeasures = jest.fn().mockResolvedValue({
-      content: [],
-      totalPages: 0,
-      totalElements: 0,
-      numberOfElements: 0,
-      pageable: { offset: 0 },
-    });
+    const mockSearchMeasures = jest.fn().mockResolvedValue(zeroItemResponse);
 
     useMeasureServiceApi.mockReturnValue({
       searchMeasuresByCriteria: mockSearchMeasures,
@@ -228,13 +222,7 @@ describe("AddComponentsDialog", () => {
   });
 
   it("returns PROPORTION, RATIO, and CONTINUOUS_VARIABLE for Linear composite scoring", async () => {
-    const mockSearchMeasures = jest.fn().mockResolvedValue({
-      content: [],
-      totalPages: 0,
-      totalElements: 0,
-      numberOfElements: 0,
-      pageable: { offset: 0 },
-    });
+    const mockSearchMeasures = jest.fn().mockResolvedValue(zeroItemResponse);
 
     useMeasureServiceApi.mockReturnValue({
       searchMeasuresByCriteria: mockSearchMeasures,
@@ -449,5 +437,508 @@ describe("AddComponentsDialog", () => {
 
     expect(screen.queryByText("Test Measure")).toBeInTheDocument();
     expect(screen.queryByText("Another Measure")).toBeInTheDocument();
+  });
+
+  it("calls onClose when cancel button is clicked", async () => {
+    const mockSearchMeasures = jest.fn().mockResolvedValue(zeroItemResponse);
+
+    useMeasureServiceApi.mockReturnValue({
+      searchMeasuresByCriteria: mockSearchMeasures,
+      getMeasuresByMeasureSetId: jest.fn(),
+    });
+
+    render(
+      <AddComponentsDialog
+        open={true}
+        onClose={onCloseMock}
+        measure={mockMeasure}
+        compositeScoring="Opportunity"
+      />
+    );
+
+    const cancelButton = screen.getByTestId(
+      "select-composite-measure-components-cancel-button"
+    );
+    await userEvent.click(cancelButton);
+
+    expect(onCloseMock).toHaveBeenCalled();
+  });
+
+  it("displays loading spinner while fetching data", () => {
+    const mockSearchMeasures = jest
+      .fn()
+      .mockImplementation(() => new Promise(() => {}));
+
+    useMeasureServiceApi.mockReturnValue({
+      searchMeasuresByCriteria: mockSearchMeasures,
+      getMeasuresByMeasureSetId: jest.fn(),
+    });
+
+    render(
+      <AddComponentsDialog
+        open={true}
+        onClose={onCloseMock}
+        measure={mockMeasure}
+        compositeScoring="Opportunity"
+      />
+    );
+
+    expect(mockSearchMeasures).toHaveBeenCalled();
+  });
+
+  it("displays empty state message when no measures found", async () => {
+    const mockSearchMeasures = jest.fn().mockResolvedValue(zeroItemResponse);
+
+    useMeasureServiceApi.mockReturnValue({
+      searchMeasuresByCriteria: mockSearchMeasures,
+      getMeasuresByMeasureSetId: jest.fn(),
+    });
+
+    render(
+      <AddComponentsDialog
+        open={true}
+        onClose={onCloseMock}
+        measure={mockMeasure}
+        compositeScoring="Opportunity"
+      />
+    );
+
+    await waitFor(() => {
+      expect(mockSearchMeasures).toHaveBeenCalled();
+    });
+
+    await waitFor(() => {
+      expect(
+        screen.getByText("There are no measures that belong to the same model.")
+      ).toBeInTheDocument();
+    });
+  });
+
+  it("handles pagination - page change", async () => {
+    const mockSearchMeasures = jest.fn().mockResolvedValue({
+      content: data,
+      totalPages: 3,
+      totalElements: 15,
+      numberOfElements: 5,
+      pageable: { offset: 0 },
+    });
+
+    useMeasureServiceApi.mockReturnValue({
+      searchMeasuresByCriteria: mockSearchMeasures,
+      getMeasuresByMeasureSetId: jest.fn(),
+    });
+
+    render(
+      <AddComponentsDialog
+        open={true}
+        onClose={onCloseMock}
+        measure={mockMeasure}
+        compositeScoring="Opportunity"
+      />
+    );
+
+    await waitFor(() => {
+      expect(mockSearchMeasures).toHaveBeenCalled();
+    });
+
+    mockSearchMeasures.mockClear();
+
+    const nextPageButton = screen.getByRole("button", { name: /next/i });
+    await userEvent.click(nextPageButton);
+
+    await waitFor(() => {
+      expect(mockSearchMeasures).toHaveBeenCalled();
+    });
+  });
+
+  it("handles pagination - limit change", async () => {
+    const mockSearchMeasures = jest.fn().mockResolvedValue({
+      content: data,
+      totalPages: 1,
+      totalElements: 2,
+      numberOfElements: 2,
+      pageable: { offset: 0 },
+    });
+
+    useMeasureServiceApi.mockReturnValue({
+      searchMeasuresByCriteria: mockSearchMeasures,
+      getMeasuresByMeasureSetId: jest.fn(),
+    });
+
+    render(
+      <AddComponentsDialog
+        open={true}
+        onClose={onCloseMock}
+        measure={mockMeasure}
+        compositeScoring="Opportunity"
+      />
+    );
+
+    await waitFor(() => {
+      expect(mockSearchMeasures).toHaveBeenCalled();
+    });
+
+    mockSearchMeasures.mockClear();
+
+    const limitSelect = screen.getByRole("combobox");
+    await userEvent.click(limitSelect);
+
+    const option10 = screen.getByRole("option", { name: "10" });
+    await userEvent.click(option10);
+
+    await waitFor(() => {
+      expect(mockSearchMeasures).toHaveBeenCalled();
+    });
+  });
+
+  it("does not fetch measures when dialog is closed", () => {
+    const mockSearchMeasures = jest.fn().mockResolvedValue(zeroItemResponse);
+
+    useMeasureServiceApi.mockReturnValue({
+      searchMeasuresByCriteria: mockSearchMeasures,
+      getMeasuresByMeasureSetId: jest.fn(),
+    });
+
+    render(
+      <AddComponentsDialog
+        open={false}
+        onClose={onCloseMock}
+        measure={mockMeasure}
+        compositeScoring="Opportunity"
+      />
+    );
+
+    expect(mockSearchMeasures).not.toHaveBeenCalled();
+  });
+
+  it("handles keyboard interaction on expand icon", async () => {
+    const mockGetMeasuresBySetId = jest.fn().mockResolvedValue([
+      {
+        id: "child-1",
+        measureName: "Child Measure 1",
+        version: "1.0.0",
+        measureSet: { cmsId: "CMS789" },
+        lastModifiedAt: "2024-01-15",
+      },
+    ]);
+
+    const mockSearchMeasures = jest.fn().mockResolvedValue({
+      content: data,
+      totalPages: 1,
+      totalElements: 2,
+      numberOfElements: 2,
+      pageable: { offset: 0 },
+    });
+
+    useMeasureServiceApi.mockReturnValue({
+      searchMeasuresByCriteria: mockSearchMeasures,
+      getMeasuresByMeasureSetId: mockGetMeasuresBySetId,
+    });
+
+    render(
+      <AddComponentsDialog
+        open={true}
+        onClose={onCloseMock}
+        measure={mockMeasure}
+        compositeScoring="Opportunity"
+      />
+    );
+
+    await waitFor(() => {
+      expect(mockSearchMeasures).toHaveBeenCalled();
+    });
+
+    await waitFor(
+      () => {
+        expect(screen.queryByText("Test Measure")).toBeInTheDocument();
+      },
+      { timeout: 3000 }
+    );
+
+    const rows = screen.getAllByRole("row");
+    const firstDataRow = rows[1];
+
+    if (firstDataRow) {
+      const expandButton = firstDataRow.querySelector('span[role="button"]');
+      if (expandButton) {
+        expandButton.focus();
+        await userEvent.keyboard("{Enter}");
+
+        await waitFor(
+          () => {
+            expect(mockGetMeasuresBySetId).toHaveBeenCalled();
+          },
+          { timeout: 3000 }
+        );
+      }
+    }
+  });
+
+  it("handles space key on expand icon", async () => {
+    const mockGetMeasuresBySetId = jest.fn().mockResolvedValue([
+      {
+        id: "child-1",
+        measureName: "Child Measure 1",
+        version: "1.0.0",
+        measureSet: { cmsId: "CMS789" },
+        lastModifiedAt: "2024-01-15",
+      },
+    ]);
+
+    const mockSearchMeasures = jest.fn().mockResolvedValue({
+      content: data,
+      totalPages: 1,
+      totalElements: 2,
+      numberOfElements: 2,
+      pageable: { offset: 0 },
+    });
+
+    useMeasureServiceApi.mockReturnValue({
+      searchMeasuresByCriteria: mockSearchMeasures,
+      getMeasuresByMeasureSetId: mockGetMeasuresBySetId,
+    });
+
+    render(
+      <AddComponentsDialog
+        open={true}
+        onClose={onCloseMock}
+        measure={mockMeasure}
+        compositeScoring="Opportunity"
+      />
+    );
+
+    await waitFor(() => {
+      expect(mockSearchMeasures).toHaveBeenCalled();
+    });
+
+    await waitFor(
+      () => {
+        expect(screen.queryByText("Test Measure")).toBeInTheDocument();
+      },
+      { timeout: 3000 }
+    );
+
+    const rows = screen.getAllByRole("row");
+    const firstDataRow = rows[1];
+
+    if (firstDataRow) {
+      const expandButton = firstDataRow.querySelector('span[role="button"]');
+      if (expandButton) {
+        expandButton.focus();
+        await userEvent.keyboard(" ");
+
+        await waitFor(
+          () => {
+            expect(mockGetMeasuresBySetId).toHaveBeenCalled();
+          },
+          { timeout: 3000 }
+        );
+      }
+    }
+  });
+
+  it("handles submit button click", async () => {
+    const mockSearchMeasures = jest.fn().mockResolvedValue(zeroItemResponse);
+
+    useMeasureServiceApi.mockReturnValue({
+      searchMeasuresByCriteria: mockSearchMeasures,
+      getMeasuresByMeasureSetId: jest.fn(),
+    });
+
+    render(
+      <AddComponentsDialog
+        open={true}
+        onClose={onCloseMock}
+        measure={mockMeasure}
+        compositeScoring="Opportunity"
+      />
+    );
+
+    const saveButton = screen.getByTestId(
+      "select-composite-measure-components-continue-button"
+    );
+    await userEvent.click(saveButton);
+    expect(onCloseMock).not.toHaveBeenCalled();
+  });
+
+  it("displays correct CMS ID in expanded rows", async () => {
+    const mockGetMeasuresBySetId = jest.fn().mockResolvedValue([
+      {
+        id: "child-1",
+        measureName: "Child Measure 1",
+        version: "1.0.0",
+        measureSet: { cmsId: "CMS789" },
+        lastModifiedAt: "2024-01-15",
+      },
+    ]);
+
+    const mockSearchMeasures = jest.fn().mockResolvedValue({
+      content: data,
+      totalPages: 1,
+      totalElements: 2,
+      numberOfElements: 2,
+      pageable: { offset: 0 },
+    });
+
+    useMeasureServiceApi.mockReturnValue({
+      searchMeasuresByCriteria: mockSearchMeasures,
+      getMeasuresByMeasureSetId: mockGetMeasuresBySetId,
+    });
+
+    render(
+      <AddComponentsDialog
+        open={true}
+        onClose={onCloseMock}
+        measure={mockMeasure}
+        compositeScoring="Opportunity"
+      />
+    );
+
+    await waitFor(() => {
+      expect(mockSearchMeasures).toHaveBeenCalled();
+    });
+
+    await waitFor(
+      () => {
+        expect(screen.queryByText("Test Measure")).toBeInTheDocument();
+      },
+      { timeout: 3000 }
+    );
+
+    const rows = screen.getAllByRole("row");
+    const firstDataRow = rows[1];
+
+    if (firstDataRow) {
+      const expandButton = firstDataRow.querySelector('button[aria-label=""]');
+      if (expandButton) {
+        await userEvent.click(expandButton);
+
+        await waitFor(
+          () => {
+            expect(mockGetMeasuresBySetId).toHaveBeenCalled();
+          },
+          { timeout: 3000 }
+        );
+      }
+    }
+  });
+
+  it("handles error during measure fetch gracefully", async () => {
+    const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation();
+    const mockSearchMeasures = jest
+      .fn()
+      .mockRejectedValue(new Error("Network error"));
+
+    useMeasureServiceApi.mockReturnValue({
+      searchMeasuresByCriteria: mockSearchMeasures,
+      getMeasuresByMeasureSetId: jest.fn(),
+    });
+
+    render(
+      <AddComponentsDialog
+        open={true}
+        onClose={onCloseMock}
+        measure={mockMeasure}
+        compositeScoring="Opportunity"
+      />
+    );
+
+    await waitFor(() => {
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        "Failed to fetch measures:",
+        expect.any(Error)
+      );
+    });
+
+    consoleErrorSpy.mockRestore();
+  });
+
+  it("does not log error when request is aborted", async () => {
+    const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation();
+    const abortError = new Error("Request aborted");
+    abortError.name = "AbortError";
+    const mockSearchMeasures = jest.fn().mockRejectedValue(abortError);
+
+    useMeasureServiceApi.mockReturnValue({
+      searchMeasuresByCriteria: mockSearchMeasures,
+      getMeasuresByMeasureSetId: jest.fn(),
+    });
+
+    render(
+      <AddComponentsDialog
+        open={true}
+        onClose={onCloseMock}
+        measure={mockMeasure}
+        compositeScoring="Opportunity"
+      />
+    );
+
+    await waitFor(() => {
+      expect(mockSearchMeasures).toHaveBeenCalled();
+    });
+    await new Promise((resolve) => setTimeout(resolve, 100));
+
+    expect(consoleErrorSpy).not.toHaveBeenCalled();
+    consoleErrorSpy.mockRestore();
+  });
+
+  it("does not fetch measures when measure prop is missing", () => {
+    const mockSearchMeasures = jest.fn().mockResolvedValue(zeroItemResponse);
+
+    useMeasureServiceApi.mockReturnValue({
+      searchMeasuresByCriteria: mockSearchMeasures,
+      getMeasuresByMeasureSetId: jest.fn(),
+    });
+
+    render(
+      <AddComponentsDialog
+        open={true}
+        onClose={onCloseMock}
+        measure={null}
+        compositeScoring="Opportunity"
+      />
+    );
+
+    expect(mockSearchMeasures).not.toHaveBeenCalled();
+  });
+
+  it("does not fetch measures when measure model is missing", () => {
+    const mockSearchMeasures = jest.fn().mockResolvedValue(zeroItemResponse);
+
+    useMeasureServiceApi.mockReturnValue({
+      searchMeasuresByCriteria: mockSearchMeasures,
+      getMeasuresByMeasureSetId: jest.fn(),
+    });
+
+    render(
+      <AddComponentsDialog
+        open={true}
+        onClose={onCloseMock}
+        measure={{ id: "test-id", measureName: "Test" }}
+        compositeScoring="Opportunity"
+      />
+    );
+
+    expect(mockSearchMeasures).not.toHaveBeenCalled();
+  });
+
+  it("does not fetch measures when measure id is missing", () => {
+    const mockSearchMeasures = jest.fn().mockResolvedValue(zeroItemResponse);
+
+    useMeasureServiceApi.mockReturnValue({
+      searchMeasuresByCriteria: mockSearchMeasures,
+      getMeasuresByMeasureSetId: jest.fn(),
+    });
+
+    render(
+      <AddComponentsDialog
+        open={true}
+        onClose={onCloseMock}
+        measure={{ model: "QI-Core", measureName: "Test" }}
+        compositeScoring="Opportunity"
+      />
+    );
+
+    expect(mockSearchMeasures).not.toHaveBeenCalled();
   });
 });

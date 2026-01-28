@@ -459,7 +459,7 @@ export default function AddComponentsDialog({
               ) : _.isEmpty(measureList) ? (
                 <tr>
                   <td colSpan={columns.length} tw="text-center p-2">
-                    There are no measures that belongs to the same model.
+                    There are no measures that belong to the same model.
                   </td>
                 </tr>
               ) : (
