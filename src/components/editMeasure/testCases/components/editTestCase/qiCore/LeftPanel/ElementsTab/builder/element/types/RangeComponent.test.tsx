@@ -6,7 +6,6 @@ import {
   waitFor,
   within,
 } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
 import { Formik } from "formik";
 import { ExecutionContextProvider } from "../../../../../../../routes/qiCore/ExecutionContext";
 import RangeComponent from "./RangeComponent";
@@ -133,7 +132,7 @@ describe("RangeComponent", () => {
 
     const lowContainer = screen.getByText("Low").closest(".quantity-fields")!;
     const inputLow = within(lowContainer).getByTestId(
-      "decimal-input-field-Low"
+      "decimal-field-input-Observation.range.low.value"
     ) as HTMLInputElement;
     const codeLow = within(lowContainer).getByTestId(
       "code-input-input"
@@ -144,7 +143,7 @@ describe("RangeComponent", () => {
 
     const highContainer = screen.getByText("High").closest(".quantity-fields")!;
     const inputHigh = within(highContainer).getByTestId(
-      "decimal-input-field-High"
+      "decimal-field-input-Observation.range.high.value"
     ) as HTMLInputElement;
     const codeHigh = within(highContainer).getByTestId(
       "code-input-input"
@@ -162,12 +161,12 @@ describe("RangeComponent", () => {
 
     const lowContainer = screen.getByText("Low").closest(".quantity-fields")!;
     const inputLow = within(lowContainer).getByTestId(
-      "decimal-input-field-Low"
+      "decimal-field-input-Observation.range.low.value"
     ) as HTMLInputElement;
 
     const highContainer = screen.getByText("High").closest(".quantity-fields")!;
     const inputHigh = within(highContainer).getByTestId(
-      "decimal-input-field-High"
+      "decimal-field-input-Observation.range.high.value"
     ) as HTMLInputElement;
 
     fireEvent.change(inputLow, { target: { value: "10" } });
@@ -179,6 +178,7 @@ describe("RangeComponent", () => {
     });
   });
 
+  //works
   test("updates low and high units correctly", async () => {
     renderWithFormik();
 
@@ -204,24 +204,21 @@ describe("RangeComponent", () => {
   test("all fields are read-only when canEdit is false", async () => {
     renderWithFormik({ canEdit: false });
 
-    const lowContainer = screen
-      .getByTestId("decimal-field-Low")
-      .closest(".quantity-component")!;
-    const inputLow = within(lowContainer).getByTestId(
-      "decimal-field-Low"
-    ) as HTMLTextAreaElement;
+    const lowContainer = screen.getByText("Low").closest(".quantity-fields")!;
+    const highContainer = screen.getByText("High").closest(".quantity-fields")!;
+
+    const inputLow = screen.getByTestId(
+      "decimal-field-Observation.range.low.value"
+    ) as HTMLInputElement;
     const codeLow = within(lowContainer).getByTestId(
-      "code-input"
+      "code-input-Observation.range.low"
     ) as HTMLTextAreaElement;
 
-    const highContainer = screen
-      .getByTestId("decimal-field-High")
-      .closest(".quantity-component")!;
     const inputHigh = within(highContainer).getByTestId(
-      "decimal-field-High"
+      "decimal-field-Observation.range.high.value"
     ) as HTMLTextAreaElement;
     const codeHigh = within(highContainer).getByTestId(
-      "code-input"
+      "code-input-Observation.range.high"
     ) as HTMLTextAreaElement;
 
     expect(inputLow).toHaveAttribute("readonly");

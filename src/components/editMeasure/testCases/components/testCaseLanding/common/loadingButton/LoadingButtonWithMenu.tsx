@@ -1,9 +1,16 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useRef, useState } from "react";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import LoadingButton from "@mui/lab/LoadingButton";
-import { Popover } from "@madie/madie-design-system/dist/react";
+import {
+  ClickAwayListener,
+  Grow,
+  MenuItem,
+  MenuList,
+  Paper,
+  Popper,
+} from "@mui/material";
 
-interface MenuItem {
+interface MenuItemType {
   label: string;
   dataTestId: string;
   toImplementFunction: () => void;
@@ -15,7 +22,7 @@ interface LoadingButtonMenuProps {
   label: string;
   dataTestId?: string;
   primary?: boolean;
-  menuItems: MenuItem[];
+  menuItems: MenuItemType[];
   showOptions: boolean;
   setShowOptions: (show: boolean) => void;
 }
@@ -30,21 +37,20 @@ export default function LoadingButtonWithMenu({
   setShowOptions,
   showOptions,
 }: LoadingButtonMenuProps) {
-  const [anchorEl, setAnchorEl] = useState(null);
+  const anchorRef = useRef<HTMLButtonElement>(null);
 
-  const handleShowOptions = useCallback((event) => {
-    setAnchorEl(event.currentTarget);
+  const handleShowOptions = useCallback(() => {
     setShowOptions(true);
-  }, []);
+  }, [setShowOptions]);
 
   const handleClose = useCallback(() => {
     setShowOptions(false);
-    setAnchorEl(null);
-  }, []);
+  }, [setShowOptions]);
 
   return (
     <>
       <LoadingButton
+        ref={anchorRef}
         sx={{
           textTransform: "none",
           color: primary ? "white" : "#0073c8",
@@ -67,14 +73,35 @@ export default function LoadingButtonWithMenu({
       >
         {label}
       </LoadingButton>
-      <Popover
-        optionsOpen={showOptions}
-        anchorEl={anchorEl}
-        handleClose={handleClose}
-        additionalSelectOptionProps={menuItems}
-        onClick={handleClose}
-        dataTestId="overlapping-codes-popover"
-      />
+      <Popper
+        open={showOptions}
+        anchorEl={anchorRef.current}
+        placement="bottom-start"
+        transition
+      >
+        {({ TransitionProps }) => (
+          <Grow {...TransitionProps} style={{ transformOrigin: "left top" }}>
+            <Paper>
+              <ClickAwayListener onClickAway={handleClose}>
+                <MenuList autoFocusItem={showOptions}>
+                  {menuItems.map((item) => (
+                    <MenuItem
+                      key={item.dataTestId}
+                      data-testid={item.dataTestId}
+                      onClick={() => {
+                        item.toImplementFunction();
+                        handleClose();
+                      }}
+                    >
+                      {item.label}
+                    </MenuItem>
+                  ))}
+                </MenuList>
+              </ClickAwayListener>
+            </Paper>
+          </Grow>
+        )}
+      </Popper>
     </>
   );
 }

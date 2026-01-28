@@ -1,5 +1,11 @@
 import * as React from "react";
-import { render, screen, act, waitFor, within } from "@testing-library/react";
+import {
+  render,
+  screen,
+  act,
+  waitFor,
+  fireEvent,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import TypeEditor from "./TypeEditor";
@@ -23,7 +29,7 @@ const getNestedProperty = (obj, path) => {
 const claimResponseValues = {
   ClaimResponse: {
     id: "test",
-    order: "1234",
+    order: 12,
     time: "01:23:45",
     Coding: {
       code: "",
@@ -40,9 +46,7 @@ const mockSetFieldValue = jest.fn();
 
 //@ts-ignore
 const mockFormik: FormikContextType<any> = {
-  values: {
-    claimResponseValues,
-  },
+  values: claimResponseValues,
   touched: {},
   getFieldProps: (label) => {
     const value = getNestedProperty(claimResponseValues, label);
@@ -64,13 +68,13 @@ jest.mock("@madie/madie-util", () => ({
   }),
 }));
 
-jest.mock("./types/MoneyComponent", () => ({ label }: any) => (
-  <div data-testid={`money-component-${label}`}>MoneyComponent Mock</div>
-));
+// jest.mock("./types/MoneyComponent", () => ({ label }: any) => (
+//   <div data-testid={`money-component-${label}`}>MoneyComponent Mock</div>
+// ));
 
-jest.mock("./types/QuantityComponent", () => ({ label }: any) => (
-  <div data-testid={`quantity-component-${label}`}>QuantityComponent Mock</div>
-));
+// jest.mock("./types/QuantityComponent", () => ({ label }: any) => (
+//   <div data-testid={`quantity-component-${label}`}>QuantityComponent Mock</div>
+// ));
 
 const codingDef = {
   path: "Coding",
@@ -358,6 +362,138 @@ describe("TypeEditor Component", () => {
 
     userEvent.type(inputField, "1234-abcd-ABCD-5678");
     expect(onChange).toHaveBeenCalled();
+  });
+  test("Should render Decimal component", async () => {
+    const setFieldValue = jest.fn();
+    const setFieldTouched = jest.fn();
+    const onChange = jest.fn();
+    const decimalFormik = {
+      ...mockFormik,
+      setFieldTouched: setFieldTouched,
+      setFieldValue: setFieldValue,
+      getFieldProps: () => ({
+        label: "ClaimResponse.addItem[0].factor",
+        name: "ClaimResponse.addItem[0].factor",
+        value: undefined,
+        onChange,
+        onBlur: jest.fn(),
+      }),
+    };
+
+    render(
+      <FormikProvider value={decimalFormik}>
+        <RequiredFieldsProvider
+          requiredFields={mockRequiredFields}
+          formInfo={mockFormInfo}
+        >
+          <TypeEditor
+            resource={null}
+            structureDefinition={{
+              id: "ClaimResponse.addItem[0].factor",
+              path: "ClaimResponse.addItem[0].factor",
+              min: 1,
+              max: "1",
+              type: [
+                {
+                  extension: [
+                    {
+                      url: "http://hl7.org/fhir/StructureDefinition/structuredefinition-fhir-type",
+                      valueUrl: "test",
+                    },
+                  ],
+                  code: "decimal",
+                },
+              ],
+            }}
+            label={"ClaimResponse.addItem[0].factor"}
+            canEdit={true}
+            parentStructureDefinition={null}
+          />
+        </RequiredFieldsProvider>
+      </FormikProvider>
+    );
+    const inputField = screen.getByTestId(
+      "decimal-field-input-ClaimResponse.addItem[0].factor"
+    ) as HTMLInputElement;
+    expect(inputField).toBeInTheDocument();
+    expect(inputField.value).toBe("");
+
+    await userEvent.type(inputField, "1.234");
+    expect(onChange).toHaveBeenCalled();
+    await userEvent.type(inputField, "{backspace}".repeat(4));
+    expect(inputField.value).toBe("");
+    await userEvent.type(inputField, "abcdef");
+    expect(inputField.value).toBe("");
+    fireEvent.wheel(inputField);
+    expect(inputField).not.toHaveFocus();
+  });
+
+  test("Should render Decimal multiple cardinality, when values present", async () => {
+    const formik = {
+      handleChange: jest.fn(),
+      setFieldValue: jest.fn(),
+      setFieldTouched: jest.fn(),
+    };
+    const arrayDecimalFormik = {
+      ...formik,
+      values: {
+        ClaimResponse: {
+          addItem: [
+            {
+              factor: [1.5, 2.5],
+            },
+          ],
+        },
+      },
+      getFieldProps: (label: string) => {
+        const match = label.match(/factor\[(\d+)]/);
+        if (match) {
+          const index = parseInt(match[1]);
+          return {
+            value: [1.5, 2.5][index],
+            name: label,
+            onChange: jest.fn(),
+            onBlur: jest.fn(),
+          };
+        }
+      },
+    };
+    render(
+      <FormikProvider value={arrayDecimalFormik}>
+        <RequiredFieldsProvider
+          requiredFields={mockRequiredFields}
+          formInfo={mockFormInfo}
+        >
+          <TypeEditor
+            resource={null}
+            structureDefinition={{
+              id: "ClaimResponse.addItem[0].factor",
+              path: "ClaimResponse.addItem[0].factor",
+              min: 0,
+              max: "*",
+              type: [
+                {
+                  code: "decimal",
+                },
+              ],
+            }}
+            label={"ClaimResponse.addItem[0].factor"}
+            canEdit={true}
+            parentStructureDefinition={null}
+          />
+        </RequiredFieldsProvider>
+      </FormikProvider>
+    );
+    const input1 = screen.getByTestId(
+      "decimal-field-input-ClaimResponse.addItem[0].factor[0]"
+    ) as HTMLInputElement;
+    expect(input1).toBeInTheDocument();
+    expect(input1.value).toBe("1.5");
+    const input2 = screen.getByTestId(
+      "decimal-field-input-ClaimResponse.addItem[0].factor[1]"
+    ) as HTMLInputElement;
+    expect(input2).toBeInTheDocument();
+    expect(input2.value).toBe("2.5");
   });
 
   test("String field should display errors and helper text", () => {
@@ -726,6 +862,62 @@ describe("TypeEditor Component", () => {
     expect(
       screen.getByTestId("boolean-input-field-MedicationAbsent.meta")
     ).toBeInTheDocument();
+  });
+
+  test("Should update Boolean component value", async () => {
+    const setFieldValue = jest.fn();
+
+    const updatedMockFormik = {
+      ...mockFormik,
+      setFieldValue,
+      getFieldProps: () => ({
+        label: "MedicationAbsent.meta",
+        name: "MedicationAbsent.meta",
+        value: "true",
+        onChange: jest.fn(),
+        onBlur: jest.fn(),
+      }),
+    };
+
+    render(
+      <FormikProvider value={updatedMockFormik}>
+        <RequiredFieldsProvider
+          requiredFields={mockRequiredFields}
+          formInfo={mockFormInfo}
+        >
+          <TypeEditor
+            structureDefinition={{
+              id: "MedicationAbsent.meta",
+              path: "MedicationAbsent.meta",
+              min: 0,
+              max: "1",
+              type: [{ code: "boolean" }],
+            }}
+            label="MedicationAbsent.meta"
+            resource={null}
+            canEdit={true}
+            parentStructureDefinition={null}
+          />
+        </RequiredFieldsProvider>
+      </FormikProvider>
+    );
+
+    const selectField = screen.getByRole("combobox", {
+      name: "Meta",
+    });
+    expect(selectField).toBeInTheDocument();
+
+    userEvent.click(selectField);
+
+    const falseOption = screen.getByRole("option", { name: "false" });
+    userEvent.click(falseOption);
+    expect(setFieldValue).toHaveBeenCalledWith("MedicationAbsent.meta", false);
+
+    userEvent.click(selectField);
+
+    const trueOption = screen.getByRole("option", { name: "true" });
+    userEvent.click(trueOption);
+    expect(setFieldValue).toHaveBeenCalledWith("MedicationAbsent.meta", true);
   });
 
   test("Should render URI component", () => {
@@ -1148,7 +1340,7 @@ describe("TypeEditor Component", () => {
     const inputField = screen.getByTestId(
       "integer-field-input-ClaimResponse.order"
     ) as HTMLInputElement;
-    expect(inputField.value).toBe("1234");
+    expect(inputField.value).toBe("12");
   });
 
   test("Should render unsignedInt component", () => {
@@ -1182,7 +1374,7 @@ describe("TypeEditor Component", () => {
     const inputField = screen.getByTestId(
       "integer-field-input-ClaimResponse.order"
     ) as HTMLInputElement;
-    expect(inputField.value).toBe("1234");
+    expect(inputField.value).toBe("12");
   });
 
   test("Should render unsignedInt component", () => {
@@ -1216,7 +1408,7 @@ describe("TypeEditor Component", () => {
     const inputField = screen.getByTestId(
       "integer-field-input-ClaimResponse.order"
     ) as HTMLInputElement;
-    expect(inputField.value).toBe("1234");
+    expect(inputField.value).toBe("12");
   });
 
   test("Should render unsignedInt component with and without [0] already added", () => {
@@ -2135,16 +2327,14 @@ describe("TypeEditor Component", () => {
 
     // Verify mocked QuantityComponents for Low and High
     const lowComponent = await screen.findByTestId(
-      "quantity-component-Observation.referenceRange[0].age.low"
+      "decimal-field-Observation.referenceRange[0].age.low.value"
     );
     expect(lowComponent).toBeInTheDocument();
-    expect(lowComponent).toHaveTextContent("QuantityComponent Mock");
 
     const highComponent = await screen.findByTestId(
-      "quantity-component-Observation.referenceRange[0].age.high"
+      "decimal-field-Observation.referenceRange[0].age.high.value"
     );
     expect(highComponent).toBeInTheDocument();
-    expect(highComponent).toHaveTextContent("QuantityComponent Mock");
 
     // Assert Comparator is NOT present
     expect(screen.queryByLabelText(/Comparator/i)).not.toBeInTheDocument();
@@ -2240,12 +2430,19 @@ describe("TypeEditor Component", () => {
       </ExecutionContextProvider>
     );
 
-    // Verify the mocked QuantityComponent is rendered
-    const quantityComponent = await screen.findByTestId(
-      "quantity-component-Observation.valueQuantity"
+    // Comparator
+    const comparator = await screen.findByLabelText("Comparator");
+    expect(comparator).toBeInTheDocument();
+
+    // Value input
+    const valueInput = await screen.findByTestId(
+      "decimal-field-input-Observation.valueQuantity.value"
     );
-    expect(quantityComponent).toBeInTheDocument();
-    expect(quantityComponent).toHaveTextContent("QuantityComponent Mock");
+    expect(valueInput).toBeInTheDocument();
+
+    // Code input
+    const codeInput = await screen.findByTestId("code-input-input");
+    expect(codeInput).toBeInTheDocument();
   });
   test("renders QuantityComponent fields correctly with multiple cardinality", async () => {
     useFhirDefinitionsServiceApiMock.mockImplementation(
@@ -2337,12 +2534,20 @@ describe("TypeEditor Component", () => {
       </ExecutionContextProvider>
     );
 
-    // Verify the mocked QuantityComponent is rendered
-    const quantityComponent = await screen.findByTestId(
-      "quantity-component-Observation.valueQuantity[0]"
+    // Comparator
+    const comparator = await screen.findByLabelText("Comparator");
+    expect(comparator).toBeInTheDocument();
+
+    // Value input
+    const valueInput = await screen.findByTestId(
+      "decimal-field-input-Observation.valueQuantity[0].value"
     );
-    expect(quantityComponent).toBeInTheDocument();
-    expect(quantityComponent).toHaveTextContent("QuantityComponent Mock");
+
+    expect(valueInput).toBeInTheDocument();
+
+    // Code input
+    const codeInput = await screen.findByTestId("code-input-input");
+    expect(codeInput).toBeInTheDocument();
   });
 
   test("renders SimpleQuantityComponent fields correctly inside TypeEditor", async () => {
@@ -2443,12 +2648,19 @@ describe("TypeEditor Component", () => {
       </ExecutionContextProvider>
     );
 
-    // Verify the mocked QuantityComponent is rendered for SimpleQuantity
-    const quantityComponent = await screen.findByTestId(
-      "quantity-component-Observation.simpleQuantity"
+    // Value input
+    const valueInput = await screen.findByTestId(
+      "decimal-field-input-Observation.simpleQuantity.value"
     );
-    expect(quantityComponent).toBeInTheDocument();
-    expect(quantityComponent).toHaveTextContent("QuantityComponent Mock");
+    expect(valueInput).toBeInTheDocument();
+
+    // Code input
+    const codeInput = await screen.findByTestId("code-input-input");
+    expect(codeInput).toBeInTheDocument();
+
+    // Comparator should NOT exist
+    const comparator = screen.queryByLabelText("Comparator");
+    expect(comparator).not.toBeInTheDocument();
   });
 
   test("updates Formik when MoneyComponent value or currency changes", async () => {
@@ -2487,14 +2699,11 @@ describe("TypeEditor Component", () => {
       total: { value: 100, currency: "USD" },
     };
 
-    const claimValues = { Claim: claimResource };
-
-    //@ts-ignore
     const mockFormik: FormikContextType<any> = {
-      values: claimValues,
+      values: { Claim: claimResource },
       touched: {},
       getFieldProps: (label) => {
-        const value = getNestedProperty(claimValues, label);
+        const value = getNestedProperty(mockFormik.values, label);
         return {
           value,
           name: label,
@@ -2545,13 +2754,32 @@ describe("TypeEditor Component", () => {
         </FormikProvider>
       </ExecutionContextProvider>
     );
+    const valueInput = (await screen.findByTestId(
+      "decimal-field-input-Claim.total.value"
+    )) as HTMLInputElement;
+    expect(valueInput).toBeInTheDocument();
+    expect(valueInput.value).toBe("100");
 
-    // Verify the mocked MoneyComponent is rendered
-    const moneyComponent = await screen.findByTestId(
-      "money-component-Claim.total"
+    await userEvent.clear(valueInput);
+    await userEvent.type(valueInput, "250");
+    expect(valueInput);
+
+    const currencySelect = await screen.findByLabelText("Currency");
+    expect(currencySelect).toBeInTheDocument();
+
+    userEvent.click(currencySelect);
+    const cadOption = await screen.findByRole("option", {
+      name: "Canadian dollar",
+    });
+    userEvent.click(cadOption);
+
+    expect(mockFormik.setFieldValue).toHaveBeenCalledWith(
+      "Claim.total.currency",
+      "CAD"
     );
-    expect(moneyComponent).toBeInTheDocument();
-    expect(moneyComponent).toHaveTextContent("MoneyComponent Mock");
+    await waitFor(() => {
+      expect(currencySelect).toHaveTextContent("Canadian dollar");
+    });
   });
 
   // ========== NEW TESTS FOR ARRAY RENDERING AND CARDINALITY ==========
@@ -3515,16 +3743,25 @@ describe("TypeEditor Component", () => {
         setFieldValue: jest.fn(),
         setFieldTouched: jest.fn(),
         handleChange: jest.fn(),
-        getFieldProps: (label) => {
-          const value = getNestedProperty(quantityValues, label);
-          return {
-            value,
-            name: label,
-            onChange: jest.fn(),
-            onBlur: jest.fn(),
-          };
-        },
+        getFieldProps: jest.fn(),
       };
+
+      mockFormikQuantity.getFieldProps.mockImplementation((path) => {
+        const value = path
+          .replace(/\[(\d+)\]/g, ".$1")
+          .split(".")
+          .reduce(
+            (obj, key) => (obj ? obj[key] : undefined),
+            mockFormikQuantity.values
+          );
+
+        return {
+          name: path,
+          value,
+          onChange: jest.fn(),
+          onBlur: jest.fn(),
+        };
+      });
 
       render(
         <ExecutionContextProvider
@@ -3561,18 +3798,35 @@ describe("TypeEditor Component", () => {
         </ExecutionContextProvider>
       );
 
-      // Verify the mocked QuantityComponents are rendered (2 elements in array)
-      const quantityComponent0 = await screen.findByTestId(
-        "quantity-component-Device.property.valueQuantity[0]"
+      const valInput1 = await screen.findByTestId(
+        "decimal-field-input-Device.property.valueQuantity[0].value"
       );
-      expect(quantityComponent0).toBeInTheDocument();
-      expect(quantityComponent0).toHaveTextContent("QuantityComponent Mock");
+      expect(valInput1.value).toBe("10");
 
-      const quantityComponent1 = await screen.findByTestId(
-        "quantity-component-Device.property.valueQuantity[1]"
+      const valInput2 = await screen.findByTestId(
+        "decimal-field-input-Device.property.valueQuantity[1].value"
       );
-      expect(quantityComponent1).toBeInTheDocument();
-      expect(quantityComponent1).toHaveTextContent("QuantityComponent Mock");
+      expect(valInput2.value).toBe("20");
+
+      const codeInputs = await screen.findAllByTestId("code-input-input");
+      const comparatorInputs = await screen.findAllByTestId(
+        "code-selector-input-Comparator"
+      );
+      expect(codeInputs).toHaveLength(2);
+      expect(comparatorInputs).toHaveLength(2);
+
+      expect(comparatorInputs[0]).toHaveValue(">");
+      expect(comparatorInputs[1]).toHaveValue("<=");
+
+      expect(codeInputs[0]).toHaveValue("mg");
+      expect(codeInputs[1]).toHaveValue("g");
+
+      const addButtons = screen.getAllByText("Add Value Quantity");
+      expect(addButtons).toHaveLength(1);
+
+      userEvent.click(addButtons[0]);
+
+      expect(mockFormikQuantity.setFieldValue).toHaveBeenCalled();
     });
 
     test("Should not show add button for root level elements", () => {
@@ -4152,6 +4406,73 @@ describe("TypeEditor Component", () => {
       `date-time-format-selector-field-ClaimResponse.date[0]`
     );
     expect(inputDate).toBeInTheDocument();
+  });
+
+  test("Should render first level ContentReferenceType attribute", () => {
+    const adjudicationElementDef = {
+      id: "ClaimResponse.adjudication",
+      type: [],
+      max: "*",
+      min: 0,
+      canBeMultipleCardinality: true,
+      contentReference: "#ClaimResponse.item.adjudication",
+    };
+    const mockFormInfo = [
+      ["ClaimResponse.adjudication", adjudicationElementDef],
+      [
+        "ClaimResponse.item.adjudication",
+        {
+          id: "ClaimResponse.item.adjudication",
+          type: [{ code: "BackboneElement" }],
+          max: "1",
+          min: 1,
+          canBeMultipleCardinality: false,
+        },
+      ],
+      [
+        "ClaimResponse.item.adjudication.category",
+        {
+          id: "ClaimResponse.item.adjudication.category",
+          type: [{ code: "CodeableConcept" }],
+          max: "1",
+          min: 1,
+          canBeMultipleCardinality: false,
+        },
+      ],
+      [
+        "ClaimResponse.item.adjudication.reason",
+        {
+          id: "ClaimResponse.item.adjudication.reason",
+          type: [{ code: "CodeableConcept" }],
+          max: "1",
+          min: 0,
+          canBeMultipleCardinality: false,
+        },
+      ],
+    ];
+    // Override the global mock to return false for this test
+    const fhirUtils = require("../../../../../../../api/fhirDefinitionServiceUtilities");
+    jest.spyOn(fhirUtils, "isComponentDataType").mockReturnValue(false);
+
+    render(
+      <FormikProvider value={mockFormik}>
+        <RequiredFieldsProvider requiredFields={{}} formInfo={mockFormInfo}>
+          <TypeEditor
+            resource={{ resourceType: "ClaimResponse" }}
+            structureDefinition={adjudicationElementDef}
+            label="ClaimResponse.adjudication"
+            canEdit={true}
+            parentStructureDefinition={null}
+          />
+        </RequiredFieldsProvider>
+      </FormikProvider>
+    );
+
+    // "Category" and "Reason" elements from the referenced definition must be rendered
+    expect(screen.queryByText("Category")).toBeInTheDocument();
+    expect(screen.queryByText("Reason")).toBeInTheDocument();
+    // Restore the original mock
+    jest.restoreAllMocks();
   });
 
   test("Should render ContentReferenceType when childDef has contentReference", () => {
