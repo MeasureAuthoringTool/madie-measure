@@ -292,17 +292,17 @@ export default function ReferenceComponent({
                     "add_new_resource",
                     newMadieResource
                   );
-                // Append to array instead of overwriting - supports multiple "Add New" references
-                const existingResources =
-                  formikContext.values["add_new_resources"] || [];
-                formikContext.setFieldValue("add_new_resources", [
-                  ...existingResources,
-                  newMadieResource,
-                ]);
-                formikContext.setFieldValue(
-                  `${label}.reference`,
-                  `${selectedReferenceType}/${newMadieResource.resource.id}`
-                );
+                  // Append to array instead of overwriting - supports multiple "Add New" references
+                  const existingResources =
+                    formikContext.values["add_new_resources"] || [];
+                  formikContext.setFieldValue("add_new_resources", [
+                    ...existingResources,
+                    newMadieResource,
+                  ]);
+                  formikContext.setFieldValue(
+                    `${label}.reference`,
+                    `${selectedReferenceType}/${newMadieResource.resource.id}`
+                  );
                   setSelectedReferenceId("add_new_id");
                 }
               } else {
