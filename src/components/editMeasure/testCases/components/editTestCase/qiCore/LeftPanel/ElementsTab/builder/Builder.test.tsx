@@ -192,7 +192,7 @@ describe("Builder Component", () => {
     (useFormikContext as jest.Mock).mockReturnValue({ resetForm, dirty: true });
 
     renderBuilderComponent(mockBundle);
-    const addedTab = screen.getByText("Added (2)");
+    const addedTab = screen.getByText("Added (3)");
 
     userEvent.click(addedTab);
     const discardDialog = await screen.getByRole("dialog", {
@@ -225,7 +225,7 @@ describe("Builder Component", () => {
     renderBuilderComponent(mockBundle);
 
     const availableTab = await screen.findByText("Available");
-    const addedTab = await screen.findByText("Added (2)");
+    const addedTab = await screen.findByText("Added (3)");
 
     expect(availableTab).toHaveAttribute("aria-selected", "true");
     expect(await screen.findByLabelText("Search")).toBeInTheDocument();
@@ -284,7 +284,7 @@ describe("Builder Component", () => {
     expect(screen.queryByText("Available")).not.toBeInTheDocument();
 
     // Added tab should still be present and selected by default
-    const addedTab = await screen.findByText("Added (2)");
+    const addedTab = await screen.findByText("Added (3)");
     expect(addedTab).toBeInTheDocument();
     expect(addedTab).toHaveAttribute("aria-selected", "true");
 
@@ -373,7 +373,7 @@ describe("scrollToElementByIdWhenAvailable", () => {
 
     renderBuilderComponent(mockBundle);
 
-    const addedTab = await screen.findByText("Added (2)");
+    const addedTab = await screen.findByText("Added (3)");
     userEvent.click(addedTab);
 
     await waitFor(() => {
@@ -392,7 +392,7 @@ describe("scrollToElementByIdWhenAvailable", () => {
 
     const { container } = renderBuilderComponent(mockBundle);
 
-    const addedTab = await screen.findByText("Added (2)");
+    const addedTab = await screen.findByText("Added (3)");
     userEvent.click(addedTab);
 
     await waitFor(() => {
@@ -427,7 +427,7 @@ describe("scrollToElementByIdWhenAvailable", () => {
 
     const { container } = renderBuilderComponent(mockBundle);
 
-    const addedTab = await screen.findByText("Added (2)");
+    const addedTab = await screen.findByText("Added (3)");
     userEvent.click(addedTab);
 
     await waitFor(() => {

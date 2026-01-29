@@ -72,7 +72,6 @@ import {
   MenuItemContainer,
 } from "../../../../../styles/editMeasure/populationCriteria/groups/index";
 import CompletionIndicator from "../CompletionIndicator";
-import CompositeScoring from "../Composite/compositeScoring/CompositeScoring";
 import CompositeComponent from "../Composite/CompositeComponent";
 
 interface ColSpanPopulationsType {
@@ -685,6 +684,24 @@ const MeasureGroups = (props: MeasureGroupProps) => {
             "Measure criteria successfully deleted. Your Criteria and populations have been re numbered."
           );
         }
+      })
+      .catch((error) => {
+        handleDialogClose();
+        if (error?.message.includes("locked")) {
+          props.setAlertMessage({
+            type: "error",
+            message:
+              "The Population Criteria cannot be deleted because changes to the Population Criteria will update test cases and one or more test cases are locked by another user.",
+            canClose: false,
+          });
+          navigate(`${groupsBaseUrl}/${measureGroupNumber}`);
+        } else {
+          props.setAlertMessage({
+            type: "error",
+            message: error.message,
+            canClose: false,
+          });
+        }
       });
   };
 
@@ -1255,7 +1272,11 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                 )}
                 {activeTab === "components" && (
                   <div data-testid="components">
-                    <CompositeComponent canEdit={canEdit} formik={formik} />
+                    <CompositeComponent
+                      canEdit={canEdit}
+                      formik={formik}
+                      measure={measure}
+                    />
                   </div>
                 )}
                 {activeTab === "stratification" && (
