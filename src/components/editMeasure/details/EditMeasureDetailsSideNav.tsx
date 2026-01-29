@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { Tab, Tabs } from "@madie/madie-design-system/dist/react";
 import "../../../styles/VerticalSideBarNav.scss";
@@ -36,29 +36,6 @@ export default function EditMeasureDetailsSideNav(
       return acc;
     }, {} as Record<string, boolean>)
   );
-
-  useEffect(() => {
-    setExpandedSections((prev) => {
-      const nextState = { ...prev };
-      let changed = false;
-
-      links.forEach((link) => {
-        if (nextState[link.title] === undefined) {
-          nextState[link.title] = true;
-          changed = true;
-        }
-      });
-
-      Object.keys(nextState).forEach((title) => {
-        if (!links.find((link) => link.title === title)) {
-          delete nextState[title];
-          changed = true;
-        }
-      });
-
-      return changed ? nextState : prev;
-    });
-  }, [links]);
 
   const toggleSection = (title: string) => {
     setExpandedSections((prev) => ({

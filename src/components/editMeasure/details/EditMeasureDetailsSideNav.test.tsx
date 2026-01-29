@@ -124,18 +124,17 @@ describe("EditMeasureDetailsSideNav", () => {
       },
     ],
   };
-  const RenderEditMeasureDetailsSideNav = (props) => {
-    return render(
+  const renderEditMeasureDetailsSideNav = (props) =>
+    render(
       <MemoryRouter
         initialEntries={[{ pathname: "/measures/test-measure/edit/details" }]}
       >
         <EditMeasureDetailsSideNav {...props} />
       </MemoryRouter>
     );
-  };
 
   test("Measure Details side nav bar is rendered with appropriate titles, icons, and nav links", async () => {
-    await waitFor(() => RenderEditMeasureDetailsSideNav(initialProps));
+    await waitFor(() => renderEditMeasureDetailsSideNav(initialProps));
 
     expect(screen.queryByText("General Information")).toBeInTheDocument();
     expect(
@@ -245,7 +244,7 @@ describe("EditMeasureDetailsSideNav", () => {
   });
 
   test("Measure Details sections can be collapsed and expanded", async () => {
-    await waitFor(() => RenderEditMeasureDetailsSideNav(initialProps));
+    await waitFor(() => renderEditMeasureDetailsSideNav(initialProps));
 
     const generalInfoToggle = screen.getByRole("button", {
       name: "General Information",
