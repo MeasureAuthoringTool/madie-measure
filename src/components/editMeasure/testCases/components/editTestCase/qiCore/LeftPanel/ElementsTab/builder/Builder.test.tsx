@@ -190,7 +190,35 @@ describe("Builder Component", () => {
     jest.resetAllMocks();
   });
 
-  it("renders the Available tab content correctly", async () => {
+  it("renders the component correctly", async () => {
+    (useFormikContext as jest.Mock).mockReturnValue({ resetForm, dirty: true });
+
+    renderBuilderComponent(mockBundle);
+    const addedTab = screen.getByText("Added (3)");
+
+    userEvent.click(addedTab);
+    const discardDialog = await screen.getByRole("dialog", {
+      name: "Discard Changes?",
+    });
+    expect(discardDialog).toBeInTheDocument();
+    // close
+    const closeButton = screen.getByRole("button", { name: /close/i });
+    userEvent.click(closeButton);
+    await waitFor(() => {
+      expect(closeButton).not.toBeInTheDocument();
+    });
+    userEvent.click(addedTab);
+    await waitFor(() => {
+      expect(screen.getByText("Discard Changes?")).toBeInTheDocument();
+    });
+    // on continue
+    userEvent.click(screen.getByText("Yes, Discard All Changes"));
+    await waitFor(() => {
+      expect(closeButton).not.toBeInTheDocument();
+    });
+  });
+
+  it("should render Available and Added tabs correctly", async () => {
     (useFormikContext as jest.Mock).mockReturnValue({
       resetForm,
       dirty: false,
@@ -198,6 +226,10 @@ describe("Builder Component", () => {
 
     renderBuilderComponent(mockBundle, "available");
 
+    const availableTab = await screen.findByText("Available");
+    const addedTab = await screen.findByText("Added (3)");
+
+    expect(availableTab).toHaveAttribute("aria-selected", "true");
     expect(await screen.findByLabelText("Search")).toBeInTheDocument();
     const rows = await screen.findAllByRole("row");
     expect(rows).toHaveLength(5);
@@ -257,42 +289,10 @@ describe("Builder Component", () => {
     expect(screen.queryByLabelText("Search")).not.toBeInTheDocument();
   });
 
-  it("should render Added content when canEdit is false and activeTab is added", async (bundleToAdd = mockBundle) => {
-    (useFormikContext as jest.Mock).mockReturnValue({
-      resetForm,
-      dirty: false,
-    });
-
-    render(
-      <ApiContextProvider value={serviceConfig}>
-        <ExecutionContextProvider
-          value={{
-            measureState: [mockMeasure, jest.fn()],
-            bundleState: [null, jest.fn()] as any,
-            valueSetsState: [null, jest.fn()] as any,
-            executionContextReady: true,
-            executing: false,
-            setExecuting: jest.fn(),
-            contextFailure: false,
-          }}
-        >
-          <QiCoreResourceContext.Provider
-            value={{
-              state: { bundle: bundleToAdd },
-              dispatch: jest.fn(),
-            }}
-          >
-            <Builder
-              canEdit={false}
-              testCase={{} as TestCase}
-              setInitialFormikValuesStu6={jest.fn()}
-              setValidationSchema={jest.fn()}
-              activeTab="added"
-            />
-          </QiCoreResourceContext.Provider>
-        </ExecutionContextProvider>
-      </ApiContextProvider>
-    );
+    // Added tab should still be present and selected by default
+    const addedTab = await screen.findByText("Added (3)");
+    expect(addedTab).toBeInTheDocument();
+    expect(addedTab).toHaveAttribute("aria-selected", "true");
 
     // Grid content should be visible
     expect(screen.getByText("Profile")).toBeInTheDocument();
@@ -376,9 +376,15 @@ describe("scrollToElementByIdWhenAvailable", () => {
 
     const { container } = renderBuilderComponent(mockBundle, "added");
 
-    // Verify the wrapper structure exists for the Added tab content
-    const wrapperDiv = container.querySelector('[style*="position: relative"]');
-    expect(wrapperDiv).toBeInTheDocument();
+    const addedTab = await screen.findByText("Added (3)");
+    userEvent.click(addedTab);
+
+    await waitFor(() => {
+      expect(addedTab).toHaveAttribute("aria-selected", "true");
+    });
+
+    // Initially, the spinner should not be visible
+    expect(screen.queryByRole("progressbar")).not.toBeInTheDocument();
   });
 
   it("displays Added tab content with wrapper for spinner overlay", async () => {
@@ -387,7 +393,14 @@ describe("scrollToElementByIdWhenAvailable", () => {
       dirty: false,
     });
 
-    const { container } = renderBuilderComponent(mockBundle, "added");
+    const { container } = renderBuilderComponent(mockBundle);
+
+    const addedTab = await screen.findByText("Added (3)");
+    userEvent.click(addedTab);
+
+    await waitFor(() => {
+      expect(addedTab).toHaveAttribute("aria-selected", "true");
+    });
 
     // Check that the wrapper div with relative positioning exists
     const tabContent = container.querySelector('[style*="position: relative"]');
@@ -415,7 +428,14 @@ describe("scrollToElementByIdWhenAvailable", () => {
       dirty: false,
     });
 
-    const { container } = renderBuilderComponent(mockBundle, "added");
+    const { container } = renderBuilderComponent(mockBundle);
+
+    const addedTab = await screen.findByText("Added (3)");
+    userEvent.click(addedTab);
+
+    await waitFor(() => {
+      expect(addedTab).toHaveAttribute("aria-selected", "true");
+    });
 
     // The ResourceEditor should receive the applyLoading props
     // Verify the wrapper structure that contains ResourceEditor
