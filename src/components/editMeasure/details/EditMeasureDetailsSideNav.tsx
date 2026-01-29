@@ -28,12 +28,13 @@ export default function EditMeasureDetailsSideNav(
     navigate(newPath);
   };
 
-  const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>(
-    () =>
-      links.reduce((acc, link) => {
-        acc[link.title] = true;
-        return acc;
-      }, {} as Record<string, boolean>)
+  const [expandedSections, setExpandedSections] = useState<
+    Record<string, boolean>
+  >(() =>
+    links.reduce((acc, link) => {
+      acc[link.title] = true;
+      return acc;
+    }, {} as Record<string, boolean>)
   );
 
   useEffect(() => {
@@ -65,9 +66,6 @@ export default function EditMeasureDetailsSideNav(
       [title]: !prev[title],
     }));
   };
-
-  const sectionIsActive = (link: Link) =>
-    link.links?.some((linkInfo) => linkInfo.href === endRoute);
 
   function getTabLabel(linkInfo) {
     if (linkInfo.displayCompletedIcon) {
@@ -115,11 +113,7 @@ export default function EditMeasureDetailsSideNav(
               <div className="link-container" key={link.title}>
                 <button
                   type="button"
-                  className={
-                    sectionIsActive(link)
-                      ? "collapsable-button active"
-                      : "collapsable-button"
-                  }
+                  className="collapsable-button"
                   onClick={() => toggleSection(link.title)}
                   aria-expanded={isExpanded}
                   aria-controls={`${sectionId}-tabs`}
