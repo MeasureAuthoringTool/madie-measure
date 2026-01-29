@@ -555,7 +555,7 @@ describe("ReferenceComponent", () => {
     await userEvent.click(screen.getByText("ID Not Present (Add New)"));
     // ID Not Present (Add New)-option
     await waitFor(() => {
-      expect(screen.getByText("Chose Profile")).toBeVisible();
+      expect(screen.getByText("Choose Profile")).toBeVisible();
     });
     // select an add option
     const combo2 = screen.getByRole("combobox", { name: /Reference/i });
@@ -582,7 +582,7 @@ describe("ReferenceComponent", () => {
     // close it
     userEvent.click(screen.getByTestId("add-new-profile-ref-cancel-button"));
     await waitFor(() => {
-      expect(screen.queryByText("Chose Profile")).not.toBeInTheDocument();
+      expect(screen.queryByText("Chooe Profile")).not.toBeInTheDocument();
     });
   });
 
@@ -640,7 +640,7 @@ describe("ReferenceComponent", () => {
     await userEvent.click(screen.getByText("ID Not Present (Add New)"));
     // ID Not Present (Add New)-option
     await waitFor(() => {
-      expect(screen.getByText("Chose Profile")).toBeVisible();
+      expect(screen.getByText("Choose Profile")).toBeVisible();
     });
     // select an add option
     const combo2 = screen.getByRole("combobox", { name: /Reference/i });
@@ -666,7 +666,7 @@ describe("ReferenceComponent", () => {
     // save it
     userEvent.click(screen.getByTestId("add-new-profile-ref-save-button"));
     await waitFor(() => {
-      expect(screen.queryByText("Chose Profile")).not.toBeInTheDocument();
+      expect(screen.queryByText("Choose Profile")).not.toBeInTheDocument();
     });
   });
 

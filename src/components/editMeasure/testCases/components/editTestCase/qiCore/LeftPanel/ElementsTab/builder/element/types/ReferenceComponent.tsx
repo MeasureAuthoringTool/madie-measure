@@ -327,7 +327,7 @@ export default function ReferenceComponent({
       )}
       <MadieDialog
         form
-        title="Chose Profile"
+        title="Choose Profile"
         dialogProps={{
           onClose: () => {
             setOpen(false);
@@ -383,11 +383,6 @@ export default function ReferenceComponent({
             onChange={(e) => {
               setSelectedProfileAddNew(e.target.value);
             }}
-            placeHolder={{
-              name: "Select",
-              value: "",
-            }}
-            data-testId=""
             value={selectedProfileAddNew}
             renderValue={(selected) => {
               // Find the corresponding label for the selected value
