@@ -18,14 +18,29 @@ import Typography from "@mui/material/Typography";
 import ResourceContext from "../ResourceContext";
 import { Button } from "@madie/madie-design-system/dist/react";
 import { ResourceIdentifier } from "../../../../../../../api/models/ResourceIdentifier";
+import { Box } from "@mui/material";
 
+export const UI_BUILDER_VIEW_MESSAGE =
+  "Viewing this in the UI builder is unsupported.";
+export const UI_BUILDER_EDIT_MESSAGE =
+  "Fixing this in the UI builder is unsupported. You can utilize the JSON workspace to edit it. Please contact the help desk if you have additional questions.";
 export const UNSUPPORTED_PROFILE_ERROR = "Unsupported Profile";
-export const UNSUPPORTED_PROFILE_MESSAGE =
-  "This profile is unsupported in the UI builder. You can utilize the JSON workspace to edit it. Please contact the help desk if you have additional questions.";
 export const RESOURCE_TYPE_MISMATCH_ERROR =
   "Profile and Resource Type do not match";
-export const RESOURCE_TYPE_MISMATCH_MESSAGE =
-  "Profile and Resource Type do not match. Fixing this in the UI builder is unsupported. You can utilize the JSON workspace to edit it. Please contact the help desk if you have additional questions.";
+
+const getUnsupportedProfileMessage = (canEdit: boolean) => {
+  if (canEdit) {
+    return `${UNSUPPORTED_PROFILE_ERROR}. ${UI_BUILDER_EDIT_MESSAGE}`;
+  }
+  return `${UNSUPPORTED_PROFILE_ERROR}. ${UI_BUILDER_VIEW_MESSAGE}`;
+};
+
+const getResourceTypeMismatchMessage = (canEdit: boolean) => {
+  if (canEdit) {
+    return `${RESOURCE_TYPE_MISMATCH_ERROR}. ${UI_BUILDER_EDIT_MESSAGE}`;
+  }
+  return `${RESOURCE_TYPE_MISMATCH_ERROR}. ${UI_BUILDER_VIEW_MESSAGE}`;
+};
 
 interface ProfileValidationResult {
   isValid: boolean;
@@ -50,7 +65,8 @@ interface TestCaseSummaryGridProps {
 
 export const validateProfiles = (
   entry: BundleEntry,
-  allResourceProfiles: ResourceIdentifier[]
+  allResourceProfiles: ResourceIdentifier[],
+  canEdit: boolean
 ): ProfileValidationResult => {
   // get list of profiles for a test case resource from the meta
   const profiles = entry?.resource?.meta?.profile || [];
@@ -71,7 +87,7 @@ export const validateProfiles = (
     return {
       isValid: false,
       error: UNSUPPORTED_PROFILE_ERROR,
-      message: UNSUPPORTED_PROFILE_MESSAGE,
+      message: getUnsupportedProfileMessage(canEdit),
     };
   }
 
@@ -83,7 +99,7 @@ export const validateProfiles = (
     return {
       isValid: false,
       error: RESOURCE_TYPE_MISMATCH_ERROR,
-      message: RESOURCE_TYPE_MISMATCH_MESSAGE,
+      message: getResourceTypeMismatchMessage(canEdit),
     };
   }
   return { error: "", message: "", isValid: true };
@@ -103,9 +119,13 @@ const TestCaseSummaryGrid = ({
     () =>
       gridData?.map((gridItem) => ({
         ...gridItem,
-        validationResult: validateProfiles(gridItem.entry, allResourceProfiles),
+        validationResult: validateProfiles(
+          gridItem.entry,
+          allResourceProfiles,
+          testCaseCanEdit
+        ),
       })) ?? [],
-    [gridData, allResourceProfiles]
+    [gridData, allResourceProfiles, testCaseCanEdit]
   );
 
   const actions = React.useMemo<ActionItemDef[]>(
@@ -198,18 +218,29 @@ const TestCaseSummaryGrid = ({
               )
             : viewAction;
           return readOnly ? (
-            <Button
-              variant="outline-filled"
-              data-testid={`view-test-case-${entry.resource.id}`}
-              onClick={() => {
-                onRowEdit(entry);
-              }}
-              tabIndex={0}
-              role="button"
-              aria-label={`View test case ${row.original.title} id ${entry.resource.id}`}
+            <Tooltip
+              title={validationResult.message}
+              placement="bottom-start"
+              arrow
+              enterTouchDelay={0}
+              aria-label={validationResult.message}
             >
-              View
-            </Button>
+              <Box component="span" sx={{ display: "inline-block" }}>
+                <Button
+                  disabled={!validationResult.isValid}
+                  variant="outline-filled"
+                  data-testid={`view-profile-${entry.resource.id}`}
+                  onClick={() => {
+                    onRowEdit(entry);
+                  }}
+                  tabIndex={0}
+                  role="button"
+                  aria-label={`View profile ${row.original.title} id ${entry.resource.id}`}
+                >
+                  View
+                </Button>
+              </Box>
+            </Tooltip>
           ) : (
             <ActionCenter
               actions={rowActions}

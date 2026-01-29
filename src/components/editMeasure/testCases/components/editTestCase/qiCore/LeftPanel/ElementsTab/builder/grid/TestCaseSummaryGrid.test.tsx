@@ -263,6 +263,33 @@ describe("TestCaseSummaryGrid", () => {
     expect(mockOnRowEdit).not.toHaveBeenCalled();
   });
 
+  it("should display error message for mismatched profile without edit permissions", async () => {
+    renderWithResourceContext(
+      <TestCaseSummaryGrid
+        gridData={
+          [
+            ...gridData,
+            {
+              title: "QICore Practitioner",
+              entry: mockBundle.entry[2], // mismatched profile & resourceType
+            },
+          ] as GridDataEntry[]
+        }
+        onRowEdit={mockOnRowEdit}
+        onRowDelete={mockOnRowDelete}
+        testCaseCanEdit={undefined}
+        readOnly={true}
+      />
+    );
+
+    expect(screen.getByText(RESOURCE_TYPE_MISMATCH_ERROR)).toBeInTheDocument();
+    const viewAction = await screen.findByTestId("view-profile-patient-1");
+    expect(viewAction).toHaveAttribute("disabled");
+    // Ensure clicking it does NOT call edit
+    userEvent.click(viewAction);
+    expect(mockOnRowEdit).not.toHaveBeenCalled();
+  });
+
   it("should call onRowEdit when Edit action is clicked (Supported)", async () => {
     renderWithResourceContext(
       <TestCaseSummaryGrid
@@ -295,7 +322,7 @@ describe("TestCaseSummaryGrid", () => {
       />
     );
 
-    const firstActionCenterButton = screen.getByTestId("view-test-case-ec-1");
+    const firstActionCenterButton = screen.getByTestId("view-profile-ec-1");
     userEvent.click(firstActionCenterButton);
     expect(mockOnRowEdit).toHaveBeenCalledWith(mockBundle.entry[0]);
   });
