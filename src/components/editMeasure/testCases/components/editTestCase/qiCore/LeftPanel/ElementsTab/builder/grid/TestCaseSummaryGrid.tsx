@@ -17,10 +17,28 @@ import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
 import ResourceContext from "../ResourceContext";
 import { Button } from "@madie/madie-design-system/dist/react";
+import { ResourceIdentifier } from "../../../../../../../api/models/ResourceIdentifier";
+
+export const UNSUPPORTED_PROFILE_ERROR = "Unsupported Profile";
+export const UNSUPPORTED_PROFILE_MESSAGE =
+  "This profile is unsupported in the UI builder. You can utilize the JSON workspace to edit it. Please contact the help desk if you have additional questions.";
+export const RESOURCE_TYPE_MISMATCH_ERROR =
+  "Profile and Resource Type do not match";
+export const RESOURCE_TYPE_MISMATCH_MESSAGE =
+  "Profile and Resource Type do not match. Fixing this in the UI builder is unsupported. You can utilize the JSON workspace to edit it. Please contact the help desk if you have additional questions.";
+
+interface ProfileValidationResult {
+  isValid: boolean;
+  error: string;
+  message: string;
+}
+
 export interface GridDataEntry {
   title: string;
   entry: BundleEntry;
+  validationResult?: ProfileValidationResult;
 }
+
 interface TestCaseSummaryGridProps {
   onRowEdit: (row: any) => void;
   onRowDelete: (row: any) => void;
@@ -29,6 +47,47 @@ interface TestCaseSummaryGridProps {
   selectedRowId?: string;
   readOnly: boolean;
 }
+
+export const validateProfiles = (
+  entry: BundleEntry,
+  allResourceProfiles: ResourceIdentifier[]
+): ProfileValidationResult => {
+  // get list of profiles for a test case resource from the meta
+  const profiles = entry?.resource?.meta?.profile || [];
+
+  // find list of profiles from allResourceProfiles that match test case resource profiles
+  const supportedProfiles = Array.from(
+    allResourceProfiles
+      .filter((resource) => profiles.includes(resource.profile))
+      .reduce((map, resource) => map.set(resource.id, resource), new Map()) // dedup
+      .values()
+  );
+
+  // if count doesn't match, then some profiles are unsupported
+  if (
+    supportedProfiles.length === 0 ||
+    supportedProfiles.length !== profiles.length
+  ) {
+    return {
+      isValid: false,
+      error: UNSUPPORTED_PROFILE_ERROR,
+      message: UNSUPPORTED_PROFILE_MESSAGE,
+    };
+  }
+
+  // make sure all profiles have same resource type as the test case resource
+  const resourceTypeMatch = supportedProfiles.every(
+    (profile) => profile.type === entry?.resource.resourceType
+  );
+  if (!resourceTypeMatch) {
+    return {
+      isValid: false,
+      error: RESOURCE_TYPE_MISMATCH_ERROR,
+      message: RESOURCE_TYPE_MISMATCH_MESSAGE,
+    };
+  }
+  return { error: "", message: "", isValid: true };
+};
 
 const TestCaseSummaryGrid = ({
   gridData,
@@ -40,7 +99,14 @@ const TestCaseSummaryGrid = ({
 }: TestCaseSummaryGridProps) => {
   const allResourceProfiles = useContext(ResourceContext); // get all profiles loaded from builder
 
-  const data = React.useMemo(() => gridData ?? [], [gridData]);
+  const data = React.useMemo(
+    () =>
+      gridData?.map((gridItem) => ({
+        ...gridItem,
+        validationResult: validateProfiles(gridItem.entry, allResourceProfiles),
+      })) ?? [],
+    [gridData, allResourceProfiles]
+  );
 
   const actions = React.useMemo<ActionItemDef[]>(
     () => [
@@ -69,31 +135,23 @@ const TestCaseSummaryGrid = ({
     [onRowEdit]
   );
 
-  const isSupportedProfile = (entry: BundleEntry) => {
-    const profiles = entry?.resource?.meta?.profile || [];
-    return profiles.some((url: string) =>
-      allResourceProfiles?.some((profileObj: any) => profileObj.profile === url)
-    );
-  };
-
   const columns = React.useMemo<ColumnDef<any>[]>(
     () => [
       {
         header: "Profile",
         id: "resourceType",
         cell: ({ row }) => {
-          const entry = row.original.entry;
-          const supported = isSupportedProfile(entry);
+          const validationResult = row.original.validationResult;
           return (
             <div>
               <div>{row.original.title}</div>
-              {!supported && (
+              {validationResult && !validationResult.isValid && (
                 <Tooltip
-                  title="This profile is unsupported in the UI builder. You can utilize the JSON workspace to edit it. Please contact the help desk if you have additional questions."
+                  title={validationResult.message}
                   placement="bottom-start"
                   arrow
                   enterTouchDelay={0}
-                  aria-label="Unsupported profile tooltip"
+                  aria-label="Unsupported profile"
                 >
                   <Typography
                     variant="caption"
@@ -104,9 +162,9 @@ const TestCaseSummaryGrid = ({
                       mt: 0.5,
                     }}
                     tabIndex={0}
-                    aria-label="Unsupported Profile"
+                    aria-label={validationResult.error}
                   >
-                    Unsupported Profile
+                    {validationResult.error}
                   </Typography>
                 </Tooltip>
               )}
@@ -124,15 +182,17 @@ const TestCaseSummaryGrid = ({
         id: "actions",
         cell: ({ row }) => {
           const entry = row.original.entry;
-          const supported = isSupportedProfile(entry);
+          const validationResult = row.original.validationResult;
           // For edit action, disable if unsupported
           const rowActions = testCaseCanEdit
             ? actions.map((action) =>
                 action.name === "Edit"
                   ? {
                       ...action,
-                      disabled: !supported,
-                      tooltip: !supported ? "Unsupported Profile" : undefined,
+                      disabled: !validationResult.isValid,
+                      tooltip: !validationResult.isValid
+                        ? validationResult.message
+                        : undefined,
                     }
                   : action
               )
@@ -140,27 +200,27 @@ const TestCaseSummaryGrid = ({
           return readOnly ? (
             <Button
               variant="outline-filled"
-              data-testid={`view-test-case-${row.original.entry.resource.id}`}
+              data-testid={`view-test-case-${entry.resource.id}`}
               onClick={() => {
-                onRowEdit(row.original.entry);
+                onRowEdit(entry);
               }}
               tabIndex={0}
               role="button"
-              aria-label={`View test case ${row.original.title} id ${row.original.entry.resource.id}`}
+              aria-label={`View test case ${row.original.title} id ${entry.resource.id}`}
             >
               View
             </Button>
           ) : (
             <ActionCenter
               actions={rowActions}
-              testId={row.original.entry.resource.id}
-              target={row.original.entry}
+              testId={entry.resource.id}
+              target={entry}
             />
           );
         },
       },
     ],
-    [actions, testCaseCanEdit, viewAction]
+    [testCaseCanEdit, actions, viewAction, readOnly, onRowEdit]
   );
 
   const table = useReactTable({

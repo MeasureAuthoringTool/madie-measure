@@ -1,6 +1,10 @@
 import * as React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
-import TestCaseSummaryGrid, { GridDataEntry } from "./TestCaseSummaryGrid";
+import TestCaseSummaryGrid, {
+  GridDataEntry,
+  RESOURCE_TYPE_MISMATCH_ERROR,
+  UNSUPPORTED_PROFILE_ERROR,
+} from "./TestCaseSummaryGrid";
 import { within } from "@testing-library/dom";
 import userEvent from "@testing-library/user-event";
 import ResourceContext from "../ResourceContext";
@@ -25,6 +29,17 @@ export const mockBundle = {
         // No profile = Unsupported
       },
     },
+    {
+      resource: {
+        resourceType: "Practitioner",
+        id: "patient-1",
+        meta: {
+          profile: [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient",
+          ],
+        }, // profile & resourceType mismatch
+      },
+    },
   ],
 };
 
@@ -45,6 +60,13 @@ const resourceIdentifiers = [
     category: "Clinical",
     profile:
       "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-encounter",
+  },
+  {
+    id: "qicore-patient",
+    title: "QICore Patient",
+    type: "Patient",
+    category: "Clinical",
+    profile: "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient",
   },
   // No Procedure profile, so Procedure is unsupported
 ];
@@ -72,6 +94,7 @@ describe("TestCaseSummaryGrid", () => {
         onRowEdit={mockOnRowEdit}
         onRowDelete={mockOnRowDelete}
         testCaseCanEdit={true}
+        readOnly={false}
       />
     );
 
@@ -103,7 +126,7 @@ describe("TestCaseSummaryGrid", () => {
     // Verify unsupported message/tooltip is present for unsupported profile
     expect(
       within(rows[2].querySelector("td:nth-child(1)")).getByText(
-        "Unsupported Profile"
+        UNSUPPORTED_PROFILE_ERROR
       )
     ).toBeInTheDocument();
   });
@@ -115,6 +138,7 @@ describe("TestCaseSummaryGrid", () => {
         onRowEdit={mockOnRowEdit}
         onRowDelete={mockOnRowDelete}
         testCaseCanEdit={true}
+        readOnly={false}
       />
     );
 
@@ -129,6 +153,7 @@ describe("TestCaseSummaryGrid", () => {
         onRowEdit={mockOnRowEdit}
         onRowDelete={mockOnRowDelete}
         testCaseCanEdit={true}
+        readOnly={false}
       />
     );
 
@@ -143,6 +168,7 @@ describe("TestCaseSummaryGrid", () => {
         onRowEdit={mockOnRowEdit}
         onRowDelete={mockOnRowDelete}
         testCaseCanEdit={true}
+        readOnly={false}
       />
     );
 
@@ -170,6 +196,7 @@ describe("TestCaseSummaryGrid", () => {
         onRowEdit={mockOnRowEdit}
         onRowDelete={mockOnRowDelete}
         testCaseCanEdit={true}
+        readOnly={false}
       />
     );
 
@@ -194,6 +221,48 @@ describe("TestCaseSummaryGrid", () => {
     expect(mockOnRowEdit).not.toHaveBeenCalled();
   });
 
+  it("should display error message if Profile doesn't match with correct resource type", async () => {
+    renderWithResourceContext(
+      <TestCaseSummaryGrid
+        gridData={
+          [
+            ...gridData,
+            {
+              title: "QICore Practitioner",
+              entry: mockBundle.entry[2], // mismatched profile & resourceType
+            },
+          ] as GridDataEntry[]
+        }
+        onRowEdit={mockOnRowEdit}
+        onRowDelete={mockOnRowDelete}
+        testCaseCanEdit={true}
+        readOnly={false}
+      />
+    );
+
+    const actionCenterButton = screen.getByTestId(
+      "action-center-button-patient-1"
+    );
+    userEvent.click(actionCenterButton);
+
+    // Edit should be disabled.
+    const editAction = await screen.findByTestId(
+      "action-center-patient-1_Edit"
+    );
+    expect(editAction).toHaveAttribute("aria-disabled", "true");
+
+    // Delete should still be enabled
+    const deleteAction = await screen.findByRole("menuitem", {
+      name: "Delete",
+    });
+    expect(deleteAction).not.toHaveAttribute("aria-disabled", "true");
+    expect(screen.getByText(RESOURCE_TYPE_MISMATCH_ERROR)).toBeInTheDocument();
+
+    // Ensure clicking it does NOT call edit
+    userEvent.click(editAction);
+    expect(mockOnRowEdit).not.toHaveBeenCalled();
+  });
+
   it("should call onRowEdit when Edit action is clicked (Supported)", async () => {
     renderWithResourceContext(
       <TestCaseSummaryGrid
@@ -201,6 +270,7 @@ describe("TestCaseSummaryGrid", () => {
         onRowEdit={mockOnRowEdit}
         onRowDelete={mockOnRowDelete}
         testCaseCanEdit={true}
+        readOnly={false}
       />
     );
 
@@ -237,6 +307,7 @@ describe("TestCaseSummaryGrid", () => {
         onRowEdit={mockOnRowEdit}
         onRowDelete={mockOnRowDelete}
         testCaseCanEdit={true}
+        readOnly={false}
       />
     );
 
@@ -277,6 +348,7 @@ describe("TestCaseSummaryGrid", () => {
         onRowEdit={mockOnRowEdit}
         onRowDelete={mockOnRowDelete}
         testCaseCanEdit={false}
+        readOnly={false}
       />
     );
 
@@ -286,7 +358,7 @@ describe("TestCaseSummaryGrid", () => {
     userEvent.click(firstActionCenterButton);
     const viewAction = await screen.findByRole("menuitem", { name: "View" });
     expect(viewAction).toBeInTheDocument();
-    const deleteAction = await screen.queryByRole("menuitem", {
+    const deleteAction = screen.queryByRole("menuitem", {
       name: "Delete",
     });
     expect(deleteAction).not.toBeInTheDocument();
