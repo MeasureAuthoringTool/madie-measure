@@ -543,7 +543,7 @@ describe("ElementEditor Component", () => {
     });
   });
 
-  it("dispatches ADD_RESOURCE_BY_REFERENCE when add_new_resource is present", async () => {
+  it("dispatches ADD_RESOURCE_BY_REFERENCE when add_new_resources is present", async () => {
     jest.useFakeTimers();
     const setApplyLoading = jest.fn();
     const setInitialFormikValuesStu6 = jest.fn();
@@ -554,7 +554,7 @@ describe("ElementEditor Component", () => {
       ClaimResponse: {
         id: "test",
       },
-      add_new_resource: { type: "Encounter", reference: "test-ref" },
+      add_new_resources: [{ type: "Encounter", reference: "test-ref" }],
     };
     mockFormikObj.values = mockFormikValues;
 
@@ -589,7 +589,7 @@ describe("ElementEditor Component", () => {
           type: "ADD_RESOURCE_BY_REFERENCE",
           payload: expect.objectContaining({
             bundleEntry: expect.any(Object),
-            add_new_resource: mockFormikValues.add_new_resource,
+            add_new_resources: mockFormikValues.add_new_resources,
           }),
         })
       );
@@ -598,7 +598,7 @@ describe("ElementEditor Component", () => {
     jest.useRealTimers();
   });
 
-  it("dispatches MODIFY_BUNDLE_ENTRY when add_new_resource is not present", async () => {
+  it("dispatches MODIFY_BUNDLE_ENTRY when add_new_resources is not present", async () => {
     jest.useFakeTimers();
     const setApplyLoading = jest.fn();
     const setInitialFormikValuesStu6 = jest.fn();

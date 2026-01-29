@@ -1,8 +1,9 @@
 import * as React from "react";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import ReferenceComponent, {
   getReferenceComponentLabel,
   getHighestPriorityResourceList,
+  getProfileMatchTypes,
 } from "./ReferenceComponent";
 import ResourceContext from "../../ResourceContext";
 import { useQiCoreResource } from "../../../../../../../../util/QiCorePatientProvider";
@@ -24,6 +25,30 @@ const mockFormik: FormikContextType<any> = {
 } as unknown as FormikContextType<any>;
 
 describe("ReferenceComponent", () => {
+  const QICORE_OBS = {
+    title: "QICore Observation",
+    type: "Observation",
+    profile:
+      "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-observation",
+  };
+
+  const QICORE_1 = {
+    id: "encounter-qicore-1",
+    title: "Encounter (QICore)",
+    type: "Encounter",
+    profile:
+      "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-encounter",
+    category: "TestCategory",
+  };
+  const QICORE_2 = {
+    id: "encounter-qicore-2",
+    title: "Encounter (QICore v2)",
+    type: "Encounter",
+    profile:
+      "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-encounter-alt",
+    category: "TestCategory",
+  };
+
   const baseProfiles = [
     {
       id: "encounter-base",
@@ -63,6 +88,9 @@ describe("ReferenceComponent", () => {
     ],
   };
 
+  it("returns []", () => {
+    expect(getProfileMatchTypes("none")).toEqual([]);
+  });
   it("renders reference type dropdown with correct options", async () => {
     (useQiCoreResource as jest.Mock).mockReturnValue({
       state: { bundle: { entry: [] } },
@@ -417,7 +445,7 @@ describe("ReferenceComponent", () => {
     expect(screen.getByTestId("reference-label")).toHaveTextContent("Label");
   });
 
-  it("shows 'ID Not Present' when no matching profile entries exist", async () => {
+  it("shows 'ID Not Present' when no matching profile entries exist, triggers onClick", async () => {
     (useQiCoreResource as jest.Mock).mockReturnValue({
       state: {
         bundle: {
@@ -466,6 +494,180 @@ describe("ReferenceComponent", () => {
       options.some((opt) => opt.textContent?.includes("ID Not Present"))
     ).toBe(true);
     expect(screen.getByTestId("reference-label")).toHaveTextContent("Label");
+    // click "ID not present"
+    await userEvent.click(screen.getByText("ID Not Present (Add New)"));
+    await waitFor(() => {
+      expect(mockSetFieldValue).toHaveBeenCalled();
+    });
+  });
+
+  it("Opens a dialog when there are multiple resources that have been selected through an add new workflow", async () => {
+    (useQiCoreResource as jest.Mock).mockReturnValue({
+      state: {
+        bundle: {
+          entry: [
+            {
+              resource: {
+                resourceType: "Encounter",
+                id: "encounter-other-1",
+                meta: {
+                  profile: ["http://hl7.org/fhir/StructureDefinition/Other"],
+                },
+              },
+            },
+          ],
+        },
+      },
+    });
+    const multiQiCoreProfiles = baseProfiles.concat(QICORE_1, QICORE_2);
+    render(
+      <ResourceContext.Provider value={multiQiCoreProfiles}>
+        <FormikProvider value={mockFormik}>
+          <ReferenceComponent
+            structureDefinition={structureDefinition}
+            canEdit={true}
+            required={true}
+            helperText="Select a reference"
+            error={false}
+            showAddAttributeButton={false}
+            addTitle=""
+            label="test.label"
+          />
+        </FormikProvider>
+      </ResourceContext.Provider>
+    );
+
+    await userEvent.click(screen.getByLabelText("Reference Type"));
+    await userEvent.click(screen.getByTestId("Encounter (QICore)-option"));
+
+    // Wait for the second dropdown to be present
+    const combo = screen.getByRole("combobox", { name: /specify encounter/i });
+    await userEvent.click(combo);
+    await userEvent.click(await screen.findByTestId("reference-select-0"));
+
+    const options = await screen.findAllByRole("option");
+    expect(options.length).toBe(1);
+    expect(
+      options.some((opt) => opt.textContent?.includes("ID Not Present"))
+    ).toBe(true);
+    expect(screen.getByTestId("reference-label")).toHaveTextContent("Label");
+    // click "ID not present"
+    await userEvent.click(screen.getByText("ID Not Present (Add New)"));
+    // ID Not Present (Add New)-option
+    await waitFor(() => {
+      expect(screen.getByText("Choose Profile")).toBeVisible();
+    });
+    // select an add option
+    const combo2 = screen.getByRole("combobox", { name: /Reference/i });
+    await userEvent.click(combo2);
+
+    await waitFor(() => {
+      expect(
+        screen.getByTestId(
+          "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-encounter-alt-option"
+        )
+      ).toBeInTheDocument();
+      userEvent.click(
+        screen.getByTestId(
+          "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-encounter-alt-option"
+        )
+      );
+    });
+    // QICore NonPatient Observation-option
+    await waitFor(() => {
+      expect(
+        screen.getByTestId("add-new-profile-ref-save-button")
+      ).toBeEnabled();
+    });
+    // close it
+    userEvent.click(screen.getByTestId("add-new-profile-ref-cancel-button"));
+    await waitFor(() => {
+      expect(screen.queryByText("Chooe Profile")).not.toBeInTheDocument();
+    });
+  });
+
+  it("Opens a dialog when there are multiple resources that have been selected through an add new workflow", async () => {
+    (useQiCoreResource as jest.Mock).mockReturnValue({
+      state: {
+        bundle: {
+          entry: [
+            {
+              resource: {
+                resourceType: "Encounter",
+                id: "encounter-other-1",
+                meta: {
+                  profile: ["http://hl7.org/fhir/StructureDefinition/Other"],
+                },
+              },
+            },
+          ],
+        },
+      },
+    });
+    const multiQiCoreProfiles = baseProfiles.concat(QICORE_1, QICORE_2);
+    render(
+      <ResourceContext.Provider value={multiQiCoreProfiles}>
+        <FormikProvider value={mockFormik}>
+          <ReferenceComponent
+            structureDefinition={structureDefinition}
+            canEdit={true}
+            required={true}
+            helperText="Select a reference"
+            error={false}
+            showAddAttributeButton={false}
+            addTitle=""
+            label="test.label"
+          />
+        </FormikProvider>
+      </ResourceContext.Provider>
+    );
+
+    await userEvent.click(screen.getByLabelText("Reference Type"));
+    await userEvent.click(screen.getByTestId("Encounter (QICore)-option"));
+
+    // Wait for the second dropdown to be present
+    const combo = screen.getByRole("combobox", { name: /specify encounter/i });
+    await userEvent.click(combo);
+    await userEvent.click(await screen.findByTestId("reference-select-0"));
+
+    const options = await screen.findAllByRole("option");
+    expect(options.length).toBe(1);
+    expect(
+      options.some((opt) => opt.textContent?.includes("ID Not Present"))
+    ).toBe(true);
+    expect(screen.getByTestId("reference-label")).toHaveTextContent("Label");
+    // click "ID not present"
+    await userEvent.click(screen.getByText("ID Not Present (Add New)"));
+    // ID Not Present (Add New)-option
+    await waitFor(() => {
+      expect(screen.getByText("Choose Profile")).toBeVisible();
+    });
+    // select an add option
+    const combo2 = screen.getByRole("combobox", { name: /Reference/i });
+    await userEvent.click(combo2);
+
+    await waitFor(() => {
+      expect(
+        screen.getByTestId(
+          "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-encounter-alt-option"
+        )
+      ).toBeInTheDocument();
+      userEvent.click(
+        screen.getByTestId(
+          "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-encounter-alt-option"
+        )
+      );
+    });
+    await waitFor(() => {
+      expect(
+        screen.getByTestId("add-new-profile-ref-save-button")
+      ).toBeEnabled();
+    });
+    // save it
+    userEvent.click(screen.getByTestId("add-new-profile-ref-save-button"));
+    await waitFor(() => {
+      expect(screen.queryByText("Choose Profile")).not.toBeInTheDocument();
+    });
   });
 
   describe("test getReferenceComponentLabel", () => {
@@ -517,12 +719,12 @@ describe("ReferenceComponent", () => {
         usCoreProfiles,
         baseFhirProfiles
       )
-    ).toBe(qiCoreProfiles[0]);
+    ).toBe(qiCoreProfiles);
     expect(
       getHighestPriorityResourceList([], usCoreProfiles, baseFhirProfiles)
-    ).toBe(usCoreProfiles[0]);
+    ).toBe(usCoreProfiles);
     expect(getHighestPriorityResourceList([], [], baseFhirProfiles)).toBe(
-      baseFhirProfiles[0]
+      baseFhirProfiles
     );
   });
 
@@ -690,6 +892,160 @@ describe("ReferenceComponent", () => {
       );
 
       expect(screen.getByTestId("reference-type-select-1")).toBeInTheDocument();
+    });
+
+    it("appends to add_new_resources array when selecting 'ID Not Present (Add New)'", async () => {
+      const setFieldValueMock = jest.fn();
+      const formikWithAddNewResources: FormikContextType<any> = {
+        values: {
+          add_new_resources: [{ resource: { id: "existing-resource" } }],
+        },
+        touched: {},
+        getFieldProps: jest.fn(),
+        handleChange: jest.fn(),
+        setFieldValue: setFieldValueMock,
+        setFieldTouched: jest.fn(),
+      } as unknown as FormikContextType<any>;
+
+      (useQiCoreResource as jest.Mock).mockReturnValue({
+        state: { bundle: { entry: [] } },
+      });
+
+      render(
+        <ResourceContext.Provider value={baseProfiles}>
+          <FormikProvider value={formikWithAddNewResources}>
+            <ReferenceComponent
+              structureDefinition={structureDefinition}
+              canEdit={true}
+              required={false}
+              helperText="Select a reference"
+              error={false}
+              showAddAttributeButton={false}
+              addTitle=""
+              index={0}
+              label="ClaimResponse.addItem[0].provider[0]"
+            />
+          </FormikProvider>
+        </ResourceContext.Provider>
+      );
+
+      // Select a reference type first
+      await userEvent.click(screen.getByLabelText("Reference Type"));
+      await userEvent.click(screen.getByTestId("Encounter (QICore)-option"));
+
+      // Wait for the second dropdown to be present
+      const combo = screen.getByRole("combobox", {
+        name: /specify encounter/i,
+      });
+      await userEvent.click(combo);
+      await userEvent.click(await screen.findByTestId("reference-select-0"));
+
+      // Find and click the "ID Not Present (Add New)" option
+      const options = await screen.findAllByRole("option");
+      const addNewOption = options.find((opt) =>
+        opt.textContent?.includes("ID Not Present (Add New)")
+      );
+      expect(addNewOption).toBeDefined();
+      await userEvent.click(addNewOption!);
+
+      // Verify setFieldValue was called with add_new_resources array containing both old and new resources
+      expect(setFieldValueMock).toHaveBeenCalledWith(
+        "add_new_resources",
+        expect.arrayContaining([
+          expect.objectContaining({
+            resource: expect.objectContaining({ id: "existing-resource" }),
+          }),
+          expect.objectContaining({
+            resource: expect.objectContaining({ resourceType: "Encounter" }),
+          }),
+        ])
+      );
+    });
+
+    it("clears add_new_resources when selecting an existing resource", async () => {
+      const setFieldValueMock = jest.fn();
+      // Simulate a scenario where user previously selected "Add New" for an Encounter
+      const formikWithPreviousAddNew: FormikContextType<any> = {
+        values: {
+          add_new_resources: [
+            {
+              resource: {
+                resourceType: "Encounter",
+                id: "temp-encounter-123",
+              },
+            },
+          ],
+        },
+        touched: {},
+        getFieldProps: jest.fn(),
+        handleChange: jest.fn(),
+        setFieldValue: setFieldValueMock,
+        setFieldTouched: jest.fn(),
+      } as unknown as FormikContextType<any>;
+
+      // Provide an existing encounter in the bundle
+      (useQiCoreResource as jest.Mock).mockReturnValue({
+        state: {
+          bundle: {
+            entry: [
+              {
+                resource: {
+                  resourceType: "Encounter",
+                  id: "existing-encounter-1",
+                  meta: {
+                    profile: [
+                      "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-encounter",
+                    ],
+                  },
+                },
+              },
+            ],
+          },
+        },
+      });
+
+      render(
+        <ResourceContext.Provider value={baseProfiles}>
+          <FormikProvider value={formikWithPreviousAddNew}>
+            <ReferenceComponent
+              structureDefinition={structureDefinition}
+              canEdit={true}
+              required={false}
+              helperText="Select a reference"
+              error={false}
+              showAddAttributeButton={false}
+              addTitle=""
+              index={0}
+              label="ClaimResponse.addItem[0].provider[0]"
+            />
+          </FormikProvider>
+        </ResourceContext.Provider>
+      );
+
+      // Select a reference type first
+      await userEvent.click(screen.getByLabelText("Reference Type"));
+      await userEvent.click(screen.getByTestId("Encounter (QICore)-option"));
+
+      // Wait for the second dropdown to be present
+      const combo = screen.getByRole("combobox", {
+        name: /specify encounter/i,
+      });
+      await userEvent.click(combo);
+      await userEvent.click(await screen.findByTestId("reference-select-0"));
+
+      // Find and click the existing encounter option
+      const options = await screen.findAllByRole("option");
+      const existingOption = options.find((opt) =>
+        opt.textContent?.includes("existing-encounter-1")
+      );
+      expect(existingOption).toBeDefined();
+      await userEvent.click(existingOption!);
+
+      // Verify setFieldValue was called with the reference
+      expect(setFieldValueMock).toHaveBeenCalledWith(
+        "ClaimResponse.addItem[0].provider[0]",
+        { reference: "Encounter/existing-encounter-1" }
+      );
     });
   });
 });

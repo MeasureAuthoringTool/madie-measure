@@ -516,6 +516,118 @@ describe("Measure Groups Page", () => {
       );
     });
 
+    test("Display error when unable to delete group", async () => {
+      mockMeasureServiceApi.deleteMeasureGroup = jest
+        .fn()
+        .mockRejectedValueOnce({
+          status: 400,
+          message: "oof",
+        });
+      const setAlertMessageMock = jest.fn();
+      const propsWithMock = {
+        ...customProps,
+        setAlertMessage: setAlertMessageMock,
+      };
+      group.id = "7p03-5r29-7O0I";
+      group.groupDescription = "testDescription";
+      measure.groups = [group];
+
+      renderMeasureGroupComponent(propsWithMock);
+
+      expect(screen.getByTestId("title").textContent).toBe(
+        "Population Criteria 1"
+      );
+
+      expect(screen.getByTestId("group-form-delete-btn")).toBeInTheDocument();
+      expect(screen.getByTestId("group-form-delete-btn")).toBeEnabled();
+
+      userEvent.click(screen.getByTestId("group-form-delete-btn"));
+
+      expect(
+        screen.getByTestId("delete-measure-group-modal-cancel-btn")
+      ).toBeInTheDocument();
+
+      expect(
+        screen.getByTestId("delete-measure-group-modal-agree-btn")
+      ).toBeInTheDocument();
+
+      userEvent.click(
+        screen.getByTestId("delete-measure-group-modal-agree-btn")
+      );
+
+      await waitFor(() => {
+        expect(setAlertMessageMock).toHaveBeenCalled();
+      });
+
+      expect(setAlertMessageMock).toHaveBeenCalledWith({
+        type: "error",
+        message: "oof",
+        canClose: false,
+      });
+    });
+
+    test("Display error when deleting a locked measure group if any Test Case is Locked by another user", async () => {
+      useFeatureFlags.mockImplementation(() => ({
+        Locking: true,
+      }));
+      mockMeasureServiceApi.deleteMeasureGroup = jest
+        .fn()
+        .mockRejectedValueOnce({
+          status: 423,
+          message: "locked",
+        });
+      const setAlertMessageMock = jest.fn();
+      const propsWithMock = {
+        ...customProps,
+        setAlertMessage: setAlertMessageMock,
+      };
+
+      group.id = "7p03-5r29-7O0I";
+      group.groupDescription = "testDescription";
+      measure.groups = [group];
+      const { rerender } = renderMeasureGroupComponent(propsWithMock);
+
+      expect(screen.getByTestId("title").textContent).toBe(
+        "Population Criteria 1"
+      );
+
+      expect(screen.getByTestId("group-form-delete-btn")).toBeInTheDocument();
+      expect(screen.getByTestId("group-form-delete-btn")).toBeEnabled();
+
+      userEvent.click(screen.getByTestId("group-form-delete-btn"));
+
+      expect(
+        screen.getByTestId("delete-measure-group-modal-cancel-btn")
+      ).toBeInTheDocument();
+
+      expect(
+        screen.getByTestId("delete-measure-group-modal-agree-btn")
+      ).toBeInTheDocument();
+
+      userEvent.click(
+        screen.getByTestId("delete-measure-group-modal-agree-btn")
+      );
+
+      expect(
+        await screen.findByTestId("group-form-delete-btn")
+      ).not.toBeInTheDocument();
+
+      await waitFor(() => {
+        expect(setAlertMessageMock).toHaveBeenCalled();
+      });
+
+      expect(setAlertMessageMock).toHaveBeenCalledWith({
+        type: "error",
+        message:
+          "The Population Criteria cannot be deleted because changes to the Population Criteria will update test cases and one or more test cases are locked by another user.",
+        canClose: false,
+      });
+
+      useFeatureFlags.mockImplementation(() => ({
+        Locking: false,
+      }));
+    });
+
     test("Navigating between the tabs in measure groups page", async () => {
       group.id = "7p03-5r29-7O0I";
       group.groupDescription = "Description Text";
