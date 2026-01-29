@@ -8,6 +8,7 @@
     display: flex;
     flex-direction: row;
     align-items: center;
+    column-gap: 12px;
 
     .comparator-input {
       margin-right: 16px;
@@ -15,11 +16,6 @@
 
     .comparator-input .codes-select-container {
       width: 180px;
-    }
-
-    .value-input,
-    .unit-input {
-      width: 130px;
     }
 
     .element-add-container {

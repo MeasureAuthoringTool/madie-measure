@@ -26,7 +26,6 @@ const BooleanComponent = ({
       key={`boolean-True-${testIdBase}`}
       value={`true`}
       data-testid={`boolean-True-${testIdBase}`}
-      defaultValue={`true`}
     >
       true
     </MuiMenuItem>,
@@ -60,7 +59,7 @@ const BooleanComponent = ({
         error={error}
         options={booleanOptions}
         {...props}
-        value={value || ""} // mui thinks undefined is an uncontrolled input. We need to display this otherwise.
+        value={value === true ? "true" : value === false ? "false" : ""}
       ></Select>
       {canEdit && (
         <div tw="mt-5 flex items-center">

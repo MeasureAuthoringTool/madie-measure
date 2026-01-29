@@ -314,6 +314,11 @@ const EditTestCase = (props: EditTestCaseProps) => {
   );
   const [callstackMap, setCallstackMap] = useState<CqlDefinitionCallstack>();
 
+  // whenever we nav using the breadcrumbs, this file doesn't fully rerender, but we need to blank the results for the right panel coverage, and actual.
+  useEffect(() => {
+    setPopulationGroupResults(undefined);
+  }, [id]);
+
   const {
     measureState,
     bundleState,

@@ -159,7 +159,9 @@ describe("QuantityComponent", () => {
     expect(comparator).toHaveTextContent("Greater than");
 
     // Value input
-    const valueInput = await screen.findByTestId("decimal-input-field-Value");
+    const valueInput = await screen.findByTestId(
+      "decimal-field-input-Observation.quantity.value"
+    );
     expect(valueInput).toBeInTheDocument();
     expect((valueInput as HTMLInputElement).value).toBe("10");
 
@@ -219,9 +221,10 @@ describe("QuantityComponent", () => {
   test("sets value when field object is initially empty", async () => {
     renderWithFormik({ initialValues: { Observation: {} } });
 
-    const valueInput = screen.getByTestId(
-      "decimal-input-field-Value"
-    ) as HTMLInputElement;
+    const valueInput = await screen.findByTestId(
+      "decimal-field-input-Observation.quantity.value"
+    );
+
     expect(valueInput.value).toBe("");
     userEvent.clear(valueInput);
     userEvent.type(valueInput, "42");
@@ -248,9 +251,9 @@ describe("QuantityComponent", () => {
   test("updates value when Value changes", async () => {
     renderWithFormik();
 
-    const valueInput = screen.getByTestId(
-      "decimal-input-field-Value"
-    ) as HTMLInputElement;
+    const valueInput = await screen.findByTestId(
+      "decimal-field-input-Observation.quantity.value"
+    );
 
     userEvent.clear(valueInput);
     userEvent.type(valueInput, "25");
@@ -540,13 +543,14 @@ describe("QuantityComponent", () => {
     );
     expect(comparatorField).toHaveAttribute("readonly");
 
-    const valueInput = (await screen.findByTestId(
-      "decimal-field-Value"
-    )) as HTMLTextAreaElement;
+    const valueInput = await screen.findByTestId(
+      "decimal-field-Observation.quantity.value"
+    );
+
     expect(valueInput).toHaveAttribute("readonly");
 
     const codeInput = (await screen.findByTestId(
-      "code-input"
+      "code-input-Observation.quantity"
     )) as HTMLTextAreaElement;
     expect(codeInput).toHaveAttribute("readonly");
   });

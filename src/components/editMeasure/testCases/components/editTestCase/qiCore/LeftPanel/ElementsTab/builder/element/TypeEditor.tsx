@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo, useRef } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import * as _ from "lodash";
 import { Box, Divider } from "@mui/material";
 
@@ -8,7 +8,7 @@ import BooleanComponent from "./types/BooleanComponent";
 import UriComponent from "./types/UriComponent";
 import UrlComponent from "./types/UrlComponent";
 import DateComponent from "./types/DateComponent";
-import IntegerComponent, { IntegerType } from "./types/IntegerComponent";
+import IntegerComponent from "./types/IntegerComponent";
 import CodesComponent from "./types/CodesComponent";
 import InstantComponent from "./types/InstantComponent";
 import TimeComponent from "./types/TimeComponent";
@@ -16,19 +16,18 @@ import { useFormikContext } from "formik";
 import ExtensionComponent from "./types/ExtensionComponent";
 import useFhirDefinitionsServiceApi from "../../../../../../../api/useFhirDefinitionsService";
 import {
-  isComponentDataType,
-  stripAllIndexes,
-  getRequired,
-  getTopLevelElements,
+  formatAttributeLabel,
   getFirstChildren,
-  getNestedProperty,
   getIndexFromPath,
   getLastPart,
-  formatAttributeLabel,
+  getNestedProperty,
+  getRequired,
+  getTopLevelElements,
+  isComponentDataType,
+  stripAllIndexes,
 } from "../../../../../../../api/fhirDefinitionServiceUtilities";
 import CodingComponent from "./types/CodingComponent";
 import { useRequiredFields } from "./RequiredFieldsContext";
-import ElementSection from "../../../../../../common/UIOnlyModelAgnostic/ElementSection";
 import CodeableConceptComponent from "./types/CodeableConceptComponent";
 import PeriodDateTimeComponent from "./types/PeriodDateTimeComponent";
 import ChoiceType from "./ChoiceType";
@@ -39,6 +38,9 @@ import TimingComponent from "./types/TimingComponent";
 import RangeComponent from "./types/RangeComponent";
 import ReferenceComponent from "./types/ReferenceComponent";
 import ContentReferenceType from "./contentReferenceType/ContentReferenceType";
+import DecimalComponent from "./types/DecimalComponent";
+import { IntegerType } from "./typesValidations/FhirNumbers";
+import ElementSectionQiCore from "./ElementSectionQiCore";
 import { getEmptyValueForType } from "./TypeEditorUtils";
 
 export const formikErrorHandler = (name: string, formik) => {
@@ -48,6 +50,10 @@ export const formikErrorHandler = (name: string, formik) => {
     return errors;
   }
 };
+
+const getContentReferencePath = (referenceUrl: string) =>
+  referenceUrl.split("#").pop();
+
 // onChange is being deprecated as no updates to the resource are tracked.
 // Changes directly to the json should be done with a dispatch, this propagates downstream changes in formik.
 // any temporary form state should be done through formik.
@@ -59,16 +65,21 @@ const TypeEditor = ({
   label,
 }) => {
   const formik = useFormikContext();
+  // Ref to track formik.values for use in closures (prevents stale state issues when rapidly clicking Add)
+  const valuesRef = useRef<object>(formik.values as object);
+  valuesRef.current = formik.values as object;
+
   const { requiredFields, formInfo } = useRequiredFields();
   let required = getRequired(requiredFields, stripAllIndexes(label));
   const fhirDefinitionsService = useRef(useFhirDefinitionsServiceApi());
 
-  let type: string = structureDefinition?.type?.find((t) =>
+  let type = structureDefinition?.type?.find((t) =>
     _.toLower(label).includes(_.toLower(t.code))
   )?.code;
   if (!type) {
     type = structureDefinition?.type?.[0]?.code;
   }
+
   const values = _.get(formik.values, label);
   // is multiple cardinality?
   if (structureDefinition?.max === "*") {
@@ -91,18 +102,23 @@ const TypeEditor = ({
   // DiagnosticReport.presentedForm comes in without the index. We need to map it for multiple cardinality to test stuff.
   const childDefs = useMemo(() => {
     if (!isComponentDataType(type)) {
-      const elements = getFirstChildren(stripAllIndexes(label), formInfo);
+      let strippedLabel = stripAllIndexes(label);
+      if (structureDefinition?.contentReference) {
+        strippedLabel = getContentReferencePath(
+          structureDefinition.contentReference
+        );
+      }
+      const elements = getFirstChildren(strippedLabel, formInfo);
       if (elements?.length) {
-        const updatedElements = elements.map((el) => {
+        return elements.map((el) => {
           const lastPart = el.id.split(".").pop();
           const updatedId = `${label}.${lastPart}`;
           return { ...el, id: updatedId };
         });
-        return updatedElements; //previously filtered out type === BackboneElement
       }
     }
     return [];
-  }, [type, label, getFirstChildren]);
+  }, [type, label, structureDefinition, formInfo]);
 
   // Given structureDefinition.type[{ code: "sometype", profiles: ["strings", "of", "profiles"]}]
   // we need to look at the get use the profile list to get resource trees so we can render all the children in case Extension.
@@ -180,13 +196,9 @@ const TypeEditor = ({
         return (
           <Box sx={{ display: "flex", flexDirection: "column", width: "100%" }}>
             {(isArrayMode ? values : [null]).map((el, index) => {
-              let fieldLabel;
-              if (isArrayMode && !appendedZeroAlready) {
-                fieldLabel = `${label}[${index}]`;
-              } else if (isArrayMode && appendedZeroAlready) {
+              let fieldLabel = label;
+              if (isArrayMode && appendedZeroAlready) {
                 fieldLabel = `${label.slice(0, label.length - 3)}[${index}]`;
-              } else {
-                fieldLabel = label;
               }
               return (
                 <StringComponent
@@ -232,6 +244,54 @@ const TypeEditor = ({
             />
           </Box>
         );
+      /*
+        Decimal most commonly appears as a child of different complex types
+        that we want to handle inside of different TypeEditor rendered components,
+        since they have different rules about information that needs to be supplied aside of a single number.
+        Examples:
+        Quantity,  -> implemented
+        Money, -> implemented
+        Timing -> implementedp
+        Duration, not supported type
+        Range, not supported type
+        Ratio, not supported type
+        Count, not supported type
+        Age, not supported type
+        */
+      case "decimal":
+        // ClaimResponse.attItem[0].factor. This is our primitive case.
+        return (
+          // primitive multiple cardinality decimal fields are extremely rare, but we're going to cover it anyway.
+          <Box sx={{ display: "flex", flexDirection: "column", width: "100%" }}>
+            {(isArrayMode ? values : [null]).map((el, index) => {
+              let fieldLabel = label;
+              if (isArrayMode && appendedZeroAlready) {
+                fieldLabel = `${label.slice(0, label.length - 3)}[${index}]`;
+              }
+              return (
+                <DecimalComponent
+                  key={`${fieldLabel}-${index}`}
+                  label={fieldLabel}
+                  canEdit={canEdit}
+                  helperText={formikErrorHandler(fieldLabel, formik)}
+                  error={Boolean(getNestedProperty(formik.errors, fieldLabel))}
+                  required={required}
+                  showAddAttributeButton={
+                    showAddAttributeButton &&
+                    (!isArrayMode || index === lastIndex)
+                  }
+                  showDeleteButton={isArrayMode && index > 0}
+                  handleDeleteElement={() =>
+                    handleDeleteElement(index, fieldLabel)
+                  }
+                  addTitle={addTitle}
+                  handleAddElement={handleAddElement}
+                  {...formik.getFieldProps(fieldLabel)}
+                />
+              );
+            })}
+          </Box>
+        );
       case "markdown":
         return (
           <Box sx={{ display: "flex", flexDirection: "column", width: "100%" }}>
@@ -252,13 +312,9 @@ const TypeEditor = ({
         return (
           <>
             {(isArrayMode ? values : [null]).map((el, index) => {
-              let fieldLabel;
-              if (isArrayMode && !appendedZeroAlready) {
-                fieldLabel = `${label}[${index}]`;
-              } else if (isArrayMode && appendedZeroAlready) {
+              let fieldLabel = label;
+              if (isArrayMode && appendedZeroAlready) {
                 fieldLabel = `${label.slice(0, label.length - 3)}[${index}]`;
-              } else {
-                fieldLabel = label;
               }
               return (
                 <QuantityComponent
@@ -302,13 +358,9 @@ const TypeEditor = ({
         return (
           <>
             {(isArrayMode ? values : [null]).map((el, index) => {
-              let fieldLabel;
-              if (isArrayMode && !appendedZeroAlready) {
-                fieldLabel = `${label}[${index}]`;
-              } else if (isArrayMode && appendedZeroAlready) {
+              let fieldLabel = label;
+              if (isArrayMode && appendedZeroAlready) {
                 fieldLabel = `${label.slice(0, label.length - 3)}[${index}]`;
-              } else {
-                fieldLabel = label;
               }
               return (
                 <DateTimeComponent
@@ -347,13 +399,9 @@ const TypeEditor = ({
         return (
           <>
             {(isArrayMode ? values : [null]).map((el, index) => {
-              let fieldLabel;
-              if (isArrayMode && !appendedZeroAlready) {
-                fieldLabel = `${label}[${index}]`;
-              } else if (isArrayMode && appendedZeroAlready) {
+              let fieldLabel = label;
+              if (isArrayMode && appendedZeroAlready) {
                 fieldLabel = `${label.slice(0, label.length - 3)}[${index}]`;
-              } else {
-                fieldLabel = label;
               }
               return (
                 <TimeComponent
@@ -404,17 +452,22 @@ const TypeEditor = ({
       case "integer":
       case "positiveInt":
       case "unsignedInt":
+        let integerType: IntegerType;
+
+        if (type === "unsignedInt") {
+          integerType = IntegerType.UNSIGNED;
+        } else if (type === "positiveInt") {
+          integerType = IntegerType.POSITIVE_INT;
+        } else {
+          integerType = IntegerType.SIGNED;
+        }
         // Example of multiple cardinality ClaimResponse.item.noteNumber
         return (
           <>
             {(isArrayMode ? values : [null]).map((el, index) => {
-              let fieldLabel;
-              if (isArrayMode && !appendedZeroAlready) {
-                fieldLabel = `${label}[${index}]`;
-              } else if (isArrayMode && appendedZeroAlready) {
+              let fieldLabel = label;
+              if (isArrayMode && appendedZeroAlready) {
                 fieldLabel = `${label.slice(0, label.length - 3)}[${index}]`;
-              } else {
-                fieldLabel = label;
               }
               return (
                 <IntegerComponent
@@ -425,11 +478,7 @@ const TypeEditor = ({
                   label={fieldLabel}
                   helperText={formikErrorHandler(fieldLabel, formik)}
                   error={getNestedProperty(formik.errors, fieldLabel)}
-                  integerType={
-                    type === "unsignedInt"
-                      ? IntegerType.UNSIGNED
-                      : IntegerType.POSITIVE_INT
-                  }
+                  integerType={integerType}
                   showAddAttributeButton={
                     showMultipleCardinalityActionCenter &&
                     (!isArrayMode || index === lastIndex)
@@ -464,13 +513,9 @@ const TypeEditor = ({
         return (
           <>
             {(isArrayMode ? values : [null]).map((el, index) => {
-              let fieldLabel;
-              if (isArrayMode && !appendedZeroAlready) {
-                fieldLabel = `${label}[${index}]`;
-              } else if (isArrayMode && appendedZeroAlready) {
+              let fieldLabel = label;
+              if (isArrayMode && appendedZeroAlready) {
                 fieldLabel = `${label.slice(0, label.length - 3)}[${index}]`;
-              } else {
-                fieldLabel = label;
               }
               return (
                 <BooleanComponent
@@ -492,6 +537,9 @@ const TypeEditor = ({
                   addTitle={addTitle}
                   handleAddElement={handleAddElement}
                   {...formik.getFieldProps(fieldLabel)}
+                  onChange={(e) => {
+                    formik.setFieldValue(fieldLabel, e.target.value === "true");
+                  }}
                 />
               );
             })}
@@ -502,13 +550,9 @@ const TypeEditor = ({
         return (
           <>
             {(isArrayMode ? values : [null]).map((el, index) => {
-              let fieldLabel;
-              if (isArrayMode && !appendedZeroAlready) {
-                fieldLabel = `${label}[${index}]`;
-              } else if (isArrayMode && appendedZeroAlready) {
+              let fieldLabel = label;
+              if (isArrayMode && appendedZeroAlready) {
                 fieldLabel = `${label.slice(0, label.length - 3)}[${index}]`;
-              } else {
-                fieldLabel = label;
               }
               return (
                 <UriComponent
@@ -545,13 +589,9 @@ const TypeEditor = ({
         return (
           <>
             {(isArrayMode ? values : [null]).map((el, index) => {
-              let fieldLabel;
-              if (isArrayMode && !appendedZeroAlready) {
-                fieldLabel = `${label}[${index}]`;
-              } else if (isArrayMode && appendedZeroAlready) {
+              let fieldLabel = label;
+              if (isArrayMode && appendedZeroAlready) {
                 fieldLabel = `${label.slice(0, label.length - 3)}[${index}]`;
-              } else {
-                fieldLabel = label;
               }
               return (
                 <UrlComponent
@@ -603,13 +643,9 @@ const TypeEditor = ({
         return (
           <>
             {(isArrayMode ? values : [null]).map((el, index) => {
-              let fieldLabel;
-              if (isArrayMode && !appendedZeroAlready) {
-                fieldLabel = `${label}[${index}]`;
-              } else if (isArrayMode && appendedZeroAlready) {
+              let fieldLabel = label;
+              if (isArrayMode && appendedZeroAlready) {
                 fieldLabel = `${label.slice(0, label.length - 3)}[${index}]`;
-              } else {
-                fieldLabel = label;
               }
               return (
                 <>
@@ -678,11 +714,9 @@ const TypeEditor = ({
         return (
           <>
             {(isArrayMode ? values : [null]).map((el, index) => {
-              let fieldLabel;
+              let fieldLabel = label;
               if (isArrayMode && appendedZeroAlready) {
                 fieldLabel = `${label.slice(0, label.length - 3)}[${index}]`;
-              } else {
-                fieldLabel = label;
               }
               return (
                 <CodeableConceptComponent
@@ -729,25 +763,47 @@ const TypeEditor = ({
         return (
           <>
             {(isArrayMode ? values : [null]).map((el, index) => {
+              let fieldLabel;
+              if (isArrayMode && !appendedZeroAlready) {
+                fieldLabel = `${label}[${index}]`;
+              } else if (isArrayMode && appendedZeroAlready) {
+                fieldLabel = `${label.slice(0, label.length - 3)}[${index}]`;
+              } else {
+                fieldLabel = label;
+              }
               return (
                 <ReferenceComponent
                   key={index}
                   index={index}
                   structureDefinition={structureDefinition}
-                  label={label}
+                  label={fieldLabel}
                   canEdit={canEdit}
                   required={required}
-                  helperText={formikErrorHandler(label, formik)}
-                  error={getNestedProperty(formik.errors, label)}
+                  helperText={formikErrorHandler(fieldLabel, formik)}
+                  error={getNestedProperty(formik.errors, fieldLabel)}
                   showAddAttributeButton={
                     showMultipleCardinalityActionCenter &&
                     (!isArrayMode || index === lastIndex)
                   }
                   showDeleteButton={showMultipleCardinalityActionCenter}
-                  handleDeleteElement={() => handleDeleteElement(index, label)}
+                  handleDeleteElement={() =>
+                      handleDeleteElement(index, fieldLabel)
+                  }
                   addTitle={addTitle}
-                  handleAddElement={handleAddElement}
-                  {...formik.getFieldProps(label)}
+                  handleAddElement={() => {
+                    // Get the base path without trailing index for adding new elements
+                    const basePath = fieldLabel.replace(/\[\d+\]$/, "");
+                    // Read current values from valuesRef to get the latest values
+                    // This avoids stale closure issues when clicking Add multiple times rapidly
+                    const currentValues = _.get(
+                      valuesRef.current,
+                      basePath,
+                      []
+                    );
+                    const newValues = [...currentValues, {}];
+                    formik.setFieldValue(basePath, newValues);
+                  }}
+                  {...formik.getFieldProps(fieldLabel)}
                 />
               );
             })}
@@ -989,7 +1045,7 @@ const TypeEditor = ({
             );
           } else if (!isComponentDataType(childDef?.type?.[0]?.code)) {
             return (
-              <ElementSection
+              <ElementSectionQiCore
                 title={formatAttributeLabel(childDef.id)}
                 startOpen={false}
                 children={

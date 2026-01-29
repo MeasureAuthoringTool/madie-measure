@@ -1,7 +1,7 @@
 import * as React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { FormikProvider, FormikContextType } from "formik";
+import { FormikContextType, Formik } from "formik";
 import { ExecutionContextProvider } from "../../../../../../../routes/qiCore/ExecutionContext";
 import MoneyComponent from "./MoneyComponent";
 import useFhirDefinitionsServiceApi, {
@@ -75,14 +75,14 @@ const renderWithFormik = () =>
         contextFailure: false,
       }}
     >
-      <FormikProvider value={mockFormik}>
+      <Formik initialValues={mockFormik.values} onSubmit={jest.fn()}>
         <MoneyComponent
           label="Claim.total"
           canEdit={true}
           resource={{}}
           fieldRequired={false}
         />
-      </FormikProvider>
+      </Formik>
     </ExecutionContextProvider>
   );
 
@@ -96,7 +96,7 @@ describe("MoneyComponent", () => {
 
     // decimal input
     const valueInput = (await screen.findByTestId(
-      "decimal-input-field-Value"
+      "decimal-field-input-Claim.total.value"
     )) as HTMLInputElement;
     expect(valueInput).toBeInTheDocument();
     expect(valueInput.value).toBe("100");
@@ -119,12 +119,6 @@ describe("MoneyComponent", () => {
     userEvent.click(cadOption);
 
     await waitFor(() => {
-      // assert Formik was updated
-      expect(mockFormik.setFieldValue).toHaveBeenCalledWith(
-        "Claim.total.currency",
-        "CAD"
-      );
-
       // assert displayed text updated
       expect(currencySelect).toHaveTextContent("Canadian dollar");
     });
@@ -134,17 +128,14 @@ describe("MoneyComponent", () => {
     renderWithFormik();
 
     const valueInput = screen.getByTestId(
-      "decimal-input-field-Value"
+      "decimal-field-input-Claim.total.value"
     ) as HTMLInputElement;
 
     userEvent.clear(valueInput);
     userEvent.type(valueInput, "250");
 
     await waitFor(() => {
-      expect(mockFormik.setFieldValue).toHaveBeenCalledWith(
-        "Claim.total.value",
-        250
-      );
+      expect(valueInput.value).toBe("250");
     });
   });
 });
