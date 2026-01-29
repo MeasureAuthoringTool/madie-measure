@@ -1,4 +1,4 @@
-import React from "react";
+import * as React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
 import UriComponent from "./UriComponent";
 import { FormikProvider, FormikContextType } from "formik";
@@ -81,7 +81,9 @@ describe("UriComponent Component", () => {
 
     const uriField = screen.getByTestId("uri-field-URI");
     expect(uriField).toBeInTheDocument();
-    const uriFieldInput = screen.getByTestId("uri-input-field-URI");
+    const uriFieldInput = screen.getByTestId(
+      "uri-input-field-URI"
+    ) as HTMLInputElement;
     expect(uriFieldInput).toBeInTheDocument();
     expect(uriFieldInput.value).toBe("urn:oid:2.16.840.1.113883.6.238");
   });
@@ -101,7 +103,9 @@ describe("UriComponent Component", () => {
 
     const uriField = screen.getByTestId("uri-field-URI");
     expect(uriField).toBeInTheDocument();
-    const uriFieldInput = screen.getByTestId("uri-input-field-URI");
+    const uriFieldInput = screen.getByTestId(
+      "uri-input-field-URI"
+    ) as HTMLInputElement;
     expect(uriFieldInput).toBeInTheDocument();
     expect(uriFieldInput.value).toBe("urn:oid:2.16.840.1.113883.6.238");
     fireEvent.change(uriFieldInput, {
@@ -120,5 +124,70 @@ describe("UriComponent Component", () => {
     );
     expect(screen.getByText("Add URI")).toBeInTheDocument();
     expect(uriFieldInput.value).toBe("urn:oid:2.16.840.1.113883.4.642.3.224");
+  });
+
+  test("does not render AddElementButton or delete button when canEdit is false", () => {
+    render(
+      <UriComponent
+        value="urn:oid:2.16.840.1.113883.6.238"
+        label="Test.uri"
+        canEdit={false}
+        fieldRequired={false}
+        structureDefinition={null}
+        showDeleteButton={true}
+        handleDeleteElement={jest.fn()}
+        showAddAttributeButton={true}
+        addTitle="URI"
+        handleAddElement={jest.fn()}
+      />
+    );
+
+    expect(screen.queryByText("Add URI")).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId("delete-button-Test.uri")
+    ).not.toBeInTheDocument();
+  });
+
+  test("should display delete icon and calls handleDeleteElement when delete button is clicked", () => {
+    const handleDeleteElementMock = jest.fn();
+
+    render(
+      <UriComponent
+        value="urn:oid:2.16.840.1.113883.6.238"
+        label="Test.uri"
+        canEdit={true}
+        fieldRequired={false}
+        structureDefinition={null}
+        showDeleteButton={true}
+        handleDeleteElement={handleDeleteElementMock}
+      />
+    );
+
+    const deleteButton = screen.getByTestId("delete-button-Test.uri");
+    fireEvent.click(deleteButton);
+
+    expect(handleDeleteElementMock).toHaveBeenCalledTimes(1);
+  });
+
+  test("should display add new icon and calls handleAddElement when AddElementButton is clicked", () => {
+    const handleAddElementMock = jest.fn();
+
+    render(
+      <UriComponent
+        value="urn:oid:2.16.840.1.113883.6.238"
+        label="Test.uri"
+        canEdit={true}
+        fieldRequired={false}
+        structureDefinition={null}
+        showAddAttributeButton={true}
+        addTitle="URI"
+        handleAddElement={handleAddElementMock}
+      />
+    );
+
+    const addButton = screen.getByText("Add URI");
+    fireEvent.click(addButton);
+
+    expect(handleAddElementMock).toHaveBeenCalledTimes(1);
   });
 });

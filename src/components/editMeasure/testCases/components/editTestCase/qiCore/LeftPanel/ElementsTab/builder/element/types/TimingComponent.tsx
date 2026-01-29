@@ -32,6 +32,8 @@ const TimingComponent = ({
     formik.setFieldValue(path, [...(getIn(formik.values, path) || [""]), ""]);
   };
 
+  // Todo Rohit work on handleDeleteElement later
+
   const eventArrayPath = `${label}.event`;
   const eventValues = getIn(formik.values, eventArrayPath) || [""];
 

@@ -1,4 +1,6 @@
 import React, { useContext, useEffect, useState } from "react";
+import "twin.macro";
+import "styled-components/macro";
 import ResourceContext from "../../ResourceContext";
 import { Select } from "@madie/madie-design-system/dist/react";
 import { IconButton, MenuItem, Tooltip, InputLabel } from "@mui/material";
@@ -221,20 +223,26 @@ export default function ReferenceComponent({
           helperText={helperText}
           error={error}
         />
-        {showDeleteButton && canEdit && (
-          <Tooltip title="Delete" placement="top" arrow>
-            <IconButton
-              onClick={handleDeleteElement}
-              data-testid={`delete-button-${label}`}
-              aria-label={`delete ${label}`}
-              size="small"
-            >
-              <DeleteOutlineIcon fontSize="small" />
-            </IconButton>
-          </Tooltip>
-        )}
-        {showAddAttributeButton && addTitle && (
-          <AddElementButton name={addTitle} onClick={handleAddElement} />
+        {canEdit && (
+          <div tw="mt-5 flex items-center">
+            {showDeleteButton && (
+              <Tooltip title="Delete" placement="top" arrow>
+                <span>
+                  <IconButton
+                    onClick={handleDeleteElement}
+                    data-testid={`delete-button-${label}`}
+                    aria-label={`delete ${label}`}
+                    size="small"
+                  >
+                    <DeleteOutlineIcon fontSize="small" color="error" />
+                  </IconButton>
+                </span>
+              </Tooltip>
+            )}
+            {showAddAttributeButton && (
+              <AddElementButton name={addTitle} onClick={handleAddElement} />
+            )}
+          </div>
         )}
       </div>
       {/* Select a specific resource from the selected reference type, from tc json */}

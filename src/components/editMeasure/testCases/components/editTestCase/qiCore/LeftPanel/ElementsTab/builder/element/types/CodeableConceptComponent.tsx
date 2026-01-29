@@ -17,6 +17,8 @@ interface CodeableConceptComponentProps {
   addTitle?: string;
   showAddAttributeButton?: boolean;
   handleAddElement?: Function;
+  showDeleteButton?: boolean;
+  handleDeleteElement?: Function;
 }
 
 const CodeableConceptComponent: React.FC<CodeableConceptComponentProps> = ({
@@ -27,6 +29,8 @@ const CodeableConceptComponent: React.FC<CodeableConceptComponentProps> = ({
   addTitle,
   showAddAttributeButton,
   handleAddElement,
+  showDeleteButton,
+  // handleDeleteElement,
 }) => {
   const formik = useFormikContext();
 
@@ -90,7 +94,7 @@ const CodeableConceptComponent: React.FC<CodeableConceptComponentProps> = ({
               addTitle={addTitle}
               label={codingLabel}
               canEdit={canEdit}
-              showDeleteButton={codings.length > 1}
+              showDeleteButton={showDeleteButton}
               handleDeleteElement={() => handleDeleteElement(index)}
               showAddAttributeButton={isLastElement}
               structureDefinition={structureDefinition}

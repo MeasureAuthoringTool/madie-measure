@@ -1,4 +1,4 @@
-import React from "react";
+import * as React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
 import IntegerComponent, { IntegerType } from "./IntegerComponent";
 import userEvent from "@testing-library/user-event";
@@ -6,7 +6,7 @@ import userEvent from "@testing-library/user-event";
 describe("IntegerComponent", () => {
   describe("Unsigned IntegerComponent", () => {
     test("Should render Unsigned IntegerComponent", () => {
-      const { rerender } = render(
+      render(
         <IntegerComponent
           label="Coverage.class.value"
           canEdit={true}
@@ -21,7 +21,7 @@ describe("IntegerComponent", () => {
       expect(integerField).toBeInTheDocument();
       const integerFieldInput = screen.getByTestId(
         "integer-field-input-Coverage.class.value"
-      );
+      ) as HTMLInputElement;
       expect(integerFieldInput).toBeInTheDocument();
       screen.debug();
     });
@@ -39,7 +39,9 @@ describe("IntegerComponent", () => {
 
       const integerField = screen.getByTestId("integer-field-");
       expect(integerField).toBeInTheDocument();
-      const integerFieldInput = screen.getByTestId("integer-field-input-");
+      const integerFieldInput = screen.getByTestId(
+        "integer-field-input-"
+      ) as HTMLInputElement;
       expect(integerFieldInput).toBeInTheDocument();
       expect(integerFieldInput.value).toBe("1");
 
@@ -60,7 +62,9 @@ describe("IntegerComponent", () => {
       );
       const integerField = screen.getByTestId("integer-field-");
       expect(integerField).toBeInTheDocument();
-      const integerFieldInput = screen.getByTestId("integer-field-input-");
+      const integerFieldInput = screen.getByTestId(
+        "integer-field-input-"
+      ) as HTMLInputElement;
       expect(integerFieldInput).toBeInTheDocument();
       expect(integerFieldInput.value).toBe("");
       userEvent.type(integerFieldInput, "-");
@@ -78,7 +82,9 @@ describe("IntegerComponent", () => {
       );
       const integerField = screen.getByTestId("integer-field-");
       expect(integerField).toBeInTheDocument();
-      const integerFieldInput = screen.getByTestId("integer-field-input-");
+      const integerFieldInput = screen.getByTestId(
+        "integer-field-input-"
+      ) as HTMLInputElement;
       expect(integerFieldInput).toBeInTheDocument();
       expect(integerFieldInput.value).toBe("");
       fireEvent.keyPress(integerFieldInput, { key: "-", charCode: 173 });
@@ -98,7 +104,7 @@ describe("IntegerComponent", () => {
       expect(integerField).toBeInTheDocument();
       const integerFieldInput = screen.getByTestId(
         "integer-field-input-Integer"
-      );
+      ) as HTMLInputElement;
       expect(integerFieldInput).toBeInTheDocument();
       expect(integerFieldInput.value).toBe("");
 
@@ -122,7 +128,7 @@ describe("IntegerComponent", () => {
       expect(integerField).toBeInTheDocument();
       const integerFieldInput = screen.getByTestId(
         "integer-field-input-Unsigned"
-      );
+      ) as HTMLInputElement;
       expect(integerFieldInput).toBeInTheDocument();
       expect(integerFieldInput.value).toBe("");
 
@@ -145,7 +151,9 @@ describe("IntegerComponent", () => {
       );
       const integerField = screen.getByTestId("integer-field-");
       expect(integerField).toBeInTheDocument();
-      const integerFieldInput = screen.getByTestId("integer-field-input-");
+      const integerFieldInput = screen.getByTestId(
+        "integer-field-input-"
+      ) as HTMLInputElement;
       expect(integerFieldInput).toBeInTheDocument();
       expect(integerFieldInput.value).toBe("");
 
@@ -171,7 +179,9 @@ describe("IntegerComponent", () => {
 
       const integerField = screen.getByTestId("integer-field-");
       expect(integerField).toBeInTheDocument();
-      const integerFieldInput = screen.getByTestId("integer-field-input-");
+      const integerFieldInput = screen.getByTestId(
+        "integer-field-input-"
+      ) as HTMLInputElement;
       expect(integerFieldInput).toBeInTheDocument();
       expect(integerFieldInput.value).toBe("2147483647");
     });
@@ -188,7 +198,9 @@ describe("IntegerComponent", () => {
       );
       const integerField = screen.getByTestId("integer-field-");
       expect(integerField).toBeInTheDocument();
-      const integerFieldInput = screen.getByTestId("integer-field-input-");
+      const integerFieldInput = screen.getByTestId(
+        "integer-field-input-"
+      ) as HTMLInputElement;
       expect(integerFieldInput).toBeInTheDocument();
       expect(integerFieldInput.value).toBe("1");
 
@@ -207,7 +219,9 @@ describe("IntegerComponent", () => {
       );
       const integerField = screen.getByTestId("integer-field-");
       expect(integerField).toBeInTheDocument();
-      const integerFieldInput = screen.getByTestId("integer-field-input-");
+      const integerFieldInput = screen.getByTestId(
+        "integer-field-input-"
+      ) as HTMLInputElement;
       expect(integerFieldInput).toBeInTheDocument();
       expect(integerFieldInput.value).toBe("");
 
@@ -227,7 +241,9 @@ describe("IntegerComponent", () => {
       );
       const integerField = screen.getByTestId("integer-field-");
       expect(integerField).toBeInTheDocument();
-      const integerFieldInput = screen.getByTestId("integer-field-input-");
+      const integerFieldInput = screen.getByTestId(
+        "integer-field-input-"
+      ) as HTMLInputElement;
       expect(integerFieldInput).toBeInTheDocument();
       expect(integerFieldInput.value).toBe("");
 
@@ -250,7 +266,7 @@ describe("IntegerComponent", () => {
       expect(integerField).toBeInTheDocument();
       const integerFieldInput = screen.getByTestId(
         "integer-field-input-Integer"
-      );
+      ) as HTMLInputElement;
       expect(integerFieldInput).toBeInTheDocument();
       expect(integerFieldInput.value).toBe("");
 
@@ -273,7 +289,9 @@ describe("IntegerComponent", () => {
 
       const integerField = screen.getByTestId("integer-field-");
       expect(integerField).toBeInTheDocument();
-      const integerFieldInput = screen.getByTestId("integer-field-input-");
+      const integerFieldInput = screen.getByTestId(
+        "integer-field-input-"
+      ) as HTMLInputElement;
       expect(integerFieldInput).toBeInTheDocument();
       expect(integerFieldInput.value).toBe("-2147483649");
     });
@@ -291,7 +309,9 @@ describe("IntegerComponent", () => {
 
       const integerField = screen.getByTestId("integer-field-");
       expect(integerField).toBeInTheDocument();
-      const integerFieldInput = screen.getByTestId("integer-field-input-");
+      const integerFieldInput = screen.getByTestId(
+        "integer-field-input-"
+      ) as HTMLInputElement;
       expect(integerFieldInput).toBeInTheDocument();
       expect(integerFieldInput.value).toBe("1");
 
@@ -312,7 +332,9 @@ describe("IntegerComponent", () => {
       );
       const integerField = screen.getByTestId("integer-field-");
       expect(integerField).toBeInTheDocument();
-      const integerFieldInput = screen.getByTestId("integer-field-input-");
+      const integerFieldInput = screen.getByTestId(
+        "integer-field-input-"
+      ) as HTMLInputElement;
       expect(integerFieldInput).toBeInTheDocument();
       expect(integerFieldInput.value).toBe("");
 
@@ -337,7 +359,9 @@ describe("IntegerComponent", () => {
       );
       const integerField = screen.getByTestId("integer-field-");
       expect(integerField).toBeInTheDocument();
-      const integerFieldInput = screen.getByTestId("integer-field-input-");
+      const integerFieldInput = screen.getByTestId(
+        "integer-field-input-"
+      ) as HTMLInputElement;
       expect(integerFieldInput).toBeInTheDocument();
       expect(integerFieldInput.value).toBe("");
 
@@ -359,7 +383,9 @@ describe("IntegerComponent", () => {
       );
       const integerField = screen.getByTestId("integer-field-");
       expect(integerField).toBeInTheDocument();
-      const integerFieldInput = screen.getByTestId("integer-field-input-");
+      const integerFieldInput = screen.getByTestId(
+        "integer-field-input-"
+      ) as HTMLInputElement;
       expect(integerFieldInput).toBeInTheDocument();
       expect(integerFieldInput.value).toBe("");
 
@@ -381,7 +407,9 @@ describe("IntegerComponent", () => {
       );
       const integerField = screen.getByTestId("integer-field-");
       expect(integerField).toBeInTheDocument();
-      const integerFieldInput = screen.getByTestId("integer-field-input-");
+      const integerFieldInput = screen.getByTestId(
+        "integer-field-input-"
+      ) as HTMLInputElement;
       expect(integerFieldInput).toBeInTheDocument();
       expect(integerFieldInput.value).toBe("");
 
@@ -408,7 +436,7 @@ describe("IntegerComponent", () => {
       expect(integerField).toBeInTheDocument();
       const integerFieldInput = screen.getByTestId(
         "integer-field-input-Integer"
-      );
+      ) as HTMLInputElement;
       expect(integerFieldInput).toBeInTheDocument();
       expect(integerFieldInput.value).toBe("");
 
@@ -418,6 +446,73 @@ describe("IntegerComponent", () => {
           "Signed integer range is [-2147483648 to 2147483647]"
         )
       ).not.toBeInTheDocument();
+    });
+  });
+
+  describe("Button functionality", () => {
+    test("does not render AddElementButton or delete button when canEdit is false", () => {
+      render(
+        <IntegerComponent
+          value={42}
+          label="Test.integer"
+          canEdit={false}
+          fieldRequired={false}
+          integerType={IntegerType.SIGNED}
+          showDeleteButton={true}
+          handleDeleteElement={jest.fn()}
+          showAddAttributeButton={true}
+          addTitle="Integer"
+          handleAddElement={jest.fn()}
+        />
+      );
+
+      expect(screen.queryByText("Add Integer")).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId("delete-button-Test.integer")
+      ).not.toBeInTheDocument();
+    });
+
+    test("calls handleDeleteElement when delete button is clicked", () => {
+      const handleDeleteElementMock = jest.fn();
+
+      render(
+        <IntegerComponent
+          value={42}
+          label="Test.integer"
+          canEdit={true}
+          fieldRequired={false}
+          integerType={IntegerType.SIGNED}
+          showDeleteButton={true}
+          handleDeleteElement={handleDeleteElementMock}
+        />
+      );
+
+      const deleteButton = screen.getByTestId("delete-button-Test.integer");
+      fireEvent.click(deleteButton);
+
+      expect(handleDeleteElementMock).toHaveBeenCalledTimes(1);
+    });
+
+    test("calls handleAddElement when AddElementButton is clicked", () => {
+      const handleAddElementMock = jest.fn();
+
+      render(
+        <IntegerComponent
+          value={42}
+          label="Test.integer"
+          canEdit={true}
+          fieldRequired={false}
+          integerType={IntegerType.SIGNED}
+          showAddAttributeButton={true}
+          addTitle="Integer"
+          handleAddElement={handleAddElementMock}
+        />
+      );
+
+      const addButton = screen.getByText("Add Integer");
+      fireEvent.click(addButton);
+
+      expect(handleAddElementMock).toHaveBeenCalledTimes(1);
     });
   });
 });
