@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from "react";
 import ResourceContext from "../../ResourceContext";
-import { Select } from "@madie/madie-design-system/dist/react";
+import { Select, MadieDialog } from "@madie/madie-design-system/dist/react";
 import { IconButton, MenuItem, Tooltip, InputLabel } from "@mui/material";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import { useQiCoreResource } from "../../../../../../../../util/QiCorePatientProvider";
@@ -8,6 +8,7 @@ import AddElementButton from "../../../../../../../common/UIOnlyModelAgnostic/Ad
 import { useFormikContext } from "formik";
 import { buildMadieResourceFromResourceIdentifier } from "../../../../../../../../api/fhirDefinitionServiceUtilities";
 import * as _ from "lodash";
+import "./ReferenceComponent.scss";
 
 export const getReferenceComponentLabel = (label: string) => {
   //e.g. for label = ClaimResponse.addItem[0].provider[0] return Provider
@@ -24,12 +25,22 @@ export const getHighestPriorityResourceList = (
   baseFhirProfiles
 ) => {
   if (qiCoreProfiles.length > 0) {
-    return qiCoreProfiles[0];
+    return qiCoreProfiles;
   } else if (usCoreProfiles.length > 0) {
-    return usCoreProfiles[0];
+    return usCoreProfiles;
   } else {
-    return baseFhirProfiles[0];
+    return baseFhirProfiles;
   }
+};
+
+// Helper function to determine profile match type and hierarchy
+export const getProfileMatchTypes = (profileUrl) => {
+  if (profileUrl.includes("/fhir/us/qicore")) return ["/fhir/us/qicore"];
+  if (profileUrl.includes("/fhir/us/core"))
+    return ["/fhir/us/core", "/fhir/us/qicore"];
+  if (profileUrl.includes("/fhir/StructureDefinition/"))
+    return ["/fhir/StructureDefinition/", "/fhir/us/core/", "/fhir/us/qicore/"];
+  return [];
 };
 export default function ReferenceComponent({
   structureDefinition,
@@ -50,6 +61,9 @@ export default function ReferenceComponent({
   const formikContext = useFormikContext();
   // First dropdown Utilities
   const allResourceProfiles = useContext(ResourceContext); // get all profiles loaded from builder
+
+  const [open, setOpen] = useState<boolean>(false);
+  const [selectedProfileAddNew, setSelectedProfileAddNew] = useState(null);
 
   const targetProfiles =
     structureDefinition.type?.find(
@@ -89,12 +103,17 @@ export default function ReferenceComponent({
       !rp.profile.includes("/us/")
   );
 
-  let finalResourceOptionForAddNew;
-  finalResourceOptionForAddNew = getHighestPriorityResourceList(
+  const finalList = getHighestPriorityResourceList(
     qiCoreProfiles,
     usCoreProfiles,
     baseFhirProfiles
   );
+  const finalResourceOptionForAddNew = finalList[0];
+  const finalListMappedOptions = finalList.map((res) => ({
+    label: res.title,
+    value: res.profile,
+  }));
+
   const emptyOption = [
     { label: "ID Not Present (Add New)", value: "add_new_id" },
   ]; // If no resources of that type exist, we need to show a message in the dropdown
@@ -103,20 +122,6 @@ export default function ReferenceComponent({
   const [selectedProfileUrl, setSelectedProfileUrl] = useState<string>(
     value?.referenceProfileUrl || ""
   );
-
-  // Helper function to determine profile match type and hierarchy
-  const getProfileMatchTypes = (profileUrl) => {
-    if (profileUrl.includes("/fhir/us/qicore")) return ["/fhir/us/qicore"];
-    if (profileUrl.includes("/fhir/us/core"))
-      return ["/fhir/us/core", "/fhir/us/qicore"];
-    if (profileUrl.includes("/fhir/StructureDefinition/"))
-      return [
-        "/fhir/StructureDefinition/",
-        "/fhir/us/core/",
-        "/fhir/us/qicore/",
-      ];
-    return [];
-  };
 
   // Updated getFinalOptions to filter by resourceType and meta.profile hierarchy
   const getFinalOptions = (
@@ -275,22 +280,31 @@ export default function ReferenceComponent({
             }}
             onChange={(e) => {
               if (e.target.value === "add_new_id") {
-                const newMadieResource =
-                  buildMadieResourceFromResourceIdentifier(
-                    finalResourceOptionForAddNew
+                if (finalList?.length > 1) {
+                  setOpen(true);
+                } else {
+                  // what's the list length of possible profiles of type per model
+                  const newMadieResource =
+                    buildMadieResourceFromResourceIdentifier(
+                      finalResourceOptionForAddNew
+                    );
+                  formikContext.setFieldValue(
+                    "add_new_resource",
+                    newMadieResource
                   );
-                // Append to array instead of overwriting - supports multiple "Add New" references
-                const existingResources =
-                  formikContext.values["add_new_resources"] || [];
-                formikContext.setFieldValue("add_new_resources", [
-                  ...existingResources,
-                  newMadieResource,
-                ]);
-                formikContext.setFieldValue(
-                  `${label}.reference`,
-                  `${selectedReferenceType}/${newMadieResource.resource.id}`
-                );
-                setSelectedReferenceId("add_new_id");
+                  // Append to array instead of overwriting - supports multiple "Add New" references
+                  const existingResources =
+                    formikContext.values["add_new_resources"] || [];
+                  formikContext.setFieldValue("add_new_resources", [
+                    ...existingResources,
+                    newMadieResource,
+                  ]);
+                  formikContext.setFieldValue(
+                    `${label}.reference`,
+                    `${selectedReferenceType}/${newMadieResource.resource.id}`
+                  );
+                  setSelectedReferenceId("add_new_id");
+                }
               } else {
                 // Selecting an existing resource - just update the reference
                 formikContext.setFieldValue(label, {
@@ -311,6 +325,75 @@ export default function ReferenceComponent({
           <div />
         </div>
       )}
+      <MadieDialog
+        form
+        title="Choose Profile"
+        dialogProps={{
+          onClose: () => {
+            setOpen(false);
+            setSelectedProfileAddNew(null);
+          },
+          open,
+          // apply the profile
+          onSubmit: (e) => {
+            e.stopPropagation();
+            e.preventDefault();
+            const selectedProfile = finalList.find(
+              (item) => item.profile === selectedProfileAddNew
+            );
+            const newMadieResource =
+              buildMadieResourceFromResourceIdentifier(selectedProfile);
+            formikContext.setFieldValue("add_new_resource", newMadieResource);
+            formikContext.setFieldValue(
+              `${label}.reference`,
+              `${selectedReferenceType}/${newMadieResource.resource.id}`
+            );
+            setSelectedReferenceId("add_new_id");
+            setOpen(false);
+          },
+          maxWidth: "sm",
+          fullWidth: true,
+        }}
+        cancelButtonProps={{
+          variant: "secondary",
+          cancelText: "Cancel",
+          "data-testid": "add-new-profile-ref-cancel-button",
+        }}
+        continueButtonProps={{
+          variant: "cyan",
+          type: "submit",
+          "data-testid": "add-new-profile-ref-save-button",
+          disabled: !selectedProfileAddNew,
+          continueText: "Save",
+        }}
+      >
+        <div data-testid="add-new-profile-ref" id="add-new-profile-ref">
+          <Select
+            label="Reference"
+            name="Reference"
+            options={finalListMappedOptions.map((opt, i) => (
+              <MenuItem
+                key={`${opt.label}-${opt.value}-${i}`}
+                data-testid={`${opt.value}-option`}
+                value={opt.value}
+              >
+                {opt.label}
+              </MenuItem>
+            ))}
+            onChange={(e) => {
+              setSelectedProfileAddNew(e.target.value);
+            }}
+            value={selectedProfileAddNew}
+            renderValue={(selected) => {
+              // Find the corresponding label for the selected value
+              const item = finalListMappedOptions.find(
+                (item) => item.value === selected
+              );
+              return item?.label || "Select";
+            }}
+          />
+        </div>
+      </MadieDialog>
     </>
   );
 }
