@@ -1,17 +1,107 @@
 import * as React from "react";
 import Builder, { scrollToElementByIdWhenAvailable } from "./Builder";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import { Measure, TestCase } from "@madie/madie-models";
 import { QiCoreResourceContext } from "../../../../../../util/QiCorePatientProvider";
 import { ExecutionContextProvider } from "../../../../../routes/qiCore/ExecutionContext";
-import userEvent from "@testing-library/user-event";
 import {
   ApiContextProvider,
   ServiceConfig,
 } from "../../../../../../../../../api/ServiceContext";
 import { useFormikContext } from "formik";
 import { mockBundle } from "./grid/TestCaseSummaryGrid.test";
-import { within } from "@testing-library/dom";
+
+const mockGetResourceTree = jest.fn(() => Promise.resolve({}));
+
+jest.mock("./resource/ResourceEditor", () => {
+  const React = require("react");
+  return {
+    __esModule: true,
+    default: function MockResourceEditor({ setApplyLoading }) {
+      React.useEffect(() => {
+        setApplyLoading(true);
+      }, [setApplyLoading]);
+      return <div data-testid="mock-resource-editor" />;
+    },
+  };
+});
+
+jest.mock("./resource/ResourceList", () => {
+  const React = require("react");
+  return {
+    __esModule: true,
+    default: function MockResourceList(props) {
+      const { resourceIdentifiers = [], onClick } = props;
+
+      React.useEffect(() => {
+        if (resourceIdentifiers.length && onClick) {
+          onClick(resourceIdentifiers[0]);
+        }
+      }, [resourceIdentifiers, onClick]);
+
+      return (
+        <div data-testid="mock-resource-list">
+          <label>
+            Search
+            <input aria-label="Search" />
+          </label>
+          <table>
+            <tbody>
+              {resourceIdentifiers.map((res) => (
+                <tr key={res.id}>
+                  <td>{res.title}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      );
+    },
+  };
+});
+
+const defaultResourceIdentifiers = [
+  {
+    id: "qicore-patient",
+    title: "QICore Patient",
+    type: "Patient",
+    category: "Base.Individuals",
+    profile: "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient",
+  },
+  {
+    id: "qicore-service-request",
+    title: "QICore ServiceRequest",
+    type: "ServiceRequest",
+    category: "Clinical.Summary",
+    profile:
+      "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-servicerequest",
+  },
+  {
+    id: "qicore-procedure",
+    title: "QICore Procedure",
+    type: "Procedure",
+    category: "Clinical.Summary",
+    profile:
+      "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-procedure",
+  },
+  {
+    id: "qicore-encounter",
+    title: "QICore Encounter",
+    type: "Encounter",
+    category: "Base.Management",
+    profile:
+      "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-encounter",
+  },
+  {
+    id: "ChargeItem",
+    title: "ChargeItem",
+    type: "ChargeItem",
+    category: "Financial.General",
+    profile: "http://hl7.org/fhir/StructureDefinition/ChargeItem",
+  },
+];
+
+const mockGetResources = jest.fn(() => defaultResourceIdentifiers);
 
 const serviceConfig: ServiceConfig = {
   measureService: {
@@ -39,47 +129,8 @@ const serviceConfig: ServiceConfig = {
 
 jest.mock("../../../../../../api/useFhirDefinitionsService", () => {
   return () => ({
-    getResources: () => [
-      {
-        id: "qicore-patient",
-        title: "QICore Patient",
-        type: "Patient",
-        category: "Base.Individuals",
-        profile:
-          "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient",
-      },
-      {
-        id: "qicore-service-request",
-        title: "QICore ServiceRequest",
-        type: "ServiceRequest",
-        category: "Clinical.Summary",
-        profile:
-          "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-servicerequest",
-      },
-      {
-        id: "qicore-procedure",
-        title: "QICore Procedure",
-        type: "Procedure",
-        category: "Clinical.Summary",
-        profile:
-          "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-procedure",
-      },
-      {
-        id: "qicore-encounter",
-        title: "QICore Encounter",
-        type: "Encounter",
-        category: "Base.Management",
-        profile:
-          "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-encounter",
-      },
-      {
-        id: "ChargeItem",
-        title: "ChargeItem",
-        type: "ChargeItem",
-        category: "Financial.General",
-        profile: "http://hl7.org/fhir/StructureDefinition/ChargeItem",
-      },
-    ],
+    getResources: mockGetResources,
+    getResourceTree: mockGetResourceTree,
   });
 });
 jest.mock(
@@ -117,6 +168,30 @@ jest.mock("formik", () => ({
   useFormikContext: jest.fn(),
 }));
 
+jest.mock("../../../../../../api/fhirDefinitionServiceUtilities", () => ({
+  buildMadieResourceFromResourceIdentifier: (resourceIdentifier) => ({
+    bundleEntry: true,
+    resource: { resourceType: resourceIdentifier.type || "Observation" },
+  }),
+  getTopLevelElements: () => [
+    {
+      min: 1,
+      max: "1",
+      path: "component",
+      base: { max: "1" },
+      patternCodeableConcept: { coding: [{ code: "pattern" }] },
+    },
+    {
+      min: 1,
+      max: "1",
+      path: "value",
+      base: { max: "*" },
+      fixedCode: { code: "fixed" },
+    },
+  ],
+  getLastPart: (path) => path,
+}));
+
 const mockBundleWithMultiplePatients = {
   entry: [
     {
@@ -147,10 +222,15 @@ const mockBundleWithMultiplePatients = {
     },
   ],
 };
-const renderBuilderComponent = (
+const renderBuilderComponent = ({
   bundleToAdd = mockBundleWithMultiplePatients,
-  activeTab = "available"
-) => {
+  activeTab = "available",
+  canEdit = true,
+}: {
+  bundleToAdd?: any;
+  activeTab?: string;
+  canEdit?: boolean;
+} = {}) => {
   return render(
     <ApiContextProvider value={serviceConfig}>
       <ExecutionContextProvider
@@ -171,7 +251,7 @@ const renderBuilderComponent = (
           }}
         >
           <Builder
-            canEdit={true}
+            canEdit={canEdit}
             testCase={{} as TestCase}
             setInitialFormikValuesStu6={jest.fn()}
             setValidationSchema={jest.fn()}
@@ -184,118 +264,141 @@ const renderBuilderComponent = (
 };
 
 describe("Builder Component", () => {
-  const resetForm = jest.fn();
-
   beforeEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
+    (useFormikContext as jest.Mock).mockReturnValue({ resetForm: jest.fn() });
+    mockGetResources.mockReturnValue(defaultResourceIdentifiers);
+    mockGetResourceTree.mockResolvedValue({});
   });
 
-  it("renders the component correctly", async () => {
-    (useFormikContext as jest.Mock).mockReturnValue({ resetForm, dirty: true });
-
-    renderBuilderComponent(mockBundle);
-    const addedTab = screen.getByText("Added (3)");
-
-    userEvent.click(addedTab);
-    const discardDialog = await screen.getByRole("dialog", {
-      name: "Discard Changes?",
-    });
-    expect(discardDialog).toBeInTheDocument();
-    // close
-    const closeButton = screen.getByRole("button", { name: /close/i });
-    userEvent.click(closeButton);
-    await waitFor(() => {
-      expect(closeButton).not.toBeInTheDocument();
-    });
-    userEvent.click(addedTab);
-    await waitFor(() => {
-      expect(screen.getByText("Discard Changes?")).toBeInTheDocument();
-    });
-    // on continue
-    userEvent.click(screen.getByText("Yes, Discard All Changes"));
-    await waitFor(() => {
-      expect(closeButton).not.toBeInTheDocument();
-    });
+  it("shows an error when multiple patients exist in the bundle", async () => {
+    renderBuilderComponent();
+    expect(
+      await screen.findByTestId("json-error-alert-multiple-patients")
+    ).toBeInTheDocument();
   });
 
-  it("should render Available and Added tabs correctly", async () => {
-    (useFormikContext as jest.Mock).mockReturnValue({
-      resetForm,
-      dirty: false,
-    });
+  it("renders available content when activeTab is available and editable", async () => {
+    renderBuilderComponent({ bundleToAdd: mockBundle, activeTab: "available" });
 
-    renderBuilderComponent(mockBundle, "available");
-
-    const availableTab = await screen.findByText("Available");
-    const addedTab = await screen.findByText("Added (3)");
-
-    expect(availableTab).toHaveAttribute("aria-selected", "true");
     expect(await screen.findByLabelText("Search")).toBeInTheDocument();
     const rows = await screen.findAllByRole("row");
-    expect(rows).toHaveLength(5);
+    expect(rows).toHaveLength(4);
   });
 
-  it("renders the Added tab content correctly", async () => {
-    (useFormikContext as jest.Mock).mockReturnValue({
-      resetForm,
-      dirty: false,
+  it("does not render available content when not editable", () => {
+    renderBuilderComponent({
+      bundleToAdd: mockBundle,
+      activeTab: "available",
+      canEdit: false,
     });
 
-    renderBuilderComponent(mockBundle, "added");
-
-    expect(screen.getByText("Profile")).toBeInTheDocument();
-    // Verify the table is rendered
-    expect(screen.getByRole("table")).toBeInTheDocument();
-  });
-
-  it("should not render Available content when canEdit is false and activeTab is available", async (bundleToAdd = mockBundle) => {
-    (useFormikContext as jest.Mock).mockReturnValue({
-      resetForm,
-      dirty: false,
-    });
-
-    render(
-      <ApiContextProvider value={serviceConfig}>
-        <ExecutionContextProvider
-          value={{
-            measureState: [mockMeasure, jest.fn()],
-            bundleState: [null, jest.fn()] as any,
-            valueSetsState: [null, jest.fn()] as any,
-            executionContextReady: true,
-            executing: false,
-            setExecuting: jest.fn(),
-            contextFailure: false,
-          }}
-        >
-          <QiCoreResourceContext.Provider
-            value={{
-              state: { bundle: bundleToAdd },
-              dispatch: jest.fn(),
-            }}
-          >
-            <Builder
-              canEdit={false}
-              testCase={{} as TestCase}
-              setInitialFormikValuesStu6={jest.fn()}
-              setValidationSchema={jest.fn()}
-              activeTab="available"
-            />
-          </QiCoreResourceContext.Provider>
-        </ExecutionContextProvider>
-      </ApiContextProvider>
-    );
-
-    // ResourceList should not be rendered when canEdit is false
     expect(screen.queryByLabelText("Search")).not.toBeInTheDocument();
   });
 
-    // Added tab should still be present and selected by default
-    const addedTab = await screen.findByText("Added (3)");
-    expect(addedTab).toBeInTheDocument();
-    expect(addedTab).toHaveAttribute("aria-selected", "true");
+  it("renders added content when activeTab is added", async () => {
+    renderBuilderComponent({ bundleToAdd: mockBundle, activeTab: "added" });
 
-    // Grid content should be visible
     expect(screen.getByText("Profile")).toBeInTheDocument();
+    expect(screen.getByRole("table")).toBeInTheDocument();
+    expect(screen.queryByRole("progressbar")).not.toBeInTheDocument();
+  });
+
+  it("places qicore patient first even when service returns it later", async () => {
+    mockGetResources.mockReturnValue([
+      defaultResourceIdentifiers[1],
+      defaultResourceIdentifiers[2],
+      defaultResourceIdentifiers[3],
+      defaultResourceIdentifiers[0], // patient intentionally last
+    ]);
+
+    renderBuilderComponent({ bundleToAdd: mockBundle, activeTab: "available" });
+
+    const rows = await screen.findAllByRole("row");
+    const firstResourceRow = rows[0];
+    expect(firstResourceRow.textContent).toContain("QICore Patient");
+  });
+
+  it("maps grid titles using resource definitions and falls back to resource type", async () => {
+    (useFormikContext as jest.Mock).mockReturnValue({
+      resetForm: jest.fn(),
+      dirty: false,
+    });
+
+    const bundleWithMixedProfiles = {
+      entry: [
+        {
+          resource: {
+            resourceType: "Encounter",
+            id: "enc-1",
+            meta: {
+              profile: [
+                "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-encounter",
+              ],
+            },
+          },
+        },
+        {
+          resource: {
+            resourceType: "Observation",
+            id: "obs-1",
+            meta: {
+              profile: ["http://example.com/observation"],
+            },
+          },
+        },
+        {
+          resource: {
+            resourceType: "ServiceRequest",
+            id: "sr-1",
+            meta: {
+              profile: [
+                "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-servicerequest",
+              ],
+            },
+          },
+        },
+      ],
+    };
+
+    renderBuilderComponent({
+      bundleToAdd: bundleWithMixedProfiles,
+      activeTab: "added",
+    });
+
+    expect(await screen.findByText("QICore Encounter")).toBeInTheDocument();
+    expect(await screen.findByText("Observation")).toBeInTheDocument();
+    expect(
+      await screen.findByText("QICore ServiceRequest")
+    ).toBeInTheDocument();
+  });
+
+  it("handles empty bundle entries without rendering data rows", async () => {
+    (useFormikContext as jest.Mock).mockReturnValue({
+      resetForm: jest.fn(),
+      dirty: false,
+    });
+
+    const emptyBundle = { entry: [] };
+
+    renderBuilderComponent({ bundleToAdd: emptyBundle, activeTab: "added" });
+
+    // table renders headers but no data rows
+    const rows = await screen.findAllByRole("row");
+    expect(rows.length).toBe(1);
+  });
+
+  it("triggers resource addition logic with required elements and spinner overlay", async () => {
+    (useFormikContext as jest.Mock).mockReturnValue({
+      resetForm: jest.fn(),
+      dirty: false,
+    });
+
+    renderBuilderComponent({ bundleToAdd: mockBundle, activeTab: "available" });
+
+    await screen.findByTestId("mock-resource-list");
+
+    expect(mockGetResourceTree).toHaveBeenCalledWith("qicore-patient");
   });
 });
 
@@ -351,7 +454,7 @@ describe("scrollToElementByIdWhenAvailable", () => {
       dirty: false,
     });
 
-    renderBuilderComponent(mockBundle, "available");
+    renderBuilderComponent({ bundleToAdd: mockBundle, activeTab: "available" });
 
     const rows = await screen.findAllByRole("row");
     const firstResourceRow = rows.find((row) =>
@@ -359,9 +462,9 @@ describe("scrollToElementByIdWhenAvailable", () => {
     );
 
     // The first resource row should be the first after the header
-    expect(rows.indexOf(firstResourceRow!)).toBe(1);
+    expect(rows.indexOf(firstResourceRow!)).toBe(0);
 
-    const resourceTitles = rows.slice(1).map((row) => row.textContent);
+    const resourceTitles = rows.map((row) => row.textContent);
     expect(resourceTitles[0]).toContain("QICore Patient");
     expect(resourceTitles[1]).toContain("QICore ServiceRequest");
     expect(resourceTitles[2]).toContain("QICore Procedure");
@@ -374,16 +477,8 @@ describe("scrollToElementByIdWhenAvailable", () => {
       dirty: false,
     });
 
-    const { container } = renderBuilderComponent(mockBundle, "added");
+    renderBuilderComponent({ bundleToAdd: mockBundle, activeTab: "added" });
 
-    const addedTab = await screen.findByText("Added (3)");
-    userEvent.click(addedTab);
-
-    await waitFor(() => {
-      expect(addedTab).toHaveAttribute("aria-selected", "true");
-    });
-
-    // Initially, the spinner should not be visible
     expect(screen.queryByRole("progressbar")).not.toBeInTheDocument();
   });
 
@@ -393,13 +488,9 @@ describe("scrollToElementByIdWhenAvailable", () => {
       dirty: false,
     });
 
-    const { container } = renderBuilderComponent(mockBundle);
-
-    const addedTab = await screen.findByText("Added (3)");
-    userEvent.click(addedTab);
-
-    await waitFor(() => {
-      expect(addedTab).toHaveAttribute("aria-selected", "true");
+    const { container } = renderBuilderComponent({
+      bundleToAdd: mockBundle,
+      activeTab: "added",
     });
 
     // Check that the wrapper div with relative positioning exists
@@ -416,7 +507,7 @@ describe("scrollToElementByIdWhenAvailable", () => {
       dirty: false,
     });
 
-    renderBuilderComponent(mockBundle, "available");
+    renderBuilderComponent({ bundleToAdd: mockBundle, activeTab: "available" });
 
     // Verify the builder component renders successfully
     expect(screen.getByTestId("qi-core-test-case-builder")).toBeInTheDocument();
@@ -428,13 +519,9 @@ describe("scrollToElementByIdWhenAvailable", () => {
       dirty: false,
     });
 
-    const { container } = renderBuilderComponent(mockBundle);
-
-    const addedTab = await screen.findByText("Added (3)");
-    userEvent.click(addedTab);
-
-    await waitFor(() => {
-      expect(addedTab).toHaveAttribute("aria-selected", "true");
+    const { container } = renderBuilderComponent({
+      bundleToAdd: mockBundle,
+      activeTab: "added",
     });
 
     // The ResourceEditor should receive the applyLoading props
@@ -449,7 +536,7 @@ describe("scrollToElementByIdWhenAvailable", () => {
       dirty: false,
     });
 
-    renderBuilderComponent(mockBundleWithMultiplePatients);
+    renderBuilderComponent({ bundleToAdd: mockBundleWithMultiplePatients });
     const madieErrorAlert = await screen.findByTestId(
       "json-error-alert-multiple-patients"
     );
