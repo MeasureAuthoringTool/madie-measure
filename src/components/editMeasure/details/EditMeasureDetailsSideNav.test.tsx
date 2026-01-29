@@ -1,5 +1,6 @@
 import * as React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import EditMeasureDetailsSideNav, {
   EditMeasureDetailsSideNavProps,
@@ -135,9 +136,11 @@ describe("EditMeasureDetailsSideNav", () => {
 
   test("Measure Details side nav bar is rendered with appropriate titles, icons, and nav links", async () => {
     await waitFor(() => RenderEditMeasureDetailsSideNav(initialProps));
-    screen.debug();
 
     expect(screen.queryByText("General Information")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "General Information" })
+    ).toHaveAttribute("aria-expanded", "true");
     expect(screen.queryByText("Name, Version & ID")).toBeInTheDocument();
     expect(
       screen.queryByText("Model & Measurement Period")
@@ -160,6 +163,9 @@ describe("EditMeasureDetailsSideNav", () => {
     ).toBeInTheDocument();
 
     expect(screen.queryByText("Measure Overview")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Measure Overview" })
+    ).toHaveAttribute("aria-expanded", "true");
     expect(screen.queryByText("Description")).toBeInTheDocument();
     expect(screen.queryByText("Rationale")).toBeInTheDocument();
     expect(screen.queryByText("Guidance (Usage)")).toBeInTheDocument();
@@ -220,6 +226,10 @@ describe("EditMeasureDetailsSideNav", () => {
     ).toBeInTheDocument();
 
     expect(screen.queryByText("Legal")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Legal" })).toHaveAttribute(
+      "aria-expanded",
+      "true"
+    );
     expect(screen.queryByText("Copyright")).toBeInTheDocument();
     expect(screen.queryByText("Disclaimer")).toBeInTheDocument();
     expect(
@@ -232,5 +242,22 @@ describe("EditMeasureDetailsSideNav", () => {
         `measure-details-completed-icon-${initialProps.links[2].links[1].id}`
       )
     ).toBeInTheDocument();
+  });
+
+  test("Measure Details sections can be collapsed and expanded", async () => {
+    await waitFor(() => RenderEditMeasureDetailsSideNav(initialProps));
+
+    const generalInfoToggle = screen.getByRole("button", {
+      name: "General Information",
+    });
+    expect(screen.getByText("Name, Version & ID")).toBeInTheDocument();
+
+    await userEvent.click(generalInfoToggle);
+    expect(generalInfoToggle).toHaveAttribute("aria-expanded", "false");
+    expect(screen.queryByText("Name, Version & ID")).not.toBeInTheDocument();
+
+    await userEvent.click(generalInfoToggle);
+    expect(generalInfoToggle).toHaveAttribute("aria-expanded", "true");
+    expect(screen.getByText("Name, Version & ID")).toBeInTheDocument();
   });
 });
