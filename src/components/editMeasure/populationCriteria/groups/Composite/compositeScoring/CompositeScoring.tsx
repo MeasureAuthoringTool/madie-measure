@@ -26,7 +26,7 @@ export const compositeScoringOptions = [
   },
 ];
 
-const CompositeScoring = ({ canEdit, formik }) => {
+const CompositeScoring = ({ canEdit, formik, measure }) => {
   const isCompositeScoringSelected =
     formik.values?.compositeScoring &&
     formik.values.compositeScoring !== "" &&
@@ -98,6 +98,8 @@ const CompositeScoring = ({ canEdit, formik }) => {
       <AddComponentsDialog
         open={openAddComponentsDialog}
         onClose={onAddComponentsClose}
+        measure={measure}
+        compositeScoring={formik.values.compositeScoring}
       />
     </>
   );
