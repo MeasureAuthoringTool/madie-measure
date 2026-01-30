@@ -137,7 +137,11 @@
           }
         }
         > .panel-content {
+          padding-top: 32px;
           overflow: scroll;
+        }
+        > .panel-content#left-panel-content {
+          padding-top: 0;
         }
       }
       .sash {

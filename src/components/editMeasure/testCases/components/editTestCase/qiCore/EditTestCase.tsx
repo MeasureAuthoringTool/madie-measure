@@ -320,7 +320,7 @@ const LeftPanelContent = ({
         />
       </div>
       {isBuilderTab && isValidJson(editorVal) && (
-        <div className="panel-content">
+        <div className="panel-content" id="left-panel-content">
           <div data-testid="elements-content" id="elements-content">
             <FormikProvider value={formikStu6Context}>
               <ElementsTab
