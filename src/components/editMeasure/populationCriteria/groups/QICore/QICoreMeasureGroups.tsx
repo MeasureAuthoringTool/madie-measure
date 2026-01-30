@@ -72,7 +72,6 @@ import {
   MenuItemContainer,
 } from "../../../../../styles/editMeasure/populationCriteria/groups/index";
 import CompletionIndicator from "../CompletionIndicator";
-import CompositeScoring from "../Composite/compositeScoring/CompositeScoring";
 import CompositeComponent from "../Composite/CompositeComponent";
 
 interface ColSpanPopulationsType {
@@ -1273,7 +1272,11 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                 )}
                 {activeTab === "components" && (
                   <div data-testid="components">
-                    <CompositeComponent canEdit={canEdit} formik={formik} />
+                    <CompositeComponent
+                      canEdit={canEdit}
+                      formik={formik}
+                      measure={measure}
+                    />
                   </div>
                 )}
                 {activeTab === "stratification" && (

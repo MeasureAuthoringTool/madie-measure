@@ -2,6 +2,7 @@ import React from "react";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import CompositeComponent from "./CompositeComponent";
+import { oneItemResponse } from "../../../../__mocks__/mockMeasureResponses";
 
 const mockFormik = {
   values: {
@@ -11,6 +12,14 @@ const mockFormik = {
   touched: {},
   errors: {},
 };
+
+const mockMeasureServiceApi = {
+  searchMeasuresByCriteria: jest.fn().mockResolvedValue(oneItemResponse),
+};
+
+jest.mock("@madie/madie-util", () => ({
+  useMeasureServiceApi: jest.fn(() => mockMeasureServiceApi),
+}));
 
 describe("CompositeComponent", () => {
   it("renders the composite component container", () => {
