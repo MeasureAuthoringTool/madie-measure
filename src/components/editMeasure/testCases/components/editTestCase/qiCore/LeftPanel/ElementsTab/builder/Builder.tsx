@@ -20,13 +20,9 @@ import { ResourceIdentifier } from "../../../../../../api/models/ResourceIdentif
 import useFhirElmTranslationServiceApi from "../../../../../../../../../api/useFhirElmTranslationServiceApi";
 import useExecutionContext from "../../../../../routes/qiCore/useExecutionContext";
 import {
-  Tabs,
-  Tab,
-  MadieDiscardDialog,
   MadieSpinner,
   MadieAlert,
 } from "@madie/madie-design-system/dist/react";
-import { useFormikContext } from "formik";
 import { handleCancel, handleRowDelete, handleRowEdit } from "./BuilderUtils";
 import "./Builder.scss";
 import {
@@ -42,6 +38,7 @@ interface BuilderProps {
   canEdit: boolean;
   setInitialFormikValuesStu6: Dispatch<SetStateAction<Object>>;
   setValidationSchema: Dispatch<SetStateAction<Object>>;
+  activeTab: string;
 }
 
 export function scrollToElementByIdWhenAvailable(
@@ -89,6 +86,7 @@ const Builder = ({
   canEdit,
   setInitialFormikValuesStu6,
   setValidationSchema,
+  activeTab,
 }: BuilderProps) => {
   const fhirDefinitionsService = useRef(useFhirDefinitionsServiceApi());
   const fhirElmTranslationService = useRef(useFhirElmTranslationServiceApi());
@@ -97,23 +95,9 @@ const Builder = ({
   const { measureState } = useExecutionContext();
   const [measure] = measureState;
 
-  // track form dirty and an intermediate tab to know what the discard dialog should nav to
-  const { dirty, resetForm } = useFormikContext();
-  const [activeTab, setActiveTab] = useState<string>(
-    canEdit ? "Available" : "Added"
-  );
-  const [pendingTab, setPendingTab] = useState<string>(activeTab);
-  const [dialogOpen, setDialogOpen] = useState<boolean>(false);
-  const onContinue = () => {
-    setDialogOpen(false);
-    setActiveTab(pendingTab);
-    resetForm();
-  };
-
   const [selectedResourceID, setSelectedResourceId] = useState<string>(null); // one single source of truth.
   const [resourceIdentifiers, setResourceIdentifiers] = useState([]);
   const [resources, setResources] = useState<ResourceIdentifier[]>([]);
-  const addedResources = state?.bundle?.entry?.length || 0;
   const [savedGridID, setSavedGridID] = useState(null);
   const [applyLoading, setApplyLoading] = useState(false);
   useEffect(() => {
@@ -196,44 +180,9 @@ const Builder = ({
       id="qi-core-test-case-builder"
       data-testId="qi-core-test-case-builder"
     >
-      <Box>
-        <Tabs
-          value={activeTab}
-          onChange={(e, v) => {
-            if (dirty) {
-              setDialogOpen(true);
-              setPendingTab(v);
-            } else {
-              setActiveTab(v);
-            }
-          }}
-          className="horizontal-nav-tabs"
-          type="B"
-          orientation="horizontal"
-        >
-          {canEdit && (
-            <Tab
-              type="B"
-              tabIndex={0}
-              aria-label="Available elements tab panel"
-              label={"Available"}
-              data-testid="available-tab"
-              value="Available"
-            />
-          )}
-          <Tab
-            type="B"
-            tabIndex={0}
-            aria-label="Added elements tab panel"
-            label={`Added (${addedResources})`}
-            data-testid="added-tab"
-            value="Added"
-          />
-        </Tabs>
-      </Box>
       <div className="panel-content-pane" id="tc-builder-panel-content-pane">
         {/* available elements that we don't want to display when a resource is selected */}
-        {activeTab === "Available" && canEdit && (
+        {activeTab === "available" && canEdit && (
           <ResourceList
             resourceIdentifiers={resources.filter(
               (res) =>
@@ -279,7 +228,7 @@ const Builder = ({
             isPatientAdded={isPatientAdded}
           />
         )}
-        {activeTab === "Added" && (
+        {activeTab === "added" && (
           <div style={{ position: "relative", minHeight: "400px" }}>
             {applyLoading && (
               <div
@@ -332,13 +281,6 @@ const Builder = ({
           </div>
         )}
       </div>
-      <MadieDiscardDialog
-        open={dialogOpen}
-        onContinue={onContinue}
-        onClose={() => {
-          setDialogOpen(false);
-        }}
-      />
     </Box>
   );
 };
