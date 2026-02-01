@@ -277,10 +277,10 @@ const TypeEditor = ({
                   error={Boolean(getNestedProperty(formik.errors, fieldLabel))}
                   required={required}
                   showAddAttributeButton={
-                    showAddAttributeButton &&
+                    showMultipleCardinalityActionCenter &&
                     (!isArrayMode || index === lastIndex)
                   }
-                  showDeleteButton={isArrayMode && index > 0}
+                  showDeleteButton={showMultipleCardinalityActionCenter}
                   handleDeleteElement={() =>
                     handleDeleteElement(index, fieldLabel)
                   }
@@ -787,7 +787,7 @@ const TypeEditor = ({
                   }
                   showDeleteButton={showMultipleCardinalityActionCenter}
                   handleDeleteElement={() =>
-                      handleDeleteElement(index, fieldLabel)
+                    handleDeleteElement(index, fieldLabel)
                   }
                   addTitle={addTitle}
                   handleAddElement={() => {

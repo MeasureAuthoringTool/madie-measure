@@ -35,7 +35,18 @@ const TimingComponent = ({
     formik.setFieldValue(path, [...(getIn(formik.values, path) || [""]), ""]);
   };
 
-  // Todo Rohit work on handleDeleteElement later
+  const handleDeleteElement = (path: string, index: number) => {
+    const currentArray = getIn(formik.values, path) || [];
+
+    if (currentArray.length === 1) {
+      // If it's the last element, just clear its value
+      formik.setFieldValue(`${path}[${index}]`, "");
+    } else {
+      // If there are multiple elements, remove this one from the array
+      const newArray = currentArray.filter((_: any, i: number) => i !== index);
+      formik.setFieldValue(path, newArray);
+    }
+  };
 
   const eventArrayPath = `${label}.event`;
   const eventValues = getIn(formik.values, eventArrayPath) || [""];
@@ -89,6 +100,10 @@ const TimingComponent = ({
             showAddAttributeButton={index === eventValues.length - 1}
             addTitle={"Event"}
             handleAddElement={() => handleAddElement(eventArrayPath)}
+            showDeleteButton={true} // always true for multiple cardinality
+            handleDeleteElement={() =>
+              handleDeleteElement(eventArrayPath, index)
+            }
             {...formik.getFieldProps(`${eventArrayPath}[${index}]`)}
             onChange={(value) => {
               formik.setFieldTouched(`${eventArrayPath}[${index}]`);
@@ -317,6 +332,10 @@ const TimingComponent = ({
             showAddAttributeButton={index === dayOfWeekValues.length - 1}
             addTitle="Repeat.Day of Week"
             handleAddElement={() => handleAddElement(dayOfWeekArrayPath)}
+            showDeleteButton={true} // always true for multiple cardinality
+            handleDeleteElement={() =>
+              handleDeleteElement(dayOfWeekArrayPath, index)
+            }
           />
         ))}
 
@@ -330,6 +349,10 @@ const TimingComponent = ({
             showAddAttributeButton={index === timeOfDayValues.length - 1}
             addTitle="Repeat.Time of Day"
             handleAddElement={() => handleAddElement(timeOfDayArrayPath)}
+            showDeleteButton={true} // always true for multiple cardinality
+            handleDeleteElement={() =>
+              handleDeleteElement(timeOfDayArrayPath, index)
+            }
             {...formik.getFieldProps(`${timeOfDayArrayPath}[${index}]`)}
             onChange={(value) =>
               formik.setFieldValue(`${timeOfDayArrayPath}[${index}]`, value)
@@ -359,6 +382,10 @@ const TimingComponent = ({
             showAddAttributeButton={index === whenValues.length - 1}
             addTitle="Repeat.When"
             handleAddElement={() => handleAddElement(whenArrayPath)}
+            showDeleteButton={true} // always true for multiple cardinality
+            handleDeleteElement={() =>
+              handleDeleteElement(whenArrayPath, index)
+            }
           />
         ))}
 
