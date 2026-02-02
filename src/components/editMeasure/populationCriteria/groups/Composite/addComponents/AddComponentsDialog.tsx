@@ -355,7 +355,7 @@ export default function AddComponentsDialog({
 
   const handleDialogSubmit = (e) => {
     e.preventDefault();
-    // required line to prevent event bubbling to parent forms
+    // required: to prevent event bubbling to parent forms
     e.stopPropagation();
   };
 
