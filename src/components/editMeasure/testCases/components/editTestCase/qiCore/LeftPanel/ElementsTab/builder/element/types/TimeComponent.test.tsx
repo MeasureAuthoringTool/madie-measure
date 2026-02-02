@@ -20,9 +20,10 @@ describe("TimeComponent", () => {
     expect(inputTime).toBeInTheDocument();
   });
 
-  test("Should handle change and AddElementButton functionality", () => {
+  test("Should handle change, AddElementButton, and DeleteButton functionality", () => {
     const handleChange = jest.fn();
     const handleAddElement = jest.fn();
+    const handleDeleteElement = jest.fn();
     render(
       <TimeComponent
         canEdit={true}
@@ -33,10 +34,21 @@ describe("TimeComponent", () => {
         addTitle={"Time"}
         showAddAttributeButton={true}
         handleAddElement={handleAddElement}
+        showDeleteButton={true}
+        handleDeleteElement={handleDeleteElement}
+        label="Time"
       />
     );
+
+    // Test AddElementButton is rendered
     expect(screen.getByText("Add Time")).toBeInTheDocument();
 
+    // Test DeleteButton is rendered
+    const deleteButton = screen.getByTestId("delete-button-Time");
+    expect(deleteButton).toBeInTheDocument();
+    expect(deleteButton).toHaveAttribute("aria-label", "delete Time");
+
+    // Test time input change
     const input = screen.getByPlaceholderText("hh:mm:ss aa");
     userEvent.type(input, "082359AM");
     expect(input).toHaveValue("08:23:59 AM");
@@ -45,7 +57,11 @@ describe("TimeComponent", () => {
     // Test AddElementButton click
     const addButton = screen.getByText("Add Time");
     userEvent.click(addButton);
-    expect(handleAddElement).toHaveBeenCalled();
+    expect(handleAddElement).toHaveBeenCalledTimes(1);
+
+    // Test DeleteButton click
+    userEvent.click(deleteButton);
+    expect(handleDeleteElement).toHaveBeenCalledTimes(1);
   });
 
   test("AddElementButton is not rendered when showAddAttributeButton is false", () => {
@@ -65,19 +81,28 @@ describe("TimeComponent", () => {
     expect(screen.queryByText("Add Time")).not.toBeInTheDocument();
   });
 
-  test("AddElementButton is not rendered when addTitle is not provided", () => {
+  test("Delete and Add buttons are not rendered when canEdit is false", () => {
     const handleChange = jest.fn();
+    const handleAddElement = jest.fn();
+    const handleDeleteElement = jest.fn();
     render(
       <TimeComponent
-        canEdit={true}
+        canEdit={false}
         structureDefinition={null}
         fieldRequired={false}
         onChange={handleChange}
         value={`01:23:45`}
+        addTitle={"Time"}
         showAddAttributeButton={true}
+        handleAddElement={handleAddElement}
+        showDeleteButton={true}
+        handleDeleteElement={handleDeleteElement}
+        label="Time"
       />
     );
 
-    expect(screen.queryByText(/Add/)).not.toBeInTheDocument();
+    // Both buttons should not be rendered when canEdit is false
+    expect(screen.queryByText("Add Time")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("delete-button-Time")).not.toBeInTheDocument();
   });
 });

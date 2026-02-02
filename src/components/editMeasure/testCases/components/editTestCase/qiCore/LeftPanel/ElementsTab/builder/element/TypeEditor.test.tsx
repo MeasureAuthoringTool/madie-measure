@@ -238,7 +238,7 @@ jest.mock("../../../../../../../api/fhirDefinitionServiceUtilities", () => {
     ...jest.requireActual(
       "../../../../../../../api/fhirDefinitionServiceUtilities"
     ),
-    isComponentDataType: (type: string) => true,
+    isComponentDataType: (_type: string) => true,
     getAllChildren: jest.fn().mockReturnValue(codingTopLevelElements),
     getTopLevelElements: jest.fn().mockReturnValue(codingTopLevelElements),
     updateChildrenPaths: jest.fn().mockReturnValue(codingTopLevelElements),
@@ -1084,7 +1084,6 @@ describe("TypeEditor Component", () => {
   });
 
   test("Should render Instant component for valid format", () => {
-    const handleChange = jest.fn();
     const onChange = jest.fn();
     const setFieldTouched = jest.fn();
     const updatedMockFormik = {
@@ -2059,10 +2058,11 @@ describe("TypeEditor Component", () => {
       setFieldValue: jest.fn(),
     };
 
-    const childDefs = [
-      { id: "ClaimResponse.period.start" },
-      { id: "ClaimResponse.period.end" },
-    ];
+    // childDefs are not used in this test but kept for reference
+    // const childDefs = [
+    //   { id: "ClaimResponse.period.start" },
+    //   { id: "ClaimResponse.period.end" },
+    // ];
 
     jest.spyOn(React, "useMemo").mockImplementationOnce((fn) => fn());
     jest.mocked = jest.fn();
@@ -3436,11 +3436,10 @@ describe("TypeEditor Component", () => {
         </FormikProvider>
       );
 
-      // First element should NOT have a delete button
+      // All elements should have a delete button
       const deleteButtons = screen.queryAllByTestId(/delete-button-/);
-      expect(deleteButtons).toHaveLength(1);
+      expect(deleteButtons).toHaveLength(2);
 
-      // Only the second element should have a delete button
       const secondDeleteButton = screen.getByTestId(
         "delete-button-CarePlan.activity[0].detail.instantiatesCanonical[1]"
       );
@@ -3512,7 +3511,7 @@ describe("TypeEditor Component", () => {
 
       // Only one delete button should be shown (for the second element)
       const deleteButtons = screen.getAllByLabelText(
-        /^delete CarePlan\.activity\[0\]\.detail\.instantiatesCanonical\[1\]$/
+        /^delete CarePlan\.activity\[0]\.detail\.instantiatesCanonical\[1]$/
       );
       expect(deleteButtons).toHaveLength(1);
 
@@ -3588,11 +3587,10 @@ describe("TypeEditor Component", () => {
         </FormikProvider>
       );
 
-      // First element should NOT have a delete button
+      // All element should have a delete button
       const deleteButtons = screen.queryAllByTestId(/delete-button-/);
-      expect(deleteButtons).toHaveLength(1);
+      expect(deleteButtons).toHaveLength(2);
 
-      // Only the second element should have a delete button
       const secondDeleteButton = screen.getByTestId(
         "delete-button-CarePlan.activity[0].detail.instantiatesUri[1]"
       );
@@ -3663,7 +3661,7 @@ describe("TypeEditor Component", () => {
 
       // Only one delete button should be shown (for the second element)
       const deleteButtons = screen.getAllByLabelText(
-        /^delete CarePlan\.activity\[0\]\.detail\.instantiatesUri\[1\]$/
+        /^delete CarePlan\.activity\[0]\.detail\.instantiatesUri\[1]$/
       );
       expect(deleteButtons).toHaveLength(1);
 
@@ -3748,7 +3746,7 @@ describe("TypeEditor Component", () => {
 
       mockFormikQuantity.getFieldProps.mockImplementation((path) => {
         const value = path
-          .replace(/\[(\d+)\]/g, ".$1")
+          .replace(/\[(\d+)]/g, ".$1")
           .split(".")
           .reduce(
             (obj, key) => (obj ? obj[key] : undefined),
@@ -4211,11 +4209,11 @@ describe("TypeEditor Component", () => {
       ).value
     ).toBe("3");
 
-    // Delete buttons should appear on elements after the first one
+    // Delete buttons should appear on all elements
     const deleteButtons = screen.getAllByRole("button", {
-      name: /delete Claim.item\[0\].careTeamSequence\[\d+\]/,
+      name: /delete Claim.item\[0].careTeamSequence\[\d+]/,
     });
-    expect(deleteButtons).toHaveLength(2); // Elements 1 and 2 should have delete buttons
+    expect(deleteButtons).toHaveLength(3); //All Elements should have delete buttons
 
     // Add button should only appear on the last element
     const addButtons = screen.getAllByText("Add Care Team Sequence");
@@ -4308,11 +4306,11 @@ describe("TypeEditor Component", () => {
       )
     ).toBeInTheDocument();
 
-    // Delete buttons should appear on elements after the first one
+    // Delete buttons should appear on all elements
     const deleteButtons = screen.getAllByRole("button", {
-      name: /delete Observation.component\[0\].valueBoolean\[\d+\]/,
+      name: /delete Observation.component\[0].valueBoolean\[\d+]/,
     });
-    expect(deleteButtons).toHaveLength(2); // Elements 1 and 2 should have delete buttons
+    expect(deleteButtons).toHaveLength(3);
 
     // Add button should only appear on the last element
     const addButtons = screen.getAllByText("Add Value Boolean");
@@ -4325,76 +4323,6 @@ describe("TypeEditor Component", () => {
     // Click a delete button
     userEvent.click(deleteButtons[0]);
     expect(booleanArrayFormik.setFieldValue).toHaveBeenCalled();
-  });
-
-  // trigger multiple cardinality code blocks
-  test("Should render Integer components as array when multiple cardinality", () => {
-    //@ts-ignore
-    const integerArrayFormik = {
-      ...mockFormik,
-      values: {
-        Claim: {
-          item: [
-            {
-              careTeamSequence: [1],
-            },
-          ],
-        },
-      },
-      getFieldProps: (label: string) => {
-        const match = label.match(/careTeamSequence\[(\d+)]/);
-        if (match) {
-          const index = parseInt(match[1]);
-          return {
-            value: [1, 2, 3][index],
-            name: label,
-            onChange: jest.fn(),
-            onBlur: jest.fn(),
-          };
-        }
-        return {
-          value: "",
-          name: label,
-          onChange: jest.fn(),
-          onBlur: jest.fn(),
-        };
-      },
-    };
-
-    render(
-      //@ts-ignore
-      <FormikProvider value={integerArrayFormik}>
-        <RequiredFieldsProvider
-          requiredFields={mockRequiredFields}
-          formInfo={mockFormInfo}
-        >
-          <TypeEditor
-            resource={null}
-            structureDefinition={{
-              id: "Claim.item.careTeamSequence",
-              path: "Claim.item.careTeamSequence",
-              min: 0,
-              max: "*",
-              type: [
-                {
-                  code: "positiveInt",
-                },
-              ],
-            }}
-            label="Claim.item[0].careTeamSequence"
-            canEdit={true}
-            parentStructureDefinition={null}
-          />
-        </RequiredFieldsProvider>
-      </FormikProvider>
-    );
-
-    // Check that all three integer inputs are rendered
-    expect(
-      screen.getByTestId(
-        "integer-field-input-Claim.item[0].careTeamSequence[0]"
-      )
-    ).toBeInTheDocument();
   });
 
   test("Should render DateTime component, multiple cardinality", () => {
