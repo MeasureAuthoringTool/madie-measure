@@ -355,6 +355,8 @@ export default function AddComponentsDialog({
 
   const handleDialogSubmit = (e) => {
     e.preventDefault();
+    // required line to prevent event bubbling to parent forms
+    e.stopPropagation();
   };
 
   const expandedColumns = useMemo<ColumnDef<Measure>[]>(() => {
@@ -363,6 +365,8 @@ export default function AddComponentsDialog({
 
   return (
     <MadieDialog
+      true
+      form={true}
       title="Select Composite Measure Components"
       dialogProps={{
         onClose: handleDialogClose,
