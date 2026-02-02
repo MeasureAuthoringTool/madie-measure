@@ -16,17 +16,20 @@ export interface NavTabProps {
   isQICore6: boolean;
   dirty: boolean;
   setCalculationDialogOpen: any;
+  canEdit?: boolean;
+  addedCount?: number;
 }
 export default function CreateTestCaseNavTabs(props: NavTabProps) {
   const {
     leftPanelActiveTab,
     setLeftPanelActiveTab,
+    isQICore6,
     dirty,
     setCalculationDialogOpen,
+    canEdit,
+    addedCount,
   } = props;
   const [pendingPanel, setPendingPanel] = useState(leftPanelActiveTab);
-
-  const isQICore6 = props.isQICore6;
   const [discardDialogOpen, setDiscardDialogOpen] = useState(false);
 
   const onContinue = () => {
@@ -51,19 +54,29 @@ export default function CreateTestCaseNavTabs(props: NavTabProps) {
               }}
               type="D"
             >
+              {canEdit && (
+                <Tab
+                  tabIndex={0}
+                  aria-label="Available elements tab panel"
+                  type="D"
+                  label="Available"
+                  data-testid="available-tab"
+                  value="available"
+                />
+              )}
               <Tab
                 tabIndex={0}
-                aria-label="Elements tab panel"
+                aria-label="Added elements tab panel"
                 type="D"
-                label={`Elements`}
-                data-testid="elements-tab"
-                value="elements"
+                label={`Added (${addedCount})`}
+                data-testid="added-tab"
+                value="added"
               />
               <Tab
                 tabIndex={0}
                 aria-label="JSON tab panel"
                 type="D"
-                label={`JSON`}
+                label="JSON"
                 data-testid="json-tab"
                 value="json"
               />
@@ -73,13 +86,11 @@ export default function CreateTestCaseNavTabs(props: NavTabProps) {
             <EditorCalculator onClick={() => setCalculationDialogOpen(true)} />
             {leftPanelActiveTab === "json" && <EditorSearch />}
           </div>
-          {isQICore6 && (
-            <MadieDiscardDialog
-              open={discardDialogOpen}
-              onClose={() => setDiscardDialogOpen(false)}
-              onContinue={onContinue}
-            />
-          )}
+          <MadieDiscardDialog
+            open={discardDialogOpen}
+            onClose={() => setDiscardDialogOpen(false)}
+            onContinue={onContinue}
+          />
         </div>
       )}
     </>

@@ -10,11 +10,13 @@ describe("Create Test Case nav tabs", () => {
     const mocksetLeftPanelActiveTab = jest.fn();
     render(
       <CreateTestCaseLeftPanelNavTabs
-        leftPanelActiveTab="elements"
+        leftPanelActiveTab="available"
         setLeftPanelActiveTab={mocksetLeftPanelActiveTab}
         isQICore6={true}
         dirty={true}
         setCalculationDialogOpen={jest.fn()}
+        canEdit={true}
+        addedCount={0}
       />
     );
     //open
@@ -45,11 +47,13 @@ describe("Create Test Case nav tabs", () => {
     const mocksetCalculationDialogOpen = jest.fn();
     render(
       <CreateTestCaseLeftPanelNavTabs
-        leftPanelActiveTab="elements"
+        leftPanelActiveTab="available"
         setLeftPanelActiveTab={mocksetLeftPanelActiveTab}
         isQICore6={true}
         dirty={true}
         setCalculationDialogOpen={mocksetCalculationDialogOpen}
+        canEdit={true}
+        addedCount={0}
       />
     );
     expect(
@@ -61,5 +65,43 @@ describe("Create Test Case nav tabs", () => {
 
     expect(mocksetCalculationDialogOpen).toHaveBeenCalledTimes(1);
     expect(mocksetCalculationDialogOpen).toHaveBeenCalledWith(true);
+  });
+
+  it("hides Available tab when canEdit is false", async () => {
+    const mocksetLeftPanelActiveTab = jest.fn();
+    render(
+      <CreateTestCaseLeftPanelNavTabs
+        leftPanelActiveTab="added"
+        setLeftPanelActiveTab={mocksetLeftPanelActiveTab}
+        isQICore6={true}
+        dirty={false}
+        setCalculationDialogOpen={jest.fn()}
+        canEdit={false}
+        addedCount={5}
+      />
+    );
+    expect(screen.queryByTestId("available-tab")).not.toBeInTheDocument();
+    expect(screen.getByTestId("added-tab")).toBeInTheDocument();
+    expect(screen.getByText("Added (5)")).toBeInTheDocument();
+    expect(screen.getByTestId("json-tab")).toBeInTheDocument();
+  });
+
+  it("shows all tabs when canEdit is true", async () => {
+    const mocksetLeftPanelActiveTab = jest.fn();
+    render(
+      <CreateTestCaseLeftPanelNavTabs
+        leftPanelActiveTab="available"
+        setLeftPanelActiveTab={mocksetLeftPanelActiveTab}
+        isQICore6={true}
+        dirty={false}
+        setCalculationDialogOpen={jest.fn()}
+        canEdit={true}
+        addedCount={3}
+      />
+    );
+    expect(screen.getByTestId("available-tab")).toBeInTheDocument();
+    expect(screen.getByTestId("added-tab")).toBeInTheDocument();
+    expect(screen.getByText("Added (3)")).toBeInTheDocument();
+    expect(screen.getByTestId("json-tab")).toBeInTheDocument();
   });
 });

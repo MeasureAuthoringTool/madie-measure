@@ -292,7 +292,10 @@ describe("ElementsTab", () => {
 
   const setMeasure = jest.fn();
 
-  const renderElementTab = (measure: Measure = defaultMeasure) => {
+  const renderElementTab = (
+    measure: Measure = defaultMeasure,
+    activeTab: string = "available"
+  ) => {
     render(
       <ApiContextProvider value={serviceConfig}>
         <ExecutionContextProvider
@@ -312,6 +315,7 @@ describe("ElementsTab", () => {
               setEditorVal={setEditorVal}
               editorVal={JSON.stringify(patientBundle)}
               testCase={{ json: JSON.stringify(patientBundle) } as TestCase}
+              activeTab={activeTab}
             />
           </QiCoreResourceProvider>
         </ExecutionContextProvider>
@@ -319,12 +323,13 @@ describe("ElementsTab", () => {
     );
   };
 
-  it("displays Element Tab for a QICore case, and navigates between added and available", async () => {
-    renderElementTab();
+  it("displays Available tab content for a QICore case", async () => {
+    renderElementTab(defaultMeasure, "available");
     expect(await screen.findByText("QICore AdverseEvent")).toBeInTheDocument();
-    const addedTab = screen.getByTestId("added-tab");
-    expect(addedTab).toBeInTheDocument();
-    userEvent.click(addedTab);
-    expect(screen.getByText("Profile")).toBeInTheDocument();
+  });
+
+  it("displays Added tab content for a QICore case", async () => {
+    renderElementTab(defaultMeasure, "added");
+    expect(await screen.findByText("Profile")).toBeInTheDocument();
   });
 });
