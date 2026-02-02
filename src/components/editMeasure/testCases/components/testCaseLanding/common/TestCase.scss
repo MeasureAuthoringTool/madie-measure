@@ -3,6 +3,10 @@
 #testCaseListTable {
   overflow: scroll;
 
+  thead tr {
+    border-bottom: solid 1px #8c8c8c;
+  }
+
   .tcl-tr {
     border-bottom: solid 1px #8c8c8c;
 
@@ -24,11 +28,16 @@
     border-collapse: collapse;
     border-spacing: 0 1em;
     border: solid 1px #8c8c8c;
-    border-radius: 3px;
+    border-top: 0;
+    border-radius: 0 0 3px 3px;
     > .table-body {
       border-top: inherit;
       border-radius: 3px;
     }
+  }
+
+  .ml-tr {
+    border-bottom: solid 1px #8c8c8c;
   }
 
   .chip-draft {

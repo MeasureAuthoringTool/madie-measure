@@ -1056,7 +1056,6 @@ export default function MeasureList(props: {
         className="tcl-table"
         id="testCaseListTable"
         style={{
-          borderTop: "solid 1px #8c8c8c",
           borderSpacing: "0 2em !important",
         }}
       >
@@ -1157,7 +1156,7 @@ export default function MeasureList(props: {
                 className="ml-tr"
                 data-testid={`row-item`}
                 style={{
-                  borderTop: "solid 1px #8c8c8c",
+                  borderBottom: "solid 1px #8c8c8c",
                   borderSpacing: "0 2em !important",
                 }}
               >
