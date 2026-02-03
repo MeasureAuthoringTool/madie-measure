@@ -10,9 +10,15 @@ import { useQiCoreResource } from "../../../../../../../../util/QiCorePatientPro
 import userEvent from "@testing-library/user-event";
 import { FormikProvider, FormikContextType } from "formik";
 
-jest.mock("../../../../../../../../util/QiCorePatientProvider", () => ({
-  useQiCoreResource: jest.fn(),
-}));
+jest.mock("../../../../../../../../util/QiCorePatientProvider", () => {
+  const actual = jest.requireActual(
+    "../../../../../../../../util/QiCorePatientProvider"
+  );
+  return {
+    ...actual,
+    useQiCoreResource: jest.fn(),
+  };
+});
 
 const mockSetFieldValue = jest.fn();
 const mockFormik: FormikContextType<any> = {
@@ -603,6 +609,7 @@ describe("ReferenceComponent", () => {
           ],
         },
       },
+      dispatch: jest.fn(),
     });
     const multiQiCoreProfiles = baseProfiles.concat(QICORE_1, QICORE_2);
     render(
