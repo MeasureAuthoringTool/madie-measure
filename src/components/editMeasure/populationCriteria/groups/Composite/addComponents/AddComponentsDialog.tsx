@@ -365,8 +365,7 @@ export default function AddComponentsDialog({
 
   return (
     <MadieDialog
-      true
-      form={true}
+      form
       title="Select Composite Measure Components"
       dialogProps={{
         onClose: handleDialogClose,
