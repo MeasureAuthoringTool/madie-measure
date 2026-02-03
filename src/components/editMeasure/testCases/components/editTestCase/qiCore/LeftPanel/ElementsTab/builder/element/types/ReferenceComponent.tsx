@@ -3,10 +3,16 @@ import ResourceContext from "../../ResourceContext";
 import { Select, MadieDialog } from "@madie/madie-design-system/dist/react";
 import { IconButton, MenuItem, Tooltip, InputLabel } from "@mui/material";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
-import { useQiCoreResource } from "../../../../../../../../util/QiCorePatientProvider";
+import {
+  ResourceActionType,
+  useQiCoreResource,
+} from "../../../../../../../../util/QiCorePatientProvider";
 import AddElementButton from "../../../../../../../common/UIOnlyModelAgnostic/AddElementButton";
 import { useFormikContext } from "formik";
-import { buildMadieResourceFromResourceIdentifier } from "../../../../../../../../api/fhirDefinitionServiceUtilities";
+import {
+  buildMadieResourceFromResourceIdentifier,
+  removeUndefinedAndEmptyObjects,
+} from "../../../../../../../../api/fhirDefinitionServiceUtilities";
 import * as _ from "lodash";
 import "./ReferenceComponent.scss";
 
@@ -57,7 +63,7 @@ export default function ReferenceComponent({
   handleDeleteElement,
   showDeleteButton = false,
 }: any) {
-  const { state } = useQiCoreResource();
+  const { dispatch, state } = useQiCoreResource();
   const formikContext = useFormikContext();
   // First dropdown Utilities
   const allResourceProfiles = useContext(ResourceContext); // get all profiles loaded from builder
@@ -108,6 +114,7 @@ export default function ReferenceComponent({
     usCoreProfiles,
     baseFhirProfiles
   );
+
   const finalResourceOptionForAddNew = finalList[0];
   const finalListMappedOptions = finalList.map((res) => ({
     label: res.title,
@@ -288,10 +295,6 @@ export default function ReferenceComponent({
                     buildMadieResourceFromResourceIdentifier(
                       finalResourceOptionForAddNew
                     );
-                  formikContext.setFieldValue(
-                    "add_new_resource",
-                    newMadieResource
-                  );
                   // Append to array instead of overwriting - supports multiple "Add New" references
                   const existingResources =
                     formikContext.values["add_new_resources"] || [];
@@ -341,13 +344,28 @@ export default function ReferenceComponent({
             const selectedProfile = finalList.find(
               (item) => item.profile === selectedProfileAddNew
             );
+            // generate single resource
             const newMadieResource =
               buildMadieResourceFromResourceIdentifier(selectedProfile);
-            formikContext.setFieldValue("add_new_resource", newMadieResource);
+            // document the resource id and type on current resource
             formikContext.setFieldValue(
               `${label}.reference`,
               `${selectedReferenceType}/${newMadieResource.resource.id}`
             );
+            // simulate what we're doing with the individual apply click.
+            // clean the values like normal
+            const formikCleanedValues = removeUndefinedAndEmptyObjects(
+              formikContext.values
+            );
+            // dispatch our event to modify our current bundle entry (formik.values), with the resource we want to add.
+            dispatch({
+              type: ResourceActionType.ADD_RESOURCE_BY_REFERENCE,
+              payload: {
+                bundleEntry: formikCleanedValues,
+                add_new_resources: [newMadieResource],
+              },
+            });
+            // append
             setSelectedReferenceId("add_new_id");
             setOpen(false);
           },
