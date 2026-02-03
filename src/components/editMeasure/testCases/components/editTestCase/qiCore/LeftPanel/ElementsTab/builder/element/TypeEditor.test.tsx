@@ -4027,6 +4027,307 @@ describe("TypeEditor Component", () => {
         ])
       );
     });
+
+    // Adding test cases for few component to test the delete sub element functionalities
+    test("Should clear value when deleting the last StringComponent element", () => {
+      const stringFormik = {
+        handleChange: jest.fn(),
+        setFieldValue: jest.fn(),
+        setFieldTouched: jest.fn(),
+        values: {
+          Patient: {
+            name: [{ given: ["John"] }],
+          },
+        },
+        getFieldProps: (label) => {
+          return {
+            value: "John",
+            name: label,
+            onChange: jest.fn(),
+            onBlur: jest.fn(),
+          };
+        },
+      };
+
+      render(
+        <FormikProvider value={stringFormik as any}>
+          <RequiredFieldsProvider
+            requiredFields={mockRequiredFields}
+            formInfo={mockFormInfo}
+          >
+            <TypeEditor
+              resource={null}
+              structureDefinition={{
+                id: "Patient.name.given",
+                path: "Patient.name.given",
+                min: 0,
+                max: "*",
+                type: [{ code: "string" }],
+              }}
+              label="Patient.name[0].given"
+              canEdit={true}
+              parentStructureDefinition={null}
+            />
+          </RequiredFieldsProvider>
+        </FormikProvider>
+      );
+
+      // Find and click the delete button for the only element
+      const deleteButton = screen.getByTestId(
+        "delete-button-Patient.name[0].given[0]"
+      );
+      userEvent.click(deleteButton);
+
+      // Should call setFieldValue to clear the last element (set to empty array with empty string)
+      expect(stringFormik.setFieldValue).toHaveBeenCalledWith(
+        "Patient.name[0].given",
+        [""]
+      );
+    });
+
+    test("Should clear value when deleting the last DecimalComponent element", () => {
+      const decimalFormik = {
+        handleChange: jest.fn(),
+        setFieldValue: jest.fn(),
+        setFieldTouched: jest.fn(),
+        values: {
+          ClaimResponse: {
+            addItem: [{ factor: [1.5] }],
+          },
+        },
+        getFieldProps: (label) => {
+          return {
+            value: 1.5,
+            name: label,
+            onChange: jest.fn(),
+            onBlur: jest.fn(),
+          };
+        },
+      };
+
+      render(
+        <FormikProvider value={decimalFormik as any}>
+          <RequiredFieldsProvider
+            requiredFields={mockRequiredFields}
+            formInfo={mockFormInfo}
+          >
+            <TypeEditor
+              resource={null}
+              structureDefinition={{
+                id: "ClaimResponse.addItem.factor",
+                path: "ClaimResponse.addItem.factor",
+                min: 0,
+                max: "*",
+                type: [{ code: "decimal" }],
+              }}
+              label="ClaimResponse.addItem[0].factor"
+              canEdit={true}
+              parentStructureDefinition={null}
+            />
+          </RequiredFieldsProvider>
+        </FormikProvider>
+      );
+
+      // Find and click the delete button for the only element
+      const deleteButton = screen.getByTestId(
+        "delete-button-ClaimResponse.addItem[0].factor[0]"
+      );
+      userEvent.click(deleteButton);
+
+      // Should call setFieldValue to clear the last element
+      expect(decimalFormik.setFieldValue).toHaveBeenCalledWith(
+        "ClaimResponse.addItem[0].factor",
+        [""]
+      );
+    });
+
+    test("Should clear value when deleting the last QuantityComponent element", () => {
+      const quantityFormik = {
+        handleChange: jest.fn(),
+        setFieldValue: jest.fn(),
+        setFieldTouched: jest.fn(),
+        values: {
+          Observation: {
+            referenceRange: [
+              {
+                low: [{ value: 10, unit: "mg" }],
+              },
+            ],
+          },
+        },
+        getFieldProps: (label) => {
+          if (label.includes("value")) {
+            return {
+              value: 10,
+              name: label,
+              onChange: jest.fn(),
+              onBlur: jest.fn(),
+            };
+          }
+          return {
+            value: "mg",
+            name: label,
+            onChange: jest.fn(),
+            onBlur: jest.fn(),
+          };
+        },
+      };
+
+      render(
+        <FormikProvider value={quantityFormik as any}>
+          <RequiredFieldsProvider
+            requiredFields={mockRequiredFields}
+            formInfo={mockFormInfo}
+          >
+            <TypeEditor
+              resource={null}
+              structureDefinition={{
+                id: "Observation.referenceRange.low",
+                path: "Observation.referenceRange.low",
+                min: 0,
+                max: "*",
+                type: [{ code: "Quantity" }],
+              }}
+              label="Observation.referenceRange[0].low"
+              canEdit={true}
+              parentStructureDefinition={null}
+            />
+          </RequiredFieldsProvider>
+        </FormikProvider>
+      );
+
+      // Find and click the delete button for the only element
+      const deleteButton = screen.getByTestId(
+        "delete-button-Observation.referenceRange[0].low[0]"
+      );
+      userEvent.click(deleteButton);
+
+      // Should call setFieldValue to clear the last element (Quantity gets empty object)
+      expect(quantityFormik.setFieldValue).toHaveBeenCalledWith(
+        "Observation.referenceRange[0].low",
+        [{}]
+      );
+    });
+
+    test("Should handle delete for StringComponent with multiple elements", () => {
+      const stringFormik = {
+        handleChange: jest.fn(),
+        setFieldValue: jest.fn(),
+        setFieldTouched: jest.fn(),
+        values: {
+          Patient: {
+            name: [{ given: ["John", "Jane", "Bob"] }],
+          },
+        },
+        getFieldProps: (label) => {
+          const match = label.match(/given\[(\d+)]/);
+          if (match) {
+            const index = parseInt(match[1]);
+            return {
+              value: ["John", "Jane", "Bob"][index],
+              name: label,
+              onChange: jest.fn(),
+              onBlur: jest.fn(),
+            };
+          }
+        },
+      };
+
+      render(
+        <FormikProvider value={stringFormik as any}>
+          <RequiredFieldsProvider
+            requiredFields={mockRequiredFields}
+            formInfo={mockFormInfo}
+          >
+            <TypeEditor
+              resource={null}
+              structureDefinition={{
+                id: "Patient.name.given",
+                path: "Patient.name.given",
+                min: 0,
+                max: "*",
+                type: [{ code: "string" }],
+              }}
+              label="Patient.name[0].given"
+              canEdit={true}
+              parentStructureDefinition={null}
+            />
+          </RequiredFieldsProvider>
+        </FormikProvider>
+      );
+
+      // Find and click the delete button for the second element
+      const deleteButton = screen.getByTestId(
+        "delete-button-Patient.name[0].given[1]"
+      );
+      userEvent.click(deleteButton);
+
+      // Should call setFieldValue to remove the second element
+      expect(stringFormik.setFieldValue).toHaveBeenCalledWith(
+        "Patient.name[0].given",
+        ["John", "Bob"]
+      );
+    });
+
+    test("Should handle delete for DecimalComponent with multiple elements", () => {
+      const decimalFormik = {
+        handleChange: jest.fn(),
+        setFieldValue: jest.fn(),
+        setFieldTouched: jest.fn(),
+        values: {
+          ClaimResponse: {
+            addItem: [{ factor: [1.5, 2.0, 3.5] }],
+          },
+        },
+        getFieldProps: (label) => {
+          const match = label.match(/factor\[(\d+)]/);
+          if (match) {
+            const index = parseInt(match[1]);
+            return {
+              value: [1.5, 2.0, 3.5][index],
+              name: label,
+              onChange: jest.fn(),
+              onBlur: jest.fn(),
+            };
+          }
+        },
+      };
+
+      render(
+        <FormikProvider value={decimalFormik as any}>
+          <RequiredFieldsProvider
+            requiredFields={mockRequiredFields}
+            formInfo={mockFormInfo}
+          >
+            <TypeEditor
+              resource={null}
+              structureDefinition={{
+                id: "ClaimResponse.addItem.factor",
+                path: "ClaimResponse.addItem.factor",
+                min: 0,
+                max: "*",
+                type: [{ code: "decimal" }],
+              }}
+              label="ClaimResponse.addItem[0].factor"
+              canEdit={true}
+              parentStructureDefinition={null}
+            />
+          </RequiredFieldsProvider>
+        </FormikProvider>
+      );
+
+      // Find and click the delete button for the first element
+      const deleteButton = screen.getByTestId(
+        "delete-button-ClaimResponse.addItem[0].factor[0]"
+      );
+      userEvent.click(deleteButton);
+
+      // Should call setFieldValue to remove the first element
+      expect(decimalFormik.setFieldValue).toHaveBeenCalledWith(
+        "ClaimResponse.addItem[0].factor",
+        [2.0, 3.5]
+      );
+    });
   });
   test("Should render a reference component", () => {
     const mockBundle = {
