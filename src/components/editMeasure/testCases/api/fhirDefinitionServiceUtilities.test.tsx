@@ -32,6 +32,8 @@ import {
   filterUnusedExtensionsFromElements,
   getParentPath,
   formatAttributeLabel,
+  buildPrefixSet,
+  shouldSkip,
 } from "./fhirDefinitionServiceUtilities";
 
 describe("FhirDefinitionServiceUtilities", () => {
@@ -1090,5 +1092,17 @@ describe("formatAttributeLabel", () => {
     expect(formatAttributeLabel("ClaimResponse.addItem.noteNumber")).toBe(
       "Note Number"
     );
+  });
+
+  it("handlesBuildPrefixSet", () => {
+    expect(buildPrefixSet([null])).toEqual(new Set([]));
+    expect(
+      buildPrefixSet(["Patient", "Patient.name", "patient.name.test"])
+    ).toEqual(new Set(["Patient", "Patient.name", "patient.name.test"]));
+  });
+
+  it("handles buildSkip", () => {
+    expect(shouldSkip("Patient.name[0].given", ["Patient"])).toBe(true);
+    expect(shouldSkip("Patient.name[0].given", [null, "Patient"])).toBe(true);
   });
 });

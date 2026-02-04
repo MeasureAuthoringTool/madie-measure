@@ -20,6 +20,8 @@ import {
   removeUndefinedAndEmptyObjects,
   mapElementsRequired,
   buildFullValidationSchema,
+  shouldSkip,
+  buildPrefixSet,
 } from "../../../../../../../api/fhirDefinitionServiceUtilities";
 import {
   useQiCoreResource,
@@ -113,49 +115,71 @@ const ElementEditor = ({
   // A collection of all labels with without array indeces to serve as constant time lookup in type editor for weather it's required
   const requiredFields = mapElementsRequired(selectedResource); // this includes stuff like name.
   const [formInfo, setFormInfo] = useState(null);
-  const buildNode = async (child, resourcePath, resource, nodeList = []) => {
+
+  const buildNode = async (
+    child,
+    resourcePath,
+    resource,
+    nodeList = [],
+    ctx
+  ) => {
     const type = child?.type?.[0]?.code;
+
+    // NEW: snapshot-first check (no hardcoding; purely prefix-based)
+    const hasInlineChildren = !!ctx?.prefixSet?.has(child?.id);
+
     if (!isComponentDataType(type)) {
       // Fetch the resource tree asynchronously
       // nesting these ifs to avoid a crash in deeply nested ClaimResponse.item. Might cause issue elsewhere.
       if (type) {
-        const def = await fhirDefinitionsService.current.getResourceTree(type);
-        if (def) {
-          const elements = getTopLevelElements(def);
-          const updatedElements = updateChildrenPaths(child, elements);
-          if (updatedElements) {
-            for (const element of updatedElements) {
-              nodeList = await buildNode(
-                element,
-                resourcePath,
-                resource,
-                nodeList
-              );
+        // NEW: If snapshot already has child.id.* nodes, do NOT expand by datatype.
+        // This ensures a single source of truth (snapshot) for ordering.
+        if (!hasInlineChildren) {
+          const def = await fhirDefinitionsService.current.getResourceTree(
+            type
+          );
+          if (def) {
+            const elements = getTopLevelElements(def, true);
+            const updatedElements = updateChildrenPaths(child, elements);
+            if (updatedElements) {
+              // NEW: If we expand, skip later snapshot nodes under this prefix (prevents duplicates)
+              if (ctx?.skipPrefixes) ctx.skipPrefixes.add(child?.id);
+
+              for (const element of updatedElements) {
+                nodeList = await buildNode(
+                  element,
+                  resourcePath,
+                  resource,
+                  nodeList,
+                  ctx // NEW: pass ctx through recursion
+                );
+              }
             }
+            const {
+              max,
+              min,
+              type,
+              id,
+              // need binding for extensions
+              binding,
+              // need for extension valueElement. Should probably be depreicated
+              definition,
+              // need for profiledExtension to map Extension children.
+              snapshot,
+            } = child;
+            return nodeList.concat({
+              id,
+              type: type,
+              max,
+              required: min > 0,
+              binding,
+              definition,
+              snapshot,
+            });
           }
-          const {
-            max,
-            min,
-            type,
-            id,
-            // need binding for extensions
-            binding,
-            // need for extension valueElement. Should probably be depreicated
-            definition,
-            // need for profiledExtension to map Extension children.
-            snapshot,
-          } = child;
-          return nodeList.concat({
-            id,
-            type: type,
-            max,
-            required: min > 0,
-            binding,
-            definition,
-            snapshot,
-          });
         }
       }
+
       // This is the edge case for when we're providing the root of the structure like ClaimResponse as it's not a componentDataType and there is no type
       const required = +child?.min > 0;
       const elemPath = child?.path;
@@ -208,12 +232,24 @@ const ElementEditor = ({
     const formInfo = {};
     const nodeList = [];
     const allNodes = [rootDefinition, ...allChildren];
+
+    const ids = allNodes.map((n) => n?.id).filter(Boolean);
+    const prefixSet = buildPrefixSet(ids);
+    const skipPrefixes = new Set();
+
+    // we want to know when we're matching against previously opened branches
+    const ctx = { prefixSet, skipPrefixes };
+
     for (const node of allNodes) {
-      nodeList.push(...(await buildNode(node, resourcePath, resource)));
+      // if we expanded a prefix earlier, skip later snapshot children under it to prevent weird ordering / duplicates
+      if (shouldSkip(node?.id, skipPrefixes)) continue;
+
+      nodeList.push(
+        ...(await buildNode(node, resourcePath, resource, [], ctx))
+      );
     }
     for (const builtNode of nodeList) {
       // associate id with form
-
       formInfo[builtNode.id] = builtNode;
     }
     buildSchemaAndInitialValues(formInfo, resource);
@@ -221,7 +257,6 @@ const ElementEditor = ({
 
   // we need to know not only the properties that have values,
   // but also the ones that don't since a user can enter values into those fields
-
   const buildSchemaAndInitialValues = (formInfo, resource) => {
     setFormInfo(simplifySnapshotElements(Object.entries(formInfo)));
     // Get the correct initial values more simply.
