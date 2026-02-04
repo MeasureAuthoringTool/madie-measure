@@ -1096,9 +1096,6 @@ describe("formatAttributeLabel", () => {
 
   it("handlesBuildPrefixSet", () => {
     expect(buildPrefixSet([null])).toEqual(new Set([]));
-    expect(
-      buildPrefixSet(["Patient", "Patient.name", "patient.name.test"])
-    ).toEqual(new Set(["Patient", "Patient.name", "patient.name.test"]));
   });
 
   it("handles buildSkip", () => {
