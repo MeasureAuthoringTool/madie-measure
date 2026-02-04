@@ -290,6 +290,283 @@ describe("Measure References Component", () => {
     ).toHaveTextContent("Measure Reference Saved Successfully");
   });
 
+  it("Should create a new reference successfully when one already exists", async () => {
+    const existingReference: Reference = {
+      id: "id-1",
+      referenceType: "Citation",
+      referenceText: "existing reference text",
+    };
+
+    const testMeasure = {
+      ...measure,
+      measureMetaData: { references: [existingReference] },
+    };
+
+    measureStore.state.mockImplementation(() => testMeasure);
+    measureStore.initialState.mockImplementation(() => testMeasure);
+
+    const newReference: Reference = {
+      id: "id-2",
+      referenceType: "Justification",
+      referenceText: "new reference text",
+    };
+
+    const updatedMeasure = {
+      ...testMeasure,
+      measureMetaData: {
+        references: [existingReference, newReference],
+      },
+    };
+
+    mockMeasureServiceApi.updateMeasure = jest
+      .fn()
+      .mockResolvedValueOnce({ status: 200, data: updatedMeasure });
+
+    render(
+      <ApiContextProvider value={serviceConfig}>
+        <MemoryRouter initialEntries={["/"]}>
+          <MeasureReferences
+            setErrorMessage={jest.fn()}
+            measureCanEdit={true}
+          />
+        </MemoryRouter>
+      </ApiContextProvider>
+    );
+
+    const createButton = await screen.findByTestId("create-reference-button");
+    expect(createButton).toBeEnabled();
+
+    fireEvent.click(createButton);
+
+    await waitFor(() => {
+      expect(screen.getByTestId("dialog-form")).toBeInTheDocument();
+    });
+
+    const typeInput = screen.getByTestId(
+      "measure-referenceType-input"
+    ) as HTMLInputElement;
+
+    fireEvent.change(typeInput, {
+      target: { value: "Justification" },
+    });
+
+    await waitFor(() => {
+      expect(typeInput.value).toBe("Justification");
+    });
+
+    const referenceEditor = screen.getByRole("textbox");
+    expect(referenceEditor).toBeInTheDocument();
+
+    fireEvent.focus(referenceEditor);
+
+    act(() => {
+      fireEvent.input(referenceEditor, {
+        target: { textContent: "new reference text" },
+      });
+    });
+
+    fireEvent.blur(referenceEditor);
+
+    const saveButton = screen.getByTestId("save-button");
+
+    await waitFor(() => {
+      expect(saveButton).toBeEnabled();
+    });
+
+    fireEvent.click(saveButton);
+
+    await waitFor(
+      () => {
+        expect(
+          screen.getByTestId("measure-references-success")
+        ).toBeInTheDocument();
+      },
+      { timeout: 3000 }
+    );
+
+    const successToast = screen.getByTestId("measure-references-success");
+    expect(successToast).toHaveTextContent(
+      "Measure Reference Saved Successfully"
+    );
+
+    expect(mockMeasureServiceApi.updateMeasure).toHaveBeenCalledTimes(1);
+  });
+
+  it("Should create a new reference successfully when references is null", async () => {
+    const testMeasure = {
+      ...measure,
+      measureMetaData: {
+        references: null,
+      },
+    };
+
+    measureStore.state.mockImplementation(() => testMeasure);
+    measureStore.initialState.mockImplementation(() => testMeasure);
+
+    const newReference: Reference = {
+      id: "id-1",
+      referenceType: "Citation",
+      referenceText: "first reference text",
+    };
+
+    const updatedMeasure = {
+      ...testMeasure,
+      measureMetaData: {
+        references: [newReference],
+      },
+    };
+
+    mockMeasureServiceApi.updateMeasure = jest
+      .fn()
+      .mockResolvedValueOnce({ status: 200, data: updatedMeasure });
+
+    render(
+      <ApiContextProvider value={serviceConfig}>
+        <MemoryRouter initialEntries={["/"]}>
+          <MeasureReferences
+            setErrorMessage={jest.fn()}
+            measureCanEdit={true}
+          />
+        </MemoryRouter>
+      </ApiContextProvider>
+    );
+
+    const createButton = await screen.findByTestId("create-reference-button");
+    expect(createButton).toBeEnabled();
+
+    fireEvent.click(createButton);
+
+    await waitFor(() => {
+      expect(screen.getByTestId("dialog-form")).toBeInTheDocument();
+    });
+
+    const typeInput = screen.getByTestId(
+      "measure-referenceType-input"
+    ) as HTMLInputElement;
+
+    fireEvent.change(typeInput, {
+      target: { value: "Citation" },
+    });
+
+    await waitFor(() => {
+      expect(typeInput.value).toBe("Citation");
+    });
+
+    const referenceEditor = screen.getByRole("textbox");
+    expect(referenceEditor).toBeInTheDocument();
+
+    fireEvent.focus(referenceEditor);
+
+    act(() => {
+      fireEvent.input(referenceEditor, {
+        target: { textContent: "first reference text" },
+      });
+    });
+
+    fireEvent.blur(referenceEditor);
+
+    const saveButton = screen.getByTestId("save-button");
+
+    await waitFor(() => {
+      expect(saveButton).toBeEnabled();
+    });
+
+    fireEvent.click(saveButton);
+
+    await waitFor(
+      () => {
+        expect(
+          screen.getByTestId("measure-references-success")
+        ).toBeInTheDocument();
+      },
+      { timeout: 3000 }
+    );
+
+    const successToast = screen.getByTestId("measure-references-success");
+    expect(successToast).toHaveTextContent(
+      "Measure Reference Saved Successfully"
+    );
+
+    expect(mockMeasureServiceApi.updateMeasure).toHaveBeenCalledTimes(1);
+  });
+
+  it("Should handle server-side validation errors and display formatted message", async () => {
+    const reference: Reference = {
+      id: "id-1",
+      referenceType: "Citation",
+      referenceText: "original reference text",
+    };
+    const testMeasure = {
+      ...measure,
+      measureMetaData: { references: [reference] },
+    };
+    measureStore.state.mockImplementation(() => testMeasure);
+    measureStore.initialState.mockImplementation(() => testMeasure);
+
+    // Mock API to reject with validationErrors
+    mockMeasureServiceApi.updateMeasure = jest.fn().mockRejectedValueOnce({
+      response: {
+        data: {
+          validationErrors: {
+            "measureMetaData.references[0].referenceType": "Required",
+            "measureMetaData.references[0].referenceText": "Required",
+          },
+        },
+      },
+    });
+
+    const setErrorMessage = jest.fn();
+
+    render(
+      <ApiContextProvider value={serviceConfig}>
+        <MemoryRouter initialEntries={["/"]}>
+          <MeasureReferences
+            setErrorMessage={setErrorMessage}
+            measureCanEdit={true}
+          />
+        </MemoryRouter>
+      </ApiContextProvider>
+    );
+
+    const editButton = await screen.findByTestId("edit-measure-reference-id-1");
+    expect(editButton).toBeInTheDocument();
+
+    userEvent.click(editButton);
+    await waitFor(() => {
+      expect(screen.getByTestId("dialog-form")).toBeInTheDocument();
+    });
+
+    const typeInput = screen.getByTestId(
+      "measure-referenceType-input"
+    ) as HTMLInputElement;
+    expect(typeInput.value).toBe("Citation");
+
+    const referenceEditor = screen.getByRole("textbox");
+    expect(referenceEditor).toBeInTheDocument();
+    expect(referenceEditor).toHaveTextContent("original reference text");
+
+    act(() => {
+      fireEvent.input(referenceEditor, {
+        target: { textContent: "updated reference text" },
+      });
+    });
+    fireEvent.blur(referenceEditor);
+
+    const saveButton = screen.getByTestId("save-button");
+    await waitFor(() => expect(saveButton).toBeEnabled());
+    fireEvent.click(saveButton);
+
+    // Expect toast / error message with validation suffix
+    const toast = await screen.findByTestId("measure-references-error");
+    expect(toast).toHaveTextContent(
+      'Error updating measure "measureName": All References must have a valid type and text.'
+    );
+
+    expect(setErrorMessage).toHaveBeenCalledWith(
+      'Error updating measure "measureName": All References must have a valid type and text.'
+    );
+  });
+
   it("Editing existing reference with type Citation, user should see Citation in the dropdown", async () => {
     const reference: Reference = {
       id: "id-1",
