@@ -49,10 +49,7 @@ const MeasureReferences = (props: MeasureReferencesProps) => {
     () => [
       "Citation",
       "Justification",
-      ...(measure?.model === Model.QICORE ||
-      measure?.model === Model.QICORE_6_0_0
-        ? []
-        : ["Unknown"]),
+      ...(measure?.model === Model.QDM_5_6 ? ["Unknown"] : []),
     ],
     [measure?.model]
   );
@@ -135,33 +132,27 @@ const MeasureReferences = (props: MeasureReferencesProps) => {
       };
       return references.sort(sorterFunction);
     };
-    const copiedMetaData = { ...measure?.measureMetaData };
-    if (
-      copiedMetaData.hasOwnProperty("references") &&
-      Array.isArray(copiedMetaData.references)
-    ) {
-      if (!selectedReference) {
-        // if it does exist we push to it
-        copiedMetaData.references.push(values);
-        copiedMetaData.references = sortByTypeThenReferences(
-          copiedMetaData.references
-        );
-      } else {
-        const newReferences: Array<Reference> =
-          copiedMetaData.references.filter(
-            (reference) => reference.id !== selectedReference.id
-          );
-        newReferences.push(values);
-        copiedMetaData.references = sortByTypeThenReferences(newReferences);
-      }
+
+    const currentReferences = measure?.measureMetaData?.references || [];
+    let newReferences: Reference[];
+
+    if (!selectedReference) {
+      newReferences = [...currentReferences, values];
     } else {
-      // if none exist, we will init our the array
-      copiedMetaData.references = [values];
+      newReferences = currentReferences
+        .filter((reference) => reference.id !== selectedReference.id)
+        .concat(values);
     }
-    const modifiedMeasure = {
+    newReferences = sortByTypeThenReferences(newReferences);
+
+    const modifiedMeasure: Measure = {
       ...measure,
-      measureMetaData: copiedMetaData,
+      measureMetaData: {
+        ...measure.measureMetaData,
+        references: newReferences,
+      },
     };
+
     measureServiceApi
       .updateMeasure(modifiedMeasure)
       .then((res) => {
@@ -188,18 +179,22 @@ const MeasureReferences = (props: MeasureReferencesProps) => {
               ),
             } as unknown as MeasureLock,
           });
-          setOpen(false);
-          formik.resetForm();
         }
-        measureReferences.map((reference) => {
-          if (!reference.referenceType && message.slice(-1) != ".")
-            message += ": All References must have a type.";
-        });
+
+        const validationErrors = reason?.response?.data?.validationErrors || {};
+        const referenceErrorKeys = Object.keys(validationErrors).filter((key) =>
+          key.startsWith("measureMetaData.references")
+        );
+
+        if (referenceErrorKeys.length > 0) {
+          message += ": All References must have a valid type and text.";
+        }
 
         handleToast("danger", message, true);
-        // to do: some sort of error handling
-        // console.warn(`Error updating measure : ${reason}`);
         setErrorMessage(message);
+
+        setOpen(false);
+        formik.resetForm();
       });
   };
 
