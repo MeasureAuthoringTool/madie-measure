@@ -1216,7 +1216,6 @@ describe("Cohort Population Criteria validations", () => {
     expect(submitBtn).toBeDisabled();
   });
 
-  //temporarily skipping as 423 error is not being returned from mock api
   test("Should not be able to save if there is 423 error", async () => {
     jest.clearAllMocks();
     cohortMeasure.scoring = "Cohort";
@@ -1631,10 +1630,12 @@ describe("Delete Tests", () => {
       )
     );
 
-    expect(mockMeasureServiceApi.deleteMeasureGroup).toHaveBeenCalledWith(
-      "7p03-5r29-7O0I",
-      "test-measure"
-    );
+    await waitFor(() => {
+      expect(mockMeasureServiceApi.deleteMeasureGroup).toHaveBeenCalledWith(
+        "7p03-5r29-7O0I",
+        "test-measure"
+      );
+    });
 
     renderMeasureGroupComponent();
     await waitFor(() => {
@@ -1647,6 +1648,52 @@ describe("Delete Tests", () => {
       expect(editableContent).toHaveAttribute("contenteditable", "true");
       expect(editableContent).toHaveTextContent("");
     });
+  });
+
+  test("Group Delete blocked if any test case is locked by another user", async () => {
+    cohortGroup.id = "7p03-5r29-7O0I";
+    cohortGroup.groupDescription = "testDescription";
+    cohortMeasure.groups = [cohortGroup];
+    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
+      Locking: true,
+    }));
+    renderMeasureGroupComponent({
+      ...props,
+      checkTestCasesLockStatus: jest.fn().mockResolvedValue(true),
+    });
+
+    expect(screen.getByTestId("title").textContent).toBe(
+      "Population Criteria 1"
+    );
+
+    expect(screen.getByTestId("group-form-delete-btn")).toBeInTheDocument();
+    expect(screen.getByTestId("group-form-delete-btn")).toBeEnabled();
+
+    userEvent.click(screen.getByTestId("group-form-delete-btn"));
+
+    expect(
+      screen.getByTestId("delete-measure-group-modal-cancel-btn")
+    ).toBeInTheDocument();
+
+    expect(
+      screen.getByTestId("delete-measure-group-modal-agree-btn")
+    ).toBeInTheDocument();
+
+    act(() =>
+      userEvent.click(
+        screen.getByTestId("delete-measure-group-modal-agree-btn")
+      )
+    );
+
+    expect(mockMeasureServiceApi.deleteMeasureGroup).not.toBeCalled();
+    const errorToastMsg = await screen.findByText(
+      "This measure cannot be saved because changes to the Population Criteria will update test cases and one or more test cases are locked by another user."
+    );
+    expect(errorToastMsg).toBeInTheDocument();
+
+    renderMeasureGroupComponent();
+    const groupDescription = await screen.findByText("testDescription");
+    expect(groupDescription).toBeInTheDocument();
   });
 });
 

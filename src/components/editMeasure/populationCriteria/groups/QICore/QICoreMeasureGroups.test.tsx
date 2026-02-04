@@ -608,20 +608,10 @@ describe("Measure Groups Page", () => {
         screen.getByTestId("delete-measure-group-modal-agree-btn")
       );
 
-      expect(
-        await screen.findByTestId("group-form-delete-btn")
-      ).not.toBeInTheDocument();
-
-      await waitFor(() => {
-        expect(setAlertMessageMock).toHaveBeenCalled();
-      });
-
-      expect(setAlertMessageMock).toHaveBeenCalledWith({
-        type: "error",
-        message:
-          "The Population Criteria cannot be deleted because changes to the Population Criteria will update test cases and one or more test cases are locked by another user.",
-        canClose: false,
-      });
+      const errorToastMsg = await screen.findByText(
+        "This measure cannot be saved because changes to the Population Criteria will update test cases and one or more test cases are locked by another user."
+      );
+      expect(errorToastMsg).toBeInTheDocument();
 
       useFeatureFlags.mockImplementation(() => ({
         Locking: false,
