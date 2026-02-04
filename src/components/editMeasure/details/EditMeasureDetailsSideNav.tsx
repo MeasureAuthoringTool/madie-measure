@@ -82,7 +82,10 @@ export default function EditMeasureDetailsSideNav(
         className="vertical-side-nav"
         id="edit-measure-details-side-nav"
       >
-        <nav aria-label="Sidebar">
+        <nav
+          aria-label="Measure Details Sidebar Navigation"
+          data-testid="measure-details-sidebar"
+        >
           {links.map((link) => {
             const sectionId = link.title.toLowerCase().replace(/\s+/g, "-");
             const isExpanded = expandedSections[link.title];
@@ -102,26 +105,29 @@ export default function EditMeasureDetailsSideNav(
                   </span>
                 </button>
                 {isExpanded && (
-                  <Tabs
-                    id={`${sectionId}-tabs`}
-                    type="C"
-                    orientation="vertical"
-                    value={endRoute}
-                    onChange={handleChange}
-                  >
-                    {link.links.map((linkInfo) => {
-                      return (
-                        <Tab
-                          key={linkInfo.id}
-                          label={getTabLabel(linkInfo)}
-                          type="C"
-                          value={linkInfo.href}
-                          id={linkInfo.id}
-                          data-testid={linkInfo.dataTestId}
-                        />
-                      );
-                    })}
-                  </Tabs>
+                  <div className="indented-tabs">
+                    <Tabs
+                      id={`${sectionId}-tabs`}
+                      type="C"
+                      size="standard"
+                      orientation="vertical"
+                      value={endRoute}
+                      onChange={handleChange}
+                    >
+                      {link.links.map((linkInfo) => {
+                        return (
+                          <Tab
+                            key={linkInfo.id}
+                            label={getTabLabel(linkInfo)}
+                            type="C"
+                            value={linkInfo.href}
+                            id={linkInfo.id}
+                            data-testid={linkInfo.dataTestId}
+                          />
+                        );
+                      })}
+                    </Tabs>
+                  </div>
                 )}
               </div>
             );
