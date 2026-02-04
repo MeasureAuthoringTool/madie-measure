@@ -125,7 +125,7 @@ const ElementEditor = ({
   ) => {
     const type = child?.type?.[0]?.code;
 
-    // NEW: snapshot-first check (no hardcoding; purely prefix-based)
+    // Check to see if the prefix has been expanded already from previous entries
     const hasInlineChildren = !!ctx?.prefixSet?.has(child?.id);
 
     if (!isComponentDataType(type)) {
