@@ -425,16 +425,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
     // enableReinitialize: true,
     onSubmit: async (group: Group) => {
       window.scrollTo(0, 0);
-      if (featureFlags.Locking && (await props.checkTestCasesLockStatus())) {
-        handleToast(
-          "danger",
-          "This measure cannot be saved because changes to the Population Criteria will update test cases and one or more test cases are locked by another user.",
-          true
-        );
-        formik.resetForm();
-        return;
-      }
-
+      if (await checkTestCasesLockStatus()) return;
       if (
         measure?.groups &&
         !(measureGroupNumber >= measure?.groups?.length) &&
@@ -461,6 +452,19 @@ const MeasureGroups = (props: MeasureGroupProps) => {
   });
   useFormikResetOnEvent(formik);
   const { resetForm, validateForm } = formik;
+
+  const checkTestCasesLockStatus = async (): Promise<boolean> => {
+    if (featureFlags.Locking && (await props.checkTestCasesLockStatus())) {
+      handleToast(
+        "danger",
+        "This measure cannot be saved because changes to the Population Criteria will update test cases and one or more test cases are locked by another user.",
+        true
+      );
+      formik.resetForm();
+      return true;
+    }
+    return false;
+  };
 
   useEffect(() => {
     if (measure?.groups && measure?.groups[measureGroupNumber]) {
@@ -665,8 +669,12 @@ const MeasureGroups = (props: MeasureGroupProps) => {
     setDeleteMeasureGroupDialog({ open: false });
   };
 
-  const deleteMeasureGroup = (e) => {
+  const deleteMeasureGroup = async (e) => {
     e.preventDefault();
+    if (await checkTestCasesLockStatus()) {
+      handleDialogClose();
+      return;
+    }
     measureServiceApi
       .deleteMeasureGroup(measure?.groups[measureGroupNumber]?.id, measure.id)
       .then((response) => {
@@ -676,7 +684,6 @@ const MeasureGroups = (props: MeasureGroupProps) => {
             "/" +
             (measureGroupNumber === 0 ? 1 : measureGroupNumber)
         );
-        handleDialogClose();
         if (response && response.groups?.length > 0) {
           setToastOpen(true);
           setToastType("success");
@@ -686,7 +693,6 @@ const MeasureGroups = (props: MeasureGroupProps) => {
         }
       })
       .catch((error) => {
-        handleDialogClose();
         if (error?.message.includes("locked")) {
           props.setAlertMessage({
             type: "error",
@@ -694,7 +700,6 @@ const MeasureGroups = (props: MeasureGroupProps) => {
               "The Population Criteria cannot be deleted because changes to the Population Criteria will update test cases and one or more test cases are locked by another user.",
             canClose: false,
           });
-          navigate(`${groupsBaseUrl}/${measureGroupNumber}`);
         } else {
           props.setAlertMessage({
             type: "error",
@@ -702,6 +707,9 @@ const MeasureGroups = (props: MeasureGroupProps) => {
             canClose: false,
           });
         }
+      })
+      .finally(() => {
+        handleDialogClose();
       });
   };
 
