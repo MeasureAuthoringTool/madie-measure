@@ -12,6 +12,7 @@
   border-right: solid 1px #8c8c8c;
   padding-bottom: 16px;
   padding-top: 16px;
+
   .link-container,
   nav {
     display: flex;
@@ -22,6 +23,25 @@
       line-height: normal !important;
       min-height: 48px;
       height: fit-content;
+      position: relative;
+      z-index: 0;
+
+      &::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 100%;
+        width: 50vw;
+        background-color: transparent;
+        z-index: -1;
+        transition: background-color 0.2s ease;
+      }
+
+      &:hover::after,
+      &.Mui-selected::after {
+        background-color: #fff;
+      }
     }
 
     > .link-heading {
@@ -45,6 +65,25 @@
     font-weight: 400;
     font-size: 16px;
     line-height: 24px;
+    position: relative;
+    z-index: 0;
+
+    &::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      width: 50vw;
+      background-color: transparent;
+      z-index: -1;
+      transition: background-color 0.2s ease;
+    }
+
+    &:hover::after,
+    &.active::after {
+      background-color: #fff;
+    }
 
     &.active {
       font-weight: 500;
