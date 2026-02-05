@@ -132,8 +132,7 @@ const ElementEditor = ({
       // Fetch the resource tree asynchronously
       // nesting these ifs to avoid a crash in deeply nested ClaimResponse.item. Might cause issue elsewhere.
       if (type) {
-        // NEW: If snapshot already has child.id.* nodes, do NOT expand by datatype.
-        // This ensures a single source of truth (snapshot) for ordering.
+        // snapshot already has child.id.* nodes, do NOT expand by datatype.
         if (!hasInlineChildren) {
           const def = await fhirDefinitionsService.current.getResourceTree(
             type
@@ -142,7 +141,6 @@ const ElementEditor = ({
             const elements = getTopLevelElements(def, true);
             const updatedElements = updateChildrenPaths(child, elements);
             if (updatedElements) {
-              // NEW: If we expand, skip later snapshot nodes under this prefix (prevents duplicates)
               if (ctx?.skipPrefixes) ctx.skipPrefixes.add(child?.id);
 
               for (const element of updatedElements) {
@@ -151,7 +149,7 @@ const ElementEditor = ({
                   resourcePath,
                   resource,
                   nodeList,
-                  ctx // NEW: pass ctx through recursion
+                  ctx // pass ctx through recursion
                 );
               }
             }
