@@ -105,7 +105,6 @@ export default function EditMeasureDetailsSideNav(
                   </span>
                 </button>
                 {isExpanded && (
-                  <div className="indented-tabs">
                     <Tabs
                       id={`${sectionId}-tabs`}
                       type="C"
@@ -127,7 +126,6 @@ export default function EditMeasureDetailsSideNav(
                         );
                       })}
                     </Tabs>
-                  </div>
                 )}
               </div>
             );
