@@ -105,27 +105,27 @@ export default function EditMeasureDetailsSideNav(
                   </span>
                 </button>
                 {isExpanded && (
-                    <Tabs
-                      id={`${sectionId}-tabs`}
-                      type="C"
-                      size="standard"
-                      orientation="vertical"
-                      value={endRoute}
-                      onChange={handleChange}
-                    >
-                      {link.links.map((linkInfo) => {
-                        return (
-                          <Tab
-                            key={linkInfo.id}
-                            label={getTabLabel(linkInfo)}
-                            type="C"
-                            value={linkInfo.href}
-                            id={linkInfo.id}
-                            data-testid={linkInfo.dataTestId}
-                          />
-                        );
-                      })}
-                    </Tabs>
+                  <Tabs
+                    id={`${sectionId}-tabs`}
+                    type="C"
+                    size="standard"
+                    orientation="vertical"
+                    value={endRoute}
+                    onChange={handleChange}
+                  >
+                    {link.links.map((linkInfo) => {
+                      return (
+                        <Tab
+                          key={linkInfo.id}
+                          label={getTabLabel(linkInfo)}
+                          type="C"
+                          value={linkInfo.href}
+                          id={linkInfo.id}
+                          data-testid={linkInfo.dataTestId}
+                        />
+                      );
+                    })}
+                  </Tabs>
                 )}
               </div>
             );
