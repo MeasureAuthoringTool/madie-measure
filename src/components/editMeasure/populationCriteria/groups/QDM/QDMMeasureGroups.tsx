@@ -331,16 +331,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
     ),
     onSubmit: async (group: Group) => {
       window.scrollTo(0, 0);
-      if (featureFlags.Locking && (await props.checkTestCasesLockStatus())) {
-        handleToast(
-          "danger",
-          "This measure cannot be saved because changes to the Population Criteria will update test cases and one or more test cases are locked by another user.",
-          true
-        );
-        formik.resetForm();
-        return;
-      }
-
+      if (await checkTestCasesLockStatus()) return;
       if (
         measure?.groups &&
         !(measureGroupNumber >= measure?.groups?.length) &&
@@ -372,6 +363,19 @@ const MeasureGroups = (props: MeasureGroupProps) => {
       validateForm();
     }
   }, [formik.values.populations, validateForm]);
+
+  const checkTestCasesLockStatus = async (): Promise<boolean> => {
+    if (featureFlags.Locking && (await props.checkTestCasesLockStatus())) {
+      handleToast(
+        "danger",
+        "This measure cannot be saved because changes to the Population Criteria will update test cases and one or more test cases are locked by another user.",
+        true
+      );
+      formik.resetForm();
+      return true;
+    }
+    return false;
+  };
 
   useEffect(() => {
     const subscription = measureStore.subscribe((measure: Measure) => {
@@ -626,8 +630,12 @@ const MeasureGroups = (props: MeasureGroupProps) => {
     setDeleteMeasureGroupDialog({ open: false });
   };
 
-  const deleteMeasureGroup = (e) => {
+  const deleteMeasureGroup = async (e) => {
     e.preventDefault();
+    if (await checkTestCasesLockStatus()) {
+      handleDialogClose();
+      return;
+    }
     measureServiceApi
       .deleteMeasureGroup(measure?.groups[measureGroupNumber]?.id, measure.id)
       .then((response) => {

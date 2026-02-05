@@ -496,7 +496,6 @@ const TestCaseTable = (props: TestCaseTableProps) => {
         className="tcl-table"
         id="testCaseListTable"
         style={{
-          borderTop: "solid 1px #8c8c8c",
           borderSpacing: "0 2em !important",
         }}
       >

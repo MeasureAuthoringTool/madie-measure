@@ -366,7 +366,10 @@ export function getBasePath(resource: any): string {
 // For ClaimResponse.item.adjudication
 // we want to get only the elements at the top of the tree for the render
 // This function also filters out non-extension sliced elements (id contains ':') except for extension slices (extension:xxx)
-export function getTopLevelElements(resource: any) {
+export function getTopLevelElements(
+  resource: any,
+  maintainSortOrder: boolean = false
+) {
   const elements = [...resource?.definition?.snapshot?.element];
   const basePath = resource?.definition?.type;
   const elementsFiltered = elements?.filter(
@@ -421,19 +424,45 @@ export function getTopLevelElements(resource: any) {
       filteredWithoutSlices.splice(filteredWithoutSlices.indexOf(element), 1);
     }
   });
-  // Sort elements alphabetically by their path (after the basePath, if available)
-  if (basePath) {
-    filteredWithoutSlices.sort((a, b) => {
-      const labelA = a.path.substring(basePath.length + 1);
-      const labelB = b.path.substring(basePath.length + 1);
-      return labelA.localeCompare(labelB);
-    });
-  } else {
-    // If no basePath, sort by full path
-    filteredWithoutSlices.sort((a, b) => a.path.localeCompare(b.path));
+  // Sort only if maintainSortOrder is false
+  if (!maintainSortOrder) {
+    if (basePath) {
+      filteredWithoutSlices.sort((a, b) => {
+        const labelA = a.path.substring(basePath.length + 1);
+        const labelB = b.path.substring(basePath.length + 1);
+        return labelA.localeCompare(labelB);
+      });
+    } else {
+      // If no basePath, sort by full path
+      filteredWithoutSlices.sort((a, b) => a.path.localeCompare(b.path));
+    }
   }
+  // Sort elements alphabetically by their path (after the basePath, if available)
   return filteredWithoutSlices;
 }
+
+// we want to build a set of all prefixes for quick lookup
+export const buildPrefixSet = (ids) => {
+  const prefixSet = new Set();
+  for (const id of ids) {
+    if (!id) continue;
+    const parts = id.split(".");
+    for (let i = 1; i < parts.length; i++) {
+      prefixSet.add(parts.slice(0, i).join("."));
+    }
+  }
+  return prefixSet;
+};
+
+// should we skip a ndode that we expanded earlier?
+export const shouldSkip = (id, skipPrefixes) => {
+  if (!id) return false;
+  for (const prefix of skipPrefixes) {
+    if (id.startsWith(prefix + ".")) return true;
+  }
+  return false;
+};
+
 // find out who needs to be required on formik validation
 export function getRequiredElements(resource: any) {
   const elements = [...resource?.definition?.snapshot?.element];
