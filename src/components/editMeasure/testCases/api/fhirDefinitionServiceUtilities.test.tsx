@@ -956,6 +956,32 @@ describe("filterUnusedExtensionsFromElements", () => {
         },
       ],
     },
+    {
+      id: "Patient.id",
+      path: "Patient.id",
+      short: "Logical id of this artifact",
+      definition:
+        "The logical id of the resource, as used in the URL for the resource. Once assigned, this value never changes.",
+      comment:
+        "The only time that a resource does not have an id is when it is being submitted to the server using a create operation.",
+
+      base: {
+        path: "Resource.id",
+        min: 0,
+        max: "1",
+      },
+      type: [
+        {
+          extension: [
+            {
+              url: "http://hl7.org/fhir/StructureDefinition/structuredefinition-fhir-type",
+              valueUrl: "id",
+            },
+          ],
+          code: "http://hl7.org/fhirpath/System.String",
+        },
+      ],
+    },
   ];
   it("should filter out unused extensions", () => {
     const selectedResource = {

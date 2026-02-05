@@ -142,15 +142,17 @@ export const filterUnusedExtensionsFromElements = (
 ) => {
   const extensions = selectedResource?.bundleEntry?.resource?.extension || [];
   // now we can filter out extensions not present on the extensions variable, from the topElements.
-  const filteredElements = allDisplayedElements?.filter((el) => {
-    if (el.id.includes("extension:")) {
-      // find the extension in the extensions array that matches el.type[0].profile[0]
-      const extUrl = el.type?.[0]?.profile?.[0];
-      return extensions.some((ext) => ext.url === extUrl);
-    }
+  const filteredElements = allDisplayedElements
+    ?.filter((el) => {
+      if (el.id.includes("extension:")) {
+        // find the extension in the extensions array that matches el.type[0].profile[0]
+        const extUrl = el.type?.[0]?.profile?.[0];
+        return extensions.some((ext) => ext.url === extUrl);
+      }
 
-    return true;
-  });
+      return true;
+    })
+    ?.filter((el) => !/\.id$/.test(el.id));
 
   return filteredElements;
 };
