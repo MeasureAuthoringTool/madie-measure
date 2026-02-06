@@ -82,7 +82,10 @@ export default function EditMeasureDetailsSideNav(
         className="vertical-side-nav"
         id="edit-measure-details-side-nav"
       >
-        <nav aria-label="Sidebar">
+        <nav
+          aria-label="Measure Details Sidebar Navigation"
+          data-testid="measure-details-sidebar"
+        >
           {links.map((link) => {
             const sectionId = link.title.toLowerCase().replace(/\s+/g, "-");
             const isExpanded = expandedSections[link.title];
@@ -105,6 +108,7 @@ export default function EditMeasureDetailsSideNav(
                   <Tabs
                     id={`${sectionId}-tabs`}
                     type="C"
+                    size="standard"
                     orientation="vertical"
                     value={endRoute}
                     onChange={handleChange}
