@@ -17,6 +17,8 @@ interface CodeableConceptComponentProps {
   addTitle?: string;
   showAddAttributeButton?: boolean;
   handleAddElement?: Function;
+  showDeleteButton?: boolean;
+  handleDeleteElement?: Function;
 }
 
 const CodeableConceptComponent: React.FC<CodeableConceptComponentProps> = ({
@@ -27,6 +29,8 @@ const CodeableConceptComponent: React.FC<CodeableConceptComponentProps> = ({
   addTitle,
   showAddAttributeButton,
   handleAddElement,
+  showDeleteButton,
+  // handleDeleteElement,
 }) => {
   const formik = useFormikContext();
 
@@ -47,19 +51,26 @@ const CodeableConceptComponent: React.FC<CodeableConceptComponentProps> = ({
 
   /**
    * Removes a coding element at the specified index from the CodeableConcept
+   * If it's the last element, clears its value instead of removing it
    */
   const handleDeleteElement = useCallback(
     (index: number) => {
       const currentValue = _.get(formik.values, label) as CodeableConcept;
+      const currentCoding = currentValue?.coding || [undefined];
 
-      // Filter out deleted coding
-      const updatedCoding = currentValue.coding.filter((_, i) => i !== index);
-      const updatedValue: CodeableConcept = {
-        ...currentValue,
-        coding: updatedCoding,
-      };
-
-      formik.setFieldValue(label, updatedValue);
+      if (currentCoding.length === 1) {
+        // If it's the last element, just clear its value
+        const codingLabel = `${label}.coding[${index}]`;
+        formik.setFieldValue(codingLabel, undefined);
+      } else {
+        // If there are multiple elements, remove this one from the array
+        const updatedCoding = currentCoding.filter((_, i) => i !== index);
+        const updatedValue: CodeableConcept = {
+          ...currentValue,
+          coding: updatedCoding,
+        };
+        formik.setFieldValue(label, updatedValue);
+      }
     },
     [formik, label]
   );
@@ -90,7 +101,7 @@ const CodeableConceptComponent: React.FC<CodeableConceptComponentProps> = ({
               addTitle={addTitle}
               label={codingLabel}
               canEdit={canEdit}
-              showDeleteButton={codings.length > 1}
+              showDeleteButton={true} // Always show delete button for coding elements
               handleDeleteElement={() => handleDeleteElement(index)}
               showAddAttributeButton={isLastElement}
               structureDefinition={structureDefinition}
