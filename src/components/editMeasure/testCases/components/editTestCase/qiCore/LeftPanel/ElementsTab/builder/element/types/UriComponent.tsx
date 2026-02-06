@@ -1,6 +1,5 @@
 import React from "react";
 import { TypeComponentProps } from "./TypeComponentProps";
-import Box from "@mui/material/Box";
 import { IconButton, Tooltip } from "@mui/material";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import { TextField } from "@madie/madie-design-system/dist/react/";
@@ -45,21 +44,26 @@ const UriComponent = ({
         fullWidth
         {...props}
       />
-      {showDeleteButton && canEdit && (
-        <Tooltip title="Delete" arrow>
-          <IconButton
-            onClick={handleDeleteElement}
-            data-testid={`delete-button-${testIdBase}`}
-            size="small"
-            color="error"
-            aria-label={`delete ${testIdBase}`}
-          >
-            <DeleteOutlineIcon fontSize="small" />
-          </IconButton>
-        </Tooltip>
-      )}
-      {showAddAttributeButton && addTitle && (
-        <AddElementButton name={addTitle} onClick={handleAddElement} />
+      {canEdit && (
+        <div tw="mt-5 flex items-center">
+          {showDeleteButton && (
+            <Tooltip title="Delete" placement="top" arrow>
+              <span>
+                <IconButton
+                  onClick={handleDeleteElement}
+                  data-testid={`delete-button-${label}`}
+                  aria-label={`delete ${label}`}
+                  size="small"
+                >
+                  <DeleteOutlineIcon fontSize="small" color="error" />
+                </IconButton>
+              </span>
+            </Tooltip>
+          )}
+          {showAddAttributeButton && (
+            <AddElementButton name={addTitle} onClick={handleAddElement} />
+          )}
+        </div>
       )}
     </div>
   );
