@@ -338,12 +338,9 @@ describe("Codes Component", () => {
           onChange={onChangeMock}
           fieldRequired
           structureDefinition={structureDefinition}
-          addTitle={"Codes"}
-          showAddAttributeButton={true}
         />
       </ApiContextProvider>
     );
-    expect(screen.getByText("Add Codes")).toBeInTheDocument();
     expect(axios.get).toHaveBeenCalledWith(
       "fhirService.com/qicore/resources/value-set-definition?url=" +
         valueSetUrl,
@@ -371,9 +368,9 @@ describe("Codes Component", () => {
       mockedAxios.put.mockImplementation((url, body, config) => {
         if (
           url === "terminology-service.com/ValueSet/$expand" &&
-          Array.isArray(body.valueSet) &&
-          body.valueSet.includes(oids[0]) &&
-          body.valueSet.includes(oids[1]) &&
+          Array.isArray((body as any).valueSet) &&
+          (body as any).valueSet.includes(oids[0]) &&
+          (body as any).valueSet.includes(oids[1]) &&
           config.headers.Authorization === "Bearer test.jwt"
         ) {
           return Promise.resolve({ data: valueSetsExpansion });
@@ -535,5 +532,87 @@ describe("Codes Component", () => {
       expect(birthSexInput).toBeInTheDocument();
       expect(birthSexInput).toHaveValue("");
     });
+  });
+
+  it("Should render delete button and handle delete action when showDeleteButton is true", async () => {
+    const handleDeleteElement = jest.fn();
+    render(
+      <ApiContextProvider value={mockConfig}>
+        <CodesComponent
+          canEdit={true}
+          label={"Gender"}
+          value={"female"}
+          onChange={onChangeMock}
+          fieldRequired
+          structureDefinition={structureDefinition}
+          showDeleteButton={true}
+          handleDeleteElement={handleDeleteElement}
+        />
+      </ApiContextProvider>
+    );
+
+    const deleteButton = screen.getByTestId("delete-button-Gender");
+    expect(deleteButton).toBeInTheDocument();
+    expect(deleteButton).toHaveAttribute("aria-label", "delete Gender");
+
+    userEvent.click(deleteButton);
+    await waitFor(() => {
+      expect(handleDeleteElement).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  it("Should render add button and handle add action when showAddAttributeButton is true", async () => {
+    const handleAddElement = jest.fn();
+    render(
+      <ApiContextProvider value={mockConfig}>
+        <CodesComponent
+          canEdit={true}
+          label={"Gender"}
+          value={"female"}
+          onChange={onChangeMock}
+          fieldRequired
+          structureDefinition={structureDefinition}
+          showAddAttributeButton={true}
+          addTitle="Codes"
+          handleAddElement={handleAddElement}
+        />
+      </ApiContextProvider>
+    );
+
+    const addButton = screen.getByText("Add Codes");
+    expect(addButton).toBeInTheDocument();
+
+    userEvent.click(addButton);
+    await waitFor(() => {
+      expect(handleAddElement).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  it("Should not render delete and add buttons when canEdit is false", async () => {
+    const handleDeleteElement = jest.fn();
+    const handleAddElement = jest.fn();
+    render(
+      <ApiContextProvider value={mockConfig}>
+        <CodesComponent
+          canEdit={false}
+          label={"Gender"}
+          value={"female"}
+          onChange={onChangeMock}
+          fieldRequired
+          structureDefinition={structureDefinition}
+          showDeleteButton={true}
+          handleDeleteElement={handleDeleteElement}
+          showAddAttributeButton={true}
+          addTitle="Codes"
+          handleAddElement={handleAddElement}
+        />
+      </ApiContextProvider>
+    );
+
+    const deleteButton = screen.queryByTestId("delete-button-Gender");
+    expect(deleteButton).not.toBeInTheDocument();
+
+    const addButton = screen.queryByText("Add Codes");
+    expect(addButton).not.toBeInTheDocument();
   });
 });

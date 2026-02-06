@@ -113,6 +113,8 @@ const renderWithFormik = ({
   showAddAttributeButton = false,
   addTitle = "",
   handleAddElement = jest.fn(),
+  showDeleteButton = false,
+  handleDeleteElement = jest.fn(),
 } = {}) =>
   render(
     <ExecutionContextProvider
@@ -135,6 +137,8 @@ const renderWithFormik = ({
           showAddAttributeButton={showAddAttributeButton}
           addTitle={addTitle}
           handleAddElement={handleAddElement}
+          showDeleteButton={showDeleteButton}
+          handleDeleteElement={handleDeleteElement}
         />
       </Formik>
     </ExecutionContextProvider>
@@ -588,13 +592,17 @@ describe("QuantityComponent", () => {
     expect(screen.queryByText("Add Quantity")).not.toBeInTheDocument();
   });
 
-  test("does not render AddElementButton when canEdit is false", () => {
+  test("does not render AddElementButton or delete button when canEdit is false", () => {
     renderWithFormik({
       showAddAttributeButton: true,
       addTitle: "Quantity",
+      showDeleteButton: true,
       canEdit: false,
     });
     expect(screen.queryByText("Add Quantity")).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId("delete-button-Observation.quantity")
+    ).not.toBeInTheDocument();
   });
 
   test("displays tooltip on hover for Unit(s) field", async () => {
@@ -616,5 +624,35 @@ describe("QuantityComponent", () => {
       const tooltip = screen.getByTestId("code-input-tooltip");
       expect(tooltip).toHaveClass("madie-tooltip hidden");
     });
+  });
+
+  test("should display delete icon and calls handleDeleteElement when delete button is clicked", async () => {
+    const handleDeleteElementMock = jest.fn();
+
+    renderWithFormik({
+      showDeleteButton: true,
+      handleDeleteElement: handleDeleteElementMock,
+    });
+
+    const deleteButton = screen.getByTestId(
+      "delete-button-Observation.quantity"
+    );
+    expect(deleteButton).toBeInTheDocument();
+
+    fireEvent.click(deleteButton);
+
+    await waitFor(() => {
+      expect(handleDeleteElementMock).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  test("does not display delete button when showDeleteButton is false", () => {
+    renderWithFormik({
+      showDeleteButton: false,
+    });
+
+    expect(
+      screen.queryByTestId("delete-button-Observation.quantity")
+    ).not.toBeInTheDocument();
   });
 });

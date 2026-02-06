@@ -41,6 +41,7 @@ import ContentReferenceType from "./contentReferenceType/ContentReferenceType";
 import DecimalComponent from "./types/DecimalComponent";
 import { IntegerType } from "./typesValidations/FhirNumbers";
 import ElementSectionQiCore from "./ElementSectionQiCore";
+import { getEmptyValueForType } from "./TypeEditorUtils";
 
 export const formikErrorHandler = (name: string, formik) => {
   const touched = getNestedProperty(formik.touched, name);
@@ -165,8 +166,16 @@ const TypeEditor = ({
     // label comes in like Claim.item[0].careTeamSequence[1], need to get Claim.item[0].careTeamSequence
     const rootLabel = label.substring(0, label.lastIndexOf("["));
     const currentValues = _.get(formik.values, rootLabel, []);
-    const updatedValues = currentValues.filter((_, i) => i !== index);
-    formik.setFieldValue(rootLabel, updatedValues);
+
+    // If there's more than 1 element, remove the element at the index
+    if (currentValues.length > 1) {
+      const updatedValues = currentValues.filter((_, i) => i !== index);
+      formik.setFieldValue(rootLabel, updatedValues);
+    } else {
+      // If there's only 1 element, clear its value instead of removing the element
+      const emptyValue = getEmptyValueForType(type);
+      formik.setFieldValue(rootLabel, [emptyValue]);
+    }
   };
 
   const isRoot = structureDefinition?.id?.split?.(".")?.length === 2;
@@ -174,10 +183,10 @@ const TypeEditor = ({
   const addTitle = structureDefinition?.id
     ? _.startCase(getLastPart(structureDefinition.id))
     : "";
-  const showAddAttributeButton = Boolean(
+  const showMultipleCardinalityActionCenter = Boolean(
     !isRoot && canBeMultipleCardinality && canEdit
   );
-  let isArrayMode = showAddAttributeButton && values;
+  let isArrayMode = showMultipleCardinalityActionCenter && values;
   const lastIndex = isArrayMode ? values.length - 1 : null;
   const appendedZeroAlready = getIndexFromPath(label);
   if (isComponentDataType(type)) {
@@ -200,10 +209,10 @@ const TypeEditor = ({
                   error={getNestedProperty(formik.errors, fieldLabel)}
                   fieldRequired={required}
                   showAddAttributeButton={
-                    showAddAttributeButton &&
+                    showMultipleCardinalityActionCenter &&
                     (!isArrayMode || index === lastIndex)
                   }
-                  showDeleteButton={isArrayMode && index > 0}
+                  showDeleteButton={showMultipleCardinalityActionCenter}
                   handleDeleteElement={() =>
                     handleDeleteElement(index, fieldLabel)
                   }
@@ -224,7 +233,8 @@ const TypeEditor = ({
               helperText={formikErrorHandler(label, formik)}
               error={getNestedProperty(formik.errors, label)}
               fieldRequired={required}
-              showAddAttributeButton={showAddAttributeButton}
+              showAddAttributeButton={showMultipleCardinalityActionCenter}
+              showDeleteButton={showMultipleCardinalityActionCenter}
               addTitle={addTitle}
               {...formik.getFieldProps(label)}
               onChange={({ target }) => {
@@ -235,7 +245,7 @@ const TypeEditor = ({
           </Box>
         );
       /*
-        Decimal most commonly appears as a child of different complex types 
+        Decimal most commonly appears as a child of different complex types
         that we want to handle inside of different TypeEditor rendered components,
         since they have different rules about information that needs to be supplied aside of a single number.
         Examples:
@@ -267,10 +277,10 @@ const TypeEditor = ({
                   error={Boolean(getNestedProperty(formik.errors, fieldLabel))}
                   required={required}
                   showAddAttributeButton={
-                    showAddAttributeButton &&
+                    showMultipleCardinalityActionCenter &&
                     (!isArrayMode || index === lastIndex)
                   }
-                  showDeleteButton={isArrayMode && index > 0}
+                  showDeleteButton={showMultipleCardinalityActionCenter}
                   handleDeleteElement={() =>
                     handleDeleteElement(index, fieldLabel)
                   }
@@ -290,7 +300,8 @@ const TypeEditor = ({
               canEdit={canEdit}
               helperText={formikErrorHandler(label, formik)}
               error={getNestedProperty(formik.errors, label)}
-              showAddAttributeButton={showAddAttributeButton}
+              showAddAttributeButton={showMultipleCardinalityActionCenter}
+              showDeleteButton={showMultipleCardinalityActionCenter}
               addTitle={addTitle}
               fieldRequired={required}
               {...formik.getFieldProps(label)}
@@ -313,10 +324,10 @@ const TypeEditor = ({
                   structureDefinition={structureDefinition}
                   fieldRequired={required}
                   showAddAttributeButton={
-                    showAddAttributeButton &&
+                    showMultipleCardinalityActionCenter &&
                     (!isArrayMode || index === lastIndex)
                   }
-                  showDeleteButton={isArrayMode && index > 0}
+                  showDeleteButton={showMultipleCardinalityActionCenter}
                   handleDeleteElement={() =>
                     handleDeleteElement(index, fieldLabel)
                   }
@@ -360,10 +371,10 @@ const TypeEditor = ({
                   error={getNestedProperty(formik.errors, fieldLabel)}
                   fieldRequired={required}
                   showAddAttributeButton={
-                    showAddAttributeButton &&
+                    showMultipleCardinalityActionCenter &&
                     (!isArrayMode || index === lastIndex)
                   }
-                  showDeleteButton={isArrayMode && index > 0}
+                  showDeleteButton={showMultipleCardinalityActionCenter}
                   handleDeleteElement={() =>
                     handleDeleteElement(index, fieldLabel)
                   }
@@ -400,10 +411,10 @@ const TypeEditor = ({
                   helperText={formikErrorHandler(fieldLabel, formik)}
                   error={getNestedProperty(formik.errors, fieldLabel)}
                   showAddAttributeButton={
-                    showAddAttributeButton &&
+                    showMultipleCardinalityActionCenter &&
                     (!isArrayMode || index === lastIndex)
                   }
-                  showDeleteButton={isArrayMode && index > 0}
+                  showDeleteButton={showMultipleCardinalityActionCenter}
                   handleDeleteElement={() =>
                     handleDeleteElement(index, fieldLabel)
                   }
@@ -431,7 +442,7 @@ const TypeEditor = ({
             setTouched={() => {
               formik.setFieldTouched(label);
             }}
-            showAddAttributeButton={showAddAttributeButton}
+            showAddAttributeButton={showMultipleCardinalityActionCenter}
             addTitle={addTitle}
             dateTimeValue={formik.getFieldProps(label).value}
             onBlur={() => formik.setFieldTouched(label)}
@@ -469,10 +480,10 @@ const TypeEditor = ({
                   error={getNestedProperty(formik.errors, fieldLabel)}
                   integerType={integerType}
                   showAddAttributeButton={
-                    showAddAttributeButton &&
+                    showMultipleCardinalityActionCenter &&
                     (!isArrayMode || index === lastIndex)
                   }
-                  showDeleteButton={isArrayMode && index > 0}
+                  showDeleteButton={showMultipleCardinalityActionCenter}
                   handleDeleteElement={() =>
                     handleDeleteElement(index, fieldLabel)
                   }
@@ -516,10 +527,10 @@ const TypeEditor = ({
                   helperText={formikErrorHandler(fieldLabel, formik)}
                   error={getNestedProperty(formik.errors, fieldLabel)}
                   showAddAttributeButton={
-                    showAddAttributeButton &&
+                    showMultipleCardinalityActionCenter &&
                     (!isArrayMode || index === lastIndex)
                   }
-                  showDeleteButton={isArrayMode && index > 0}
+                  showDeleteButton={showMultipleCardinalityActionCenter}
                   handleDeleteElement={() =>
                     handleDeleteElement(index, fieldLabel)
                   }
@@ -553,10 +564,10 @@ const TypeEditor = ({
                   helperText={formikErrorHandler(fieldLabel, formik)}
                   error={getNestedProperty(formik.errors, fieldLabel)}
                   showAddAttributeButton={
-                    showAddAttributeButton &&
+                    showMultipleCardinalityActionCenter &&
                     (!isArrayMode || index === lastIndex)
                   }
-                  showDeleteButton={isArrayMode && index > 0}
+                  showDeleteButton={showMultipleCardinalityActionCenter}
                   handleDeleteElement={() =>
                     handleDeleteElement(index, fieldLabel)
                   }
@@ -592,10 +603,10 @@ const TypeEditor = ({
                   helperText={formikErrorHandler(fieldLabel, formik)}
                   error={getNestedProperty(formik.errors, fieldLabel)}
                   showAddAttributeButton={
-                    showAddAttributeButton &&
+                    showMultipleCardinalityActionCenter &&
                     (!isArrayMode || index === lastIndex)
                   }
-                  showDeleteButton={isArrayMode && index > 0}
+                  showDeleteButton={showMultipleCardinalityActionCenter}
                   handleDeleteElement={() =>
                     handleDeleteElement(index, fieldLabel)
                   }
@@ -615,7 +626,7 @@ const TypeEditor = ({
             helperText={formikErrorHandler(label, formik)}
             error={getNestedProperty(formik.errors, label)}
             fieldRequired={required}
-            showAddAttributeButton={showAddAttributeButton}
+            showAddAttributeButton={showMultipleCardinalityActionCenter}
             addTitle={addTitle}
             {...formik.getFieldProps(label)}
             onChange={(value) => {
@@ -648,10 +659,10 @@ const TypeEditor = ({
                     helperText={formikErrorHandler(fieldLabel, formik)}
                     error={getNestedProperty(formik.errors, fieldLabel)}
                     showAddAttributeButton={
-                      showAddAttributeButton &&
+                      showMultipleCardinalityActionCenter &&
                       (!isArrayMode || index === lastIndex)
                     }
-                    showDeleteButton={isArrayMode && index > 0}
+                    showDeleteButton={showMultipleCardinalityActionCenter}
                     handleDeleteElement={() =>
                       handleDeleteElement(index, fieldLabel)
                     }
@@ -688,8 +699,8 @@ const TypeEditor = ({
             label={label}
             canEdit={canEdit}
             structureDefinition={structureDefinition}
-            showAddAttributeButton={showAddAttributeButton}
-            showDeleteButton={showAddAttributeButton}
+            showAddAttributeButton={showMultipleCardinalityActionCenter}
+            showDeleteButton={showMultipleCardinalityActionCenter}
             addTitle={addTitle}
             {...formik.getFieldProps(label)}
             onChange={(value) => {
@@ -714,8 +725,12 @@ const TypeEditor = ({
                   structureDefinition={structureDefinition}
                   label={fieldLabel}
                   showAddAttributeButton={
-                    showAddAttributeButton &&
+                    showMultipleCardinalityActionCenter &&
                     (!isArrayMode || index === lastIndex)
+                  }
+                  showDeleteButton={showMultipleCardinalityActionCenter}
+                  handleDeleteElement={() =>
+                    handleDeleteElement(index, fieldLabel)
                   }
                   addTitle={addTitle}
                   handleAddElement={handleAddElement}
@@ -767,10 +782,10 @@ const TypeEditor = ({
                   helperText={formikErrorHandler(fieldLabel, formik)}
                   error={getNestedProperty(formik.errors, fieldLabel)}
                   showAddAttributeButton={
-                    showAddAttributeButton &&
+                    showMultipleCardinalityActionCenter &&
                     (!isArrayMode || index === lastIndex)
                   }
-                  showDeleteButton={isArrayMode && index > 0}
+                  showDeleteButton={showMultipleCardinalityActionCenter}
                   handleDeleteElement={() =>
                     handleDeleteElement(index, fieldLabel)
                   }
@@ -933,7 +948,7 @@ const TypeEditor = ({
         ) {
           return (
             <ExtensionComponent
-              showAddAttributeButton={showAddAttributeButton}
+              showAddAttributeButton={showMultipleCardinalityActionCenter}
               addTitle={addTitle}
               label={label}
               canEdit={canEdit}
