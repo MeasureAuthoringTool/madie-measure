@@ -6,16 +6,19 @@
   display: flex;
   background-color: #ededed;
   overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .vertical-side-nav {
   border-right: solid 1px #8c8c8c;
   padding-bottom: 16px;
   padding-top: 16px;
+  overflow-x: hidden;
   .link-container,
   nav {
     display: flex;
     flex-direction: column;
+    overflow-x: hidden;
     .MuiButtonBase-root {
       text-align: left;
       align-items: flex-start;

@@ -286,7 +286,11 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
 
   return (
     <>
-      <Grid>
+      <Grid
+        style={{
+          gridTemplateColumns: "minmax(50px, 240px) repeat(5, minmax(0, 1fr))",
+        }}
+      >
         <EditMeasureDetailsSideNav links={links} />
         <Routes>
           <Route
