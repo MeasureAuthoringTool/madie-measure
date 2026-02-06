@@ -142,18 +142,15 @@ export const filterUnusedExtensionsFromElements = (
 ) => {
   const extensions = selectedResource?.bundleEntry?.resource?.extension || [];
   // now we can filter out extensions not present on the extensions variable, from the topElements.
-  const filteredElements = allDisplayedElements
-    ?.filter((el) => {
-      if (el.id.includes("extension:")) {
-        // find the extension in the extensions array that matches el.type[0].profile[0]
-        const extUrl = el.type?.[0]?.profile?.[0];
-        return extensions.some((ext) => ext.url === extUrl);
-      }
+  const filteredElements = allDisplayedElements?.filter((el) => {
+    if (el.id.includes("extension:")) {
+      // find the extension in the extensions array that matches el.type[0].profile[0]
+      const extUrl = el.type?.[0]?.profile?.[0];
+      return extensions.some((ext) => ext.url === extUrl);
+    }
 
-      return true;
-    })
-    ?.filter((el) => !/\.id$/.test(el.id));
-
+    return true;
+  });
   return filteredElements;
 };
 
@@ -377,6 +374,7 @@ export function getTopLevelElements(
       (e.path.split(".")?.length === 2 &&
         e.id !== "Extension.extension" &&
         e.id !== "Patient.extension" &&
+        !/\.id$/.test(e.id) &&
         e.max !== "0" &&
         // Exclude entries where the path contains these attributes or matches these element names
         ![
