@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useState, useMemo } from "react";
 import "twin.macro";
 import "styled-components/macro";
 import ResourceContext from "../../ResourceContext";
@@ -50,6 +50,22 @@ export const getProfileMatchTypes = (profileUrl) => {
     return ["/fhir/StructureDefinition/", "/fhir/us/core/", "/fhir/us/qicore/"];
   return [];
 };
+
+// Helper function to find the profile URL from reference type
+const findProfileUrlFromReferenceType = (
+  referenceType: string,
+  resourceProfileOptions: any
+) => {
+  if (!referenceType || resourceProfileOptions.length === 0) return "";
+
+  // Find the matching profile option based on the resource type
+  const matchingOption = resourceProfileOptions.find(
+    (opt) => opt.value === referenceType
+  );
+
+  return matchingOption?.profile || "";
+};
+
 export default function ReferenceComponent({
   structureDefinition,
   canEdit,
@@ -73,22 +89,26 @@ export default function ReferenceComponent({
   const [open, setOpen] = useState<boolean>(false);
   const [selectedProfileAddNew, setSelectedProfileAddNew] = useState(null);
 
-  const targetProfiles =
-    structureDefinition.type?.find(
-      (type: { code: string }) => type.code === "Reference"
-    )?.targetProfile || []; // get the profiles declared in the structure definition
-  const resourceProfileOptions =
-    allResourceProfiles
-      ?.filter((r) => targetProfiles.includes(r.profile))
-      .filter(
-        (r, index, self) =>
-          index === self.findIndex((t) => t.profile === r.profile)
-      )
-      .map((resourceProfile) => ({
-        label: resourceProfile.title,
-        value: resourceProfile.type,
-        profile: resourceProfile.profile,
-      })) || [];
+  const resourceProfileOptions = useMemo(() => {
+    const targetProfiles =
+      structureDefinition.type?.find(
+        (type: { code: string }) => type.code === "Reference"
+      )?.targetProfile || [];
+
+    return (
+      allResourceProfiles
+        ?.filter((r) => targetProfiles.includes(r.profile))
+        .filter(
+          (r, index, self) =>
+            index === self.findIndex((t) => t.profile === r.profile)
+        )
+        .map((resourceProfile) => ({
+          label: resourceProfile.title,
+          value: resourceProfile.type,
+          profile: resourceProfile.profile,
+        })) || []
+    );
+  }, [allResourceProfiles, structureDefinition.type]);
 
   const [selectedReferenceType, setSelectedReferenceType] = useState<string>(
     value?.reference?.split("/")?.[0] || ""
@@ -169,6 +189,13 @@ export default function ReferenceComponent({
     const newType = value?.reference?.split("/")?.[0] || "";
     const newId = value?.reference || "";
     setSelectedReferenceType(newType);
+
+    // Initialize selectedProfileUrl - derive it from the reference type if it exists
+    const initialProfileUrl = findProfileUrlFromReferenceType(
+      newType,
+      resourceProfileOptions
+    );
+    setSelectedProfileUrl(initialProfileUrl);
     // if the earmark is present, we do not want to update our local state.
     const addNewResources = formikContext.values["add_new_resources"] || [];
     if (addNewResources.length === 0) {
