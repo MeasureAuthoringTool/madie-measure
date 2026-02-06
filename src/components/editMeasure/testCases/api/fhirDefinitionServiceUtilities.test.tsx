@@ -1087,6 +1087,20 @@ describe("formatAttributeLabel", () => {
     expect(formatAttributeLabel("")).toBe("");
   });
 
+  it("strips [x] choice type indicator from paths", () => {
+    expect(formatAttributeLabel("Observation.component[0].value[x]")).toBe(
+      "Value"
+    );
+    expect(formatAttributeLabel("Observation.value[x]")).toBe("Value");
+    expect(formatAttributeLabel("MedicationRequest.medication[x]")).toBe(
+      "Medication"
+    );
+    expect(formatAttributeLabel("Claim.procedure[0].procedure[x]")).toBe(
+      "Procedure"
+    );
+    expect(formatAttributeLabel("Patient.deceased[x]")).toBe("Deceased");
+  });
+
   it("formats complex nested paths", () => {
     expect(formatAttributeLabel("Patient.contact.name.given")).toBe("Given");
     expect(formatAttributeLabel("ClaimResponse.addItem.noteNumber")).toBe(

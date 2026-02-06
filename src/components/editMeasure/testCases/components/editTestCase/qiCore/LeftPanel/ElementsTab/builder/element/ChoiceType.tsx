@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
-
+import "twin.macro";
+import "styled-components/macro";
 import { Box, MenuItem } from "@mui/material";
 import { Select } from "@madie/madie-design-system/dist/react";
 import * as _ from "lodash";
@@ -42,7 +43,7 @@ export const ChoiceType = (props: ChoiceTypePropsInterface) => {
   return (
     <Box sx={{ mb: 2 }}>
       <Select
-        label={formatAttributeLabel(updatedLabel)}
+        label={formatAttributeLabel(label)}
         id={`choice-type-selector-${updatedLabel}`}
         required="true"
         inputProps={{
@@ -70,8 +71,7 @@ export const ChoiceType = (props: ChoiceTypePropsInterface) => {
         }}
       />
       {selectedChoiceType && (
-        //put a border around the TypeEditor
-        <Box sx={{ border: "1px solid #ccc", padding: 2, mt: 2 }}>
+        <div tw="ml-4 mt-3">
           <TypeEditor
             resource={resource}
             structureDefinition={childDef}
@@ -79,7 +79,7 @@ export const ChoiceType = (props: ChoiceTypePropsInterface) => {
             canEdit={canEdit}
             label={updatedLabel}
           />
-        </Box>
+        </div>
       )}
     </Box>
   );
