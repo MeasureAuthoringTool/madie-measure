@@ -261,6 +261,7 @@ export function PopulationCriteriaHome({ measureCanEdit }) {
         style={{
           borderColor: "#8c8c8c",
           borderRadius: "4px",
+          gridTemplateColumns: "minmax(50px, 240px) repeat(5, minmax(0, 1fr))",
         }}
       >
         <PopulationCriteriaSideNav
