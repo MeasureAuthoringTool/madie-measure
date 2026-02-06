@@ -191,7 +191,10 @@ export default function ReferenceComponent({
     setSelectedReferenceType(newType);
 
     // Initialize selectedProfileUrl - derive it from the reference type if it exists
-    const initialProfileUrl = findProfileUrlFromReferenceType(newType, resourceProfileOptions);
+    const initialProfileUrl = findProfileUrlFromReferenceType(
+      newType,
+      resourceProfileOptions
+    );
     setSelectedProfileUrl(initialProfileUrl);
     // if the earmark is present, we do not want to update our local state.
     const addNewResources = formikContext.values["add_new_resources"] || [];
