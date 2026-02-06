@@ -7,6 +7,7 @@ import * as _ from "lodash";
 import TypeEditor from "./TypeEditor";
 import { useFormikContext } from "formik";
 import { formatAttributeLabel } from "../../../../../../../api/fhirDefinitionServiceUtilities";
+import ElementSectionQiCore from "./ElementSectionQiCore";
 
 interface ChoiceTypePropsInterface {
   childDef: any;
@@ -41,47 +42,60 @@ export const ChoiceType = (props: ChoiceTypePropsInterface) => {
   }, [choiceBase]);
 
   return (
-    <Box sx={{ mb: 2 }}>
-      <Select
-        label={formatAttributeLabel(label)}
-        id={`choice-type-selector-${updatedLabel}`}
-        required="true"
-        inputProps={{
-          "data-testid": `choice-type-input-${updatedLabel}`,
-        }}
-        data-testid={`choice-type-${updatedLabel}`}
-        readOnly={!canEdit}
-        options={childDef?.type?.map((ref) => (
-          <MenuItem
-            key={ref.code}
-            data-testid={`${ref.code}-option`}
-            value={ref.code}
-          >
-            {_.upperFirst(ref.code)}
-          </MenuItem>
-        ))}
-        value={_.upperFirst(selectedChoiceType)}
-        onChange={(e) => {
-          // clear previous choice type value
-          _.unset(formik.values, choiceBase + _.upperFirst(selectedChoiceType));
-          // update label and selected choice type based on the new selection
-          const newChoice: any = e.target.value;
-          setUpdatedLabel(`${choiceBase}${_.upperFirst(newChoice)}`);
-          setSelectedChoiceType(newChoice);
-        }}
-      />
-      {selectedChoiceType && (
-        <div tw="ml-4 mt-3">
-          <TypeEditor
-            resource={resource}
-            structureDefinition={childDef}
-            parentStructureDefinition={parentStructureDefinition}
-            canEdit={canEdit}
-            label={updatedLabel}
+    <ElementSectionQiCore
+      title={formatAttributeLabel(label)}
+      startOpen={false}
+      children={
+        <Box
+          style={{
+            paddingLeft: "16px",
+          }}
+        >
+          <Select
+            label="Choice Type Selector"
+            id={`choice-type-selector-${updatedLabel}`}
+            required="true"
+            inputProps={{
+              "data-testid": `choice-type-input-${updatedLabel}`,
+            }}
+            data-testid={`choice-type-${updatedLabel}`}
+            readOnly={!canEdit}
+            options={childDef?.type?.map((ref) => (
+              <MenuItem
+                key={ref.code}
+                data-testid={`${ref.code}-option`}
+                value={ref.code}
+              >
+                {_.upperFirst(ref.code)}
+              </MenuItem>
+            ))}
+            value={_.upperFirst(selectedChoiceType)}
+            onChange={(e) => {
+              // clear previous choice type value
+              _.unset(
+                formik.values,
+                choiceBase + _.upperFirst(selectedChoiceType)
+              );
+              // update label and selected choice type based on the new selection
+              const newChoice: any = e.target.value;
+              setUpdatedLabel(`${choiceBase}${_.upperFirst(newChoice)}`);
+              setSelectedChoiceType(newChoice);
+            }}
           />
-        </div>
-      )}
-    </Box>
+          {selectedChoiceType && (
+            <div tw="mt-3">
+              <TypeEditor
+                resource={resource}
+                structureDefinition={childDef}
+                parentStructureDefinition={parentStructureDefinition}
+                canEdit={canEdit}
+                label={updatedLabel}
+              />
+            </div>
+          )}
+        </Box>
+      }
+    />
   );
 };
 
