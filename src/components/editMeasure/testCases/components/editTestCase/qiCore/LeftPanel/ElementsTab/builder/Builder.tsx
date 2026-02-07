@@ -146,34 +146,75 @@ const Builder = ({
     };
   }, [measure]);
 
+  const displayMultiplePatientsAlert = () => {
+    return (
+      <div style={{ margin: "-16px", marginTop: "-32px", marginRight: 0 }}>
+        <MadieAlert
+          minimizeAlerts={false}
+          type="error"
+          content={
+            <div
+              aria-live="polite"
+              role="alert"
+              data-testid="json-error-alert-multiple-patients"
+              style={{
+                paddingTop: "10px",
+                paddingBottom: "8px",
+              }}
+            >
+              <h3>JSON Failing</h3>
+              Builder disabled. Builder is designed to work with a single
+              patient resource. Please remove the extra patient(s) from the JSON
+              to enable Builder support.
+            </div>
+          }
+          canClose={false}
+        />
+      </div>
+    );
+  };
+  const displayDuplicateIdAlert = () => {
+    return (
+      <div style={{ margin: "-16px", marginTop: "-32px", marginRight: 0 }}>
+        <MadieAlert
+          minimizeAlerts={false}
+          type="error"
+          content={
+            <div
+              aria-live="polite"
+              role="alert"
+              data-testid="json-error-alert-duplicate-resource-ids"
+              style={{
+                paddingTop: "10px",
+                paddingBottom: "8px",
+              }}
+            >
+              <h3>JSON Failing</h3>
+              Two profiles are currently using the same ID, and the builder
+              requires each profile to have a unique identifier. Please update
+              the JSON so that every profile has a distinct ID before
+              proceeding.
+            </div>
+          }
+          canClose={false}
+        />
+      </div>
+    );
+  };
+
   const numberOfPatientsAdded = state?.bundle?.entry?.filter(
     (e) => e.resource?.resourceType === "Patient"
   )?.length;
   const isPatientAdded = numberOfPatientsAdded > 0;
+  const resourceIds = state?.bundle?.entry?.map((e) => e.resource?.id);
+  const duplicateResourceIds = resourceIds?.filter(
+    (id, index) => resourceIds.indexOf(id) !== index
+  );
+
   return numberOfPatientsAdded > 1 ? (
-    <div style={{ margin: "-16px", marginTop: "-32px", marginRight: 0 }}>
-      <MadieAlert
-        minimizeAlerts={false}
-        type="error"
-        content={
-          <div
-            aria-live="polite"
-            role="alert"
-            data-testid="json-error-alert-multiple-patients"
-            style={{
-              paddingTop: "10px",
-              paddingBottom: "8px",
-            }}
-          >
-            <h3>JSON Failing</h3>
-            Builder disabled. Builder is designed to work with a single patient
-            resource. Please remove the extra patient(s) from the JSON to enable
-            Builder support.
-          </div>
-        }
-        canClose={false}
-      />
-    </div>
+    displayMultiplePatientsAlert()
+  ) : duplicateResourceIds?.length > 0 ? (
+    displayDuplicateIdAlert()
   ) : (
     <Box
       sx={{ mr: 2 }}
