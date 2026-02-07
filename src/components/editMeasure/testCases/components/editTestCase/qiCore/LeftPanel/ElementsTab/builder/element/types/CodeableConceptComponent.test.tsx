@@ -311,4 +311,64 @@ describe("CodeableConceptComponent Tests", () => {
       });
     });
   });
+
+  it("clears value when deleting the last coding element", async () => {
+    const value = {
+      coding: [
+        {
+          code: "B1",
+          system: "http://example.com/system1",
+          display: "B1 Code",
+        },
+      ],
+    };
+
+    const mockFormik = createMockFormik({ "test-label": value });
+
+    mockedAxios.get.mockResolvedValue({
+      data: mockBindingValueSet,
+    });
+
+    render(
+      <ApiContextProvider value={mockConfig}>
+        <ExecutionContextProvider
+          value={{
+            measureState: [null, jest.fn()],
+            bundleState: [null, jest.fn()],
+            valueSetsState: [null, jest.fn()],
+            executionContextReady: true,
+            executing: false,
+            setExecuting: jest.fn(),
+            contextFailure: false,
+          }}
+        >
+          <FormikProvider value={mockFormik}>
+            <CodeableConceptComponent
+              canEdit={true}
+              structureDefinition={mockStructureDefinition}
+              label="test-label"
+              value={value}
+              addTitle={"Codeable"}
+            />
+          </FormikProvider>
+        </ExecutionContextProvider>
+      </ApiContextProvider>
+    );
+
+    // Find and click the delete button for the only coding element
+    const deleteButton = screen.getByTestId(
+      "delete-button-test-label.coding[0]"
+    );
+    expect(deleteButton).toBeInTheDocument();
+
+    userEvent.click(deleteButton);
+
+    // Should clear the value of the last element instead of removing it
+    await waitFor(() => {
+      expect(mockSetFieldValue).toHaveBeenCalledWith(
+        "test-label.coding[0]",
+        undefined
+      );
+    });
+  });
 });

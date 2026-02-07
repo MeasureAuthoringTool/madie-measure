@@ -1055,4 +1055,83 @@ describe("ReferenceComponent", () => {
       );
     });
   });
+
+  it("displays accurate information in both select dropdowns based on value prop", async () => {
+    // Set up bundle with multiple resource types
+    (useQiCoreResource as jest.Mock).mockReturnValue({
+      state: {
+        bundle: {
+          entry: [
+            {
+              resource: {
+                resourceType: "Encounter",
+                id: "encounter-qicore-123",
+                meta: {
+                  profile: [
+                    "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-encounter",
+                  ],
+                },
+              },
+            },
+            {
+              resource: {
+                resourceType: "Encounter",
+                id: "encounter-uscore-456",
+                meta: {
+                  profile: [
+                    "http://hl7.org/fhir/us/core/StructureDefinition/us-core-encounter",
+                  ],
+                },
+              },
+            },
+          ],
+        },
+      },
+    });
+
+    // Provide a value prop with reference and profile URL
+    const valueWithReference = {
+      reference: "Encounter/encounter-qicore-123",
+    };
+
+    render(
+      <ResourceContext.Provider value={baseProfiles}>
+        <FormikProvider value={mockFormik}>
+          <ReferenceComponent
+            structureDefinition={structureDefinition}
+            canEdit={true}
+            required={false}
+            helperText="Select a reference"
+            error={false}
+            showAddAttributeButton={false}
+            addTitle=""
+            label="ClaimResponse.addItem[0].provider[0]"
+            value={valueWithReference}
+          />
+        </FormikProvider>
+      </ResourceContext.Provider>
+    );
+
+    // Verify first dropdown (Reference Type) displays the correct value
+    const referenceTypeSelect = screen.getByLabelText("Reference Type");
+    expect(referenceTypeSelect).toBeInTheDocument();
+
+    // The first dropdown should display "Encounter (QICore)" based on the reference type
+    await waitFor(() => {
+      expect(referenceTypeSelect).toHaveTextContent(/Encounter/);
+    });
+
+    // Verify second dropdown (Specify Encounter) displays the correct value
+    const referenceSelect = screen.getByRole("combobox", {
+      name: /specify encounter/i,
+    });
+    expect(referenceSelect).toBeInTheDocument();
+
+    // The second dropdown should display "Encounter/encounter-qicore-123"
+    await waitFor(() => {
+      expect(referenceSelect).toHaveTextContent(
+        "Encounter/encounter-qicore-123"
+      );
+    });
+  });
 });

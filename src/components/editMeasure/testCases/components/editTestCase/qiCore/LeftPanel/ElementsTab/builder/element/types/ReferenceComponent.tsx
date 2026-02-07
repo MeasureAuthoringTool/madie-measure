@@ -1,4 +1,6 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useState, useMemo } from "react";
+import "twin.macro";
+import "styled-components/macro";
 import ResourceContext from "../../ResourceContext";
 import { Select, MadieDialog } from "@madie/madie-design-system/dist/react";
 import { IconButton, MenuItem, Tooltip, InputLabel } from "@mui/material";
@@ -48,6 +50,22 @@ export const getProfileMatchTypes = (profileUrl) => {
     return ["/fhir/StructureDefinition/", "/fhir/us/core/", "/fhir/us/qicore/"];
   return [];
 };
+
+// Helper function to find the profile URL from reference type
+const findProfileUrlFromReferenceType = (
+  referenceType: string,
+  resourceProfileOptions: any
+) => {
+  if (!referenceType || resourceProfileOptions.length === 0) return "";
+
+  // Find the matching profile option based on the resource type
+  const matchingOption = resourceProfileOptions.find(
+    (opt) => opt.value === referenceType
+  );
+
+  return matchingOption?.profile || "";
+};
+
 export default function ReferenceComponent({
   structureDefinition,
   canEdit,
@@ -71,22 +89,26 @@ export default function ReferenceComponent({
   const [open, setOpen] = useState<boolean>(false);
   const [selectedProfileAddNew, setSelectedProfileAddNew] = useState(null);
 
-  const targetProfiles =
-    structureDefinition.type?.find(
-      (type: { code: string }) => type.code === "Reference"
-    )?.targetProfile || []; // get the profiles declared in the structure definition
-  const resourceProfileOptions =
-    allResourceProfiles
-      ?.filter((r) => targetProfiles.includes(r.profile))
-      .filter(
-        (r, index, self) =>
-          index === self.findIndex((t) => t.profile === r.profile)
-      )
-      .map((resourceProfile) => ({
-        label: resourceProfile.title,
-        value: resourceProfile.type,
-        profile: resourceProfile.profile,
-      })) || [];
+  const resourceProfileOptions = useMemo(() => {
+    const targetProfiles =
+      structureDefinition.type?.find(
+        (type: { code: string }) => type.code === "Reference"
+      )?.targetProfile || [];
+
+    return (
+      allResourceProfiles
+        ?.filter((r) => targetProfiles.includes(r.profile))
+        .filter(
+          (r, index, self) =>
+            index === self.findIndex((t) => t.profile === r.profile)
+        )
+        .map((resourceProfile) => ({
+          label: resourceProfile.title,
+          value: resourceProfile.type,
+          profile: resourceProfile.profile,
+        })) || []
+    );
+  }, [allResourceProfiles, structureDefinition.type]);
 
   const [selectedReferenceType, setSelectedReferenceType] = useState<string>(
     value?.reference?.split("/")?.[0] || ""
@@ -167,6 +189,13 @@ export default function ReferenceComponent({
     const newType = value?.reference?.split("/")?.[0] || "";
     const newId = value?.reference || "";
     setSelectedReferenceType(newType);
+
+    // Initialize selectedProfileUrl - derive it from the reference type if it exists
+    const initialProfileUrl = findProfileUrlFromReferenceType(
+      newType,
+      resourceProfileOptions
+    );
+    setSelectedProfileUrl(initialProfileUrl);
     // if the earmark is present, we do not want to update our local state.
     const addNewResources = formikContext.values["add_new_resources"] || [];
     if (addNewResources.length === 0) {
@@ -234,20 +263,26 @@ export default function ReferenceComponent({
           helperText={helperText}
           error={error}
         />
-        {showDeleteButton && canEdit && (
-          <Tooltip title="Delete" placement="top" arrow>
-            <IconButton
-              onClick={handleDeleteElement}
-              data-testid={`delete-button-${label}`}
-              aria-label={`delete ${label}`}
-              size="small"
-            >
-              <DeleteOutlineIcon fontSize="small" />
-            </IconButton>
-          </Tooltip>
-        )}
-        {showAddAttributeButton && addTitle && (
-          <AddElementButton name={addTitle} onClick={handleAddElement} />
+        {canEdit && (
+          <div tw="mt-5 flex items-center">
+            {showDeleteButton && (
+              <Tooltip title="Delete" placement="top" arrow>
+                <span>
+                  <IconButton
+                    onClick={handleDeleteElement}
+                    data-testid={`delete-button-${label}`}
+                    aria-label={`delete ${label}`}
+                    size="small"
+                  >
+                    <DeleteOutlineIcon fontSize="small" color="error" />
+                  </IconButton>
+                </span>
+              </Tooltip>
+            )}
+            {showAddAttributeButton && (
+              <AddElementButton name={addTitle} onClick={handleAddElement} />
+            )}
+          </div>
         )}
       </div>
       {/* Select a specific resource from the selected reference type, from tc json */}

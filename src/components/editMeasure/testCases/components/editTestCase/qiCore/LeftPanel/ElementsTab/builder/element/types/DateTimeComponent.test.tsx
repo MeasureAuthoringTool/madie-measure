@@ -7,6 +7,7 @@ import DateTimeComponent, {
   YEAR_MONTH_DAY_FORMAT,
   DATE_TIME_ZONE_FORMAT,
 } from "./DateTimeComponent";
+// @ts-ignore
 import dayjs from "dayjs";
 
 describe("DateTimeComponent", () => {
@@ -213,7 +214,7 @@ describe("DateTimeComponent", () => {
     expect(screen.queryByText("Add Birthday")).not.toBeInTheDocument();
   });
 
-  test("AddElementButton is not rendered when addTitle is not provided", () => {
+  test("AddElementButton and delete button are not rendered when canEdit is false", () => {
     const handleChange = jest.fn();
     render(
       <DateTimeComponent
@@ -226,7 +227,10 @@ describe("DateTimeComponent", () => {
       />
     );
 
-    expect(screen.queryByText(/Add/)).not.toBeInTheDocument();
+    expect(screen.queryByText("Add Date Time")).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId("delete-button-date-time")
+    ).not.toBeInTheDocument();
   });
 
   it("Handles pasted date and resets time to 00:00:00", () => {

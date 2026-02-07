@@ -95,4 +95,71 @@ describe("IntegerComponent", () => {
       );
     });
   });
+
+  describe("Button functionality", () => {
+    test("does not render AddElementButton or delete button when canEdit is false", () => {
+      render(
+        <IntegerComponent
+          value={42}
+          label="Test.integer"
+          canEdit={false}
+          fieldRequired={false}
+          integerType={IntegerType.SIGNED}
+          showDeleteButton={true}
+          handleDeleteElement={jest.fn()}
+          showAddAttributeButton={true}
+          addTitle="Integer"
+          handleAddElement={jest.fn()}
+        />
+      );
+
+      expect(screen.queryByText("Add Integer")).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId("delete-button-Test.integer")
+      ).not.toBeInTheDocument();
+    });
+
+    test("calls handleDeleteElement when delete button is clicked", () => {
+      const handleDeleteElementMock = jest.fn();
+
+      render(
+        <IntegerComponent
+          value={42}
+          label="Test.integer"
+          canEdit={true}
+          fieldRequired={false}
+          integerType={IntegerType.SIGNED}
+          showDeleteButton={true}
+          handleDeleteElement={handleDeleteElementMock}
+        />
+      );
+
+      const deleteButton = screen.getByTestId("delete-button-Test.integer");
+      fireEvent.click(deleteButton);
+
+      expect(handleDeleteElementMock).toHaveBeenCalledTimes(1);
+    });
+
+    test("calls handleAddElement when AddElementButton is clicked", () => {
+      const handleAddElementMock = jest.fn();
+
+      render(
+        <IntegerComponent
+          value={42}
+          label="Test.integer"
+          canEdit={true}
+          fieldRequired={false}
+          integerType={IntegerType.SIGNED}
+          showAddAttributeButton={true}
+          addTitle="Integer"
+          handleAddElement={handleAddElementMock}
+        />
+      );
+
+      const addButton = screen.getByText("Add Integer");
+      fireEvent.click(addButton);
+
+      expect(handleAddElementMock).toHaveBeenCalledTimes(1);
+    });
+  });
 });
