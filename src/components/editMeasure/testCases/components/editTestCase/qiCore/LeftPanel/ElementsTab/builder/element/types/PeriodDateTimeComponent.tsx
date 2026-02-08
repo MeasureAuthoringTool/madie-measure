@@ -90,7 +90,7 @@ const PeriodDateTimeComponent = ({
   fieldRequired,
   value = {},
   onChange, // expects { start, end }
-  label = "DateTime",
+  label = "Period",
   error = {},
   helperText = {},
 }: TypeComponentProps) => {
@@ -147,7 +147,20 @@ const PeriodDateTimeComponent = ({
       sx={{ display: "flex", flexDirection: "column", gap: 2 }}
       data-component-type="PeriodDateTimeComponent"
     >
-      <div style={{ marginBottom: "16px", maxWidth: 220 }}>
+      <label
+        htmlFor={label}
+        aria-labelledby={`${label}-label`}
+        data-testid={`${label}-label`}
+        style={{
+          textTransform: "none",
+          color: "#0073c8",
+          marginTop: "12px",
+          marginBottom: "-12px",
+        }}
+      >
+        {label}
+      </label>
+      <div style={{ maxWidth: 220 }} id={label}>
         <Select
           readOnly={!canEdit}
           required={fieldRequired}

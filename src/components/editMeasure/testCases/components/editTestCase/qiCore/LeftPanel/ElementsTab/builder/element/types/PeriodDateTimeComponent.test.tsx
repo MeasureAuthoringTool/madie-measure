@@ -20,11 +20,13 @@ describe("PeriodDateTimeComponent", () => {
         onChange={handleChange}
       />
     );
+    expect(screen.getByTestId("Period-label")).toBeInTheDocument();
+    expect(screen.getByText("Period")).toBeInTheDocument();
     expect(
-      screen.getByTestId("start-YYYY-MM-DD-field-DateTime")
+      screen.getByTestId("start-YYYY-MM-DD-field-Period")
     ).toBeInTheDocument();
     expect(
-      screen.getByTestId("end-YYYY-MM-DD-field-DateTime")
+      screen.getByTestId("end-YYYY-MM-DD-field-Period")
     ).toBeInTheDocument();
   });
 
@@ -289,7 +291,7 @@ describe("PeriodDateTimeComponent useEffect", () => {
     );
 
     const startInput = await screen.findByTestId(
-      "start-YYYY-MM-DD-field-DateTime"
+      "start-YYYY-MM-DD-field-Period"
     );
     expect(startInput).toBeInTheDocument();
   });
@@ -304,7 +306,7 @@ describe("PeriodDateTimeComponent useEffect", () => {
       />
     );
 
-    const endInput = await screen.findByTestId("end-YYYY-MM-DD-field-DateTime");
+    const endInput = await screen.findByTestId("end-YYYY-MM-DD-field-Period");
     expect(endInput).toBeInTheDocument();
   });
 
@@ -318,8 +320,8 @@ describe("PeriodDateTimeComponent useEffect", () => {
       />
     );
 
-    const startInput = await screen.findByTestId("start-year-field-DateTime");
-    const endInput = await screen.findByTestId("end-year-field-DateTime");
+    const startInput = await screen.findByTestId("start-year-field-Period");
+    const endInput = await screen.findByTestId("end-year-field-Period");
 
     expect(startInput).toBeInTheDocument();
     expect(endInput).toBeInTheDocument();
@@ -369,7 +371,7 @@ describe("PeriodDateTimeComponent useEffect", () => {
     );
 
     const selector = await screen.findByTestId(
-      "date-time-format-selector-input-field-DateTime"
+      "date-time-format-selector-input-field-Period"
     );
 
     // Simulate user manually selecting "YYYY"
@@ -399,7 +401,7 @@ describe("PeriodDateTimeComponent useEffect", () => {
     );
 
     const selector = await screen.findByTestId(
-      "date-time-format-selector-input-field-DateTime"
+      "date-time-format-selector-input-field-Period"
     );
     expect((selector as HTMLSelectElement).value).toBe("YYYY-MM-DD");
   });
@@ -419,25 +421,23 @@ describe("PeriodDateTimeComponent useEffect", () => {
 
     // Verify that the date format selector is read-only
     const formatSelector = await screen.findByTestId(
-      `date-time-format-selector-field-DateTime`
+      `date-time-format-selector-field-Period`
     );
     expect(formatSelector).toHaveAttribute("readonly");
 
     // Verify that the start and end date fields are read-only
     const startDateField = await screen.findByTestId(
-      "start-YYYY-MM-DDTHH:mm:ssZ-field-DateTime"
+      "start-YYYY-MM-DDTHH:mm:ssZ-field-Period"
     );
     const endDateField = await screen.findByTestId(
-      "end-YYYY-MM-DDTHH:mm:ssZ-field-DateTime"
+      "end-YYYY-MM-DDTHH:mm:ssZ-field-Period"
     );
     expect(startDateField).toHaveAttribute("readonly");
     expect(endDateField).toHaveAttribute("readonly");
 
     // Verify that time fields are also read-only
-    const startTimeInput = await screen.findByTestId(
-      "start-time-field-DateTime"
-    );
-    const endTimeInput = await screen.findByTestId("end-time-field-DateTime");
+    const startTimeInput = await screen.findByTestId("start-time-field-Period");
+    const endTimeInput = await screen.findByTestId("end-time-field-Period");
     expect(startTimeInput).toHaveAttribute("readonly");
     expect(endTimeInput).toHaveAttribute("readonly");
   });
