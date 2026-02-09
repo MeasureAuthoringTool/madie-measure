@@ -136,7 +136,7 @@ const TestCaseSummaryGrid = ({
         onClick: (targetContext: any) => onRowEdit(targetContext),
       },
       {
-        name: "Delete",
+        name: "Remove",
         icon: <DeleteOutlinedIcon sx={{ color: "#D92F2F" }} />,
         onClick: (targetContext: any) => onRowDelete(targetContext),
       },
