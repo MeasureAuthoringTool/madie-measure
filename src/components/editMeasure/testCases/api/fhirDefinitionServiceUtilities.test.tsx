@@ -155,6 +155,12 @@ describe("FhirDefinitionServiceUtilities", () => {
           path: "Observation.code",
           min: 0,
           type: [{ code: "CodeableConcept" }],
+        },
+        {
+          path: "Patient.id",
+          id: "Patient.id",
+          min: 1,
+          type: [{ code: "Resource" }],
         }
       );
       const result = getTopLevelElements(resourceWithSlices);
@@ -170,6 +176,7 @@ describe("FhirDefinitionServiceUtilities", () => {
       expect(
         result.find((el) => el.id === "Patient.extension:race")
       ).toBeDefined();
+      expect(result.find((el) => el.id === "Patient.id")).toBeUndefined();
     });
 
     it("should keep extension slices but filter non-extension slices", () => {

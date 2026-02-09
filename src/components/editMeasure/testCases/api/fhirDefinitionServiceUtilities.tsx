@@ -157,7 +157,6 @@ export const filterUnusedExtensionsFromElements = (
 
     return true;
   });
-
   return filteredElements;
 };
 
@@ -381,6 +380,7 @@ export function getTopLevelElements(
       (e.path.split(".")?.length === 2 &&
         e.id !== "Extension.extension" &&
         e.id !== "Patient.extension" &&
+        !/\.id$/.test(e.id) &&
         e.max !== "0" &&
         // Exclude entries where the path contains these attributes or matches these element names
         ![
