@@ -1,5 +1,5 @@
 import * as React from "react";
-import { render, screen, cleanup } from "@testing-library/react";
+import { render, screen, cleanup, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import ElementSelector, {
   getOptionLabel,
@@ -47,8 +47,7 @@ describe("ElementSelector", () => {
   const defaultProps = {
     basePath: "Patient",
     options: mockOptions,
-    value: [],
-    newValues: [],
+    selectedElements: [],
     onChange: jest.fn(),
   };
 
@@ -85,7 +84,7 @@ describe("ElementSelector", () => {
   it("disables already selected options", () => {
     const props = {
       ...defaultProps,
-      value: [mockOptions[0], mockOptions[3]],
+      selectedElements: [mockOptions[0], mockOptions[3]],
     };
 
     render(<ElementSelector {...props} />);
@@ -94,18 +93,20 @@ describe("ElementSelector", () => {
     userEvent.click(input);
 
     // Find the gender option by text and check if it's disabled
-    const genderOption = screen.getByText("gender").closest("li");
+    const genderOption = screen.getAllByText("gender")[1].closest("li");
     expect(genderOption).toHaveAttribute("aria-disabled", "true");
 
     // Find the deceasedBoolean option from deceased[x] choice type and check if it's disabled
-    const deceasedOption = screen.getByText("deceasedBoolean").closest("li");
+    const deceasedOption = screen
+      .getAllByText("deceasedBoolean")[1]
+      .closest("li");
     expect(deceasedOption).toHaveAttribute("aria-disabled", "true");
   });
 
   it("renders chips for selected values", () => {
     const props = {
       ...defaultProps,
-      newValues: [mockOptions[0]],
+      selectedElements: [mockOptions[0]],
     };
 
     render(<ElementSelector {...props} />);
@@ -117,8 +118,7 @@ describe("ElementSelector", () => {
   it("disables delete for chips that are in value prop", () => {
     const props = {
       ...defaultProps,
-      value: [mockOptions[0]],
-      newValues: [mockOptions[0]],
+      selectedElements: [mockOptions[0]],
     };
 
     render(<ElementSelector {...props} />);
@@ -152,20 +152,20 @@ describe("ElementSelector", () => {
   it("limits visible tags to 3", () => {
     const props = {
       ...defaultProps,
-      newValues: mockOptions,
+      selectedElements: mockOptions,
     };
 
     render(<ElementSelector {...props} />);
 
-    const chips = screen.getAllByRole("button");
-    expect(chips.length).toBe(3);
+    // Grab all chip elements whose testid ends with "-chip"
+    const chips = screen.getAllByTestId(/-chip$/i);
+    expect(chips.length).toBe(2);
   });
 
   it("prevents backspace from deleting disabled chips", async () => {
     const props = {
       ...defaultProps,
-      value: [mockOptions[0]], // gender is disabled
-      newValues: [mockOptions[0], mockOptions[1]], // has both gender and birthDate
+      selectedElements: [mockOptions[0], mockOptions[1]], // has both gender and birthDate
     };
 
     render(<ElementSelector {...props} />);
@@ -175,13 +175,13 @@ describe("ElementSelector", () => {
       screen.getByTestId("disabled-element-selector-gender-chip")
     ).toBeInTheDocument();
     expect(
-      screen.getByTestId("element-selector-birthDate-chip")
+      screen.getByTestId("disabled-element-selector-birthDate-chip")
     ).toBeInTheDocument();
 
     const input = screen.getByPlaceholderText("Attributes");
-    await userEvent.type(input, "{Backspace}");
-    await userEvent.type(input, "{Backspace}");
-    await userEvent.type(input, "{Backspace}");
+    userEvent.type(input, "{Backspace}");
+    userEvent.type(input, "{Backspace}");
+    userEvent.type(input, "{Backspace}");
 
     // Verify disabled chip still exists and hasn't been removed
     expect(
@@ -241,7 +241,7 @@ describe("ElementSelector", () => {
     const props = {
       ...defaultProps,
       options: choiceOptions,
-      newValues: [choiceOptions[0]],
+      selectedElements: [choiceOptions[0]],
     };
 
     render(<ElementSelector {...props} />);
@@ -271,7 +271,7 @@ describe("ElementSelector", () => {
     const propsWithMultipleBirth = {
       ...defaultProps,
       options: choiceOptions,
-      newValues: [choiceOptions[2]],
+      selectedElements: [choiceOptions[2]],
     };
 
     render(<ElementSelector {...propsWithMultipleBirth} />);
@@ -306,7 +306,7 @@ describe("ElementSelector", () => {
       const props = {
         ...defaultProps,
         options: choiceOptions,
-        newValues: [choiceOptions[0]],
+        selectedElements: [choiceOptions[0]],
       };
 
       render(<ElementSelector {...props} />);

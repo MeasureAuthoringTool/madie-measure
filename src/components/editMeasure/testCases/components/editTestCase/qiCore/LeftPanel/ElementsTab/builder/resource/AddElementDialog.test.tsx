@@ -1,12 +1,12 @@
-import React, { useState } from "react";
-import { render, screen, waitFor, fireEvent } from "@testing-library/react";
+import * as React from "react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import AddElementDialog from "./AddElementDialog";
 import { ElementDefinition } from "fhir/r4";
 
 describe("AddElementDialog", () => {
   const mockOnClose = jest.fn();
-  const mockSaveElements = jest.fn();
+  const mockAddElements = jest.fn();
 
   const mockOptions = [
     {
@@ -25,7 +25,7 @@ describe("AddElementDialog", () => {
     basePath: "Patient",
     options: mockOptions,
     value: [] as ElementDefinition[],
-    saveElements: mockSaveElements,
+    addElements: mockAddElements,
   };
 
   beforeEach(() => {
@@ -71,7 +71,7 @@ describe("AddElementDialog", () => {
     userEvent.click(screen.getByTestId("add-element-button-2"));
 
     await waitFor(() => {
-      expect(mockSaveElements).toHaveBeenCalledWith([
+      expect(mockAddElements).toHaveBeenCalledWith([
         {
           id: "Patient.name",
           path: "Patient.name",
@@ -100,7 +100,7 @@ describe("AddElementDialog", () => {
     userEvent.click(screen.getByTestId("add-element-button-2"));
 
     await waitFor(() => {
-      expect(mockSaveElements).toHaveBeenCalledWith([
+      expect(mockAddElements).toHaveBeenCalledWith([
         ...existingValue,
         {
           id: "Patient.gender",
@@ -131,7 +131,7 @@ describe("AddElementDialog", () => {
     userEvent.click(screen.getByTestId("add-element-button-2"));
 
     await waitFor(() => {
-      expect(mockSaveElements).toHaveBeenCalledWith([
+      expect(mockAddElements).toHaveBeenCalledWith([
         ...existingValue,
         {
           id: "Patient.gender",
@@ -145,7 +145,7 @@ describe("AddElementDialog", () => {
 
     await waitFor(() => {
       // Verify that newValues is reset to the original value
-      expect(mockSaveElements).not.toHaveBeenCalledTimes(2); // Ensure no additional save occurred
+      expect(mockAddElements).not.toHaveBeenCalledTimes(2); // Ensure no additional save occurred
       expect(mockOnClose).toHaveBeenCalledTimes(2); // Ensure onClose is called
     });
   });
@@ -171,7 +171,7 @@ describe("AddElementDialog", () => {
     userEvent.click(screen.getByTestId("add-element-button-2"));
 
     await waitFor(() => {
-      expect(mockSaveElements).toHaveBeenCalledWith([
+      expect(mockAddElements).toHaveBeenCalledWith([
         ...initialValue,
         {
           id: "Patient.gender",
@@ -185,7 +185,7 @@ describe("AddElementDialog", () => {
 
     await waitFor(() => {
       // Verify that newValues is reset to the initial value
-      expect(mockSaveElements).not.toHaveBeenCalledTimes(2); // Ensure no additional save occurred
+      expect(mockAddElements).not.toHaveBeenCalledTimes(2); // Ensure no additional save occurred
       expect(mockOnClose).toHaveBeenCalledTimes(2); // Ensure onClose is called
     });
   });

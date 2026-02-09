@@ -26,6 +26,7 @@ import {
   getNestedProperty,
   stripAllIndexes,
   filterUnusedExtensionsFromElements,
+  PRIMITIVE_DEFAULT_VALUES,
 } from "../../../../../../../api/fhirDefinitionServiceUtilities";
 import { useFormikContext } from "formik";
 import {
@@ -66,6 +67,23 @@ export const getResourceName = (title: string, baseResourceType: string) => {
   } else {
     return title;
   }
+};
+
+// Builds the element path used to access values in the resource JSON, with special handling for choice types and array types
+// e.g. choice type "Patient.deceased[x]" becomes "deceasedBoolean"
+// e.g. array type "Patient.contact[0]" becomes "contact"
+const buildElementPath = (element: ElementDefinition) => {
+  const resourceName = element.path.split(".")[0];
+  const elemPath = stripResourcePath(resourceName, element.path);
+  // for choice types e.g. Patient.deceased[x]
+  if (elemPath.endsWith("[x]")) {
+    // becomes 'deceased'
+    const cleanPath = elemPath.substring(0, elemPath.lastIndexOf("["));
+
+    // append type to element name so that it will be a valid choice type name e.g. 'deceasedBoolean'
+    return _.camelCase(cleanPath + _.upperFirst(element.type[0].code));
+  }
+  return elemPath;
 };
 
 const ResourceEditor = ({
@@ -133,43 +151,13 @@ const ResourceEditor = ({
           const requiredElements = [...topElements.filter((e) => e.min > 0)];
           const elementsWithValues = [
             ...topElements.filter((e) => {
-              const elemPath = stripResourcePath(
-                selectedResource.definition.type,
-                e.path
+              const elemPath = buildElementPath(e);
+              const elemValue = _.get(
+                selectedResource.bundleEntry.resource,
+                elemPath
               );
-              //let's look at e.path and see if it is a choice type
-              //if e.path ends with [x] then we need to check if the resource has a value for that type
-              if (elemPath.endsWith("[x]")) {
-                //if it does, then we need to check if the resource has a value for that type
-                const type = elemPath.substring(
-                  elemPath.lastIndexOf("[") + 1,
-                  elemPath.lastIndexOf("]")
-                );
-                const elemPathWithoutType = elemPath.substring(
-                  0,
-                  elemPath.lastIndexOf("[")
-                );
-
-                //let's appent e.type[0].code to the end of the elemPathWithoutType
-                const elemPathType = _.camelCase(
-                  elemPathWithoutType + _.upperFirst(e.type[0].code)
-                );
-                //we're going to have to find elementX if type == e.type[0]
-
-                const elemValue = _.get(
-                  selectedResource.bundleEntry.resource,
-                  elemPathType
-                );
-                if (!_.isNil(elemValue)) {
-                  return true;
-                }
-              } else {
-                const elemValue = _.get(
-                  selectedResource.bundleEntry.resource,
-                  elemPath
-                );
-                return !_.isNil(elemValue);
-              }
+              // null or empty string/arrays/objects are valid values, so only filter out undefined
+              return !_.isUndefined(elemValue);
             }),
           ];
 
@@ -230,10 +218,16 @@ const ResourceEditor = ({
           )
         );
     }
-  }, [selectedResourceID, state, setActiveTab, setLastAddedElemPath]);
+  }, [
+    selectedResourceID,
+    state,
+    setActiveTab,
+    setLastAddedElemPath,
+    lastAddedElemPath,
+  ]);
 
-  const saveElements = (newValue: ElementDefinition[] | null) => {
-    // removed uncessesary reference to modifying displayedElements.
+  const addElements = (elements: ElementDefinition[] | null) => {
+    // removed unnecessary reference to modifying displayedElements.
     // Any updates through dispatch will trickle down child component references accordingly.
 
     const { type } = selectedResource?.definition;
@@ -243,12 +237,8 @@ const ResourceEditor = ({
     nextEntry.resource = formikCleanedValues[type];
     nextEntry.resource.resourceType = type;
     // Add empty values for new elements
-    newValue?.forEach((element) => {
-      let elemPath = stripResourcePath(
-        selectedResource.definition.type,
-        element.path
-      );
-      // if elemPath ends with ], then we're going to have to find the resource element that has a correct matching type
+    elements?.forEach((element) => {
+      let elemPath = buildElementPath(element);
       const currentValue = _.get(nextEntry.resource, elemPath);
 
       if (elemPath.endsWith("]") && !elemPath.endsWith("[x]")) {
@@ -267,11 +257,17 @@ const ResourceEditor = ({
 
       if (_.isNil(currentValue)) {
         if (!elemPath.includes("extension:")) {
+          let defaultValue: any;
           if (element.max == "*" || Number(element.max) > 1) {
-            _.set(nextEntry.resource, elemPath, []);
+            defaultValue = [];
+          } else if (
+            PRIMITIVE_DEFAULT_VALUES.hasOwnProperty(element.type?.[0]?.code)
+          ) {
+            defaultValue = PRIMITIVE_DEFAULT_VALUES[element.type[0].code];
           } else {
-            _.set(nextEntry.resource, elemPath, "");
+            defaultValue = null;
           }
+          _.set(nextEntry.resource, elemPath, defaultValue);
         } else {
           const filtered = allElements.filter((ele) =>
             ele.id.includes(elemPath)
@@ -476,8 +472,8 @@ const ResourceEditor = ({
         open={addDialogOpen}
         basePath={resourceBasePath}
         options={allElements}
-        value={displayedElements.filter((el) => !el.id.includes("[x]"))} // avoid adding empty choice elements.
-        saveElements={saveElements}
+        value={displayedElements}
+        addElements={addElements}
         onClose={() => setAddDialogOpen(false)}
       />
       <MadieDiscardDialog

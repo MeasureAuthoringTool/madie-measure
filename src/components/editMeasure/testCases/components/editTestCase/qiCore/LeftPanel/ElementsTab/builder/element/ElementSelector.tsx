@@ -60,8 +60,7 @@ const CHOICE_TYPES_ALLOWED = [
 interface ElementSelectorProps {
   basePath: string;
   options: ElementDefinition[];
-  value: ElementDefinition[];
-  newValues: ElementDefinition[];
+  selectedElements: ElementDefinition[];
   onChange: (event, newValue: ElementDefinition[] | null) => void;
 }
 
@@ -133,20 +132,19 @@ export const getChoiceBaseLabel = (
 const ElementSelector = ({
   basePath,
   options,
-  value,
-  newValues,
+  selectedElements,
   onChange,
 }: ElementSelectorProps) => {
-  // Create a map of selected element IDs for efficient lookup
+  // Create a map of selected element paths for efficient lookup
   const selectedOptions = useMemo(() => {
-    const ids = new Map<string, ElementDefinition>();
-    value.forEach((v) => {
-      if (v.id) {
-        ids.set(v.id, v);
+    const pathElementMap = new Map<string, ElementDefinition>();
+    selectedElements.forEach((v) => {
+      if (v.path) {
+        pathElementMap.set(v.path, v);
       }
     });
-    return ids;
-  }, [value]);
+    return pathElementMap;
+  }, [selectedElements]);
 
   const isInValue = (option: ElementDefinition) => {
     if (!option.id || !selectedOptions.has(option.id)) {
@@ -195,7 +193,7 @@ const ElementSelector = ({
         limitTags={2}
         id="resource-element-selector-autocomplete"
         options={options}
-        value={newValues}
+        value={selectedElements}
         onChange={onChange}
         disableCloseOnSelect
         getOptionLabel={(option) => getOptionLabel(option, basePath)}
@@ -209,7 +207,7 @@ const ElementSelector = ({
           if (base) {
             // if any other option with same base is selected, and this option is not selected, disable
             // find if any selected option with same base but different code
-            const isOtherSelected = newValues.some(
+            const isOtherSelected = selectedElements.some(
               (value) =>
                 value !== option && getChoiceBaseLabel(value, basePath) === base
             );
@@ -293,9 +291,9 @@ const ElementSelector = ({
                 e.key === "Backspace" &&
                 e.target instanceof HTMLInputElement &&
                 e.target.value === "" &&
-                newValues.length > 0
+                selectedElements.length > 0
               ) {
-                const lastChip = newValues[newValues.length - 1];
+                const lastChip = selectedElements[selectedElements.length - 1];
                 if (isInValue(lastChip)) {
                   e.preventDefault();
                   e.stopPropagation();
