@@ -41,7 +41,10 @@ import ContentReferenceType from "./contentReferenceType/ContentReferenceType";
 import DecimalComponent from "./types/DecimalComponent";
 import { IntegerType } from "./typesValidations/FhirNumbers";
 import ElementSectionQiCore from "./ElementSectionQiCore";
-import { getEmptyValueForType } from "./TypeEditorUtils";
+import {
+  getEmptyValueForType,
+  getLastSegmentCapitalized,
+} from "./TypeEditorUtils";
 
 export const formikErrorHandler = (name: string, formik) => {
   const touched = getNestedProperty(formik.touched, name);
@@ -341,7 +344,7 @@ const TypeEditor = ({
       case "Period":
         return (
           <PeriodDateTimeComponent
-            label={label}
+            label={getLastSegmentCapitalized(label)}
             canEdit={canEdit}
             helperText={formikErrorHandler(label, formik)}
             error={getNestedProperty(formik.errors, label)}
