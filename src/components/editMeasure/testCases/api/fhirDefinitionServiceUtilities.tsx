@@ -61,6 +61,7 @@ export function modifySliceNameForReadability(sliceName) {
  *   "Patient.name.family" -> "Family"
  *   "Claim.procedure.procedureCodeableConcept" -> "Procedure Codeable Concept"
  *   "Encounter.period.start" -> "Start"
+ *   "Observation.component[0].value[x]" -> "Value" (strips [x] choice type indicator)
  */
 export function formatAttributeLabel(path: string): string {
   if (!path) {
@@ -84,15 +85,20 @@ export function formatAttributeLabel(path: string): string {
   if (arrayWithPropertyMatch) {
     // Extract just the property name after the array index
     const propertyName = arrayWithPropertyMatch[1];
+    // Strip [x] suffix if present (FHIR choice type indicator)
+    const strippedPropertyName = propertyName.replace(/\[x\]$/, "");
     // Format just the property name
-    return _.startCase(propertyName);
+    return _.startCase(strippedPropertyName);
   }
 
   // Extract the last segment after the final dot
   const lastSegment = path.split(".").pop() || path;
 
+  // Strip [x] suffix if present (FHIR choice type indicator)
+  const strippedSegment = lastSegment.replace(/\[x\]$/, "");
+
   // Convert to Title Case with spaces (handles camelCase and choice types)
-  return _.startCase(lastSegment);
+  return _.startCase(strippedSegment);
 }
 
 export function getElementName(
@@ -151,7 +157,6 @@ export const filterUnusedExtensionsFromElements = (
 
     return true;
   });
-
   return filteredElements;
 };
 
@@ -375,6 +380,7 @@ export function getTopLevelElements(
       (e.path.split(".")?.length === 2 &&
         e.id !== "Extension.extension" &&
         e.id !== "Patient.extension" &&
+        !/\.id$/.test(e.id) &&
         e.max !== "0" &&
         // Exclude entries where the path contains these attributes or matches these element names
         ![
