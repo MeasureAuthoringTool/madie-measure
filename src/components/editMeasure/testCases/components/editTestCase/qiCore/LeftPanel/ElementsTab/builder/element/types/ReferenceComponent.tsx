@@ -130,6 +130,8 @@ export default function ReferenceComponent({
       rp.profile.includes("fhir/StructureDefinition") &&
       !rp.profile.includes("/us/")
   );
+  // specificity qi-core -> us-core -> base fhir
+  // if us-core selected, check to see if qi-core is available as well
 
   const finalList = getHighestPriorityResourceList(
     qiCoreProfiles,

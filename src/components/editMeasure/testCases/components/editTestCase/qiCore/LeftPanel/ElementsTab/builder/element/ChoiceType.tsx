@@ -42,60 +42,50 @@ export const ChoiceType = (props: ChoiceTypePropsInterface) => {
   }, [choiceBase]);
 
   return (
-    <ElementSectionQiCore
-      title={formatAttributeLabel(label)}
-      startOpen={false}
-      children={
-        <Box
-          style={{
-            paddingLeft: "16px",
-          }}
-        >
-          <Select
-            label="Choice Type Selector"
-            id={`choice-type-selector-${updatedLabel}`}
-            required="true"
-            inputProps={{
-              "data-testid": `choice-type-input-${updatedLabel}`,
-            }}
-            data-testid={`choice-type-${updatedLabel}`}
-            readOnly={!canEdit}
-            options={childDef?.type?.map((ref) => (
-              <MenuItem
-                key={ref.code}
-                data-testid={`${ref.code}-option`}
-                value={ref.code}
-              >
-                {_.upperFirst(ref.code)}
-              </MenuItem>
-            ))}
-            value={_.upperFirst(selectedChoiceType)}
-            onChange={(e) => {
-              // clear previous choice type value
-              _.unset(
-                formik.values,
-                choiceBase + _.upperFirst(selectedChoiceType)
-              );
-              // update label and selected choice type based on the new selection
-              const newChoice: any = e.target.value;
-              setUpdatedLabel(`${choiceBase}${_.upperFirst(newChoice)}`);
-              setSelectedChoiceType(newChoice);
-            }}
+    <Box>
+      <Select
+        label="Choice Type Selector"
+        id={`choice-type-selector-${updatedLabel}`}
+        required="true"
+        inputProps={{
+          "data-testid": `choice-type-input-${updatedLabel}`,
+        }}
+        data-testid={`choice-type-${updatedLabel}`}
+        readOnly={!canEdit}
+        options={childDef?.type?.map((ref) => (
+          <MenuItem
+            key={ref.code}
+            data-testid={`${ref.code}-option`}
+            value={ref.code}
+          >
+            {_.upperFirst(ref.code)}
+          </MenuItem>
+        ))}
+        value={_.upperFirst(selectedChoiceType)}
+        onChange={(e) => {
+          // clear previous choice type value
+          _.unset(formik.values, choiceBase + _.upperFirst(selectedChoiceType));
+          // update label and selected choice type based on the new selection
+          const newChoice: any = e.target.value;
+          setUpdatedLabel(`${choiceBase}${_.upperFirst(newChoice)}`);
+          setSelectedChoiceType(newChoice);
+        }}
+      />
+      {selectedChoiceType && (
+        //put a border around the TypeEditor
+        // <Box sx={{ paddingTop: "24px", border: "solid 1px red"}}>
+        <div className="choice-type-edit-option">
+          <TypeEditor
+            resource={resource}
+            structureDefinition={childDef}
+            parentStructureDefinition={parentStructureDefinition}
+            canEdit={canEdit}
+            label={updatedLabel}
+            noWrap={true}
           />
-          {selectedChoiceType && (
-            <div tw="mt-3">
-              <TypeEditor
-                resource={resource}
-                structureDefinition={childDef}
-                parentStructureDefinition={parentStructureDefinition}
-                canEdit={canEdit}
-                label={updatedLabel}
-              />
-            </div>
-          )}
-        </Box>
-      }
-    />
+        </div>
+      )}
+    </Box>
   );
 };
 

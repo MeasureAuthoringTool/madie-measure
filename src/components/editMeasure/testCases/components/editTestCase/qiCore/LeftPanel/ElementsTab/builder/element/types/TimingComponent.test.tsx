@@ -182,9 +182,6 @@ function renderTimingComponent({
 describe("TimingComponent", () => {
   test("triggers Formik setFieldValue on interactions", async () => {
     renderTimingComponent({});
-    userEvent.click(
-      screen.getByTestId("elements-heading-expansion-button-Timing")
-    );
     // Event
     const formatSelector = screen.getByTestId(
       "date-time-format-selector-input-field-MedicationRequest.dosageInstruction[0].timing.event[0]"
@@ -497,9 +494,6 @@ describe("TimingComponent", () => {
         },
       },
     });
-    userEvent.click(
-      screen.getByTestId("elements-heading-expansion-button-Timing")
-    );
     const lowContainer = screen.getByText("Low").closest(".quantity-fields")!;
 
     const inputLow = within(lowContainer).getByTestId(
@@ -565,9 +559,6 @@ describe("TimingComponent", () => {
       },
     });
 
-    userEvent.click(
-      screen.getByTestId("elements-heading-expansion-button-Timing")
-    );
     const lowContainer = screen.getByText("Low").closest(".quantity-fields")!;
     const unitLow = within(lowContainer).getByTestId(
       "code-input-input"
@@ -607,9 +598,6 @@ describe("TimingComponent", () => {
         },
       },
     });
-    userEvent.click(
-      screen.getByTestId("elements-heading-expansion-button-Timing")
-    );
 
     const boundsInput = screen.getByTestId(
       "repeat-bounds-input"

@@ -17,13 +17,22 @@ $grey-19: #ddd;
   }
 
   > .growing-div-qi-core {
+    .elements-header-content {
+      margin-left: 56px;
+      &.x-display {
+        position: relative;
+      }
+    }
+
     > .info-row {
-      margin-top: 12px;
-      margin-bottom: 12px;
+      margin-top: 6px;
+      margin-bottom: 6px;
 
       > .header {
         color: $blue-70;
         line-height: normal;
+        margin-left: 16px;
+        margin-bottom: 0px;
       }
 
       button > .chevron-display {
@@ -41,5 +50,23 @@ $grey-19: #ddd;
     &.open {
       margin-bottom: 12px;
     }
+  }
+}
+
+.choice-type-edit-option {
+  padding-top: 24px;
+  margin-left: 0;
+  position: relative;
+  padding-left: 56px;
+  &::before {
+    content: "";
+    position: absolute;
+    width: 38px;
+    height: calc(100% - 28px);
+    left: 10px;
+    top: 8px;
+    border-bottom: dashed 2px #8c8c8c;
+    border-left: dashed 2px #8c8c8c;
+    z-index: 1;
   }
 }
