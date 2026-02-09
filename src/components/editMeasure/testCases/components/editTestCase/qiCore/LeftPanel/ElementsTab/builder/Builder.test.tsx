@@ -222,6 +222,78 @@ const mockBundleWithMultiplePatients = {
     },
   ],
 };
+const mockBundleSameRespurceIds = {
+  entry: [
+    {
+      fullUrl:
+        "https://madie.cms.gov/Organization/NotscreRefAsseNotmNodxNocp-98",
+      resource: {
+        resourceType: "Organization",
+        id: "NotscreRefAsseNotmNodxNocp-98",
+        meta: {
+          profile: [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-organization",
+          ],
+        },
+        identifier: [
+          {
+            use: "temp",
+            system: "urn:oid:2.16.840.1.113883.4.4",
+            value: "21-3259825",
+          },
+        ],
+        active: true,
+        type: [
+          {
+            coding: [
+              {
+                system:
+                  "http://terminology.hl7.org/CodeSystem/organization-type",
+                code: "pay",
+                display: "Payer",
+              },
+            ],
+          },
+        ],
+        name: "Blue Cross Blue Shield of Texas",
+      },
+    },
+    {
+      fullUrl:
+        "https://madie.cms.gov/Organization/NotscreRefAsseNotmNodxNocp-98",
+      resource: {
+        resourceType: "Organization",
+        id: "NotscreRefAsseNotmNodxNocp-98",
+        meta: {
+          profile: [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-organization",
+          ],
+        },
+        identifier: [
+          {
+            use: "temp",
+            system: "urn:oid:2.16.840.1.113883.4.4",
+            value: "21-3259825",
+          },
+        ],
+        active: true,
+        type: [
+          {
+            coding: [
+              {
+                system:
+                  "http://terminology.hl7.org/CodeSystem/organization-type",
+                code: "pay",
+                display: "Payer",
+              },
+            ],
+          },
+        ],
+        name: "Blue Cross Blue Shield of Texas",
+      },
+    },
+  ],
+};
 const renderBuilderComponent = ({
   bundleToAdd = mockBundleWithMultiplePatients,
   activeTab = "available",
@@ -541,5 +613,14 @@ describe("scrollToElementByIdWhenAvailable", () => {
       "json-error-alert-multiple-patients"
     );
     expect(madieErrorAlert).toBeInTheDocument();
+  });
+
+  it("Should render duplicate resource error when duplicate resources are in the bundle", async () => {
+    renderBuilderComponent({ bundleToAdd: mockBundleSameRespurceIds });
+
+    const duplicateResourceError = await screen.findByTestId(
+      "json-error-alert-duplicate-resource-ids"
+    );
+    expect(duplicateResourceError).toBeInTheDocument();
   });
 });
