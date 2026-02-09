@@ -98,13 +98,23 @@ export default function MeasureInformation(props: MeasureInformationProps) {
     }
   };
 
+  const getMeasureOwnerName = (response) => {
+    const names = [response?.firstName, response?.lastName]
+      .map((name) => name?.trim())
+      .filter(Boolean);
+    return names.length
+      ? names.join(" ")
+      : !_.isEmpty(response?.harpId)
+      ? response.harpId
+      : "-";
+  };
+
   useEffect(() => {
     if (measure?.measureSet?.owner) {
       userServiceApi
         .getOwnerDetails(measure?.measureSet?.owner)
         .then((response) => {
-          const ownerName = `${response?.firstName} ${response?.lastName}`;
-          setMeasureOwner(ownerName);
+          setMeasureOwner(getMeasureOwnerName(response));
         })
         .catch(() => {
           setMeasureOwner("-");

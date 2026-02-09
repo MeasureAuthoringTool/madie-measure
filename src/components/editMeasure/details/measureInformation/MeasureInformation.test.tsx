@@ -1555,4 +1555,56 @@ describe("MeasureInformation component", () => {
       ).toBe("-");
     });
   });
+
+  it("sets only last name when the first name is null ", async () => {
+    mockUserServiceApi.getOwnerDetails.mockResolvedValueOnce({
+      firstName: null,
+      lastName: "Doe",
+    });
+
+    const { getByTestId } = render(
+      <MeasureInformation setErrorMessage={jest.fn()} measureCanEdit={true} />
+    );
+
+    await waitFor(() => {
+      expect(
+        (getByTestId("measure-owner-text-field") as HTMLInputElement).value
+      ).toBe("Doe");
+    });
+  });
+
+  it("sets only first name when the last name is null ", async () => {
+    mockUserServiceApi.getOwnerDetails.mockResolvedValueOnce({
+      firstName: "Jane",
+      lastName: null,
+    });
+
+    const { getByTestId } = render(
+      <MeasureInformation setErrorMessage={jest.fn()} measureCanEdit={true} />
+    );
+
+    await waitFor(() => {
+      expect(
+        (getByTestId("measure-owner-text-field") as HTMLInputElement).value
+      ).toBe("Jane");
+    });
+  });
+
+  it("sets harpId if both first name and last name are null ", async () => {
+    mockUserServiceApi.getOwnerDetails.mockResolvedValueOnce({
+      firstName: null,
+      lastName: null,
+      harpId: "jane@test",
+    });
+
+    const { getByTestId } = render(
+      <MeasureInformation setErrorMessage={jest.fn()} measureCanEdit={true} />
+    );
+
+    await waitFor(() => {
+      expect(
+        (getByTestId("measure-owner-text-field") as HTMLInputElement).value
+      ).toBe("jane@test");
+    });
+  });
 });
