@@ -22,7 +22,7 @@ import {
   stripResourcePath,
   getDisplayedElementsTree,
   getElementName,
-  removeUndefinedAndEmptyObjects,
+  removeUndefinedProperties,
   getNestedProperty,
   stripAllIndexes,
   filterUnusedExtensionsFromElements,
@@ -231,7 +231,7 @@ const ResourceEditor = ({
     // Any updates through dispatch will trickle down child component references accordingly.
 
     const { type } = selectedResource?.definition;
-    const formikCleanedValues = removeUndefinedAndEmptyObjects(values);
+    const formikCleanedValues = removeUndefinedProperties(values);
     const nextEntry = _.cloneDeep(selectedResource.bundleEntry);
     // Update with formik values
     nextEntry.resource = formikCleanedValues[type];
@@ -255,7 +255,7 @@ const ResourceEditor = ({
         elemPath = _.camelCase(elemPathWithoutType + _.upperFirst(type));
       }
 
-      if (_.isNil(currentValue)) {
+      if (_.isUndefined(currentValue)) {
         if (!elemPath.includes("extension:")) {
           let defaultValue: any;
           if (element.max == "*" || Number(element.max) > 1) {

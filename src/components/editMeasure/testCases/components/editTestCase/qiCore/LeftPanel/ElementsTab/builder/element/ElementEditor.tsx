@@ -17,7 +17,7 @@ import {
   getAllChildren,
   stripResourcePath,
   isComponentDataType,
-  removeUndefinedAndEmptyObjects,
+  removeUndefinedProperties,
   mapElementsRequired,
   buildFullValidationSchema,
   shouldSkip,
@@ -307,9 +307,7 @@ const ElementEditor = ({
         try {
           const { type } = selectedResource?.definition;
           const { bundleEntry } = selectedResource;
-          const formikCleanedValues = removeUndefinedAndEmptyObjects(
-            formik.values
-          );
+          const formikCleanedValues = removeUndefinedProperties(formik.values);
           // need type to access formik values, as well as append to to the resource object so it is not lost.
           bundleEntry.resource = formikCleanedValues[type];
           bundleEntry.resource.resourceType = type;

@@ -344,7 +344,7 @@ export function getDisplayedElementsTree(uniqueElements) {
 }
 
 // remove all the falsey values from an object recursively so we have only what the user has generated.
-export function removeUndefinedAndEmptyObjects(obj) {
+export function removeUndefinedProperties(obj) {
   if (typeof obj !== "object" || obj === null) {
     return obj;
   }
@@ -352,15 +352,15 @@ export function removeUndefinedAndEmptyObjects(obj) {
   if (Array.isArray(obj)) {
     // Clean each item in the array recursively
     return obj
-      .map((item) => removeUndefinedAndEmptyObjects(item))
+      .map((item) => removeUndefinedProperties(item))
       .filter((item) => !_.isUndefined(item));
   }
 
   for (let key in obj) {
     if (obj.hasOwnProperty(key) && key !== "x") {
       const value = obj[key];
-      const cleanedValue = removeUndefinedAndEmptyObjects(value);
-      if (_.isNil(cleanedValue)) {
+      const cleanedValue = removeUndefinedProperties(value);
+      if (_.isUndefined(cleanedValue)) {
         delete obj[key];
       } else {
         obj[key] = cleanedValue;
