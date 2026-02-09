@@ -92,7 +92,7 @@ const ActionCenter = ({ actions, testId, target }: PropTypes) => {
               onClick={() => {
                 if (action.disabled) return;
                 setOpen(false);
-                if (action.name === "Delete") {
+                if (action.name === "Remove") {
                   setOpenConfirmDialog(true);
                   setDeleteAction(action);
                 } else {
@@ -125,9 +125,10 @@ const ActionCenter = ({ actions, testId, target }: PropTypes) => {
         onClose={() => {
           setOpenConfirmDialog(false);
         }}
-        dialogTitle="Delete Element"
+        dialogTitle="Remove Element"
         name={target.resource?.resourceType}
         hideWarning={true}
+        alternateText="Remove"
       />
     </div>
   );
