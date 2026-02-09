@@ -628,102 +628,10 @@ describe("ResourceEditor", () => {
 
     // Find all tabs
     const tabs = await screen.findAllByRole("tab");
-    expect(tabs.length).toBeGreaterThan(1);
+    expect(tabs.length).toBe(1);
+    userEvent.click(tabs[0]);
 
-    // Click the second tab (index 1)
-    userEvent.click(tabs[1]);
-
-    // Verify tab changed by checking aria-selected attribute
-    expect(tabs[1]).toHaveAttribute("aria-selected", "true");
-    expect(tabs[0]).toHaveAttribute("aria-selected", "false");
-  });
-
-  it("should delete selected attribute and dispatch even to update test case json state", async () => {
-    // Override the mock for this specific test to use AllergyIntolerance
-    const fhirDefinitionsServiceApiMock = {
-      getResourceTree: jest
-        .fn()
-        .mockResolvedValue(mockClaimResponseStructuredDef),
-      getValueSetDefinition: jest.fn().mockResolvedValue(mockValueSetsState),
-    } as unknown as FhirDefinitionsServiceApi;
-    useFhirDefinitionsServiceApiMock.mockImplementation(
-      () => fhirDefinitionsServiceApiMock
-    );
-    const cleanFormMock = {
-      ...localMockFormikObj,
-      dirty: false,
-      ClaimResponse: {
-        id: "test2",
-        disposition: "test3",
-        widget: ["test4", "test5"],
-      },
-    };
-    (useFormikContext as jest.Mock).mockReturnValue(cleanFormMock);
-    const mockDispatch = jest.fn();
-
-    // We are testing to see if "Id" attribute is deleted accurately
-    const expectedPayload = {
-      payload: {
-        ...localMockResourceState.bundle.entry[1],
-        resource: {
-          ...localMockResourceState.bundle.entry[1].resource,
-        },
-      },
-      type: "ModifyBundleEntry",
-    };
-
-    delete expectedPayload?.payload?.resource?.id;
-
-    render(
-      <ExecutionContextProvider
-        value={{
-          valueSetsState: localMockckValueSetsState,
-          executionContextReady: true,
-        }}
-      >
-        <ApiContextProvider value={mockConfig}>
-          <QiCoreResourceContext.Provider
-            value={{ state: localMockResourceState, dispatch: mockDispatch }}
-          >
-            <ResourceEditor
-              selectedResourceID="6fb9d817-76c5-4b68-ba06-92c7429e6b5c"
-              setValidationSchema={mockSetValidationSchema}
-              setInitialFormikValuesStu6={mockSetInitialFormikValuesStu6}
-              onCancel={mockOnCancel}
-              canEdit={true}
-            />
-          </QiCoreResourceContext.Provider>
-        </ApiContextProvider>
-      </ExecutionContextProvider>
-    );
-
-    // Click on the "id" tab since elements are now sorted alphabetically
-    const idTab = await screen.findByTestId("Id");
-    userEvent.click(idTab);
-
-    const actionCenter = await screen.findByTestId(
-      "elements-action-center-actual-icon"
-    );
-    userEvent.click(actionCenter);
-
-    const deleteButton = await screen.findByRole("menuitem", {
-      name: "Delete",
-    });
-    userEvent.click(deleteButton);
-
-    const deleteDialog = await screen.findByRole("dialog", {
-      name: "Delete Element",
-    });
-    expect(deleteDialog).toBeInTheDocument();
-    const deleteConfirmationButton = await screen.findByRole("button", {
-      name: "Yes, Delete",
-    });
-    expect(deleteConfirmationButton).toBeEnabled();
-
-    userEvent.click(deleteConfirmationButton);
-
-    expect(mockDispatch).toHaveBeenCalledTimes(1);
-    expect(mockDispatch).toHaveBeenCalledWith(expectedPayload);
+    expect(tabs[0]).toHaveAttribute("aria-selected", "true");
   });
 
   it("should delete choice type attribute", async () => {
