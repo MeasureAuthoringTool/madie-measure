@@ -103,7 +103,7 @@ const Builder = ({
   const ERROR_MULTIPLE_PATIENTS =
     "Builder disabled. Builder is designed to work with a single patient resource. Please remove the extra patient(s) from the JSON to enable Builder support.";
   const ERROR_DUPLICATE_RESOURCE_IDS =
-    "Two profiles are currently using the same ID, and the builder requires each profile to have a unique identifier. Please update the JSON so that every profile has a distinct ID before proceeding.";
+    "Two profiles are currently using the same ID, and the builder requires each profile to have a unique ID. Please update the JSON so that every profile has a distinct ID before proceeding.";
   useEffect(() => {
     const fetchResources = async () => {
       // we want to filter out base fhir resources, by checking if the id does not start with qicore or us-core
