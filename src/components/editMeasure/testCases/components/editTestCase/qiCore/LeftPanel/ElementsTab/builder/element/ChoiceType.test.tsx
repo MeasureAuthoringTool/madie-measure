@@ -50,9 +50,15 @@ describe("ChoiceType", () => {
       getFormikValues()
     );
 
-    const select = screen.getByRole("combobox");
-    await act(async () => {
-      await userEvent.click(select);
+    const accordianTitle = await screen.findByTestId(
+      "elements-heading-expansion-button-Component[0]"
+    );
+
+    userEvent.click(accordianTitle);
+
+    const select = await screen.findByRole("combobox");
+    act(async () => {
+      userEvent.click(select);
     });
 
     const listbox = screen.getByRole("listbox");
@@ -61,7 +67,7 @@ describe("ChoiceType", () => {
     expect(within(listbox).getByText("Integer")).toBeInTheDocument();
   });
 
-  it("initializes with first type when no value exists", () => {
+  it("initializes with first type when no value exists", async () => {
     renderWithFormik(
       {
         childDef: getChildDef(),
@@ -70,6 +76,12 @@ describe("ChoiceType", () => {
       },
       {}
     );
+
+    const accordianTitle = await screen.findByTestId(
+      "elements-heading-expansion-button-Value"
+    );
+
+    userEvent.click(accordianTitle);
 
     expect(screen.getByRole("combobox")).toHaveTextContent("String");
     expect(screen.getByTestId("type-editor")).toHaveTextContent(
@@ -89,6 +101,12 @@ describe("ChoiceType", () => {
       );
     });
 
+    const accordianTitle = await screen.findByTestId(
+      "elements-heading-expansion-button-Value"
+    );
+
+    userEvent.click(accordianTitle);
+
     expect(screen.getByRole("combobox")).toHaveTextContent("Boolean");
     expect(screen.getByTestId("type-editor")).toHaveTextContent(
       "TypeEditor Observation.component[0].valueBoolean"
@@ -104,6 +122,12 @@ describe("ChoiceType", () => {
       },
       getFormikValues("boolean", true)
     );
+
+    const accordianTitle = await screen.findByTestId(
+      "elements-heading-expansion-button-Value"
+    );
+
+    userEvent.click(accordianTitle);
 
     const select = screen.getByRole("combobox");
     await act(async () => {
@@ -122,7 +146,7 @@ describe("ChoiceType", () => {
     );
   });
 
-  it("disables select when canEdit is false", () => {
+  it("disables select when canEdit is false", async () => {
     renderWithFormik(
       {
         childDef: getChildDef(),
@@ -131,6 +155,12 @@ describe("ChoiceType", () => {
       },
       getFormikValues()
     );
+
+    const accordianTitle = await screen.findByTestId(
+      "elements-heading-expansion-button-Value"
+    );
+
+    userEvent.click(accordianTitle);
 
     // When canEdit is false, the select is rendered as a readonly textarea
     const select = screen.getByTestId(

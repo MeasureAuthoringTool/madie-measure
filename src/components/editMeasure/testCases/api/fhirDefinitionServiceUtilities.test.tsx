@@ -155,6 +155,12 @@ describe("FhirDefinitionServiceUtilities", () => {
           path: "Observation.code",
           min: 0,
           type: [{ code: "CodeableConcept" }],
+        },
+        {
+          path: "Patient.id",
+          id: "Patient.id",
+          min: 1,
+          type: [{ code: "Resource" }],
         }
       );
       const result = getTopLevelElements(resourceWithSlices);
@@ -170,6 +176,7 @@ describe("FhirDefinitionServiceUtilities", () => {
       expect(
         result.find((el) => el.id === "Patient.extension:race")
       ).toBeDefined();
+      expect(result.find((el) => el.id === "Patient.id")).toBeUndefined();
     });
 
     it("should keep extension slices but filter non-extension slices", () => {
@@ -1085,6 +1092,20 @@ describe("formatAttributeLabel", () => {
     expect(formatAttributeLabel(null)).toBe(null);
     expect(formatAttributeLabel(undefined)).toBe(undefined);
     expect(formatAttributeLabel("")).toBe("");
+  });
+
+  it("strips [x] choice type indicator from paths", () => {
+    expect(formatAttributeLabel("Observation.component[0].value[x]")).toBe(
+      "Value"
+    );
+    expect(formatAttributeLabel("Observation.value[x]")).toBe("Value");
+    expect(formatAttributeLabel("MedicationRequest.medication[x]")).toBe(
+      "Medication"
+    );
+    expect(formatAttributeLabel("Claim.procedure[0].procedure[x]")).toBe(
+      "Procedure"
+    );
+    expect(formatAttributeLabel("Patient.deceased[x]")).toBe("Deceased");
   });
 
   it("formats complex nested paths", () => {

@@ -184,7 +184,7 @@ describe("TestCaseSummaryGrid", () => {
     expect(editAction).not.toHaveAttribute("aria-disabled", "true");
 
     const deleteAction = await screen.findByRole("menuitem", {
-      name: "Delete",
+      name: "Remove",
     });
     expect(deleteAction).toBeInTheDocument();
   });
@@ -211,7 +211,7 @@ describe("TestCaseSummaryGrid", () => {
 
     // Delete should still be enabled
     const deleteAction = await screen.findByRole("menuitem", {
-      name: "Delete",
+      name: "Remove",
     });
     expect(deleteAction).toBeInTheDocument();
     expect(deleteAction).not.toHaveAttribute("aria-disabled", "true");
@@ -253,7 +253,7 @@ describe("TestCaseSummaryGrid", () => {
 
     // Delete should still be enabled
     const deleteAction = await screen.findByRole("menuitem", {
-      name: "Delete",
+      name: "Remove",
     });
     expect(deleteAction).not.toHaveAttribute("aria-disabled", "true");
     expect(screen.getByText(RESOURCE_TYPE_MISMATCH_ERROR)).toBeInTheDocument();
@@ -343,7 +343,7 @@ describe("TestCaseSummaryGrid", () => {
     );
     userEvent.click(firstActionCenterButton);
     const deleteButton = await screen.findByRole("menuitem", {
-      name: "Delete",
+      name: "Remove",
     });
     expect(deleteButton).toBeInTheDocument();
     userEvent.click(deleteButton);
@@ -351,7 +351,7 @@ describe("TestCaseSummaryGrid", () => {
 
     const deleteDialog = screen.getByTestId("delete-dialog");
     expect(deleteDialog).toBeInTheDocument();
-    expect(screen.getByText("Delete Element")).toBeInTheDocument();
+    expect(screen.getByText("Remove Element")).toBeInTheDocument();
 
     expect(screen.getByTestId("close-button")).toBeInTheDocument();
 

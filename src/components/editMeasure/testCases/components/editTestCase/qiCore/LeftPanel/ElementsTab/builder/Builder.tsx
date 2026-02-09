@@ -100,6 +100,10 @@ const Builder = ({
   const [resources, setResources] = useState<ResourceIdentifier[]>([]);
   const [savedGridID, setSavedGridID] = useState(null);
   const [applyLoading, setApplyLoading] = useState(false);
+  const ERROR_MULTIPLE_PATIENTS =
+    "Builder disabled. Builder is designed to work with a single patient resource. Please remove the extra patient(s) from the JSON to enable Builder support.";
+  const ERROR_DUPLICATE_RESOURCE_IDS =
+    "Two profiles are currently using the same ID, and the builder requires each profile to have a unique identifier. Please update the JSON so that every profile has a distinct ID before proceeding.";
   useEffect(() => {
     const fetchResources = async () => {
       // we want to filter out base fhir resources, by checking if the id does not start with qicore or us-core
@@ -146,34 +150,45 @@ const Builder = ({
     };
   }, [measure]);
 
+  const displayBuilderAlert = (error: string, dataTestInfo: string) => {
+    return (
+      <div style={{ margin: "-16px", marginTop: "-32px", marginRight: 0 }}>
+        <MadieAlert
+          minimizeAlerts={false}
+          type="error"
+          content={
+            <div
+              aria-live="polite"
+              role="alert"
+              data-testid={`json-error-alert-${dataTestInfo}`}
+              style={{
+                paddingTop: "10px",
+                paddingBottom: "8px",
+              }}
+            >
+              <h3>JSON Failing</h3>
+              {error}
+            </div>
+          }
+          canClose={false}
+        />
+      </div>
+    );
+  };
+
   const numberOfPatientsAdded = state?.bundle?.entry?.filter(
     (e) => e.resource?.resourceType === "Patient"
   )?.length;
   const isPatientAdded = numberOfPatientsAdded > 0;
+  const resourceIds = state?.bundle?.entry?.map((e) => e.resource?.id);
+  const duplicateResourceIds = resourceIds?.filter(
+    (id, index) => resourceIds.indexOf(id) !== index
+  );
+
   return numberOfPatientsAdded > 1 ? (
-    <div style={{ margin: "-16px", marginTop: "-32px", marginRight: 0 }}>
-      <MadieAlert
-        minimizeAlerts={false}
-        type="error"
-        content={
-          <div
-            aria-live="polite"
-            role="alert"
-            data-testid="json-error-alert-multiple-patients"
-            style={{
-              paddingTop: "10px",
-              paddingBottom: "8px",
-            }}
-          >
-            <h3>JSON Failing</h3>
-            Builder disabled. Builder is designed to work with a single patient
-            resource. Please remove the extra patient(s) from the JSON to enable
-            Builder support.
-          </div>
-        }
-        canClose={false}
-      />
-    </div>
+    displayBuilderAlert(ERROR_MULTIPLE_PATIENTS, "multiple-patients")
+  ) : duplicateResourceIds?.length > 0 ? (
+    displayBuilderAlert(ERROR_DUPLICATE_RESOURCE_IDS, "duplicate-resource-ids")
   ) : (
     <Box
       sx={{ mr: 2 }}

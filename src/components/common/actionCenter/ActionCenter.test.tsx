@@ -6,7 +6,7 @@ import userEvent from "@testing-library/user-event";
 
 const mockActions = [
   { name: "Add", icon: <AddIcon />, onClick: jest.fn() },
-  { name: "Delete", icon: <DeleteIcon />, onClick: jest.fn() },
+  { name: "Remove", icon: <DeleteIcon />, onClick: jest.fn() },
 ];
 
 const mockTarget = { id: "test-target" };
@@ -48,7 +48,7 @@ describe("ActionCenter", () => {
         `action-center-${testId}_${action.name.replace(/\s/g, "")}`
       );
       await userEvent.click(actionButton);
-      if (action.name !== "Delete") {
+      if (action.name !== "Remove") {
         expect(action.onClick).toHaveBeenCalledWith(mockTarget);
       }
     }
@@ -62,14 +62,14 @@ describe("ActionCenter", () => {
     await userEvent.click(button);
 
     const deleteBtn = await screen.findByTestId(
-      "action-center-test-component_Delete"
+      "action-center-test-component_Remove"
     );
     expect(deleteBtn).toBeInTheDocument();
     await userEvent.click(deleteBtn);
 
     const deleteDialog = await screen.findByTestId("delete-dialog");
     expect(deleteDialog).toBeInTheDocument();
-    expect(screen.getByText("Delete Element")).toBeInTheDocument();
+    expect(screen.getByText("Remove Element")).toBeInTheDocument();
 
     const closeBtn = screen.getByTestId("close-button");
     expect(closeBtn).toBeInTheDocument();
@@ -95,14 +95,14 @@ describe("ActionCenter", () => {
     await userEvent.click(button);
 
     const deleteBtn = await screen.findByTestId(
-      "action-center-test-component_Delete"
+      "action-center-test-component_Remove"
     );
     expect(deleteBtn).toBeInTheDocument();
     await userEvent.click(deleteBtn);
 
     const deleteDialog = await screen.findByTestId("delete-dialog");
     expect(deleteDialog).toBeInTheDocument();
-    expect(screen.getByText("Delete Element")).toBeInTheDocument();
+    expect(screen.getByText("Remove Element")).toBeInTheDocument();
 
     expect(screen.getByTestId("close-button")).toBeInTheDocument();
     const cancelBtn = screen.getByTestId("delete-dialog-cancel-button");
@@ -126,14 +126,14 @@ describe("ActionCenter", () => {
     await userEvent.click(button);
 
     const deleteBtn = await screen.findByTestId(
-      "action-center-test-component_Delete"
+      "action-center-test-component_Remove"
     );
     expect(deleteBtn).toBeInTheDocument();
     await userEvent.click(deleteBtn);
 
     const deleteDialog = await screen.findByTestId("delete-dialog");
     expect(deleteDialog).toBeInTheDocument();
-    expect(screen.getByText("Delete Element")).toBeInTheDocument();
+    expect(screen.getByText("Remove Element")).toBeInTheDocument();
 
     expect(screen.getByTestId("close-button")).toBeInTheDocument();
 
