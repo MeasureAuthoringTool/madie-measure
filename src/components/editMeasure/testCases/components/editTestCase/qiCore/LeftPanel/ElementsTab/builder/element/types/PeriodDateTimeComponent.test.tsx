@@ -139,6 +139,8 @@ describe("PeriodDateTimeComponent", () => {
     fireEvent.change(startTimeInput, { target: { value: "12:30:45" } });
     fireEvent.change(endTimeInput, { target: { value: "14:15:00" } });
 
+    fireEvent.change(startTimeInput, { target: { value: "12:45:45" } });
+
     expect(handleChange).toHaveBeenCalled();
   });
 
@@ -276,6 +278,42 @@ describe("PeriodDateTimeComponent", () => {
     fireEvent.change(endInput, { target: { value: "invalid-date" } });
     fireEvent.blur(endInput);
     expect(onChange).not.toHaveBeenCalled();
+  });
+
+  it("test handleTimeChange", async () => {
+    const onChange = jest.fn();
+    render(
+      <PeriodDateTimeComponent
+        canEdit={true}
+        fieldRequired={false}
+        value={{
+          start: "2024-09-26T12:00:00+00:00",
+          end: "2024-09-27T14:00:00+00:00",
+        }}
+        onChange={onChange}
+        label="DateTime"
+      />
+    );
+
+    const startInput = screen.getByDisplayValue("12:00:00 PM");
+    expect(startInput.value).toBe("12:00:00 PM");
+    fireEvent.change(startInput, { target: { value: "01:30:00 PM" } });
+    expect(startInput.value).toBe("01:30:00 PM");
+
+    expect(onChange).toHaveBeenCalledWith({
+      start: "2024-09-26T13:30:00+00:00",
+      end: "2024-09-27T14:00:00+00:00",
+    });
+
+    const endInput = screen.getByDisplayValue("02:00:00 PM");
+    expect(endInput.value).toBe("02:00:00 PM");
+    fireEvent.change(endInput, { target: { value: "03:00:00 PM" } });
+    expect(endInput.value).toBe("03:00:00 PM");
+
+    expect(onChange).toHaveBeenCalledWith({
+      start: "2024-09-26T13:30:00+00:00",
+      end: "2024-09-27T15:00:00+00:00",
+    });
   });
 });
 
