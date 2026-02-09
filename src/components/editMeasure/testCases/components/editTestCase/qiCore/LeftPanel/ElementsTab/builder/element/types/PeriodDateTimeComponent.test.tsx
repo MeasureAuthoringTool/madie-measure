@@ -6,6 +6,7 @@ import PeriodDateTimeComponent, {
   YEAR_MONTH_FORMAT,
   YEAR_MONTH_DAY_FORMAT,
   DATE_TIME_ZONE_FORMAT,
+  getCurrentFormat,
 } from "./PeriodDateTimeComponent";
 import dayjs from "dayjs";
 
@@ -315,6 +316,36 @@ describe("PeriodDateTimeComponent", () => {
       end: "2024-09-27T15:00:00+00:00",
     });
   });
+
+  it("test start date onChange with DATE_TIME_ZONE_FORMAT", async () => {
+    const onChange = jest.fn();
+    render(
+      <PeriodDateTimeComponent
+        canEdit={true}
+        fieldRequired={false}
+        value={{
+          start: "2017-09-26T12:00:00+00:00",
+          end: "2017-09-27T14:00:00+00:00",
+        }}
+        onChange={onChange}
+        label="Period"
+      />
+    );
+
+    const startInput = screen.getByDisplayValue("09-26-2017");
+    fireEvent.change(startInput, { target: { value: "09-26-2024" } });
+    expect(onChange).toHaveBeenCalledWith({
+      start: "2024-09-26T12:00:00+00:00",
+      end: "2017-09-27T14:00:00+00:00",
+    });
+
+    const endInput = screen.getByDisplayValue("09-27-2017");
+    fireEvent.change(endInput, { target: { value: "09-27-2024" } });
+    expect(onChange).toHaveBeenCalledWith({
+      start: "2024-09-26T12:00:00+00:00",
+      end: "2024-09-27T14:00:00+00:00",
+    });
+  });
 });
 
 describe("PeriodDateTimeComponent useEffect", () => {
@@ -478,5 +509,29 @@ describe("PeriodDateTimeComponent useEffect", () => {
     const endTimeInput = await screen.findByTestId("end-time-field-Period");
     expect(startTimeInput).toHaveAttribute("readonly");
     expect(endTimeInput).toHaveAttribute("readonly");
+  });
+});
+
+describe("getCurrentFormat", () => {
+  test("returns correct format for YEAR", () => {
+    expect(getCurrentFormat("2024")).toBe(YEAR_FORMAT);
+  });
+
+  test("returns correct format for YEAR_MONTH", () => {
+    expect(getCurrentFormat("2024-09")).toBe(YEAR_MONTH_FORMAT);
+  });
+
+  test("returns correct format for YEAR_MONTH_DAY", () => {
+    expect(getCurrentFormat("2024-09-26")).toBe(YEAR_MONTH_DAY_FORMAT);
+  });
+
+  test("returns correct format for DATE_TIME_ZONE", () => {
+    expect(getCurrentFormat("2024-09-26T12:00:00Z")).toBe(
+      DATE_TIME_ZONE_FORMAT
+    );
+  });
+
+  test("returns Invalid Format for unrecognized format", () => {
+    expect(getCurrentFormat("invalid-date")).toBe("Invalid Format");
   });
 });
