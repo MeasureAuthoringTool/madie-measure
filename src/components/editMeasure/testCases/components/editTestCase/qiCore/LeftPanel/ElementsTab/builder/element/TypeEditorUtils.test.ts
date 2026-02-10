@@ -1,7 +1,4 @@
-import {
-  getEmptyValueForType,
-  getLastSegmentCapitalized,
-} from "./TypeEditorUtils";
+import { getEmptyValueForType } from "./TypeEditorUtils";
 
 describe("TypeEditorUtils", () => {
   it("getEmptyValueForType should return null for case: http://hl7.org/fhirpath/System.Boolean", () => {
