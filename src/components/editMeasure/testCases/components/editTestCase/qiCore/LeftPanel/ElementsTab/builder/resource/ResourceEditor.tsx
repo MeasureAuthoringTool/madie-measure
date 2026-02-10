@@ -240,21 +240,7 @@ const ResourceEditor = ({
     elements?.forEach((element) => {
       let elemPath = buildElementPath(element);
       const currentValue = _.get(nextEntry.resource, elemPath);
-
-      if (elemPath.endsWith("]") && !elemPath.endsWith("[x]")) {
-        //type = the value between the last [ and ]
-        const type = elemPath.substring(
-          elemPath.lastIndexOf("[") + 1,
-          elemPath.lastIndexOf("]")
-        );
-        const elemPathWithoutType = elemPath.substring(
-          0,
-          elemPath.lastIndexOf("[")
-        );
-        // turn elemPath path[type] into pathType
-        elemPath = _.camelCase(elemPathWithoutType + _.upperFirst(type));
-      }
-
+      // Add elements with a default values if they don't already exist in the resource.
       if (_.isUndefined(currentValue)) {
         if (!elemPath.includes("extension:")) {
           let defaultValue: any;
