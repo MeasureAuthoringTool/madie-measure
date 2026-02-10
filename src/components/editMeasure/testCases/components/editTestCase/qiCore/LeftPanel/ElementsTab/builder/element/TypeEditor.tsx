@@ -1108,13 +1108,7 @@ const TypeEditor = ({
                 startOpen={false}
                 children={
                   // Start of ClaimResponse.addItem.detail[0]
-                  <Box
-                    style={
-                      {
-                        // paddingLeft: "16px",
-                      }
-                    }
-                  >
+                  <Box>
                     <TypeEditor
                       resource={resource}
                       parentStructureDefinition={structureDefinition}

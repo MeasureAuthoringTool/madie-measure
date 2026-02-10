@@ -70,8 +70,6 @@ export const ChoiceType = (props: ChoiceTypePropsInterface) => {
         }}
       />
       {selectedChoiceType && (
-        //put a border around the TypeEditor
-        // <Box sx={{ paddingTop: "24px", border: "solid 1px red"}}>
         <div className="choice-type-edit-option">
           <TypeEditor
             resource={resource}
