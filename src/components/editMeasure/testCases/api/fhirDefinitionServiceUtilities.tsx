@@ -684,12 +684,12 @@ export function addCardinalityToElement(nextEntry, elemPath, rootDefinition) {
     // make it one
     nextEntry.resource[elemPath] = [nextEntry.resource[elemPath]];
   }
-  // add a new element;
+  // add a new element and add default values if it's a primitive type
   nextEntry.resource[elemPath] = nextEntry.resource[elemPath].concat(
     isPrimitiveType(rootDefinition.type?.[0]?.code)
       ? PRIMITIVE_DEFAULT_VALUES[rootDefinition.type[0].code]
       : {}
-  ); // add an empty object.
+  );
   return nextEntry;
 }
 // We need to update labels based weather or not the parent has multiple cardinality as well as if the child is multiple cardinality
