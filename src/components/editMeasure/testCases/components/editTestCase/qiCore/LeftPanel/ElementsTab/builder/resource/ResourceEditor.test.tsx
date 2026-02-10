@@ -210,6 +210,8 @@ describe("ResourceEditor", () => {
               setInitialFormikValuesStu6={mockSetInitialFormikValuesStu6}
               onCancel={mockOnCancel}
               canEdit={true}
+              applyLoading={false}
+              setApplyLoading={jest.fn()}
             />
           </QiCoreResourceContext.Provider>
         </ApiContextProvider>
@@ -255,6 +257,8 @@ describe("ResourceEditor", () => {
           setInitialFormikValuesStu6={mockSetInitialFormikValuesStu6}
           onCancel={mockOnCancel}
           canEdit={true}
+          applyLoading={false}
+          setApplyLoading={jest.fn()}
         />
       </QiCoreResourceContext.Provider>
     );
@@ -313,6 +317,8 @@ describe("ResourceEditor", () => {
           setInitialFormikValuesStu6={mockSetInitialFormikValuesStu6}
           onCancel={mockOnCancel}
           canEdit={true}
+          applyLoading={false}
+          setApplyLoading={jest.fn()}
         />
       </QiCoreResourceContext.Provider>
     );
@@ -360,6 +366,8 @@ describe("ResourceEditor", () => {
           setInitialFormikValuesStu6={mockSetInitialFormikValuesStu6}
           onCancel={mockOnCancel}
           canEdit={true}
+          applyLoading={false}
+          setApplyLoading={jest.fn()}
         />
       </QiCoreResourceContext.Provider>
     );
@@ -410,6 +418,8 @@ describe("ResourceEditor", () => {
               setInitialFormikValuesStu6={mockSetInitialFormikValuesStu6}
               onCancel={mockOnCancel}
               canEdit={true}
+              applyLoading={false}
+              setApplyLoading={jest.fn()}
             />
           </QiCoreResourceContext.Provider>
         </ApiContextProvider>
@@ -506,6 +516,8 @@ describe("ResourceEditor", () => {
           setInitialFormikValuesStu6={mockSetInitialFormikValuesStu6}
           onCancel={mockOnCancel}
           canEdit={true}
+          applyLoading={false}
+          setApplyLoading={jest.fn()}
         />
       </QiCoreResourceContext.Provider>
     );
@@ -532,6 +544,8 @@ describe("ResourceEditor", () => {
           setInitialFormikValuesStu6={mockSetInitialFormikValuesStu6}
           onCancel={mockOnCancel}
           canEdit={true}
+          applyLoading={false}
+          setApplyLoading={jest.fn()}
         />
       </QiCoreResourceContext.Provider>
     );
@@ -568,6 +582,8 @@ describe("ResourceEditor", () => {
               setInitialFormikValuesStu6={mockSetInitialFormikValuesStu6}
               onCancel={mockOnCancel}
               canEdit={true}
+              applyLoading={false}
+              setApplyLoading={jest.fn()}
             />
           </QiCoreResourceContext.Provider>
         </ApiContextProvider>
@@ -620,6 +636,8 @@ describe("ResourceEditor", () => {
               setInitialFormikValuesStu6={mockSetInitialFormikValuesStu6}
               onCancel={mockOnCancel}
               canEdit={true}
+              applyLoading={false}
+              setApplyLoading={jest.fn()}
             />
           </QiCoreResourceContext.Provider>
         </ApiContextProvider>
@@ -682,6 +700,8 @@ describe("ResourceEditor", () => {
           setInitialFormikValuesStu6={mockSetInitialFormikValuesStu6}
           onCancel={mockOnCancel}
           canEdit={true}
+          applyLoading={false}
+          setApplyLoading={jest.fn()}
         />
       </QiCoreResourceContext.Provider>
     );
@@ -753,6 +773,8 @@ describe("ResourceEditor", () => {
               setInitialFormikValuesStu6={jest.fn()}
               onCancel={jest.fn()}
               canEdit={true}
+              applyLoading={false}
+              setApplyLoading={jest.fn()}
             />
           </QiCoreResourceContext.Provider>
         </ApiContextProvider>
