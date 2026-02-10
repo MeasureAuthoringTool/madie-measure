@@ -19,6 +19,7 @@ $grey-19: #ddd;
   > .growing-div-qi-core {
     .elements-header-content {
       margin-left: 56px;
+
       &.x-display {
         position: relative;
       }
@@ -32,7 +33,7 @@ $grey-19: #ddd;
         color: $blue-70;
         line-height: normal;
         margin-left: 16px;
-        margin-bottom: 0px;
+        margin-bottom: 0;
       }
 
       button > .chevron-display {
@@ -58,6 +59,7 @@ $grey-19: #ddd;
   margin-left: 0;
   position: relative;
   padding-left: 56px;
+  
   &::before {
     content: "";
     position: absolute;
