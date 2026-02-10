@@ -308,9 +308,15 @@ const ElementEditor = ({
           const { type } = selectedResource?.definition;
           const { bundleEntry } = selectedResource;
           const formikCleanedValues = removeUndefinedProperties(formik.values);
-          // need type to access formik values, as well as append to to the resource object so it is not lost.
-          bundleEntry.resource = formikCleanedValues[type];
-          bundleEntry.resource.resourceType = type;
+          // Preserve existing metadata (id, meta/profile, etc.) while applying cleaned form values.
+          const existingResource = bundleEntry.resource || {};
+          const cleanedResource = formikCleanedValues?.[type] || {};
+          bundleEntry.resource = {
+            ...existingResource,
+            ...cleanedResource,
+            resourceType: type,
+          };
+
           // @ts-ignore
           const { add_new_resources } = formik.values;
           if (add_new_resources && add_new_resources.length > 0) {
