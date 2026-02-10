@@ -40,7 +40,11 @@ const ElementEditorChildren = ({
         (entry) => entry.resource.id === selectedResourceID
       )
     );
-    const updatedEntry = addCardinalityToElement(nextEntry, elemPath);
+    const updatedEntry = addCardinalityToElement(
+      nextEntry,
+      elemPath,
+      rootDefinition
+    );
     dispatch({
       type: ResourceActionType.MODIFY_BUNDLE_ENTRY,
       payload: updatedEntry,
