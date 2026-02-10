@@ -37,11 +37,3 @@ export const getEmptyValueForType = (type: string) => {
       return {};
   }
 };
-
-export function getLastSegmentCapitalized(input: string): string {
-  if (!input) return "";
-  const segments = input.split(".");
-  const last = segments[segments.length - 1];
-  if (!last) return "";
-  return last.charAt(0).toUpperCase() + last.slice(1);
-}
