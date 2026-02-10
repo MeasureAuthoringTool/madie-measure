@@ -62,7 +62,7 @@ const AddElementDialog = (props: AddElementDialogProps) => {
         cancelText: "Discard Changes",
       }}
       continueButtonProps={{
-        id: "saveBtn",
+        id: "applyBtn",
         "data-testid": "add-element-button-2",
         "aria-label": "apply button",
         variant: "primary",

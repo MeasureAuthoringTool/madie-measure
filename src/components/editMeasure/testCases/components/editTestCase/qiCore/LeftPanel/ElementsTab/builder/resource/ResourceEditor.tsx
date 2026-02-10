@@ -70,7 +70,7 @@ export const getResourceName = (title: string, baseResourceType: string) => {
 };
 
 // Builds the element path used to access values in the resource JSON, with special handling for choice types and array types
-// e.g. choice type "Patient.deceased[x]" becomes "deceasedBoolean"
+// e.g. choice type "Patient.deceased[x]" with type "boolean" becomes "deceasedBoolean"
 // e.g. array type "Patient.contact[0]" becomes "contact"
 const buildElementPath = (element: ElementDefinition) => {
   const resourceName = element.path.split(".")[0];
