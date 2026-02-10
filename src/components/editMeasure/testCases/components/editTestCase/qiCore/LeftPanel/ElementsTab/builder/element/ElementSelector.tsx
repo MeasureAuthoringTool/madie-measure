@@ -5,7 +5,7 @@ import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
 import CheckBoxIcon from "@mui/icons-material/CheckBox";
 import { ElementDefinition } from "fhir/r4";
 import * as _ from "lodash";
-import {stripAllIndexes} from "../../../../../../../api/fhirDefinitionServiceUtilities";
+import { stripAllIndexes } from "../../../../../../../api/fhirDefinitionServiceUtilities";
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
 
