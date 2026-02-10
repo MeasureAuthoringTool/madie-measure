@@ -6,8 +6,6 @@ import { Select } from "@madie/madie-design-system/dist/react";
 import * as _ from "lodash";
 import TypeEditor from "./TypeEditor";
 import { useFormikContext } from "formik";
-import { formatAttributeLabel } from "../../../../../../../api/fhirDefinitionServiceUtilities";
-import ElementSectionQiCore from "./ElementSectionQiCore";
 
 interface ChoiceTypePropsInterface {
   childDef: any;

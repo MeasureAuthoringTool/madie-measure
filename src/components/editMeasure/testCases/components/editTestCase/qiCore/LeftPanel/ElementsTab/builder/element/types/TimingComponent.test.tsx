@@ -649,10 +649,6 @@ describe("TimingComponent", () => {
       },
     });
 
-    userEvent.click(
-      screen.getByTestId("elements-heading-expansion-button-Timing")
-    );
-
     // Test Event (DateTimeComponent)
     const eventDeleteButton = await screen.findByTestId(
       "delete-button-Event[0]"
@@ -713,10 +709,6 @@ describe("TimingComponent", () => {
         },
       },
     });
-
-    userEvent.click(
-      screen.getByTestId("elements-heading-expansion-button-Timing")
-    );
 
     // Find the delete button for the only Event element
     const eventDeleteButton = await screen.findByTestId(
