@@ -17,7 +17,7 @@ const ElementSectionQiCore = (props: ElementSectionProps) => {
   const growingDivClass = open
     ? "growing-div-qi-core open"
     : "growing-div-qi-core";
-
+  const xClass = title.includes("[x]") ? "x-display" : "";
   return (
     <div
       className="test-case-tab-headinq-qi-core"
@@ -43,13 +43,15 @@ const ElementSectionQiCore = (props: ElementSectionProps) => {
           >
             <ChevronRightIcon className={chevronClass} />
           </IconButton>
-          <h4
-            className="header"
-            style={{ marginBottom: 0, marginLeft: "16px" }}
-          >{`${props.title}`}</h4>
+          <h4 className="header">{`${props.title}`}</h4>
         </div>
         {open && (
-          <div data-testid={`elements-header-content-${title}`}>{children}</div>
+          <div
+            className={`elements-header-content ${xClass}`}
+            data-testid={`elements-header-content-${title}`}
+          >
+            {children}
+          </div>
         )}
       </div>
     </div>
