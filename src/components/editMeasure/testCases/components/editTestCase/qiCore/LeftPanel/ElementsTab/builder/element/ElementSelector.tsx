@@ -259,30 +259,43 @@ const ElementSelector = ({
             </li>
           );
         }}
-        renderTags={(tagValue, getTagProps) =>
-          tagValue.map((option, index) => {
-            const { key, ...tagProps } = getTagProps({ index }); // Remove onDelete from destructuring
-            const isDisabled = isInValue(option);
-            return (
-              <Chip
-                sx={
-                  isDisabled
-                    ? { opacity: "1.0 !important" }
-                    : { backgroundColor: "#2a8cdb !important", color: "white" }
-                }
-                key={key}
-                label={getOptionLabel(option, basePath)}
-                {...tagProps}
-                disabled={isDisabled}
-                onDelete={isDisabled ? null : tagProps.onDelete} // Use null instead of undefined
-                deleteIcon={isDisabled ? null : undefined}
-                data-testid={`${
-                  isDisabled ? "disabled-" : ""
-                }element-selector-${getOptionLabel(option, basePath)}-chip`}
-              />
-            );
-          })
-        }
+        renderTags={(tagValue, getTagProps) => {
+          const seenPaths = new Set<string>();
+          return tagValue
+            .filter((option) => {
+              const path = option?.path;
+              if (seenPaths.has(path)) {
+                return false;
+              }
+              seenPaths.add(path);
+              return true;
+            })
+            .map((option, index) => {
+              const { key, ...tagProps } = getTagProps({ index });
+              const isDisabled = isInValue(option);
+              return (
+                <Chip
+                  sx={
+                    isDisabled
+                      ? { opacity: "1.0 !important" }
+                      : {
+                          backgroundColor: "#2a8cdb !important",
+                          color: "white",
+                        }
+                  }
+                  key={key}
+                  label={getOptionLabel(option, basePath)}
+                  {...tagProps}
+                  disabled={isDisabled}
+                  onDelete={isDisabled ? null : tagProps.onDelete}
+                  deleteIcon={isDisabled ? null : undefined}
+                  data-testid={`${
+                    isDisabled ? "disabled-" : ""
+                  }element-selector-${getOptionLabel(option, basePath)}-chip`}
+                />
+              );
+            });
+        }}
         renderInput={(params) => (
           <TextField
             {...params}
