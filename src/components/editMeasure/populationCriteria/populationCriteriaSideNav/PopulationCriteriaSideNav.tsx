@@ -279,7 +279,7 @@ export default function PopulationCriteriaSideNav(
               return (
                 <Tab
                   {...l}
-                  type="B"
+                  type="C"
                   label={
                     <CompletionIndicator
                       label={l.label}

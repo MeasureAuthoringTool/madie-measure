@@ -57,6 +57,13 @@
     }
   }
 
+  /* Remove blue focus outline on sidebar tab/button clicks */
+  .MuiButtonBase-root:focus,
+  .MuiButtonBase-root:focus-visible {
+    outline: none;
+    box-shadow: none;
+  }
+
   .indented-tabs {
     .MuiButtonBase-root {
       padding-left: 40px;
