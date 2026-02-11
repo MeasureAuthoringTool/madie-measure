@@ -42,6 +42,7 @@ import DecimalComponent from "./types/DecimalComponent";
 import { IntegerType } from "./typesValidations/FhirNumbers";
 import ElementSectionQiCore from "./ElementSectionQiCore";
 import { getEmptyValueForType } from "./TypeEditorUtils";
+import { getMultipleCardinalityLabel } from "./types/TypeUtil";
 
 export const formikErrorHandler = (name: string, formik) => {
   const touched = getNestedProperty(formik.touched, name);
@@ -63,7 +64,8 @@ const TypeEditor = ({
   parentStructureDefinition,
   canEdit,
   label,
-}) => {
+  noWrap = false,
+}): JSX.Element | null => {
   const formik = useFormikContext();
   // Ref to track formik.values for use in closures (prevents stale state issues when rapidly clicking Add)
   const valuesRef = useRef<object>(formik.values as object);
@@ -189,6 +191,32 @@ const TypeEditor = ({
   let isArrayMode = showMultipleCardinalityActionCenter && values;
   const lastIndex = isArrayMode ? values.length - 1 : null;
   const appendedZeroAlready = getIndexFromPath(label);
+
+  // utility function to wrap these
+
+  const wrapWithSection = (
+    title: string,
+    node: React.ReactElement,
+    opts?: { key?: React.Key }
+  ): React.ReactElement => {
+    // If root, don't wrap
+    // choice types fall under root in many cases. we'll also check to see if the label is terminated with an [x]
+    if ((isRoot && !title.endsWith("[x]")) || noWrap) {
+      return <>{node}</>;
+    }
+
+    // Otherwise wrap
+    return (
+      <ElementSectionQiCore
+        key={opts?.key}
+        title={getMultipleCardinalityLabel(title)}
+        startOpen={true}
+      >
+        {node}
+      </ElementSectionQiCore>
+    );
+  };
+
   if (isComponentDataType(type)) {
     switch (type) {
       case "string":
@@ -200,7 +228,7 @@ const TypeEditor = ({
               if (isArrayMode && appendedZeroAlready) {
                 fieldLabel = `${label.slice(0, label.length - 3)}[${index}]`;
               }
-              return (
+              const string = (
                 <StringComponent
                   key={index}
                   label={fieldLabel}
@@ -221,11 +249,12 @@ const TypeEditor = ({
                   {...formik.getFieldProps(fieldLabel)}
                 />
               );
+              return wrapWithSection(fieldLabel, string, { key: index });
             })}
           </Box>
         );
       case "base64Binary":
-        return (
+        const base64 = (
           <Box sx={{ display: "flex", flexDirection: "column", width: "100%" }}>
             <StringComponent
               label={label}
@@ -244,6 +273,7 @@ const TypeEditor = ({
             />
           </Box>
         );
+        return wrapWithSection(label, base64);
       /*
         Decimal most commonly appears as a child of different complex types
         that we want to handle inside of different TypeEditor rendered components,
@@ -268,7 +298,7 @@ const TypeEditor = ({
               if (isArrayMode && appendedZeroAlready) {
                 fieldLabel = `${label.slice(0, label.length - 3)}[${index}]`;
               }
-              return (
+              const decimal = (
                 <DecimalComponent
                   key={`${fieldLabel}-${index}`}
                   label={fieldLabel}
@@ -289,11 +319,12 @@ const TypeEditor = ({
                   {...formik.getFieldProps(fieldLabel)}
                 />
               );
+              return wrapWithSection(fieldLabel, decimal, { key: index });
             })}
           </Box>
         );
       case "markdown":
-        return (
+        const markdown = (
           <Box sx={{ display: "flex", flexDirection: "column", width: "100%" }}>
             <StringComponent
               label={label}
@@ -308,6 +339,7 @@ const TypeEditor = ({
             />
           </Box>
         );
+        return wrapWithSection(label, markdown);
       case "Quantity":
         return (
           <>
@@ -316,7 +348,7 @@ const TypeEditor = ({
               if (isArrayMode && appendedZeroAlready) {
                 fieldLabel = `${label.slice(0, label.length - 3)}[${index}]`;
               }
-              return (
+              const quantity = (
                 <QuantityComponent
                   key={index}
                   canEdit={canEdit}
@@ -335,11 +367,12 @@ const TypeEditor = ({
                   handleAddElement={handleAddElement}
                 />
               );
+              return wrapWithSection(fieldLabel, quantity, { key: index });
             })}
           </>
         );
       case "Period":
-        return (
+        const period = (
           <PeriodDateTimeComponent
             label={label}
             canEdit={canEdit}
@@ -353,6 +386,7 @@ const TypeEditor = ({
             }}
           />
         );
+        return wrapWithSection(label, period);
       case "dateTime":
       case "http://hl7.org/fhirpath/System.DateTime":
         return (
@@ -362,7 +396,7 @@ const TypeEditor = ({
               if (isArrayMode && appendedZeroAlready) {
                 fieldLabel = `${label.slice(0, label.length - 3)}[${index}]`;
               }
-              return (
+              const dateTime = (
                 <DateTimeComponent
                   key={index}
                   label={fieldLabel}
@@ -390,6 +424,7 @@ const TypeEditor = ({
                   }}
                 />
               );
+              return wrapWithSection(fieldLabel, dateTime, { key: index });
             })}
           </>
         );
@@ -403,7 +438,7 @@ const TypeEditor = ({
               if (isArrayMode && appendedZeroAlready) {
                 fieldLabel = `${label.slice(0, label.length - 3)}[${index}]`;
               }
-              return (
+              const time = (
                 <TimeComponent
                   canEdit={canEdit}
                   fieldRequired={required}
@@ -423,12 +458,13 @@ const TypeEditor = ({
                   {...formik.getFieldProps(fieldLabel)}
                 />
               );
+              return wrapWithSection(fieldLabel, time, { key: index });
             })}
           </>
         );
       case "instant":
       case "http://hl7.org/fhir/R4/datatypes.html#instant":
-        return (
+        const instant = (
           <InstantComponent
             name={label}
             label={label}
@@ -448,6 +484,7 @@ const TypeEditor = ({
             onBlur={() => formik.setFieldTouched(label)}
           />
         );
+        return wrapWithSection(label, instant);
       case "http://hl7.org/fhirpath/System.Integer":
       case "integer":
       case "positiveInt":
@@ -469,7 +506,7 @@ const TypeEditor = ({
               if (isArrayMode && appendedZeroAlready) {
                 fieldLabel = `${label.slice(0, label.length - 3)}[${index}]`;
               }
-              return (
+              const integer = (
                 <IntegerComponent
                   key={index}
                   structureDefinition={undefined}
@@ -492,11 +529,12 @@ const TypeEditor = ({
                   {...formik.getFieldProps(fieldLabel)}
                 />
               );
+              return wrapWithSection(fieldLabel, integer, { key: index });
             })}
           </>
         );
       case "Identifier":
-        return (
+        const identifier = (
           <IdentifierComponent
             label={label}
             handleAddElement={handleAddElement}
@@ -508,6 +546,7 @@ const TypeEditor = ({
             helperText={formikErrorHandler(label, formik)}
           />
         );
+        return wrapWithSection(label, identifier);
       case "http://hl7.org/fhirpath/System.Boolean":
       case "boolean":
         return (
@@ -517,7 +556,7 @@ const TypeEditor = ({
               if (isArrayMode && appendedZeroAlready) {
                 fieldLabel = `${label.slice(0, label.length - 3)}[${index}]`;
               }
-              return (
+              const boolean = (
                 <BooleanComponent
                   key={index}
                   structureDefinition={undefined}
@@ -542,6 +581,7 @@ const TypeEditor = ({
                   }}
                 />
               );
+              return wrapWithSection(fieldLabel, boolean, { key: index });
             })}
           </>
         );
@@ -554,7 +594,7 @@ const TypeEditor = ({
               if (isArrayMode && appendedZeroAlready) {
                 fieldLabel = `${label.slice(0, label.length - 3)}[${index}]`;
               }
-              return (
+              const uri = (
                 <UriComponent
                   key={index}
                   canEdit={canEdit}
@@ -580,6 +620,7 @@ const TypeEditor = ({
                   }}
                 />
               );
+              return wrapWithSection(fieldLabel, uri, { key: index });
             })}
           </>
         );
@@ -593,7 +634,7 @@ const TypeEditor = ({
               if (isArrayMode && appendedZeroAlready) {
                 fieldLabel = `${label.slice(0, label.length - 3)}[${index}]`;
               }
-              return (
+              const url = (
                 <UrlComponent
                   key={index}
                   canEdit={canEdit}
@@ -615,11 +656,12 @@ const TypeEditor = ({
                   {...formik.getFieldProps(fieldLabel)}
                 />
               );
+              return wrapWithSection(fieldLabel, url, { key: index });
             })}
           </>
         );
       case "date":
-        return (
+        const date = (
           <DateComponent
             label={label}
             canEdit={canEdit}
@@ -638,6 +680,7 @@ const TypeEditor = ({
             }}
           />
         );
+        return wrapWithSection(label, date);
 
       case "code":
         return (
@@ -647,7 +690,7 @@ const TypeEditor = ({
               if (isArrayMode && appendedZeroAlready) {
                 fieldLabel = `${label.slice(0, label.length - 3)}[${index}]`;
               }
-              return (
+              const code = (
                 <>
                   {/* Observation.category , AuditEvent.type 0..*, but base fhir only. Revisit this render once base fhir is supported. */}
                   <CodesComponent
@@ -679,11 +722,12 @@ const TypeEditor = ({
                   />
                 </>
               );
+              return wrapWithSection(fieldLabel, code, { key: index });
             })}
           </>
         );
       case "Range":
-        return (
+        const range = (
           <RangeComponent
             canEdit={canEdit}
             label={label}
@@ -691,8 +735,9 @@ const TypeEditor = ({
             fieldRequired={false}
           />
         );
+        return wrapWithSection(label, range);
       case "Coding":
-        return (
+        const coding = (
           <CodingComponent
             handleDeleteElement={handleDeleteElement}
             handleAddElement={handleAddElement}
@@ -710,6 +755,7 @@ const TypeEditor = ({
             includePrev={false}
           />
         );
+        return wrapWithSection(label, coding);
       case "CodeableConcept":
         return (
           <>
@@ -718,7 +764,7 @@ const TypeEditor = ({
               if (isArrayMode && appendedZeroAlready) {
                 fieldLabel = `${label.slice(0, label.length - 3)}[${index}]`;
               }
-              return (
+              const codeableconcept = (
                 <CodeableConceptComponent
                   key={index}
                   canEdit={canEdit}
@@ -737,11 +783,12 @@ const TypeEditor = ({
                   {...formik.getFieldProps(fieldLabel)}
                 />
               );
+              return wrapWithSection(label, codeableconcept);
             })}
           </>
         );
       case "Money":
-        return (
+        const money = (
           <MoneyComponent
             label={label}
             canEdit={canEdit}
@@ -749,8 +796,9 @@ const TypeEditor = ({
             fieldRequired={false}
           />
         );
+        return wrapWithSection(label, money);
       case "Timing":
-        return (
+        const timing = (
           <TimingComponent
             resource={resource}
             structureDefinition={structureDefinition}
@@ -759,6 +807,7 @@ const TypeEditor = ({
             fieldRequired={false}
           />
         );
+        return wrapWithSection(label, timing);
       case "Reference":
         return (
           <>
@@ -771,7 +820,7 @@ const TypeEditor = ({
               } else {
                 fieldLabel = label;
               }
-              return (
+              const reference = (
                 <ReferenceComponent
                   key={index}
                   index={index}
@@ -806,6 +855,7 @@ const TypeEditor = ({
                   {...formik.getFieldProps(fieldLabel)}
                 />
               );
+              return wrapWithSection(fieldLabel, reference, { key: index });
             })}
           </>
         );
@@ -886,12 +936,11 @@ const TypeEditor = ({
                     }
                   }
 
-                  return (
+                  const slice = (
                     <Box
                       sx={{
                         display: "flex",
                         flexDirection: "column",
-                        marginTop: "10px",
                       }}
                     >
                       <TypeEditor
@@ -906,6 +955,9 @@ const TypeEditor = ({
                       <Divider />
                     </Box>
                   );
+                  return wrapWithSection(elementDefinition.id, slice, {
+                    key: index,
+                  });
                 })}
               </Box>
             </Box>
@@ -946,7 +998,7 @@ const TypeEditor = ({
           parentStructureDefinition?.type?.[0]?.code === "Extension" ||
           parentStructureDefinition?.definition?.type === "Extension"
         ) {
-          return (
+          const extension = (
             <ExtensionComponent
               showAddAttributeButton={showMultipleCardinalityActionCenter}
               addTitle={addTitle}
@@ -962,6 +1014,7 @@ const TypeEditor = ({
               parentStructureDefinition={parentStructureDefinition} // id: patient.identifier[0]  ;
             />
           );
+          return wrapWithSection(label, extension);
         } else {
           return <></>;
         }
@@ -974,7 +1027,7 @@ const TypeEditor = ({
     const hasEnd = childDefs.some((def) => def.id.endsWith(".end"));
 
     if (isPeriodParent && hasStart && hasEnd) {
-      return (
+      const childDefPeriod = (
         <PeriodDateTimeComponent
           label={label}
           canEdit={canEdit}
@@ -988,9 +1041,10 @@ const TypeEditor = ({
           }}
         />
       );
+      return wrapWithSection(label, childDefPeriod);
     }
     return (
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+      <Box sx={{ display: "flex", flexDirection: "column" }}>
         {childDefs?.map((childDef) => {
           // if it's not a component dataType, we should render a header since it will have it's own property paths
           if (_.endsWith(childDef.id, "[x]") && childDef?.type?.length > 1) {
@@ -1025,7 +1079,7 @@ const TypeEditor = ({
               ),
             };
             //Let's render a select that allows us to select the type of childDef we want to render.
-            return (
+            const choiceType = (
               <ChoiceType
                 childDef={filteredChildDef}
                 resource={resource}
@@ -1034,8 +1088,10 @@ const TypeEditor = ({
                 label={filteredChildDef.id}
               />
             );
+            // return choiceType;
+            return wrapWithSection(childDef.id, choiceType);
           } else if (childDef.contentReference) {
-            return (
+            const contentRef = (
               <ContentReferenceType
                 elementDefinition={childDef}
                 parentElementDefinition={structureDefinition}
@@ -1043,17 +1099,16 @@ const TypeEditor = ({
                 canEdit={canEdit}
               />
             );
+            return contentRef;
+            // return wrapWithSection(childDef.id, contentRef);
           } else if (!isComponentDataType(childDef?.type?.[0]?.code)) {
             return (
               <ElementSectionQiCore
                 title={formatAttributeLabel(childDef.id)}
                 startOpen={false}
                 children={
-                  <Box
-                    style={{
-                      paddingLeft: "16px",
-                    }}
-                  >
+                  // Start of ClaimResponse.addItem.detail[0]
+                  <Box>
                     <TypeEditor
                       resource={resource}
                       parentStructureDefinition={structureDefinition}
@@ -1066,7 +1121,7 @@ const TypeEditor = ({
               />
             );
           } else {
-            return (
+            const baseCase = (
               <TypeEditor
                 resource={resource}
                 parentStructureDefinition={structureDefinition}
@@ -1075,6 +1130,8 @@ const TypeEditor = ({
                 label={childDef.id}
               />
             );
+            // return wrapWithSection(childDef.id, baseCase);
+            return baseCase;
           }
         })}
       </Box>

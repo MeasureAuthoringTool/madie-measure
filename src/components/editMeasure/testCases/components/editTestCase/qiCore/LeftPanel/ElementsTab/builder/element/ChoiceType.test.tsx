@@ -50,12 +50,6 @@ describe("ChoiceType", () => {
       getFormikValues()
     );
 
-    const accordianTitle = await screen.findByTestId(
-      "elements-heading-expansion-button-Component[0]"
-    );
-
-    userEvent.click(accordianTitle);
-
     const select = await screen.findByRole("combobox");
     act(async () => {
       userEvent.click(select);
@@ -77,12 +71,6 @@ describe("ChoiceType", () => {
       {}
     );
 
-    const accordianTitle = await screen.findByTestId(
-      "elements-heading-expansion-button-Value"
-    );
-
-    userEvent.click(accordianTitle);
-
     expect(screen.getByRole("combobox")).toHaveTextContent("String");
     expect(screen.getByTestId("type-editor")).toHaveTextContent(
       "TypeEditor Observation.component[0].valueString"
@@ -101,12 +89,6 @@ describe("ChoiceType", () => {
       );
     });
 
-    const accordianTitle = await screen.findByTestId(
-      "elements-heading-expansion-button-Value"
-    );
-
-    userEvent.click(accordianTitle);
-
     expect(screen.getByRole("combobox")).toHaveTextContent("Boolean");
     expect(screen.getByTestId("type-editor")).toHaveTextContent(
       "TypeEditor Observation.component[0].valueBoolean"
@@ -122,12 +104,6 @@ describe("ChoiceType", () => {
       },
       getFormikValues("boolean", true)
     );
-
-    const accordianTitle = await screen.findByTestId(
-      "elements-heading-expansion-button-Value"
-    );
-
-    userEvent.click(accordianTitle);
 
     const select = screen.getByRole("combobox");
     await act(async () => {
@@ -146,6 +122,7 @@ describe("ChoiceType", () => {
     );
   });
 
+  // this test fails often when not in isolation. Need to use async waits since the data is changing.
   it("disables select when canEdit is false", async () => {
     renderWithFormik(
       {
@@ -156,14 +133,8 @@ describe("ChoiceType", () => {
       getFormikValues()
     );
 
-    const accordianTitle = await screen.findByTestId(
-      "elements-heading-expansion-button-Value"
-    );
-
-    userEvent.click(accordianTitle);
-
     // When canEdit is false, the select is rendered as a readonly textarea
-    const select = screen.getByTestId(
+    const select = await screen.findByTestId(
       "choice-type-Observation.component[0].valueBoolean"
     );
     expect(select).toHaveAttribute("readonly");
