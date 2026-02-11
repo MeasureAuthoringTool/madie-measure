@@ -4,6 +4,24 @@ import { ResourceIdentifier } from "./models/ResourceIdentifier";
 import * as Yup from "yup";
 import * as _ from "lodash";
 
+export const PRIMITIVE_DEFAULT_VALUES = {
+  instant: "",
+  time: "",
+  boolean: false,
+  date: "",
+  datetime: "",
+  decimal: 0,
+  integer: 0,
+  unsignedInt: 0,
+  positiveInt: 1,
+  uri: "",
+  url: "",
+  uuid: "",
+  canonical: "",
+  string: "",
+  code: "",
+};
+
 /**
  * Prepares the element name to be displayed for tab labels
  * for sliced elements- it will be sliceName. e.g. Patient.extension:race results into race
@@ -326,33 +344,23 @@ export function getDisplayedElementsTree(uniqueElements) {
 }
 
 // remove all the falsey values from an object recursively so we have only what the user has generated.
-export function removeUndefinedAndEmptyObjects(obj) {
+export function removeUndefinedProperties(obj) {
   if (typeof obj !== "object" || obj === null) {
     return obj;
   }
 
   if (Array.isArray(obj)) {
     // Clean each item in the array recursively
-    const cleanedArray = obj
-      .map((item) => removeUndefinedAndEmptyObjects(item))
-      .filter((item) => {
-        // Remove null, undefined, empty values (if string type)
-        return !(
-          _.isNil(item) ||
-          (typeof item === "string" && _.isEmpty(item))
-        );
-      });
-    return cleanedArray.length > 0 ? cleanedArray : undefined;
+    return obj
+      .map((item) => removeUndefinedProperties(item))
+      .filter((item) => !_.isUndefined(item));
   }
 
   for (let key in obj) {
     if (obj.hasOwnProperty(key) && key !== "x") {
       const value = obj[key];
-      const cleanedValue = removeUndefinedAndEmptyObjects(value);
-      if (
-        _.isNil(cleanedValue) ||
-        (typeof cleanedValue === "object" && _.isEmpty(cleanedValue))
-      ) {
+      const cleanedValue = removeUndefinedProperties(value);
+      if (_.isUndefined(cleanedValue)) {
         delete obj[key];
       } else {
         obj[key] = cleanedValue;

@@ -11,7 +11,7 @@ import {
   isComponentDataType,
   setNestedValue,
   getDisplayedElementsTree,
-  removeUndefinedAndEmptyObjects,
+  removeUndefinedProperties,
   getElementName,
   getChildren,
   getParentDefinition,
@@ -350,46 +350,30 @@ describe("FhirDefinitionServiceUtilities", () => {
     });
   });
 
-  describe("removeUndefinedAndEmptyObjects", () => {
+  describe("removeUndefinedProperties", () => {
     it("should remove undefined values from an object", () => {
       const obj = { a: 1, b: undefined, c: 3 };
-      expect(removeUndefinedAndEmptyObjects(obj)).toEqual({ a: 1, c: 3 });
-    });
-
-    it("should remove empty nested objects", () => {
-      const obj = { a: { b: {} }, c: 3 };
-      expect(removeUndefinedAndEmptyObjects(obj)).toEqual({ c: 3 });
-    });
-
-    it("should handle deeply nested empty objects", () => {
-      const obj = { a: { b: { c: {} } }, d: 4 };
-      expect(removeUndefinedAndEmptyObjects(obj)).toEqual({ d: 4 });
+      expect(removeUndefinedProperties(obj)).toEqual({ a: 1, c: 3 });
     });
 
     it("should keep nested objects with values", () => {
       const obj = { a: { b: { c: 5 } }, d: 4 };
-      expect(removeUndefinedAndEmptyObjects(obj)).toEqual({
+      expect(removeUndefinedProperties(obj)).toEqual({
         a: { b: { c: 5 } },
         d: 4,
       });
     });
 
     it("should return the same value if not an object", () => {
-      expect(removeUndefinedAndEmptyObjects(null)).toBe(null);
-      expect(removeUndefinedAndEmptyObjects(12)).toBe(12);
-      expect(removeUndefinedAndEmptyObjects("test")).toBe("test");
+      expect(removeUndefinedProperties(null)).toBe(null);
+      expect(removeUndefinedProperties(12)).toBe(12);
+      expect(removeUndefinedProperties("test")).toBe("test");
     });
 
-    it("should return array by removing empty/null/undefined values", () => {
+    it("should return array by removing undefined values", () => {
       expect(
-        removeUndefinedAndEmptyObjects([
-          "2024",
-          "",
-          undefined,
-          null,
-          "08/09/2025",
-        ])
-      ).toEqual(["2024", "08/09/2025"]);
+        removeUndefinedProperties(["2024", "", undefined, null, "08/09/2025"])
+      ).toEqual(["2024", "", null, "08/09/2025"]);
     });
   });
 });

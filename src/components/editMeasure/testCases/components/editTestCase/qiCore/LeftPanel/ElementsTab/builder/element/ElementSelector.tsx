@@ -5,63 +5,15 @@ import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
 import CheckBoxIcon from "@mui/icons-material/CheckBox";
 import { ElementDefinition } from "fhir/r4";
 import * as _ from "lodash";
+import { stripAllIndexes } from "../../../../../../../api/fhirDefinitionServiceUtilities";
+
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
-
-// Comprehensive list of FHIR datatypes that can appear in choice types
-const CHOICE_TYPES_ALLOWED = [
-  // Primitive types
-  "Boolean",
-  "Integer",
-  "String",
-  "Decimal",
-  "Uri",
-  "Url",
-  "Canonical",
-  "Base64Binary",
-  "Instant",
-  "Date",
-  "DateTime",
-  "Time",
-  "Code",
-  "Oid",
-  "Id",
-  "Markdown",
-  "UnsignedInt",
-  "PositiveInt",
-  "Uuid",
-
-  // Complex types
-  "Quantity",
-  "Money",
-  "SimpleQuantity",
-  "Distance",
-  "Duration",
-  "Count",
-  "Age",
-  "Range",
-  "Period",
-  "Ratio",
-  "Reference",
-  "CodeableConcept",
-  "Coding",
-  "Identifier",
-  "HumanName",
-  "Address",
-  "ContactPoint",
-  "Timing",
-  "Signature",
-  "Annotation",
-  "SampledData",
-  "Attachment",
-  "Extension",
-];
 
 interface ElementSelectorProps {
   basePath: string;
   options: ElementDefinition[];
-  value: ElementDefinition[];
-  newValues: ElementDefinition[];
+  selectedElements: ElementDefinition[];
   onChange: (event, newValue: ElementDefinition[] | null) => void;
 }
 
@@ -99,54 +51,26 @@ export const getChoiceBaseLabel = (
   if (label.endsWith("[x]")) {
     return label.substring(0, label.length - 3);
   }
-
-  for (const type of CHOICE_TYPES_ALLOWED) {
-    if (label.endsWith(type) && label.length > type.length) {
-      return label.substring(0, label.length - type.length);
-    }
-  }
-
-  // find last camelCase boundary, in case of new datatype
-  const matches = label.match(/([a-z0-9])([A-Z])/g);
-  if (matches && matches.length > 0) {
-    // find all humps
-    const allMatches = [];
-    let regex = /([a-z0-9])([A-Z])/g;
-    let match;
-
-    while ((match = regex.exec(label)) !== null) {
-      allMatches.push({
-        transition: match[0],
-        index: match.index,
-      });
-    }
-
-    // Get the last occurrence
-    const lastMatch = allMatches[allMatches.length - 1];
-    // Return everything up to and including the lowercase letter
-    return label.substring(0, lastMatch.index + 1);
-  }
-
   return null;
 };
 
 const ElementSelector = ({
   basePath,
   options,
-  value,
-  newValues,
+  selectedElements,
   onChange,
 }: ElementSelectorProps) => {
   // Create a map of selected element IDs for efficient lookup
   const selectedOptions = useMemo(() => {
     const ids = new Map<string, ElementDefinition>();
-    value.forEach((v) => {
+    selectedElements.forEach((v) => {
       if (v.id) {
-        ids.set(v.id, v);
+        const id = stripAllIndexes(v.id);
+        ids.set(id, v);
       }
     });
     return ids;
-  }, [value]);
+  }, [selectedElements]);
 
   const isInValue = (option: ElementDefinition) => {
     if (!option.id || !selectedOptions.has(option.id)) {
@@ -195,7 +119,7 @@ const ElementSelector = ({
         limitTags={2}
         id="resource-element-selector-autocomplete"
         options={options}
-        value={newValues}
+        value={selectedElements}
         onChange={onChange}
         disableCloseOnSelect
         getOptionLabel={(option) => getOptionLabel(option, basePath)}
@@ -209,7 +133,7 @@ const ElementSelector = ({
           if (base) {
             // if any other option with same base is selected, and this option is not selected, disable
             // find if any selected option with same base but different code
-            const isOtherSelected = newValues.some(
+            const isOtherSelected = selectedElements.some(
               (value) =>
                 value !== option && getChoiceBaseLabel(value, basePath) === base
             );
@@ -293,9 +217,9 @@ const ElementSelector = ({
                 e.key === "Backspace" &&
                 e.target instanceof HTMLInputElement &&
                 e.target.value === "" &&
-                newValues.length > 0
+                selectedElements.length > 0
               ) {
-                const lastChip = newValues[newValues.length - 1];
+                const lastChip = selectedElements[selectedElements.length - 1];
                 if (isInValue(lastChip)) {
                   e.preventDefault();
                   e.stopPropagation();
