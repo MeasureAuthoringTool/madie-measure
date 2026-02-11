@@ -95,7 +95,7 @@ const CodeableConceptComponent: React.FC<CodeableConceptComponentProps> = ({
         const isLastElement = index === codings.length - 1;
 
         return (
-          <Box key={codingLabel} sx={{ mb: 2 }}>
+          <Box key={codingLabel}>
             <CodingComponent
               handleAddElement={handleAddCoding}
               addTitle={addTitle}

@@ -88,7 +88,7 @@ const TimingComponent = ({
   });
 
   return (
-    <ElementSectionQiCore title={"Timing"} startOpen={false}>
+    <ElementSectionQiCore title={"Timing"} startOpen={true}>
       <div id="timing-component" data-component-type="TimingComponent">
         {/* Event */}
         {eventValues.map((_, index) => (
