@@ -31,8 +31,9 @@ const AddElementDialog = (props: AddElementDialogProps) => {
     [basePath]
   );
   const handleClose = useCallback(() => {
+    setSelectedElements(value);
     onClose();
-  }, [onClose]);
+  }, [onClose, value]);
   const handleAddElements = useCallback(() => {
     addElements(selectedElements);
     onClose();

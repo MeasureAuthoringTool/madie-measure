@@ -5,6 +5,7 @@ import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
 import CheckBoxIcon from "@mui/icons-material/CheckBox";
 import { ElementDefinition } from "fhir/r4";
 import * as _ from "lodash";
+import { stripAllIndexes } from "../../../../../../../api/fhirDefinitionServiceUtilities";
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
 
@@ -135,15 +136,16 @@ const ElementSelector = ({
   selectedElements,
   onChange,
 }: ElementSelectorProps) => {
-  // Create a map of selected element paths for efficient lookup
+  // Create a map of selected element IDs for efficient lookup
   const selectedOptions = useMemo(() => {
-    const pathElementMap = new Map<string, ElementDefinition>();
+    const ids = new Map<string, ElementDefinition>();
     selectedElements.forEach((v) => {
-      if (v.path) {
-        pathElementMap.set(v.path, v);
+      if (v.id) {
+        const id = stripAllIndexes(v.id);
+        ids.set(id, v);
       }
     });
-    return pathElementMap;
+    return ids;
   }, [selectedElements]);
 
   const isInValue = (option: ElementDefinition) => {
