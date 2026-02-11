@@ -247,11 +247,11 @@ const ResourceEditor = ({
           let defaultValue: any;
           if (element.max == "*" || Number(element.max) > 1) {
             defaultValue = [
-              isPrimitiveType(element.type?.[0]?.code)
+              isPrimitiveType(element?.type?.[0]?.code)
                 ? PRIMITIVE_DEFAULT_VALUES[element.type[0].code]
                 : {},
             ];
-          } else if (isPrimitiveType(element.type?.[0]?.code)) {
+          } else if (isPrimitiveType(element?.type?.[0]?.code)) {
             defaultValue = PRIMITIVE_DEFAULT_VALUES[element.type[0].code];
           } else {
             defaultValue = null;

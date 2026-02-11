@@ -686,7 +686,7 @@ export function addCardinalityToElement(nextEntry, elemPath, rootDefinition) {
   }
   // add a new element and add default values if it's a primitive type
   nextEntry.resource[elemPath] = nextEntry.resource[elemPath].concat(
-    isPrimitiveType(rootDefinition.type?.[0]?.code)
+    isPrimitiveType(rootDefinition?.type?.[0]?.code)
       ? PRIMITIVE_DEFAULT_VALUES[rootDefinition.type[0].code]
       : {}
   );
