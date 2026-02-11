@@ -225,12 +225,34 @@ describe("ElementSelector", () => {
 
   it("disables related choice types using FHIR datatype matching", () => {
     const choiceOptions: ElementDefinition[] = [
-      { path: "Patient.deceasedBoolean", min: 0, max: "1" },
-      { path: "Patient.deceasedDateTime", min: 0, max: "1" },
-      { path: "Patient.multipleBirthBoolean", min: 0, max: "1" },
-      { path: "Patient.multipleBirthInteger", min: 0, max: "1" },
-      { path: "Patient.valueString", min: 0, max: "1" },
-      { path: "Patient.valueQuantity", min: 0, max: "1" },
+      {
+        id: "Patient.deceased[x]",
+        path: "Patient.deceased[x]",
+        min: 0,
+        max: "1",
+        type: [{ code: "boolean" }],
+      },
+      {
+        id: "Patient.deceased[x]",
+        path: "Patient.deceased[x]",
+        min: 0,
+        max: "1",
+        type: [{ code: "dateTime" }],
+      },
+      {
+        id: "Patient.multipleBirth[x]",
+        path: "Patient.multipleBirth[x]",
+        min: 0,
+        max: "1",
+        type: [{ code: "boolean" }],
+      },
+      {
+        id: "Patient.multipleBirth[x]",
+        path: "Patient.multipleBirth[x]",
+        min: 0,
+        max: "1",
+        type: [{ code: "integer" }],
+      },
       {
         path: "Patient.unrelatedpath",
         min: 1,
@@ -293,55 +315,45 @@ describe("ElementSelector", () => {
   });
 
   it("correctly extracts choice base types from datatype ending elements", () => {
-    const testChoiceDisabling = (
-      selectedPath,
-      relatedPath,
-      shouldBeDisabled
-    ) => {
-      const choiceOptions: ElementDefinition[] = [
-        { path: selectedPath, min: 0, max: "1" },
-        { path: relatedPath, min: 0, max: "1" },
-      ];
+    const choiceOptions: ElementDefinition[] = [
+      {
+        id: "Patient.deceased[x]",
+        path: "Patient.deceased[x]",
+        min: 0,
+        max: "1",
+        type: [{ code: "boolean" }],
+      },
+      {
+        id: "Patient.deceased[x]",
+        path: "Patient.deceased[x]",
+        min: 0,
+        max: "1",
+        type: [{ code: "dateTime" }],
+      },
+    ];
 
-      const props = {
-        ...defaultProps,
-        options: choiceOptions,
-        selectedElements: [choiceOptions[0]],
-      };
-
-      render(<ElementSelector {...props} />);
-      userEvent.click(screen.getByPlaceholderText("Attributes"));
-
-      // Get the label of the related (second) option
-      const relatedLabel = getOptionLabel(choiceOptions[1], "Patient");
-      const relatedOption = screen.getByText(relatedLabel).closest("li");
-
-      if (shouldBeDisabled) {
-        expect(relatedOption).toHaveAttribute("aria-disabled", "true");
-      } else {
-        expect(relatedOption).not.toHaveAttribute("aria-disabled", "true");
-      }
-
-      cleanup();
+    const props = {
+      ...defaultProps,
+      options: choiceOptions,
+      selectedElements: [choiceOptions[0]],
     };
 
-    testChoiceDisabling(
-      "Patient.valueString",
-      "Patient.valueCodeableConcept",
-      true
-    );
-    testChoiceDisabling("Patient.onsetAge", "Patient.onsetPeriod", true);
-    testChoiceDisabling(
-      "Patient.effectiveDateTime",
-      "Patient.effectivePeriod",
-      true
-    );
-    testChoiceDisabling(
-      "Patient.performedDateTime",
-      "Patient.performedPeriod",
-      true
-    );
-    testChoiceDisabling("Patient.valueString", "Patient.onsetAge", false);
+    render(<ElementSelector {...props} />);
+    userEvent.click(screen.getByPlaceholderText("Attributes"));
+
+    // Get the first option i.e. deceasedBoolean which is selected choice
+    const deceasedBoolean = screen
+      .getAllByText("deceasedBoolean")[1]
+      .closest("li");
+
+    expect(deceasedBoolean).toHaveAttribute("aria-selected", "true");
+    expect(deceasedBoolean).toHaveAttribute("aria-disabled", "true");
+
+    // Get the label of the related (second) option i.e. deceasedDateTime
+    const deceasedDateTime = screen.getByText("deceasedDateTime").closest("li");
+
+    expect(deceasedDateTime).toHaveAttribute("aria-selected", "false");
+    expect(deceasedDateTime).toHaveAttribute("aria-disabled", "true");
   });
 });
 
@@ -353,16 +365,6 @@ describe("getChoiceBaseLabel", () => {
     expect(getChoiceBaseLabel(option, basePath)).toBe("value");
   });
 
-  it("should strip FHIR datatype suffix when present", () => {
-    const option = { path: "Observation.valueString" };
-    expect(getChoiceBaseLabel(option, basePath)).toBe("value");
-  });
-
-  it("should handle complex FHIR datatype suffix", () => {
-    const option = { path: "Observation.valueCodeableConcept" };
-    expect(getChoiceBaseLabel(option, basePath)).toBe("value");
-  });
-
   it("should return null if label cannot be determined", () => {
     const option = { path: "Observation" }; // same as basePath
     expect(getChoiceBaseLabel(option, basePath)).toBeNull();
@@ -370,12 +372,7 @@ describe("getChoiceBaseLabel", () => {
 
   it("should handle unknown datatype by splitting camelCase", () => {
     const option = { path: "Observation.valueCustomType" };
-    expect(getChoiceBaseLabel(option, basePath)).toBe("valueCustom");
-  });
-
-  it("should handle multiple camelCase humps and return up to last lowercase", () => {
-    const option = { path: "Observation.someVeryCustomType" };
-    expect(getChoiceBaseLabel(option, basePath)).toBe("someVeryCustom");
+    expect(getChoiceBaseLabel(option, basePath)).toBe(null);
   });
 
   it("should return null if no camelCase boundary and no datatype match", () => {
@@ -385,11 +382,6 @@ describe("getChoiceBaseLabel", () => {
 
   it("should handle label shorter than datatype (edge case)", () => {
     const option = { path: "Observation.Boolean" }; // label = 'Boolean'
-    expect(getChoiceBaseLabel(option, basePath)).toBeNull();
-  });
-
-  it("should handle datatype match but label length equals type length (edge case)", () => {
-    const option = { path: "Observation.String" }; // label = 'String'
     expect(getChoiceBaseLabel(option, basePath)).toBeNull();
   });
 });

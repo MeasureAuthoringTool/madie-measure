@@ -6,57 +6,9 @@ import CheckBoxIcon from "@mui/icons-material/CheckBox";
 import { ElementDefinition } from "fhir/r4";
 import * as _ from "lodash";
 import { stripAllIndexes } from "../../../../../../../api/fhirDefinitionServiceUtilities";
+
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
-
-// Comprehensive list of FHIR datatypes that can appear in choice types
-const CHOICE_TYPES_ALLOWED = [
-  // Primitive types
-  "Boolean",
-  "Integer",
-  "String",
-  "Decimal",
-  "Uri",
-  "Url",
-  "Canonical",
-  "Base64Binary",
-  "Instant",
-  "Date",
-  "DateTime",
-  "Time",
-  "Code",
-  "Oid",
-  "Id",
-  "Markdown",
-  "UnsignedInt",
-  "PositiveInt",
-  "Uuid",
-
-  // Complex types
-  "Quantity",
-  "Money",
-  "SimpleQuantity",
-  "Distance",
-  "Duration",
-  "Count",
-  "Age",
-  "Range",
-  "Period",
-  "Ratio",
-  "Reference",
-  "CodeableConcept",
-  "Coding",
-  "Identifier",
-  "HumanName",
-  "Address",
-  "ContactPoint",
-  "Timing",
-  "Signature",
-  "Annotation",
-  "SampledData",
-  "Attachment",
-  "Extension",
-];
 
 interface ElementSelectorProps {
   basePath: string;
@@ -99,34 +51,6 @@ export const getChoiceBaseLabel = (
   if (label.endsWith("[x]")) {
     return label.substring(0, label.length - 3);
   }
-
-  for (const type of CHOICE_TYPES_ALLOWED) {
-    if (label.endsWith(type) && label.length > type.length) {
-      return label.substring(0, label.length - type.length);
-    }
-  }
-
-  // find last camelCase boundary, in case of new datatype
-  const matches = label.match(/([a-z0-9])([A-Z])/g);
-  if (matches && matches.length > 0) {
-    // find all humps
-    const allMatches = [];
-    let regex = /([a-z0-9])([A-Z])/g;
-    let match;
-
-    while ((match = regex.exec(label)) !== null) {
-      allMatches.push({
-        transition: match[0],
-        index: match.index,
-      });
-    }
-
-    // Get the last occurrence
-    const lastMatch = allMatches[allMatches.length - 1];
-    // Return everything up to and including the lowercase letter
-    return label.substring(0, lastMatch.index + 1);
-  }
-
   return null;
 };
 
