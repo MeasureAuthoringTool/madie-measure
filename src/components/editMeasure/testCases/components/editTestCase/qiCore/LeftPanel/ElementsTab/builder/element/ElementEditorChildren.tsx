@@ -89,7 +89,7 @@ const ElementEditorChildren = ({
           </div>
         )}
       </div>
-      <Box>
+      <Box sx={{ rowGap: 0 }}>
         <TypeEditor
           resource={resource}
           structureDefinition={rootDefinition}

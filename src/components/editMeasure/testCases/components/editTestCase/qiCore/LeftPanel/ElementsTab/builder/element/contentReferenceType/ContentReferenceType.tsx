@@ -55,7 +55,7 @@ interface MultiCardinalityElementProps {
 }
 
 // Constants
-const NESTED_BOX_STYLE = { paddingLeft: "16px" };
+const NESTED_BOX_STYLE = { paddingLeft: "0px" };
 
 /**
  * Filter function to determine if an element should be included in the contentReference
@@ -139,9 +139,9 @@ const MultiCardinalityElement = ({
   return (
     <ElementSectionQiCore
       title={_.startCase(getLastPart(parentPath))}
-      startOpen={false}
+      startOpen={true}
       children={
-        <Box style={NESTED_BOX_STYLE}>
+        <div className="nested-element-section">
           {values.map((v: any, i: number) => {
             const label = `${parentPathMap.path}[${i}].${idPart}`;
             return (
@@ -155,7 +155,7 @@ const MultiCardinalityElement = ({
               />
             );
           })}
-        </Box>
+        </div>
       }
     />
   );
@@ -261,7 +261,7 @@ const ContentReferenceType = ({
             title={_.startCase(
               `${sectionLabel} ${values.length > 1 ? index + 1 : ""}`
             )}
-            startOpen={false}
+            startOpen={true}
             children={
               <>
                 <Typography
@@ -277,7 +277,11 @@ const ContentReferenceType = ({
                   Nesting. Please use the JSON editor if you need more levels of
                   nesting.
                 </Typography>
-                <Box style={NESTED_BOX_STYLE}>
+                {/* ClaimResponse.Adjudication */}
+                <div
+                  className="nested-element-section"
+                  style={NESTED_BOX_STYLE}
+                >
                   {elements.map((element) => {
                     const idPart = getLastPart(element.id);
                     const parentPath = getParentPath(element.id);
@@ -316,7 +320,7 @@ const ContentReferenceType = ({
                       />
                     );
                   })}
-                </Box>
+                </div>
               </>
             }
           />
