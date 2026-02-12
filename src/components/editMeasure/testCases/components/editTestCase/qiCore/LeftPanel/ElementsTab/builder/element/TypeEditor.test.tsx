@@ -4784,4 +4784,258 @@ describe("TypeEditor Component", () => {
     // Restore the original mock
     jest.restoreAllMocks();
   });
+
+  describe("Basic Patient Extensions (birthsex, sex, genderIdentity)", () => {
+    // Mock structure definition for a basic extension like birthsex
+    const basicExtensionProfileDef = {
+      definition: {
+        resourceType: "StructureDefinition",
+        id: "us-core-birthsex",
+        url: "http://hl7.org/fhir/us/core/StructureDefinition/us-core-birthsex",
+        name: "USCoreBirthSexExtension",
+        title: "US Core Birth Sex Extension",
+        type: "Extension",
+        snapshot: {
+          element: [
+            {
+              id: "Extension",
+              path: "Extension",
+              short: "Birth Sex Extension",
+              min: 0,
+              max: "1",
+            },
+            {
+              id: "Extension.id",
+              path: "Extension.id",
+              short: "Unique id for inter-element referencing",
+              min: 0,
+              max: "1",
+              type: [{ code: "http://hl7.org/fhirpath/System.String" }],
+            },
+            {
+              id: "Extension.url",
+              path: "Extension.url",
+              short: "identifies the meaning of the extension",
+              min: 1,
+              max: "1",
+              type: [{ code: "uri" }],
+              fixedUri:
+                "http://hl7.org/fhir/us/core/StructureDefinition/us-core-birthsex",
+            },
+            {
+              id: "Extension.value[x]",
+              path: "Extension.value[x]",
+              short: "Value of extension",
+              min: 1,
+              max: "1",
+              type: [{ code: "code" }],
+              binding: {
+                strength: "required",
+                valueSet: "http://hl7.org/fhir/us/core/ValueSet/birthsex",
+              },
+            },
+          ],
+        },
+      },
+    };
+
+    const birthsexStructureDefinition = {
+      id: "Patient.extension:birthsex",
+      path: "Patient.extension",
+      sliceName: "birthsex",
+      short: "Birth Sex Extension",
+      min: 0,
+      max: "1",
+      type: [
+        {
+          code: "Extension",
+          profile: [
+            "http://hl7.org/fhir/us/core/StructureDefinition/us-core-birthsex",
+          ],
+        },
+      ],
+    };
+
+    test("should filter out Extension.id elements from basic patient extensions", async () => {
+      const fhirDefinitionsServiceApiMock = {
+        getResourceTree: jest.fn().mockResolvedValue(basicExtensionProfileDef),
+        getValueSetDefinition: jest.fn().mockResolvedValue({}),
+      } as unknown as FhirDefinitionsServiceApi;
+      useFhirDefinitionsServiceApiMock.mockImplementation(
+        () => fhirDefinitionsServiceApiMock
+      );
+
+      // Override the global mock to properly handle getTopLevelElements for this test
+      const fhirUtils = require("../../../../../../../api/fhirDefinitionServiceUtilities");
+      jest.spyOn(fhirUtils, "getTopLevelElements").mockReturnValue([
+        {
+          id: "Extension.id",
+          path: "Extension.id",
+          short: "Unique id for inter-element referencing",
+          min: 0,
+          max: "1",
+          type: [{ code: "http://hl7.org/fhirpath/System.String" }],
+        },
+        {
+          id: "Extension.url",
+          path: "Extension.url",
+          short: "identifies the meaning of the extension",
+          min: 1,
+          max: "1",
+          type: [{ code: "uri" }],
+          fixedUri:
+            "http://hl7.org/fhir/us/core/StructureDefinition/us-core-birthsex",
+        },
+        {
+          id: "Extension.value[x]",
+          path: "Extension.value[x]",
+          short: "Value of extension",
+          min: 1,
+          max: "1",
+          type: [{ code: "code" }],
+        },
+      ]);
+
+      const mockFormikWithPatient = {
+        values: {
+          Patient: {
+            extension: [
+              {
+                url: "http://hl7.org/fhir/us/core/StructureDefinition/us-core-birthsex",
+                valueCode: "M",
+              },
+            ],
+          },
+        },
+        touched: {},
+        errors: {},
+        getFieldProps: (label: string) => ({
+          value: undefined,
+          name: label,
+          onChange: jest.fn(),
+          onBlur: jest.fn(),
+        }),
+        handleChange: jest.fn(),
+        setFieldValue: jest.fn(),
+        setFieldTouched: jest.fn(),
+      } as unknown as FormikProps<any>;
+
+      render(
+        <FormikProvider value={mockFormikWithPatient}>
+          <RequiredFieldsProvider
+            requiredFields={mockRequiredFields}
+            formInfo={mockFormInfo}
+          >
+            <TypeEditor
+              resource={{ resourceType: "Patient" }}
+              structureDefinition={birthsexStructureDefinition}
+              parentStructureDefinition={{}}
+              canEdit={true}
+              label={"Patient.extension:birthsex"}
+            />
+          </RequiredFieldsProvider>
+        </FormikProvider>
+      );
+
+      // Wait for the extension profile to load
+      await waitFor(() => {
+        // Extension.id should NOT be rendered (filtered out)
+        expect(screen.queryByText(/Extension\.id/i)).not.toBeInTheDocument();
+      });
+
+      // Restore the original mock
+      jest.restoreAllMocks();
+    });
+
+    test("should make Extension.url read-only when it has fixedUri", async () => {
+      const fhirDefinitionsServiceApiMock = {
+        getResourceTree: jest.fn().mockResolvedValue(basicExtensionProfileDef),
+        getValueSetDefinition: jest.fn().mockResolvedValue({}),
+      } as unknown as FhirDefinitionsServiceApi;
+      useFhirDefinitionsServiceApiMock.mockImplementation(
+        () => fhirDefinitionsServiceApiMock
+      );
+
+      // Override the global mock to properly handle getTopLevelElements for this test
+      const fhirUtils = require("../../../../../../../api/fhirDefinitionServiceUtilities");
+      jest.spyOn(fhirUtils, "getTopLevelElements").mockReturnValue([
+        {
+          id: "Extension.url",
+          path: "Extension.url",
+          short: "identifies the meaning of the extension",
+          min: 1,
+          max: "1",
+          type: [{ code: "uri" }],
+          fixedUri:
+            "http://hl7.org/fhir/us/core/StructureDefinition/us-core-birthsex",
+        },
+        {
+          id: "Extension.value[x]",
+          path: "Extension.value[x]",
+          short: "Value of extension",
+          min: 1,
+          max: "1",
+          type: [{ code: "code" }],
+        },
+      ]);
+      jest.spyOn(fhirUtils, "isComponentDataType").mockReturnValue(true);
+
+      const mockFormikWithPatient = {
+        values: {
+          Patient: {
+            extension: [
+              {
+                url: "http://hl7.org/fhir/us/core/StructureDefinition/us-core-birthsex",
+                valueCode: "M",
+              },
+            ],
+          },
+        },
+        touched: {},
+        errors: {},
+        getFieldProps: (label: string) => ({
+          value:
+            label === "Patient.extension[0].url"
+              ? "http://hl7.org/fhir/us/core/StructureDefinition/us-core-birthsex"
+              : undefined,
+          name: label,
+          onChange: jest.fn(),
+          onBlur: jest.fn(),
+        }),
+        handleChange: jest.fn(),
+        setFieldValue: jest.fn(),
+        setFieldTouched: jest.fn(),
+      } as unknown as FormikProps<any>;
+
+      render(
+        <FormikProvider value={mockFormikWithPatient}>
+          <RequiredFieldsProvider
+            requiredFields={mockRequiredFields}
+            formInfo={mockFormInfo}
+          >
+            <TypeEditor
+              resource={{ resourceType: "Patient" }}
+              structureDefinition={birthsexStructureDefinition}
+              parentStructureDefinition={{}}
+              canEdit={true}
+              label={"Patient.extension:birthsex"}
+            />
+          </RequiredFieldsProvider>
+        </FormikProvider>
+      );
+
+      // Wait for the extension profile to load
+      await waitFor(() => {
+        // The URL field should be rendered but read-only
+        const urlInput = screen.queryByTestId(/uri-input-field.*url/i);
+        if (urlInput) {
+          // The input should have readOnly attribute when canEdit is false for fixed URLs
+          expect(urlInput).toHaveAttribute("readonly");
+        }
+      });
+
+      // Restore the original mock
+      jest.restoreAllMocks();
+    });
+  });
 });

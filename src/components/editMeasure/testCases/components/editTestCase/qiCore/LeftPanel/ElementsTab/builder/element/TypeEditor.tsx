@@ -866,6 +866,12 @@ const TypeEditor = ({
             ? getTopLevelElements(extensionProfileDef)
             : null;
 
+          // Filter out Extension.id elements for basic patient extensions (birthsex, sex, genderIdentity)
+          // and identify Extension.url elements with fixedUri that should be read-only
+          const filteredTopLevelElements = topLevelElements?.filter(
+            (el) => !/\.id$/.test(el.id)
+          );
+
           //@ts-ignore
           const { definition } = extensionProfileDef;
           let foundIndex = formik?.values?.[
@@ -884,7 +890,7 @@ const TypeEditor = ({
             <Box sx={{ display: "flex", flexDirection: "column" }}>
               <Box>{structureDefinition.short}</Box>
               <Box sx={{ display: "flex", flexDirection: "column" }}>
-                {topLevelElements.map((elementDefinition, index) => {
+                {filteredTopLevelElements.map((elementDefinition, index) => {
                   // given updatedLabel = Patient.extension[1],
                   /*
                   and our json string looks like this.., we need to do a find on each one of the elements. to get the name
@@ -936,6 +942,12 @@ const TypeEditor = ({
                     }
                   }
 
+                  // For Extension.url elements with fixedUri, make them read-only
+                  const isFixedUrl =
+                    /\.url$/.test(elementDefinition.id) &&
+                    elementDefinition.fixedUri;
+                  const elementCanEdit = isFixedUrl ? false : canEdit;
+
                   const slice = (
                     <Box
                       sx={{
@@ -948,7 +960,7 @@ const TypeEditor = ({
                         structureDefinition={elementDefinition}
                         // parent structure definition should be structureDefinition, since these are the children
                         parentStructureDefinition={extensionProfileDef} // parent structureDefinition needs snapshot.element
-                        canEdit={canEdit}
+                        canEdit={elementCanEdit}
                         label={updatedLocalLabel} // updated local label based off of a find find matching id or slicename
                         {...formik.getFieldProps(updatedLocalLabel)}
                       />
