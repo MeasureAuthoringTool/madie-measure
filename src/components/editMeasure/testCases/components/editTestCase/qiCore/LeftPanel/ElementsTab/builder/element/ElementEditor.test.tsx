@@ -756,4 +756,81 @@ describe("ElementEditor Component", () => {
       });
     });
   });
+
+  test("falls back to scrollTo when scrollIntoView is unavailable", async () => {
+    const setInitialFormikValuesStu6 = jest.fn();
+    const setValidationSchema = jest.fn();
+    const dispatch = jest.fn();
+    mockFormikObj.dirty = false;
+    mockFormikObj.values = {};
+    mockFormikObj.errors = {};
+
+    const scrollTarget = document.createElement("div");
+    scrollTarget.id = "tc-builder-resource-editor";
+    const scrollToMock = jest.fn();
+    // @ts-ignore
+    scrollTarget.scrollIntoView = undefined;
+    // @ts-ignore
+    scrollTarget.scrollTo = scrollToMock;
+    const getElementSpy = jest
+      .spyOn(document, "getElementById")
+      .mockReturnValue(scrollTarget as HTMLElement);
+
+    const firstDefinition = {
+      ...mockElementDefinition,
+      id: "ClaimResponse.id",
+    };
+    const secondDefinition = {
+      ...mockElementDefinition,
+      id: "ClaimResponse.outcome",
+    };
+
+    const { rerender } = renderElementEditor(
+      mockSelectedResource,
+      mockResource,
+      firstDefinition,
+      "ClaimResponse",
+      mockOnChange,
+      true,
+      mockDisplayedElementsTree,
+      setValidationSchema,
+      setInitialFormikValuesStu6,
+      dispatch
+    );
+
+    await waitFor(() =>
+      expect(mockFhirDefinitionsService.getResourceTree).toHaveBeenCalled()
+    );
+
+    rerender(
+      <QiCoreResourceContext.Provider
+        value={{ state: mockPatientState, dispatch }}
+      >
+        <ElementEditor
+          selectedResourceID="6fb9d817-76c5-4b68-ba06-92c7429e6b5c"
+          setValidationSchema={setValidationSchema}
+          setInitialFormikValuesStu6={setInitialFormikValuesStu6}
+          selectedResource={mockSelectedResource}
+          resource={mockResource}
+          elementDefinition={secondDefinition}
+          resourcePath="ClaimResponse"
+          onChange={mockOnChange}
+          canEdit={true}
+          displayedElementsTree={mockDisplayedElementsTree}
+          setLastAddedElemPath={jest.fn()}
+          applyLoading={false}
+          setApplyLoading={jest.fn()}
+        />
+      </QiCoreResourceContext.Provider>
+    );
+
+    await waitFor(() => {
+      expect(scrollToMock).toHaveBeenCalledWith({
+        top: 0,
+        behavior: "smooth",
+      });
+    });
+
+    getElementSpy.mockRestore();
+  });
 });
