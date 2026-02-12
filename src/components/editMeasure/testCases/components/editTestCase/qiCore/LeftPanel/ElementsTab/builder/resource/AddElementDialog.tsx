@@ -1,6 +1,4 @@
 import React, { useCallback, useEffect, useState } from "react";
-import CloseIcon from "@mui/icons-material/Close";
-import { IconButton, DialogActions, Divider } from "@mui/material";
 import ElementSelector, { getOptionLabel } from "../element/ElementSelector";
 import { ElementDefinition } from "fhir/r4";
 import { MadieDialog as Dialog } from "@madie/madie-design-system/dist/react";
@@ -11,15 +9,16 @@ export interface AddElementDialogProps {
   basePath: string;
   options: ElementDefinition[];
   value: ElementDefinition[];
-  saveElements: Function;
+  addElements: Function;
 }
 
 const AddElementDialog = (props: AddElementDialogProps) => {
-  const { open, onClose, basePath, options, value, saveElements } = props;
-
-  const [newValues, setNewValues] = useState<ElementDefinition[]>([]);
+  const { open, onClose, basePath, options, value, addElements } = props;
+  const [selectedElements, setSelectedElements] = useState<ElementDefinition[]>(
+    []
+  );
   useEffect(() => {
-    setNewValues(value);
+    setSelectedElements(value);
   }, [value]);
   const handleChange = useCallback(
     (event, newValue: ElementDefinition[] | null) => {
@@ -27,18 +26,18 @@ const AddElementDialog = (props: AddElementDialogProps) => {
         basePath +
         "." +
         getOptionLabel(newValue[newValue.length - 1], basePath);
-      setNewValues(newValue);
+      setSelectedElements(newValue);
     },
-    [value]
+    [basePath]
   );
   const handleClose = useCallback(() => {
-    setNewValues(value);
+    setSelectedElements(value);
     onClose();
   }, [onClose, value]);
-  const handleSave = useCallback(() => {
-    saveElements(newValues);
+  const handleAddElements = useCallback(() => {
+    addElements(selectedElements);
     onClose();
-  }, [newValues, onClose, saveElements]);
+  }, [selectedElements, onClose, addElements]);
 
   return (
     <Dialog
@@ -64,11 +63,11 @@ const AddElementDialog = (props: AddElementDialogProps) => {
         cancelText: "Discard Changes",
       }}
       continueButtonProps={{
-        id: "saveBtn",
+        id: "applyBtn",
         "data-testid": "add-element-button-2",
         "aria-label": "apply button",
         variant: "primary",
-        onClick: handleSave,
+        onClick: handleAddElements,
         continueText: "Apply",
       }}
       sx={{
@@ -109,8 +108,7 @@ const AddElementDialog = (props: AddElementDialogProps) => {
         <ElementSelector
           basePath={basePath}
           options={options}
-          value={value}
-          newValues={newValues}
+          selectedElements={selectedElements}
           onChange={handleChange}
         />
       </p>

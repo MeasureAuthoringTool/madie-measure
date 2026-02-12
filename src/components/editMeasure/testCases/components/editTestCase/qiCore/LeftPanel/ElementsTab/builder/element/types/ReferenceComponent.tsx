@@ -13,7 +13,7 @@ import AddElementButton from "../../../../../../../common/UIOnlyModelAgnostic/Ad
 import { useFormikContext } from "formik";
 import {
   buildMadieResourceFromResourceIdentifier,
-  removeUndefinedAndEmptyObjects,
+  removeUndefinedProperties,
 } from "../../../../../../../../api/fhirDefinitionServiceUtilities";
 import * as _ from "lodash";
 import "./ReferenceComponent.scss";
@@ -399,7 +399,7 @@ export default function ReferenceComponent({
             );
             // simulate what we're doing with the individual apply click.
             // clean the values like normal
-            const formikCleanedValues = removeUndefinedAndEmptyObjects(
+            const formikCleanedValues = removeUndefinedProperties(
               formikContext.values
             );
             // dispatch our event to modify our current bundle entry (formik.values), with the resource we want to add.
