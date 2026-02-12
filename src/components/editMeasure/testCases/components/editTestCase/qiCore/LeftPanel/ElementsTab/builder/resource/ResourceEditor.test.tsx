@@ -42,132 +42,132 @@ jest.mock("../../../../../../../api/useFhirDefinitionsService");
 const useFhirDefinitionsServiceApiMock =
   useFhirDefinitionsServiceApi as jest.Mock<FhirDefinitionsServiceApi>;
 
-describe("ResourceEditor", () => {
-  const formikValues = {
-    Patient: {
-      resourceType: "Patient",
-      id: "446b20b5-dd46-415e-9b9f-9eba6b260743",
-      meta: {
-        profile: [
-          "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient",
-        ],
-      },
-      extension: [
-        {
-          url: "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race",
-          extension: [
-            {
-              url: "ombCategory",
-              valueCoding: {
-                code: "1002-5",
-                system: "urn:oid:2.16.840.1.113883.6.238",
-                display: "American Indian or Alaska Native",
-                userSelected: true,
-              },
-            },
-            {
-              url: "text",
-              valueString: "American Indian or Alaska Native",
-            },
-          ],
-        },
-        {
-          url: "http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethnicity",
-          extension: [
-            {
-              url: "ombCategory",
-              valueCoding: {
-                code: "2135-2",
-                system: "urn:oid:2.16.840.1.113883.6.238",
-                display: "Hispanic or Latino",
-                userSelected: true,
-              },
-            },
-            {
-              url: "text",
-              valueString: "Hispanic or Latino",
-            },
-          ],
-        },
-        {
-          url: "http://hl7.org/fhir/us/core/StructureDefinition/us-core-birthsex",
-          valueCode: "M",
-        },
-      ],
-      identifier: [
-        {
-          type: {
-            coding: [
-              {
-                code: "MR",
-                system: "http://terminology.hl7.org/CodeSystem/v2-0203",
-              },
-            ],
-          },
-          system: "https://madie.cms.gov/",
-          value: "NotscreRefAsseNotmNodxNocp",
-        },
-      ],
-      active: true,
-      name: [
-        {
-          use: "usual",
-          text: "NotscreRefAsseNotmNodxNocp",
-          family: "denompass2",
-          given: ["NotscreRefAsseNotmNodxNocpdenompass2"],
-        },
-      ],
-      gender: "male",
-      birthDate: "1952-01-01",
-      address: [
-        {
-          text: "NotscreRefAsseNotmNodxNocp, Screened Not at risk Assessed Severely Malnourished Diagnosed Care Plan, ID=NotscreRefAsseNotmNodxNocp, DOB: 01 Jan 1952",
-        },
+const formikValues = {
+  Patient: {
+    resourceType: "Patient",
+    id: "446b20b5-dd46-415e-9b9f-9eba6b260743",
+    meta: {
+      profile: [
+        "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient",
       ],
     },
-  };
+    extension: [
+      {
+        url: "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race",
+        extension: [
+          {
+            url: "ombCategory",
+            valueCoding: {
+              code: "1002-5",
+              system: "urn:oid:2.16.840.1.113883.6.238",
+              display: "American Indian or Alaska Native",
+              userSelected: true,
+            },
+          },
+          {
+            url: "text",
+            valueString: "American Indian or Alaska Native",
+          },
+        ],
+      },
+      {
+        url: "http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethnicity",
+        extension: [
+          {
+            url: "ombCategory",
+            valueCoding: {
+              code: "2135-2",
+              system: "urn:oid:2.16.840.1.113883.6.238",
+              display: "Hispanic or Latino",
+              userSelected: true,
+            },
+          },
+          {
+            url: "text",
+            valueString: "Hispanic or Latino",
+          },
+        ],
+      },
+      {
+        url: "http://hl7.org/fhir/us/core/StructureDefinition/us-core-birthsex",
+        valueCode: "M",
+      },
+    ],
+    identifier: [
+      {
+        type: {
+          coding: [
+            {
+              code: "MR",
+              system: "http://terminology.hl7.org/CodeSystem/v2-0203",
+            },
+          ],
+        },
+        system: "https://madie.cms.gov/",
+        value: "NotscreRefAsseNotmNodxNocp",
+      },
+    ],
+    active: true,
+    name: [
+      {
+        use: "usual",
+        text: "NotscreRefAsseNotmNodxNocp",
+        family: "denompass2",
+        given: ["NotscreRefAsseNotmNodxNocpdenompass2"],
+      },
+    ],
+    gender: "male",
+    birthDate: "1952-01-01",
+    address: [
+      {
+        text: "NotscreRefAsseNotmNodxNocp, Screened Not at risk Assessed Severely Malnourished Diagnosed Care Plan, ID=NotscreRefAsseNotmNodxNocp, DOB: 01 Jan 1952",
+      },
+    ],
+  },
+};
 
-  const getProps = (label) => {
-    if (label === "ClaimResource.id") {
-      return {
-        value: "6fb9d817-76c5-4b68-ba06-92c7429e6b5c",
-      };
-    } else if (label === "id") {
-      return {
-        value: "446b20b5-dd46-415e-9b9f-9eba6b260743",
-      };
-    } else if (label === "AllergyIntolerance.id") {
-      return {
-        value: "6fb9d817",
-      };
-    } else if (label === "AllergyIntolerance.onsetDateTime") {
-      return {
-        value: "2025-07-01T04:00:00+00:00",
-      };
-    } else {
-      return {
-        value: "test1",
-      };
-    }
-  };
+const getProps = (label) => {
+  if (label === "ClaimResource.id") {
+    return {
+      value: "6fb9d817-76c5-4b68-ba06-92c7429e6b5c",
+    };
+  } else if (label === "id") {
+    return {
+      value: "446b20b5-dd46-415e-9b9f-9eba6b260743",
+    };
+  } else if (label === "AllergyIntolerance.id") {
+    return {
+      value: "6fb9d817",
+    };
+  } else if (label === "AllergyIntolerance.onsetDateTime") {
+    return {
+      value: "2025-07-01T04:00:00+00:00",
+    };
+  } else {
+    return {
+      value: "test1",
+    };
+  }
+};
 
-  const resetForm = jest.fn();
-  const mockFormikObj = {
-    touched: {},
-    errors: {},
-    values: formikValues,
-    isSubmitting: false,
-    setFieldValue: jest.fn(),
-    getFieldProps: getProps,
-    dirty: true,
-    resetForm,
-    setFieldTouched: jest.fn(),
-  };
+const resetForm = jest.fn();
+const mockFormikObj = {
+  touched: {},
+  errors: {},
+  values: formikValues,
+  isSubmitting: false,
+  setFieldValue: jest.fn(),
+  getFieldProps: getProps,
+  dirty: true,
+  resetForm,
+  setFieldTouched: jest.fn(),
+};
 
-  const mockOnCancel = jest.fn();
-  const mockSetValidationSchema = jest.fn();
-  const mockSetInitialFormikValuesStu6 = jest.fn();
+const mockOnCancel = jest.fn();
+const mockSetValidationSchema = jest.fn();
+const mockSetInitialFormikValuesStu6 = jest.fn();
 
+describe("ResourceEditor", () => {
   let localMockResourceState;
   let localMockckValueSetsState;
   let localMockFormikObj;
@@ -210,6 +210,8 @@ describe("ResourceEditor", () => {
               setInitialFormikValuesStu6={mockSetInitialFormikValuesStu6}
               onCancel={mockOnCancel}
               canEdit={true}
+              applyLoading={false}
+              setApplyLoading={jest.fn()}
             />
           </QiCoreResourceContext.Provider>
         </ApiContextProvider>
@@ -255,6 +257,8 @@ describe("ResourceEditor", () => {
           setInitialFormikValuesStu6={mockSetInitialFormikValuesStu6}
           onCancel={mockOnCancel}
           canEdit={true}
+          applyLoading={false}
+          setApplyLoading={jest.fn()}
         />
       </QiCoreResourceContext.Provider>
     );
@@ -313,6 +317,8 @@ describe("ResourceEditor", () => {
           setInitialFormikValuesStu6={mockSetInitialFormikValuesStu6}
           onCancel={mockOnCancel}
           canEdit={true}
+          applyLoading={false}
+          setApplyLoading={jest.fn()}
         />
       </QiCoreResourceContext.Provider>
     );
@@ -360,6 +366,8 @@ describe("ResourceEditor", () => {
           setInitialFormikValuesStu6={mockSetInitialFormikValuesStu6}
           onCancel={mockOnCancel}
           canEdit={true}
+          applyLoading={false}
+          setApplyLoading={jest.fn()}
         />
       </QiCoreResourceContext.Provider>
     );
@@ -388,8 +396,7 @@ describe("ResourceEditor", () => {
     });
   });
 
-  // temp skip
-  it.skip("opens AddElementDialog, interacts with it, and can close it", async () => {
+  it("opens and closes the AddElementDialog", async () => {
     (useFormikContext as jest.Mock).mockReturnValue(localMockFormikObj);
     const mockDispatch = jest.fn();
 
@@ -410,6 +417,8 @@ describe("ResourceEditor", () => {
               setInitialFormikValuesStu6={mockSetInitialFormikValuesStu6}
               onCancel={mockOnCancel}
               canEdit={true}
+              applyLoading={false}
+              setApplyLoading={jest.fn()}
             />
           </QiCoreResourceContext.Provider>
         </ApiContextProvider>
@@ -448,13 +457,100 @@ describe("ResourceEditor", () => {
     await waitFor(() => {
       expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
     });
+  });
 
-    // Reopen dialog one more time to test save
-    userEvent.click(addAttributeButton);
+  it("opens AddElementDialog and add attributes", async () => {
+    (useFormikContext as jest.Mock).mockReturnValue(localMockFormikObj);
+    const mockDispatch = jest.fn();
 
-    // Click save button
-    const saveButton = screen.getByTestId("add-element-button-2");
-    userEvent.click(saveButton);
+    render(
+      <ExecutionContextProvider
+        value={{
+          valueSetsState: localMockckValueSetsState,
+          executionContextReady: true,
+        }}
+      >
+        <ApiContextProvider value={mockConfig}>
+          <QiCoreResourceContext.Provider
+            value={{ state: localMockResourceState, dispatch: mockDispatch }}
+          >
+            <ResourceEditor
+              selectedResourceID="446b20b5-dd46-415e-9b9f-9eba6b260743"
+              setValidationSchema={mockSetValidationSchema}
+              setInitialFormikValuesStu6={mockSetInitialFormikValuesStu6}
+              onCancel={mockOnCancel}
+              canEdit={true}
+              applyLoading={false}
+              setApplyLoading={jest.fn()}
+            />
+          </QiCoreResourceContext.Provider>
+        </ApiContextProvider>
+      </ExecutionContextProvider>
+    );
+
+    // Click the "Add Attribute(s)" button to open dialog
+    const addAttributeButton = await screen.findByTestId(
+      "add-attribute-dialog-button"
+    );
+
+    await waitFor(() => {
+      userEvent.click(addAttributeButton);
+    });
+
+    // Verify dialog is open
+    await waitFor(() => {
+      expect(screen.getByTestId("close-button")).toBeInTheDocument();
+    });
+
+    // Verify attribute selector is present
+    expect(screen.getByText("Attribute Selector")).toBeInTheDocument();
+
+    // Find the autocomplete input
+    const autocompleteInput = await screen.findByRole("combobox");
+    expect(autocompleteInput).toBeInTheDocument();
+
+    // Click on the autocomplete to open the dropdown
+    userEvent.click(autocompleteInput);
+
+    // Wait for dropdown to be ready before typing
+    await waitFor(() => {
+      expect(autocompleteInput).toHaveFocus();
+    });
+
+    // select the deceasedBoolean attribute
+    userEvent.type(autocompleteInput, "deceased");
+
+    await waitFor(() => {
+      const deceasedOption = screen.getByText(/deceasedBoolean/i);
+      expect(deceasedOption).toBeInTheDocument();
+      userEvent.click(deceasedOption);
+    });
+
+    // // Clear input and select the maritalStatus attribute
+    // userEvent.clear(autocompleteInput);
+    // userEvent.type(autocompleteInput, "maritalStatus");
+    //
+    // await waitFor(() => {
+    //   const maritalStatusOption = screen.getAllByText(/maritalStatus/i)[0];
+    //   expect(maritalStatusOption).toBeInTheDocument();
+    //   userEvent.click(maritalStatusOption);
+    // });
+
+    // Clear input and select gender identity slice
+    userEvent.clear(autocompleteInput);
+    userEvent.type(autocompleteInput, "genderIdentity");
+
+    await waitFor(() => {
+      const genderIdentityOption = screen.getByText(
+        /extension:genderIdentity/i
+      );
+      expect(genderIdentityOption).toBeInTheDocument();
+      userEvent.click(genderIdentityOption);
+    });
+
+    // Click Apply button to save the selected attribute
+    const applyButton = screen.getByTestId("add-element-button-2");
+    userEvent.click(applyButton);
 
     // Verify dialog is closed and dispatch was called
     await waitFor(() => {
@@ -506,6 +602,8 @@ describe("ResourceEditor", () => {
           setInitialFormikValuesStu6={mockSetInitialFormikValuesStu6}
           onCancel={mockOnCancel}
           canEdit={true}
+          applyLoading={false}
+          setApplyLoading={jest.fn()}
         />
       </QiCoreResourceContext.Provider>
     );
@@ -532,6 +630,8 @@ describe("ResourceEditor", () => {
           setInitialFormikValuesStu6={mockSetInitialFormikValuesStu6}
           onCancel={mockOnCancel}
           canEdit={true}
+          applyLoading={false}
+          setApplyLoading={jest.fn()}
         />
       </QiCoreResourceContext.Provider>
     );
@@ -568,6 +668,8 @@ describe("ResourceEditor", () => {
               setInitialFormikValuesStu6={mockSetInitialFormikValuesStu6}
               onCancel={mockOnCancel}
               canEdit={true}
+              applyLoading={false}
+              setApplyLoading={jest.fn()}
             />
           </QiCoreResourceContext.Provider>
         </ApiContextProvider>
@@ -620,6 +722,8 @@ describe("ResourceEditor", () => {
               setInitialFormikValuesStu6={mockSetInitialFormikValuesStu6}
               onCancel={mockOnCancel}
               canEdit={true}
+              applyLoading={false}
+              setApplyLoading={jest.fn()}
             />
           </QiCoreResourceContext.Provider>
         </ApiContextProvider>
@@ -682,6 +786,8 @@ describe("ResourceEditor", () => {
           setInitialFormikValuesStu6={mockSetInitialFormikValuesStu6}
           onCancel={mockOnCancel}
           canEdit={true}
+          applyLoading={false}
+          setApplyLoading={jest.fn()}
         />
       </QiCoreResourceContext.Provider>
     );
@@ -753,6 +859,8 @@ describe("ResourceEditor", () => {
               setInitialFormikValuesStu6={jest.fn()}
               onCancel={jest.fn()}
               canEdit={true}
+              applyLoading={false}
+              setApplyLoading={jest.fn()}
             />
           </QiCoreResourceContext.Provider>
         </ApiContextProvider>
