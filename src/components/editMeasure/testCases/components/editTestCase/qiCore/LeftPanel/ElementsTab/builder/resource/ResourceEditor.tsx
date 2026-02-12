@@ -27,6 +27,7 @@ import {
   stripAllIndexes,
   filterUnusedExtensionsFromElements,
   PRIMITIVE_DEFAULT_VALUES,
+  isPrimitiveType,
 } from "../../../../../../../api/fhirDefinitionServiceUtilities";
 import { useFormikContext } from "formik";
 import {
@@ -245,10 +246,12 @@ const ResourceEditor = ({
         if (!elemPath.includes("extension:")) {
           let defaultValue: any;
           if (element.max == "*" || Number(element.max) > 1) {
-            defaultValue = [];
-          } else if (
-            PRIMITIVE_DEFAULT_VALUES.hasOwnProperty(element.type?.[0]?.code)
-          ) {
+            defaultValue = [
+              isPrimitiveType(element?.type?.[0]?.code)
+                ? PRIMITIVE_DEFAULT_VALUES[element.type[0].code]
+                : {},
+            ];
+          } else if (isPrimitiveType(element?.type?.[0]?.code)) {
             defaultValue = PRIMITIVE_DEFAULT_VALUES[element.type[0].code];
           } else {
             defaultValue = null;
