@@ -22,6 +22,9 @@ export const PRIMITIVE_DEFAULT_VALUES = {
   code: "",
 };
 
+export const isPrimitiveType = (typeCode: string) =>
+  PRIMITIVE_DEFAULT_VALUES.hasOwnProperty(typeCode);
+
 /**
  * Prepares the element name to be displayed for tab labels
  * for sliced elements- it will be sliceName. e.g. Patient.extension:race results into race
@@ -671,7 +674,7 @@ export function buildMadieResourceFromResourceIdentifier(
   return newEntry;
 }
 
-export function addCardinalityToElement(nextEntry, elemPath) {
+export function addCardinalityToElement(nextEntry, elemPath, rootDefinition) {
   if (!nextEntry?.resource[elemPath]) {
     // make it accessible to avoid a null
     nextEntry.resource[elemPath] = {};
@@ -681,8 +684,12 @@ export function addCardinalityToElement(nextEntry, elemPath) {
     // make it one
     nextEntry.resource[elemPath] = [nextEntry.resource[elemPath]];
   }
-  // add a new element;
-  nextEntry.resource[elemPath] = nextEntry.resource[elemPath].concat({}); // add an empty object.
+  // add a new element and add default values if it's a primitive type
+  nextEntry.resource[elemPath] = nextEntry.resource[elemPath].concat(
+    isPrimitiveType(rootDefinition?.type?.[0]?.code)
+      ? PRIMITIVE_DEFAULT_VALUES[rootDefinition.type[0].code]
+      : {}
+  );
   return nextEntry;
 }
 // We need to update labels based weather or not the parent has multiple cardinality as well as if the child is multiple cardinality
