@@ -68,6 +68,13 @@ const ComputedDate = () => {
             textFieldSx={{ width: "160px" }}
             onBlur={() => {}}
           />
+          <Button
+            onClick={() => {
+              setInitialDate(dayjs.utc().toISOString());
+            }}
+          >
+            Today
+          </Button>
         </div>
         <div className="add-subtract-option">
           <RadioButton
