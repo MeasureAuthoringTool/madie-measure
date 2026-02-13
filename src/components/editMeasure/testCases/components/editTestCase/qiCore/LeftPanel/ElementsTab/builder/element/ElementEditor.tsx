@@ -17,7 +17,7 @@ import {
   getAllChildren,
   stripResourcePath,
   isComponentDataType,
-  removeUndefinedAndEmptyObjects,
+  removeUndefinedProperties,
   mapElementsRequired,
   buildFullValidationSchema,
   shouldSkip,
@@ -307,10 +307,7 @@ const ElementEditor = ({
         try {
           const { type } = selectedResource?.definition;
           const { bundleEntry } = selectedResource;
-          const formikCleanedValues = removeUndefinedAndEmptyObjects(
-            formik.values
-          );
-
+          const formikCleanedValues = removeUndefinedProperties(formik.values);
           // Preserve existing metadata (id, meta/profile, etc.) while applying cleaned form values.
           const existingResource = bundleEntry.resource || {};
           const cleanedResource = formikCleanedValues?.[type] || {};
