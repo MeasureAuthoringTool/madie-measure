@@ -6,6 +6,7 @@ import { ResourceIdentifier } from "./models/ResourceIdentifier";
 import { StructureDefinitionDto } from "./models/StructureDefinitionDto";
 import { ValueSet } from "fhir/r4";
 import { TestCase } from "@madie/madie-models";
+import { qicoreVerionModelTypeMap } from "../util/CalculationTestHelpers";
 
 export interface TestCaseExecutionBundlesDTO {
   testCases: TestCase[];
@@ -78,13 +79,9 @@ export class FhirDefinitionsServiceApi {
     testCases: TestCase[]
   ): Promise<TestCaseExecutionBundlesDTO> {
     try {
-      const model = "4-1-1";
-      console.log(
-        `${this.baseUrl}/fhir/test-cases/qicore/${model}/execution-bundles`
-      );
-
+      const versionModel = qicoreVerionModelTypeMap(model);
       const response = await axios.post<TestCaseExecutionBundlesDTO>(
-        `${this.baseUrl}/fhir/test-cases/qicore/${model}/execution-bundles`,
+        `${this.baseUrl}/fhir/test-cases/qicore/${versionModel}/execution-bundles`,
         testCases,
         {
           headers: {

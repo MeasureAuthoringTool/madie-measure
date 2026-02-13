@@ -904,7 +904,7 @@ const EditTestCase = (props: EditTestCaseProps) => {
       const calculationOutput: CalculationOutput<any> =
         await calculation.current.calculateTestCases(
           measure,
-          updatedTestCaseExecutionBundle.testCases,
+          updatedTestCaseExecutionBundle?.testCases,
           measureBundle,
           valueSets
         );
