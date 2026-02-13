@@ -28,6 +28,7 @@ import {
   Measure,
 } from "@madie/madie-models";
 import useTestCaseServiceApi from "../../../api/useTestCaseServiceApi";
+import useFhirDefinitionsServiceApi from "../../../api/useFhirDefinitionsService";
 import Editor from "../../editor/Editor";
 import { TestCaseValidator } from "../../../validators/TestCaseValidator";
 import { MadieError, sanitizeUserInput } from "../../../util/Utils";
@@ -431,6 +432,7 @@ const EditTestCase = (props: EditTestCaseProps) => {
     []
   );
   const [callstackMap, setCallstackMap] = useState<CqlDefinitionCallstack>();
+  const fhirDefinitionServiceApi = useRef(useFhirDefinitionsServiceApi());
 
   const {
     measureState,
@@ -891,11 +893,18 @@ const EditTestCase = (props: EditTestCaseProps) => {
       }
     }
 
+    // filter any resources with invalid references.
+    const updatedTestCaseExecutionBundle =
+      await fhirDefinitionServiceApi.current.getTestCaseExecutionBundle(
+        measure.model,
+        [modifiedTestCase]
+      );
+
     try {
       const calculationOutput: CalculationOutput<any> =
         await calculation.current.calculateTestCases(
           measure,
-          [modifiedTestCase],
+          updatedTestCaseExecutionBundle.testCases,
           measureBundle,
           valueSets
         );

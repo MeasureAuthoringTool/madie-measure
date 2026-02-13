@@ -3531,6 +3531,16 @@ describe("EditTestCase component", () => {
           data: testCase,
         });
       });
+      mockedAxios.post.mockClear().mockImplementation((args) => {
+        if (args && args.endsWith("execution-bundles")) {
+          return Promise.resolve({
+            data: {
+              testCases: [testCase],
+              modifiedTestCaseIds: ["1234"],
+            },
+          });
+        }
+      });
       renderWithRouter(
         [
           "/measures/623cacebe74613783378c17b/edit/test-cases/623cacffe74613783378c17c",
@@ -3568,22 +3578,32 @@ describe("EditTestCase component", () => {
           data: { ...testCaseFixture, createdBy: MEASURE_CREATEDBY },
         });
       });
-      mockedAxios.post.mockResolvedValue({
-        data: {
-          code: 200,
-          message: null,
-          successful: true,
-          outcomeResponse: {
-            resourceType: "OperationOutcome",
-            issue: [
-              {
-                severity: "informational",
-                code: "processing",
-                diagnostics: "No issues!",
-              },
-            ],
+      mockedAxios.post.mockClear().mockImplementation((args) => {
+        if (args && args.endsWith("execution-bundles")) {
+          return Promise.resolve({
+            data: {
+              testCases: [testCaseFixture],
+              modifiedTestCaseIds: [testCaseFixture.id],
+            },
+          });
+        }
+        return Promise.resolve({
+          data: {
+            code: 200,
+            message: null,
+            successful: true,
+            outcomeResponse: {
+              resourceType: "OperationOutcome",
+              issue: [
+                {
+                  severity: "informational",
+                  code: "processing",
+                  diagnostics: "No issues!",
+                },
+              ],
+            },
           },
-        },
+        });
       });
       const measure = { ...simpleMeasureFixture, createdBy: MEASURE_CREATEDBY };
       renderWithRouter(
@@ -3690,22 +3710,32 @@ describe("EditTestCase component", () => {
           data: { ...nonBoolTestCaseFixture, createdBy: MEASURE_CREATEDBY },
         });
       });
-      mockedAxios.post.mockResolvedValue({
-        data: {
-          code: 200,
-          message: null,
-          successful: true,
-          outcomeResponse: {
-            resourceType: "OperationOutcome",
-            issue: [
-              {
-                severity: "informational",
-                code: "processing",
-                diagnostics: "No issues!",
-              },
-            ],
+      mockedAxios.post.mockClear().mockImplementation((args) => {
+        if (args && args.endsWith("execution-bundles")) {
+          return Promise.resolve({
+            data: {
+              testCases: [nonBoolTestCaseFixture],
+              modifiedTestCaseIds: [nonBoolTestCaseFixture.id],
+            },
+          });
+        }
+        return Promise.resolve({
+          data: {
+            code: 200,
+            message: null,
+            successful: true,
+            outcomeResponse: {
+              resourceType: "OperationOutcome",
+              issue: [
+                {
+                  severity: "informational",
+                  code: "processing",
+                  diagnostics: "No issues!",
+                },
+              ],
+            },
           },
-        },
+        });
       });
       const measure = {
         ...multiGroupMeasureFixture,
@@ -3833,22 +3863,32 @@ describe("EditTestCase component", () => {
           data: testCase,
         });
       });
-      mockedAxios.post.mockResolvedValue({
-        data: {
-          code: 200,
-          message: null,
-          successful: false,
-          outcomeResponse: {
-            resourceType: "OperationOutcome",
-            issue: [
-              {
-                severity: "error",
-                code: "processing",
-                diagnostics: "Major issue on line 1!",
-              },
-            ],
+      mockedAxios.post.mockClear().mockImplementation((args) => {
+        if (args && args.endsWith("execution-bundles")) {
+          return Promise.resolve({
+            data: {
+              testCases: [testCaseFixture],
+              modifiedTestCaseIds: [testCaseFixture.id],
+            },
+          });
+        }
+        return Promise.resolve({
+          data: {
+            code: 200,
+            message: null,
+            successful: false,
+            outcomeResponse: {
+              resourceType: "OperationOutcome",
+              issue: [
+                {
+                  severity: "error",
+                  code: "processing",
+                  diagnostics: "Major issue on line 1!",
+                },
+              ],
+            },
           },
-        },
+        });
       });
       const measure = { ...simpleMeasureFixture, createdBy: MEASURE_CREATEDBY };
       renderWithRouter(
@@ -3891,22 +3931,32 @@ describe("EditTestCase component", () => {
           data: { ...testCaseFixture, createdBy: MEASURE_CREATEDBY },
         });
       });
-      mockedAxios.post.mockResolvedValue({
-        data: {
-          code: 200,
-          message: null,
-          successful: false,
-          outcomeResponse: {
-            resourceType: "OperationOutcome",
-            issue: [
-              {
-                severity: "error",
-                code: "processing",
-                diagnostics: "Major issue on line 1!",
-              },
-            ],
+      mockedAxios.post.mockClear().mockImplementation((args) => {
+        if (args && args.endsWith("execution-bundles")) {
+          return Promise.resolve({
+            data: {
+              testCases: [testCaseFixture],
+              modifiedTestCaseIds: [testCaseFixture.id],
+            },
+          });
+        }
+        return Promise.resolve({
+          data: {
+            code: 200,
+            message: null,
+            successful: false,
+            outcomeResponse: {
+              resourceType: "OperationOutcome",
+              issue: [
+                {
+                  severity: "error",
+                  code: "processing",
+                  diagnostics: "Major issue on line 1!",
+                },
+              ],
+            },
           },
-        },
+        });
       });
       const measure = { ...simpleMeasureFixture, createdBy: MEASURE_CREATEDBY };
       renderWithRouter(
@@ -4020,6 +4070,16 @@ describe("EditTestCase component", () => {
             hapiOperationOutcome: validationOutcome,
           },
         });
+      });
+      mockedAxios.post.mockClear().mockImplementation((args) => {
+        if (args && args.endsWith("execution-bundles")) {
+          return Promise.resolve({
+            data: {
+              testCases: [testCaseFixture],
+              modifiedTestCaseIds: [testCaseFixture.id],
+            },
+          });
+        }
       });
       const measure = { ...simpleMeasureFixture, createdBy: MEASURE_CREATEDBY };
       measure.testCaseConfiguration.executeInvalidTestCases = true;
