@@ -1,18 +1,28 @@
 import * as React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
 import ComputedDate from "./ComputedDate";
+import dayjs from "dayjs";
 import userEvent from "@testing-library/user-event";
 
 describe("ComputedDate", () => {
   it("renders the ComputedDate with initial state", () => {
     render(<ComputedDate />);
     expect(screen.getByLabelText("Initial Date")).toBeInTheDocument();
+    expect(screen.getByText("Today")).toBeInTheDocument();
     expect(screen.getByText("Add/Subtract")).toBeInTheDocument();
     expect(
       screen.getByLabelText("Days/Weeks/Months/Years")
     ).toBeInTheDocument();
     expect(screen.getByText("Calculate")).toBeInTheDocument();
     expect(screen.getByPlaceholderText("--/--/----")).toBeInTheDocument();
+  });
+
+  it("updates initial date when 'Today' button is clicked", () => {
+    render(<ComputedDate />);
+    const todayButton = screen.getByText("Today");
+    fireEvent.click(todayButton);
+    const startDateInput = screen.getByLabelText("Initial Date");
+    expect(startDateInput).toHaveValue(dayjs.utc().format("MM/DD/YYYY"));
   });
 
   it("Click compute precision dropdown can select options", () => {
