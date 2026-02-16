@@ -38,6 +38,16 @@ export const formatMap = {
   [YEAR_MONTH_DAY_FORMAT]: ["year", "month", "day"],
   [DATE_TIME_ZONE_FORMAT]: ["year", "month", "day"],
 };
+export const formatRank = {
+  [YEAR_FORMAT]: 1,
+  [YEAR_MONTH_FORMAT]: 2,
+  [YEAR_MONTH_DAY_FORMAT]: 3,
+  [DATE_TIME_ZONE_FORMAT]: 4,
+};
+
+export const isFormatLessComplex = (format: string, currentFormat: string) => {
+  return formatRank[format] < formatRank[currentFormat];
+};
 
 const dateRegex =
   /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{3})?([+-]\d{2}:\d{2}|Z)$/;
@@ -48,21 +58,11 @@ const isValidFormattedDate = (dateString: string) => {
 };
 
 export const getCurrentFormat = (dateStr: string) => {
-  // the following regexes ensure that we don't misidentify a date like "2023-01" as YEAR_MONTH_FORMAT, even though it's technically valid for YEAR_FORMAT according to dayjs,
-  const YEAR_REGEX = /^\d{4}$/;
-  const YEAR_MONTH_REGEX = /^\d{4}-\d{2}$/;
-  const YEAR_MONTH_DAY_REGEX = /^\d{4}-\d{2}-\d{2}$/;
-  if (dayjs(dateStr, YEAR_FORMAT, true).isValid() && YEAR_REGEX.test(dateStr)) {
+  if (dayjs(dateStr, YEAR_FORMAT, true).isValid()) {
     return YEAR_FORMAT;
-  } else if (
-    dayjs(dateStr, YEAR_MONTH_FORMAT, true).isValid() &&
-    YEAR_MONTH_REGEX.test(dateStr)
-  ) {
+  } else if (dayjs(dateStr, YEAR_MONTH_FORMAT, true).isValid()) {
     return YEAR_MONTH_FORMAT;
-  } else if (
-    dayjs(dateStr, YEAR_MONTH_DAY_FORMAT, true).isValid() &&
-    YEAR_MONTH_DAY_REGEX.test(dateStr)
-  ) {
+  } else if (dayjs(dateStr, YEAR_MONTH_DAY_FORMAT, true).isValid()) {
     return YEAR_MONTH_DAY_FORMAT;
   } else if (isValidFormattedDate(dateStr)) {
     return DATE_TIME_ZONE_FORMAT;
@@ -89,8 +89,8 @@ const PeriodDateTimeComponent = ({
   canEdit,
   fieldRequired,
   value = {},
-  onChange, // expects { start, end }
-  label = "Period",
+  onChange, // expects { start, end } and only returns filled fields, or undefined if both empty
+  label = "DateTime",
   error = {},
   helperText = {},
 }: TypeComponentProps) => {
@@ -134,9 +134,27 @@ const PeriodDateTimeComponent = ({
         ? dayjs.utc(end)
         : null
     );
+  }, [value, userSelectedFormat]);
 
-    setUserSelectedFormat(false);
-  }, [value]);
+  // Helper function to build the period object with only filled fields
+  // Returns undefined if both fields are empty (to remove the period key from JSON)
+  const buildPeriodValue = (
+    startValue: string | null,
+    endValue: string | null
+  ) => {
+    const period: { start?: string; end?: string } = {};
+    if (startValue?.trim()) period.start = startValue;
+    if (endValue?.trim()) period.end = endValue;
+    return period.start || period.end ? period : undefined;
+  };
+
+  // Centralized function to update period with current start/end state
+  const updatePeriod = (newStartDate: any, newEndDate: any) => {
+    const startValue = newStartDate ? newStartDate.format(format) : null;
+    const endValue = newEndDate ? newEndDate.format(format) : null;
+    onChange(buildPeriodValue(startValue, endValue));
+  };
+
   // When the Select switches to readOnly, prevent the resulting ReadOnlyTextField's style from being overwritten
   const selectProps: any = {};
   if (canEdit) {
@@ -147,20 +165,7 @@ const PeriodDateTimeComponent = ({
       sx={{ display: "flex", flexDirection: "column", gap: 2 }}
       data-component-type="PeriodDateTimeComponent"
     >
-      <label
-        htmlFor={label}
-        aria-labelledby={`${label}-label`}
-        data-testid={`${label}-label`}
-        style={{
-          textTransform: "none",
-          color: "#0073c8",
-          marginTop: "12px",
-          marginBottom: "-12px",
-        }}
-      >
-        {label}
-      </label>
-      <div style={{ maxWidth: 220 }} id={label}>
+      <div style={{ marginBottom: "16px", maxWidth: 220 }}>
         <Select
           readOnly={!canEdit}
           required={fieldRequired}
@@ -181,12 +186,12 @@ const PeriodDateTimeComponent = ({
           onChange={(event) => {
             const { value } = event.target;
             setFormat(value);
-            setUserSelectedFormat(true);
             setStartDate(null);
             setEndDate(null);
             setStartTime(null);
             setEndTime(null);
-            onChange({ start: "", end: "" });
+            setUserSelectedFormat(true);
+            onChange(undefined);
           }}
           placeHolder={{ name: "Select Format", value: "" }}
           value={format ? format : ""}
@@ -213,10 +218,8 @@ const PeriodDateTimeComponent = ({
                 console.error("Invalid date format pasted:", pastedValue);
                 return;
               }
-              onChange({
-                start: parsedDate.format(format),
-                end: endDate?.format(format) || "",
-              });
+              setStartDate(parsedDate);
+              updatePeriod(parsedDate, endDate);
             }}
           >
             <DateField
@@ -232,12 +235,16 @@ const PeriodDateTimeComponent = ({
               placeholder={format ? formatOptionRenderMap[format] : ""}
               id={`start-${format || "year"}-field-${label}`}
               onChange={(newDate) => {
+                // Handle clearing the field
                 if (!newDate || newDate.format(format) === "Invalid Date") {
+                  setStartDate(null);
+                  setStartTime(null);
+                  updatePeriod(null, endDate);
                   return;
                 }
 
                 const dateUTC = dayjs.utc(newDate);
-                setStartDate(dateUTC);
+
                 if (format === DATE_TIME_ZONE_FORMAT && startTime) {
                   // Merge date and time
                   const merged = dateUTC
@@ -245,15 +252,10 @@ const PeriodDateTimeComponent = ({
                     .minute(startTime.minute())
                     .second(startTime.second());
                   setStartDate(merged);
-                  onChange({
-                    start: merged.format(format),
-                    end: endDate ? endDate.format(format) : "",
-                  });
+                  updatePeriod(merged, endDate);
                 } else {
-                  onChange({
-                    start: dateUTC.format(format),
-                    end: endDate ? endDate.format(format) : "",
-                  });
+                  setStartDate(dateUTC);
+                  updatePeriod(dateUTC, endDate);
                 }
               }}
               onBlur={() => {}}
@@ -279,10 +281,7 @@ const PeriodDateTimeComponent = ({
                       .minute(utcTime.minute())
                       .second(utcTime.second());
                     setStartDate(merged);
-                    onChange({
-                      start: merged.format(format),
-                      end: endDate ? endDate.format(format) : "",
-                    });
+                    updatePeriod(merged, endDate);
                   }}
                   value={startTime || startDate}
                 />
@@ -311,10 +310,8 @@ const PeriodDateTimeComponent = ({
                 console.error("Invalid date format pasted:", pastedValue);
                 return;
               }
-              onChange({
-                start: startDate ? startDate.format(format) : "",
-                end: parsedDate.format(format),
-              });
+              setEndDate(parsedDate);
+              updatePeriod(startDate, parsedDate);
             }}
           >
             <DateField
@@ -330,12 +327,16 @@ const PeriodDateTimeComponent = ({
               placeholder={format ? formatOptionRenderMap[format] : ""}
               id={`end-${format || "year"}-field-${label}`}
               onChange={(newDate) => {
+                // Handle clearing the field
                 if (!newDate || newDate.format(format) === "Invalid Date") {
+                  setEndDate(null);
+                  setEndTime(null);
+                  updatePeriod(startDate, null);
                   return;
                 }
 
                 const dateUTC = dayjs.utc(newDate);
-                setEndDate(dateUTC);
+
                 if (format === DATE_TIME_ZONE_FORMAT && endTime) {
                   // Merge date and time
                   const merged = dateUTC
@@ -343,15 +344,10 @@ const PeriodDateTimeComponent = ({
                     .minute(endTime.minute())
                     .second(endTime.second());
                   setEndDate(merged);
-                  onChange({
-                    start: startDate ? startDate.format(format) : "",
-                    end: merged.format(format),
-                  });
+                  updatePeriod(startDate, merged);
                 } else {
-                  onChange({
-                    start: startDate ? startDate.format(format) : "",
-                    end: dateUTC.format(format),
-                  });
+                  setEndDate(dateUTC);
+                  updatePeriod(startDate, dateUTC);
                 }
               }}
               onBlur={() => {}}
@@ -376,10 +372,7 @@ const PeriodDateTimeComponent = ({
                       .minute(utcTime.minute())
                       .second(utcTime.second());
                     setEndDate(merged);
-                    onChange({
-                      start: startDate ? startDate.format(format) : "",
-                      end: merged.format(format),
-                    });
+                    updatePeriod(startDate, merged);
                   }}
                   value={endTime || endDate}
                 />
