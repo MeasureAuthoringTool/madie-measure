@@ -117,8 +117,10 @@ export default function MeasureInformation(props: MeasureInformationProps) {
           setMeasureOwner(getMeasureOwnerName(response));
         })
         .catch(() => {
-          setMeasureOwner("-");
+          setMeasureOwner(measure?.measureSet?.owner);
         });
+    } else {
+      setMeasureOwner("-");
     }
   }, [measure?.measureSet?.owner]);
 
