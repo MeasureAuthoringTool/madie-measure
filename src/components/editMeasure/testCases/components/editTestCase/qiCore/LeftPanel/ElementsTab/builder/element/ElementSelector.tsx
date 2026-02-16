@@ -45,7 +45,7 @@ export const getChoiceBaseLabel = (
   option: ElementDefinition,
   basePath: string
 ) => {
-  const label = option.path?.substring(basePath.length + 1);
+  const label = option.id?.substring(basePath.length + 1);
 
   // If this is an original choice type definition with [x]
   if (label.endsWith("[x]")) {
@@ -129,8 +129,8 @@ const ElementSelector = ({
           if (option.min === 1) {
             return true;
           }
-          const base = getChoiceBaseLabel(option, basePath);
-          if (base) {
+          if (option.id.includes("[x]")) {
+            const base = getChoiceBaseLabel(option, basePath);
             // if any other option with same base is selected, and this option is not selected, disable
             // find if any selected option with same base but different code
             const isOtherSelected = selectedElements.some(
