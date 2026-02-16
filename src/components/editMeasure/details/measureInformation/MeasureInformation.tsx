@@ -109,7 +109,7 @@ export default function MeasureInformation(props: MeasureInformationProps) {
       : "-";
   };
 
-  useEffect(() => {
+   useEffect(() => {
     if (measure?.measureSet?.owner) {
       userServiceApi
         .getOwnerDetails(measure?.measureSet?.owner)
@@ -117,8 +117,10 @@ export default function MeasureInformation(props: MeasureInformationProps) {
           setMeasureOwner(getMeasureOwnerName(response));
         })
         .catch(() => {
-          setMeasureOwner("-");
+          setMeasureOwner(measure?.measureSet?.owner);
         });
+    } else {
+      setMeasureOwner("-");
     }
   }, [measure?.measureSet?.owner]);
 
