@@ -6,6 +6,7 @@ import { Select, Button } from "@madie/madie-design-system/dist/react";
 import { MenuItem, Box } from "@mui/material";
 import _ from "lodash";
 import AddComponentsDialog from "../addComponents/AddComponentsDialog";
+import AddedComponentsTable from "./AddedComponentsTable";
 
 export const compositeScoringOptions = [
   {
@@ -26,7 +27,13 @@ export const compositeScoringOptions = [
   },
 ];
 
-const CompositeScoring = ({ canEdit, formik, measure }) => {
+const CompositeScoring = ({
+  canEdit,
+  formik,
+  measure,
+  components,
+  submitComponentForm,
+}) => {
   const isCompositeScoringSelected =
     formik.values?.compositeScoring &&
     formik.values.compositeScoring !== "" &&
@@ -95,7 +102,11 @@ const CompositeScoring = ({ canEdit, formik, measure }) => {
         </Box>
       </Box>
 
+      <AddedComponentsTable components={components} />
+
       <AddComponentsDialog
+        components={components}
+        submitComponentForm={submitComponentForm}
         open={openAddComponentsDialog}
         onClose={onAddComponentsClose}
         measure={measure}

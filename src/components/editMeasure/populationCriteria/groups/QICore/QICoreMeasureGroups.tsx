@@ -73,6 +73,7 @@ import {
 } from "../../../../../styles/editMeasure/populationCriteria/groups/index";
 import CompletionIndicator from "../CompletionIndicator";
 import CompositeComponent from "../Composite/CompositeComponent";
+import { components } from "react-select";
 
 interface ColSpanPopulationsType {
   isExclusionPop?: boolean;
@@ -359,6 +360,8 @@ const MeasureGroups = (props: MeasureGroupProps) => {
           compositeScoring: isCompositeMeasure
             ? measure?.groups[measureGroupNumber]?.compositeScoring || ""
             : null,
+          //@ts-ignore
+          components: group?.components || [],
         },
       });
       setVisibleStrats(
@@ -385,6 +388,8 @@ const MeasureGroups = (props: MeasureGroupProps) => {
             scoringUnit: "",
             scoringPrecision: "",
             compositeScoring: isCompositeMeasure ? "" : null,
+            //@ts-ignore
+            components: group?.components || [],
           },
         });
       }
@@ -416,7 +421,9 @@ const MeasureGroups = (props: MeasureGroupProps) => {
       compositeScoring: isCompositeMeasure
         ? group?.compositeScoring || ""
         : null,
-    } as Group,
+      //@ts-ignore
+      components: group?.components || [],
+    } as any,
     validationSchema: measureGroupSchemaValidator(
       cqlDefinitionDataTypes,
       cqlFunctionDataTypes,
@@ -452,7 +459,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
   });
   useFormikResetOnEvent(formik);
   const { resetForm, validateForm } = formik;
-
+  console.log("formik.values", formik.values.components);
   const checkTestCasesLockStatus = async (): Promise<boolean> => {
     if (featureFlags.Locking && (await props.checkTestCasesLockStatus())) {
       handleToast(
@@ -562,6 +569,97 @@ const MeasureGroups = (props: MeasureGroupProps) => {
       });
     }
     setDiscardDialogOpen(false);
+  };
+
+  const submitComponentForm = (uniqueComponents) => {
+    group.displayId = "Group_" + (measureGroupNumber + 1);
+    // If measure is composite, ensure scoring is set to "Composite"
+    if (isCompositeMeasure) {
+      group.scoring = GroupScoring.COMPOSITE;
+    }
+    if (group.stratifications) {
+      group.stratifications = group.stratifications.filter(
+        (strat) =>
+          (!!strat.description || !!strat.cqlDefinition) &&
+          strat.description !== deleteToken
+      );
+    }
+    //@ts-ignore;
+    group.components = uniqueComponents;
+    if (measure?.groups && !(measureGroupNumber >= measure?.groups?.length)) {
+      group.id = measure?.groups[measureGroupNumber].id;
+      measureServiceApi
+        .updateGroup(group, measure.id)
+        .then(async (g: Group) => {
+          if (g === null || g.id === null) {
+            throw new Error("Error updating group");
+          }
+          await updateMeasureFromDb(measure.id);
+        })
+        .then(() => {
+          setAssociationChanged(false);
+          handleDialogClose();
+          handleToast(
+            "success",
+            "Successfully added components to composite measure.",
+            true
+          );
+          formik.resetForm();
+          setActiveTab(defaultActiveTab);
+        })
+        .catch((error) => {
+          if (
+            featureFlags?.Locking &&
+            error?.message.includes(
+              "Unable to update measure. Measure is locked by"
+            )
+          ) {
+            updateMeasure({
+              ...measure,
+              measureLock: {
+                lockedBy: error?.message
+                  ?.replace(
+                    "Unable to update measure. Measure is locked by",
+                    ""
+                  )
+                  .trim(),
+              } as unknown as MeasureLock,
+            });
+            resetForm();
+          }
+          props.setAlertMessage({
+            type: "error",
+            message: error.message,
+            canClose: false,
+          });
+        });
+    } else {
+      measureServiceApi
+        .createGroup(group, measure.id)
+        .then(async (g: Group) => {
+          if (g === null || g.id === null) {
+            throw new Error("Error creating group");
+          }
+          const updatedMeasure = await updateMeasureFromDb(measure.id);
+
+          return updatedMeasure;
+        })
+        .then((updatedMeasure) => {
+          handleToast(
+            "success",
+            "Population details for this group saved successfully.",
+            true
+          );
+          navigate(groupsBaseUrl + "/" + updatedMeasure?.groups.length);
+        })
+        .catch((error) => {
+          props.setAlertMessage({
+            type: "error",
+            message: error.message,
+            canClose: false,
+          });
+        });
+    }
   };
 
   const updateMeasureFromDb = async (measureId) => {
@@ -1284,6 +1382,9 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                       canEdit={canEdit}
                       formik={formik}
                       measure={measure}
+                      components={formik.values.components}
+                      //@ts-ignore
+                      submitComponentForm={submitComponentForm}
                     />
                   </div>
                 )}

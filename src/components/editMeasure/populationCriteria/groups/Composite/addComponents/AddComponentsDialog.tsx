@@ -51,6 +51,13 @@ export default function AddComponentsDialog({
   onClose,
   measure,
   compositeScoring,
+  // export interface Component {
+  // measureId: string;
+  // groupId: string;
+  // weight: number;
+  // }
+  components,
+  submitComponentForm,
 }) {
   const measureServiceApi = useRef(useMeasureServiceApi()).current;
   const [limit, setLimit] = useState(5);
@@ -148,17 +155,15 @@ export default function AddComponentsDialog({
             />
           );
         },
-
-        cell: (info) => (
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "row",
-              gap: 16,
-            }}
-          >
+        cell: ({ row }) => (
+          <div style={{ display: "flex", flexDirection: "row", gap: 16 }}>
             <div className="px-1">
-              <IndeterminateCheckbox />
+              <IndeterminateCheckbox
+                checked={row.getIsSelected()}
+                indeterminate={row.getIsSomeSelected?.()}
+                onChange={row.getToggleSelectedHandler()}
+                aria-label={`Toggle row ${row.id}`}
+              />
             </div>
           </div>
         ),
@@ -311,6 +316,7 @@ export default function AddComponentsDialog({
         setTotalItems(totalElements);
         setVisibleItems(numberOfElements);
         setMeasureList(content);
+        console.log("content", content);
         setOffset(pageable?.offset);
         setLoading(false);
       })
@@ -331,6 +337,8 @@ export default function AddComponentsDialog({
     };
   }, [fetchMeasures, measure?.id]);
 
+  const [rowSelection, setRowSelection] = useState({});
+  console.log("rowSelection", rowSelection);
   const table = useReactTable({
     data: measureList,
     columns,
@@ -346,17 +354,48 @@ export default function AddComponentsDialog({
     onSortingChange: setSorting,
     state: {
       sorting,
+      rowSelection,
     },
+    enableRowSelection: true,
+    onRowSelectionChange: setRowSelection,
   });
 
   const handleDialogClose = () => {
     onClose();
   };
 
-  const handleDialogSubmit = (e) => {
+  const handleDialogSubmit = async (e) => {
     e.preventDefault();
     // required: to prevent event bubbling to parent forms
     e.stopPropagation();
+
+    // make shallow copy of what we already have
+    console.log("components are", components);
+    const newComponents = [...components];
+    // get all the objectIds of the selected measures
+    const selectedMeasureObjectIds = Object.keys(rowSelection);
+    console.log("selectedMeasureObjectIds", selectedMeasureObjectIds);
+    const results = await measureServiceApi.fetchMeasuresByIds(
+      selectedMeasureObjectIds
+    );
+    console.log("results", results);
+
+    // now that we have results, we want to generate components
+    // const newComponents = [];
+    results.forEach((measure) => {
+      measure.groups.forEach((group) => {
+        newComponents.push({
+          measureId: measure.id,
+          groupId: group.id,
+        });
+      });
+    });
+    // Now we have a new list of components. We need to filter out any duplicates.
+    const uniqueComponents = _.uniq(newComponents);
+    console.log("uniqueComponents", uniqueComponents);
+    submitComponentForm(uniqueComponents);
+
+    // onClose();
   };
 
   const expandedColumns = useMemo<ColumnDef<Measure>[]>(() => {
