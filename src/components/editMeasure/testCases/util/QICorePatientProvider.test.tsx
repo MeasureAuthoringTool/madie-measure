@@ -211,3 +211,48 @@ describe("QiCoreResourceContext", () => {
     consoleError.mockRestore();
   });
 });
+
+describe("QiCoreResourceProvider expose window for cypress", () => {
+  beforeEach(() => {
+    delete (window as any).Cypress;
+    delete (window as any).store;
+  });
+
+  afterAll(() => {
+    delete (window as any).Cypress;
+    delete (window as any).store;
+  });
+
+  it("sets window.store when available", () => {
+    (window as any).Cypress = true;
+
+    render(
+      <QiCoreResourceProvider>
+        <TestComponent />
+      </QiCoreResourceProvider>
+    );
+
+    expect((window as any).store).toBeDefined();
+    expect((window as any).store).toEqual(
+      expect.objectContaining({
+        resource: null,
+        bundle: null,
+      })
+    );
+    act(() => {
+      screen.getByText("Load Bundle").click();
+    });
+
+    expect((window as any).store.bundle).toEqual(
+      expect.objectContaining({ id: "bundle-1" })
+    );
+
+    act(() => {
+      screen.getByText("Add Entry").click();
+    });
+
+    const storeAfterAdd = (window as any).store;
+    const entries = storeAfterAdd?.bundle?.entry ?? [];
+    expect(entries.some((e: any) => e?.resource?.id === "res-1")).toBe(true);
+  });
+});
