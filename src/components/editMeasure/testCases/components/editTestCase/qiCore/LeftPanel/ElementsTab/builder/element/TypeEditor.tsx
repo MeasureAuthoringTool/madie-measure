@@ -51,6 +51,30 @@ export const formikErrorHandler = (name: string, formik) => {
     return errors;
   }
 };
+export const wrapWithSection = (
+  title: string,
+  node: React.ReactElement,
+  isRoot?: boolean,
+  noWrap?: boolean,
+  opts?: { key?: React.Key }
+): React.ReactElement => {
+  // If root, don't wrap
+  // choice types fall under root in many cases. we'll also check to see if the label is terminated with an [x]
+  if ((isRoot && !title.endsWith("[x]")) || noWrap) {
+    return <>{node}</>;
+  }
+
+  // Otherwise wrap
+  return (
+    <ElementSectionQiCore
+      key={opts?.key}
+      title={getMultipleCardinalityLabel(title)}
+      startOpen={true}
+    >
+      {node}
+    </ElementSectionQiCore>
+  );
+};
 
 const getContentReferencePath = (referenceUrl: string) =>
   referenceUrl.split("#").pop();
@@ -194,29 +218,6 @@ const TypeEditor = ({
 
   // utility function to wrap these
 
-  const wrapWithSection = (
-    title: string,
-    node: React.ReactElement,
-    opts?: { key?: React.Key }
-  ): React.ReactElement => {
-    // If root, don't wrap
-    // choice types fall under root in many cases. we'll also check to see if the label is terminated with an [x]
-    if ((isRoot && !title.endsWith("[x]")) || noWrap) {
-      return <>{node}</>;
-    }
-
-    // Otherwise wrap
-    return (
-      <ElementSectionQiCore
-        key={opts?.key}
-        title={getMultipleCardinalityLabel(title)}
-        startOpen={true}
-      >
-        {node}
-      </ElementSectionQiCore>
-    );
-  };
-
   if (isComponentDataType(type)) {
     switch (type) {
       case "string":
@@ -249,7 +250,9 @@ const TypeEditor = ({
                   {...formik.getFieldProps(fieldLabel)}
                 />
               );
-              return wrapWithSection(fieldLabel, string, { key: index });
+              return wrapWithSection(fieldLabel, string, isRoot, noWrap, {
+                key: index,
+              });
             })}
           </Box>
         );
@@ -273,7 +276,7 @@ const TypeEditor = ({
             />
           </Box>
         );
-        return wrapWithSection(label, base64);
+        return wrapWithSection(label, base64, isRoot, noWrap);
       /*
         Decimal most commonly appears as a child of different complex types
         that we want to handle inside of different TypeEditor rendered components,
@@ -319,7 +322,9 @@ const TypeEditor = ({
                   {...formik.getFieldProps(fieldLabel)}
                 />
               );
-              return wrapWithSection(fieldLabel, decimal, { key: index });
+              return wrapWithSection(fieldLabel, decimal, isRoot, noWrap, {
+                key: index,
+              });
             })}
           </Box>
         );
@@ -339,7 +344,7 @@ const TypeEditor = ({
             />
           </Box>
         );
-        return wrapWithSection(label, markdown);
+        return wrapWithSection(label, markdown, isRoot, noWrap);
       case "Quantity":
         return (
           <>
@@ -367,7 +372,9 @@ const TypeEditor = ({
                   handleAddElement={handleAddElement}
                 />
               );
-              return wrapWithSection(fieldLabel, quantity, { key: index });
+              return wrapWithSection(fieldLabel, quantity, isRoot, noWrap, {
+                key: index,
+              });
             })}
           </>
         );
@@ -386,7 +393,7 @@ const TypeEditor = ({
             }}
           />
         );
-        return wrapWithSection(label, period);
+        return wrapWithSection(label, period, isRoot, noWrap);
       case "dateTime":
       case "http://hl7.org/fhirpath/System.DateTime":
         return (
@@ -424,7 +431,9 @@ const TypeEditor = ({
                   }}
                 />
               );
-              return wrapWithSection(fieldLabel, dateTime, { key: index });
+              return wrapWithSection(fieldLabel, dateTime, isRoot, noWrap, {
+                key: index,
+              });
             })}
           </>
         );
@@ -458,7 +467,9 @@ const TypeEditor = ({
                   {...formik.getFieldProps(fieldLabel)}
                 />
               );
-              return wrapWithSection(fieldLabel, time, { key: index });
+              return wrapWithSection(fieldLabel, time, isRoot, noWrap, {
+                key: index,
+              });
             })}
           </>
         );
@@ -484,7 +495,7 @@ const TypeEditor = ({
             onBlur={() => formik.setFieldTouched(label)}
           />
         );
-        return wrapWithSection(label, instant);
+        return wrapWithSection(label, instant, isRoot, noWrap);
       case "http://hl7.org/fhirpath/System.Integer":
       case "integer":
       case "positiveInt":
@@ -529,7 +540,9 @@ const TypeEditor = ({
                   {...formik.getFieldProps(fieldLabel)}
                 />
               );
-              return wrapWithSection(fieldLabel, integer, { key: index });
+              return wrapWithSection(fieldLabel, integer, isRoot, noWrap, {
+                key: index,
+              });
             })}
           </>
         );
@@ -546,7 +559,7 @@ const TypeEditor = ({
             helperText={formikErrorHandler(label, formik)}
           />
         );
-        return wrapWithSection(label, identifier);
+        return wrapWithSection(label, identifier, isRoot, noWrap);
       case "http://hl7.org/fhirpath/System.Boolean":
       case "boolean":
         return (
@@ -581,7 +594,9 @@ const TypeEditor = ({
                   }}
                 />
               );
-              return wrapWithSection(fieldLabel, boolean, { key: index });
+              return wrapWithSection(fieldLabel, boolean, isRoot, noWrap, {
+                key: index,
+              });
             })}
           </>
         );
@@ -620,7 +635,9 @@ const TypeEditor = ({
                   }}
                 />
               );
-              return wrapWithSection(fieldLabel, uri, { key: index });
+              return wrapWithSection(fieldLabel, uri, isRoot, noWrap, {
+                key: index,
+              });
             })}
           </>
         );
@@ -656,7 +673,9 @@ const TypeEditor = ({
                   {...formik.getFieldProps(fieldLabel)}
                 />
               );
-              return wrapWithSection(fieldLabel, url, { key: index });
+              return wrapWithSection(fieldLabel, url, isRoot, noWrap, {
+                key: index,
+              });
             })}
           </>
         );
@@ -680,7 +699,7 @@ const TypeEditor = ({
             }}
           />
         );
-        return wrapWithSection(label, date);
+        return wrapWithSection(label, date, isRoot, noWrap);
 
       case "code":
         return (
@@ -722,7 +741,9 @@ const TypeEditor = ({
                   />
                 </>
               );
-              return wrapWithSection(fieldLabel, code, { key: index });
+              return wrapWithSection(fieldLabel, code, isRoot, noWrap, {
+                key: index,
+              });
             })}
           </>
         );
@@ -735,7 +756,7 @@ const TypeEditor = ({
             fieldRequired={false}
           />
         );
-        return wrapWithSection(label, range);
+        return wrapWithSection(label, range, isRoot, noWrap);
       case "Coding":
         const coding = (
           <CodingComponent
@@ -755,7 +776,7 @@ const TypeEditor = ({
             includePrev={false}
           />
         );
-        return wrapWithSection(label, coding);
+        return wrapWithSection(label, coding, isRoot, noWrap);
       case "CodeableConcept":
         return (
           <>
@@ -783,7 +804,7 @@ const TypeEditor = ({
                   {...formik.getFieldProps(fieldLabel)}
                 />
               );
-              return wrapWithSection(label, codeableconcept);
+              return wrapWithSection(label, codeableconcept, isRoot, noWrap);
             })}
           </>
         );
@@ -796,7 +817,7 @@ const TypeEditor = ({
             fieldRequired={false}
           />
         );
-        return wrapWithSection(label, money);
+        return wrapWithSection(label, money, isRoot, noWrap);
       case "Timing":
         const timing = (
           <TimingComponent
@@ -807,7 +828,7 @@ const TypeEditor = ({
             fieldRequired={false}
           />
         );
-        return wrapWithSection(label, timing);
+        return wrapWithSection(label, timing, isRoot, noWrap);
       case "Reference":
         return (
           <>
@@ -855,7 +876,9 @@ const TypeEditor = ({
                   {...formik.getFieldProps(fieldLabel)}
                 />
               );
-              return wrapWithSection(fieldLabel, reference, { key: index });
+              return wrapWithSection(fieldLabel, reference, isRoot, noWrap, {
+                key: index,
+              });
             })}
           </>
         );
@@ -955,9 +978,15 @@ const TypeEditor = ({
                       <Divider />
                     </Box>
                   );
-                  return wrapWithSection(elementDefinition.id, slice, {
-                    key: index,
-                  });
+                  return wrapWithSection(
+                    elementDefinition.id,
+                    slice,
+                    isRoot,
+                    noWrap,
+                    {
+                      key: index,
+                    }
+                  );
                 })}
               </Box>
             </Box>
@@ -1014,7 +1043,7 @@ const TypeEditor = ({
               parentStructureDefinition={parentStructureDefinition} // id: patient.identifier[0]  ;
             />
           );
-          return wrapWithSection(label, extension);
+          return wrapWithSection(label, extension, isRoot, noWrap);
         } else {
           return <></>;
         }
@@ -1041,7 +1070,7 @@ const TypeEditor = ({
           }}
         />
       );
-      return wrapWithSection(label, childDefPeriod);
+      return wrapWithSection(label, childDefPeriod, isRoot, noWrap);
     }
     return (
       <Box sx={{ display: "flex", flexDirection: "column" }}>
@@ -1089,7 +1118,7 @@ const TypeEditor = ({
               />
             );
             // return choiceType;
-            return wrapWithSection(childDef.id, choiceType);
+            return wrapWithSection(childDef.id, choiceType, isRoot, noWrap);
           } else if (childDef.contentReference) {
             const contentRef = (
               <ContentReferenceType
