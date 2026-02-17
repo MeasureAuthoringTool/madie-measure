@@ -316,3 +316,11 @@ function markStatementRelevant(
     }
   }
 }
+
+export function qicoreVerionModelTypeMap(version: string): string {
+  const match = version.match(/^QI-Core v(\d+\.\d+\.\d+)/i);
+  if (match && match[1]) {
+    return match[1].replace(/\./g, "-");
+  }
+  return version;
+}
