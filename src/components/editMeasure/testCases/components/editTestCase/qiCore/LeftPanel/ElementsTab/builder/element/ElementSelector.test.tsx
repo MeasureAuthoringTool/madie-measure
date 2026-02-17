@@ -361,27 +361,27 @@ describe("getChoiceBaseLabel", () => {
   const basePath = "Observation";
 
   it("should return label without [x] when label ends with [x]", () => {
-    const option = { path: "Observation.value[x]" };
+    const option = { id: "Observation.value[x]" } as ElementDefinition;
     expect(getChoiceBaseLabel(option, basePath)).toBe("value");
   });
 
   it("should return null if label cannot be determined", () => {
-    const option = { path: "Observation" }; // same as basePath
+    const option = { id: "Observation" } as ElementDefinition; // same as basePath
     expect(getChoiceBaseLabel(option, basePath)).toBeNull();
   });
 
   it("should handle unknown datatype by splitting camelCase", () => {
-    const option = { path: "Observation.valueCustomType" };
+    const option = { id: "Observation.valueCustomType" } as ElementDefinition;
     expect(getChoiceBaseLabel(option, basePath)).toBe(null);
   });
 
   it("should return null if no camelCase boundary and no datatype match", () => {
-    const option = { path: "Observation.valuecustomtype" };
+    const option = { id: "Observation.valuecustomtype" } as ElementDefinition;
     expect(getChoiceBaseLabel(option, basePath)).toBeNull();
   });
 
   it("should handle label shorter than datatype (edge case)", () => {
-    const option = { path: "Observation.Boolean" }; // label = 'Boolean'
+    const option = { id: "Observation.Boolean" } as ElementDefinition; // label = 'Boolean'
     expect(getChoiceBaseLabel(option, basePath)).toBeNull();
   });
 });

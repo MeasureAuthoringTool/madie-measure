@@ -112,6 +112,11 @@ function QiCoreResourceProvider({ children }) {
     bundle: null,
   });
   const value = { state, dispatch };
+  // expose object state to cypress for testing
+  if (typeof window !== "undefined" && (window as any).Cypress) {
+    (window as any).store = state;
+  }
+
   return (
     <QiCoreResourceContext.Provider value={value}>
       {children}

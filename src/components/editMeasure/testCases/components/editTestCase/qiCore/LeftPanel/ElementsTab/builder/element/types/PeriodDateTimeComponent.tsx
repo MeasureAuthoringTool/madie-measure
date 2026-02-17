@@ -38,16 +38,6 @@ export const formatMap = {
   [YEAR_MONTH_DAY_FORMAT]: ["year", "month", "day"],
   [DATE_TIME_ZONE_FORMAT]: ["year", "month", "day"],
 };
-export const formatRank = {
-  [YEAR_FORMAT]: 1,
-  [YEAR_MONTH_FORMAT]: 2,
-  [YEAR_MONTH_DAY_FORMAT]: 3,
-  [DATE_TIME_ZONE_FORMAT]: 4,
-};
-
-export const isFormatLessComplex = (format: string, currentFormat: string) => {
-  return formatRank[format] < formatRank[currentFormat];
-};
 
 const dateRegex =
   /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{3})?([+-]\d{2}:\d{2}|Z)$/;
@@ -58,11 +48,21 @@ const isValidFormattedDate = (dateString: string) => {
 };
 
 export const getCurrentFormat = (dateStr: string) => {
-  if (dayjs(dateStr, YEAR_FORMAT, true).isValid()) {
+  // the following regexes ensure that we don't misidentify a date like "2023-01" as YEAR_MONTH_FORMAT, even though it's technically valid for YEAR_FORMAT according to dayjs,
+  const YEAR_REGEX = /^\d{4}$/;
+  const YEAR_MONTH_REGEX = /^\d{4}-\d{2}$/;
+  const YEAR_MONTH_DAY_REGEX = /^\d{4}-\d{2}-\d{2}$/;
+  if (dayjs(dateStr, YEAR_FORMAT, true).isValid() && YEAR_REGEX.test(dateStr)) {
     return YEAR_FORMAT;
-  } else if (dayjs(dateStr, YEAR_MONTH_FORMAT, true).isValid()) {
+  } else if (
+    dayjs(dateStr, YEAR_MONTH_FORMAT, true).isValid() &&
+    YEAR_MONTH_REGEX.test(dateStr)
+  ) {
     return YEAR_MONTH_FORMAT;
-  } else if (dayjs(dateStr, YEAR_MONTH_DAY_FORMAT, true).isValid()) {
+  } else if (
+    dayjs(dateStr, YEAR_MONTH_DAY_FORMAT, true).isValid() &&
+    YEAR_MONTH_DAY_REGEX.test(dateStr)
+  ) {
     return YEAR_MONTH_DAY_FORMAT;
   } else if (isValidFormattedDate(dateStr)) {
     return DATE_TIME_ZONE_FORMAT;
@@ -90,7 +90,7 @@ const PeriodDateTimeComponent = ({
   fieldRequired,
   value = {},
   onChange, // expects { start, end }
-  label = "DateTime",
+  label = "Period",
   error = {},
   helperText = {},
 }: TypeComponentProps) => {
@@ -147,7 +147,20 @@ const PeriodDateTimeComponent = ({
       sx={{ display: "flex", flexDirection: "column", gap: 2 }}
       data-component-type="PeriodDateTimeComponent"
     >
-      <div style={{ marginBottom: "16px", maxWidth: 220 }}>
+      <label
+        htmlFor={label}
+        aria-labelledby={`${label}-label`}
+        data-testid={`${label}-label`}
+        style={{
+          textTransform: "none",
+          color: "#0073c8",
+          marginTop: "12px",
+          marginBottom: "-12px",
+        }}
+      >
+        {label}
+      </label>
+      <div style={{ maxWidth: 220 }} id={label}>
         <Select
           readOnly={!canEdit}
           required={fieldRequired}

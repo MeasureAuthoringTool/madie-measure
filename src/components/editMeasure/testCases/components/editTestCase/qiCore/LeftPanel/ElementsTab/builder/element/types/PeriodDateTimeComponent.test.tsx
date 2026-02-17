@@ -6,6 +6,7 @@ import PeriodDateTimeComponent, {
   YEAR_MONTH_FORMAT,
   YEAR_MONTH_DAY_FORMAT,
   DATE_TIME_ZONE_FORMAT,
+  getCurrentFormat,
 } from "./PeriodDateTimeComponent";
 import dayjs from "dayjs";
 
@@ -20,11 +21,13 @@ describe("PeriodDateTimeComponent", () => {
         onChange={handleChange}
       />
     );
+    expect(screen.getByTestId("Period-label")).toBeInTheDocument();
+    expect(screen.getByText("Period")).toBeInTheDocument();
     expect(
-      screen.getByTestId("start-YYYY-MM-DD-field-DateTime")
+      screen.getByTestId("start-YYYY-MM-DD-field-Period")
     ).toBeInTheDocument();
     expect(
-      screen.getByTestId("end-YYYY-MM-DD-field-DateTime")
+      screen.getByTestId("end-YYYY-MM-DD-field-Period")
     ).toBeInTheDocument();
   });
 
@@ -136,6 +139,8 @@ describe("PeriodDateTimeComponent", () => {
     const endTimeInput = endTimeDiv.querySelector("input") as HTMLInputElement;
     fireEvent.change(startTimeInput, { target: { value: "12:30:45" } });
     fireEvent.change(endTimeInput, { target: { value: "14:15:00" } });
+
+    fireEvent.change(startTimeInput, { target: { value: "12:45:45" } });
 
     expect(handleChange).toHaveBeenCalled();
   });
@@ -275,6 +280,72 @@ describe("PeriodDateTimeComponent", () => {
     fireEvent.blur(endInput);
     expect(onChange).not.toHaveBeenCalled();
   });
+
+  it("test handleTimeChange", async () => {
+    const onChange = jest.fn();
+    render(
+      <PeriodDateTimeComponent
+        canEdit={true}
+        fieldRequired={false}
+        value={{
+          start: "2024-09-26T12:00:00+00:00",
+          end: "2024-09-27T14:00:00+00:00",
+        }}
+        onChange={onChange}
+        label="DateTime"
+      />
+    );
+
+    const startInput = screen.getByDisplayValue("12:00:00 PM");
+    expect(startInput.value).toBe("12:00:00 PM");
+    fireEvent.change(startInput, { target: { value: "01:30:00 PM" } });
+    expect(startInput.value).toBe("01:30:00 PM");
+
+    expect(onChange).toHaveBeenCalledWith({
+      start: "2024-09-26T13:30:00+00:00",
+      end: "2024-09-27T14:00:00+00:00",
+    });
+
+    const endInput = screen.getByDisplayValue("02:00:00 PM");
+    expect(endInput.value).toBe("02:00:00 PM");
+    fireEvent.change(endInput, { target: { value: "03:00:00 PM" } });
+    expect(endInput.value).toBe("03:00:00 PM");
+
+    expect(onChange).toHaveBeenCalledWith({
+      start: "2024-09-26T13:30:00+00:00",
+      end: "2024-09-27T15:00:00+00:00",
+    });
+  });
+
+  it("test start date onChange with DATE_TIME_ZONE_FORMAT", async () => {
+    const onChange = jest.fn();
+    render(
+      <PeriodDateTimeComponent
+        canEdit={true}
+        fieldRequired={false}
+        value={{
+          start: "2017-09-26T12:00:00+00:00",
+          end: "2017-09-27T14:00:00+00:00",
+        }}
+        onChange={onChange}
+        label="Period"
+      />
+    );
+
+    const startInput = screen.getByDisplayValue("09-26-2017");
+    fireEvent.change(startInput, { target: { value: "09-26-2024" } });
+    expect(onChange).toHaveBeenCalledWith({
+      start: "2024-09-26T12:00:00+00:00",
+      end: "2017-09-27T14:00:00+00:00",
+    });
+
+    const endInput = screen.getByDisplayValue("09-27-2017");
+    fireEvent.change(endInput, { target: { value: "09-27-2024" } });
+    expect(onChange).toHaveBeenCalledWith({
+      start: "2024-09-26T12:00:00+00:00",
+      end: "2024-09-27T14:00:00+00:00",
+    });
+  });
 });
 
 describe("PeriodDateTimeComponent useEffect", () => {
@@ -289,7 +360,7 @@ describe("PeriodDateTimeComponent useEffect", () => {
     );
 
     const startInput = await screen.findByTestId(
-      "start-YYYY-MM-DD-field-DateTime"
+      "start-YYYY-MM-DD-field-Period"
     );
     expect(startInput).toBeInTheDocument();
   });
@@ -304,7 +375,7 @@ describe("PeriodDateTimeComponent useEffect", () => {
       />
     );
 
-    const endInput = await screen.findByTestId("end-YYYY-MM-DD-field-DateTime");
+    const endInput = await screen.findByTestId("end-YYYY-MM-DD-field-Period");
     expect(endInput).toBeInTheDocument();
   });
 
@@ -318,8 +389,8 @@ describe("PeriodDateTimeComponent useEffect", () => {
       />
     );
 
-    const startInput = await screen.findByTestId("start-year-field-DateTime");
-    const endInput = await screen.findByTestId("end-year-field-DateTime");
+    const startInput = await screen.findByTestId("start-year-field-Period");
+    const endInput = await screen.findByTestId("end-year-field-Period");
 
     expect(startInput).toBeInTheDocument();
     expect(endInput).toBeInTheDocument();
@@ -369,7 +440,7 @@ describe("PeriodDateTimeComponent useEffect", () => {
     );
 
     const selector = await screen.findByTestId(
-      "date-time-format-selector-input-field-DateTime"
+      "date-time-format-selector-input-field-Period"
     );
 
     // Simulate user manually selecting "YYYY"
@@ -399,7 +470,7 @@ describe("PeriodDateTimeComponent useEffect", () => {
     );
 
     const selector = await screen.findByTestId(
-      "date-time-format-selector-input-field-DateTime"
+      "date-time-format-selector-input-field-Period"
     );
     expect((selector as HTMLSelectElement).value).toBe("YYYY-MM-DD");
   });
@@ -419,26 +490,48 @@ describe("PeriodDateTimeComponent useEffect", () => {
 
     // Verify that the date format selector is read-only
     const formatSelector = await screen.findByTestId(
-      `date-time-format-selector-field-DateTime`
+      `date-time-format-selector-field-Period`
     );
     expect(formatSelector).toHaveAttribute("readonly");
 
     // Verify that the start and end date fields are read-only
     const startDateField = await screen.findByTestId(
-      "start-YYYY-MM-DDTHH:mm:ssZ-field-DateTime"
+      "start-YYYY-MM-DDTHH:mm:ssZ-field-Period"
     );
     const endDateField = await screen.findByTestId(
-      "end-YYYY-MM-DDTHH:mm:ssZ-field-DateTime"
+      "end-YYYY-MM-DDTHH:mm:ssZ-field-Period"
     );
     expect(startDateField).toHaveAttribute("readonly");
     expect(endDateField).toHaveAttribute("readonly");
 
     // Verify that time fields are also read-only
-    const startTimeInput = await screen.findByTestId(
-      "start-time-field-DateTime"
-    );
-    const endTimeInput = await screen.findByTestId("end-time-field-DateTime");
+    const startTimeInput = await screen.findByTestId("start-time-field-Period");
+    const endTimeInput = await screen.findByTestId("end-time-field-Period");
     expect(startTimeInput).toHaveAttribute("readonly");
     expect(endTimeInput).toHaveAttribute("readonly");
+  });
+});
+
+describe("getCurrentFormat", () => {
+  test("returns correct format for YEAR", () => {
+    expect(getCurrentFormat("2024")).toBe(YEAR_FORMAT);
+  });
+
+  test("returns correct format for YEAR_MONTH", () => {
+    expect(getCurrentFormat("2024-09")).toBe(YEAR_MONTH_FORMAT);
+  });
+
+  test("returns correct format for YEAR_MONTH_DAY", () => {
+    expect(getCurrentFormat("2024-09-26")).toBe(YEAR_MONTH_DAY_FORMAT);
+  });
+
+  test("returns correct format for DATE_TIME_ZONE", () => {
+    expect(getCurrentFormat("2024-09-26T12:00:00Z")).toBe(
+      DATE_TIME_ZONE_FORMAT
+    );
+  });
+
+  test("returns Invalid Format for unrecognized format", () => {
+    expect(getCurrentFormat("invalid-date")).toBe("Invalid Format");
   });
 });
