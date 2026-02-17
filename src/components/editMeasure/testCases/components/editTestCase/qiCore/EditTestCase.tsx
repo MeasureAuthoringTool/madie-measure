@@ -921,7 +921,7 @@ const EditTestCase = (props: EditTestCaseProps) => {
         ? {
             status: "error",
             message:
-              "An error occurred while preparing the test case execution bundle. Please try again. If the issue continues, please contact helpdesk..",
+              "An error occurred while preparing the test case execution bundle. Please try again. If the issue continues, please contact helpdesk.",
           }
         : {
             status: "error",
