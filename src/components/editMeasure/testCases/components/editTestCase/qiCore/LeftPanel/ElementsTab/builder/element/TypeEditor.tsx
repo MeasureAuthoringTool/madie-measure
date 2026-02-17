@@ -1,4 +1,10 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import * as _ from "lodash";
 import { Box, Divider } from "@mui/material";
 
@@ -12,7 +18,7 @@ import IntegerComponent from "./types/IntegerComponent";
 import CodesComponent from "./types/CodesComponent";
 import InstantComponent from "./types/InstantComponent";
 import TimeComponent from "./types/TimeComponent";
-import { useFormikContext } from "formik";
+import { getIn, useFormikContext } from "formik";
 import ExtensionComponent from "./types/ExtensionComponent";
 import useFhirDefinitionsServiceApi from "../../../../../../../api/useFhirDefinitionsService";
 import {
@@ -186,6 +192,20 @@ const TypeEditor = ({
       "",
     ]);
   };
+
+  const handleAddComplexElement = useCallback(
+    (path: string) => {
+      const currentValue = _.get(formik.values, path) || [{}];
+
+      const updatedValue = [
+        ...currentValue,
+        _.cloneDeep(_.mapValues(currentValue[0], () => {})),
+      ];
+
+      formik.setFieldValue(path, updatedValue);
+    },
+    [formik]
+  );
 
   // remove element at specific index from value array
   const handleDeleteElement = (index: number, label: string) => {
@@ -1132,22 +1152,42 @@ const TypeEditor = ({
             // return wrapWithSection(childDef.id, contentRef);
           } else if (!isComponentDataType(childDef?.type?.[0]?.code)) {
             return (
-              <ElementSectionQiCore
-                title={formatAttributeLabel(childDef.id)}
-                startOpen={false}
-                children={
-                  // Start of ClaimResponse.addItem.detail[0]
-                  <Box>
-                    <TypeEditor
-                      resource={resource}
-                      parentStructureDefinition={structureDefinition}
-                      structureDefinition={childDef}
-                      canEdit={canEdit}
-                      label={childDef.id}
+              <>
+                {(canBeMultipleCardinality
+                  ? values?.[childDef.id.split(".").pop()] || [{}]
+                  : [null]
+                ).map((el, index) => {
+                  return (
+                    <ElementSectionQiCore
+                      key={index}
+                      title={
+                        formatAttributeLabel(childDef.id) + ` ${index + 1}`
+                      }
+                      elementDefinition={childDef}
+                      startOpen={false}
+                      handleAddElement={() =>
+                        handleAddComplexElement(childDef.id)
+                      }
+                      canBeMultipleCardinality={canBeMultipleCardinality}
+                      children={
+                        <Box
+                          style={{
+                            paddingLeft: "16px",
+                          }}
+                        >
+                          <TypeEditor
+                            resource={resource}
+                            parentStructureDefinition={structureDefinition}
+                            structureDefinition={childDef}
+                            canEdit={canEdit}
+                            label={childDef.id + `[${index}]`}
+                          />
+                        </Box>
+                      }
                     />
-                  </Box>
-                }
-              />
+                  );
+                })}
+              </>
             );
           } else {
             const baseCase = (

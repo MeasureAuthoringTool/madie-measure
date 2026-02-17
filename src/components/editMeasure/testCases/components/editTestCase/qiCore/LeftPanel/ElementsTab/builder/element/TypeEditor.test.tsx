@@ -4718,8 +4718,8 @@ describe("TypeEditor Component", () => {
     );
 
     // "Category" and "Reason" elements from the referenced definition must be rendered
-    expect(screen.queryByText("Category")).toBeInTheDocument();
-    expect(screen.queryByText("Reason")).toBeInTheDocument();
+    expect(screen.queryByText("Category 1")).toBeInTheDocument();
+    expect(screen.queryByText("Reason 1")).toBeInTheDocument();
     // Restore the original mock
     jest.restoreAllMocks();
   });
@@ -4783,5 +4783,118 @@ describe("TypeEditor Component", () => {
     expect(screen.queryByText("Item")).toBeInTheDocument();
     // Restore the original mock
     jest.restoreAllMocks();
+  });
+
+  test("Should render complex element with multiple cardinality and handle add element", () => {
+    const complexElementFormik = {
+      handleChange: jest.fn(),
+      setFieldValue: jest.fn(),
+      setFieldTouched: jest.fn(),
+      values: {
+        MedicationRequest: {
+          dosageInstruction: [
+            {
+              doseAndRate: [
+                {
+                  type: {
+                    coding: [
+                      {
+                        system: "http://loinc.org",
+                        code: "38267-1",
+                        display: "DXA Lumbar spine [T-score] Bone density",
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          ],
+        },
+      },
+      getFieldProps: jest.fn().mockReturnValue({
+        value: undefined,
+        name: "MedicationRequest.dosageInstruction[0]",
+        onChange: jest.fn(),
+        onBlur: jest.fn(),
+      }),
+    };
+
+    const mockFormInfo = [
+      [
+        "MedicationRequest.dosageInstruction",
+        {
+          id: "MedicationRequest.dosageInstruction",
+          required: false,
+          canBeMultipleCardinality: true,
+        },
+      ],
+      [
+        "MedicationRequest.dosageInstruction.doseAndRate",
+        {
+          id: "MedicationRequest.dosageInstruction.doseAndRate",
+          max: "*",
+          min: "0",
+          canBeMultipleCardinality: true,
+          contentReference: undefined,
+        },
+      ],
+    ];
+
+    const fhirUtils = require("../../../../../../../api/fhirDefinitionServiceUtilities");
+    jest.spyOn(fhirUtils, "isComponentDataType").mockReturnValue(false);
+
+    render(
+      <FormikProvider value={complexElementFormik as any}>
+        <RequiredFieldsProvider
+          requiredFields={mockRequiredFields}
+          formInfo={mockFormInfo}
+        >
+          <TypeEditor
+            resource={{ resourceType: "MedicationRequest" }}
+            structureDefinition={{
+              id: "MedicationRequest.dosageInstruction",
+              path: "MedicationRequest.dosageInstruction",
+              min: 0,
+              max: "*",
+              type: [
+                {
+                  code: "Dosage",
+                },
+              ],
+            }}
+            label="MedicationRequest.dosageInstruction[0]"
+            canEdit={true}
+            parentStructureDefinition={null}
+          />
+        </RequiredFieldsProvider>
+      </FormikProvider>
+    );
+
+    // screen.debug();
+    expect(screen.queryByText("Dose And Rate 1")).toBeInTheDocument();
+    expect(screen.queryByText("Dose And Rate 2")).not.toBeInTheDocument();
+
+    const addButton = screen.queryByRole("button", { name: "Add Element" });
+
+    userEvent.click(addButton);
+    expect(complexElementFormik.setFieldValue).toHaveBeenCalled();
+
+    waitFor(() =>
+      expect(screen.queryByText("Dose And Rate 2")).toBeCalledWith(
+        "MedicationRequest.dosageInstruction[0].doseAndRate",
+        expect.objectContaining({
+          type: {
+            coding: [
+              {
+                system: "http://loinc.org",
+                code: "38267-1",
+                display: "DXA Lumbar spine [T-score] Bone density",
+              },
+            ],
+          },
+        }),
+        expect.objectContaining({ type: undefined })
+      )
+    );
   });
 });
