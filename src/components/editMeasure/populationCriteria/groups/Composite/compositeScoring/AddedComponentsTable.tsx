@@ -43,7 +43,10 @@ export default function AddedComponentsTable({
       return;
     }
     try {
-      const componentMeasureIds = components.map((c) => c.measureId);
+      // multiple components can share the same measureId (different groups).
+      // we only need each measureId once.
+      const componentMeasureIds = _.uniq(components.map((c) => c.measureId));
+
       const results = await measureServiceApi.fetchMeasuresByIds(
         componentMeasureIds
       );
