@@ -53,6 +53,7 @@ import TestCaseLandingWrapper from "../common/TestCaseLandingWrapper";
 import TestCaseLanding from "../qiCore/TestCaseLanding";
 // @ts-ignore
 import dotMadieFile from "./testDataImport/dotMadie.json";
+import useFhirDefinitionsServiceApi from "../../../api/useFhirDefinitionsService";
 
 const createZipFile = async (
   patientIds: string[],
@@ -653,6 +654,16 @@ const useTestCaseServiceMockResolved = {
   ),
 } as unknown as TestCaseServiceApi;
 
+jest.mock("../../../api/useFhirDefinitionsService");
+const useFhirDefinitionsServiceMock = useFhirDefinitionsServiceApi as jest.Mock;
+
+const fhirDefinitionsServiceMockResolved = {
+  getTestCaseExecutionBundle: jest.fn().mockResolvedValue({
+    testCases,
+    modifiedTestCaseIds: testCases.map((tc) => tc.id),
+  }),
+} as unknown as ReturnType<typeof useFhirDefinitionsServiceApi>;
+
 jest.mock("../common/copyTestCases/CopyTestCaseDialog", () => ({
   __esModule: true,
   default: () => (
@@ -703,6 +714,9 @@ describe("TestCaseList component", () => {
     });
     useTestCaseServiceMock.mockReset().mockImplementation(() => {
       return useTestCaseServiceMockResolved;
+    });
+    useFhirDefinitionsServiceMock.mockImplementation(() => {
+      return fhirDefinitionsServiceMockResolved;
     });
 
     (checkUserCanEdit as jest.Mock).mockClear().mockImplementation(() => true);

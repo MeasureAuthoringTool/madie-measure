@@ -46,6 +46,7 @@ import MakeJsonMatchUiDialog from "../../common/MakeJsonMatchUiDialog/MakeJsonMa
 import { generateQiCoreReport } from "../../../util/OverlappingCodesUtils";
 import OverlappingCodesDialog from "../common/overLappingCodes/OverlappingCodesDialog";
 import getModelFamily from "../../../../../../utils/measureModelHelpers";
+import useFhirDefinitionsServiceApi from "../../../api/useFhirDefinitionsService";
 
 export const IMPORT_ERROR =
   "An error occurred while importing your test cases. Please try again, or reach out to the Help Desk.";
@@ -216,6 +217,9 @@ const TestCaseList = (props: TestCaseListProps) => {
   } | null>(null);
   const [openMakeJsonMatchUiSpinner, setOpenMakeJsonMatchUiSpinner] =
     useState<boolean>(false);
+
+  const fhirDefinitionServiceApi = useRef(useFhirDefinitionsServiceApi());
+
   useEffect(() => {
     if (testCases?.length != measure?.testCases?.length) {
       const newMeasure = { ...measure, testCases };
@@ -472,18 +476,24 @@ const TestCaseList = (props: TestCaseListProps) => {
       return null;
     }
 
-    const testCasesToExecute = measure?.testCaseConfiguration
+    const filteredTestCases = measure?.testCaseConfiguration
       ?.executeInvalidTestCases
       ? sortedTestCases
       : sortedTestCases?.filter((tc) => tc.validResource);
 
-    if (testCasesToExecute && testCasesToExecute.length > 0 && measureBundle) {
+    if (filteredTestCases && filteredTestCases.length > 0 && measureBundle) {
       setExecuting(true);
       try {
+        const updatedTestCaseExecutionBundle =
+          await fhirDefinitionServiceApi.current.getTestCaseExecutionBundle(
+            measure.model,
+            filteredTestCases
+          );
+
         const calculationOutput: CalculationOutput<any> =
           await calculation.current.calculateTestCases(
             measure,
-            testCasesToExecute,
+            updatedTestCaseExecutionBundle?.testCases,
             measureBundle,
             valueSets
           );
@@ -508,9 +518,16 @@ const TestCaseList = (props: TestCaseListProps) => {
         } else {
           setErrors((prevState) => [...prevState, error?.message]);
         }
+
+        if (error.message?.includes("filtering resource")) {
+          setErrors((prevState) => [
+            ...prevState,
+            "An error occurred while preparing the test case execution bundle. Please try again. If the issue continues, please contact helpdesk.",
+          ]);
+        }
       }
       setExecuting(false);
-    } else if (_.isNil(testCasesToExecute) || _.isEmpty(testCasesToExecute)) {
+    } else if (_.isNil(filteredTestCases) || _.isEmpty(filteredTestCases)) {
       console.error("calculateTestCases: No valid test cases to execute");
       setErrors((prevState) => [
         ...prevState,
