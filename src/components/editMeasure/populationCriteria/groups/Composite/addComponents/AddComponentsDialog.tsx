@@ -33,6 +33,12 @@ import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore";
 import { convertDate } from "../../../../testCases/components/testCaseLanding/common/TestCaseTable/TestCaseTable";
+import {
+  filterByOptions,
+  filterMap,
+  useMeasureFilterSearch,
+} from "../../../../hooks/useMeasureFilterSearch";
+import { MeasureSearchFilters } from "../../../../shared/MeasureSearchFilters";
 
 const TH = tw.th`p-3 text-left text-sm font-bold capitalize`;
 
@@ -67,6 +73,17 @@ export default function AddComponentsDialog({
   const [isRowExpanded, setIsRowExpanded] = useState<boolean>(false);
   const [expandedSectionData, setExpandedSectionData] = useState<TCRow[]>([]);
   const abortController = useRef(null);
+
+  // Use custom hook for filter and search functionality
+  const {
+    filterBy,
+    searchField,
+    finalSearchAndFilterby,
+    handleFilter,
+    handleSearch,
+    finalizeSearchCriteria,
+    blankSearchCriteria,
+  } = useMeasureFilterSearch(() => setPage(0));
 
   const [measureList, setMeasureList] = useState<Measure[]>([]);
   const IndeterminateCheckbox = ({ indeterminate, checked, ...rest }: any) => {
@@ -278,7 +295,19 @@ export default function AddComponentsDialog({
     setLoading(true);
     setSelectedRowId(null);
     abortController.current = new AbortController();
+    const { finalSearchField, finalFilterBy } = finalSearchAndFilterby;
     const optionalSearchProperties = [];
+
+    if (finalFilterBy) {
+      optionalSearchProperties.push(filterMap[finalFilterBy]);
+    }
+
+    if (!finalFilterBy && finalSearchField) {
+      // apply all conditions
+      filterByOptions.forEach((condition) => {
+        optionalSearchProperties.push(filterMap[condition]);
+      });
+    }
 
     const searchCriteria: any = {
       model: measure.model,
@@ -287,6 +316,7 @@ export default function AddComponentsDialog({
       draft: false,
       fromCompositeMeasureComponent: true,
       allowedScoringTypes: getAllowedScoringTypes(compositeScoring),
+      searchField: finalSearchField,
     };
 
     measureServiceApi
@@ -320,7 +350,15 @@ export default function AddComponentsDialog({
           console.error("Failed to fetch measures:", error);
         }
       });
-  }, [measure, limit, page, abortController, open]);
+  }, [
+    measure,
+    open,
+    finalSearchAndFilterby,
+    compositeScoring,
+    measureServiceApi,
+    limit,
+    page,
+  ]);
 
   useEffect(() => {
     fetchMeasures();
@@ -385,6 +423,14 @@ export default function AddComponentsDialog({
       }}
       maxWidth={"lg"}
     >
+      <MeasureSearchFilters
+        filterBy={filterBy}
+        searchField={searchField}
+        onFilterChange={handleFilter}
+        onSearchChange={handleSearch}
+        onSearchTrigger={finalizeSearchCriteria}
+        onSearchClear={blankSearchCriteria}
+      />
       <div className="measure-table no-margin-top">
         <div className="table" style={{ overflow: "auto" }}>
           <table

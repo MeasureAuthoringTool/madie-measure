@@ -1,4 +1,4 @@
-import React from "react";
+import * as React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import AddComponentsDialog from "./AddComponentsDialog";
@@ -580,11 +580,16 @@ describe("AddComponentsDialog", () => {
 
     mockSearchMeasures.mockClear();
 
-    const limitSelect = screen.getByRole("combobox");
-    await userEvent.click(limitSelect);
+    const limitSelect = screen
+      .getAllByRole("combobox")
+      .find(
+        (select) =>
+          select.getAttribute("aria-labelledby") === "pagination-limit-select"
+      );
+    userEvent.click(limitSelect);
 
     const option10 = screen.getByRole("option", { name: "10" });
-    await userEvent.click(option10);
+    userEvent.click(option10);
 
     await waitFor(() => {
       expect(mockSearchMeasures).toHaveBeenCalled();
