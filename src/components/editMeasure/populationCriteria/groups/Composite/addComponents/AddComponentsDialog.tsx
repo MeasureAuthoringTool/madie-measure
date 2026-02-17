@@ -77,16 +77,13 @@ export default function AddComponentsDialog({
   const abortController = useRef(null);
 
   const [measureList, setMeasureList] = useState<Measure[]>([]);
-  // update preselected values with checkboxes.
 
   useEffect(() => {
     setRowSelection((prev) => {
-      // If there are no rows, clear only if prev wasn't already empty
       if (!measureList?.length) {
-        return Object.keys(prev).length ? {} : prev; // <-- return prev when already {}
+        return Object.keys(prev).length ? {} : prev;
       }
 
-      // MERGE semantics: preserve prior user selection and add defaults for this page
       let changed = false;
       const next = { ...prev };
 
@@ -97,7 +94,6 @@ export default function AddComponentsDialog({
         }
       }
 
-      // Avoid unnecessary updates (prevents loops in tests)
       return changed ? next : prev;
     });
   }, [measureList, preselectedIds]);
