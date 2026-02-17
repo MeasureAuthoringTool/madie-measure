@@ -856,6 +856,7 @@ const EditTestCase = (props: EditTestCaseProps) => {
       return;
     }
     let modifiedTestCase = { ...testCase, json: editorVal };
+    let updatedTestCaseExecutionBundle;
     // validate the JSON iff executeInvalidTestCases is false and JSON has been modified
     if (
       !measure?.testCaseConfiguration?.executeInvalidTestCases &&
@@ -893,14 +894,14 @@ const EditTestCase = (props: EditTestCaseProps) => {
       }
     }
 
-    // filter any resources with invalid references.
-    const updatedTestCaseExecutionBundle =
-      await fhirDefinitionServiceApi.current.getTestCaseExecutionBundle(
-        measure.model,
-        [modifiedTestCase]
-      );
-
     try {
+      //filter any resources with invalid references.
+      updatedTestCaseExecutionBundle =
+        await fhirDefinitionServiceApi.current.getTestCaseExecutionBundle(
+          measure.model,
+          [modifiedTestCase]
+        );
+
       const calculationOutput: CalculationOutput<any> =
         await calculation.current.calculateTestCases(
           measure,
@@ -915,10 +916,19 @@ const EditTestCase = (props: EditTestCaseProps) => {
         executionResults[0].detailedResults as DetailedPopulationGroupResult[]
       );
     } catch (error) {
-      setCalculationErrors({
-        status: "error",
-        message: error.message,
-      });
+      const calculationError: AlertProps = error.message?.includes(
+        "filtering resource"
+      )
+        ? {
+            status: "error",
+            message:
+              "An error occurred while preparing the test case execution bundle. Please try again. If the issue continues, please contact helpdesk..",
+          }
+        : {
+            status: "error",
+            message: error.message,
+          };
+      setCalculationErrors(calculationError);
       setErrors([...errors, error.message]);
     } finally {
       setExecuting(false);

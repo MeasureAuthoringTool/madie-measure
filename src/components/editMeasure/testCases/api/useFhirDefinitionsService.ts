@@ -92,7 +92,7 @@ export class FhirDefinitionsServiceApi {
       return response.data;
     } catch (error) {
       console.error(
-        `An error occurred while generating test case execution bundle for model version [${model}]: `,
+        `An error occurred while filtering resource and generating test case execution bundle for model version [${model}]: `,
         error
       );
     }
