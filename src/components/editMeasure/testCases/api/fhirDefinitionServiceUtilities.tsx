@@ -1,8 +1,9 @@
-import { ElementDefinition } from "fhir/r4";
+import { ElementDefinition, Extension } from "fhir/r4";
 import { v4 as uuidv4 } from "uuid";
 import { ResourceIdentifier } from "./models/ResourceIdentifier";
 import * as Yup from "yup";
 import * as _ from "lodash";
+import { StructureDefinitionDto } from "./models/StructureDefinitionDto";
 
 /**
  * Prepares the element name to be displayed for tab labels
@@ -364,6 +365,24 @@ export function removeUndefinedAndEmptyObjects(obj) {
 
 export function getBasePath(resource: any): string {
   return resource?.definition?.snapshot?.element?.[0]?.path;
+}
+
+/**
+ * For extensions, we want to get the elements that are either sliced with a sliceName.
+ * @param extensionProfileDef a FHIR StructureDefinition for an extension profile, which contains the definition of the sliced extension and its elements.
+ */
+export function getEditableExtensionSubElements(
+  extensionProfileDef: StructureDefinitionDto
+): ElementDefinition[] {
+  if (!extensionProfileDef?.definition?.snapshot?.element) {
+    return [];
+  }
+
+  const elements = extensionProfileDef.definition.snapshot.element;
+
+  return elements.filter((e) => {
+    return e.sliceName;
+  });
 }
 
 // For ClaimResponse.item.adjudication
