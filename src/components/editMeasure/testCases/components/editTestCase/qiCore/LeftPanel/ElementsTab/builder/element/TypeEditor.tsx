@@ -374,7 +374,7 @@ const TypeEditor = ({
       case "Period":
         const period = (
           <PeriodDateTimeComponent
-            label={label}
+            label={_.capitalize(getLastPart(label))}
             canEdit={canEdit}
             helperText={formikErrorHandler(label, formik)}
             error={getNestedProperty(formik.errors, label)}
