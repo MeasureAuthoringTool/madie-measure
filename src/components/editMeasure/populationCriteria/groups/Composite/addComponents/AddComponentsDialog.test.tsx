@@ -415,7 +415,7 @@ describe("AddComponentsDialog", () => {
       getMeasuresByMeasureSetId: jest.fn(),
     });
 
-    render(
+    await render(
       <AddComponentsDialog
         open={true}
         onClose={onCloseMock}
@@ -447,7 +447,7 @@ describe("AddComponentsDialog", () => {
       getMeasuresByMeasureSetId: jest.fn(),
     });
 
-    render(
+    await render(
       <AddComponentsDialog
         open={true}
         onClose={onCloseMock}
@@ -464,7 +464,7 @@ describe("AddComponentsDialog", () => {
     expect(onCloseMock).toHaveBeenCalled();
   });
 
-  it("displays loading spinner while fetching data", () => {
+  it("displays loading spinner while fetching data", async () => {
     const mockSearchMeasures = jest
       .fn()
       .mockImplementation(() => new Promise(() => {}));
@@ -474,7 +474,7 @@ describe("AddComponentsDialog", () => {
       getMeasuresByMeasureSetId: jest.fn(),
     });
 
-    render(
+    await render(
       <AddComponentsDialog
         open={true}
         onClose={onCloseMock}
@@ -739,17 +739,35 @@ describe("AddComponentsDialog", () => {
 
   it("handles submit button click", async () => {
     const mockSearchMeasures = jest.fn().mockResolvedValue(zeroItemResponse);
-
+    const mockFetchMeasuresByIds = jest.fn().mockResolvedValue([
+      {
+        id: "measure-1",
+        measureName: "Parent Measure",
+        version: "1.0.0",
+        groups: [{ id: "pg-1" }, { id: "pg-2" }],
+      },
+      {
+        id: "child-valid",
+        measureName: "Valid Child",
+        version: "1.0.0",
+        measureSet: { cmsId: "CMS999" },
+        lastModifiedAt: "2024-01-15",
+        groups: [{ id: "cg-1" }],
+      },
+    ]);
     useMeasureServiceApi.mockReturnValue({
       searchMeasuresByCriteria: mockSearchMeasures,
       getMeasuresByMeasureSetId: jest.fn(),
+      fetchMeasuresByIds: mockFetchMeasuresByIds,
     });
+    const submitComponentFormMock = jest.fn();
 
     render(
       <AddComponentsDialog
         open={true}
         onClose={onCloseMock}
         measure={mockMeasure}
+        submitComponentForm={submitComponentFormMock}
         compositeScoring="Opportunity"
       />
     );
@@ -780,13 +798,32 @@ describe("AddComponentsDialog", () => {
       pageable: { offset: 0 },
     });
 
+    const mockFetchMeasuresByIds = jest.fn().mockResolvedValue([
+      {
+        id: "measure-1",
+        measureName: "Parent Measure",
+        version: "1.0.0",
+        groups: [{ id: "pg-1" }, { id: "pg-2" }],
+      },
+      {
+        id: "child-valid",
+        measureName: "Valid Child",
+        version: "1.0.0",
+        measureSet: { cmsId: "CMS999" },
+        lastModifiedAt: "2024-01-15",
+        groups: [{ id: "cg-1" }],
+      },
+    ]);
+
     useMeasureServiceApi.mockReturnValue({
       searchMeasuresByCriteria: mockSearchMeasures,
       getMeasuresByMeasureSetId: mockGetMeasuresBySetId,
+      fetchMeasuresByIds: mockFetchMeasuresByIds,
     });
-
+    const submitComponentFormMock = jest.fn();
     render(
       <AddComponentsDialog
+        submitComponentForm={submitComponentFormMock}
         open={true}
         onClose={onCloseMock}
         measure={mockMeasure}

@@ -1,4 +1,10 @@
-import React, { useMemo, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   ColumnDef,
   getCoreRowModel,
@@ -7,28 +13,50 @@ import {
   SortingState,
   getSortedRowModel,
 } from "@tanstack/react-table";
-import {
-  TruncateText,
-  MadieDialog,
-  Pagination,
-  MadieSpinner,
-} from "@madie/madie-design-system/dist/react";
+import { TruncateText } from "@madie/madie-design-system/dist/react";
 import * as _ from "lodash";
-
+import { useMeasureServiceApi } from "@madie/madie-util";
+import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
 import tw from "twin.macro";
 import "styled-components/macro";
 import { convertDate } from "../../../../testCases/components/testCaseLanding/common/TestCaseTable/TestCaseTable";
 import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
-import { Measure } from "@madie/madie-models";
+import { Component, Measure } from "@madie/madie-models";
+import { IconButton, Tooltip } from "@mui/material";
 
 const TH = tw.th`p-3 text-left text-sm font-bold capitalize`;
 
-export default function AddedComponentsTable({ components }) {
+export default function AddedComponentsTable({
+  components,
+}: {
+  components: Component[];
+}) {
   const [hoveredHeader, setHoveredHeader] = useState<string>("");
-  const retrievedComponents = [];
-  console.log('components are', components)
+  const measureServiceApi = useRef(useMeasureServiceApi()).current;
+  const [retrievedComponents, setRetrievedComponents] = useState([]);
+
+  const fetchMeasuresForComponents = useCallback(async () => {
+    if (!components?.length) {
+      setRetrievedComponents([]);
+      return;
+    }
+    try {
+      const componentMeasureIds = components.map((c) => c.measureId);
+      const results = await measureServiceApi.fetchMeasuresByIds(
+        componentMeasureIds
+      );
+      setRetrievedComponents(results);
+    } catch (err) {
+      console.error(err);
+    }
+  }, [components, measureServiceApi]);
+
+  useEffect(() => {
+    fetchMeasuresForComponents();
+  }, [fetchMeasuresForComponents]);
+
   const columns = useMemo<ColumnDef<Measure>[]>(() => {
     const columnDefs = [
       {
@@ -71,31 +99,23 @@ export default function AddedComponentsTable({ components }) {
         cell: (info) => {
           const converted = convertDate(info.row.original.lastModifiedAt);
           const { date } = converted;
-          return <div style={{ marginLeft: "8px" }}>{date}</div>;
+          return <div>{date}</div>;
         },
         accessorKey: "lastModifiedAt",
       },
       {
-        header: "",
-        cell: (info) => {
-          if (info.row.original?.hasAssociatedMeasures) {
-            return (
-              <span
-                role="button"
-                tabIndex={0}
-                style={{
-                  cursor: "pointer",
-                  display: "inline-flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              ></span>
-            );
-          } else {
-            return <></>;
-          }
-        },
-        accessorKey: "expandArrow",
+        id: "actions",
+        header: null,
+
+        cell: () => (
+          <Tooltip title="Delete">
+            <IconButton size="small">
+              <DeleteOutlinedIcon sx={{ color: "#D92F2F" }} />
+            </IconButton>
+          </Tooltip>
+        ),
+
+        accessorKey: "",
       },
     ];
 
@@ -104,7 +124,7 @@ export default function AddedComponentsTable({ components }) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
 
   const table = useReactTable({
-    data: components,
+    data: retrievedComponents,
     columns,
     getRowId: (row) => row.id,
     defaultColumn: {
@@ -121,12 +141,13 @@ export default function AddedComponentsTable({ components }) {
     },
     enableRowSelection: true,
   });
-
-  return (
+  const uniqueMeasures = _.uniqBy(components, (c) => c.measureId);
+  return components.length > 0 ? (
     <div>
-      <h2></h2>
-
-      <div className="measure-table no-margin-top">
+      <h3
+        style={{ fontWeight: 500, marginBottom: 24 }}
+      >{`Selected Composite Measure Components (${uniqueMeasures.length})`}</h3>
+      <div className="measure-table no-margin no-vert-borders no-radius middle-align-row">
         <div className="table" style={{ overflow: "auto" }}>
           <table
             tw="min-w-full"
@@ -134,7 +155,6 @@ export default function AddedComponentsTable({ components }) {
             className="ml-table"
             style={{
               borderSpacing: "0 2em !important",
-              borderBottom: "1px solid rgb(140, 140, 140)",
             }}
           >
             <thead tw="bg-slate">
@@ -223,5 +243,5 @@ export default function AddedComponentsTable({ components }) {
         </div>
       </div>
     </div>
-  );
+  ) : null;
 }

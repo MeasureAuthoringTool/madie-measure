@@ -51,14 +51,15 @@ export default function AddComponentsDialog({
   onClose,
   measure,
   compositeScoring,
-  // export interface Component {
-  // measureId: string;
-  // groupId: string;
-  // weight: number;
-  // }
   components,
   submitComponentForm,
 }) {
+  // we need to know what measures are added by means of component selection
+  const preselectedIds = useMemo(
+    () => new Set((components ?? []).map((c) => c.measureId)),
+    [components]
+  );
+
   const measureServiceApi = useRef(useMeasureServiceApi()).current;
   const [limit, setLimit] = useState(5);
   const [page, setPage] = useState(0);
@@ -76,6 +77,31 @@ export default function AddComponentsDialog({
   const abortController = useRef(null);
 
   const [measureList, setMeasureList] = useState<Measure[]>([]);
+  // update preselected values with checkboxes.
+
+  useEffect(() => {
+    setRowSelection((prev) => {
+      // If there are no rows, clear only if prev wasn't already empty
+      if (!measureList?.length) {
+        return Object.keys(prev).length ? {} : prev; // <-- return prev when already {}
+      }
+
+      // MERGE semantics: preserve prior user selection and add defaults for this page
+      let changed = false;
+      const next = { ...prev };
+
+      for (const m of measureList) {
+        if (m?.id && preselectedIds.has(m.id) && !next[m.id]) {
+          next[m.id] = true;
+          changed = true;
+        }
+      }
+
+      // Avoid unnecessary updates (prevents loops in tests)
+      return changed ? next : prev;
+    });
+  }, [measureList, preselectedIds]);
+
   const IndeterminateCheckbox = ({ indeterminate, checked, ...rest }: any) => {
     const ref = React.useRef<HTMLInputElement>(null);
 
@@ -316,7 +342,6 @@ export default function AddComponentsDialog({
         setTotalItems(totalElements);
         setVisibleItems(numberOfElements);
         setMeasureList(content);
-        console.log("content", content);
         setOffset(pageable?.offset);
         setLoading(false);
       })
@@ -338,7 +363,6 @@ export default function AddComponentsDialog({
   }, [fetchMeasures, measure?.id]);
 
   const [rowSelection, setRowSelection] = useState({});
-  console.log("rowSelection", rowSelection);
   const table = useReactTable({
     data: measureList,
     columns,
@@ -368,20 +392,13 @@ export default function AddComponentsDialog({
     e.preventDefault();
     // required: to prevent event bubbling to parent forms
     e.stopPropagation();
-
     // make shallow copy of what we already have
-    console.log("components are", components);
-    const newComponents = [...components];
+    const newComponents = [];
     // get all the objectIds of the selected measures
     const selectedMeasureObjectIds = Object.keys(rowSelection);
-    console.log("selectedMeasureObjectIds", selectedMeasureObjectIds);
     const results = await measureServiceApi.fetchMeasuresByIds(
       selectedMeasureObjectIds
     );
-    console.log("results", results);
-
-    // now that we have results, we want to generate components
-    // const newComponents = [];
     results.forEach((measure) => {
       measure.groups.forEach((group) => {
         newComponents.push({
@@ -390,16 +407,16 @@ export default function AddComponentsDialog({
         });
       });
     });
-    // Now we have a new list of components. We need to filter out any duplicates.
-    const uniqueComponents = _.uniq(newComponents);
-    console.log("uniqueComponents", uniqueComponents);
+    const uniqueComponents = _.uniqBy(
+      newComponents,
+      (c) => `${c.measureId}:${c.groupId}`
+    );
     submitComponentForm(uniqueComponents);
-
-    // onClose();
+    onClose();
   };
 
   const expandedColumns = useMemo<ColumnDef<Measure>[]>(() => {
-    return columns;
+    return (columns as any[]).filter((c) => c.id !== "select");
   }, [columns]);
 
   return (
