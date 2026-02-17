@@ -31,9 +31,11 @@
   &.no-radius {
     border-radius: 0;
   }
+
   &.no-margin-top {
     margin-top: 0;
   }
+
   &.middle-align-row {
     .table > table > tbody > tr > td {
       vertical-align: middle;
