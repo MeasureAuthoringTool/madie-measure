@@ -1,5 +1,8 @@
 import * as _ from "lodash";
-import { getStatementRelevanceForPopulationSet } from "./CalculationTestHelpers";
+import {
+  getStatementRelevanceForPopulationSet,
+  qicoreVerionModelTypeMap,
+} from "./CalculationTestHelpers";
 
 describe("CalculationTestHelpers", () => {
   let testMeasure;
@@ -81,6 +84,16 @@ describe("CalculationTestHelpers", () => {
         "Numerator Observation"
       ]
     ).toBe("TRUE");
+  });
+
+  it("should return related version input based on QI-Core pattern", () => {
+    expect(qicoreVerionModelTypeMap("QI-Core v4.1.1")).toBe("4-1-1");
+    expect(qicoreVerionModelTypeMap("QI-Core v6.0.0")).toBe("6-0-0");
+    expect(qicoreVerionModelTypeMap("OtherModel v4.1.1")).toBe(
+      "OtherModel v4.1.1"
+    );
+    expect(qicoreVerionModelTypeMap("QI-Core 4.1.1")).toBe("QI-Core 4.1.1");
+    expect(qicoreVerionModelTypeMap("QI-Core v4.1")).toBe("QI-Core v4.1");
   });
 });
 
