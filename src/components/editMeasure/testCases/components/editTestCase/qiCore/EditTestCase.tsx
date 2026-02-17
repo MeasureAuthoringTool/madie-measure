@@ -856,7 +856,6 @@ const EditTestCase = (props: EditTestCaseProps) => {
       return;
     }
     let modifiedTestCase = { ...testCase, json: editorVal };
-    let updatedTestCaseExecutionBundle;
     // validate the JSON iff executeInvalidTestCases is false and JSON has been modified
     if (
       !measure?.testCaseConfiguration?.executeInvalidTestCases &&
@@ -896,7 +895,7 @@ const EditTestCase = (props: EditTestCaseProps) => {
 
     try {
       //filter any resources with invalid references.
-      updatedTestCaseExecutionBundle =
+      const updatedTestCaseExecutionBundle =
         await fhirDefinitionServiceApi.current.getTestCaseExecutionBundle(
           measure.model,
           [modifiedTestCase]
