@@ -5,6 +5,13 @@ import axios from "../../../../api/axios-instance";
 import { ResourceIdentifier } from "./models/ResourceIdentifier";
 import { StructureDefinitionDto } from "./models/StructureDefinitionDto";
 import { ValueSet } from "fhir/r4";
+import { TestCase } from "@madie/madie-models";
+import { qicoreVerionModelTypeMap } from "../util/CalculationTestHelpers";
+
+export interface TestCaseExecutionBundlesDTO {
+  testCases: TestCase[];
+  modifiedTestCaseIds: string[];
+}
 
 export class FhirDefinitionsServiceApi {
   constructor(private baseUrl: string, private getAccessToken: () => string) {}
@@ -65,6 +72,30 @@ export class FhirDefinitionsServiceApi {
       );
     }
     return null;
+  }
+
+  async getTestCaseExecutionBundle(
+    model: string,
+    testCases: TestCase[]
+  ): Promise<TestCaseExecutionBundlesDTO> {
+    try {
+      const versionModel = qicoreVerionModelTypeMap(model);
+      const response = await axios.post<TestCaseExecutionBundlesDTO>(
+        `${this.baseUrl}/fhir/test-cases/qicore/${versionModel}/execution-bundles`,
+        testCases,
+        {
+          headers: {
+            Authorization: `Bearer ${this.getAccessToken()}`,
+          },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error(
+        `An error occurred while filtering resource and generating test case execution bundle for model version [${model}]: `,
+        error
+      );
+    }
   }
 }
 
