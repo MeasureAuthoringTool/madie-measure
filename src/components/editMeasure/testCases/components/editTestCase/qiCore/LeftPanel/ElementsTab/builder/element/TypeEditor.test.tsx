@@ -2337,6 +2337,68 @@ describe("TypeEditor Component", () => {
     expect(screen.queryByLabelText(/Comparator/i)).not.toBeInTheDocument();
   });
 
+  test("Should render Ratio component", async () => {
+    const mockFormik: FormikContextType<any> = {
+      values: {
+        "Observation.valueRatio": {
+          numerator: { value: "1" },
+          denominator: { value: "10" },
+        },
+      },
+      touched: {},
+      getFieldProps: (label) => {
+        const value = getNestedProperty(mockFormik.values, label);
+        return { value, name: label, onChange: jest.fn(), onBlur: jest.fn() };
+      },
+      handleChange: () => {},
+    } as unknown as FormikContextType<any>;
+
+    render(
+      <ExecutionContextProvider
+        value={{
+          measureState: [null, jest.fn()],
+          bundleState: [null, jest.fn()],
+          valueSetsState: [[], jest.fn()],
+          executionContextReady: true,
+          executing: false,
+          setExecuting: jest.fn(),
+          contextFailure: false,
+        }}
+      >
+        <FormikProvider value={mockFormik}>
+          <RequiredFieldsProvider requiredFields={{}} formInfo={[]}>
+            <TypeEditor
+              resource={null}
+              structureDefinition={{
+                id: "Observation.value[x]",
+                type: [{ code: "Ratio" }],
+                required: false,
+                canBeMultipleCardinality: false,
+                max: "1",
+                min: 0,
+              }}
+              label="Observation.valueRatio"
+              canEdit={true}
+              parentStructureDefinition={null}
+            />
+          </RequiredFieldsProvider>
+        </FormikProvider>
+      </ExecutionContextProvider>
+    );
+
+    const numeratorComponent = await screen.findByTestId(
+      "decimal-field-Observation.valueRatio.numerator.value"
+    );
+    expect(numeratorComponent).toBeInTheDocument();
+
+    const denominatorComponent = await screen.findByTestId(
+      "decimal-field-Observation.valueRatio.denominator.value"
+    );
+    expect(denominatorComponent).toBeInTheDocument();
+
+    expect(screen.queryByText("Comparator")).not.toBeInTheDocument();
+  });
+
   test("renders QuantityComponent fields correctly", async () => {
     useFhirDefinitionsServiceApiMock.mockImplementation(
       () =>

@@ -49,6 +49,7 @@ import { IntegerType } from "./typesValidations/FhirNumbers";
 import ElementSectionQiCore from "./ElementSectionQiCore";
 import { getEmptyValueForType } from "./TypeEditorUtils";
 import { getMultipleCardinalityLabel } from "./types/TypeUtil";
+import RatioComponent from "./types/RatioComponent";
 
 export const formikErrorHandler = (name: string, formik) => {
   const touched = getNestedProperty(formik.touched, name);
@@ -361,6 +362,14 @@ const TypeEditor = ({
         );
         return wrapWithSection(label, markdown);
       case "Quantity":
+        // Show comparator for Quantity types that are NOT SimpleQuantity
+        const isSimpleQuantity = structureDefinition?.type?.some(
+          ({ code, profile }) =>
+            code === "Quantity" &&
+            profile?.includes(
+              "http://hl7.org/fhir/StructureDefinition/SimpleQuantity"
+            )
+        );
         return (
           <>
             {(isArrayMode ? values : [null]).map((el, index) => {
@@ -373,7 +382,7 @@ const TypeEditor = ({
                   key={index}
                   canEdit={canEdit}
                   label={fieldLabel}
-                  structureDefinition={structureDefinition}
+                  showComparator={!isSimpleQuantity}
                   fieldRequired={required}
                   showAddAttributeButton={
                     showMultipleCardinalityActionCenter &&
@@ -751,11 +760,19 @@ const TypeEditor = ({
           <RangeComponent
             canEdit={canEdit}
             label={label}
-            structureDefinition={structureDefinition}
             fieldRequired={false}
           />
         );
         return wrapWithSection(label, range);
+      case "Ratio":
+        const ratio = (
+          <RatioComponent
+            canEdit={canEdit}
+            label={label}
+            fieldRequired={false}
+          />
+        );
+        return wrapWithSection(label, ratio);
       case "Coding":
         const coding = (
           <CodingComponent

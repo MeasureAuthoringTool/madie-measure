@@ -1,28 +1,28 @@
 import React from "react";
 import { InputLabel } from "@madie/madie-design-system/dist/react/";
 import { TypeComponentProps } from "./TypeComponentProps";
-import "./RangeComponent.scss";
+import "./RatioComponent.scss";
 import QuantityComponent from "./QuantityComponent";
 import { getMultipleCardinalityLabel } from "./TypeUtil";
 
-const RangeComponent = ({ canEdit, label }: TypeComponentProps) => {
+const RatioComponent = ({ canEdit, label }: TypeComponentProps) => {
   const formattedLabel = getMultipleCardinalityLabel(label);
-  const lowPath = `${label}.low`;
-  const highPath = `${label}.high`;
+  const numeratorPath = `${label}.numerator`;
+  const denominatorPath = `${label}.denominator`;
 
   return (
-    <div className="range-component" data-component-type="RangeComponent">
+    <div className="ratio-component" data-component-type="RatioComponent">
       <InputLabel>{formattedLabel}</InputLabel>
 
       <div className="quantity-row">
-        {/* Low field */}
+        {/* Numerator field */}
         <div className="low-input">
           <QuantityComponent
             canEdit={canEdit}
-            label={lowPath}
+            label={numeratorPath}
             showLabel={false}
             showComparator={false}
-            valueFieldLabel="Low"
+            valueFieldLabel="Numerator"
             fieldRequired={false}
           />
         </div>
@@ -30,14 +30,14 @@ const RangeComponent = ({ canEdit, label }: TypeComponentProps) => {
         {/* Colon separator */}
         <span className="separator">:</span>
 
-        {/* High field */}
+        {/* Denominator field */}
         <div className="high-input">
           <QuantityComponent
             canEdit={canEdit}
-            label={highPath}
+            label={denominatorPath}
             showLabel={false}
             showComparator={false}
-            valueFieldLabel="High"
+            valueFieldLabel="Denominator"
             fieldRequired={false}
           />
         </div>
@@ -46,4 +46,4 @@ const RangeComponent = ({ canEdit, label }: TypeComponentProps) => {
   );
 };
 
-export default RangeComponent;
+export default RatioComponent;

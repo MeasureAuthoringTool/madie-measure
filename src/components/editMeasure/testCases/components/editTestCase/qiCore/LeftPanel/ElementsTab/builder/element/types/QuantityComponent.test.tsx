@@ -88,24 +88,9 @@ useTerminologyServiceApiMock.mockImplementation(() => ({
   getValueSetsExpansionForOids: jest.fn().mockResolvedValue([]),
 }));
 
-const quantityStructureDefinition = {
-  path: "Observation.quantity",
-  type: [{ code: "Quantity" }],
-};
-
-const simpleQuantityStructureDefinition = {
-  path: "Observation.simpleQuantity",
-  type: [
-    {
-      code: "Quantity",
-      profile: ["http://hl7.org/fhir/StructureDefinition/SimpleQuantity"],
-    },
-  ],
-};
-
 const renderWithFormik = ({
   label = "Observation.quantity",
-  structureDefinition = quantityStructureDefinition,
+  showComparator = true,
   canEdit = true,
   initialValues = {
     Observation: { quantity: { value: 10, code: "mg", comparator: ">" } },
@@ -132,7 +117,7 @@ const renderWithFormik = ({
         <QuantityComponent
           label={label}
           canEdit={canEdit}
-          structureDefinition={structureDefinition}
+          showComparator={showComparator}
           fieldRequired={false}
           showAddAttributeButton={showAddAttributeButton}
           addTitle={addTitle}
@@ -171,10 +156,10 @@ describe("QuantityComponent", () => {
     expect((codeInput as HTMLInputElement).value).toBe("mg");
   });
 
-  test("hides comparator field for SimpleQuantity structure definition because SimpleQuantity does not allow a comparator", async () => {
+  test("hides comparator field when showComparator is false", async () => {
     renderWithFormik({
       label: "Observation.quantity",
-      structureDefinition: simpleQuantityStructureDefinition,
+      showComparator: false,
     });
     expect(screen.queryByLabelText("Comparator")).not.toBeInTheDocument();
   });
@@ -281,7 +266,7 @@ describe("QuantityComponent", () => {
   test("displays validation error for invalid code 'z'", async () => {
     renderWithFormik({
       label: "Observation.quantity",
-      structureDefinition: quantityStructureDefinition,
+      showComparator: true,
       canEdit: true,
     });
 
@@ -299,7 +284,7 @@ describe("QuantityComponent", () => {
   test("does not display validation error for valid code 'mg'", async () => {
     renderWithFormik({
       label: "Observation.quantity",
-      structureDefinition: quantityStructureDefinition,
+      showComparator: true,
       canEdit: true,
     });
 
@@ -340,7 +325,7 @@ describe("QuantityComponent", () => {
               <QuantityComponent
                 label="Observation.quantity"
                 canEdit={true}
-                structureDefinition={quantityStructureDefinition}
+                showComparator={true}
               />
             );
           }}
@@ -398,7 +383,7 @@ describe("QuantityComponent", () => {
               <QuantityComponent
                 label="Observation.quantity"
                 canEdit={true}
-                structureDefinition={quantityStructureDefinition}
+                showComparator={true}
               />
             );
           }}
@@ -454,7 +439,7 @@ describe("QuantityComponent", () => {
               <QuantityComponent
                 label="Observation.quantity"
                 canEdit={true}
-                structureDefinition={quantityStructureDefinition}
+                showComparator={true}
               />
             );
           }}
@@ -509,7 +494,7 @@ describe("QuantityComponent", () => {
               <QuantityComponent
                 label="Observation.quantity"
                 canEdit={true}
-                structureDefinition={quantityStructureDefinition}
+                showComparator={true}
               />
             );
           }}
@@ -534,7 +519,7 @@ describe("QuantityComponent", () => {
   test("all fields are read-only when canEdit is false", async () => {
     renderWithFormik({
       label: "Observation.quantity",
-      structureDefinition: quantityStructureDefinition,
+      showComparator: true,
       canEdit: false,
     });
 
