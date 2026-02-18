@@ -1000,7 +1000,7 @@ describe("AddComponentsDialog", () => {
       expect(searchCriteria.optionalSearchProperties.length).toBe(1);
     });
 
-    it("applies all filter conditions when finalFilterBy not selected but Search has search string", async () => {
+    it("applies all filters when FilterBy not selected but Search has search string", async () => {
       const mockSearchMeasures = jest
         .fn()
         .mockResolvedValue(mockOneItemResponse);
