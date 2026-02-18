@@ -43,8 +43,11 @@ export const MeasureSearchFilters: React.FC<MeasureFilterSearchProps> = ({
           name="filterBy"
           value={filterBy}
           onChange={onFilterChange}
-          options={filterByOptions
-            ?.map((option) => {
+          options={[
+            <MenuItem key="-" value="" data-testid={`filter-by--`}>
+              -
+            </MenuItem>,
+            ...filterByOptions?.map((option) => {
               return (
                 <MenuItem
                   key={option}
@@ -54,12 +57,8 @@ export const MeasureSearchFilters: React.FC<MeasureFilterSearchProps> = ({
                   {option}
                 </MenuItem>
               );
-            })
-            .concat(
-              <MenuItem key="-" value="" data-testid={`filter-by--`}>
-                -
-              </MenuItem>
-            )}
+            }),
+          ]}
         />
       </div>
       <div>
