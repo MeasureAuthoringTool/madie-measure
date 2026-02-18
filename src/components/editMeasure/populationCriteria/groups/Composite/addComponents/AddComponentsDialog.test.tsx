@@ -946,4 +946,163 @@ describe("AddComponentsDialog", () => {
 
     expect(mockSearchMeasures).not.toHaveBeenCalled();
   });
+
+  describe("Filtering", () => {
+    it("applies specific filter when FilterBy is selected", async () => {
+      const mockSearchMeasures = jest
+        .fn()
+        .mockResolvedValue(mockOneItemResponse);
+
+      useMeasureServiceApi.mockReturnValue({
+        searchMeasuresByCriteria: mockSearchMeasures,
+        getMeasuresByMeasureSetId: jest.fn(),
+      });
+
+      render(
+        <AddComponentsDialog
+          open={true}
+          onClose={onCloseMock}
+          measure={mockMeasure}
+          compositeScoring="Opportunity"
+        />
+      );
+
+      await waitFor(() => {
+        expect(mockSearchMeasures).toHaveBeenCalled();
+      });
+
+      // Get the filter dropdown and search input
+      const filterDropdown = screen.getByLabelText("Filter By");
+      const searchInput = screen.getByPlaceholderText("Search");
+      const searchTrigger = screen.getByTestId("test-cases-trigger-search");
+
+      // Select a specific filter (e.g., "Measure")
+      userEvent.click(filterDropdown);
+      const measureOption = screen.getByRole("option", { name: "Measure" });
+      userEvent.click(measureOption);
+
+      // Enter search text
+      userEvent.type(searchInput, "Test");
+
+      // Click search trigger to trigger the search
+      mockSearchMeasures.mockClear();
+      userEvent.click(searchTrigger);
+
+      await waitFor(() => {
+        expect(mockSearchMeasures).toHaveBeenCalled();
+      });
+
+      // Verify that only "measureName" is in optionalSearchProperties
+      const lastCall =
+        mockSearchMeasures.mock.calls[mockSearchMeasures.mock.calls.length - 1];
+      const searchCriteria = lastCall[5];
+      expect(searchCriteria.optionalSearchProperties).toEqual(["measureName"]);
+      expect(searchCriteria.optionalSearchProperties.length).toBe(1);
+    });
+
+    it("applies all filter conditions when finalFilterBy not selected but Search has search string", async () => {
+      const mockSearchMeasures = jest
+        .fn()
+        .mockResolvedValue(mockOneItemResponse);
+
+      useMeasureServiceApi.mockReturnValue({
+        searchMeasuresByCriteria: mockSearchMeasures,
+        getMeasuresByMeasureSetId: jest.fn(),
+      });
+
+      render(
+        <AddComponentsDialog
+          open={true}
+          onClose={onCloseMock}
+          measure={mockMeasure}
+          compositeScoring="Opportunity"
+        />
+      );
+
+      await waitFor(() => {
+        expect(mockSearchMeasures).toHaveBeenCalled();
+      });
+
+      // Get the search input (filter dropdown should be empty/default)
+      const searchInput = screen.getByPlaceholderText("Search");
+      const searchTrigger = screen.getByTestId("test-cases-trigger-search");
+
+      // Enter search text without selecting a filter
+      userEvent.type(searchInput, "TestSearch");
+
+      // Click search trigger to trigger the search
+      mockSearchMeasures.mockClear();
+      userEvent.click(searchTrigger);
+
+      await waitFor(() => {
+        expect(mockSearchMeasures).toHaveBeenCalled();
+      });
+
+      // Verify that all filter options are in optionalSearchProperties
+      const lastCall =
+        mockSearchMeasures.mock.calls[mockSearchMeasures.mock.calls.length - 1];
+      const searchCriteria = lastCall[5];
+      expect(searchCriteria.optionalSearchProperties).toEqual([
+        "measureName",
+        "version",
+        "cmsId",
+      ]);
+      expect(searchCriteria.optionalSearchProperties.length).toBe(3);
+    });
+
+    it("clears filters when clear button is clicked", async () => {
+      const mockSearchMeasures = jest
+        .fn()
+        .mockResolvedValue(mockOneItemResponse);
+
+      useMeasureServiceApi.mockReturnValue({
+        searchMeasuresByCriteria: mockSearchMeasures,
+        getMeasuresByMeasureSetId: jest.fn(),
+      });
+
+      render(
+        <AddComponentsDialog
+          open={true}
+          onClose={onCloseMock}
+          measure={mockMeasure}
+          compositeScoring="Opportunity"
+        />
+      );
+
+      await waitFor(() => {
+        expect(mockSearchMeasures).toHaveBeenCalled();
+      });
+
+      const filterDropdown = screen.getByLabelText("Filter By");
+      const searchInput = screen.getByPlaceholderText("Search");
+      const searchTrigger = screen.getByTestId("test-cases-trigger-search");
+
+      // Set filter and search
+      userEvent.click(filterDropdown);
+      const measureOption = screen.getByRole("option", { name: "Measure" });
+      userEvent.click(measureOption);
+      userEvent.type(searchInput, "Test");
+      userEvent.click(searchTrigger);
+
+      await waitFor(() => {
+        expect(mockSearchMeasures).toHaveBeenCalled();
+      });
+
+      // Clear filters
+      const clearButton = screen.getByTestId("test-cases-clear-search");
+      mockSearchMeasures.mockClear();
+      userEvent.click(clearButton);
+
+      await waitFor(() => {
+        expect(mockSearchMeasures).toHaveBeenCalled();
+      });
+
+      // After clearing, should have no optional filter properties
+      const lastCall =
+        mockSearchMeasures.mock.calls[mockSearchMeasures.mock.calls.length - 1];
+      const searchCriteria = lastCall[5];
+      expect(searchCriteria.optionalSearchProperties).toEqual([]);
+      expect(searchCriteria.searchField).toBe("");
+    });
+  });
 });
