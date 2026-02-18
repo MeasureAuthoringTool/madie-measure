@@ -2,16 +2,26 @@ import React, { useState } from "react";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import "./ElementSectionQiCore.scss";
 import { IconButton } from "@mui/material";
+import AddElementButton from "../../../../../../common/UIOnlyModelAgnostic/AddElementButton";
 // Tab heading to display weather or not we can see contents
 
 interface ElementSectionProps {
   title: any;
+  elementDefinition?: any;
   children?: any;
   startOpen?: any;
+  canBeMultipleCardinality?: boolean;
+  handleAddElement?: () => void;
 }
 
 const ElementSectionQiCore = (props: ElementSectionProps) => {
-  const { title, children, startOpen = true } = props;
+  const {
+    title,
+    children,
+    startOpen,
+    canBeMultipleCardinality,
+    handleAddElement = true,
+  } = props;
   const [open, setOpen] = useState(startOpen);
   const chevronClass = open ? "chevron-display open" : "chevron-display";
   const growingDivClass = open
@@ -44,6 +54,14 @@ const ElementSectionQiCore = (props: ElementSectionProps) => {
             <ChevronRightIcon className={chevronClass} />
           </IconButton>
           <h4 className="header">{`${props.title}`}</h4>
+          {props.canBeMultipleCardinality && (
+            <div style={{ marginLeft: "auto" }}>
+              <AddElementButton
+                name="Element"
+                onClick={props.handleAddElement}
+              />
+            </div>
+          )}
         </div>
         {open && (
           <div

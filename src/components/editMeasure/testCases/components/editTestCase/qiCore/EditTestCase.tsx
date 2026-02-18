@@ -28,6 +28,7 @@ import {
   Measure,
 } from "@madie/madie-models";
 import useTestCaseServiceApi from "../../../api/useTestCaseServiceApi";
+import useFhirDefinitionsServiceApi from "../../../api/useFhirDefinitionsService";
 import Editor from "../../editor/Editor";
 import { TestCaseValidator } from "../../../validators/TestCaseValidator";
 import { MadieError, sanitizeUserInput } from "../../../util/Utils";
@@ -431,6 +432,7 @@ const EditTestCase = (props: EditTestCaseProps) => {
     []
   );
   const [callstackMap, setCallstackMap] = useState<CqlDefinitionCallstack>();
+  const fhirDefinitionServiceApi = useRef(useFhirDefinitionsServiceApi());
 
   const {
     measureState,
@@ -892,10 +894,17 @@ const EditTestCase = (props: EditTestCaseProps) => {
     }
 
     try {
+      //filter any resources with invalid references.
+      const updatedTestCaseExecutionBundle =
+        await fhirDefinitionServiceApi.current.getTestCaseExecutionBundle(
+          measure.model,
+          [modifiedTestCase]
+        );
+
       const calculationOutput: CalculationOutput<any> =
         await calculation.current.calculateTestCases(
           measure,
-          [modifiedTestCase],
+          updatedTestCaseExecutionBundle?.testCases,
           measureBundle,
           valueSets
         );
@@ -906,10 +915,19 @@ const EditTestCase = (props: EditTestCaseProps) => {
         executionResults[0].detailedResults as DetailedPopulationGroupResult[]
       );
     } catch (error) {
-      setCalculationErrors({
-        status: "error",
-        message: error.message,
-      });
+      const calculationError: AlertProps = error.message?.includes(
+        "filtering resource"
+      )
+        ? {
+            status: "error",
+            message:
+              "An error occurred while preparing the test case execution bundle. Please try again. If the issue continues, please contact helpdesk.",
+          }
+        : {
+            status: "error",
+            message: error.message,
+          };
+      setCalculationErrors(calculationError);
       setErrors([...errors, error.message]);
     } finally {
       setExecuting(false);
