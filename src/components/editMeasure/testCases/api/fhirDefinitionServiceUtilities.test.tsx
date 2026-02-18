@@ -224,6 +224,54 @@ describe("FhirDefinitionServiceUtilities", () => {
       expect(result.find((el) => el.path === "Patient.name")).toBeDefined();
       expect(result.find((el) => el.path === "Patient.age")).toBeDefined();
     });
+
+    it("should filter out generic extension elements without sliceName", () => {
+      const resourceWithGenericExtension = _.cloneDeep(mockResource);
+      resourceWithGenericExtension.definition.snapshot.element.push(
+        {
+          id: "ClaimResponse.extension",
+          path: "ClaimResponse.extension",
+          min: 0,
+          type: [{ code: "Extension" }],
+        },
+        {
+          id: "Condition.extension",
+          path: "Condition.extension",
+          min: 0,
+          type: [{ code: "Extension" }],
+        },
+        {
+          id: "Patient.extension:ethnicity",
+          path: "Patient.extension",
+          sliceName: "ethnicity",
+          min: 0,
+          type: [
+            {
+              code: "Extension",
+              profile: [
+                "http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethnicity",
+              ],
+            },
+          ],
+        }
+      );
+      const result = getTopLevelElements(resourceWithGenericExtension);
+
+      // Generic extensions without sliceName should be filtered out
+      expect(
+        result.find((el) => el.id === "ClaimResponse.extension")
+      ).toBeUndefined();
+      expect(
+        result.find((el) => el.id === "Condition.extension")
+      ).toBeUndefined();
+      // Sliced extensions should remain
+      expect(
+        result.find((el) => el.id === "Patient.extension:race")
+      ).toBeDefined();
+      expect(
+        result.find((el) => el.id === "Patient.extension:ethnicity")
+      ).toBeDefined();
+    });
   });
 
   describe("getRequiredElements", () => {
