@@ -56,7 +56,7 @@ describe("View Human Readable Modal component", () => {
     );
     expect(screen.getByTestId("view-hr-modal")).toBeInTheDocument();
     expect(screen.getByTestId("close-button")).toBeInTheDocument();
-    expect(screen.getByText(/Cancel/i)).toBeInTheDocument();
+    expect(screen.getByText(/Close/i)).toBeInTheDocument();
     expect(screen.getByText(/Export/i)).toBeInTheDocument();
   });
 
@@ -65,7 +65,7 @@ describe("View Human Readable Modal component", () => {
     expect(screen.getByTestId("view-hr-modal")).toBeInTheDocument();
   });
 
-  it("should call onClose when the close button is clicked", async () => {
+  it("should call onClose when the Close button is clicked", async () => {
     renderComponent();
     expect(screen.getByTestId("view-hr-modal")).toBeInTheDocument();
     act(() => {
@@ -74,9 +74,9 @@ describe("View Human Readable Modal component", () => {
     });
   });
 
-  it("should call onClose when the cancel button is clicked", async () => {
+  it("should call onClose when the Close button is clicked", async () => {
     renderComponent();
-    userEvent.click(screen.getByText(/Cancel/i));
+    userEvent.click(screen.getByText(/Close/i));
     expect(onCloseFn).toHaveBeenCalled();
   });
 

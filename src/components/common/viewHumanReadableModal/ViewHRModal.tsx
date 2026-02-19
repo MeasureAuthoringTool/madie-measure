@@ -69,7 +69,7 @@ export default function ViewHRModal(props: ModalProps) {
       }}
       cancelButtonProps={{
         variant: "secondary",
-        cancelText: "Cancel",
+        cancelText: "Close",
         "data-testid": "human-readable-cancel-button",
       }}
       continueButtonProps={{
