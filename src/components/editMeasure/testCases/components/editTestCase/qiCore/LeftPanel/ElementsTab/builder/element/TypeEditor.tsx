@@ -893,6 +893,7 @@ const TypeEditor = ({
                     const newValues = [...currentValues, {}];
                     formik.setFieldValue(basePath, newValues);
                   }}
+                  resource={resource}
                   {...formik.getFieldProps(fieldLabel)}
                 />
               );
