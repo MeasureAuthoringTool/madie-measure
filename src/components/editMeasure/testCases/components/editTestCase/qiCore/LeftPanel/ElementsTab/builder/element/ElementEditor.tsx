@@ -278,7 +278,6 @@ const ElementEditor = ({
     if (selectedResource) {
       buildForm();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedResource]); // buildForm is excluded because it only uses stable setState functions
 
   useEffect(() => {
