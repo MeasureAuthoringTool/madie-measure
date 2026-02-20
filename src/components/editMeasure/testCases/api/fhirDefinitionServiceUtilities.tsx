@@ -410,11 +410,6 @@ export function getTopLevelElements(
       (e?.path?.includes("extension") && e?.id.includes(":"))
   );
 
-  // Filter out elements where type contains code 'Age'
-  // const filteredWithoutAge = elementsFiltered.filter(
-  //   (item) => !item.type?.some((t) => t.code === "Age")
-  // );
-
   // Filter out sliced elements (id contains ':') except extension slices
   const filteredWithoutSlices = elementsFiltered.filter((e) => {
     if (e.id?.includes(":")) {
