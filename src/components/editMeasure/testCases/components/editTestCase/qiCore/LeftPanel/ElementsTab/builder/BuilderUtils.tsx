@@ -22,8 +22,10 @@ export function handleRowEdit(
 
 export function handleRowDelete(
   row: any,
+  setSelectedResourceId: (id: string) => void,
   dispatch: (action: { type: string; payload: any }) => void
 ) {
+  setSelectedResourceId(null);
   dispatch({
     type: ResourceActionType.REMOVE_BUNDLE_ENTRY,
     payload: row,

@@ -150,6 +150,10 @@ const Builder = ({
     };
   }, [measure]);
 
+  useEffect(() => {
+    setSelectedResourceId(null);
+  }, [activeTab]);
+
   const displayBuilderAlert = (error: string, dataTestInfo: string) => {
     return (
       <div style={{ margin: "-16px", marginTop: "-32px", marginRight: 0 }}>
@@ -286,7 +290,9 @@ const Builder = ({
                   onRowEdit={(row) =>
                     handleRowEdit(row, setSelectedResourceId, setSavedGridID)
                   }
-                  onRowDelete={(row) => handleRowDelete(row, dispatch)}
+                  onRowDelete={(row) =>
+                    handleRowDelete(row, setSelectedResourceId, dispatch)
+                  }
                   testCaseCanEdit={canEdit}
                   selectedRowId={selectedResourceID}
                   readOnly={!canEdit}
