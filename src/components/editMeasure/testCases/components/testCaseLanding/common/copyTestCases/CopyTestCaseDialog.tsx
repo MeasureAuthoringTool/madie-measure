@@ -7,18 +7,14 @@ import React, {
 } from "react";
 import tw from "twin.macro";
 import "styled-components/macro";
-import { IconButton, MenuItem, Chip, InputAdornment } from "@mui/material";
+import { Chip } from "@mui/material";
 import {
   MadieDialog,
   MadieSpinner,
   TruncateText,
   Pagination,
-  Select,
-  TextField,
 } from "@madie/madie-design-system/dist/react";
 
-import SearchIcon from "@mui/icons-material/Search";
-import ClearIcon from "@mui/icons-material/Clear";
 import * as _ from "lodash";
 import "../../../../../../measureLanding/MeasureLanding.scss";
 import {
@@ -43,20 +39,17 @@ import {
 import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
-
-import "./tcPagination.scss";
 import useTestCaseServiceApi from "../../../../api/useTestCaseServiceApi";
 import Typography from "@mui/material/Typography";
 import { useMeasureServiceApi, useFeatureFlags } from "@madie/madie-util";
+import {
+  useMeasureFilterSearch,
+  filterMap,
+  filterByOptions,
+} from "../../../../../hooks/useMeasureFilterSearch";
+import { MeasureSearchFilters } from "../../../../../shared/MeasureSearchFilters";
 
 const TH = tw.th`p-3 text-left text-sm font-bold capitalize`;
-
-export const filterByOptions = ["Measure", "Version", "CMS ID"];
-const filterMap = {
-  Measure: "measureName",
-  Version: "version",
-  "CMS ID": "cmsId",
-};
 
 const CopyTestCaseDialog = ({ open, onClose, measure, selectedTestCases }) => {
   const measureSearchApi = useRef(useMeasureServiceApi());
@@ -72,18 +65,22 @@ const CopyTestCaseDialog = ({ open, onClose, measure, selectedTestCases }) => {
   const [totalPages, setTotalPages] = useState<number>(0);
   const [totalItems, setTotalItems] = useState<number>(0);
   const [visibleItems, setVisibleItems] = useState<number>(0);
-  // utilities for filter & search
-  const [filterBy, setFilterBy] = useState<string>("");
-  const [searchField, setSearchField] = useState<string>("");
+
+  // Use custom hook for filter and search functionality
+  const {
+    filterBy,
+    searchField,
+    finalSearchAndFilterby,
+    handleFilter,
+    handleSearch,
+    finalizeSearchCriteria,
+    blankSearchCriteria,
+  } = useMeasureFilterSearch(() => setPage(0));
+
   const [selectedIdForExpansion, setSelectedIdForExpansion] = useState(null);
   const [isRowExpanded, setIsRowExpanded] = useState<boolean>(false);
   const [expandedSectionData, setExpandedSectionData] = useState<TCRow[]>([]);
   const featureFlags = useFeatureFlags();
-
-  const [finalSearchAndFilterby, setFinalSearchAndFilterby] = useState({
-    finalSearchField: "",
-    finalFilterBy: "",
-  });
 
   type TCRow = {
     id: string;
@@ -104,12 +101,6 @@ const CopyTestCaseDialog = ({ open, onClose, measure, selectedTestCases }) => {
     }));
   };
 
-  const handleSearch = (e) => {
-    setSearchField(e.target.value);
-  };
-  const handleFilter = (e) => {
-    setFilterBy(e.target.value);
-  };
   // measures owned or shared for the current user excluding the current measure
   const [measureList, setMeasureList] = useState<Measure[]>([]);
   const [offset, setOffset] = useState<number>(0);
@@ -182,15 +173,7 @@ const CopyTestCaseDialog = ({ open, onClose, measure, selectedTestCases }) => {
       });
     // usually we'd attach the filter conditions as url params, but I don't think it makes sense if it's part of a dialog.
     // may be a smarter way to do this using a non controlled component, but it's not apparent to me now
-  }, [
-    measure,
-    limit,
-    page,
-    finalSearchAndFilterby,
-    filterMap,
-    abortController,
-    open,
-  ]);
+  }, [measure, limit, page, finalSearchAndFilterby, open]);
 
   const [allTestCases, setAllTestCases] = useState<TestCase[]>([]);
   const retrieveTestCases = useCallback(() => {
@@ -414,21 +397,6 @@ const CopyTestCaseDialog = ({ open, onClose, measure, selectedTestCases }) => {
     },
   });
 
-  const finalizeSearchCriteria = () => {
-    const finalSearchAndFilter = {
-      finalSearchField: searchField,
-      finalFilterBy: filterBy,
-    };
-    setFinalSearchAndFilterby(finalSearchAndFilter);
-  };
-
-  const blankSearchCriteria = () => {
-    setSearchField("");
-    setFilterBy("");
-    setFinalSearchAndFilterby({ finalFilterBy: "", finalSearchField: "" });
-    setPage(0);
-  };
-
   const onSubmit = async (e) => {
     if (_.isEmpty(selectedRowId)) {
       return;
@@ -541,87 +509,14 @@ const CopyTestCaseDialog = ({ open, onClose, measure, selectedTestCases }) => {
     >
       {!executing && !cannotCopy && (
         <div id="measure-landing" data-testid="measure-landing">
-          <div id="tc-search">
-            <div>
-              <Select
-                label="Filter By"
-                id="filter-by-select"
-                data-testid="filter-by-select"
-                inputProps={{ "data-testid": "filter-by-select-input" }}
-                placeHolder={{ name: "Filter By", value: "" }}
-                SelectDisplayProps={{
-                  "aria-required": "true",
-                }}
-                size="small"
-                name="filterBy"
-                value={filterBy}
-                onChange={handleFilter}
-                options={filterByOptions
-                  ?.map((option) => {
-                    return (
-                      <MenuItem
-                        key={option}
-                        value={option}
-                        data-testid={`filter-by-${option}`}
-                      >
-                        {option}
-                      </MenuItem>
-                    );
-                  })
-                  .concat(
-                    <MenuItem key="-" value="" data-testid={`filter-by--`}>
-                      -
-                    </MenuItem>
-                  )}
-              />
-            </div>
-            <div>
-              <TextField
-                id="search"
-                label="Search"
-                placeholder="Search"
-                inputProps={{
-                  "data-testid": "test-case-list-search-input",
-                }}
-                data-testid="test-case-list-search"
-                name="searchField"
-                value={searchField}
-                onChange={handleSearch}
-                onKeyPress={(e) => {
-                  if (e.key === "Enter") {
-                    e.preventDefault();
-                    finalizeSearchCriteria();
-                  }
-                }}
-                slotProps={{
-                  input: {
-                    startAdornment: (
-                      <InputAdornment
-                        position="start"
-                        data-testid="test-cases-trigger-search"
-                        onClick={finalizeSearchCriteria}
-                        style={{ cursor: "pointer" }}
-                      >
-                        <SearchIcon />
-                      </InputAdornment>
-                    ),
-                    endAdornment: (
-                      <InputAdornment
-                        data-testid="test-cases-clear-search"
-                        position="end"
-                        style={{ cursor: "pointer" }}
-                        onClick={blankSearchCriteria}
-                      >
-                        <IconButton>
-                          <ClearIcon />
-                        </IconButton>
-                      </InputAdornment>
-                    ),
-                  },
-                }}
-              />
-            </div>
-          </div>
+          <MeasureSearchFilters
+            filterBy={filterBy}
+            searchField={searchField}
+            onFilterChange={handleFilter}
+            onSearchChange={handleSearch}
+            onSearchTrigger={finalizeSearchCriteria}
+            onSearchClear={blankSearchCriteria}
+          />
           <div className="measure-table no-margin-top">
             <div className="table" style={{ overflow: "auto" }}>
               <table
