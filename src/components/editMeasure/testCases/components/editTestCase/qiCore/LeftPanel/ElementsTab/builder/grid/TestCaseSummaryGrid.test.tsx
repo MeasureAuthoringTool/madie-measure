@@ -49,13 +49,13 @@ export const mockBundle = {
       resource: {
         resourceType: "Procedure",
         id: "pd-2",
-      },
+      }, // No profile present, but resourceType is valid
     },
     {
       resource: {
         resourceType: "UnknownResource",
         id: "unknown",
-      },
+      }, // Unsupported resource type
     },
   ],
 };
@@ -68,7 +68,7 @@ const gridData = [
   },
   {
     title: "QICore Procedure",
-    entry: mockBundle.entry[3], // Unsupported
+    entry: mockBundle.entry[3],
   },
   {
     title: "Unknown Resource",
