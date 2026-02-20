@@ -95,7 +95,7 @@
     "@madie/madie-auth": "^0.0.1",
     "@madie/madie-design-system": "^1.2.85",
     "@madie/madie-editor": "^0.0.1",
-    "@madie/madie-models": "^1.4.57",
+    "@madie/madie-models": "^1.4.59",
     "@madie/madie-root": "^0.0.3",
     "@mui/icons-material": "^6.1.0",
     "@mui/lab": "6.0.1-beta.34",

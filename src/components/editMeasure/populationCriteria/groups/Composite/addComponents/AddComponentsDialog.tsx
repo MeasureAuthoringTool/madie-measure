@@ -57,7 +57,15 @@ export default function AddComponentsDialog({
   onClose,
   measure,
   compositeScoring,
+  components,
+  submitComponentForm,
 }) {
+  // we need to know what measures are added by means of component selection
+  const preselectedIds = useMemo(
+    () => new Set((components ?? []).map((c) => c.measureId)),
+    [components]
+  );
+
   const measureServiceApi = useRef(useMeasureServiceApi()).current;
   const [limit, setLimit] = useState(5);
   const [page, setPage] = useState(0);
@@ -86,6 +94,27 @@ export default function AddComponentsDialog({
   } = useMeasureFilterSearch(() => setPage(0));
 
   const [measureList, setMeasureList] = useState<Measure[]>([]);
+
+  useEffect(() => {
+    setRowSelection((prev) => {
+      if (!measureList?.length) {
+        return Object.keys(prev).length ? {} : prev;
+      }
+
+      let changed = false;
+      const next = { ...prev };
+
+      for (const m of measureList) {
+        if (m?.id && preselectedIds.has(m.id) && !next[m.id]) {
+          next[m.id] = true;
+          changed = true;
+        }
+      }
+
+      return changed ? next : prev;
+    });
+  }, [measureList, preselectedIds]);
+
   const IndeterminateCheckbox = ({ indeterminate, checked, ...rest }: any) => {
     const ref = React.useRef<HTMLInputElement>(null);
 
@@ -165,17 +194,15 @@ export default function AddComponentsDialog({
             />
           );
         },
-
-        cell: (info) => (
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "row",
-              gap: 16,
-            }}
-          >
+        cell: ({ row }) => (
+          <div style={{ display: "flex", flexDirection: "row", gap: 16 }}>
             <div className="px-1">
-              <IndeterminateCheckbox />
+              <IndeterminateCheckbox
+                checked={row.getIsSelected()}
+                indeterminate={row.getIsSomeSelected?.()}
+                onChange={row.getToggleSelectedHandler()}
+                aria-label={`Toggle row ${row.id}`}
+              />
             </div>
           </div>
         ),
@@ -369,6 +396,7 @@ export default function AddComponentsDialog({
     };
   }, [fetchMeasures, measure?.id]);
 
+  const [rowSelection, setRowSelection] = useState({});
   const table = useReactTable({
     data: measureList,
     columns,
@@ -384,21 +412,45 @@ export default function AddComponentsDialog({
     onSortingChange: setSorting,
     state: {
       sorting,
+      rowSelection,
     },
+    enableRowSelection: true,
+    onRowSelectionChange: setRowSelection,
   });
 
   const handleDialogClose = () => {
     onClose();
   };
 
-  const handleDialogSubmit = (e) => {
+  const handleDialogSubmit = async (e) => {
     e.preventDefault();
     // required: to prevent event bubbling to parent forms
     e.stopPropagation();
+    // make shallow copy of what we already have
+    const newComponents = [];
+    // get all the objectIds of the selected measures
+    const selectedMeasureObjectIds = Object.keys(rowSelection);
+    const results = await measureServiceApi.fetchMeasuresByIds(
+      selectedMeasureObjectIds
+    );
+    results.forEach((measure) => {
+      measure.groups.forEach((group) => {
+        newComponents.push({
+          measureId: measure.id,
+          groupId: group.id,
+        });
+      });
+    });
+    const uniqueComponents = _.uniqBy(
+      newComponents,
+      (c) => `${c.measureId}:${c.groupId}`
+    );
+    submitComponentForm(uniqueComponents);
+    onClose();
   };
 
   const expandedColumns = useMemo<ColumnDef<Measure>[]>(() => {
-    return columns;
+    return (columns as any[]).filter((c) => c.id !== "select");
   }, [columns]);
 
   return (
