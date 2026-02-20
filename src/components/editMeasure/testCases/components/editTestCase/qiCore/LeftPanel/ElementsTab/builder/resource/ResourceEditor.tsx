@@ -87,6 +87,23 @@ const buildElementPath = (element: ElementDefinition) => {
   return elemPath;
 };
 
+export const ProfileName = ({ profileUrl }: { profileUrl?: string }) => {
+  let name = "NA";
+  if (profileUrl) {
+    if (profileUrl.includes("/qicore")) {
+      name = "QICore";
+    } else if (profileUrl.includes("/us-core")) {
+      name = "USCore";
+    }
+  }
+  return (
+    <>
+      <span style={{ color: "125496", fontWeight: 700 }}>Profile:&nbsp;</span>
+      <span style={{ color: "#333333" }}>{name}</span>
+    </>
+  );
+};
+
 const ResourceEditor = ({
   selectedResourceID,
   onCancel,
@@ -308,16 +325,11 @@ const ResourceEditor = ({
                 {selectedResource?.bundleEntry?.resource?.id}
               </span>
               <div />
-              <span style={{ color: "125496", fontWeight: 700 }}>
-                Profile:&nbsp;&nbsp;
-              </span>
-              <span style={{ color: "#333333" }}>
-                {selectedResource?.bundleEntry?.resource?.meta?.profile?.[0]
-                  ?.match(/\/(qicore|core)\//)
-                  .includes("qicore")
-                  ? "QICore"
-                  : "US Core"}
-              </span>
+              <ProfileName
+                profileUrl={
+                  selectedResource?.bundleEntry?.resource?.meta?.profile?.[0]
+                }
+              />
             </Typography>
             <IconButton
               data-testid="close-resource-editor-button"

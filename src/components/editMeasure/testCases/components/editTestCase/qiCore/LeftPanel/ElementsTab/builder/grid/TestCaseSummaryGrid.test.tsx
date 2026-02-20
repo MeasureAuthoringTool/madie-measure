@@ -4,6 +4,7 @@ import TestCaseSummaryGrid, {
   GridDataEntry,
   RESOURCE_TYPE_MISMATCH_ERROR,
   UNSUPPORTED_PROFILE_ERROR,
+  UNSUPPORTED_RESOURCE_ERROR,
 } from "./TestCaseSummaryGrid";
 import { within } from "@testing-library/dom";
 import userEvent from "@testing-library/user-event";
@@ -26,7 +27,11 @@ export const mockBundle = {
       resource: {
         resourceType: "Procedure",
         id: "pd-1",
-        // No profile = Unsupported
+        meta: {
+          profile: [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-uknown-procedure",
+          ],
+        },
       },
     },
     {
@@ -40,6 +45,18 @@ export const mockBundle = {
         }, // profile & resourceType mismatch
       },
     },
+    {
+      resource: {
+        resourceType: "Procedure",
+        id: "pd-2",
+      },
+    },
+    {
+      resource: {
+        resourceType: "UnknownResource",
+        id: "unknown",
+      },
+    },
   ],
 };
 
@@ -48,6 +65,14 @@ const gridData = [
   {
     title: "QICore Procedure",
     entry: mockBundle.entry[1], // Unsupported
+  },
+  {
+    title: "QICore Procedure",
+    entry: mockBundle.entry[3], // Unsupported
+  },
+  {
+    title: "Unknown Resource",
+    entry: mockBundle.entry[4], // Unsupported
   },
 ] as GridDataEntry[];
 
@@ -67,6 +92,14 @@ const resourceIdentifiers = [
     type: "Patient",
     category: "Clinical",
     profile: "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient",
+  },
+  {
+    id: "qicore-procedure",
+    title: "QICore Procedure",
+    type: "Procedure",
+    category: "Clinical",
+    profile:
+      "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-procedure",
   },
   // No Procedure profile, so Procedure is unsupported
 ];
@@ -127,6 +160,12 @@ describe("TestCaseSummaryGrid", () => {
     expect(
       within(rows[2].querySelector("td:nth-child(1)")).getByText(
         UNSUPPORTED_PROFILE_ERROR
+      )
+    ).toBeInTheDocument();
+    // Verify unsupported message/tooltip is present for unsupported profile
+    expect(
+      within(rows[4].querySelector("td:nth-child(1)")).getByText(
+        UNSUPPORTED_RESOURCE_ERROR
       )
     ).toBeInTheDocument();
   });

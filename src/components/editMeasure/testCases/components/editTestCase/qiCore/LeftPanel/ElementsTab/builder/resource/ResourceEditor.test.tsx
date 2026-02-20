@@ -3,6 +3,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import ResourceEditor, {
   deleteMultipleCardinalityElement,
   getResourceName,
+  ProfileName,
 } from "./ResourceEditor";
 import { QiCoreResourceContext } from "../../../../../../../util/QiCorePatientProvider";
 import mockClaimResponseStructuredDef from "./mockSelectedResourceTree.json";
@@ -970,5 +971,17 @@ describe("Test the ResourceEditor utility functions", () => {
     expect(
       getResourceName("Test Condition Encounter Diagnosis", "Encounter")
     ).toBe("Test Condition Encounter Diagnosis");
+  });
+
+  it("Should render NA if profile url is absent", async () => {
+    render(<ProfileName profileUrl={undefined} />);
+    expect(screen.getByText(/Profile:/)).toBeInTheDocument();
+    expect(screen.getByText("NA")).toBeInTheDocument();
+  });
+
+  it("Should render Profile: USCore if profile url contains us-core", async () => {
+    render(<ProfileName profileUrl="StructuredDefinition/us-core-encounter" />);
+    expect(screen.getByText(/Profile:/)).toBeInTheDocument();
+    expect(screen.getByText("USCore")).toBeInTheDocument();
   });
 });

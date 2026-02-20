@@ -6,7 +6,7 @@ import React, {
   SetStateAction,
 } from "react";
 import { Box } from "@mui/material";
-import * as _ from "lodash";
+import _ from "lodash";
 import useFhirDefinitionsServiceApi from "../../../../../../../api/useFhirDefinitionsService";
 import ElementEditorChildren from "./ElementEditorChildren";
 import "./ElementEditor.scss";
@@ -221,14 +221,13 @@ const ElementEditor = ({
     }
   };
 
-  const buildForm = async (
-    rootDefinition,
-    allChildren,
-    resourcePath,
-    resource
-  ) => {
+  const buildForm = async () => {
     const formInfo = {};
     const nodeList = [];
+    const rootDefinition = selectedResource.definition?.snapshot?.element?.[0];
+    const resource = selectedResource.bundleEntry.resource;
+    const currentPath = selectedResource.definition.type;
+    const allChildren = getAllChildren(selectedResource, currentPath);
     const allNodes = [rootDefinition, ...allChildren];
 
     const ids = allNodes.map((n) => n?.id).filter(Boolean);
@@ -273,25 +272,14 @@ const ElementEditor = ({
     // need a loading toggle or formikProvider dies violently.
     setLoading(false);
   };
-  const triggerFormBuilder = async () => {
-    const currentPath = selectedResource.definition.type;
-    const allChildren = getAllChildren(selectedResource, currentPath);
-    await buildForm(
-      selectedResource?.definition?.snapshot?.element?.[0],
-      allChildren,
-      resourcePath,
-      selectedResourceOnBundleEntry
-    );
-  };
+
   // Whenever the displayedElements list changes in volume, we need to rebuild the form.
   useEffect(() => {
-    if (
-      selectedResourceOnBundleEntry &&
-      Object.keys(displayedElementsTree).length
-    ) {
-      triggerFormBuilder();
+    if (selectedResource) {
+      buildForm();
     }
-  }, [displayedElementsTree, state, selectedResourceID]); // using selected resource as a render point
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedResource]); // buildForm is excluded because it only uses stable setState functions
 
   useEffect(() => {
     if (loading) return;
