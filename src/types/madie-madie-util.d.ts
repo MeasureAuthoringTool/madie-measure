@@ -104,6 +104,7 @@ declare module "@madie/madie-util" {
       sortByLatestVersion?: boolean,
       searchCriteria?: MeasureSearchCriteria
     ): Promise<any>;
+    fetchMeasuresByIds(measureIds: string[]): Promise<any>;
     searchMeasuresByCriteria(
       ownershipTypes: OwnershipType[],
       limit: string | number,
