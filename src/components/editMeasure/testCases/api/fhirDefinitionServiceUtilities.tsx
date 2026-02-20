@@ -391,6 +391,7 @@ export function getTopLevelElements(
       (e.path.split(".")?.length === 2 &&
         e.id !== "Extension.extension" &&
         e.id !== "Patient.extension" &&
+        // e.id !== "AllergyIntolerance.extension:resolutionAge" &&
         !/\.id$/.test(e.id) &&
         e.max !== "0" &&
         // Exclude entries where the path contains these attributes or matches these element names
@@ -408,6 +409,11 @@ export function getTopLevelElements(
         )) ||
       (e?.path?.includes("extension") && e?.id.includes(":"))
   );
+
+  // Filter out elements where type contains code 'Age'
+  // const filteredWithoutAge = elementsFiltered.filter(
+  //   (item) => !item.type?.some((t) => t.code === "Age")
+  // );
 
   // Filter out sliced elements (id contains ':') except extension slices
   const filteredWithoutSlices = elementsFiltered.filter((e) => {
@@ -439,21 +445,29 @@ export function getTopLevelElements(
       filteredWithoutSlices.splice(filteredWithoutSlices.indexOf(element), 1);
     }
   });
+
+  // Filter out attributes or extensions that are of type 'Age'
+  const filteredWithoutAge = filteredWithoutSlices.filter(
+    (item) =>
+      !item.type?.some((t) => t.code === "Age") &&
+      item.id !== "AllergyIntolerance.extension:resolutionAge"
+  );
+
   // Sort only if maintainSortOrder is false
   if (!maintainSortOrder) {
     if (basePath) {
-      filteredWithoutSlices.sort((a, b) => {
+      filteredWithoutAge.sort((a, b) => {
         const labelA = a.path.substring(basePath.length + 1);
         const labelB = b.path.substring(basePath.length + 1);
         return labelA.localeCompare(labelB);
       });
     } else {
       // If no basePath, sort by full path
-      filteredWithoutSlices.sort((a, b) => a.path.localeCompare(b.path));
+      filteredWithoutAge.sort((a, b) => a.path.localeCompare(b.path));
     }
   }
   // Sort elements alphabetically by their path (after the basePath, if available)
-  return filteredWithoutSlices;
+  return filteredWithoutAge;
 }
 
 // we want to build a set of all prefixes for quick lookup
