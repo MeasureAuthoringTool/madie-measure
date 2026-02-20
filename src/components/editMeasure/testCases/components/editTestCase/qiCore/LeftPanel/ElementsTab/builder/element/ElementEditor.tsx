@@ -225,8 +225,8 @@ const ElementEditor = ({
     const formInfo = {};
     const nodeList = [];
     const rootDefinition = selectedResource.definition?.snapshot?.element?.[0];
-    const resource = selectedResource.bundleEntry.resource;
-    const currentPath = selectedResource.definition.type;
+    const resource = selectedResource.bundleEntry?.resource;
+    const currentPath = selectedResource.definition?.type;
     const allChildren = getAllChildren(selectedResource, currentPath);
     const allNodes = [rootDefinition, ...allChildren];
 
