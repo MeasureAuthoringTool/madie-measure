@@ -33,6 +33,12 @@ import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore";
 import { convertDate } from "../../../../testCases/components/testCaseLanding/common/TestCaseTable/TestCaseTable";
+import {
+  filterByOptions,
+  filterMap,
+  useMeasureFilterSearch,
+} from "../../../../hooks/useMeasureFilterSearch";
+import { MeasureSearchFilters } from "../../../../shared/MeasureSearchFilters";
 
 const TH = tw.th`p-3 text-left text-sm font-bold capitalize`;
 
@@ -51,7 +57,15 @@ export default function AddComponentsDialog({
   onClose,
   measure,
   compositeScoring,
+  components,
+  submitComponentForm,
 }) {
+  // we need to know what measures are added by means of component selection
+  const preselectedIds = useMemo(
+    () => new Set((components ?? []).map((c) => c.measureId)),
+    [components]
+  );
+
   const measureServiceApi = useRef(useMeasureServiceApi()).current;
   const [limit, setLimit] = useState(5);
   const [page, setPage] = useState(0);
@@ -68,7 +82,39 @@ export default function AddComponentsDialog({
   const [expandedSectionData, setExpandedSectionData] = useState<TCRow[]>([]);
   const abortController = useRef(null);
 
+  // Use custom hook for filter and search functionality
+  const {
+    filterBy,
+    searchField,
+    finalSearchAndFilterby,
+    handleFilter,
+    handleSearch,
+    finalizeSearchCriteria,
+    blankSearchCriteria,
+  } = useMeasureFilterSearch(() => setPage(0));
+
   const [measureList, setMeasureList] = useState<Measure[]>([]);
+
+  useEffect(() => {
+    setRowSelection((prev) => {
+      if (!measureList?.length) {
+        return Object.keys(prev).length ? {} : prev;
+      }
+
+      let changed = false;
+      const next = { ...prev };
+
+      for (const m of measureList) {
+        if (m?.id && preselectedIds.has(m.id) && !next[m.id]) {
+          next[m.id] = true;
+          changed = true;
+        }
+      }
+
+      return changed ? next : prev;
+    });
+  }, [measureList, preselectedIds]);
+
   const IndeterminateCheckbox = ({ indeterminate, checked, ...rest }: any) => {
     const ref = React.useRef<HTMLInputElement>(null);
 
@@ -148,17 +194,15 @@ export default function AddComponentsDialog({
             />
           );
         },
-
-        cell: (info) => (
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "row",
-              gap: 16,
-            }}
-          >
+        cell: ({ row }) => (
+          <div style={{ display: "flex", flexDirection: "row", gap: 16 }}>
             <div className="px-1">
-              <IndeterminateCheckbox />
+              <IndeterminateCheckbox
+                checked={row.getIsSelected()}
+                indeterminate={row.getIsSomeSelected?.()}
+                onChange={row.getToggleSelectedHandler()}
+                aria-label={`Toggle row ${row.id}`}
+              />
             </div>
           </div>
         ),
@@ -278,7 +322,19 @@ export default function AddComponentsDialog({
     setLoading(true);
     setSelectedRowId(null);
     abortController.current = new AbortController();
+    const { finalSearchField, finalFilterBy } = finalSearchAndFilterby;
     const optionalSearchProperties = [];
+
+    if (finalFilterBy) {
+      optionalSearchProperties.push(filterMap[finalFilterBy]);
+    }
+
+    if (!finalFilterBy && finalSearchField) {
+      // apply all conditions
+      filterByOptions.forEach((condition) => {
+        optionalSearchProperties.push(filterMap[condition]);
+      });
+    }
 
     const searchCriteria: any = {
       model: measure.model,
@@ -287,6 +343,7 @@ export default function AddComponentsDialog({
       draft: false,
       fromCompositeMeasureComponent: true,
       allowedScoringTypes: getAllowedScoringTypes(compositeScoring),
+      searchField: finalSearchField,
     };
 
     measureServiceApi
@@ -320,7 +377,15 @@ export default function AddComponentsDialog({
           console.error("Failed to fetch measures:", error);
         }
       });
-  }, [measure, limit, page, abortController, open]);
+  }, [
+    measure,
+    open,
+    finalSearchAndFilterby,
+    compositeScoring,
+    measureServiceApi,
+    limit,
+    page,
+  ]);
 
   useEffect(() => {
     fetchMeasures();
@@ -331,6 +396,7 @@ export default function AddComponentsDialog({
     };
   }, [fetchMeasures, measure?.id]);
 
+  const [rowSelection, setRowSelection] = useState({});
   const table = useReactTable({
     data: measureList,
     columns,
@@ -346,21 +412,45 @@ export default function AddComponentsDialog({
     onSortingChange: setSorting,
     state: {
       sorting,
+      rowSelection,
     },
+    enableRowSelection: true,
+    onRowSelectionChange: setRowSelection,
   });
 
   const handleDialogClose = () => {
     onClose();
   };
 
-  const handleDialogSubmit = (e) => {
+  const handleDialogSubmit = async (e) => {
     e.preventDefault();
     // required: to prevent event bubbling to parent forms
     e.stopPropagation();
+    // make shallow copy of what we already have
+    const newComponents = [];
+    // get all the objectIds of the selected measures
+    const selectedMeasureObjectIds = Object.keys(rowSelection);
+    const results = await measureServiceApi.fetchMeasuresByIds(
+      selectedMeasureObjectIds
+    );
+    results.forEach((measure) => {
+      measure.groups.forEach((group) => {
+        newComponents.push({
+          measureId: measure.id,
+          groupId: group.id,
+        });
+      });
+    });
+    const uniqueComponents = _.uniqBy(
+      newComponents,
+      (c) => `${c.measureId}:${c.groupId}`
+    );
+    submitComponentForm(uniqueComponents);
+    onClose();
   };
 
   const expandedColumns = useMemo<ColumnDef<Measure>[]>(() => {
-    return columns;
+    return (columns as any[]).filter((c) => c.id !== "select");
   }, [columns]);
 
   return (
@@ -385,6 +475,14 @@ export default function AddComponentsDialog({
       }}
       maxWidth={"lg"}
     >
+      <MeasureSearchFilters
+        filterBy={filterBy}
+        searchField={searchField}
+        onFilterChange={handleFilter}
+        onSearchChange={handleSearch}
+        onSearchTrigger={finalizeSearchCriteria}
+        onSearchClear={blankSearchCriteria}
+      />
       <div className="measure-table no-margin-top">
         <div className="table" style={{ overflow: "auto" }}>
           <table
