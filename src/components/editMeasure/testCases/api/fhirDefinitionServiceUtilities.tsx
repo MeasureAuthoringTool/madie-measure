@@ -684,7 +684,6 @@ export function isComponentDataType(datatype) {
     case "http://hl7.org/fhirpath/system.datetime":
     case "decimal":
     case "id":
-    case "identifier":
     case "instant":
     case "integer":
     case "integer64":
