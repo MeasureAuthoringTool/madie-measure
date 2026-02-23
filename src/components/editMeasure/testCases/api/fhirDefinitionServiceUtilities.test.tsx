@@ -10,7 +10,6 @@ import {
   updateChildrenPaths,
   isComponentDataType,
   setNestedValue,
-  getDisplayedElementsTree,
   removeUndefinedProperties,
   getElementName,
   getChildren,
@@ -366,35 +365,6 @@ describe("FhirDefinitionServiceUtilities", () => {
       const obj = {};
       setNestedValue(obj, "x.y.z", "test");
       expect(obj).toEqual({ x: { y: { z: "test" } } });
-    });
-  });
-  describe("getDisplayedElementsTree", () => {
-    it("should return an empty object when no elements are provided", () => {
-      expect(getDisplayedElementsTree([])).toEqual({});
-    });
-
-    it("should build a nested structure from paths", () => {
-      const elements = [{ path: "a.b" }, { path: "a.c" }, { path: "a.b.d" }];
-      expect(getDisplayedElementsTree(elements)).toEqual({
-        a: {
-          b: { d: true },
-          c: true,
-        },
-      });
-    });
-
-    it("should handle duplicate paths", () => {
-      const elements = [{ path: "x.y" }, { path: "x.y" }, { path: "x.y.z" }];
-      expect(getDisplayedElementsTree(elements)).toEqual({
-        x: {
-          y: { z: true },
-        },
-      });
-    });
-
-    it("should ignore undefined or empty paths", () => {
-      const elements = [{ path: "a.b" }, { path: "" }, { path: undefined }];
-      expect(getDisplayedElementsTree(elements)).toEqual({ a: { b: true } });
     });
   });
 

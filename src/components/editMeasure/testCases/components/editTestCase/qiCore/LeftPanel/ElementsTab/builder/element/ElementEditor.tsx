@@ -45,7 +45,6 @@ interface ElementEditorProps {
   value?: any;
   onChange?: (path: string, value: any) => void;
   canEdit: boolean;
-  displayedElementsTree: Object;
   setInitialFormikValuesStu6: Dispatch<SetStateAction<Object>>;
   setValidationSchema: Dispatch<SetStateAction<Object>>;
   deleteElement?: (path: string, element: any, elementName: string) => void;
@@ -83,7 +82,6 @@ const ElementEditor = ({
   elementDefinition,
   resourcePath,
   canEdit,
-  displayedElementsTree,
   setInitialFormikValuesStu6,
   setValidationSchema,
   deleteElement,

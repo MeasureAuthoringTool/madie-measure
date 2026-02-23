@@ -20,7 +20,6 @@ import {
   getTopLevelElements,
   getBasePath,
   stripResourcePath,
-  getDisplayedElementsTree,
   getElementName,
   removeUndefinedProperties,
   getNestedProperty,
@@ -129,7 +128,6 @@ const ResourceEditor = ({
   };
   const [dialogOpen, setDialogOpen] = useState<boolean>(false);
   const [addDialogOpen, setAddDialogOpen] = useState<boolean>(false);
-  const [displayedElementsTree, setDisplayedElementsTree] = useState({});
 
   const [allElements, setAllElements] = useState([]); // we don't need this.
   const [selectedResource, setSelectedResource] = useState(null);
@@ -217,7 +215,6 @@ const ResourceEditor = ({
             elementsModifiedForCardinality
           );
           setDisplayedElements(displayedElements);
-          setDisplayedElementsTree(getDisplayedElementsTree(uniqueElements));
           // this is not the best way to do this, but I'm unsure of a better way without a lot more overhead.
           const index = _.findLastIndex(
             elementsModifiedForCardinality,
@@ -413,7 +410,6 @@ const ResourceEditor = ({
               selectedResourceID={selectedResourceID}
               resource={editingResource}
               resourcePath={resourceBasePath}
-              displayedElementsTree={displayedElementsTree}
               applyLoading={applyLoading}
               setApplyLoading={setApplyLoading}
               onChange={(path, value) => {
