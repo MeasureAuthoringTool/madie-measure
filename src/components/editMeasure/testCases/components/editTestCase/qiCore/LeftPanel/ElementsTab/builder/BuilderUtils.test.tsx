@@ -41,8 +41,9 @@ describe("Builder handler functions", () => {
   it("dispatches on delete, nothing explodes.", () => {
     const row = { resource: { id: "abc-123" } };
     const dispatch = jest.fn();
+    const setSelectedResourceId = jest.fn();
 
-    handleRowDelete(row, dispatch);
+    handleRowDelete(row, setSelectedResourceId, dispatch);
 
     expect(dispatch).toHaveBeenCalledWith({
       type: ResourceActionType.REMOVE_BUNDLE_ENTRY,

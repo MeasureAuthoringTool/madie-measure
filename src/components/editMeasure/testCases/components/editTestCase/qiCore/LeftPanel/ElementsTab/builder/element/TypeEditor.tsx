@@ -752,11 +752,15 @@ const TypeEditor = ({
                     handleAddElement={handleAddElement}
                     {...formik.getFieldProps(fieldLabel)}
                     onChange={(value) => {
-                      if (label.includes(".value[x")) {
-                        label = label.replace(".value[x]", ".valueCode");
+                      let targetLabel = fieldLabel;
+                      if (targetLabel.includes(".value[x]")) {
+                        targetLabel = targetLabel.replace(
+                          ".value[x]",
+                          ".valueCode"
+                        );
                       }
-                      formik.setFieldTouched(label);
-                      formik.setFieldValue(label, value);
+                      formik.setFieldTouched(targetLabel);
+                      formik.setFieldValue(targetLabel, value);
                     }}
                   />
                 </>
@@ -893,6 +897,7 @@ const TypeEditor = ({
                     const newValues = [...currentValues, {}];
                     formik.setFieldValue(basePath, newValues);
                   }}
+                  resource={resource}
                   {...formik.getFieldProps(fieldLabel)}
                 />
               );

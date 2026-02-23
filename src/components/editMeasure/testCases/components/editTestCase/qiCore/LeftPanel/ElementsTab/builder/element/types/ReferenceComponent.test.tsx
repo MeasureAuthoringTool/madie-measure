@@ -739,6 +739,79 @@ describe("ReferenceComponent", () => {
     // select an add option
   });
 
+  it("Filters the entries when the entry id is same as resource id", async () => {
+    (useQiCoreResource as jest.Mock).mockReturnValue({
+      state: {
+        bundle: {
+          entry: [
+            {
+              resource: {
+                resourceType: "Encounter",
+                id: "encounter-other-1",
+                meta: {
+                  profile: ["http://hl7.org/fhir/StructureDefinition/Other"],
+                },
+              },
+            },
+            {
+              resource: {
+                resourceType: "Encounter",
+                id: "encounter-other-1",
+                meta: {
+                  profile: [
+                    "http://hl7.org/fhir/us/qicore/StructureDefinition/Other",
+                  ],
+                },
+              },
+            },
+          ],
+        },
+      },
+      dispatch: jest.fn(),
+    });
+    const multiQiCoreProfiles = baseProfiles.concat(QICORE_1, QICORE_2);
+    const resource = {
+      id: "encounter-other-1",
+      name: "test",
+      resourceType: "Encounter",
+    };
+    render(
+      <ResourceContext.Provider value={multiQiCoreProfiles}>
+        <FormikProvider value={mockFormik}>
+          <ReferenceComponent
+            structureDefinition={structureDefinition}
+            canEdit={true}
+            required={true}
+            helperText="Select a reference"
+            error={false}
+            showAddAttributeButton={false}
+            addTitle=""
+            label="test.label"
+            resource={resource}
+          />
+        </FormikProvider>
+      </ResourceContext.Provider>
+    );
+
+    await userEvent.click(screen.getByLabelText("Reference Type"));
+    await userEvent.click(screen.getByTestId("Encounter (QICore)-option"));
+
+    const combo = screen.getByRole("combobox", { name: /specify encounter/i });
+    await userEvent.click(combo);
+    await userEvent.click(await screen.findByTestId("reference-select-0"));
+
+    const options = await screen.findAllByRole("option");
+    expect(options.length).toBe(1);
+    expect(
+      options.some((opt) => opt.textContent?.includes("ID Not Present"))
+    ).toBe(true);
+    expect(screen.getByTestId("reference-label")).toHaveTextContent("Label");
+    await userEvent.click(screen.getByText("ID Not Present (Add New)"));
+    await waitFor(() => {
+      expect(screen.queryByText("Choose Profile")).not.toBeInTheDocument();
+    });
+  });
+
   describe("test getReferenceComponentLabel", () => {
     it("should return the correct label for a given reference", () => {
       const result = getReferenceComponentLabel(

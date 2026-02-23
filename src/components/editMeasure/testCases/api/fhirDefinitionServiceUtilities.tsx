@@ -391,6 +391,8 @@ export function getTopLevelElements(
       (e.path.split(".")?.length === 2 &&
         e.id !== "Extension.extension" &&
         e.id !== "Patient.extension" &&
+        // Exclude generic extension (no sliceName) - only allow sliced extensions like extension:race
+        !(e.path?.endsWith(".extension") && !e.sliceName) &&
         !/\.id$/.test(e.id) &&
         e.max !== "0" &&
         // Exclude entries where the path contains these attributes or matches these element names
