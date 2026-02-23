@@ -87,6 +87,7 @@ const ElementEditorChildren = ({
       </div>
       <Box sx={{ rowGap: 0 }}>
         <TypeEditor
+          key={formatChoiceType(rootDefinition)} //React uses the key to determine whether a component instance should be reused or recreated when re-rendering.
           resource={resource}
           structureDefinition={rootDefinition}
           parentStructureDefinition={parentStructureDefinition}

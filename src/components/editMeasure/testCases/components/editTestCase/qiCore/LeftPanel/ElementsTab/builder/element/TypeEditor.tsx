@@ -14,6 +14,7 @@ import InstantComponent from "./types/InstantComponent";
 import TimeComponent from "./types/TimeComponent";
 import { useFormikContext } from "formik";
 import ExtensionComponent from "./types/ExtensionComponent";
+import ExtensionNormalizer from "./ExtensionNormalizer";
 import {
   formatAttributeLabel,
   getEditableExtensionSubElements,
@@ -77,9 +78,8 @@ const TypeEditor = ({
   canEdit,
   label,
   noWrap = false,
-                      onChangeForExtension,
-}: // onChangeForExtension,
-TypeEditorProps): JSX.Element | null => {
+  onChangeForExtension,
+}: TypeEditorProps): JSX.Element | null => {
   const formik = useFormikContext();
   // Ref to track formik.values for use in closures (prevents stale state issues when rapidly clicking Add)
   const valuesRef = useRef<object>(formik.values as object);
@@ -231,6 +231,15 @@ TypeEditorProps): JSX.Element | null => {
     );
   };
 
+  // Memoize extension element definitions to keep a stable reference across renders.
+  // Without this, getEditableExtensionSubElements creates a new array each render,
+  // which would cause ExtensionNormalizer's useEffect to fire every render.
+  const extensionElementDefinitions: ElementDefinition[] = useMemo(() => {
+    return extensionProfileDef
+      ? getEditableExtensionSubElements(extensionProfileDef)
+      : null;
+  }, [extensionProfileDef]);
+
   if (isComponentDataType(type)) {
     switch (type) {
       case "string":
@@ -242,6 +251,12 @@ TypeEditorProps): JSX.Element | null => {
               if (isArrayMode && appendedZeroAlready) {
                 fieldLabel = `${label.slice(0, label.length - 3)}[${index}]`;
               }
+
+              // For extensions, use onBlur to avoid triggering on every keystroke
+              const isExtensionContext =
+                parentStructureDefinition?.type?.[0]?.code === "Extension";
+              const fieldProps = formik.getFieldProps(fieldLabel);
+
               const string = (
                 <StringComponent
                   key={index}
@@ -260,7 +275,17 @@ TypeEditorProps): JSX.Element | null => {
                   }
                   addTitle={addTitle}
                   handleAddElement={handleAddElement}
-                  {...formik.getFieldProps(fieldLabel)}
+                  {...fieldProps}
+                  onBlur={
+                    isExtensionContext
+                      ? (e) => {
+                          fieldProps.onBlur(e);
+                          if (e.target.value) {
+                            onChangeForExtension(e.target.value);
+                          }
+                        }
+                      : fieldProps.onBlur
+                  }
                 />
               );
               return wrapWithSection(fieldLabel, string, { key: index });
@@ -312,6 +337,12 @@ TypeEditorProps): JSX.Element | null => {
               if (isArrayMode && appendedZeroAlready) {
                 fieldLabel = `${label.slice(0, label.length - 3)}[${index}]`;
               }
+
+              // For extensions, use onBlur to avoid triggering on every keystroke
+              const isExtensionContext =
+                parentStructureDefinition?.type?.[0]?.code === "Extension";
+              const fieldProps = formik.getFieldProps(fieldLabel);
+
               const decimal = (
                 <DecimalComponent
                   key={`${fieldLabel}-${index}`}
@@ -330,7 +361,22 @@ TypeEditorProps): JSX.Element | null => {
                   }
                   addTitle={addTitle}
                   handleAddElement={handleAddElement}
-                  {...formik.getFieldProps(fieldLabel)}
+                  {...fieldProps}
+                  onChange={
+                    isExtensionContext
+                      ? fieldProps.onChange
+                      : fieldProps.onChange
+                  }
+                  onBlur={
+                    isExtensionContext
+                      ? (e) => {
+                          fieldProps.onBlur(e);
+                          if (e.target.value) {
+                            onChangeForExtension(parseFloat(e.target.value));
+                          }
+                        }
+                      : fieldProps.onBlur
+                  }
                 />
               );
               return wrapWithSection(fieldLabel, decimal, { key: index });
@@ -430,8 +476,15 @@ TypeEditorProps): JSX.Element | null => {
                   handleAddElement={handleAddElement}
                   {...formik.getFieldProps(fieldLabel)}
                   onChange={(value) => {
-                    formik.setFieldTouched(fieldLabel);
-                    formik.setFieldValue(fieldLabel, value);
+                    if (
+                      parentStructureDefinition?.type?.[0]?.code === "Extension"
+                    ) {
+                      formik.setFieldTouched(fieldLabel);
+                      onChangeForExtension(value);
+                    } else {
+                      formik.setFieldTouched(fieldLabel);
+                      formik.setFieldValue(fieldLabel, value);
+                    }
                   }}
                   setTouched={() => {
                     formik.setFieldTouched(fieldLabel);
@@ -591,7 +644,14 @@ TypeEditorProps): JSX.Element | null => {
                   handleAddElement={handleAddElement}
                   {...formik.getFieldProps(fieldLabel)}
                   onChange={(e) => {
-                    formik.setFieldValue(fieldLabel, e.target.value === "true");
+                    const boolValue = e.target.value === "true";
+                    if (
+                      parentStructureDefinition?.type?.[0]?.code === "Extension"
+                    ) {
+                      onChangeForExtension(boolValue);
+                    } else {
+                      formik.setFieldValue(fieldLabel, boolValue);
+                    }
                   }}
                 />
               );
@@ -726,11 +786,20 @@ TypeEditorProps): JSX.Element | null => {
                     handleAddElement={handleAddElement}
                     {...formik.getFieldProps(fieldLabel)}
                     onChange={(value) => {
+                      let targetLabel = label;
                       if (label.includes(".value[x")) {
-                        label = label.replace(".value[x]", ".valueCode");
+                        targetLabel = label.replace(".value[x]", ".valueCode");
                       }
-                      formik.setFieldTouched(label);
-                      formik.setFieldValue(label, value);
+
+                      if (
+                        parentStructureDefinition?.type?.[0]?.code ===
+                        "Extension"
+                      ) {
+                        onChangeForExtension(value);
+                      } else {
+                        formik.setFieldTouched(targetLabel);
+                        formik.setFieldValue(targetLabel, value);
+                      }
                     }}
                   />
                 </>
@@ -801,6 +870,11 @@ TypeEditorProps): JSX.Element | null => {
                   addTitle={addTitle}
                   handleAddElement={handleAddElement}
                   {...formik.getFieldProps(fieldLabel)}
+                  onChangeForExtension={
+                    parentStructureDefinition?.type?.[0]?.code === "Extension"
+                      ? (value) => onChangeForExtension(value)
+                      : undefined
+                  }
                 />
               );
               return wrapWithSection(label, codeableconcept);
@@ -885,9 +959,6 @@ TypeEditorProps): JSX.Element | null => {
         if (extensionProfileDef) {
           // Displays only the URL of the Extension example : http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethinicity
           // and the children of the extension that are slices ( example : OMBCategory, text) Any generic extensions are excluded
-          const elementDefinitions: ElementDefinition[] = extensionProfileDef
-            ? getEditableExtensionSubElements(extensionProfileDef)
-            : null;
           /*
                extensionIndex is the index at which the current Extension (ex: race) lies inside the resource. ex: patient.extension is an array.
                extensionLabel This is our root label ex: Patient.extension[0]
@@ -911,84 +982,92 @@ TypeEditorProps): JSX.Element | null => {
                 ]
                }
             */
-          const extensionIndex = formik?.values?.[
-            resource?.resourceType
-          ]?.extension?.findIndex((el) => {
-            return el.url === extensionProfileDef.definition.url;
-          });
+          const resourceExtensions =
+            formik?.values?.[resource?.resourceType]?.extension;
+          const extensionIndex = Array.isArray(resourceExtensions)
+            ? resourceExtensions.findIndex((el) => {
+                return el.url === extensionProfileDef.definition.url;
+              })
+            : -1;
+
+          // If extension not found, it means the parent extension hasn't been initialized yet
+          if (extensionIndex === -1) {
+            return (
+              <div>
+                Extension not found in resource. Please ensure the parent
+                extension is properly initialized.
+              </div>
+            );
+          }
+
           const extensionLabel = `${resource?.resourceType}.extension[${extensionIndex}]`;
-          const extensionValue = _.get(formik.values, extensionLabel);
+
           //Every Extension should have a url, and the url should not be editable since it determines the structure of the extension.
           return (
-            <Box sx={{ display: "flex", flexDirection: "column" }}>
-              <Box>{structureDefinition.short}</Box>
+            <>
+              <ExtensionNormalizer
+                extensionLabel={extensionLabel}
+                elementDefinitions={extensionElementDefinitions}
+              />
               <Box sx={{ display: "flex", flexDirection: "column" }}>
-                <UriComponent
-                  canEdit={false}
-                  fieldRequired={true}
-                  label={extensionLabel + ".url"}
-                  {...formik.getFieldProps(extensionLabel + ".url")}
-                />
-                {(() => {
-                  // Track the next available index for new extensions
-                  // We need to assign the next available index to new extensions to avoid overwriting existing extensions when adding new ones
-                  let nextAvailableIndex =
-                    extensionValue?.extension?.length || 0;
+                <Box>{structureDefinition.short}</Box>
+                <Box sx={{ display: "flex", flexDirection: "column" }}>
+                  <UriComponent
+                    canEdit={false}
+                    fieldRequired={true}
+                    label={extensionLabel + ".url"}
+                    {...formik.getFieldProps(extensionLabel + ".url")}
+                  />
+                  {(() => {
+                    // Create a stable index mapping for each elementDefinition based on its position in the array
+                    // This ensures consistent labels regardless of which extensions the user has filled in
+                    // e.g., ombCategory is always at index 0, detailed at index 1, text at index 2
+                    return extensionElementDefinitions.map(
+                      (elementDefinition, reservedIndex) => {
+                        let subSlicedExtensionLabel;
 
-                  return elementDefinitions.map((elementDefinition) => {
-                    let subSlicedExtensionLabel;
+                        if (elementDefinition.sliceName) {
+                          // Each elementDefinition gets a reserved index based on its position in elementDefinitions array
+                          // This ensures the label is always consistent (e.g., text is always extension[2])
+                          // regardless of whether other slices have been filled in
+                          subSlicedExtensionLabel = `${extensionLabel}.extension[${reservedIndex}]`;
+                        } else {
+                          // Not a sliced extension - use property path
+                          // it's not a slice. It's like...extension.url, extension.id
+                          subSlicedExtensionLabel = extensionLabel;
+                        }
 
-                    if (elementDefinition.sliceName) {
-                      // Find if the form value already has an extension with the same URL as the sliceName (which is the identifier for the slice)
-                      const existingIndex =
-                        extensionValue?.extension?.findIndex(
-                          (ext) => ext?.url === elementDefinition?.sliceName
+                        return (
+                          <Box
+                            key={elementDefinition.id || reservedIndex}
+                            sx={{
+                              display: "flex",
+                              flexDirection: "column",
+                            }}
+                          >
+                            <ExtensionComponent
+                              showAddAttributeButton={
+                                showMultipleCardinalityActionCenter
+                              }
+                              addTitle={addTitle}
+                              label={subSlicedExtensionLabel}
+                              canEdit={canEdit}
+                              fhirResource={resource}
+                              elementDefinition={elementDefinition}
+                              extensionProfileDef={extensionProfileDef}
+                            />
+                            <Divider />
+                          </Box>
                         );
-
-                      if (existingIndex > -1) {
-                        // Use the existing extension's index
-                        subSlicedExtensionLabel = `${extensionLabel}.extension[${existingIndex}]`;
-                      } else {
-                        // Use the next available index for this new extension
-                        subSlicedExtensionLabel = `${extensionLabel}.extension[${nextAvailableIndex}]`;
-                        nextAvailableIndex++;
                       }
-                    } else {
-                      // Not a sliced extension - use property path
-                      // it's not a slice. It's like...extension.url, extension.id
-                      subSlicedExtensionLabel = `${extensionLabel}.${getLastPart(
-                        elementDefinition.path
-                      )}`;
-                    }
-
-                    return (
-                      <Box
-                        sx={{
-                          display: "flex",
-                          flexDirection: "column",
-                        }}
-                      >
-                        <ExtensionComponent
-                          showAddAttributeButton={
-                            showMultipleCardinalityActionCenter
-                          }
-                          addTitle={addTitle}
-                          label={subSlicedExtensionLabel}
-                          canEdit={canEdit}
-                          fhirResource={resource}
-                          elementDefinition={elementDefinition}
-                          extensionProfileDef={extensionProfileDef}
-                        />
-                        <Divider />
-                      </Box>
                     );
-                  });
-                })()}
+                  })()}
+                </Box>
               </Box>
-            </Box>
+            </>
           );
         } else {
-          return <div>Extension profile definition not found</div>;
+          return <></>;
         }
       default:
         return <div>Unsupported Type [{type}]</div>;

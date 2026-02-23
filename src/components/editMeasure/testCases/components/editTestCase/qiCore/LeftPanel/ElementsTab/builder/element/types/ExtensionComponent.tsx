@@ -1,12 +1,10 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   DomainResource,
   ElementDefinition,
   StructureDefinition,
 } from "fhir/r4";
-import UriComponent from "./UriComponent";
-import { Select } from "@madie/madie-design-system/dist/react";
-import { MenuItem, Typography } from "@mui/material";
+import { Typography } from "@mui/material";
 import TypeEditor from "../TypeEditor";
 import { StructureDefinitionDto } from "../../../../../../../../api/models/StructureDefinitionDto";
 import _ from "lodash";
@@ -58,11 +56,6 @@ const ExtensionComponent = ({
     elementDefinition?.id
   );
 
-  console.log("elementDefinition", elementDefinition);
-  console.log("extensionProfileDef", extensionProfileDef);
-  console.log("urlElement", urlElement);
-  console.log("valueElement", valueElement);
-
   /**
    * Value Type is the type of the value[x] element. We need to know the value type in order to render the correct input component for the extension value.
    * For Slices, this value type is pre-determined.
@@ -107,6 +100,24 @@ const ExtensionComponent = ({
             <AddElementButton name={addTitle} />
           )}
         </div>
+      </div>
+    );
+  } else {
+    const typedLabel = `${label}.value${_.startCase(
+      elementDefinition.type[0].code
+    )}`;
+    return (
+      <div className="element-editor-add-row">
+        <TypeEditor
+          structureDefinition={elementDefinition}
+          resource={fhirResource}
+          canEdit={canEdit}
+          label={typedLabel}
+          parentStructureDefinition={extensionProfileDef}
+        />
+        {showAddAttributeButton && addTitle && (
+          <AddElementButton name={addTitle} />
+        )}
       </div>
     );
   }

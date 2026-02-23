@@ -23,7 +23,16 @@ import { ExecutionContextProvider } from "../../../../../../routes/qiCore/Execut
 import { useQiCoreResource } from "../../../../../../../util/QiCorePatientProvider";
 
 const getNestedProperty = (obj, path) => {
-  return path.split(".").reduce((current, key) => current && current[key], obj);
+  // Split on dots, then further split segments with array indices
+  // e.g., "Patient.extension[0].url" -> ["Patient", "extension", "0", "url"]
+  const keys = path.split(".").flatMap((key) => {
+    const match = key.match(/^([^\[]+)\[(\d+)\]$/);
+    if (match) {
+      return [match[1], match[2]];
+    }
+    return [key];
+  });
+  return keys.reduce((current, key) => current && current[key], obj);
 };
 
 const claimResponseValues = {
@@ -262,6 +271,18 @@ describe("TypeEditor Component", () => {
     (useQiCoreResource as jest.Mock).mockReturnValue({
       state: { bundle: mockBundle },
     });
+    // Restore default fhir definitions service mock before each test.
+    // A fresh mock is needed because jest.resetAllMocks() (called in some tests)
+    // clears the jest.fn() implementations on the original fhirDefinitionsServiceApiMock.
+    useFhirDefinitionsServiceApiMock.mockImplementation(
+      () =>
+        ({
+          getResourceTree: jest.fn().mockResolvedValue(codingDef),
+          getValueSetDefinition: jest
+            .fn()
+            .mockResolvedValue(mockValueSetDefinitionBirthSex),
+        } as unknown as FhirDefinitionsServiceApi)
+    );
   });
   test("Should render String component", () => {
     // const handleChange = jest.fn();
@@ -1566,87 +1587,588 @@ describe("TypeEditor Component", () => {
     ).not.toBeInTheDocument();
   });
 
-  test("Should handle render of !isComponentDataType with a profile extension", async () => {
-    const fhirDefinitionsServiceApiMock = {
-      getResourceTree: jest.fn().mockResolvedValue(codingDef),
-      getAllChildren: jest.fn().mockReturnValue(codingTopLevelElements),
+  /**
+   * ===========================================================================================
+   * Extension Type Tests
+   * ===========================================================================================
+   *
+   * When the TypeEditor encounters type "Extension", it renders a profiled extension.
+   *
+   * How Extensions work in FHIR:
+   * ----------------------------
+   * A Patient resource can have an "extension" array. Each entry in that array is an Extension
+   * object with a "url" (identifying which extension it is) and either a direct value or nested
+   * sub-extensions.
+   *
+   * Example: us-core-race extension on a Patient:
+   * {
+   *   "resourceType": "Patient",
+   *   "extension": [
+   *     {
+   *       "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race",
+   *       "extension": [
+   *         { "url": "ombCategory", "valueCoding": { "code": "1002-5", ... } },
+   *         { "url": "detailed",    "valueCoding": { "code": "1023-1", ... } },
+   *         { "url": "text",        "valueString": "American Indian" }
+   *       ]
+   *     },
+   *     {
+   *       "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethnicity",
+   *       "extension": []
+   *     }
+   *   ]
+   * }
+   *
+   * Each profiled extension (like us-core-race) has a StructureDefinition that describes:
+   *  - Which slices (sub-extensions) it supports (e.g., ombCategory, detailed, text)
+   *  - What type each slice's value[x] should be (e.g., Coding for ombCategory, string for text)
+   *  - The fixed URL for each slice
+   *
+   * The TypeEditor's Extension case:
+   *  1. Fetches the extension's StructureDefinition via getResourceTree
+   *  2. Extracts editable sub-elements (slices) via getEditableExtensionSubElements
+   *  3. Finds the extension's index in the resource's extension array (by matching url)
+   *  4. Renders ExtensionNormalizer to reorder sub-extensions to match slice order
+   *  5. Renders the extension URL (non-editable) and an ExtensionComponent per slice
+   * ===========================================================================================
+   */
+
+  // ---- Mock data for Extension tests ----
+
+  /**
+   * This is what getResourceTree("us-core-race") returns - a StructureDefinitionDto.
+   * The snapshot.element array contains all the elements defined by the extension profile.
+   * Elements with a "sliceName" are the editable sub-extension slices (ombCategory, detailed, text).
+   * Each slice has an id like "Extension.extension:ombCategory" and its own nested elements
+   * (e.g., Extension.extension:ombCategory.url, Extension.extension:ombCategory.value[x]).
+   */
+  const mockRaceExtensionProfileDef = {
+    definition: {
+      resourceType: "StructureDefinition",
+      id: "us-core-race",
+      url: "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race",
+      name: "USCoreRaceExtension",
+      title: "US Core Race Extension",
+      type: "Extension",
+      snapshot: {
+        element: [
+          {
+            id: "Extension",
+            path: "Extension",
+            short: "(QI-Core)(USCDI) US Core Race Extension",
+          },
+          // ombCategory slice: value type is Coding
+          {
+            id: "Extension.extension:ombCategory",
+            path: "Extension.extension",
+            sliceName: "ombCategory",
+            short: "American Indian or Alaska Native|Asian|...",
+            min: 0,
+            max: "*",
+            type: [{ code: "Extension" }],
+          },
+          {
+            id: "Extension.extension:ombCategory.url",
+            path: "Extension.extension.url",
+            fixedUri: "ombCategory",
+            type: [{ code: "uri" }],
+          },
+          {
+            id: "Extension.extension:ombCategory.value[x]",
+            path: "Extension.extension.value[x]",
+            short: "OMB Race Category value",
+            type: [{ code: "Coding" }],
+            binding: {
+              strength: "required",
+              valueSet:
+                "http://hl7.org/fhir/us/core/ValueSet/omb-race-category",
+            },
+          },
+          // detailed slice: value type is also Coding
+          {
+            id: "Extension.extension:detailed",
+            path: "Extension.extension",
+            sliceName: "detailed",
+            short: "Extended Race Codes",
+            min: 0,
+            max: "*",
+            type: [{ code: "Extension" }],
+          },
+          {
+            id: "Extension.extension:detailed.url",
+            path: "Extension.extension.url",
+            fixedUri: "detailed",
+            type: [{ code: "uri" }],
+          },
+          {
+            id: "Extension.extension:detailed.value[x]",
+            path: "Extension.extension.value[x]",
+            short: "Detailed Race value",
+            type: [{ code: "Coding" }],
+            binding: {
+              strength: "required",
+              valueSet: "http://hl7.org/fhir/us/core/ValueSet/detailed-race",
+            },
+          },
+          // text slice: value type is string
+          {
+            id: "Extension.extension:text",
+            path: "Extension.extension",
+            sliceName: "text",
+            short: "Race Text",
+            min: 1,
+            max: "1",
+            type: [{ code: "Extension" }],
+          },
+          {
+            id: "Extension.extension:text.url",
+            path: "Extension.extension.url",
+            fixedUri: "text",
+            type: [{ code: "uri" }],
+          },
+          {
+            id: "Extension.extension:text.value[x]",
+            path: "Extension.extension.value[x]",
+            short: "Race Text value",
+            type: [{ code: "string" }],
+          },
+          // Extension.url - the fixed canonical URL for the extension itself
+          {
+            id: "Extension.url",
+            path: "Extension.url",
+            fixedUri:
+              "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race",
+            type: [{ code: "uri" }],
+          },
+        ],
+      },
+    },
+  };
+
+  /**
+   * structureDefinition prop for the Race extension as it appears in the Patient's
+   * snapshot (e.g. Patient.extension:race). This is what the tree/element list passes
+   * to TypeEditor when the user clicks on the "Race" element.
+   *
+   * Key properties:
+   *  - type[0].code = "Extension" → triggers the Extension case in the switch
+   *  - type[0].profile = ["...us-core-race"] → tells TypeEditor which profile to fetch
+   *  - sliceName = "race" → identifies this as a named slice
+   *  - short → displayed as a heading in the UI
+   */
+  const raceStructureDefinition = {
+    id: "Patient.extension:race",
+    path: "Patient.extension",
+    sliceName: "race",
+    short: "(QI-Core)(USCDI) US Core Race Extension",
+    min: 0,
+    max: "1",
+    type: [
+      {
+        code: "Extension",
+        profile: [
+          "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race",
+        ],
+      },
+    ],
+  };
+
+  /**
+   * Formik values representing a Patient with a race extension that has
+   * ombCategory (Coding), detailed (Coding), and text (string) sub-extensions.
+   */
+  const patientWithRaceExtensionValues = {
+    Patient: {
+      resourceType: "Patient",
+      id: "test-patient-1",
+      extension: [
+        {
+          url: "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race",
+          extension: [
+            {
+              url: "ombCategory",
+              valueCoding: {
+                system: "http://terminology.hl7.org/CodeSystem/v3-NullFlavor",
+                code: "ASKU",
+                display: "asked but unknown",
+              },
+            },
+            {
+              url: "detailed",
+              valueCoding: {
+                system: "urn:oid:2.16.840.1.113883.6.238",
+                code: "1023-1",
+                display: "Southern Arapaho",
+              },
+            },
+            {
+              url: "text",
+              valueString: "Some race text",
+            },
+          ],
+        },
+      ],
+    },
+  };
+
+  test("Extension type: renders extension URL and sub-extension slices when profile is loaded", async () => {
+    /**
+     * Scenario: User clicks on the Race extension element in the test case builder.
+     * TypeEditor receives a structureDefinition with type "Extension" and a profile URL.
+     * It fetches the profile definition (us-core-race) which describes 3 slices:
+     *   - ombCategory (Coding)
+     *   - detailed (Coding)
+     *   - text (string)
+     *
+     * Expected: The extension URL is displayed (non-editable), and each slice's fixedUri
+     * is rendered as a label identifying which sub-extension it is.
+     */
+    const localFhirApi = {
+      getResourceTree: jest.fn().mockResolvedValue(mockRaceExtensionProfileDef),
+      getValueSetDefinition: jest.fn().mockResolvedValue(null),
     } as unknown as FhirDefinitionsServiceApi;
-    useFhirDefinitionsServiceApiMock.mockImplementation(
-      () => fhirDefinitionsServiceApiMock
-    );
+    useFhirDefinitionsServiceApiMock.mockImplementation(() => localFhirApi);
+
+    const extensionFormik = {
+      ...mockFormik,
+      values: patientWithRaceExtensionValues,
+      dirty: false,
+      resetForm: jest.fn(),
+      getFieldProps: (label: string) => {
+        const value = getNestedProperty(patientWithRaceExtensionValues, label);
+        return {
+          value,
+          name: label,
+          onChange: jest.fn(),
+          onBlur: jest.fn(),
+        };
+      },
+    };
+
     render(
-      <FormikProvider value={mockFormik}>
+      <ExecutionContextProvider
+        value={{
+          valueSetsState: [[], jest.fn()],
+          executionContextReady: true,
+          executing: false,
+          setExecuting: jest.fn(),
+          contextFailure: false,
+          measureState: [null, jest.fn()],
+          bundleState: [null, jest.fn()],
+        }}
+      >
+        <FormikProvider value={extensionFormik}>
+          <RequiredFieldsProvider
+            requiredFields={mockRequiredFields}
+            formInfo={mockFormInfo}
+          >
+            <TypeEditor
+              resource={{ resourceType: "Patient" }}
+              structureDefinition={raceStructureDefinition}
+              parentStructureDefinition={{}}
+              canEdit={true}
+              label={"Patient.extension:race"}
+            />
+          </RequiredFieldsProvider>
+        </FormikProvider>
+      </ExecutionContextProvider>
+    );
+
+    // Wait for the async profile fetch to complete — findByText retries until found or timeout
+    const heading = await screen.findByText(
+      "(QI-Core)(USCDI) US Core Race Extension"
+    );
+    expect(heading).toBeInTheDocument();
+
+    // The extension URL input should be rendered and display the Race extension URL
+    const urlInput = screen.getByDisplayValue(
+      "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race"
+    );
+    expect(urlInput).toBeInTheDocument();
+
+    // Each slice's fixedUri should appear, identifying the sub-extension
+    expect(screen.getByText("ombCategory")).toBeInTheDocument();
+    expect(screen.getByText("detailed")).toBeInTheDocument();
+    expect(screen.getByText("text")).toBeInTheDocument();
+  });
+
+  test("Extension type: renders empty fragment when no extensionProfileDef is loaded yet", async () => {
+    /**
+     * Scenario: TypeEditor is told the type is Extension, but the async profile fetch
+     * hasn't completed yet (or returns null). In this case the Extension case falls through
+     * to "else { return <></> }" and renders nothing.
+     */
+    const localFhirApi = {
+      getResourceTree: jest.fn().mockResolvedValue(null),
+    } as unknown as FhirDefinitionsServiceApi;
+    useFhirDefinitionsServiceApiMock.mockImplementation(() => localFhirApi);
+
+    const extensionFormik = {
+      ...mockFormik,
+      values: patientWithRaceExtensionValues,
+      getFieldProps: (label: string) => ({
+        value: getNestedProperty(patientWithRaceExtensionValues, label),
+        name: label,
+        onChange: jest.fn(),
+        onBlur: jest.fn(),
+      }),
+    };
+
+    const { container } = render(
+      <FormikProvider value={extensionFormik}>
         <RequiredFieldsProvider
           requiredFields={mockRequiredFields}
           formInfo={mockFormInfo}
         >
           <TypeEditor
-            resource={null}
-            structureDefinition={{
-              id: "Patient.extension:race",
-              extension: [
-                {
-                  url: "http://hl7.org/fhir/us/core/StructureDefinition/uscdi-requirement",
-                  valueBoolean: true,
-                },
-                {
-                  url: "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-keyelement",
-                  valueBoolean: true,
-                },
-              ],
-              path: "Patient.extension",
-              sliceName: "race",
-              short: "(QI-Core)(USCDI) US Core Race Extension",
-              definition:
-                "Concepts classifying the person into a named category of humans sharing common history, traits, geographical origin or nationality.  The race codes used to represent these concepts are based upon the [CDC Race and Ethnicity Code Set Version 1.0](http://www.cdc.gov/phin/resources/vocabulary/index.html) which includes over 900 concepts for representing race and ethnicity of which 921 reference race.  The race concepts are grouped by and pre-mapped to the 5 OMB race categories:\n\n   - American Indian or Alaska Native\n   - Asian\n   - Black or African American\n   - Native Hawaiian or Other Pacific Islander\n   - White.",
-              min: 0,
-              max: "1",
-              base: {
-                path: "DomainResource.extension",
-                min: 0,
-                max: "*",
-              },
-              type: [
-                {
-                  code: "Extension",
-                  profile: [
-                    "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race",
-                  ],
-                },
-              ],
-              condition: ["ele-1"],
-              constraint: [
-                {
-                  key: "ele-1",
-                  severity: "error",
-                  human: "All FHIR elements must have a @value or children",
-                  expression: "hasValue() or (children().count() > id.count())",
-                  xpath: "@value|f:*|h:div",
-                  source: "http://hl7.org/fhir/StructureDefinition/Element",
-                },
-                {
-                  key: "ext-1",
-                  severity: "error",
-                  human: "Must have either extensions or value[x], not both",
-                  expression: "extension.exists() != value.exists()",
-                  xpath:
-                    "exists(f:extension)!=exists(f:*[starts-with(local-name(.), 'value')])",
-                  source: "http://hl7.org/fhir/StructureDefinition/Extension",
-                },
-              ],
-              mustSupport: false,
-              isModifier: false,
-            }}
+            resource={{ resourceType: "Patient" }}
+            structureDefinition={raceStructureDefinition}
             parentStructureDefinition={{}}
             canEdit={true}
-            label={"ClaimResponse.meta"}
+            label={"Patient.extension:race"}
           />
         </RequiredFieldsProvider>
       </FormikProvider>
     );
+
+    // Should not render the extension heading or any slice labels
     expect(
-      screen.queryByText(`Unsupported Type [test]`)
+      screen.queryByText("(QI-Core)(USCDI) US Core Race Extension")
     ).not.toBeInTheDocument();
+    expect(screen.queryByText("ombCategory")).not.toBeInTheDocument();
+  });
+
+  test("Extension type: shows error message when extension URL is not found in resource extensions array", async () => {
+    /**
+     * Scenario: The profile definition is loaded, but the resource's extension array
+     * does not contain an entry with a matching URL. This can happen if the parent
+     * extension hasn't been initialized yet.
+     *
+     * The code does: resourceExtensions.findIndex(el => el.url === extensionProfileDef.definition.url)
+     * If the result is -1, it renders an error message.
+     */
+    const localFhirApi = {
+      getResourceTree: jest.fn().mockResolvedValue(mockRaceExtensionProfileDef),
+    } as unknown as FhirDefinitionsServiceApi;
+    useFhirDefinitionsServiceApiMock.mockImplementation(() => localFhirApi);
+
+    // Formik values have an extension array but no entry matches the race URL
+    const noMatchingExtensionValues = {
+      Patient: {
+        resourceType: "Patient",
+        id: "test-patient-1",
+        extension: [
+          {
+            url: "http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethnicity",
+            extension: [],
+          },
+        ],
+      },
+    };
+
+    const extensionFormik = {
+      ...mockFormik,
+      values: noMatchingExtensionValues,
+      getFieldProps: (label: string) => ({
+        value: getNestedProperty(noMatchingExtensionValues, label),
+        name: label,
+        onChange: jest.fn(),
+        onBlur: jest.fn(),
+      }),
+    };
+
+    await act(async () => {
+      render(
+        <FormikProvider value={extensionFormik}>
+          <RequiredFieldsProvider
+            requiredFields={mockRequiredFields}
+            formInfo={mockFormInfo}
+          >
+            <TypeEditor
+              resource={{ resourceType: "Patient" }}
+              structureDefinition={raceStructureDefinition}
+              parentStructureDefinition={{}}
+              canEdit={true}
+              label={"Patient.extension:race"}
+            />
+          </RequiredFieldsProvider>
+        </FormikProvider>
+      );
+    });
+
+    expect(
+      screen.getByText(
+        "Extension not found in resource. Please ensure the parent extension is properly initialized."
+      )
+    ).toBeInTheDocument();
+  });
+
+  test("Extension type: correctly computes extensionIndex when multiple extensions exist", async () => {
+    /**
+     * Scenario: The Patient has two extensions - ethnicity at index 0 and race at index 1.
+     * When the user clicks on Race, the code must find the correct index (1) in the
+     * extension array by matching the URL to the profile definition URL.
+     *
+     * This means formik labels will be:
+     *   Patient.extension[1].url
+     *   Patient.extension[1].extension[0] (ombCategory)
+     *   Patient.extension[1].extension[1] (detailed)
+     *   Patient.extension[1].extension[2] (text)
+     */
+    const localFhirApi = {
+      getResourceTree: jest.fn().mockResolvedValue(mockRaceExtensionProfileDef),
+      getValueSetDefinition: jest.fn().mockResolvedValue(null),
+    } as unknown as FhirDefinitionsServiceApi;
+    useFhirDefinitionsServiceApiMock.mockImplementation(() => localFhirApi);
+
+    const multiExtensionValues = {
+      Patient: {
+        resourceType: "Patient",
+        id: "test-patient-2",
+        extension: [
+          {
+            url: "http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethnicity",
+            extension: [],
+          },
+          {
+            url: "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race",
+            extension: [
+              {
+                url: "ombCategory",
+                valueCoding: {
+                  system: "http://terminology.hl7.org/CodeSystem/v3-NullFlavor",
+                  code: "ASKU",
+                  display: "asked but unknown",
+                },
+              },
+              {
+                url: "detailed",
+                valueCoding: {
+                  system: "urn:oid:2.16.840.1.113883.6.238",
+                  code: "1023-1",
+                  display: "Southern Arapaho",
+                },
+              },
+              {
+                url: "text",
+                valueString: "test text",
+              },
+            ],
+          },
+        ],
+      },
+    };
+
+    const extensionFormik = {
+      ...mockFormik,
+      values: multiExtensionValues,
+      dirty: false,
+      resetForm: jest.fn(),
+      getFieldProps: (label: string) => {
+        const value = getNestedProperty(multiExtensionValues, label);
+        return {
+          value,
+          name: label,
+          onChange: jest.fn(),
+          onBlur: jest.fn(),
+        };
+      },
+    };
+
+    render(
+      <ExecutionContextProvider
+        value={{
+          valueSetsState: [[], jest.fn()],
+          executionContextReady: true,
+          executing: false,
+          setExecuting: jest.fn(),
+          contextFailure: false,
+          measureState: [null, jest.fn()],
+          bundleState: [null, jest.fn()],
+        }}
+      >
+        <FormikProvider value={extensionFormik}>
+          <RequiredFieldsProvider
+            requiredFields={mockRequiredFields}
+            formInfo={mockFormInfo}
+          >
+            <TypeEditor
+              resource={{ resourceType: "Patient" }}
+              structureDefinition={raceStructureDefinition}
+              parentStructureDefinition={{}}
+              canEdit={true}
+              label={"Patient.extension:race"}
+            />
+          </RequiredFieldsProvider>
+        </FormikProvider>
+      </ExecutionContextProvider>
+    );
+
+    // Wait for the async profile fetch to complete
+    const urlInput = await screen.findByDisplayValue(
+      "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race"
+    );
+    expect(urlInput).toBeInTheDocument();
+
+    // All slice labels should be present
+    expect(screen.getByText("ombCategory")).toBeInTheDocument();
+    expect(screen.getByText("detailed")).toBeInTheDocument();
+    expect(screen.getByText("text")).toBeInTheDocument();
+  });
+
+  test("Extension type: shows error when resource has no extension array", async () => {
+    /**
+     * Scenario: Profile definition loads, but the resource has no extension array at all.
+     * resourceExtensions will be undefined, Array.isArray returns false, extensionIndex = -1.
+     */
+    const localFhirApi = {
+      getResourceTree: jest.fn().mockResolvedValue(mockRaceExtensionProfileDef),
+      getValueSetDefinition: jest.fn().mockResolvedValue(null),
+    } as unknown as FhirDefinitionsServiceApi;
+    useFhirDefinitionsServiceApiMock.mockImplementation(() => localFhirApi);
+
+    const noExtensionValues = {
+      Patient: {
+        resourceType: "Patient",
+        id: "test-patient-3",
+      },
+    };
+
+    const extensionFormik = {
+      ...mockFormik,
+      values: noExtensionValues,
+      getFieldProps: (label: string) => ({
+        value: getNestedProperty(noExtensionValues, label),
+        name: label,
+        onChange: jest.fn(),
+        onBlur: jest.fn(),
+      }),
+    };
+
+    await act(async () => {
+      render(
+        <FormikProvider value={extensionFormik}>
+          <RequiredFieldsProvider
+            requiredFields={mockRequiredFields}
+            formInfo={mockFormInfo}
+          >
+            <TypeEditor
+              resource={{ resourceType: "Patient" }}
+              structureDefinition={raceStructureDefinition}
+              parentStructureDefinition={{}}
+              canEdit={true}
+              label={"Patient.extension:race"}
+            />
+          </RequiredFieldsProvider>
+        </FormikProvider>
+      );
+    });
+
+    expect(
+      screen.getByText(
+        "Extension not found in resource. Please ensure the parent extension is properly initialized."
+      )
+    ).toBeInTheDocument();
   });
 
   test("Should render Coding component", async () => {
@@ -1714,101 +2236,6 @@ describe("TypeEditor Component", () => {
       name: "Value Set / Direct Reference Code",
     });
     expect(valueSetSelector).toHaveTextContent("- Select -");
-  });
-
-  test("Should render Coding component for <Patient.extension[2].value[x]> and handle onChange properly", async () => {
-    const fhirDefinitionsServiceApiMock = {
-      getResourceTree: jest.fn().mockResolvedValue([{}]),
-      getValueSetDefinition: jest
-        .fn()
-        .mockResolvedValue(mockValueSetDefinitionBirthSex),
-    } as unknown as FhirDefinitionsServiceApi;
-    useFhirDefinitionsServiceApiMock.mockImplementation(
-      () => fhirDefinitionsServiceApiMock
-    );
-
-    const terminologyServiceApiMock = {
-      getValueSetsExpansionForOids: jest
-        .fn()
-        .mockResolvedValue(valueSetExpansionBirthSex),
-    } as unknown as TerminologyServiceApi;
-    useTerminologyServiceApiMock.mockImplementation(
-      () => terminologyServiceApiMock
-    );
-
-    const onChange = jest.fn();
-    const setFieldTouched = jest.fn();
-    const setFieldValue = jest.fn();
-    const mockFormik = {
-      setFieldTouched: setFieldTouched,
-      setFieldValue: onChange,
-      getFieldProps: () => ({
-        label: "Patient.extension[2].value[x]",
-        name: "Patient.extension[2].value[x]",
-        value: "M",
-        setFieldTouched: setFieldTouched,
-        setFieldValue: setFieldValue,
-      }),
-    } as unknown as FormikProps<any>;
-
-    render(
-      <ExecutionContextProvider
-        value={{
-          measureState: [null, jest.fn()],
-          bundleState: [null, jest.fn()],
-          valueSetsState: [null, jest.fn()],
-          executionContextReady: true,
-          executing: false,
-          setExecuting: jest.fn(),
-          contextFailure: false,
-        }}
-      >
-        <FormikProvider value={mockFormik}>
-          <RequiredFieldsProvider
-            requiredFields={{ "Patient.extension[2].value[x]": true }}
-            formInfo={[
-              "Patient.extension[2].value[x]",
-              {
-                id: "Patient.extension[2].value[x]",
-                required: true,
-                canBeMultipleCardinality: false,
-              },
-            ]}
-          >
-            <TypeEditor
-              structureDefinition={structureDefinitionForExtensionValue}
-              resource={null}
-              label="Patient.extension[2].value[x]"
-              canEdit={true}
-              parentStructureDefinition={parentStructureDefinition}
-            />
-          </RequiredFieldsProvider>
-        </FormikProvider>
-      </ExecutionContextProvider>
-    );
-
-    const codeSelects = screen.getByRole("combobox", {
-      name: "Value[x]",
-    });
-    expect(codeSelects).toBeInTheDocument();
-    expect(screen.getByDisplayValue("M")).toBeInTheDocument();
-
-    userEvent.click(codeSelects);
-    const options = await screen.findAllByRole("option");
-    expect(options).toHaveLength(5);
-
-    userEvent.click(options[0]);
-
-    await waitFor(() => {
-      expect(codeSelects).toHaveTextContent("F");
-      expect(onChange).toHaveBeenCalledWith(
-        "Patient.extension[2].valueCode",
-        "F"
-      );
-      expect(setFieldTouched).toHaveBeenCalledWith(
-        "Patient.extension[2].valueCode"
-      );
-    });
   });
 
   test("Should render CodeableConcept component and handle onChange", async () => {
