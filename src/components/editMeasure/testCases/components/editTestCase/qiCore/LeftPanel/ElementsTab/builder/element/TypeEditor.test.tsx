@@ -1716,7 +1716,7 @@ describe("TypeEditor Component", () => {
     expect(valueSetSelector).toHaveTextContent("- Select -");
   });
 
-  test("Should render Coding component for <Patient.extension[2].value[x]> and handle onChange properly", async () => {
+  test("Should render Coding component for 'Patient.extension[2].value[x]' and handle onChange properly", async () => {
     const fhirDefinitionsServiceApiMock = {
       getResourceTree: jest.fn().mockResolvedValue([{}]),
       getValueSetDefinition: jest
