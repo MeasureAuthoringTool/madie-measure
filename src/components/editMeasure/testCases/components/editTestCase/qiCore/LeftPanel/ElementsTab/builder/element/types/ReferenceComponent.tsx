@@ -13,7 +13,7 @@ import AddElementButton from "../../../../../../../common/UIOnlyModelAgnostic/Ad
 import { useFormikContext } from "formik";
 import {
   buildMadieResourceFromResourceIdentifier,
-  removeUndefinedAndEmptyObjects,
+  removeUndefinedProperties,
 } from "../../../../../../../../api/fhirDefinitionServiceUtilities";
 import * as _ from "lodash";
 import "./ReferenceComponent.scss";
@@ -80,6 +80,7 @@ export default function ReferenceComponent({
   handleAddElement,
   handleDeleteElement,
   showDeleteButton = false,
+  resource,
 }: any) {
   const { dispatch, state } = useQiCoreResource();
   const formikContext = useFormikContext();
@@ -164,6 +165,8 @@ export default function ReferenceComponent({
     const matchTypes = getProfileMatchTypes(selectedProfileUrl);
     const filtered = bundleEntries.filter((entry) => {
       if (entry.resource.resourceType !== selectedReferenceType) return false;
+      if (entry.resource.id === resource?.id) return false;
+
       const profiles = entry.resource.meta?.profile || [];
       return profiles.some((url) =>
         matchTypes.some((type) => url.includes(type))
@@ -205,6 +208,23 @@ export default function ReferenceComponent({
     }
   }, [value, formikContext.values]); // Use formikContext.values for dependency
 
+  const triggerAddNewFlow = () => {
+    // what's the list length of possible profiles of type per model
+    const newMadieResource = buildMadieResourceFromResourceIdentifier(
+      finalResourceOptionForAddNew
+    );
+    // Append to array instead of overwriting - supports multiple "Add New" references
+    const existingResources = formikContext.values["add_new_resources"] || [];
+    formikContext.setFieldValue("add_new_resources", [
+      ...existingResources,
+      newMadieResource,
+    ]);
+    formikContext.setFieldValue(
+      `${label}.reference`,
+      `${selectedReferenceType}/${newMadieResource.resource.id}`
+    );
+    setSelectedReferenceId("add_new_id");
+  };
   return (
     <>
       <div
@@ -324,26 +344,17 @@ export default function ReferenceComponent({
             }}
             onChange={(e) => {
               if (e.target.value === "add_new_id") {
-                if (finalList?.length > 1) {
+                // WE WANT TO open the dialog only in the case that our selection has greater levels of specificity available.
+                // Qi-Core is an implementation derived from us-core, which is derived from fhir at the most basal resource type.
+                // say we choose a base fhir type, find most specific list QI-core, us-Core, fhir. If most specific list has more than 1 item, open dropdown
+                // If we slect a qi-core profile type, no dropdown should ever open. It is the most specific
+                if (selectedProfileUrl.includes("qicore")) {
+                  triggerAddNewFlow();
+                } else if (finalList?.length > 1) {
                   setOpen(true);
                 } else {
                   // what's the list length of possible profiles of type per model
-                  const newMadieResource =
-                    buildMadieResourceFromResourceIdentifier(
-                      finalResourceOptionForAddNew
-                    );
-                  // Append to array instead of overwriting - supports multiple "Add New" references
-                  const existingResources =
-                    formikContext.values["add_new_resources"] || [];
-                  formikContext.setFieldValue("add_new_resources", [
-                    ...existingResources,
-                    newMadieResource,
-                  ]);
-                  formikContext.setFieldValue(
-                    `${label}.reference`,
-                    `${selectedReferenceType}/${newMadieResource.resource.id}`
-                  );
-                  setSelectedReferenceId("add_new_id");
+                  triggerAddNewFlow();
                 }
               } else {
                 // Selecting an existing resource - just update the reference
@@ -391,7 +402,7 @@ export default function ReferenceComponent({
             );
             // simulate what we're doing with the individual apply click.
             // clean the values like normal
-            const formikCleanedValues = removeUndefinedAndEmptyObjects(
+            const formikCleanedValues = removeUndefinedProperties(
               formikContext.values
             );
             // dispatch our event to modify our current bundle entry (formik.values), with the resource we want to add.

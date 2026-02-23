@@ -11,7 +11,7 @@ import {
   isComponentDataType,
   setNestedValue,
   getDisplayedElementsTree,
-  removeUndefinedAndEmptyObjects,
+  removeUndefinedProperties,
   getElementName,
   getChildren,
   getParentDefinition,
@@ -226,6 +226,54 @@ describe("FhirDefinitionServiceUtilities", () => {
       expect(result.find((el) => el.path === "Patient.name")).toBeDefined();
       expect(result.find((el) => el.path === "Patient.age")).toBeDefined();
     });
+
+    it("should filter out generic extension elements without sliceName", () => {
+      const resourceWithGenericExtension = _.cloneDeep(mockResource);
+      resourceWithGenericExtension.definition.snapshot.element.push(
+        {
+          id: "ClaimResponse.extension",
+          path: "ClaimResponse.extension",
+          min: 0,
+          type: [{ code: "Extension" }],
+        },
+        {
+          id: "Condition.extension",
+          path: "Condition.extension",
+          min: 0,
+          type: [{ code: "Extension" }],
+        },
+        {
+          id: "Patient.extension:ethnicity",
+          path: "Patient.extension",
+          sliceName: "ethnicity",
+          min: 0,
+          type: [
+            {
+              code: "Extension",
+              profile: [
+                "http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethnicity",
+              ],
+            },
+          ],
+        }
+      );
+      const result = getTopLevelElements(resourceWithGenericExtension);
+
+      // Generic extensions without sliceName should be filtered out
+      expect(
+        result.find((el) => el.id === "ClaimResponse.extension")
+      ).toBeUndefined();
+      expect(
+        result.find((el) => el.id === "Condition.extension")
+      ).toBeUndefined();
+      // Sliced extensions should remain
+      expect(
+        result.find((el) => el.id === "Patient.extension:race")
+      ).toBeDefined();
+      expect(
+        result.find((el) => el.id === "Patient.extension:ethnicity")
+      ).toBeDefined();
+    });
   });
 
   describe("getRequiredElements", () => {
@@ -352,46 +400,30 @@ describe("FhirDefinitionServiceUtilities", () => {
     });
   });
 
-  describe("removeUndefinedAndEmptyObjects", () => {
+  describe("removeUndefinedProperties", () => {
     it("should remove undefined values from an object", () => {
       const obj = { a: 1, b: undefined, c: 3 };
-      expect(removeUndefinedAndEmptyObjects(obj)).toEqual({ a: 1, c: 3 });
-    });
-
-    it("should remove empty nested objects", () => {
-      const obj = { a: { b: {} }, c: 3 };
-      expect(removeUndefinedAndEmptyObjects(obj)).toEqual({ c: 3 });
-    });
-
-    it("should handle deeply nested empty objects", () => {
-      const obj = { a: { b: { c: {} } }, d: 4 };
-      expect(removeUndefinedAndEmptyObjects(obj)).toEqual({ d: 4 });
+      expect(removeUndefinedProperties(obj)).toEqual({ a: 1, c: 3 });
     });
 
     it("should keep nested objects with values", () => {
       const obj = { a: { b: { c: 5 } }, d: 4 };
-      expect(removeUndefinedAndEmptyObjects(obj)).toEqual({
+      expect(removeUndefinedProperties(obj)).toEqual({
         a: { b: { c: 5 } },
         d: 4,
       });
     });
 
     it("should return the same value if not an object", () => {
-      expect(removeUndefinedAndEmptyObjects(null)).toBe(null);
-      expect(removeUndefinedAndEmptyObjects(12)).toBe(12);
-      expect(removeUndefinedAndEmptyObjects("test")).toBe("test");
+      expect(removeUndefinedProperties(null)).toBe(null);
+      expect(removeUndefinedProperties(12)).toBe(12);
+      expect(removeUndefinedProperties("test")).toBe("test");
     });
 
-    it("should return array by removing empty/null/undefined values", () => {
+    it("should return array by removing undefined values", () => {
       expect(
-        removeUndefinedAndEmptyObjects([
-          "2024",
-          "",
-          undefined,
-          null,
-          "08/09/2025",
-        ])
-      ).toEqual(["2024", "08/09/2025"]);
+        removeUndefinedProperties(["2024", "", undefined, null, "08/09/2025"])
+      ).toEqual(["2024", "", null, "08/09/2025"]);
     });
   });
 });
@@ -805,39 +837,76 @@ describe("recursiveAddYupObject", () => {
 });
 
 describe("addCardinalityToElement", () => {
+  const mockRootElement = {
+    id: "Communication.instantiatesUri[0]",
+    path: "Communication.instantiatesUri",
+    short: "Instantiates external protocol or definition",
+    max: "*",
+    base: {
+      path: "Communication.instantiatesUri",
+      min: 0,
+      max: "*",
+    },
+    type: [
+      {
+        code: "uri",
+      },
+    ],
+  };
+
   it("should add a new element when the path is missing", () => {
     const nextEntry = { resource: {} };
     const elemPath = "name";
-    const result = addCardinalityToElement(nextEntry, elemPath);
-    expect(result.resource[elemPath]).toEqual([{}, {}]);
+    const result = addCardinalityToElement(
+      nextEntry,
+      elemPath,
+      mockRootElement
+    );
+    expect(result.resource[elemPath]).toEqual([{}, ""]);
   });
 
   it("should wrap a non-array element in an array and add a new element", () => {
     const nextEntry = { resource: { name: { given: "John" } } };
     const elemPath = "name";
-    const result = addCardinalityToElement(nextEntry, elemPath);
-    expect(result.resource[elemPath]).toEqual([{ given: "John" }, {}]);
+    const result = addCardinalityToElement(
+      nextEntry,
+      elemPath,
+      mockRootElement
+    );
+    expect(result.resource[elemPath]).toEqual([{ given: "John" }, ""]);
   });
 
   it("should append a el to existing array", () => {
     const nextEntry = { resource: { name: [{ given: "John" }] } };
     const elemPath = "name";
-    const result = addCardinalityToElement(nextEntry, elemPath);
-    expect(result.resource[elemPath]).toEqual([{ given: "John" }, {}]);
+    const result = addCardinalityToElement(
+      nextEntry,
+      elemPath,
+      mockRootElement
+    );
+    expect(result.resource[elemPath]).toEqual([{ given: "John" }, ""]);
   });
 
   it("should handle by converting to array", () => {
     const nextEntry = { resource: { name: {} } };
     const elemPath = "name";
-    const result = addCardinalityToElement(nextEntry, elemPath);
-    expect(result.resource[elemPath]).toEqual([{}, {}]);
+    const result = addCardinalityToElement(
+      nextEntry,
+      elemPath,
+      mockRootElement
+    );
+    expect(result.resource[elemPath]).toEqual([{}, ""]);
   });
 
   it("should handle undefined paths by converting to array", () => {
     const nextEntry = { resource: { name: undefined } };
     const elemPath = "name";
-    const result = addCardinalityToElement(nextEntry, elemPath);
-    expect(result.resource[elemPath]).toEqual([{}, {}]);
+    const result = addCardinalityToElement(
+      nextEntry,
+      elemPath,
+      mockRootElement
+    );
+    expect(result.resource[elemPath]).toEqual([{}, ""]);
   });
 
   it("should return an empty array if no elements match the criteria", () => {

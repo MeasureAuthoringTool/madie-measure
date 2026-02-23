@@ -73,6 +73,7 @@ import {
 } from "../../../../../styles/editMeasure/populationCriteria/groups/index";
 import CompletionIndicator from "../CompletionIndicator";
 import CompositeComponent from "../Composite/CompositeComponent";
+import { components } from "react-select";
 
 interface ColSpanPopulationsType {
   isExclusionPop?: boolean;
@@ -359,6 +360,8 @@ const MeasureGroups = (props: MeasureGroupProps) => {
           compositeScoring: isCompositeMeasure
             ? measure?.groups[measureGroupNumber]?.compositeScoring || ""
             : null,
+          //@ts-ignore
+          components: group?.components || [],
         },
       });
       setVisibleStrats(
@@ -385,6 +388,8 @@ const MeasureGroups = (props: MeasureGroupProps) => {
             scoringUnit: "",
             scoringPrecision: "",
             compositeScoring: isCompositeMeasure ? "" : null,
+            //@ts-ignore
+            components: group?.components || [],
           },
         });
       }
@@ -416,7 +421,9 @@ const MeasureGroups = (props: MeasureGroupProps) => {
       compositeScoring: isCompositeMeasure
         ? group?.compositeScoring || ""
         : null,
-    } as Group,
+      //@ts-ignore
+      components: group?.components || [],
+    } as any,
     validationSchema: measureGroupSchemaValidator(
       cqlDefinitionDataTypes,
       cqlFunctionDataTypes,
@@ -452,7 +459,6 @@ const MeasureGroups = (props: MeasureGroupProps) => {
   });
   useFormikResetOnEvent(formik);
   const { resetForm, validateForm } = formik;
-
   const checkTestCasesLockStatus = async (): Promise<boolean> => {
     if (featureFlags.Locking && (await props.checkTestCasesLockStatus())) {
       handleToast(
@@ -551,6 +557,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
           populationBasis: defaultPopulationBasis,
           scoringUnit: "",
           scoringPrecision: "",
+          components: group?.components || [],
         },
       });
     } else {
@@ -562,6 +569,10 @@ const MeasureGroups = (props: MeasureGroupProps) => {
       });
     }
     setDiscardDialogOpen(false);
+  };
+
+  const submitComponentForm = async (uniqueComponents) => {
+    formik.setFieldValue("components", uniqueComponents);
   };
 
   const updateMeasureFromDb = async (measureId) => {
@@ -1284,6 +1295,8 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                       canEdit={canEdit}
                       formik={formik}
                       measure={measure}
+                      components={formik.values.components}
+                      submitComponentForm={submitComponentForm}
                     />
                   </div>
                 )}

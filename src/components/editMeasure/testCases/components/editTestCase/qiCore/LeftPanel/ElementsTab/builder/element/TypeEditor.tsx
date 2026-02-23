@@ -1,4 +1,10 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import * as _ from "lodash";
 import { Box, Divider } from "@mui/material";
 
@@ -12,7 +18,7 @@ import IntegerComponent from "./types/IntegerComponent";
 import CodesComponent from "./types/CodesComponent";
 import InstantComponent from "./types/InstantComponent";
 import TimeComponent from "./types/TimeComponent";
-import { useFormikContext } from "formik";
+import { getIn, useFormikContext } from "formik";
 import ExtensionComponent from "./types/ExtensionComponent";
 import ExtensionNormalizer from "./ExtensionNormalizer";
 import {
@@ -53,6 +59,30 @@ export const formikErrorHandler = (name: string, formik) => {
   if (touched && errors) {
     return errors;
   }
+};
+export const wrapWithSection = (
+  title: string,
+  node: React.ReactElement,
+  isRoot?: boolean,
+  noWrap?: boolean,
+  opts?: { key?: React.Key }
+): React.ReactElement => {
+  // If root, don't wrap
+  // choice types fall under root in many cases. we'll also check to see if the label is terminated with an [x]
+  if ((isRoot && !title.endsWith("[x]")) || noWrap) {
+    return <>{node}</>;
+  }
+
+  // Otherwise wrap
+  return (
+    <ElementSectionQiCore
+      key={opts?.key}
+      title={getMultipleCardinalityLabel(title)}
+      startOpen={true}
+    >
+      {node}
+    </ElementSectionQiCore>
+  );
 };
 
 const getContentReferencePath = (referenceUrl: string) =>
@@ -177,6 +207,20 @@ const TypeEditor = ({
     ]);
   };
 
+  const handleAddComplexElement = useCallback(
+    (path: string) => {
+      const currentValue = _.get(formik.values, path) || [{}];
+
+      const updatedValue = [
+        ...currentValue,
+        _.cloneDeep(_.mapValues(currentValue[0], () => {})),
+      ];
+
+      formik.setFieldValue(path, updatedValue);
+    },
+    [formik]
+  );
+
   // remove element at specific index from value array
   const handleDeleteElement = (index: number, label: string) => {
     // label comes in like Claim.item[0].careTeamSequence[1], need to get Claim.item[0].careTeamSequence
@@ -205,31 +249,6 @@ const TypeEditor = ({
   let isArrayMode = showMultipleCardinalityActionCenter && values;
   const lastIndex = isArrayMode ? values.length - 1 : null;
   const appendedZeroAlready = getIndexFromPath(label);
-
-  // utility function to wrap these
-
-  const wrapWithSection = (
-    title: string,
-    node: React.ReactElement,
-    opts?: { key?: React.Key }
-  ): React.ReactElement => {
-    // If root, don't wrap
-    // choice types fall under root in many cases. we'll also check to see if the label is terminated with an [x]
-    if ((isRoot && !title.endsWith("[x]")) || noWrap) {
-      return <>{node}</>;
-    }
-
-    // Otherwise wrap
-    return (
-      <ElementSectionQiCore
-        key={opts?.key}
-        title={getMultipleCardinalityLabel(title)}
-        startOpen={true}
-      >
-        {node}
-      </ElementSectionQiCore>
-    );
-  };
 
   // Memoize extension element definitions to keep a stable reference across renders.
   // Without this, getEditableExtensionSubElements creates a new array each render,
@@ -288,7 +307,9 @@ const TypeEditor = ({
                   }
                 />
               );
-              return wrapWithSection(fieldLabel, string, { key: index });
+              return wrapWithSection(fieldLabel, string, isRoot, noWrap, {
+                key: index,
+              });
             })}
           </Box>
         );
@@ -312,7 +333,7 @@ const TypeEditor = ({
             />
           </Box>
         );
-        return wrapWithSection(label, base64);
+        return wrapWithSection(label, base64, isRoot, noWrap);
       /*
         Decimal most commonly appears as a child of different complex types
         that we want to handle inside of different TypeEditor rendered components,
@@ -379,7 +400,9 @@ const TypeEditor = ({
                   }
                 />
               );
-              return wrapWithSection(fieldLabel, decimal, { key: index });
+              return wrapWithSection(fieldLabel, decimal, isRoot, noWrap, {
+                key: index,
+              });
             })}
           </Box>
         );
@@ -399,7 +422,7 @@ const TypeEditor = ({
             />
           </Box>
         );
-        return wrapWithSection(label, markdown);
+        return wrapWithSection(label, markdown, isRoot, noWrap);
       case "Quantity":
         return (
           <>
@@ -427,14 +450,16 @@ const TypeEditor = ({
                   handleAddElement={handleAddElement}
                 />
               );
-              return wrapWithSection(fieldLabel, quantity, { key: index });
+              return wrapWithSection(fieldLabel, quantity, isRoot, noWrap, {
+                key: index,
+              });
             })}
           </>
         );
       case "Period":
         const period = (
           <PeriodDateTimeComponent
-            label={label}
+            label={_.capitalize(getLastPart(label))}
             canEdit={canEdit}
             helperText={formikErrorHandler(label, formik)}
             error={getNestedProperty(formik.errors, label)}
@@ -446,7 +471,7 @@ const TypeEditor = ({
             }}
           />
         );
-        return wrapWithSection(label, period);
+        return wrapWithSection(label, period, isRoot, noWrap);
       case "dateTime":
       case "http://hl7.org/fhirpath/System.DateTime":
         return (
@@ -491,7 +516,9 @@ const TypeEditor = ({
                   }}
                 />
               );
-              return wrapWithSection(fieldLabel, dateTime, { key: index });
+              return wrapWithSection(fieldLabel, dateTime, isRoot, noWrap, {
+                key: index,
+              });
             })}
           </>
         );
@@ -525,7 +552,9 @@ const TypeEditor = ({
                   {...formik.getFieldProps(fieldLabel)}
                 />
               );
-              return wrapWithSection(fieldLabel, time, { key: index });
+              return wrapWithSection(fieldLabel, time, isRoot, noWrap, {
+                key: index,
+              });
             })}
           </>
         );
@@ -551,7 +580,7 @@ const TypeEditor = ({
             onBlur={() => formik.setFieldTouched(label)}
           />
         );
-        return wrapWithSection(label, instant);
+        return wrapWithSection(label, instant, isRoot, noWrap);
       case "http://hl7.org/fhirpath/System.Integer":
       case "integer":
       case "positiveInt":
@@ -596,7 +625,9 @@ const TypeEditor = ({
                   {...formik.getFieldProps(fieldLabel)}
                 />
               );
-              return wrapWithSection(fieldLabel, integer, { key: index });
+              return wrapWithSection(fieldLabel, integer, isRoot, noWrap, {
+                key: index,
+              });
             })}
           </>
         );
@@ -613,7 +644,7 @@ const TypeEditor = ({
             helperText={formikErrorHandler(label, formik)}
           />
         );
-        return wrapWithSection(label, identifier);
+        return wrapWithSection(label, identifier, isRoot, noWrap);
       case "http://hl7.org/fhirpath/System.Boolean":
       case "boolean":
         return (
@@ -655,7 +686,9 @@ const TypeEditor = ({
                   }}
                 />
               );
-              return wrapWithSection(fieldLabel, boolean, { key: index });
+              return wrapWithSection(fieldLabel, boolean, isRoot, noWrap, {
+                key: index,
+              });
             })}
           </>
         );
@@ -694,7 +727,9 @@ const TypeEditor = ({
                   }}
                 />
               );
-              return wrapWithSection(fieldLabel, uri, { key: index });
+              return wrapWithSection(fieldLabel, uri, isRoot, noWrap, {
+                key: index,
+              });
             })}
           </>
         );
@@ -730,7 +765,9 @@ const TypeEditor = ({
                   {...formik.getFieldProps(fieldLabel)}
                 />
               );
-              return wrapWithSection(fieldLabel, url, { key: index });
+              return wrapWithSection(fieldLabel, url, isRoot, noWrap, {
+                key: index,
+              });
             })}
           </>
         );
@@ -754,7 +791,8 @@ const TypeEditor = ({
             }}
           />
         );
-        return wrapWithSection(label, date);
+        return wrapWithSection(label, date, isRoot, noWrap);
+
       case "code":
         return (
           <>
@@ -804,7 +842,9 @@ const TypeEditor = ({
                   />
                 </>
               );
-              return wrapWithSection(fieldLabel, code, { key: index });
+              return wrapWithSection(fieldLabel, code, isRoot, noWrap, {
+                key: index,
+              });
             })}
           </>
         );
@@ -817,7 +857,7 @@ const TypeEditor = ({
             fieldRequired={false}
           />
         );
-        return wrapWithSection(label, range);
+        return wrapWithSection(label, range, isRoot, noWrap);
       case "Coding":
         const coding = (
           <CodingComponent
@@ -831,8 +871,6 @@ const TypeEditor = ({
             addTitle={addTitle}
             {...formik.getFieldProps(label)}
             onChange={(value) => {
-              // formik.setFieldTouched(label);
-              // formik.setFieldValue(label, value);
               // If the parent is an extension then there should a fixedUri that needed to be added to the value
               if (parentStructureDefinition?.type?.[0]?.code === "Extension") {
                 onChangeForExtension(value);
@@ -844,7 +882,7 @@ const TypeEditor = ({
             includePrev={false}
           />
         );
-        return wrapWithSection(label, coding);
+        return wrapWithSection(label, coding, isRoot, noWrap);
       case "CodeableConcept":
         return (
           <>
@@ -877,7 +915,7 @@ const TypeEditor = ({
                   }
                 />
               );
-              return wrapWithSection(label, codeableconcept);
+              return wrapWithSection(label, codeableconcept, isRoot, noWrap);
             })}
           </>
         );
@@ -890,7 +928,7 @@ const TypeEditor = ({
             fieldRequired={false}
           />
         );
-        return wrapWithSection(label, money);
+        return wrapWithSection(label, money, isRoot, noWrap);
       case "Timing":
         const timing = (
           <TimingComponent
@@ -901,7 +939,7 @@ const TypeEditor = ({
             fieldRequired={false}
           />
         );
-        return wrapWithSection(label, timing);
+        return wrapWithSection(label, timing, isRoot, noWrap);
       case "Reference":
         return (
           <>
@@ -946,10 +984,13 @@ const TypeEditor = ({
                     const newValues = [...currentValues, {}];
                     formik.setFieldValue(basePath, newValues);
                   }}
+                  resource={resource}
                   {...formik.getFieldProps(fieldLabel)}
                 />
               );
-              return wrapWithSection(fieldLabel, reference, { key: index });
+              return wrapWithSection(fieldLabel, reference, isRoot, noWrap, {
+                key: index,
+              });
             })}
           </>
         );
@@ -1092,7 +1133,7 @@ const TypeEditor = ({
           }}
         />
       );
-      return wrapWithSection(label, childDefPeriod);
+      return wrapWithSection(label, childDefPeriod, isRoot, noWrap);
     }
     return (
       <Box sx={{ display: "flex", flexDirection: "column" }}>
@@ -1140,7 +1181,7 @@ const TypeEditor = ({
               />
             );
             // return choiceType;
-            return wrapWithSection(childDef.id, choiceType);
+            return wrapWithSection(childDef.id, choiceType, isRoot, noWrap);
           } else if (childDef.contentReference) {
             const contentRef = (
               <ContentReferenceType
@@ -1154,22 +1195,42 @@ const TypeEditor = ({
             // return wrapWithSection(childDef.id, contentRef);
           } else if (!isComponentDataType(childDef?.type?.[0]?.code)) {
             return (
-              <ElementSectionQiCore
-                title={formatAttributeLabel(childDef.id)}
-                startOpen={false}
-                children={
-                  // Start of ClaimResponse.addItem.detail[0]
-                  <Box>
-                    <TypeEditor
-                      resource={resource}
-                      parentStructureDefinition={structureDefinition}
-                      structureDefinition={childDef}
-                      canEdit={canEdit}
-                      label={childDef.id}
+              <>
+                {(canBeMultipleCardinality
+                  ? values?.[childDef.id.split(".").pop()] || [{}]
+                  : [null]
+                ).map((el, index) => {
+                  return (
+                    <ElementSectionQiCore
+                      key={index}
+                      title={
+                        formatAttributeLabel(childDef.id) + ` ${index + 1}`
+                      }
+                      elementDefinition={childDef}
+                      startOpen={false}
+                      handleAddElement={() =>
+                        handleAddComplexElement(childDef.id)
+                      }
+                      canBeMultipleCardinality={canBeMultipleCardinality}
+                      children={
+                        <Box
+                          style={{
+                            paddingLeft: "16px",
+                          }}
+                        >
+                          <TypeEditor
+                            resource={resource}
+                            parentStructureDefinition={structureDefinition}
+                            structureDefinition={childDef}
+                            canEdit={canEdit}
+                            label={childDef.id + `[${index}]`}
+                          />
+                        </Box>
+                      }
                     />
-                  </Box>
-                }
-              />
+                  );
+                })}
+              </>
             );
           } else {
             const baseCase = (

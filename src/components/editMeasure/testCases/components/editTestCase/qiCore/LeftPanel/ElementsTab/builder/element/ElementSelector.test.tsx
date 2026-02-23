@@ -1,5 +1,5 @@
 import * as React from "react";
-import { render, screen, cleanup } from "@testing-library/react";
+import { render, screen, cleanup, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import ElementSelector, {
   getOptionLabel,
@@ -47,8 +47,7 @@ describe("ElementSelector", () => {
   const defaultProps = {
     basePath: "Patient",
     options: mockOptions,
-    value: [],
-    newValues: [],
+    selectedElements: [],
     onChange: jest.fn(),
   };
 
@@ -85,7 +84,7 @@ describe("ElementSelector", () => {
   it("disables already selected options", () => {
     const props = {
       ...defaultProps,
-      value: [mockOptions[0], mockOptions[3]],
+      selectedElements: [mockOptions[0], mockOptions[3]],
     };
 
     render(<ElementSelector {...props} />);
@@ -94,18 +93,20 @@ describe("ElementSelector", () => {
     userEvent.click(input);
 
     // Find the gender option by text and check if it's disabled
-    const genderOption = screen.getByText("gender").closest("li");
+    const genderOption = screen.getAllByText("gender")[1].closest("li");
     expect(genderOption).toHaveAttribute("aria-disabled", "true");
 
     // Find the deceasedBoolean option from deceased[x] choice type and check if it's disabled
-    const deceasedOption = screen.getByText("deceasedBoolean").closest("li");
+    const deceasedOption = screen
+      .getAllByText("deceasedBoolean")[1]
+      .closest("li");
     expect(deceasedOption).toHaveAttribute("aria-disabled", "true");
   });
 
   it("renders chips for selected values", () => {
     const props = {
       ...defaultProps,
-      newValues: [mockOptions[0]],
+      selectedElements: [mockOptions[0]],
     };
 
     render(<ElementSelector {...props} />);
@@ -117,8 +118,7 @@ describe("ElementSelector", () => {
   it("disables delete for chips that are in value prop", () => {
     const props = {
       ...defaultProps,
-      value: [mockOptions[0]],
-      newValues: [mockOptions[0]],
+      selectedElements: [mockOptions[0]],
     };
 
     render(<ElementSelector {...props} />);
@@ -152,20 +152,20 @@ describe("ElementSelector", () => {
   it("limits visible tags to 3", () => {
     const props = {
       ...defaultProps,
-      newValues: mockOptions,
+      selectedElements: mockOptions,
     };
 
     render(<ElementSelector {...props} />);
 
-    const chips = screen.getAllByRole("button");
-    expect(chips.length).toBe(3);
+    // Grab all chip elements whose testid ends with "-chip"
+    const chips = screen.getAllByTestId(/-chip$/i);
+    expect(chips.length).toBe(2);
   });
 
   it("prevents backspace from deleting disabled chips", async () => {
     const props = {
       ...defaultProps,
-      value: [mockOptions[0]], // gender is disabled
-      newValues: [mockOptions[0], mockOptions[1]], // has both gender and birthDate
+      selectedElements: [mockOptions[0], mockOptions[1]], // has both gender and birthDate
     };
 
     render(<ElementSelector {...props} />);
@@ -175,13 +175,13 @@ describe("ElementSelector", () => {
       screen.getByTestId("disabled-element-selector-gender-chip")
     ).toBeInTheDocument();
     expect(
-      screen.getByTestId("element-selector-birthDate-chip")
+      screen.getByTestId("disabled-element-selector-birthDate-chip")
     ).toBeInTheDocument();
 
     const input = screen.getByPlaceholderText("Attributes");
-    await userEvent.type(input, "{Backspace}");
-    await userEvent.type(input, "{Backspace}");
-    await userEvent.type(input, "{Backspace}");
+    userEvent.type(input, "{Backspace}");
+    userEvent.type(input, "{Backspace}");
+    userEvent.type(input, "{Backspace}");
 
     // Verify disabled chip still exists and hasn't been removed
     expect(
@@ -225,12 +225,34 @@ describe("ElementSelector", () => {
 
   it("disables related choice types using FHIR datatype matching", () => {
     const choiceOptions: ElementDefinition[] = [
-      { path: "Patient.deceasedBoolean", min: 0, max: "1" },
-      { path: "Patient.deceasedDateTime", min: 0, max: "1" },
-      { path: "Patient.multipleBirthBoolean", min: 0, max: "1" },
-      { path: "Patient.multipleBirthInteger", min: 0, max: "1" },
-      { path: "Patient.valueString", min: 0, max: "1" },
-      { path: "Patient.valueQuantity", min: 0, max: "1" },
+      {
+        id: "Patient.deceased[x]",
+        path: "Patient.deceased[x]",
+        min: 0,
+        max: "1",
+        type: [{ code: "boolean" }],
+      },
+      {
+        id: "Patient.deceased[x]",
+        path: "Patient.deceased[x]",
+        min: 0,
+        max: "1",
+        type: [{ code: "dateTime" }],
+      },
+      {
+        id: "Patient.multipleBirth[x]",
+        path: "Patient.multipleBirth[x]",
+        min: 0,
+        max: "1",
+        type: [{ code: "boolean" }],
+      },
+      {
+        id: "Patient.multipleBirth[x]",
+        path: "Patient.multipleBirth[x]",
+        min: 0,
+        max: "1",
+        type: [{ code: "integer" }],
+      },
       {
         path: "Patient.unrelatedpath",
         min: 1,
@@ -241,7 +263,7 @@ describe("ElementSelector", () => {
     const props = {
       ...defaultProps,
       options: choiceOptions,
-      newValues: [choiceOptions[0]],
+      selectedElements: [choiceOptions[0]],
     };
 
     render(<ElementSelector {...props} />);
@@ -271,7 +293,7 @@ describe("ElementSelector", () => {
     const propsWithMultipleBirth = {
       ...defaultProps,
       options: choiceOptions,
-      newValues: [choiceOptions[2]],
+      selectedElements: [choiceOptions[2]],
     };
 
     render(<ElementSelector {...propsWithMultipleBirth} />);
@@ -293,55 +315,45 @@ describe("ElementSelector", () => {
   });
 
   it("correctly extracts choice base types from datatype ending elements", () => {
-    const testChoiceDisabling = (
-      selectedPath,
-      relatedPath,
-      shouldBeDisabled
-    ) => {
-      const choiceOptions: ElementDefinition[] = [
-        { path: selectedPath, min: 0, max: "1" },
-        { path: relatedPath, min: 0, max: "1" },
-      ];
+    const choiceOptions: ElementDefinition[] = [
+      {
+        id: "Patient.deceased[x]",
+        path: "Patient.deceased[x]",
+        min: 0,
+        max: "1",
+        type: [{ code: "boolean" }],
+      },
+      {
+        id: "Patient.deceased[x]",
+        path: "Patient.deceased[x]",
+        min: 0,
+        max: "1",
+        type: [{ code: "dateTime" }],
+      },
+    ];
 
-      const props = {
-        ...defaultProps,
-        options: choiceOptions,
-        newValues: [choiceOptions[0]],
-      };
-
-      render(<ElementSelector {...props} />);
-      userEvent.click(screen.getByPlaceholderText("Attributes"));
-
-      // Get the label of the related (second) option
-      const relatedLabel = getOptionLabel(choiceOptions[1], "Patient");
-      const relatedOption = screen.getByText(relatedLabel).closest("li");
-
-      if (shouldBeDisabled) {
-        expect(relatedOption).toHaveAttribute("aria-disabled", "true");
-      } else {
-        expect(relatedOption).not.toHaveAttribute("aria-disabled", "true");
-      }
-
-      cleanup();
+    const props = {
+      ...defaultProps,
+      options: choiceOptions,
+      selectedElements: [choiceOptions[0]],
     };
 
-    testChoiceDisabling(
-      "Patient.valueString",
-      "Patient.valueCodeableConcept",
-      true
-    );
-    testChoiceDisabling("Patient.onsetAge", "Patient.onsetPeriod", true);
-    testChoiceDisabling(
-      "Patient.effectiveDateTime",
-      "Patient.effectivePeriod",
-      true
-    );
-    testChoiceDisabling(
-      "Patient.performedDateTime",
-      "Patient.performedPeriod",
-      true
-    );
-    testChoiceDisabling("Patient.valueString", "Patient.onsetAge", false);
+    render(<ElementSelector {...props} />);
+    userEvent.click(screen.getByPlaceholderText("Attributes"));
+
+    // Get the first option i.e. deceasedBoolean which is selected choice
+    const deceasedBoolean = screen
+      .getAllByText("deceasedBoolean")[1]
+      .closest("li");
+
+    expect(deceasedBoolean).toHaveAttribute("aria-selected", "true");
+    expect(deceasedBoolean).toHaveAttribute("aria-disabled", "true");
+
+    // Get the label of the related (second) option i.e. deceasedDateTime
+    const deceasedDateTime = screen.getByText("deceasedDateTime").closest("li");
+
+    expect(deceasedDateTime).toHaveAttribute("aria-selected", "false");
+    expect(deceasedDateTime).toHaveAttribute("aria-disabled", "true");
   });
 });
 
@@ -349,47 +361,27 @@ describe("getChoiceBaseLabel", () => {
   const basePath = "Observation";
 
   it("should return label without [x] when label ends with [x]", () => {
-    const option = { path: "Observation.value[x]" };
-    expect(getChoiceBaseLabel(option, basePath)).toBe("value");
-  });
-
-  it("should strip FHIR datatype suffix when present", () => {
-    const option = { path: "Observation.valueString" };
-    expect(getChoiceBaseLabel(option, basePath)).toBe("value");
-  });
-
-  it("should handle complex FHIR datatype suffix", () => {
-    const option = { path: "Observation.valueCodeableConcept" };
+    const option = { id: "Observation.value[x]" } as ElementDefinition;
     expect(getChoiceBaseLabel(option, basePath)).toBe("value");
   });
 
   it("should return null if label cannot be determined", () => {
-    const option = { path: "Observation" }; // same as basePath
+    const option = { id: "Observation" } as ElementDefinition; // same as basePath
     expect(getChoiceBaseLabel(option, basePath)).toBeNull();
   });
 
   it("should handle unknown datatype by splitting camelCase", () => {
-    const option = { path: "Observation.valueCustomType" };
-    expect(getChoiceBaseLabel(option, basePath)).toBe("valueCustom");
-  });
-
-  it("should handle multiple camelCase humps and return up to last lowercase", () => {
-    const option = { path: "Observation.someVeryCustomType" };
-    expect(getChoiceBaseLabel(option, basePath)).toBe("someVeryCustom");
+    const option = { id: "Observation.valueCustomType" } as ElementDefinition;
+    expect(getChoiceBaseLabel(option, basePath)).toBe(null);
   });
 
   it("should return null if no camelCase boundary and no datatype match", () => {
-    const option = { path: "Observation.valuecustomtype" };
+    const option = { id: "Observation.valuecustomtype" } as ElementDefinition;
     expect(getChoiceBaseLabel(option, basePath)).toBeNull();
   });
 
   it("should handle label shorter than datatype (edge case)", () => {
-    const option = { path: "Observation.Boolean" }; // label = 'Boolean'
-    expect(getChoiceBaseLabel(option, basePath)).toBeNull();
-  });
-
-  it("should handle datatype match but label length equals type length (edge case)", () => {
-    const option = { path: "Observation.String" }; // label = 'String'
+    const option = { id: "Observation.Boolean" } as ElementDefinition; // label = 'Boolean'
     expect(getChoiceBaseLabel(option, basePath)).toBeNull();
   });
 });

@@ -5,6 +5,27 @@ import * as Yup from "yup";
 import * as _ from "lodash";
 import { StructureDefinitionDto } from "./models/StructureDefinitionDto";
 
+export const PRIMITIVE_DEFAULT_VALUES = {
+  instant: "",
+  time: "",
+  boolean: false,
+  date: "",
+  datetime: "",
+  decimal: 0,
+  integer: 0,
+  unsignedInt: 0,
+  positiveInt: 1,
+  uri: "",
+  url: "",
+  uuid: "",
+  canonical: "",
+  string: "",
+  code: "",
+};
+
+export const isPrimitiveType = (typeCode: string) =>
+  PRIMITIVE_DEFAULT_VALUES.hasOwnProperty(typeCode);
+
 /**
  * Prepares the element name to be displayed for tab labels
  * for sliced elements- it will be sliceName. e.g. Patient.extension:race results into race
@@ -327,23 +348,16 @@ export function getDisplayedElementsTree(uniqueElements) {
 }
 
 // remove all the falsey values from an object recursively so we have only what the user has generated.
-export function removeUndefinedAndEmptyObjects(obj) {
+export function removeUndefinedProperties(obj) {
   if (typeof obj !== "object" || obj === null) {
     return obj;
   }
 
   if (Array.isArray(obj)) {
     // Clean each item in the array recursively
-    const cleanedArray = obj
-      .map((item) => removeUndefinedAndEmptyObjects(item))
-      .filter((item) => {
-        // Remove null, undefined, empty values (if string type)
-        return !(
-          _.isNil(item) ||
-          (typeof item === "string" && _.isEmpty(item))
-        );
-      });
-    return cleanedArray.length > 0 ? cleanedArray : undefined;
+    return obj
+      .map((item) => removeUndefinedProperties(item))
+      .filter((item) => !_.isUndefined(item));
   }
 
   for (let key in obj) {
@@ -353,7 +367,7 @@ export function removeUndefinedAndEmptyObjects(obj) {
       // Special handling for extension arrays - filter out objects without 'url' property
       if (key === "extension" && Array.isArray(value)) {
         const cleanedExtensions = value
-          .map((item) => removeUndefinedAndEmptyObjects(item))
+          .map((item) => removeUndefinedProperties(item))
           .filter((item) => {
             // Remove null, undefined, empty strings
             if (
@@ -377,7 +391,7 @@ export function removeUndefinedAndEmptyObjects(obj) {
         continue;
       }
 
-      const cleanedValue = removeUndefinedAndEmptyObjects(value);
+      const cleanedValue = removeUndefinedProperties(value);
       if (
         _.isNil(cleanedValue) ||
         (typeof cleanedValue === "object" && _.isEmpty(cleanedValue))
@@ -503,6 +517,8 @@ export function getTopLevelElements(
       (e.path.split(".")?.length === 2 &&
         e.id !== "Extension.extension" &&
         e.id !== "Patient.extension" &&
+        // Exclude generic extension (no sliceName) - only allow sliced extensions like extension:race
+        !(e.path?.endsWith(".extension") && !e.sliceName) &&
         !/\.id$/.test(e.id) &&
         e.max !== "0" &&
         // Exclude entries where the path contains these attributes or matches these element names
@@ -786,7 +802,7 @@ export function buildMadieResourceFromResourceIdentifier(
   return newEntry;
 }
 
-export function addCardinalityToElement(nextEntry, elemPath) {
+export function addCardinalityToElement(nextEntry, elemPath, rootDefinition) {
   if (!nextEntry?.resource[elemPath]) {
     // make it accessible to avoid a null
     nextEntry.resource[elemPath] = {};
@@ -796,8 +812,12 @@ export function addCardinalityToElement(nextEntry, elemPath) {
     // make it one
     nextEntry.resource[elemPath] = [nextEntry.resource[elemPath]];
   }
-  // add a new element;
-  nextEntry.resource[elemPath] = nextEntry.resource[elemPath].concat({}); // add an empty object.
+  // add a new element and add default values if it's a primitive type
+  nextEntry.resource[elemPath] = nextEntry.resource[elemPath].concat(
+    isPrimitiveType(rootDefinition?.type?.[0]?.code)
+      ? PRIMITIVE_DEFAULT_VALUES[rootDefinition.type[0].code]
+      : {}
+  );
   return nextEntry;
 }
 // We need to update labels based weather or not the parent has multiple cardinality as well as if the child is multiple cardinality
