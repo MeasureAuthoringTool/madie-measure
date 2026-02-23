@@ -292,6 +292,22 @@ const ElementEditor = ({
       triggerFormBuilder();
     }
   }, [displayedElementsTree, state, selectedResourceID]); // using selected resource as a render point
+
+  useEffect(() => {
+    if (loading) return;
+
+    const scrollTarget = document.getElementById("tc-builder-resource-editor");
+
+    if (!scrollTarget) return;
+
+    if (typeof scrollTarget.scrollIntoView === "function") {
+      scrollTarget.scrollIntoView({ behavior: "smooth", block: "start" });
+    } else if (typeof scrollTarget.scrollTo === "function") {
+      scrollTarget.scrollTo({ top: 0, behavior: "smooth" });
+    } else {
+      scrollTarget.scrollTop = 0;
+    }
+  }, [elementDefinition?.id, loading]);
   const formik = useFormikContext();
   useFormikResetOnEvent(formik);
   // on individual apply
@@ -357,7 +373,7 @@ const ElementEditor = ({
         requiredFields={requiredFields}
         formInfo={formInfo}
       >
-        <Box id="element-editor">
+        <Box id="element-editor" data-testid="element-editor">
           {/* we need to render not only the current item, but all children */}
           <ElementEditorChildren //recursive render control
             // stuff we need only at the init root

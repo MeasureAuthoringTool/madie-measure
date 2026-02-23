@@ -80,6 +80,7 @@ export default function ReferenceComponent({
   handleAddElement,
   handleDeleteElement,
   showDeleteButton = false,
+  resource,
 }: any) {
   const { dispatch, state } = useQiCoreResource();
   const formikContext = useFormikContext();
@@ -164,6 +165,8 @@ export default function ReferenceComponent({
     const matchTypes = getProfileMatchTypes(selectedProfileUrl);
     const filtered = bundleEntries.filter((entry) => {
       if (entry.resource.resourceType !== selectedReferenceType) return false;
+      if (entry.resource.id === resource?.id) return false;
+
       const profiles = entry.resource.meta?.profile || [];
       return profiles.some((url) =>
         matchTypes.some((type) => url.includes(type))
