@@ -39,8 +39,16 @@ import {
   useMeasureFilterSearch,
 } from "../../../../hooks/useMeasureFilterSearch";
 import { MeasureSearchFilters } from "../../../../shared/MeasureSearchFilters";
+import styled from "styled-components";
 
 const TH = tw.th`p-3 text-left text-sm font-bold capitalize`;
+
+const SelectedRow = styled.tr`
+  background-color: #e3f2fd;
+  &:hover {
+    background-color: #bbdefb;
+  }
+`;
 
 type TCRow = {
   id: string;
@@ -164,6 +172,17 @@ export default function AddComponentsDialog({
       setSelectedIdForExpansion(null);
     }
   };
+
+  // Sync rowSelection with components whenever dialog opens or components change
+  useEffect(() => {
+    if (open) {
+      const newRowSelection = {};
+      preselectedIds.forEach((id: any) => {
+        newRowSelection[id] = true;
+      });
+      setRowSelection(newRowSelection);
+    }
+  }, [open, preselectedIds]);
 
   const columns = useMemo<ColumnDef<Measure>[]>(() => {
     const columnDefs = [
@@ -297,6 +316,7 @@ export default function AddComponentsDialog({
     selectedIdForExpansion,
     isRowExpanded,
     expandedSectionData,
+    components,
   ]);
 
   const getAllowedScoringTypes = (compositeScoring: string) => {
@@ -566,27 +586,50 @@ export default function AddComponentsDialog({
               ) : (
                 table.getRowModel().rows.map((row) => (
                   <React.Fragment key={row.id}>
-                    <tr
-                      key={row.id}
-                      className="ml-tr"
-                      data-testid={`row-item`}
-                      style={{
-                        borderTop: "solid 1px #8c8c8c",
-                        borderSpacing: "0 2em !important",
-                      }}
-                    >
-                      {row.getVisibleCells().map((cell) => (
-                        <td
-                          key={cell.id}
-                          data-testid={`measure-name-${cell.id}`}
-                        >
-                          {flexRender(
-                            cell.column.columnDef.cell,
-                            cell.getContext()
-                          )}
-                        </td>
-                      ))}
-                    </tr>
+                    {row.getIsSelected() ? (
+                      <SelectedRow
+                        className="ml-tr"
+                        data-testid={`row-item-selected-${row.id}`}
+                        style={{
+                          borderTop: "solid 1px #8c8c8c",
+                          borderSpacing: "0 2em !important",
+                        }}
+                      >
+                        {row.getVisibleCells().map((cell) => (
+                          <td
+                            key={cell.id}
+                            data-testid={`measure-name-${cell.id}`}
+                          >
+                            {flexRender(
+                              cell.column.columnDef.cell,
+                              cell.getContext()
+                            )}
+                          </td>
+                        ))}
+                      </SelectedRow>
+                    ) : (
+                      <tr
+                        key={row.id}
+                        className="ml-tr"
+                        data-testid={`row-item`}
+                        style={{
+                          borderTop: "solid 1px #8c8c8c",
+                          borderSpacing: "0 2em !important",
+                        }}
+                      >
+                        {row.getVisibleCells().map((cell) => (
+                          <td
+                            key={cell.id}
+                            data-testid={`measure-name-${cell.id}`}
+                          >
+                            {flexRender(
+                              cell.column.columnDef.cell,
+                              cell.getContext()
+                            )}
+                          </td>
+                        ))}
+                      </tr>
+                    )}
                     {selectedIdForExpansion === row.original.measureSetId &&
                       expandedSectionData?.map((subRow) => (
                         <tr key={subRow.id} className="expanded-row">

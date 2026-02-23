@@ -30,12 +30,16 @@ const TH = tw.th`p-3 text-left text-sm font-bold capitalize`;
 
 export default function AddedComponentsTable({
   components,
+  onComponentsUpdate,
 }: {
   components: Component[];
+  onComponentsUpdate: (updatedComponents: Component[]) => void;
+  measureId: string;
 }) {
   const [hoveredHeader, setHoveredHeader] = useState<string>("");
   const measureServiceApi = useRef(useMeasureServiceApi()).current;
   const [retrievedComponents, setRetrievedComponents] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   const fetchMeasuresForComponents = useCallback(async () => {
     if (!components?.length) {
@@ -59,6 +63,21 @@ export default function AddedComponentsTable({
   useEffect(() => {
     fetchMeasuresForComponents();
   }, [fetchMeasuresForComponents]);
+
+  const handleDeleteComponent = async (measureId: string) => {
+    setLoading(true);
+    try {
+      const updatedComponents = components.filter(
+        (comp) => comp.measureId !== measureId
+      );
+
+      onComponentsUpdate(updatedComponents);
+    } catch (err) {
+      console.error("Error deleting component:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const columns = useMemo<ColumnDef<Measure>[]>(() => {
     const columnDefs = [
@@ -84,7 +103,7 @@ export default function AddedComponentsTable({
             />
           </>
         ),
-        accessorKey: "CMS ID",
+        accessorKey: "version",
       },
       {
         header: "CMS ID",
@@ -109,21 +128,24 @@ export default function AddedComponentsTable({
       {
         id: "actions",
         header: null,
-
-        cell: () => (
+        cell: (info) => (
           <Tooltip title="Delete">
-            <IconButton size="small">
+            <IconButton
+              size="small"
+              onClick={() => handleDeleteComponent(info.row.original.id)}
+              disabled={loading}
+              data-testid={`delete-component-${info.row.original.id}`}
+            >
               <DeleteOutlinedIcon sx={{ color: "#D92F2F" }} />
             </IconButton>
           </Tooltip>
         ),
-
-        accessorKey: "",
+        accessorKey: "actions",
       },
     ];
 
     return columnDefs;
-  }, []);
+  }, [loading, components]);
   const [sorting, setSorting] = React.useState<SortingState>([]);
 
   const table = useReactTable({

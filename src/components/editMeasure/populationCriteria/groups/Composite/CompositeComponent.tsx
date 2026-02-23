@@ -20,7 +20,11 @@ export default function CompositeComponent({
           submitComponentForm={submitComponentForm}
         />
       </div>
-      <AddedComponentsTable components={components} />
+      <AddedComponentsTable
+        components={components}
+        measureId={measure.id}
+        onComponentsUpdate={submitComponentForm}
+      />
     </div>
   );
 }
