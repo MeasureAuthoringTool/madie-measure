@@ -80,6 +80,8 @@ export default function AddComponentsDialog({
   const [selectedIdForExpansion, setSelectedIdForExpansion] = useState(null);
   const [isRowExpanded, setIsRowExpanded] = useState<boolean>(false);
   const [expandedSectionData, setExpandedSectionData] = useState<TCRow[]>([]);
+  const [selectedExpandedMeasuresIds, setSelectedExpandedMeasuresIds] =
+    useState<string[]>([]);
   const abortController = useRef(null);
 
   // Use custom hook for filter and search functionality
@@ -194,18 +196,20 @@ export default function AddComponentsDialog({
             />
           );
         },
-        cell: ({ row }) => (
-          <div style={{ display: "flex", flexDirection: "row", gap: 16 }}>
-            <div className="px-1">
-              <IndeterminateCheckbox
-                checked={row.getIsSelected()}
-                indeterminate={row.getIsSomeSelected?.()}
-                onChange={row.getToggleSelectedHandler()}
-                aria-label={`Toggle row ${row.id}`}
-              />
+        cell: ({ row }) => {
+          return (
+            <div style={{ display: "flex", flexDirection: "row", gap: 16 }}>
+              <div className="px-1">
+                <IndeterminateCheckbox
+                  indeterminate={row.getIsSomeSelected?.()}
+                  checked={row.getIsSelected()}
+                  onChange={row.getToggleSelectedHandler()}
+                  aria-label={`Toggle row ${row.id}`}
+                />
+              </div>
             </div>
-          </div>
-        ),
+          );
+        },
       },
       {
         header: "Measure Name",
@@ -247,7 +251,7 @@ export default function AddComponentsDialog({
         cell: (info) => {
           const converted = convertDate(info.row.original.lastModifiedAt);
           const { date } = converted;
-          return <div style={{ marginLeft: "8px" }}>{date}</div>;
+          return <div>{date}</div>;
         },
         accessorKey: "lastModifiedAt",
       },
@@ -422,6 +426,66 @@ export default function AddComponentsDialog({
     onClose();
   };
 
+  const columnsToBeAdded = [
+    {
+      header: "Measure",
+      cell: (info) => (
+        <>
+          <TruncateText
+            text={info.row.original.measureName}
+            maxLength={120}
+            dataTestId={`measure-name-${info.row.original.id}`}
+          />
+        </>
+      ),
+      accessorKey: "measureName",
+    },
+    {
+      header: "Version",
+      cell: (info) => (
+        <TruncateText
+          text={info.row.original.version}
+          maxLength={60}
+          dataTestId={`measure-version-${info.row.original.id}`}
+        />
+      ),
+      accessorKey: "version",
+    },
+    {
+      header: "CMS ID",
+      cell: (info) => (
+        <TruncateText
+          text={(() => {
+            const cmsId =
+              info.row.original.actions?.measureSet?.cmsId?.toString();
+            const model = info.row.original.actions?.model;
+
+            if (!cmsId) return "";
+
+            return model?.startsWith("QI-Core") ? `${cmsId}FHIR` : cmsId;
+          })()}
+          maxLength={60}
+          dataTestId={`measure-cmsId-${info.row.original.id}`}
+        />
+      ),
+      accessorKey: "measureSet.cmsId",
+    },
+    {
+      header: "Updated",
+      cell: (info) => (
+        <span>
+          {new Date(
+            info.row.original.actions.lastModifiedAt
+          ).toLocaleDateString()}
+        </span>
+      ),
+      accessorKey: "lastModifiedAt",
+      sortingFn: (rowA, rowB) =>
+        new Date(rowA.original.actions.lastModifiedAt).getTime() -
+        new Date(rowB.original.actions.lastModifiedAt).getTime(),
+    },
+  ];
+
   const handleDialogSubmit = async (e) => {
     e.preventDefault();
     // required: to prevent event bubbling to parent forms
@@ -449,9 +513,46 @@ export default function AddComponentsDialog({
     onClose();
   };
 
-  const expandedColumns = useMemo<ColumnDef<Measure>[]>(() => {
-    return (columns as any[]).filter((c) => c.id !== "select");
-  }, [columns]);
+  const expandedColumns = useMemo<ColumnDef<TCRow>[]>(() => {
+    return [
+      {
+        id: "select",
+        accessorKey: "select",
+        header: "Select",
+        cell: (info) => {
+          const id = info.row.original.id;
+          const isChecked = !!rowSelection[id];
+
+          // hook into tanstacks selection state
+          const onToggle = (checked: boolean) => {
+            setRowSelection((prev) => {
+              const next = { ...prev };
+              if (checked) {
+                next[id] = true;
+              } else {
+                delete next[id];
+              }
+              return next;
+            });
+          };
+
+          return (
+            <input
+              type="checkbox"
+              checked={isChecked}
+              onChange={(e) => onToggle(e.target.checked)}
+            />
+          );
+        },
+      },
+      ...columnsToBeAdded,
+      {
+        header: "",
+        cell: (info) => <></>,
+        accessorKey: "",
+      },
+    ];
+  }, [selectedExpandedMeasuresIds, isRowExpanded]);
 
   return (
     <MadieDialog
