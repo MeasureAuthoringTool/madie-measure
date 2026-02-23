@@ -586,50 +586,35 @@ export default function AddComponentsDialog({
               ) : (
                 table.getRowModel().rows.map((row) => (
                   <React.Fragment key={row.id}>
-                    {row.getIsSelected() ? (
-                      <SelectedRow
-                        className="ml-tr"
-                        data-testid={`row-item-selected-${row.id}`}
-                        style={{
-                          borderTop: "solid 1px #8c8c8c",
-                          borderSpacing: "0 2em !important",
-                        }}
-                      >
-                        {row.getVisibleCells().map((cell) => (
-                          <td
-                            key={cell.id}
-                            data-testid={`measure-name-${cell.id}`}
-                          >
-                            {flexRender(
-                              cell.column.columnDef.cell,
-                              cell.getContext()
-                            )}
-                          </td>
-                        ))}
-                      </SelectedRow>
-                    ) : (
-                      <tr
-                        key={row.id}
-                        className="ml-tr"
-                        data-testid={`row-item`}
-                        style={{
-                          borderTop: "solid 1px #8c8c8c",
-                          borderSpacing: "0 2em !important",
-                        }}
-                      >
-                        {row.getVisibleCells().map((cell) => (
-                          <td
-                            key={cell.id}
-                            data-testid={`measure-name-${cell.id}`}
-                          >
-                            {flexRender(
-                              cell.column.columnDef.cell,
-                              cell.getContext()
-                            )}
-                          </td>
-                        ))}
-                      </tr>
-                    )}
+                    <tr
+                      className={
+                        row.getIsSelected() ? "ml-tr selected" : "ml-tr"
+                      }
+                      data-testid={
+                        row.getIsSelected()
+                          ? `row-item-selected-${row.id}`
+                          : "row-item"
+                      }
+                      style={{
+                        borderTop: "solid 1px #8c8c8c",
+                        borderSpacing: "0 2em !important",
+                        ...(row.getIsSelected() && {
+                          backgroundColor: "#e3f2fd",
+                        }),
+                      }}
+                    >
+                      {row.getVisibleCells().map((cell) => (
+                        <td
+                          key={cell.id}
+                          data-testid={`measure-name-${cell.id}`}
+                        >
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext()
+                          )}
+                        </td>
+                      ))}
+                    </tr>
                     {selectedIdForExpansion === row.original.measureSetId &&
                       expandedSectionData?.map((subRow) => (
                         <tr key={subRow.id} className="expanded-row">
