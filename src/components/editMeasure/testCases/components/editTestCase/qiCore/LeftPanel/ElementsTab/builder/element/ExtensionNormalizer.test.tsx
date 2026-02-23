@@ -462,8 +462,7 @@ describe("ExtensionNormalizer", () => {
       expect(newValues.Patient.resourceType).toBe("Patient");
 
       // Extension should be normalized
-      const normalizedExtensions =
-        newValues.Patient.extension[0].extension;
+      const normalizedExtensions = newValues.Patient.extension[0].extension;
       expect(normalizedExtensions[0].url).toBe("ombCategory");
       expect(normalizedExtensions[2].url).toBe("text");
     });
