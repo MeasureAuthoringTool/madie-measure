@@ -95,6 +95,18 @@ export class FhirDefinitionsServiceApi {
         `An error occurred while filtering resource and generating test case execution bundle for model version [${model}]: `,
         error
       );
+      const errorMessage = error?.response?.data?.message;
+      if (
+        errorMessage &&
+        errorMessage.includes("Incorrect resource type found")
+      ) {
+        throw new Error(
+          "Test Case Execution cancelled: Unable to parse Patient Bundle"
+        );
+      }
+      throw new Error(
+        "An error occurred while generating test case execution bundle. Please try again."
+      );
     }
   }
 }
