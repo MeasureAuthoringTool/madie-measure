@@ -322,30 +322,6 @@ export function getNestedProperty(obj, path) {
   return keys?.reduce((current, key) => current && current[key], obj);
 }
 
-// we want to get all the displayed elements, and then compare them to formik, to make sure we have the first two paths so we know we should add them to the form
-export function getDisplayedElementsTree(uniqueElements) {
-  const displayedElementPaths = {};
-  const setNestedValue = (obj, path, value) => {
-    const keys = path.split(".");
-    let currentObj = obj;
-    // start nested structure
-    keys.forEach((key, index) => {
-      if (index === keys.length - 1) {
-        currentObj[key] = value;
-      } else {
-        currentObj[key] = currentObj[key] ? { ...currentObj[key] } : {};
-        currentObj = currentObj[key];
-      }
-    });
-  };
-  uniqueElements.forEach(({ path }) => {
-    if (path) {
-      setNestedValue(displayedElementPaths, path, true);
-    }
-  });
-  return { ...displayedElementPaths };
-}
-
 // remove all the falsey values from an object recursively so we have only what the user has generated.
 export function removeUndefinedProperties(obj) {
   if (typeof obj !== "object" || obj === null) {
@@ -716,7 +692,6 @@ export function isComponentDataType(datatype) {
     case "http://hl7.org/fhirpath/system.datetime":
     case "decimal":
     case "id":
-    case "identifier":
     case "instant":
     case "integer":
     case "integer64":
