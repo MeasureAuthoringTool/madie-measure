@@ -824,9 +824,12 @@ const TypeEditor = ({
                     handleAddElement={handleAddElement}
                     {...formik.getFieldProps(fieldLabel)}
                     onChange={(value) => {
-                      let targetLabel = label;
-                      if (label.includes(".value[x")) {
-                        targetLabel = label.replace(".value[x]", ".valueCode");
+                      let targetLabel = fieldLabel;
+                      if (targetLabel.includes(".value[x]")) {
+                        targetLabel = targetLabel.replace(
+                          ".value[x]",
+                          ".valueCode"
+                        );
                       }
 
                       if (
