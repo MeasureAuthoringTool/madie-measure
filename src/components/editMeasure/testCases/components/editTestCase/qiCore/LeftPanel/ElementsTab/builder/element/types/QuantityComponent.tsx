@@ -17,6 +17,7 @@ import DecimalComponent from "./DecimalComponent";
 export interface QuantityComponentProps extends TypeComponentProps {
   showLabel?: boolean;
   valueFieldLabel?: string;
+  showComparator: boolean;
 }
 
 const QuantityComponent = ({
@@ -25,7 +26,7 @@ const QuantityComponent = ({
   name,
   showLabel = true,
   valueFieldLabel,
-  structureDefinition,
+  showComparator,
   showAddAttributeButton = false,
   addTitle = "",
   handleAddElement = () => {},
@@ -47,21 +48,6 @@ const QuantityComponent = ({
     formik.validateForm();
   };
 
-  /*
-    Determine whether to display the comparator field:
-
-    - Shown only for "Quantity" types that are NOT SimpleQuantity.
-    - Hidden for:
-        - SimpleQuantity (profile includes SimpleQuantity)
-        - Range types or any other type
-  */
-  const showComparator = structureDefinition?.type?.some(
-    ({ code, profile }) =>
-      code === "Quantity" &&
-      !profile?.includes(
-        "http://hl7.org/fhir/StructureDefinition/SimpleQuantity"
-      )
-  );
   const comparatorPath = `${label}.comparator`;
   const comparator = getIn(formik.values, comparatorPath);
 
