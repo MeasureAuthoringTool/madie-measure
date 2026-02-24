@@ -475,7 +475,6 @@ export default function AddComponentsDialog({
     const results = await measureServiceApi.fetchMeasuresByIds(
       selectedMeasureObjectIds
     );
-    console.log(results);
     results.forEach((measure) => {
       measure.groups.forEach((group) => {
         newComponents.push({
