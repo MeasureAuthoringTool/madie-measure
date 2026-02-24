@@ -714,6 +714,7 @@ export function isComponentDataType(datatype) {
     case "reference":
     case "quantity":
     case "range":
+    case "ratio":
     case "period":
       return true;
     default:
