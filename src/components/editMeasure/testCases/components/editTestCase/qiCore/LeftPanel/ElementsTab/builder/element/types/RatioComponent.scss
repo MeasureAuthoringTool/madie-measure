@@ -6,6 +6,10 @@
     display: flex;
     align-items: flex-start;
 
+    > .element-editor-add-row {
+      flex: 0 0 max-content;
+    }
+
     .separator {
       margin: 35px 10px;
       font-weight: bold;

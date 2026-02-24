@@ -16,31 +16,27 @@ const RatioComponent = ({ canEdit, label }: TypeComponentProps) => {
 
       <div className="quantity-row">
         {/* Numerator field */}
-        <div className="low-input">
-          <QuantityComponent
-            canEdit={canEdit}
-            label={numeratorPath}
-            showLabel={false}
-            showComparator={false}
-            valueFieldLabel="Numerator"
-            fieldRequired={false}
-          />
-        </div>
+        <QuantityComponent
+          canEdit={canEdit}
+          label={numeratorPath}
+          showLabel={false}
+          showComparator={false}
+          valueFieldLabel="Numerator"
+          fieldRequired={false}
+        />
 
         {/* Colon separator */}
         <span className="separator">:</span>
 
         {/* Denominator field */}
-        <div className="high-input">
-          <QuantityComponent
-            canEdit={canEdit}
-            label={denominatorPath}
-            showLabel={false}
-            showComparator={false}
-            valueFieldLabel="Denominator"
-            fieldRequired={false}
-          />
-        </div>
+        <QuantityComponent
+          canEdit={canEdit}
+          label={denominatorPath}
+          showLabel={false}
+          showComparator={false}
+          valueFieldLabel="Denominator"
+          fieldRequired={false}
+        />
       </div>
     </div>
   );

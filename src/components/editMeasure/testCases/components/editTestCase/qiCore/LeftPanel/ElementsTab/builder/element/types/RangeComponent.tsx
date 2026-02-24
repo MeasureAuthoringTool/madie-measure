@@ -16,31 +16,27 @@ const RangeComponent = ({ canEdit, label }: TypeComponentProps) => {
 
       <div className="quantity-row">
         {/* Low field */}
-        <div className="low-input">
-          <QuantityComponent
-            canEdit={canEdit}
-            label={lowPath}
-            showLabel={false}
-            showComparator={false}
-            valueFieldLabel="Low"
-            fieldRequired={false}
-          />
-        </div>
+        <QuantityComponent
+          canEdit={canEdit}
+          label={lowPath}
+          showLabel={false}
+          showComparator={false}
+          valueFieldLabel="Low"
+          fieldRequired={false}
+        />
 
         {/* Colon separator */}
         <span className="separator">:</span>
 
         {/* High field */}
-        <div className="high-input">
-          <QuantityComponent
-            canEdit={canEdit}
-            label={highPath}
-            showLabel={false}
-            showComparator={false}
-            valueFieldLabel="High"
-            fieldRequired={false}
-          />
-        </div>
+        <QuantityComponent
+          canEdit={canEdit}
+          label={highPath}
+          showLabel={false}
+          showComparator={false}
+          valueFieldLabel="High"
+          fieldRequired={false}
+        />
       </div>
     </div>
   );
