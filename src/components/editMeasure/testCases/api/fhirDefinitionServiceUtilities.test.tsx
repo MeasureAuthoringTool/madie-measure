@@ -271,6 +271,91 @@ describe("FhirDefinitionServiceUtilities", () => {
         result.find((el) => el.id === "Patient.extension:ethnicity")
       ).toBeDefined();
     });
+
+    it("should filter out attributes or extensions that are of type 'Age'", () => {
+      const testResource = {
+        definition: {
+          snapshot: {
+            element: [
+              {
+                id: "Condition.onset[x]",
+                path: "Condition.onset[x]",
+                min: 0,
+                max: "1",
+                type: [
+                  {
+                    code: "dateTime",
+                  },
+                  {
+                    code: "Age",
+                  },
+                  {
+                    code: "Period",
+                  },
+                  {
+                    code: "Range",
+                  },
+                ],
+              },
+            ],
+          },
+        },
+      };
+
+      const result = getTopLevelElements(testResource);
+      expect(result).toEqual([
+        {
+          id: "Condition.onset[x]",
+          max: "1",
+          min: 0,
+          path: "Condition.onset[x]",
+          type: [
+            {
+              code: "dateTime",
+            },
+          ],
+        },
+        {
+          id: "Condition.onset[x]",
+          max: "1",
+          min: 0,
+          path: "Condition.onset[x]",
+          type: [
+            {
+              code: "Period",
+            },
+          ],
+        },
+        {
+          id: "Condition.onset[x]",
+          max: "1",
+          min: 0,
+          path: "Condition.onset[x]",
+          type: [
+            {
+              code: "Range",
+            },
+          ],
+        },
+      ]);
+    });
+
+    it("should filter out attribute of AllergyIntolerance.extension:resolutionAge", () => {
+      const testResource = {
+        definition: {
+          snapshot: {
+            element: [
+              {
+                id: "AllergyIntolerance.extension:resolutionAge",
+                path: "AllergyIntolerance.extension",
+              },
+            ],
+          },
+        },
+      };
+      const result = getTopLevelElements(testResource);
+      expect(result).toEqual([]);
+    });
   });
 
   describe("getRequiredElements", () => {
