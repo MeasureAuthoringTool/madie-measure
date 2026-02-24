@@ -824,22 +824,14 @@ const TypeEditor = ({
                     handleAddElement={handleAddElement}
                     {...formik.getFieldProps(fieldLabel)}
                     onChange={(value) => {
-                      let targetLabel = fieldLabel;
-                      if (targetLabel.includes(".value[x]")) {
-                        targetLabel = targetLabel.replace(
-                          ".value[x]",
-                          ".valueCode"
-                        );
-                      }
-
                       if (
                         parentStructureDefinition?.type?.[0]?.code ===
                         "Extension"
                       ) {
                         onChangeForExtension(value);
                       } else {
-                        formik.setFieldTouched(targetLabel);
-                        formik.setFieldValue(targetLabel, value);
+                        formik.setFieldTouched(fieldLabel);
+                        formik.setFieldValue(fieldLabel, value);
                       }
                     }}
                   />
