@@ -6,7 +6,7 @@ import React, {
   SetStateAction,
 } from "react";
 import { Box } from "@mui/material";
-import * as _ from "lodash";
+import _ from "lodash";
 import useFhirDefinitionsServiceApi from "../../../../../../../api/useFhirDefinitionsService";
 import ElementEditorChildren from "./ElementEditorChildren";
 import "./ElementEditor.scss";
@@ -45,7 +45,6 @@ interface ElementEditorProps {
   value?: any;
   onChange?: (path: string, value: any) => void;
   canEdit: boolean;
-  displayedElementsTree: Object;
   setInitialFormikValuesStu6: Dispatch<SetStateAction<Object>>;
   setValidationSchema: Dispatch<SetStateAction<Object>>;
   deleteElement?: (path: string, element: any, elementName: string) => void;
@@ -83,7 +82,6 @@ const ElementEditor = ({
   elementDefinition,
   resourcePath,
   canEdit,
-  displayedElementsTree,
   setInitialFormikValuesStu6,
   setValidationSchema,
   deleteElement,
@@ -221,14 +219,13 @@ const ElementEditor = ({
     }
   };
 
-  const buildForm = async (
-    rootDefinition,
-    allChildren,
-    resourcePath,
-    resource
-  ) => {
+  const buildForm = async () => {
     const formInfo = {};
     const nodeList = [];
+    const rootDefinition = selectedResource.definition?.snapshot?.element?.[0];
+    const resource = selectedResource.bundleEntry?.resource;
+    const currentPath = selectedResource.definition?.type;
+    const allChildren = getAllChildren(selectedResource, currentPath);
     const allNodes = [rootDefinition, ...allChildren];
 
     const ids = allNodes.map((n) => n?.id).filter(Boolean);
@@ -273,25 +270,29 @@ const ElementEditor = ({
     // need a loading toggle or formikProvider dies violently.
     setLoading(false);
   };
-  const triggerFormBuilder = async () => {
-    const currentPath = selectedResource.definition.type;
-    const allChildren = getAllChildren(selectedResource, currentPath);
-    await buildForm(
-      selectedResource?.definition?.snapshot?.element?.[0],
-      allChildren,
-      resourcePath,
-      selectedResourceOnBundleEntry
-    );
-  };
+
   // Whenever the displayedElements list changes in volume, we need to rebuild the form.
   useEffect(() => {
-    if (
-      selectedResourceOnBundleEntry &&
-      Object.keys(displayedElementsTree).length
-    ) {
-      triggerFormBuilder();
+    if (selectedResource) {
+      buildForm();
     }
-  }, [displayedElementsTree, state, selectedResourceID]); // using selected resource as a render point
+  }, [selectedResource]); // buildForm is excluded because it only uses stable setState functions
+
+  useEffect(() => {
+    if (loading) return;
+
+    const scrollTarget = document.getElementById("tc-builder-resource-editor");
+
+    if (!scrollTarget) return;
+
+    if (typeof scrollTarget.scrollIntoView === "function") {
+      scrollTarget.scrollIntoView({ behavior: "smooth", block: "start" });
+    } else if (typeof scrollTarget.scrollTo === "function") {
+      scrollTarget.scrollTo({ top: 0, behavior: "smooth" });
+    } else {
+      scrollTarget.scrollTop = 0;
+    }
+  }, [elementDefinition?.id, loading]);
   const formik = useFormikContext();
   useFormikResetOnEvent(formik);
   // on individual apply
@@ -357,7 +358,7 @@ const ElementEditor = ({
         requiredFields={requiredFields}
         formInfo={formInfo}
       >
-        <Box id="element-editor">
+        <Box id="element-editor" data-testid="element-editor">
           {/* we need to render not only the current item, but all children */}
           <ElementEditorChildren //recursive render control
             // stuff we need only at the init root

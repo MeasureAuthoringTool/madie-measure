@@ -575,20 +575,6 @@ const TypeEditor = ({
             })}
           </>
         );
-      case "Identifier":
-        const identifier = (
-          <IdentifierComponent
-            label={label}
-            handleAddElement={handleAddElement}
-            canEdit={canEdit}
-            resource={resource}
-            structureDefinition={structureDefinition}
-            fieldRequired={false}
-            error={getNestedProperty(formik.errors, label)}
-            helperText={formikErrorHandler(label, formik)}
-          />
-        );
-        return wrapWithSection(label, identifier, isRoot, noWrap);
       case "http://hl7.org/fhirpath/System.Boolean":
       case "boolean":
         return (
@@ -761,11 +747,15 @@ const TypeEditor = ({
                     handleAddElement={handleAddElement}
                     {...formik.getFieldProps(fieldLabel)}
                     onChange={(value) => {
-                      if (label.includes(".value[x")) {
-                        label = label.replace(".value[x]", ".valueCode");
+                      let targetLabel = fieldLabel;
+                      if (targetLabel.includes(".value[x]")) {
+                        targetLabel = targetLabel.replace(
+                          ".value[x]",
+                          ".valueCode"
+                        );
                       }
-                      formik.setFieldTouched(label);
-                      formik.setFieldValue(label, value);
+                      formik.setFieldTouched(targetLabel);
+                      formik.setFieldValue(targetLabel, value);
                     }}
                   />
                 </>
@@ -910,6 +900,7 @@ const TypeEditor = ({
                     const newValues = [...currentValues, {}];
                     formik.setFieldValue(basePath, newValues);
                   }}
+                  resource={resource}
                   {...formik.getFieldProps(fieldLabel)}
                 />
               );
@@ -1168,42 +1159,47 @@ const TypeEditor = ({
             return contentRef;
             // return wrapWithSection(childDef.id, contentRef);
           } else if (!isComponentDataType(childDef?.type?.[0]?.code)) {
+            const childDefValues = values?.[childDef.id.split(".").pop()] || [
+              {},
+            ];
             return (
               <>
-                {(canBeMultipleCardinality
-                  ? values?.[childDef.id.split(".").pop()] || [{}]
-                  : [null]
-                ).map((el, index) => {
-                  return (
-                    <ElementSectionQiCore
-                      key={index}
-                      title={
-                        formatAttributeLabel(childDef.id) + ` ${index + 1}`
-                      }
-                      elementDefinition={childDef}
-                      startOpen={false}
-                      handleAddElement={() =>
-                        handleAddComplexElement(childDef.id)
-                      }
-                      canBeMultipleCardinality={canBeMultipleCardinality}
-                      children={
-                        <Box
-                          style={{
-                            paddingLeft: "16px",
-                          }}
-                        >
-                          <TypeEditor
-                            resource={resource}
-                            parentStructureDefinition={structureDefinition}
-                            structureDefinition={childDef}
-                            canEdit={canEdit}
-                            label={childDef.id + `[${index}]`}
-                          />
-                        </Box>
-                      }
-                    />
-                  );
-                })}
+                {(canBeMultipleCardinality ? childDefValues : [null]).map(
+                  (el, index) => {
+                    return (
+                      <ElementSectionQiCore
+                        key={index}
+                        title={
+                          formatAttributeLabel(childDef.id) + ` ${index + 1}`
+                        }
+                        elementDefinition={childDef}
+                        startOpen={false}
+                        handleAddElement={() =>
+                          handleAddComplexElement(childDef.id)
+                        }
+                        canBeMultipleCardinality={
+                          canBeMultipleCardinality &&
+                          childDefValues.length - 1 === index
+                        }
+                        children={
+                          <Box
+                            style={{
+                              paddingLeft: "16px",
+                            }}
+                          >
+                            <TypeEditor
+                              resource={resource}
+                              parentStructureDefinition={structureDefinition}
+                              structureDefinition={childDef}
+                              canEdit={canEdit}
+                              label={childDef.id + `[${index}]`}
+                            />
+                          </Box>
+                        }
+                      />
+                    );
+                  }
+                )}
               </>
             );
           } else {

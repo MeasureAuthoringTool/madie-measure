@@ -5,7 +5,6 @@ import {
   waitFor,
   fireEvent,
   act,
-  queryByRole,
 } from "@testing-library/react";
 import * as React from "react";
 import {
@@ -81,7 +80,7 @@ const mockCurrentMeasure = {
     draft: false,
   },
   testCases: testCases,
-} as Measure;
+} as unknown as Measure;
 
 const otherMeasuresOwnedByUser = [
   {
@@ -174,7 +173,7 @@ const otherMeasuresOwnedByUser = [
     },
     testCases: testCases,
   },
-] as Measure[];
+] as unknown as Measure[];
 
 const mockMeasureSearchResponse = {
   content: otherMeasuresOwnedByUser,

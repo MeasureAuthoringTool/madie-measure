@@ -27,6 +27,14 @@ export const UI_BUILDER_EDIT_MESSAGE =
 export const UNSUPPORTED_PROFILE_ERROR = "Unsupported Profile";
 export const RESOURCE_TYPE_MISMATCH_ERROR =
   "Profile and Resource Type do not match";
+export const UNSUPPORTED_RESOURCE_ERROR = "Unsupported Resource";
+
+const getUnsupportedResourceMessage = (canEdit: boolean) => {
+  if (canEdit) {
+    return `${UNSUPPORTED_RESOURCE_ERROR}. ${UI_BUILDER_EDIT_MESSAGE}`;
+  }
+  return `${UNSUPPORTED_RESOURCE_ERROR}. ${UI_BUILDER_VIEW_MESSAGE}`;
+};
 
 const getUnsupportedProfileMessage = (canEdit: boolean) => {
   if (canEdit) {
@@ -63,6 +71,15 @@ interface TestCaseSummaryGridProps {
   readOnly: boolean;
 }
 
+const isValidResourceType = (
+  allResourceProfiles: ResourceIdentifier[],
+  type: string
+): boolean => {
+  return (
+    allResourceProfiles.find((resource) => resource.type === type) !== undefined
+  );
+};
+
 export const validateProfiles = (
   entry: BundleEntry,
   allResourceProfiles: ResourceIdentifier[],
@@ -70,6 +87,18 @@ export const validateProfiles = (
 ): ProfileValidationResult => {
   // get list of profiles for a test case resource from the meta
   const profiles = entry?.resource?.meta?.profile || [];
+  // if no profiles, then check if resource type is valid
+  if (profiles.length === 0) {
+    const type = entry?.resource?.resourceType;
+    if (type && isValidResourceType(allResourceProfiles, type)) {
+      return { error: "", message: "", isValid: true };
+    }
+    return {
+      error: UNSUPPORTED_RESOURCE_ERROR,
+      message: getUnsupportedResourceMessage(canEdit),
+      isValid: false,
+    };
+  }
 
   // find list of profiles from allResourceProfiles that match test case resource profiles
   const supportedProfiles = Array.from(

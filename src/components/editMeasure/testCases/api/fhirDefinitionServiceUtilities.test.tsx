@@ -10,7 +10,6 @@ import {
   updateChildrenPaths,
   isComponentDataType,
   setNestedValue,
-  getDisplayedElementsTree,
   removeUndefinedProperties,
   getElementName,
   getChildren,
@@ -224,6 +223,139 @@ describe("FhirDefinitionServiceUtilities", () => {
       expect(result.find((el) => el.path === "Patient.name")).toBeDefined();
       expect(result.find((el) => el.path === "Patient.age")).toBeDefined();
     });
+
+    it("should filter out generic extension elements without sliceName", () => {
+      const resourceWithGenericExtension = _.cloneDeep(mockResource);
+      resourceWithGenericExtension.definition.snapshot.element.push(
+        {
+          id: "ClaimResponse.extension",
+          path: "ClaimResponse.extension",
+          min: 0,
+          type: [{ code: "Extension" }],
+        },
+        {
+          id: "Condition.extension",
+          path: "Condition.extension",
+          min: 0,
+          type: [{ code: "Extension" }],
+        },
+        {
+          id: "Patient.extension:ethnicity",
+          path: "Patient.extension",
+          sliceName: "ethnicity",
+          min: 0,
+          type: [
+            {
+              code: "Extension",
+              profile: [
+                "http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethnicity",
+              ],
+            },
+          ],
+        }
+      );
+      const result = getTopLevelElements(resourceWithGenericExtension);
+
+      // Generic extensions without sliceName should be filtered out
+      expect(
+        result.find((el) => el.id === "ClaimResponse.extension")
+      ).toBeUndefined();
+      expect(
+        result.find((el) => el.id === "Condition.extension")
+      ).toBeUndefined();
+      // Sliced extensions should remain
+      expect(
+        result.find((el) => el.id === "Patient.extension:race")
+      ).toBeDefined();
+      expect(
+        result.find((el) => el.id === "Patient.extension:ethnicity")
+      ).toBeDefined();
+    });
+
+    it("should filter out attributes or extensions that are of type 'Age'", () => {
+      const testResource = {
+        definition: {
+          snapshot: {
+            element: [
+              {
+                id: "Condition.onset[x]",
+                path: "Condition.onset[x]",
+                min: 0,
+                max: "1",
+                type: [
+                  {
+                    code: "dateTime",
+                  },
+                  {
+                    code: "Age",
+                  },
+                  {
+                    code: "Period",
+                  },
+                  {
+                    code: "Range",
+                  },
+                ],
+              },
+            ],
+          },
+        },
+      };
+
+      const result = getTopLevelElements(testResource);
+      expect(result).toEqual([
+        {
+          id: "Condition.onset[x]",
+          max: "1",
+          min: 0,
+          path: "Condition.onset[x]",
+          type: [
+            {
+              code: "dateTime",
+            },
+          ],
+        },
+        {
+          id: "Condition.onset[x]",
+          max: "1",
+          min: 0,
+          path: "Condition.onset[x]",
+          type: [
+            {
+              code: "Period",
+            },
+          ],
+        },
+        {
+          id: "Condition.onset[x]",
+          max: "1",
+          min: 0,
+          path: "Condition.onset[x]",
+          type: [
+            {
+              code: "Range",
+            },
+          ],
+        },
+      ]);
+    });
+
+    it("should filter out attribute of AllergyIntolerance.extension:resolutionAge", () => {
+      const testResource = {
+        definition: {
+          snapshot: {
+            element: [
+              {
+                id: "AllergyIntolerance.extension:resolutionAge",
+                path: "AllergyIntolerance.extension",
+              },
+            ],
+          },
+        },
+      };
+      const result = getTopLevelElements(testResource);
+      expect(result).toEqual([]);
+    });
   });
 
   describe("getRequiredElements", () => {
@@ -318,35 +450,6 @@ describe("FhirDefinitionServiceUtilities", () => {
       const obj = {};
       setNestedValue(obj, "x.y.z", "test");
       expect(obj).toEqual({ x: { y: { z: "test" } } });
-    });
-  });
-  describe("getDisplayedElementsTree", () => {
-    it("should return an empty object when no elements are provided", () => {
-      expect(getDisplayedElementsTree([])).toEqual({});
-    });
-
-    it("should build a nested structure from paths", () => {
-      const elements = [{ path: "a.b" }, { path: "a.c" }, { path: "a.b.d" }];
-      expect(getDisplayedElementsTree(elements)).toEqual({
-        a: {
-          b: { d: true },
-          c: true,
-        },
-      });
-    });
-
-    it("should handle duplicate paths", () => {
-      const elements = [{ path: "x.y" }, { path: "x.y" }, { path: "x.y.z" }];
-      expect(getDisplayedElementsTree(elements)).toEqual({
-        x: {
-          y: { z: true },
-        },
-      });
-    });
-
-    it("should ignore undefined or empty paths", () => {
-      const elements = [{ path: "a.b" }, { path: "" }, { path: undefined }];
-      expect(getDisplayedElementsTree(elements)).toEqual({ a: { b: true } });
     });
   });
 

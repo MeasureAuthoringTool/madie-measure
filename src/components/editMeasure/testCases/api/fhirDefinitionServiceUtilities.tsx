@@ -322,30 +322,6 @@ export function getNestedProperty(obj, path) {
   return keys?.reduce((current, key) => current && current[key], obj);
 }
 
-// we want to get all the displayed elements, and then compare them to formik, to make sure we have the first two paths so we know we should add them to the form
-export function getDisplayedElementsTree(uniqueElements) {
-  const displayedElementPaths = {};
-  const setNestedValue = (obj, path, value) => {
-    const keys = path.split(".");
-    let currentObj = obj;
-    // start nested structure
-    keys.forEach((key, index) => {
-      if (index === keys.length - 1) {
-        currentObj[key] = value;
-      } else {
-        currentObj[key] = currentObj[key] ? { ...currentObj[key] } : {};
-        currentObj = currentObj[key];
-      }
-    });
-  };
-  uniqueElements.forEach(({ path }) => {
-    if (path) {
-      setNestedValue(displayedElementPaths, path, true);
-    }
-  });
-  return { ...displayedElementPaths };
-}
-
 // remove all the falsey values from an object recursively so we have only what the user has generated.
 export function removeUndefinedProperties(obj) {
   if (typeof obj !== "object" || obj === null) {
@@ -391,6 +367,8 @@ export function getTopLevelElements(
       (e.path.split(".")?.length === 2 &&
         e.id !== "Extension.extension" &&
         e.id !== "Patient.extension" &&
+        // Exclude generic extension (no sliceName) - only allow sliced extensions like extension:race
+        !(e.path?.endsWith(".extension") && !e.sliceName) &&
         !/\.id$/.test(e.id) &&
         e.max !== "0" &&
         // Exclude entries where the path contains these attributes or matches these element names
@@ -439,21 +417,29 @@ export function getTopLevelElements(
       filteredWithoutSlices.splice(filteredWithoutSlices.indexOf(element), 1);
     }
   });
+
+  // Filter out attributes or extensions that are of type 'Age'
+  const filteredWithoutAge = filteredWithoutSlices.filter(
+    (item) =>
+      !item.type?.some((t) => t.code === "Age") &&
+      item.id !== "AllergyIntolerance.extension:resolutionAge"
+  );
+
   // Sort only if maintainSortOrder is false
   if (!maintainSortOrder) {
     if (basePath) {
-      filteredWithoutSlices.sort((a, b) => {
+      filteredWithoutAge.sort((a, b) => {
         const labelA = a.path.substring(basePath.length + 1);
         const labelB = b.path.substring(basePath.length + 1);
         return labelA.localeCompare(labelB);
       });
     } else {
       // If no basePath, sort by full path
-      filteredWithoutSlices.sort((a, b) => a.path.localeCompare(b.path));
+      filteredWithoutAge.sort((a, b) => a.path.localeCompare(b.path));
     }
   }
   // Sort elements alphabetically by their path (after the basePath, if available)
-  return filteredWithoutSlices;
+  return filteredWithoutAge;
 }
 
 // we want to build a set of all prefixes for quick lookup
@@ -706,7 +692,6 @@ export function isComponentDataType(datatype) {
     case "http://hl7.org/fhirpath/system.datetime":
     case "decimal":
     case "id":
-    case "identifier":
     case "instant":
     case "integer":
     case "integer64":
