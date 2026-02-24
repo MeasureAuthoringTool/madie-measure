@@ -174,16 +174,35 @@ export default function AddComponentsDialog({
     }
   };
 
-  // Sync rowSelection with components whenever dialog opens or components change
   useEffect(() => {
     if (open) {
+      // Sync main table row selection with preselected IDs
       const newRowSelection = {};
       preselectedIds.forEach((id: any) => {
         newRowSelection[id] = true;
       });
       setRowSelection(newRowSelection);
+    } else {
+      // Reset all expanded state when dialog closes
+      setExpandedRowSelection({});
+      setIsRowExpanded(false);
+      setSelectedIdForExpansion(null);
+      setExpandedSectionData([]);
     }
   }, [open, preselectedIds]);
+
+  // Sync expanded row selection with preselected IDs whenever expanded data changes
+  useEffect(() => {
+    if (open && expandedSectionData?.length > 0) {
+      const newExpandedRowSelection: Record<string, boolean> = {};
+      expandedSectionData.forEach((row) => {
+        if (preselectedIds.has(row.actions.id)) {
+          newExpandedRowSelection[row.id] = true;
+        }
+      });
+      setExpandedRowSelection(newExpandedRowSelection);
+    }
+  }, [expandedSectionData, preselectedIds, open]);
 
   const columns = useMemo<ColumnDef<Measure>[]>(() => {
     const columnDefs = [
@@ -484,24 +503,35 @@ export default function AddComponentsDialog({
               <IndeterminateCheckbox
                 checked={expandedRowSelection[row.id] || false}
                 onChange={(e) => {
-                  setExpandedRowSelection((prev) => ({
-                    ...prev,
-                    [row.id]: e.target.checked,
-                  }));
-                  // Also update the main table selection
-                  if (e.target.checked) {
+                  const isChecked = e.target.checked;
+                  if (isChecked) {
+                    setExpandedRowSelection((prev) => ({
+                      ...prev,
+                      [row.id]: true,
+                    }));
                     setRowSelection((prev) => ({
                       ...prev,
                       [row.original.actions.id]: true,
                     }));
+                  } else {
+                    setExpandedRowSelection((prev) => {
+                      const newState = { ...prev };
+                      delete newState[row.id];
+                      return newState;
+                    });
+                    setRowSelection((prev) => {
+                      const newState = { ...prev };
+                      delete newState[row.original.actions.id];
+                      return newState;
+                    });
                   }
                 }}
-                aria-label={`Toggle row ${row.id}`}
-                sx={{
-                  color: expandedRowSelection[row.id] ? "#2196F3" : "inherit",
-                  "&.Mui-checked": {
-                    color: "#2196F3",
-                  },
+                aria-label={`Toggle expanded row ${row.id}`}
+                style={{
+                  accentColor: expandedRowSelection[row.id]
+                    ? "#2196F3"
+                    : "inherit",
+                  cursor: "pointer",
                 }}
               />
             </div>
@@ -564,10 +594,10 @@ export default function AddComponentsDialog({
       },
       {
         header: "",
-        cell: () => <></>,
+        cell: () => null,
       },
     ];
-  }, [expandedRowSelection, rowSelection]);
+  }, [expandedRowSelection]);
 
   return (
     <MadieDialog
