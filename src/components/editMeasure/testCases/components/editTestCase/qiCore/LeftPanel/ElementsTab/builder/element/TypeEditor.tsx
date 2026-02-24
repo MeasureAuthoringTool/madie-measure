@@ -52,6 +52,7 @@ import { getMultipleCardinalityLabel } from "./types/TypeUtil";
 import { StructureDefinitionDto } from "../../../../../../../api/models/StructureDefinitionDto";
 import { ElementDefinition, StructureDefinition } from "fhir/r4";
 import useFhirDefinitionsServiceApi from "../../../../../../../api/useFhirDefinitionsService";
+import RatioComponent from "./types/RatioComponent";
 
 export const formikErrorHandler = (name: string, formik) => {
   const touched = getNestedProperty(formik.touched, name);
@@ -424,6 +425,14 @@ const TypeEditor = ({
         );
         return wrapWithSection(label, markdown, isRoot, noWrap);
       case "Quantity":
+        // Show comparator for Quantity types that are NOT SimpleQuantity
+        const isSimpleQuantity = structureDefinition?.type?.some(
+          ({ code, profile }) =>
+            code === "Quantity" &&
+            profile?.includes(
+              "http://hl7.org/fhir/StructureDefinition/SimpleQuantity"
+            )
+        );
         return (
           <>
             {(isArrayMode ? values : [null]).map((el, index) => {
@@ -436,7 +445,7 @@ const TypeEditor = ({
                   key={index}
                   canEdit={canEdit}
                   label={fieldLabel}
-                  structureDefinition={structureDefinition}
+                  showComparator={!isSimpleQuantity}
                   fieldRequired={required}
                   showAddAttributeButton={
                     showMultipleCardinalityActionCenter &&
@@ -631,20 +640,6 @@ const TypeEditor = ({
             })}
           </>
         );
-      case "Identifier":
-        const identifier = (
-          <IdentifierComponent
-            label={label}
-            handleAddElement={handleAddElement}
-            canEdit={canEdit}
-            resource={resource}
-            structureDefinition={structureDefinition}
-            fieldRequired={false}
-            error={getNestedProperty(formik.errors, label)}
-            helperText={formikErrorHandler(label, formik)}
-          />
-        );
-        return wrapWithSection(label, identifier, isRoot, noWrap);
       case "http://hl7.org/fhirpath/System.Boolean":
       case "boolean":
         return (
@@ -848,11 +843,19 @@ const TypeEditor = ({
           <RangeComponent
             canEdit={canEdit}
             label={label}
-            structureDefinition={structureDefinition}
             fieldRequired={false}
           />
         );
         return wrapWithSection(label, range, isRoot, noWrap);
+      case "Ratio":
+        const ratio = (
+          <RatioComponent
+            canEdit={canEdit}
+            label={label}
+            fieldRequired={false}
+          />
+        );
+        return wrapWithSection(label, ratio, isRoot, noWrap);
       case "Coding":
         const coding = (
           <CodingComponent
@@ -1189,42 +1192,47 @@ const TypeEditor = ({
             return contentRef;
             // return wrapWithSection(childDef.id, contentRef);
           } else if (!isComponentDataType(childDef?.type?.[0]?.code)) {
+            const childDefValues = values?.[childDef.id.split(".").pop()] || [
+              {},
+            ];
             return (
               <>
-                {(canBeMultipleCardinality
-                  ? values?.[childDef.id.split(".").pop()] || [{}]
-                  : [null]
-                ).map((el, index) => {
-                  return (
-                    <ElementSectionQiCore
-                      key={index}
-                      title={
-                        formatAttributeLabel(childDef.id) + ` ${index + 1}`
-                      }
-                      elementDefinition={childDef}
-                      startOpen={false}
-                      handleAddElement={() =>
-                        handleAddComplexElement(childDef.id)
-                      }
-                      canBeMultipleCardinality={canBeMultipleCardinality}
-                      children={
-                        <Box
-                          style={{
-                            paddingLeft: "16px",
-                          }}
-                        >
-                          <TypeEditor
-                            resource={resource}
-                            parentStructureDefinition={structureDefinition}
-                            structureDefinition={childDef}
-                            canEdit={canEdit}
-                            label={childDef.id + `[${index}]`}
-                          />
-                        </Box>
-                      }
-                    />
-                  );
-                })}
+                {(canBeMultipleCardinality ? childDefValues : [null]).map(
+                  (el, index) => {
+                    return (
+                      <ElementSectionQiCore
+                        key={index}
+                        title={
+                          formatAttributeLabel(childDef.id) + ` ${index + 1}`
+                        }
+                        elementDefinition={childDef}
+                        startOpen={false}
+                        handleAddElement={() =>
+                          handleAddComplexElement(childDef.id)
+                        }
+                        canBeMultipleCardinality={
+                          canBeMultipleCardinality &&
+                          childDefValues.length - 1 === index
+                        }
+                        children={
+                          <Box
+                            style={{
+                              paddingLeft: "16px",
+                            }}
+                          >
+                            <TypeEditor
+                              resource={resource}
+                              parentStructureDefinition={structureDefinition}
+                              structureDefinition={childDef}
+                              canEdit={canEdit}
+                              label={childDef.id + `[${index}]`}
+                            />
+                          </Box>
+                        }
+                      />
+                    );
+                  }
+                )}
               </>
             );
           } else {

@@ -123,19 +123,6 @@ describe("ElementEditor Component", () => {
     getResourceTree: jest.fn().mockResolvedValue({}),
   };
 
-  const mockDisplayedElementsTree = {
-    ClaimResponse: {
-      created: true,
-      id: true,
-      insurer: true,
-      outcome: true,
-      patient: true,
-      status: true,
-      type: true,
-      use: true,
-    },
-  };
-
   const renderElementEditor = (
     selectedResource: any,
     resource: any,
@@ -143,7 +130,6 @@ describe("ElementEditor Component", () => {
     resourcePath: any,
     onChange: any,
     canEdit: any,
-    displayedElementsTree: any,
     setValidationSchema: any,
     setInitialFormikValuesStu6: any,
     dispatch: any,
@@ -165,7 +151,6 @@ describe("ElementEditor Component", () => {
           resourcePath={resourcePath}
           onChange={onChange}
           canEdit={canEdit}
-          displayedElementsTree={displayedElementsTree}
           setLastAddedElemPath={setLastAddedElemPath}
           applyLoading={applyLoading}
           setApplyLoading={setApplyLoading}
@@ -191,7 +176,6 @@ describe("ElementEditor Component", () => {
       "ClaimResponse",
       mockOnChange,
       true,
-      mockDisplayedElementsTree,
       setValidationSchema,
       setInitialFormikValuesStu6,
       dispatch
@@ -230,7 +214,6 @@ describe("ElementEditor Component", () => {
       "ClaimResponse",
       mockOnChange,
       true,
-      mockDisplayedElementsTree,
       setValidationSchema,
       setInitialFormikValuesStu6,
       dispatch
@@ -276,7 +259,6 @@ describe("ElementEditor Component", () => {
       "ClaimResponse",
       mockOnChange,
       true,
-      mockDisplayedElementsTree,
       setValidationSchema,
       setInitialFormikValuesStu6,
       dispatch
@@ -296,7 +278,6 @@ describe("ElementEditor Component", () => {
       "ClaimResponse",
       mockOnChange,
       true,
-      mockDisplayedElementsTree,
       setValidationSchema,
       setInitialFormikValuesStu6,
       dispatch
@@ -334,7 +315,6 @@ describe("ElementEditor Component", () => {
       "ClaimResponse",
       mockOnChange,
       true,
-      mockDisplayedElementsTree,
       jest.fn(),
       jest.fn(),
       jest.fn()
@@ -375,7 +355,6 @@ describe("ElementEditor Component", () => {
       "ClaimResponse",
       mockOnChange,
       true,
-      mockDisplayedElementsTree,
       jest.fn(),
       jest.fn(),
       jest.fn()
@@ -415,7 +394,6 @@ describe("ElementEditor Component", () => {
       "ClaimResponse",
       mockOnChange,
       true,
-      mockDisplayedElementsTree,
       setValidationSchema,
       setInitialFormikValuesStu6,
       dispatch,
@@ -462,7 +440,6 @@ describe("ElementEditor Component", () => {
       "ClaimResponse",
       mockOnChange,
       true,
-      mockDisplayedElementsTree,
       setValidationSchema,
       setInitialFormikValuesStu6,
       dispatch,
@@ -519,7 +496,6 @@ describe("ElementEditor Component", () => {
       "ClaimResponse",
       mockOnChange,
       true,
-      mockDisplayedElementsTree,
       setValidationSchema,
       setInitialFormikValuesStu6,
       dispatch,
@@ -565,7 +541,6 @@ describe("ElementEditor Component", () => {
       "ClaimResponse",
       mockOnChange,
       true,
-      mockDisplayedElementsTree,
       setValidationSchema,
       setInitialFormikValuesStu6,
       dispatch,
@@ -619,7 +594,6 @@ describe("ElementEditor Component", () => {
       "ClaimResponse",
       mockOnChange,
       true,
-      mockDisplayedElementsTree,
       setValidationSchema,
       setInitialFormikValuesStu6,
       dispatch,
@@ -668,7 +642,6 @@ describe("ElementEditor Component", () => {
       "ClaimResponse",
       mockOnChange,
       false, // canEdit is false
-      mockDisplayedElementsTree,
       setValidationSchema,
       setInitialFormikValuesStu6,
       dispatch
@@ -717,7 +690,6 @@ describe("ElementEditor Component", () => {
       "ClaimResponse",
       mockOnChange,
       true,
-      mockDisplayedElementsTree,
       setValidationSchema,
       setInitialFormikValuesStu6,
       dispatch
@@ -741,7 +713,6 @@ describe("ElementEditor Component", () => {
           resourcePath="ClaimResponse"
           onChange={mockOnChange}
           canEdit={true}
-          displayedElementsTree={mockDisplayedElementsTree}
           setLastAddedElemPath={jest.fn()}
           applyLoading={false}
           setApplyLoading={jest.fn()}
@@ -792,7 +763,6 @@ describe("ElementEditor Component", () => {
       "ClaimResponse",
       mockOnChange,
       true,
-      mockDisplayedElementsTree,
       setValidationSchema,
       setInitialFormikValuesStu6,
       dispatch
@@ -816,7 +786,6 @@ describe("ElementEditor Component", () => {
           resourcePath="ClaimResponse"
           onChange={mockOnChange}
           canEdit={true}
-          displayedElementsTree={mockDisplayedElementsTree}
           setLastAddedElemPath={jest.fn()}
           applyLoading={false}
           setApplyLoading={jest.fn()}

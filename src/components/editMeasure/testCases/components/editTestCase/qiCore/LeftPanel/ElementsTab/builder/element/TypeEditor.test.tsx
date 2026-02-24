@@ -21,6 +21,7 @@ import mockRequiredFields from "./mockRequiredFields";
 import mockFormInfo from "./mockFormInfo";
 import { ExecutionContextProvider } from "../../../../../../routes/qiCore/ExecutionContext";
 import { useQiCoreResource } from "../../../../../../../util/QiCorePatientProvider";
+import fhirUtils from "../../../../../../../api/fhirDefinitionServiceUtilities";
 
 const getNestedProperty = (obj, path) => {
   // Split on dots, then further split segments with array indices
@@ -2580,6 +2581,90 @@ describe("TypeEditor Component", () => {
       }),
     };
 
+    const identifierElementDef = {
+      id: "MedicationRequest.identifier[0]",
+      path: "MedicationRequest.identifier",
+      type: [{ code: "Identifier" }],
+      min: 0,
+      max: "*",
+    };
+    const mockFormInfo = [
+      ["MedicationRequest.identifier", identifierElementDef],
+      [
+        "MedicationRequest.identifier.use",
+        {
+          id: "MedicationRequest.identifier.use",
+          type: [{ code: "code" }],
+          max: "1",
+          min: 0,
+          canBeMultipleCardinality: false,
+        },
+      ],
+      [
+        "MedicationRequest.identifier.type",
+        {
+          id: "MedicationRequest.identifier.type",
+          type: [{ code: "CodeableConcept" }],
+          max: "1",
+          min: 0,
+          canBeMultipleCardinality: false,
+        },
+      ],
+      [
+        "MedicationRequest.identifier.system",
+        {
+          id: "MedicationRequest.identifier.system",
+          type: [{ code: "uri" }],
+          max: "1",
+          min: 0,
+          canBeMultipleCardinality: false,
+        },
+      ],
+      [
+        "MedicationRequest.identifier.value",
+        {
+          id: "MedicationRequest.identifier.value",
+          type: [{ code: "string" }],
+          max: "1",
+          min: 0,
+          canBeMultipleCardinality: false,
+        },
+      ],
+      [
+        "MedicationRequest.identifier.period",
+        {
+          id: "MedicationRequest.identifier.period",
+          type: [{ code: "Period" }],
+          max: "1",
+          min: 0,
+          canBeMultipleCardinality: false,
+        },
+      ],
+      [
+        "MedicationRequest.identifier.assigner",
+        {
+          id: "MedicationRequest.identifier.assigner",
+          type: [
+            {
+              code: "Reference",
+              targetProfile: [
+                "http://hl7.org/fhir/StructureDefinition/Organization",
+              ],
+            },
+          ],
+          max: "1",
+          min: 0,
+          canBeMultipleCardinality: false,
+        },
+      ],
+    ];
+
+    // Override the global mock to return false for this test
+    const fhirUtils = require("../../../../../../../api/fhirDefinitionServiceUtilities");
+    jest
+      .spyOn(fhirUtils, "isComponentDataType")
+      .mockImplementation((type) => (type === "Identifier" ? false : true));
+
     render(
       <ExecutionContextProvider
         value={{
@@ -2593,18 +2678,12 @@ describe("TypeEditor Component", () => {
         }}
       >
         <FormikProvider value={mockFormik}>
-          <RequiredFieldsProvider requiredFields={{}} formInfo={{}}>
+          <RequiredFieldsProvider requiredFields={{}} formInfo={mockFormInfo}>
             <TypeEditor
               label="MedicationRequest.identifier[0]"
               canEdit={true}
-              resource={{}}
-              structureDefinition={{
-                id: "MedicationRequest.identifier",
-                path: "MedicationRequest.identifier",
-                type: [{ code: "Identifier" }],
-                min: 0,
-                max: "*",
-              }}
+              resource={{ resourceType: "MedicationRequest" }}
+              structureDefinition={identifierElementDef}
               fieldRequired={false}
             />
           </RequiredFieldsProvider>
@@ -2620,7 +2699,7 @@ describe("TypeEditor Component", () => {
     expect(await screen.findByLabelText("Value")).toBeInTheDocument();
     expect(await screen.findByLabelText("Start Date")).toBeInTheDocument();
     expect(await screen.findByLabelText("End Date")).toBeInTheDocument();
-    expect(await screen.findByLabelText("Assigner")).toBeInTheDocument();
+    expect(screen.getByTestId("reference-type-select-0")).toBeInTheDocument();
   });
 
   test("TypeEditor renders TimingComponent fields for Timing type", async () => {
@@ -2762,6 +2841,68 @@ describe("TypeEditor Component", () => {
 
     // Assert Comparator is NOT present
     expect(screen.queryByLabelText(/Comparator/i)).not.toBeInTheDocument();
+  });
+
+  test("Should render Ratio component", async () => {
+    const mockFormik: FormikContextType<any> = {
+      values: {
+        "Observation.valueRatio": {
+          numerator: { value: "1" },
+          denominator: { value: "10" },
+        },
+      },
+      touched: {},
+      getFieldProps: (label) => {
+        const value = getNestedProperty(mockFormik.values, label);
+        return { value, name: label, onChange: jest.fn(), onBlur: jest.fn() };
+      },
+      handleChange: () => {},
+    } as unknown as FormikContextType<any>;
+
+    render(
+      <ExecutionContextProvider
+        value={{
+          measureState: [null, jest.fn()],
+          bundleState: [null, jest.fn()],
+          valueSetsState: [[], jest.fn()],
+          executionContextReady: true,
+          executing: false,
+          setExecuting: jest.fn(),
+          contextFailure: false,
+        }}
+      >
+        <FormikProvider value={mockFormik}>
+          <RequiredFieldsProvider requiredFields={{}} formInfo={[]}>
+            <TypeEditor
+              resource={null}
+              structureDefinition={{
+                id: "Observation.value[x]",
+                type: [{ code: "Ratio" }],
+                required: false,
+                canBeMultipleCardinality: false,
+                max: "1",
+                min: 0,
+              }}
+              label="Observation.valueRatio"
+              canEdit={true}
+              parentStructureDefinition={null}
+            />
+          </RequiredFieldsProvider>
+        </FormikProvider>
+      </ExecutionContextProvider>
+    );
+
+    const numeratorComponent = await screen.findByTestId(
+      "decimal-field-Observation.valueRatio.numerator.value"
+    );
+    expect(numeratorComponent).toBeInTheDocument();
+
+    const denominatorComponent = await screen.findByTestId(
+      "decimal-field-Observation.valueRatio.denominator.value"
+    );
+    expect(denominatorComponent).toBeInTheDocument();
+
+    expect(screen.queryByText("Comparator")).not.toBeInTheDocument();
   });
 
   test("renders QuantityComponent fields correctly", async () => {
