@@ -7,9 +7,11 @@ import {
 import { Typography } from "@mui/material";
 import TypeEditor from "../TypeEditor";
 import { StructureDefinitionDto } from "../../../../../../../../api/models/StructureDefinitionDto";
-import _ from "lodash";
 import AddElementButton from "../../../../../../../common/UIOnlyModelAgnostic/AddElementButton";
 import { useFormikContext } from "formik";
+
+const capitalizeFirst = (str: string): string =>
+  str ? str.charAt(0).toUpperCase() + str.slice(1) : "";
 
 interface ExtensionProps {
   label: string;
@@ -64,14 +66,14 @@ const ExtensionComponent = ({
    */
   useEffect(() => {
     if (valueElement) {
-      setSelectedValueType(valueElement.type[0].code);
+      setSelectedValueType(valueElement.type[0]?.code);
     }
   }, [valueElement]);
 
   const onChangeForExtension = (value: any) => {
     const extension = {
       url: urlElement?.fixedUri,
-      [`value${_.startCase(selectedValueType)}`]: value,
+      [`value${capitalizeFirst(selectedValueType)}`]: value,
     };
     formik.setFieldTouched(label);
     formik.setFieldValue(label, extension);
@@ -92,7 +94,7 @@ const ExtensionComponent = ({
             structureDefinition={valueElement}
             resource={fhirResource}
             canEdit={canEdit}
-            label={`${label}.value${_.startCase(selectedValueType)}`}
+            label={`${label}.value${capitalizeFirst(selectedValueType)}`}
             parentStructureDefinition={elementDefinition}
             onChangeForExtension={onChangeForExtension}
           />
@@ -103,7 +105,7 @@ const ExtensionComponent = ({
       </div>
     );
   } else {
-    const typedLabel = `${label}.value${_.startCase(
+    const typedLabel = `${label}.value${capitalizeFirst(
       elementDefinition.type[0].code
     )}`;
     return (

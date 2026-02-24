@@ -852,8 +852,8 @@ describe("ExtensionComponent — simple (non-sliced) extensions", () => {
      * For a simple extension with type "code", the formik label should be:
      *   "Patient.extension[0].valueCode"
      *
-     * _.startCase("code") = "Code", so the label becomes:
-     *   `${label}.value${_.startCase(type)}` = "Patient.extension[0].valueCode"
+     * capitalizeFirst("code") = "Code", so the label becomes:
+     *   `${label}.value${capitalizeFirst(type)}` = "Patient.extension[0].valueCode"
      *
      * This matches the JSON structure:
      *   { "url": "...", "valueCode": "ASKU" }
