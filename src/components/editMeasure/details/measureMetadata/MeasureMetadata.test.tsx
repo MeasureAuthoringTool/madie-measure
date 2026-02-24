@@ -417,7 +417,6 @@ describe("MeasureRationale component", () => {
           measureMetadataType="Rationale"
           setErrorMessage={setErrorMessage}
           measureCanEdit={true}
-          lockingFeatureEnabled={true}
         />
       );
       const rationaleEditor = screen.getByRole("textbox");

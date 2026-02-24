@@ -1508,30 +1508,6 @@ describe("TestCaseList component", () => {
     });
   });
 
-  it("should render delete dialogue on Test Case list page when delete button is clicked and Locking is true", async () => {
-    (useFeatureFlags as jest.Mock)
-      .mockClear()
-      .mockImplementation(() => ({ Locking: true }));
-    const { getByTestId } = renderTestCaseListComponent();
-    await waitFor(() => {
-      const selectButton = screen.getByTestId(`test-case-title-0_select`);
-      const checkboxButton = within(selectButton).getByRole("checkbox");
-      expect(checkboxButton).toBeInTheDocument();
-      fireEvent.click(checkboxButton);
-      expect(checkboxButton).toBeChecked();
-    });
-
-    const deleteButton = screen.getByTestId("delete-action-icon");
-    expect(deleteButton).toBeEnabled();
-    fireEvent.click(deleteButton);
-
-    await waitFor(() => {
-      expect(screen.getByTestId("delete-dialog")).toBeInTheDocument();
-    });
-
-    const dialog = screen.getByTestId("delete-dialog");
-  });
-
   it("should handle delete error on Test Case list page when delete button is clicked", async () => {
     useTestCaseServiceMock.mockImplementation(() => {
       return {

@@ -34,11 +34,10 @@ import TextEditor from "../../populationCriteria/groups/TextEditor";
 interface MeasureReferencesProps {
   setErrorMessage: Function;
   measureCanEdit: boolean;
-  lockingFeatureEnabled?: boolean;
 }
 
 const MeasureReferences = (props: MeasureReferencesProps) => {
-  const { setErrorMessage, measureCanEdit, lockingFeatureEnabled } = props;
+  const { setErrorMessage, measureCanEdit } = props;
   const { search } = useLocation();
   let navigate = useNavigate();
   const measureServiceApi = useMeasureServiceApi();
@@ -168,7 +167,7 @@ const MeasureReferences = (props: MeasureReferencesProps) => {
       })
       .catch((reason) => {
         let message = `Error updating measure "${measure.measureName}"`;
-        if (lockingFeatureEnabled && reason?.status === 423) {
+        if (reason?.status === 423) {
           message = reason?.response?.data?.message;
           updateMeasure({
             ...originalMeasure,

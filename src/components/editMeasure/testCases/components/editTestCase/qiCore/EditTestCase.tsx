@@ -583,9 +583,7 @@ const EditTestCase = (props: EditTestCaseProps) => {
         const nextTc = _.cloneDeep(tc);
         nextTc.json = standardizeJson(nextTc);
         setTestCase(nextTc);
-        setLockedModalOpen(
-          canEdit && featureFlags.Locking && nextTc.testCaseLock ? true : false
-        );
+        setLockedModalOpen(canEdit && nextTc.testCaseLock ? true : false);
         setEditorVal(nextTc.json ? nextTc.json : "");
         if (measure && measure.groups) {
           nextTc.groupPopulations = measure.groups.map((group) => {
@@ -654,7 +652,7 @@ const EditTestCase = (props: EditTestCaseProps) => {
       testCaseService.current.unlockTestCase(id);
     };
 
-    if (featureFlags?.Locking && testCaseCanEdit) {
+    if (testCaseCanEdit) {
       window.addEventListener("beforeunload", handleUnload);
       testCaseService.current
         .lockTestCase(measureId, id)
@@ -665,7 +663,7 @@ const EditTestCase = (props: EditTestCaseProps) => {
     }
 
     return () => {
-      if (featureFlags?.Locking && testCaseCanEdit) {
+      if (testCaseCanEdit) {
         window.removeEventListener("beforeunload", handleUnload);
         testCaseService.current.unlockTestCase(id);
       }
@@ -682,16 +680,12 @@ const EditTestCase = (props: EditTestCaseProps) => {
     measure,
     mapMeasureGroups,
     seriesState.loaded,
-    featureFlags?.Locking,
     canEdit,
   ]);
 
-  const testCaseCanEdit =
-    canEdit && !(featureFlags.Locking && testCase?.testCaseLock);
-  const testCaseLockedBy: string =
-    featureFlags?.Locking && testCase?.testCaseLock
-      ? testCase?.testCaseLock?.lockedBy
-      : undefined;
+  const testCaseCanEdit = canEdit && !testCase?.testCaseLock;
+  const testCaseLockedBy: string = testCase?.testCaseLock?.lockedBy;
+
   const [lockedModalOpen, setLockedModalOpen] = useState(
     canEdit && testCaseLockedBy ? true : false
   );
@@ -828,7 +822,7 @@ const EditTestCase = (props: EditTestCaseProps) => {
       setEditorVal(updatedTc.json);
       handleTestCaseResponse(updatedTc, "update", timezoneUpdated);
     } catch (error) {
-      if (featureFlags.Locking && error.message.includes("is locked by:")) {
+      if (error.message.includes("is locked by:")) {
         discardChanges();
       }
 
@@ -1137,7 +1131,6 @@ const EditTestCase = (props: EditTestCaseProps) => {
         <EditTestCaseBreadCrumbs
           testCase={testCase}
           measureId={measureId}
-          lockingEnabled={featureFlags?.Locking}
           canEdit={canEdit}
         />
         {/* this needs to have a conditional class depending if qi-core 6 or 4, otherwise it qi-core4 will become fouled. */}

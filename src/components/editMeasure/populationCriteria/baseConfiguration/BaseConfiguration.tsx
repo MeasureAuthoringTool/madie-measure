@@ -12,7 +12,6 @@ import {
   checkUserCanEdit,
   routeHandlerStore,
   useMeasureServiceApi,
-  useFeatureFlags,
 } from "@madie/madie-util";
 import { MenuItem as MuiMenuItem } from "@mui/material";
 import MetaDataWrapper from "../../../editMeasure/details/MetaDataWrapper";
@@ -57,8 +56,6 @@ const BaseConfiguration = (props: BaseConfigurationProps) => {
   const [warningDialogModalType, setWarningDialogModalType] = useState("");
   const [currentPatientBasis, setCurrentPatientBasis] =
     useState<boolean>(undefined);
-  const featureFlags = useFeatureFlags();
-
   useEffect(() => {
     const subscription = measureStore.subscribe(setMeasure);
     return () => {
@@ -139,7 +136,7 @@ const BaseConfiguration = (props: BaseConfigurationProps) => {
   };
 
   const handleSubmit = async () => {
-    if (featureFlags.Locking && (await props.checkTestCasesLockStatus())) {
+    if (await props.checkTestCasesLockStatus()) {
       handleToast(
         "danger",
         "This measure cannot be saved because changes to the Population Criteria will update test cases and one or more test cases are locked by another user.",
@@ -198,7 +195,7 @@ const BaseConfiguration = (props: BaseConfigurationProps) => {
       })
       // update to alert
       .catch((err) => {
-        if (featureFlags?.Locking && err?.status === 423) {
+        if (err?.status === 423) {
           updateMeasure({
             ...measure,
             measureLock: {

@@ -26,10 +26,9 @@ const asterisk = { color: "#D92F2F", marginRight: 3 };
 interface StewardAndDevelopersProps {
   setErrorMessage: Function;
   measureCanEdit: boolean;
-  lockingFeatureEnabled?: boolean;
 }
 export default function StewardAndDevelopers(props: StewardAndDevelopersProps) {
-  const { setErrorMessage, measureCanEdit, lockingFeatureEnabled } = props;
+  const { setErrorMessage, measureCanEdit } = props;
   const measureServiceApi = useMeasureServiceApi();
   const [organizations, setOrganizations] = useState<Organization[]>();
   const [measure, setMeasure] = useState<any>(measureStore.state);
@@ -94,7 +93,7 @@ export default function StewardAndDevelopers(props: StewardAndDevelopersProps) {
       })
       .catch((err) => {
         let message = `Error updating measure "${measure.measureName}"`;
-        if (lockingFeatureEnabled && err?.status === 423) {
+        if (err?.status === 423) {
           message = err?.response?.data?.message.toString();
           updateMeasure({
             ...measure,

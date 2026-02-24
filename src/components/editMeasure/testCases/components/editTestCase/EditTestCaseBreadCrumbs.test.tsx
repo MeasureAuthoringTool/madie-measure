@@ -103,7 +103,6 @@ describe("EditTestCaseBreadCrumbs", () => {
             } as TestCase
           }
           measureId="unknown"
-          lockingEnabled={true}
           canEdit={true}
         />
       </MemoryRouter>
@@ -135,7 +134,6 @@ describe("EditTestCaseBreadCrumbs", () => {
             } as unknown as TestCase
           }
           measureId="unknown"
-          lockingEnabled={false}
           canEdit={false}
         />
       </MemoryRouter>
@@ -159,7 +157,6 @@ describe("EditTestCaseBreadCrumbs", () => {
             } as unknown as TestCase
           }
           measureId="unknown"
-          lockingEnabled={false}
           canEdit={true}
         />
       </MemoryRouter>
@@ -200,7 +197,6 @@ describe("EditTestCaseBreadCrumbs", () => {
             } as unknown as TestCase
           }
           measureId="unknown"
-          lockingEnabled={false}
           canEdit={true}
         />
       </MemoryRouter>
@@ -235,7 +231,6 @@ describe("EditTestCaseBreadCrumbs", () => {
             } as TestCase
           }
           measureId="unknown"
-          lockingEnabled={true}
           canEdit={true}
         />
       </MemoryRouter>
