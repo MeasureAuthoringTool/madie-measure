@@ -417,21 +417,29 @@ export function getTopLevelElements(
       filteredWithoutSlices.splice(filteredWithoutSlices.indexOf(element), 1);
     }
   });
+
+  // Filter out attributes or extensions that are of type 'Age'
+  const filteredWithoutAge = filteredWithoutSlices.filter(
+    (item) =>
+      !item.type?.some((t) => t.code === "Age") &&
+      item.id !== "AllergyIntolerance.extension:resolutionAge"
+  );
+
   // Sort only if maintainSortOrder is false
   if (!maintainSortOrder) {
     if (basePath) {
-      filteredWithoutSlices.sort((a, b) => {
+      filteredWithoutAge.sort((a, b) => {
         const labelA = a.path.substring(basePath.length + 1);
         const labelB = b.path.substring(basePath.length + 1);
         return labelA.localeCompare(labelB);
       });
     } else {
       // If no basePath, sort by full path
-      filteredWithoutSlices.sort((a, b) => a.path.localeCompare(b.path));
+      filteredWithoutAge.sort((a, b) => a.path.localeCompare(b.path));
     }
   }
   // Sort elements alphabetically by their path (after the basePath, if available)
-  return filteredWithoutSlices;
+  return filteredWithoutAge;
 }
 
 // we want to build a set of all prefixes for quick lookup
