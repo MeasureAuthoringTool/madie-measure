@@ -1607,5 +1607,205 @@ describe("AddComponentsDialog", () => {
 
       consoleErrorSpy.mockRestore();
     });
+
+    it("submits selected measures and calls submitComponentForm with correct component structure", async () => {
+      const mockSearchMeasures = jest.fn().mockResolvedValue({
+        content: [
+          {
+            id: "1",
+            measureName: "Test Measure",
+            version: "1.0.0",
+            measureSet: { cmsId: "CMS123" },
+            measureSetId: "set-1",
+            lastModifiedAt: "2024-01-01",
+            hasAssociatedMeasures: true,
+            groups: [{ id: "pg-1" }],
+          },
+          {
+            id: "2",
+            measureName: "Another Measure",
+            version: "2.0.0",
+            measureSet: { cmsId: "CMS456" },
+            measureSetId: "set-2",
+            lastModifiedAt: "2024-02-01",
+            hasAssociatedMeasures: false,
+            groups: [{ id: "pg-2" }, { id: "pg-3" }],
+          },
+        ],
+        totalPages: 1,
+        totalElements: 2,
+        numberOfElements: 2,
+        pageable: { offset: 0 },
+      });
+
+      const mockFetchMeasuresByIds = jest.fn().mockResolvedValue([
+        {
+          id: "1",
+          measureName: "Test Measure",
+          version: "1.0.0",
+          groups: [{ id: "pg-1" }],
+        },
+        {
+          id: "2",
+          measureName: "Another Measure",
+          version: "2.0.0",
+          groups: [{ id: "pg-2" }, { id: "pg-3" }],
+        },
+      ]);
+
+      useMeasureServiceApi.mockReturnValue({
+        searchMeasuresByCriteria: mockSearchMeasures,
+        getMeasuresByMeasureSetId: jest.fn(),
+        fetchMeasuresByIds: mockFetchMeasuresByIds,
+      });
+
+      const onCloseMock = jest.fn();
+      const submitComponentFormMock = jest.fn();
+      const mockMeasure = {
+        id: "measure-1",
+        model: "QI-Core",
+        measureName: "Parent Measure",
+      };
+
+      render(
+        <AddComponentsDialog
+          open={true}
+          onClose={onCloseMock}
+          measure={mockMeasure}
+          compositeScoring="Opportunity"
+          components={[]}
+          submitComponentForm={submitComponentFormMock}
+        />
+      );
+
+      await waitFor(() => {
+        expect(mockSearchMeasures).toHaveBeenCalled();
+      });
+
+      await waitFor(
+        () => {
+          expect(screen.queryByText("Test Measure")).toBeInTheDocument();
+        },
+        { timeout: 3000 }
+      );
+
+      const checkboxes = screen.getAllByRole("checkbox");
+      const measure1Checkbox = checkboxes[1];
+      const measure2Checkbox = checkboxes[2];
+
+      await userEvent.click(measure1Checkbox);
+      await userEvent.click(measure2Checkbox);
+
+      const saveButton = screen.getByTestId(
+        "select-composite-measure-components-continue-button"
+      );
+      await userEvent.click(saveButton);
+
+      await waitFor(() => {
+        expect(mockFetchMeasuresByIds).toHaveBeenCalledWith(["1", "2"]);
+      });
+
+      await waitFor(() => {
+        expect(submitComponentFormMock).toHaveBeenCalledWith([
+          { measureId: "1", groupId: "pg-1" },
+          { measureId: "2", groupId: "pg-2" },
+          { measureId: "2", groupId: "pg-3" },
+        ]);
+      });
+
+      await waitFor(() => {
+        expect(onCloseMock).toHaveBeenCalled();
+      });
+    });
+
+    it("removes duplicate components and calls submitComponentForm with unique components only", async () => {
+      const mockSearchMeasures = jest.fn().mockResolvedValue({
+        content: [
+          {
+            id: "1",
+            measureName: "Test Measure",
+            version: "1.0.0",
+            measureSet: { cmsId: "CMS123" },
+            measureSetId: "set-1",
+            lastModifiedAt: "2024-01-01",
+            hasAssociatedMeasures: true,
+            groups: [{ id: "pg-1" }, { id: "pg-1" }],
+          },
+        ],
+        totalPages: 1,
+        totalElements: 1,
+        numberOfElements: 1,
+        pageable: { offset: 0 },
+      });
+
+      const mockFetchMeasuresByIds = jest.fn().mockResolvedValue([
+        {
+          id: "1",
+          measureName: "Test Measure",
+          version: "1.0.0",
+          groups: [{ id: "pg-1" }, { id: "pg-1" }],
+        },
+      ]);
+
+      useMeasureServiceApi.mockReturnValue({
+        searchMeasuresByCriteria: mockSearchMeasures,
+        getMeasuresByMeasureSetId: jest.fn(),
+        fetchMeasuresByIds: mockFetchMeasuresByIds,
+      });
+
+      const onCloseMock = jest.fn();
+      const submitComponentFormMock = jest.fn();
+      const mockMeasure = {
+        id: "measure-1",
+        model: "QI-Core",
+        measureName: "Parent Measure",
+      };
+
+      render(
+        <AddComponentsDialog
+          open={true}
+          onClose={onCloseMock}
+          measure={mockMeasure}
+          compositeScoring="Opportunity"
+          components={[]}
+          submitComponentForm={submitComponentFormMock}
+        />
+      );
+
+      await waitFor(() => {
+        expect(mockSearchMeasures).toHaveBeenCalled();
+      });
+
+      await waitFor(
+        () => {
+          expect(screen.queryByText("Test Measure")).toBeInTheDocument();
+        },
+        { timeout: 3000 }
+      );
+
+      const checkboxes = screen.getAllByRole("checkbox");
+      const measureCheckbox = checkboxes[1];
+
+      await userEvent.click(measureCheckbox);
+
+      const saveButton = screen.getByTestId(
+        "select-composite-measure-components-continue-button"
+      );
+      await userEvent.click(saveButton);
+
+      await waitFor(() => {
+        expect(mockFetchMeasuresByIds).toHaveBeenCalledWith(["1"]);
+      });
+
+      await waitFor(() => {
+        expect(submitComponentFormMock).toHaveBeenCalledWith([
+          { measureId: "1", groupId: "pg-1" },
+        ]);
+      });
+
+      await waitFor(() => {
+        expect(onCloseMock).toHaveBeenCalled();
+      });
+    });
   });
 });
