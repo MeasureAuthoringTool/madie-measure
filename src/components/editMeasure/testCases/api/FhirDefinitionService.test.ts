@@ -58,7 +58,7 @@ describe("MeasureServiceApi", () => {
     expect(definition).toBeNull();
   });
 
-  it("should throw error with 'Unable to parse Patient Bundle' message when 'Incorrect resource type found' is in error response", async () => {
+  it("should throw the related error when resource type is not bundle", async () => {
     const errorResponse = {
       response: {
         status: 400,
@@ -77,7 +77,7 @@ describe("MeasureServiceApi", () => {
         mockTestCases
       )
     ).rejects.toThrow(
-      "Test Case Execution cancelled: Unable to parse Patient Bundle"
+      "An error occurred while generating test case execution bundle. Please try again."
     );
 
     expect(consoleErrorSpy).toHaveBeenCalledWith(
@@ -93,8 +93,7 @@ describe("MeasureServiceApi", () => {
       response: {
         status: 400,
         data: {
-          message:
-            "Error: Incorrect resource type found. Expected Patient resource but got Observation resource.",
+          message: "HAPI-1825: Unknown element 'entryd' found during parse",
         },
       },
     };
@@ -107,7 +106,7 @@ describe("MeasureServiceApi", () => {
         mockTestCases
       )
     ).rejects.toThrow(
-      "Test Case Execution cancelled: Unable to parse Patient Bundle"
+      "Test case execution was cancelled because Unknown element 'entryd' found during parse. If this error persists, please contact support."
     );
   });
 
