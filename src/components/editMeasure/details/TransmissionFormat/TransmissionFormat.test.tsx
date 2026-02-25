@@ -252,7 +252,6 @@ describe("Transmission Format page", () => {
           <TransmissionFormat
             setErrorMessage={jest.fn()}
             measureCanEdit={true}
-            lockingFeatureEnabled={true}
           />
         </MemoryRouter>
       </ApiContextProvider>

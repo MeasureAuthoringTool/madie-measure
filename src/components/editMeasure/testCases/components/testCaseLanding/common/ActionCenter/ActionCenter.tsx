@@ -23,7 +23,6 @@ import FileUploadOutlinedIcon from "@mui/icons-material/FileUploadOutlined";
 import { useFormik } from "formik";
 import queryString from "query-string";
 import { useNavigate, useLocation } from "react-router-dom";
-import { useFeatureFlags } from "@madie/madie-util";
 import { blue, grey, red } from "@mui/material/colors";
 import { TestCase } from "@madie/madie-models";
 import { Icon } from "@iconify-icon/react";
@@ -98,7 +97,6 @@ export default function ActionCenter(props: ActionCenterProps) {
 
   const { search } = useLocation();
   let navigate = useNavigate();
-  const featureFlags = useFeatureFlags();
   const values = queryString.parse(search);
 
   // init against URL
@@ -400,7 +398,7 @@ export default function ActionCenter(props: ActionCenterProps) {
                 </span>
               </Tooltip>
 
-              {featureFlags?.MakeJSONMatchUI && !isQDM && (
+              {!isQDM && (
                 <Tooltip
                   data-testid="make-json-match-ui-tooltip"
                   title={makeJsonMatchUiTooltipMessage}

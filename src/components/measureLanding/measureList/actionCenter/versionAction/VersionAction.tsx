@@ -3,8 +3,6 @@ import { IconButton } from "@mui/material";
 import Tooltip from "@mui/material/Tooltip";
 import { Measure, Model } from "@madie/madie-models";
 import AccountTreeOutlinedIcon from "@mui/icons-material/AccountTreeOutlined";
-import { useFeatureFlags } from "@madie/madie-util";
-
 interface PropTypes {
   measures: Measure[];
   onClick: () => void;
@@ -22,7 +20,6 @@ export default function VersionAction(props: PropTypes) {
   const { measures, canEdit, onClick } = props;
   const [disableVersionBtn, setDisableVersionBtn] = useState(true);
   const [tooltipMessage, setTooltipMessage] = useState(NOTHING_SELECTED);
-  const featureFlags = useFeatureFlags();
 
   const validateVersionActionState = useCallback(() => {
     // set button state to disabled by default
@@ -34,19 +31,14 @@ export default function VersionAction(props: PropTypes) {
       canEdit
       /* check if there is not already a Version for that measure set*/
     ) {
-      if (featureFlags.Locking) {
-        if (measures[0].measureLock?.lockedBy) {
-          setDisableVersionBtn(true);
-          setTooltipMessage(
-            `${MEASURE_LOCKED_MESSAGE} ${measures[0].measureLock.lockedBy}`
-          );
-        } else if (measures[0].hasLockedTestCases) {
-          setDisableVersionBtn(true);
-          setTooltipMessage(TEST_CASES_LOCKED_MESSAGE);
-        } else {
-          setDisableVersionBtn(false);
-          setTooltipMessage(VERSION_MEASURE);
-        }
+      if (measures[0].measureLock?.lockedBy) {
+        setDisableVersionBtn(true);
+        setTooltipMessage(
+          `${MEASURE_LOCKED_MESSAGE} ${measures[0].measureLock.lockedBy}`
+        );
+      } else if (measures[0].hasLockedTestCases) {
+        setDisableVersionBtn(true);
+        setTooltipMessage(TEST_CASES_LOCKED_MESSAGE);
       } else {
         setDisableVersionBtn(false);
         setTooltipMessage(VERSION_MEASURE);

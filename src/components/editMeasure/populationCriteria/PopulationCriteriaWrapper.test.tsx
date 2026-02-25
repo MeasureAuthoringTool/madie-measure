@@ -30,9 +30,15 @@ const QiCoreMeasure = {
   ],
 } as Measure;
 
-let mockFeatureFlags = { Locking: false };
+let mockFeatureFlags = {};
+
+const mockMeasureServiceApi = {
+  updateMeasureLock: jest.fn().mockResolvedValue({}),
+  unlockMeasure: jest.fn(),
+};
+
 jest.mock("@madie/madie-util", () => ({
-  useMeasureServiceApi: jest.fn(() => {}),
+  useMeasureServiceApi: jest.fn(() => mockMeasureServiceApi),
   useDocumentTitle: jest.fn(),
   measureStore: {
     updateMeasure: (measure: Measure) => measure,
@@ -60,7 +66,6 @@ describe("PopulationCriteriaWrapper", () => {
   });
 
   it("renders PopulationCriteriaWrapper when measure is locked", async () => {
-    mockFeatureFlags = { Locking: true };
     render(
       <MemoryRouter>
         <PopulationCriteriaWrapper
@@ -86,7 +91,6 @@ describe("PopulationCriteriaWrapper", () => {
   });
 
   it("does not render locked measure popup when displayLockedMeasurePopup is false", () => {
-    mockFeatureFlags = { Locking: true };
     render(
       <MemoryRouter>
         <PopulationCriteriaWrapper

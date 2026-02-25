@@ -24,12 +24,10 @@ export interface MeasureMetadataProps {
   setErrorMessage: Function;
   required?: boolean;
   measureCanEdit: boolean;
-  lockingFeatureEnabled?: boolean;
 }
 
 export default function MeasureMetadata(props: MeasureMetadataProps) {
-  const { setErrorMessage, required, measureCanEdit, lockingFeatureEnabled } =
-    props;
+  const { setErrorMessage, required, measureCanEdit } = props;
   const { measureMetadataId, measureMetadataType, header } = props;
   const typeLower = _.kebabCase(measureMetadataType.toLowerCase());
   const { updateMeasure } = measureStore;
@@ -108,7 +106,7 @@ export default function MeasureMetadata(props: MeasureMetadataProps) {
       })
       .catch((reason) => {
         let message = `Error updating measure "${measure.measureName}"`;
-        if (lockingFeatureEnabled && reason?.status === 423) {
+        if (reason?.status === 423) {
           message = reason?.response?.data?.message;
           updateMeasure({
             ...originalMeasure,

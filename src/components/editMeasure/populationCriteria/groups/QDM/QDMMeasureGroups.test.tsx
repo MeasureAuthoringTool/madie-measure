@@ -85,9 +85,7 @@ jest.mock("@madie/madie-util", () => ({
   useOktaTokens: () => ({
     getAccessToken: () => "test.jwt",
   }),
-  useFeatureFlags: jest.fn(() => ({
-    Locking: false,
-  })),
+  useFeatureFlags: jest.fn(() => ({})),
   routeHandlerStore: {
     subscribe: () => {
       return { unsubscribe: () => null };
@@ -883,9 +881,6 @@ describe("Measure Groups Page", () => {
   });
 
   test("render Measure group properties in readonly mode if a testcase is locked", async () => {
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-      Locking: true,
-    }));
     const customProps: MeasureGroupProps = {
       ...props,
       isTestCaseLocked: true,
@@ -906,9 +901,6 @@ describe("Measure Groups Page", () => {
   });
 
   test("displays error alert when test cases are locked and locking feature is enabled", async () => {
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-      Locking: true,
-    }));
     const checkTestCasesLockStatusMock = jest.fn().mockResolvedValue(true);
     const setAlertMessageMock = jest.fn();
     const customProps: MeasureGroupProps = {
@@ -1244,9 +1236,6 @@ describe("Cohort Population Criteria validations", () => {
     mockMeasureServiceApi.updateMeasure = jest
       .fn()
       .mockResolvedValueOnce({ status: 200 });
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementationOnce(() => ({
-      Locking: true,
-    }));
     mockMeasureServiceApi.updateGroup = jest.fn().mockRejectedValueOnce({
       status: 423,
       message: "Unable to update measure. Measure is locked by another user.",
@@ -1654,9 +1643,6 @@ describe("Delete Tests", () => {
     cohortGroup.id = "7p03-5r29-7O0I";
     cohortGroup.groupDescription = "testDescription";
     cohortMeasure.groups = [cohortGroup];
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-      Locking: true,
-    }));
     renderMeasureGroupComponent({
       ...props,
       checkTestCasesLockStatus: jest.fn().mockResolvedValue(true),

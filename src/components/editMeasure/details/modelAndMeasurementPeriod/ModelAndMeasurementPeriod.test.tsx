@@ -623,7 +623,6 @@ describe("Model and Measurement Period component", () => {
       <ModelAndMeasurementPeriod
         setErrorMessage={setErrorMessage}
         measureCanEdit={true}
-        lockingFeatureEnabled={true}
       />
     );
 

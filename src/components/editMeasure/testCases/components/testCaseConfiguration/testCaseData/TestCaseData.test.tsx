@@ -78,9 +78,7 @@ jest.mock("@madie/madie-util", () => ({
   useOktaTokens: () => ({
     getAccessToken: () => "test.jwt",
   }),
-  useFeatureFlags: jest.fn().mockReturnValue({
-    Locking: false,
-  }),
+  useFeatureFlags: jest.fn().mockReturnValue({}),
 }));
 
 const setExecutionContextReady = jest.fn();
@@ -121,9 +119,6 @@ describe("TestCaseData", () => {
     jest.clearAllMocks();
     (checkUserCanEdit as jest.Mock).mockImplementation(() => true);
     measureStore.state.mockImplementation(() => measure);
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-      Locking: false,
-    }));
   });
 
   it("should render Test Case Data component with action buttons", () => {
@@ -320,46 +315,6 @@ describe("TestCaseData", () => {
     });
   });
 
-  it("should display an error message when unable to shift all test case dates", async () => {
-    const shiftAllTestCaseDatesApiMock = jest.fn().mockRejectedValueOnce({
-      response: {
-        data: {
-          message: "something went wrong",
-        },
-      },
-    });
-    useTestCaseServiceMock.mockImplementationOnce(() => {
-      return {
-        shiftAllQdmTestCaseDates: shiftAllTestCaseDatesApiMock,
-      } as unknown as TestCaseServiceApi;
-    });
-
-    renderTestCaseDataComponent();
-    const shiftTestCaseDatesInput = screen.getByRole("spinbutton", {
-      name: "Shift Test Case Dates",
-    }) as HTMLInputElement;
-    const saveButton = screen.getByRole("button", { name: "Save" });
-    const discardButton = screen.getByRole("button", {
-      name: "Discard Changes",
-    });
-    expect(shiftTestCaseDatesInput).not.toBeDisabled();
-    expect(saveButton).toBeDisabled();
-    expect(discardButton).toBeDisabled();
-
-    userEvent.type(shiftTestCaseDatesInput, "5");
-
-    expect(shiftTestCaseDatesInput.value).toBe("5");
-    expect(saveButton).toBeEnabled();
-    expect(discardButton).toBeEnabled();
-
-    act(() => {
-      fireEvent.click(saveButton);
-    });
-    await waitFor(() =>
-      expect(mockShiftTestCaseDatesWarning.mock.calls).toHaveLength(1)
-    );
-  });
-
   it("should display disabled state of the form when user doesn't have authorization to edit", () => {
     (checkUserCanEdit as jest.Mock).mockClear().mockImplementation(() => {
       return false;
@@ -485,10 +440,7 @@ describe("TestCaseData", () => {
     );
   });
 
-  it("should successfully shift all test case dates when feature flag is on", async () => {
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-      Locking: true,
-    }));
+  it("should successfully shift all test case dates", async () => {
     const shiftAllTestCaseDatesApiMock = jest
       .fn()
       .mockResolvedValueOnce(responseDto);
@@ -533,9 +485,6 @@ describe("TestCaseData", () => {
 
   it("should successfully shift all test case dates with failed test cases", async () => {
     measureStore.state.mockImplementationOnce(() => qiCoreMeasure);
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-      Locking: true,
-    }));
     const failedResponseDto = {
       failed: ["1234"],
       shifted: [],
@@ -576,10 +525,7 @@ describe("TestCaseData", () => {
     );
   });
 
-  it("should display an error message when unable to shift all test case dates when feature flag is on", async () => {
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-      Locking: true,
-    }));
+  it("should display an error message when unable to shift all test case dates", async () => {
     const shiftAllTestCaseDatesApiMock = jest
       .fn()
       .mockRejectedValueOnce(
@@ -625,9 +571,6 @@ describe("TestCaseData", () => {
   });
 
   it("should display an error message when unable to shift all test case dates due to locking for qicore", async () => {
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-      Locking: true,
-    }));
     measureStore.state.mockImplementationOnce(() => qiCoreMeasure);
 
     const shiftAllTestCaseDatesApiMock = jest
