@@ -12,7 +12,6 @@ import Box from "@mui/material/Box";
 export interface EditTestCaseBreadCrumbsProps {
   measureId: string;
   testCase: TestCase;
-  lockingEnabled: boolean;
   canEdit: boolean;
 }
 
@@ -78,10 +77,10 @@ const EditTestCaseBreadCrumbs = (props: EditTestCaseBreadCrumbsProps) => {
     testCaseString: string,
     testCase: TestCase
   ) => {
-    if (props.lockingEnabled && props.canEdit && testCase.testCaseLock) {
+    if (props.canEdit && testCase.testCaseLock) {
       return (
         <Box component="span" display="inline-flex" alignItems="center">
-          {props.lockingEnabled && props.canEdit && testCase.testCaseLock && (
+          {props.canEdit && testCase.testCaseLock && (
             <Tooltip
               title={
                 testCase.testCaseLock?.lockedBy

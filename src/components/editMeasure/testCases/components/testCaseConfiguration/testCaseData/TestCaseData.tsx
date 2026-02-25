@@ -11,7 +11,6 @@ import {
   measureStore,
   checkUserCanEdit,
   routeHandlerStore,
-  useFeatureFlags,
 } from "@madie/madie-util";
 import "../testCaseConfiguration.scss";
 import { Typography } from "@mui/material";
@@ -31,7 +30,6 @@ const TestCaseData = (props: TestCaseListProps) => {
   const testCaseService = useRef(useTestCaseServiceApi());
   const [executing, setExecuting] = useState<boolean>(false);
   const { setShiftTestCaseDatesWarnings } = props;
-  const featureFlags = useFeatureFlags();
 
   useEffect(() => {
     const subscription = measureStore.subscribe(setMeasure);
@@ -105,14 +103,7 @@ const TestCaseData = (props: TestCaseListProps) => {
           }
         })
         .catch((err) => {
-          if (featureFlags?.Locking) {
-            handleToast("danger", err.message, true);
-          } else {
-            setShiftTestCaseDatesWarnings((prevState) => [
-              ...prevState,
-              err?.response?.data?.message,
-            ]);
-          }
+          handleToast("danger", err.message, true);
         });
     } else {
       testCaseService.current

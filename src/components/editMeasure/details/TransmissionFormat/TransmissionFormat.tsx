@@ -19,11 +19,10 @@ import { MeasureLock } from "@madie/madie-models";
 interface TransmissionFormatProps {
   setErrorMessage: Function;
   measureCanEdit: boolean;
-  lockingFeatureEnabled?: boolean;
 }
 
 const TransmissionFormat = (props: TransmissionFormatProps) => {
-  const { setErrorMessage, measureCanEdit, lockingFeatureEnabled } = props;
+  const { setErrorMessage, measureCanEdit } = props;
   const measureServiceApi = useMeasureServiceApi();
   const { updateMeasure } = measureStore;
   const [measure, setMeasure] = useState<any>(measureStore.state);
@@ -74,7 +73,7 @@ const TransmissionFormat = (props: TransmissionFormatProps) => {
       })
       .catch((err) => {
         let message = `Error updating Transmission Format for "${measure.measureName}"`;
-        if (lockingFeatureEnabled && err?.status === 423) {
+        if (err?.status === 423) {
           updateMeasure({
             ...measure,
             measureLock: {

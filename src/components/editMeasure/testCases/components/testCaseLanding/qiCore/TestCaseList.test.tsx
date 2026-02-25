@@ -160,8 +160,6 @@ jest.mock("@madie/madie-util", () => ({
   checkUserCanEdit: jest.fn().mockImplementation(() => true),
   useFeatureFlags: jest.fn().mockImplementation(() => ({
     applyDefaults: false,
-    Locking: false,
-    MakeJSONMatchUI: true,
   })),
   routeHandlerStore: {
     subscribe: (set) => {
@@ -720,9 +718,7 @@ describe("TestCaseList component", () => {
     });
 
     (checkUserCanEdit as jest.Mock).mockClear().mockImplementation(() => true);
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-      MakeJSONMatchUI: true,
-    }));
+    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({}));
     setError.mockClear();
 
     testCases[0].validResource = true;
@@ -1030,30 +1026,6 @@ describe("TestCaseList component", () => {
       const submitButton = screen.queryByText("Yes, Delete");
       expect(submitButton).not.toBeInTheDocument();
     });
-  });
-
-  it("should render delete dialogue on Test Case list page when delete button is clicked and Locking is true", async () => {
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-      Locking: true,
-    }));
-    const { getByTestId } = renderTestCaseListComponent();
-    await waitFor(() => {
-      const selectButton = screen.getByTestId(`test-case-title-0_select`);
-      const checkboxButton = within(selectButton).getByRole("checkbox");
-      expect(checkboxButton).toBeInTheDocument();
-      fireEvent.click(checkboxButton);
-      expect(checkboxButton).toBeChecked();
-    });
-
-    const deleteButton = screen.getByTestId("delete-action-icon");
-    expect(deleteButton).toBeEnabled();
-    fireEvent.click(deleteButton);
-
-    await waitFor(() => {
-      expect(screen.getByTestId("delete-dialog")).toBeInTheDocument();
-    });
-
-    const dialog = screen.getByTestId("delete-dialog");
   });
 
   it("should handle delete error on Test Case list page when delete button is clicked", async () => {

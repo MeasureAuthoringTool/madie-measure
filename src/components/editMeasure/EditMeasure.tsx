@@ -17,7 +17,6 @@ import { Measure, Model } from "@madie/madie-models";
 import {
   measureStore,
   routeHandlerStore,
-  useFeatureFlags,
   useMeasureServiceApi,
   checkUserCanEdit,
 } from "@madie/madie-util";
@@ -65,7 +64,6 @@ export default function EditMeasure() {
   let navigate = useNavigate();
   const location = useLocation();
   const [currentMeasureId, setCurrentMeasureId] = useState<string>(measureId);
-  const featureFlags = useFeatureFlags();
 
   // Required by every single spa application that has internal routing
   // This will block user from navigating inside madie-measure when the current form is dirty
@@ -164,10 +162,9 @@ export default function EditMeasure() {
     measure?.measureSet?.acls,
     measure?.measureMetaData?.draft
   );
-  const measureLockedBy: string =
-    featureFlags?.Locking && measure?.measureLock
-      ? measure?.measureLock?.lockedBy
-      : undefined;
+  const measureLockedBy: string = measure?.measureLock
+    ? measure?.measureLock?.lockedBy
+    : undefined;
 
   useEffect(() => {
     const deleteListener = () => {
@@ -650,7 +647,6 @@ export default function EditMeasure() {
                   <MeasureDetails
                     setErrorMessage={setErrorMessage}
                     isQDM={isQDM}
-                    featureFlags={featureFlags}
                     measureCanEdit={measureCanEdit}
                     measureLockedBy={measureLockedBy}
                   />
