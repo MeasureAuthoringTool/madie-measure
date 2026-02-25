@@ -12,6 +12,7 @@ interface ElementSectionProps {
   startOpen?: any;
   canBeMultipleCardinality?: boolean;
   handleAddElement?: () => void;
+  required?: boolean;
 }
 
 const ElementSectionQiCore = (props: ElementSectionProps) => {
@@ -21,6 +22,7 @@ const ElementSectionQiCore = (props: ElementSectionProps) => {
     startOpen,
     canBeMultipleCardinality,
     handleAddElement = true,
+    required = false,
   } = props;
   const [open, setOpen] = useState(startOpen);
   const chevronClass = open ? "chevron-display open" : "chevron-display";
@@ -53,7 +55,12 @@ const ElementSectionQiCore = (props: ElementSectionProps) => {
           >
             <ChevronRightIcon className={chevronClass} />
           </IconButton>
-          <h4 className="header">{`${props.title}`}</h4>
+          <h4 className="header">
+            {props.required && (
+              <span style={{ color: "#AE1C1C", marginRight: 4 }}>*</span>
+            )}
+            {`${props.title}`}
+          </h4>
           {props.canBeMultipleCardinality && (
             <div style={{ marginLeft: "auto" }}>
               <AddElementButton
