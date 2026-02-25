@@ -333,13 +333,7 @@ export default function AddComponentsDialog({
     ];
 
     return columnDefs;
-  }, [
-    selectedRowId,
-    selectedIdForExpansion,
-    isRowExpanded,
-    expandedSectionData,
-    components,
-  ]);
+  }, [selectedRowId, selectedIdForExpansion, isRowExpanded]);
 
   const getAllowedScoringTypes = (compositeScoring: string) => {
     if (

@@ -34,7 +34,6 @@ export default function AddedComponentsTable({
 }: {
   components: Component[];
   onComponentsUpdate: (updatedComponents: Component[]) => void;
-  measureId: string;
 }) {
   const [hoveredHeader, setHoveredHeader] = useState<string>("");
   const measureServiceApi = useRef(useMeasureServiceApi()).current;
@@ -64,7 +63,7 @@ export default function AddedComponentsTable({
     fetchMeasuresForComponents();
   }, [fetchMeasuresForComponents]);
 
-  const handleDeleteComponent = async (measureId: string) => {
+  const handleDeleteComponent = (measureId: string) => {
     setLoading(true);
     try {
       const updatedComponents = components.filter(
