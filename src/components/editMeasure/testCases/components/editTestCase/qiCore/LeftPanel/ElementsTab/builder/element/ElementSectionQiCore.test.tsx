@@ -59,4 +59,16 @@ describe("TabHeadings", () => {
     const addButton = screen.queryByText("Add Element");
     expect(addButton).not.toBeInTheDocument();
   });
+
+  test("Required asterisk is displayed when required is true", async () => {
+    render(<ElementSectionQiCore title="Required Title" required={true} />);
+    const asterisk = await screen.findByText("*");
+    expect(asterisk).toBeInTheDocument();
+  });
+
+  test("Required asterisk is not displayed when required is false", async () => {
+    render(<ElementSectionQiCore title="Optional Title" required={false} />);
+    const asterisk = screen.queryByText("*");
+    expect(asterisk).not.toBeInTheDocument();
+  });
 });
