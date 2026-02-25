@@ -3,6 +3,7 @@ import { v4 as uuidv4 } from "uuid";
 import { ResourceIdentifier } from "./models/ResourceIdentifier";
 import * as Yup from "yup";
 import * as _ from "lodash";
+import { StructureDefinitionDto } from "./models/StructureDefinitionDto";
 
 export const PRIMITIVE_DEFAULT_VALUES = {
   instant: "",
@@ -438,6 +439,7 @@ export function getTopLevelElements(
       filteredWithoutAge.sort((a, b) => a.path.localeCompare(b.path));
     }
   }
+
   // Sort elements alphabetically by their path (after the basePath, if available)
   return filteredWithoutAge;
 }
@@ -725,4 +727,35 @@ export function isComponentDataType(datatype) {
 export function getValueSetUrl(url: string) {
   if (!url) return "";
   return url.split("|").shift();
+}
+
+// MAT-9683 filter out attribute types that SMEs have deemed either can't be represented in the builder or wont be used in measures
+export function stripOutUnusedAttributes(
+  resourceTree: StructureDefinitionDto
+): any {
+  const filteredResourceTree = {
+    ...resourceTree,
+    definition: {
+      ...resourceTree.definition,
+      snapshot: {
+        ...resourceTree.definition.snapshot,
+        element: resourceTree.definition.snapshot.element.filter(
+          (e) =>
+            e.id !== "Device.udiCarrier.carrierAIDC" &&
+            e.id !== "Coverage.contract" &&
+            e.id !== "CarePlan.activity.reference" &&
+            e.id !== "CarePlan.activity.progress" &&
+            e.id !== "CarePlan.activity.detail.performer" &&
+            e.id !== "AllergyIntolerance.note" &&
+            e.id !== "BodyStructure.image" &&
+            e.id !== "ClaimResponse.form" &&
+            e.id !== "Location.address" &&
+            e.id !== "Organization.address" &&
+            e.id !== "CareTeam.telecom" &&
+            e.id !== "Device.contact"
+        ),
+      },
+    },
+  };
+  return filteredResourceTree;
 }

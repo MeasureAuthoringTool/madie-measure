@@ -33,7 +33,9 @@ import {
   formatAttributeLabel,
   buildPrefixSet,
   shouldSkip,
+  stripOutUnusedAttributes,
 } from "./fhirDefinitionServiceUtilities";
+import { StructureDefinitionDto } from "./models/StructureDefinitionDto";
 
 describe("FhirDefinitionServiceUtilities", () => {
   const mockResource = {
@@ -1246,5 +1248,46 @@ describe("formatAttributeLabel", () => {
   it("handles buildSkip", () => {
     expect(shouldSkip("Patient.name[0].given", ["Patient"])).toBe(true);
     expect(shouldSkip("Patient.name[0].given", [null, "Patient"])).toBe(true);
+  });
+});
+
+describe("stripOutUnusedAttributes", () => {
+  it("removes unwanted attributes from the element list", () => {
+    const resourceTree: StructureDefinitionDto = {
+      name: "example",
+      definition: {
+        snapshot: {
+          element: [
+            { id: "Patient.name", path: "Patient.name" },
+            { id: "Patient.gender", path: "Patient.gender" },
+            { id: "Coverage.contract", path: "Coverage.contract" },
+            {
+              id: "CarePlan.activity.detail.performer",
+              path: "CarePlan.activity.detail.performer",
+            },
+            { id: "AllergyIntolerance.note", path: "AllergyIntolerance.note" },
+            { id: "BodyStructure.image", path: "BodyStructure.image" },
+            { id: "ClaimResponse.form", path: "ClaimResponse.form" },
+            { id: "Location.address", path: "Location.address" },
+            { id: "Organization.address", path: "Organization.address" },
+            { id: "CareTeam.telecom", path: "CareTeam.telecom" },
+            { id: "Device.contact", path: "Device.contact" },
+          ],
+        },
+      },
+    };
+
+    const filtered = stripOutUnusedAttributes(resourceTree);
+    expect(filtered).toEqual({
+      definition: {
+        snapshot: {
+          element: [
+            { id: "Patient.name", path: "Patient.name" },
+            { id: "Patient.gender", path: "Patient.gender" },
+          ],
+        },
+      },
+      name: "example",
+    });
   });
 });
