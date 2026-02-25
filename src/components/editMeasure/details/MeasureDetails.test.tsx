@@ -97,13 +97,11 @@ const incompletedIconMeasure = {
   },
 } as unknown as Measure;
 
-const mockUseFeatureFlags = jest.fn(() => ({
-  Locking: false,
-}));
+const mockUseFeatureFlags = jest.fn(() => ({}));
 
 const mockMeasureServiceApi: MeasureServiceApi = {
   unlockMeasure: jest.fn(),
-  updateMeasureLock: jest.fn(),
+  updateMeasureLock: jest.fn().mockResolvedValue({}),
 } as unknown as MeasureServiceApi;
 
 jest.mock("./measureInformation/MeasureInformation");
@@ -689,7 +687,6 @@ describe("MeasureDetails component", () => {
               path="/foo/:measureId"
               element={
                 <MeasureDetails
-                  featureFlags={{ Locking: true }}
                   setErrorMessage={setErrorMessage}
                   isQDM={true}
                   measureCanEdit={true}
@@ -734,7 +731,6 @@ describe("MeasureDetails component", () => {
               path="/measures/:measureId"
               element={
                 <MeasureDetails
-                  featureFlags={{ Locking: true }}
                   setErrorMessage={setErrorMessage}
                   isQDM={true}
                   measureCanEdit={true}
@@ -790,7 +786,6 @@ describe("MeasureDetails component", () => {
                 <MeasureDetails
                   setErrorMessage={setErrorMessage}
                   isQDM={false}
-                  featureFlags={{ Locking: true }}
                   measureCanEdit={true}
                   measureLockedBy="another-user"
                 />

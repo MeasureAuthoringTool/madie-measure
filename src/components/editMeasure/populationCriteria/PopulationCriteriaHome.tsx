@@ -3,11 +3,7 @@ import "twin.macro";
 import "styled-components/macro";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import PopulationCriteriaSideNav from "./populationCriteriaSideNav/PopulationCriteriaSideNav";
-import {
-  measureStore,
-  useFeatureFlags,
-  useMeasureServiceApi,
-} from "@madie/madie-util";
+import { measureStore, useMeasureServiceApi } from "@madie/madie-util";
 import { Measure } from "@madie/madie-models";
 import BaseConfiguration from "./baseConfiguration/BaseConfiguration";
 import QDMReporting from "./QDMReporting/QDMReporting";
@@ -22,30 +18,26 @@ export function PopulationCriteriaHome({ measureCanEdit }) {
   const { groupNumber, measureId } = useParams();
   const measureServiceApi = useRef(useMeasureServiceApi()).current;
   const [measure, setMeasure] = useState<Measure>(measureStore.state);
-  const featureFlags = useFeatureFlags();
   const [isTestCaseLocked, setIsTestCaseLocked] = useState<any>(false);
 
   const canEdit = !isTestCaseLocked && measureCanEdit;
 
   const checkTestCasesLockStatus = async () => {
-    if (featureFlags.Locking) {
-      try {
-        const isLocked = await measureServiceApi.checkTestCasesLocked(
-          measure?.id
-        );
-        setIsTestCaseLocked(isLocked);
-        return isLocked;
-      } catch (err) {
-        setAlertMessage({
-          type: "error",
-          message: err.message,
-          canClose: false,
-        });
-        setIsTestCaseLocked(false);
-        return false;
-      }
+    try {
+      const isLocked = await measureServiceApi.checkTestCasesLocked(
+        measure?.id
+      );
+      setIsTestCaseLocked(isLocked);
+      return isLocked;
+    } catch (err) {
+      setAlertMessage({
+        type: "error",
+        message: err.message,
+        canClose: false,
+      });
+      setIsTestCaseLocked(false);
+      return false;
     }
-    return false;
   };
   const [alertMessage, setAlertMessage] = useState(null);
   useEffect(() => {
@@ -59,7 +51,7 @@ export function PopulationCriteriaHome({ measureCanEdit }) {
         });
       }
     });
-  }, [measureServiceApi, measureId, featureFlags.Locking, pathname]);
+  }, [measureServiceApi, measureId, pathname]);
 
   useEffect(() => {
     // Subscribe to store
@@ -67,8 +59,8 @@ export function PopulationCriteriaHome({ measureCanEdit }) {
     const handleUnload = () => {
       measureServiceApi.unlockMeasure(measureId);
     };
-    // Lock the measure if the Locking feature is enabled
-    if (featureFlags?.Locking && canEdit) {
+    // Lock the measure
+    if (canEdit) {
       window.addEventListener("beforeunload", handleUnload);
       measureServiceApi
         .updateMeasureLock(measureId)
@@ -81,12 +73,12 @@ export function PopulationCriteriaHome({ measureCanEdit }) {
     // Cleanup on unmount
     return () => {
       subscription.unsubscribe();
-      if (featureFlags?.Locking && canEdit) {
+      if (canEdit) {
         window.removeEventListener("beforeunload", handleUnload);
         measureServiceApi.unlockMeasure(measureId);
       }
     };
-  }, [measureServiceApi, measureId, featureFlags?.Locking, canEdit]);
+  }, [measureServiceApi, measureId, canEdit]);
 
   let navigate = useNavigate();
 

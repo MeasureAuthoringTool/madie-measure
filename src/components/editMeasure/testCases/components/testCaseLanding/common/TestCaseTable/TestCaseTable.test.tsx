@@ -836,10 +836,6 @@ describe("TestCase component", () => {
     } as unknown as TestCase;
 
     it("should display lock icon and View button when test case is locked by another user and Locking flag is enabled", async () => {
-      (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-        Locking: true,
-      }));
-
       const deleteTestCase = jest.fn();
       const exportTestCase = jest.fn();
       const onCloneTestCase = jest.fn();
@@ -871,10 +867,6 @@ describe("TestCase component", () => {
     });
 
     it("should display tooltip with locked user information when hovering over locked test case button", async () => {
-      (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-        Locking: true,
-      }));
-
       const deleteTestCase = jest.fn();
       const exportTestCase = jest.fn();
       const onCloneTestCase = jest.fn();
@@ -909,10 +901,6 @@ describe("TestCase component", () => {
     });
 
     it("should include lock information in aria-label when test case is locked", async () => {
-      (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-        Locking: true,
-      }));
-
       const deleteTestCase = jest.fn();
       const exportTestCase = jest.fn();
       const onCloneTestCase = jest.fn();
@@ -943,46 +931,7 @@ describe("TestCase component", () => {
       });
     });
 
-    it("should NOT display lock icon when Locking feature flag is disabled", async () => {
-      (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-        Locking: false,
-      }));
-
-      const deleteTestCase = jest.fn();
-      const exportTestCase = jest.fn();
-      const onCloneTestCase = jest.fn();
-      const setSelectedTestCasesMock = jest.fn();
-
-      renderWithTestCase(
-        [lockedTestCase],
-        true,
-        deleteTestCase,
-        exportTestCase,
-        onCloneTestCase,
-        defaultMeasure,
-        setSelectedTestCasesMock,
-        undefined,
-        []
-      );
-
-      await waitFor(() => {
-        const actionButton = screen.getByTestId(
-          `view-edit-test-case-button-${lockedTestCase.id}`
-        );
-
-        expect(actionButton).toBeInTheDocument();
-        expect(actionButton).toHaveTextContent("Edit");
-
-        const lockIcon = within(actionButton).queryByTestId("LockOutlinedIcon");
-        expect(lockIcon).not.toBeInTheDocument();
-      });
-    });
-
     it("should NOT display lock icon when user does not have edit access", async () => {
-      (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-        Locking: true,
-      }));
-
       const deleteTestCase = jest.fn();
       const exportTestCase = jest.fn();
       const onCloneTestCase = jest.fn();
@@ -1014,10 +963,6 @@ describe("TestCase component", () => {
     });
 
     it("should display Edit button without lock icon when test case is not locked", async () => {
-      (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-        Locking: true,
-      }));
-
       const unlockedTestCase = {
         ...testCase,
         testCaseLock: null,
@@ -1054,10 +999,6 @@ describe("TestCase component", () => {
     });
 
     it("should navigate to test case view when clicking locked test case button", async () => {
-      (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-        Locking: true,
-      }));
-
       const deleteTestCase = jest.fn();
       const exportTestCase = jest.fn();
       const onCloneTestCase = jest.fn();

@@ -9,7 +9,6 @@ import {
   measureStore,
   routeHandlerStore,
   useMeasureServiceApi,
-  useFeatureFlags,
 } from "@madie/madie-util";
 import { CqlAntlr } from "@madie/cql-antlr-parser/dist/src";
 import MetaDataWrapper from "../../../details/MetaDataWrapper";
@@ -57,7 +56,6 @@ const RiskAdjustment = (props: RiskAdjustmentProps) => {
   const [definitions, setDefinitions] = useState([]);
   const { updateMeasure } = measureStore;
   const measureServiceApi = useMeasureServiceApi();
-  const featureFlags = useFeatureFlags();
 
   useEffect(() => {
     const subscription = measureStore.subscribe(setMeasure);
@@ -99,7 +97,7 @@ const RiskAdjustment = (props: RiskAdjustmentProps) => {
   const { resetForm } = formik;
 
   const handleSubmit = async (values) => {
-    if (featureFlags.Locking && (await props.checkTestCasesLockStatus())) {
+    if (await props.checkTestCasesLockStatus()) {
       handleToast(
         "danger",
         "This measure cannot be saved because changes to the Population Criteria will update test cases and one or more test cases are locked by another user.",
@@ -130,7 +128,7 @@ const RiskAdjustment = (props: RiskAdjustmentProps) => {
       })
       .catch((reason) => {
         let message = `Error updating measure "${modifiedMeasure.measureName}": ${reason}`;
-        if (featureFlags?.Locking && reason?.status === 423) {
+        if (reason?.status === 423) {
           updateMeasure({
             ...measure,
             measureLock: {

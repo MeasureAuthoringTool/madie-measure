@@ -12,16 +12,13 @@ import AssociateCmsIdAction, {
 } from "./AccociateCmsIdAction";
 import { Measure, MeasureSet, Model } from "@madie/madie-models";
 import userEvent from "@testing-library/user-event";
-import { useFeatureFlags } from "@madie/madie-util";
 
 const mockUser = "test user";
 jest.mock("@madie/madie-util", () => ({
   useOktaTokens: () => ({
     getUserName: () => mockUser,
   }),
-  useFeatureFlags: jest.fn().mockReturnValue({
-    Locking: false,
-  }),
+  useFeatureFlags: jest.fn().mockReturnValue({}),
 }));
 
 const mockMeasureSet = {
@@ -186,7 +183,6 @@ describe("AssociateCmsIdAction", () => {
   });
 
   it("Should disable action btn if feature flag Locking is enabled and QI-Core measure is locked", () => {
-    (useFeatureFlags as jest.Mock).mockReturnValue({ Locking: true });
     const lockedQiCoreMeasure = {
       ...qiCoreMeasure,
       measureLock: { lockedBy: mockUser, lockDateTime: new Date() },
@@ -205,7 +201,6 @@ describe("AssociateCmsIdAction", () => {
   });
 
   it("Should enable action btn if feature flag Locking is enabled and QI-Core measure is not locked", () => {
-    (useFeatureFlags as jest.Mock).mockReturnValue({ Locking: true });
     render(
       <AssociateCmsIdAction
         measures={[qdmMeasure, qiCoreMeasure]}

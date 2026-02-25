@@ -65,9 +65,7 @@ jest.mock("@madie/madie-util", () => ({
     state: { canTravel: true, pendingPath: "" },
     initialState: { canTravel: true, pendingPath: "" },
   },
-  useFeatureFlags: jest.fn(() => ({
-    Locking: false,
-  })),
+  useFeatureFlags: jest.fn(() => ({})),
 }));
 
 const increasedNotation = "Increased score indicates improvement";
@@ -578,9 +576,6 @@ describe("QDMReporting component", () => {
   });
 
   test("displays error alert when locking feature is enabled and test cases get locked during edit", async () => {
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-      Locking: true,
-    }));
     const checkTestCasesLockStatusMock = jest.fn().mockResolvedValue(true);
     const setAlertMessageMock = jest.fn();
 
@@ -614,9 +609,6 @@ describe("QDMReporting component", () => {
   });
 
   test("Save with 423 failure will display error message", async () => {
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementationOnce(() => ({
-      Locking: true,
-    }));
     (mockMeasureServiceApi.updateMeasure as jest.Mock).mockRejectedValueOnce({
       status: 423,
       response: {

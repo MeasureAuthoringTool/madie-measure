@@ -127,9 +127,7 @@ jest.mock("@madie/madie-util", () => ({
   useOktaTokens: () => ({
     getAccessToken: () => "test.jwt",
   }),
-  useFeatureFlags: jest.fn(() => ({
-    Locking: false,
-  })),
+  useFeatureFlags: jest.fn(() => ({})),
   routeHandlerStore: {
     subscribe: () => {
       return { unsubscribe: () => null };
@@ -146,7 +144,7 @@ const props: MeasureGroupProps = {
   setIsFormDirty: jest.fn,
   measureId: "testMeasureId",
   setAlertMessage: jest.fn,
-  checkTestCasesLockStatus: jest.fn,
+  checkTestCasesLockStatus: jest.fn().mockResolvedValue(false),
   isTestCaseLocked: true,
   measureCanEdit: false,
 };
@@ -567,9 +565,6 @@ describe("Measure Groups Page", () => {
     });
 
     test("Display error when deleting a locked measure group if any Test Case is Locked by another user", async () => {
-      useFeatureFlags.mockImplementation(() => ({
-        Locking: true,
-      }));
       mockMeasureServiceApi.deleteMeasureGroup = jest
         .fn()
         .mockRejectedValueOnce({
@@ -608,14 +603,14 @@ describe("Measure Groups Page", () => {
         screen.getByTestId("delete-measure-group-modal-agree-btn")
       );
 
-      const errorToastMsg = await screen.findByText(
-        "This measure cannot be saved because changes to the Population Criteria will update test cases and one or more test cases are locked by another user."
-      );
-      expect(errorToastMsg).toBeInTheDocument();
-
-      useFeatureFlags.mockImplementation(() => ({
-        Locking: false,
-      }));
+      await waitFor(() => {
+        expect(setAlertMessageMock).toHaveBeenCalledWith({
+          type: "error",
+          message:
+            "The Population Criteria cannot be deleted because changes to the Population Criteria will update test cases and one or more test cases are locked by another user.",
+          canClose: false,
+        });
+      });
     });
 
     test("Navigating between the tabs in measure groups page", async () => {
@@ -743,7 +738,9 @@ describe("Measure Groups Page", () => {
                     setMeasureGroupNumber={jest.fn}
                     setAlertMessage={jest.fn}
                     isTestCaseLocked={false}
-                    checkTestCasesLockStatus={jest.fn}
+                    checkTestCasesLockStatus={jest
+                      .fn()
+                      .mockResolvedValue(false)}
                     measureCanEdit={true}
                     alertMessage=""
                   />
@@ -1285,9 +1282,6 @@ describe("Measure Groups Page", () => {
     });
 
     test("Should display 423 error when measure is locked", async () => {
-      useFeatureFlags.mockImplementation(() => ({
-        Locking: true,
-      }));
       mockMeasureServiceApi.updateGroup = jest.fn().mockRejectedValueOnce({
         status: 423,
         message: "Unable to update measure. Measure is locked by another user.",
@@ -2535,9 +2529,6 @@ describe("Measure Groups Page", () => {
     });
 
     test("render Measure group properties in readonly mode if a testcase is locked", async () => {
-      (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-        Locking: true,
-      }));
       renderMeasureGroupComponent({ ...customProps, isTestCaseLocked: true });
       const descriptionEditor = screen.getByTestId(
         "group-description-rich-text-editor"
@@ -2563,9 +2554,6 @@ describe("Measure Groups Page", () => {
     });
 
     test("render Measure group properties if a testcase is unlocked", async () => {
-      (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-        Locking: true,
-      }));
       renderMeasureGroupComponent(customProps);
       const descriptionEditor = screen.getByTestId(
         "group-description-rich-text-editor"
@@ -2589,13 +2577,12 @@ describe("Measure Groups Page", () => {
     });
 
     test("displays error alert when test cases are locked and locking feature is enabled", async () => {
-      (useFeatureFlags as jest.Mock).mockImplementation(() => ({
-        Locking: true,
-      }));
       const checkTestCasesLockStatusMock = jest.fn().mockResolvedValue(true);
-      const setAlertMessageMock = jest.fn();
 
-      renderMeasureGroupComponent(customProps);
+      renderMeasureGroupComponent({
+        ...customProps,
+        checkTestCasesLockStatus: checkTestCasesLockStatusMock,
+      });
 
       await changePopulationBasis("Encounter");
 

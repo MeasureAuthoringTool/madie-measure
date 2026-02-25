@@ -7,16 +7,12 @@ import DeleteAction, {
   TEST_CASES_LOCKED_MESSAGE,
 } from "./DeleteAction";
 import { Measure, MeasureLock, MeasureSet, Model } from "@madie/madie-models";
-import { useFeatureFlags } from "@madie/madie-util";
-
 const mockUser = "test user";
 jest.mock("@madie/madie-util", () => ({
   useOktaTokens: () => ({
     getUserName: () => mockUser,
   }),
-  useFeatureFlags: jest.fn().mockReturnValue({
-    Locking: false,
-  }),
+  useFeatureFlags: jest.fn().mockReturnValue({}),
 }));
 
 const mockMeasureSet = {
@@ -94,9 +90,6 @@ describe("DeleteAction", () => {
   });
 
   it("Should disable button if measure is locked", () => {
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-      Locking: true,
-    }));
     const lockedByUser = "another user";
     render(
       <DeleteAction
@@ -118,9 +111,6 @@ describe("DeleteAction", () => {
   });
 
   it("Should disable button if measure has test cases that are locked by other users", () => {
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-      Locking: true,
-    }));
     const lockedByUser = "another user";
     render(
       <DeleteAction
@@ -142,9 +132,6 @@ describe("DeleteAction", () => {
   });
 
   it("Should enable button if measure is not locked and no locked test cases present", () => {
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-      Locking: true,
-    }));
     render(
       <DeleteAction
         measures={[qiCoreMeasure]}
