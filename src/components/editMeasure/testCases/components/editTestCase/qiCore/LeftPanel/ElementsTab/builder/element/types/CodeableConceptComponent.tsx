@@ -19,6 +19,7 @@ interface CodeableConceptComponentProps {
   handleAddElement?: Function;
   showDeleteButton?: boolean;
   handleDeleteElement?: Function;
+  onChangeForExtension?: (value: CodeableConcept) => void;
 }
 
 const CodeableConceptComponent: React.FC<CodeableConceptComponentProps> = ({
@@ -30,6 +31,7 @@ const CodeableConceptComponent: React.FC<CodeableConceptComponentProps> = ({
   showAddAttributeButton,
   handleAddElement,
   showDeleteButton,
+  onChangeForExtension,
   // handleDeleteElement,
 }) => {
   const formik = useFormikContext();
@@ -105,9 +107,27 @@ const CodeableConceptComponent: React.FC<CodeableConceptComponentProps> = ({
               handleDeleteElement={() => handleDeleteElement(index)}
               showAddAttributeButton={isLastElement}
               structureDefinition={structureDefinition}
-              onChange={(newValue: Coding) =>
-                formik.setFieldValue(codingLabel, newValue)
-              }
+              onChange={(newValue: Coding) => {
+                const currentValue = _.get(
+                  formik.values,
+                  label
+                ) as CodeableConcept;
+                const updatedCodings = [...(currentValue?.coding || [])];
+                updatedCodings[index] = newValue;
+
+                const updatedCodeableConcept: CodeableConcept = {
+                  ...currentValue,
+                  coding: updatedCodings,
+                };
+
+                if (onChangeForExtension) {
+                  // For extension context, call the parent onChange with full CodeableConcept
+                  onChangeForExtension(updatedCodeableConcept);
+                } else {
+                  // Regular case - just update the specific coding
+                  formik.setFieldValue(codingLabel, newValue);
+                }
+              }}
               value={coding}
             />
           </Box>

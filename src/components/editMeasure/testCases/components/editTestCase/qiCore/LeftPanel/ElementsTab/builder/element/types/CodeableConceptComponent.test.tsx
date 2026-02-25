@@ -371,4 +371,108 @@ describe("CodeableConceptComponent Tests", () => {
       );
     });
   });
+
+  it("calls onChangeForExtension with full CodeableConcept when in extension context", async () => {
+    const value = {
+      coding: [
+        {
+          ...mockBindingValueSet.expansion?.contains[0],
+          extension: [
+            {
+              url: "http://hl7.org/fhir/StructureDefinition/valueset-reference",
+              valueUri: mockBindingValueSet.url,
+            },
+          ],
+        },
+      ],
+    };
+
+    const mockFormik = createMockFormik({
+      "Patient.extension[0].valueCodeableConcept": value,
+    });
+    const onChangeForExtension = jest.fn();
+
+    mockedAxios.get.mockResolvedValue({
+      data: mockBindingValueSet,
+    });
+
+    render(
+      <ApiContextProvider value={mockConfig}>
+        <ExecutionContextProvider
+          value={{
+            measureState: [null, jest.fn()],
+            bundleState: [null, jest.fn()],
+            valueSetsState: [null, jest.fn()],
+            executionContextReady: true,
+            executing: false,
+            setExecuting: jest.fn(),
+            contextFailure: false,
+          }}
+        >
+          <FormikProvider value={mockFormik}>
+            <CodeableConceptComponent
+              canEdit={true}
+              structureDefinition={mockStructureDefinition}
+              label="Patient.extension[0].valueCodeableConcept"
+              value={value}
+              addTitle={"Codeable"}
+              onChangeForExtension={onChangeForExtension}
+            />
+          </FormikProvider>
+        </ExecutionContextProvider>
+      </ApiContextProvider>
+    );
+
+    // Wait for value set to load
+    const valueSetSelect = screen.getByRole("combobox", {
+      name: "Value Set / Direct Reference Code",
+    });
+    await waitFor(() => {
+      expect(valueSetSelect).toHaveTextContent(mockBindingValueSet.title);
+    });
+
+    // Select a different code system
+    const codeSystemSelect = screen.getByRole("combobox", {
+      name: "Code System",
+    });
+    await userEvent.click(codeSystemSelect);
+    const codeSystemOptions = screen.getAllByRole("option");
+    await userEvent.click(codeSystemOptions[1]);
+
+    await waitFor(() => {
+      expect(codeSystemSelect).toHaveTextContent(
+        mockBindingValueSet.expansion?.contains[1].system
+      );
+    });
+
+    // Select a code
+    const codeSelect = screen.getByRole("combobox", {
+      name: "Code",
+    });
+    await userEvent.click(codeSelect);
+    const codeOptions = screen.getAllByRole("option");
+    await userEvent.click(codeOptions[0]);
+
+    // Verify onChangeForExtension was called with the full CodeableConcept
+    await waitFor(() => {
+      expect(onChangeForExtension).toHaveBeenCalledWith({
+        coding: [
+          {
+            code: mockBindingValueSet.expansion?.contains[1].code,
+            system: mockBindingValueSet.expansion?.contains[1].system,
+            display: mockBindingValueSet.expansion?.contains[1].display,
+            extension: [
+              {
+                url: "http://hl7.org/fhir/StructureDefinition/valueset-reference",
+                valueUri: mockBindingValueSet.url,
+              },
+            ],
+          },
+        ],
+      });
+    });
+
+    // Verify formik.setFieldValue was NOT called (extension context should use onChangeForExtension instead)
+    expect(mockSetFieldValue).not.toHaveBeenCalled();
+  });
 });
