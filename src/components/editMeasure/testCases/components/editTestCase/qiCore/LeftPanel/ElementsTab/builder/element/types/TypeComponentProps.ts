@@ -5,6 +5,7 @@ export interface TypeComponentProps {
   canEdit: boolean;
   value?: any;
   onChange?: (nextValue: any) => void;
+  onBlur?: (e: any) => void;
   structureDefinition?: ElementDefinition;
   fieldRequired: boolean;
   helperText?: any;
