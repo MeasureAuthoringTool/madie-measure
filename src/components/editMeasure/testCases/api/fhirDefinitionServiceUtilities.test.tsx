@@ -480,6 +480,248 @@ describe("FhirDefinitionServiceUtilities", () => {
         removeUndefinedProperties(["2024", "", undefined, null, "08/09/2025"])
       ).toEqual(["2024", "", null, "08/09/2025"]);
     });
+
+    it("should remove null values from an object", () => {
+      const obj = { a: 1, b: null, c: 3 };
+      expect(removeUndefinedProperties(obj)).toEqual({ a: 1, c: 3 });
+    });
+
+    it("should remove empty objects from nested structures", () => {
+      const obj = { a: 1, b: {}, c: 3 };
+      expect(removeUndefinedProperties(obj)).toEqual({ a: 1, c: 3 });
+    });
+
+    it("should remove deeply nested undefined values", () => {
+      const obj = {
+        a: {
+          b: {
+            c: undefined,
+            d: null,
+          },
+        },
+        e: 5,
+      };
+      expect(removeUndefinedProperties(obj)).toEqual({ e: 5 });
+    });
+
+    it("should preserve the 'x' key when present", () => {
+      const obj = { a: 1, x: undefined, b: 2 };
+      expect(removeUndefinedProperties(obj)).toEqual({
+        a: 1,
+        x: undefined,
+        b: 2,
+      });
+    });
+
+    it("should handle extension arrays with valid url properties", () => {
+      const obj = {
+        extension: [
+          { url: "http://example.com/ext1", valueString: "test" },
+          { url: "http://example.com/ext2", valueBoolean: true },
+        ],
+      };
+      expect(removeUndefinedProperties(obj)).toEqual({
+        extension: [
+          { url: "http://example.com/ext1", valueString: "test" },
+          { url: "http://example.com/ext2", valueBoolean: true },
+        ],
+      });
+    });
+
+    it("should filter out extension objects without url property", () => {
+      const obj = {
+        extension: [
+          { url: "http://example.com/ext1", valueString: "test" },
+          { valueString: "no url" },
+          { url: "http://example.com/ext2", valueBoolean: true },
+        ],
+      };
+      expect(removeUndefinedProperties(obj)).toEqual({
+        extension: [
+          { url: "http://example.com/ext1", valueString: "test" },
+          { url: "http://example.com/ext2", valueBoolean: true },
+        ],
+      });
+    });
+
+    it("should filter out null and undefined values from extension arrays", () => {
+      const obj = {
+        extension: [
+          { url: "http://example.com/ext1", valueString: "test" },
+          null,
+          undefined,
+          { url: "http://example.com/ext2", valueBoolean: true },
+        ],
+      };
+      expect(removeUndefinedProperties(obj)).toEqual({
+        extension: [
+          { url: "http://example.com/ext1", valueString: "test" },
+          { url: "http://example.com/ext2", valueBoolean: true },
+        ],
+      });
+    });
+
+    it("should filter out empty strings from extension arrays", () => {
+      const obj = {
+        extension: [
+          { url: "http://example.com/ext1", valueString: "test" },
+          "",
+          { url: "http://example.com/ext2", valueBoolean: true },
+        ],
+      };
+      expect(removeUndefinedProperties(obj)).toEqual({
+        extension: [
+          { url: "http://example.com/ext1", valueString: "test" },
+          { url: "http://example.com/ext2", valueBoolean: true },
+        ],
+      });
+    });
+
+    it("should delete extension key when all extensions are filtered out", () => {
+      const obj = {
+        name: "test",
+        extension: [{ valueString: "no url" }, null, undefined, ""],
+      };
+      expect(removeUndefinedProperties(obj)).toEqual({ name: "test" });
+    });
+
+    it("should delete extension key when array becomes empty after filtering", () => {
+      const obj = {
+        name: "test",
+        extension: [],
+      };
+      expect(removeUndefinedProperties(obj)).toEqual({ name: "test" });
+    });
+
+    it("should recursively clean nested objects within extension arrays", () => {
+      const obj = {
+        extension: [
+          {
+            url: "http://example.com/ext1",
+            valueString: "test",
+            nested: { a: 1, b: undefined },
+          },
+        ],
+      };
+      expect(removeUndefinedProperties(obj)).toEqual({
+        extension: [
+          {
+            url: "http://example.com/ext1",
+            valueString: "test",
+            nested: { a: 1 },
+          },
+        ],
+      });
+    });
+
+    it("should handle arrays of objects with undefined properties", () => {
+      const obj = {
+        items: [
+          { id: 1, name: "test", value: undefined },
+          { id: 2, name: "test2", value: "valid" },
+        ],
+      };
+      expect(removeUndefinedProperties(obj)).toEqual({
+        items: [
+          { id: 1, name: "test" },
+          { id: 2, name: "test2", value: "valid" },
+        ],
+      });
+    });
+
+    it("should handle nested arrays within objects", () => {
+      const obj = {
+        data: {
+          values: [1, undefined, 2, null, 3],
+        },
+      };
+      expect(removeUndefinedProperties(obj)).toEqual({
+        data: {
+          values: [1, 2, null, 3],
+        },
+      });
+    });
+
+    it("should handle complex nested structures", () => {
+      const obj = {
+        patient: {
+          name: [
+            { given: ["John"], family: "Doe" },
+            { given: undefined, family: null },
+          ],
+          identifier: { value: "123", system: undefined },
+          extension: [
+            { url: "http://example.com/race", valueString: "test" },
+            { valueString: "no url" },
+          ],
+        },
+        meta: {},
+      };
+      expect(removeUndefinedProperties(obj)).toEqual({
+        patient: {
+          name: [
+            { given: ["John"], family: "Doe" },
+            {}, // empty object remains in array after removing undefined/null properties
+          ],
+          identifier: { value: "123" },
+          extension: [{ url: "http://example.com/race", valueString: "test" }],
+        },
+      });
+    });
+
+    it("should handle objects where all properties become empty", () => {
+      const obj = {
+        wrapper: {
+          a: undefined,
+          b: null,
+          c: {},
+        },
+      };
+      expect(removeUndefinedProperties(obj)).toEqual({});
+    });
+
+    it("should preserve false and 0 values", () => {
+      const obj = { a: 0, b: false, c: "", d: undefined };
+      expect(removeUndefinedProperties(obj)).toEqual({ a: 0, b: false, c: "" });
+    });
+
+    it("should handle arrays with nested objects containing empty values", () => {
+      const obj = {
+        data: [
+          { id: 1, meta: { a: undefined } },
+          { id: 2, meta: { b: "value" } },
+        ],
+      };
+      expect(removeUndefinedProperties(obj)).toEqual({
+        data: [{ id: 1 }, { id: 2, meta: { b: "value" } }],
+      });
+    });
+
+    it("should handle extension arrays within nested objects", () => {
+      const obj = {
+        patient: {
+          extension: [
+            { url: "http://example.com/ext", valueString: "test" },
+            { noUrl: "value" },
+          ],
+        },
+        observation: {
+          extension: null,
+        },
+      };
+      expect(removeUndefinedProperties(obj)).toEqual({
+        patient: {
+          extension: [{ url: "http://example.com/ext", valueString: "test" }],
+        },
+      });
+    });
+
+    it("should handle hasOwnProperty check correctly", () => {
+      const obj = Object.create({ inherited: "value" });
+      obj.own = "test";
+      obj.empty = undefined;
+      expect(removeUndefinedProperties(obj)).toEqual({ own: "test" });
+    });
   });
 });
 

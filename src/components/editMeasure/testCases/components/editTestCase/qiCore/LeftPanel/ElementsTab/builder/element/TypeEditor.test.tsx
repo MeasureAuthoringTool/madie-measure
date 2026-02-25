@@ -2172,6 +2172,333 @@ describe("TypeEditor Component", () => {
     ).toBeInTheDocument();
   });
 
+  test("onChangeForExtension: string type calls onChangeForExtension on blur", async () => {
+    const onChangeForExtension = jest.fn();
+    const setFieldTouched = jest.fn();
+    const onBlur = jest.fn();
+
+    const extensionStringFormik = {
+      ...mockFormik,
+      values: { Patient: { extension: [{ url: "test", valueString: "" }] } },
+      setFieldTouched,
+      getFieldProps: () => ({
+        name: "Patient.extension[0].valueString",
+        value: "",
+        onChange: jest.fn(),
+        onBlur,
+      }),
+    };
+
+    render(
+      <FormikProvider value={extensionStringFormik}>
+        <RequiredFieldsProvider
+          requiredFields={mockRequiredFields}
+          formInfo={mockFormInfo}
+        >
+          <TypeEditor
+            resource={null}
+            structureDefinition={{
+              id: "Extension.value[x]",
+              path: "Extension.value[x]",
+              type: [
+                {
+                  code: "http://hl7.org/fhirpath/System.String",
+                  extension: [
+                    {
+                      url: "http://hl7.org/fhir/StructureDefinition/structuredefinition-fhir-type",
+                      valueUrl: "string",
+                    },
+                  ],
+                },
+              ],
+              min: 0,
+              max: "1",
+            }}
+            label={"Patient.extension[0].valueString"}
+            canEdit={true}
+            parentStructureDefinition={{
+              type: [{ code: "Extension" }],
+            }}
+            onChangeForExtension={onChangeForExtension}
+          />
+        </RequiredFieldsProvider>
+      </FormikProvider>
+    );
+
+    const inputField = screen.getByTestId(
+      "string-field-input-Patient.extension[0].valueString"
+    ) as HTMLInputElement;
+    expect(inputField).toBeInTheDocument();
+
+    // For string type in extension context, onChangeForExtension fires on blur.
+    // The onBlur handler reads e.target.value to pass to onChangeForExtension.
+    fireEvent.blur(inputField, { target: { value: "hello extension" } });
+
+    expect(onChangeForExtension).toHaveBeenCalledWith("hello extension");
+  });
+
+  test("onChangeForExtension: decimal type calls onChangeForExtension on blur with parsed float", async () => {
+    const onChangeForExtension = jest.fn();
+    const onBlur = jest.fn();
+
+    const extensionDecimalFormik = {
+      ...mockFormik,
+      values: { Patient: { extension: [{ url: "test", valueDecimal: 0 }] } },
+      setFieldTouched: jest.fn(),
+      getFieldProps: () => ({
+        name: "Patient.extension[0].valueDecimal",
+        value: "",
+        onChange: jest.fn(),
+        onBlur,
+      }),
+    };
+
+    render(
+      <FormikProvider value={extensionDecimalFormik}>
+        <RequiredFieldsProvider
+          requiredFields={mockRequiredFields}
+          formInfo={mockFormInfo}
+        >
+          <TypeEditor
+            resource={null}
+            structureDefinition={{
+              id: "Extension.value[x]",
+              path: "Extension.value[x]",
+              type: [{ code: "decimal" }],
+              min: 0,
+              max: "1",
+            }}
+            label={"Patient.extension[0].valueDecimal"}
+            canEdit={true}
+            parentStructureDefinition={{
+              type: [{ code: "Extension" }],
+            }}
+            onChangeForExtension={onChangeForExtension}
+          />
+        </RequiredFieldsProvider>
+      </FormikProvider>
+    );
+
+    const inputField = screen.getByTestId(
+      "decimal-field-input-Patient.extension[0].valueDecimal"
+    ) as HTMLInputElement;
+    expect(inputField).toBeInTheDocument();
+
+    // Decimal type in extension context calls onChangeForExtension on blur with parseFloat
+    fireEvent.blur(inputField, { target: { value: "3.14" } });
+
+    expect(onChangeForExtension).toHaveBeenCalledWith(3.14);
+  });
+
+  test("onChangeForExtension: boolean type calls onChangeForExtension on change", async () => {
+    const onChangeForExtension = jest.fn();
+
+    const extensionBoolFormik = {
+      ...mockFormik,
+      values: {
+        Patient: { extension: [{ url: "test", valueBoolean: false }] },
+      },
+      setFieldTouched: jest.fn(),
+      setFieldValue: jest.fn(),
+      getFieldProps: () => ({
+        name: "Patient.extension[0].valueBoolean",
+        value: false,
+        onChange: jest.fn(),
+        onBlur: jest.fn(),
+      }),
+    };
+
+    render(
+      <FormikProvider value={extensionBoolFormik}>
+        <RequiredFieldsProvider
+          requiredFields={mockRequiredFields}
+          formInfo={mockFormInfo}
+        >
+          <TypeEditor
+            resource={null}
+            structureDefinition={{
+              id: "Extension.value[x]",
+              path: "Extension.value[x]",
+              type: [{ code: "boolean" }],
+              min: 0,
+              max: "1",
+            }}
+            label={"Patient.extension[0].valueBoolean"}
+            canEdit={true}
+            parentStructureDefinition={{
+              type: [{ code: "Extension" }],
+            }}
+            onChangeForExtension={onChangeForExtension}
+          />
+        </RequiredFieldsProvider>
+      </FormikProvider>
+    );
+
+    // Boolean renders a select with "true"/"false" options
+    const selectEl = screen.getByRole("combobox");
+    expect(selectEl).toBeInTheDocument();
+
+    // Change the value to "true" — triggers onChangeForExtension(true)
+    userEvent.click(selectEl);
+    const trueOption = screen.getByRole("option", { name: "true" });
+    userEvent.click(trueOption);
+
+    expect(onChangeForExtension).toHaveBeenCalledWith(true);
+    // Should NOT call formik.setFieldValue in extension context
+    expect(extensionBoolFormik.setFieldValue).not.toHaveBeenCalled();
+  });
+
+  test("onChangeForExtension: dateTime type calls onChangeForExtension on change", async () => {
+    const onChangeForExtension = jest.fn();
+
+    const extensionDateTimeFormik = {
+      ...mockFormik,
+      values: {
+        Patient: { extension: [{ url: "test", valueDateTime: "" }] },
+      },
+      setFieldTouched: jest.fn(),
+      setFieldValue: jest.fn(),
+      getFieldProps: () => ({
+        name: "Patient.extension[0].valueDateTime",
+        value: "",
+        onChange: jest.fn(),
+        onBlur: jest.fn(),
+      }),
+    };
+
+    render(
+      <FormikProvider value={extensionDateTimeFormik}>
+        <RequiredFieldsProvider
+          requiredFields={mockRequiredFields}
+          formInfo={mockFormInfo}
+        >
+          <TypeEditor
+            resource={null}
+            structureDefinition={{
+              id: "Extension.value[x]",
+              path: "Extension.value[x]",
+              type: [{ code: "dateTime" }],
+              min: 0,
+              max: "1",
+            }}
+            label={"Patient.extension[0].valueDateTime"}
+            canEdit={true}
+            parentStructureDefinition={{
+              type: [{ code: "Extension" }],
+            }}
+            onChangeForExtension={onChangeForExtension}
+          />
+        </RequiredFieldsProvider>
+      </FormikProvider>
+    );
+
+    // DateTime input renders with a specific placeholder
+    const dateTimeInput = screen.getByPlaceholderText(
+      "MM-DD-YYYY"
+    ) as HTMLInputElement;
+    expect(dateTimeInput).toBeInTheDocument();
+
+    // Simulate a dateTime change
+    fireEvent.change(dateTimeInput, {
+      target: { value: "01-15-2025" },
+    });
+
+    // In extension context, onChangeForExtension should be called instead of formik.setFieldValue
+    expect(onChangeForExtension).toHaveBeenCalled();
+    expect(extensionDateTimeFormik.setFieldValue).not.toHaveBeenCalled();
+  });
+
+  test("onChangeForExtension: code type calls onChangeForExtension on change", async () => {
+    const onChangeForExtension = jest.fn();
+
+    useFhirDefinitionsServiceApiMock.mockImplementation(
+      () =>
+        ({
+          getResourceTree: jest.fn().mockResolvedValue(codingDef),
+          getValueSetDefinition: jest
+            .fn()
+            .mockResolvedValue(mockValueSetDefinitionBirthSex),
+        } as unknown as FhirDefinitionsServiceApi)
+    );
+    useTerminologyServiceApiMock.mockImplementation(
+      () =>
+        ({
+          getValueSetsExpansionForOids: jest
+            .fn()
+            .mockResolvedValue(valueSetExpansionBirthSex),
+        } as unknown as TerminologyServiceApi)
+    );
+
+    const extensionCodeFormik = {
+      ...mockFormik,
+      values: {
+        Patient: {
+          extension: [
+            {
+              url: "http://hl7.org/fhir/us/core/StructureDefinition/us-core-birthsex",
+              valueCode: "",
+            },
+          ],
+        },
+      },
+      setFieldTouched: jest.fn(),
+      setFieldValue: jest.fn(),
+      getFieldProps: () => ({
+        name: "Patient.extension[0].valueCode",
+        value: "",
+        onChange: jest.fn(),
+        onBlur: jest.fn(),
+      }),
+    };
+
+    await act(async () => {
+      render(
+        <ExecutionContextProvider
+          value={{
+            measureState: [null, jest.fn()],
+            bundleState: [null, jest.fn()],
+            valueSetsState: [[], jest.fn()],
+            executionContextReady: true,
+            executing: false,
+            setExecuting: jest.fn(),
+            contextFailure: false,
+          }}
+        >
+          <FormikProvider value={extensionCodeFormik}>
+            <RequiredFieldsProvider
+              requiredFields={mockRequiredFields}
+              formInfo={mockFormInfo}
+            >
+              <TypeEditor
+                resource={null}
+                structureDefinition={structureDefinitionForExtensionValue}
+                label={"Patient.extension[0].valueCode"}
+                canEdit={true}
+                parentStructureDefinition={{
+                  type: [{ code: "Extension" }],
+                }}
+                onChangeForExtension={onChangeForExtension}
+              />
+            </RequiredFieldsProvider>
+          </FormikProvider>
+        </ExecutionContextProvider>
+      );
+    });
+
+    // Wait for the code dropdown to render with value set options
+    const codeSelect = await screen.findByRole("combobox");
+    expect(codeSelect).toBeInTheDocument();
+
+    // Select a value — triggers onChangeForExtension
+    await userEvent.click(codeSelect);
+    const maleOption = await screen.findByRole("option", { name: "Male" });
+    await userEvent.click(maleOption);
+
+    expect(onChangeForExtension).toHaveBeenCalled();
+    // In extension context, formik.setFieldValue should NOT be called directly
+    expect(extensionCodeFormik.setFieldValue).not.toHaveBeenCalled();
+  });
+
   test("Should render Coding component", async () => {
     const onChange = jest.fn();
     const setFieldTouched = jest.fn();

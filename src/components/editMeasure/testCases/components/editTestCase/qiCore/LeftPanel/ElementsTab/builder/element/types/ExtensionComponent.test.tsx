@@ -1,5 +1,5 @@
 import * as React from "react";
-import { render, screen } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { FormikProvider, FormikContextType } from "formik";
 import * as _ from "lodash";
 import ExtensionComponent, {
@@ -559,6 +559,178 @@ describe("ExtensionComponent", () => {
 
     expect(screen.getByTestId("extension:ombCategory")).toBeInTheDocument();
   });
+
+  test("onChangeForExtension calls formik.setFieldTouched and formik.setFieldValue with correct extension object", () => {
+    /**
+     * The text slice (type = string) renders a StringComponent via TypeEditor.
+     * In extension context, StringComponent fires onChangeForExtension on blur.
+     * ExtensionComponent's onChangeForExtension builds { url: fixedUri, valueString: value }
+     * and calls formik.setFieldTouched + formik.setFieldValue.
+     */
+    const mockSetFieldValue = jest.fn();
+    const mockSetFieldTouched = jest.fn();
+    const mockFormik = createMockFormik(
+      {
+        Patient: {
+          extension: [
+            {
+              url: "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race",
+              extension: [
+                undefined,
+                undefined,
+                { url: "text", valueString: "" },
+              ],
+            },
+          ],
+        },
+      },
+      {
+        setFieldValue: mockSetFieldValue,
+        setFieldTouched: mockSetFieldTouched,
+      }
+    );
+
+    render(
+      <FormikProvider value={mockFormik}>
+        <ExtensionComponent
+          label="Patient.extension[0].extension[2]"
+          canEdit={true}
+          fhirResource={{ resourceType: "Patient" }}
+          elementDefinition={
+            {
+              id: "Extension.extension:text",
+              path: "Extension.extension",
+              sliceName: "text",
+              type: [{ code: "Extension" }],
+            } as any
+          }
+          extensionProfileDef={mockRaceExtensionProfileDef as any}
+        />
+      </FormikProvider>
+    );
+
+    // Find the string input rendered by TypeEditor → StringComponent
+    const stringInput = screen.getByTestId(
+      "string-field-input-Patient.extension[0].extension[2].valueString"
+    );
+    expect(stringInput).toBeInTheDocument();
+
+    // Blur with a value triggers onChangeForExtension(e.target.value)
+    fireEvent.blur(stringInput, { target: { value: "White" } });
+
+    // onChangeForExtension should build { url: "text", valueString: "White" }
+    // and call formik.setFieldTouched + formik.setFieldValue
+    expect(mockSetFieldTouched).toHaveBeenCalledWith(
+      "Patient.extension[0].extension[2]"
+    );
+    expect(mockSetFieldValue).toHaveBeenCalledWith(
+      "Patient.extension[0].extension[2]",
+      { url: "text", valueString: "White" }
+    );
+  });
+
+  test("passes canEdit=false to TypeEditor for sliced extension", () => {
+    const mockFormik = createMockFormik({
+      Patient: {
+        extension: [
+          {
+            url: "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race",
+            extension: [{ url: "text", valueString: "White" }],
+          },
+        ],
+      },
+    });
+
+    render(
+      <FormikProvider value={mockFormik}>
+        <ExtensionComponent
+          label="Patient.extension[0].extension[2]"
+          canEdit={false}
+          fhirResource={{ resourceType: "Patient" }}
+          elementDefinition={
+            {
+              id: "Extension.extension:text",
+              path: "Extension.extension",
+              sliceName: "text",
+              type: [{ code: "Extension" }],
+            } as any
+          }
+          extensionProfileDef={mockRaceExtensionProfileDef as any}
+        />
+      </FormikProvider>
+    );
+
+    expect(screen.getByText("text")).toBeInTheDocument();
+  });
+
+  test("handles element ID without 'Extension.' prefix", () => {
+    /**
+     * When elementDefinition.id has no "Extension." prefix (e.g., "customSlice"),
+     * idPrefix = "customSlice".split("Extension.").pop() returns "customSlice".
+     * We need a profile whose snapshot has matching "customSlice.url" / "customSlice.value[x]"
+     * so that the if-branch renders and data-testid is applied.
+     */
+    const customProfile = {
+      definition: {
+        resourceType: "StructureDefinition",
+        id: "custom-ext",
+        type: "Extension",
+        snapshot: {
+          element: [
+            {
+              id: "customSlice",
+              path: "Extension.extension",
+              sliceName: "custom",
+            },
+            {
+              id: "customSlice.url",
+              path: "Extension.extension.url",
+              fixedUri: "custom",
+              type: [{ code: "uri" }],
+            },
+            {
+              id: "customSlice.value[x]",
+              path: "Extension.extension.value[x]",
+              type: [{ code: "string" }],
+            },
+          ],
+        },
+      },
+    };
+
+    const mockFormik = createMockFormik({
+      Patient: {
+        extension: [
+          {
+            url: "http://example.org/custom",
+            extension: [{ url: "custom", valueString: "test" }],
+          },
+        ],
+      },
+    });
+
+    render(
+      <FormikProvider value={mockFormik}>
+        <ExtensionComponent
+          label="Patient.extension[0].extension[0]"
+          canEdit={true}
+          fhirResource={{ resourceType: "Patient" }}
+          elementDefinition={
+            {
+              id: "customSlice",
+              path: "Extension.extension",
+              sliceName: "custom",
+              type: [{ code: "Extension" }],
+            } as any
+          }
+          extensionProfileDef={customProfile as any}
+        />
+      </FormikProvider>
+    );
+
+    // "customSlice".split("Extension.").pop() === "customSlice" (no prefix to strip)
+    expect(screen.getByTestId("customSlice")).toBeInTheDocument();
+  });
 });
 
 /**
@@ -592,18 +764,6 @@ describe("ExtensionComponent", () => {
  * The url is set at the parent level (by TypeEditor's Extension case), NOT by
  * ExtensionComponent. ExtensionComponent only handles the value portion.
  * ===========================================================================================
- */
-
-/**
- * Mock profile definition for us-core-birthsex — a simple (non-sliced) extension.
- *
- * Unlike us-core-race, birthsex has NO sliced sub-extensions. Its snapshot contains:
- *   - Extension (base)
- *   - Extension.url (structural, fixedUri = the extension URL)
- *   - Extension.value[x] (type = code, with binding to birthsex value set)
- *
- * getEditableExtensionSubElements will find no sliceName elements and fall back
- * to returning the value[x] element.
  */
 const mockBirthsexExtensionProfileDef = {
   definition: {
@@ -889,6 +1049,149 @@ describe("ExtensionComponent — simple (non-sliced) extensions", () => {
 
     // TypeEditor should receive label "Patient.extension[0].valueCode"
     // which gets passed to formik.getFieldProps
+    expect(mockFormik.getFieldProps).toHaveBeenCalledWith(
+      "Patient.extension[0].valueCode"
+    );
+  });
+
+  test("handles extension with valueElement but no type gracefully", () => {
+    const incompleteProfile = {
+      definition: {
+        resourceType: "StructureDefinition",
+        id: "incomplete-ext",
+        url: "http://example.org/fhir/StructureDefinition/incomplete",
+        type: "Extension",
+        snapshot: {
+          element: [
+            {
+              id: "Extension.extension:slice1",
+              path: "Extension.extension",
+              sliceName: "slice1",
+            },
+            {
+              id: "Extension.extension:slice1.url",
+              path: "Extension.extension.url",
+              fixedUri: "slice1",
+            },
+            {
+              id: "Extension.extension:slice1.value[x]",
+              path: "Extension.extension.value[x]",
+              type: [], // Empty type array
+            },
+          ],
+        },
+      },
+    };
+
+    const mockFormik = createMockFormik({
+      Patient: {
+        extension: [{ url: "http://example.org/...", extension: [] }],
+      },
+    });
+
+    render(
+      <FormikProvider value={mockFormik}>
+        <ExtensionComponent
+          label="Patient.extension[0].extension[0]"
+          canEdit={true}
+          fhirResource={{ resourceType: "Patient" }}
+          elementDefinition={
+            {
+              id: "Extension.extension:slice1",
+              path: "Extension.extension",
+              sliceName: "slice1",
+            } as any
+          }
+          extensionProfileDef={incompleteProfile as any}
+        />
+      </FormikProvider>
+    );
+
+    // Should render without crashing, even though valueElement.type[0]?.code is undefined
+    expect(screen.getByText("slice1")).toBeInTheDocument();
+  });
+
+  test("handles extension with no valueElement (only urlElement)", () => {
+    const urlOnlyProfile = {
+      definition: {
+        resourceType: "StructureDefinition",
+        id: "url-only-ext",
+        url: "http://example.org/fhir/StructureDefinition/url-only",
+        type: "Extension",
+        snapshot: {
+          element: [
+            {
+              id: "Extension.extension:urlOnly",
+              path: "Extension.extension",
+              sliceName: "urlOnly",
+            },
+            {
+              id: "Extension.extension:urlOnly.url",
+              path: "Extension.extension.url",
+              fixedUri: "urlOnly",
+            },
+          ],
+        },
+      },
+    };
+
+    const mockFormik = createMockFormik({
+      Patient: {
+        extension: [{ url: "http://example.org/...", extension: [] }],
+      },
+    });
+
+    render(
+      <FormikProvider value={mockFormik}>
+        <ExtensionComponent
+          label="Patient.extension[0].extension[0]"
+          canEdit={true}
+          fhirResource={{ resourceType: "Patient" }}
+          elementDefinition={
+            {
+              id: "Extension.extension:urlOnly",
+              path: "Extension.extension",
+              sliceName: "urlOnly",
+            } as any
+          }
+          extensionProfileDef={urlOnlyProfile as any}
+        />
+      </FormikProvider>
+    );
+
+    expect(screen.getByText("urlOnly")).toBeInTheDocument();
+  });
+
+  test("passes canEdit=false to TypeEditor for simple extension", () => {
+    const mockFormik = createMockFormik({
+      Patient: {
+        extension: [
+          {
+            url: "http://hl7.org/fhir/us/core/StructureDefinition/us-core-birthsex",
+            valueCode: "F",
+          },
+        ],
+      },
+    });
+
+    const birthsexValueElement = {
+      id: "Extension.value[x]",
+      path: "Extension.value[x]",
+      type: [{ code: "code" }],
+    };
+
+    render(
+      <FormikProvider value={mockFormik}>
+        <ExtensionComponent
+          label="Patient.extension[0]"
+          canEdit={false}
+          fhirResource={{ resourceType: "Patient" }}
+          elementDefinition={birthsexValueElement as any}
+          extensionProfileDef={mockBirthsexExtensionProfileDef as any}
+        />
+      </FormikProvider>
+    );
+
     expect(mockFormik.getFieldProps).toHaveBeenCalledWith(
       "Patient.extension[0].valueCode"
     );
