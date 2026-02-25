@@ -7,13 +7,9 @@ import VersionAction, {
   TEST_CASES_LOCKED_MESSAGE,
 } from "./VersionAction";
 import { Measure, MeasureSet, Model, MeasureLock } from "@madie/madie-models";
-import { useFeatureFlags } from "@madie/madie-util";
-
 const mockUser = "test user";
 jest.mock("@madie/madie-util", () => ({
-  useFeatureFlags: jest.fn().mockReturnValue({
-    Locking: false,
-  }),
+  useFeatureFlags: jest.fn().mockReturnValue({}),
 }));
 
 const mockMeasureSet = {
@@ -112,9 +108,6 @@ describe("VersionAction", () => {
   });
 
   it("Should disable button if measure is locked", () => {
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-      Locking: true,
-    }));
     const lockedByUser = "another user";
     render(
       <VersionAction
@@ -136,9 +129,6 @@ describe("VersionAction", () => {
   });
 
   it("Should disable button if test cases are locked", () => {
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-      Locking: true,
-    }));
     const lockedByUser = "another user";
     render(
       <VersionAction
@@ -161,9 +151,6 @@ describe("VersionAction", () => {
   });
 
   it("Should enable button if neither measure nor test cases are locked", () => {
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-      Locking: true,
-    }));
     render(
       <VersionAction
         measures={[

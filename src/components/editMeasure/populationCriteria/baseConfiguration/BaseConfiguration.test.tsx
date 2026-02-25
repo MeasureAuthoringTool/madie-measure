@@ -70,9 +70,7 @@ jest.mock("@madie/madie-util", () => ({
     state: { canTravel: true, pendingPath: "" },
     initialState: { canTravel: true, pendingPath: "" },
   },
-  useFeatureFlags: jest.fn(() => ({
-    Locking: false,
-  })),
+  useFeatureFlags: jest.fn(() => ({})),
 }));
 
 const useMeasureServiceApiMock =
@@ -312,9 +310,6 @@ describe("Base Configuration component", () => {
   });
 
   test("Save measure scoring with failure will display 423 error message", async () => {
-    useFeatureFlags.mockImplementation(() => ({
-      Locking: true,
-    }));
     mockMeasureServiceApi.updateMeasure = jest.fn().mockRejectedValueOnce({
       status: 423,
       response: {
@@ -636,9 +631,6 @@ describe("Base Configuration component", () => {
   });
 
   it("displays error alert when locking feature is enabled and test cases get locked during edit", async () => {
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-      Locking: true,
-    }));
     mockMeasureServiceApi.updateMeasure = jest
       .fn()
       .mockResolvedValue({ status: 200 });

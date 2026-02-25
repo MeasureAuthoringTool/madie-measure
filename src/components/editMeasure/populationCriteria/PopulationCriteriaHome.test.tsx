@@ -112,7 +112,7 @@ const QiCoreMeasure = {
     },
   ],
 } as Measure;
-let mockFeatureFlags = { Locking: false };
+let mockFeatureFlags = {};
 const populationBasisValues: string[] = [
   "boolean",
   "Encounter",
@@ -139,6 +139,8 @@ const mockMeasureServiceApi: MeasureServiceApi = {
     boolIpp: "boolean",
   }),
   updateGroup: jest.fn().mockResolvedValue({ status: 200 }),
+  updateMeasureLock: jest.fn().mockResolvedValue({}),
+  unlockMeasure: jest.fn(),
 } as unknown as MeasureServiceApi;
 
 jest.mock("@madie/madie-util", () => ({
@@ -568,7 +570,6 @@ describe("PopulationCriteriaHome", () => {
 
   it("should trigger lock, success", async () => {
     const mockedMeasureState = measureStore as jest.Mocked<{ state }>;
-    mockFeatureFlags = { Locking: true };
     mockedMeasureState.state = { ...QiCoreMeasure };
 
     mockMeasureServiceApi.updateMeasureLock = jest.fn().mockResolvedValueOnce({
@@ -601,8 +602,6 @@ describe("PopulationCriteriaHome", () => {
   it("should trigger lock, fail", async () => {
     const mockedMeasureState = measureStore as jest.Mocked<{ state }>;
     mockedMeasureState.state = { ...QiCoreMeasure };
-    mockFeatureFlags = { Locking: true };
-
     mockMeasureServiceApi.updateMeasureLock = jest
       .fn()
       .mockRejectedValue("test");

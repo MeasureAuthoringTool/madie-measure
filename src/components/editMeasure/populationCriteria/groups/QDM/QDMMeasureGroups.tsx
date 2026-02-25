@@ -38,7 +38,6 @@ import {
   routeHandlerStore,
   useDocumentTitle,
   useMeasureServiceApi,
-  useFeatureFlags,
 } from "@madie/madie-util";
 import MeasureGroupsWarningDialog from "../MeasureGroupWarningDialog";
 import { getPopulationsForScoring } from "../../PopulationHelper";
@@ -169,7 +168,6 @@ const MeasureGroups = (props: MeasureGroupProps) => {
 
   const canEdit = !props.isTestCaseLocked && props.measureCanEdit;
   const measureServiceApi = useMeasureServiceApi();
-  const featureFlags = useFeatureFlags();
   let location = useLocation();
   const { pathname } = useLocation();
 
@@ -365,7 +363,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
   }, [formik.values.populations, validateForm]);
 
   const checkTestCasesLockStatus = async (): Promise<boolean> => {
-    if (featureFlags.Locking && (await props.checkTestCasesLockStatus())) {
+    if (await props.checkTestCasesLockStatus()) {
       handleToast(
         "danger",
         "This measure cannot be saved because changes to the Population Criteria will update test cases and one or more test cases are locked by another user.",
@@ -557,7 +555,6 @@ const MeasureGroups = (props: MeasureGroupProps) => {
         })
         .catch((error) => {
           if (
-            featureFlags?.Locking &&
             error?.message.includes(
               "Unable to update measure. Measure is locked by"
             )

@@ -2868,9 +2868,6 @@ describe("Measure List", () => {
 describe("Measure lock functionality", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    (useFeatureFlags as jest.Mock).mockImplementation(() => ({
-      Locking: true,
-    }));
   });
 
   it("should display lock icon and 'View' text when measure is locked by another user", async () => {
@@ -2985,69 +2982,6 @@ describe("Measure lock functionality", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("should not display lock icon when Locking feature flag is disabled", async () => {
-    (useFeatureFlags as jest.Mock).mockImplementation(() => ({
-      Locking: false,
-    }));
-
-    const lockedMeasure = {
-      ...measures[0],
-      measureLock: {
-        lockedBy: "AnotherUser",
-        lockedAt: new Date().toISOString(),
-        expiresAt: new Date(Date.now() + 900000).toISOString(),
-        measureId: measures[0].id,
-      },
-      measureMetaData: { draft: true },
-      measureSet: {
-        owner: "testUser",
-        acls: [],
-      },
-    };
-
-    render(
-      <ServiceContext.Provider value={serviceConfig}>
-        <MeasureList
-          measureList={[lockedMeasure]}
-          setMeasureList={setMeasureListMock}
-          setTotalPages={setTotalPagesMock}
-          setTotalItems={setTotalItemsMock}
-          setVisibleItems={setVisibleItemsMock}
-          setOffset={setOffsetMock}
-          setLoading={setLoadingMock}
-          activeTab={0}
-          searchCriteria={null}
-          setSearchCriteria={setSearchCriteriaMock}
-          currentLimit={10}
-          currentPage={0}
-          setErrMsg={setErrMsgMock}
-          currentSort="lastModifiedAt"
-          currentDirection="DESC"
-          setCurrentSort={setCurrentSortMock}
-          setCurrentDirection={setCurrentDirectionMock}
-          handlePageChange={handlePageChangeMock}
-          search=""
-          toastOpen={false}
-          toastMessage=""
-          toastType="danger"
-          setToastOpen={setToastOpenMock}
-          setToastMessage={setToastMessageMock}
-          setToastType={setToastTypeMock}
-          onToastClose={onToastCloseMock}
-        />
-      </ServiceContext.Provider>
-    );
-
-    const actionButton = await screen.findByTestId(
-      `measure-action-${lockedMeasure.id}`
-    );
-
-    expect(actionButton).toHaveTextContent("Edit");
-    expect(
-      within(actionButton).queryByTestId("LockOutlinedIcon")
-    ).not.toBeInTheDocument();
-  });
-
   it("should display 'View' without lock icon when user doesn't have edit permission", async () => {
     (checkUserCanEdit as jest.Mock).mockImplementationOnce(() => false);
 
@@ -3105,12 +3039,7 @@ describe("Measure lock functionality", () => {
       ownerDisplayName: `Owner of ${m.measureName}`,
     }));
 
-    it("should display Owner column on Shared Measures tab when DisplayOwner flag is enabled", async () => {
-      (useFeatureFlags as jest.Mock).mockReturnValue({
-        ...mockUseFeatureFlagsApi,
-        DisplayOwner: true,
-      });
-
+    it("should display Owner column on Shared Measures tab", async () => {
       render(
         <ServiceContext.Provider value={serviceConfig}>
           <MeasureList
@@ -3164,12 +3093,7 @@ describe("Measure lock functionality", () => {
       );
     });
 
-    it("should display Owner column on All Measures tab when DisplayOwner flag is enabled", async () => {
-      (useFeatureFlags as jest.Mock).mockReturnValue({
-        ...mockUseFeatureFlagsApi,
-        DisplayOwner: true,
-      });
-
+    it("should display Owner column on All Measures tab", async () => {
       render(
         <ServiceContext.Provider value={serviceConfig}>
           <MeasureList
@@ -3223,12 +3147,7 @@ describe("Measure lock functionality", () => {
       );
     });
 
-    it("should NOT display Owner column on My Measures tab even when DisplayOwner flag is enabled", async () => {
-      (useFeatureFlags as jest.Mock).mockReturnValue({
-        ...mockUseFeatureFlagsApi,
-        DisplayOwner: true,
-      });
-
+    it("should NOT display Owner column on My Measures tab", async () => {
       render(
         <ServiceContext.Provider value={serviceConfig}>
           <MeasureList
@@ -3266,55 +3185,7 @@ describe("Measure lock functionality", () => {
       expect(screen.queryByText("Owner")).not.toBeInTheDocument();
     });
 
-    it("should NOT display Owner column when DisplayOwner flag is disabled", async () => {
-      (useFeatureFlags as jest.Mock).mockReturnValue({
-        ...mockUseFeatureFlagsApi,
-        DisplayOwner: false,
-      });
-
-      render(
-        <ServiceContext.Provider value={serviceConfig}>
-          <MeasureList
-            measureList={measuresWithOwner}
-            setMeasureList={setMeasureListMock}
-            setTotalPages={setTotalPagesMock}
-            setTotalItems={setTotalItemsMock}
-            setVisibleItems={setVisibleItemsMock}
-            setOffset={setOffsetMock}
-            setLoading={setLoadingMock}
-            activeTab={1}
-            searchCriteria={null}
-            setSearchCriteria={setSearchCriteriaMock}
-            currentLimit={10}
-            currentPage={0}
-            setErrMsg={setErrMsgMock}
-            currentSort="lastModifiedAt"
-            currentDirection="DESC"
-            setCurrentSort={setCurrentSortMock}
-            setCurrentDirection={setCurrentDirectionMock}
-            handlePageChange={handlePageChangeMock}
-            search=""
-            toastOpen={false}
-            toastMessage=""
-            toastType="danger"
-            setToastOpen={setToastOpenMock}
-            setToastMessage={setToastMessageMock}
-            setToastType={setToastTypeMock}
-            onToastClose={onToastCloseMock}
-          />
-        </ServiceContext.Provider>
-      );
-
-      // Check that Owner column header does NOT exist
-      expect(screen.queryByText("Owner")).not.toBeInTheDocument();
-    });
-
     it("should display '-' when measure has no owner", async () => {
-      (useFeatureFlags as jest.Mock).mockReturnValue({
-        ...mockUseFeatureFlagsApi,
-        DisplayOwner: true,
-      });
-
       const measuresWithoutOwner = measures.map((m) => ({
         ...m,
         measureSet: {
@@ -3374,11 +3245,6 @@ describe("Measure lock functionality", () => {
     });
 
     it("should display dash when ownerDisplayName is missing or empty", async () => {
-      (useFeatureFlags as jest.Mock).mockReturnValue({
-        ...mockUseFeatureFlagsApi,
-        DisplayOwner: true,
-      });
-
       // Create measures with missing/null owner display names
       const measuresWithMissingOwner = [
         {
@@ -3452,11 +3318,6 @@ describe("Measure lock functionality", () => {
     });
 
     it("should display owner display names correctly", async () => {
-      (useFeatureFlags as jest.Mock).mockReturnValue({
-        ...mockUseFeatureFlagsApi,
-        DisplayOwner: true,
-      });
-
       // Create measures with different owner display names
       const measuresWithOwners = [
         {
@@ -3527,11 +3388,6 @@ describe("Measure lock functionality", () => {
     });
 
     it("should not allow sorting on Owner column", async () => {
-      (useFeatureFlags as jest.Mock).mockReturnValue({
-        ...mockUseFeatureFlagsApi,
-        DisplayOwner: true,
-      });
-
       render(
         <ServiceContext.Provider value={serviceConfig}>
           <MeasureList
