@@ -33,6 +33,8 @@ import {
   formatAttributeLabel,
   buildPrefixSet,
   shouldSkip,
+  normalizeExtensionArray,
+  getEditableExtensionSubElements,
 } from "./fhirDefinitionServiceUtilities";
 
 describe("FhirDefinitionServiceUtilities", () => {
@@ -477,6 +479,248 @@ describe("FhirDefinitionServiceUtilities", () => {
       expect(
         removeUndefinedProperties(["2024", "", undefined, null, "08/09/2025"])
       ).toEqual(["2024", "", null, "08/09/2025"]);
+    });
+
+    it("should remove null values from an object", () => {
+      const obj = { a: 1, b: null, c: 3 };
+      expect(removeUndefinedProperties(obj)).toEqual({ a: 1, c: 3 });
+    });
+
+    it("should remove empty objects from nested structures", () => {
+      const obj = { a: 1, b: {}, c: 3 };
+      expect(removeUndefinedProperties(obj)).toEqual({ a: 1, c: 3 });
+    });
+
+    it("should remove deeply nested undefined values", () => {
+      const obj = {
+        a: {
+          b: {
+            c: undefined,
+            d: null,
+          },
+        },
+        e: 5,
+      };
+      expect(removeUndefinedProperties(obj)).toEqual({ e: 5 });
+    });
+
+    it("should preserve the 'x' key when present", () => {
+      const obj = { a: 1, x: undefined, b: 2 };
+      expect(removeUndefinedProperties(obj)).toEqual({
+        a: 1,
+        x: undefined,
+        b: 2,
+      });
+    });
+
+    it("should handle extension arrays with valid url properties", () => {
+      const obj = {
+        extension: [
+          { url: "http://example.com/ext1", valueString: "test" },
+          { url: "http://example.com/ext2", valueBoolean: true },
+        ],
+      };
+      expect(removeUndefinedProperties(obj)).toEqual({
+        extension: [
+          { url: "http://example.com/ext1", valueString: "test" },
+          { url: "http://example.com/ext2", valueBoolean: true },
+        ],
+      });
+    });
+
+    it("should filter out extension objects without url property", () => {
+      const obj = {
+        extension: [
+          { url: "http://example.com/ext1", valueString: "test" },
+          { valueString: "no url" },
+          { url: "http://example.com/ext2", valueBoolean: true },
+        ],
+      };
+      expect(removeUndefinedProperties(obj)).toEqual({
+        extension: [
+          { url: "http://example.com/ext1", valueString: "test" },
+          { url: "http://example.com/ext2", valueBoolean: true },
+        ],
+      });
+    });
+
+    it("should filter out null and undefined values from extension arrays", () => {
+      const obj = {
+        extension: [
+          { url: "http://example.com/ext1", valueString: "test" },
+          null,
+          undefined,
+          { url: "http://example.com/ext2", valueBoolean: true },
+        ],
+      };
+      expect(removeUndefinedProperties(obj)).toEqual({
+        extension: [
+          { url: "http://example.com/ext1", valueString: "test" },
+          { url: "http://example.com/ext2", valueBoolean: true },
+        ],
+      });
+    });
+
+    it("should filter out empty strings from extension arrays", () => {
+      const obj = {
+        extension: [
+          { url: "http://example.com/ext1", valueString: "test" },
+          "",
+          { url: "http://example.com/ext2", valueBoolean: true },
+        ],
+      };
+      expect(removeUndefinedProperties(obj)).toEqual({
+        extension: [
+          { url: "http://example.com/ext1", valueString: "test" },
+          { url: "http://example.com/ext2", valueBoolean: true },
+        ],
+      });
+    });
+
+    it("should delete extension key when all extensions are filtered out", () => {
+      const obj = {
+        name: "test",
+        extension: [{ valueString: "no url" }, null, undefined, ""],
+      };
+      expect(removeUndefinedProperties(obj)).toEqual({ name: "test" });
+    });
+
+    it("should delete extension key when array becomes empty after filtering", () => {
+      const obj = {
+        name: "test",
+        extension: [],
+      };
+      expect(removeUndefinedProperties(obj)).toEqual({ name: "test" });
+    });
+
+    it("should recursively clean nested objects within extension arrays", () => {
+      const obj = {
+        extension: [
+          {
+            url: "http://example.com/ext1",
+            valueString: "test",
+            nested: { a: 1, b: undefined },
+          },
+        ],
+      };
+      expect(removeUndefinedProperties(obj)).toEqual({
+        extension: [
+          {
+            url: "http://example.com/ext1",
+            valueString: "test",
+            nested: { a: 1 },
+          },
+        ],
+      });
+    });
+
+    it("should handle arrays of objects with undefined properties", () => {
+      const obj = {
+        items: [
+          { id: 1, name: "test", value: undefined },
+          { id: 2, name: "test2", value: "valid" },
+        ],
+      };
+      expect(removeUndefinedProperties(obj)).toEqual({
+        items: [
+          { id: 1, name: "test" },
+          { id: 2, name: "test2", value: "valid" },
+        ],
+      });
+    });
+
+    it("should handle nested arrays within objects", () => {
+      const obj = {
+        data: {
+          values: [1, undefined, 2, null, 3],
+        },
+      };
+      expect(removeUndefinedProperties(obj)).toEqual({
+        data: {
+          values: [1, 2, null, 3],
+        },
+      });
+    });
+
+    it("should handle complex nested structures", () => {
+      const obj = {
+        patient: {
+          name: [
+            { given: ["John"], family: "Doe" },
+            { given: undefined, family: null },
+          ],
+          identifier: { value: "123", system: undefined },
+          extension: [
+            { url: "http://example.com/race", valueString: "test" },
+            { valueString: "no url" },
+          ],
+        },
+        meta: {},
+      };
+      expect(removeUndefinedProperties(obj)).toEqual({
+        patient: {
+          name: [
+            { given: ["John"], family: "Doe" },
+            {}, // empty object remains in array after removing undefined/null properties
+          ],
+          identifier: { value: "123" },
+          extension: [{ url: "http://example.com/race", valueString: "test" }],
+        },
+      });
+    });
+
+    it("should handle objects where all properties become empty", () => {
+      const obj = {
+        wrapper: {
+          a: undefined,
+          b: null,
+          c: {},
+        },
+      };
+      expect(removeUndefinedProperties(obj)).toEqual({});
+    });
+
+    it("should preserve false and 0 values", () => {
+      const obj = { a: 0, b: false, c: "", d: undefined };
+      expect(removeUndefinedProperties(obj)).toEqual({ a: 0, b: false, c: "" });
+    });
+
+    it("should handle arrays with nested objects containing empty values", () => {
+      const obj = {
+        data: [
+          { id: 1, meta: { a: undefined } },
+          { id: 2, meta: { b: "value" } },
+        ],
+      };
+      expect(removeUndefinedProperties(obj)).toEqual({
+        data: [{ id: 1 }, { id: 2, meta: { b: "value" } }],
+      });
+    });
+
+    it("should handle extension arrays within nested objects", () => {
+      const obj = {
+        patient: {
+          extension: [
+            { url: "http://example.com/ext", valueString: "test" },
+            { noUrl: "value" },
+          ],
+        },
+        observation: {
+          extension: null,
+        },
+      };
+      expect(removeUndefinedProperties(obj)).toEqual({
+        patient: {
+          extension: [{ url: "http://example.com/ext", valueString: "test" }],
+        },
+      });
+    });
+
+    it("should handle hasOwnProperty check correctly", () => {
+      const obj = Object.create({ inherited: "value" });
+      obj.own = "test";
+      obj.empty = undefined;
+      expect(removeUndefinedProperties(obj)).toEqual({ own: "test" });
     });
   });
 });
@@ -1246,5 +1490,438 @@ describe("formatAttributeLabel", () => {
   it("handles buildSkip", () => {
     expect(shouldSkip("Patient.name[0].given", ["Patient"])).toBe(true);
     expect(shouldSkip("Patient.name[0].given", [null, "Patient"])).toBe(true);
+  });
+});
+
+/**
+ * ============================================================================
+ * normalizeExtensionArray
+ * ============================================================================
+ *
+ * BACKGROUND:
+ * FHIR extensions are stored as arrays inside a resource (e.g., Patient.extension).
+ * Each top-level extension (like us-core-race) can itself contain sub-extensions
+ * (like ombCategory, detailed, text). The sub-extensions are also stored as an array.
+ *
+ * THE PROBLEM:
+ * Formik uses array indices in field labels (e.g., "Patient.extension[0].extension[0]")
+ * to bind form fields to values. If sub-extensions arrive in any order — or some are
+ * missing — the labels would not match the correct slice. For example:
+ *
+ *   Input order:       [text, ombCategory]
+ *   Expected order:    [ombCategory, detailed, text]   (based on elementDefinitions)
+ *
+ * Without normalization, Formik might show "text" data in the "ombCategory" field
+ * because both are at index 0.
+ *
+ * THE SOLUTION:
+ * normalizeExtensionArray re-orders the sub-extensions so that each one sits at its
+ * "reserved index" — the position of its sliceName in the elementDefinitions array.
+ *
+ * EXAMPLE:
+ *   elementDefinitions = [{ sliceName: "ombCategory" }, { sliceName: "detailed" }, { sliceName: "text" }]
+ *   input extensions   = [{ url: "text", ... }, { url: "ombCategory", ... }]
+ *
+ *   After normalization:
+ *     result[0] = { url: "ombCategory", ... }  // reserved index 0
+ *     result[1] = undefined                      // "detailed" not present
+ *     result[2] = { url: "text", ... }           // reserved index 2
+ * ============================================================================
+ */
+describe("normalizeExtensionArray", () => {
+  // Shared elementDefinitions representing the us-core-race extension slices
+  const raceElementDefs: ElementDefinition[] = [
+    {
+      id: "Extension.extension:ombCategory",
+      path: "Extension.extension",
+      sliceName: "ombCategory",
+    },
+    {
+      id: "Extension.extension:detailed",
+      path: "Extension.extension",
+      sliceName: "detailed",
+    },
+    {
+      id: "Extension.extension:text",
+      path: "Extension.extension",
+      sliceName: "text",
+    },
+  ];
+
+  it("returns the same array when extensions are already in the correct order", () => {
+    // ombCategory at 0, detailed at 1, text at 2 — matches elementDefinitions
+    const extensions = [
+      { url: "ombCategory", valueCoding: { code: "ASKU" } },
+      { url: "detailed", valueCoding: { code: "1023-1" } },
+      { url: "text", valueString: "some text" },
+    ];
+    const result = normalizeExtensionArray(extensions, raceElementDefs);
+    expect(result).toEqual(extensions);
+  });
+
+  it("reorders extensions that are out of order", () => {
+    // text (should be at 2) is first, ombCategory (should be at 0) is second
+    const extensions = [
+      { url: "text", valueString: "some text" },
+      { url: "ombCategory", valueCoding: { code: "ASKU" } },
+    ];
+    const result = normalizeExtensionArray(extensions, raceElementDefs);
+    expect(result[0]).toEqual({
+      url: "ombCategory",
+      valueCoding: { code: "ASKU" },
+    });
+    expect(result[1]).toBeUndefined(); // "detailed" was not in the input
+    expect(result[2]).toEqual({ url: "text", valueString: "some text" });
+  });
+
+  it("returns input unchanged when extensions is null", () => {
+    expect(normalizeExtensionArray(null, raceElementDefs)).toBeNull();
+  });
+
+  it("returns input unchanged when extensions is undefined", () => {
+    expect(normalizeExtensionArray(undefined, raceElementDefs)).toBeUndefined();
+  });
+
+  it("returns input unchanged when elementDefinitions is empty", () => {
+    const extensions = [{ url: "text", valueString: "hello" }];
+    expect(normalizeExtensionArray(extensions, [])).toEqual(extensions);
+  });
+
+  it("returns input unchanged when elementDefinitions is null", () => {
+    const extensions = [{ url: "text", valueString: "hello" }];
+    expect(normalizeExtensionArray(extensions, null)).toEqual(extensions);
+  });
+
+  it("skips null entries in the extensions array (sparse Formik arrays)", () => {
+    // Formik sometimes creates sparse arrays with null/undefined holes
+    const extensions = [
+      null,
+      { url: "ombCategory", valueCoding: { code: "ASKU" } },
+      undefined,
+    ];
+    const result = normalizeExtensionArray(extensions, raceElementDefs);
+    expect(result[0]).toEqual({
+      url: "ombCategory",
+      valueCoding: { code: "ASKU" },
+    });
+    expect(result.length).toBe(1); // only ombCategory, no nulls
+  });
+
+  it("skips entries without a url property (incomplete form objects)", () => {
+    // During form editing, Formik may create partial objects without a url
+    const extensions = [
+      { url: "ombCategory", valueCoding: { code: "ASKU" } },
+      { valueCoding: { code: "incomplete" } }, // no url
+      {}, // empty object, no url
+    ];
+    const result = normalizeExtensionArray(extensions, raceElementDefs);
+    expect(result[0]).toEqual({
+      url: "ombCategory",
+      valueCoding: { code: "ASKU" },
+    });
+    expect(result.length).toBe(1); // only ombCategory
+  });
+
+  it("places unrecognized extensions at the end of the array", () => {
+    // An extension with a url not in elementDefinitions gets appended
+    const extensions = [
+      { url: "ombCategory", valueCoding: { code: "ASKU" } },
+      { url: "unknownSlice", valueString: "mystery" },
+    ];
+    const result = normalizeExtensionArray(extensions, raceElementDefs);
+    expect(result[0]).toEqual({
+      url: "ombCategory",
+      valueCoding: { code: "ASKU" },
+    });
+    // unknownSlice is pushed to end (after the reserved indices 0,1,2)
+    const lastElement = result[result.length - 1];
+    expect(lastElement).toEqual({
+      url: "unknownSlice",
+      valueString: "mystery",
+    });
+  });
+
+  it("handles only one extension present at a non-zero reserved index", () => {
+    // Only "text" is present; its reserved index is 2
+    const extensions = [{ url: "text", valueString: "just text" }];
+    const result = normalizeExtensionArray(extensions, raceElementDefs);
+    expect(result[0]).toBeUndefined();
+    expect(result[1]).toBeUndefined();
+    expect(result[2]).toEqual({ url: "text", valueString: "just text" });
+  });
+
+  it("handles elementDefinitions without sliceName (non-sliced elements)", () => {
+    // If elementDefinitions have entries without sliceName, they are ignored
+    const defsWithoutSlice: ElementDefinition[] = [
+      { id: "Extension.url", path: "Extension.url" },
+      { id: "Extension.id", path: "Extension.id" },
+    ];
+    const extensions = [{ url: "something", valueString: "val" }];
+    const result = normalizeExtensionArray(extensions, defsWithoutSlice);
+    // "something" has no reserved index → pushed to end
+    expect(result).toEqual([{ url: "something", valueString: "val" }]);
+  });
+
+  it("handles empty extensions array", () => {
+    const result = normalizeExtensionArray([], raceElementDefs);
+    expect(result).toEqual([]);
+  });
+});
+
+/**
+ * ============================================================================
+ * getEditableExtensionSubElements
+ * ============================================================================
+ *
+ * BACKGROUND:
+ * When viewing an extension in the test case builder (e.g., us-core-race), the
+ * system fetches the extension's StructureDefinition (its "profile definition").
+ * This profile describes all the sub-elements of the extension, including:
+ *   - The base Extension element itself
+ *   - Extension.url, Extension.id (structural elements)
+ *   - Extension.extension:ombCategory (a sliced sub-extension)
+ *   - Extension.extension:detailed (another sliced sub-extension)
+ *   - Extension.extension:text (another sliced sub-extension)
+ *
+ * TWO KINDS OF EXTENSIONS:
+ *
+ * 1. Complex extensions (e.g., us-core-race):
+ *    These have sliced sub-extensions with sliceNames like "ombCategory", "detailed", "text".
+ *    The function returns only these sliced elements so the UI can render a form field for each.
+ *
+ *    Example profile snapshot:
+ *      [
+ *        { path: "Extension" },
+ *        { path: "Extension.url" },
+ *        { path: "Extension.extension", sliceName: "ombCategory" },  ← returned
+ *        { path: "Extension.extension", sliceName: "detailed" },     ← returned
+ *        { path: "Extension.extension", sliceName: "text" },         ← returned
+ *      ]
+ *
+ * 2. Simple extensions (e.g., us-core-birthsex):
+ *    These have NO sliced sub-extensions. Instead, they carry a direct value via
+ *    a "value[x]" element (e.g., Extension.valueCode, Extension.valueString).
+ *    When no sliceNames are found, the function falls back to returning the
+ *    element whose path ends with "value[x]" so the user can set the value directly.
+ *
+ *    Example profile snapshot:
+ *      [
+ *        { path: "Extension" },
+ *        { path: "Extension.url" },
+ *        { path: "Extension.value[x]" },  ← returned (fallback)
+ *      ]
+ * ============================================================================
+ */
+describe("getEditableExtensionSubElements", () => {
+  describe("complex extensions (with sliced sub-extensions)", () => {
+    it("returns only elements that have a sliceName", () => {
+      const profileDef = {
+        definition: {
+          snapshot: {
+            element: [
+              { id: "Extension", path: "Extension" },
+              { id: "Extension.url", path: "Extension.url" },
+              {
+                id: "Extension.extension:ombCategory",
+                path: "Extension.extension",
+                sliceName: "ombCategory",
+              },
+              {
+                id: "Extension.extension:detailed",
+                path: "Extension.extension",
+                sliceName: "detailed",
+              },
+              {
+                id: "Extension.extension:text",
+                path: "Extension.extension",
+                sliceName: "text",
+              },
+            ],
+          },
+        },
+      };
+      const result = getEditableExtensionSubElements(profileDef as any);
+      expect(result).toHaveLength(3);
+      expect(result[0].sliceName).toBe("ombCategory");
+      expect(result[1].sliceName).toBe("detailed");
+      expect(result[2].sliceName).toBe("text");
+    });
+
+    it("returns sliceName elements and ignores value[x] when both exist", () => {
+      // A profile might have both sliced sub-extensions AND a value[x] element.
+      // When slices exist, the slices take priority — value[x] is NOT returned.
+      const profileDef = {
+        definition: {
+          snapshot: {
+            element: [
+              { id: "Extension", path: "Extension" },
+              { id: "Extension.id", path: "Extension.id" },
+              { id: "Extension.extension", path: "Extension.extension" }, // no sliceName
+              {
+                id: "Extension.extension:mySlice",
+                path: "Extension.extension",
+                sliceName: "mySlice",
+              },
+              { id: "Extension.url", path: "Extension.url" },
+              { id: "Extension.value[x]", path: "Extension.value[x]" },
+            ],
+          },
+        },
+      };
+      const result = getEditableExtensionSubElements(profileDef as any);
+      expect(result).toHaveLength(1);
+      expect(result[0].sliceName).toBe("mySlice");
+    });
+  });
+
+  describe("simple extensions (no sliced sub-extensions, fallback to value[x])", () => {
+    it("returns the value[x] element when no sliceName elements exist", () => {
+      // Simple extensions like us-core-birthsex have no sliced sub-extensions.
+      // They carry their value directly in Extension.value[x] (e.g., valueCode).
+      const profileDef = {
+        definition: {
+          snapshot: {
+            element: [
+              { id: "Extension", path: "Extension" },
+              { id: "Extension.url", path: "Extension.url" },
+              {
+                id: "Extension.value[x]",
+                path: "Extension.value[x]",
+                type: [{ code: "code" }],
+              },
+            ],
+          },
+        },
+      };
+      const result = getEditableExtensionSubElements(profileDef as any);
+      expect(result).toHaveLength(1);
+      expect(result[0].path).toBe("Extension.value[x]");
+      expect(result[0].type[0].code).toBe("code");
+    });
+
+    it("preserves binding information on the value[x] element", () => {
+      // Extensions like us-core-birthsex have a binding on value[x].
+      // ExtensionComponent relies on this binding info to render a value set selector.
+      // The function must return the full element definition including its binding.
+      //
+      // Example JSON: { "url": "http://.../us-core-birthsex", "valueCode": "M" }
+      const profileDef = {
+        definition: {
+          snapshot: {
+            element: [
+              { id: "Extension", path: "Extension" },
+              { id: "Extension.url", path: "Extension.url" },
+              {
+                id: "Extension.value[x]",
+                path: "Extension.value[x]",
+                type: [{ code: "code" }],
+                binding: {
+                  strength: "required",
+                  valueSet: "http://hl7.org/fhir/us/core/ValueSet/birthsex",
+                },
+              },
+            ],
+          },
+        },
+      };
+      const result = getEditableExtensionSubElements(profileDef as any);
+      expect(result).toHaveLength(1);
+      expect(result[0].binding).toEqual({
+        strength: "required",
+        valueSet: "http://hl7.org/fhir/us/core/ValueSet/birthsex",
+      });
+    });
+
+    it("returns value[x] for a string-type simple extension", () => {
+      // A simple extension whose value is a string.
+      // Example JSON: { "url": "http://.../some-ext", "valueString": "hello" }
+      const profileDef = {
+        definition: {
+          snapshot: {
+            element: [
+              { id: "Extension", path: "Extension" },
+              { id: "Extension.url", path: "Extension.url" },
+              {
+                id: "Extension.value[x]",
+                path: "Extension.value[x]",
+                type: [{ code: "string" }],
+              },
+            ],
+          },
+        },
+      };
+      const result = getEditableExtensionSubElements(profileDef as any);
+      expect(result).toHaveLength(1);
+      expect(result[0].type[0].code).toBe("string");
+    });
+
+    it("returns value[x] for a boolean-type simple extension", () => {
+      // A simple extension whose value is a boolean.
+      // Example JSON: { "url": "http://.../some-ext", "valueBoolean": true }
+      const profileDef = {
+        definition: {
+          snapshot: {
+            element: [
+              { id: "Extension", path: "Extension" },
+              { id: "Extension.url", path: "Extension.url" },
+              {
+                id: "Extension.value[x]",
+                path: "Extension.value[x]",
+                type: [{ code: "boolean" }],
+              },
+            ],
+          },
+        },
+      };
+      const result = getEditableExtensionSubElements(profileDef as any);
+      expect(result).toHaveLength(1);
+      expect(result[0].type[0].code).toBe("boolean");
+    });
+
+    it("returns empty array when no sliceName AND no value[x] elements exist", () => {
+      // Edge case: profile has neither sliced sub-extensions nor value[x]
+      // If there is no type information available in elementDefinition.type[0].code,
+      // we do not support such extensions.
+      const profileDef = {
+        definition: {
+          snapshot: {
+            element: [
+              { id: "Extension", path: "Extension" },
+              { id: "Extension.url", path: "Extension.url" },
+              { id: "Extension.id", path: "Extension.id" },
+            ],
+          },
+        },
+      };
+      const result = getEditableExtensionSubElements(profileDef as any);
+      expect(result).toEqual([]);
+    });
+  });
+
+  describe("edge cases", () => {
+    it("returns empty array when profile has no snapshot", () => {
+      expect(
+        getEditableExtensionSubElements({ definition: {} } as any)
+      ).toEqual([]);
+    });
+
+    it("returns empty array when profileDef is null", () => {
+      expect(getEditableExtensionSubElements(null as any)).toEqual([]);
+    });
+
+    it("returns empty array when profileDef is undefined", () => {
+      expect(getEditableExtensionSubElements(undefined as any)).toEqual([]);
+    });
+
+    it("returns empty array when snapshot has an empty element array", () => {
+      const profileDef = {
+        definition: {
+          snapshot: {
+            element: [],
+          },
+        },
+      };
+      expect(getEditableExtensionSubElements(profileDef as any)).toEqual([]);
+    });
   });
 });
