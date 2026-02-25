@@ -20,15 +20,15 @@ import InstantComponent from "./types/InstantComponent";
 import TimeComponent from "./types/TimeComponent";
 import { getIn, useFormikContext } from "formik";
 import ExtensionComponent from "./types/ExtensionComponent";
-import useFhirDefinitionsServiceApi from "../../../../../../../api/useFhirDefinitionsService";
+import ExtensionNormalizer from "./ExtensionNormalizer";
 import {
   formatAttributeLabel,
+  getEditableExtensionSubElements,
   getFirstChildren,
   getIndexFromPath,
   getLastPart,
   getNestedProperty,
   getRequired,
-  getTopLevelElements,
   isComponentDataType,
   stripAllIndexes,
 } from "../../../../../../../api/fhirDefinitionServiceUtilities";
@@ -49,6 +49,9 @@ import { IntegerType } from "./typesValidations/FhirNumbers";
 import ElementSectionQiCore from "./ElementSectionQiCore";
 import { getEmptyValueForType } from "./TypeEditorUtils";
 import { getMultipleCardinalityLabel } from "./types/TypeUtil";
+import { StructureDefinitionDto } from "../../../../../../../api/models/StructureDefinitionDto";
+import { ElementDefinition, StructureDefinition } from "fhir/r4";
+import useFhirDefinitionsServiceApi from "../../../../../../../api/useFhirDefinitionsService";
 import RatioComponent from "./types/RatioComponent";
 
 export const formikErrorHandler = (name: string, formik) => {
@@ -88,6 +91,16 @@ export const wrapWithSection = (
 const getContentReferencePath = (referenceUrl: string) =>
   referenceUrl.split("#").pop();
 
+interface TypeEditorProps {
+  resource?: any;
+  structureDefinition: any;
+  parentStructureDefinition?: any;
+  canEdit: boolean;
+  label: string;
+  noWrap?: boolean;
+  onChangeForExtension?: (value: any) => void;
+}
+
 // onChange is being deprecated as no updates to the resource are tracked.
 // Changes directly to the json should be done with a dispatch, this propagates downstream changes in formik.
 // any temporary form state should be done through formik.
@@ -98,7 +111,8 @@ const TypeEditor = ({
   canEdit,
   label,
   noWrap = false,
-}): JSX.Element | null => {
+  onChangeForExtension,
+}: TypeEditorProps): JSX.Element | null => {
   const formik = useFormikContext();
   // Ref to track formik.values for use in closures (prevents stale state issues when rapidly clicking Add)
   const valuesRef = useRef<object>(formik.values as object);
@@ -158,7 +172,8 @@ const TypeEditor = ({
   // Given structureDefinition.type[{ code: "sometype", profiles: ["strings", "of", "profiles"]}]
   // we need to look at the get use the profile list to get resource trees so we can render all the children in case Extension.
   // Removed POC ProfiledExtension component.
-  const [extensionProfileDef, setExtensionProfileDef] = useState<any[]>(null);
+  const [extensionProfileDef, setExtensionProfileDef] =
+    useState<StructureDefinitionDto>(null);
   useEffect(() => {
     // can't be a memo since it's async.
     const fetchProfiles = async () => {
@@ -177,8 +192,7 @@ const TypeEditor = ({
             setExtensionProfileDef(null);
           }
         } catch (e) {
-          // eslint-disable-next-line no-console
-          console.log("retrieve profileDefinitions failure", e);
+          console.error("retrieve profileDefinitions failure", e);
           setExtensionProfileDef(null);
         }
       } else {
@@ -239,7 +253,14 @@ const TypeEditor = ({
   const lastIndex = isArrayMode ? values.length - 1 : null;
   const appendedZeroAlready = getIndexFromPath(label);
 
-  // utility function to wrap these
+  // Memoize extension element definitions to keep a stable reference across renders.
+  // Without this, getEditableExtensionSubElements creates a new array each render,
+  // which would cause ExtensionNormalizer's useEffect to fire every render.
+  const extensionElementDefinitions: ElementDefinition[] = useMemo(() => {
+    return extensionProfileDef
+      ? getEditableExtensionSubElements(extensionProfileDef)
+      : null;
+  }, [extensionProfileDef]);
 
   if (isComponentDataType(type)) {
     switch (type) {
@@ -252,6 +273,12 @@ const TypeEditor = ({
               if (isArrayMode && appendedZeroAlready) {
                 fieldLabel = `${label.slice(0, label.length - 3)}[${index}]`;
               }
+
+              // For extensions, use onBlur to avoid triggering on every keystroke
+              const isExtensionContext =
+                parentStructureDefinition?.type?.[0]?.code === "Extension";
+              const fieldProps = formik.getFieldProps(fieldLabel);
+
               const string = (
                 <StringComponent
                   key={index}
@@ -270,7 +297,17 @@ const TypeEditor = ({
                   }
                   addTitle={addTitle}
                   handleAddElement={handleAddElement}
-                  {...formik.getFieldProps(fieldLabel)}
+                  {...fieldProps}
+                  onBlur={
+                    isExtensionContext
+                      ? (e) => {
+                          fieldProps.onBlur(e);
+                          if (e.target.value) {
+                            onChangeForExtension(e.target.value);
+                          }
+                        }
+                      : fieldProps.onBlur
+                  }
                 />
               );
               return wrapWithSection(
@@ -331,6 +368,12 @@ const TypeEditor = ({
               if (isArrayMode && appendedZeroAlready) {
                 fieldLabel = `${label.slice(0, label.length - 3)}[${index}]`;
               }
+
+              // For extensions, use onBlur to avoid triggering on every keystroke
+              const isExtensionContext =
+                parentStructureDefinition?.type?.[0]?.code === "Extension";
+              const fieldProps = formik.getFieldProps(fieldLabel);
+
               const decimal = (
                 <DecimalComponent
                   key={`${fieldLabel}-${index}`}
@@ -349,7 +392,22 @@ const TypeEditor = ({
                   }
                   addTitle={addTitle}
                   handleAddElement={handleAddElement}
-                  {...formik.getFieldProps(fieldLabel)}
+                  {...fieldProps}
+                  onChange={
+                    isExtensionContext
+                      ? fieldProps.onChange
+                      : fieldProps.onChange
+                  }
+                  onBlur={
+                    isExtensionContext
+                      ? (e) => {
+                          fieldProps.onBlur(e);
+                          if (e.target.value) {
+                            onChangeForExtension(parseFloat(e.target.value));
+                          }
+                        }
+                      : fieldProps.onBlur
+                  }
                 />
               );
               return wrapWithSection(
@@ -475,8 +533,15 @@ const TypeEditor = ({
                   handleAddElement={handleAddElement}
                   {...formik.getFieldProps(fieldLabel)}
                   onChange={(value) => {
-                    formik.setFieldTouched(fieldLabel);
-                    formik.setFieldValue(fieldLabel, value);
+                    if (
+                      parentStructureDefinition?.type?.[0]?.code === "Extension"
+                    ) {
+                      formik.setFieldTouched(fieldLabel);
+                      onChangeForExtension(value);
+                    } else {
+                      formik.setFieldTouched(fieldLabel);
+                      formik.setFieldValue(fieldLabel, value);
+                    }
                   }}
                   setTouched={() => {
                     formik.setFieldTouched(fieldLabel);
@@ -649,7 +714,14 @@ const TypeEditor = ({
                   handleAddElement={handleAddElement}
                   {...formik.getFieldProps(fieldLabel)}
                   onChange={(e) => {
-                    formik.setFieldValue(fieldLabel, e.target.value === "true");
+                    const boolValue = e.target.value === "true";
+                    if (
+                      parentStructureDefinition?.type?.[0]?.code === "Extension"
+                    ) {
+                      onChangeForExtension(boolValue);
+                    } else {
+                      formik.setFieldValue(fieldLabel, boolValue);
+                    }
                   }}
                 />
               );
@@ -812,15 +884,15 @@ const TypeEditor = ({
                     handleAddElement={handleAddElement}
                     {...formik.getFieldProps(fieldLabel)}
                     onChange={(value) => {
-                      let targetLabel = fieldLabel;
-                      if (targetLabel.includes(".value[x]")) {
-                        targetLabel = targetLabel.replace(
-                          ".value[x]",
-                          ".valueCode"
-                        );
+                      if (
+                        parentStructureDefinition?.type?.[0]?.code ===
+                        "Extension"
+                      ) {
+                        onChangeForExtension(value);
+                      } else {
+                        formik.setFieldTouched(fieldLabel);
+                        formik.setFieldValue(fieldLabel, value);
                       }
-                      formik.setFieldTouched(targetLabel);
-                      formik.setFieldValue(targetLabel, value);
                     }}
                   />
                 </>
@@ -869,8 +941,13 @@ const TypeEditor = ({
             addTitle={addTitle}
             {...formik.getFieldProps(label)}
             onChange={(value) => {
-              formik.setFieldTouched(label);
-              formik.setFieldValue(label, value);
+              // If the parent is an extension then there should a fixedUri that needed to be added to the value
+              if (parentStructureDefinition?.type?.[0]?.code === "Extension") {
+                onChangeForExtension(value);
+              } else {
+                formik.setFieldTouched(label);
+                formik.setFieldValue(label, value);
+              }
             }}
             includePrev={false}
           />
@@ -901,6 +978,11 @@ const TypeEditor = ({
                   addTitle={addTitle}
                   handleAddElement={handleAddElement}
                   {...formik.getFieldProps(fieldLabel)}
+                  onChangeForExtension={
+                    parentStructureDefinition?.type?.[0]?.code === "Extension"
+                      ? (value) => onChangeForExtension(value)
+                      : undefined
+                  }
                 />
               );
               return wrapWithSection(
@@ -996,168 +1078,118 @@ const TypeEditor = ({
           </>
         );
       case "Extension":
+        // Every profiled extension such as Slices ( Race, ethnicity, Tribal Affiliation will have its own structure definition
         // This case is hit when we're on a complex extension like race, gender that has children inputs
         if (extensionProfileDef) {
-          const topLevelElements = extensionProfileDef
-            ? getTopLevelElements(extensionProfileDef)
-            : null;
-
-          //@ts-ignore
-          const { definition } = extensionProfileDef;
-          let foundIndex = formik?.values?.[
-            resource?.resourceType
-          ]?.extension?.findIndex((el) => {
-            return el.url === definition.url;
-          });
-          // This is our root label ex: Patient.extension[0]
-          let updatedLabel = `${resource?.resourceType}.extension[${foundIndex}]`;
-          // couldn't find it, need to change it
-
-          // This work is commented out as it may need to be used later. This is for handling when an extension is not present.
-          // It's possible that this will not be possible later with the workflow.
-          const foundValue = _.get(formik.values, updatedLabel);
-          return extensionProfileDef ? (
-            <Box sx={{ display: "flex", flexDirection: "column" }}>
-              <Box>{structureDefinition.short}</Box>
-              <Box sx={{ display: "flex", flexDirection: "column" }}>
-                {topLevelElements.map((elementDefinition, index) => {
-                  // given updatedLabel = Patient.extension[1],
-                  /*
-                  and our json string looks like this.., we need to do a find on each one of the elements. to get the name
-                    {
-                      "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethnicity",
-                      "extension": [
-                        {
-                          "url": "ombCategory",
-                          "valueCoding": {
-                            "system": "urn:oid:2.16.840.1.113883.6.238",
-                            "code": "2135-2",
-                            "display": "Hispanic or Latino",
-                            "userSelected": true
-                          }
-                        },
-                        {
-                          "url": "text",
-                          "valueString": "Hispanic or Latino"
-                        }
-                      ]
+          // Displays only the URL of the Extension example : http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethinicity
+          // and the children of the extension that are slices ( example : OMBCategory, text) Any generic extensions are excluded
+          /*
+               extensionIndex is the index at which the current Extension (ex: race) lies inside the resource. ex: patient.extension is an array.
+               extensionLabel This is our root label ex: Patient.extension[0]
+               extensionValue is the value of extension example:
+               {
+                "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race",
+                "extension": [
+                  {
+                    "url": "ombCategory",
+                    "valueCoding": {
+                      "system": "urn:oid:2.16.840.1.113883.6.238",
+                      "code": "1002-5",
+                      "display": "American Indian or Alaska Native",
+                      "userSelected": true
                     }
-                  */
-                  let updatedLocalLabel = updatedLabel;
-                  let localFoundValue = null;
-                  // we already have a root extension here that lives in the form
-                  if (foundValue) {
-                    if (elementDefinition.sliceName) {
-                      // This is like.. extension::ethnicity. sliceName is ethnicity
-                      let foundIndex = foundValue?.extension?.findIndex(
-                        (el) => {
-                          return el.url === elementDefinition.sliceName;
+                  },
+                  {
+                    "url": "text",
+                    "valueString": "American Indian or Alaska Native"
+                  }
+                ]
+               }
+            */
+          const resourceExtensions =
+            formik?.values?.[resource?.resourceType]?.extension;
+          const extensionIndex = Array.isArray(resourceExtensions)
+            ? resourceExtensions.findIndex((el) => {
+                return el.url === extensionProfileDef.definition.url;
+              })
+            : -1;
+
+          // If extension not found, it means the parent extension hasn't been initialized yet
+          if (extensionIndex === -1) {
+            return (
+              <div>
+                Extension not found in resource. Please ensure the parent
+                extension is properly initialized.
+              </div>
+            );
+          }
+
+          const extensionLabel = `${resource?.resourceType}.extension[${extensionIndex}]`;
+
+          //Every Extension should have a url, and the url should not be editable since it determines the structure of the extension.
+          return (
+            <>
+              <ExtensionNormalizer
+                extensionLabel={extensionLabel}
+                elementDefinitions={extensionElementDefinitions}
+              />
+              <Box sx={{ display: "flex", flexDirection: "column" }}>
+                <Box>{structureDefinition.short}</Box>
+                <Box sx={{ display: "flex", flexDirection: "column" }}>
+                  <UriComponent
+                    canEdit={false}
+                    fieldRequired={true}
+                    label={extensionLabel + ".url"}
+                    {...formik.getFieldProps(extensionLabel + ".url")}
+                  />
+                  {(() => {
+                    // Create a stable index mapping for each elementDefinition based on its position in the array
+                    // This ensures consistent labels regardless of which extensions the user has filled in
+                    // e.g., ombCategory is always at index 0, detailed at index 1, text at index 2
+                    return extensionElementDefinitions.map(
+                      (elementDefinition, reservedIndex) => {
+                        let subSlicedExtensionLabel;
+
+                        if (elementDefinition.sliceName) {
+                          // Each elementDefinition gets a reserved index based on its position in elementDefinitions array
+                          // This ensures the label is always consistent (e.g., text is always extension[2])
+                          // regardless of whether other slices have been filled in
+                          subSlicedExtensionLabel = `${extensionLabel}.extension[${reservedIndex}]`;
+                        } else {
+                          // Not a sliced extension - use property path
+                          // it's not a slice. It's like...extension.url, extension.id
+                          subSlicedExtensionLabel = extensionLabel;
                         }
-                      );
-                      // The case where it exists.
-                      if (foundIndex > -1) {
-                        updatedLocalLabel = `${updatedLabel}.extension[${foundIndex}]`;
-                        localFoundValue = _.get(
-                          formik.values,
-                          updatedLocalLabel
+
+                        return (
+                          <Box
+                            key={elementDefinition.id || reservedIndex}
+                            sx={{
+                              display: "flex",
+                              flexDirection: "column",
+                            }}
+                          >
+                            <ExtensionComponent
+                              showAddAttributeButton={
+                                showMultipleCardinalityActionCenter
+                              }
+                              addTitle={addTitle}
+                              label={subSlicedExtensionLabel}
+                              canEdit={canEdit}
+                              fhirResource={resource}
+                              elementDefinition={elementDefinition}
+                              extensionProfileDef={extensionProfileDef}
+                            />
+                            <Divider />
+                          </Box>
                         );
                       }
-                    } else {
-                      // it's not a slice. It's like...extension.url, extension.id
-                      updatedLocalLabel =
-                        updatedLocalLabel = `${updatedLabel}.${getLastPart(
-                          elementDefinition.path
-                        )}`;
-                      localFoundValue = _.get(formik.values, updatedLocalLabel);
-                    }
-                  }
-
-                  const slice = (
-                    <Box
-                      sx={{
-                        display: "flex",
-                        flexDirection: "column",
-                      }}
-                    >
-                      <TypeEditor
-                        resource={resource}
-                        structureDefinition={elementDefinition}
-                        // parent structure definition should be structureDefinition, since these are the children
-                        parentStructureDefinition={extensionProfileDef} // parent structureDefinition needs snapshot.element
-                        canEdit={canEdit}
-                        label={updatedLocalLabel} // updated local label based off of a find find matching id or slicename
-                        {...formik.getFieldProps(updatedLocalLabel)}
-                      />
-                      <Divider />
-                    </Box>
-                  );
-                  return wrapWithSection(
-                    elementDefinition.id,
-                    slice,
-                    isRoot,
-                    noWrap,
-                    required,
-                    {
-                      key: index,
-                    }
-                  );
-                })}
+                    );
+                  })()}
+                </Box>
               </Box>
-            </Box>
-          ) : (
-            <>Loading Extension...</>
+            </>
           );
-        }
-        // baes case for extensions. returns [URL, Value] || [FIXEDUri , value]
-        // TODO figure out when NOT to render these components because they can live on anything. Patient.name does not need extensions.
-        // if no index, we need to provide one.
-        // we could get an object of {url: "somestring", extension: [{url, valueString, etc..}, {}]}
-        // from here it may make sense to render each
-        // parentStructureDefinition.url can be used to locate the extension index..
-        // if (foundValue?.extension?.length) {
-        // it's a list.
-        // return foundValue?.extension?.map((ext, index) => {
-        //   label = `${updatedLabel}.extension[${index}]`
-        //   return (
-        //     <div></div>
-        //   <ExtensionComponent
-        //     label={label}
-        //     canEdit={canEdit}
-        //     {...formik.getFieldProps(label)}
-        //     onChange={() => {}}
-        //     formikHandleChange={formik.handleChange}
-        //     // Being depcreated for a formik handleChange
-        //     // label={label} // label will be needed later to hook up to formik.
-        //     fhirResource={resource}
-        //     elementDefinition={structureDefinition} // id is patient.identifier[0].extension    ;
-        //     parentStructureDefinition={parentStructureDefinition} // id: patient.identifier[0]  ;
-        //     //   />
-        //     );
-        //   })
-        // }
-
-        // render extension component only if parent structure defintion is Extension type
-        if (
-          parentStructureDefinition?.type?.[0]?.code === "Extension" ||
-          parentStructureDefinition?.definition?.type === "Extension"
-        ) {
-          const extension = (
-            <ExtensionComponent
-              showAddAttributeButton={showMultipleCardinalityActionCenter}
-              addTitle={addTitle}
-              label={label}
-              canEdit={canEdit}
-              {...formik.getFieldProps(label)}
-              onChange={() => {}}
-              formikHandleChange={formik.handleChange}
-              // Being deprecated for a formik handleChange
-              // label={label} // label will be needed later to hook up to formik.
-              fhirResource={resource}
-              elementDefinition={structureDefinition} // id is patient.identifier[0].extension    ;
-              parentStructureDefinition={parentStructureDefinition} // id: patient.identifier[0]  ;
-            />
-          );
-          return wrapWithSection(label, extension, isRoot, noWrap, required);
         } else {
           return <></>;
         }
