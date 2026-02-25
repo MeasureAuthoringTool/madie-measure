@@ -22,7 +22,6 @@ export default function CompositeComponent({
       </div>
       <AddedComponentsTable
         components={components}
-        measureId={measure?.id}
         onComponentsUpdate={submitComponentForm}
       />
     </div>
