@@ -6,11 +6,7 @@ import DraftAction from "./draftAction/DraftAction";
 import VersionAction from "./versionAction/VersionAction";
 import AssociateCmsIdAction from "./associateCmsIdAction/AccociateCmsIdAction";
 import ViewHRAction from "./viewHumanReadableAction/ViewHRAction";
-import {
-  checkUserCanEdit,
-  useFeatureFlags,
-  checkUserCanDelete,
-} from "@madie/madie-util";
+import { checkUserCanEdit, checkUserCanDelete } from "@madie/madie-util";
 import ShareAction from "./shareAction/ShareAction";
 import TransferAction from "./transferAction/TransferAction";
 import HistoryAction from "./historyAction/HistoryAction";
@@ -36,7 +32,6 @@ export default function ActionCenter(props: PropTypes) {
   const [canEdit, setCanEdit] = useState<boolean>(false);
   const [isOwner, setIsOwner] = useState<boolean>(false);
   const [isSharedWithUser, setIsSharedWithUser] = useState<boolean>(false);
-  const featureFlags = useFeatureFlags();
 
   const versionMeasure = useCallback(() => {
     if (props.measures?.length === 1) {
@@ -202,12 +197,10 @@ export default function ActionCenter(props: PropTypes) {
         activeTab={props?.activeTab}
       />
       <HistoryAction measures={props.measures} onClick={viewMeasureHistory} />
-      {featureFlags?.CompareMeasureVersions && (
-        <CompareVersionsAction
-          measures={props.measures}
-          onClick={compareVersions}
-        />
-      )}
+      <CompareVersionsAction
+        measures={props.measures}
+        onClick={compareVersions}
+      />
     </div>
   );
 }

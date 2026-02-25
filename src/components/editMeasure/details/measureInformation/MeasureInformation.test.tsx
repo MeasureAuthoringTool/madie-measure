@@ -111,10 +111,7 @@ const mockUserServiceApi = {
 jest.mock("@madie/madie-util", () => ({
   useMeasureServiceApi: jest.fn(() => mockMeasureServiceApi),
   useUserServiceApi: jest.fn(() => mockUserServiceApi),
-  useFeatureFlags: jest.fn().mockReturnValue({
-    Locking: true,
-    DisplayOwner: true,
-  }),
+  useFeatureFlags: jest.fn().mockReturnValue({}),
   useOktaTokens: jest.fn(() => ({
     getAccessToken: () => "test.jwt",
   })),

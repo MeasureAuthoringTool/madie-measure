@@ -16,9 +16,7 @@ jest.mock("@madie/madie-util", () => ({
   useOktaTokens: () => ({
     getAccessToken: () => "test.jwt",
   }),
-  useFeatureFlags: jest.fn().mockReturnValue({
-    Locking: false,
-  }),
+  useFeatureFlags: jest.fn().mockReturnValue({}),
 }));
 jest.mock("../../../../api/useTestCaseServiceApi");
 const useTestCaseServiceMock =
@@ -52,9 +50,6 @@ const qiCoreMeasure = {
 describe("Shift Test Case Dates Dialog", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-      Locking: false,
-    }));
   });
 
   test("should render ShiftDatesDialog", async () => {
@@ -440,10 +435,7 @@ describe("Shift Test Case Dates Dialog", () => {
     });
   });
 
-  it("should successfully shift all test case dates when feature flag is on", async () => {
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-      Locking: true,
-    }));
+  it("should successfully shift all test case dates", async () => {
     const shiftTestCaseDatesApiMock = jest
       .fn()
       .mockResolvedValueOnce({ failed: [], shifted: [] });
@@ -503,9 +495,6 @@ describe("Shift Test Case Dates Dialog", () => {
   });
 
   it("should not shift test case dates when locking failed", async () => {
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-      Locking: true,
-    }));
     const shiftTestCaseDatesApiMock = jest
       .fn()
       .mockRejectedValueOnce(
@@ -567,9 +556,6 @@ describe("Shift Test Case Dates Dialog", () => {
   });
 
   it("should display locking error for qicore", async () => {
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-      Locking: true,
-    }));
     const shiftQiCoreTestCaseDates = jest
       .fn()
       .mockRejectedValueOnce(

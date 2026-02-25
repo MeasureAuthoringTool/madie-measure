@@ -6,7 +6,6 @@ import {
   measureStore,
   routeHandlerStore,
   useMeasureServiceApi,
-  useFeatureFlags,
 } from "@madie/madie-util";
 import MetaDataWrapper from "../../../editMeasure/details/MetaDataWrapper";
 
@@ -74,7 +73,6 @@ const QDMReporting = (props: ReportingProps) => {
   const [toastMessage, setToastMessage] = useState<string>("");
   const [toastType, setToastType] = useState<string>("danger");
   const { updateRouteHandlerState } = routeHandlerStore;
-  const featureFlags = useFeatureFlags();
 
   useEffect(() => {
     const subscription = measureStore.subscribe(setMeasure);
@@ -120,7 +118,7 @@ const QDMReporting = (props: ReportingProps) => {
   };
 
   const handleSubmit = async (values) => {
-    if (featureFlags.Locking && (await props.checkTestCasesLockStatus())) {
+    if (await props.checkTestCasesLockStatus()) {
       handleToast(
         "danger",
         "This measure cannot be saved because changes to the Population Criteria will update test cases and one or more test cases are locked by another user.",
@@ -145,7 +143,7 @@ const QDMReporting = (props: ReportingProps) => {
       })
       // update to alert
       .catch((err) => {
-        if (featureFlags?.Locking && err?.status === 423) {
+        if (err?.status === 423) {
           updateMeasure({
             ...measure,
             measureLock: {

@@ -32,7 +32,6 @@ export interface RouteHandlerState {
 export interface MeasureDetailsProps {
   setErrorMessage: Function;
   isQDM: boolean;
-  featureFlags;
   measureCanEdit: boolean;
   measureLockedBy: string;
 }
@@ -52,13 +51,7 @@ export interface Link {
 }
 
 export default function MeasureDetails(props: MeasureDetailsProps) {
-  const {
-    setErrorMessage,
-    isQDM,
-    featureFlags,
-    measureCanEdit,
-    measureLockedBy,
-  } = props;
+  const { setErrorMessage, isQDM, measureCanEdit, measureLockedBy } = props;
   const [lockedModalOpen, setLockedModalOpen] = useState(
     measureCanEdit && !measureLockedBy ? false : true
   );
@@ -92,8 +85,8 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
     const handleUnload = () => {
       measureServiceApi.unlockMeasure(measureId);
     };
-    // Lock the measure if the Locking feature is enabled
-    if (featureFlags?.Locking && measureCanEdit && !measureLockedBy) {
+    // Lock the measure
+    if (measureCanEdit && !measureLockedBy) {
       window.addEventListener("beforeunload", handleUnload);
       measureServiceApi
         .updateMeasureLock(measureId)
@@ -105,18 +98,12 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
     // Cleanup on unmount
     return () => {
       subscription.unsubscribe();
-      if (featureFlags?.Locking && measureCanEdit && !measureLockedBy) {
+      if (measureCanEdit && !measureLockedBy) {
         window.removeEventListener("beforeunload", handleUnload);
         measureServiceApi.unlockMeasure(measureId);
       }
     };
-  }, [
-    measureServiceApi,
-    measureId,
-    featureFlags?.Locking,
-    measureCanEdit,
-    measureLockedBy,
-  ]);
+  }, [measureServiceApi, measureId, measureCanEdit, measureLockedBy]);
 
   const links = [
     // General Information
@@ -308,7 +295,6 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
               <ModelAndMeasurementPeriod
                 setErrorMessage={setErrorMessage}
                 measureCanEdit={measureCanEdit && !measureLockedBy}
-                lockingFeatureEnabled={featureFlags?.Locking}
               />
             }
           />
@@ -318,7 +304,6 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
               <StewardAndDevelopers
                 setErrorMessage={setErrorMessage}
                 measureCanEdit={measureCanEdit && !measureLockedBy}
-                lockingFeatureEnabled={featureFlags?.Locking}
               />
             }
           />
@@ -332,7 +317,6 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
                 header="Description"
                 setErrorMessage={setErrorMessage}
                 measureCanEdit={measureCanEdit && !measureLockedBy}
-                lockingFeatureEnabled={featureFlags?.Locking}
               />
             }
           />
@@ -345,7 +329,6 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
                 header="Copyright"
                 setErrorMessage={setErrorMessage}
                 measureCanEdit={measureCanEdit && !measureLockedBy}
-                lockingFeatureEnabled={featureFlags?.Locking}
               />
             }
           />
@@ -358,7 +341,6 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
                 header="Disclaimer"
                 setErrorMessage={setErrorMessage}
                 measureCanEdit={measureCanEdit && !measureLockedBy}
-                lockingFeatureEnabled={featureFlags?.Locking}
               />
             }
           />
@@ -371,7 +353,6 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
                 header="Rationale"
                 setErrorMessage={setErrorMessage}
                 measureCanEdit={measureCanEdit && !measureLockedBy}
-                lockingFeatureEnabled={featureFlags?.Locking}
               />
             }
           />
@@ -385,7 +366,6 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
                   header="Purpose"
                   setErrorMessage={setErrorMessage}
                   measureCanEdit={measureCanEdit && !measureLockedBy}
-                  lockingFeatureEnabled={featureFlags?.Locking}
                 />
               }
             />
@@ -399,7 +379,6 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
                 header="Guidance (Usage)"
                 setErrorMessage={setErrorMessage}
                 measureCanEdit={measureCanEdit && !measureLockedBy}
-                lockingFeatureEnabled={featureFlags?.Locking}
               />
             }
           />
@@ -412,7 +391,6 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
                 header="Clinical Recommendation"
                 setErrorMessage={setErrorMessage}
                 measureCanEdit={measureCanEdit && !measureLockedBy}
-                lockingFeatureEnabled={featureFlags?.Locking}
               />
             }
           />
@@ -424,7 +402,6 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
                   <TransmissionFormat
                     setErrorMessage={setErrorMessage}
                     measureCanEdit={measureCanEdit && !measureLockedBy}
-                    lockingFeatureEnabled={featureFlags?.Locking}
                   />
                 }
               />
@@ -437,7 +414,6 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
                     header="Measure Set"
                     setErrorMessage={setErrorMessage}
                     measureCanEdit={measureCanEdit && !measureLockedBy}
-                    lockingFeatureEnabled={featureFlags?.Locking}
                   />
                 }
               />
@@ -447,7 +423,6 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
                   <MeasureReferences
                     setErrorMessage={setErrorMessage}
                     measureCanEdit={measureCanEdit && !measureLockedBy}
-                    lockingFeatureEnabled={featureFlags?.Locking}
                   />
                 }
               />
@@ -461,7 +436,6 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
                     header="Definition"
                     setErrorMessage={setErrorMessage}
                     measureCanEdit={measureCanEdit && !measureLockedBy}
-                    lockingFeatureEnabled={featureFlags?.Locking}
                   />
                 }
               />
@@ -475,7 +449,6 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
                   <MeasureDefinitions
                     setErrorMessage={setErrorMessage}
                     measureCanEdit={measureCanEdit && !measureLockedBy}
-                    lockingFeatureEnabled={featureFlags?.Locking}
                   />
                 }
               />
@@ -489,7 +462,6 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
                   <MeasureReferences
                     setErrorMessage={setErrorMessage}
                     measureCanEdit={measureCanEdit && !measureLockedBy}
-                    lockingFeatureEnabled={featureFlags?.Locking}
                   />
                 }
               />

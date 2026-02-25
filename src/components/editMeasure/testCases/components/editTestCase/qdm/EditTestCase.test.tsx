@@ -190,7 +190,7 @@ const useTestCaseServiceMockResolved = {
     .mockResolvedValue(["Series 1", "Series 2"]),
   updateTestCase: jest.fn().mockResolvedValue(testCase),
   lockTestCase: jest.fn().mockResolvedValue(lockInfo),
-  unLockTestCase: jest.fn().mockResolvedValue(lockInfo),
+  unlockTestCase: jest.fn().mockResolvedValue(lockInfo),
 } as unknown as TestCaseServiceApi;
 
 const useTestCaseServiceMockRejectedGetTestCase = {
@@ -203,13 +203,13 @@ const useTestCaseServiceMockRejected = {
   getTestCaseSeriesForMeasure: jest
     .fn()
     .mockResolvedValue(["Series 1", "Series 2"]),
-  updateTestCase: jest.fn().mockRejectedValueOnce({
-    data: {
-      error: "error",
-    },
-  }),
+  updateTestCase: jest
+    .fn()
+    .mockRejectedValueOnce(
+      new MadieError("Reason for test case update failure")
+    ),
   lockTestCase: jest.fn().mockRejectedValueOnce(lockInfo),
-  unLockTestCase: jest.fn().mockRejectedValueOnce(lockInfo),
+  unlockTestCase: jest.fn().mockResolvedValue(lockInfo),
 } as unknown as TestCaseServiceApi;
 const useTestCaseServiceMockRejected423 = {
   getTestCase: jest.fn().mockResolvedValue(testCase),
@@ -224,7 +224,7 @@ const useTestCaseServiceMockRejected423 = {
       )
     ),
   lockTestCase: jest.fn().mockRejectedValueOnce(lockInfo),
-  unLockTestCase: jest.fn().mockRejectedValueOnce(lockInfo),
+  unlockTestCase: jest.fn().mockResolvedValue(lockInfo),
 } as unknown as TestCaseServiceApi;
 const nonUniqNameData: MadieError = new MadieError("Error Msg");
 
@@ -301,7 +301,6 @@ jest.mock("@madie/madie-util", () => ({
     return {
       applyDefaults: mockApplyDefaults,
       qdmHideJson: false,
-      Locking: true,
     };
   }),
   measureStore: {
@@ -454,12 +453,6 @@ test("Calculator button is found", async () => {
   useCqlParsingServiceMock.mockImplementation(() => {
     return useCqlParsingServiceMockResolved;
   });
-  (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => {
-    return {
-      applyDefaults: mockApplyDefaults,
-      Locking: false,
-    };
-  });
   await waitFor(() => renderEditTestCaseComponent());
   expect(screen.queryByTestId("editor-calculator-button")).toBeInTheDocument();
 
@@ -490,12 +483,6 @@ describe("EditTestCase QDM Component", () => {
     });
     useCqlParsingServiceMock.mockImplementation(() => {
       return useCqlParsingServiceMockResolved;
-    });
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => {
-      return {
-        applyDefaults: mockApplyDefaults,
-        Locking: false,
-      };
     });
   });
 
@@ -840,7 +827,7 @@ describe("EditTestCase QDM Component", () => {
     await waitFor(
       () => {
         expect(screen.getByTestId("error-toast")).toHaveTextContent(
-          "Error updating Test Case "
+          'Error updating Test Case "test measure": Reason for test case update failure'
         );
         const closeToastBtn = screen.getByTestId("close-toast-button");
         userEvent.click(closeToastBtn);
@@ -885,52 +872,6 @@ describe("EditTestCase QDM Component", () => {
         expect(
           screen.queryByText(
             "Unable to update Test Case. Test Case is locked by: anotherUser"
-          )
-        ).not.toBeInTheDocument();
-      },
-      { timeout: 1500 }
-    );
-  });
-
-  it("Should display failed update toast due to a lock", async () => {
-    testCase.json = JSON.stringify(testCaseJson);
-
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-      applyDefaults: mockApplyDefaults,
-      Locking: true,
-    }));
-
-    useTestCaseServiceMock.mockImplementation(() => {
-      return {
-        ...useTestCaseServiceMockResolved,
-        updateTestCase: jest.fn().mockRejectedValueOnce({
-          message:
-            "Unable to update Test Case. Test Case is locked by: another.user",
-        }),
-      } as unknown as TestCaseServiceApi;
-    });
-
-    await waitFor(() => renderEditTestCaseComponent());
-
-    const raceSelector = screen.getByRole("combobox", { name: "Race" });
-    userEvent.click(raceSelector);
-    const raceOptions = await screen.findAllByRole("option");
-    userEvent.click(raceOptions[3]);
-
-    const saveButton = screen.getByRole("button", { name: "Save" });
-    expect(saveButton).toBeEnabled();
-    userEvent.click(saveButton);
-
-    await waitFor(
-      () => {
-        expect(screen.getByTestId("error-toast")).toHaveTextContent(
-          "Unable to update Test Case. Test Case is locked by: another.user"
-        );
-        const closeToastBtn = screen.getByTestId("close-toast-button");
-        userEvent.click(closeToastBtn);
-        expect(
-          screen.queryByText(
-            "Unable to update Test Case. Test Case is locked by: another.user"
           )
         ).not.toBeInTheDocument();
       },
@@ -1228,17 +1169,11 @@ describe("EditTestCase QDM Component when test case is locked by another user", 
         .fn()
         .mockResolvedValue(["Series 1", "Series 2"]),
       lockTestCase: jest.fn().mockResolvedValue(lockInfo),
-      unLockTestCase: jest.fn().mockResolvedValue(lockInfo),
+      unlockTestCase: jest.fn().mockResolvedValue(lockInfo),
     } as unknown as TestCaseServiceApi;
 
     useTestCaseServiceMock.mockImplementation(() => {
       return useTestCaseServiceMockResolved;
-    });
-
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => {
-      return {
-        Locking: true,
-      };
     });
   });
 
