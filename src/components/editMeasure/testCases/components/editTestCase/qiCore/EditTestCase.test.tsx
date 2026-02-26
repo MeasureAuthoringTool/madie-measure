@@ -3540,6 +3540,8 @@ describe("EditTestCase component", () => {
           });
         }
       });
+      const measure = { ...simpleMeasureFixture, createdBy: MEASURE_CREATEDBY };
+      measure.testCaseConfiguration.executeInvalidTestCases = false;
       renderWithRouter(
         [
           "/measures/623cacebe74613783378c17b/edit/test-cases/623cacffe74613783378c17c",
