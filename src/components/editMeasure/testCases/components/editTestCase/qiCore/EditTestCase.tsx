@@ -1141,7 +1141,6 @@ const EditTestCase = (props: EditTestCaseProps) => {
     return map;
   }, [measure?.groups]);
 
-  console.log("formik", formik?.errors);
   return (
     <>
       <TestCaseForm
