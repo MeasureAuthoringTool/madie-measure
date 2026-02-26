@@ -11,7 +11,6 @@ import { useFeatureFlags } from "@madie/madie-util";
 
 const mockUser = "test user";
 jest.mock("@madie/madie-util", () => ({
-  useIsAdminTransferEnabled: () => false,
   useOktaTokens: () => ({
     getUserName: () => mockUser,
   }),

@@ -18,7 +18,6 @@ jest.mock("@madie/madie-design-system/dist/react", () => ({
 }));
 
 jest.mock("@madie/madie-util", () => ({
-  useIsAdminTransferEnabled: () => false,
   useFeatureFlags: () => ({}),
 }));
 

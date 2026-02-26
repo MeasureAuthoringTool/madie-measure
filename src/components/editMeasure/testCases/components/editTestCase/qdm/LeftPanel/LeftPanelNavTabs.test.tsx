@@ -8,7 +8,6 @@ import LeftPanelNavTabs from "./LeftPanelNavTabs";
 
 // Mock useFeatureFlags
 jest.mock("@madie/madie-util", () => ({
-  useIsAdminTransferEnabled: () => false,
   useFeatureFlags: jest.fn(),
 }));
 

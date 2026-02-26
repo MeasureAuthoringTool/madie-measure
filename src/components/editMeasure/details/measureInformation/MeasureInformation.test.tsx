@@ -109,7 +109,6 @@ const mockUserServiceApi = {
   getOwnerDetails: jest.fn().mockResolvedValue({}),
 } as unknown as UserServiceApi;
 jest.mock("@madie/madie-util", () => ({
-  useIsAdminTransferEnabled: () => false,
   useMeasureServiceApi: jest.fn(() => mockMeasureServiceApi),
   useUserServiceApi: jest.fn(() => mockUserServiceApi),
   useFeatureFlags: jest.fn().mockReturnValue({

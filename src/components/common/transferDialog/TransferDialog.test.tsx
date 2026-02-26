@@ -16,7 +16,6 @@ import userEvent from "@testing-library/user-event";
 import { MeasureServiceApi } from "@madie/madie-util";
 
 jest.mock("@madie/madie-util", () => ({
-  useIsAdminTransferEnabled: () => false,
   useMeasureServiceApi: jest.fn(() => mockMeasureServiceApi),
   useOktaTokens: jest.fn(() => ({
     getAccessToken: () => "test.jwt",

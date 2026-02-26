@@ -4,7 +4,6 @@ import TestCaseLandingWrapper from "./TestCaseLandingWrapper";
 import { MemoryRouter } from "react-router-dom";
 
 jest.mock("@madie/madie-util", () => ({
-  useIsAdminTransferEnabled: () => false,
   measureStore: {
     state: {
       groups: [

@@ -387,7 +387,6 @@ const useCqmConversionServiceMockResolved = {
 let mockApplyDefaults = false;
 
 jest.mock("@madie/madie-util", () => ({
-  useIsAdminTransferEnabled: () => false,
   useDocumentTitle: jest.fn(),
   useFeatureFlags: () => {
     return { applyDefaults: mockApplyDefaults };

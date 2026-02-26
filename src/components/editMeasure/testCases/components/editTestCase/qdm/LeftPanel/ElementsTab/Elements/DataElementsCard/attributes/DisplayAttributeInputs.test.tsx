@@ -66,7 +66,6 @@ const mockFormik: FormikContextType<any> = {
 };
 
 jest.mock("@madie/madie-util", () => ({
-  useIsAdminTransferEnabled: () => false,
   routeHandlerStore: {
     subscribe: (set) => {
       set();

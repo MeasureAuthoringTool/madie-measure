@@ -30,7 +30,7 @@ export default function TransferAction(props: PropTypes) {
   const { measures, activeTab } = props;
   const [disableTransferBtn, setDisableTransferBtn] = useState(true);
   const [tooltipMessage, setTooltipMessage] = useState(NOTHING_SELECTED);
-  const isAdminTransferEnabled = useIsAdminTransferEnabled();
+  const isAdminTransferEnabled = useIsAdminTransferEnabled?.() ?? false;
 
   const validateTransferActionState = useCallback(() => {
     setDisableTransferBtn(false);

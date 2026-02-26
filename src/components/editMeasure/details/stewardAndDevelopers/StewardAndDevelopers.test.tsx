@@ -65,7 +65,6 @@ const mockMeasure = {
 } as Measure;
 
 jest.mock("@madie/madie-util", () => ({
-  useIsAdminTransferEnabled: () => false,
   useMeasureServiceApi: jest.fn(() => mockMeasureServiceApi),
   useKeyPress: jest.fn(() => false),
   measureStore: {

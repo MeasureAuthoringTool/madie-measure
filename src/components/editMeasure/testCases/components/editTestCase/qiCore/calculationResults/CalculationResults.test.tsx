@@ -15,7 +15,6 @@ import userEvent from "@testing-library/user-event";
 import { useFeatureFlags } from "@madie/madie-util";
 
 jest.mock("@madie/madie-util", () => ({
-  useIsAdminTransferEnabled: () => false,
   useFeatureFlags: jest.fn().mockReturnValue({}),
 }));
 

@@ -14,7 +14,6 @@ const mockedAxios = axios as jest.Mocked<typeof axios>;
 
 const MEASURE_CREATEDBY = "testuser";
 jest.mock("@madie/madie-util", () => ({
-  useIsAdminTransferEnabled: () => false,
   useOktaTokens: () => ({
     getAccessToken: () => "test.jwt",
   }),

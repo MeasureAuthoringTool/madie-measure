@@ -125,7 +125,6 @@ const mockMeasureServiceApi: MeasureServiceApi = {
   searchMeasuresByCriteria: jest.fn(() => Promise.resolve([mockMeasure])),
 } as unknown as MeasureServiceApi;
 jest.mock("@madie/madie-util", () => ({
-  useIsAdminTransferEnabled: () => false,
   useMeasureServiceApi: jest.fn(() => mockMeasureServiceApi),
   useDocumentTitle: jest.fn(),
   checkUserCanEdit: jest.fn().mockImplementation(() => true),

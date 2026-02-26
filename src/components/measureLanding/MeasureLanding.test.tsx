@@ -40,7 +40,6 @@ const abortController = new AbortController();
 const mockUser = "TestUser1";
 
 jest.mock("@madie/madie-util", () => ({
-  useIsAdminTransferEnabled: () => false,
   useDocumentTitle: jest.fn(),
   useOktaTokens: () => ({
     getUserName: () => mockUser,
@@ -83,7 +82,6 @@ const mockMeasureServiceApi = {
 } as unknown as MeasureServiceApi;
 
 jest.mock("@madie/madie-util", () => ({
-  useIsAdminTransferEnabled: () => false,
   useMeasureServiceApi: jest.fn(() => mockMeasureServiceApi),
   useOktaTokens: jest.fn(() => ({
     getAccessToken: () => "test.jwt",

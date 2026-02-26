@@ -19,7 +19,6 @@ const testMeasure = {
 } as unknown as Measure;
 
 jest.mock("@madie/madie-util", () => ({
-  useIsAdminTransferEnabled: () => false,
   checkUserCanEdit: jest.fn(() => {
     return true;
   }),

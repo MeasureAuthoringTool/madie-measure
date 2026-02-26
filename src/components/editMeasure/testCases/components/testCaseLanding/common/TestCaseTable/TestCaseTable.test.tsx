@@ -206,7 +206,6 @@ const defaultMeasure = {
 
 let mockApplyDefaults = false;
 jest.mock("@madie/madie-util", () => ({
-  useIsAdminTransferEnabled: () => false,
   useFeatureFlags: jest.fn().mockImplementation(() => ({
     applyDefaults: mockApplyDefaults,
   })),

@@ -43,7 +43,6 @@ const setViewHumanReadableModal = jest.fn();
 const mockCheckUserCanDelete = jest.fn();
 
 jest.mock("@madie/madie-util", () => ({
-  useIsAdminTransferEnabled: () => false,
   useMeasureServiceApi: jest.fn(() => mockMeasureServiceApi),
   checkUserCanEdit: jest.fn(),
   useFeatureFlags: jest.fn().mockReturnValue({

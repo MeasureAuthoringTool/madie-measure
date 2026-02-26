@@ -10,7 +10,6 @@ import { MeasureServiceApi } from "@madie/madie-util";
 
 const mockUser = "test user";
 jest.mock("@madie/madie-util", () => ({
-  useIsAdminTransferEnabled: () => false,
   useOktaTokens: () => ({
     getUserName: () => mockUser,
   }),
@@ -22,7 +21,6 @@ const mockMeasureServiceApi = {
     .mockResolvedValue([{ model: Model.QICORE }, { model: Model.QICORE }]),
 } as unknown as MeasureServiceApi;
 jest.mock("@madie/madie-util", () => ({
-  useIsAdminTransferEnabled: () => false,
   useMeasureServiceApi: jest.fn(() => mockMeasureServiceApi),
   useOktaTokens: jest.fn(() => ({
     getAccessToken: () => "test.jwt",

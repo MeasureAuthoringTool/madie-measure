@@ -57,7 +57,6 @@ const valueSets = [
 ];
 
 jest.mock("@madie/madie-util", () => ({
-  useIsAdminTransferEnabled: () => false,
   routeHandlerStore: {
     subscribe: (set) => {
       set();

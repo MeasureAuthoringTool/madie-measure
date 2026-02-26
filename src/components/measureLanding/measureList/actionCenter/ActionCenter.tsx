@@ -47,7 +47,7 @@ export default function ActionCenter(props: PropTypes) {
   const [canEdit, setCanEdit] = useState<boolean>(false);
   const [isOwner, setIsOwner] = useState<boolean>(false);
   const [isSharedWithUser, setIsSharedWithUser] = useState<boolean>(false);
-  const isAdminTransferEnabled = useIsAdminTransferEnabled();
+  const isAdminTransferEnabled = useIsAdminTransferEnabled?.() ?? false;
   const featureFlags = useFeatureFlags();
 
   const versionMeasure = useCallback(() => {

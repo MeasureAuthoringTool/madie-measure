@@ -11,7 +11,6 @@ import { ManifestExpansion } from "@madie/madie-models";
 jest.mock("../../../../api/axios-instance");
 
 jest.mock("@madie/madie-util", () => ({
-  useIsAdminTransferEnabled: () => false,
   getOidFromString: (oid) => oid.split("urn:oid:")[1],
 }));
 

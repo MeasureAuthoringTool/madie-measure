@@ -67,7 +67,7 @@ export default function EditMeasure() {
   const location = useLocation();
   const [currentMeasureId, setCurrentMeasureId] = useState<string>(measureId);
   const featureFlags = useFeatureFlags();
-  const isAdminTransferEnabled = useIsAdminTransferEnabled();
+  const isAdminTransferEnabled = useIsAdminTransferEnabled?.() ?? false;
 
   // Required by every single spa application that has internal routing
   // This will block user from navigating inside madie-measure when the current form is dirty

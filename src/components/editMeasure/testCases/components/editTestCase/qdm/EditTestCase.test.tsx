@@ -296,7 +296,6 @@ const qdmCalculationServiceMockResolved = {
 } as unknown as QdmCalculationService;
 
 jest.mock("@madie/madie-util", () => ({
-  useIsAdminTransferEnabled: () => false,
   useDocumentTitle: jest.fn(),
   useFeatureFlags: jest.fn(() => {
     return {

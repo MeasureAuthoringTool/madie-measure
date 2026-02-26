@@ -17,7 +17,6 @@ const mockNavigate = jest.fn();
 
 jest.mock("../../../../api/useTestCaseServiceApi");
 jest.mock("@madie/madie-util", () => ({
-  useIsAdminTransferEnabled: () => false,
   measureStore: {
     updateTestCases: jest.fn(),
   },

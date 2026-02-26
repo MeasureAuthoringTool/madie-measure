@@ -10,7 +10,6 @@ import { Measure, TestCase } from "@madie/madie-models";
 import userEvent from "@testing-library/user-event";
 
 jest.mock("@madie/madie-util", () => ({
-  useIsAdminTransferEnabled: () => false,
   useDocumentTitle: jest.fn(),
   useOktaTokens: jest.fn(() => ({
     getAccessToken: () => "test.jwt",

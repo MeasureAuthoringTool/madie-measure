@@ -13,7 +13,6 @@ import useTestCaseServiceApi, {
 } from "../../../../api/useTestCaseServiceApi";
 
 jest.mock("@madie/madie-util", () => ({
-  useIsAdminTransferEnabled: () => false,
   useOktaTokens: () => ({
     getAccessToken: () => "test.jwt",
   }),

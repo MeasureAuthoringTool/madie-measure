@@ -59,7 +59,6 @@ const handleChange = jest.fn();
 const deleteCode = jest.fn();
 
 jest.mock("@madie/madie-util", () => ({
-  useIsAdminTransferEnabled: () => false,
   routeHandlerStore: {
     subscribe: (set) => {
       set();

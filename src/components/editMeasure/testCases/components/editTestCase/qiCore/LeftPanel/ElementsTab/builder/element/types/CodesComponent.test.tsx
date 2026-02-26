@@ -247,7 +247,6 @@ jest.mock("../../../../../../../../../../../api/axios-instance");
 const mockedAxios = axios as jest.Mocked<typeof axios>;
 
 jest.mock("@madie/madie-util", () => ({
-  useIsAdminTransferEnabled: () => false,
   useOktaTokens: () => ({ getAccessToken: () => "test.jwt" }),
 }));
 
