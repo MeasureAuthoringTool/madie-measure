@@ -10,11 +10,7 @@ import React, {
 import tw from "twin.macro";
 import "styled-components/macro";
 import { Measure, Model } from "@madie/madie-models";
-import {
-  useMeasureServiceApi,
-  checkUserCanEdit,
-  useFeatureFlags,
-} from "@madie/madie-util";
+import { useMeasureServiceApi, checkUserCanEdit } from "@madie/madie-util";
 import { useNavigate } from "react-router-dom";
 import { Chip, Tooltip } from "@mui/material";
 import {
@@ -163,7 +159,6 @@ export default function MeasureList(props: {
   const [isRowExpanded, setIsRowExpanded] = useState<boolean>(false);
   const [selectedExpandedMeasuresIds, setSelectedExpandedMeasuresIds] =
     useState([]);
-  const featureFlags = useFeatureFlags();
   const [transferDialog, setTransferDialog] = useState({
     open: false,
     measures: [],
@@ -319,9 +314,8 @@ export default function MeasureList(props: {
       ),
       accessorKey: "measureSet.cmsId",
     },
-    // Do not display Owner column in My Measures tab or when DisplayOwner flag is disabled
-    ...((props.activeTab === 1 || props.activeTab === 2) &&
-    featureFlags?.DisplayOwner
+    // Do not display Owner column in My Measures tab
+    ...(props.activeTab === 1 || props.activeTab === 2
       ? [
           {
             header: "Owner",
@@ -365,9 +359,7 @@ export default function MeasureList(props: {
             info.row.original.actions?.measureSet?.acls
           ) && info.row.original.actions.measureMetaData?.draft;
         const isLockedByOther =
-          featureFlags?.Locking &&
-          canEdit &&
-          !!info.row.original.actions?.measureLock;
+          canEdit && !!info.row.original.actions?.measureLock;
 
         const buttonText = isLockedByOther ? "View" : canEdit ? "Edit" : "View";
 
@@ -512,12 +504,7 @@ export default function MeasureList(props: {
     });
 
     return t;
-  }, [
-    selectedIdForExpansion,
-    isRowExpanded,
-    featureFlags?.DisplayOwner,
-    props.activeTab,
-  ]);
+  }, [selectedIdForExpansion, isRowExpanded, props.activeTab]);
 
   const expandedcolumns = useMemo<ColumnDef<TCRow>[]>(() => {
     return [
@@ -557,12 +544,7 @@ export default function MeasureList(props: {
         accessorKey: "",
       },
     ];
-  }, [
-    selectedExpandedMeasuresIds,
-    isRowExpanded,
-    featureFlags?.DisplayOwner,
-    props.activeTab,
-  ]);
+  }, [selectedExpandedMeasuresIds, isRowExpanded, props.activeTab]);
 
   const handleRowClick = async (actions) => {
     if (!isRowExpanded || selectedIdForExpansion !== actions?.measureSetId) {

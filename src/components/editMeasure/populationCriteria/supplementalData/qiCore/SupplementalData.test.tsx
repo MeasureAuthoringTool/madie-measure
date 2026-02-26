@@ -68,9 +68,7 @@ jest.mock("@madie/madie-util", () => ({
   useOktaTokens: () => ({
     getAccessToken: () => "test.jwt",
   }),
-  useFeatureFlags: jest.fn(() => ({
-    Locking: false,
-  })),
+  useFeatureFlags: jest.fn(() => ({})),
   routeHandlerStore: {
     subscribe: (set) => {
       set({ canTravel: false, pendingPath: "" });
@@ -534,9 +532,6 @@ describe("SupplementalData Component QI-Core", () => {
     }
   });
   it("displays error alert when locking feature is enabled and test cases get locked during edit", async () => {
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-      Locking: true,
-    }));
     const checkTestCasesLockStatusMock = jest.fn().mockResolvedValue(true);
     const setAlertMessageMock = jest.fn();
     RenderSupplementalElements({
@@ -581,9 +576,6 @@ describe("SupplementalData Component QI-Core", () => {
   });
 
   it("Should fail an update to supplemental data values due to 423 error", async () => {
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementationOnce(() => ({
-      Locking: true,
-    }));
     mockMeasureServiceApi.updateMeasure = jest.fn().mockRejectedValueOnce({
       status: 423,
       response: {

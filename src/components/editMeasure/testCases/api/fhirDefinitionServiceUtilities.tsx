@@ -1,4 +1,4 @@
-import { ElementDefinition } from "fhir/r4";
+import { ElementDefinition, Extension } from "fhir/r4";
 import { v4 as uuidv4 } from "uuid";
 import { ResourceIdentifier } from "./models/ResourceIdentifier";
 import * as Yup from "yup";
@@ -339,8 +339,39 @@ export function removeUndefinedProperties(obj) {
   for (let key in obj) {
     if (obj.hasOwnProperty(key) && key !== "x") {
       const value = obj[key];
+
+      // Special handling for extension arrays - filter out objects without 'url' property
+      if (key === "extension" && Array.isArray(value)) {
+        const cleanedExtensions = value
+          .map((item) => removeUndefinedProperties(item))
+          .filter((item) => {
+            // Remove null, undefined, empty strings
+            if (
+              _.isNil(item) ||
+              (typeof item === "string" && _.isEmpty(item))
+            ) {
+              return false;
+            }
+            // Remove extension objects without a 'url' property (partial/incomplete extensions)
+            if (typeof item === "object" && !item.url) {
+              return false;
+            }
+            return true;
+          });
+
+        if (cleanedExtensions.length > 0) {
+          obj[key] = cleanedExtensions;
+        } else {
+          delete obj[key];
+        }
+        continue;
+      }
+
       const cleanedValue = removeUndefinedProperties(value);
-      if (_.isUndefined(cleanedValue)) {
+      if (
+        _.isNil(cleanedValue) ||
+        (typeof cleanedValue === "object" && _.isEmpty(cleanedValue))
+      ) {
         delete obj[key];
       } else {
         obj[key] = cleanedValue;
@@ -352,6 +383,100 @@ export function removeUndefinedProperties(obj) {
 
 export function getBasePath(resource: any): string {
   return resource?.definition?.snapshot?.element?.[0]?.path;
+}
+
+/**
+ * For extensions, we want to get the elements that are sliced with a sliceName.
+ * If sliced sub-extensions exist (e.g., ombCategory, detailed, text for us-core-race),
+ * return only those — they represent the named sub-extension slots the user can fill in.
+ *
+ * If NO sliced sub-extensions exist (i.e., the extension is a simple extension with a
+ * direct value rather than nested sub-extensions), fall back to returning the element
+ * whose path ends with "value[x]". This lets the user set the extension's value directly.
+ *
+ * Example of a sliced extension (us-core-race):
+ *   Extension.extension:ombCategory  → sliceName = "ombCategory" ← returned
+ *   Extension.extension:detailed     → sliceName = "detailed"    ← returned
+ *   Extension.extension:text         → sliceName = "text"        ← returned
+ *
+ * Example of a simple extension (us-core-birthsex):
+ *   Extension.url                    → no sliceName
+ *   Extension.value[x]              → path ends with "value[x]"  ← returned (fallback)
+ *
+ * @param extensionProfileDef a FHIR StructureDefinition for an extension profile
+ */
+export function getEditableExtensionSubElements(
+  extensionProfileDef: StructureDefinitionDto
+): ElementDefinition[] {
+  if (!extensionProfileDef?.definition?.snapshot?.element) {
+    return [];
+  }
+
+  const elements = extensionProfileDef.definition.snapshot.element;
+
+  const slicedSubExtensions = elements.filter((e) => e.sliceName);
+
+  // Array.filter() always returns an array (truthy even when empty),
+  // so we must check .length to know if any sliced sub-extensions were found.
+  if (slicedSubExtensions.length > 0) {
+    return slicedSubExtensions;
+  }
+
+  // Simple Extensions: no sliced sub-extensions → return the value[x] element
+  // so the user can set the extension's value directly.
+  return elements.filter((e) => e.path.endsWith("value[x]"));
+}
+
+/**
+ * Normalizes extension arrays to match the reserved index mapping based on elementDefinitions order.
+ * This ensures that each extension slice is at its reserved index (based on elementDefinitions array position),
+ * allowing for consistent formik labels regardless of the order extensions appear in the data.
+ *
+ * @param extensions - Array of extension objects from the FHIR resource
+ * @param elementDefinitions - Array of ElementDefinitions that define the expected slices
+ * @returns Normalized extension array with extensions at their reserved indices (may be sparse)
+ */
+export function normalizeExtensionArray(
+  extensions: any[],
+  elementDefinitions: ElementDefinition[]
+): any[] {
+  if (!extensions || !elementDefinitions || elementDefinitions.length === 0) {
+    return extensions;
+  }
+
+  // Create a map from sliceName to reserved index
+  const sliceNameToIndex = new Map<string, number>();
+  elementDefinitions.forEach((elementDef, index) => {
+    if (elementDef.sliceName) {
+      sliceNameToIndex.set(elementDef.sliceName, index);
+    }
+  });
+
+  // Create a sparse array with extensions at their reserved indices
+  const normalizedArray: any[] = [];
+  extensions.forEach((ext) => {
+    // Skip undefined/null values (can happen with sparse arrays from Formik)
+    if (!ext) {
+      return;
+    }
+
+    // Skip partial extension objects that don't have a url property
+    // These are incomplete objects created during form editing
+    if (!ext.url) {
+      return;
+    }
+
+    const reservedIndex = sliceNameToIndex.get(ext.url);
+    if (reservedIndex !== undefined) {
+      normalizedArray[reservedIndex] = ext;
+    } else {
+      // If no reserved index found, keep the extension at the end
+      // This handles extensions that aren't in the elementDefinitions
+      normalizedArray.push(ext);
+    }
+  });
+
+  return normalizedArray;
 }
 
 // For ClaimResponse.item.adjudication

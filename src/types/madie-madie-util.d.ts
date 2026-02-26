@@ -26,12 +26,8 @@ declare module "@madie/madie-util" {
     enableQdmRepeatTransfer: boolean;
     qiCoreElementsTab: boolean;
     qdmHideJson: boolean;
-    Locking: boolean;
     qiCore7: boolean;
-    CompareMeasureVersions: boolean;
     QICoreCompositeMeasure: boolean;
-    DisplayOwner: boolean;
-    MakeJSONMatchUI: boolean;
   }
 
   export interface ServiceConfig {

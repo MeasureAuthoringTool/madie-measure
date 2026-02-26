@@ -29,7 +29,7 @@ import FiberManualRecord from "@mui/icons-material/FiberManualRecord";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import ShiftDatesDialog from "../shiftDates/ShiftDatesDialog";
 import { Tooltip } from "@mui/material";
-import { checkUserCanEdit, useFeatureFlags } from "@madie/madie-util";
+import { checkUserCanEdit } from "@madie/madie-util";
 import _ from "lodash";
 import { useNavigate } from "react-router-dom";
 import DeleteDisabledIcon from "../../../../../../common/DeleteDisabledIcon";
@@ -144,7 +144,6 @@ const TestCaseTable = (props: TestCaseTableProps) => {
     setToastOpen(false);
   };
 
-  const featureFlags = useFeatureFlags();
   const navigate = useNavigate();
   const isQICore6 = measure?.model === Model.QICORE_6_0_0;
 
@@ -382,8 +381,7 @@ const TestCaseTable = (props: TestCaseTableProps) => {
           const testCase = testCases.find(
             (tc) => tc.id === info.row.original.id
           );
-          const isLockedByOther =
-            featureFlags?.Locking && canEdit && !!testCase?.testCaseLock;
+          const isLockedByOther = canEdit && !!testCase?.testCaseLock;
 
           const buttonText = isLockedByOther
             ? "View"
@@ -449,7 +447,7 @@ const TestCaseTable = (props: TestCaseTableProps) => {
         enableSorting: false,
       },
     ];
-  }, [testCases, featureFlags?.Locking]);
+  }, [testCases]);
 
   const table = useReactTable({
     data,
@@ -597,9 +595,7 @@ const TestCaseTable = (props: TestCaseTableProps) => {
           dialogTitle={`Delete Test Case`}
           name={selectedTestCases?.map((testCase) => testCase.title).join(", ")}
           additionalText={
-            featureFlags?.Locking
-              ? " Test cases in-use by another user will not be deleted."
-              : ""
+            " Test cases in-use by another user will not be deleted."
           }
         />
 

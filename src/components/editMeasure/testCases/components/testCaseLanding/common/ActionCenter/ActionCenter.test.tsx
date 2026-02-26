@@ -4,16 +4,9 @@ import ActionCenter from "./ActionCenter";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router";
 import { useNavigate } from "react-router-dom";
-// @ts-ignore
-import { useFeatureFlags } from "@madie/madie-util";
-
 jest.mock("react-router-dom", () => ({
   ...jest.requireActual("react-router-dom"),
   useNavigate: jest.fn(),
-}));
-
-jest.mock("@madie/madie-util", () => ({
-  useFeatureFlags: jest.fn(),
 }));
 
 describe("ActionCenter Component", () => {
@@ -513,35 +506,6 @@ describe("ActionCenter Component", () => {
     });
 
     describe("Make JSON Match UI Button", () => {
-      beforeEach(() => {
-        (useFeatureFlags as jest.Mock).mockReturnValue({
-          MakeJSONMatchUI: true,
-        });
-      });
-
-      it("should not display Make JSON Match UI button when feature flag is off", () => {
-        (useFeatureFlags as jest.Mock).mockReturnValue({
-          MakeJSONMatchUI: false,
-        });
-
-        render(
-          <MemoryRouter>
-            <ActionCenter
-              selectedTestCases={[
-                { id: "1", validResource: true, title: "Test Case 1" },
-              ]}
-              canEdit={true}
-              isQDM={false}
-              isDraft={true}
-            />
-          </MemoryRouter>
-        );
-
-        expect(
-          screen.queryByTestId("make-json-match-ui-action-btn")
-        ).not.toBeInTheDocument();
-      });
-
       it("should not display Make JSON Match UI button when user does not have edit access", () => {
         render(
           <MemoryRouter>
@@ -580,7 +544,7 @@ describe("ActionCenter Component", () => {
         ).not.toBeInTheDocument();
       });
 
-      it("should display Make JSON Match UI button for QI-Core measures when feature flag is enabled and user has edit access", () => {
+      it("should display Make JSON Match UI button for QI-Core measures when user has edit access", () => {
         render(
           <MemoryRouter>
             <ActionCenter

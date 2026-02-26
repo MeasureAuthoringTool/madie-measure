@@ -4,7 +4,6 @@ import {
   measureStore,
   checkUserCanEdit,
   routeHandlerStore,
-  useFeatureFlags,
 } from "@madie/madie-util";
 import {
   TestCase,
@@ -52,7 +51,6 @@ import LockedMessageModal from "../../../../../common/lockedMessageModal/LockedM
 
 const EditTestCase = () => {
   useDocumentTitle("MADiE Edit Measure Edit Test Case");
-  const featureFlags = useFeatureFlags();
   /* For formik, we could simplify our patterns in some places
 
   Establish a single source of truth and preserve it in state
@@ -142,11 +140,7 @@ const EditTestCase = () => {
         .getTestCase(id, measureId, false)
         .then((tc: TestCase) => {
           const nextTc = _.cloneDeep(tc);
-          setLockedModalOpen(
-            canEdit && featureFlags.Locking && nextTc.testCaseLock
-              ? true
-              : false
-          );
+          setLockedModalOpen(canEdit && nextTc.testCaseLock ? true : false);
           if (measure?.groups) {
             nextTc.groupPopulations = measure.groups?.map((group) => {
               const existingTestCasePC = tc.groupPopulations?.find(
@@ -175,7 +169,7 @@ const EditTestCase = () => {
       const handleUnload = () => {
         testCaseService.current.unlockTestCase(id);
       };
-      if (featureFlags?.Locking && canEdit) {
+      if (canEdit) {
         window.addEventListener("beforeunload", handleUnload);
         testCaseService.current
           .lockTestCase(measureId, id)
@@ -185,27 +179,17 @@ const EditTestCase = () => {
           });
       }
       return () => {
-        if (featureFlags?.Locking && canEdit) {
+        if (canEdit) {
           window.removeEventListener("beforeunload", handleUnload);
           testCaseService.current.unlockTestCase(id);
         }
       };
     }
-  }, [
-    measureId,
-    id,
-    measure?.groups,
-    navigate,
-    featureFlags?.Locking,
-    canEdit,
-  ]);
+  }, [measureId, id, measure?.groups, navigate, canEdit]);
 
-  const testCaseCanEdit =
-    canEdit && !(featureFlags?.Locking && currentTestCase?.testCaseLock);
-  const testCaseLockedBy: string =
-    featureFlags?.Locking && currentTestCase?.testCaseLock
-      ? currentTestCase?.testCaseLock?.lockedBy
-      : undefined;
+  const testCaseCanEdit = canEdit && !currentTestCase?.testCaseLock;
+  const testCaseLockedBy: string = currentTestCase?.testCaseLock?.lockedBy;
+
   const [lockedModalOpen, setLockedModalOpen] = useState(
     canEdit && testCaseLockedBy ? true : false
   );
@@ -241,7 +225,7 @@ const EditTestCase = () => {
       updateMeasureStore(updatedTestCase);
       showToast("Test Case Updated Successfully", "success");
     } catch (error) {
-      if (featureFlags.Locking && error.message.includes("is locked by:")) {
+      if (error.message.includes("is locked by:")) {
         const splitted = error.message.trim().split(" ");
         const lockedBy = splitted[splitted.length - 1];
         setCurrentTestCase({
@@ -378,7 +362,6 @@ const EditTestCase = () => {
         <EditTestCaseBreadCrumbs
           testCase={currentTestCase}
           measureId={measureId}
-          lockingEnabled={featureFlags?.Locking}
           canEdit={canEdit}
         />
 
