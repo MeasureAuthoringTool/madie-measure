@@ -7,7 +7,6 @@ import {
 import { useFormik } from "formik";
 import * as _ from "lodash";
 import "./ShiftDatesDialog.scss";
-import { useFeatureFlags } from "@madie/madie-util";
 import useTestCaseServiceApi from "../../../../api/useTestCaseServiceApi";
 
 interface shiftDatesDialogProps {
@@ -33,7 +32,6 @@ const ShiftDatesDialog = ({
   setToastMessage,
   setShiftTestCaseDatesWarnings,
 }: shiftDatesDialogProps) => {
-  const featureFlags = useFeatureFlags();
   const testCaseService = useRef(useTestCaseServiceApi());
   const isQdm = measure?.model?.includes("QDM");
   const formik = useFormik({

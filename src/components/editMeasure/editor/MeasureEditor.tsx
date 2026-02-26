@@ -48,7 +48,6 @@ import {
   measureStore,
   useDocumentTitle,
   routeHandlerStore,
-  useFeatureFlags,
   useMeasureServiceApi,
 } from "@madie/madie-util";
 import StatusHandler from "./StatusHandler";
@@ -165,7 +164,6 @@ const MeasureEditor = ({ measureCanEdit, measureLockedBy }) => {
   const { updateMeasure } = measureStore;
   const { measureId } = useParams();
   const [processing, setProcessing] = useState<boolean>(true);
-  const featureFlags = useFeatureFlags();
   useEffect(() => {
     const handleUnload = () => {
       measureServiceApi.unlockMeasure(measureId);
@@ -174,7 +172,7 @@ const MeasureEditor = ({ measureCanEdit, measureLockedBy }) => {
       setMeasure(measure);
       validateCql(measure, setToastOpen, setToastMessage);
     });
-    if (featureFlags?.Locking && measureCanEdit && !measureLockedBy) {
+    if (measureCanEdit && !measureLockedBy) {
       window.addEventListener("beforeunload", handleUnload);
       measureServiceApi
         .updateMeasureLock(measureId)
@@ -185,18 +183,12 @@ const MeasureEditor = ({ measureCanEdit, measureLockedBy }) => {
     }
     return () => {
       subscription.unsubscribe();
-      if (featureFlags?.Locking && measureCanEdit && !measureLockedBy) {
+      if (measureCanEdit && !measureLockedBy) {
         window.removeEventListener("beforeunload", handleUnload);
         measureServiceApi.unlockMeasure(measureId);
       }
     };
-  }, [
-    measureServiceApi,
-    measureId,
-    featureFlags?.Locking,
-    measureCanEdit,
-    measureLockedBy,
-  ]);
+  }, [measureServiceApi, measureId, measureCanEdit, measureLockedBy]);
 
   const [discardDialogOpen, setDiscardDialogOpen]: [
     boolean,
@@ -512,7 +504,7 @@ const MeasureEditor = ({ measureCanEdit, measureLockedBy }) => {
             if (callback) callback();
           })
           .catch((reason) => {
-            if (featureFlags?.Locking && reason?.status === 423) {
+            if (reason?.status === 423) {
               setErrorMessage(reason?.response?.data?.message);
               updateMeasure({
                 ...measure,

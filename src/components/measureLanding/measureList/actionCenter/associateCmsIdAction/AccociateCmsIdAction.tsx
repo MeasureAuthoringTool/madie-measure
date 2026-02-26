@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import { IconButton } from "@mui/material";
 import Tooltip from "@mui/material/Tooltip";
 import { Measure, Model } from "@madie/madie-models";
-import { useOktaTokens, useFeatureFlags } from "@madie/madie-util";
+import { useOktaTokens } from "@madie/madie-util";
 import IconLink from "../../../../../icons/IconLink";
 
 interface PropTypes {
@@ -29,8 +29,6 @@ export default function AssociateCmsIdAction(props: PropTypes) {
 
   const { getUserName } = useOktaTokens();
   const userName = getUserName();
-  const featureFlags = useFeatureFlags();
-
   const validateAssociateCmsIdActionState = useCallback(() => {
     if (measures?.length === 2) {
       const qdmMeasure = measures.find(
@@ -60,16 +58,10 @@ export default function AssociateCmsIdAction(props: PropTypes) {
         } else if (qiCoreMeasure.measureSet.cmsId) {
           setTooltipMessage(MUST_NOT_HAVE_CMS_ID);
         } else {
-          if (featureFlags.Locking) {
-            if (qiCoreMeasure.measureLock?.lockedBy) {
-              setTooltipMessage(
-                MEASURE_LOCKED_MESSAGE +
-                  ` ${qiCoreMeasure.measureLock.lockedBy}`
-              );
-            } else {
-              setTooltipMessage(ASSOCIATE_CMS_ID);
-              setDisableAssociateCmsIdBtn(false);
-            }
+          if (qiCoreMeasure.measureLock?.lockedBy) {
+            setTooltipMessage(
+              MEASURE_LOCKED_MESSAGE + ` ${qiCoreMeasure.measureLock.lockedBy}`
+            );
           } else {
             setTooltipMessage(ASSOCIATE_CMS_ID);
             setDisableAssociateCmsIdBtn(false);

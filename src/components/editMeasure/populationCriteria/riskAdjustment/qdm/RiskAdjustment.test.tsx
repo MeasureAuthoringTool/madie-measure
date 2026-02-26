@@ -75,9 +75,7 @@ jest.mock("@madie/madie-util", () => ({
   useOktaTokens: () => ({
     getAccessToken: () => "test.jwt",
   }),
-  useFeatureFlags: jest.fn(() => ({
-    Locking: false,
-  })),
+  useFeatureFlags: jest.fn(() => ({})),
   routeHandlerStore: {
     subscribe: (set) => {
       set({ canTravel: false, pendingPath: "" });
@@ -632,9 +630,6 @@ describe("QdmRiskAdjustment Component", () => {
     }
   });
   it("displays error alert when locking feature is enabled and test cases get locked during edit", async () => {
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-      Locking: true,
-    }));
     const checkTestCasesLockStatusMock = jest.fn().mockResolvedValue(true);
     const setAlertMessageMock = jest.fn();
     RenderRiskAdjustment({
@@ -676,9 +671,6 @@ describe("QdmRiskAdjustment Component", () => {
   });
 
   it("Should fail an update to risk adjustment values because of 423 error", async () => {
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementationOnce(() => ({
-      Locking: true,
-    }));
     (mockMeasureServiceApi.updateMeasure as jest.Mock).mockRejectedValue({
       status: 423,
       response: {

@@ -217,12 +217,10 @@ export default function ActionCenter(props: PropTypes) {
         activeTab={props?.activeTab}
       />
       <HistoryAction measures={props.measures} onClick={viewMeasureHistory} />
-      {featureFlags?.CompareMeasureVersions && (
-        <CompareVersionsAction
-          measures={props.measures}
-          onClick={compareVersions}
-        />
-      )}
+      <CompareVersionsAction
+        measures={props.measures}
+        onClick={compareVersions}
+      />
     </div>
   );
 }

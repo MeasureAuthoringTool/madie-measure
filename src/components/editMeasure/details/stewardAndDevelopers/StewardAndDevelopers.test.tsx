@@ -476,7 +476,6 @@ describe("Steward and Developers component", () => {
       <StewardAndDevelopers
         setErrorMessage={setErrorMessage}
         measureCanEdit={true}
-        lockingFeatureEnabled={true}
       />
     );
     await act(async () => {

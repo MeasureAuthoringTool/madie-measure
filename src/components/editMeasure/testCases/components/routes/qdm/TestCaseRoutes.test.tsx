@@ -139,6 +139,11 @@ CQMConversionMock.mockImplementation(() => {
 });
 
 describe("TestCaseRoutes", () => {
+  beforeEach(() => {
+    mockedAxios.put.mockResolvedValue({ data: {} });
+    mockedAxios.delete.mockResolvedValue({ data: {} });
+  });
+
   it("should render the test case list component", async () => {
     mockedAxios.get.mockImplementation(() => {
       return Promise.resolve({

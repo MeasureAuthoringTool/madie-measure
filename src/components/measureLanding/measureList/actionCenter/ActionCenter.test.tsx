@@ -5,7 +5,6 @@ import ActionCenter from "./ActionCenter";
 import { Measure, MeasureSet, Model } from "@madie/madie-models";
 import {
   checkUserCanEdit,
-  useFeatureFlags,
   useOktaTokens,
   checkUserCanDelete,
   MeasureServiceApi,
@@ -87,9 +86,6 @@ describe("ActionCenter", () => {
     (checkUserCanDelete as jest.Mock).mockImplementation(
       mockCheckUserCanDelete
     );
-    (useFeatureFlags as jest.Mock).mockImplementation(() => ({
-      CompareMeasureVersions: false,
-    }));
   });
 
   it("should render all action components", () => {
@@ -602,38 +598,8 @@ describe("ActionCenter", () => {
     });
   });
 
-  it("should not render compare versions action if feature flag is not on", () => {
+  it("should render compare versions action", () => {
     mockCheckUserCanEdit.mockReturnValue(true);
-
-    render(
-      <ActionCenter
-        measures={[qdmMeasure]}
-        associateCmsId={jest.fn()}
-        exportMeasure={jest.fn()}
-        updateTargetMeasure={jest.fn()}
-        setCreateVersionDialog={jest.fn()}
-        setDraftMeasureDialog={jest.fn()}
-        setDeleteMeasureDialog={jest.fn()}
-        setShareDialog={jest.fn()}
-        deleteMeasure={jest.fn()}
-        setViewHumanReadableModal={jest.fn()}
-        setViewMeasureHistoryDialog={jest.fn()}
-        activeTab={0}
-        setTransferDialog={jest.fn()}
-      />
-    );
-
-    expect(screen.getByTestId("action-center")).toBeInTheDocument();
-    expect(
-      screen.queryByTestId("compare-versions-action-btn")
-    ).not.toBeInTheDocument();
-  });
-
-  it("should render compare versions action if feature flag is on", () => {
-    mockCheckUserCanEdit.mockReturnValue(true);
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-      CompareMeasureVersions: true,
-    }));
 
     render(
       <ActionCenter
@@ -661,9 +627,6 @@ describe("ActionCenter", () => {
 
   it("should call setCompareVersionsDialog when compare versions action is clicked", async () => {
     mockCheckUserCanEdit.mockReturnValue(true);
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-      CompareMeasureVersions: true,
-    }));
 
     const setCompareVersionsDialog = jest.fn();
 
@@ -697,9 +660,6 @@ describe("ActionCenter", () => {
 
   it("should keep compare versions button disabled when measures length !== 2", async () => {
     mockCheckUserCanEdit.mockReturnValue(true);
-    (useFeatureFlags as jest.Mock).mockImplementation(() => ({
-      CompareMeasureVersions: true,
-    }));
 
     const setCompareVersionsDialog = jest.fn();
 
@@ -732,9 +692,6 @@ describe("ActionCenter", () => {
 
   it("should keep compare versions button disabled when measures are from different measure sets", async () => {
     mockCheckUserCanEdit.mockReturnValue(true);
-    (useFeatureFlags as jest.Mock).mockImplementation(() => ({
-      CompareMeasureVersions: true,
-    }));
 
     const setCompareVersionsDialog = jest.fn();
 

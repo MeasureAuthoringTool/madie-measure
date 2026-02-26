@@ -245,4 +245,120 @@ describe("AddedComponentsTable", () => {
     expect(screen.getByText("Alpha Measure")).toBeInTheDocument();
     expect(screen.getByText("Beta Measure")).toBeInTheDocument();
   });
+
+  it("calls onComponentsUpdate with filtered components when delete button is clicked", async () => {
+    const service = makeService();
+    (useMeasureServiceApi as jest.Mock).mockReturnValue(service);
+
+    const components = [
+      { measureId: "m1", groupId: "g1" },
+      { measureId: "m2", groupId: "g2" },
+    ];
+
+    const mockOnComponentsUpdate = jest.fn();
+
+    render(
+      <AddedComponentsTable
+        components={components}
+        onComponentsUpdate={mockOnComponentsUpdate}
+      />
+    );
+
+    await waitFor(() =>
+      expect(screen.getByTestId("measure-list-tbl")).toBeInTheDocument()
+    );
+
+    const deleteButton = screen.getByTestId("delete-component-m1");
+    await userEvent.click(deleteButton);
+
+    expect(mockOnComponentsUpdate).toHaveBeenCalledWith([
+      { measureId: "m2", groupId: "g2" },
+    ]);
+  });
+
+  it("updates the component count in header after deletion", async () => {
+    const service = makeService();
+    (useMeasureServiceApi as jest.Mock).mockReturnValue(service);
+
+    const components = [
+      { measureId: "m1", groupId: "g1" },
+      { measureId: "m2", groupId: "g2" },
+      { measureId: "m2", groupId: "g3" },
+    ];
+
+    const mockOnComponentsUpdate = jest.fn();
+
+    const { rerender } = render(
+      <AddedComponentsTable
+        components={components}
+        onComponentsUpdate={mockOnComponentsUpdate}
+      />
+    );
+
+    await waitFor(() =>
+      expect(screen.getByTestId("measure-list-tbl")).toBeInTheDocument()
+    );
+
+    // Initial count should be 2 (unique m1, m2)
+    expect(
+      screen.getByText("Selected Composite Measure Components (2)")
+    ).toBeInTheDocument();
+
+    const deleteButton = screen.getByTestId("delete-component-m1");
+    await userEvent.click(deleteButton);
+
+    // Rerender with updated components
+    rerender(
+      <AddedComponentsTable
+        components={[
+          { measureId: "m2", groupId: "g2" },
+          { measureId: "m2", groupId: "g3" },
+        ]}
+        onComponentsUpdate={mockOnComponentsUpdate}
+      />
+    );
+
+    await waitFor(() => {
+      expect(
+        screen.getByText("Selected Composite Measure Components (1)")
+      ).toBeInTheDocument();
+    });
+  });
+
+  it("handles deletion when components have multiple groups for same measureId", async () => {
+    const service = makeService();
+    (useMeasureServiceApi as jest.Mock).mockReturnValue(service);
+
+    const components = [
+      { measureId: "m1", groupId: "g1" },
+      { measureId: "m1", groupId: "g2" },
+      { measureId: "m2", groupId: "g3" },
+    ];
+
+    const mockOnComponentsUpdate = jest.fn();
+
+    render(
+      <AddedComponentsTable
+        components={components}
+        onComponentsUpdate={mockOnComponentsUpdate}
+      />
+    );
+
+    await waitFor(() =>
+      expect(screen.getByTestId("measure-list-tbl")).toBeInTheDocument()
+    );
+
+    // Should have 2 unique measures displayed
+    expect(
+      screen.getByText("Selected Composite Measure Components (2)")
+    ).toBeInTheDocument();
+
+    const deleteButton = screen.getByTestId("delete-component-m1");
+    await userEvent.click(deleteButton);
+
+    // All components with m1 should be removed
+    expect(mockOnComponentsUpdate).toHaveBeenCalledWith([
+      { measureId: "m2", groupId: "g3" },
+    ]);
+  });
 });

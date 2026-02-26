@@ -122,7 +122,6 @@ jest.mock("@madie/madie-util", () => {
       return {
         applyDefaults: mockApplyDefaults,
         qiCoreElementsTab: true,
-        Locking: true,
       };
     }),
     measureStore: {
@@ -3541,6 +3540,8 @@ describe("EditTestCase component", () => {
           });
         }
       });
+      const measure = { ...simpleMeasureFixture, createdBy: MEASURE_CREATEDBY };
+      measure.testCaseConfiguration.executeInvalidTestCases = false;
       renderWithRouter(
         [
           "/measures/623cacebe74613783378c17b/edit/test-cases/623cacffe74613783378c17c",
@@ -4143,11 +4144,6 @@ describe("EditTestCase component", () => {
 
   describe("locking test case", () => {
     it("locking test case successfully", () => {
-      (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => {
-        return {
-          Locking: true,
-        };
-      });
       const testCase = {
         id: "1234",
         description: "Test IPP",
@@ -4177,11 +4173,6 @@ describe("EditTestCase component", () => {
     });
 
     it("locking test case fails", () => {
-      (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => {
-        return {
-          Locking: true,
-        };
-      });
       mockedAxios.post.mockImplementation((args) => {
         if (args && args.endsWith("lock")) {
           return Promise.reject({
@@ -4600,11 +4591,6 @@ describe("EditTestCase QICore Component - Test Case Locked By Other User", () =>
   beforeEach(() => {
     (checkUserCanEdit as jest.Mock).mockClear().mockImplementation(() => {
       return true;
-    });
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => {
-      return {
-        Locking: true,
-      };
     });
     mockedAxios.get.mockImplementation((args) => {
       if (args && args.endsWith("series")) {

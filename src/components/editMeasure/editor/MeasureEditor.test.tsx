@@ -44,7 +44,7 @@ const mockUseFeatureFlags = jest.fn(() => ({}));
 const mockMeasureServiceApi = {
   updateMeasure: jest.fn(),
   unlockMeasure: jest.fn(),
-  updateMeasureLock: jest.fn(),
+  updateMeasureLock: jest.fn().mockResolvedValue({}),
 };
 
 jest.mock("@madie/madie-util", () => ({
@@ -573,7 +573,6 @@ describe("MeasureEditor component", () => {
   });
 
   it("reports 423 error when save cql fails", async () => {
-    mockUseFeatureFlags.mockReturnValue({ Locking: true });
     mockMeasureServiceApi.updateMeasureLock.mockResolvedValueOnce({
       isLocked: true,
       lockedBy: "testuser@example.com",
@@ -1314,8 +1313,6 @@ define function MeasureObservation(e Encounter):
       lockedBy: "testuser@example.com",
     });
 
-    mockUseFeatureFlags.mockReturnValue({ Locking: true });
-
     renderEditor(measure);
 
     await waitFor(() => {
@@ -1324,8 +1321,6 @@ define function MeasureObservation(e Encounter):
   });
 
   it("Should fail lock", async () => {
-    mockUseFeatureFlags.mockReturnValue({ Locking: true });
-
     const errorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
 
     mockMeasureServiceApi.updateMeasure.mockResolvedValueOnce(measure);

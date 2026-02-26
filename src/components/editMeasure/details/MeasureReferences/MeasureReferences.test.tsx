@@ -669,7 +669,6 @@ describe("Measure References Component", () => {
           <MeasureReferences
             setErrorMessage={jest.fn()}
             measureCanEdit={true}
-            lockingFeatureEnabled={true}
           />
         </MemoryRouter>
       </ApiContextProvider>
@@ -1164,7 +1163,6 @@ describe("Measure References Component", () => {
           <MeasureReferences
             setErrorMessage={jest.fn()}
             measureCanEdit={true}
-            lockingFeatureEnabled={true}
           />
         </MemoryRouter>
       </ApiContextProvider>

@@ -198,9 +198,7 @@ jest.mock("@madie/madie-util", () => ({
     getUserName: () => "test user",
   })),
   checkUserCanEdit: jest.fn().mockImplementation(() => true),
-  useFeatureFlags: jest.fn(() => ({
-    Locking: false,
-  })),
+  useFeatureFlags: jest.fn(() => ({})),
   measureStore: {
     updateMeasure: jest.fn((measure) => measure),
     state: jest.fn().mockImplementation(() => null),
@@ -959,9 +957,6 @@ describe("EditMeasure Component", () => {
   });
 
   test("Renders in read-only mode when measure is locked", async () => {
-    useFeatureFlags.mockImplementation(() => ({
-      Locking: true,
-    }));
     const lockedMeasure = {
       ...measure,
       measureLock: { lockedBy: "anotherUser" },
