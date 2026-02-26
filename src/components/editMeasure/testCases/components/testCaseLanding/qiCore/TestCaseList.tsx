@@ -484,22 +484,21 @@ const TestCaseList = (props: TestCaseListProps) => {
     if (filteredTestCases && filteredTestCases.length > 0 && measureBundle) {
       setExecuting(true);
       try {
-        let updatedTestCaseExecutionBundle;
+        let executionBundle = filteredTestCases;
         if (!measure?.testCaseConfiguration?.executeInvalidTestCases) {
           //filter any resources with invalid references.
-          updatedTestCaseExecutionBundle =
+          const updatedTestCaseExecutionBundle =
             await fhirDefinitionServiceApi.current.getTestCaseExecutionBundle(
               measure.model,
               filteredTestCases
             );
+          executionBundle = updatedTestCaseExecutionBundle?.testCases;
         }
 
         const calculationOutput: CalculationOutput<any> =
           await calculation.current.calculateTestCases(
             measure,
-            !measure?.testCaseConfiguration?.executeInvalidTestCases
-              ? updatedTestCaseExecutionBundle?.testCases
-              : filteredTestCases,
+            executionBundle,
             measureBundle,
             valueSets
           );
