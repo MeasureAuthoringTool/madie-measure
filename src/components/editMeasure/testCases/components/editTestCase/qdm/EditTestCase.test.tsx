@@ -1026,6 +1026,96 @@ describe("EditTestCase QDM Component", () => {
       );
     });
   });
+
+  it("should display tooltip with title error when title is cleared and form is dirty", async () => {
+    testCase.json = JSON.stringify(testCaseJson);
+    await waitFor(() => renderEditTestCaseComponent());
+
+    const detailsTab = getByRole("tab", { name: "Details tab panel" });
+    act(() => {
+      fireEvent.click(detailsTab);
+    });
+    await waitFor(() => {
+      expect(detailsTab).toHaveAttribute("aria-selected", "true");
+    });
+
+    const tcTitle = await screen.findByTestId("test-case-title");
+    expect(tcTitle).toHaveValue(testCase.title);
+
+    // Clear the title to trigger validation error
+    userEvent.clear(tcTitle);
+    await waitFor(() => {
+      expect(tcTitle).toHaveValue("");
+    });
+    fireEvent.blur(tcTitle);
+
+    const saveButton = getByRole("button", { name: "Save" });
+    await waitFor(() => expect(saveButton).toBeDisabled());
+
+    // Hover over the span wrapping the disabled save button to trigger tooltip
+    fireEvent.mouseOver(saveButton.closest("span"));
+    await waitFor(() => {
+      expect(
+        screen.getByText(/title: Test Case Title is required/)
+      ).toBeInTheDocument();
+    });
+  });
+
+  it("should display tooltip with description error when description exceeds max length", async () => {
+    testCase.json = JSON.stringify(testCaseJson);
+    await waitFor(() => renderEditTestCaseComponent());
+
+    const detailsTab = getByRole("tab", { name: "Details tab panel" });
+    act(() => {
+      fireEvent.click(detailsTab);
+    });
+    await waitFor(() => {
+      expect(detailsTab).toHaveAttribute("aria-selected", "true");
+    });
+
+    const descriptionInput = screen.getByTestId("test-case-description");
+    const longDescription = "a".repeat(251);
+    userEvent.clear(descriptionInput);
+    userEvent.type(descriptionInput, longDescription);
+    fireEvent.blur(descriptionInput);
+
+    const saveButton = getByRole("button", { name: "Save" });
+    await waitFor(() => expect(saveButton).toBeDisabled());
+
+    fireEvent.mouseOver(saveButton.closest("span"));
+    await waitFor(() => {
+      expect(
+        screen.getByText(
+          /description: Test Case Description cannot be more than 250 characters/
+        )
+      ).toBeInTheDocument();
+    });
+  });
+
+  it("should not display tooltip when form has no errors", async () => {
+    testCase.json = JSON.stringify(testCaseJson);
+    await waitFor(() => renderEditTestCaseComponent());
+
+    // Make a change to enable the Save button (change race dropdown)
+    const raceSelector = screen.getByRole("combobox", { name: "Race" });
+    userEvent.click(raceSelector);
+    const raceOptions = await screen.findAllByRole("option");
+    userEvent.click(raceOptions[3]);
+    expect(raceSelector).toHaveTextContent("White");
+
+    const saveButton = getByRole("button", { name: "Save" });
+    await waitFor(() => expect(saveButton).not.toBeDisabled());
+
+    // Hover over the button's wrapper span
+    fireEvent.mouseOver(saveButton.closest("span"));
+    // The tooltip should not show any error text
+    await waitFor(() => {
+      expect(screen.queryByText(/title:/)).not.toBeInTheDocument();
+      expect(screen.queryByText(/description:/)).not.toBeInTheDocument();
+      expect(screen.queryByText(/series:/)).not.toBeInTheDocument();
+    });
+  });
+
   describe("validator", () => {
     it("should provide error for non boolean populations when value is in decimal", () => {
       const tc = {
