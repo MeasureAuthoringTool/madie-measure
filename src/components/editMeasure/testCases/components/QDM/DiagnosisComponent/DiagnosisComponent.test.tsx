@@ -52,6 +52,7 @@ const valueSets = [
 let handleDiagnosisChange = jest.fn();
 
 jest.mock("@madie/madie-util", () => ({
+  useIsAdminTransferEnabled: () => false,
   routeHandlerStore: {
     subscribe: (set) => {
       set();

@@ -13,6 +13,7 @@ import { Measure, Model } from "@madie/madie-models";
 import { useFeatureFlags } from "@madie/madie-util";
 
 jest.mock("@madie/madie-util", () => ({
+  useIsAdminTransferEnabled: () => false,
   useFeatureFlags: jest.fn().mockReturnValue({
     qiCore6: true,
     qiCore7: true,

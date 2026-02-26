@@ -11,6 +11,7 @@ const mockMeasureServiceApi = {
 };
 
 jest.mock("@madie/madie-util", () => ({
+  useIsAdminTransferEnabled: () => false,
   useMeasureServiceApi: jest.fn(() => mockMeasureServiceApi),
 }));
 jest.mock("@madie/madie-design-system/dist/react", () => ({

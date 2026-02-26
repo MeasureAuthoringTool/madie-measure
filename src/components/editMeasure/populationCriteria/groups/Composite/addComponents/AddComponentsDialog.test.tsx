@@ -42,6 +42,7 @@ const zeroItemResponse = {
 };
 
 jest.mock("@madie/madie-util", () => ({
+  useIsAdminTransferEnabled: () => false,
   useMeasureServiceApi: jest.fn(() => ({
     searchMeasuresByCriteria: jest.fn().mockResolvedValue(mockOneItemResponse),
     getMeasuresByMeasureSetId: jest.fn().mockResolvedValue([]),

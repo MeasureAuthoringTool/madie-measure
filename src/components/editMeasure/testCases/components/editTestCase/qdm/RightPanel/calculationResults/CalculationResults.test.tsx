@@ -23,6 +23,7 @@ const useCqlParsingServiceMockResolved = {
 import { calculationResults } from "../../../groupCoverage/_mocks_/QdmCalculationResults";
 
 jest.mock("@madie/madie-util", () => ({
+  useIsAdminTransferEnabled: () => false,
   useFeatureFlags: jest.fn(() => ({})),
 }));
 

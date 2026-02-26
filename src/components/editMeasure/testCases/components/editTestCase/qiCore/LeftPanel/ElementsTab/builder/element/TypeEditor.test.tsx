@@ -64,6 +64,7 @@ const mockFormik: FormikContextType<any> = {
 };
 
 jest.mock("@madie/madie-util", () => ({
+  useIsAdminTransferEnabled: () => false,
   useOktaTokens: () => ({
     getAccessToken: () => "test.jwt",
   }),

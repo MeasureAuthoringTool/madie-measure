@@ -52,11 +52,16 @@ const mockOktaTokenApi = {
 };
 
 jest.mock("@madie/madie-util", () => ({
+  useIsAdminTransferEnabled: () => false,
   useMeasureServiceApi: jest.fn(() => mockMeasureServiceApi),
   useOktaTokens: () => mockOktaTokenApi,
   checkUserCanEdit: jest.fn().mockImplementation(() => true),
   checkUserCanDelete: jest.fn().mockImplementation(() => true),
   useFeatureFlags: jest.fn(() => mockUseFeatureFlagsApi),
+  useUserRoles: jest.fn(() => ({
+    roles: [],
+    isAdmin: false,
+  })),
   measureStore: {
     updateMeasure: jest.fn((measure) => measure),
     state: jest.fn().mockImplementation(() => null),

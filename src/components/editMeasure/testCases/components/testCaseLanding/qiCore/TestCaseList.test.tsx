@@ -140,6 +140,7 @@ const mockMeasureServiceApiResolved = {
     .mockResolvedValue(buildMeasureBundle(mockMeasure)),
 } as unknown as MeasureServiceApi;
 jest.mock("@madie/madie-util", () => ({
+  useIsAdminTransferEnabled: () => false,
   useMeasureServiceApi: jest.fn(() => mockMeasureServiceApiResolved),
   useDocumentTitle: jest.fn(),
   measureStore: {

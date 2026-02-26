@@ -3,7 +3,7 @@ import { IconButton } from "@mui/material";
 import Tooltip from "@mui/material/Tooltip";
 import { Measure } from "@madie/madie-models";
 import SwapVertOutlinedIcon from "@mui/icons-material/SwapVertOutlined";
-import { checkUserCanEdit } from "@madie/madie-util";
+import { checkUserCanEdit, useIsAdminTransferEnabled } from "@madie/madie-util";
 
 interface PropTypes {
   measures: Measure[];
@@ -30,24 +30,39 @@ export default function TransferAction(props: PropTypes) {
   const { measures, activeTab } = props;
   const [disableTransferBtn, setDisableTransferBtn] = useState(true);
   const [tooltipMessage, setTooltipMessage] = useState(NOTHING_SELECTED);
+  const isAdminTransferEnabled = useIsAdminTransferEnabled();
 
   const validateTransferActionState = useCallback(() => {
     setDisableTransferBtn(false);
     setTooltipMessage(TRANSFER);
+
+    // If no measures selected, disable the button
     if (measures?.length === 0) {
       setDisableTransferBtn(true);
       setTooltipMessage(NOTHING_SELECTED);
+      return;
     }
+
+    // Admin users with feature flag enabled can transfer any measure
+    if (isAdminTransferEnabled) {
+      setDisableTransferBtn(false);
+      setTooltipMessage(TRANSFER);
+      return;
+    }
+
+    // Non-admin users: apply existing business rules
     if (activeTab === 1) {
+      // Shared Measures tab - cannot transfer
       setTooltipMessage(CANNOT_TRANSFER);
       setDisableTransferBtn(true);
     } else if (activeTab === 2) {
+      // All Measures tab - must be owner of all selected
       if (!isOwnerOfSelectedMeasure(measures)) {
         setTooltipMessage(MORE_THAN_ONE_NOT_OWNED);
         setDisableTransferBtn(true);
       }
     }
-  }, [measures, activeTab]);
+  }, [measures, activeTab, isAdminTransferEnabled]);
 
   useEffect(() => {
     validateTransferActionState();

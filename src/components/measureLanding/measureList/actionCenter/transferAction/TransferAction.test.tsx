@@ -8,7 +8,13 @@ import TransferAction, {
 } from "./TransferAction";
 import { Measure, MeasureSet, Model } from "@madie/madie-models";
 //import userEvent from "@testing-library/user-event";
-import { checkUserCanEdit, useOktaTokens } from "@madie/madie-util";
+import {
+  checkUserCanEdit,
+  useOktaTokens,
+  useFeatureFlags,
+  useUserRoles,
+  useIsAdminTransferEnabled,
+} from "@madie/madie-util";
 
 const mockUser = "test user";
 
@@ -26,6 +32,7 @@ const mockMeasure = {
 } as unknown as Measure;
 
 jest.mock("@madie/madie-util", () => ({
+  useIsAdminTransferEnabled: jest.fn(() => false),
   checkUserCanEdit: jest.fn(() => {
     return true;
   }),
@@ -34,11 +41,26 @@ jest.mock("@madie/madie-util", () => ({
       getUserName: mockUser,
     };
   }),
+  useFeatureFlags: jest.fn(() => ({
+    AdminTransferMeasures: false,
+  })),
+  useUserRoles: jest.fn(() => ({
+    roles: [],
+    isAdmin: false,
+  })),
 }));
 
 describe("TransferAction", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    (useIsAdminTransferEnabled as jest.Mock).mockReturnValue(false);
+    (useFeatureFlags as jest.Mock).mockReturnValue({
+      AdminTransferMeasures: false,
+    });
+    (useUserRoles as jest.Mock).mockReturnValue({
+      roles: [],
+      isAdmin: false,
+    });
   });
 
   it("Should disable action btn if no measure selected", () => {
@@ -81,7 +103,7 @@ describe("TransferAction", () => {
   });
 
   it("Should enable action btn if it's from All Measures tab and user is the owner", () => {
-    checkUserCanEdit.mockImplementationOnce(() => true);
+    (checkUserCanEdit as jest.Mock).mockImplementationOnce(() => true);
     render(
       <TransferAction
         measures={[mockMeasure]}
@@ -97,7 +119,7 @@ describe("TransferAction", () => {
   });
 
   it("Should display nothing selected", () => {
-    checkUserCanEdit.mockImplementation(() => true);
+    (checkUserCanEdit as jest.Mock).mockImplementation(() => true);
     render(<TransferAction measures={[]} onClick={() => {}} activeTab={2} />);
     expect(screen.getByTestId("transfer-action-btn")).toBeDisabled();
     expect(screen.getByTestId("transfer-action-tooltip")).toHaveAttribute(
@@ -107,7 +129,7 @@ describe("TransferAction", () => {
   });
 
   it("Should disable action btn if user is not the owner", () => {
-    checkUserCanEdit.mockImplementation(() => false);
+    (checkUserCanEdit as jest.Mock).mockImplementation(() => false);
     const testMeasureSet = { ...mockMeasureSet, owner: "anotherUser" };
     const testMeasure = { ...mockMeasure, measureSet: testMeasureSet };
     render(
@@ -122,5 +144,103 @@ describe("TransferAction", () => {
       "aria-label",
       MORE_THAN_ONE_NOT_OWNED
     );
+  });
+
+  // Admin user tests
+  describe("Admin user with AdminTransferMeasures feature flag enabled", () => {
+    beforeEach(() => {
+      (useIsAdminTransferEnabled as jest.Mock).mockReturnValue(true);
+      (useFeatureFlags as jest.Mock).mockReturnValue({
+        AdminTransferMeasures: true,
+      });
+      (useUserRoles as jest.Mock).mockReturnValue({
+        roles: ["MADiE-Admin"],
+        isAdmin: true,
+      });
+    });
+
+    it("Should disable action btn if no measure selected even for admin", () => {
+      render(<TransferAction measures={[]} onClick={() => {}} activeTab={0} />);
+      expect(screen.getByTestId("transfer-action-btn")).toBeDisabled();
+      expect(screen.getByTestId("transfer-action-tooltip")).toHaveAttribute(
+        "aria-label",
+        NOTHING_SELECTED
+      );
+    });
+
+    it("Should enable action btn for admin on Owned Measures tab", () => {
+      render(
+        <TransferAction
+          measures={[mockMeasure]}
+          onClick={() => {}}
+          activeTab={0}
+        />
+      );
+      expect(screen.getByTestId("transfer-action-btn")).not.toBeDisabled();
+      expect(screen.getByTestId("transfer-action-tooltip")).toHaveAttribute(
+        "aria-label",
+        TRANSFER
+      );
+    });
+
+    it("Should enable action btn for admin on Shared Measures tab", () => {
+      render(
+        <TransferAction
+          measures={[mockMeasure]}
+          onClick={() => {}}
+          activeTab={1}
+        />
+      );
+      expect(screen.getByTestId("transfer-action-btn")).not.toBeDisabled();
+      expect(screen.getByTestId("transfer-action-tooltip")).toHaveAttribute(
+        "aria-label",
+        TRANSFER
+      );
+    });
+
+    it("Should enable action btn for admin on All Measures tab even for non-owned measures", () => {
+      (checkUserCanEdit as jest.Mock).mockImplementation(() => false);
+      const testMeasureSet = { ...mockMeasureSet, owner: "anotherUser" };
+      const testMeasure = { ...mockMeasure, measureSet: testMeasureSet };
+      render(
+        <TransferAction
+          measures={[testMeasure]}
+          onClick={() => {}}
+          activeTab={2}
+        />
+      );
+      expect(screen.getByTestId("transfer-action-btn")).not.toBeDisabled();
+      expect(screen.getByTestId("transfer-action-tooltip")).toHaveAttribute(
+        "aria-label",
+        TRANSFER
+      );
+    });
+  });
+
+  describe("Admin user with AdminTransferMeasures feature flag disabled", () => {
+    beforeEach(() => {
+      (useFeatureFlags as jest.Mock).mockReturnValue({
+        AdminTransferMeasures: false,
+      });
+      (useUserRoles as jest.Mock).mockReturnValue({
+        roles: ["MADiE-Admin"],
+        isAdmin: true,
+      });
+    });
+
+    it("Should disable action btn on Shared Measures tab even for admin when flag is off", () => {
+      render(
+        <TransferAction
+          measures={[mockMeasure]}
+          onClick={() => {}}
+          activeTab={1}
+        />
+      );
+      expect(screen.getByTestId("transfer-action-btn")).toBeDisabled();
+      expect(screen.getByTestId("transfer-action-tooltip")).toHaveAttribute(
+        "aria-label",
+        CANNOT_TRANSFER
+      );
+    });
   });
 });

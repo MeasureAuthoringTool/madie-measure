@@ -30,6 +30,7 @@ const { getByTestId, findByTestId, findByRole } = screen;
 const MEASURE_OWNER = "test.user";
 
 jest.mock("@madie/madie-util", () => ({
+  useIsAdminTransferEnabled: () => false,
   useMeasureServiceApi: jest.fn(() => mockMeasureServiceApi),
   useFeatureFlags: jest.fn().mockReturnValue({}),
 }));

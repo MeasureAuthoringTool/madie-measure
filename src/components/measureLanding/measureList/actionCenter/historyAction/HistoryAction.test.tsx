@@ -9,6 +9,7 @@ import userEvent from "@testing-library/user-event";
 
 const mockUser = "test user";
 jest.mock("@madie/madie-util", () => ({
+  useIsAdminTransferEnabled: () => false,
   useOktaTokens: () => ({
     getUserName: () => mockUser,
   }),

@@ -32,6 +32,7 @@ const QiCoreMeasure = {
 
 let mockFeatureFlags = { Locking: false };
 jest.mock("@madie/madie-util", () => ({
+  useIsAdminTransferEnabled: () => false,
   useMeasureServiceApi: jest.fn(() => {}),
   useDocumentTitle: jest.fn(),
   measureStore: {

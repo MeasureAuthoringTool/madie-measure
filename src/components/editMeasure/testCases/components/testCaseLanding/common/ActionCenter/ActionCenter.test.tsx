@@ -13,6 +13,7 @@ jest.mock("react-router-dom", () => ({
 }));
 
 jest.mock("@madie/madie-util", () => ({
+  useIsAdminTransferEnabled: () => false,
   useFeatureFlags: jest.fn(),
 }));
 

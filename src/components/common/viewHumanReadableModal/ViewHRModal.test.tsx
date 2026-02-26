@@ -6,6 +6,7 @@ import { MeasureServiceApi } from "@madie/madie-util";
 import userEvent from "@testing-library/user-event";
 
 jest.mock("@madie/madie-util", () => ({
+  useIsAdminTransferEnabled: () => false,
   useMeasureServiceApi: jest.fn(() => mockMeasureServiceApi),
   measureStore: {
     updateMeasure: jest.fn((measure) => measure),

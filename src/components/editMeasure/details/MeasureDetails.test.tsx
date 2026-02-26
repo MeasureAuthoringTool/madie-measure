@@ -109,6 +109,7 @@ const mockMeasureServiceApi: MeasureServiceApi = {
 jest.mock("./measureInformation/MeasureInformation");
 jest.mock("./measureMetadata/MeasureMetadata");
 jest.mock("@madie/madie-util", () => ({
+  useIsAdminTransferEnabled: () => false,
   useMeasureServiceApi: jest.fn(() => mockMeasureServiceApi),
   useDocumentTitle: jest.fn(),
   useFeatureFlags: jest.fn(() => mockUseFeatureFlags()),

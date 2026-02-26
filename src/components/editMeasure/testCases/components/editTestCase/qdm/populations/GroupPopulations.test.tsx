@@ -19,6 +19,7 @@ const measure = {
   model: "QDM v5.6",
 } as unknown as Measure;
 jest.mock("@madie/madie-util", () => ({
+  useIsAdminTransferEnabled: () => false,
   measureStore: {
     state: jest.fn().mockImplementation(() => measure),
     initialState: jest.fn().mockImplementation(() => measure),

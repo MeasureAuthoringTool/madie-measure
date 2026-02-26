@@ -116,6 +116,7 @@ const setExecuting = jest.fn();
 const setError = jest.fn();
 
 jest.mock("@madie/madie-util", () => ({
+  useIsAdminTransferEnabled: () => false,
   useDocumentTitle: jest.fn(),
   measureStore: {
     updateMeasure: jest.fn((measure) => measure),

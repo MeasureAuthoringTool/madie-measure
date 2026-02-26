@@ -17,9 +17,10 @@ import { Measure, Model } from "@madie/madie-models";
 import {
   measureStore,
   routeHandlerStore,
-  useFeatureFlags,
   useMeasureServiceApi,
   checkUserCanEdit,
+  useFeatureFlags,
+  useIsAdminTransferEnabled,
 } from "@madie/madie-util";
 import CreateVersionDialog from "../common/createVersionDialog/CreateVersionDialog";
 import InvalidTestCaseDialog from "../common/invalidTestCaseDialog/InvalidTestCaseDialog";
@@ -66,6 +67,7 @@ export default function EditMeasure() {
   const location = useLocation();
   const [currentMeasureId, setCurrentMeasureId] = useState<string>(measureId);
   const featureFlags = useFeatureFlags();
+  const isAdminTransferEnabled = useIsAdminTransferEnabled();
 
   // Required by every single spa application that has internal routing
   // This will block user from navigating inside madie-measure when the current form is dirty
@@ -141,6 +143,7 @@ export default function EditMeasure() {
   const [transferDialog, setTransferDialog] = useState({
     open: false,
     measures: [],
+    isAdminTransfer: false,
   });
   const [viewMeasureHistoryDialog, setViewMeasureHistoryDialog] =
     useState(false);
@@ -256,16 +259,20 @@ export default function EditMeasure() {
 
   useEffect(() => {
     const transferListener = () => {
+      // Check if user is admin and doesn't own the measure
+      const isOwner = checkUserCanEdit(measure?.measureSet?.owner, []);
+      const needsAdminTransfer = isAdminTransferEnabled && !isOwner;
       setTransferDialog({
         open: true,
         measures: [measure],
+        isAdminTransfer: needsAdminTransfer,
       });
     };
     window.addEventListener("transfer-measure", transferListener, false);
     return () => {
       window.removeEventListener("transfer-measure", transferListener, false);
     };
-  }, []);
+  }, [measure, isAdminTransferEnabled]);
 
   useEffect(() => {
     const subscription = measureStore.subscribe(setMeasure);
@@ -405,6 +412,7 @@ export default function EditMeasure() {
     setTransferDialog({
       open: false,
       measures: [],
+      isAdminTransfer: false,
     });
     setViewMeasureHistoryDialog(false);
   };
@@ -777,6 +785,7 @@ export default function EditMeasure() {
             open={transferDialog.open}
             onClose={handleTransferDialogClose}
             setStatusHandler={setStatusHandler}
+            isAdminTransfer={transferDialog.isAdminTransfer}
           />
           <ViewMeasureHistoryDialog
             measures={[measure]}

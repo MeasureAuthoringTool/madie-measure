@@ -88,6 +88,7 @@ jest.mock(
     <div data-testid="copy-test-case-dialog">Mock Copy Test Case Dialog</div>
 );
 jest.mock("@madie/madie-util", () => ({
+  useIsAdminTransferEnabled: () => false,
   // useMeasureServiceApi: jest.fn(() => ( {
   //   //fetchMeasureBundle: jest.fn().mockResolvedValue({}),
   // })) ,
