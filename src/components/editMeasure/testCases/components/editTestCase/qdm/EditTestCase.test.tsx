@@ -1075,8 +1075,9 @@ describe("EditTestCase QDM Component", () => {
 
     const descriptionInput = screen.getByTestId("test-case-description");
     const longDescription = "a".repeat(251);
-    userEvent.clear(descriptionInput);
-    userEvent.type(descriptionInput, longDescription);
+    fireEvent.change(descriptionInput, {
+      target: { value: longDescription },
+    });
     fireEvent.blur(descriptionInput);
 
     const saveButton = getByRole("button", { name: "Save" });

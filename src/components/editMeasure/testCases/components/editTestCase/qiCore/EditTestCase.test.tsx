@@ -4210,8 +4210,9 @@ describe("EditTestCase component", () => {
         "test-case-description"
       );
       const longDescription = "a".repeat(251);
-      userEvent.clear(descriptionInput);
-      userEvent.type(descriptionInput, longDescription);
+      fireEvent.change(descriptionInput, {
+        target: { value: longDescription },
+      });
       fireEvent.blur(descriptionInput);
 
       const saveButton = await screen.findByRole("button", {
