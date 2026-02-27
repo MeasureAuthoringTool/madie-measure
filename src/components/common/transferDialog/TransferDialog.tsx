@@ -216,6 +216,7 @@ interface TransferDialogProps {
   open: boolean;
   onClose: Function;
   setStatusHandler: Function;
+  isAdminTransfer?: boolean;
 }
 
 const TransferDialog = ({
@@ -223,6 +224,7 @@ const TransferDialog = ({
   open,
   onClose,
   setStatusHandler,
+  isAdminTransfer = false,
 }: TransferDialogProps) => {
   const measureServiceApi = useRef(useMeasureServiceApi()).current;
 
@@ -231,12 +233,20 @@ const TransferDialog = ({
 
     const measureIds = measures.map((m) => m.id);
 
-    return measureServiceApi
-      .transferMeasures(
-        measureIds,
-        formik.values.harpId,
-        formik.values.retainShareAccess
-      )
+    // Use admin endpoint if this is an admin transfer, otherwise use regular endpoint
+    const transferPromise = isAdminTransfer
+      ? measureServiceApi.adminTransferMeasures(
+          measureIds,
+          formik.values.harpId,
+          formik.values.retainShareAccess
+        )
+      : measureServiceApi.transferMeasures(
+          measureIds,
+          formik.values.harpId,
+          formik.values.retainShareAccess
+        );
+
+    return transferPromise
       .then((response) => {
         if (response.status === 200) {
           onClose({

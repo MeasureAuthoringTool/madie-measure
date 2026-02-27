@@ -162,6 +162,7 @@ export default function MeasureList(props: {
   const [transferDialog, setTransferDialog] = useState({
     open: false,
     measures: [],
+    isAdminTransfer: false,
   });
   const [compareVersionsDialog, setCompareVersionsDialog] =
     useState<boolean>(false);
@@ -641,6 +642,7 @@ export default function MeasureList(props: {
     setTransferDialog({
       open: false,
       measures: [],
+      isAdminTransfer: false,
     });
     setViewMeasureHistoryDialog(false);
   };
@@ -1236,6 +1238,7 @@ export default function MeasureList(props: {
         open={transferDialog.open}
         onClose={handleTransferDialogClose}
         setStatusHandler={props.setStatusHandler}
+        isAdminTransfer={transferDialog.isAdminTransfer}
       />
       <ViewMeasureHistoryDialog
         measures={selectedMeasures}

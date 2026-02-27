@@ -13,6 +13,7 @@ module.exports = {
     "single-spa-react/parcel": "single-spa-react/lib/cjs/parcel.cjs",
     "^react($|/.+)": "<rootDir>/node_modules/react$1", // makes sure all React imports are running off of the one in this package.
     "\\.(css|scss)$": "identity-obj-proxy",
+    "^@madie/madie-util$": "<rootDir>/src/__mocks__/@madie/madie-util.tsx",
   },
   setupFilesAfterEnv: ["@testing-library/jest-dom", "./jest.setup.js"],
   globals: {
