@@ -677,7 +677,7 @@ const TestCaseList = (props: TestCaseListProps) => {
             tw="lg:col-span-5 pl-2 pr-2"
             // sticky container lives here.
             // any child between here and sticky target need overflow: visible.
-            style={{ overflow: "auto" }}
+            style={{ overflowY: "auto", overflowX: "hidden" }}
           >
             <div data-testid="code-coverage-tabs">
               <CreateCodeCoverageNavTabs
@@ -782,22 +782,6 @@ const TestCaseList = (props: TestCaseListProps) => {
                           setShiftTestCaseDatesWarnings
                         }
                       />
-                      {currentSlice?.length > 0 && (
-                        <Pagination
-                          totalItems={totalItems}
-                          visibleItems={visibleItems}
-                          limitOptions={[10, 25, 50, "All"]}
-                          offset={offset}
-                          handlePageChange={handlePageChange}
-                          handleLimitChange={handleLimitChange}
-                          page={page}
-                          limit={limit}
-                          count={count}
-                          shape="rounded"
-                          hideNextButton={!canGoNext}
-                          hidePrevButton={!canGoPrev}
-                        />
-                      )}
                     </>
                   )}
                   {executing && (
@@ -893,6 +877,22 @@ const TestCaseList = (props: TestCaseListProps) => {
         >
           <MadieSpinner style={{ height: 40, width: 40 }} />
         </div>
+      )}
+      {currentSlice?.length > 0 && (
+        <Pagination
+          totalItems={totalItems}
+          visibleItems={visibleItems}
+          limitOptions={[10, 25, 50, "All"]}
+          offset={offset}
+          handlePageChange={handlePageChange}
+          handleLimitChange={handleLimitChange}
+          page={page}
+          limit={limit}
+          count={count}
+          shape="rounded"
+          hideNextButton={!canGoNext}
+          hidePrevButton={!canGoPrev}
+        />
       )}
     </div>
   );
