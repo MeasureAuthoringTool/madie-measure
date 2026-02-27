@@ -25,7 +25,6 @@ import CreateCodeCoverageNavTabs from "./CreateCodeCoverageNavTabs";
 import CodeCoverageHighlighting from "../common/CodeCoverageHighlighting";
 import CreateNewTestCaseDialog from "../../createTestCase/CreateNewTestCaseDialog";
 import {
-  MadieDeleteDialog,
   MadieSpinner,
   Pagination,
   Toast,
@@ -673,7 +672,13 @@ const TestCaseList = (props: TestCaseListProps) => {
               "data-testid": "close-error-button",
             }}
           />
-          <div tw="lg:col-span-5 pl-2 pr-2">
+          <div
+            className="calc-vh"
+            tw="lg:col-span-5 pl-2 pr-2"
+            // sticky container lives here.
+            // any child between here and sticky target need overflow: visible.
+            style={{ overflow: "auto" }}
+          >
             <div data-testid="code-coverage-tabs">
               <CreateCodeCoverageNavTabs
                 activeTab={activeTab}
@@ -709,7 +714,10 @@ const TestCaseList = (props: TestCaseListProps) => {
               onSuccess={insertTestCases}
             />
             {activeTab === "passing" && (
-              <div tw="overflow-x-auto sm:-mx-6 lg:-mx-8">
+              <div
+                tw="overflow-x-auto sm:-mx-6 lg:-mx-8"
+                style={{ overflow: "visible" }}
+              >
                 <div tw="py-2 inline-block min-w-full sm:px-6 lg:px-8">
                   {!executing && (
                     <>
