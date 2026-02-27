@@ -16,6 +16,7 @@ import {
   Toast,
   MadieDiscardDialog,
 } from "@madie/madie-design-system/dist/react";
+import Tooltip from "@mui/material/Tooltip";
 import qdmCalculationService from "../../../api/QdmCalculationService";
 import { Allotment } from "allotment";
 import RightPanel from "./RightPanel/RightPanel";
@@ -328,6 +329,20 @@ const EditTestCase = () => {
     setMissingDataElements(value);
   };
 
+  function getSaveButtonTooltip(): string {
+    if (formik.dirty && !formik.isValid && formik.errors) {
+      return Object.entries(formik.errors)
+        .map(([key, value]) => {
+          if (typeof value === "string") {
+            return `${key}: ${value}`;
+          }
+          return `${key}: ${JSON.stringify(value)}`;
+        })
+        .join("\n");
+    }
+    return "";
+  }
+
   return (
     <>
       {qdmExecutionErrors && qdmExecutionErrors.length > 0 && (
@@ -446,14 +461,24 @@ const EditTestCase = () => {
             >
               Run Test
             </Button>
-            <Button
-              variant="cyan"
-              type="submit"
-              data-testid="edit-test-case-save-button"
-              disabled={!(formik.dirty && formik.isValid) || !testCaseCanEdit}
+            <Tooltip
+              title={getSaveButtonTooltip()}
+              data-testid="save-button-tooltip"
+              arrow
             >
-              Save
-            </Button>
+              <span>
+                <Button
+                  variant="cyan"
+                  type="submit"
+                  data-testid="edit-test-case-save-button"
+                  disabled={
+                    !(formik.dirty && formik.isValid) || !testCaseCanEdit
+                  }
+                >
+                  Save
+                </Button>
+              </span>
+            </Tooltip>
             <Button
               variant="outline-filled"
               disabled={!formik.dirty || !testCaseCanEdit}
