@@ -44,7 +44,13 @@ const mockCheckUserCanDelete = jest.fn();
 jest.mock("@madie/madie-util", () => ({
   useMeasureServiceApi: jest.fn(() => mockMeasureServiceApi),
   checkUserCanEdit: jest.fn(),
-  useFeatureFlags: jest.fn().mockReturnValue({}),
+  useFeatureFlags: jest.fn().mockReturnValue({
+    AdminTransferMeasures: false,
+  }),
+  useUserRoles: jest.fn().mockReturnValue({
+    roles: [],
+    isAdmin: false,
+  }),
   useOktaTokens: jest.fn(),
   fetchMeasureDraftStatuses: jest.fn(),
   checkUserCanDelete: jest.fn(),
@@ -557,6 +563,7 @@ describe("ActionCenter", () => {
 
     expect(setTransferDialog).toHaveBeenCalledWith({
       open: true,
+      isAdminTransfer: false,
     });
   });
 
