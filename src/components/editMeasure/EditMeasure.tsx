@@ -21,6 +21,7 @@ import {
   checkUserCanEdit,
   useFeatureFlags,
   useIsAdminTransferEnabled,
+  useOktaTokens,
 } from "@madie/madie-util";
 import CreateVersionDialog from "../common/createVersionDialog/CreateVersionDialog";
 import InvalidTestCaseDialog from "../common/invalidTestCaseDialog/InvalidTestCaseDialog";
@@ -167,8 +168,13 @@ export default function EditMeasure() {
     measure?.measureSet?.acls,
     measure?.measureMetaData?.draft
   );
+
+  const { getUserName } = useOktaTokens();
+  const userName = getUserName();
   const measureLockedBy: string = measure?.measureLock
-    ? measure?.measureLock?.lockedBy
+    ? measure?.measureLock?.lockedBy !== userName.toLowerCase()
+      ? measure?.measureLock?.lockedBy
+      : undefined
     : undefined;
 
   useEffect(() => {
