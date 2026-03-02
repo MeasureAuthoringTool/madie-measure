@@ -487,7 +487,7 @@ const TestCaseTable = (props: TestCaseTableProps) => {
   }, [testCases, table.getSelectedRowModel().rows]);
 
   return (
-    <div style={{ overflow: "hidden" }}>
+    <div style={{ overflow: "visible" }}>
       <table
         tw="min-w-full"
         data-testid="test-case-tbl"
@@ -495,9 +495,10 @@ const TestCaseTable = (props: TestCaseTableProps) => {
         id="testCaseListTable"
         style={{
           borderSpacing: "0 2em !important",
+          overflow: "visible",
         }}
       >
-        <thead tw="bg-slate">
+        <thead tw="bg-slate" className="sticky-table">
           {table.getHeaderGroups().map((headerGroup) => (
             <tr key={headerGroup.id}>
               {headerGroup.headers.map((header) => {

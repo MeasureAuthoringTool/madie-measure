@@ -241,7 +241,16 @@ export default function ActionCenter(props: ActionCenterProps) {
   }
 
   return (
-    <form onSubmit={formik.handleSubmit}>
+    <form
+      onSubmit={formik.handleSubmit}
+      style={{
+        position: "sticky",
+        top: 0,
+        zIndex: 20,
+        backgroundColor: "#fff",
+        opacity: 1,
+      }}
+    >
       <div tw="flex py-4 justify-between items-center">
         <div tw="flex w-1/2 pr-4">
           <div tw="w-1/2 pr-2">

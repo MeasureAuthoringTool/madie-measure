@@ -1,8 +1,15 @@
 @use "sass:color";
 
 #testCaseListTable {
-  overflow: scroll;
-
+  .sticky-table {
+    > tr > th {
+      position: sticky;
+      top: 96px;
+      z-index: 20;
+      background: rgb(237 237 237 / 1);
+      border-bottom: solid 1px #000;
+    }
+  }
   thead tr {
     border-bottom: solid 1px #8c8c8c;
   }
@@ -30,6 +37,7 @@
     border: solid 1px #8c8c8c;
     border-top: 0;
     border-radius: 0 0 3px 3px;
+
     > .table-body {
       border-top: inherit;
       border-radius: 3px;
