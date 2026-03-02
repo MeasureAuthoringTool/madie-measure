@@ -1,3 +1,7 @@
+.calc-vh {
+  max-height: calc(100vh - 472px);
+}
+
 #measure-landing {
   position: relative;
 
@@ -18,6 +22,16 @@
   margin: 0 32px 32px 32px;
   border-radius: 6px;
   overflow: hidden;
+
+  .sticky-table {
+    > tr > th {
+      position: sticky;
+      top: 96px;
+      z-index: 20;
+      background: rgb(237 237 237 / 1);
+      border-bottom: solid 1px #000;
+    }
+  }
 
   &.no-margin {
     margin: 0;
