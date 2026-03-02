@@ -71,6 +71,7 @@ import {
   Toast,
   TextArea,
 } from "@madie/madie-design-system/dist/react";
+import Tooltip from "@mui/material/Tooltip";
 import { Allotment } from "allotment";
 import ElementsTab from "./LeftPanel/ElementsTab/ElementsTab";
 import {
@@ -1079,6 +1080,20 @@ const EditTestCase = (props: EditTestCaseProps) => {
     }
   }
 
+  function getSaveButtonTooltip(): string {
+    if (formik.dirty && !formik.isValid && formik.errors) {
+      return Object.entries(formik.errors)
+        .map(([key, value]) => {
+          if (typeof value === "string") {
+            return `${key}: ${value}`;
+          }
+          return `${key}: ${JSON.stringify(value)}`;
+        })
+        .join("\n");
+    }
+    return "";
+  }
+
   function isJsonModified() {
     return testCase && (!_.isNil(testCase?.json) || !_.isEmpty(editorVal))
       ? editorVal !== testCase?.json
@@ -1125,6 +1140,7 @@ const EditTestCase = (props: EditTestCaseProps) => {
     }
     return map;
   }, [measure?.groups]);
+
   return (
     <>
       <TestCaseForm
@@ -1490,15 +1506,23 @@ const EditTestCase = (props: EditTestCaseProps) => {
                   Run Test Case
                 </Button>
                 {testCaseCanEdit && (
-                  <Button
-                    tw="m-2"
-                    variant="cyan"
-                    type="submit"
-                    data-testid="edit-test-case-save-button"
-                    disabled={!isModified()}
+                  <Tooltip
+                    title={getSaveButtonTooltip()}
+                    data-testid="save-button-tooltip"
+                    arrow
                   >
-                    Save
-                  </Button>
+                    <span>
+                      <Button
+                        tw="m-2"
+                        variant="cyan"
+                        type="submit"
+                        data-testid="edit-test-case-save-button"
+                        disabled={!isModified()}
+                      >
+                        Save
+                      </Button>
+                    </span>
+                  </Tooltip>
                 )}
               </FormikProvider>
             </div>
