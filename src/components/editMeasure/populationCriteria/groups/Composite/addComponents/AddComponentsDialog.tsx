@@ -610,7 +610,7 @@ export default function AddComponentsDialog({
         variant: "cyan",
         type: "submit",
         "data-testid": "select-composite-measure-components-continue-button",
-        continueText: "Save",
+        continueText: "Continue",
       }}
       maxWidth={"lg"}
     >
