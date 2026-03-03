@@ -495,6 +495,9 @@ export default function ActionCenter(props: ActionCenterProps) {
             role={undefined}
             placement="bottom-end"
             transition
+            sx={{
+              zIndex: 99,
+            }}
           >
             {({ TransitionProps }) => (
               <Grow
