@@ -1000,14 +1000,18 @@ export default function MeasureList(props: {
   };
 
   return (
-    <div style={{ overflow: "auto" }}>
+    <div style={{ overflow: "auto", maxHeight: "703px" }}>
       <div
         style={{
           display: "flex",
           flexDirection: "row",
           justifyContent: "space-between",
-          margin: 16,
+          padding: 16,
+          backgroundColor: "#fff",
           alignItems: "end",
+          position: "sticky",
+          top: 0,
+          zIndex: 20,
         }}
       >
         <Search
@@ -1041,9 +1045,12 @@ export default function MeasureList(props: {
         id="testCaseListTable"
         style={{
           borderSpacing: "0 2em !important",
+          overflow: "visible",
+          backgroundColor: "#fff",
+          opacity: 1,
         }}
       >
-        <thead tw="bg-slate">
+        <thead className="sticky-table" style={{ overflow: "visible" }}>
           {table.getHeaderGroups().map((headerGroup) => (
             <tr key={headerGroup.id}>
               {headerGroup.headers.map((header) => {

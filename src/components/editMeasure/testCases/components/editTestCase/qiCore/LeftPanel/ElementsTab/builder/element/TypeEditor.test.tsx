@@ -385,6 +385,7 @@ describe("TypeEditor Component", () => {
     userEvent.type(inputField, "1234-abcd-ABCD-5678");
     expect(onChange).toHaveBeenCalled();
   });
+
   test("Should render Decimal component", async () => {
     const setFieldValue = jest.fn();
     const setFieldTouched = jest.fn();
@@ -1062,7 +1063,7 @@ describe("TypeEditor Component", () => {
     ).toBeInTheDocument();
   });
 
-  test("Should render canonical url type attribute", () => {
+  test("Should render canonical url type attribute", async () => {
     const canonicalUri = "https://example.com/blog";
     const updatedMockFormik = {
       ...mockFormik,
@@ -1103,6 +1104,14 @@ describe("TypeEditor Component", () => {
     expect(
       screen.getByTestId("url-input-field-Observation.issued")
     ).toHaveValue(canonicalUri);
+    userEvent.type(
+      screen.getByTestId("url-input-field-Observation.issued"),
+      "test"
+    );
+    await waitFor(() => {
+      expect(updatedMockFormik.setFieldValue).toHaveBeenCalled();
+      expect(updatedMockFormik.setFieldTouched).toHaveBeenCalled();
+    });
   });
 
   test("Should render Instant component for valid format", () => {

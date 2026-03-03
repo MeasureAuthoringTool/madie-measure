@@ -816,6 +816,10 @@ const TypeEditor = ({
                   addTitle={addTitle}
                   handleAddElement={handleAddElement}
                   {...formik.getFieldProps(fieldLabel)}
+                  onChange={({ target }) => {
+                    formik.setFieldTouched(fieldLabel);
+                    formik.setFieldValue(fieldLabel, target.value);
+                  }}
                 />
               );
               return wrapWithSection(
