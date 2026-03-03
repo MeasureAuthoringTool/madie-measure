@@ -119,6 +119,9 @@ export default function ShareAction(props: PropTypes) {
           role={undefined}
           placement="bottom-start"
           transition
+          sx={{
+            zIndex: 99,
+          }}
         >
           {({ TransitionProps, placement }) => (
             <Grow
