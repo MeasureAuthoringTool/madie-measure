@@ -23,6 +23,25 @@ export const PRIMITIVE_DEFAULT_VALUES = {
   code: "",
 };
 
+export const ATTRIBUTES_NOT_USED = [
+  "base64Binary",
+  "markdown",
+  "Expression",
+  "ParameterDefinition",
+  "Annotation",
+  "Attachment",
+  "Contributor",
+  "SampledData",
+  "RelatedArtifact",
+  "TriggerDefinition",
+  "UsageContext",
+  "Meta",
+  "Address",
+  "ContactPoint",
+  "contactDetail",
+  "DataRequirement",
+];
+
 export const isPrimitiveType = (typeCode: string) =>
   PRIMITIVE_DEFAULT_VALUES.hasOwnProperty(typeCode);
 
@@ -851,4 +870,72 @@ export function isComponentDataType(datatype) {
 export function getValueSetUrl(url: string) {
   if (!url) return "";
   return url.split("|").shift();
+}
+
+// MAT-9683 filter out attribute types that SMEs have deemed either can't be represented in the builder or wont be used in measures
+export function stripOutUnusedAttributes(
+  resourceTree: StructureDefinitionDto
+): any {
+  const filteredResourceTree = {
+    ...resourceTree,
+    definition: {
+      ...resourceTree.definition,
+      snapshot: {
+        ...resourceTree.definition.snapshot,
+        element: stripOutUsedAttributesForElements(
+          resourceTree.definition.snapshot.element
+        ),
+      },
+    },
+  };
+  return filteredResourceTree;
+}
+
+export function stripOutUsedAttributesForElements(elements) {
+  return elements
+    .map((e) => {
+      /*
+      If the element is a choice type (indicated by [x] in the path) and has multiple types,
+      we need to filter out any unused attribute types.
+      e.g. for observation slices:
+       {
+        id: "Observation.value[x]",
+        path: "Observation.value[x]",
+        type: [
+          {
+            code: "CodeableConcept",
+          },
+          {
+            code: "SampledData",
+          },
+          {
+            code: "time",
+          },
+          ...
+        ],
+      },
+      we need to filter out code: "SampledData"
+      */
+      if (
+        e.path?.includes("[x]") &&
+        Array.isArray(e.type) &&
+        e.type.length > 1
+      ) {
+        const filteredTypes = e.type.filter(
+          (t) => !ATTRIBUTES_NOT_USED.includes(t.code)
+        );
+        // if all codes are filtered out, return null
+        if (filteredTypes.length === 0) {
+          return null;
+        }
+        return { ...e, type: filteredTypes };
+      } else if (e.type?.length === 1) {
+        if (ATTRIBUTES_NOT_USED.includes(e.type[0].code)) {
+          return null;
+        }
+        return e;
+      }
+      return e;
+    })
+    .filter(Boolean);
 }

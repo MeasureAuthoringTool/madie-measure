@@ -234,14 +234,10 @@ describe("ResourceEditor", () => {
       ).toBeInTheDocument();
       expect(screen.getByText("*Identifier")).toBeInTheDocument();
       expect(screen.getByText("*Name")).toBeInTheDocument();
-      expect(screen.getByText("*Gender")).toBeInTheDocument();
+      expect(screen.getAllByText("*Gender")).toHaveLength(2);
       expect(screen.getByText("Active")).toBeInTheDocument();
       expect(screen.getByText("Birth Date")).toBeInTheDocument();
-      expect(screen.getByText("Address")).toBeInTheDocument();
-
-      // const idBtn = screen.getByTestId("id");
-      // expect(idBtn).toBeInTheDocument();
-      // userEvent.click(idBtn);
+      expect(screen.queryByText("Address")).not.toBeInTheDocument();
     });
   });
 
