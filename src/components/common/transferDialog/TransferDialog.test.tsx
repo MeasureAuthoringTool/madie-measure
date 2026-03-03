@@ -339,4 +339,83 @@ describe("Transfer Measures Dialog component", () => {
       });
     });
   });
+
+  it("should display measure count in info text", () => {
+    render(
+      <TransferDialog
+        measures={[mockMeasure1, mockMeasure2, mockMeasure3]}
+        open={true}
+        onClose={jest.fn()}
+        setStatusHandler={jest.fn()}
+      />
+    );
+
+    expect(
+      screen.getByText(
+        /You are about to Transfer ownership of the 3 selected measure/
+      )
+    ).toBeInTheDocument();
+  });
+
+  it("should display 'This action cannot be undone!' warning for regular users", () => {
+    render(
+      <TransferDialog
+        measures={[mockMeasure1]}
+        open={true}
+        onClose={jest.fn()}
+        setStatusHandler={jest.fn()}
+      />
+    );
+
+    expect(
+      screen.getByText(/This action cannot be undone/)
+    ).toBeInTheDocument();
+  });
+
+  it("should display updated info text with correct wording", () => {
+    render(
+      <TransferDialog
+        measures={[mockMeasure1]}
+        open={true}
+        onClose={jest.fn()}
+        setStatusHandler={jest.fn()}
+      />
+    );
+
+    expect(
+      screen.getByText(
+        /All versions and drafts will be transferred, but only the most recent measure name appears in the list below/
+      )
+    ).toBeInTheDocument();
+  });
+
+  it("should NOT display owner column in measures table", () => {
+    const measureWithOwner = {
+      ...mockMeasure1,
+      measureSet: {
+        ...mockMeasure1.measureSet,
+        owner: "testOwner",
+      },
+    };
+
+    render(
+      <TransferDialog
+        measures={[measureWithOwner]}
+        open={true}
+        onClose={jest.fn()}
+        setStatusHandler={jest.fn()}
+      />
+    );
+
+    // The "Current Measure Owner" field label should exist
+    const fieldLabel = screen.getByText("Current Measure Owner");
+    expect(fieldLabel).toBeInTheDocument();
+
+    // But it should NOT be a table header in the measures table
+    const tableHeaders = screen.getAllByRole("columnheader");
+    const ownerColumnHeader = tableHeaders.find(
+      (header) => header.textContent === "Current Measure Owner"
+    );
+    expect(ownerColumnHeader).toBeUndefined();
+  });
 });

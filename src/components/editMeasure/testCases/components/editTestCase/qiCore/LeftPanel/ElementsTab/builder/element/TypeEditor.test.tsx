@@ -888,20 +888,24 @@ describe("TypeEditor Component", () => {
 
   test("Should update Boolean component value", async () => {
     const setFieldValue = jest.fn();
+    let currentValue: any = "true"; // Track the current value
 
     const updatedMockFormik = {
       ...mockFormik,
-      setFieldValue,
+      setFieldValue: (field: string, value: any) => {
+        currentValue = value; // Update tracked value when setFieldValue is called
+        setFieldValue(field, value);
+      },
       getFieldProps: () => ({
         label: "MedicationAbsent.meta",
         name: "MedicationAbsent.meta",
-        value: "true",
+        value: currentValue, // Use the tracked value
         onChange: jest.fn(),
         onBlur: jest.fn(),
       }),
     };
 
-    render(
+    const { rerender } = render(
       <FormikProvider value={updatedMockFormik}>
         <RequiredFieldsProvider
           requiredFields={mockRequiredFields}
@@ -934,6 +938,30 @@ describe("TypeEditor Component", () => {
     const falseOption = screen.getByRole("option", { name: "false" });
     userEvent.click(falseOption);
     expect(setFieldValue).toHaveBeenCalledWith("MedicationAbsent.meta", false);
+
+    // Manually trigger re-render with updated formik value
+    rerender(
+      <FormikProvider value={updatedMockFormik}>
+        <RequiredFieldsProvider
+          requiredFields={mockRequiredFields}
+          formInfo={mockFormInfo}
+        >
+          <TypeEditor
+            structureDefinition={{
+              id: "MedicationAbsent.meta",
+              path: "MedicationAbsent.meta",
+              min: 0,
+              max: "1",
+              type: [{ code: "boolean" }],
+            }}
+            label="MedicationAbsent.meta"
+            resource={null}
+            canEdit={true}
+            parentStructureDefinition={null}
+          />
+        </RequiredFieldsProvider>
+      </FormikProvider>
+    );
 
     userEvent.click(selectField);
 

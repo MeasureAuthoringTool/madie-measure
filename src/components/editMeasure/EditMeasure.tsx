@@ -19,6 +19,7 @@ import {
   routeHandlerStore,
   useMeasureServiceApi,
   checkUserCanEdit,
+  useFeatureFlags,
 } from "@madie/madie-util";
 import CreateVersionDialog from "../common/createVersionDialog/CreateVersionDialog";
 import InvalidTestCaseDialog from "../common/invalidTestCaseDialog/InvalidTestCaseDialog";
@@ -47,8 +48,10 @@ import { AxiosResponse } from "axios";
 import ViewHRModal from "../common/viewHumanReadableModal/ViewHRModal";
 import ShareDialog from "../common/shareDialog/ShareDialog";
 import TransferDialog from "../common/transferDialog/TransferDialog";
+import AdminTransferDialog from "../common/adminTransferDialog/AdminTransferDialog";
 import ViewMeasureHistoryDialog from "../common/viewMeasureHistoryDialog/ViewMeasureHistoryDialog";
 import StatusHandler, { INITIAL_STATUS_HANDLER } from "./editor/StatusHandler";
+import checkUserIsAdmin from "../../utils/checkUserIsAdmin";
 
 const OBJECT_ID_REGEX = /\/[a-f0-9]{24}/g;
 
@@ -64,6 +67,8 @@ export default function EditMeasure() {
   let navigate = useNavigate();
   const location = useLocation();
   const [currentMeasureId, setCurrentMeasureId] = useState<string>(measureId);
+  const featureFlags = useFeatureFlags();
+  const isAdmin = checkUserIsAdmin();
 
   // Required by every single spa application that has internal routing
   // This will block user from navigating inside madie-measure when the current form is dirty
@@ -768,12 +773,21 @@ export default function EditMeasure() {
             exportMeasure={handleHumanReadableDialog}
             open={viewHumanReadableModal.open}
           />
-          <TransferDialog
-            measures={[measure]}
-            open={transferDialog.open}
-            onClose={handleTransferDialogClose}
-            setStatusHandler={setStatusHandler}
-          />
+          {featureFlags?.AdminTransferMeasures && isAdmin ? (
+            <AdminTransferDialog
+              measures={[measure]}
+              open={transferDialog.open}
+              onClose={handleTransferDialogClose}
+              setStatusHandler={setStatusHandler}
+            />
+          ) : (
+            <TransferDialog
+              measures={[measure]}
+              open={transferDialog.open}
+              onClose={handleTransferDialogClose}
+              setStatusHandler={setStatusHandler}
+            />
+          )}
           <ViewMeasureHistoryDialog
             measures={[measure]}
             open={viewMeasureHistoryDialog}

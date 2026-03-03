@@ -10,7 +10,11 @@ import React, {
 import tw from "twin.macro";
 import "styled-components/macro";
 import { Measure, Model } from "@madie/madie-models";
-import { useMeasureServiceApi, checkUserCanEdit } from "@madie/madie-util";
+import {
+  useMeasureServiceApi,
+  checkUserCanEdit,
+  useFeatureFlags,
+} from "@madie/madie-util";
 import { useNavigate } from "react-router-dom";
 import { Chip, Tooltip } from "@mui/material";
 import {
@@ -56,7 +60,9 @@ import queryString from "query-string";
 import _ from "lodash";
 import { getTabStorageKey } from "../measureLandingUtils";
 import TransferDialog from "../../common/transferDialog/TransferDialog";
+import AdminTransferDialog from "../../common/adminTransferDialog/AdminTransferDialog";
 import CompareVersionsDialog from "../../common/compareVersionsDialog/CompareVersionsDialog";
+import checkUserIsAdmin from "../../../utils/checkUserIsAdmin";
 
 const TH = tw.th`p-3 text-left text-sm font-bold capitalize`;
 
@@ -116,6 +122,8 @@ export default function MeasureList(props: {
   const { searchCriteria, setSearchCriteria, retrieveMeasures } = { ...props };
   const measureServiceApi = useRef(useMeasureServiceApi()).current; //needs to be ref or triggers jest. throws warn
   const [hoveredHeader, setHoveredHeader] = useState<string>("");
+  const featureFlags = useFeatureFlags();
+  const isAdmin = checkUserIsAdmin();
 
   const navigate = useNavigate();
   // Popover utilities
@@ -1231,12 +1239,21 @@ export default function MeasureList(props: {
         measureId={targetMeasure?.current?.id}
         exportMeasure={exportMeasure}
       />
-      <TransferDialog
-        measures={selectedMeasures}
-        open={transferDialog.open}
-        onClose={handleTransferDialogClose}
-        setStatusHandler={props.setStatusHandler}
-      />
+      {featureFlags?.AdminTransferMeasures && isAdmin ? (
+        <AdminTransferDialog
+          measures={selectedMeasures}
+          open={transferDialog.open}
+          onClose={handleTransferDialogClose}
+          setStatusHandler={props.setStatusHandler}
+        />
+      ) : (
+        <TransferDialog
+          measures={selectedMeasures}
+          open={transferDialog.open}
+          onClose={handleTransferDialogClose}
+          setStatusHandler={props.setStatusHandler}
+        />
+      )}
       <ViewMeasureHistoryDialog
         measures={selectedMeasures}
         open={viewMeasureHistoryDialog}

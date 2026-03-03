@@ -28,6 +28,7 @@ declare module "@madie/madie-util" {
     qdmHideJson: boolean;
     qiCore7: boolean;
     QICoreCompositeMeasure: boolean;
+    AdminTransferMeasures: boolean;
   }
 
   export interface ServiceConfig {

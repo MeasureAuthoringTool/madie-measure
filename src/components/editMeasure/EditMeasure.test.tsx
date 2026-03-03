@@ -28,6 +28,7 @@ import {
 } from "@madie/madie-util";
 import { oneItemResponse } from "../__mocks__/mockMeasureResponses";
 import userEvent from "@testing-library/user-event";
+import checkUserIsAdmin from "../../utils/checkUserIsAdmin";
 
 jest.mock("./details/MeasureDetails");
 jest.mock("./editor/MeasureEditor");
@@ -37,6 +38,11 @@ jest.mock("../common/createVersionDialog/CreateVersionDialog", () => ({
     <div data-testid="create-version-dialog">Create Version Dialog</div>
   )),
 }));
+jest.mock("../../utils/checkUserIsAdmin");
+
+const mockCheckUserIsAdmin = checkUserIsAdmin as jest.MockedFunction<
+  typeof checkUserIsAdmin
+>;
 
 const MeasureEditorMock = MeasureEditor as jest.Mock<JSX.Element>;
 
@@ -251,6 +257,7 @@ describe("EditMeasure Component", () => {
   beforeEach(() => {
     measureStore.state.mockImplementation(() => measure);
     measure.testCases = testCases;
+    mockCheckUserIsAdmin.mockReturnValue(false);
   });
   afterEach(cleanup);
   it("should render a loading page if the measure is not yet loaded", async () => {

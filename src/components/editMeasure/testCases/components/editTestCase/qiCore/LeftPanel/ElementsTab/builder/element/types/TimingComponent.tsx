@@ -97,6 +97,7 @@ const TimingComponent = ({
             label={`Event[${index}]`}
             canEdit={canEdit}
             fieldRequired={false}
+            {...formik.getFieldProps(`${eventArrayPath}[${index}]`)}
             showAddAttributeButton={index === eventValues.length - 1}
             addTitle={"Event"}
             handleAddElement={() => handleAddElement(eventArrayPath)}
@@ -104,7 +105,6 @@ const TimingComponent = ({
             handleDeleteElement={() =>
               handleDeleteElement(eventArrayPath, index)
             }
-            {...formik.getFieldProps(`${eventArrayPath}[${index}]`)}
             onChange={(value) => {
               formik.setFieldTouched(`${eventArrayPath}[${index}]`);
               formik.setFieldValue(`${eventArrayPath}[${index}]`, value);
@@ -346,6 +346,7 @@ const TimingComponent = ({
             label={`Repeat.Time of Day[${index}]`}
             canEdit={canEdit}
             fieldRequired={false}
+            {...formik.getFieldProps(`${timeOfDayArrayPath}[${index}]`)}
             showAddAttributeButton={index === timeOfDayValues.length - 1}
             addTitle="Repeat.Time of Day"
             handleAddElement={() => handleAddElement(timeOfDayArrayPath)}
@@ -353,7 +354,6 @@ const TimingComponent = ({
             handleDeleteElement={() =>
               handleDeleteElement(timeOfDayArrayPath, index)
             }
-            {...formik.getFieldProps(`${timeOfDayArrayPath}[${index}]`)}
             onChange={(value) =>
               formik.setFieldValue(`${timeOfDayArrayPath}[${index}]`, value)
             }
