@@ -1977,9 +1977,6 @@ describe("stripOutUnusedAttributes", () => {
     expect(result.definition.snapshot.element[0].type[0].code).toBe(
       "CodeableConcept"
     );
-    // expect(result.definition.snapshot.element[0].type[1].code).toBe(
-    //   "SampledData"
-    // );
     expect(result.definition.snapshot.element[0].type[1].code).toBe("time");
   });
 
