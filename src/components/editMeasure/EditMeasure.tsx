@@ -171,11 +171,10 @@ export default function EditMeasure() {
 
   const { getUserName } = useOktaTokens();
   const userName = getUserName();
-  const measureLockedBy: string = measure?.measureLock
-    ? measure?.measureLock?.lockedBy !== userName.toLowerCase()
+  const measureLockedBy =
+    measure?.measureLock?.lockedBy?.toLowerCase() !== userName.toLowerCase()
       ? measure?.measureLock?.lockedBy
-      : undefined
-    : undefined;
+      : undefined;
 
   useEffect(() => {
     const deleteListener = () => {
