@@ -145,10 +145,7 @@ const DateTimeComponent = ({
   }
   const formattedLabel = getMultipleCardinalityLabel(label);
   return (
-    <div
-      className="element-editor-add-row"
-      data-component-type="DateTimeComponent"
-    >
+    <div className="element-editor-add-row">
       <Box sx={{ display: "flex", flexDirection: "column" }}>
         <InputLabel required={fieldRequired}>{formattedLabel}</InputLabel>
         <LocalizationProvider dateAdapter={AdapterDayjs}>

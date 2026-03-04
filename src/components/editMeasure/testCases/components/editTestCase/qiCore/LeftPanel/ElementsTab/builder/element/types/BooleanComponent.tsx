@@ -40,10 +40,7 @@ const BooleanComponent = ({
   ];
   const formattedLabel = getMultipleCardinalityLabel(label);
   return (
-    <div
-      className="element-editor-add-row"
-      data-component-type="BooleanComponent"
-    >
+    <div className="element-editor-add-row">
       <Select
         id={`boolean-selector-${testIdBase}`}
         label={formattedLabel}
@@ -60,7 +57,6 @@ const BooleanComponent = ({
         error={error}
         options={booleanOptions}
         {...props}
-        value={typeof value === "boolean" ? String(value) : value ?? ""} // Convert boolean to string to match MenuItem values
       ></Select>
       {showDeleteButton && canEdit && (
         <Tooltip title="Delete" placement="top" arrow>
