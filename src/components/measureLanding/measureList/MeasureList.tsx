@@ -60,9 +60,7 @@ import queryString from "query-string";
 import _ from "lodash";
 import { getTabStorageKey } from "../measureLandingUtils";
 import TransferDialog from "../../common/transferDialog/TransferDialog";
-import AdminTransferDialog from "../../common/adminTransferDialog/AdminTransferDialog";
 import CompareVersionsDialog from "../../common/compareVersionsDialog/CompareVersionsDialog";
-import checkUserIsAdmin from "../../../utils/checkUserIsAdmin";
 
 const TH = tw.th`p-3 text-left text-sm font-bold capitalize`;
 
@@ -123,7 +121,6 @@ export default function MeasureList(props: {
   const measureServiceApi = useRef(useMeasureServiceApi()).current; //needs to be ref or triggers jest. throws warn
   const [hoveredHeader, setHoveredHeader] = useState<string>("");
   const featureFlags = useFeatureFlags();
-  const isAdmin = checkUserIsAdmin();
 
   const navigate = useNavigate();
   // Popover utilities
@@ -170,6 +167,7 @@ export default function MeasureList(props: {
   const [transferDialog, setTransferDialog] = useState({
     open: false,
     measures: [],
+    isAdminTransfer: false,
   });
   const [compareVersionsDialog, setCompareVersionsDialog] =
     useState<boolean>(false);
@@ -649,6 +647,7 @@ export default function MeasureList(props: {
     setTransferDialog({
       open: false,
       measures: [],
+      isAdminTransfer: false,
     });
     setViewMeasureHistoryDialog(false);
   };
@@ -1006,14 +1005,18 @@ export default function MeasureList(props: {
   };
 
   return (
-    <div style={{ overflow: "auto" }}>
+    <div style={{ overflow: "auto", maxHeight: "703px" }}>
       <div
         style={{
           display: "flex",
           flexDirection: "row",
           justifyContent: "space-between",
-          margin: 16,
+          padding: 16,
+          backgroundColor: "#fff",
           alignItems: "end",
+          position: "sticky",
+          top: 0,
+          zIndex: 20,
         }}
       >
         <Search
@@ -1047,9 +1050,12 @@ export default function MeasureList(props: {
         id="testCaseListTable"
         style={{
           borderSpacing: "0 2em !important",
+          overflow: "visible",
+          backgroundColor: "#fff",
+          opacity: 1,
         }}
       >
-        <thead tw="bg-slate">
+        <thead className="sticky-table" style={{ overflow: "visible" }}>
           {table.getHeaderGroups().map((headerGroup) => (
             <tr key={headerGroup.id}>
               {headerGroup.headers.map((header) => {
@@ -1239,21 +1245,13 @@ export default function MeasureList(props: {
         measureId={targetMeasure?.current?.id}
         exportMeasure={exportMeasure}
       />
-      {featureFlags?.AdminTransferMeasures && isAdmin ? (
-        <AdminTransferDialog
-          measures={selectedMeasures}
-          open={transferDialog.open}
-          onClose={handleTransferDialogClose}
-          setStatusHandler={props.setStatusHandler}
-        />
-      ) : (
-        <TransferDialog
-          measures={selectedMeasures}
-          open={transferDialog.open}
-          onClose={handleTransferDialogClose}
-          setStatusHandler={props.setStatusHandler}
-        />
-      )}
+      <TransferDialog
+        measures={selectedMeasures}
+        open={transferDialog.open}
+        onClose={handleTransferDialogClose}
+        setStatusHandler={props.setStatusHandler}
+        isAdminTransfer={transferDialog.isAdminTransfer}
+      />
       <ViewMeasureHistoryDialog
         measures={selectedMeasures}
         open={viewMeasureHistoryDialog}

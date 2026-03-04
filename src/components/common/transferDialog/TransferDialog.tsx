@@ -25,6 +25,7 @@ interface TransferDialogProps {
   open: boolean;
   onClose: Function;
   setStatusHandler: Function;
+  isAdminTransfer?: boolean;
 }
 
 const TransferDialog = ({
@@ -32,6 +33,7 @@ const TransferDialog = ({
   open,
   onClose,
   setStatusHandler,
+  isAdminTransfer = false,
 }: TransferDialogProps) => {
   const measureServiceApi = useRef(useMeasureServiceApi()).current;
 
@@ -40,12 +42,20 @@ const TransferDialog = ({
 
     const measureIds = measures.map((m) => m.id);
 
-    return measureServiceApi
-      .transferMeasures(
-        measureIds,
-        formik.values.harpId,
-        formik.values.retainShareAccess
-      )
+    // Use admin endpoint if this is an admin transfer, otherwise use regular endpoint
+    const transferPromise = isAdminTransfer
+      ? measureServiceApi.adminTransferMeasures(
+          measureIds,
+          formik.values.harpId,
+          formik.values.retainShareAccess
+        )
+      : measureServiceApi.transferMeasures(
+          measureIds,
+          formik.values.harpId,
+          formik.values.retainShareAccess
+        );
+
+    return transferPromise
       .then((response) => {
         if (response.status === 200) {
           onClose({
@@ -116,11 +126,11 @@ const TransferDialog = ({
           "data-testid": "transfer-cancel-button",
         }}
         continueButtonProps={{
-          variant: "danger-primary",
+          variant: isAdminTransfer ? "cyan-primary" : "danger-primary",
           type: "submit",
           continueText: "Transfer",
           "data-testid": "transfer-save-button",
-          disabled: !formik.dirty,
+          disabled: !formik.dirty || !formik.values.harpId,
         }}
       >
         <div className="transfer-dialog-info-text">
@@ -130,31 +140,35 @@ const TransferDialog = ({
             transferred, but only the most recent measure name appears in the
             list below.
           </div>
-          <div className="warning-message">
-            <ErrorOutlineIcon color="error" fontSize="small" />
-            This action cannot be undone.
-          </div>
+          {!isAdminTransfer && (
+            <div className="warning-message">
+              <ErrorOutlineIcon color="error" fontSize="small" />
+              This action cannot be undone.
+            </div>
+          )}
         </div>
         <div data-testid="transferred-measures-list">
           <TransferredMeasuresTable
             measures={measures}
-            showOwnerColumn={false}
+            showOwnerColumn={isAdminTransfer}
           />
         </div>
         <div className="owner">Owner</div>
         <Divider sx={{ borderColor: "#8c8c8c", paddingBottom: "16px" }} />
 
         <div id="transfer-measure">
-          <div className="current-owner">
-            <ReadOnlyTextField
-              label="Current Measure Owner"
-              inputProps={{
-                "data-testid": "current-owner",
-              }}
-              size="large"
-              {...formik.getFieldProps("currentUser")}
-            />
-          </div>
+          {!isAdminTransfer && (
+            <div className="current-owner">
+              <ReadOnlyTextField
+                label="Current Measure Owner"
+                inputProps={{
+                  "data-testid": "current-owner",
+                }}
+                size="large"
+                {...formik.getFieldProps("currentUser")}
+              />
+            </div>
+          )}
           <div>
             <TextField
               label="New Measure Owner"

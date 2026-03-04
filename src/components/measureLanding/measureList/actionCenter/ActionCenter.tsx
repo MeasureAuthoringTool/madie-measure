@@ -6,11 +6,26 @@ import DraftAction from "./draftAction/DraftAction";
 import VersionAction from "./versionAction/VersionAction";
 import AssociateCmsIdAction from "./associateCmsIdAction/AccociateCmsIdAction";
 import ViewHRAction from "./viewHumanReadableAction/ViewHRAction";
-import { checkUserCanEdit, checkUserCanDelete } from "@madie/madie-util";
+import {
+  checkUserCanEdit,
+  checkUserCanDelete,
+  useUserRoles,
+  useFeatureFlags,
+} from "@madie/madie-util";
 import ShareAction from "./shareAction/ShareAction";
 import TransferAction from "./transferAction/TransferAction";
 import HistoryAction from "./historyAction/HistoryAction";
 import CompareVersionsAction from "./compareVersionsAction/CompareVersionsAction";
+
+// Helper to check if user owns all selected measures
+const isOwnerOfAllMeasures = (measures: Measure[]) => {
+  return (
+    measures &&
+    measures.every((measure) =>
+      checkUserCanEdit(measure?.measureSet?.owner ?? "", [])
+    )
+  );
+};
 
 interface PropTypes {
   measures: Measure[];
@@ -32,6 +47,8 @@ export default function ActionCenter(props: PropTypes) {
   const [canEdit, setCanEdit] = useState<boolean>(false);
   const [isOwner, setIsOwner] = useState<boolean>(false);
   const [isSharedWithUser, setIsSharedWithUser] = useState<boolean>(false);
+  const featureFlags = useFeatureFlags();
+  const userRoles = useUserRoles();
 
   const versionMeasure = useCallback(() => {
     if (props.measures?.length === 1) {
@@ -67,13 +84,18 @@ export default function ActionCenter(props: PropTypes) {
   }, [props.measures, props.setDraftMeasureDialog, props.updateTargetMeasure]);
 
   const transferMeasure = useCallback(() => {
-    //to be implemented
     if (props.measures?.length > 0) {
+      // Use admin transfer if user is admin and doesn't own all selected measures
+      const isAdminTransferEnabled =
+        featureFlags?.AdminTransferMeasures && userRoles?.isAdmin;
+      const needsAdminTransfer =
+        isAdminTransferEnabled && !isOwnerOfAllMeasures(props.measures);
       props.setTransferDialog({
         open: true,
+        isAdminTransfer: needsAdminTransfer,
       });
     }
-  }, [props.measures, props.setTransferDialog]);
+  }, [props.measures, props.setTransferDialog, featureFlags, userRoles]);
 
   const exportMeasure = useCallback(
     (exportType: string) => {

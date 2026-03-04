@@ -25,7 +25,6 @@ import CreateCodeCoverageNavTabs from "./CreateCodeCoverageNavTabs";
 import CodeCoverageHighlighting from "../common/CodeCoverageHighlighting";
 import CreateNewTestCaseDialog from "../../createTestCase/CreateNewTestCaseDialog";
 import {
-  MadieDeleteDialog,
   MadieSpinner,
   Pagination,
   Toast,
@@ -484,16 +483,21 @@ const TestCaseList = (props: TestCaseListProps) => {
     if (filteredTestCases && filteredTestCases.length > 0 && measureBundle) {
       setExecuting(true);
       try {
-        const updatedTestCaseExecutionBundle =
-          await fhirDefinitionServiceApi.current.getTestCaseExecutionBundle(
-            measure.model,
-            filteredTestCases
-          );
+        let executionBundle = filteredTestCases;
+        if (!measure?.testCaseConfiguration?.executeInvalidTestCases) {
+          //filter any resources with invalid references.
+          const updatedTestCaseExecutionBundle =
+            await fhirDefinitionServiceApi.current.getTestCaseExecutionBundle(
+              measure.model,
+              filteredTestCases
+            );
+          executionBundle = updatedTestCaseExecutionBundle?.testCases;
+        }
 
         const calculationOutput: CalculationOutput<any> =
           await calculation.current.calculateTestCases(
             measure,
-            updatedTestCaseExecutionBundle?.testCases,
+            executionBundle,
             measureBundle,
             valueSets
           );
@@ -668,7 +672,13 @@ const TestCaseList = (props: TestCaseListProps) => {
               "data-testid": "close-error-button",
             }}
           />
-          <div tw="lg:col-span-5 pl-2 pr-2">
+          <div
+            className="calc-vh"
+            tw="lg:col-span-5 pl-2 pr-2"
+            // sticky container lives here.
+            // any child between here and sticky target need overflow: visible.
+            style={{ overflowY: "auto", overflowX: "hidden" }}
+          >
             <div data-testid="code-coverage-tabs">
               <CreateCodeCoverageNavTabs
                 activeTab={activeTab}
@@ -704,7 +714,10 @@ const TestCaseList = (props: TestCaseListProps) => {
               onSuccess={insertTestCases}
             />
             {activeTab === "passing" && (
-              <div tw="overflow-x-auto sm:-mx-6 lg:-mx-8">
+              <div
+                tw="overflow-x-auto sm:-mx-6 lg:-mx-8"
+                style={{ overflow: "visible" }}
+              >
                 <div tw="py-2 inline-block min-w-full sm:px-6 lg:px-8">
                   {!executing && (
                     <>
@@ -769,22 +782,6 @@ const TestCaseList = (props: TestCaseListProps) => {
                           setShiftTestCaseDatesWarnings
                         }
                       />
-                      {currentSlice?.length > 0 && (
-                        <Pagination
-                          totalItems={totalItems}
-                          visibleItems={visibleItems}
-                          limitOptions={[10, 25, 50, "All"]}
-                          offset={offset}
-                          handlePageChange={handlePageChange}
-                          handleLimitChange={handleLimitChange}
-                          page={page}
-                          limit={limit}
-                          count={count}
-                          shape="rounded"
-                          hideNextButton={!canGoNext}
-                          hidePrevButton={!canGoPrev}
-                        />
-                      )}
                     </>
                   )}
                   {executing && (
@@ -880,6 +877,22 @@ const TestCaseList = (props: TestCaseListProps) => {
         >
           <MadieSpinner style={{ height: 40, width: 40 }} />
         </div>
+      )}
+      {currentSlice?.length > 0 && (
+        <Pagination
+          totalItems={totalItems}
+          visibleItems={visibleItems}
+          limitOptions={[10, 25, 50, "All"]}
+          offset={offset}
+          handlePageChange={handlePageChange}
+          handleLimitChange={handleLimitChange}
+          page={page}
+          limit={limit}
+          count={count}
+          shape="rounded"
+          hideNextButton={!canGoNext}
+          hidePrevButton={!canGoPrev}
+        />
       )}
     </div>
   );

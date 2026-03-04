@@ -20,6 +20,7 @@ import {
   useMeasureServiceApi,
   checkUserCanEdit,
   useFeatureFlags,
+  useUserRoles,
 } from "@madie/madie-util";
 import CreateVersionDialog from "../common/createVersionDialog/CreateVersionDialog";
 import InvalidTestCaseDialog from "../common/invalidTestCaseDialog/InvalidTestCaseDialog";
@@ -48,10 +49,8 @@ import { AxiosResponse } from "axios";
 import ViewHRModal from "../common/viewHumanReadableModal/ViewHRModal";
 import ShareDialog from "../common/shareDialog/ShareDialog";
 import TransferDialog from "../common/transferDialog/TransferDialog";
-import AdminTransferDialog from "../common/adminTransferDialog/AdminTransferDialog";
 import ViewMeasureHistoryDialog from "../common/viewMeasureHistoryDialog/ViewMeasureHistoryDialog";
 import StatusHandler, { INITIAL_STATUS_HANDLER } from "./editor/StatusHandler";
-import checkUserIsAdmin from "../../utils/checkUserIsAdmin";
 
 const OBJECT_ID_REGEX = /\/[a-f0-9]{24}/g;
 
@@ -68,7 +67,7 @@ export default function EditMeasure() {
   const location = useLocation();
   const [currentMeasureId, setCurrentMeasureId] = useState<string>(measureId);
   const featureFlags = useFeatureFlags();
-  const isAdmin = checkUserIsAdmin();
+  const userRoles = useUserRoles();
 
   // Required by every single spa application that has internal routing
   // This will block user from navigating inside madie-measure when the current form is dirty
@@ -144,6 +143,7 @@ export default function EditMeasure() {
   const [transferDialog, setTransferDialog] = useState({
     open: false,
     measures: [],
+    isAdminTransfer: false,
   });
   const [viewMeasureHistoryDialog, setViewMeasureHistoryDialog] =
     useState(false);
@@ -258,16 +258,22 @@ export default function EditMeasure() {
 
   useEffect(() => {
     const transferListener = () => {
+      // Check if user is admin and doesn't own the measure
+      const isOwner = checkUserCanEdit(measure?.measureSet?.owner, []);
+      const isAdminTransferEnabled =
+        featureFlags?.AdminTransferMeasures && userRoles?.isAdmin;
+      const needsAdminTransfer = isAdminTransferEnabled && !isOwner;
       setTransferDialog({
         open: true,
         measures: [measure],
+        isAdminTransfer: needsAdminTransfer,
       });
     };
     window.addEventListener("transfer-measure", transferListener, false);
     return () => {
       window.removeEventListener("transfer-measure", transferListener, false);
     };
-  }, []);
+  }, [measure, featureFlags, userRoles]);
 
   useEffect(() => {
     const subscription = measureStore.subscribe(setMeasure);
@@ -407,6 +413,7 @@ export default function EditMeasure() {
     setTransferDialog({
       open: false,
       measures: [],
+      isAdminTransfer: false,
     });
     setViewMeasureHistoryDialog(false);
   };
@@ -773,21 +780,13 @@ export default function EditMeasure() {
             exportMeasure={handleHumanReadableDialog}
             open={viewHumanReadableModal.open}
           />
-          {featureFlags?.AdminTransferMeasures && isAdmin ? (
-            <AdminTransferDialog
-              measures={[measure]}
-              open={transferDialog.open}
-              onClose={handleTransferDialogClose}
-              setStatusHandler={setStatusHandler}
-            />
-          ) : (
-            <TransferDialog
-              measures={[measure]}
-              open={transferDialog.open}
-              onClose={handleTransferDialogClose}
-              setStatusHandler={setStatusHandler}
-            />
-          )}
+          <TransferDialog
+            measures={[measure]}
+            open={transferDialog.open}
+            onClose={handleTransferDialogClose}
+            setStatusHandler={setStatusHandler}
+            isAdminTransfer={transferDialog.isAdminTransfer}
+          />
           <ViewMeasureHistoryDialog
             measures={[measure]}
             open={viewMeasureHistoryDialog}

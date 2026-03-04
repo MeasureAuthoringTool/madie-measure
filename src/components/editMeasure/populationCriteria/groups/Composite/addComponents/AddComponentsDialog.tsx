@@ -39,8 +39,16 @@ import {
   useMeasureFilterSearch,
 } from "../../../../hooks/useMeasureFilterSearch";
 import { MeasureSearchFilters } from "../../../../shared/MeasureSearchFilters";
+import styled from "styled-components";
 
 const TH = tw.th`p-3 text-left text-sm font-bold capitalize`;
+
+const SelectedRow = styled.tr`
+  background-color: #e3f2fd;
+  &:hover {
+    background-color: #bbdefb;
+  }
+`;
 
 type TCRow = {
   id: string;
@@ -81,6 +89,7 @@ export default function AddComponentsDialog({
   const [isRowExpanded, setIsRowExpanded] = useState<boolean>(false);
   const [expandedSectionData, setExpandedSectionData] = useState<TCRow[]>([]);
   const abortController = useRef(null);
+  const [expandedRowSelection, setExpandedRowSelection] = useState({});
 
   // Use custom hook for filter and search functionality
   const {
@@ -165,6 +174,36 @@ export default function AddComponentsDialog({
     }
   };
 
+  useEffect(() => {
+    if (open) {
+      // Sync main table row selection with preselected IDs
+      const newRowSelection = {};
+      preselectedIds.forEach((id: any) => {
+        newRowSelection[id] = true;
+      });
+      setRowSelection(newRowSelection);
+    } else {
+      // Reset all expanded state when dialog closes
+      setExpandedRowSelection({});
+      setIsRowExpanded(false);
+      setSelectedIdForExpansion(null);
+      setExpandedSectionData([]);
+    }
+  }, [open, preselectedIds]);
+
+  // Sync expanded row selection with preselected IDs whenever expanded data changes
+  useEffect(() => {
+    if (open && expandedSectionData?.length > 0) {
+      const newExpandedRowSelection: Record<string, boolean> = {};
+      expandedSectionData.forEach((row) => {
+        if (preselectedIds.has(row.actions.id)) {
+          newExpandedRowSelection[row.id] = true;
+        }
+      });
+      setExpandedRowSelection(newExpandedRowSelection);
+    }
+  }, [expandedSectionData, preselectedIds, open]);
+
   const columns = useMemo<ColumnDef<Measure>[]>(() => {
     const columnDefs = [
       {
@@ -194,18 +233,20 @@ export default function AddComponentsDialog({
             />
           );
         },
-        cell: ({ row }) => (
-          <div style={{ display: "flex", flexDirection: "row", gap: 16 }}>
-            <div className="px-1">
-              <IndeterminateCheckbox
-                checked={row.getIsSelected()}
-                indeterminate={row.getIsSomeSelected?.()}
-                onChange={row.getToggleSelectedHandler()}
-                aria-label={`Toggle row ${row.id}`}
-              />
+        cell: ({ row }) => {
+          return (
+            <div style={{ display: "flex", flexDirection: "row", gap: 16 }}>
+              <div className="px-1">
+                <IndeterminateCheckbox
+                  indeterminate={row.getIsSomeSelected?.()}
+                  checked={row.getIsSelected()}
+                  onChange={row.getToggleSelectedHandler()}
+                  aria-label={`Toggle row ${row.id}`}
+                />
+              </div>
             </div>
-          </div>
-        ),
+          );
+        },
       },
       {
         header: "Measure Name",
@@ -247,7 +288,7 @@ export default function AddComponentsDialog({
         cell: (info) => {
           const converted = convertDate(info.row.original.lastModifiedAt);
           const { date } = converted;
-          return <div style={{ marginLeft: "8px" }}>{date}</div>;
+          return <div>{date}</div>;
         },
         accessorKey: "lastModifiedAt",
       },
@@ -292,12 +333,7 @@ export default function AddComponentsDialog({
     ];
 
     return columnDefs;
-  }, [
-    selectedRowId,
-    selectedIdForExpansion,
-    isRowExpanded,
-    expandedSectionData,
-  ]);
+  }, [selectedIdForExpansion, isRowExpanded]);
 
   const getAllowedScoringTypes = (compositeScoring: string) => {
     if (
@@ -449,9 +485,112 @@ export default function AddComponentsDialog({
     onClose();
   };
 
-  const expandedColumns = useMemo<ColumnDef<Measure>[]>(() => {
-    return (columns as any[]).filter((c) => c.id !== "select");
-  }, [columns]);
+  const expandedColumns = useMemo<ColumnDef<TCRow>[]>(() => {
+    return [
+      {
+        id: "select",
+        header: null,
+        cell: ({ row }) => (
+          <div style={{ display: "flex", flexDirection: "row", gap: 16 }}>
+            <div className="px-1">
+              <IndeterminateCheckbox
+                checked={expandedRowSelection[row.id] || false}
+                onChange={(e) => {
+                  const isChecked = e.target.checked;
+                  if (isChecked) {
+                    setExpandedRowSelection((prev) => ({
+                      ...prev,
+                      [row.id]: true,
+                    }));
+                    setRowSelection((prev) => ({
+                      ...prev,
+                      [row.original.actions.id]: true,
+                    }));
+                  } else {
+                    setExpandedRowSelection((prev) => {
+                      const newState = { ...prev };
+                      delete newState[row.id];
+                      return newState;
+                    });
+                    setRowSelection((prev) => {
+                      const newState = { ...prev };
+                      delete newState[row.original.actions.id];
+                      return newState;
+                    });
+                  }
+                }}
+                aria-label={`Toggle expanded row ${row.id}`}
+                style={{
+                  accentColor: expandedRowSelection[row.id]
+                    ? "#2196F3"
+                    : "inherit",
+                  cursor: "pointer",
+                }}
+              />
+            </div>
+          </div>
+        ),
+      },
+      {
+        header: "Measure Name",
+        cell: (info) => (
+          <TruncateText
+            text={info.row.original.measureName}
+            maxLength={120}
+            dataTestId={`measure-name-${info.row.original.id}`}
+          />
+        ),
+        accessorKey: "measureName",
+      },
+      {
+        header: "Version",
+        cell: (info) => (
+          <TruncateText
+            text={info.row.original.actions?.version}
+            maxLength={20}
+            dataTestId={`measure-version-${info.row.original.id}`}
+          />
+        ),
+        accessorKey: "version",
+      },
+      {
+        header: "CMS ID",
+        cell: (info) => (
+          <TruncateText
+            text={(() => {
+              const cmsId =
+                info.row.original.actions?.measureSet?.cmsId?.toString();
+              const model = info.row.original.actions?.model;
+
+              if (!cmsId) return "";
+              return model?.startsWith("QI-Core") ? `${cmsId}FHIR` : cmsId;
+            })()}
+            maxLength={60}
+            dataTestId={`measure-cmsId-${info.row.original.id}`}
+          />
+        ),
+        accessorKey: "measureSet.cmsId",
+      },
+      {
+        header: "Updated",
+        cell: (info) => (
+          <span>
+            {new Date(
+              info.row.original.actions.lastModifiedAt
+            ).toLocaleDateString()}
+          </span>
+        ),
+        accessorKey: "lastModifiedAt",
+        sortingFn: (rowA, rowB) =>
+          new Date(rowA.original.actions.lastModifiedAt).getTime() -
+          new Date(rowB.original.actions.lastModifiedAt).getTime(),
+      },
+      {
+        header: "",
+        cell: () => null,
+      },
+    ];
+  }, [expandedRowSelection]);
 
   return (
     <MadieDialog
@@ -573,6 +712,9 @@ export default function AddComponentsDialog({
                       style={{
                         borderTop: "solid 1px #8c8c8c",
                         borderSpacing: "0 2em !important",
+                        ...(row.getIsSelected() && {
+                          backgroundColor: "#e3f2fd",
+                        }),
                       }}
                     >
                       {row.getVisibleCells().map((cell) => (
@@ -589,22 +731,31 @@ export default function AddComponentsDialog({
                     </tr>
                     {selectedIdForExpansion === row.original.measureSetId &&
                       expandedSectionData?.map((subRow) => (
-                        <tr key={subRow.id} className="expanded-row">
+                        <SelectedRow
+                          key={subRow.id}
+                          className="expanded-row"
+                          style={{
+                            backgroundColor: expandedRowSelection[subRow.id]
+                              ? "#e3f2fd"
+                              : "white",
+                            borderTop: "solid 1px #8c8c8c",
+                          }}
+                          data-testid={`expanded-row-${subRow.id}`}
+                        >
                           {expandedColumns.map((column: any) => (
                             <td key={column?.accessorKey || column.id}>
-                              {column.accessorKey === "cmsId"
-                                ? subRow?.actions?.measureSet?.cmsId || ""
-                                : flexRender(
-                                    column.cell ?? column.accessorKey,
-                                    {
-                                      row: { original: subRow },
-                                      getValue: () =>
-                                        subRow[column.accessorKey],
-                                    }
-                                  )}
+                              {flexRender(column.cell ?? column.accessorKey, {
+                                row: {
+                                  id: subRow.id,
+                                  original: subRow,
+                                  getIsSelected: () =>
+                                    expandedRowSelection[subRow.id] || false,
+                                },
+                                getValue: () => subRow[column.accessorKey],
+                              })}
                             </td>
                           ))}
-                        </tr>
+                        </SelectedRow>
                       ))}
                   </React.Fragment>
                 ))

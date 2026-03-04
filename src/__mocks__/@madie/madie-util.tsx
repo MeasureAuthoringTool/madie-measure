@@ -71,3 +71,31 @@ export const routeHandlerStore = {
   subscribe: () => null, // needs to return an object with key subscribe
   unsubscribe: () => null,
 };
+
+// Check if user can edit a measure
+export const checkUserCanEdit = (
+  owner: string,
+  sharedWith: string[] = []
+): boolean => {
+  const username = "test-fake-user@email.com"; //#nosec
+  return owner === username || sharedWith.includes(username);
+};
+
+// Check if user can delete a measure
+export const checkUserCanDelete = (owner: string): boolean => {
+  const username = "test-fake-user@email.com"; //#nosec
+  return owner === username;
+};
+
+// Mock for admin transfer enabled check
+export const useIsAdminTransferEnabled = () => false;
+
+// Mock userRolesStore
+export const userRolesStore = {
+  getState: () => ({ roles: [], isAdmin: false }),
+  updateUserRoles: () => {},
+  subscribe: () => ({ unsubscribe: () => {} }),
+};
+
+// Mock useUserRoles hook
+export const useUserRoles = () => ({ roles: [], isAdmin: false });

@@ -22,13 +22,20 @@ declare module "@madie/madie-util" {
     useClassicEngine: boolean;
   };
 
-  interface FeatureFlags {
+  export interface FeatureFlags {
     enableQdmRepeatTransfer: boolean;
     qiCoreElementsTab: boolean;
     qdmHideJson: boolean;
     qiCore7: boolean;
     QICoreCompositeMeasure: boolean;
+    DisplayOwner: boolean;
+    MakeJSONMatchUI: boolean;
     AdminTransferMeasures: boolean;
+  }
+
+  export interface UserRoles {
+    roles: string[];
+    isAdmin: boolean;
   }
 
   export interface ServiceConfig {
@@ -40,6 +47,17 @@ declare module "@madie/madie-util" {
     };
     terminologyService: {
       baseUrl: string;
+    };
+    features?: {
+      export?: boolean;
+      qdmToFhirConversion?: boolean;
+      qiCoreElementsTab?: boolean;
+      qdmHideJson?: boolean;
+      enableQdmRepeatTransfer?: boolean;
+      EnhancedTextFormatting?: boolean;
+      qiCore7?: boolean;
+      QICoreCompositeMeasure?: boolean;
+      AdminTransferMeasures?: boolean;
     };
   }
 
@@ -68,6 +86,28 @@ declare module "@madie/madie-util" {
   };
 
   export function useFeatureFlags(): FeatureFlags;
+
+  export function useUserRoles(): UserRoles;
+
+  export function useIsAdminTransferEnabled(): boolean;
+
+  export const featureFlagsStore: {
+    subscribe: (
+      setFeatureFlags: React.Dispatch<React.SetStateAction<FeatureFlags>>
+    ) => import("rxjs").Subscription;
+    updateFeatureFlags: (featureFlags: FeatureFlags | null) => void;
+    initialState: FeatureFlags;
+    state: FeatureFlags;
+  };
+
+  export const userRolesStore: {
+    subscribe: (
+      setUserRoles: React.Dispatch<React.SetStateAction<UserRoles>>
+    ) => import("rxjs").Subscription;
+    updateUserRoles: (roles: string[] | null) => void;
+    initialState: UserRoles;
+    state: UserRoles;
+  };
 
   export function useServiceConfig(): ServiceConfig;
   export function getServiceConfig(): Promise<ServiceConfig>;
@@ -137,6 +177,11 @@ declare module "@madie/madie-util" {
     shareMeasures(measureUserIdMap: Map<string, string[]>): Promise<any>;
     unshareMeasures(measureUserIdMap: Map<string, string[]>): Promise<any>;
     transferMeasures(
+      measureIds: Array<string>,
+      harpId: string,
+      retainShareAccess: boolean
+    ): Promise<any>;
+    adminTransferMeasures(
       measureIds: Array<string>,
       harpId: string,
       retainShareAccess: boolean

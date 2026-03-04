@@ -1142,4 +1142,670 @@ describe("AddComponentsDialog", () => {
       expect(searchCriteria.searchField).toBe("");
     });
   });
+
+  describe("Nested Rows - Selection, Updating, and Saving", () => {
+    const getCheckbox = (
+      row: HTMLElement | undefined
+    ): HTMLInputElement | null => {
+      if (!row) return null;
+      return row.querySelector(
+        "input[type='checkbox']"
+      ) as HTMLInputElement | null;
+    };
+
+    const getExpandButton = (
+      row: HTMLElement | undefined
+    ): HTMLElement | null => {
+      if (!row) return null;
+      return row.querySelector(
+        "button[aria-label='Toggle row expansion']"
+      ) as HTMLElement | null;
+    };
+
+    it("checks nested row checkbox and updates rowSelection state", async () => {
+      const mockGetMeasuresBySetId = jest.fn().mockResolvedValue([
+        {
+          id: "child-1",
+          measureName: "Child Measure 1",
+          version: "1.0.0",
+          measureSet: { cmsId: "CMS789" },
+          lastModifiedAt: "2024-01-15",
+          groups: [{ id: "cg-1" }],
+        },
+        {
+          id: "child-2",
+          measureName: "Child Measure 2",
+          version: "1.1.0",
+          measureSet: { cmsId: "CMS790" },
+          lastModifiedAt: "2024-01-20",
+          groups: [{ id: "cg-2" }],
+        },
+      ]);
+
+      const mockSearchMeasures = jest.fn().mockResolvedValue({
+        content: [
+          {
+            id: "1",
+            measureName: "Test Measure",
+            version: "1.0.0",
+            measureSet: { cmsId: "CMS123" },
+            measureSetId: "set-1",
+            lastModifiedAt: "2024-01-01",
+            hasAssociatedMeasures: true,
+            groups: [{ id: "pg-1" }],
+          },
+        ],
+        totalPages: 1,
+        totalElements: 1,
+        numberOfElements: 1,
+        pageable: { offset: 0 },
+      });
+
+      useMeasureServiceApi.mockReturnValue({
+        searchMeasuresByCriteria: mockSearchMeasures,
+        getMeasuresByMeasureSetId: mockGetMeasuresBySetId,
+      });
+
+      const onCloseMock = jest.fn();
+      const mockMeasure = {
+        id: "measure-1",
+        model: "QI-Core",
+        measureName: "Parent Measure",
+      };
+
+      render(
+        <AddComponentsDialog
+          open={true}
+          onClose={onCloseMock}
+          measure={mockMeasure}
+          compositeScoring="Opportunity"
+          components={[]}
+          submitComponentForm={jest.fn()}
+        />
+      );
+
+      await waitFor(() => {
+        expect(mockSearchMeasures).toHaveBeenCalled();
+      });
+
+      await waitFor(() => {
+        expect(screen.queryByText("Test Measure")).toBeInTheDocument();
+      });
+
+      const rows = screen.getAllByRole("row");
+      const firstDataRow = rows[1];
+      const expandButton = firstDataRow.querySelector("span[role='button']");
+
+      await userEvent.click(expandButton);
+
+      await waitFor(() => {
+        expect(mockGetMeasuresBySetId).toHaveBeenCalled();
+      });
+
+      await waitFor(() => {
+        expect(screen.queryByText("Child Measure 1")).toBeInTheDocument();
+        expect(screen.queryByText("Child Measure 2")).toBeInTheDocument();
+      });
+    });
+    it("applies blue background to checked nested row", async () => {
+      const mockGetMeasuresBySetId = jest.fn().mockResolvedValue([
+        {
+          id: "child-1",
+          measureName: "Child Measure 1",
+          version: "1.0.0",
+          measureSet: { cmsId: "CMS789" },
+          lastModifiedAt: "2024-01-15",
+          groups: [{ id: "cg-1" }],
+        },
+      ]);
+
+      const mockSearchMeasures = jest.fn().mockResolvedValue({
+        content: [
+          {
+            id: "1",
+            measureName: "Test Measure",
+            version: "1.0.0",
+            measureSet: { cmsId: "CMS123" },
+            measureSetId: "set-1",
+            lastModifiedAt: "2024-01-01",
+            hasAssociatedMeasures: true,
+            groups: [{ id: "pg-1" }],
+          },
+        ],
+        totalPages: 1,
+        totalElements: 1,
+        numberOfElements: 1,
+        pageable: { offset: 0 },
+      });
+
+      useMeasureServiceApi.mockReturnValue({
+        searchMeasuresByCriteria: mockSearchMeasures,
+        getMeasuresByMeasureSetId: mockGetMeasuresBySetId,
+      });
+
+      const mockMeasure = {
+        id: "measure-1",
+        model: "QI-Core",
+        measureName: "Parent Measure",
+      };
+
+      render(
+        <AddComponentsDialog
+          open={true}
+          onClose={jest.fn()}
+          measure={mockMeasure}
+          compositeScoring="Opportunity"
+          components={[]}
+          submitComponentForm={jest.fn()}
+        />
+      );
+
+      await waitFor(() => {
+        expect(mockSearchMeasures).toHaveBeenCalled();
+      });
+
+      await waitFor(
+        () => {
+          expect(screen.queryByText("Test Measure")).toBeInTheDocument();
+        },
+        { timeout: 3000 }
+      );
+
+      const rows = screen.getAllByRole("row");
+      const firstDataRow = rows[1];
+      const expandButton = getExpandButton(firstDataRow);
+
+      if (expandButton) {
+        await userEvent.click(expandButton);
+
+        await waitFor(
+          () => {
+            expect(screen.queryByText("Child Measure 1")).toBeInTheDocument();
+          },
+          { timeout: 3000 }
+        );
+      }
+
+      const expandedRows = screen.getAllByRole("row");
+      const nestedRow = expandedRows.find(
+        (row) =>
+          row.textContent.includes("Child Measure 1") &&
+          row.className.includes("expanded-row")
+      );
+
+      const checkbox = getCheckbox(nestedRow);
+
+      if (checkbox) {
+        await userEvent.click(checkbox);
+        expect(checkbox).toBeChecked();
+        expect(nestedRow).toHaveStyle({ backgroundColor: "#e3f2fd" });
+      }
+    });
+
+    it("unchecks nested row checkbox when clicked again", async () => {
+      const mockGetMeasuresBySetId = jest.fn().mockResolvedValue([
+        {
+          id: "child-1",
+          measureName: "Child Measure 1",
+          version: "1.0.0",
+          measureSet: { cmsId: "CMS789" },
+          lastModifiedAt: "2024-01-15",
+          groups: [{ id: "cg-1" }],
+        },
+      ]);
+
+      const mockSearchMeasures = jest.fn().mockResolvedValue({
+        content: [
+          {
+            id: "1",
+            measureName: "Test Measure",
+            version: "1.0.0",
+            measureSet: { cmsId: "CMS123" },
+            measureSetId: "set-1",
+            lastModifiedAt: "2024-01-01",
+            hasAssociatedMeasures: true,
+            groups: [{ id: "pg-1" }],
+          },
+        ],
+        totalPages: 1,
+        totalElements: 1,
+        numberOfElements: 1,
+        pageable: { offset: 0 },
+      });
+
+      useMeasureServiceApi.mockReturnValue({
+        searchMeasuresByCriteria: mockSearchMeasures,
+        getMeasuresByMeasureSetId: mockGetMeasuresBySetId,
+      });
+
+      const mockMeasure = {
+        id: "measure-1",
+        model: "QI-Core",
+        measureName: "Parent Measure",
+      };
+
+      render(
+        <AddComponentsDialog
+          open={true}
+          onClose={jest.fn()}
+          measure={mockMeasure}
+          compositeScoring="Opportunity"
+          components={[]}
+          submitComponentForm={jest.fn()}
+        />
+      );
+
+      await waitFor(() => {
+        expect(mockSearchMeasures).toHaveBeenCalled();
+      });
+
+      await waitFor(
+        () => {
+          expect(screen.queryByText("Test Measure")).toBeInTheDocument();
+        },
+        { timeout: 3000 }
+      );
+
+      const rows = screen.getAllByRole("row");
+      const firstDataRow = rows[1];
+      const expandButton = getExpandButton(firstDataRow);
+
+      if (expandButton) {
+        await userEvent.click(expandButton);
+
+        await waitFor(
+          () => {
+            expect(screen.queryByText("Child Measure 1")).toBeInTheDocument();
+          },
+          { timeout: 3000 }
+        );
+      }
+
+      const expandedRows = screen.getAllByRole("row");
+      const nestedRow = expandedRows.find(
+        (row) =>
+          row.textContent.includes("Child Measure 1") &&
+          row.className.includes("expanded-row")
+      );
+
+      const checkbox = getCheckbox(nestedRow);
+
+      if (checkbox) {
+        await userEvent.click(checkbox);
+        expect(checkbox).toBeChecked();
+        expect(nestedRow).toHaveStyle({ backgroundColor: "#e3f2fd" });
+
+        await userEvent.click(checkbox);
+        expect(checkbox).not.toBeChecked();
+        expect(nestedRow).toHaveStyle({ backgroundColor: "white" });
+      }
+    });
+
+    it("syncs nested row selection with preselected ids on dialog open", async () => {
+      const mockGetMeasuresBySetId = jest.fn().mockResolvedValue([
+        {
+          id: "child-1",
+          measureName: "Child Measure 1",
+          version: "1.0.0",
+          measureSet: { cmsId: "CMS789" },
+          lastModifiedAt: "2024-01-15",
+          groups: [{ id: "cg-1" }],
+        },
+      ]);
+
+      const mockSearchMeasures = jest.fn().mockResolvedValue({
+        content: [
+          {
+            id: "1",
+            measureName: "Test Measure",
+            version: "1.0.0",
+            measureSet: { cmsId: "CMS123" },
+            measureSetId: "set-1",
+            lastModifiedAt: "2024-01-01",
+            hasAssociatedMeasures: true,
+            groups: [{ id: "pg-1" }],
+          },
+        ],
+        totalPages: 1,
+        totalElements: 1,
+        numberOfElements: 1,
+        pageable: { offset: 0 },
+      });
+
+      useMeasureServiceApi.mockReturnValue({
+        searchMeasuresByCriteria: mockSearchMeasures,
+        getMeasuresByMeasureSetId: mockGetMeasuresBySetId,
+      });
+
+      const mockMeasure = {
+        id: "measure-1",
+        model: "QI-Core",
+        measureName: "Parent Measure",
+      };
+
+      render(
+        <AddComponentsDialog
+          open={true}
+          onClose={jest.fn()}
+          measure={mockMeasure}
+          compositeScoring="Opportunity"
+          components={[{ measureId: "child-1", groupId: "cg-1" }]}
+          submitComponentForm={jest.fn()}
+        />
+      );
+
+      await waitFor(() => {
+        expect(mockSearchMeasures).toHaveBeenCalled();
+      });
+
+      await waitFor(
+        () => {
+          expect(screen.queryByText("Test Measure")).toBeInTheDocument();
+        },
+        { timeout: 3000 }
+      );
+
+      const rows = screen.getAllByRole("row");
+      const firstDataRow = rows[1];
+      const expandButton = getExpandButton(firstDataRow);
+
+      if (expandButton) {
+        await userEvent.click(expandButton);
+
+        await waitFor(
+          () => {
+            expect(screen.queryByText("Child Measure 1")).toBeInTheDocument();
+          },
+          { timeout: 3000 }
+        );
+
+        const expandedRows = screen.getAllByRole("row");
+        const nestedRow = expandedRows.find(
+          (row) =>
+            row.textContent.includes("Child Measure 1") &&
+            row.className.includes("expanded-row")
+        );
+
+        const checkbox = getCheckbox(nestedRow);
+        expect(checkbox).toBeChecked();
+        expect(nestedRow).toHaveStyle({ backgroundColor: "#e3f2fd" });
+      }
+    });
+
+    it("handles error during nested row expansion gracefully", async () => {
+      const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation();
+      const mockGetMeasuresBySetId = jest
+        .fn()
+        .mockRejectedValue(new Error("Failed to fetch associated measures"));
+
+      const mockSearchMeasures = jest.fn().mockResolvedValue({
+        content: [
+          {
+            id: "1",
+            measureName: "Test Measure",
+            version: "1.0.0",
+            measureSet: { cmsId: "CMS123" },
+            measureSetId: "set-1",
+            lastModifiedAt: "2024-01-01",
+            hasAssociatedMeasures: true,
+            groups: [{ id: "pg-1" }],
+          },
+        ],
+        totalPages: 1,
+        totalElements: 1,
+        numberOfElements: 1,
+        pageable: { offset: 0 },
+      });
+
+      useMeasureServiceApi.mockReturnValue({
+        searchMeasuresByCriteria: mockSearchMeasures,
+        getMeasuresByMeasureSetId: mockGetMeasuresBySetId,
+      });
+
+      const mockMeasure = {
+        id: "measure-1",
+        model: "QI-Core",
+        measureName: "Parent Measure",
+      };
+
+      render(
+        <AddComponentsDialog
+          open={true}
+          onClose={jest.fn()}
+          measure={mockMeasure}
+          compositeScoring="Opportunity"
+          components={[]}
+          submitComponentForm={jest.fn()}
+        />
+      );
+
+      await waitFor(() => {
+        expect(mockSearchMeasures).toHaveBeenCalled();
+      });
+
+      await waitFor(
+        () => {
+          expect(screen.queryByText("Test Measure")).toBeInTheDocument();
+        },
+        { timeout: 3000 }
+      );
+
+      const rows = screen.getAllByRole("row");
+      const firstDataRow = rows[1];
+      const expandButton = getExpandButton(firstDataRow);
+
+      if (expandButton) {
+        await userEvent.click(expandButton);
+
+        await waitFor(() => {
+          expect(consoleErrorSpy).toHaveBeenCalledWith(
+            "Failed to fetch associated measures:",
+            expect.any(Error)
+          );
+        });
+      }
+
+      consoleErrorSpy.mockRestore();
+    });
+
+    it("submits selected measures and calls submitComponentForm with correct component structure", async () => {
+      const mockSearchMeasures = jest.fn().mockResolvedValue({
+        content: [
+          {
+            id: "1",
+            measureName: "Test Measure",
+            version: "1.0.0",
+            measureSet: { cmsId: "CMS123" },
+            measureSetId: "set-1",
+            lastModifiedAt: "2024-01-01",
+            hasAssociatedMeasures: true,
+            groups: [{ id: "pg-1" }],
+          },
+          {
+            id: "2",
+            measureName: "Another Measure",
+            version: "2.0.0",
+            measureSet: { cmsId: "CMS456" },
+            measureSetId: "set-2",
+            lastModifiedAt: "2024-02-01",
+            hasAssociatedMeasures: false,
+            groups: [{ id: "pg-2" }, { id: "pg-3" }],
+          },
+        ],
+        totalPages: 1,
+        totalElements: 2,
+        numberOfElements: 2,
+        pageable: { offset: 0 },
+      });
+
+      const mockFetchMeasuresByIds = jest.fn().mockResolvedValue([
+        {
+          id: "1",
+          measureName: "Test Measure",
+          version: "1.0.0",
+          groups: [{ id: "pg-1" }],
+        },
+        {
+          id: "2",
+          measureName: "Another Measure",
+          version: "2.0.0",
+          groups: [{ id: "pg-2" }, { id: "pg-3" }],
+        },
+      ]);
+
+      useMeasureServiceApi.mockReturnValue({
+        searchMeasuresByCriteria: mockSearchMeasures,
+        getMeasuresByMeasureSetId: jest.fn(),
+        fetchMeasuresByIds: mockFetchMeasuresByIds,
+      });
+
+      const onCloseMock = jest.fn();
+      const submitComponentFormMock = jest.fn();
+      const mockMeasure = {
+        id: "measure-1",
+        model: "QI-Core",
+        measureName: "Parent Measure",
+      };
+
+      render(
+        <AddComponentsDialog
+          open={true}
+          onClose={onCloseMock}
+          measure={mockMeasure}
+          compositeScoring="Opportunity"
+          components={[]}
+          submitComponentForm={submitComponentFormMock}
+        />
+      );
+
+      await waitFor(() => {
+        expect(mockSearchMeasures).toHaveBeenCalled();
+      });
+
+      await waitFor(
+        () => {
+          expect(screen.queryByText("Test Measure")).toBeInTheDocument();
+        },
+        { timeout: 3000 }
+      );
+
+      const checkboxes = screen.getAllByRole("checkbox");
+      const measure1Checkbox = checkboxes[1];
+      const measure2Checkbox = checkboxes[2];
+
+      await userEvent.click(measure1Checkbox);
+      await userEvent.click(measure2Checkbox);
+
+      const saveButton = screen.getByTestId(
+        "select-composite-measure-components-continue-button"
+      );
+      await userEvent.click(saveButton);
+
+      await waitFor(() => {
+        expect(mockFetchMeasuresByIds).toHaveBeenCalledWith(["1", "2"]);
+      });
+
+      await waitFor(() => {
+        expect(submitComponentFormMock).toHaveBeenCalledWith([
+          { measureId: "1", groupId: "pg-1" },
+          { measureId: "2", groupId: "pg-2" },
+          { measureId: "2", groupId: "pg-3" },
+        ]);
+      });
+
+      await waitFor(() => {
+        expect(onCloseMock).toHaveBeenCalled();
+      });
+    });
+
+    it("removes duplicate components and calls submitComponentForm with unique components only", async () => {
+      const mockSearchMeasures = jest.fn().mockResolvedValue({
+        content: [
+          {
+            id: "1",
+            measureName: "Test Measure",
+            version: "1.0.0",
+            measureSet: { cmsId: "CMS123" },
+            measureSetId: "set-1",
+            lastModifiedAt: "2024-01-01",
+            hasAssociatedMeasures: true,
+            groups: [{ id: "pg-1" }, { id: "pg-1" }],
+          },
+        ],
+        totalPages: 1,
+        totalElements: 1,
+        numberOfElements: 1,
+        pageable: { offset: 0 },
+      });
+
+      const mockFetchMeasuresByIds = jest.fn().mockResolvedValue([
+        {
+          id: "1",
+          measureName: "Test Measure",
+          version: "1.0.0",
+          groups: [{ id: "pg-1" }, { id: "pg-1" }],
+        },
+      ]);
+
+      useMeasureServiceApi.mockReturnValue({
+        searchMeasuresByCriteria: mockSearchMeasures,
+        getMeasuresByMeasureSetId: jest.fn(),
+        fetchMeasuresByIds: mockFetchMeasuresByIds,
+      });
+
+      const onCloseMock = jest.fn();
+      const submitComponentFormMock = jest.fn();
+      const mockMeasure = {
+        id: "measure-1",
+        model: "QI-Core",
+        measureName: "Parent Measure",
+      };
+
+      render(
+        <AddComponentsDialog
+          open={true}
+          onClose={onCloseMock}
+          measure={mockMeasure}
+          compositeScoring="Opportunity"
+          components={[]}
+          submitComponentForm={submitComponentFormMock}
+        />
+      );
+
+      await waitFor(() => {
+        expect(mockSearchMeasures).toHaveBeenCalled();
+      });
+
+      await waitFor(
+        () => {
+          expect(screen.queryByText("Test Measure")).toBeInTheDocument();
+        },
+        { timeout: 3000 }
+      );
+
+      const checkboxes = screen.getAllByRole("checkbox");
+      const measureCheckbox = checkboxes[1];
+
+      await userEvent.click(measureCheckbox);
+
+      const saveButton = screen.getByTestId(
+        "select-composite-measure-components-continue-button"
+      );
+      await userEvent.click(saveButton);
+
+      await waitFor(() => {
+        expect(mockFetchMeasuresByIds).toHaveBeenCalledWith(["1"]);
+      });
+
+      await waitFor(() => {
+        expect(submitComponentFormMock).toHaveBeenCalledWith([
+          { measureId: "1", groupId: "pg-1" },
+        ]);
+      });
+
+      await waitFor(() => {
+        expect(onCloseMock).toHaveBeenCalled();
+      });
+    });
+  });
 });

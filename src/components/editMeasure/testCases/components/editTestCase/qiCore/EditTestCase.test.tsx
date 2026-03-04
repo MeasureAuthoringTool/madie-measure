@@ -3540,6 +3540,8 @@ describe("EditTestCase component", () => {
           });
         }
       });
+      const measure = { ...simpleMeasureFixture, createdBy: MEASURE_CREATEDBY };
+      measure.testCaseConfiguration.executeInvalidTestCases = false;
       renderWithRouter(
         [
           "/measures/623cacebe74613783378c17b/edit/test-cases/623cacffe74613783378c17c",
@@ -4137,6 +4139,129 @@ describe("EditTestCase component", () => {
           screen.queryByTestId("calculation-dialog")
         ).not.toBeInTheDocument()
       );
+    });
+
+    it("should display tooltip with title error when title is cleared and form is dirty", async () => {
+      const testCase = {
+        id: "1234",
+        description: "Test IPP",
+        series: "SeriesA",
+        createdBy: MEASURE_CREATEDBY,
+        createdAt: "",
+        lastModifiedAt: "",
+        lastModifiedBy: "null",
+        title: "TestIPP",
+        name: "TestIPP",
+        executionStatus: "false",
+        json: '{ "resourceType": "Bundle", "type": "collection", "entry": [] }',
+      } as TestCase;
+      mockedAxios.get.mockClear().mockImplementation((args) => {
+        if (args && args.endsWith("series")) {
+          return Promise.resolve({ data: ["SeriesA"] });
+        } else if (args && args.endsWith("resources")) {
+          return Promise.resolve({
+            data: [...resourceIdentifiers],
+          });
+        }
+        return Promise.resolve({ data: { ...testCase } });
+      });
+      renderWithRouter(
+        ["/measures/m1234/edit/test-cases/1234"],
+        "/measures/:measureId/edit/test-cases/:id"
+      );
+
+      userEvent.click(screen.getByTestId("details-tab"));
+      const tcTitle = await screen.findByTestId("test-case-title");
+      expect(tcTitle).toBeInTheDocument();
+      // Clear the title to trigger a validation error
+      userEvent.clear(tcTitle);
+      await waitFor(() => {
+        expect(tcTitle).toHaveValue("");
+      });
+      // blur to trigger touched
+      fireEvent.blur(tcTitle);
+
+      const saveButton = await screen.findByRole("button", {
+        name: "Save",
+      });
+      await waitFor(() => expect(saveButton).toBeDisabled());
+
+      // Hover over the span wrapping the disabled save button to trigger tooltip
+      fireEvent.mouseOver(saveButton.closest("span"));
+      await waitFor(() => {
+        expect(
+          screen.getByText(/title: Test Case Title is required/)
+        ).toBeInTheDocument();
+      });
+    });
+
+    it("should display tooltip with description error when description exceeds max length", async () => {
+      renderWithRouter(
+        ["/measures/m1234/edit/test-cases"],
+        "/measures/:measureId/edit/test-cases"
+      );
+
+      userEvent.click(screen.getByTestId("details-tab"));
+
+      // First set a valid title so the title error does not appear
+      await testTitle("ValidTitle");
+
+      const descriptionInput = await screen.findByTestId(
+        "test-case-description"
+      );
+      const longDescription = "a".repeat(251);
+      fireEvent.change(descriptionInput, {
+        target: { value: longDescription },
+      });
+      fireEvent.blur(descriptionInput);
+
+      const saveButton = await screen.findByRole("button", {
+        name: "Save",
+      });
+      await waitFor(() => expect(saveButton).toBeDisabled());
+
+      fireEvent.mouseOver(saveButton.closest("span"));
+      await waitFor(() => {
+        expect(
+          screen.getByText(
+            /description: Test Case Description cannot be more than 250 characters/
+          )
+        ).toBeInTheDocument();
+      });
+    });
+
+    it("should not display tooltip when form has no errors", async () => {
+      renderWithRouter(
+        ["/measures/m1234/edit/test-cases"],
+        "/measures/:measureId/edit/test-cases"
+      );
+
+      mockedAxios.post.mockResolvedValue({
+        data: {
+          id: "testID",
+          createdBy: MEASURE_CREATEDBY,
+          description: "desc",
+          title: "ValidTitle",
+          hapiOperationOutcome: hapiOperationSuccessOutcome,
+        },
+      });
+
+      userEvent.click(screen.getByTestId("details-tab"));
+      await testTitle("ValidTitle");
+
+      const saveButton = await screen.findByRole("button", {
+        name: "Save",
+      });
+      await waitFor(() => expect(saveButton).not.toBeDisabled());
+
+      // Hover over the button's wrapper span
+      fireEvent.mouseOver(saveButton.closest("span"));
+      // The tooltip should not show any error text
+      await waitFor(() => {
+        expect(screen.queryByText(/title:/)).not.toBeInTheDocument();
+        expect(screen.queryByText(/description:/)).not.toBeInTheDocument();
+        expect(screen.queryByText(/series:/)).not.toBeInTheDocument();
+      });
     });
   });
 

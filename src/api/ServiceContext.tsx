@@ -22,6 +22,17 @@ export interface ServiceConfig {
   excelExportService: {
     baseUrl: string;
   };
+  features?: {
+    export?: boolean;
+    qdmToFhirConversion?: boolean;
+    qiCoreElementsTab?: boolean;
+    qdmHideJson?: boolean;
+    enableQdmRepeatTransfer?: boolean;
+    EnhancedTextFormatting?: boolean;
+    qiCore7?: boolean;
+    QICoreCompositeMeasure?: boolean;
+    AdminTransferMeasures?: boolean;
+  };
 }
 
 const ServiceContext = createContext<ServiceConfig>(null);

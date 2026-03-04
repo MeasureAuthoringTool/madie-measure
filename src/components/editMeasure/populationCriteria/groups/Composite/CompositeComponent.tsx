@@ -20,7 +20,10 @@ export default function CompositeComponent({
           submitComponentForm={submitComponentForm}
         />
       </div>
-      <AddedComponentsTable components={components} />
+      <AddedComponentsTable
+        components={components}
+        onComponentsUpdate={submitComponentForm}
+      />
     </div>
   );
 }
