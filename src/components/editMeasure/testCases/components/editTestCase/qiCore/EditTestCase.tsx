@@ -426,8 +426,7 @@ const EditTestCase = (props: EditTestCaseProps) => {
   const [populationGroupResults, setPopulationGroupResults] =
     useState<DetailedPopulationGroupResult[]>();
   const [calculationErrors, setCalculationErrors] = useState<AlertProps>();
-  const [rightPanelActiveTab, setRightPanelActiveTab] =
-    useState<string>("measurecql");
+  const [rightPanelActiveTab, setRightPanelActiveTab] = useState<string>();
   const [leftPanelActiveTab, setLeftPanelActiveTab] = useState<string>("added");
   const [groupPopulations, setGroupPopulations] = useState<GroupPopulation[]>(
     []
@@ -454,6 +453,8 @@ const EditTestCase = (props: EditTestCaseProps) => {
     measure?.measureSet?.owner,
     measure?.measureSet?.acls
   );
+
+  const isCompositeMeasure = measure?.measureMetaData?.composite || false;
 
   const formik = useFormik({
     initialValues: { ...INITIAL_VALUES },
@@ -699,6 +700,14 @@ const EditTestCase = (props: EditTestCaseProps) => {
       initialTabSet.current = true;
     }
   }, [testCaseCanEdit]);
+
+  // Update right panel tab when measure type changes
+  useEffect(() => {
+    const correctTab = isCompositeMeasure ? "expectoractual" : "measurecql";
+    if (rightPanelActiveTab !== correctTab) {
+      setRightPanelActiveTab(correctTab);
+    }
+  }, [isCompositeMeasure]);
 
   const handleSubmit = async (testCase: TestCase) => {
     setAlert(null);
@@ -1203,6 +1212,7 @@ const EditTestCase = (props: EditTestCaseProps) => {
               <div className="right-panel">
                 <CreateTestCaseRightPanelNavTabs
                   rightPanelActiveTab={rightPanelActiveTab}
+                  isCompositeMeasure={isCompositeMeasure}
                   setRightPanelActiveTab={setRightPanelActiveTab}
                 />
                 {rightPanelActiveTab === "measurecql" &&

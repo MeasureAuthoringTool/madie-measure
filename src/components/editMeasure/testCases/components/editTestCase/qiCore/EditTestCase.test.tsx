@@ -4782,7 +4782,7 @@ describe("EditTestCase QICore Component - Test Case Locked By Other User", () =>
   afterEach(() => {
     jest.clearAllMocks();
   });
-  it("Should disable eidt", async () => {
+  it("Should disable edit", async () => {
     const measure = {
       ...defaultMeasure,
       model: Model.QICORE_6_0_0,

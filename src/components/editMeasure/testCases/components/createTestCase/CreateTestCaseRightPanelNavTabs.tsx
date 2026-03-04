@@ -3,11 +3,14 @@ import { Tabs, Tab } from "@madie/madie-design-system/dist/react";
 import "./CreateTestCaseNavTabs.scss";
 export interface NavTabProps {
   rightPanelActiveTab: string;
+  isCompositeMeasure: boolean;
   setRightPanelActiveTab: (value: string) => void;
 }
 
 export default function CreateTestCaseRightPanelNavTabs(props: NavTabProps) {
-  const { rightPanelActiveTab, setRightPanelActiveTab } = props;
+  const { rightPanelActiveTab, setRightPanelActiveTab, isCompositeMeasure } =
+    props;
+
   return (
     <Tabs
       id="test-case-nav-container"
@@ -17,28 +20,34 @@ export default function CreateTestCaseRightPanelNavTabs(props: NavTabProps) {
       }}
       type="B"
     >
+      {!isCompositeMeasure && (
+        <Tab
+          tabIndex={0}
+          aria-label="Measure CQL View Only tab panel"
+          type="B"
+          label="CQL"
+          data-testid="measurecql-tab"
+          value="measurecql"
+        />
+      )}
+      {!isCompositeMeasure && (
+        <Tab
+          tabIndex={0}
+          aria-label="Highlighting tab panel"
+          type="B"
+          label="Highlighting"
+          data-testid="highlighting-tab"
+          value="highlighting"
+        />
+      )}
       <Tab
         tabIndex={0}
-        aria-label="Measure CQL View Only tab panel"
-        type="B"
-        label={`CQL`}
-        data-testid="measurecql-tab"
-        value="measurecql"
-      />
-      <Tab
-        tabIndex={0}
-        aria-label="Highlighting tab panel"
-        type="B"
-        label={`Highlighting`}
-        data-testid="highlighting-tab"
-        value="highlighting"
-      />
-      <Tab
-        tabIndex={0}
-        aria-label="Expected or Actual tab panel"
+        aria-label={`${
+          isCompositeMeasure ? "Actual" : "Expected or Actual"
+        } tab panel`}
         type="B"
         value="expectoractual"
-        label="Expected / Actual"
+        label={isCompositeMeasure ? "Actual" : "Expected / Actual"}
         data-testid="expectoractual-tab"
       />
       <Tab
