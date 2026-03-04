@@ -269,34 +269,58 @@ const Builder = ({
             )}
             <>
               <ResourceContextProvider value={resourceIdentifiers}>
-                {selectedResourceID && (
-                  <ResourceEditor
-                    selectedResourceID={selectedResourceID}
-                    setValidationSchema={setValidationSchema}
-                    setInitialFormikValuesStu6={setInitialFormikValuesStu6}
-                    onCancel={() =>
-                      handleCancel(setSelectedResourceId, savedGridID)
+                {_.isEmpty(state?.bundle?.entry) ? (
+                  <MadieAlert
+                    minimizeAlerts={false}
+                    type="warning"
+                    content={
+                      <p
+                        aria-live="polite"
+                        role="alert"
+                        data-testid="no-profiles-alert"
+                      >
+                        No Profiles have been added to the test case. Navigate
+                        to the Available Elements tab to add profiles.
+                      </p>
                     }
-                    canEdit={canEdit}
-                    applyLoading={applyLoading}
-                    setApplyLoading={setApplyLoading}
+                    canClose={false}
                   />
+                ) : (
+                  <>
+                    {selectedResourceID && (
+                      <ResourceEditor
+                        selectedResourceID={selectedResourceID}
+                        setValidationSchema={setValidationSchema}
+                        setInitialFormikValuesStu6={setInitialFormikValuesStu6}
+                        onCancel={() =>
+                          handleCancel(setSelectedResourceId, savedGridID)
+                        }
+                        canEdit={canEdit}
+                        applyLoading={applyLoading}
+                        setApplyLoading={setApplyLoading}
+                      />
+                    )}
+                    <TestCaseSummaryGrid
+                      gridData={prepareSummaryGridData(
+                        state?.bundle?.entry,
+                        resourceIdentifiers
+                      )}
+                      onRowEdit={(row) =>
+                        handleRowEdit(
+                          row,
+                          setSelectedResourceId,
+                          setSavedGridID
+                        )
+                      }
+                      onRowDelete={(row) =>
+                        handleRowDelete(row, setSelectedResourceId, dispatch)
+                      }
+                      testCaseCanEdit={canEdit}
+                      selectedRowId={selectedResourceID}
+                      readOnly={!canEdit}
+                    />
+                  </>
                 )}
-                <TestCaseSummaryGrid
-                  gridData={prepareSummaryGridData(
-                    state?.bundle?.entry,
-                    resourceIdentifiers
-                  )}
-                  onRowEdit={(row) =>
-                    handleRowEdit(row, setSelectedResourceId, setSavedGridID)
-                  }
-                  onRowDelete={(row) =>
-                    handleRowDelete(row, setSelectedResourceId, dispatch)
-                  }
-                  testCaseCanEdit={canEdit}
-                  selectedRowId={selectedResourceID}
-                  readOnly={!canEdit}
-                />
               </ResourceContextProvider>
             </>
           </div>

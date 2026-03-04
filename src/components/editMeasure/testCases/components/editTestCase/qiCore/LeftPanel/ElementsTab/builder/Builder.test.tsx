@@ -455,9 +455,14 @@ describe("Builder Component", () => {
 
     renderBuilderComponent({ bundleToAdd: emptyBundle, activeTab: "added" });
 
-    // table renders headers but no data rows
-    const rows = await screen.findAllByRole("row");
-    expect(rows.length).toBe(1);
+    const noProfilesAlert = await screen.findByTestId("no-profiles-alert");
+
+    expect(noProfilesAlert).toBeInTheDocument();
+    expect(noProfilesAlert).toHaveTextContent(
+      "No Profiles have been added to the test case. Navigate to the Available Elements tab to add profiles."
+    );
+
+    expect(screen.queryByRole("table")).not.toBeInTheDocument();
   });
 
   it("triggers resource addition logic with required elements and spinner overlay", async () => {
