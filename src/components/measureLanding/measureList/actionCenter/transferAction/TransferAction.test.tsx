@@ -42,7 +42,7 @@ jest.mock("@madie/madie-util", () => ({
     };
   }),
   useFeatureFlags: jest.fn(() => ({
-    AdminTransferMeasures: false,
+    AdminTransferMeasure: false,
   })),
   useUserRoles: jest.fn(() => ({
     roles: [],
@@ -55,7 +55,7 @@ describe("TransferAction", () => {
     jest.clearAllMocks();
     (useIsAdminTransferEnabled as jest.Mock).mockReturnValue(false);
     (useFeatureFlags as jest.Mock).mockReturnValue({
-      AdminTransferMeasures: false,
+      AdminTransferMeasure: false,
     });
     (useUserRoles as jest.Mock).mockReturnValue({
       roles: [],
@@ -147,11 +147,11 @@ describe("TransferAction", () => {
   });
 
   // Admin user tests
-  describe("Admin user with AdminTransferMeasures feature flag enabled", () => {
+  describe("Admin user with AdminTransferMeasure feature flag enabled", () => {
     beforeEach(() => {
       (useIsAdminTransferEnabled as jest.Mock).mockReturnValue(true);
       (useFeatureFlags as jest.Mock).mockReturnValue({
-        AdminTransferMeasures: true,
+        AdminTransferMeasure: true,
       });
       (useUserRoles as jest.Mock).mockReturnValue({
         roles: ["MADiE-Admin"],
@@ -217,10 +217,10 @@ describe("TransferAction", () => {
     });
   });
 
-  describe("Admin user with AdminTransferMeasures feature flag disabled", () => {
+  describe("Admin user with AdminTransferMeasure feature flag disabled", () => {
     beforeEach(() => {
       (useFeatureFlags as jest.Mock).mockReturnValue({
-        AdminTransferMeasures: false,
+        AdminTransferMeasure: false,
       });
       (useUserRoles as jest.Mock).mockReturnValue({
         roles: ["MADiE-Admin"],

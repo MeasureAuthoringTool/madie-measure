@@ -50,7 +50,7 @@ export default function TransferAction(props: PropTypes) {
 
     // Admin users with feature flag enabled can transfer any measure
     const isAdminTransferEnabled =
-      featureFlags?.AdminTransferMeasures && userRoles?.isAdmin;
+      featureFlags?.AdminTransferMeasure && userRoles?.isAdmin;
     if (isAdminTransferEnabled) {
       setDisableTransferBtn(false);
       setTooltipMessage(TRANSFER);

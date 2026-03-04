@@ -30,7 +30,7 @@ declare module "@madie/madie-util" {
     QICoreCompositeMeasure: boolean;
     DisplayOwner: boolean;
     MakeJSONMatchUI: boolean;
-    AdminTransferMeasures: boolean;
+    AdminTransferMeasure: boolean;
   }
 
   export interface UserRoles {
@@ -57,7 +57,7 @@ declare module "@madie/madie-util" {
       EnhancedTextFormatting?: boolean;
       qiCore7?: boolean;
       QICoreCompositeMeasure?: boolean;
-      AdminTransferMeasures?: boolean;
+      AdminTransferMeasure?: boolean;
     };
   }
 

@@ -87,7 +87,7 @@ export default function ActionCenter(props: PropTypes) {
     if (props.measures?.length > 0) {
       // Use admin transfer if user is admin and doesn't own all selected measures
       const isAdminTransferEnabled =
-        featureFlags?.AdminTransferMeasures && userRoles?.isAdmin;
+        featureFlags?.AdminTransferMeasure && userRoles?.isAdmin;
       const needsAdminTransfer =
         isAdminTransferEnabled && !isOwnerOfAllMeasures(props.measures);
       props.setTransferDialog({

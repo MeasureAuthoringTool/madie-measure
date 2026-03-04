@@ -199,7 +199,7 @@ jest.mock("@madie/madie-util", () => ({
   })),
   checkUserCanEdit: jest.fn().mockImplementation(() => true),
   useFeatureFlags: jest.fn(() => ({
-    AdminTransferMeasures: false,
+    AdminTransferMeasure: false,
   })),
   useUserRoles: jest.fn(() => ({
     roles: [],

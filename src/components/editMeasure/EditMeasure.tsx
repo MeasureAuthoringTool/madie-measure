@@ -261,7 +261,7 @@ export default function EditMeasure() {
       // Check if user is admin and doesn't own the measure
       const isOwner = checkUserCanEdit(measure?.measureSet?.owner, []);
       const isAdminTransferEnabled =
-        featureFlags?.AdminTransferMeasures && userRoles?.isAdmin;
+        featureFlags?.AdminTransferMeasure && userRoles?.isAdmin;
       const needsAdminTransfer = isAdminTransferEnabled && !isOwner;
       setTransferDialog({
         open: true,
