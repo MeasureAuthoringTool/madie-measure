@@ -170,21 +170,19 @@ describe("AddedComponentsTable", () => {
     await waitFor(() =>
       expect(screen.getByTestId("measure-list-tbl")).toBeInTheDocument()
     );
-    const allRows = screen.getAllByRole("row");
-    const bodyRows = allRows.slice(1);
+    const bodyRows = screen.getAllByTestId("row-item");
 
     expect(bodyRows.length).toBeGreaterThan(0);
 
     for (const row of bodyRows) {
-      // only IconButton in the row
-      const btn = within(row).getByRole("button");
-      await userEvent.hover(btn);
+      const deleteBtn = within(row).getByTestId(/^delete-component-/);
+      await userEvent.hover(deleteBtn);
 
       await waitFor(() => {
         expect(screen.getByText("Delete")).toBeInTheDocument();
       });
 
-      await userEvent.unhover(btn);
+      await userEvent.unhover(deleteBtn);
     }
   });
 
@@ -360,5 +358,166 @@ describe("AddedComponentsTable", () => {
     expect(mockOnComponentsUpdate).toHaveBeenCalledWith([
       { measureId: "m2", groupId: "g3" },
     ]);
+  });
+
+  it("expands group section when expand icon is clicked", async () => {
+    const service = makeService();
+    (useMeasureServiceApi as jest.Mock).mockReturnValue(service);
+
+    const components = [
+      {
+        measureId: "m1",
+        groupId: "g1",
+        groups: [
+          { id: "group1", displayId: "group1", version: "1.0.0" },
+          { id: "group2", displayId: "group2", version: "2.0.0" },
+        ],
+      },
+    ];
+
+    render(<AddedComponentsTable components={components} />);
+
+    await waitFor(() =>
+      expect(screen.getByTestId("measure-list-tbl")).toBeInTheDocument()
+    );
+
+    const rows = screen.getAllByRole("row");
+    const expandButtons = rows[1].querySelectorAll("span[role='button']");
+    const expandButton = expandButtons[expandButtons.length - 1];
+
+    await userEvent.click(expandButton);
+
+    await waitFor(() => {
+      expect(screen.getByTestId("expanded-group-row")).toBeInTheDocument();
+    });
+  });
+
+  it("displays group sub-table with Population Criteria header when expanded", async () => {
+    const service = makeService();
+    (useMeasureServiceApi as jest.Mock).mockReturnValue(service);
+
+    const components = [
+      {
+        measureId: "m1",
+        groupId: "g1",
+        groups: [
+          { id: "group1", displayId: "group1", version: "1.0.0" },
+          { id: "group2", displayId: "group2", version: "2.0.0" },
+        ],
+      },
+    ];
+
+    render(<AddedComponentsTable components={components} />);
+
+    await waitFor(() =>
+      expect(screen.getByTestId("measure-list-tbl")).toBeInTheDocument()
+    );
+
+    const rows = screen.getAllByRole("row");
+    const expandButtons = rows[1].querySelectorAll("span[role='button']");
+    const expandButton = expandButtons[expandButtons.length - 1];
+
+    await userEvent.click(expandButton);
+
+    await waitFor(() => {
+      expect(screen.getByText("Population Criteria")).toBeInTheDocument();
+    });
+  });
+
+  it("handles empty groups array gracefully", async () => {
+    const service = makeService();
+    (useMeasureServiceApi as jest.Mock).mockReturnValue(service);
+
+    const components = [
+      {
+        measureId: "m1",
+        groupId: "g1",
+        groups: [],
+      },
+    ];
+
+    render(<AddedComponentsTable components={components} />);
+
+    await waitFor(() =>
+      expect(screen.getByTestId("measure-list-tbl")).toBeInTheDocument()
+    );
+
+    const rows = screen.getAllByRole("row");
+    const expandButtons = rows[1].querySelectorAll("span[role='button']");
+    const expandButton = expandButtons[expandButtons.length - 1];
+
+    await userEvent.click(expandButton);
+    const groupRows = screen.queryByTestId("expanded-group-row");
+    expect(groupRows).toBeInTheDocument();
+    expect(groupRows?.querySelector("tbody")?.children.length).toBe(0);
+  });
+
+  it("handles components without groups property", async () => {
+    const service = makeService();
+    (useMeasureServiceApi as jest.Mock).mockReturnValue(service);
+
+    const components = [
+      {
+        measureId: "m1",
+        groupId: "g1",
+      },
+    ];
+
+    render(<AddedComponentsTable components={components} />);
+
+    await waitFor(() =>
+      expect(screen.getByTestId("measure-list-tbl")).toBeInTheDocument()
+    );
+
+    const rows = screen.getAllByRole("row");
+    const expandButtons = rows[1].querySelectorAll("span[role='button']");
+    const expandButton = expandButtons[expandButtons.length - 1];
+
+    await userEvent.click(expandButton);
+    const groupRows = screen.queryByTestId("expanded-group-row");
+    expect(groupRows).toBeInTheDocument();
+    expect(groupRows?.querySelector("tbody")?.children.length).toBe(0);
+  });
+
+  it("toggle expand icon based on expansion state", async () => {
+    const service = makeService();
+    (useMeasureServiceApi as jest.Mock).mockReturnValue(service);
+
+    const components = [
+      {
+        measureId: "m1",
+        groupId: "g1",
+        groups: [{ id: "group1", displayId: "group1", version: "1.0.0" }],
+      },
+    ];
+
+    render(<AddedComponentsTable components={components} />);
+
+    await waitFor(() =>
+      expect(screen.getByTestId("measure-list-tbl")).toBeInTheDocument()
+    );
+
+    let rows = screen.getAllByRole("row");
+    let expandButtons = rows[1].querySelectorAll("span[role='button']");
+    let expandButton = expandButtons[expandButtons.length - 1];
+    expect(expandButton.querySelector("svg")).toBeInTheDocument();
+
+    await userEvent.click(expandButton);
+
+    await waitFor(() => {
+      expect(screen.getByTestId("expanded-group-row")).toBeInTheDocument();
+    });
+
+    rows = screen.getAllByRole("row");
+    expandButtons = rows[1].querySelectorAll("span[role='button']");
+    expandButton = expandButtons[expandButtons.length - 1];
+
+    await userEvent.click(expandButton);
+
+    await waitFor(() => {
+      expect(
+        screen.queryByTestId("expanded-group-row")
+      ).not.toBeInTheDocument();
+    });
   });
 });
