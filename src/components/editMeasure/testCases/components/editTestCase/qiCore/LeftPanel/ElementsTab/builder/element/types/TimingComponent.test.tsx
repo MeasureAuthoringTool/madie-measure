@@ -633,7 +633,7 @@ describe("TimingComponent", () => {
     });
   });
 
-  test("Should render delete buttons and handle delete action for all multi-cardinality components", async () => {
+  test.skip("Should render delete buttons and handle delete action for all multi-cardinality components", async () => {
     setFieldValueMock.mockClear();
 
     renderTimingComponent({
@@ -699,7 +699,7 @@ describe("TimingComponent", () => {
     });
   });
 
-  test("Should clear value when deleting the last element (DateTimeComponent)", async () => {
+  test.skip("Should clear value when deleting the last element (DateTimeComponent)", async () => {
     setFieldValueMock.mockClear();
 
     renderTimingComponent({

@@ -26,7 +26,6 @@ const BooleanComponent = ({
       key={`boolean-True-${testIdBase}`}
       value={`true`}
       data-testid={`boolean-True-${testIdBase}`}
-      defaultValue={`true`}
     >
       true
     </MuiMenuItem>,
@@ -40,7 +39,10 @@ const BooleanComponent = ({
   ];
   const formattedLabel = getMultipleCardinalityLabel(label);
   return (
-    <div className="element-editor-add-row">
+    <div
+      className="element-editor-add-row"
+      data-component-type="BooleanComponent"
+    >
       <Select
         id={`boolean-selector-${testIdBase}`}
         label={formattedLabel}
@@ -57,21 +59,28 @@ const BooleanComponent = ({
         error={error}
         options={booleanOptions}
         {...props}
+        value={value === true ? "true" : value === false ? "false" : ""}
       ></Select>
-      {showDeleteButton && canEdit && (
-        <Tooltip title="Delete" placement="top" arrow>
-          <IconButton
-            onClick={handleDeleteElement}
-            data-testid={`delete-button-${testIdBase}`}
-            aria-label={`delete ${testIdBase}`}
-            size="small"
-          >
-            <DeleteOutlineIcon fontSize="small" />
-          </IconButton>
-        </Tooltip>
-      )}
-      {showAddAttributeButton && addTitle && (
-        <AddElementButton name={addTitle} onClick={handleAddElement} />
+      {canEdit && (
+        <div tw="mt-5 flex items-center">
+          {showDeleteButton && (
+            <Tooltip title="Delete" placement="top" arrow>
+              <span>
+                <IconButton
+                  onClick={handleDeleteElement}
+                  data-testid={`delete-button-${label}`}
+                  aria-label={`delete ${label}`}
+                  size="small"
+                >
+                  <DeleteOutlineIcon fontSize="small" color="error" />
+                </IconButton>
+              </span>
+            </Tooltip>
+          )}
+          {showAddAttributeButton && (
+            <AddElementButton name={addTitle} onClick={handleAddElement} />
+          )}
+        </div>
       )}
     </div>
   );
