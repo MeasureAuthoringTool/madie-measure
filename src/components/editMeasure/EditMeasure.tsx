@@ -580,9 +580,11 @@ export default function EditMeasure() {
     handleDialogClose();
     handleToast(toastType, toastMessage, toastOpen);
 
-    setTimeout(() => {
-      navigate("/measures");
-    }, 1000);
+    if (toastType === "success") {
+      setTimeout(() => {
+        navigate("/measures");
+      }, 1000);
+    }
   };
 
   const onToastClose = () => {
