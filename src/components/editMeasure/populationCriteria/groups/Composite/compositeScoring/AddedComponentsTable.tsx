@@ -146,23 +146,6 @@ export default function AddedComponentsTable({
         accessorKey: "lastModifiedAt",
       },
       {
-        id: "actions",
-        header: null,
-        cell: (info) => (
-          <Tooltip title="Delete">
-            <IconButton
-              size="small"
-              onClick={() => handleDeleteComponent(info.row.original.id)}
-              disabled={loading}
-              data-testid={`delete-component-${info.row.original.id}`}
-            >
-              <DeleteOutlinedIcon sx={{ color: "#D92F2F" }} />
-            </IconButton>
-          </Tooltip>
-        ),
-        accessorKey: "actions",
-      },
-      {
         header: "",
         cell: (info) => {
           const handleKeyDown = (e) => {
@@ -196,10 +179,27 @@ export default function AddedComponentsTable({
         },
         accessorKey: "expandArrow",
       },
+      {
+        id: "actions",
+        header: null,
+        cell: (info) => (
+          <Tooltip title="Delete">
+            <IconButton
+              size="small"
+              onClick={() => handleDeleteComponent(info.row.original.id)}
+              disabled={loading}
+              data-testid={`delete-component-${info.row.original.id}`}
+            >
+              <DeleteOutlinedIcon sx={{ color: "#D92F2F" }} />
+            </IconButton>
+          </Tooltip>
+        ),
+        accessorKey: "actions",
+      },
     ];
 
     return columnDefs;
-  }, [components, isGroupRowExpanded]);
+  }, [components, isGroupRowExpanded, selectedGroupForExpansion]);
   const [sorting, setSorting] = React.useState<SortingState>([]);
 
   const table = useReactTable({
