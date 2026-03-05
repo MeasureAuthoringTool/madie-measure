@@ -2,3 +2,14 @@
 .modal-body .header_table h1 {
   line-height: 1.4;
 }
+
+#view-hr-modal .MuiDialogContent-root {
+  padding: 16px;
+  overflow: hidden;
+}
+
+.hr-modal-container {
+  max-height: calc(80vh - 130px);
+  overflow: auto;
+}
+

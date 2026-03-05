@@ -104,7 +104,7 @@ export default function ViewHRModal(props: ModalProps) {
       }}
     >
       <DialogContent>
-        <div data-testid="view-hr-modal">
+        <div data-testid="view-hr-modal" className="hr-modal-container">
           <Typography>
             {!loading && (
               <div>
