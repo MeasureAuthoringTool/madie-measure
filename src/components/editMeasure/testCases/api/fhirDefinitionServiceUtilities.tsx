@@ -23,7 +23,7 @@ export const PRIMITIVE_DEFAULT_VALUES = {
   code: "",
 };
 
-export const ATTRIBUTES_NOT_USED = [
+export const TYPE_CODE_NOT_USED = [
   "base64Binary",
   "markdown",
   "Expression",
@@ -922,7 +922,7 @@ export function stripOutUsedAttributesForElements(elements) {
         e.type.length > 1
       ) {
         const filteredTypes = e.type.filter(
-          (t) => !ATTRIBUTES_NOT_USED.includes(t.code)
+          (t) => !TYPE_CODE_NOT_USED.includes(t.code)
         );
         // if all codes are filtered out, return null
         if (filteredTypes.length === 0) {
@@ -930,7 +930,7 @@ export function stripOutUsedAttributesForElements(elements) {
         }
         return { ...e, type: filteredTypes };
       } else if (e.type?.length === 1) {
-        if (ATTRIBUTES_NOT_USED.includes(e.type[0].code)) {
+        if (TYPE_CODE_NOT_USED.includes(e.type[0].code)) {
           return null;
         }
         return e;
