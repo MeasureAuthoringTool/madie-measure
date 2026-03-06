@@ -96,7 +96,7 @@ export const convertDate = (date: string) => {
 // Returns true if the test case was created or modified after the measure was last versioned
 const isCreatedOrModifiedAfterVersioning = (
   testCaseLastModifiedDateStr: string,
-  measureLastModifiedDateStr: string
+  measureLastModifiedDateStr: string,
 ) => {
   const testCaseLastModifiedDate = new Date(testCaseLastModifiedDateStr);
   const measureLastModifiedDate = new Date(measureLastModifiedDateStr);
@@ -193,10 +193,10 @@ const TestCaseTable = (props: TestCaseTableProps) => {
         const visibleRows = table.getRowModel().rows;
 
         const allVisibleSelected = visibleRows.every((row) =>
-          row.getIsSelected()
+          row.getIsSelected(),
         );
         const someVisibleSelected = visibleRows.some((row) =>
-          row.getIsSelected()
+          row.getIsSelected(),
         );
 
         const toggleVisibleRows = () => {
@@ -275,7 +275,7 @@ const TestCaseTable = (props: TestCaseTableProps) => {
           <TestCaseStatus executionStatus={info.row.original.status} />
         ),
         accessorKey: "executionStatus",
-      }
+      },
     );
 
     if (isQICore6) {
@@ -352,7 +352,7 @@ const TestCaseTable = (props: TestCaseTableProps) => {
               {!measure.measureMetaData?.draft &&
               isCreatedOrModifiedAfterVersioning(
                 info.row.original.lastSaved,
-                measure?.lastModifiedAt
+                measure?.lastModifiedAt,
               ) ? (
                 <div>
                   <FiberManualRecord
@@ -379,7 +379,7 @@ const TestCaseTable = (props: TestCaseTableProps) => {
         ),
         cell: (info) => {
           const testCase = testCases.find(
-            (tc) => tc.id === info.row.original.id
+            (tc) => tc.id === info.row.original.id,
           );
           const isLockedByOther = canEdit && !!testCase?.testCaseLock;
 
@@ -481,7 +481,7 @@ const TestCaseTable = (props: TestCaseTableProps) => {
       .getSelectedRowModel()
       .rows.map((row) => row.original?.id);
     const selectedTestCases = testCases.filter((testCase) =>
-      selectedRowIds.includes(testCase.id)
+      selectedRowIds.includes(testCase.id),
     );
     setSelectedTestCases(selectedTestCases);
   }, [testCases, table.getSelectedRowModel().rows]);
@@ -541,13 +541,13 @@ const TestCaseTable = (props: TestCaseTableProps) => {
                         </span>
                         {flexRender(
                           header.column.columnDef.header,
-                          header.getContext()
+                          header.getContext(),
                         )}
                       </button>
                     ) : (
                       flexRender(
                         header.column.columnDef.header,
-                        header.getContext()
+                        header.getContext(),
                       )
                     )}
                   </TH>
@@ -593,8 +593,15 @@ const TestCaseTable = (props: TestCaseTableProps) => {
           onClose={() => {
             setDeleteDialogModalOpen(false);
           }}
-          dialogTitle={`Delete Test Case`}
-          name={selectedTestCases?.map((testCase) => testCase.title).join(", ")}
+          dialogTitle={`Are you sure?`}
+          customDialog={
+            "You are choosing to delete the following Test Case(s)!"
+          }
+          name={`<ul style='margin:0;padding-left:28px;list-style:disc;font-weight:normal'>${selectedTestCases
+            ?.map((tc) => `<li>${tc.series} - ${tc.title}</li>`)
+            .join("")}</ul>`}
+          alternateText="Delete Case(s)"
+          statement={true}
           additionalText={
             " Test cases in-use by another user will not be deleted."
           }

@@ -815,6 +815,32 @@ describe("TestCase component", () => {
     expect((selectAllCheckboxAfter as HTMLInputElement).checked).toBe(false);
   });
 
+  it("renders delete dialog with bulleted list when open", () => {
+    const deleteTestCase = jest.fn();
+    const exportTestCase = jest.fn();
+    const onCloneTestCase = jest.fn();
+    const setSelectedTestCasesMock = jest.fn();
+
+    renderWithTestCase(
+      testCases,
+      true,
+      deleteTestCase,
+      exportTestCase,
+      onCloneTestCase,
+      measures[0],
+      setSelectedTestCasesMock,
+      undefined,
+      [],
+      true
+    );
+
+    expect(screen.getByText("Are you sure?")).toBeInTheDocument();
+    expect(
+      screen.getByText("You are choosing to delete the following Test Case(s)!")
+    );
+    expect(screen.getByText("Delete Case(s)")).toBeInTheDocument();
+  });
+
   describe("Test Case Locking", () => {
     const lockedTestCase = {
       id: "LOCKED_ID",
