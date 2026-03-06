@@ -12,10 +12,17 @@ import ShareAction, {
 import userEvent from "@testing-library/user-event";
 
 const mockUser = "test user";
+
+// Default mock values
+let mockFeatureFlags = { AdminShareMeasures: false };
+let mockUserRoles = { isAdmin: false, roles: [] };
+
 jest.mock("@madie/madie-util", () => ({
   useOktaTokens: () => ({
     getUserName: () => mockUser,
   }),
+  useFeatureFlags: jest.fn(() => mockFeatureFlags),
+  useUserRoles: jest.fn(() => mockUserRoles),
 }));
 
 const mockMeasureSet = {
@@ -453,5 +460,138 @@ describe("508, keyboard and clickaway behavior", () => {
       bubbles: true,
     });
     await waitFor(() => expect(screen.queryByRole("menu")).toBeNull());
+  });
+});
+
+describe("ShareAction with Admin privileges", () => {
+  beforeEach(() => {
+    mockFeatureFlags = { AdminShareMeasures: true };
+    mockUserRoles = { isAdmin: true, roles: ["MADiE-Admin"] };
+  });
+
+  afterEach(() => {
+    mockFeatureFlags = { AdminShareMeasures: false };
+    mockUserRoles = { isAdmin: false, roles: [] };
+  });
+
+  it("Should enable share action for admin user even when isOwner is false on Owned Measures tab", () => {
+    render(
+      <ShareAction
+        measures={[qiCoreMeasure]}
+        onClick={() => {}}
+        isOwner={false}
+        isSharedWithUser={false}
+        activeTab={0}
+      />
+    );
+    expect(screen.getByTestId("share-action-btn")).not.toBeDisabled();
+    expect(screen.getByTestId("share-action-tooltip")).toHaveAttribute(
+      "aria-label",
+      VALID_SHARE_MEASURE
+    );
+  });
+
+  it("Should enable share action for admin user on All Measures tab", () => {
+    render(
+      <ShareAction
+        measures={[qiCoreMeasure]}
+        onClick={() => {}}
+        isOwner={false}
+        isSharedWithUser={false}
+        activeTab={2}
+      />
+    );
+    expect(screen.getByTestId("share-action-btn")).not.toBeDisabled();
+    expect(screen.getByTestId("share-action-tooltip")).toHaveAttribute(
+      "aria-label",
+      VALID_SHARE_MEASURE
+    );
+  });
+
+  it("Should enable share action for admin user on Shared Measures tab", () => {
+    render(
+      <ShareAction
+        measures={[qiCoreMeasure]}
+        onClick={() => {}}
+        isOwner={false}
+        isSharedWithUser={false}
+        activeTab={1}
+      />
+    );
+    expect(screen.getByTestId("share-action-btn")).not.toBeDisabled();
+    expect(screen.getByTestId("share-action-tooltip")).toHaveAttribute(
+      "aria-label",
+      SHARED_TAB_UNSHARE
+    );
+  });
+
+  it("Should display both Share With and Unshare options for admin user on Owned Measures tab", () => {
+    render(
+      <ShareAction
+        measures={[qiCoreMeasure]}
+        onClick={() => {}}
+        isOwner={false}
+        isSharedWithUser={false}
+        activeTab={0}
+      />
+    );
+    const shareButton = screen.getByTestId("share-action-btn");
+    fireEvent.click(shareButton);
+
+    expect(screen.getByTestId("Share With-option")).toBeInTheDocument();
+    expect(screen.getByTestId("Unshare-option")).toBeInTheDocument();
+  });
+
+  it("Should disable share action when no measures selected even for admin", () => {
+    render(
+      <ShareAction
+        measures={[]}
+        onClick={() => {}}
+        isOwner={false}
+        isSharedWithUser={false}
+        activeTab={0}
+      />
+    );
+    expect(screen.getByTestId("share-action-btn")).toBeDisabled();
+    expect(screen.getByTestId("share-action-tooltip")).toHaveAttribute(
+      "aria-label",
+      NOTHING_SELECTED
+    );
+  });
+
+  it("Should not enable share action if feature flag is false even for admin user", () => {
+    mockFeatureFlags = { AdminShareMeasures: false };
+    render(
+      <ShareAction
+        measures={[qiCoreMeasure]}
+        onClick={() => {}}
+        isOwner={false}
+        isSharedWithUser={false}
+        activeTab={0}
+      />
+    );
+    expect(screen.getByTestId("share-action-btn")).toBeDisabled();
+    expect(screen.getByTestId("share-action-tooltip")).toHaveAttribute(
+      "aria-label",
+      INVALID_SHARE_MEASURE
+    );
+  });
+
+  it("Should not enable share action if user is not admin even with feature flag enabled", () => {
+    mockUserRoles = { isAdmin: false, roles: ["MADiE-User"] };
+    render(
+      <ShareAction
+        measures={[qiCoreMeasure]}
+        onClick={() => {}}
+        isOwner={false}
+        isSharedWithUser={false}
+        activeTab={0}
+      />
+    );
+    expect(screen.getByTestId("share-action-btn")).toBeDisabled();
+    expect(screen.getByTestId("share-action-tooltip")).toHaveAttribute(
+      "aria-label",
+      INVALID_SHARE_MEASURE
+    );
   });
 });

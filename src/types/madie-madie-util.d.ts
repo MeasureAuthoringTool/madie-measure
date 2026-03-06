@@ -31,6 +31,7 @@ declare module "@madie/madie-util" {
     DisplayOwner: boolean;
     MakeJSONMatchUI: boolean;
     AdminTransferMeasures: boolean;
+    AdminShareMeasures: boolean;
   }
 
   export interface UserRoles {
