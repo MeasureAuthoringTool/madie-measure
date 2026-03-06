@@ -1292,42 +1292,45 @@ const TypeEditor = ({
             ];
             return (
               <>
-                {(canBeMultipleCardinality ? childDefValues : [null]).map(
-                  (el, index) => {
-                    return (
-                      <ElementSectionQiCore
-                        key={index}
-                        title={
-                          formatAttributeLabel(childDef.id) + ` ${index + 1}`
-                        }
-                        elementDefinition={childDef}
-                        startOpen={false}
-                        handleAddElement={() =>
-                          handleAddComplexElement(childDef.id)
-                        }
-                        canBeMultipleCardinality={
-                          canBeMultipleCardinality &&
-                          childDefValues.length - 1 === index
-                        }
-                        children={
-                          <Box
-                            style={{
-                              paddingLeft: "16px",
-                            }}
-                          >
-                            <TypeEditor
-                              resource={resource}
-                              parentStructureDefinition={structureDefinition}
-                              structureDefinition={childDef}
-                              canEdit={canEdit}
-                              label={childDef.id + `[${index}]`}
-                            />
-                          </Box>
-                        }
-                      />
-                    );
-                  }
-                )}
+                {(canBeMultipleCardinality
+                  ? Array.isArray(childDefValues)
+                    ? childDefValues
+                    : [childDefValues]
+                  : [null]
+                ).map((el, index) => {
+                  return (
+                    <ElementSectionQiCore
+                      key={index}
+                      title={
+                        formatAttributeLabel(childDef.id) + ` ${index + 1}`
+                      }
+                      elementDefinition={childDef}
+                      startOpen={false}
+                      handleAddElement={() =>
+                        handleAddComplexElement(childDef.id)
+                      }
+                      canBeMultipleCardinality={
+                        canBeMultipleCardinality &&
+                        childDefValues.length - 1 === index
+                      }
+                      children={
+                        <Box
+                          style={{
+                            paddingLeft: "16px",
+                          }}
+                        >
+                          <TypeEditor
+                            resource={resource}
+                            parentStructureDefinition={structureDefinition}
+                            structureDefinition={childDef}
+                            canEdit={canEdit}
+                            label={childDef.id + `[${index}]`}
+                          />
+                        </Box>
+                      }
+                    />
+                  );
+                })}
               </>
             );
           } else {
