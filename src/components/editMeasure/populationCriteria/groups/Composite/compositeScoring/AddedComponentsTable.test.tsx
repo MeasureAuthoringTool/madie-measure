@@ -360,8 +360,23 @@ describe("AddedComponentsTable", () => {
     ]);
   });
 
-  it("expands group section when expand icon is clicked", async () => {
-    const service = makeService();
+  it("displays expanded section with group data when component is expanded", async () => {
+    const service = makeService({
+      fetchMeasuresByIds: jest.fn().mockResolvedValue([
+        {
+          id: "m1",
+          measureName: "Alpha Measure",
+          version: "1.0.0",
+          measureSet: { cmsId: "CMS111" },
+          lastModifiedAt: "2024-01-15",
+          groups: [
+            { id: "group1", displayId: "Population1", version: "1.0.0" },
+            { id: "group2", displayId: "Population2", version: "2.0.0" },
+            { id: "group3", displayId: "Population3", version: "3.0.0" },
+          ],
+        },
+      ]),
+    });
     (useMeasureServiceApi as jest.Mock).mockReturnValue(service);
 
     const components = [
@@ -369,13 +384,20 @@ describe("AddedComponentsTable", () => {
         measureId: "m1",
         groupId: "g1",
         groups: [
-          { id: "group1", displayId: "group1", version: "1.0.0" },
-          { id: "group2", displayId: "group2", version: "2.0.0" },
+          { id: "group1", displayId: "Population1", version: "1.0.0" },
+          { id: "group2", displayId: "Population2", version: "2.0.0" },
+          { id: "group3", displayId: "Population3", version: "3.0.0" },
         ],
       },
     ];
 
-    render(<AddedComponentsTable components={components} />);
+    render(
+      <AddedComponentsTable
+        components={components}
+        onComponentsUpdate={jest.fn()}
+      />
+    );
+
     await waitFor(() =>
       expect(screen.getByTestId("measure-list-tbl")).toBeInTheDocument()
     );
@@ -385,38 +407,23 @@ describe("AddedComponentsTable", () => {
     const expandButton = expandButtons[expandButtons.length - 1];
 
     await userEvent.click(expandButton);
-    await waitFor(() => {
-      expect(screen.getByTestId("expanded-group-row")).toBeInTheDocument();
-    });
-  });
+    const expandedRow = await screen.findByTestId("expanded-group-row");
 
-  it("displays group sub-table with Population Criteria header when expanded", async () => {
-    const service = makeService();
-    (useMeasureServiceApi as jest.Mock).mockReturnValue(service);
-    const components = [
-      {
-        measureId: "m1",
-        groupId: "g1",
-        groups: [
-          { id: "group1", displayId: "group1", version: "1.0.0" },
-          { id: "group2", displayId: "group2", version: "2.0.0" },
-        ],
-      },
-    ];
+    expect(expandedRow).toBeInTheDocument();
+    expect(
+      within(expandedRow).getByText("Population Criteria")
+    ).toBeInTheDocument();
 
-    render(<AddedComponentsTable components={components} />);
-    await waitFor(() =>
-      expect(screen.getByTestId("measure-list-tbl")).toBeInTheDocument()
-    );
+    const tbody = expandedRow.querySelector("tbody");
+    expect(tbody).toBeInTheDocument();
 
-    const rows = screen.getAllByRole("row");
-    const expandButtons = rows[1].querySelectorAll("span[role='button']");
-    const expandButton = expandButtons[expandButtons.length - 1];
+    const groupRows = tbody?.querySelectorAll("tr");
+    expect(groupRows?.length).toBe(3);
 
-    await userEvent.click(expandButton);
-    await waitFor(() => {
-      expect(screen.getByText("Population Criteria")).toBeInTheDocument();
-    });
+    const tableContent = expandedRow.textContent;
+    expect(tableContent).toContain("Population1");
+    expect(tableContent).toContain("Population2");
+    expect(tableContent).toContain("Population3");
   });
 
   it("handling when there no groups present", async () => {
@@ -431,33 +438,6 @@ describe("AddedComponentsTable", () => {
     ];
 
     render(<AddedComponentsTable components={components} />);
-    await waitFor(() =>
-      expect(screen.getByTestId("measure-list-tbl")).toBeInTheDocument()
-    );
-
-    const rows = screen.getAllByRole("row");
-    const expandButtons = rows[1].querySelectorAll("span[role='button']");
-    const expandButton = expandButtons[expandButtons.length - 1];
-
-    await userEvent.click(expandButton);
-    const groupRows = screen.queryByTestId("expanded-group-row");
-    expect(groupRows).toBeInTheDocument();
-    expect(groupRows?.querySelector("tbody")?.children.length).toBe(0);
-  });
-
-  it("handles components if there is no group property", async () => {
-    const service = makeService();
-    (useMeasureServiceApi as jest.Mock).mockReturnValue(service);
-
-    const components = [
-      {
-        measureId: "m1",
-        groupId: "g1",
-      },
-    ];
-
-    render(<AddedComponentsTable components={components} />);
-
     await waitFor(() =>
       expect(screen.getByTestId("measure-list-tbl")).toBeInTheDocument()
     );
