@@ -35,7 +35,10 @@ import {
   shouldSkip,
   normalizeExtensionArray,
   getEditableExtensionSubElements,
+  stripOutUnusedAttributes,
+  stripOutUsedAttributesForElements,
 } from "./fhirDefinitionServiceUtilities";
+import { StructureDefinitionDto } from "./models/StructureDefinitionDto";
 
 describe("FhirDefinitionServiceUtilities", () => {
   const mockResource = {
@@ -1923,5 +1926,135 @@ describe("getEditableExtensionSubElements", () => {
       };
       expect(getEditableExtensionSubElements(profileDef as any)).toEqual([]);
     });
+  });
+});
+
+describe("stripOutUnusedAttributes", () => {
+  it("does not remove used attributes from elements", () => {
+    const elements = [
+      { id: "1", path: "Observation.value[x]", type: [{ code: "string" }] },
+      { id: "2", path: "Observation.value[x]", type: [{ code: "boolean" }] },
+      { id: "3", path: "Observation.value[x]", type: [{ code: "integer" }] },
+    ];
+    const resourceTree: StructureDefinitionDto = {
+      definition: {
+        snapshot: {
+          element: elements,
+        },
+      },
+    };
+    const result = stripOutUnusedAttributes(resourceTree);
+    expect(result.definition.snapshot.element).toHaveLength(3);
+  });
+
+  it("removes attributes that are not used in any element", () => {
+    const elements = [
+      {
+        id: "Observation.value[x]",
+        path: "Observation.value[x]",
+        type: [
+          {
+            code: "CodeableConcept",
+          },
+          {
+            code: "SampledData",
+          },
+          {
+            code: "time",
+          },
+        ],
+      },
+    ];
+    const resourceTree: StructureDefinitionDto = {
+      definition: {
+        snapshot: {
+          element: elements,
+        },
+      },
+    };
+    const result = stripOutUnusedAttributes(resourceTree);
+    expect(result.definition.snapshot.element).toHaveLength(1);
+    expect(result.definition.snapshot.element[0].type[0].code).toBe(
+      "CodeableConcept"
+    );
+    expect(result.definition.snapshot.element[0].type[1].code).toBe("time");
+  });
+
+  it("should filter out unused attrinbute", () => {
+    const elements = [
+      {
+        id: "Observation.value[x]",
+        path: "Observation.value[x]",
+        type: [{ code: "SampledData" }],
+      },
+      {
+        id: "Observation.implicitRules",
+        path: "Observation.implicitRules",
+        type: [{ code: "uri" }],
+      },
+      {
+        id: "RequestGroup.action.condition.expression",
+        path: "RequestGroup.action.condition.expression",
+        type: [
+          {
+            code: "Expression",
+          },
+        ],
+      },
+    ];
+    const result = stripOutUsedAttributesForElements(elements);
+    expect(result).toHaveLength(1);
+  });
+
+  it("should not filter out used attrinbute", () => {
+    const elements = [
+      {
+        id: "Observation.value[x]",
+        path: "Observation.value[x]",
+        type: [{ code: "Integer" }],
+      },
+      {
+        id: "Location.address",
+        path: "Location.address",
+        type: [{ code: "Address" }],
+      },
+      {
+        id: "RequestGroup.action.condition.expression",
+        path: "RequestGroup.action.condition.expression",
+
+        type: [
+          {
+            code: "Expression",
+          },
+        ],
+      },
+    ];
+    const result = stripOutUsedAttributesForElements(elements);
+    expect(result).toHaveLength(1);
+    expect(result[0].type[0].code).toBe("Integer");
+  });
+
+  it("stripOutUsedAttributesForElements filteredTypes 0", () => {
+    const elements = [
+      {
+        id: "Observation.value[x]",
+        path: "Observation.value[x]",
+        type: [{ code: "SampledData" }, { code: "SampledData" }],
+      },
+    ];
+    const result = stripOutUsedAttributesForElements(elements);
+    expect(result).toHaveLength(0); // All types filtered out, so element is removed
+  });
+
+  it("stripOutUsedAttributesForElements type length 0", () => {
+    const elements = [
+      {
+        id: "Observation.value[x]",
+        path: "Observation.value[x]",
+        type: [],
+      },
+    ];
+    const result = stripOutUsedAttributesForElements(elements);
+    expect(result).toHaveLength(1);
   });
 });

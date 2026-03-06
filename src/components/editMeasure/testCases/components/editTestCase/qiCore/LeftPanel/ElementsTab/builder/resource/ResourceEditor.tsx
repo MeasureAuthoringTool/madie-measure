@@ -27,6 +27,7 @@ import {
   filterUnusedExtensionsFromElements,
   PRIMITIVE_DEFAULT_VALUES,
   isPrimitiveType,
+  stripOutUnusedAttributes,
 } from "../../../../../../../api/fhirDefinitionServiceUtilities";
 import { useFormikContext } from "formik";
 import {
@@ -157,7 +158,7 @@ const ResourceEditor = ({
         .getResourceTree(resourceId)
         .then((resourceTree) => {
           const selectedResource = {
-            ...resourceTree,
+            ...stripOutUnusedAttributes(resourceTree),
             bundleEntry: selectedEntry,
           };
 
