@@ -55,11 +55,9 @@ describe("CreateTestCaseRightPanelNavTabs", () => {
 
       expect(screen.queryByTestId("measurecql-tab")).not.toBeInTheDocument();
       expect(screen.queryByTestId("highlighting-tab")).not.toBeInTheDocument();
-      expect(screen.getByTestId("expectoractual-tab")).toBeInTheDocument();
+      expect(screen.getByTestId("actual-tab")).toBeInTheDocument();
       expect(screen.getByTestId("details-tab")).toBeInTheDocument();
-      expect(screen.getByTestId("expectoractual-tab")).toHaveTextContent(
-        "Actual"
-      );
+      expect(screen.getByTestId("actual-tab")).toHaveTextContent("Actual");
     });
 
     it("should allow switching to Details tab", () => {
