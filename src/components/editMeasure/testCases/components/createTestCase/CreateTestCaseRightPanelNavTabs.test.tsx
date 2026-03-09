@@ -63,7 +63,7 @@ describe("CreateTestCaseRightPanelNavTabs", () => {
     it("should allow switching to Details tab", () => {
       render(
         <CreateTestCaseRightPanelNavTabs
-          rightPanelActiveTab="expectoractual"
+          rightPanelActiveTab="actual"
           isCompositeMeasure={true}
           setRightPanelActiveTab={mockSetRightPanelActiveTab}
         />
