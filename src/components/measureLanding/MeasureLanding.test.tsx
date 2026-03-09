@@ -90,7 +90,6 @@ jest.mock("@madie/madie-util", () => ({
   checkUserCanEdit: jest.fn().mockImplementation(() => true),
   checkUserCanDelete: jest.fn().mockImplementation(() => true),
   useFeatureFlags: jest.fn(),
-  useUserRoles: jest.fn(() => ({ roles: [], isAdmin: false })),
   useDocumentTitle: jest.fn(),
   measureStore: {
     updateMeasure: jest.fn((measure) => measure),
