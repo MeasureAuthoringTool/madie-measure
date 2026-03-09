@@ -703,7 +703,7 @@ const EditTestCase = (props: EditTestCaseProps) => {
 
   // Update right panel tab when measure type changes
   useEffect(() => {
-    const correctTab = isCompositeMeasure ? "expectoractual" : "measurecql";
+    const correctTab = isCompositeMeasure ? "actual" : "measurecql";
     if (rightPanelActiveTab !== correctTab) {
       setRightPanelActiveTab(correctTab);
     }
@@ -1260,6 +1260,11 @@ const EditTestCase = (props: EditTestCaseProps) => {
                         groups={measure?.groups}
                       />
                     )}
+                  </div>
+                )}
+                {rightPanelActiveTab === "actual" && (
+                  <div className="panel-content">
+                    Composite actual results in progress...
                   </div>
                 )}
                 {rightPanelActiveTab === "expectoractual" && (

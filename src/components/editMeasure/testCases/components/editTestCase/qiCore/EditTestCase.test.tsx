@@ -4807,3 +4807,84 @@ describe("EditTestCase QICore Component - Test Case Locked By Other User", () =>
     expect(tcTitle).toHaveAttribute("readonly");
   });
 });
+
+describe("Composite Measure Edit test case functionality", () => {
+  const compositeMeasure = {
+    ...defaultMeasure,
+    measureMetaData: {
+      ...defaultMeasure.measureMetaData,
+      composite: true,
+    },
+  } as unknown as Measure;
+
+  beforeEach(() => {
+    (checkUserCanEdit as jest.Mock).mockClear().mockImplementation(() => {
+      return true;
+    });
+    mockedAxios.post.mockImplementation((args) => {
+      if (args && args.endsWith("lock")) {
+        return Promise.resolve({
+          data: {
+            isLocked: false,
+            lockedBy: MEASURE_CREATEDBY,
+          },
+        });
+      }
+    });
+    mockedAxios.delete.mockImplementation((args) => {
+      if (args && args.endsWith("lock")) {
+        return Promise.resolve({
+          data: {
+            isLocked: false,
+            lockedBy: null,
+          },
+        });
+      }
+    });
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("should render actual tab for composite measure and is active by default", async () => {
+    renderWithRouter(
+      ["/measures/m1234/edit/test-cases/tc123"],
+      "/measures/:measureId/edit/test-cases/:id",
+      compositeMeasure
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId("actual-tab")).toBeInTheDocument();
+    });
+
+    const actualTab = screen.getByTestId("actual-tab");
+    expect(actualTab).toBeInTheDocument();
+    expect(actualTab).toHaveTextContent("Actual");
+    await waitFor(() => {
+      expect(actualTab).toHaveAttribute("aria-selected", "true");
+    });
+    const actualContent = screen.getByText(
+      "Composite actual results in progress..."
+    );
+    expect(actualContent).toBeInTheDocument();
+  });
+
+  it("should show details tab but not CQL and Highlighting tabs for composite measure", async () => {
+    renderWithRouter(
+      ["/measures/m1234/edit/test-cases/tc123"],
+      "/measures/:measureId/edit/test-cases/:id",
+      compositeMeasure
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId("actual-tab")).toBeInTheDocument();
+    });
+
+    // Details tab should be present
+    expect(screen.getByTestId("details-tab")).toBeInTheDocument();
+    // CQL and Highlighting tabs should not be present
+    expect(screen.queryByTestId("measurecql-tab")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("highlighting-tab")).not.toBeInTheDocument();
+  });
+});
