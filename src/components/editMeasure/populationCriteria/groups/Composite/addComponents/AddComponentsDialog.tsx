@@ -380,6 +380,7 @@ export default function AddComponentsDialog({
       fromCompositeMeasureComponent: true,
       allowedScoringTypes: getAllowedScoringTypes(compositeScoring),
       searchField: finalSearchField,
+      priorityMeasureIds: components?.map((c) => c.measureId) || [],
     };
 
     measureServiceApi
