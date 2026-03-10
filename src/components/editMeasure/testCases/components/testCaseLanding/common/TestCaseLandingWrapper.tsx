@@ -13,6 +13,7 @@ const testCaseSidebarCollapsedKey = "testCaseSidebarCollapsed";
 
 const TestCaseLandingWrapper = (props) => {
   const [measure, setMeasure] = useState<any>(measureStore.state);
+  console.log("measure", measure);
   const [isCollapsed, setIsCollapsed] = useState(
     () => localStorage.getItem(testCaseSidebarCollapsedKey) === "true"
   );
@@ -25,11 +26,15 @@ const TestCaseLandingWrapper = (props) => {
   }, []);
 
   useEffect(() => {
-    localStorage.setItem(
-      testCaseSidebarCollapsedKey,
-      isCollapsed ? "true" : "false"
-    );
-  }, [isCollapsed]);
+    if (measure && !measure?.testCases?.length) {
+      setIsCollapsed(true);
+    } else {
+      localStorage.setItem(
+        testCaseSidebarCollapsedKey,
+        isCollapsed ? "true" : "false"
+      );
+    }
+  }, [isCollapsed, measure]);
 
   return (
     <div
