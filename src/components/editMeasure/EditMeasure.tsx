@@ -21,6 +21,7 @@ import {
   checkUserCanEdit,
   useFeatureFlags,
   useIsAdminTransferEnabled,
+  useOktaTokens,
 } from "@madie/madie-util";
 import CreateVersionDialog from "../common/createVersionDialog/CreateVersionDialog";
 import InvalidTestCaseDialog from "../common/invalidTestCaseDialog/InvalidTestCaseDialog";
@@ -167,9 +168,13 @@ export default function EditMeasure() {
     measure?.measureSet?.acls,
     measure?.measureMetaData?.draft
   );
-  const measureLockedBy: string = measure?.measureLock
-    ? measure?.measureLock?.lockedBy
-    : undefined;
+
+  const { getUserName } = useOktaTokens();
+  const userName = getUserName();
+  const measureLockedBy =
+    measure?.measureLock?.lockedBy?.toLowerCase() !== userName.toLowerCase()
+      ? measure?.measureLock?.lockedBy
+      : undefined;
 
   useEffect(() => {
     const deleteListener = () => {
@@ -575,9 +580,11 @@ export default function EditMeasure() {
     handleDialogClose();
     handleToast(toastType, toastMessage, toastOpen);
 
-    setTimeout(() => {
-      navigate("/measures");
-    }, 1000);
+    if (toastType === "success") {
+      setTimeout(() => {
+        navigate("/measures");
+      }, 1000);
+    }
   };
 
   const onToastClose = () => {
