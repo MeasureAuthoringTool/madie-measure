@@ -1,5 +1,8 @@
 import * as React from "react";
-import Builder, { scrollToElementByIdWhenAvailable } from "./Builder";
+import Builder, {
+  NO_PROFILES_MESSAGE,
+  scrollToElementByIdWhenAvailable,
+} from "./Builder";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Measure, TestCase } from "@madie/madie-models";
@@ -518,9 +521,7 @@ describe("Builder Component", () => {
     const noProfilesAlert = await screen.findByTestId("no-profiles-alert");
 
     expect(noProfilesAlert).toBeInTheDocument();
-    expect(noProfilesAlert).toHaveTextContent(
-      "No Profiles have been added to the test case. Navigate to the Available Elements tab to add profiles."
-    );
+    expect(noProfilesAlert).toHaveTextContent(NO_PROFILES_MESSAGE);
 
     expect(screen.queryByRole("table")).not.toBeInTheDocument();
   });

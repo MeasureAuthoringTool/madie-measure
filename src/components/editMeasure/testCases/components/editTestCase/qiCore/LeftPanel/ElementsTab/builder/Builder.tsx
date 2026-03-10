@@ -33,6 +33,9 @@ import {
 import { BundleEntry } from "fhir/r4";
 import { ResourceContextProvider } from "./ResourceContext";
 
+export const NO_PROFILES_MESSAGE =
+  "No Profiles have been added to the test case. Navigate to the Available Elements tab to add profiles.";
+
 interface BuilderProps {
   testCase: TestCase;
   canEdit: boolean;
@@ -279,8 +282,7 @@ const Builder = ({
                         role="alert"
                         data-testid="no-profiles-alert"
                       >
-                        No Profiles have been added to the test case. Navigate
-                        to the Available Elements tab to add profiles.
+                        {NO_PROFILES_MESSAGE}
                       </p>
                     }
                     canClose={false}
