@@ -463,7 +463,7 @@ describe("EditMeasure Component", () => {
       window.dispatchEvent(new Event("view-humanreadable"));
     });
 
-    const modal = await findByTestId("view-hr-modal");
+    const modal = await findByTestId("hr-modal-container");
     expect(modal).toBeInTheDocument();
 
     expect(screen.queryByText("test human readable")).toBeInTheDocument();
