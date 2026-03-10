@@ -4,9 +4,6 @@ export interface ServiceConfig {
   measureService: {
     baseUrl: string;
   };
-  testCaseService: {
-    baseUrl: string;
-  };
   terminologyService: {
     baseUrl: string;
   };

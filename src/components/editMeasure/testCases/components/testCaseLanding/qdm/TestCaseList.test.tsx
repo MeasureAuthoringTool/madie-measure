@@ -65,9 +65,6 @@ const serviceConfig = {
   excelExportService: {
     baseUrl: "excelexport.com",
   },
-  testCaseService: {
-    baseUrl: "base.url",
-  },
   measureService: {
     baseUrl: "base.url",
   },
