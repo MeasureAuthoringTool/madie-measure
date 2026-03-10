@@ -614,6 +614,9 @@ const TestCaseTable = (props: TestCaseTableProps) => {
           setToastMessage={setToastMessage}
         />
       </table>
+      {!data.length && (
+        <div className="tc-empty-result">No Test Cases Added</div>
+      )}
     </div>
   );
 };

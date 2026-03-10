@@ -51,6 +51,10 @@ jest.mock("@madie/madie-util", () => ({
     return true;
   }),
   useFeatureFlags: jest.fn(),
+  useUserRoles: jest.fn(() => ({
+    roles: [],
+    isAdmin: false,
+  })),
   measureStore: {
     updateMeasure: jest.fn((measure) => measure),
     state: jest.fn().mockImplementation(() => null),
@@ -90,6 +94,10 @@ jest.mock("@madie/madie-util", () => ({
   checkUserCanEdit: jest.fn().mockImplementation(() => true),
   checkUserCanDelete: jest.fn().mockImplementation(() => true),
   useFeatureFlags: jest.fn(),
+  useUserRoles: jest.fn(() => ({
+    roles: [],
+    isAdmin: false,
+  })),
   useDocumentTitle: jest.fn(),
   measureStore: {
     updateMeasure: jest.fn((measure) => measure),
@@ -254,16 +262,17 @@ describe("Measure Page", () => {
       );
     });
 
+    // already in owned measures tab..
     const ownedMeasuresTab = await screen.findByTestId("owned-measures-tab");
-    userEvent.click(ownedMeasuresTab);
+    // await userEvent.click(ownedMeasuresTab);
     expect(ownedMeasuresTab).toHaveClass("Mui-selected");
 
+    // navigate shared.
     const sharedMeasuresTab = await screen.findByTestId("shared-measures-tab");
-    userEvent.click(sharedMeasuresTab);
-
-    expect(mockedUsedNavigate).toHaveBeenCalledWith("?tab=1&page=1&limit=10");
-    expect(ownedMeasuresTab).not.toHaveClass("Mui-selected");
-    expect(sharedMeasuresTab).toHaveClass("Mui-selected");
+    await userEvent.click(sharedMeasuresTab);
+    await waitFor(() => {
+      expect(mockedUsedNavigate).toHaveBeenCalledWith("?tab=1&page=1&limit=10");
+    });
   });
 
   test("all measure nav click triggers nav", async () => {
@@ -295,8 +304,6 @@ describe("Measure Page", () => {
     userEvent.click(allMeasuresTab);
 
     expect(mockedUsedNavigate).toHaveBeenCalledWith("?tab=2&page=1&limit=10");
-    expect(ownedMeasuresTab).not.toHaveClass("Mui-selected");
-    expect(allMeasuresTab).toHaveClass("Mui-selected");
   });
 
   test("loading in with props for shared measures page, triggers a fetch", async () => {

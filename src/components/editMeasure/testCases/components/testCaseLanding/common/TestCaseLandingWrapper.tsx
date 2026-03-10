@@ -31,6 +31,12 @@ const TestCaseLandingWrapper = (props) => {
     );
   }, [isCollapsed]);
 
+  useEffect(() => {
+    if (measure?.testCases && !measure?.testCases?.length) {
+      setIsCollapsed(true);
+    }
+  }, [measure]);
+
   return (
     <div
       tw="grid gap-4 mx-8 my-6 shadow-lg rounded-md border border-slate bg-white"

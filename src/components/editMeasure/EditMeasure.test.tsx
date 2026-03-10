@@ -198,7 +198,13 @@ jest.mock("@madie/madie-util", () => ({
     getUserName: () => "test user",
   })),
   checkUserCanEdit: jest.fn().mockImplementation(() => true),
-  useFeatureFlags: jest.fn(() => ({})),
+  useFeatureFlags: jest.fn(() => ({
+    AdminTransferMeasure: false,
+  })),
+  useUserRoles: jest.fn(() => ({
+    roles: [],
+    isAdmin: false,
+  })),
   measureStore: {
     updateMeasure: jest.fn((measure) => measure),
     state: jest.fn().mockImplementation(() => null),
@@ -457,7 +463,7 @@ describe("EditMeasure Component", () => {
       window.dispatchEvent(new Event("view-humanreadable"));
     });
 
-    const modal = await findByTestId("view-hr-modal");
+    const modal = await findByTestId("hr-modal-container");
     expect(modal).toBeInTheDocument();
 
     expect(screen.queryByText("test human readable")).toBeInTheDocument();
