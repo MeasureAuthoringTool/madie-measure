@@ -212,7 +212,7 @@ const ModelAndMeasurementPeriod = (props: ModelAndMeasurementPeriodProps) => {
             }
             helperText={formikErrorHandler("measurementPeriodStart", true)}
             value={formik.values.measurementPeriodStart}
-            textFieldSx={{ width: "100%" }}
+            textFieldSx={{ width: "70%" }}
             {...formik.getFieldProps("measurementPeriodStart")}
             onBlur={() =>
               formik.setFieldTouched("measurementPeriodStart", true, false)
@@ -236,7 +236,7 @@ const ModelAndMeasurementPeriod = (props: ModelAndMeasurementPeriodProps) => {
             }
             helperText={formikErrorHandler("measurementPeriodEnd", true)}
             value={formik.values.measurementPeriodEnd}
-            textFieldSx={{ width: "100%" }}
+            textFieldSx={{ width: "70%" }}
             {...formik.getFieldProps("measurementPeriodEnd")}
             onBlur={() =>
               formik.setFieldTouched("measurementPeriodEnd", true, false)

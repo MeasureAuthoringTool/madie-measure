@@ -1,6 +1,10 @@
 import * as React from "react";
-import Builder, { scrollToElementByIdWhenAvailable } from "./Builder";
-import { render, screen } from "@testing-library/react";
+import Builder, {
+  NO_PROFILES_MESSAGE,
+  scrollToElementByIdWhenAvailable,
+} from "./Builder";
+import { render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { Measure, TestCase } from "@madie/madie-models";
 import { QiCoreResourceContext } from "../../../../../../util/QiCorePatientProvider";
 import { ExecutionContextProvider } from "../../../../../routes/qiCore/ExecutionContext";
@@ -298,10 +302,12 @@ const renderBuilderComponent = ({
   bundleToAdd = mockBundleWithMultiplePatients,
   activeTab = "available",
   canEdit = true,
+  dispatch = jest.fn(),
 }: {
   bundleToAdd?: any;
   activeTab?: string;
   canEdit?: boolean;
+  dispatch?: jest.Mock;
 } = {}) => {
   return render(
     <ApiContextProvider value={serviceConfig}>
@@ -319,7 +325,7 @@ const renderBuilderComponent = ({
         <QiCoreResourceContext.Provider
           value={{
             state: { bundle: bundleToAdd },
-            dispatch: jest.fn(),
+            dispatch,
           }}
         >
           <Builder
@@ -374,6 +380,63 @@ describe("Builder Component", () => {
     expect(screen.getByText("Profile")).toBeInTheDocument();
     expect(screen.getByRole("table")).toBeInTheDocument();
     expect(screen.queryByRole("progressbar")).not.toBeInTheDocument();
+  });
+
+  it("shows ResourceEditor when a row is selected for editing in added tab", async () => {
+    (useFormikContext as jest.Mock).mockReturnValue({
+      resetForm: jest.fn(),
+      dirty: false,
+    });
+
+    renderBuilderComponent({ bundleToAdd: mockBundle, activeTab: "added" });
+
+    await screen.findByText("QICore Encounter");
+
+    const actionCenterButton = screen.getByTestId("action-center-button-ec-1");
+    userEvent.click(actionCenterButton);
+
+    const editAction = await screen.findByRole("menuitem", { name: "Edit" });
+    userEvent.click(editAction);
+
+    expect(
+      await screen.findByTestId("mock-resource-editor")
+    ).toBeInTheDocument();
+  });
+
+  it("calls handleRowDelete when row delete is confirmed", async () => {
+    (useFormikContext as jest.Mock).mockReturnValue({
+      resetForm: jest.fn(),
+      dirty: false,
+    });
+
+    const mockDispatch = jest.fn();
+    renderBuilderComponent({
+      bundleToAdd: mockBundle,
+      activeTab: "added",
+      dispatch: mockDispatch,
+    });
+
+    await screen.findByText("QICore Encounter");
+
+    const actionCenterButton = screen.getByTestId("action-center-button-ec-1");
+    userEvent.click(actionCenterButton);
+
+    const deleteAction = await screen.findByRole("menuitem", {
+      name: "Remove",
+    });
+    userEvent.click(deleteAction);
+
+    const continueButton = await screen.findByTestId(
+      "delete-dialog-continue-button"
+    );
+    userEvent.click(continueButton);
+
+    await waitFor(() => {
+      expect(mockDispatch).toHaveBeenCalledWith({
+        type: "RemoveBundleEntry",
+        payload: mockBundle.entry[0],
+      });
+    });
   });
 
   it("places qicore patient first even when service returns it later", async () => {
@@ -455,9 +518,12 @@ describe("Builder Component", () => {
 
     renderBuilderComponent({ bundleToAdd: emptyBundle, activeTab: "added" });
 
-    // table renders headers but no data rows
-    const rows = await screen.findAllByRole("row");
-    expect(rows.length).toBe(1);
+    const noProfilesAlert = await screen.findByTestId("no-profiles-alert");
+
+    expect(noProfilesAlert).toBeInTheDocument();
+    expect(noProfilesAlert).toHaveTextContent(NO_PROFILES_MESSAGE);
+
+    expect(screen.queryByRole("table")).not.toBeInTheDocument();
   });
 
   it("triggers resource addition logic with required elements and spinner overlay", async () => {

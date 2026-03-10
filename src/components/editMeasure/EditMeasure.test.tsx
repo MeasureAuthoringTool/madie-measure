@@ -198,7 +198,13 @@ jest.mock("@madie/madie-util", () => ({
     getUserName: () => "test user",
   })),
   checkUserCanEdit: jest.fn().mockImplementation(() => true),
-  useFeatureFlags: jest.fn(() => ({})),
+  useFeatureFlags: jest.fn(() => ({
+    AdminTransferMeasure: false,
+  })),
+  useUserRoles: jest.fn(() => ({
+    roles: [],
+    isAdmin: false,
+  })),
   measureStore: {
     updateMeasure: jest.fn((measure) => measure),
     state: jest.fn().mockImplementation(() => null),
@@ -251,6 +257,7 @@ describe("EditMeasure Component", () => {
   beforeEach(() => {
     measureStore.state.mockImplementation(() => measure);
     measure.testCases = testCases;
+    mockedNavigate.mockClear();
   });
   afterEach(cleanup);
   it("should render a loading page if the measure is not yet loaded", async () => {
@@ -456,7 +463,7 @@ describe("EditMeasure Component", () => {
       window.dispatchEvent(new Event("view-humanreadable"));
     });
 
-    const modal = await findByTestId("view-hr-modal");
+    const modal = await findByTestId("hr-modal-container");
     expect(modal).toBeInTheDocument();
 
     expect(screen.queryByText("test human readable")).toBeInTheDocument();
@@ -576,7 +583,7 @@ describe("EditMeasure Component", () => {
     expect(errorText).toHaveTextContent("update failed");
   });
 
-  it("should display transfer dialog when the event is triggered and close dialog when cancel button is clicked", async () => {
+  it("should display transfer dialog when the event is triggered and not navigate to /measures when cancel is clicked", async () => {
     renderRouter();
 
     const result = await findByTestId("editMeasure");
@@ -595,6 +602,65 @@ describe("EditMeasure Component", () => {
     await waitFor(() => {
       expect(queryByTestId("transfer-dialog")).not.toBeInTheDocument();
     });
+    expect(mockedNavigate).not.toHaveBeenCalledWith("/measures");
+  });
+
+  it("should display transfer dialog when the event is triggered and navigate to /measures on successful transfer", async () => {
+    renderRouter();
+
+    const result = await findByTestId("editMeasure");
+    expect(result).toBeInTheDocument();
+
+    act(() => {
+      window.dispatchEvent(new Event("transfer-measure"));
+    });
+
+    await waitFor(() => {
+      expect(getByTestId("transfer-dialog")).toBeInTheDocument();
+    });
+
+    const newHarpIdInput = getByTestId("harp-id-input");
+    fireEvent.change(newHarpIdInput, { target: { value: "newUser" } });
+
+    const transferBtn = getByTestId("transfer-save-button");
+    fireEvent.click(transferBtn);
+
+    await waitFor(
+      () => {
+        expect(mockedNavigate).toHaveBeenCalledWith("/measures");
+      },
+      { timeout: 2000 }
+    );
+  });
+
+  it("should display transfer dialog when the event is triggered and not navigate to /measures when transfer fails", async () => {
+    mockMeasureServiceApi.transferMeasures = jest
+      .fn()
+      .mockRejectedValue(new Error("Transfer failed"));
+
+    renderRouter();
+
+    const result = await findByTestId("editMeasure");
+    expect(result).toBeInTheDocument();
+
+    act(() => {
+      window.dispatchEvent(new Event("transfer-measure"));
+    });
+
+    await waitFor(() => {
+      expect(getByTestId("transfer-dialog")).toBeInTheDocument();
+    });
+
+    const newHarpIdInput = getByTestId("harp-id-input");
+    fireEvent.change(newHarpIdInput, { target: { value: "newUser" } });
+
+    const transferBtn = getByTestId("transfer-save-button");
+    fireEvent.click(transferBtn);
+
+    await waitFor(() => {
+      expect(queryByTestId("transfer-dialog")).not.toBeInTheDocument();
+    });
+    expect(mockedNavigate).not.toHaveBeenCalledWith("/measures");
   });
 
   it("should display transfer dialog when the event is triggered and handle a successful transfer", async () => {

@@ -50,6 +50,13 @@ const qiCoreMeasure = {
 describe("Shift Test Case Dates Dialog", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    // Provide default mock implementation with both QDM and QI-Core methods
+    useTestCaseServiceMock.mockImplementation(() => {
+      return {
+        shiftQdmTestCaseDates: jest.fn(),
+        shiftQiCoreTestCaseDates: jest.fn(),
+      } as unknown as TestCaseServiceApi;
+    });
   });
 
   test("should render ShiftDatesDialog", async () => {
