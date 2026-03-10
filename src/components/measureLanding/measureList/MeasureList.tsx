@@ -10,7 +10,11 @@ import React, {
 import tw from "twin.macro";
 import "styled-components/macro";
 import { Measure, Model } from "@madie/madie-models";
-import { useMeasureServiceApi, checkUserCanEdit } from "@madie/madie-util";
+import {
+  useMeasureServiceApi,
+  checkUserCanEdit,
+  useFeatureFlags,
+} from "@madie/madie-util";
 import { useNavigate } from "react-router-dom";
 import { Chip, Tooltip } from "@mui/material";
 import {
@@ -116,6 +120,7 @@ export default function MeasureList(props: {
   const { searchCriteria, setSearchCriteria, retrieveMeasures } = { ...props };
   const measureServiceApi = useRef(useMeasureServiceApi()).current; //needs to be ref or triggers jest. throws warn
   const [hoveredHeader, setHoveredHeader] = useState<string>("");
+  const featureFlags = useFeatureFlags();
 
   const navigate = useNavigate();
   // Popover utilities
