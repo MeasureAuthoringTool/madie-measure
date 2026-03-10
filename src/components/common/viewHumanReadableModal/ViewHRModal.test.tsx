@@ -54,7 +54,7 @@ describe("View Human Readable Modal component", () => {
         measureId=""
       />
     );
-    expect(screen.getByTestId("view-hr-modal")).toBeInTheDocument();
+    expect(screen.getByTestId("hr-modal-container")).toBeInTheDocument();
     expect(screen.getByTestId("close-button")).toBeInTheDocument();
     expect(screen.getByText(/Close/i)).toBeInTheDocument();
     expect(screen.getByText(/Export/i)).toBeInTheDocument();
@@ -62,12 +62,12 @@ describe("View Human Readable Modal component", () => {
 
   it("should still display human readable modal when it has error", async () => {
     renderComponent();
-    expect(screen.getByTestId("view-hr-modal")).toBeInTheDocument();
+    expect(screen.getByTestId("hr-modal-container")).toBeInTheDocument();
   });
 
   it("should call onClose when the Close button is clicked", async () => {
     renderComponent();
-    expect(screen.getByTestId("view-hr-modal")).toBeInTheDocument();
+    expect(screen.getByTestId("hr-modal-container")).toBeInTheDocument();
     act(() => {
       userEvent.click(screen.getByTestId("close-button"));
       expect(onCloseFn).toHaveBeenCalled();
