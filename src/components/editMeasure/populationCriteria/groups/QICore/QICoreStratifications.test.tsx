@@ -1,5 +1,12 @@
 import * as React from "react";
-import { act, render, screen, waitFor, within } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import MeasureGroups, { MeasureGroupProps } from "./QICoreMeasureGroups";
 import {
   Group,
@@ -308,6 +315,209 @@ describe("QICoreStratifications", () => {
       ...getEmptyStrat(),
       id: "uuid-3",
       association: null,
+    });
+  });
+
+  test("canEdit=false - Add Stratification button is not visible", async () => {
+    group.id = "7p03-5r29-7O0I";
+    group.stratifications = [
+      { ...getEmptyStrat(), id: "id-1" },
+      { ...getEmptyStrat(), id: "id-2" },
+    ];
+    measure.groups = [group];
+    renderMeasureGroupComponent({ ...customProps, measureCanEdit: false });
+    userEvent.click(screen.getByTestId("stratifications-tab"));
+    await waitFor(() => {
+      expect(screen.queryByTestId("add-strat-button")).not.toBeInTheDocument();
+    });
+  });
+
+  test("canEdit=false - stratification select is readonly", async () => {
+    group.id = "7p03-5r29-7O0I";
+    group.stratifications = [
+      { ...getEmptyStrat(), id: "id-1" },
+      { ...getEmptyStrat(), id: "id-2" },
+    ];
+    measure.groups = [group];
+    renderMeasureGroupComponent({ ...customProps, measureCanEdit: false });
+    userEvent.click(screen.getByTestId("stratifications-tab"));
+    const stratInput = await screen.findByRole("textbox", {
+      name: "Stratification 1",
+    });
+    expect(stratInput).toHaveAttribute("readonly");
+  });
+
+  test("canEdit=false - association select is readonly", async () => {
+    group.id = "7p03-5r29-7O0I";
+    group.stratifications = [
+      {
+        id: "id-1",
+        cqlDefinition: "Initial Population",
+        associations: ["Initial Population"],
+        association: null,
+        description: "",
+      },
+      { ...getEmptyStrat(), id: "id-2" },
+    ];
+    measure.groups = [group];
+    renderMeasureGroupComponent({ ...customProps, measureCanEdit: false });
+    userEvent.click(screen.getByTestId("stratifications-tab"));
+    const assocInput = await screen.findByRole("textbox", {
+      name: "Association 1",
+    });
+    expect(assocInput).toHaveAttribute("readonly");
+  });
+
+  test("Select onChange - selecting a definition auto-populates associations", async () => {
+    group.id = "7p03-5r29-7O0I";
+    group.stratifications = [
+      { ...getEmptyStrat(), id: "id-1" },
+      { ...getEmptyStrat(), id: "id-2" },
+    ];
+    measure.groups = [group];
+    renderMeasureGroupComponent(customProps);
+    userEvent.click(screen.getByTestId("stratifications-tab"));
+
+    const stratInput = await screen.findByTestId("stratification-1-input");
+    fireEvent.change(stratInput, { target: { value: "Initial Population" } });
+
+    // Open association dropdown for strat 1
+    const assocFormControl = screen.getByTestId(
+      "association-select-1-formcontrol"
+    );
+    const openButton = within(assocFormControl).getByRole("button", {
+      name: "Open",
+    });
+    userEvent.click(openButton);
+
+    // For a Cohort group with 1 defined IP, stratAssociation = ["Initial Population"].
+    // After selecting a definition all associations are populated, so "Select All" is selected.
+    await waitFor(() => {
+      expect(
+        screen.getByRole("option", { name: "option Select All selected" })
+      ).toBeInTheDocument();
+    });
+  });
+
+  test("Select onChange - clearing definition clears associations", async () => {
+    group.id = "7p03-5r29-7O0I";
+    group.stratifications = [
+      {
+        id: "id-1",
+        cqlDefinition: "Initial Population",
+        associations: ["Initial Population"],
+        association: null,
+        description: "some description",
+      },
+      { ...getEmptyStrat(), id: "id-2" },
+    ];
+    measure.groups = [group];
+    renderMeasureGroupComponent(customProps);
+    userEvent.click(screen.getByTestId("stratifications-tab"));
+
+    const stratInput = await screen.findByTestId("stratification-1-input");
+    fireEvent.change(stratInput, { target: { value: "" } });
+
+    const assocFormControl = screen.getByTestId(
+      "association-select-1-formcontrol"
+    );
+    const openButton = within(assocFormControl).getByRole("button", {
+      name: "Open",
+    });
+    userEvent.click(openButton);
+
+    // Associations cleared, so "Select All" should be not selected
+    await waitFor(() => {
+      expect(
+        screen.getByRole("option", { name: "option Select All not selected" })
+      ).toBeInTheDocument();
+    });
+  });
+
+  test("handleToggleSelectAll selects all associations when none are selected", async () => {
+    group.id = "7p03-5r29-7O0I";
+    group.stratifications = [
+      {
+        id: "id-1",
+        cqlDefinition: "Initial Population",
+        associations: [],
+        association: null,
+        description: "",
+      },
+      { ...getEmptyStrat(), id: "id-2" },
+    ];
+    measure.groups = [group];
+    renderMeasureGroupComponent(customProps);
+    userEvent.click(screen.getByTestId("stratifications-tab"));
+
+    const assocFormControl = screen.getByTestId(
+      "association-select-1-formcontrol"
+    );
+    const openButton = within(assocFormControl).getByRole("button", {
+      name: "Open",
+    });
+    userEvent.click(openButton);
+
+    const selectAllOption = await screen.findByRole("option", {
+      name: "option Select All not selected",
+    });
+    expect(selectAllOption).toBeInTheDocument();
+
+    userEvent.click(selectAllOption);
+
+    // After selecting all, "Select All" should now appear as selected
+    await waitFor(() => {
+      expect(
+        screen.getByRole("option", { name: "option Select All selected" })
+      ).toBeInTheDocument();
+    });
+  });
+
+  test("handleToggleSelectAll deselects all associations when all are already selected", async () => {
+    group.id = "7p03-5r29-7O0I";
+    group.stratifications = [
+      {
+        id: "id-1",
+        cqlDefinition: "Initial Population",
+        associations: ["Initial Population"],
+        association: null,
+        description: "",
+      },
+      { ...getEmptyStrat(), id: "id-2" },
+    ];
+    measure.groups = [group];
+    renderMeasureGroupComponent(customProps);
+    userEvent.click(screen.getByTestId("stratifications-tab"));
+
+    const assocFormControl = screen.getByTestId(
+      "association-select-1-formcontrol"
+    );
+
+    // The "Initial Population" chip should be visible before deselection
+    await waitFor(() => {
+      expect(
+        within(assocFormControl).getByText("Initial Population")
+      ).toBeInTheDocument();
+    });
+
+    const openButton = within(assocFormControl).getByRole("button", {
+      name: "Open",
+    });
+    userEvent.click(openButton);
+
+    // All associations already selected, so "Select All" should be selected
+    const selectAllOption = await screen.findByRole("option", {
+      name: "option Select All selected",
+    });
+    expect(selectAllOption).toBeInTheDocument();
+
+    userEvent.click(selectAllOption);
+
+    // After deselecting all, the "Initial Population" chip should be removed
+    await waitFor(() => {
+      expect(
+        within(assocFormControl).queryByText("Initial Population")
+      ).not.toBeInTheDocument();
     });
   });
 
