@@ -41,9 +41,6 @@ const serviceConfig = {
   measureService: {
     baseUrl: "measure.url",
   },
-  testCaseService: {
-    baseUrl: "base.url",
-  },
   terminologyService: {
     baseUrl: "something.com",
   },
