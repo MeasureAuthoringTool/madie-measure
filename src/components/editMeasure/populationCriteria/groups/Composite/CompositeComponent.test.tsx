@@ -68,7 +68,7 @@ describe("CompositeComponent", () => {
         submitComponentForm={submitComponentForm}
       />
     );
-    const addButton = screen.getByTestId("add-components-btn");
+    const addButton = screen.getByTestId("select-components-btn");
     expect(addButton).toBeDisabled();
   });
 });

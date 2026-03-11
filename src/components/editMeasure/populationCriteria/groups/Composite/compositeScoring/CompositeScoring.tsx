@@ -91,11 +91,11 @@ const CompositeScoring = ({
         >
           <Button
             variant="primary"
-            data-testid="add-components-btn"
+            data-testid="select-components-btn"
             disabled={!isCompositeScoringSelected || !canEdit}
             onClick={() => setOpenAddComponentsDialog(true)}
           >
-            Add Components
+            Select Components
           </Button>
         </Box>
       </Box>

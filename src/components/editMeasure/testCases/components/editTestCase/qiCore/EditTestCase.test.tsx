@@ -102,9 +102,6 @@ const serviceConfig: ServiceConfig = {
   measureService: {
     baseUrl: "measure.url",
   },
-  testCaseService: {
-    baseUrl: "base.url",
-  },
   fhirService: {
     baseUrl: "fhirservice.url",
   },
@@ -2548,14 +2545,7 @@ describe("EditTestCase component", () => {
 
     it("should display an error when test case series fail to load", async () => {
       mockedAxios.get.mockClear().mockImplementation((args) => {
-        if (args && args.startsWith(serviceConfig.measureService.baseUrl)) {
-          return Promise.resolve({
-            data: {
-              id: "m1234",
-              measureScoring: MeasureScoring.COHORT,
-            },
-          });
-        } else if (args && args.endsWith("series")) {
+        if (args && args.endsWith("series")) {
           return Promise.reject({
             status: 500,
             data: null,
@@ -2563,6 +2553,16 @@ describe("EditTestCase component", () => {
         } else if (args && args.endsWith("resources")) {
           return Promise.resolve({
             data: [...resourceIdentifiers],
+          });
+        } else if (
+          args &&
+          args.startsWith(serviceConfig.measureService.baseUrl)
+        ) {
+          return Promise.resolve({
+            data: {
+              id: "m1234",
+              measureScoring: MeasureScoring.COHORT,
+            },
           });
         }
         return Promise.resolve({ data: null });
@@ -2590,18 +2590,21 @@ describe("EditTestCase component", () => {
       } as unknown as AxiosError;
 
       mockedAxios.get.mockClear().mockImplementation((args) => {
-        if (args && args.startsWith(serviceConfig.measureService.baseUrl)) {
+        if (args && args.endsWith("series")) {
+          return Promise.reject(axiosError);
+        } else if (args && args.endsWith("resources")) {
+          return Promise.resolve({
+            data: [...resourceIdentifiers],
+          });
+        } else if (
+          args &&
+          args.startsWith(serviceConfig.measureService.baseUrl)
+        ) {
           return Promise.resolve({
             data: {
               id: "m1234",
               measureScoring: MeasureScoring.COHORT,
             },
-          });
-        } else if (args && args.endsWith("series")) {
-          return Promise.reject(axiosError);
-        } else if (args && args.endsWith("resources")) {
-          return Promise.resolve({
-            data: [...resourceIdentifiers],
           });
         }
         return Promise.resolve({ data: null });
@@ -3141,7 +3144,16 @@ describe("EditTestCase component", () => {
         hapiOperationOutcome: {} as HapiOperationOutcome,
       } as TestCase;
       mockedAxios.get.mockClear().mockImplementation((args) => {
-        if (args && args.startsWith(serviceConfig.measureService.baseUrl)) {
+        if (args && args.endsWith("series")) {
+          return Promise.resolve({ data: ["SeriesA", "SeriesB", "SeriesC"] });
+        } else if (args && args.endsWith("resources")) {
+          return Promise.resolve({
+            data: [...resourceIdentifiers],
+          });
+        } else if (
+          args &&
+          args.startsWith(serviceConfig.measureService.baseUrl)
+        ) {
           return Promise.resolve({
             data: {
               id: "m1234",
@@ -3156,12 +3168,6 @@ describe("EditTestCase component", () => {
                 },
               ],
             },
-          });
-        } else if (args && args.endsWith("series")) {
-          return Promise.resolve({ data: ["SeriesA", "SeriesB", "SeriesC"] });
-        } else if (args && args.endsWith("resources")) {
-          return Promise.resolve({
-            data: [...resourceIdentifiers],
           });
         }
         return Promise.resolve({ data: testCase });
@@ -3270,14 +3276,17 @@ describe("EditTestCase component", () => {
         hapiOperationOutcome: {} as HapiOperationOutcome,
       } as TestCase;
       mockedAxios.get.mockClear().mockImplementation((args) => {
-        if (args && args.startsWith(serviceConfig.measureService.baseUrl)) {
-          return Promise.resolve({ data: simpleMeasureFixture });
-        } else if (args && args.endsWith("series")) {
+        if (args && args.endsWith("series")) {
           return Promise.resolve({ data: ["SeriesA", "SeriesB", "SeriesC"] });
         } else if (args && args.endsWith("resources")) {
           return Promise.resolve({
             data: [...resourceIdentifiers],
           });
+        } else if (
+          args &&
+          args.startsWith(serviceConfig.measureService.baseUrl)
+        ) {
+          return Promise.resolve({ data: simpleMeasureFixture });
         }
         return Promise.resolve({ data: testCase });
       });
@@ -3517,14 +3526,21 @@ describe("EditTestCase component", () => {
         json: '{ "resourceType": "Bundle", "type": "collection", "entry": [] }',
       } as TestCase;
       mockedAxios.get.mockClear().mockImplementation((args) => {
-        if (args && args.startsWith(serviceConfig.measureService.baseUrl)) {
-          return Promise.resolve({ data: simpleMeasureFixture });
-        } else if (args && args.endsWith("series")) {
+        if (args && args.endsWith("series")) {
           return Promise.resolve({ data: ["DENOM_Pass", "NUMER_Pass"] });
         } else if (args && args.endsWith("resources")) {
           return Promise.resolve({
             data: [...resourceIdentifiers],
           });
+        } else if (args && args.includes("test-cases/")) {
+          return Promise.resolve({
+            data: testCase,
+          });
+        } else if (
+          args &&
+          args.startsWith(serviceConfig.measureService.baseUrl)
+        ) {
+          return Promise.resolve({ data: simpleMeasureFixture });
         }
         return Promise.resolve({
           data: testCase,
