@@ -38,6 +38,13 @@ const EditMeasureNav = ({ isQDM }) => {
     navigate(`/measures/${measureId}/edit/details/`);
   }
   const match = useMatch("/measures/:id/edit/*")?.params?.["*"].split("/")[0];
+  const tabValue = [
+    "supplemental-data",
+    "risk-adjustment",
+    "base-configuration",
+  ].includes(match ?? "")
+    ? "groups"
+    : match;
 
   const [measure, setMeasure] = useState<any>(measureStore.state);
   useEffect(() => {
@@ -68,7 +75,7 @@ const EditMeasureNav = ({ isQDM }) => {
   return (
     <div>
       <div style={{ marginLeft: "32px" }} id="edit-measure-nav-a">
-        <Tabs value={match} type="A" size="standard">
+        <Tabs value={tabValue} type="A" size="standard">
           <Tab
             value={`details`}
             to="details"
@@ -92,7 +99,7 @@ const EditMeasureNav = ({ isQDM }) => {
             />
           )}
           <Tab
-            value={isQDM ? `base-configuration` : `groups`}
+            value={`groups`}
             to={isQDM ? `base-configuration` : `groups/1`}
             data-testid="groups-tab"
             type="A"
