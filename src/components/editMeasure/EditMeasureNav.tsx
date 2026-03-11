@@ -99,7 +99,7 @@ const EditMeasureNav = ({ isQDM }) => {
             />
           )}
           <Tab
-            value={`groups`}
+            value={isQDM ? `base-configuration` : `groups`}
             to={isQDM ? `base-configuration` : `groups/1`}
             data-testid="groups-tab"
             type="A"
