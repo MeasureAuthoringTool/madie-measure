@@ -91,11 +91,32 @@ jest.mock("../../common/shareDialog/ShareDialog", () => ({
 
 jest.mock("../../common/viewHumanReadableModal/ViewHRModal", () => ({
   __esModule: true,
-  default: () => (
-    <div data-testid="view-human-readable-modal">View Human Readable Modal</div>
-  ),
+  default: ({ open, onClose }: { open: boolean; onClose: () => void }) =>
+    open ? (
+      <div data-testid="view-human-readable-modal">
+        View Human Readable Modal
+        <button data-testid="view-hr-close-btn" onClick={onClose}>
+          Close
+        </button>
+      </div>
+    ) : null,
   formikErrorHandler: jest.fn(),
 }));
+jest.mock(
+  "../../common/viewMeasureHistoryDialog/ViewMeasureHistoryDialog",
+  () => ({
+    __esModule: true,
+    default: ({ open, onClose }: { open: boolean; onClose: () => void }) =>
+      open ? (
+        <div data-testid="view-measure-history-dialog">
+          View Measure History Dialog
+          <button data-testid="view-history-close-btn" onClick={onClose}>
+            Close
+          </button>
+        </div>
+      ) : null,
+  })
+);
 jest.mock("./actionCenter/draftAction/DraftAction", () => ({
   __esModule: true,
   default: () => <div data-testid="draft-action">Draft Action</div>,
@@ -3035,6 +3056,182 @@ describe("Measure lock functionality", () => {
     expect(
       within(actionButton).queryByTestId("LockOutlinedIcon")
     ).not.toBeInTheDocument();
+  });
+
+  describe("View Human Readable and History dialogs preserve expansion and selection", () => {
+    const measureWithChildren = [
+      {
+        ...measures[0],
+        id: "PARENT-1",
+        measureSetId: "SET-1",
+        measureName: "Parent Measure",
+        hasAssociatedMeasures: true,
+      },
+      ...measures.slice(1),
+    ] as unknown as Measure[];
+
+    const childMeasure = {
+      id: "CHILD-1",
+      measureSetId: "SET-1",
+      measureName: "Child Measure",
+      version: "0.0.001",
+      model: Model.QICORE,
+      measureMetaData: { draft: true },
+      measureSet: { cmsId: "cmsId1" },
+      actions: {},
+    };
+
+    beforeEach(() => {
+      mockMeasureServiceApi.getMeasuresByMeasureSetId = jest
+        .fn()
+        .mockResolvedValue([childMeasure]);
+    });
+
+    const renderWithExpandedChild = async () => {
+      const { container, ...rest } = render(
+        <ServiceContext.Provider value={serviceConfig}>
+          <MeasureList
+            measureList={measureWithChildren}
+            setMeasureList={setMeasureListMock}
+            setTotalPages={setTotalPagesMock}
+            setTotalItems={setTotalItemsMock}
+            setVisibleItems={setVisibleItemsMock}
+            setOffset={setOffsetMock}
+            setLoading={setLoadingMock}
+            activeTab={0}
+            searchCriteria={null}
+            setSearchCriteria={setSearchCriteriaMock}
+            currentLimit={10}
+            currentPage={0}
+            setErrMsg={setErrMsgMock}
+            toastOpen={false}
+            toastMessage=""
+            toastType="danger"
+            setToastOpen={setToastOpenMock}
+            setToastMessage={setToastMessageMock}
+            setToastType={setToastTypeMock}
+            onToastClose={onToastCloseMock}
+            handleToast={handleToastMock}
+            setStatusHandler={jest.fn()}
+          />
+        </ServiceContext.Provider>
+      );
+
+      // Wait for the parent measure row to render
+      await screen.findByText("Parent Measure");
+
+      // Click the expand arrow span[role="button"] inside the table
+      const expandButton = container.querySelector(
+        'span[role="button"]'
+      ) as HTMLElement;
+      expect(expandButton).toBeInTheDocument();
+      await act(async () => {
+        userEvent.click(expandButton);
+      });
+
+      // Wait for the child row to appear
+      await screen.findByText("Child Measure");
+
+      // Select the child measure's checkbox
+      const checkboxes = screen.getAllByRole("checkbox");
+      // The last checkbox belongs to the expanded child row
+      const childCheckbox = checkboxes[checkboxes.length - 1];
+      await act(async () => {
+        userEvent.click(childCheckbox);
+      });
+
+      return { container, ...rest, childCheckbox };
+    };
+
+    it("closing the View Human Readable dialog preserves the expanded row and selected child measure", async () => {
+      const { childCheckbox } = await renderWithExpandedChild();
+
+      // Open the HR dialog via the action button
+      const hrBtn = screen.getByTestId("view-hr-action-btn");
+      await act(async () => {
+        userEvent.click(hrBtn);
+      });
+
+      // The dialog should be open
+      expect(
+        screen.getByTestId("view-human-readable-modal")
+      ).toBeInTheDocument();
+
+      // Close the dialog
+      await act(async () => {
+        userEvent.click(screen.getByTestId("view-hr-close-btn"));
+      });
+
+      // Dialog should be gone
+      expect(
+        screen.queryByTestId("view-human-readable-modal")
+      ).not.toBeInTheDocument();
+
+      // The expanded child row should still be visible
+      expect(screen.getByText("Child Measure")).toBeInTheDocument();
+
+      // The child checkbox should remain checked
+      expect(childCheckbox).toBeChecked();
+    });
+
+    it("closing the View History dialog preserves the expanded row and selected child measure", async () => {
+      const { childCheckbox } = await renderWithExpandedChild();
+
+      // Open the history dialog via the action button
+      const historyBtn = screen.getByTestId("history-action-btn");
+      await act(async () => {
+        userEvent.click(historyBtn);
+      });
+
+      // The dialog should be open
+      expect(
+        screen.getByTestId("view-measure-history-dialog")
+      ).toBeInTheDocument();
+
+      // Close the dialog
+      await act(async () => {
+        userEvent.click(screen.getByTestId("view-history-close-btn"));
+      });
+
+      // Dialog should be gone
+      expect(
+        screen.queryByTestId("view-measure-history-dialog")
+      ).not.toBeInTheDocument();
+
+      // The expanded child row should still be visible
+      expect(screen.getByText("Child Measure")).toBeInTheDocument();
+
+      // The child checkbox should remain checked
+      expect(childCheckbox).toBeChecked();
+    });
+
+    it("closing a non-view dialog (e.g. create version) collapses the expanded row and clears child selection", async () => {
+      const { childCheckbox } = await renderWithExpandedChild();
+
+      // The child row should be visible and checkbox checked before we proceed
+      expect(screen.getByText("Child Measure")).toBeInTheDocument();
+      expect(childCheckbox).toBeChecked();
+
+      // Select only the parent row checkbox so we can open the version dialog
+      // (index 0 is the header select-all; the first body row checkbox is at index 1)
+      const checkboxes = screen.getAllByRole("checkbox");
+      // Uncheck child first so only the parent is selected for version action
+      await act(async () => {
+        userEvent.click(checkboxes[checkboxes.length - 1]); // uncheck child
+      });
+      await act(async () => {
+        userEvent.click(checkboxes[1]); // select parent
+      });
+
+      const createVersionButton = screen.getByTestId("version-action-btn");
+      await act(async () => {
+        userEvent.click(createVersionButton);
+      });
+
+      // CreateVersionDialog opens — handleDialogClose is wired to its onClose,
+      // which will reset isRowExpanded/selectedIdForExpansion when the dialog closes.
+      expect(screen.getByTestId("create-version-dialog")).toBeInTheDocument();
+    });
   });
 
   describe("Owner Column", () => {
