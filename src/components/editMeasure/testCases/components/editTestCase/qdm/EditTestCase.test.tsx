@@ -50,7 +50,6 @@ const serviceConfig = {
   excelExportService: { baseUrl: "base.url" },
   fhirElmTranslationService: { baseUrl: "base.url" },
   qdmElmTranslationService: { baseUrl: "base.url" },
-  testCaseService: { baseUrl: "base.url" },
   measureService: { baseUrl: "base.url" },
   terminologyService: { baseUrl: "http.com" },
 } as ServiceConfig;

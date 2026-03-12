@@ -160,9 +160,6 @@ const serviceConfig: ServiceConfig = {
   measureService: {
     baseUrl: "measure.url",
   },
-  testCaseService: {
-    baseUrl: "base.url",
-  },
   fhirService: {
     baseUrl: "fhirservice.url",
   },

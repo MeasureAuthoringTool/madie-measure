@@ -13,9 +13,6 @@ const mockConfig: ServiceConfig = {
   measureService: {
     baseUrl: "measure.com",
   },
-  testCaseService: {
-    baseUrl: "testCaseService.com",
-  },
   terminologyService: {
     baseUrl: "terminologyService.com",
   },

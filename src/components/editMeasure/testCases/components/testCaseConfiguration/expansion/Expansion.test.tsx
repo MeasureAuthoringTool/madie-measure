@@ -18,7 +18,6 @@ import axios from "../../../../../../api/axios-instance";
 
 const mockServiceConfig = {
   measureService: { baseUrl: "measure.url" },
-  testCaseService: { baseUrl: "testcase.url" },
   terminologyService: { baseUrl: "terminology.url" },
   qdmElmTranslationService: { baseUrl: "qdm-translator.url" },
   fhirElmTranslationService: { baseUrl: "fhir-translator.url" },
