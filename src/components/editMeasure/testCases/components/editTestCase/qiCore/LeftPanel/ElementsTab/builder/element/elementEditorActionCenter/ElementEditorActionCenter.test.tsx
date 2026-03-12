@@ -83,11 +83,6 @@ describe("ElementEditorActionCenter Component", () => {
     ).toBeInTheDocument();
     expect(
       await screen.findByRole("menuitem", {
-        name: "Copy",
-      })
-    ).toBeInTheDocument();
-    expect(
-      await screen.findByRole("menuitem", {
         name: "Delete",
       })
     ).toBeInTheDocument();
@@ -120,11 +115,6 @@ describe("ElementEditorActionCenter Component", () => {
     expect(addButton).toBeInTheDocument();
     userEvent.click(addButton);
     expect(addElementOfMultipleCardinality).toHaveBeenCalled();
-    expect(
-      await screen.findByRole("menuitem", {
-        name: "Copy",
-      })
-    ).toBeInTheDocument();
     // if it is a required field and only 1 element is available then we can't delete it
     expect(
       screen.queryByRole("menuitem", {
@@ -155,11 +145,6 @@ describe("ElementEditorActionCenter Component", () => {
     expect(
       await screen.findByRole("menuitem", {
         name: "Add",
-      })
-    ).toBeInTheDocument();
-    expect(
-      await screen.findByRole("menuitem", {
-        name: "Copy",
       })
     ).toBeInTheDocument();
     expect(
