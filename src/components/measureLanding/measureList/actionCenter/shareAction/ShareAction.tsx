@@ -10,6 +10,7 @@ import {
 } from "@mui/material";
 import Tooltip from "@mui/material/Tooltip";
 import { Measure } from "@madie/madie-models";
+import { useFeatureFlags, useUserRoles } from "@madie/madie-util";
 import ShareIcon from "../../../../common/ShareIcon";
 
 interface PropTypes {
@@ -34,6 +35,11 @@ export const SHARED_TAB_UNSHARE = "Unshare";
 
 export default function ShareAction(props: PropTypes) {
   const { measures, isOwner, isSharedWithUser, activeTab, onClick } = props;
+  const featureFlags = useFeatureFlags();
+  const userRoles = useUserRoles();
+  const isAdminShareEnabled =
+    featureFlags?.AdminShareMeasures && userRoles?.isAdmin;
+
   const [disableShareBtn, setDisableShareBtn] = useState(true);
   const [tooltipMessage, setTooltipMessage] = useState(
     activeTab === 1 ? SHARED_TAB_NOTHING_SELECTED : NOTHING_SELECTED
@@ -47,6 +53,18 @@ export default function ShareAction(props: PropTypes) {
   const validateShareActionState = useCallback(() => {
     setDisableShareBtn(true);
 
+    // Admin users with feature flag can share/unshare any measure
+    if (isAdminShareEnabled && measures?.length > 0) {
+      setDisableShareBtn(false);
+      if (activeTab === 1) {
+        setTooltipMessage(SHARED_TAB_UNSHARE);
+      } else {
+        setTooltipMessage(VALID_SHARE_MEASURE);
+      }
+      return;
+    }
+
+    // Non-admin users follow existing logic
     if (activeTab === 1) {
       if (measures?.length === 0) {
         setTooltipMessage(SHARED_TAB_NOTHING_SELECTED);
@@ -66,7 +84,7 @@ export default function ShareAction(props: PropTypes) {
         setTooltipMessage(INVALID_SHARE_MEASURE);
       }
     }
-  }, [measures, isOwner, isSharedWithUser, activeTab]);
+  }, [measures, isOwner, isSharedWithUser, activeTab, isAdminShareEnabled]);
 
   useEffect(() => {
     validateShareActionState();
