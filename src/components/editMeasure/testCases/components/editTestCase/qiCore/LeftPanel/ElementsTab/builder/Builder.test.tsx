@@ -534,6 +534,12 @@ describe("Builder Component", () => {
     await screen.findByTestId("mock-resource-list");
 
     expect(mockGetResourceTree).toHaveBeenCalledWith("qicore-patient");
+
+    const successToast = await screen.findByTestId("builder-success-text");
+    expect(successToast).toBeInTheDocument();
+    expect(successToast).toHaveTextContent(
+      "QICore Patient has successfully been applied to the test case. To save your changes please click 'Save'."
+    );
   });
 });
 
