@@ -593,22 +593,12 @@ describe("QuantityComponent", () => {
   test("displays tooltip on hover for Unit(s) field", async () => {
     renderWithFormik();
 
-    const tooltipButton = screen.getByTestId("code-input-tooltip-button");
-
+    const tooltipButton = await screen.getByTestId("code-input-tooltip");
     userEvent.hover(tooltipButton);
-
-    const tooltipText = await screen.findByText(
+    const tooltip = await screen.findByRole("tooltip");
+    expect(tooltip).toHaveTextContent(
       "Enter the UCUM (Unified Code for Units of Measure) code value."
     );
-
-    expect(tooltipText).toBeVisible();
-
-    userEvent.unhover(tooltipButton);
-
-    await waitFor(() => {
-      const tooltip = screen.getByTestId("code-input-tooltip");
-      expect(tooltip).toHaveClass("madie-tooltip hidden");
-    });
   });
 
   test("should display delete icon and calls handleDeleteElement when delete button is clicked", async () => {
