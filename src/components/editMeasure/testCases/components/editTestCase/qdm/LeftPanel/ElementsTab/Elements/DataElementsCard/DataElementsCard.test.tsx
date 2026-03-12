@@ -17,9 +17,6 @@ import { QdmPatientProvider } from "../../../../../../../util/QdmPatientContext"
 import userEvent from "@testing-library/user-event";
 import { getDataElementClass } from "../../../../../../../util/DataElementHelper";
 const serviceConfig = {
-  testCaseService: {
-    baseUrl: "base.url",
-  },
   measureService: {
     baseUrl: "base.url",
   },

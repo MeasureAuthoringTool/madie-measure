@@ -20,9 +20,6 @@ const serviceConfig = {
   measureService: {
     baseUrl: "measure.url",
   },
-  testCaseService: {
-    baseUrl: "base.url",
-  },
   qdmElmTranslationService: {
     baseUrl: "base.url",
   },
