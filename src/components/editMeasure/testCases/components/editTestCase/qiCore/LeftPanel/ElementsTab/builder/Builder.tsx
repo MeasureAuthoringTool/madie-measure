@@ -22,6 +22,7 @@ import useExecutionContext from "../../../../../routes/qiCore/useExecutionContex
 import {
   MadieSpinner,
   MadieAlert,
+  Toast,
 } from "@madie/madie-design-system/dist/react";
 import { handleCancel, handleRowDelete, handleRowEdit } from "./BuilderUtils";
 import "./Builder.scss";
@@ -103,6 +104,14 @@ const Builder = ({
   const [resources, setResources] = useState<ResourceIdentifier[]>([]);
   const [savedGridID, setSavedGridID] = useState(null);
   const [applyLoading, setApplyLoading] = useState(false);
+  const [toastOpen, setToastOpen] = useState<boolean>(false);
+  const [toastMessage, setToastMessage] = useState<string>("");
+  const [toastType, setToastType] = useState<string>("danger");
+  const onToastClose = () => {
+    setToastType("danger");
+    setToastMessage("");
+    setToastOpen(false);
+  };
   const ERROR_MULTIPLE_PATIENTS =
     "Builder disabled. Builder is designed to work with a single patient resource. Please remove the extra patient(s) from the JSON to enable Builder support.";
   const ERROR_DUPLICATE_RESOURCE_IDS =
@@ -246,6 +255,11 @@ const Builder = ({
                 type: ResourceActionType.ADD_BUNDLE_ENTRY,
                 payload: newEntry,
               });
+              setToastType("success");
+              setToastMessage(
+                `${resourceIdentifier.title} has successfully been applied to the test case. To save your changes please click 'Save'.`
+              );
+              setToastOpen(true);
             }}
             isPatientAdded={isPatientAdded}
           />
@@ -328,6 +342,23 @@ const Builder = ({
           </div>
         )}
       </div>
+      <Toast
+        toastKey="builder-toast"
+        aria-live="polite"
+        toastType={toastType}
+        testId={
+          toastType === "danger"
+            ? "builder-generic-error-text"
+            : "builder-success-text"
+        }
+        closeButtonProps={{
+          "data-testid": "close-toast-button",
+        }}
+        open={toastOpen}
+        message={toastMessage}
+        onClose={onToastClose}
+        autoHideDuration={6000}
+      />
     </Box>
   );
 };
