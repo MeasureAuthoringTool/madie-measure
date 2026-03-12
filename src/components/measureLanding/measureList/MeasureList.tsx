@@ -694,6 +694,14 @@ export default function MeasureList(props: {
     setViewMeasureHistoryDialog(false);
   };
 
+  const handleViewDialogClose = () => {
+    setViewHumanReadableModal({
+      open: false,
+      measureId: "",
+    });
+    setViewMeasureHistoryDialog(false);
+  };
+
   const handleShareDialogClose = () => {
     setShareDialog({
       open: false,
@@ -1283,7 +1291,7 @@ export default function MeasureList(props: {
       />
       <ViewHRModal
         open={viewHumanReadableModal.open}
-        onClose={handleDialogClose}
+        onClose={handleViewDialogClose}
         measureId={targetMeasure?.current?.id}
         exportMeasure={exportMeasure}
       />
@@ -1297,7 +1305,7 @@ export default function MeasureList(props: {
       <ViewMeasureHistoryDialog
         measures={selectedMeasures}
         open={viewMeasureHistoryDialog}
-        onClose={handleDialogClose}
+        onClose={handleViewDialogClose}
       />
       <CompareVersionsDialog
         measures={selectedMeasures}
