@@ -64,6 +64,9 @@ type TCRow = {
 
 export const ROW_EXPANSION_ERROR =
   "Failed to fetch measures for measure set. Please try again. If the issue persists, contact helpdesk.";
+const NO_RESULTS = "No results were found";
+const NO_RESULTS_FOR_MODEL =
+  "There are no measures that belong to the same model.";
 
 export default function AddComponentsDialog({
   open,
@@ -750,7 +753,9 @@ export default function AddComponentsDialog({
               ) : _.isEmpty(measureList) ? (
                 <tr>
                   <td colSpan={columns.length} tw="text-center p-2">
-                    There are no measures that belong to the same model.
+                    {finalSearchAndFilterby.finalSearchField
+                      ? NO_RESULTS
+                      : NO_RESULTS_FOR_MODEL}
                   </td>
                 </tr>
               ) : (
