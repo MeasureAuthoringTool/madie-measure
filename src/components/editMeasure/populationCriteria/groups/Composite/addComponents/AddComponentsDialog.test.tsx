@@ -1,7 +1,9 @@
 import * as React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import AddComponentsDialog from "./AddComponentsDialog";
+import AddComponentsDialog, {
+  ROW_EXPANSION_ERROR,
+} from "./AddComponentsDialog";
 import { MeasureScoring, Model } from "@madie/madie-models";
 import "@testing-library/jest-dom";
 import { useMeasureServiceApi } from "@madie/madie-util";
@@ -1858,6 +1860,7 @@ describe("AddComponentsDialog", () => {
 
       // the table row is still rendered (no crash)
       expect(screen.queryByText("Test Measure")).toBeInTheDocument();
+      expect(screen.queryByText(ROW_EXPANSION_ERROR)).toBeInTheDocument();
       consoleErrorSpy.mockRestore();
     });
 

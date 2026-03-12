@@ -1,4 +1,5 @@
 import React, {
+  ReactNode,
   useCallback,
   useEffect,
   useMemo,
@@ -10,6 +11,7 @@ import {
   MadieDialog,
   Pagination,
   MadieSpinner,
+  Toast,
 } from "@madie/madie-design-system/dist/react";
 import {
   ColumnDef,
@@ -60,6 +62,9 @@ type TCRow = {
   updated: string;
 };
 
+export const ROW_EXPANSION_ERROR =
+  "Failed to fetch measures for measure set. Please try again. If the issue persists, contact helpdesk.";
+
 export default function AddComponentsDialog({
   open,
   onClose,
@@ -104,6 +109,13 @@ export default function AddComponentsDialog({
 
   const [measureList, setMeasureList] = useState<Measure[]>([]);
 
+  // Toast state
+  const [toast, setToast] = useState({
+    open: false,
+    type: "danger",
+    message: "",
+  });
+
   useEffect(() => {
     setRowSelection((prev) => {
       if (!measureList?.length) {
@@ -147,7 +159,7 @@ export default function AddComponentsDialog({
     }));
   };
 
-  const handleRowClick = async (row: Measure) => {
+  const handleRowClick = async (row) => {
     const isRowCurrentlyExpanded =
       expandedSectionMap[row?.measureSetId]?.length > 0;
 
@@ -171,7 +183,15 @@ export default function AddComponentsDialog({
           [row.measureSetId]: transFormData(filteredResults),
         }));
       } catch (error: any) {
-        console.error("Failed to fetch measures for measure set:", error);
+        console.error(
+          "Failed to fetch measures for measure set:",
+          error?.measure
+        );
+        setToast({
+          open: true,
+          type: "danger",
+          message: ROW_EXPANSION_ERROR,
+        });
       }
     } else {
       setExpandedSectionMap((prev) => {
@@ -815,6 +835,21 @@ export default function AddComponentsDialog({
         shape="rounded"
         hideNextButton={!(page + 1 < totalPages)}
         hidePrevButton={!(page > 0)}
+      />
+      <Toast
+        toastKey="expand-meausre-set-toast"
+        testId="expand-meausre-set-toast"
+        toastType={toast.type}
+        open={toast.open}
+        message={toast.message}
+        onClose={() =>
+          setToast({
+            open: false,
+            type: "danger",
+            message: "",
+          })
+        }
+        autoHideDuration={8000}
       />
     </MadieDialog>
   );
