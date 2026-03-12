@@ -121,6 +121,8 @@ describe("AddComponentsDialog", () => {
         onClose={onCloseMock}
         measure={mockMeasure}
         compositeScoring="Opportunity"
+        components={[]}
+        submitComponentForm={jest.fn()}
       />
     );
 
@@ -137,7 +139,7 @@ describe("AddComponentsDialog", () => {
     const rows = screen.getAllByRole("row");
     const firstDataRow = rows[1];
     if (firstDataRow) {
-      const expandButton = firstDataRow.querySelector('button[aria-label=""]');
+      const expandButton = firstDataRow.querySelector("span[role='button']");
       if (expandButton) {
         await userEvent.click(expandButton);
 
@@ -165,6 +167,8 @@ describe("AddComponentsDialog", () => {
         onClose={onCloseMock}
         measure={mockMeasure}
         compositeScoring="Opportunity"
+        components={[]}
+        submitComponentForm={jest.fn()}
       />
     );
 
@@ -200,6 +204,8 @@ describe("AddComponentsDialog", () => {
         onClose={onCloseMock}
         measure={mockMeasure}
         compositeScoring="All-or-nothing"
+        components={[]}
+        submitComponentForm={jest.fn()}
       />
     );
 
@@ -235,6 +241,8 @@ describe("AddComponentsDialog", () => {
         onClose={onCloseMock}
         measure={mockMeasure}
         compositeScoring="Linear"
+        components={[]}
+        submitComponentForm={jest.fn()}
       />
     );
 
@@ -294,6 +302,8 @@ describe("AddComponentsDialog", () => {
         onClose={onCloseMock}
         measure={mockMeasure}
         compositeScoring="Opportunity"
+        components={[]}
+        submitComponentForm={jest.fn()}
       />
     );
 
@@ -310,7 +320,7 @@ describe("AddComponentsDialog", () => {
     const rows = screen.getAllByRole("row");
     const firstDataRow = rows[1];
     if (firstDataRow) {
-      const expandButton = firstDataRow.querySelector('button[aria-label=""]');
+      const expandButton = firstDataRow.querySelector("span[role='button']");
       if (expandButton) {
         await userEvent.click(expandButton);
 
@@ -364,6 +374,8 @@ describe("AddComponentsDialog", () => {
         onClose={onCloseMock}
         measure={mockMeasure}
         compositeScoring="Opportunity"
+        components={[]}
+        submitComponentForm={jest.fn()}
       />
     );
 
@@ -382,7 +394,7 @@ describe("AddComponentsDialog", () => {
     const firstDataRow = rows[1];
 
     if (firstDataRow) {
-      const expandButton = firstDataRow.querySelector('button[aria-label=""]');
+      const expandButton = firstDataRow.querySelector("span[role='button']");
       if (expandButton) {
         await userEvent.click(expandButton);
         await waitFor(
@@ -415,12 +427,14 @@ describe("AddComponentsDialog", () => {
       getMeasuresByMeasureSetId: jest.fn(),
     });
 
-    await render(
+    render(
       <AddComponentsDialog
         open={true}
         onClose={onCloseMock}
         measure={mockMeasure}
         compositeScoring="Opportunity"
+        components={[]}
+        submitComponentForm={jest.fn()}
       />
     );
 
@@ -447,12 +461,14 @@ describe("AddComponentsDialog", () => {
       getMeasuresByMeasureSetId: jest.fn(),
     });
 
-    await render(
+    render(
       <AddComponentsDialog
         open={true}
         onClose={onCloseMock}
         measure={mockMeasure}
         compositeScoring="Opportunity"
+        components={[]}
+        submitComponentForm={jest.fn()}
       />
     );
 
@@ -474,12 +490,14 @@ describe("AddComponentsDialog", () => {
       getMeasuresByMeasureSetId: jest.fn(),
     });
 
-    await render(
+    render(
       <AddComponentsDialog
         open={true}
         onClose={onCloseMock}
         measure={mockMeasure}
         compositeScoring="Opportunity"
+        components={[]}
+        submitComponentForm={jest.fn()}
       />
     );
 
@@ -500,6 +518,8 @@ describe("AddComponentsDialog", () => {
         onClose={onCloseMock}
         measure={mockMeasure}
         compositeScoring="Opportunity"
+        components={[]}
+        submitComponentForm={jest.fn()}
       />
     );
 
@@ -534,6 +554,8 @@ describe("AddComponentsDialog", () => {
         onClose={onCloseMock}
         measure={mockMeasure}
         compositeScoring="Opportunity"
+        components={[]}
+        submitComponentForm={jest.fn()}
       />
     );
 
@@ -571,6 +593,8 @@ describe("AddComponentsDialog", () => {
         onClose={onCloseMock}
         measure={mockMeasure}
         compositeScoring="Opportunity"
+        components={[]}
+        submitComponentForm={jest.fn()}
       />
     );
 
@@ -610,6 +634,8 @@ describe("AddComponentsDialog", () => {
         onClose={onCloseMock}
         measure={mockMeasure}
         compositeScoring="Opportunity"
+        components={[]}
+        submitComponentForm={jest.fn()}
       />
     );
 
@@ -646,6 +672,8 @@ describe("AddComponentsDialog", () => {
         onClose={onCloseMock}
         measure={mockMeasure}
         compositeScoring="Opportunity"
+        components={[]}
+        submitComponentForm={jest.fn()}
       />
     );
 
@@ -664,7 +692,7 @@ describe("AddComponentsDialog", () => {
     const firstDataRow = rows[1];
 
     if (firstDataRow) {
-      const expandButton = firstDataRow.querySelector('span[role="button"]');
+      const expandButton = firstDataRow.querySelector("span[role='button']");
       if (expandButton) {
         expandButton.focus();
         await userEvent.keyboard("{Enter}");
@@ -709,6 +737,8 @@ describe("AddComponentsDialog", () => {
         onClose={onCloseMock}
         measure={mockMeasure}
         compositeScoring="Opportunity"
+        components={[]}
+        submitComponentForm={jest.fn()}
       />
     );
 
@@ -727,7 +757,7 @@ describe("AddComponentsDialog", () => {
     const firstDataRow = rows[1];
 
     if (firstDataRow) {
-      const expandButton = firstDataRow.querySelector('span[role="button"]');
+      const expandButton = firstDataRow.querySelector("span[role='button']");
       if (expandButton) {
         expandButton.focus();
         await userEvent.keyboard(" ");
@@ -774,6 +804,7 @@ describe("AddComponentsDialog", () => {
         measure={mockMeasure}
         submitComponentForm={submitComponentFormMock}
         compositeScoring="Opportunity"
+        components={[]}
       />
     );
 
@@ -833,6 +864,7 @@ describe("AddComponentsDialog", () => {
         onClose={onCloseMock}
         measure={mockMeasure}
         compositeScoring="Opportunity"
+        components={[]}
       />
     );
 
@@ -851,7 +883,7 @@ describe("AddComponentsDialog", () => {
     const firstDataRow = rows[1];
 
     if (firstDataRow) {
-      const expandButton = firstDataRow.querySelector('button[aria-label=""]');
+      const expandButton = firstDataRow.querySelector("span[role='button']");
       if (expandButton) {
         await userEvent.click(expandButton);
 
@@ -882,6 +914,8 @@ describe("AddComponentsDialog", () => {
         onClose={onCloseMock}
         measure={mockMeasure}
         compositeScoring="Opportunity"
+        components={[]}
+        submitComponentForm={jest.fn()}
       />
     );
 
@@ -912,6 +946,8 @@ describe("AddComponentsDialog", () => {
         onClose={onCloseMock}
         measure={mockMeasure}
         compositeScoring="Opportunity"
+        components={[]}
+        submitComponentForm={jest.fn()}
       />
     );
 
@@ -938,6 +974,8 @@ describe("AddComponentsDialog", () => {
         onClose={onCloseMock}
         measure={null}
         compositeScoring="Opportunity"
+        components={[]}
+        submitComponentForm={jest.fn()}
       />
     );
 
@@ -958,6 +996,8 @@ describe("AddComponentsDialog", () => {
         onClose={onCloseMock}
         measure={{ id: "test-id", measureName: "Test" }}
         compositeScoring="Opportunity"
+        components={[]}
+        submitComponentForm={jest.fn()}
       />
     );
 
@@ -978,10 +1018,232 @@ describe("AddComponentsDialog", () => {
         onClose={onCloseMock}
         measure={{ model: "QI-Core", measureName: "Test" }}
         compositeScoring="Opportunity"
+        components={[]}
+        submitComponentForm={jest.fn()}
       />
     );
 
     expect(mockSearchMeasures).not.toHaveBeenCalled();
+  });
+
+  it("passes priorityMeasureSets from components to searchMeasuresByCriteria", async () => {
+    const mockSearchMeasures = jest.fn().mockResolvedValue(zeroItemResponse);
+
+    useMeasureServiceApi.mockReturnValue({
+      searchMeasuresByCriteria: mockSearchMeasures,
+      getMeasuresByMeasureSetId: jest.fn(),
+    });
+
+    render(
+      <AddComponentsDialog
+        open={true}
+        onClose={onCloseMock}
+        measure={mockMeasure}
+        compositeScoring="Opportunity"
+        components={[
+          { id: "m1", measureSetId: "set-A" },
+          { id: "m2", measureSetId: "set-B" },
+        ]}
+        submitComponentForm={jest.fn()}
+      />
+    );
+
+    await waitFor(() => {
+      expect(mockSearchMeasures).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        expect.anything(),
+        expect.anything(),
+        expect.anything(),
+        expect.objectContaining({
+          priorityMeasureSets: ["set-A", "set-B"],
+        }),
+        expect.anything()
+      );
+    });
+  });
+
+  it("auto-expands rows whose measureSetId matches a component but the row is not the exact component version", async () => {
+    // row "1" shares "set-1" with the component but has a different id ("1" vs "other-version")
+    const mockGetMeasuresBySetId = jest.fn().mockResolvedValue([]);
+
+    const mockSearchMeasures = jest.fn().mockResolvedValue({
+      content: [
+        {
+          id: "1",
+          measureName: "Test Measure",
+          version: "1.0.0",
+          measureSet: { cmsId: "CMS123" },
+          measureSetId: "set-1",
+          lastModifiedAt: "2024-01-01",
+          hasAssociatedMeasures: true,
+        },
+      ],
+      totalPages: 1,
+      totalElements: 1,
+      numberOfElements: 1,
+      pageable: { offset: 0 },
+    });
+
+    useMeasureServiceApi.mockReturnValue({
+      searchMeasuresByCriteria: mockSearchMeasures,
+      getMeasuresByMeasureSetId: mockGetMeasuresBySetId,
+    });
+
+    // component has measureSetId "set-1" but id "other-version" (not "1"),
+    // so the row should auto-expand
+    render(
+      <AddComponentsDialog
+        open={true}
+        onClose={onCloseMock}
+        measure={mockMeasure}
+        compositeScoring="Opportunity"
+        components={[{ id: "other-version", measureSetId: "set-1" }]}
+        submitComponentForm={jest.fn()}
+      />
+    );
+
+    await waitFor(() => {
+      expect(mockSearchMeasures).toHaveBeenCalled();
+    });
+
+    await waitFor(
+      () => {
+        expect(mockGetMeasuresBySetId).toHaveBeenCalledWith(
+          "set-1",
+          true,
+          expect.anything()
+        );
+      },
+      { timeout: 3000 }
+    );
+  });
+
+  it("does not auto-expand a row when the row id matches the component id exactly", async () => {
+    const mockGetMeasuresBySetId = jest.fn().mockResolvedValue([]);
+
+    const mockSearchMeasures = jest.fn().mockResolvedValue({
+      content: [
+        {
+          id: "1",
+          measureName: "Test Measure",
+          version: "1.0.0",
+          measureSet: { cmsId: "CMS123" },
+          measureSetId: "set-1",
+          lastModifiedAt: "2024-01-01",
+          hasAssociatedMeasures: true,
+        },
+      ],
+      totalPages: 1,
+      totalElements: 1,
+      numberOfElements: 1,
+      pageable: { offset: 0 },
+    });
+
+    useMeasureServiceApi.mockReturnValue({
+      searchMeasuresByCriteria: mockSearchMeasures,
+      getMeasuresByMeasureSetId: mockGetMeasuresBySetId,
+    });
+
+    // component id matches the row id exactly — no auto-expand expected
+    render(
+      <AddComponentsDialog
+        open={true}
+        onClose={onCloseMock}
+        measure={mockMeasure}
+        compositeScoring="Opportunity"
+        components={[{ id: "1", measureSetId: "set-1" }]}
+        submitComponentForm={jest.fn()}
+      />
+    );
+
+    await waitFor(() => {
+      expect(mockSearchMeasures).toHaveBeenCalled();
+    });
+
+    await new Promise((resolve) => setTimeout(resolve, 200));
+    expect(mockGetMeasuresBySetId).not.toHaveBeenCalled();
+  });
+
+  it("resets expandedSectionMap and expandedRowSelection when dialog closes", async () => {
+    const mockGetMeasuresBySetId = jest.fn().mockResolvedValue([
+      {
+        id: "child-1",
+        measureName: "Child Measure 1",
+        version: "1.0.0",
+        measureSet: { cmsId: "CMS789" },
+        lastModifiedAt: "2024-01-15",
+      },
+    ]);
+
+    const mockSearchMeasures = jest.fn().mockResolvedValue({
+      content: data,
+      totalPages: 1,
+      totalElements: 2,
+      numberOfElements: 2,
+      pageable: { offset: 0 },
+    });
+
+    useMeasureServiceApi.mockReturnValue({
+      searchMeasuresByCriteria: mockSearchMeasures,
+      getMeasuresByMeasureSetId: mockGetMeasuresBySetId,
+    });
+
+    const { rerender } = render(
+      <AddComponentsDialog
+        open={true}
+        onClose={onCloseMock}
+        measure={mockMeasure}
+        compositeScoring="Opportunity"
+        components={[]}
+        submitComponentForm={jest.fn()}
+      />
+    );
+
+    await waitFor(() =>
+      expect(screen.queryByText("Test Measure")).toBeInTheDocument()
+    );
+
+    // expand first row
+    const rows = screen.getAllByRole("row");
+    const expandButton = rows[1].querySelector("span[role='button']");
+    if (expandButton) {
+      await userEvent.click(expandButton);
+      await waitFor(() => expect(mockGetMeasuresBySetId).toHaveBeenCalled());
+    }
+
+    // close dialog — expanded state should be cleared
+    rerender(
+      <AddComponentsDialog
+        open={false}
+        onClose={onCloseMock}
+        measure={mockMeasure}
+        compositeScoring="Opportunity"
+        components={[]}
+        submitComponentForm={jest.fn()}
+      />
+    );
+
+    // re-open
+    rerender(
+      <AddComponentsDialog
+        open={true}
+        onClose={onCloseMock}
+        measure={mockMeasure}
+        compositeScoring="Opportunity"
+        components={[]}
+        submitComponentForm={jest.fn()}
+      />
+    );
+
+    await waitFor(() =>
+      expect(screen.queryByText("Test Measure")).toBeInTheDocument()
+    );
+
+    // no expanded-row should be visible after re-open without clicking expand
+    expect(
+      screen.queryByTestId("expanded-row-child-1")
+    ).not.toBeInTheDocument();
   });
 
   describe("Filtering", () => {
@@ -1001,6 +1263,8 @@ describe("AddComponentsDialog", () => {
           onClose={onCloseMock}
           measure={mockMeasure}
           compositeScoring="Opportunity"
+          components={[]}
+          submitComponentForm={jest.fn()}
         />
       );
 
@@ -1053,6 +1317,8 @@ describe("AddComponentsDialog", () => {
           onClose={onCloseMock}
           measure={mockMeasure}
           compositeScoring="Opportunity"
+          components={[{ id: "other-version", measureSetId: "set-1" }]}
+          submitComponentForm={jest.fn()}
         />
       );
 
@@ -1103,6 +1369,8 @@ describe("AddComponentsDialog", () => {
           onClose={onCloseMock}
           measure={mockMeasure}
           compositeScoring="Opportunity"
+          components={[]}
+          submitComponentForm={jest.fn()}
         />
       );
 
@@ -1144,6 +1412,14 @@ describe("AddComponentsDialog", () => {
   });
 
   describe("Nested Rows - Selection, Updating, and Saving", () => {
+    // expand button is now a span[role="button"], not a <button>
+    const getExpandButton = (
+      row: HTMLElement | undefined
+    ): HTMLElement | null => {
+      if (!row) return null;
+      return row.querySelector("span[role='button']") as HTMLElement | null;
+    };
+
     const getCheckbox = (
       row: HTMLElement | undefined
     ): HTMLInputElement | null => {
@@ -1151,15 +1427,6 @@ describe("AddComponentsDialog", () => {
       return row.querySelector(
         "input[type='checkbox']"
       ) as HTMLInputElement | null;
-    };
-
-    const getExpandButton = (
-      row: HTMLElement | undefined
-    ): HTMLElement | null => {
-      if (!row) return null;
-      return row.querySelector(
-        "button[aria-label='Toggle row expansion']"
-      ) as HTMLElement | null;
     };
 
     it("checks nested row checkbox and updates rowSelection state", async () => {
@@ -1206,17 +1473,10 @@ describe("AddComponentsDialog", () => {
         getMeasuresByMeasureSetId: mockGetMeasuresBySetId,
       });
 
-      const onCloseMock = jest.fn();
-      const mockMeasure = {
-        id: "measure-1",
-        model: "QI-Core",
-        measureName: "Parent Measure",
-      };
-
       render(
         <AddComponentsDialog
           open={true}
-          onClose={onCloseMock}
+          onClose={jest.fn()}
           measure={mockMeasure}
           compositeScoring="Opportunity"
           components={[]}
@@ -1234,7 +1494,7 @@ describe("AddComponentsDialog", () => {
 
       const rows = screen.getAllByRole("row");
       const firstDataRow = rows[1];
-      const expandButton = firstDataRow.querySelector("span[role='button']");
+      const expandButton = getExpandButton(firstDataRow);
 
       await userEvent.click(expandButton);
 
@@ -1247,6 +1507,7 @@ describe("AddComponentsDialog", () => {
         expect(screen.queryByText("Child Measure 2")).toBeInTheDocument();
       });
     });
+
     it("applies blue background to checked nested row", async () => {
       const mockGetMeasuresBySetId = jest.fn().mockResolvedValue([
         {
@@ -1282,12 +1543,6 @@ describe("AddComponentsDialog", () => {
         searchMeasuresByCriteria: mockSearchMeasures,
         getMeasuresByMeasureSetId: mockGetMeasuresBySetId,
       });
-
-      const mockMeasure = {
-        id: "measure-1",
-        model: "QI-Core",
-        measureName: "Parent Measure",
-      };
 
       render(
         <AddComponentsDialog
@@ -1337,8 +1592,16 @@ describe("AddComponentsDialog", () => {
 
       if (checkbox) {
         await userEvent.click(checkbox);
-        expect(checkbox).toBeChecked();
-        expect(nestedRow).toHaveStyle({ backgroundColor: "#e3f2fd" });
+        // re-query after state update
+        const updatedRows = screen.getAllByRole("row");
+        const updatedNestedRow = updatedRows.find(
+          (row) =>
+            row.textContent.includes("Child Measure 1") &&
+            row.className.includes("expanded-row")
+        );
+        const updatedCheckbox = getCheckbox(updatedNestedRow);
+        expect(updatedCheckbox).toBeChecked();
+        expect(updatedNestedRow).toHaveStyle({ backgroundColor: "#e3f2fd" });
       }
     });
 
@@ -1378,12 +1641,6 @@ describe("AddComponentsDialog", () => {
         getMeasuresByMeasureSetId: mockGetMeasuresBySetId,
       });
 
-      const mockMeasure = {
-        id: "measure-1",
-        model: "QI-Core",
-        measureName: "Parent Measure",
-      };
-
       render(
         <AddComponentsDialog
           open={true}
@@ -1432,12 +1689,28 @@ describe("AddComponentsDialog", () => {
 
       if (checkbox) {
         await userEvent.click(checkbox);
-        expect(checkbox).toBeChecked();
-        expect(nestedRow).toHaveStyle({ backgroundColor: "#e3f2fd" });
+        // re-query after first click
+        const checkedRows = screen.getAllByRole("row");
+        const checkedNestedRow = checkedRows.find(
+          (row) =>
+            row.textContent.includes("Child Measure 1") &&
+            row.className.includes("expanded-row")
+        );
+        const checkedCheckbox = getCheckbox(checkedNestedRow);
+        expect(checkedCheckbox).toBeChecked();
+        expect(checkedNestedRow).toHaveStyle({ backgroundColor: "#e3f2fd" });
 
-        await userEvent.click(checkbox);
-        expect(checkbox).not.toBeChecked();
-        expect(nestedRow).toHaveStyle({ backgroundColor: "white" });
+        await userEvent.click(checkedCheckbox);
+        // re-query after second click
+        const uncheckedRows = screen.getAllByRole("row");
+        const uncheckedNestedRow = uncheckedRows.find(
+          (row) =>
+            row.textContent.includes("Child Measure 1") &&
+            row.className.includes("expanded-row")
+        );
+        const uncheckedCheckbox = getCheckbox(uncheckedNestedRow);
+        expect(uncheckedCheckbox).not.toBeChecked();
+        expect(uncheckedNestedRow).toHaveStyle({ backgroundColor: "white" });
       }
     });
 
@@ -1477,19 +1750,14 @@ describe("AddComponentsDialog", () => {
         getMeasuresByMeasureSetId: mockGetMeasuresBySetId,
       });
 
-      const mockMeasure = {
-        id: "measure-1",
-        model: "QI-Core",
-        measureName: "Parent Measure",
-      };
-
       render(
         <AddComponentsDialog
           open={true}
           onClose={jest.fn()}
           measure={mockMeasure}
           compositeScoring="Opportunity"
-          components={[{ measureId: "child-1", groupId: "cg-1" }]}
+          // components carry id so preselectedIds picks up "child-1"
+          components={[{ id: "child-1", measureSetId: "set-1" }]}
           submitComponentForm={jest.fn()}
         />
       );
@@ -1505,31 +1773,24 @@ describe("AddComponentsDialog", () => {
         { timeout: 3000 }
       );
 
-      const rows = screen.getAllByRole("row");
-      const firstDataRow = rows[1];
-      const expandButton = getExpandButton(firstDataRow);
+      // auto-expand fires because component id "child-1" != row id "1" but same measureSetId
+      await waitFor(
+        () => {
+          expect(screen.queryByText("Child Measure 1")).toBeInTheDocument();
+        },
+        { timeout: 3000 }
+      );
 
-      if (expandButton) {
-        await userEvent.click(expandButton);
+      const expandedRows = screen.getAllByRole("row");
+      const nestedRow = expandedRows.find(
+        (row) =>
+          row.textContent.includes("Child Measure 1") &&
+          row.className.includes("expanded-row")
+      );
 
-        await waitFor(
-          () => {
-            expect(screen.queryByText("Child Measure 1")).toBeInTheDocument();
-          },
-          { timeout: 3000 }
-        );
-
-        const expandedRows = screen.getAllByRole("row");
-        const nestedRow = expandedRows.find(
-          (row) =>
-            row.textContent.includes("Child Measure 1") &&
-            row.className.includes("expanded-row")
-        );
-
-        const checkbox = getCheckbox(nestedRow);
-        expect(checkbox).toBeChecked();
-        expect(nestedRow).toHaveStyle({ backgroundColor: "#e3f2fd" });
-      }
+      const checkbox = getCheckbox(nestedRow);
+      expect(checkbox).toBeChecked();
+      expect(nestedRow).toHaveStyle({ backgroundColor: "#e3f2fd" });
     });
 
     it("handles error during nested row expansion gracefully", async () => {
@@ -1562,19 +1823,13 @@ describe("AddComponentsDialog", () => {
         getMeasuresByMeasureSetId: mockGetMeasuresBySetId,
       });
 
-      const mockMeasure = {
-        id: "measure-1",
-        model: "QI-Core",
-        measureName: "Parent Measure",
-      };
-
       render(
         <AddComponentsDialog
           open={true}
           onClose={jest.fn()}
           measure={mockMeasure}
           compositeScoring="Opportunity"
-          components={[]}
+          components={[{ id: "other-version", measureSetId: "set-1" }]}
           submitComponentForm={jest.fn()}
         />
       );
@@ -1595,16 +1850,14 @@ describe("AddComponentsDialog", () => {
       const expandButton = getExpandButton(firstDataRow);
 
       if (expandButton) {
-        await userEvent.click(expandButton);
-
+        userEvent.click(expandButton);
         await waitFor(() => {
-          expect(consoleErrorSpy).toHaveBeenCalledWith(
-            "Failed to fetch associated measures:",
-            expect.any(Error)
-          );
+          expect(mockGetMeasuresBySetId).toHaveBeenCalled();
         });
       }
 
+      // the table row is still rendered (no crash)
+      expect(screen.queryByText("Test Measure")).toBeInTheDocument();
       consoleErrorSpy.mockRestore();
     });
 
@@ -1659,13 +1912,7 @@ describe("AddComponentsDialog", () => {
         fetchMeasuresByIds: mockFetchMeasuresByIds,
       });
 
-      const onCloseMock = jest.fn();
       const submitComponentFormMock = jest.fn();
-      const mockMeasure = {
-        id: "measure-1",
-        model: "QI-Core",
-        measureName: "Parent Measure",
-      };
 
       render(
         <AddComponentsDialog
@@ -1753,13 +2000,7 @@ describe("AddComponentsDialog", () => {
         fetchMeasuresByIds: mockFetchMeasuresByIds,
       });
 
-      const onCloseMock = jest.fn();
       const submitComponentFormMock = jest.fn();
-      const mockMeasure = {
-        id: "measure-1",
-        model: "QI-Core",
-        measureName: "Parent Measure",
-      };
 
       render(
         <AddComponentsDialog

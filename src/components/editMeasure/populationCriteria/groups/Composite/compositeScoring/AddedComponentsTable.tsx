@@ -1,10 +1,4 @@
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import React, { useMemo, useState } from "react";
 import {
   ColumnDef,
   getCoreRowModel,
@@ -15,7 +9,6 @@ import {
 } from "@tanstack/react-table";
 import { TruncateText } from "@madie/madie-design-system/dist/react";
 import * as _ from "lodash";
-import { useMeasureServiceApi } from "@madie/madie-util";
 import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
 import tw from "twin.macro";
 import "styled-components/macro";
@@ -23,7 +16,7 @@ import { convertDate } from "../../../../testCases/components/testCaseLanding/co
 import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
-import { Component, Measure } from "@madie/madie-models";
+import { Measure } from "@madie/madie-models";
 import { IconButton, Tooltip } from "@mui/material";
 import {
   CollapseIcon,
@@ -34,14 +27,12 @@ const TH = tw.th`p-3 text-left text-sm font-bold capitalize`;
 
 export default function AddedComponentsTable({
   components,
-  onComponentsUpdate,
+  onDeleteComponent,
 }: {
-  components: Component[];
-  onComponentsUpdate: (updatedComponents: Component[]) => void;
+  components: Measure[];
+  onDeleteComponent: (componentId: string) => void;
 }) {
   const [hoveredHeader, setHoveredHeader] = useState<string>("");
-  const measureServiceApi = useRef(useMeasureServiceApi()).current;
-  const [retrievedComponents, setRetrievedComponents] = useState([]);
   const [loading, setLoading] = useState(false);
 
   const [selectedGroupForExpansion, setSelectedGroupForExpansion] =
@@ -61,37 +52,10 @@ export default function AddedComponentsTable({
     }
   };
 
-  const fetchMeasuresForComponents = useCallback(async () => {
-    if (!components?.length) {
-      setRetrievedComponents([]);
-      return;
-    }
-    try {
-      // multiple components can share the same measureId (different groups).
-      // we only need each measureId once.
-      const componentMeasureIds = _.uniq(components.map((c) => c.measureId));
-
-      const results = await measureServiceApi.fetchMeasuresByIds(
-        componentMeasureIds
-      );
-      setRetrievedComponents(results);
-    } catch (err) {
-      console.error(err);
-    }
-  }, [components, measureServiceApi]);
-
-  useEffect(() => {
-    fetchMeasuresForComponents();
-  }, [fetchMeasuresForComponents]);
-
   const handleDeleteComponent = (measureId: string) => {
     setLoading(true);
     try {
-      const updatedComponents = components.filter(
-        (comp) => comp.measureId !== measureId
-      );
-
-      onComponentsUpdate(updatedComponents);
+      onDeleteComponent(measureId);
     } catch (err) {
       console.error("Error deleting component:", err);
     } finally {
@@ -203,7 +167,7 @@ export default function AddedComponentsTable({
   const [sorting, setSorting] = React.useState<SortingState>([]);
 
   const table = useReactTable({
-    data: retrievedComponents,
+    data: components,
     columns,
     getRowId: (row) => row.id,
     defaultColumn: {
@@ -237,7 +201,7 @@ export default function AddedComponentsTable({
     ];
   }, []);
 
-  const uniqueMeasures = _.uniqBy(components, (c) => c.measureId);
+  const uniqueMeasures = _.uniqBy(components, (c) => c.id);
   return components.length > 0 ? (
     <div>
       <h3

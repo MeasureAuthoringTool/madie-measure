@@ -70,7 +70,7 @@ export default function AddComponentsDialog({
 }) {
   // we need to know what measures are added by means of component selection
   const preselectedIds = useMemo(
-    () => new Set((components ?? []).map((c) => c.measureId)),
+    () => new Set((components ?? []).map((c) => c.id)),
     [components]
   );
 
@@ -82,12 +82,12 @@ export default function AddComponentsDialog({
   const [visibleItems, setVisibleItems] = useState<number>(0);
   const [offset, setOffset] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(false);
-  const [selectedRowId, setSelectedRowId] = React.useState<string | null>(null);
   const [hoveredHeader, setHoveredHeader] = useState<string>("");
   const [sorting, setSorting] = React.useState<SortingState>([]);
-  const [selectedIdForExpansion, setSelectedIdForExpansion] = useState(null);
-  const [isRowExpanded, setIsRowExpanded] = useState<boolean>(false);
-  const [expandedSectionData, setExpandedSectionData] = useState<TCRow[]>([]);
+  // Map of measureSetId -> expanded sub-rows (supports multiple expanded rows)
+  const [expandedSectionMap, setExpandedSectionMap] = useState<
+    Record<string, TCRow[]>
+  >({});
   const abortController = useRef(null);
   const [expandedRowSelection, setExpandedRowSelection] = useState({});
 
@@ -147,30 +147,38 @@ export default function AddComponentsDialog({
     }));
   };
 
-  const handleRowClick = async (actions) => {
-    if (!isRowExpanded || selectedIdForExpansion !== actions?.measureSetId) {
-      setSelectedIdForExpansion(actions?.measureSetId);
+  const handleRowClick = async (row: Measure) => {
+    const isRowCurrentlyExpanded =
+      expandedSectionMap[row?.measureSetId]?.length > 0;
 
+    if (!isRowCurrentlyExpanded) {
       const searchCriteria: any = {
         fromCompositeMeasureComponent: true,
         allowedScoringTypes: getAllowedScoringTypes(compositeScoring),
       };
+      try {
+        const results = await measureServiceApi.getMeasuresByMeasureSetId(
+          row?.measureSetId,
+          true,
+          searchCriteria
+        );
 
-      const results = await measureServiceApi.getMeasuresByMeasureSetId(
-        actions?.measureSetId,
-        true,
-        searchCriteria
-      );
-
-      const filteredResults = results.filter(
-        (result) => result.id !== actions?.id && result.id !== measure?.id
-      );
-      setIsRowExpanded(true);
-      setExpandedSectionData(transFormData(filteredResults));
+        const filteredResults = results.filter(
+          (result) => result.id !== row?.id && result.id !== measure?.id
+        );
+        setExpandedSectionMap((prev) => ({
+          ...prev,
+          [row.measureSetId]: transFormData(filteredResults),
+        }));
+      } catch (error: any) {
+        console.error("Failed to fetch measures for measure set:", error);
+      }
     } else {
-      setIsRowExpanded(false);
-      setExpandedSectionData(null);
-      setSelectedIdForExpansion(null);
+      setExpandedSectionMap((prev) => {
+        const newState = { ...prev };
+        delete newState[row.measureSetId];
+        return newState;
+      });
     }
   };
 
@@ -185,24 +193,46 @@ export default function AddComponentsDialog({
     } else {
       // Reset all expanded state when dialog closes
       setExpandedRowSelection({});
-      setIsRowExpanded(false);
-      setSelectedIdForExpansion(null);
-      setExpandedSectionData([]);
+      setExpandedSectionMap({});
     }
   }, [open, preselectedIds]);
 
+  // Auto-expand rows whose measureSetId matches any component's measureSetId on table load
+  useEffect(() => {
+    if (!open || !measureList?.length || !components?.length) {
+      return;
+    }
+
+    const componentMeasureSetIds = new Set(
+      components.map((c) => c.measureSetId).filter(Boolean)
+    );
+
+    // expand the row by default if component selected is not the latest version in the measure set
+    for (const measure of measureList) {
+      if (
+        componentMeasureSetIds.has(measure.measureSetId) &&
+        !expandedSectionMap[measure.measureSetId] &&
+        !components.some((component) => component.id === measure.id)
+      ) {
+        handleRowClick(measure);
+      }
+    }
+  }, [measureList, open]);
+
   // Sync expanded row selection with preselected IDs whenever expanded data changes
   useEffect(() => {
-    if (open && expandedSectionData?.length > 0) {
+    if (open && Object.keys(expandedSectionMap).length > 0) {
       const newExpandedRowSelection: Record<string, boolean> = {};
-      expandedSectionData.forEach((row) => {
-        if (preselectedIds.has(row.actions.id)) {
-          newExpandedRowSelection[row.id] = true;
-        }
+      Object.values(expandedSectionMap).forEach((rows) => {
+        rows.forEach((row) => {
+          if (preselectedIds.has(row.actions.id)) {
+            newExpandedRowSelection[row.id] = true;
+          }
+        });
       });
       setExpandedRowSelection(newExpandedRowSelection);
     }
-  }, [expandedSectionData, preselectedIds, open]);
+  }, [expandedSectionMap, preselectedIds, open]);
 
   const columns = useMemo<ColumnDef<Measure>[]>(() => {
     const columnDefs = [
@@ -316,8 +346,8 @@ export default function AddComponentsDialog({
                   justifyContent: "center",
                 }}
               >
-                {isRowExpanded &&
-                selectedIdForExpansion === info.row.original.measureSetId ? (
+                {expandedSectionMap[info.row.original.measureSetId]?.length >
+                0 ? (
                   <CollapseIcon />
                 ) : (
                   <ExpandIcon />
@@ -333,7 +363,7 @@ export default function AddComponentsDialog({
     ];
 
     return columnDefs;
-  }, [selectedIdForExpansion, isRowExpanded]);
+  }, [expandedSectionMap]);
 
   const getAllowedScoringTypes = (compositeScoring: string) => {
     if (
@@ -356,7 +386,6 @@ export default function AddComponentsDialog({
       return;
     }
     setLoading(true);
-    setSelectedRowId(null);
     abortController.current = new AbortController();
     const { finalSearchField, finalFilterBy } = finalSearchAndFilterby;
     const optionalSearchProperties = [];
@@ -380,7 +409,8 @@ export default function AddComponentsDialog({
       fromCompositeMeasureComponent: true,
       allowedScoringTypes: getAllowedScoringTypes(compositeScoring),
       searchField: finalSearchField,
-      priorityMeasureIds: components?.map((c) => c.measureId) || [],
+      // already selected components should be prioritized on top, so pass their measureSetIds to backend for sorting priority
+      priorityMeasureSets: components?.map((c) => c.measureSetId) || [],
     };
 
     measureServiceApi
@@ -730,8 +760,8 @@ export default function AddComponentsDialog({
                         </td>
                       ))}
                     </tr>
-                    {selectedIdForExpansion === row.original.measureSetId &&
-                      expandedSectionData?.map((subRow) => (
+                    {expandedSectionMap[row.original.measureSetId]?.map(
+                      (subRow) => (
                         <SelectedRow
                           key={subRow.id}
                           className="expanded-row"
@@ -757,7 +787,8 @@ export default function AddComponentsDialog({
                             </td>
                           ))}
                         </SelectedRow>
-                      ))}
+                      )
+                    )}
                   </React.Fragment>
                 ))
               )}
