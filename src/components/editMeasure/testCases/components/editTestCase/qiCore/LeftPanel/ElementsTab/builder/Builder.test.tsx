@@ -111,9 +111,6 @@ const serviceConfig: ServiceConfig = {
   measureService: {
     baseUrl: "measure.com",
   },
-  testCaseService: {
-    baseUrl: "testCaseService.com",
-  },
   terminologyService: {
     baseUrl: "terminologyService.com",
   },

@@ -63,9 +63,6 @@ export const mockValueSets = [
 ];
 
 const serviceConfig: ServiceConfig = {
-  testCaseService: {
-    baseUrl: "base.url",
-  },
   measureService: {
     baseUrl: "base.url",
   },

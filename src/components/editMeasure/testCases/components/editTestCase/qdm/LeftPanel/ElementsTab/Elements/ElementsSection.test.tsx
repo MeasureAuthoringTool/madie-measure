@@ -26,9 +26,6 @@ import { useQdmPatient } from "../../../../../../util/QdmPatientContext";
 import { DataElement } from "cqm-models";
 
 const serviceConfig: ServiceConfig = {
-  testCaseService: {
-    baseUrl: "base.url",
-  },
   measureService: {
     baseUrl: "base.url",
   },

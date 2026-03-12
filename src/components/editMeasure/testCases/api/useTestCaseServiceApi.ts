@@ -522,7 +522,7 @@ const useTestCaseServiceApi = (): TestCaseServiceApi => {
   const serviceConfig: ServiceConfig = useServiceConfig();
   const { getAccessToken } = useOktaTokens();
   return new TestCaseServiceApi(
-    serviceConfig?.testCaseService.baseUrl,
+    serviceConfig?.measureService.baseUrl,
     getAccessToken
   );
 };
