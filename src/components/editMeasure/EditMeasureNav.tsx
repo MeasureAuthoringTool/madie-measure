@@ -42,7 +42,7 @@ const EditMeasureNav = ({ isQDM }) => {
     "supplemental-data",
     "risk-adjustment",
     "base-configuration",
-  ].includes(match ?? "")
+  ].includes(match!)
     ? "groups"
     : match;
 
