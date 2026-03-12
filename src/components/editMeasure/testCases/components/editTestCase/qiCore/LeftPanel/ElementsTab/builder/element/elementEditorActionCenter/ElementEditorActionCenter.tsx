@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { SpeedDial, SpeedDialAction } from "@mui/material";
 import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
-import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import { MadieDeleteDialog } from "@madie/madie-design-system/dist/react";
 
@@ -33,13 +32,6 @@ const ElementEditorActionCenter = (props: PropTypes) => {
       props.addElementOfMultipleCardinality();
     },
   };
-  const copyAction = {
-    name: "Copy",
-    icon: <ContentCopyIcon sx={{ color: "#3171C2" }} />,
-    onClick: () => {
-      // GAK MAT-8682.. avoiding an ugly error; Copy logic can be implemented here if needed
-    },
-  };
   const deleteAction = {
     name: "Delete",
     icon: <DeleteOutlinedIcon sx={{ color: "#c83f38" }} />,
@@ -64,7 +56,6 @@ const ElementEditorActionCenter = (props: PropTypes) => {
       localActions.push(deleteAction);
     }
     if (max == "*") {
-      localActions.push(copyAction);
       localActions.push(addAction);
     }
     setActions(localActions);
