@@ -842,8 +842,8 @@ export default function AddComponentsDialog({
         hidePrevButton={!(page > 0)}
       />
       <Toast
-        toastKey="expand-meausre-set-toast"
-        testId="expand-meausre-set-toast"
+        toastKey="expand-measure-set-toast"
+        testId="expand-measure-set-toast"
         toastType={toast.type}
         open={toast.open}
         message={toast.message}
