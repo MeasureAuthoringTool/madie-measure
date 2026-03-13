@@ -162,6 +162,10 @@ export default function ReferenceComponent({
     bundleEntries
   ) => {
     if (!selectedReferenceType || !selectedProfileUrl) return emptyOption;
+    const isPatient = selectedReferenceType === "Patient";
+    const hasPatient = bundleEntries.find(
+      (entry) => entry.resource.resourceType === "Patient"
+    );
     const matchTypes = getProfileMatchTypes(selectedProfileUrl);
     const filtered = bundleEntries.filter((entry) => {
       if (entry.resource.resourceType !== selectedReferenceType) return false;
@@ -173,10 +177,18 @@ export default function ReferenceComponent({
       );
     });
     if (filtered.length === 0) return emptyOption;
-    return filtered.map((res) => ({
-      label: `${selectedReferenceType}/${res.resource.id}`,
-      value: `${selectedReferenceType}/${res.resource.id}`,
-    }));
+    const filterResult = filtered
+      .map((res) => ({
+        label: `${selectedReferenceType}/${res.resource.id}`,
+        value: `${selectedReferenceType}/${res.resource.id}`,
+      }))
+      .concat(emptyOption);
+    // easier to remove the empty option then conditionally add it.
+    if (isPatient && hasPatient) {
+      // remove last entry
+      filterResult.splice(filterResult.length - 1, 1);
+    }
+    return filterResult;
   };
 
   // Use new getFinalOptions logic
