@@ -66,6 +66,47 @@ const findProfileUrlFromReferenceType = (
   return matchingOption?.profile || "";
 };
 
+const emptyOption = [
+  { label: "ID Not Present (Add New)", value: "add_new_id" },
+]; // If no resources of that type exist, we need to show a message in the dropdown
+
+// Updated getFinalOptions to filter by resourceType and meta.profile hierarchy
+export const getFinalOptions = (
+  selectedReferenceType,
+  selectedProfileUrl,
+  bundleEntries,
+  resource
+) => {
+  if (!selectedReferenceType || !selectedProfileUrl) return emptyOption;
+  const isPatient = selectedReferenceType === "Patient";
+  const hasPatient = bundleEntries.find(
+    (entry) => entry.resource.resourceType === "Patient"
+  );
+  const matchTypes = getProfileMatchTypes(selectedProfileUrl);
+  const filtered = bundleEntries.filter((entry) => {
+    if (entry.resource.resourceType !== selectedReferenceType) return false;
+    if (entry.resource.id === resource?.id) return false;
+
+    const profiles = entry.resource.meta?.profile || [];
+    return profiles.some((url) =>
+      matchTypes.some((type) => url.includes(type))
+    );
+  });
+  if (filtered.length === 0) return emptyOption;
+  const filterResult = filtered
+    .map((res) => ({
+      label: `${selectedReferenceType}/${res.resource.id}`,
+      value: `${selectedReferenceType}/${res.resource.id}`,
+    }))
+    .concat(emptyOption);
+  // easier to remove the empty option then conditionally add it.
+  if (isPatient && hasPatient) {
+    // remove last entry
+    filterResult.splice(filterResult.length - 1, 1);
+  }
+  return filterResult;
+};
+
 export default function ReferenceComponent({
   structureDefinition,
   canEdit,
@@ -146,56 +187,17 @@ export default function ReferenceComponent({
     value: res.profile,
   }));
 
-  const emptyOption = [
-    { label: "ID Not Present (Add New)", value: "add_new_id" },
-  ]; // If no resources of that type exist, we need to show a message in the dropdown
-
   // Store selected profile URL instead of just type
   const [selectedProfileUrl, setSelectedProfileUrl] = useState<string>(
     value?.referenceProfileUrl || ""
   );
 
-  // Updated getFinalOptions to filter by resourceType and meta.profile hierarchy
-  const getFinalOptions = (
-    selectedReferenceType,
-    selectedProfileUrl,
-    bundleEntries
-  ) => {
-    if (!selectedReferenceType || !selectedProfileUrl) return emptyOption;
-    const isPatient = selectedReferenceType === "Patient";
-    const hasPatient = bundleEntries.find(
-      (entry) => entry.resource.resourceType === "Patient"
-    );
-    const matchTypes = getProfileMatchTypes(selectedProfileUrl);
-    const filtered = bundleEntries.filter((entry) => {
-      if (entry.resource.resourceType !== selectedReferenceType) return false;
-      if (entry.resource.id === resource?.id) return false;
-
-      const profiles = entry.resource.meta?.profile || [];
-      return profiles.some((url) =>
-        matchTypes.some((type) => url.includes(type))
-      );
-    });
-    if (filtered.length === 0) return emptyOption;
-    const filterResult = filtered
-      .map((res) => ({
-        label: `${selectedReferenceType}/${res.resource.id}`,
-        value: `${selectedReferenceType}/${res.resource.id}`,
-      }))
-      .concat(emptyOption);
-    // easier to remove the empty option then conditionally add it.
-    if (isPatient && hasPatient) {
-      // remove last entry
-      filterResult.splice(filterResult.length - 1, 1);
-    }
-    return filterResult;
-  };
-
   // Use new getFinalOptions logic
   const finalOptions = getFinalOptions(
     selectedReferenceType,
     selectedProfileUrl,
-    state.bundle.entry
+    state.bundle.entry,
+    resource
   );
   const [selectedReferenceId, setSelectedReferenceId] = useState<string>(
     value?.reference || ""
