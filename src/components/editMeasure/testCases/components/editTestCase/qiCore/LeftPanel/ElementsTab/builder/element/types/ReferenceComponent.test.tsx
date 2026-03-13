@@ -1,9 +1,10 @@
 import * as React from "react";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import ReferenceComponent, {
   getReferenceComponentLabel,
   getHighestPriorityResourceList,
   getProfileMatchTypes,
+  getFinalOptions,
 } from "./ReferenceComponent";
 import ResourceContext from "../../ResourceContext";
 import { useQiCoreResource } from "../../../../../../../../util/QiCorePatientProvider";
@@ -1268,5 +1269,62 @@ describe("ReferenceComponent", () => {
         "Encounter/encounter-qicore-123"
       );
     });
+  });
+
+  it("removes the trailing empty option when (isPatient && hasPatient) is true", () => {
+    const selectedReferenceType = "Patient";
+    const selectedProfileUrl =
+      "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient";
+
+    const bundleEntries = [
+      {
+        resource: {
+          resourceType: "Patient",
+          id: "keep-me",
+          meta: {
+            profile: [
+              "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient",
+            ],
+          },
+        },
+      },
+      {
+        resource: {
+          resourceType: "Patient",
+          id: "exclude-me",
+          meta: {
+            profile: [
+              "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient",
+            ],
+          },
+        },
+      },
+      {
+        resource: {
+          resourceType: "Observation",
+          id: "obs-1",
+          meta: {
+            profile: [
+              "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-observation",
+            ],
+          },
+        },
+      },
+    ];
+
+    const resource = { id: "exclude-me" };
+
+    const result = getFinalOptions(
+      selectedReferenceType,
+      selectedProfileUrl,
+      bundleEntries,
+      resource
+    );
+    expect(result).toEqual([
+      { label: "Patient/keep-me", value: "Patient/keep-me" },
+    ]);
+
+    // Extra guard: ensure no "add_new_id" present
+    expect(result.some((o) => o.value === "add_new_id")).toBe(false);
   });
 });
