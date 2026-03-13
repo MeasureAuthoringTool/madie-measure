@@ -91,13 +91,9 @@ const mockTransferMeasuresResponse = jest.fn().mockResolvedValue({
   status: 200,
   data: [],
 });
-const mockAdminTransferMeasuresResponse = jest.fn().mockResolvedValue({
-  status: 200,
-  data: [],
-});
+
 const mockMeasureServiceApi = {
   transferMeasures: mockTransferMeasuresResponse,
-  adminTransferMeasures: mockAdminTransferMeasuresResponse,
 } as unknown as MeasureServiceApi;
 
 describe("Transfer Measures Dialog component", () => {

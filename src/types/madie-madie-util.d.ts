@@ -30,7 +30,6 @@ declare module "@madie/madie-util" {
     QICoreCompositeMeasure: boolean;
     DisplayOwner: boolean;
     MakeJSONMatchUI: boolean;
-    AdminTransferMeasures: boolean;
     AdminShareMeasures: boolean;
     AdminTransferMeasure: boolean;
   }
@@ -179,11 +178,6 @@ declare module "@madie/madie-util" {
     shareMeasures(measureUserIdMap: Map<string, string[]>): Promise<any>;
     unshareMeasures(measureUserIdMap: Map<string, string[]>): Promise<any>;
     transferMeasures(
-      measureIds: Array<string>,
-      harpId: string,
-      retainShareAccess: boolean
-    ): Promise<any>;
-    adminTransferMeasures(
       measureIds: Array<string>,
       harpId: string,
       retainShareAccess: boolean
