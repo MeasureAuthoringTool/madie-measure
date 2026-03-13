@@ -42,18 +42,11 @@ const TransferDialog = ({
 
     const measureIds = measures.map((m) => m.id);
 
-    // Use admin endpoint if this is an admin transfer, otherwise use regular endpoint
-    const transferPromise = isAdminTransfer
-      ? measureServiceApi.adminTransferMeasures(
-          measureIds,
-          formik.values.harpId,
-          formik.values.retainShareAccess
-        )
-      : measureServiceApi.transferMeasures(
-          measureIds,
-          formik.values.harpId,
-          formik.values.retainShareAccess
-        );
+    const transferPromise = measureServiceApi.transferMeasures(
+      measureIds,
+      formik.values.harpId,
+      formik.values.retainShareAccess
+    );
 
     return transferPromise
       .then((response) => {
