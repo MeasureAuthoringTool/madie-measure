@@ -356,7 +356,7 @@ describe("ReferenceComponent", () => {
     await userEvent.click(await screen.findByTestId("reference-select-0"));
 
     const options = await screen.findAllByRole("option");
-    expect(options.length).toBe(2);
+    expect(options.length).toBe(3);
     expect(
       options.some((opt) => opt.textContent?.includes("encounter-uscore-1"))
     ).toBe(true);
@@ -437,7 +437,7 @@ describe("ReferenceComponent", () => {
     await userEvent.click(await screen.findByTestId("reference-select-0"));
 
     const options = await screen.findAllByRole("option");
-    expect(options.length).toBe(1);
+    expect(options.length).toBe(2);
     expect(
       options.some((opt) => opt.textContent?.includes("encounter-uscore-1"))
     ).toBe(false);
