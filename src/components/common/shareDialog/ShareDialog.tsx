@@ -7,6 +7,7 @@ import React, {
 } from "react";
 import GlobalStyles from "../../../styles/GlobalStyles";
 import { Backdrop, Checkbox, Typography } from "@mui/material";
+import ExportIcon from "./ExportIcon.svg";
 import {
   TextField,
   MadieDialog,
@@ -41,6 +42,7 @@ interface ShareDialogProps {
   option: string;
   onClose: Function;
   onSave: Function;
+  isAdmin?: boolean;
 }
 
 interface SharedMeasure {
@@ -104,6 +106,7 @@ const ShareDialog = ({
   option,
   onClose,
   onSave,
+  isAdmin,
 }: ShareDialogProps) => {
   const { getUserName } = useOktaTokens();
   const userName = getUserName();
@@ -544,6 +547,17 @@ const ShareDialog = ({
     }
   }, [option, open, measures, userName]);
 
+  const handleExportUserList = (e) => {
+    e.preventDefault();
+  };
+
+  const renderExportButton = () => (
+    <button onClick={handleExportUserList} className="export-user-list-btn">
+      <img src={ExportIcon} alt="ExportIcon" />
+      Export User List(.CSV)
+    </button>
+  );
+
   return (
     <>
       <GlobalStyles />
@@ -613,10 +627,14 @@ const ShareDialog = ({
             <div>
               When sharing a measure, all versions and drafts are shared, so
               only the most recent measure name appears here.
+              {isAdmin && option !== "Unshare" && renderExportButton()}
             </div>
             {option === "Unshare" && (
-              <div>
+              <div
+                style={{ display: "flex", alignItems: "center", gap: "380px" }}
+              >
                 Deselect the users with whom you want to unshare the measure(s).
+                {isAdmin && renderExportButton()}
               </div>
             )}
           </div>
