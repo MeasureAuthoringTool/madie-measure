@@ -749,6 +749,7 @@ export default function EditMeasure() {
             option={shareDialog.option}
             onClose={handleShareDialogClose}
             onSave={handleShareDialogSave}
+            isAdmin={userRoles?.isAdmin}
           />
 
           <InvalidTestCaseDialog

@@ -173,4 +173,29 @@
   margin-left: 32px;
   margin-right: 32px;
   padding-bottom: 17px;
+
+  > div {
+    display: flex;
+    align-items: center;
+    gap: 40px;
+    font-size: 16px;
+  }
+
+  .export-user-list-btn {
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #0073c8;
+    padding: 0;
+    font: inherit;
+
+    img {
+      width: 14px;
+      height: 14px;
+    }
+  }
 }
