@@ -1,9 +1,8 @@
-import React from "react";
+import * as React from "react";
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 import AddedComponentsTable from "./AddedComponentsTable";
-import { useMeasureServiceApi } from "@madie/madie-util";
 
 jest.mock(
   "../../../../testCases/components/testCaseLanding/common/TestCaseTable/TestCaseTable",
@@ -12,13 +11,8 @@ jest.mock(
   })
 );
 
-// Service hook mock
-jest.mock("@madie/madie-util", () => ({
-  useMeasureServiceApi: jest.fn(),
-}));
-
 // ---- Test fixtures ----
-const measuresFixture = [
+const measuresFixture: any[] = [
   {
     id: "m1",
     measureName: "Alpha Measure",
@@ -35,21 +29,17 @@ const measuresFixture = [
   },
 ];
 
-const makeService = (overrides?: Partial<ReturnType<any>>) => {
-  return {
-    fetchMeasuresByIds: jest.fn().mockResolvedValue(measuresFixture),
-    ...overrides,
-  };
-};
+const mockDelete = jest.fn();
 
 describe("AddedComponentsTable", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    (useMeasureServiceApi as jest.Mock).mockReturnValue(makeService());
   });
 
-  it("renders nothing when components is empty", async () => {
-    render(<AddedComponentsTable components={[]} />);
+  it("renders nothing when components is empty", () => {
+    render(
+      <AddedComponentsTable components={[]} onDeleteComponent={mockDelete} />
+    );
 
     // component returns null if components.length === 0
     expect(screen.queryByTestId("measure-list-tbl")).not.toBeInTheDocument();
@@ -58,22 +48,12 @@ describe("AddedComponentsTable", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("fetches measures by ids and renders rows/columns", async () => {
-    const service = makeService();
-    (useMeasureServiceApi as jest.Mock).mockReturnValue(service);
-
-    // include duplicates by measureId to exercise the unique count header
-    const components = [
-      { measureId: "m1", groupId: "g1" },
-      { measureId: "m2", groupId: "g2" },
-      { measureId: "m2", groupId: "g3" },
-    ];
-
-    render(<AddedComponentsTable components={components} />);
-
-    // Fetch should be called once with distinct measure ids (component just maps ids)
-    await waitFor(() =>
-      expect(service.fetchMeasuresByIds).toHaveBeenCalledWith(["m1", "m2"])
+  it("renders rows/columns from the components prop", () => {
+    render(
+      <AddedComponentsTable
+        components={measuresFixture}
+        onDeleteComponent={mockDelete}
+      />
     );
 
     // Table exists
@@ -94,27 +74,18 @@ describe("AddedComponentsTable", () => {
     // Updated column uses mocked convertDate
     expect(screen.getAllByText("Jan 15, 2024").length).toBeGreaterThan(0);
 
-    // Unique count in header should be 2 (m1, m2)
+    // Unique count — 2 distinct ids
     expect(
       screen.getByText("Selected Composite Measure Components (2)")
     ).toBeInTheDocument();
   });
 
   it("cycles sort header title on Measure column (asc → desc → clear → asc)", async () => {
-    const service = makeService();
-    (useMeasureServiceApi as jest.Mock).mockReturnValue(service);
-
     render(
       <AddedComponentsTable
-        components={[
-          { measureId: "m1", groupId: "g1" },
-          { measureId: "m2", groupId: "g2" },
-        ]}
+        components={measuresFixture}
+        onDeleteComponent={mockDelete}
       />
-    );
-
-    await waitFor(() =>
-      expect(screen.getByTestId("measure-list-tbl")).toBeInTheDocument()
     );
 
     const measureHeaderBtn = screen.getByRole("button", { name: "Measure" });
@@ -131,21 +102,13 @@ describe("AddedComponentsTable", () => {
   });
 
   it("shows the 'hover' branch on a sortable header (no assertion on icon accessibility)", async () => {
-    const service = makeService();
-    (useMeasureServiceApi as jest.Mock).mockReturnValue(service);
-
     render(
       <AddedComponentsTable
-        components={[
-          { measureId: "m1", groupId: "g1" },
-          { measureId: "m2", groupId: "g2" },
-        ]}
+        components={measuresFixture}
+        onDeleteComponent={mockDelete}
       />
     );
 
-    await waitFor(() =>
-      expect(screen.getByTestId("measure-list-tbl")).toBeInTheDocument()
-    );
     const measureHeaderBtn = screen.getByRole("button", { name: "Measure" });
     const measureTH = measureHeaderBtn.closest("th");
     expect(measureTH).toBeInTheDocument();
@@ -155,23 +118,14 @@ describe("AddedComponentsTable", () => {
   });
 
   it("renders an actions cell with Delete tooltip for each row", async () => {
-    const service = makeService();
-    (useMeasureServiceApi as jest.Mock).mockReturnValue(service);
-
     render(
       <AddedComponentsTable
-        components={[
-          { measureId: "m1", groupId: "g1" },
-          { measureId: "m2", groupId: "g2" },
-        ]}
+        components={measuresFixture}
+        onDeleteComponent={mockDelete}
       />
     );
 
-    await waitFor(() =>
-      expect(screen.getByTestId("measure-list-tbl")).toBeInTheDocument()
-    );
     const bodyRows = screen.getAllByTestId("row-item");
-
     expect(bodyRows.length).toBeGreaterThan(0);
 
     for (const row of bodyRows) {
@@ -186,118 +140,72 @@ describe("AddedComponentsTable", () => {
     }
   });
 
-  it("logs error when fetchMeasuresByIds rejects", async () => {
+  it("logs error when onDeleteComponent throws", async () => {
     const consoleSpy = jest.spyOn(console, "error").mockImplementation();
 
-    (useMeasureServiceApi as jest.Mock).mockReturnValue(
-      makeService({
-        fetchMeasuresByIds: jest
-          .fn()
-          .mockRejectedValue(new Error("boom fetching")),
-      })
-    );
+    const throwingDelete = jest.fn(() => {
+      throw new Error("boom deleting");
+    });
 
     render(
       <AddedComponentsTable
-        components={[
-          { measureId: "m1", groupId: "g1" },
-          { measureId: "m2", groupId: "g2" },
-        ]}
+        components={measuresFixture}
+        onDeleteComponent={throwingDelete}
       />
     );
 
-    await waitFor(() => {
-      expect(consoleSpy).toHaveBeenCalled();
-    });
+    const deleteButton = screen.getByTestId("delete-component-m1");
+    await userEvent.click(deleteButton);
 
+    expect(consoleSpy).toHaveBeenCalled();
     consoleSpy.mockRestore();
   });
 
-  it("refetches when components prop changes", async () => {
-    const service = makeService();
-    (useMeasureServiceApi as jest.Mock).mockReturnValue(service);
-
+  it("rerenders correctly when components prop changes", () => {
     const { rerender } = render(
-      <AddedComponentsTable components={[{ measureId: "m1", groupId: "g1" }]} />
-    );
-
-    await waitFor(() =>
-      expect(service.fetchMeasuresByIds).toHaveBeenCalledWith(["m1"])
-    );
-
-    service.fetchMeasuresByIds.mockClear();
-
-    rerender(
       <AddedComponentsTable
-        components={[
-          { measureId: "m1", groupId: "g1" },
-          { measureId: "m2", groupId: "gX" },
-        ]}
+        components={[measuresFixture[0]]}
+        onDeleteComponent={mockDelete}
       />
     );
 
-    await waitFor(() =>
-      expect(service.fetchMeasuresByIds).toHaveBeenCalledWith(["m1", "m2"])
+    expect(screen.getByText("Alpha Measure")).toBeInTheDocument();
+    expect(screen.queryByText("Beta Measure")).not.toBeInTheDocument();
+
+    rerender(
+      <AddedComponentsTable
+        components={measuresFixture}
+        onDeleteComponent={mockDelete}
+      />
     );
 
     expect(screen.getByText("Alpha Measure")).toBeInTheDocument();
     expect(screen.getByText("Beta Measure")).toBeInTheDocument();
   });
 
-  it("calls onComponentsUpdate with filtered components when delete button is clicked", async () => {
-    const service = makeService();
-    (useMeasureServiceApi as jest.Mock).mockReturnValue(service);
-
-    const components = [
-      { measureId: "m1", groupId: "g1" },
-      { measureId: "m2", groupId: "g2" },
-    ];
-
-    const mockOnComponentsUpdate = jest.fn();
-
+  it("calls onDeleteComponent with the measure id when delete button is clicked", async () => {
     render(
       <AddedComponentsTable
-        components={components}
-        onComponentsUpdate={mockOnComponentsUpdate}
+        components={measuresFixture}
+        onDeleteComponent={mockDelete}
       />
-    );
-
-    await waitFor(() =>
-      expect(screen.getByTestId("measure-list-tbl")).toBeInTheDocument()
     );
 
     const deleteButton = screen.getByTestId("delete-component-m1");
     await userEvent.click(deleteButton);
 
-    expect(mockOnComponentsUpdate).toHaveBeenCalledWith([
-      { measureId: "m2", groupId: "g2" },
-    ]);
+    expect(mockDelete).toHaveBeenCalledWith("m1");
   });
 
   it("updates the component count in header after deletion", async () => {
-    const service = makeService();
-    (useMeasureServiceApi as jest.Mock).mockReturnValue(service);
-
-    const components = [
-      { measureId: "m1", groupId: "g1" },
-      { measureId: "m2", groupId: "g2" },
-      { measureId: "m2", groupId: "g3" },
-    ];
-
-    const mockOnComponentsUpdate = jest.fn();
-
     const { rerender } = render(
       <AddedComponentsTable
-        components={components}
-        onComponentsUpdate={mockOnComponentsUpdate}
+        components={measuresFixture}
+        onDeleteComponent={mockDelete}
       />
     );
 
-    await waitFor(() =>
-      expect(screen.getByTestId("measure-list-tbl")).toBeInTheDocument()
-    );
-
-    // Initial count should be 2 (unique m1, m2)
+    // Initial count: 2 unique measures
     expect(
       screen.getByText("Selected Composite Measure Components (2)")
     ).toBeInTheDocument();
@@ -305,102 +213,66 @@ describe("AddedComponentsTable", () => {
     const deleteButton = screen.getByTestId("delete-component-m1");
     await userEvent.click(deleteButton);
 
-    // Rerender with updated components
+    expect(mockDelete).toHaveBeenCalledWith("m1");
+
+    // Rerender with updated components (parent handles removal)
     rerender(
       <AddedComponentsTable
-        components={[
-          { measureId: "m2", groupId: "g2" },
-          { measureId: "m2", groupId: "g3" },
-        ]}
-        onComponentsUpdate={mockOnComponentsUpdate}
+        components={[measuresFixture[1]]}
+        onDeleteComponent={mockDelete}
       />
     );
 
-    await waitFor(() => {
-      expect(
-        screen.getByText("Selected Composite Measure Components (1)")
-      ).toBeInTheDocument();
-    });
+    expect(
+      screen.getByText("Selected Composite Measure Components (1)")
+    ).toBeInTheDocument();
   });
 
-  it("handles deletion when components have multiple groups for same measureId", async () => {
-    const service = makeService();
-    (useMeasureServiceApi as jest.Mock).mockReturnValue(service);
-
-    const components = [
-      { measureId: "m1", groupId: "g1" },
-      { measureId: "m1", groupId: "g2" },
-      { measureId: "m2", groupId: "g3" },
+  it("handles deletion when components have multiple entries for same id", async () => {
+    // Two entries with the same id represent multiple groups for the same measure
+    const componentsWithDuplicates = [
+      { ...measuresFixture[0] },
+      { ...measuresFixture[0], groups: [{ id: "g2", displayId: "Pop2" }] },
+      { ...measuresFixture[1] },
     ];
-
-    const mockOnComponentsUpdate = jest.fn();
 
     render(
       <AddedComponentsTable
-        components={components}
-        onComponentsUpdate={mockOnComponentsUpdate}
+        components={componentsWithDuplicates}
+        onDeleteComponent={mockDelete}
       />
     );
 
-    await waitFor(() =>
-      expect(screen.getByTestId("measure-list-tbl")).toBeInTheDocument()
-    );
-
-    // Should have 2 unique measures displayed
+    // Unique count by id: 2 (m1, m2)
     expect(
       screen.getByText("Selected Composite Measure Components (2)")
     ).toBeInTheDocument();
 
-    const deleteButton = screen.getByTestId("delete-component-m1");
-    await userEvent.click(deleteButton);
+    // Two rows share "m1" because componentsWithDuplicates has two entries with the same id
+    const deleteButtons = screen.getAllByTestId("delete-component-m1");
+    await userEvent.click(deleteButtons[0]);
 
-    // All components with m1 should be removed
-    expect(mockOnComponentsUpdate).toHaveBeenCalledWith([
-      { measureId: "m2", groupId: "g3" },
-    ]);
+    expect(mockDelete).toHaveBeenCalledWith("m1");
   });
 
   it("displays expanded section with group data when component is expanded", async () => {
-    const service = makeService({
-      fetchMeasuresByIds: jest.fn().mockResolvedValue([
-        {
-          id: "m1",
-          measureName: "Alpha Measure",
-          version: "1.0.0",
-          measureSet: { cmsId: "CMS111" },
-          lastModifiedAt: "2024-01-15",
-          groups: [
-            { id: "group1", displayId: "Population1", version: "1.0.0" },
-            { id: "group2", displayId: "Population2", version: "2.0.0" },
-            { id: "group3", displayId: "Population3", version: "3.0.0" },
-          ],
-        },
-      ]),
-    });
-    (useMeasureServiceApi as jest.Mock).mockReturnValue(service);
-
-    const components = [
-      {
-        measureId: "m1",
-        groupId: "g1",
-        groups: [
-          { id: "group1", displayId: "Population1", version: "1.0.0" },
-          { id: "group2", displayId: "Population2", version: "2.0.0" },
-          { id: "group3", displayId: "Population3", version: "3.0.0" },
-        ],
-      },
-    ];
+    const componentWithGroups = {
+      ...measuresFixture[0],
+      groups: [
+        { id: "group1", displayId: "Population1" },
+        { id: "group2", displayId: "Population2" },
+        { id: "group3", displayId: "Population3" },
+      ],
+    };
 
     render(
       <AddedComponentsTable
-        components={components}
-        onComponentsUpdate={jest.fn()}
+        components={[componentWithGroups]}
+        onDeleteComponent={jest.fn()}
       />
     );
 
-    await waitFor(() =>
-      expect(screen.getByTestId("measure-list-tbl")).toBeInTheDocument()
-    );
+    expect(screen.getByTestId("measure-list-tbl")).toBeInTheDocument();
 
     const rows = screen.getAllByRole("row");
     const expandButtons = rows[1].querySelectorAll("span[role='button']");
@@ -427,20 +299,16 @@ describe("AddedComponentsTable", () => {
   });
 
   it("handling when there no groups present", async () => {
-    const service = makeService();
-    (useMeasureServiceApi as jest.Mock).mockReturnValue(service);
-    const components = [
-      {
-        measureId: "m1",
-        groupId: "g1",
-        groups: [],
-      },
-    ];
+    const componentNoGroups = { ...measuresFixture[0], groups: [] };
 
-    render(<AddedComponentsTable components={components} />);
-    await waitFor(() =>
-      expect(screen.getByTestId("measure-list-tbl")).toBeInTheDocument()
+    render(
+      <AddedComponentsTable
+        components={[componentNoGroups]}
+        onDeleteComponent={jest.fn()}
+      />
     );
+
+    expect(screen.getByTestId("measure-list-tbl")).toBeInTheDocument();
 
     const rows = screen.getAllByRole("row");
     const expandButtons = rows[1].querySelectorAll("span[role='button']");
@@ -453,21 +321,19 @@ describe("AddedComponentsTable", () => {
   });
 
   it("toggle expand icon based on expansion state", async () => {
-    const service = makeService();
-    (useMeasureServiceApi as jest.Mock).mockReturnValue(service);
+    const componentWithGroups = {
+      ...measuresFixture[0],
+      groups: [{ id: "group1", displayId: "group1" }],
+    };
 
-    const components = [
-      {
-        measureId: "m1",
-        groupId: "g1",
-        groups: [{ id: "group1", displayId: "group1", version: "1.0.0" }],
-      },
-    ];
-    render(<AddedComponentsTable components={components} />);
-
-    await waitFor(() =>
-      expect(screen.getByTestId("measure-list-tbl")).toBeInTheDocument()
+    render(
+      <AddedComponentsTable
+        components={[componentWithGroups]}
+        onDeleteComponent={mockDelete}
+      />
     );
+
+    expect(screen.getByTestId("measure-list-tbl")).toBeInTheDocument();
 
     let rows = screen.getAllByRole("row");
     let expandButtons = rows[1].querySelectorAll("span[role='button']");
