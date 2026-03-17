@@ -6,7 +6,7 @@ import React, {
   useCallback,
 } from "react";
 import GlobalStyles from "../../../styles/GlobalStyles";
-import { Backdrop, Checkbox, Typography } from "@mui/material";
+import { Backdrop, Checkbox, Link, Typography } from "@mui/material";
 import ExportIcon from "./ExportIcon.svg";
 import {
   TextField,
@@ -552,10 +552,14 @@ const ShareDialog = ({
   };
 
   const renderExportButton = () => (
-    <button onClick={handleExportUserList} className="export-user-list-btn">
+    <Link
+      component="button"
+      onClick={handleExportUserList}
+      className="export-user-list-btn"
+    >
       <img src={ExportIcon} alt="ExportIcon" />
       Export User List(.CSV)
-    </button>
+    </Link>
   );
 
   return (
