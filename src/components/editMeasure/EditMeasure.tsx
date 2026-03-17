@@ -268,11 +268,11 @@ export default function EditMeasure() {
       const isOwner = checkUserCanEdit(measure?.measureSet?.owner, []);
       const isAdminTransferEnabled =
         featureFlags?.AdminTransferMeasure && userRoles?.isAdmin;
-      const needsAdminTransfer = isAdminTransferEnabled && !isOwner;
+      const isAdminTransfer = isAdminTransferEnabled && !isOwner;
       setTransferDialog({
         open: true,
         measures: [measure],
-        isAdminTransfer: needsAdminTransfer,
+        isAdminTransfer: isAdminTransfer,
       });
     };
     window.addEventListener("transfer-measure", transferListener, false);
