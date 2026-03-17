@@ -128,6 +128,7 @@ describe("Create Share Dialog component", () => {
         option={"Share With"}
         onClose={jest.fn()}
         onSave={jest.fn()}
+        isAdmin={false}
       />
     );
     const table = await screen.findByTestId("share-measure-tbl");
@@ -135,6 +136,12 @@ describe("Create Share Dialog component", () => {
     expect(getByTestId("share-dialog")).toBeInTheDocument();
     expect(mockMeasureServiceApi.getSharedMeasures).toBeCalled();
     expect(mockMeasureServiceApi.getRecentMeasuresByMeasureSetId).toBeCalled();
+
+    expect(await screen.findByTestId("share-dialog")).toBeInTheDocument();
+
+    const exportButtons = screen.queryAllByText(/Export User List/i);
+    expect(exportButtons.length).toBe(0);
+    expect(screen.queryByText(/Export User List/i)).not.toBeInTheDocument();
   });
 
   it("should render share dialog but not call getSharedMeasures if no measure is passed in to share dialog component", async () => {
@@ -405,9 +412,13 @@ describe("Create Share Dialog component", () => {
         option={"Unshare"}
         onClose={mockOnClose}
         onSave={jest.fn()}
+        isAdmin={false}
       />
     );
     expect(await screen.findByTestId("share-dialog")).toBeInTheDocument();
+    const exportButtons = screen.queryAllByText(/Export User List/i);
+    expect(exportButtons.length).toBe(0);
+    expect(screen.queryByText(/Export User List/i)).not.toBeInTheDocument();
     expect(await screen.findByText("Unshare")).toBeInTheDocument();
 
     const cancelButton = screen.getByTestId("share-cancel-button");
@@ -1201,6 +1212,7 @@ describe("UnshareFromMe Confirmation Dialog component", () => {
         option="UnshareFromMe"
         onClose={jest.fn()}
         onSave={jest.fn()}
+        isAdmin={false}
       />
     );
 
@@ -1221,5 +1233,61 @@ describe("UnshareFromMe Confirmation Dialog component", () => {
     expect(userListItems.length).toBe(2);
     expect(userListItems[0]).toHaveTextContent("test user");
     expect(userListItems[1]).toHaveTextContent("test user");
+  });
+
+  it("should display export user list button when isAdmin is true in Share With dialog", async () => {
+    const mockOnSave = jest.fn();
+
+    render(
+      <ShareDialog
+        measures={[mockMeasure1, mockMeasure2]}
+        open={true}
+        option={"Share With"}
+        onClose={jest.fn()}
+        onSave={mockOnSave}
+        isAdmin={true}
+      />
+    );
+
+    expect(await screen.findByTestId("share-dialog")).toBeInTheDocument();
+
+    // Check that export button is visible
+    const exportButtons = await screen.findAllByText(/Export User List/i);
+    expect(exportButtons.length).toBeGreaterThan(0);
+
+    const exportButton = exportButtons[0];
+    expect(exportButton).toBeInTheDocument();
+    expect(exportButton.querySelector("img")).toHaveAttribute(
+      "alt",
+      "ExportIcon"
+    );
+  });
+
+  it("should display export user list button when isAdmin is true in Unshare dialog", async () => {
+    const mockOnSave = jest.fn();
+
+    render(
+      <ShareDialog
+        measures={[mockMeasure1, mockMeasure2]}
+        open={true}
+        option={"Unshare"}
+        onClose={jest.fn()}
+        onSave={mockOnSave}
+        isAdmin={true}
+      />
+    );
+
+    expect(await screen.findByTestId("share-dialog")).toBeInTheDocument();
+
+    // Check that export button is visible
+    const exportButtons = await screen.findAllByText(/Export User List/i);
+    expect(exportButtons.length).toBeGreaterThan(0);
+
+    const exportButton = exportButtons[0];
+    expect(exportButton).toBeInTheDocument();
+    expect(exportButton.querySelector("img")).toHaveAttribute(
+      "alt",
+      "ExportIcon"
+    );
   });
 });
