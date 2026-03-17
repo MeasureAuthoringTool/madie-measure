@@ -551,11 +551,12 @@ const ShareDialog = ({
     e.preventDefault();
   };
 
-  const renderExportButton = () => (
+  const renderExportLink = () => (
     <Link
       component="button"
       onClick={handleExportUserList}
       className="export-user-list-btn"
+      underline="none"
     >
       <img src={ExportIcon} alt="ExportIcon" />
       Export User List(.CSV)
@@ -631,14 +632,14 @@ const ShareDialog = ({
             <div>
               When sharing a measure, all versions and drafts are shared, so
               only the most recent measure name appears here.
-              {isAdmin && option !== "Unshare" && renderExportButton()}
+              {isAdmin && option !== "Unshare" && renderExportLink()}
             </div>
             {option === "Unshare" && (
               <div
                 style={{ display: "flex", alignItems: "center", gap: "380px" }}
               >
                 Deselect the users with whom you want to unshare the measure(s).
-                {isAdmin && renderExportButton()}
+                {isAdmin && renderExportLink()}
               </div>
             )}
           </div>
