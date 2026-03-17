@@ -551,18 +551,6 @@ const ShareDialog = ({
     e.preventDefault();
   };
 
-  const renderExportLink = () => (
-    <Link
-      component="button"
-      onClick={handleExportUserList}
-      className="export-user-list-btn"
-      underline="none"
-    >
-      <img src={ExportIcon} alt="ExportIcon" />
-      Export User List(.CSV)
-    </Link>
-  );
-
   return (
     <>
       <GlobalStyles />
@@ -629,17 +617,29 @@ const ShareDialog = ({
             </div>
           )}
           <div className="share-unshare-dialog-info-text">
-            <div>
-              When sharing a measure, all versions and drafts are shared, so
-              only the most recent measure name appears here.
-              {isAdmin && option !== "Unshare" && renderExportLink()}
+            <div style={{ display: "flex", flexDirection: "column" }}>
+              <div>
+                When sharing a measure, all versions and drafts are shared, so
+                only the most recent measure name appears here.
+              </div>
+              {option === "Unshare" && (
+                <div>
+                  Deselect the users with whom you want to unshare the
+                  measure(s).
+                </div>
+              )}
             </div>
-            {option === "Unshare" && (
-              <div
-                style={{ display: "flex", alignItems: "center", gap: "380px" }}
-              >
-                Deselect the users with whom you want to unshare the measure(s).
-                {isAdmin && renderExportLink()}
+            {isAdmin && (
+              <div style={{ marginLeft: "auto", flexShrink: 0 }}>
+                <Link
+                  component="button"
+                  onClick={handleExportUserList}
+                  className="export-user-list-btn"
+                  underline="none"
+                >
+                  <img src={ExportIcon} alt="ExportIcon" />
+                  Export User List (.CSV)
+                </Link>
               </div>
             )}
           </div>
