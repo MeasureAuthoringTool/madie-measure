@@ -87,6 +87,17 @@ const EditTestCaseBreadCrumbs = (props: EditTestCaseBreadCrumbsProps) => {
                   ? `Locked while being edited by ${testCase.testCaseLock.lockedBy}`
                   : "Test Case is locked"
               }
+              slotProps={{
+                tooltip: {
+                  sx: {
+                    zIndex: 99,
+                    backgroundColor: "#333",
+                    "& .MuiTooltip-arrow": {
+                      color: "#333",
+                    },
+                  },
+                },
+              }}
             >
               <LockOutlinedIcon
                 fontSize="small"

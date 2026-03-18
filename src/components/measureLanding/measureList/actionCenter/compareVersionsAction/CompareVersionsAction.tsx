@@ -74,6 +74,17 @@ export default function CompareVersionsAction(props: PropTypes) {
       onMouseOver={validateCompareActionState}
       placement="top"
       arrow
+      slotProps={{
+        tooltip: {
+          sx: {
+            zIndex: 99,
+            backgroundColor: "#333",
+            "& .MuiTooltip-arrow": {
+              color: "#333",
+            },
+          },
+        },
+      }}
     >
       <span>
         <IconButton

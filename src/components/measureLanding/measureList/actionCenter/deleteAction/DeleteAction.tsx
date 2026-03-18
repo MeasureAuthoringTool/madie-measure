@@ -56,6 +56,17 @@ export default function DeleteAction(props: PropTypes) {
       title={tooltipMessage}
       onMouseOver={validateDeleteActionState}
       arrow
+      slotProps={{
+        tooltip: {
+          sx: {
+            zIndex: 99,
+            backgroundColor: "#333",
+            "& .MuiTooltip-arrow": {
+              color: "#333",
+            },
+          },
+        },
+      }}
     >
       <span>
         <IconButton

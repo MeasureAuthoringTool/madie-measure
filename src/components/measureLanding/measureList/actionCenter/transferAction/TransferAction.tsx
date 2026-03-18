@@ -76,7 +76,22 @@ export default function TransferAction(props: PropTypes) {
   }, [measures, validateTransferActionState, activeTab]);
 
   return (
-    <Tooltip data-testid="transfer-action-tooltip" title={tooltipMessage} arrow>
+    <Tooltip
+      data-testid="transfer-action-tooltip"
+      title={tooltipMessage}
+      arrow
+      slotProps={{
+        tooltip: {
+          sx: {
+            zIndex: 99,
+            backgroundColor: "#333",
+            "& .MuiTooltip-arrow": {
+              color: "#333",
+            },
+          },
+        },
+      }}
+    >
       <span>
         <IconButton
           onClick={props.onClick}
