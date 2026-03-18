@@ -14,6 +14,7 @@ import {
   useMeasureServiceApi,
   checkUserCanEdit,
   useFeatureFlags,
+  useUserRoles,
 } from "@madie/madie-util";
 import { useNavigate } from "react-router-dom";
 import { Chip, Tooltip } from "@mui/material";
@@ -171,6 +172,7 @@ export default function MeasureList(props: {
   });
   const [compareVersionsDialog, setCompareVersionsDialog] =
     useState<boolean>(false);
+  const userRoles = useUserRoles();
 
   const transFormData = (measureList): TCRow[] => {
     return measureList.map((measure) => ({
@@ -1281,6 +1283,7 @@ export default function MeasureList(props: {
         option={shareDialog.option}
         onClose={handleShareDialogClose}
         onSave={handleShareDialogSave}
+        isAdmin={userRoles?.isAdmin}
       />
       <DeleteDialog
         open={deleteMeasureDialog}

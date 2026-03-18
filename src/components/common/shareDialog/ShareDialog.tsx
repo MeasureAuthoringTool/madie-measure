@@ -6,7 +6,8 @@ import React, {
   useCallback,
 } from "react";
 import GlobalStyles from "../../../styles/GlobalStyles";
-import { Backdrop, Checkbox, Typography } from "@mui/material";
+import { Backdrop, Checkbox, Link, Typography } from "@mui/material";
+import ExportIcon from "./ExportIcon.svg";
 import {
   TextField,
   MadieDialog,
@@ -41,6 +42,7 @@ interface ShareDialogProps {
   option: string;
   onClose: Function;
   onSave: Function;
+  isAdmin?: boolean;
 }
 
 interface SharedMeasure {
@@ -104,6 +106,7 @@ const ShareDialog = ({
   option,
   onClose,
   onSave,
+  isAdmin,
 }: ShareDialogProps) => {
   const { getUserName } = useOktaTokens();
   const userName = getUserName();
@@ -544,6 +547,10 @@ const ShareDialog = ({
     }
   }, [option, open, measures, userName]);
 
+  const handleExportUserList = (e) => {
+    e.preventDefault();
+  };
+
   return (
     <>
       <GlobalStyles />
@@ -610,13 +617,29 @@ const ShareDialog = ({
             </div>
           )}
           <div className="share-unshare-dialog-info-text">
-            <div>
-              When sharing a measure, all versions and drafts are shared, so
-              only the most recent measure name appears here.
-            </div>
-            {option === "Unshare" && (
+            <div style={{ display: "flex", flexDirection: "column" }}>
               <div>
-                Deselect the users with whom you want to unshare the measure(s).
+                When sharing a measure, all versions and drafts are shared, so
+                only the most recent measure name appears here.
+              </div>
+              {option === "Unshare" && (
+                <div>
+                  Deselect the users with whom you want to unshare the
+                  measure(s).
+                </div>
+              )}
+            </div>
+            {isAdmin && (
+              <div style={{ marginLeft: "auto", flexShrink: 0 }}>
+                <Link
+                  component="button"
+                  onClick={handleExportUserList}
+                  className="export-user-list-btn"
+                  underline="none"
+                >
+                  <img src={ExportIcon} alt="ExportIcon" />
+                  Export User List (.CSV)
+                </Link>
               </div>
             )}
           </div>
