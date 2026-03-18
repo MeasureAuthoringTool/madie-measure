@@ -9,7 +9,20 @@ interface CalcProps {
 
 const EditorCalculator = (props: CalcProps) => {
   return (
-    <Tooltip title="Calculate Age/Birth Date/Period of Time">
+    <Tooltip
+      title="Calculate Age/Birth Date/Period of Time"
+      slotProps={{
+        tooltip: {
+          sx: {
+            zIndex: 99,
+            backgroundColor: "#333",
+            "& .MuiTooltip-arrow": {
+              color: "#333",
+            },
+          },
+        },
+      }}
+    >
       <IconButton
         data-testid="editor-calculator-button"
         aria-label="calculator button"

@@ -201,6 +201,17 @@ const TestCaseSummaryGrid = ({
                   arrow
                   enterTouchDelay={0}
                   aria-label="Unsupported profile"
+                  slotProps={{
+                    tooltip: {
+                      sx: {
+                        zIndex: 99,
+                        backgroundColor: "#333",
+                        "& .MuiTooltip-arrow": {
+                          color: "#333",
+                        },
+                      },
+                    },
+                  }}
                 >
                   <Typography
                     variant="caption"
@@ -253,6 +264,17 @@ const TestCaseSummaryGrid = ({
               arrow
               enterTouchDelay={0}
               aria-label={validationResult.message}
+              slotProps={{
+                tooltip: {
+                  sx: {
+                    zIndex: 99,
+                    backgroundColor: "#333",
+                    "& .MuiTooltip-arrow": {
+                      color: "#333",
+                    },
+                  },
+                },
+              }}
             >
               <Box component="span" sx={{ display: "inline-block" }}>
                 <Button

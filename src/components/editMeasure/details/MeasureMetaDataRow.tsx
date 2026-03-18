@@ -41,6 +41,17 @@ const MeasureMetaDataRow = (props: MeasureMetaDataRowProps) => {
               title="Delete"
               placement="top"
               arrow
+              slotProps={{
+                tooltip: {
+                  sx: {
+                    zIndex: 99,
+                    backgroundColor: "#333",
+                    "& .MuiTooltip-arrow": {
+                      color: "#333",
+                    },
+                  },
+                },
+              }}
             >
               <DeleteOutlinedIcon
                 onClick={() => {
@@ -57,6 +68,17 @@ const MeasureMetaDataRow = (props: MeasureMetaDataRowProps) => {
               title="Edit"
               placement="top"
               arrow
+              slotProps={{
+                tooltip: {
+                  sx: {
+                    zIndex: 99,
+                    backgroundColor: "#333",
+                    "& .MuiTooltip-arrow": {
+                      color: "#333",
+                    },
+                  },
+                },
+              }}
             >
               <BorderColorOutlinedIcon
                 onClick={() => {

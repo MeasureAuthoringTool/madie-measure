@@ -1525,6 +1525,17 @@ const EditTestCase = (props: EditTestCaseProps) => {
                     title={getSaveButtonTooltip()}
                     data-testid="save-button-tooltip"
                     arrow
+                    slotProps={{
+                      tooltip: {
+                        sx: {
+                          zIndex: 99,
+                          backgroundColor: "#333",
+                          "& .MuiTooltip-arrow": {
+                            color: "#333",
+                          },
+                        },
+                      },
+                    }}
                   >
                     <span>
                       <Button

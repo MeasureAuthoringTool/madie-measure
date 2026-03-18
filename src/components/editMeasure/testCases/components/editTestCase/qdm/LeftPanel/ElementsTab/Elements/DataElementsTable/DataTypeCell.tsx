@@ -12,6 +12,17 @@ const CodesRow = ({ code }) => {
             ? code.version
             : "not available"
         }`}
+        slotProps={{
+          tooltip: {
+            sx: {
+              zIndex: 99,
+              backgroundColor: "#333",
+              "& .MuiTooltip-arrow": {
+                color: "#333",
+              },
+            },
+          },
+        }}
       >
         <span>{`${code.system}: ${code.code}`}</span>
       </Tooltip>

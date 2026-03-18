@@ -347,6 +347,17 @@ export default function ActionCenter(props: ActionCenterProps) {
                 }
                 placement="top"
                 arrow
+                slotProps={{
+                  tooltip: {
+                    sx: {
+                      zIndex: 99,
+                      backgroundColor: "#333",
+                      "& .MuiTooltip-arrow": {
+                        color: "#333",
+                      },
+                    },
+                  },
+                }}
               >
                 <span>
                   <IconButton
@@ -371,6 +382,17 @@ export default function ActionCenter(props: ActionCenterProps) {
                   }
                   placement="top"
                   arrow
+                  slotProps={{
+                    tooltip: {
+                      sx: {
+                        zIndex: 99,
+                        backgroundColor: "#333",
+                        "& .MuiTooltip-arrow": {
+                          color: "#333",
+                        },
+                      },
+                    },
+                  }}
                 >
                   <span>
                     <IconButton
@@ -393,6 +415,17 @@ export default function ActionCenter(props: ActionCenterProps) {
                 title={cloneTooltipBtnMessage}
                 placement="top"
                 arrow
+                slotProps={{
+                  tooltip: {
+                    sx: {
+                      zIndex: 99,
+                      backgroundColor: "#333",
+                      "& .MuiTooltip-arrow": {
+                        color: "#333",
+                      },
+                    },
+                  },
+                }}
               >
                 <span>
                   <IconButton
@@ -413,6 +446,17 @@ export default function ActionCenter(props: ActionCenterProps) {
                   title={makeJsonMatchUiTooltipMessage}
                   placement="top"
                   arrow
+                  slotProps={{
+                    tooltip: {
+                      sx: {
+                        zIndex: 99,
+                        backgroundColor: "#333",
+                        "& .MuiTooltip-arrow": {
+                          color: "#333",
+                        },
+                      },
+                    },
+                  }}
                 >
                   <span>
                     <IconButton
@@ -441,6 +485,17 @@ export default function ActionCenter(props: ActionCenterProps) {
             }
             placement="top"
             arrow
+            slotProps={{
+              tooltip: {
+                sx: {
+                  zIndex: 99,
+                  backgroundColor: "#333",
+                  "& .MuiTooltip-arrow": {
+                    color: "#333",
+                  },
+                },
+              },
+            }}
           >
             <span>
               <IconButton
@@ -472,6 +527,17 @@ export default function ActionCenter(props: ActionCenterProps) {
             }
             placement="top"
             arrow
+            slotProps={{
+              tooltip: {
+                sx: {
+                  zIndex: 99,
+                  backgroundColor: "#333",
+                  "& .MuiTooltip-arrow": {
+                    color: "#333",
+                  },
+                },
+              },
+            }}
           >
             <span>
               <IconButton
