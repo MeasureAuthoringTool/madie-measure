@@ -334,7 +334,7 @@ export default function AddComponentsDialog({
             dataTestId={`measure-cmsId-${info.row.original.id}`}
           />
         ),
-        accessorKey: "cmsId",
+        accessorKey: "measureSet.cmsId",
       },
       {
         header: "Updated",
@@ -696,7 +696,14 @@ export default function AddComponentsDialog({
                       <TH
                         key={header.id}
                         scope="col"
-                        onClick={header.column.getToggleSortingHandler()}
+                        onClick={(e) => {
+                          //prevent bubbling event
+                          e.stopPropagation();
+                          // prevent form submission submission
+                          e.preventDefault();
+                          //call event handler that's attached
+                          header.column.getToggleSortingHandler()(e);
+                        }}
                         onMouseEnter={() => setHoveredHeader(header.id)}
                         onMouseLeave={() => setHoveredHeader(null)}
                         className="header-cell"
