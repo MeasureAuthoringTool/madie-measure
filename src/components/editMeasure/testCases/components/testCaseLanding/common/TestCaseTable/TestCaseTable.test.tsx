@@ -1,7 +1,7 @@
 import * as React from "react";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
-import TestCaseTable, { convertDate } from "./TestCaseTable";
+import TestCaseTable from "./TestCaseTable";
 import {
   Measure,
   MeasureScoring,
@@ -256,6 +256,7 @@ const renderWithTestCase = (
         setShiftDatesDialogModalOpen={setShiftDatesDialogModalOpen}
         setWarnings={jest.fn()}
         page={page}
+        setShiftTestCaseDatesWarnings={jest.fn()}
       />
     </MemoryRouter>
   );
@@ -801,6 +802,7 @@ describe("TestCase component", () => {
           setShiftDatesDialogModalOpen={jest.fn()}
           setWarnings={jest.fn()}
           page={2}
+          setShiftTestCaseDatesWarnings={jest.fn()}
         />
       </MemoryRouter>
     );
@@ -815,7 +817,7 @@ describe("TestCase component", () => {
     expect((selectAllCheckboxAfter as HTMLInputElement).checked).toBe(false);
   });
 
-  it("renders delete dialog with bulleted list when open", () => {
+  it("renders delete dialog with bulleted list when open", async () => {
     const deleteTestCase = jest.fn();
     const exportTestCase = jest.fn();
     const onCloneTestCase = jest.fn();
