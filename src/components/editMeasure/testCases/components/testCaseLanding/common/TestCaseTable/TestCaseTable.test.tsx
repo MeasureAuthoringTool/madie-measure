@@ -71,12 +71,24 @@ const testCaseValidating = {
   validationStatus: "Validating",
 } as unknown as TestCase;
 
+const testCaseNoGroup = {
+  id: "ID5",
+  title: "TEST IPP5",
+  description: "TEST DESCRIPTION5",
+  lastModifiedAt: "2024-09-06T15:15:14.382Z",
+  executionStatus: "pass",
+  caseNumber: 1,
+  createdBeforeVersioning: true,
+  validationStatus: "Valid",
+} as unknown as TestCase;
+
 const testCases = [
   testCase,
   testCaseFail,
   testCaseNA,
   testCaseInvalid,
   testCaseValidating,
+  testCaseNoGroup,
 ];
 
 const measures = [
@@ -312,7 +324,7 @@ describe("TestCase component", () => {
     expect(columns[6]).toHaveTextContent("09/06/202415:15:14 (UTC)");
 
     const buttons = await screen.findAllByRole("button");
-    expect(buttons).toHaveLength(12);
+    expect(buttons).toHaveLength(13);
     expect(buttons[8]).toHaveTextContent("Edit");
   });
 
@@ -344,7 +356,7 @@ describe("TestCase component", () => {
     expect(columns[6]).toHaveTextContent("09/06/202415:15:14 (UTC)");
 
     const buttons = await screen.findAllByRole("button");
-    expect(buttons).toHaveLength(12);
+    expect(buttons).toHaveLength(13);
   });
 
   it.skip("should render test case table with checkboxes when flag is set", async () => {
@@ -411,8 +423,8 @@ describe("TestCase component", () => {
     expect(columns[6]).toHaveTextContent("09/06/202415:15:14 (UTC)");
 
     const buttons = await screen.findAllByRole("button");
-    expect(buttons).toHaveLength(12);
-    fireEvent.click(buttons[6]);
+    expect(buttons).toHaveLength(13);
+    fireEvent.click(buttons[7]);
     expect(screen.queryByText("edit")).not.toBeInTheDocument();
     expect(
       screen.queryByText("export transaction bundle")
@@ -581,7 +593,7 @@ describe("TestCase component", () => {
     expect(columns[7]).toHaveTextContent("09/06/202415:15:14 (UTC)");
 
     const buttons = await screen.findAllByRole("button");
-    expect(buttons).toHaveLength(13);
+    expect(buttons).toHaveLength(14);
 
     expect(buttons[2].textContent).toBe("Validation");
     fireEvent.click(buttons[2]);
@@ -832,7 +844,7 @@ describe("TestCase component", () => {
       measures[0],
       setSelectedTestCasesMock,
       undefined,
-      [],
+      testCases,
       true
     );
 
@@ -840,6 +852,11 @@ describe("TestCase component", () => {
     expect(
       screen.getByText("You are choosing to delete the following Test Case(s)!")
     );
+    const deleteDialog = screen.getByTestId("delete-dialog");
+    expect(
+      within(deleteDialog).getByText("TEST SERIES4 - TEST IPP4")
+    ).toBeInTheDocument(); //With a group
+    expect(within(deleteDialog).getByText("TEST IPP5")).toBeInTheDocument(); //Without a group
     expect(screen.getByText("Delete Case(s)")).toBeInTheDocument();
   });
 
