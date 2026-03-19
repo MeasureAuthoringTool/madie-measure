@@ -143,7 +143,6 @@ const TestCaseSummaryGrid = ({
   readOnly,
 }: TestCaseSummaryGridProps) => {
   const allResourceProfiles = useContext(ResourceContext); // get all profiles loaded from builder
-
   const data = React.useMemo(
     () =>
       gridData?.map((gridItem) => ({
@@ -302,13 +301,21 @@ const TestCaseSummaryGrid = ({
         },
       },
     ],
-    [testCaseCanEdit, actions, viewAction, readOnly, onRowEdit]
+    []
   );
 
   const table = useReactTable({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
+    // stabalize state to prevent animations from triggering on every rerender.
+    meta: {
+      testCaseCanEdit,
+      readOnly,
+      actions,
+      viewAction,
+      onRowEdit,
+    },
   });
 
   return (
