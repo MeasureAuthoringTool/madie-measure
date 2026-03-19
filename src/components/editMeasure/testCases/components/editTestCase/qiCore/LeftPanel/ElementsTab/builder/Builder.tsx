@@ -22,6 +22,7 @@ import useExecutionContext from "../../../../../routes/qiCore/useExecutionContex
 import {
   MadieSpinner,
   MadieAlert,
+  Toast,
 } from "@madie/madie-design-system/dist/react";
 import { handleCancel, handleRowDelete, handleRowEdit } from "./BuilderUtils";
 import "./Builder.scss";
@@ -32,6 +33,9 @@ import {
 } from "../../../../../../api/fhirDefinitionServiceUtilities";
 import { BundleEntry } from "fhir/r4";
 import { ResourceContextProvider } from "./ResourceContext";
+
+export const NO_PROFILES_MESSAGE =
+  "No Profiles have been added to the test case. Navigate to the Available Elements tab to add profiles.";
 
 interface BuilderProps {
   testCase: TestCase;
@@ -100,6 +104,14 @@ const Builder = ({
   const [resources, setResources] = useState<ResourceIdentifier[]>([]);
   const [savedGridID, setSavedGridID] = useState(null);
   const [applyLoading, setApplyLoading] = useState(false);
+  const [toastOpen, setToastOpen] = useState<boolean>(false);
+  const [toastMessage, setToastMessage] = useState<string>("");
+  const [toastType, setToastType] = useState<string>("danger");
+  const onToastClose = () => {
+    setToastType("danger");
+    setToastMessage("");
+    setToastOpen(false);
+  };
   const ERROR_MULTIPLE_PATIENTS =
     "Builder disabled. Builder is designed to work with a single patient resource. Please remove the extra patient(s) from the JSON to enable Builder support.";
   const ERROR_DUPLICATE_RESOURCE_IDS =
@@ -243,6 +255,11 @@ const Builder = ({
                 type: ResourceActionType.ADD_BUNDLE_ENTRY,
                 payload: newEntry,
               });
+              setToastType("success");
+              setToastMessage(
+                `${resourceIdentifier.title} has successfully been applied to the test case. To save your changes please click 'Save'.`
+              );
+              setToastOpen(true);
             }}
             isPatientAdded={isPatientAdded}
           />
@@ -269,39 +286,79 @@ const Builder = ({
             )}
             <>
               <ResourceContextProvider value={resourceIdentifiers}>
-                {selectedResourceID && (
-                  <ResourceEditor
-                    selectedResourceID={selectedResourceID}
-                    setValidationSchema={setValidationSchema}
-                    setInitialFormikValuesStu6={setInitialFormikValuesStu6}
-                    onCancel={() =>
-                      handleCancel(setSelectedResourceId, savedGridID)
+                {_.isEmpty(state?.bundle?.entry) ? (
+                  <MadieAlert
+                    minimizeAlerts={false}
+                    type="warning"
+                    content={
+                      <p
+                        aria-live="polite"
+                        role="alert"
+                        data-testid="no-profiles-alert"
+                      >
+                        {NO_PROFILES_MESSAGE}
+                      </p>
                     }
-                    canEdit={canEdit}
-                    applyLoading={applyLoading}
-                    setApplyLoading={setApplyLoading}
+                    canClose={false}
                   />
+                ) : (
+                  <>
+                    {selectedResourceID && (
+                      <ResourceEditor
+                        selectedResourceID={selectedResourceID}
+                        setValidationSchema={setValidationSchema}
+                        setInitialFormikValuesStu6={setInitialFormikValuesStu6}
+                        onCancel={() =>
+                          handleCancel(setSelectedResourceId, savedGridID)
+                        }
+                        canEdit={canEdit}
+                        applyLoading={applyLoading}
+                        setApplyLoading={setApplyLoading}
+                      />
+                    )}
+                    <TestCaseSummaryGrid
+                      gridData={prepareSummaryGridData(
+                        state?.bundle?.entry,
+                        resourceIdentifiers
+                      )}
+                      onRowEdit={(row) =>
+                        handleRowEdit(
+                          row,
+                          setSelectedResourceId,
+                          setSavedGridID
+                        )
+                      }
+                      onRowDelete={(row) =>
+                        handleRowDelete(row, setSelectedResourceId, dispatch)
+                      }
+                      testCaseCanEdit={canEdit}
+                      selectedRowId={selectedResourceID}
+                      readOnly={!canEdit}
+                    />
+                  </>
                 )}
-                <TestCaseSummaryGrid
-                  gridData={prepareSummaryGridData(
-                    state?.bundle?.entry,
-                    resourceIdentifiers
-                  )}
-                  onRowEdit={(row) =>
-                    handleRowEdit(row, setSelectedResourceId, setSavedGridID)
-                  }
-                  onRowDelete={(row) =>
-                    handleRowDelete(row, setSelectedResourceId, dispatch)
-                  }
-                  testCaseCanEdit={canEdit}
-                  selectedRowId={selectedResourceID}
-                  readOnly={!canEdit}
-                />
               </ResourceContextProvider>
             </>
           </div>
         )}
       </div>
+      <Toast
+        toastKey="builder-toast"
+        aria-live="polite"
+        toastType={toastType}
+        testId={
+          toastType === "danger"
+            ? "builder-generic-error-text"
+            : "builder-success-text"
+        }
+        closeButtonProps={{
+          "data-testid": "close-toast-button",
+        }}
+        open={toastOpen}
+        message={toastMessage}
+        onClose={onToastClose}
+        autoHideDuration={6000}
+      />
     </Box>
   );
 };

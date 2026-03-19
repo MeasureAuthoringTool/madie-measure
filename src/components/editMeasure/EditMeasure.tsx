@@ -20,7 +20,9 @@ import {
   useMeasureServiceApi,
   checkUserCanEdit,
   useFeatureFlags,
+  useUserRoles,
   useIsAdminTransferEnabled,
+  useOktaTokens,
 } from "@madie/madie-util";
 import CreateVersionDialog from "../common/createVersionDialog/CreateVersionDialog";
 import InvalidTestCaseDialog from "../common/invalidTestCaseDialog/InvalidTestCaseDialog";
@@ -67,7 +69,7 @@ export default function EditMeasure() {
   const location = useLocation();
   const [currentMeasureId, setCurrentMeasureId] = useState<string>(measureId);
   const featureFlags = useFeatureFlags();
-  const isAdminTransferEnabled = useIsAdminTransferEnabled?.() ?? false;
+  const userRoles = useUserRoles();
 
   // Required by every single spa application that has internal routing
   // This will block user from navigating inside madie-measure when the current form is dirty
@@ -167,9 +169,13 @@ export default function EditMeasure() {
     measure?.measureSet?.acls,
     measure?.measureMetaData?.draft
   );
-  const measureLockedBy: string = measure?.measureLock
-    ? measure?.measureLock?.lockedBy
-    : undefined;
+
+  const { getUserName } = useOktaTokens();
+  const userName = getUserName();
+  const measureLockedBy =
+    measure?.measureLock?.lockedBy?.toLowerCase() !== userName.toLowerCase()
+      ? measure?.measureLock?.lockedBy
+      : undefined;
 
   useEffect(() => {
     const deleteListener = () => {
@@ -260,18 +266,20 @@ export default function EditMeasure() {
     const transferListener = () => {
       // Check if user is admin and doesn't own the measure
       const isOwner = checkUserCanEdit(measure?.measureSet?.owner, []);
-      const needsAdminTransfer = isAdminTransferEnabled && !isOwner;
+      const isAdminTransferEnabled =
+        featureFlags?.AdminTransferMeasure && userRoles?.isAdmin;
+      const isAdminTransfer = isAdminTransferEnabled && !isOwner;
       setTransferDialog({
         open: true,
         measures: [measure],
-        isAdminTransfer: needsAdminTransfer,
+        isAdminTransfer: isAdminTransfer,
       });
     };
     window.addEventListener("transfer-measure", transferListener, false);
     return () => {
       window.removeEventListener("transfer-measure", transferListener, false);
     };
-  }, [measure, isAdminTransferEnabled]);
+  }, [measure, featureFlags, userRoles]);
 
   useEffect(() => {
     const subscription = measureStore.subscribe(setMeasure);
@@ -741,6 +749,7 @@ export default function EditMeasure() {
             option={shareDialog.option}
             onClose={handleShareDialogClose}
             onSave={handleShareDialogSave}
+            isAdmin={userRoles?.isAdmin}
           />
 
           <InvalidTestCaseDialog

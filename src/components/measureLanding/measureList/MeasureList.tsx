@@ -10,13 +10,18 @@ import React, {
 import tw from "twin.macro";
 import "styled-components/macro";
 import { Measure, Model } from "@madie/madie-models";
-import { useMeasureServiceApi, checkUserCanEdit } from "@madie/madie-util";
+import {
+  useMeasureServiceApi,
+  checkUserCanEdit,
+  useFeatureFlags,
+  useUserRoles,
+} from "@madie/madie-util";
 import { useNavigate } from "react-router-dom";
 import { Chip, Tooltip } from "@mui/material";
 import {
   Button,
   TruncateText,
-  MadieTooltip,
+  MadieTooltipIcon,
 } from "@madie/madie-design-system/dist/react";
 import {
   useReactTable,
@@ -116,6 +121,7 @@ export default function MeasureList(props: {
   const { searchCriteria, setSearchCriteria, retrieveMeasures } = { ...props };
   const measureServiceApi = useRef(useMeasureServiceApi()).current; //needs to be ref or triggers jest. throws warn
   const [hoveredHeader, setHoveredHeader] = useState<string>("");
+  const featureFlags = useFeatureFlags();
 
   const navigate = useNavigate();
   // Popover utilities
@@ -166,6 +172,7 @@ export default function MeasureList(props: {
   });
   const [compareVersionsDialog, setCompareVersionsDialog] =
     useState<boolean>(false);
+  const userRoles = useUserRoles();
 
   const transFormData = (measureList): TCRow[] => {
     return measureList.map((measure) => ({
@@ -406,6 +413,11 @@ export default function MeasureList(props: {
                   sx: {
                     maxWidth: "none",
                     whiteSpace: "nowrap",
+                    zIndex: 99,
+                    backgroundColor: "#333",
+                    "& .MuiTooltip-arrow": {
+                      color: "#333",
+                    },
                   },
                 },
               }}
@@ -422,18 +434,60 @@ export default function MeasureList(props: {
     },
   ];
   const getHeader = () => {
-    if (props.activeTab === 0) {
+    if (props.activeTab === 0 || props.activeTab === 1) {
       return (
-        <IndeterminateCheckbox
-          checked={table.getIsAllRowsSelected()}
-          indeterminate={table.getIsSomePageRowsSelected()}
-          onChange={table.getToggleAllPageRowsSelectedHandler()}
-          id={`select-all-checkbox`}
-        />
+        <Tooltip
+          title="Select"
+          id={`measure-list-select-tooltip`}
+          placement="bottom"
+          arrow
+          slotProps={{
+            // base style
+            tooltip: {
+              sx: {
+                zIndex: 99,
+                backgroundColor: "#333",
+                // pseudo element class target
+                "& .MuiTooltip-arrow": {
+                  color: "#333",
+                },
+              },
+            },
+          }}
+        >
+          <div style={{ width: 16 }}>
+            <IndeterminateCheckbox
+              checked={table.getIsAllRowsSelected()}
+              indeterminate={table.getIsSomePageRowsSelected()}
+              onChange={table.getToggleAllPageRowsSelectedHandler()}
+              id={`select-all-checkbox`}
+            />
+          </div>
+        </Tooltip>
       );
     } else {
       return (
-        <MadieTooltip tooltipText="Select" id={`measure-list-select-tooltip`} />
+        <Tooltip
+          title="Select"
+          id={`measure-list-select-tooltip`}
+          placement="bottom"
+          arrow
+          slotProps={{
+            tooltip: {
+              sx: {
+                zIndex: 99,
+                backgroundColor: "#333",
+                "& .MuiTooltip-arrow": {
+                  color: "#333",
+                },
+              },
+            },
+          }}
+        >
+          <div style={{ width: 14 }}>
+            <MadieTooltipIcon />
+          </div>
+        </Tooltip>
       );
     }
   };
@@ -643,6 +697,14 @@ export default function MeasureList(props: {
       open: false,
       measures: [],
       isAdminTransfer: false,
+    });
+    setViewMeasureHistoryDialog(false);
+  };
+
+  const handleViewDialogClose = () => {
+    setViewHumanReadableModal({
+      open: false,
+      measureId: "",
     });
     setViewMeasureHistoryDialog(false);
   };
@@ -1221,6 +1283,7 @@ export default function MeasureList(props: {
         option={shareDialog.option}
         onClose={handleShareDialogClose}
         onSave={handleShareDialogSave}
+        isAdmin={userRoles?.isAdmin}
       />
       <DeleteDialog
         open={deleteMeasureDialog}
@@ -1236,7 +1299,7 @@ export default function MeasureList(props: {
       />
       <ViewHRModal
         open={viewHumanReadableModal.open}
-        onClose={handleDialogClose}
+        onClose={handleViewDialogClose}
         measureId={targetMeasure?.current?.id}
         exportMeasure={exportMeasure}
       />
@@ -1250,7 +1313,7 @@ export default function MeasureList(props: {
       <ViewMeasureHistoryDialog
         measures={selectedMeasures}
         open={viewMeasureHistoryDialog}
-        onClose={handleDialogClose}
+        onClose={handleViewDialogClose}
       />
       <CompareVersionsDialog
         measures={selectedMeasures}

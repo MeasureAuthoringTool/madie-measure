@@ -91,6 +91,7 @@ const mockTransferMeasuresResponse = jest.fn().mockResolvedValue({
   status: 200,
   data: [],
 });
+
 const mockMeasureServiceApi = {
   transferMeasures: mockTransferMeasuresResponse,
 } as unknown as MeasureServiceApi;
@@ -337,6 +338,219 @@ describe("Transfer Measures Dialog component", () => {
         toastMessage: TRANSFER_MEASURE_FAILURE,
         toastOpen: true,
       });
+    });
+  });
+
+  it("should display measure count in info text", () => {
+    render(
+      <TransferDialog
+        measures={[mockMeasure1, mockMeasure2, mockMeasure3]}
+        open={true}
+        onClose={jest.fn()}
+        setStatusHandler={jest.fn()}
+      />
+    );
+
+    expect(
+      screen.getByText(
+        /You are about to Transfer ownership of the 3 selected measure/
+      )
+    ).toBeInTheDocument();
+  });
+
+  it("should display 'This action cannot be undone!' warning for regular users", () => {
+    render(
+      <TransferDialog
+        measures={[mockMeasure1]}
+        open={true}
+        onClose={jest.fn()}
+        setStatusHandler={jest.fn()}
+      />
+    );
+
+    expect(
+      screen.getByText(/This action cannot be undone/)
+    ).toBeInTheDocument();
+  });
+
+  it("should NOT display 'This action cannot be undone!' warning for admin transfers", () => {
+    render(
+      <TransferDialog
+        measures={[mockMeasure1]}
+        open={true}
+        onClose={jest.fn()}
+        setStatusHandler={jest.fn()}
+        isAdminTransfer={true}
+      />
+    );
+
+    expect(
+      screen.queryByText(/This action cannot be undone/)
+    ).not.toBeInTheDocument();
+  });
+
+  it("should display updated info text with correct wording", () => {
+    render(
+      <TransferDialog
+        measures={[mockMeasure1]}
+        open={true}
+        onClose={jest.fn()}
+        setStatusHandler={jest.fn()}
+      />
+    );
+
+    expect(
+      screen.getByText(
+        /All versions and drafts will be transferred, but only the most recent measure name appears in the list below/
+      )
+    ).toBeInTheDocument();
+  });
+
+  it("should NOT display owner column in measures table for regular transfers", () => {
+    const measureWithOwner = {
+      ...mockMeasure1,
+      measureSet: {
+        ...mockMeasure1.measureSet,
+        owner: "testOwner",
+      },
+    };
+
+    render(
+      <TransferDialog
+        measures={[measureWithOwner]}
+        open={true}
+        onClose={jest.fn()}
+        setStatusHandler={jest.fn()}
+      />
+    );
+
+    // The table should NOT have "Current Measure Owner" as a column header
+    const tableHeaders = screen.getAllByRole("columnheader");
+    const ownerColumnHeader = tableHeaders.find(
+      (header) => header.textContent === "Current Measure Owner"
+    );
+    expect(ownerColumnHeader).toBeUndefined();
+  });
+
+  it("should display owner column in measures table for admin transfers", () => {
+    const measureWithOwner = {
+      ...mockMeasure1,
+      measureSet: {
+        ...mockMeasure1.measureSet,
+        owner: "testOwner",
+      },
+    };
+
+    render(
+      <TransferDialog
+        measures={[measureWithOwner]}
+        open={true}
+        onClose={jest.fn()}
+        setStatusHandler={jest.fn()}
+        isAdminTransfer={true}
+      />
+    );
+
+    // The "Current Measure Owner" should be a table header
+    const tableHeaders = screen.getAllByRole("columnheader");
+    const ownerColumnHeader = tableHeaders.find(
+      (header) => header.textContent === "Current Measure Owner"
+    );
+    expect(ownerColumnHeader).toBeDefined();
+
+    // And the owner value should be displayed in the table
+    expect(screen.getByText("testOwner")).toBeInTheDocument();
+  });
+
+  it("should NOT display 'Current Measure Owner' form field for admin transfers", () => {
+    const measureWithOwner = {
+      ...mockMeasure1,
+      measureSet: {
+        ...mockMeasure1.measureSet,
+        owner: "testOwner",
+      },
+    };
+
+    render(
+      <TransferDialog
+        measures={[measureWithOwner]}
+        open={true}
+        onClose={jest.fn()}
+        setStatusHandler={jest.fn()}
+        isAdminTransfer={true}
+      />
+    );
+
+    // The "Current Measure Owner" form field should NOT exist
+    expect(screen.queryByTestId("current-owner")).not.toBeInTheDocument();
+  });
+
+  it("should display green Transfer button for admin transfers", () => {
+    render(
+      <TransferDialog
+        measures={[mockMeasure1]}
+        open={true}
+        onClose={jest.fn()}
+        setStatusHandler={jest.fn()}
+        isAdminTransfer={true}
+      />
+    );
+
+    const transferButton = screen.getByTestId("transfer-save-button");
+    expect(transferButton).toBeInTheDocument();
+    expect(transferButton).toHaveClass("qpp-c-button--cyan");
+  });
+
+  it("should display red Transfer button for regular transfers", () => {
+    render(
+      <TransferDialog
+        measures={[mockMeasure1]}
+        open={true}
+        onClose={jest.fn()}
+        setStatusHandler={jest.fn()}
+        isAdminTransfer={false}
+      />
+    );
+
+    const transferButton = screen.getByTestId("transfer-save-button");
+    expect(transferButton).toBeInTheDocument();
+    expect(transferButton).toHaveClass("qpp-c-button--danger-primary");
+  });
+
+  it("should keep Transfer button disabled until New Measure Owner field has text", async () => {
+    render(
+      <TransferDialog
+        measures={[mockMeasure1]}
+        open={true}
+        onClose={jest.fn()}
+        setStatusHandler={jest.fn()}
+      />
+    );
+
+    const transferButton = screen.getByTestId("transfer-save-button");
+    const harpIdInput = screen.getByTestId("harp-id-input");
+
+    // Button should be disabled initially
+    expect(transferButton).toBeDisabled();
+
+    // Enter text in New Measure Owner field
+    fireEvent.change(harpIdInput, {
+      target: { value: "newOwner" },
+    });
+
+    // Button should now be enabled
+    await waitFor(() => {
+      expect(transferButton).toBeEnabled();
+    });
+
+    // Clear the field
+    fireEvent.change(harpIdInput, {
+      target: { value: "" },
+    });
+
+    // Button should be disabled again
+    await waitFor(() => {
+      expect(transferButton).toBeDisabled();
     });
   });
 });

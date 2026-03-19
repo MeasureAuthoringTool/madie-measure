@@ -32,6 +32,10 @@ jest.mock("@madie/madie-util", () => ({
   useFeatureFlags: () => ({
     MeasureListCheckboxes: false,
   }),
+  useUserRoles: () => ({
+    roles: [],
+    isAdmin: false,
+  }),
   checkUserCanEdit: jest.fn(() => true),
   checkUserCanDelete: jest.fn(() => true),
   measureStore: {

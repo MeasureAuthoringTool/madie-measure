@@ -22,7 +22,7 @@ declare module "@madie/madie-util" {
     useClassicEngine: boolean;
   };
 
-  interface FeatureFlags {
+  export interface FeatureFlags {
     enableQdmRepeatTransfer: boolean;
     qiCoreElementsTab: boolean;
     qdmHideJson: boolean;
@@ -30,7 +30,8 @@ declare module "@madie/madie-util" {
     QICoreCompositeMeasure: boolean;
     DisplayOwner: boolean;
     MakeJSONMatchUI: boolean;
-    AdminTransferMeasures: boolean;
+    AdminShareMeasures: boolean;
+    AdminTransferMeasure: boolean;
   }
 
   export interface UserRoles {
@@ -47,6 +48,17 @@ declare module "@madie/madie-util" {
     };
     terminologyService: {
       baseUrl: string;
+    };
+    features?: {
+      export?: boolean;
+      qdmToFhirConversion?: boolean;
+      qiCoreElementsTab?: boolean;
+      qdmHideJson?: boolean;
+      enableQdmRepeatTransfer?: boolean;
+      EnhancedTextFormatting?: boolean;
+      qiCore7?: boolean;
+      QICoreCompositeMeasure?: boolean;
+      AdminTransferMeasure?: boolean;
     };
   }
 
@@ -79,6 +91,15 @@ declare module "@madie/madie-util" {
   export function useUserRoles(): UserRoles;
 
   export function useIsAdminTransferEnabled(): boolean;
+
+  export const featureFlagsStore: {
+    subscribe: (
+      setFeatureFlags: React.Dispatch<React.SetStateAction<FeatureFlags>>
+    ) => import("rxjs").Subscription;
+    updateFeatureFlags: (featureFlags: FeatureFlags | null) => void;
+    initialState: FeatureFlags;
+    state: FeatureFlags;
+  };
 
   export const userRolesStore: {
     subscribe: (
@@ -157,11 +178,6 @@ declare module "@madie/madie-util" {
     shareMeasures(measureUserIdMap: Map<string, string[]>): Promise<any>;
     unshareMeasures(measureUserIdMap: Map<string, string[]>): Promise<any>;
     transferMeasures(
-      measureIds: Array<string>,
-      harpId: string,
-      retainShareAccess: boolean
-    ): Promise<any>;
-    adminTransferMeasures(
       measureIds: Array<string>,
       harpId: string,
       retainShareAccess: boolean

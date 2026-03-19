@@ -87,9 +87,6 @@ const serviceConfig = {
   excelExportService: {
     baseUrl: "excelexport.com",
   },
-  testCaseService: {
-    baseUrl: "base.url",
-  },
   measureService: {
     baseUrl: "base.url",
   },
@@ -809,6 +806,7 @@ describe("TestCaseList component", () => {
 
   it("updates all results when pop criteria tab is changed", async () => {
     mockMeasure.cqlErrors = false;
+    mockMeasure.testCases = [{}];
     mockMeasure.groups = [
       ...mockMeasure.groups,
       {
@@ -1359,6 +1357,7 @@ describe("TestCaseList component", () => {
 
   it("defaults pop criteria nav link to first pop criteria on load", async () => {
     mockMeasure.cqlErrors = false;
+    mockMeasure.testCases = [{}];
     mockMeasure.groups = [
       ...mockMeasure.groups,
       {

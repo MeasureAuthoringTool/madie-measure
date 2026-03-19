@@ -3,7 +3,11 @@ import { IconButton } from "@mui/material";
 import Tooltip from "@mui/material/Tooltip";
 import { Measure } from "@madie/madie-models";
 import SwapVertOutlinedIcon from "@mui/icons-material/SwapVertOutlined";
-import { checkUserCanEdit, useIsAdminTransferEnabled } from "@madie/madie-util";
+import {
+  checkUserCanEdit,
+  useFeatureFlags,
+  useUserRoles,
+} from "@madie/madie-util";
 
 interface PropTypes {
   measures: Measure[];
@@ -30,7 +34,8 @@ export default function TransferAction(props: PropTypes) {
   const { measures, activeTab } = props;
   const [disableTransferBtn, setDisableTransferBtn] = useState(true);
   const [tooltipMessage, setTooltipMessage] = useState(NOTHING_SELECTED);
-  const isAdminTransferEnabled = useIsAdminTransferEnabled?.() ?? false;
+  const featureFlags = useFeatureFlags();
+  const userRoles = useUserRoles();
 
   const validateTransferActionState = useCallback(() => {
     setDisableTransferBtn(false);
@@ -44,6 +49,8 @@ export default function TransferAction(props: PropTypes) {
     }
 
     // Admin users with feature flag enabled can transfer any measure
+    const isAdminTransferEnabled =
+      featureFlags?.AdminTransferMeasure && userRoles?.isAdmin;
     if (isAdminTransferEnabled) {
       setDisableTransferBtn(false);
       setTooltipMessage(TRANSFER);
@@ -62,14 +69,29 @@ export default function TransferAction(props: PropTypes) {
         setDisableTransferBtn(true);
       }
     }
-  }, [measures, activeTab, isAdminTransferEnabled]);
+  }, [measures, activeTab, featureFlags, userRoles]);
 
   useEffect(() => {
     validateTransferActionState();
   }, [measures, validateTransferActionState, activeTab]);
 
   return (
-    <Tooltip data-testid="transfer-action-tooltip" title={tooltipMessage} arrow>
+    <Tooltip
+      data-testid="transfer-action-tooltip"
+      title={tooltipMessage}
+      arrow
+      slotProps={{
+        tooltip: {
+          sx: {
+            zIndex: 99,
+            backgroundColor: "#333",
+            "& .MuiTooltip-arrow": {
+              color: "#333",
+            },
+          },
+        },
+      }}
+    >
       <span>
         <IconButton
           onClick={props.onClick}

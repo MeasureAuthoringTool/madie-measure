@@ -198,7 +198,13 @@ jest.mock("@madie/madie-util", () => ({
     getUserName: () => "test user",
   })),
   checkUserCanEdit: jest.fn().mockImplementation(() => true),
-  useFeatureFlags: jest.fn(() => ({})),
+  useFeatureFlags: jest.fn(() => ({
+    AdminTransferMeasure: false,
+  })),
+  useUserRoles: jest.fn(() => ({
+    roles: [],
+    isAdmin: false,
+  })),
   measureStore: {
     updateMeasure: jest.fn((measure) => measure),
     state: jest.fn().mockImplementation(() => null),
@@ -342,6 +348,18 @@ describe("EditMeasure Component", () => {
     expect(popCriteria).toHaveAttribute("aria-selected", "true");
   });
 
+  it.each([
+    "/measures/fakeid/edit/supplemental-data",
+    "/measures/fakeid/edit/risk-adjustment",
+  ])(
+    "should keep Population Criteria tab highlighted when navigating to %s",
+    async (pathname) => {
+      renderRouter([{ pathname }]);
+      const popCriteria = await screen.findByTestId("groups-tab");
+      expect(popCriteria).toHaveAttribute("aria-selected", "true");
+    }
+  );
+
   it("should render test-cases", async () => {
     renderRouter([{ pathname: "/measures/fakeid/edit/test-cases/" }]);
     const tcLink = await screen.findByTestId("patients-tab");
@@ -457,7 +475,7 @@ describe("EditMeasure Component", () => {
       window.dispatchEvent(new Event("view-humanreadable"));
     });
 
-    const modal = await findByTestId("view-hr-modal");
+    const modal = await findByTestId("hr-modal-container");
     expect(modal).toBeInTheDocument();
 
     expect(screen.queryByText("test human readable")).toBeInTheDocument();

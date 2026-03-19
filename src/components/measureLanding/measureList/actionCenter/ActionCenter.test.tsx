@@ -45,7 +45,7 @@ jest.mock("@madie/madie-util", () => ({
   useMeasureServiceApi: jest.fn(() => mockMeasureServiceApi),
   checkUserCanEdit: jest.fn(),
   useFeatureFlags: jest.fn().mockReturnValue({
-    AdminTransferMeasures: false,
+    AdminTransferMeasure: false,
   }),
   useUserRoles: jest.fn().mockReturnValue({
     roles: [],

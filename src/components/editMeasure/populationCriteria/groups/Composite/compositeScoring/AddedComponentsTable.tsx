@@ -1,10 +1,4 @@
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import React, { useMemo, useState } from "react";
 import {
   ColumnDef,
   getCoreRowModel,
@@ -15,7 +9,6 @@ import {
 } from "@tanstack/react-table";
 import { TruncateText } from "@madie/madie-design-system/dist/react";
 import * as _ from "lodash";
-import { useMeasureServiceApi } from "@madie/madie-util";
 import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
 import tw from "twin.macro";
 import "styled-components/macro";
@@ -23,54 +16,46 @@ import { convertDate } from "../../../../testCases/components/testCaseLanding/co
 import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
-import { Component, Measure } from "@madie/madie-models";
+import { Measure } from "@madie/madie-models";
 import { IconButton, Tooltip } from "@mui/material";
+import {
+  CollapseIcon,
+  ExpandIcon,
+} from "../../../../../../icons/MeasureListTableRightArrowIcons";
 
 const TH = tw.th`p-3 text-left text-sm font-bold capitalize`;
 
 export default function AddedComponentsTable({
   components,
-  onComponentsUpdate,
+  onDeleteComponent,
 }: {
-  components: Component[];
-  onComponentsUpdate: (updatedComponents: Component[]) => void;
+  components: Measure[];
+  onDeleteComponent: (componentId: string) => void;
 }) {
   const [hoveredHeader, setHoveredHeader] = useState<string>("");
-  const measureServiceApi = useRef(useMeasureServiceApi()).current;
-  const [retrievedComponents, setRetrievedComponents] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  const fetchMeasuresForComponents = useCallback(async () => {
-    if (!components?.length) {
-      setRetrievedComponents([]);
-      return;
-    }
-    try {
-      // multiple components can share the same measureId (different groups).
-      // we only need each measureId once.
-      const componentMeasureIds = _.uniq(components.map((c) => c.measureId));
+  const [selectedGroupForExpansion, setSelectedGroupForExpansion] =
+    useState(null);
+  const [isGroupRowExpanded, setIsGroupRowExpanded] = useState<boolean>(false);
+  const [expandedGroupsData, setExpandedGroupsData] = useState<any[]>([]);
 
-      const results = await measureServiceApi.fetchMeasuresByIds(
-        componentMeasureIds
-      );
-      setRetrievedComponents(results);
-    } catch (err) {
-      console.error(err);
+  const handleGroupRowClick = (component) => {
+    if (!isGroupRowExpanded || selectedGroupForExpansion !== component.id) {
+      setSelectedGroupForExpansion(component.id);
+      setExpandedGroupsData(component.groups || []);
+      setIsGroupRowExpanded(true);
+    } else {
+      setIsGroupRowExpanded(false);
+      setExpandedGroupsData([]);
+      setSelectedGroupForExpansion(null);
     }
-  }, [components, measureServiceApi]);
-
-  useEffect(() => {
-    fetchMeasuresForComponents();
-  }, [fetchMeasuresForComponents]);
+  };
 
   const handleDeleteComponent = (measureId: string) => {
     setLoading(true);
     try {
-      const updatedComponents = components.filter(
-        (comp) => comp.measureId !== measureId
-      );
-
-      onComponentsUpdate(updatedComponents);
+      onDeleteComponent(measureId);
     } catch (err) {
       console.error("Error deleting component:", err);
     } finally {
@@ -125,10 +110,57 @@ export default function AddedComponentsTable({
         accessorKey: "lastModifiedAt",
       },
       {
+        header: "",
+        cell: (info) => {
+          const handleKeyDown = (e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              handleGroupRowClick(info.row.original);
+            }
+          };
+          return (
+            <span
+              role="button"
+              tabIndex={0}
+              onClick={() => {
+                handleGroupRowClick(info.row.original);
+              }}
+              onKeyDown={handleKeyDown}
+              style={{
+                cursor: "pointer",
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              {isGroupRowExpanded &&
+              selectedGroupForExpansion === info.row.original.id ? (
+                <CollapseIcon />
+              ) : (
+                <ExpandIcon />
+              )}
+            </span>
+          );
+        },
+        accessorKey: "expandArrow",
+      },
+      {
         id: "actions",
         header: null,
         cell: (info) => (
-          <Tooltip title="Delete">
+          <Tooltip
+            title="Delete"
+            slotProps={{
+              tooltip: {
+                sx: {
+                  zIndex: 99,
+                  backgroundColor: "#333",
+                  "& .MuiTooltip-arrow": {
+                    color: "#333",
+                  },
+                },
+              },
+            }}
+          >
             <IconButton
               size="small"
               onClick={() => handleDeleteComponent(info.row.original.id)}
@@ -144,11 +176,11 @@ export default function AddedComponentsTable({
     ];
 
     return columnDefs;
-  }, [loading, components]);
+  }, [components, isGroupRowExpanded, selectedGroupForExpansion]);
   const [sorting, setSorting] = React.useState<SortingState>([]);
 
   const table = useReactTable({
-    data: retrievedComponents,
+    data: components,
     columns,
     getRowId: (row) => row.id,
     defaultColumn: {
@@ -165,7 +197,24 @@ export default function AddedComponentsTable({
     },
     enableRowSelection: true,
   });
-  const uniqueMeasures = _.uniqBy(components, (c) => c.measureId);
+
+  const groupColumns = useMemo<ColumnDef<any>[]>(() => {
+    return [
+      {
+        header: "Population Criteria",
+        cell: (info) => (
+          <TruncateText
+            text={info.row.original.displayId}
+            maxLength={120}
+            dataTestId={`group-name-${info.row.original.id}`}
+          />
+        ),
+        accessorKey: "displayId",
+      },
+    ];
+  }, []);
+
+  const uniqueMeasures = _.uniqBy(components, (c) => c.id);
   return components.length > 0 ? (
     <div>
       <h3
@@ -260,6 +309,77 @@ export default function AddedComponentsTable({
                       </td>
                     ))}
                   </tr>
+
+                  {selectedGroupForExpansion === row.original.id && (
+                    <tr data-testid={`expanded-group-row`}>
+                      <td colSpan={columns.length}>
+                        <div
+                          style={{
+                            paddingLeft: "40px",
+                            paddingTop: "12px",
+                            paddingBottom: "12px",
+                            paddingRight: "40px",
+                          }}
+                        >
+                          <table
+                            style={{
+                              width: "100%",
+                              borderCollapse: "collapse",
+                            }}
+                          >
+                            <thead>
+                              <tr
+                                style={{
+                                  backgroundColor: "#ededed",
+                                  borderBottom: "1px solid #8c8c8c",
+                                }}
+                              >
+                                {groupColumns.map((column) => (
+                                  <th
+                                    key={column.id}
+                                    style={{
+                                      padding: "8px 16px",
+                                      textAlign: "left",
+                                      fontWeight: "bold",
+                                    }}
+                                  >
+                                    {column.header}
+                                  </th>
+                                ))}
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {expandedGroupsData?.map((group) => (
+                                <tr
+                                  key={`group-${group.id}`}
+                                  style={{ borderBottom: "1px solid #ddd" }}
+                                >
+                                  {groupColumns.map((column: any) => (
+                                    <td
+                                      key={column?.accessorKey || column.id}
+                                      style={{ padding: "8px 16px" }}
+                                    >
+                                      {flexRender(
+                                        column.cell ?? column.accessorKey,
+                                        {
+                                          row: {
+                                            id: group.id,
+                                            original: group,
+                                          },
+                                          getValue: () =>
+                                            group[column.accessorKey],
+                                        }
+                                      )}
+                                    </td>
+                                  ))}
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      </td>
+                    </tr>
+                  )}
                 </React.Fragment>
               ))}
             </tbody>

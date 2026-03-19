@@ -1,8 +1,7 @@
-import React from "react";
-import { render, screen } from "@testing-library/react";
+import * as React from "react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import CompositeComponent from "./CompositeComponent";
-import { oneItemResponse } from "../../../../__mocks__/mockMeasureResponses";
 import { Measure } from "@madie/madie-models";
 
 const mockFormik = {
@@ -14,8 +13,19 @@ const mockFormik = {
   errors: {},
 };
 
+const mockMeasureDetails = [
+  {
+    id: "m1",
+    measureName: "Alpha Measure",
+    version: "1.0.0",
+    measureSet: { cmsId: "CMS111" },
+    lastModifiedAt: "2024-01-15",
+    groups: [{ id: "g1", displayId: "Population1" }],
+  },
+];
+
 const mockMeasureServiceApi = {
-  searchMeasuresByCriteria: jest.fn().mockResolvedValue(oneItemResponse),
+  fetchMeasuresByIds: jest.fn().mockResolvedValue(mockMeasureDetails),
 };
 
 const measure = {
@@ -32,6 +42,13 @@ jest.mock("@madie/madie-util", () => ({
 }));
 
 describe("CompositeComponent", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockMeasureServiceApi.fetchMeasuresByIds.mockResolvedValue(
+      mockMeasureDetails
+    );
+  });
+
   it("renders the composite component container", () => {
     render(
       <CompositeComponent
@@ -68,7 +85,118 @@ describe("CompositeComponent", () => {
         submitComponentForm={submitComponentForm}
       />
     );
-    const addButton = screen.getByTestId("add-components-btn");
+    const addButton = screen.getByTestId("select-components-btn");
     expect(addButton).toBeDisabled();
+  });
+
+  it("does not call fetchMeasuresByIds when components is empty", () => {
+    render(
+      <CompositeComponent
+        canEdit={true}
+        formik={mockFormik}
+        components={[]}
+        measure={measure}
+        submitComponentForm={submitComponentForm}
+      />
+    );
+    expect(mockMeasureServiceApi.fetchMeasuresByIds).not.toHaveBeenCalled();
+  });
+
+  it("calls fetchMeasuresByIds with unique measureIds on mount when components are provided", async () => {
+    const components = [
+      { measureId: "m1", groupId: "g1" },
+      { measureId: "m1", groupId: "g2" }, // duplicate measureId — should be deduped
+      { measureId: "m2", groupId: "g3" },
+    ];
+
+    render(
+      <CompositeComponent
+        canEdit={true}
+        formik={mockFormik}
+        components={components as any}
+        measure={measure}
+        submitComponentForm={submitComponentForm}
+      />
+    );
+
+    await waitFor(() => {
+      expect(mockMeasureServiceApi.fetchMeasuresByIds).toHaveBeenCalledWith([
+        "m1",
+        "m2",
+      ]);
+    });
+  });
+
+  it("renders AddedComponentsTable with fetched component details", async () => {
+    const components = [{ measureId: "m1", groupId: "g1" }];
+
+    render(
+      <CompositeComponent
+        canEdit={true}
+        formik={mockFormik}
+        components={components as any}
+        measure={measure}
+        submitComponentForm={submitComponentForm}
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText("Alpha Measure")).toBeInTheDocument();
+    });
+  });
+
+  it("calls submitComponentForm with filtered components on delete", async () => {
+    const components = [
+      { measureId: "m1", groupId: "g1" },
+      { measureId: "m2", groupId: "g2" },
+    ];
+
+    render(
+      <CompositeComponent
+        canEdit={true}
+        formik={mockFormik}
+        components={components as any}
+        measure={measure}
+        submitComponentForm={submitComponentForm}
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText("Alpha Measure")).toBeInTheDocument();
+    });
+
+    const deleteButton = screen.getByTestId("delete-component-m1");
+    await userEvent.click(deleteButton);
+
+    expect(submitComponentForm).toHaveBeenCalledWith([
+      { measureId: "m2", groupId: "g2" },
+    ]);
+  });
+
+  it("logs error and keeps componentDetails empty when fetchMeasuresByIds fails", async () => {
+    const consoleSpy = jest.spyOn(console, "error").mockImplementation();
+    mockMeasureServiceApi.fetchMeasuresByIds.mockRejectedValueOnce(
+      new Error("fetch failed")
+    );
+
+    const components = [{ measureId: "m1", groupId: "g1" }];
+
+    render(
+      <CompositeComponent
+        canEdit={true}
+        formik={mockFormik}
+        components={components as any}
+        measure={measure}
+        submitComponentForm={submitComponentForm}
+      />
+    );
+
+    await waitFor(() => {
+      expect(consoleSpy).toHaveBeenCalled();
+    });
+
+    expect(screen.queryByTestId("measure-list-tbl")).not.toBeInTheDocument();
+
+    consoleSpy.mockRestore();
   });
 });

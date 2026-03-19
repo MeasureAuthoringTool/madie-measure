@@ -432,6 +432,11 @@ const TestCaseTable = (props: TestCaseTableProps) => {
                     sx: {
                       maxWidth: "none",
                       whiteSpace: "nowrap",
+                      zIndex: 99,
+                      backgroundColor: "#333",
+                      "& .MuiTooltip-arrow": {
+                        color: "#333",
+                      },
                     },
                   },
                 }}
@@ -621,6 +626,9 @@ const TestCaseTable = (props: TestCaseTableProps) => {
           setToastMessage={setToastMessage}
         />
       </table>
+      {!data.length && (
+        <div className="tc-empty-result">No Test Cases Added</div>
+      )}
     </div>
   );
 };

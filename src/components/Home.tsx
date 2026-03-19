@@ -4,11 +4,17 @@ import MeasureRoutes from "./measureRoutes/MeasureRoutes";
 import { ApiContextProvider, ServiceConfig } from "../api/ServiceContext";
 import { ThemeProvider } from "@mui/material/styles";
 import { theme } from "@madie/madie-design-system/dist/react";
+import {
+  featureFlagsStore,
+  FeatureFlags,
+  useUserServiceApi,
+} from "@madie/madie-util";
 export default function Home() {
   const [configError, setConfigError] = useState<boolean>(false);
   const [serviceConfig, setServiceConfig] = useState<ServiceConfig | null>(
     null
   );
+  const userServiceApi = useUserServiceApi();
 
   // Use an effect hook to fetch the serviceConfig and set the state
   useEffect(() => {
@@ -17,6 +23,12 @@ export default function Home() {
       .then((value) => {
         if (value?.data?.measureService?.baseUrl) {
           setServiceConfig(value.data);
+          // Update feature flags from service config
+          if (value.data.features) {
+            featureFlagsStore.updateFeatureFlags(
+              value.data.features as FeatureFlags
+            );
+          }
         } else {
           console.error("Invalid service config");
           setConfigError(true);
@@ -27,6 +39,13 @@ export default function Home() {
         setConfigError(true);
       });
   }, []);
+
+  // Fetch user roles on mount
+  useEffect(() => {
+    userServiceApi.fetchUserRoles().catch((error) => {
+      console.error("Error fetching user roles:", error);
+    });
+  }, [userServiceApi]);
 
   const errorPage = <div>Error loading service config</div>;
 

@@ -134,7 +134,7 @@ describe("CompositeScoring Component", () => {
 
   it("disables Add Components button when composite scoring is not selected", () => {
     render(<CompositeScoring canEdit={true} formik={mockFormik} />);
-    const addButton = screen.getByTestId("add-components-btn");
+    const addButton = screen.getByTestId("select-components-btn");
     expect(addButton).toBeDisabled();
   });
 
@@ -146,7 +146,7 @@ describe("CompositeScoring Component", () => {
       },
     };
     render(<CompositeScoring canEdit={true} formik={formikWithValue} />);
-    const addButton = screen.getByTestId("add-components-btn");
+    const addButton = screen.getByTestId("select-components-btn");
     expect(addButton).toBeEnabled();
   });
 
@@ -158,7 +158,7 @@ describe("CompositeScoring Component", () => {
       },
     };
     render(<CompositeScoring canEdit={false} formik={formikWithValue} />);
-    const addButton = screen.getByTestId("add-components-btn");
+    const addButton = screen.getByTestId("select-components-btn");
     expect(addButton).toBeDisabled();
   });
 
@@ -170,7 +170,7 @@ describe("CompositeScoring Component", () => {
       },
     };
     render(<CompositeScoring canEdit={true} formik={formikWithValue} />);
-    const addButton = screen.getByTestId("add-components-btn");
+    const addButton = screen.getByTestId("select-components-btn");
     await userEvent.click(addButton);
     expect(
       await screen.findByText("Select Composite Measure Components")

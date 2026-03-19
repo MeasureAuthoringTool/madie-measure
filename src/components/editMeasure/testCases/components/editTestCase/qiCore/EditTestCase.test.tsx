@@ -102,9 +102,6 @@ const serviceConfig: ServiceConfig = {
   measureService: {
     baseUrl: "measure.url",
   },
-  testCaseService: {
-    baseUrl: "base.url",
-  },
   fhirService: {
     baseUrl: "fhirservice.url",
   },
@@ -2548,14 +2545,7 @@ describe("EditTestCase component", () => {
 
     it("should display an error when test case series fail to load", async () => {
       mockedAxios.get.mockClear().mockImplementation((args) => {
-        if (args && args.startsWith(serviceConfig.measureService.baseUrl)) {
-          return Promise.resolve({
-            data: {
-              id: "m1234",
-              measureScoring: MeasureScoring.COHORT,
-            },
-          });
-        } else if (args && args.endsWith("series")) {
+        if (args && args.endsWith("series")) {
           return Promise.reject({
             status: 500,
             data: null,
@@ -2563,6 +2553,16 @@ describe("EditTestCase component", () => {
         } else if (args && args.endsWith("resources")) {
           return Promise.resolve({
             data: [...resourceIdentifiers],
+          });
+        } else if (
+          args &&
+          args.startsWith(serviceConfig.measureService.baseUrl)
+        ) {
+          return Promise.resolve({
+            data: {
+              id: "m1234",
+              measureScoring: MeasureScoring.COHORT,
+            },
           });
         }
         return Promise.resolve({ data: null });
@@ -2590,18 +2590,21 @@ describe("EditTestCase component", () => {
       } as unknown as AxiosError;
 
       mockedAxios.get.mockClear().mockImplementation((args) => {
-        if (args && args.startsWith(serviceConfig.measureService.baseUrl)) {
+        if (args && args.endsWith("series")) {
+          return Promise.reject(axiosError);
+        } else if (args && args.endsWith("resources")) {
+          return Promise.resolve({
+            data: [...resourceIdentifiers],
+          });
+        } else if (
+          args &&
+          args.startsWith(serviceConfig.measureService.baseUrl)
+        ) {
           return Promise.resolve({
             data: {
               id: "m1234",
               measureScoring: MeasureScoring.COHORT,
             },
-          });
-        } else if (args && args.endsWith("series")) {
-          return Promise.reject(axiosError);
-        } else if (args && args.endsWith("resources")) {
-          return Promise.resolve({
-            data: [...resourceIdentifiers],
           });
         }
         return Promise.resolve({ data: null });
@@ -3141,7 +3144,16 @@ describe("EditTestCase component", () => {
         hapiOperationOutcome: {} as HapiOperationOutcome,
       } as TestCase;
       mockedAxios.get.mockClear().mockImplementation((args) => {
-        if (args && args.startsWith(serviceConfig.measureService.baseUrl)) {
+        if (args && args.endsWith("series")) {
+          return Promise.resolve({ data: ["SeriesA", "SeriesB", "SeriesC"] });
+        } else if (args && args.endsWith("resources")) {
+          return Promise.resolve({
+            data: [...resourceIdentifiers],
+          });
+        } else if (
+          args &&
+          args.startsWith(serviceConfig.measureService.baseUrl)
+        ) {
           return Promise.resolve({
             data: {
               id: "m1234",
@@ -3156,12 +3168,6 @@ describe("EditTestCase component", () => {
                 },
               ],
             },
-          });
-        } else if (args && args.endsWith("series")) {
-          return Promise.resolve({ data: ["SeriesA", "SeriesB", "SeriesC"] });
-        } else if (args && args.endsWith("resources")) {
-          return Promise.resolve({
-            data: [...resourceIdentifiers],
           });
         }
         return Promise.resolve({ data: testCase });
@@ -3270,14 +3276,17 @@ describe("EditTestCase component", () => {
         hapiOperationOutcome: {} as HapiOperationOutcome,
       } as TestCase;
       mockedAxios.get.mockClear().mockImplementation((args) => {
-        if (args && args.startsWith(serviceConfig.measureService.baseUrl)) {
-          return Promise.resolve({ data: simpleMeasureFixture });
-        } else if (args && args.endsWith("series")) {
+        if (args && args.endsWith("series")) {
           return Promise.resolve({ data: ["SeriesA", "SeriesB", "SeriesC"] });
         } else if (args && args.endsWith("resources")) {
           return Promise.resolve({
             data: [...resourceIdentifiers],
           });
+        } else if (
+          args &&
+          args.startsWith(serviceConfig.measureService.baseUrl)
+        ) {
+          return Promise.resolve({ data: simpleMeasureFixture });
         }
         return Promise.resolve({ data: testCase });
       });
@@ -3517,14 +3526,21 @@ describe("EditTestCase component", () => {
         json: '{ "resourceType": "Bundle", "type": "collection", "entry": [] }',
       } as TestCase;
       mockedAxios.get.mockClear().mockImplementation((args) => {
-        if (args && args.startsWith(serviceConfig.measureService.baseUrl)) {
-          return Promise.resolve({ data: simpleMeasureFixture });
-        } else if (args && args.endsWith("series")) {
+        if (args && args.endsWith("series")) {
           return Promise.resolve({ data: ["DENOM_Pass", "NUMER_Pass"] });
         } else if (args && args.endsWith("resources")) {
           return Promise.resolve({
             data: [...resourceIdentifiers],
           });
+        } else if (args && args.includes("test-cases/")) {
+          return Promise.resolve({
+            data: testCase,
+          });
+        } else if (
+          args &&
+          args.startsWith(serviceConfig.measureService.baseUrl)
+        ) {
+          return Promise.resolve({ data: simpleMeasureFixture });
         }
         return Promise.resolve({
           data: testCase,
@@ -4782,7 +4798,7 @@ describe("EditTestCase QICore Component - Test Case Locked By Other User", () =>
   afterEach(() => {
     jest.clearAllMocks();
   });
-  it("Should disable eidt", async () => {
+  it("Should disable edit", async () => {
     const measure = {
       ...defaultMeasure,
       model: Model.QICORE_6_0_0,
@@ -4805,5 +4821,86 @@ describe("EditTestCase QICore Component - Test Case Locked By Other User", () =>
     const tcTitle = document.getElementById("test-case-title");
     expect(tcTitle).toHaveValue(testCase.title);
     expect(tcTitle).toHaveAttribute("readonly");
+  });
+});
+
+describe("Composite Measure Edit test case functionality", () => {
+  const compositeMeasure = {
+    ...defaultMeasure,
+    measureMetaData: {
+      ...defaultMeasure.measureMetaData,
+      composite: true,
+    },
+  } as unknown as Measure;
+
+  beforeEach(() => {
+    (checkUserCanEdit as jest.Mock).mockClear().mockImplementation(() => {
+      return true;
+    });
+    mockedAxios.post.mockImplementation((args) => {
+      if (args && args.endsWith("lock")) {
+        return Promise.resolve({
+          data: {
+            isLocked: false,
+            lockedBy: MEASURE_CREATEDBY,
+          },
+        });
+      }
+    });
+    mockedAxios.delete.mockImplementation((args) => {
+      if (args && args.endsWith("lock")) {
+        return Promise.resolve({
+          data: {
+            isLocked: false,
+            lockedBy: null,
+          },
+        });
+      }
+    });
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("should render actual tab for composite measure and is active by default", async () => {
+    renderWithRouter(
+      ["/measures/m1234/edit/test-cases/tc123"],
+      "/measures/:measureId/edit/test-cases/:id",
+      compositeMeasure
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId("actual-tab")).toBeInTheDocument();
+    });
+
+    const actualTab = screen.getByTestId("actual-tab");
+    expect(actualTab).toBeInTheDocument();
+    expect(actualTab).toHaveTextContent("Actual");
+    await waitFor(() => {
+      expect(actualTab).toHaveAttribute("aria-selected", "true");
+    });
+    const actualContent = screen.getByText(
+      "Composite actual results in progress..."
+    );
+    expect(actualContent).toBeInTheDocument();
+  });
+
+  it("should show details tab but not CQL and Highlighting tabs for composite measure", async () => {
+    renderWithRouter(
+      ["/measures/m1234/edit/test-cases/tc123"],
+      "/measures/:measureId/edit/test-cases/:id",
+      compositeMeasure
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId("actual-tab")).toBeInTheDocument();
+    });
+
+    // Details tab should be present
+    expect(screen.getByTestId("details-tab")).toBeInTheDocument();
+    // CQL and Highlighting tabs should not be present
+    expect(screen.queryByTestId("measurecql-tab")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("highlighting-tab")).not.toBeInTheDocument();
   });
 });

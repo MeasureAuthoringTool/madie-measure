@@ -86,6 +86,17 @@ export default function AssociateCmsIdAction(props: PropTypes) {
       title={tooltipMessage}
       onMouseOver={validateAssociateCmsIdActionState}
       arrow
+      slotProps={{
+        tooltip: {
+          sx: {
+            zIndex: 99,
+            backgroundColor: "#333",
+            "& .MuiTooltip-arrow": {
+              color: "#333",
+            },
+          },
+        },
+      }}
     >
       <span>
         <IconButton
