@@ -789,8 +789,8 @@ const ShareDialog = ({
         </div>
       </MadieDialog>
       <Toast
-        toastKey="expand-measure-set-toast"
-        testId="expand-measure-set-toast"
+        toastKey="export-user-list-toast"
+        testId="export-user-list-toast"
         toastType={toast.type}
         open={toast.open}
         message={toast.message}

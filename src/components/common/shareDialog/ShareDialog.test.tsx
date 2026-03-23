@@ -9,7 +9,7 @@ import ShareDialog, {
 import { MeasureServiceApi } from "@madie/madie-util";
 import { Measure, MeasureMetadata } from "@madie/madie-models";
 import FileSaver from "file-saver";
-import { generateTimestampedFileName } from "../../../utils/exportUtil";
+import userEvent from "@testing-library/user-event";
 
 jest.mock("file-saver", () => ({
   saveAs: jest.fn(),
@@ -1316,7 +1316,7 @@ describe("Export user list", () => {
     ).toBeInTheDocument();
   });
 
-  it("should show error toast when export user lis fails", async () => {
+  it("should show error toast when export user list fails", async () => {
     mockMeasureServiceApi.getSharedAccessReportForMeasures = jest
       .fn()
       .mockRejectedValue(new Error("Export failed"));
@@ -1370,9 +1370,11 @@ describe("Export user list", () => {
         mockMeasureServiceApi.getSharedAccessReportForMeasures
       ).toHaveBeenCalledWith([mockMeasure2.id]);
     });
+    // verify toast
     expect(
       screen.getByText(MEASURE_SHARING_EXPORT_SUCCESS)
     ).toBeInTheDocument();
+    userEvent.click(screen.getByTestId("ClearIcon"));
   });
 
   it("should not render Export User List button when isAdmin is false", async () => {
