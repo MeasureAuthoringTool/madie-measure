@@ -581,6 +581,7 @@ const ShareDialog = ({
         message: MEASURE_SHARING_EXPORT_SUCCESS,
       });
     } catch (error) {
+      console.error(error);
       setToast({
         open: true,
         type: "danger",
