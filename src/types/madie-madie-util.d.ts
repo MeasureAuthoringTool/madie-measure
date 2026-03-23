@@ -182,6 +182,7 @@ declare module "@madie/madie-util" {
       harpId: string,
       retainShareAccess: boolean
     ): Promise<any>;
+    validateHarpId(harpId: string): Promise<any>;
     updateMeasure(measure: Measure): Promise<Response>;
     getMeasureHistoryLogs(measureId: string): Promise<MeasureHistoryActions[]>;
     getMeasureCounts(): Promise<any>;

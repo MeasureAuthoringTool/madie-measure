@@ -1,6 +1,10 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import * as React from "react";
-import ShareDialog, { SharedUser, convertDate } from "./ShareDialog";
+import ShareDialog, {
+  SharedUser,
+  convertDate,
+  INVALID_HARP_ID_MESSAGE,
+} from "./ShareDialog";
 import { MeasureServiceApi } from "@madie/madie-util";
 import { Measure, MeasureMetadata } from "@madie/madie-models";
 
@@ -102,6 +106,7 @@ const mockMeasureServiceApi = {
   shareMeasures: mockShareMeasures,
   getRecentMeasuresByMeasureSetId: mockGetRecentMeasuresByMeasureSetId,
   unshareMeasures: mockUnshareMeasures,
+  validateHarpId: jest.fn().mockResolvedValue({ status: 200 }),
 } as unknown as MeasureServiceApi;
 
 jest.mock("@madie/madie-util", () => ({
@@ -898,6 +903,97 @@ describe("Create Share Dialog component", () => {
         toastMessage: errorMessage,
         toastOpen: true,
       });
+    });
+  });
+
+  it("should display field-level error when Add User is clicked with an invalid HARP ID", async () => {
+    mockMeasureServiceApi.validateHarpId = jest.fn().mockRejectedValue({
+      response: { status: 400, data: { message: INVALID_HARP_ID_MESSAGE } },
+    });
+
+    render(
+      <ShareDialog
+        measures={[mockMeasure1, mockMeasure2]}
+        open={true}
+        option={"Share With"}
+        onClose={jest.fn()}
+        onSave={jest.fn()}
+      />
+    );
+
+    const harpIdInput = (await screen.findByTestId(
+      "harp-id-input"
+    )) as HTMLInputElement;
+    fireEvent.change(harpIdInput, { target: { value: "invalidUser" } });
+
+    const addUserBtn = await screen.findByTestId("add-user-btn");
+    fireEvent.click(addUserBtn);
+
+    await waitFor(() => {
+      expect(screen.getByText(INVALID_HARP_ID_MESSAGE)).toBeInTheDocument();
+      expect(mockMeasureServiceApi.shareMeasures).not.toBeCalled();
+    });
+  });
+
+  it("should display generic error when Add User is clicked and validateHarpId returns a non-400 error", async () => {
+    mockMeasureServiceApi.validateHarpId = jest.fn().mockRejectedValue({
+      response: { status: 500 },
+    });
+
+    render(
+      <ShareDialog
+        measures={[mockMeasure1, mockMeasure2]}
+        open={true}
+        option={"Share With"}
+        onClose={jest.fn()}
+        onSave={jest.fn()}
+      />
+    );
+
+    const harpIdInput = (await screen.findByTestId(
+      "harp-id-input"
+    )) as HTMLInputElement;
+    fireEvent.change(harpIdInput, { target: { value: "someUser" } });
+
+    const addUserBtn = await screen.findByTestId("add-user-btn");
+    fireEvent.click(addUserBtn);
+
+    await waitFor(() => {
+      expect(
+        screen.getByText("Unable to validate HARP ID. Please try again.")
+      ).toBeInTheDocument();
+      expect(mockMeasureServiceApi.shareMeasures).not.toBeCalled();
+    });
+  });
+
+  it("should add user when Add User is clicked with a valid HARP ID", async () => {
+    mockMeasureServiceApi.validateHarpId = jest
+      .fn()
+      .mockResolvedValue({ status: 200 });
+
+    render(
+      <ShareDialog
+        measures={[mockMeasure1, mockMeasure2]}
+        open={true}
+        option={"Share With"}
+        onClose={jest.fn()}
+        onSave={jest.fn()}
+      />
+    );
+
+    const harpIdInput = (await screen.findByTestId(
+      "harp-id-input"
+    )) as HTMLInputElement;
+    fireEvent.change(harpIdInput, { target: { value: "validUser" } });
+
+    const addUserBtn = await screen.findByTestId("add-user-btn");
+    fireEvent.click(addUserBtn);
+
+    await waitFor(() => {
+      expect(
+        screen.queryByText(INVALID_HARP_ID_MESSAGE)
+      ).not.toBeInTheDocument();
+      expect(harpIdInput.value).toBe("");
     });
   });
 

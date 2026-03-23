@@ -36,6 +36,9 @@ import { useMeasureServiceApi, useOktaTokens } from "@madie/madie-util";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 
+export const INVALID_HARP_ID_MESSAGE =
+  "The provided HARP ID is not associated with an active MADiE user.";
+
 interface ShareDialogProps {
   measures: Measure[];
   open: boolean;
@@ -162,7 +165,7 @@ const ShareDialog = ({
     };
   };
 
-  const handleAddUser = () => {
+  const handleAddUser = async () => {
     // Remove all spaces from harpId
     const harpId = formik.getFieldProps("harpId").value.replace(/\s/g, "");
 
@@ -172,7 +175,28 @@ const ShareDialog = ({
       return;
     }
 
-    let sharedWithAllSelectedMeasures = true;
+    if (
+      sharedMeasures.every(
+        (measure) =>
+          measure.subRows.length &&
+          measure.subRows.some((subRow) => subRow.userId === harpId)
+      )
+    ) {
+      setSharedWithAllSelectedMeasures(true);
+      return;
+    }
+
+    try {
+      await measureServiceApi.validateHarpId(harpId);
+    } catch (error) {
+      formik.setFieldError(
+        "harpId",
+        error?.response?.status === 400
+          ? INVALID_HARP_ID_MESSAGE
+          : "Unable to validate HARP ID. Please try again."
+      );
+      return;
+    }
 
     const updateSharedMeasures = sharedMeasures.map((measure) => {
       if (
@@ -181,8 +205,6 @@ const ShareDialog = ({
       ) {
         return { ...measure };
       } else {
-        sharedWithAllSelectedMeasures = false;
-
         updateSharedMeasuresRequest(measure.measureId, harpId);
 
         return {
@@ -202,12 +224,9 @@ const ShareDialog = ({
     });
 
     setSharedMeasures(updateSharedMeasures);
-    setSharedWithAllSelectedMeasures(sharedWithAllSelectedMeasures);
-
-    if (!sharedWithAllSelectedMeasures) {
-      setSaveDisabled(false);
-      formik.resetForm();
-    }
+    setSharedWithAllSelectedMeasures(false);
+    setSaveDisabled(false);
+    formik.resetForm();
   };
 
   const getSharedMeasure = useCallback(async () => {
