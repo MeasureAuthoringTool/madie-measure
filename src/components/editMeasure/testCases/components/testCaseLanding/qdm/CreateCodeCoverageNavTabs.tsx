@@ -56,6 +56,7 @@ const defaultStyle = {
     outline: "9px auto -webkit-focus-ring-color",
     outlineOffset: "-1px",
   },
+  overflow: "visible",
 };
 
 export default function CreateCodeCoverageNavTabs(props: NavTabProps) {
@@ -163,6 +164,7 @@ export default function CreateCodeCoverageNavTabs(props: NavTabProps) {
           flexDirection: "row",
           flexGrow: 1,
           alignItems: "center",
+          overflow: "visible",
         }}
       >
         <Tabs
@@ -206,7 +208,14 @@ export default function CreateCodeCoverageNavTabs(props: NavTabProps) {
             value="coverage"
           />
         </Tabs>
-        <div style={{ margin: "6px 0 0 auto", display: "flex", gap: "10px" }}>
+        <div
+          style={{
+            margin: "6px 0 0 auto",
+            display: "flex",
+            gap: "10px",
+            overflow: "visible",
+          }}
+        >
           <LoadingButtonWithMenu
             hasErrors={hasErrors}
             isExecutionContextReady={executionContextReady}
