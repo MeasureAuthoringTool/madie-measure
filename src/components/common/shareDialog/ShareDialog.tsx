@@ -14,9 +14,9 @@ import {
   Button,
   TruncateText,
   MadieSpinner,
+  Toast,
 } from "@madie/madie-design-system/dist/react";
 import "./ShareDialog.scss";
-import * as _ from "lodash";
 import {
   ColumnDef,
   flexRender,
@@ -35,6 +35,13 @@ import "styled-components/macro";
 import { useMeasureServiceApi, useOktaTokens } from "@madie/madie-util";
 import { useFormik } from "formik";
 import * as Yup from "yup";
+import FileSaver from "file-saver";
+import { generateTimestampedFileName } from "../../../utils/exportUtil";
+
+export const MEASURE_SHARING_EXPORT_SUCCESS =
+  "Measure Sharing Report exported successfully.";
+export const MEASURE_SHARING_EXPORT_ERROR =
+  "Unable to export the user list. Please try again. If the issue persists, please contact the help desk.";
 
 export const INVALID_HARP_ID_MESSAGE =
   "The provided HARP ID is not associated with an active MADiE user.";
@@ -137,6 +144,13 @@ const ShareDialog = ({
   const [rowSelection, setRowSelection] = useState({});
   const [initialRowIdsSelected, setInitialRowIdsSelected] = useState([]);
   const [confirmationDialogOpen, setConfirmationDialogOpen] = useState(false);
+
+  // Toast state
+  const [toast, setToast] = useState({
+    open: false,
+    type: "danger",
+    message: "",
+  });
 
   const updateSharedMeasuresRequest = (measureId, harpId) => {
     setShareMeasuresRequest((map) => {
@@ -566,8 +580,35 @@ const ShareDialog = ({
     }
   }, [option, open, measures, userName]);
 
-  const handleExportUserList = (e) => {
+  // export user list in Excel format for admin users
+  const handleExportUserList = async (e) => {
     e.preventDefault();
+    setLoading(true);
+    try {
+      const ids = sharedMeasures.map((m) => m.measureId);
+      const blob = await measureServiceApi.getSharedAccessReportForMeasures(
+        ids
+      );
+      const fileName = generateTimestampedFileName(
+        "MeasureSharingExport",
+        "xlsx"
+      );
+      FileSaver.saveAs(blob, fileName);
+      setToast({
+        open: true,
+        type: "success",
+        message: MEASURE_SHARING_EXPORT_SUCCESS,
+      });
+    } catch (error) {
+      console.error(error);
+      setToast({
+        open: true,
+        type: "danger",
+        message: MEASURE_SHARING_EXPORT_ERROR,
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -657,7 +698,7 @@ const ShareDialog = ({
                   underline="none"
                 >
                   <img src={ExportIcon} alt="ExportIcon" />
-                  Export User List (.CSV)
+                  Export User List
                 </Link>
               </div>
             )}
@@ -767,6 +808,21 @@ const ShareDialog = ({
           </section>
         </div>
       </MadieDialog>
+      <Toast
+        toastKey="export-user-list-toast"
+        testId="export-user-list-toast"
+        toastType={toast.type}
+        open={toast.open}
+        message={toast.message}
+        onClose={() =>
+          setToast({
+            open: false,
+            type: "danger",
+            message: "",
+          })
+        }
+        autoHideDuration={8000}
+      />
     </>
   );
 };

@@ -177,6 +177,7 @@ declare module "@madie/madie-util" {
     getSharedMeasures(measureIds: string[]): Promise<any>;
     shareMeasures(measureUserIdMap: Map<string, string[]>): Promise<any>;
     unshareMeasures(measureUserIdMap: Map<string, string[]>): Promise<any>;
+    getSharedAccessReportForMeasures(ids: Array<string>): Promise<Blob>;
     transferMeasures(
       measureIds: Array<string>,
       harpId: string,
