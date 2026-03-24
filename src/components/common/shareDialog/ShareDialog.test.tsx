@@ -1,8 +1,25 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import * as React from "react";
-import ShareDialog, { SharedUser, convertDate } from "./ShareDialog";
+import ShareDialog, {
+  SharedUser,
+  convertDate,
+  MEASURE_SHARING_EXPORT_SUCCESS,
+  MEASURE_SHARING_EXPORT_ERROR,
+} from "./ShareDialog";
 import { MeasureServiceApi } from "@madie/madie-util";
 import { Measure, MeasureMetadata } from "@madie/madie-models";
+import FileSaver from "file-saver";
+import userEvent from "@testing-library/user-event";
+
+jest.mock("file-saver", () => ({
+  saveAs: jest.fn(),
+}));
+
+jest.mock("../../../utils/exportUtil", () => ({
+  generateTimestampedFileName: jest.fn(
+    () => "MeasureSharingExport_20260320_120000.xlsx"
+  ),
+}));
 
 const testUser = "test user";
 const mockMetaData = {
@@ -102,6 +119,11 @@ const mockMeasureServiceApi = {
   shareMeasures: mockShareMeasures,
   getRecentMeasuresByMeasureSetId: mockGetRecentMeasuresByMeasureSetId,
   unshareMeasures: mockUnshareMeasures,
+  getSharedAccessReportForMeasures: jest
+    .fn()
+    .mockResolvedValue(
+      new Blob(["test"], { type: "application/vnd.ms-excel" })
+    ),
 } as unknown as MeasureServiceApi;
 
 jest.mock("@madie/madie-util", () => ({
@@ -183,6 +205,7 @@ describe("Create Share Dialog component", () => {
         open={true}
         option={"Share With"}
         onClose={jest.fn()}
+        onSave={jest.fn()}
       />
     );
 
@@ -1234,9 +1257,69 @@ describe("UnshareFromMe Confirmation Dialog component", () => {
     expect(userListItems[0]).toHaveTextContent("test user");
     expect(userListItems[1]).toHaveTextContent("test user");
   });
+});
 
-  it("should display export user list button when isAdmin is true in Share With dialog", async () => {
-    const mockOnSave = jest.fn();
+describe("Export user list", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockMeasureServiceApi.getSharedMeasures = jest.fn().mockResolvedValue({
+      [mockMeasure1.id]: [],
+      [mockMeasure2.id]: mockMeasure2.acls
+        ? mockMeasure2.acls.map(
+            (acl) =>
+              ({
+                userId: acl.userId,
+                performedAt: yesterday.toISOString(),
+              } as unknown as SharedUser)
+          )
+        : [],
+    });
+    mockMeasureServiceApi.getRecentMeasuresByMeasureSetId =
+      mockGetRecentMeasuresByMeasureSetId;
+    mockMeasureServiceApi.getSharedAccessReportForMeasures = jest
+      .fn()
+      .mockResolvedValue(
+        new Blob(["test"], { type: "application/vnd.ms-excel" })
+      );
+  });
+
+  it("should export the user list with correct measure ids and save the file on success", async () => {
+    render(
+      <ShareDialog
+        measures={[mockMeasure1, mockMeasure2]}
+        open={true}
+        option={"Share With"}
+        onClose={jest.fn()}
+        onSave={jest.fn()}
+        isAdmin={true}
+      />
+    );
+
+    expect(await screen.findByTestId("share-dialog")).toBeInTheDocument();
+    // wait for the table to load so sharedMeasures state is populated
+    await screen.findByTestId("share-measure-tbl");
+
+    const exportButton = await screen.findByText(/Export User List/i);
+    fireEvent.click(exportButton);
+
+    await waitFor(() => {
+      expect(
+        mockMeasureServiceApi.getSharedAccessReportForMeasures
+      ).toHaveBeenCalledWith([mockMeasure1.id, mockMeasure2.id]);
+      expect(FileSaver.saveAs).toHaveBeenCalledWith(
+        expect.any(Blob),
+        "MeasureSharingExport_20260320_120000.xlsx"
+      );
+    });
+    expect(
+      screen.getByText(MEASURE_SHARING_EXPORT_SUCCESS)
+    ).toBeInTheDocument();
+  });
+
+  it("should show error toast when export user list fails", async () => {
+    mockMeasureServiceApi.getSharedAccessReportForMeasures = jest
+      .fn()
+      .mockRejectedValue(new Error("Export failed"));
 
     render(
       <ShareDialog
@@ -1244,50 +1327,74 @@ describe("UnshareFromMe Confirmation Dialog component", () => {
         open={true}
         option={"Share With"}
         onClose={jest.fn()}
-        onSave={mockOnSave}
+        onSave={jest.fn()}
         isAdmin={true}
       />
     );
 
     expect(await screen.findByTestId("share-dialog")).toBeInTheDocument();
+    await screen.findByTestId("share-measure-tbl");
 
-    // Check that export button is visible
-    const exportButtons = await screen.findAllByText(/Export User List/i);
-    expect(exportButtons.length).toBeGreaterThan(0);
+    const exportButton = await screen.findByText(/Export User List/i);
+    fireEvent.click(exportButton);
 
-    const exportButton = exportButtons[0];
-    expect(exportButton).toBeInTheDocument();
-    expect(exportButton.querySelector("img")).toHaveAttribute(
-      "alt",
-      "ExportIcon"
-    );
+    await waitFor(() => {
+      expect(
+        screen.getByText(MEASURE_SHARING_EXPORT_ERROR)
+      ).toBeInTheDocument();
+    });
+    expect(FileSaver.saveAs).not.toHaveBeenCalled();
   });
 
-  it("should display export user list button when isAdmin is true in Unshare dialog", async () => {
-    const mockOnSave = jest.fn();
+  it("should export user list from unshare dialog", async () => {
+    // Only render with mockMeasure2 which has shared users
+    render(
+      <ShareDialog
+        measures={[mockMeasure2]}
+        open={true}
+        option={"Unshare"}
+        onClose={jest.fn()}
+        onSave={jest.fn()}
+        isAdmin={true}
+      />
+    );
 
+    expect(await screen.findByTestId("share-dialog")).toBeInTheDocument();
+    await screen.findByTestId("share-measure-tbl");
+
+    const exportButton = await screen.findByText(/Export User List/i);
+    fireEvent.click(exportButton);
+
+    await waitFor(() => {
+      expect(
+        mockMeasureServiceApi.getSharedAccessReportForMeasures
+      ).toHaveBeenCalledWith([mockMeasure2.id]);
+    });
+    // verify toast
+    expect(
+      screen.getByText(MEASURE_SHARING_EXPORT_SUCCESS)
+    ).toBeInTheDocument();
+    userEvent.click(screen.getByTestId("ClearIcon"));
+  });
+
+  it("should not render Export User List button when isAdmin is false", async () => {
     render(
       <ShareDialog
         measures={[mockMeasure1, mockMeasure2]}
         open={true}
-        option={"Unshare"}
+        option={"Share With"}
         onClose={jest.fn()}
-        onSave={mockOnSave}
-        isAdmin={true}
+        onSave={jest.fn()}
+        isAdmin={false}
       />
     );
 
     expect(await screen.findByTestId("share-dialog")).toBeInTheDocument();
+    await screen.findByTestId("share-measure-tbl");
 
-    // Check that export button is visible
-    const exportButtons = await screen.findAllByText(/Export User List/i);
-    expect(exportButtons.length).toBeGreaterThan(0);
-
-    const exportButton = exportButtons[0];
-    expect(exportButton).toBeInTheDocument();
-    expect(exportButton.querySelector("img")).toHaveAttribute(
-      "alt",
-      "ExportIcon"
-    );
+    expect(screen.queryByText(/Export User List/i)).not.toBeInTheDocument();
+    expect(
+      mockMeasureServiceApi.getSharedAccessReportForMeasures
+    ).not.toHaveBeenCalled();
   });
 });
