@@ -11,7 +11,6 @@ import { Measure, Model } from "@madie/madie-models";
 import TransferDialog, {
   TRANSFER_MEASURE_SUCCESS,
   TRANSFER_MEASURE_FAILURE,
-  INVALID_HARP_ID_MESSAGE,
 } from "./TransferDialog";
 import userEvent from "@testing-library/user-event";
 import { MeasureServiceApi } from "@madie/madie-util";
@@ -189,7 +188,7 @@ describe("Transfer Measures Dialog component", () => {
     await checkDataRows(6);
   });
 
-  it("should show success toast when transfer completes successfully", async () => {
+  it("test handle submit successfully", async () => {
     const submitMock = jest.fn();
     render(
       <TransferDialog
@@ -295,7 +294,7 @@ describe("Transfer Measures Dialog component", () => {
     });
   });
 
-  it("should show generic failure toast when API call fails", async () => {
+  it("test handle submit failure", async () => {
     mockMeasureServiceApi.transferMeasures = jest
       .fn()
       .mockRejectedValue(new Error(TRANSFER_MEASURE_FAILURE));
@@ -339,78 +338,6 @@ describe("Transfer Measures Dialog component", () => {
         toastMessage: TRANSFER_MEASURE_FAILURE,
         toastOpen: true,
       });
-    });
-  });
-
-  it("should display field-level error and not close dialog when API returns 400 with invalid HARP ID message", async () => {
-    mockMeasureServiceApi.transferMeasures = jest.fn().mockRejectedValue({
-      response: {
-        status: 400,
-        data: { message: INVALID_HARP_ID_MESSAGE },
-      },
-    });
-
-    const onCloseMock = jest.fn();
-    render(
-      <TransferDialog
-        measures={[mockMeasure1]}
-        open={true}
-        onClose={onCloseMock}
-        setStatusHandler={jest.fn()}
-      />
-    );
-
-    const newHarpIdInput = getByTestId("harp-id-input");
-    const transferBtn = getByTestId("transfer-save-button");
-
-    fireEvent.change(newHarpIdInput, { target: { value: "invalidUser" } });
-
-    act(() => {
-      userEvent.click(transferBtn);
-    });
-
-    await waitFor(() => {
-      expect(screen.getByText(INVALID_HARP_ID_MESSAGE)).toBeInTheDocument();
-      expect(onCloseMock).not.toHaveBeenCalled();
-    });
-  });
-
-  it("should show generic failure toast when API returns 400 with a different message", async () => {
-    mockMeasureServiceApi.transferMeasures = jest.fn().mockRejectedValue({
-      response: {
-        status: 400,
-        data: { message: "Some other 400 error" },
-      },
-    });
-
-    const onCloseMock = jest.fn();
-    render(
-      <TransferDialog
-        measures={[mockMeasure1]}
-        open={true}
-        onClose={onCloseMock}
-        setStatusHandler={jest.fn()}
-      />
-    );
-
-    const newHarpIdInput = getByTestId("harp-id-input");
-    const transferBtn = getByTestId("transfer-save-button");
-
-    fireEvent.change(newHarpIdInput, { target: { value: "someUser" } });
-
-    act(() => {
-      userEvent.click(transferBtn);
-    });
-
-    await waitFor(() => {
-      expect(onCloseMock).toHaveBeenCalledWith({
-        toastType: "danger",
-        toastMessage: TRANSFER_MEASURE_FAILURE,
-        toastOpen: true,
-      });
-      expect(
-        screen.queryByText(INVALID_HARP_ID_MESSAGE)
-      ).not.toBeInTheDocument();
     });
   });
 
