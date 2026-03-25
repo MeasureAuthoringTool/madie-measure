@@ -24,9 +24,7 @@ export function PopulationCriteriaHome({ measureCanEdit }) {
 
   const checkTestCasesLockStatus = async () => {
     try {
-      const isLocked = await measureServiceApi.checkTestCasesLocked(
-        measure?.id
-      );
+      const isLocked = await measureServiceApi.checkTestCasesLocked(measureId);
       setIsTestCaseLocked(isLocked);
       return isLocked;
     } catch (err) {
