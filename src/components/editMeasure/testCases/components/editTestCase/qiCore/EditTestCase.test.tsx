@@ -3532,10 +3532,6 @@ describe("EditTestCase component", () => {
           return Promise.resolve({
             data: [...resourceIdentifiers],
           });
-        } else if (args && args.includes("test-cases/")) {
-          return Promise.resolve({
-            data: testCase,
-          });
         } else if (
           args &&
           args.startsWith(serviceConfig.measureService.baseUrl)
