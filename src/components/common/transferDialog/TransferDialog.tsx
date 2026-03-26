@@ -19,6 +19,8 @@ export const TRANSFER_MEASURE_SUCCESS =
   "The measure(s) were successfully transferred. If you chose to retain share access, you will still be able to edit the measures.";
 export const TRANSFER_MEASURE_FAILURE =
   "Unable to transfer the selected measure(s) to the harpId. If the error persists, please contact the help desk.";
+export const INVALID_HARP_ID_MESSAGE =
+  "The provided HARP ID is not associated with an active MADiE user.";
 
 interface TransferDialogProps {
   measures: Measure[];
@@ -80,11 +82,18 @@ const TransferDialog = ({
       })
       .catch((error) => {
         console.error("TransferDialog: handleSave: error = ", error);
-        onClose({
-          toastType: "danger",
-          toastMessage: TRANSFER_MEASURE_FAILURE,
-          toastOpen: true,
-        });
+        if (
+          error?.response?.status === 400 &&
+          error?.response?.data?.message === INVALID_HARP_ID_MESSAGE
+        ) {
+          formik.setFieldError("harpId", INVALID_HARP_ID_MESSAGE);
+        } else {
+          onClose({
+            toastType: "danger",
+            toastMessage: TRANSFER_MEASURE_FAILURE,
+            toastOpen: true,
+          });
+        }
       });
   };
 
