@@ -1949,6 +1949,14 @@ describe("AddComponentsDialog", () => {
       const saveButton = screen.getByTestId(
         "select-composite-measure-components-continue-button"
       );
+      const versionHeader = screen.getByRole("columnheader", {
+        name: /version/i,
+      });
+
+      await userEvent.hover(versionHeader);
+      await userEvent.click(versionHeader);
+      await userEvent.unhover(versionHeader);
+
       await userEvent.click(saveButton);
 
       await waitFor(() => {

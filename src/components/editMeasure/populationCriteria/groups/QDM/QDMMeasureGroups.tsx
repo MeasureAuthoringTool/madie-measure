@@ -20,12 +20,11 @@ import {
   Button,
   MadieDiscardDialog,
   Select,
-  DSLink,
   Toast,
   Tab,
   Tabs,
 } from "@madie/madie-design-system/dist/react";
-import { useFormik, FormikProvider, FieldArray, Field, getIn } from "formik";
+import { useFormik, FormikProvider, FieldArray, Field } from "formik";
 import useFormikResetOnEvent from "../../../../common/useFormikResetOnEvent";
 import { v4 as uuidv4 } from "uuid";
 import {
@@ -59,6 +58,7 @@ import {
   MenuItemContainer,
 } from "../../../../../styles/editMeasure/populationCriteria/groups/index";
 import CompletionIndicator from "../CompletionIndicator";
+import QDMStratifications from "./QDMStratifications";
 
 interface ColSpanPopulationsType {
   isExclusionPop?: boolean;
@@ -205,18 +205,6 @@ const MeasureGroups = (props: MeasureGroupProps) => {
     });
 
   const [visibleStrats, setVisibleStrats] = useState<number>(2);
-  useEffect(() => {
-    if (addStratClicked && visibleStrats > 2) {
-      document
-        .getElementById(`Stratification-select-${visibleStrats}`)
-        ?.focus();
-      setAddStratClicked(false);
-    }
-  }, [visibleStrats]);
-
-  // Todo option should be an Array when passing to AutoComplete.
-  // warning during test cases
-  const [addStratClicked, setAddStratClicked] = useState(false);
 
   const [cqlDefinitionDataTypes, setCqlDefinitionDataTypes] =
     useState<CqlDefineDataTypes>();
@@ -969,119 +957,12 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                   />
                 )}
                 {activeTab === "stratification" && (
-                  <FieldArray
-                    name="stratifications"
-                    render={(arrayHelpers) => (
-                      <div>
-                        {formik.values.stratifications &&
-                          formik.values.stratifications.map(
-                            (strat, i) =>
-                              formik.values.stratifications[i].description !==
-                                deleteToken && (
-                                <div key={i} tw="mt-6">
-                                  <div tw="grid lg:grid-cols-4 gap-4">
-                                    <div tw="lg:col-span-2">
-                                      <div tw="relative">
-                                        {formik.values.stratifications.length >
-                                          2 && (
-                                          <DSLink
-                                            className="madie-link"
-                                            sx={{
-                                              position: "absolute",
-                                              left: "117px",
-                                              zIndex: "1",
-                                              textDecoration: "none",
-                                            }}
-                                            component="button"
-                                            underline="always"
-                                            onClick={(e) => {
-                                              e.preventDefault();
-                                              arrayHelpers.remove(i);
-                                              setVisibleStrats(
-                                                visibleStrats - 1
-                                              );
-                                            }}
-                                            variant="body2"
-                                            data-testid="remove-strat-button"
-                                          >
-                                            Remove
-                                          </DSLink>
-                                        )}
-
-                                        <Select
-                                          readOnly={!canEdit}
-                                          placeHolder={{
-                                            name: "Select Definition",
-                                            value: "",
-                                          }}
-                                          label={`Stratification ${i + 1}`}
-                                          id={`Stratification-select-${i + 1}`}
-                                          aria-describedby={`Stratification-select-${
-                                            i + 1
-                                          }-helper-text`}
-                                          error={Boolean(
-                                            getIn(
-                                              formik.errors,
-                                              `stratifications[${i}].cqlDefinition`
-                                            )
-                                          )}
-                                          helperText={getIn(
-                                            formik.errors,
-                                            `stratifications[${i}].cqlDefinition`
-                                          )}
-                                          inputProps={{
-                                            "data-testid": `stratification-${
-                                              i + 1
-                                            }-input`,
-                                          }}
-                                          {...formik.getFieldProps(
-                                            `stratifications[${i}].cqlDefinition`
-                                          )}
-                                          size="small"
-                                          options={stratificationOptions}
-                                        />
-                                      </div>
-                                    </div>
-                                    <div tw="lg:col-span-2">
-                                      <TextEditor
-                                        label={`Stratification ${
-                                          i + 1
-                                        } Description`}
-                                        setFieldValue={formik.setFieldValue}
-                                        readOnly={!canEdit}
-                                        {...formik.getFieldProps(
-                                          `stratifications[${i}].description`
-                                        )}
-                                      />
-                                    </div>
-                                  </div>
-                                </div>
-                              )
-                          )}
-                        {canEdit ? (
-                          <div tw="pt-4">
-                            <DSLink
-                              className="madie-link"
-                              sx={{
-                                color: "#0073C8",
-                                padding: "14px 0 14px 0",
-                              }}
-                              data-testid="add-strat-button"
-                              onClick={(e) => {
-                                e.preventDefault();
-                                setVisibleStrats(visibleStrats + 1);
-                                arrayHelpers.push(getEmptyStrat());
-                                setAddStratClicked(true);
-                              }}
-                            >
-                              + Add Stratification
-                            </DSLink>
-                          </div>
-                        ) : (
-                          <div tw="p-4"></div>
-                        )}
-                      </div>
-                    )}
+                  <QDMStratifications
+                    formik={formik}
+                    canEdit={canEdit}
+                    stratificationOptions={stratificationOptions}
+                    visibleStrats={visibleStrats}
+                    setVisibleStrats={setVisibleStrats}
                   />
                 )}
               </div>

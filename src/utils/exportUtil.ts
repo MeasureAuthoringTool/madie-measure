@@ -1,6 +1,15 @@
 import _ from "lodash";
+import { format } from "date-fns";
 import { MeasureScoring, Model } from "@madie/madie-models";
 import getModelFamily from "./measureModelHelpers";
+
+export const generateTimestampedFileName = (
+  baseName: string,
+  extension: string
+): string => {
+  const timestamp = format(new Date(), "yyyyMMdd_HHmmss");
+  return `${baseName}_${timestamp}.${extension}`;
+};
 
 export const EXPORT_FAILURE_MESSAGE =
   "Unable to Export measure. Package could not be generated. Please try again and contact the Help Desk if the problem persists.";
