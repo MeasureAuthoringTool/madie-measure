@@ -250,7 +250,7 @@ describe("Create Share Dialog component", () => {
       />
     );
     expect(await screen.findByTestId("share-dialog")).toBeInTheDocument();
-    expect(await screen.findByText("Share With")).toBeInTheDocument();
+    expect(await screen.findByText("Share With...")).toBeInTheDocument();
 
     const cancelButton = screen.getByTestId("share-cancel-button");
     expect(cancelButton).toBeEnabled();
@@ -271,7 +271,7 @@ describe("Create Share Dialog component", () => {
       />
     );
     expect(await screen.findByTestId("share-dialog")).toBeInTheDocument();
-    expect(await screen.findByText("Unshare")).toBeInTheDocument();
+    expect(await screen.findByText("Unshare From...")).toBeInTheDocument();
   });
 
   it("should render share dialog and show HARP ID input if option is Share With", async () => {
@@ -349,10 +349,8 @@ describe("Create Share Dialog component", () => {
     const tableHeaders = table.querySelectorAll("thead th");
 
     expect(tableHeaders[0]).toHaveTextContent("Measure");
-    expect(tableHeaders[1]).toHaveTextContent("User");
+    expect(tableHeaders[1]).toHaveTextContent("Shared With");
     expect(tableHeaders[2]).toHaveTextContent("Date Shared");
-    //Expand row column has no header
-    expect(tableHeaders[3]).toHaveTextContent("");
 
     const tableRows = table.querySelectorAll("tbody tr");
 
@@ -360,11 +358,6 @@ describe("Create Share Dialog component", () => {
     expect(screen.queryByTestId(`expand-button-${mockMeasure1.id}`)).toBeNull();
 
     expect(tableRows[1]).toHaveTextContent(mockMeasure2.measureName);
-
-    const expandButton = await screen.findByTestId(
-      `expand-button-${mockMeasure2.id}`
-    );
-    fireEvent.click(expandButton);
 
     //Only display checkboxes in subrows when the Unshare dialog is opened
     expect(
@@ -419,7 +412,7 @@ describe("Create Share Dialog component", () => {
     const exportButtons = screen.queryAllByText(/Export User List/i);
     expect(exportButtons.length).toBe(0);
     expect(screen.queryByText(/Export User List/i)).not.toBeInTheDocument();
-    expect(await screen.findByText("Unshare")).toBeInTheDocument();
+    expect(await screen.findByText("Unshare From...")).toBeInTheDocument();
 
     const cancelButton = screen.getByTestId("share-cancel-button");
     expect(cancelButton).toBeEnabled();
@@ -448,10 +441,8 @@ describe("Create Share Dialog component", () => {
     const tableHeaders = table.querySelectorAll("thead th");
 
     expect(tableHeaders[0]).toHaveTextContent("Measure");
-    expect(tableHeaders[1]).toHaveTextContent("User");
+    expect(tableHeaders[1]).toHaveTextContent("Shared With");
     expect(tableHeaders[2]).toHaveTextContent("Date Shared");
-    //Expand row column has no header
-    expect(tableHeaders[3]).toHaveTextContent("");
 
     const tableRows = table.querySelectorAll("tbody tr");
 
@@ -459,11 +450,6 @@ describe("Create Share Dialog component", () => {
     expect(screen.queryByTestId(`expand-button-${mockMeasure1.id}`)).toBeNull();
 
     expect(tableRows[1]).toHaveTextContent(mockMeasure2.measureName);
-
-    const expandButton = await screen.findByTestId(
-      `expand-button-${mockMeasure2.id}`
-    );
-    fireEvent.click(expandButton);
 
     expect(
       screen.queryByTestId(
@@ -535,7 +521,7 @@ describe("Create Share Dialog component", () => {
       expect(harpIdInput.value).toBe("userId1");
       expect(
         screen.getByText(
-          "The selected measure(s) are already shared with this user."
+          "The selected measure(s) are already shared with the entered user(s)."
         )
       ).toBeInTheDocument();
     });
@@ -570,15 +556,7 @@ describe("Create Share Dialog component", () => {
       target: { value: userIdWithAllwhiteSpace },
     });
     expect(harpIdInput.value).toBe(userIdWithAllwhiteSpace);
-    expect(addUserBtn).toBeEnabled();
-
-    fireEvent.click(addUserBtn);
-
-    await waitFor(() => {
-      expect(addUserBtn).toBeDisabled();
-      expect(saveBtn).toBeDisabled();
-      expect(harpIdInput.value).toBe("");
-    });
+    expect(addUserBtn).toBeDisabled();
   });
 
   it("should add a user row to the grid for each measure that does not already have that user", async () => {
@@ -638,16 +616,6 @@ describe("Create Share Dialog component", () => {
       expect(saveBtn).toBeEnabled();
       expect(harpIdInput.value).toBe("");
     });
-
-    const expandButtonMockMeasure1 = screen.getByTestId(
-      `expand-button-TestMeasureId1`
-    );
-    fireEvent.click(expandButtonMockMeasure1);
-
-    const expandButtonMockMeasure2 = screen.getByTestId(
-      `expand-button-TestMeasureId2`
-    );
-    fireEvent.click(expandButtonMockMeasure2);
 
     //Row 1
     expect(screen.getByTestId("TestMeasureId1_measureName")).toHaveTextContent(
@@ -724,17 +692,6 @@ describe("Create Share Dialog component", () => {
       expect(saveBtn).toBeEnabled();
       expect(harpIdInput.value).toBe("");
     });
-
-    const expandButtonMockMeasure1 = screen.getByTestId(
-      `expand-button-TestMeasureId1`
-    );
-    fireEvent.click(expandButtonMockMeasure1);
-
-    const expandButtonMockMeasure2 = screen.getByTestId(
-      `expand-button-TestMeasureId2`
-    );
-    fireEvent.click(expandButtonMockMeasure2);
-
     //Row 1
     expect(screen.getByTestId("TestMeasureId1_measureName")).toHaveTextContent(
       "The Measure for Testing 1"
@@ -920,20 +877,15 @@ describe("Create Share Dialog component", () => {
 
     const saveBtn = await screen.findByTestId("share-save-button");
     expect(saveBtn).toBeDisabled();
-
-    const expandButton = await screen.findByTestId(
-      `expand-button-${mockMeasure2.id}`
-    );
-    fireEvent.click(expandButton);
-
     const checkBoxes = await screen.findAllByRole("checkbox");
-    expect(checkBoxes.length).toBe(2);
+    expect(checkBoxes.length).toBe(3);
     expect(checkBoxes[0]).toBeChecked();
     expect(checkBoxes[1]).toBeChecked();
+    expect(checkBoxes[2]).toBeChecked();
 
-    fireEvent.click(checkBoxes[0]);
+    fireEvent.click(checkBoxes[1]);
 
-    await waitFor(() => expect(checkBoxes[0]).not.toBeChecked());
+    await waitFor(() => expect(checkBoxes[1]).not.toBeChecked());
     expect(saveBtn).toBeEnabled();
 
     fireEvent.click(saveBtn);
@@ -1004,20 +956,15 @@ describe("Create Share Dialog component", () => {
 
     const saveBtn = await screen.findByTestId("share-save-button");
     expect(saveBtn).toBeDisabled();
-
-    const expandButton = await screen.findByTestId(
-      `expand-button-${mockMeasure2.id}`
-    );
-    fireEvent.click(expandButton);
-
     const checkBoxes = await screen.findAllByRole("checkbox");
-    expect(checkBoxes.length).toBe(2);
+    expect(checkBoxes.length).toBe(3);
     expect(checkBoxes[0]).toBeChecked();
     expect(checkBoxes[1]).toBeChecked();
+    expect(checkBoxes[2]).toBeChecked();
 
-    fireEvent.click(checkBoxes[0]);
+    fireEvent.click(checkBoxes[1]);
 
-    await waitFor(() => expect(checkBoxes[0]).not.toBeChecked());
+    await waitFor(() => expect(checkBoxes[1]).not.toBeChecked());
     expect(saveBtn).toBeEnabled();
 
     fireEvent.click(saveBtn);
@@ -1038,6 +985,126 @@ describe("Create Share Dialog component", () => {
         toastOpen: true,
       });
     });
+  });
+
+  it("should create chips when comma is used as delimiter in HARP ID field", async () => {
+    render(
+      <ShareDialog
+        measures={[mockMeasure1]}
+        open={true}
+        option={"Share With"}
+        onClose={jest.fn()}
+        onSave={jest.fn()}
+      />
+    );
+    expect(await screen.findByTestId("share-dialog")).toBeInTheDocument();
+
+    const harpIdInput = (await screen.findByTestId(
+      "harp-id-input"
+    )) as HTMLInputElement;
+
+    // Typing "user1,user2," creates chips for user1 and user2, input cleared
+    fireEvent.change(harpIdInput, { target: { value: "user1,user2," } });
+
+    expect(await screen.findByTestId("harp-chip-user1")).toBeInTheDocument();
+    expect(await screen.findByTestId("harp-chip-user2")).toBeInTheDocument();
+    expect(harpIdInput.value).toBe("");
+
+    const addUserBtn = screen.getByTestId("add-user-btn");
+    expect(addUserBtn).toBeEnabled();
+  });
+
+  it("should clear all chips and input value when clear button is clicked", async () => {
+    render(
+      <ShareDialog
+        measures={[mockMeasure1]}
+        open={true}
+        option={"Share With"}
+        onClose={jest.fn()}
+        onSave={jest.fn()}
+      />
+    );
+    expect(await screen.findByTestId("share-dialog")).toBeInTheDocument();
+
+    const harpIdInput = (await screen.findByTestId(
+      "harp-id-input"
+    )) as HTMLInputElement;
+
+    fireEvent.change(harpIdInput, { target: { value: "user1,user2," } });
+    expect(await screen.findByTestId("harp-chip-user1")).toBeInTheDocument();
+    expect(await screen.findByTestId("harp-chip-user2")).toBeInTheDocument();
+
+    const clearBtn = await screen.findByTestId("clear-harp-ids-btn");
+    fireEvent.click(clearBtn);
+
+    expect(screen.queryByTestId("harp-chip-user1")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("harp-chip-user2")).not.toBeInTheDocument();
+    expect(harpIdInput.value).toBe("");
+  });
+
+  it("should toggle all user checkboxes when header select-all checkbox is clicked in Unshare mode", async () => {
+    render(
+      <ShareDialog
+        measures={[mockMeasure1, mockMeasure2]}
+        open={true}
+        option={"Unshare"}
+        onClose={jest.fn()}
+        onSave={jest.fn()}
+      />
+    );
+    expect(await screen.findByTestId("share-dialog")).toBeInTheDocument();
+
+    // header checkbox + 2 sub-row checkboxes (mockMeasure2 has userId1, userId2)
+    const checkBoxes = await screen.findAllByRole("checkbox");
+    expect(checkBoxes.length).toBe(3);
+
+    // Initially all rows are selected
+    expect(checkBoxes[0]).toBeChecked();
+    expect(checkBoxes[1]).toBeChecked();
+    expect(checkBoxes[2]).toBeChecked();
+
+    // Click header to deselect all
+    fireEvent.click(checkBoxes[0]);
+    await waitFor(() => {
+      expect(checkBoxes[0]).not.toBeChecked();
+      expect(checkBoxes[1]).not.toBeChecked();
+      expect(checkBoxes[2]).not.toBeChecked();
+    });
+
+    // Click header again to re-select all
+    fireEvent.click(checkBoxes[0]);
+    await waitFor(() => {
+      expect(checkBoxes[0]).toBeChecked();
+      expect(checkBoxes[1]).toBeChecked();
+      expect(checkBoxes[2]).toBeChecked();
+    });
+  });
+
+  it("should show header checkbox unchecked when only some rows are selected in Unshare mode", async () => {
+    render(
+      <ShareDialog
+        measures={[mockMeasure1, mockMeasure2]}
+        open={true}
+        option={"Unshare"}
+        onClose={jest.fn()}
+        onSave={jest.fn()}
+      />
+    );
+    expect(await screen.findByTestId("share-dialog")).toBeInTheDocument();
+
+    const checkBoxes = await screen.findAllByRole("checkbox");
+    expect(checkBoxes.length).toBe(3);
+
+    // All checked initially
+    expect(checkBoxes[0]).toBeChecked();
+
+    // Uncheck one sub-row
+    fireEvent.click(checkBoxes[1]);
+    await waitFor(() => expect(checkBoxes[1]).not.toBeChecked());
+
+    // Header should no longer be fully checked
+    expect(checkBoxes[0]).not.toBeChecked();
+    expect(checkBoxes[2]).toBeChecked();
   });
 });
 describe("UnshareFromMe Confirmation Dialog component", () => {

@@ -1,20 +1,41 @@
 #add-user-id-search {
   margin: 0 32px 40px 32px;
+}
+
+.harp-id-input-row {
   display: flex;
   flex-direction: row;
-  column-gap: 24px;
+  align-items: flex-end;
+  column-gap: 16px;
+}
 
-  > div {
-    flex-basis: 1;
+.harp-id-text-field {
+  flex: 1;
+  max-width: 500px;
+
+  .MuiOutlinedInput-root {
     display: flex;
     flex-direction: row;
-    flex-grow: 1;
-    max-width: 412px;
+    flex-wrap: wrap;
+    align-items: center;
+    height: auto !important;
+  }
+
+  .MuiInputBase-input {
+    flex: 1;
+    min-width: 40px;
+    margin: 0;
   }
 }
 
+.harp-id-chips-inline {
+  display: contents;
+}
+
 #add-user-btn {
-  margin-top: 40px;
+  flex-shrink: 0;
+  white-space: nowrap;
+  margin-bottom: 22px;
 }
 
 .confirmation-dialog-content {
