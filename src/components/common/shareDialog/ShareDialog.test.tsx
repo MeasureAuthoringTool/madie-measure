@@ -8,7 +8,7 @@ import ShareDialog, {
   INVALID_HARP_ID_MESSAGE,
 } from "./ShareDialog";
 import { MeasureServiceApi } from "@madie/madie-util";
-import { Measure, MeasureMetadata, UserStatus } from "@madie/madie-models";
+import { Measure, MeasureMetadata } from "@madie/madie-models";
 import FileSaver from "file-saver";
 import userEvent from "@testing-library/user-event";
 
@@ -130,7 +130,7 @@ const mockMeasureServiceApi = {
 const mockUserServiceApi = {
   getOwnerDetails: jest
     .fn()
-    .mockResolvedValue({ harpId: "userId", userStatus: UserStatus.ACTIVE }),
+    .mockResolvedValue({ harpId: "userId", userStatus: "ACTIVE" }),
 };
 
 jest.mock("@madie/madie-util", () => ({
@@ -604,7 +604,7 @@ describe("Create Share Dialog component", () => {
   it("should show field-error when HARP ID belongs to an inactive MADiE user", async () => {
     mockUserServiceApi.getOwnerDetails.mockResolvedValueOnce({
       harpId: "inactiveUser",
-      userStatus: UserStatus.DEACTIVATED,
+      userStatus: "DEACTIVATED",
     });
 
     render(
@@ -634,7 +634,7 @@ describe("Create Share Dialog component", () => {
   it("should add user when HARP ID is an active MADiE user", async () => {
     mockUserServiceApi.getOwnerDetails.mockResolvedValueOnce({
       harpId: "validUser",
-      userStatus: UserStatus.ACTIVE,
+      userStatus: "ACTIVE",
     });
 
     render(

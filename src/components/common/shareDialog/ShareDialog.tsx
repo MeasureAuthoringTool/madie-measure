@@ -198,7 +198,7 @@ const ShareDialog = ({
         harpId.toLowerCase()
       );
 
-      if (userDetails.userStatus !== UserStatus.ACTIVE) {
+      if (String(userDetails.userStatus) !== "ACTIVE") {
         formik.setFieldError("harpId", INVALID_HARP_ID_MESSAGE);
         return;
       }
