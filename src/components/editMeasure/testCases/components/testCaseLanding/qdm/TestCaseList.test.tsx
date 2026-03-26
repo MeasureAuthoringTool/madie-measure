@@ -1530,7 +1530,7 @@ describe("TestCaseList component", () => {
       expect(screen.getByTestId("delete-dialog")).toBeInTheDocument();
     });
     const confirmDeleteBtn = screen.getByRole("button", {
-      name: "Delete Case(s)",
+      name: "Yes, Delete Case(s)",
     });
     expect(
       screen.getByTestId("delete-dialog-cancel-button")
@@ -1571,7 +1571,7 @@ describe("TestCaseList component", () => {
       expect(screen.getByTestId("delete-dialog")).toBeInTheDocument();
     });
     const confirmDeleteBtn = screen.getByRole("button", {
-      name: "Delete Case(s)",
+      name: "Yes, Delete Case(s)",
     });
     expect(
       screen.getByTestId("delete-dialog-cancel-button")
@@ -1617,7 +1617,7 @@ describe("TestCaseList component", () => {
       expect(screen.getByTestId("delete-dialog")).toBeInTheDocument();
     });
     const confirmDeleteBtn = screen.getByRole("button", {
-      name: "Delete Case(s)",
+      name: "Yes, Delete Case(s)",
     });
     expect(
       screen.getByTestId("delete-dialog-cancel-button")
