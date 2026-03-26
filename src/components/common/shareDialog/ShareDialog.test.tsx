@@ -5,6 +5,8 @@ import ShareDialog, {
   convertDate,
   MEASURE_SHARING_EXPORT_SUCCESS,
   MEASURE_SHARING_EXPORT_ERROR,
+  INVALID_HARP_ID_MESSAGE,
+  HARP_ID_VALIDATION_FAILURE,
 } from "./ShareDialog";
 import { MeasureServiceApi } from "@madie/madie-util";
 import { Measure, MeasureMetadata } from "@madie/madie-models";
@@ -126,8 +128,15 @@ const mockMeasureServiceApi = {
     ),
 } as unknown as MeasureServiceApi;
 
+const mockUserServiceApi = {
+  getOwnerDetails: jest
+    .fn()
+    .mockResolvedValue({ harpId: "userId", userStatus: "ACTIVE" }),
+};
+
 jest.mock("@madie/madie-util", () => ({
   useMeasureServiceApi: jest.fn(() => mockMeasureServiceApi),
+  useUserServiceApi: jest.fn(() => mockUserServiceApi),
   useOktaTokens: jest.fn(() => ({
     getAccessToken: () => "test.jwt",
     getUserName: () => "test user",
@@ -561,6 +570,126 @@ describe("Create Share Dialog component", () => {
           "The selected measure(s) are already shared with this user."
         )
       ).toBeInTheDocument();
+    });
+  });
+
+  it("should show field-error when HARP ID is not a MADiE user", async () => {
+    mockUserServiceApi.getOwnerDetails.mockRejectedValueOnce({
+      response: { status: 400 },
+    });
+
+    render(
+      <ShareDialog
+        measures={[mockMeasure1]}
+        open={true}
+        option={"Share With"}
+        onClose={jest.fn()}
+        onSave={jest.fn()}
+      />
+    );
+    expect(await screen.findByTestId("share-dialog")).toBeInTheDocument();
+
+    const harpIdInput = (await screen.findByTestId(
+      "harp-id-input"
+    )) as HTMLInputElement;
+    const addUserBtn = await screen.findByTestId("add-user-btn");
+
+    fireEvent.change(harpIdInput, { target: { value: "invalidUser" } });
+    fireEvent.click(addUserBtn);
+
+    await waitFor(() => {
+      expect(screen.getByText(INVALID_HARP_ID_MESSAGE)).toBeInTheDocument();
+    });
+  });
+
+  it("should show toast error when HARP ID validation fails due to a non-400 error", async () => {
+    mockUserServiceApi.getOwnerDetails.mockRejectedValueOnce({
+      response: { status: 500 },
+    });
+
+    render(
+      <ShareDialog
+        measures={[mockMeasure1]}
+        open={true}
+        option={"Share With"}
+        onClose={jest.fn()}
+        onSave={jest.fn()}
+      />
+    );
+    expect(await screen.findByTestId("share-dialog")).toBeInTheDocument();
+
+    const harpIdInput = (await screen.findByTestId(
+      "harp-id-input"
+    )) as HTMLInputElement;
+    const addUserBtn = await screen.findByTestId("add-user-btn");
+
+    fireEvent.change(harpIdInput, { target: { value: "someUser" } });
+    fireEvent.click(addUserBtn);
+
+    await waitFor(() => {
+      expect(screen.getByText(HARP_ID_VALIDATION_FAILURE)).toBeInTheDocument();
+    });
+  });
+
+  it("should show field-error when HARP ID belongs to an inactive MADiE user", async () => {
+    mockUserServiceApi.getOwnerDetails.mockResolvedValueOnce({
+      harpId: "inactiveUser",
+      userStatus: "DEACTIVATED",
+    });
+
+    render(
+      <ShareDialog
+        measures={[mockMeasure1]}
+        open={true}
+        option={"Share With"}
+        onClose={jest.fn()}
+        onSave={jest.fn()}
+      />
+    );
+    expect(await screen.findByTestId("share-dialog")).toBeInTheDocument();
+
+    const harpIdInput = (await screen.findByTestId(
+      "harp-id-input"
+    )) as HTMLInputElement;
+    const addUserBtn = await screen.findByTestId("add-user-btn");
+
+    fireEvent.change(harpIdInput, { target: { value: "inactiveUser" } });
+    fireEvent.click(addUserBtn);
+
+    await waitFor(() => {
+      expect(screen.getByText(INVALID_HARP_ID_MESSAGE)).toBeInTheDocument();
+    });
+  });
+
+  it("should add user when HARP ID is an active MADiE user", async () => {
+    mockUserServiceApi.getOwnerDetails.mockResolvedValueOnce({
+      harpId: "validUser",
+      userStatus: "ACTIVE",
+    });
+
+    render(
+      <ShareDialog
+        measures={[mockMeasure1]}
+        open={true}
+        option={"Share With"}
+        onClose={jest.fn()}
+        onSave={jest.fn()}
+      />
+    );
+    expect(await screen.findByTestId("share-dialog")).toBeInTheDocument();
+
+    const harpIdInput = (await screen.findByTestId(
+      "harp-id-input"
+    )) as HTMLInputElement;
+    const addUserBtn = await screen.findByTestId("add-user-btn");
+    const saveBtn = await screen.findByTestId("share-save-button");
+
+    fireEvent.change(harpIdInput, { target: { value: "validUser" } });
+    fireEvent.click(addUserBtn);
+
+    await waitFor(() => {
+      expect(saveBtn).toBeEnabled();
+      expect(harpIdInput.value).toBe("");
     });
   });
 
