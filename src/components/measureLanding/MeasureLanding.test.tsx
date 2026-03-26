@@ -41,6 +41,7 @@ const mockUser = "TestUser1";
 
 jest.mock("@madie/madie-util", () => ({
   useDocumentTitle: jest.fn(),
+  useUserServiceApi: jest.fn(() => ({ getOwnerDetails: jest.fn() })),
   useOktaTokens: () => ({
     getUserName: () => mockUser,
   }),
@@ -87,6 +88,7 @@ const mockMeasureServiceApi = {
 
 jest.mock("@madie/madie-util", () => ({
   useMeasureServiceApi: jest.fn(() => mockMeasureServiceApi),
+  useUserServiceApi: jest.fn(() => ({ getOwnerDetails: jest.fn() })),
   useOktaTokens: jest.fn(() => ({
     getAccessToken: () => "test.jwt",
     getUserName: () => mockUser,
