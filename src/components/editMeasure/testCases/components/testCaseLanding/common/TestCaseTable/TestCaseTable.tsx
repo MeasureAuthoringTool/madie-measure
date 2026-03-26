@@ -432,6 +432,11 @@ const TestCaseTable = (props: TestCaseTableProps) => {
                     sx: {
                       maxWidth: "none",
                       whiteSpace: "nowrap",
+                      zIndex: 99,
+                      backgroundColor: "#333",
+                      "& .MuiTooltip-arrow": {
+                        color: "#333",
+                      },
                     },
                   },
                 }}
@@ -593,8 +598,20 @@ const TestCaseTable = (props: TestCaseTableProps) => {
           onClose={() => {
             setDeleteDialogModalOpen(false);
           }}
-          dialogTitle={`Delete Test Case`}
-          name={selectedTestCases?.map((testCase) => testCase.title).join(", ")}
+          dialogTitle={`Are you sure?`}
+          customDialogBody={
+            "You are choosing to delete the following Test Case(s)!"
+          }
+          name={`<ul style='margin:0;padding-left:28px;list-style:disc;font-weight:normal'>${selectedTestCases
+            ?.map(
+              (tc) =>
+                `<li>${
+                  tc.series ? `${tc.series} - ${tc.title}` : tc.title
+                }</li>`
+            )
+            .join("")}</ul>`}
+          alternateText="Delete Case(s)"
+          statement={true}
           additionalText={
             " Test cases in-use by another user will not be deleted."
           }

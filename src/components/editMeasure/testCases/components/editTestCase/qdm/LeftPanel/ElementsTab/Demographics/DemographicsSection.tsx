@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import ElementSection from "../../../../../common/UIOnlyModelAgnostic/ElementSection";
-import { MadieTooltip, Select } from "@madie/madie-design-system/dist/react";
+import { Select } from "@madie/madie-design-system/dist/react";
 import FormControl from "@mui/material/FormControl";
 import { DataElement, ValueSet } from "cqm-models";
 import DateTimeInput from "../../../../../QDM/dateTimeInput/DateTimeInput";
@@ -405,6 +405,17 @@ const DemographicsSection = ({ handleTestCaseWarnings, canEdit }) => {
                       : "not available"
                   }`}
                   data-testid={`demographics-race-tooltip`}
+                  slotProps={{
+                    tooltip: {
+                      sx: {
+                        zIndex: 99,
+                        backgroundColor: "#333",
+                        "& .MuiTooltip-arrow": {
+                          color: "#333",
+                        },
+                      },
+                    },
+                  }}
                 >
                   <span>
                     <Select
@@ -433,6 +444,17 @@ const DemographicsSection = ({ handleTestCaseWarnings, canEdit }) => {
                       : "not available"
                   }`}
                   data-testid={`demographics-gender-tooltip`}
+                  slotProps={{
+                    tooltip: {
+                      sx: {
+                        zIndex: 99,
+                        backgroundColor: "#333",
+                        "& .MuiTooltip-arrow": {
+                          color: "#333",
+                        },
+                      },
+                    },
+                  }}
                 >
                   <span>
                     <Select
@@ -463,6 +485,17 @@ const DemographicsSection = ({ handleTestCaseWarnings, canEdit }) => {
                       : "not available"
                   }`}
                   data-testid={`demographics-ethnicity-tooltip`}
+                  slotProps={{
+                    tooltip: {
+                      sx: {
+                        zIndex: 99,
+                        backgroundColor: "#333",
+                        "& .MuiTooltip-arrow": {
+                          color: "#333",
+                        },
+                      },
+                    },
+                  }}
                 >
                   <span>
                     <Select

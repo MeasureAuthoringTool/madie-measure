@@ -147,7 +147,20 @@ export default function AddedComponentsTable({
         id: "actions",
         header: null,
         cell: (info) => (
-          <Tooltip title="Delete">
+          <Tooltip
+            title="Delete"
+            slotProps={{
+              tooltip: {
+                sx: {
+                  zIndex: 99,
+                  backgroundColor: "#333",
+                  "& .MuiTooltip-arrow": {
+                    color: "#333",
+                  },
+                },
+              },
+            }}
+          >
             <IconButton
               size="small"
               onClick={() => handleDeleteComponent(info.row.original.id)}

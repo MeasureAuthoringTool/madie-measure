@@ -45,6 +45,17 @@ const ActionCenter = ({ actions, testId, target }: PropTypes) => {
             title={open ? "Close" : "More"}
             placement="top"
             arrow
+            slotProps={{
+              tooltip: {
+                sx: {
+                  zIndex: 99,
+                  backgroundColor: "#333",
+                  "& .MuiTooltip-arrow": {
+                    color: "#333",
+                  },
+                },
+              },
+            }}
           >
             <div
               style={{

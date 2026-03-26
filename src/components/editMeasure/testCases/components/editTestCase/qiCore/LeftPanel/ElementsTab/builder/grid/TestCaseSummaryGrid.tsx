@@ -143,7 +143,6 @@ const TestCaseSummaryGrid = ({
   readOnly,
 }: TestCaseSummaryGridProps) => {
   const allResourceProfiles = useContext(ResourceContext); // get all profiles loaded from builder
-
   const data = React.useMemo(
     () =>
       gridData?.map((gridItem) => ({
@@ -201,6 +200,17 @@ const TestCaseSummaryGrid = ({
                   arrow
                   enterTouchDelay={0}
                   aria-label="Unsupported profile"
+                  slotProps={{
+                    tooltip: {
+                      sx: {
+                        zIndex: 99,
+                        backgroundColor: "#333",
+                        "& .MuiTooltip-arrow": {
+                          color: "#333",
+                        },
+                      },
+                    },
+                  }}
                 >
                   <Typography
                     variant="caption"
@@ -253,6 +263,17 @@ const TestCaseSummaryGrid = ({
               arrow
               enterTouchDelay={0}
               aria-label={validationResult.message}
+              slotProps={{
+                tooltip: {
+                  sx: {
+                    zIndex: 99,
+                    backgroundColor: "#333",
+                    "& .MuiTooltip-arrow": {
+                      color: "#333",
+                    },
+                  },
+                },
+              }}
             >
               <Box component="span" sx={{ display: "inline-block" }}>
                 <Button
@@ -280,13 +301,21 @@ const TestCaseSummaryGrid = ({
         },
       },
     ],
-    [testCaseCanEdit, actions, viewAction, readOnly, onRowEdit]
+    []
   );
 
   const table = useReactTable({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
+    // stabalize state to prevent animations from triggering on every rerender.
+    meta: {
+      testCaseCanEdit,
+      readOnly,
+      actions,
+      viewAction,
+      onRowEdit,
+    },
   });
 
   return (

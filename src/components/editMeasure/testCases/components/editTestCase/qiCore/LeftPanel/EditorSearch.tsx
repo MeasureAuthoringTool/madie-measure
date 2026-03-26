@@ -10,7 +10,20 @@ const EditorSearch = () => {
   };
 
   return (
-    <Tooltip title="Find in editor">
+    <Tooltip
+      title="Find in editor"
+      slotProps={{
+        tooltip: {
+          sx: {
+            zIndex: 99,
+            backgroundColor: "#333",
+            "& .MuiTooltip-arrow": {
+              color: "#333",
+            },
+          },
+        },
+      }}
+    >
       <IconButton
         data-testid="editor-search-button"
         aria-label="search button"
