@@ -48,6 +48,8 @@ export const MEASURE_SHARING_EXPORT_ERROR =
   "Unable to export the user list. Please try again. If the issue persists, please contact the help desk.";
 export const INVALID_HARP_ID_MESSAGE =
   "The provided HARP ID is not associated with an active MADiE user.";
+export const HARP_ID_VALIDATION_FAILURE =
+  "Unable to validate the provided HARP ID. If the error persists, please contact the help desk.";
 
 interface ShareDialogProps {
   measures: Measure[];
@@ -203,7 +205,15 @@ const ShareDialog = ({
         return;
       }
     } catch (error) {
-      formik.setFieldError("harpId", INVALID_HARP_ID_MESSAGE);
+      if (error?.response?.status === 400) {
+        formik.setFieldError("harpId", INVALID_HARP_ID_MESSAGE);
+      } else {
+        setToast({
+          open: true,
+          type: "danger",
+          message: HARP_ID_VALIDATION_FAILURE,
+        });
+      }
       return;
     }
 
