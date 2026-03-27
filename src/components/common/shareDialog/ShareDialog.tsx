@@ -24,7 +24,7 @@ import {
   getExpandedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { Measure } from "@madie/madie-models";
+import { Measure, UserDetails, UserStatus } from "@madie/madie-models";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowRightIcon from "@mui/icons-material/KeyboardArrowRight";
 import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
@@ -32,7 +32,11 @@ import CheckBoxIcon from "@mui/icons-material/CheckBox";
 import "../../measureLanding/MeasureLanding.scss";
 import tw from "twin.macro";
 import "styled-components/macro";
-import { useMeasureServiceApi, useOktaTokens } from "@madie/madie-util";
+import {
+  useMeasureServiceApi,
+  useOktaTokens,
+  useUserServiceApi,
+} from "@madie/madie-util";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import FileSaver from "file-saver";
@@ -42,6 +46,10 @@ export const MEASURE_SHARING_EXPORT_SUCCESS =
   "Measure Sharing Report exported successfully.";
 export const MEASURE_SHARING_EXPORT_ERROR =
   "Unable to export the user list. Please try again. If the issue persists, please contact the help desk.";
+export const INVALID_HARP_ID_MESSAGE =
+  "The provided HARP ID is not associated with an active MADiE user.";
+export const HARP_ID_VALIDATION_FAILURE =
+  "Unable to validate the provided HARP ID. If the error persists, please contact the help desk.";
 
 interface ShareDialogProps {
   measures: Measure[];
@@ -121,6 +129,7 @@ const ShareDialog = ({
   const showShareDialog = option === "Share With" || option === "Unshare";
 
   const measureServiceApi = useRef(useMeasureServiceApi()).current;
+  const userServiceApi = useRef(useUserServiceApi()).current;
 
   const [loading, setLoading] = useState<boolean>(false);
   const [saveDisabled, setSaveDisabled] = useState<boolean>(true);
@@ -176,13 +185,35 @@ const ShareDialog = ({
     };
   };
 
-  const handleAddUser = () => {
+  const handleAddUser = async () => {
     // Remove all spaces from harpId
     const harpId = formik.getFieldProps("harpId").value.replace(/\s/g, "");
 
     // If no harpId is passed in (string with all whitespace), only clear out the harpId field
     if (!harpId) {
       formik.setFieldValue("harpId", "");
+      return;
+    }
+
+    try {
+      const userDetails: UserDetails = await userServiceApi.getOwnerDetails(
+        harpId.toLowerCase()
+      );
+
+      if (String(userDetails.userStatus) !== "ACTIVE") {
+        formik.setFieldError("harpId", INVALID_HARP_ID_MESSAGE);
+        return;
+      }
+    } catch (error) {
+      if (error?.response?.status === 400) {
+        formik.setFieldError("harpId", INVALID_HARP_ID_MESSAGE);
+      } else {
+        setToast({
+          open: true,
+          type: "danger",
+          message: HARP_ID_VALIDATION_FAILURE,
+        });
+      }
       return;
     }
 
