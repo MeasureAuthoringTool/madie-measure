@@ -53,6 +53,7 @@ const mockOktaTokenApi = {
 
 jest.mock("@madie/madie-util", () => ({
   useMeasureServiceApi: jest.fn(() => mockMeasureServiceApi),
+  useUserServiceApi: jest.fn(() => ({ getOwnerDetails: jest.fn() })),
   useOktaTokens: () => mockOktaTokenApi,
   checkUserCanEdit: jest.fn().mockImplementation(() => true),
   checkUserCanDelete: jest.fn().mockImplementation(() => true),

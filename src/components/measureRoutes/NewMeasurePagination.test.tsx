@@ -24,6 +24,7 @@ const serviceConfig = {
 const mockUser = "TestUser1";
 jest.mock("@madie/madie-util", () => ({
   useMeasureServiceApi: jest.fn(() => mockMeasureServiceApi),
+  useUserServiceApi: jest.fn(() => ({ getOwnerDetails: jest.fn() })),
   useDocumentTitle: jest.fn(),
   useOktaTokens: () => ({
     getAccessToken: () => "test.jwt",
