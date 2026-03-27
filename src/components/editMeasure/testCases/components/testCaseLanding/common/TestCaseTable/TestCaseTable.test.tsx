@@ -849,13 +849,15 @@ describe("TestCase component", () => {
     );
 
     expect(screen.getByText("Are you sure?")).toBeInTheDocument();
-    expect(screen.getByText(/Are you sure you want to delete case\(s\)/i));
+    expect(
+      screen.getByText("You are choosing to delete the following Test Case(s)!")
+    );
     const deleteDialog = screen.getByTestId("delete-dialog");
     expect(
       within(deleteDialog).getByText("TEST SERIES4 - TEST IPP4")
     ).toBeInTheDocument(); //With a group
     expect(within(deleteDialog).getByText("TEST IPP5")).toBeInTheDocument(); //Without a group
-    expect(screen.getByText("Yes, Delete Case(s)")).toBeInTheDocument();
+    expect(screen.getByText("Delete Case(s)")).toBeInTheDocument();
   });
 
   describe("Test Case Locking", () => {
