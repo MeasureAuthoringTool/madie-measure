@@ -1,49 +1,30 @@
 import React, { useEffect, useState } from "react";
-import {
-  NavLink,
-  useLocation,
-  useNavigate,
-  useMatch,
-  useParams,
-} from "react-router-dom";
-import tw, { styled } from "twin.macro";
+import { NavLink, useNavigate, useMatch, useParams } from "react-router-dom";
 import { Tabs, Tab } from "@madie/madie-design-system/dist/react";
 import { measureStore } from "@madie/madie-util";
-interface PropTypes {
-  isActive?: boolean;
-}
-
-const MenuItemContainer = tw.ul`bg-transparent flex px-8`;
-
-const MenuItem = styled.li((props: PropTypes) => [
-  tw`mr-1 text-white bg-[rgba(0, 32, 64, 0.5)] rounded-t-md hover:bg-[rgba(0,6,13, 0.5)]`,
-  props.isActive && tw`bg-slate text-slate-90 font-medium hover:bg-slate`,
-]);
 
 const EditMeasureNav = ({ isQDM }) => {
   const [testCaseLength, setTestCaseLength] = useState<any>(null);
   const testCaseLabel =
     testCaseLength === null ? `Test Cases` : `Test Cases (${testCaseLength})`;
-  const { pathname } = useLocation();
   let navigate = useNavigate();
   const { measureId } = useParams<{
     measureId: string;
   }>();
-  const qdmNavTo = () => {
-    isQDM ? `${pathname}/base-configuration` : `${pathname}/groups/1`;
-  };
   // we grab the matching pattern after edit, then we only get the part before the next slash.
   const fullMatch = useMatch("/measures/:id/edit/*")?.params?.["*"];
   if (fullMatch === "details" && measureId) {
     navigate(`/measures/${measureId}/edit/details/`);
   }
   const match = useMatch("/measures/:id/edit/*")?.params?.["*"].split("/")[0];
-  const tabValue = [
-    "supplemental-data",
-    "risk-adjustment",
-    "base-configuration",
-  ].includes(match!)
-    ? "groups"
+  const populationCriteriaRoutes = isQDM
+    ? ["groups", "supplemental-data", "risk-adjustment", "reporting"]
+    : ["supplemental-data", "risk-adjustment"];
+  // update the tab value to make sure correct population criteria tab is active for sub-routes
+  const tabValue = populationCriteriaRoutes.includes(match!)
+    ? isQDM
+      ? "base-configuration"
+      : "groups"
     : match;
 
   const [measure, setMeasure] = useState<any>(measureStore.state);
