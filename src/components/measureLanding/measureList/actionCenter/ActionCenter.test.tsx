@@ -43,6 +43,7 @@ const mockCheckUserCanDelete = jest.fn();
 
 jest.mock("@madie/madie-util", () => ({
   useMeasureServiceApi: jest.fn(() => mockMeasureServiceApi),
+  useUserServiceApi: jest.fn(() => ({ getOwnerDetails: jest.fn() })),
   checkUserCanEdit: jest.fn(),
   useFeatureFlags: jest.fn().mockReturnValue({
     AdminTransferMeasure: false,
