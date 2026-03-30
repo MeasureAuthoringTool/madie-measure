@@ -47,13 +47,13 @@ export interface NavTabProps {
 const defaultStyle = {
   padding: "0px 10px",
   height: "80px",
-  minHeight: "80px",
   textTransform: "none",
   marginRight: "36px",
   "&:focus": {
     outline: "9px auto -webkit-focus-ring-color",
     outlineOffset: "-1px",
   },
+  overflow: "visible",
 };
 
 export default function CreateCodeCoverageNavTabs(props: NavTabProps) {
@@ -147,7 +147,7 @@ export default function CreateCodeCoverageNavTabs(props: NavTabProps) {
     contextFailure;
 
   return (
-    <div tw="flex justify-between items-center">
+    <div tw="flex justify-between items-center" style={{ overflow: "visible" }}>
       <Tabs
         value={activeTab}
         onChange={(e, v) => {
@@ -206,7 +206,10 @@ export default function CreateCodeCoverageNavTabs(props: NavTabProps) {
           />
         )}
       </Tabs>
-      <div tw="flex flex-wrap space-x-4 justify-end h-10">
+      <div
+        tw="flex flex-wrap space-x-4 justify-end"
+        style={{ overflow: "visible" }}
+      >
         <LoadingButtonWithMenu
           hasErrors={hasErrors}
           isExecutionContextReady={executionContextReady}
@@ -222,7 +225,6 @@ export default function CreateCodeCoverageNavTabs(props: NavTabProps) {
           showOptions={props.showReportOptions}
           setShowOptions={props.setShowReportOptions}
         />
-
         {canEdit && (
           <>
             <Button
