@@ -53,23 +53,6 @@ interface ResourceEditorProps {
   setApplyLoading: Dispatch<SetStateAction<boolean>>;
 }
 
-// Determines the resource name to display based on the title and base resource name
-// e.g. "QI-Core Condition Encounter Diagnosis" or "US Core Condition Encounter Diagnosis" becomes "Condition Encounter Diagnosis"
-export const getResourceName = (title: string, baseResourceType: string) => {
-  if (!title) {
-    return baseResourceType;
-  }
-  if (title.includes("QI-Core")) {
-    return title.replace("QI-Core", "").trim();
-  } else if (title.includes("QICore")) {
-    return title.replace("QICore", "").trim();
-  } else if (title.includes("US Core")) {
-    return title.replace("US Core", "").trim();
-  } else {
-    return title;
-  }
-};
-
 // Builds the element path used to access values in the resource JSON, with special handling for choice types and array types
 // e.g. choice type "Patient.deceased[x]" with type "boolean" becomes "deceasedBoolean"
 // e.g. array type "Patient.contact[0]" becomes "contact"
@@ -85,23 +68,6 @@ const buildElementPath = (element: ElementDefinition) => {
     return _.camelCase(cleanPath + _.upperFirst(element.type[0].code));
   }
   return elemPath;
-};
-
-export const ProfileName = ({ profileUrl }: { profileUrl?: string }) => {
-  let name = "NA";
-  if (profileUrl) {
-    if (profileUrl.includes("/qicore")) {
-      name = "QICore";
-    } else if (profileUrl.includes("/us-core")) {
-      name = "USCore";
-    }
-  }
-  return (
-    <>
-      <span style={{ color: "125496", fontWeight: 700 }}>Profile:&nbsp;</span>
-      <span style={{ color: "#333333" }}>{name}</span>
-    </>
-  );
 };
 
 const ResourceEditor = ({
@@ -309,10 +275,9 @@ const ResourceEditor = ({
         <div className="resource-editor">
           <div className="resource-header">
             <Typography>
-              {getResourceName(
-                selectedResource?.definition?.title,
-                resourceBasePath
-              )}
+              {selectedResource?.definition?.title
+                ? selectedResource?.definition?.title
+                : resourceBasePath}
             </Typography>
             <div className="spacer" />
             <Typography sx={{ fontSize: "14px" }}>
@@ -323,11 +288,6 @@ const ResourceEditor = ({
                 {selectedResource?.bundleEntry?.resource?.id}
               </span>
               <div />
-              <ProfileName
-                profileUrl={
-                  selectedResource?.bundleEntry?.resource?.meta?.profile?.[0]
-                }
-              />
             </Typography>
             <IconButton
               data-testid="close-resource-editor-button"
