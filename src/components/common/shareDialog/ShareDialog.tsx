@@ -205,16 +205,6 @@ const ShareDialog = ({
     []
   );
 
-  const handleHarpInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Backspace" && !harpInputValue && harpIds.length > 0) {
-      setHarpIds((prev) => prev.slice(0, -1));
-    }
-  };
-
-  const handleDeleteChip = (chipToDelete: string) => {
-    setHarpIds((prev) => prev.filter((id) => id !== chipToDelete));
-  };
-
   const handleAddUser = async () => {
     const allIds = [...harpIds];
     const remaining = harpInputValue.replace(/\s/g, "");
@@ -245,7 +235,6 @@ const ShareDialog = ({
 
     try {
       const userDetails = await userServiceApi.getBulkUserDetails(newIds);
-
       const validUsers: string[] = [];
       const invalidUsers: string[] = [];
 
