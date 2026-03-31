@@ -126,6 +126,26 @@ describe("TestCaseRoutes", () => {
     jest.clearAllMocks();
     mockMeasure.errors = [];
     measureBundle.entry = undefined;
+    (mockMeasure as any).measureMetaData = undefined;
+    mockMeasure.cqlErrors = false;
+    mockMeasure.elmJson = "Fak3";
+    mockMeasure.groups = [
+      {
+        id: null,
+        scoring: "Cohort",
+        populations: [
+          {
+            id: "id-1",
+            name: PopulationType.INITIAL_POPULATION,
+            definition: "Initial Population",
+          },
+        ],
+        groupDescription: "",
+        measureGroupTypes: [],
+        populationBasis: "boolean",
+        scoringUnit: "",
+      },
+    ];
   });
 
   it("should render the landing component first", async () => {
@@ -206,6 +226,76 @@ describe("TestCaseRoutes", () => {
 
     const testCaseTitle = await screen.getByTestId("test-case-landing-wrapper");
     expect(testCaseTitle).toBeInTheDocument();
+  });
+
+  it("should not show CQL or population criteria errors for composite measures", async () => {
+    (mockMeasure as any).measureMetaData = { composite: true };
+    mockMeasure.cqlErrors = true;
+    mockMeasure.elmJson = undefined;
+    mockMeasure.groups = [];
+    mockMeasure.errors = [
+      MeasureErrorType.MISMATCH_CQL_POPULATION_RETURN_TYPES,
+      MeasureErrorType.MISMATCH_CQL_SUPPLEMENTAL_DATA,
+    ];
+    const bundle = {
+      id: "m1234",
+      createdBy: "testuser",
+      measureScoring: "Cohort",
+      measurementPeriodStart: "2023-01-01",
+      measurementPeriodEnd: "2023-12-31",
+    };
+    mockMeasureServiceApi.fetchMeasureBundle.mockResolvedValue(bundle);
+    mockedAxios.get.mockImplementation((args) => {
+      return Promise.resolve({
+        data: [
+          {
+            id: "id1",
+            title: "TC1",
+            description: "Desc1",
+            series: "IPP_Pass",
+            lastModifiedAt: "2024-09-10T09:19:14.382Z",
+            status: null,
+          },
+        ],
+      });
+    });
+    render(
+      <MemoryRouter
+        initialEntries={["/measures/m1234/edit/test-cases/list-page"]}
+      >
+        <ApiContextProvider value={serviceConfig}>
+          <Routes>
+            <Route
+              path="/measures/:measureId/edit/test-cases/*"
+              element={<TestCaseRoutes />}
+            />
+          </Routes>
+        </ApiContextProvider>
+      </MemoryRouter>
+    );
+
+    await screen.findByTestId("test-case-landing-wrapper");
+    expect(
+      screen.queryByText(
+        "An error exists with the measure CQL, please review the CQL Editor tab."
+      )
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(
+        /No Population Criteria is associated with this measure/
+      )
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(
+        /One or more Population Criteria has a mismatch with CQL return types/
+      )
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(
+        /Supplemental Data Elements or Risk Adjustment Variables/
+      )
+    ).not.toBeInTheDocument();
+    expect(mockMeasureServiceApi.fetchMeasureBundle).toHaveBeenCalled();
   });
 
   it("should allow navigation to create test case dialog from landing page ", async () => {

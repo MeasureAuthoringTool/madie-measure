@@ -7,7 +7,7 @@ import {
   ApiContextProvider,
   ServiceConfig,
 } from "../../../../../../api/ServiceContext";
-import { Model, PopulationType } from "@madie/madie-models";
+import { Model, MeasureErrorType, PopulationType } from "@madie/madie-models";
 import useCqmConversionService, {
   CqmConversionService,
 } from "../../../api/CqmModelConversionService";
@@ -139,6 +139,33 @@ describe("TestCaseRoutes", () => {
   beforeEach(() => {
     mockedAxios.put.mockResolvedValue({ data: {} });
     mockedAxios.delete.mockResolvedValue({ data: {} });
+    CQMConversionMock.mockImplementation(() => {
+      return useCqmConversionServiceMockResolved;
+    });
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+    (mockMeasure as any).measureMetaData = undefined;
+    mockMeasure.cqlErrors = false;
+    mockMeasure.elmJson = "Fak3";
+    mockMeasure.groups = [
+      {
+        id: "63d953802ac2a77f7fec4e5b",
+        scoring: "Cohort",
+        populations: [
+          {
+            id: "id-1",
+            name: PopulationType.INITIAL_POPULATION,
+            definition: "Initial Population",
+          },
+        ],
+        groupDescription: "",
+        measureGroupTypes: [],
+        populationBasis: "boolean",
+        scoringUnit: "",
+      },
+    ];
   });
 
   it("should render the test case list component", async () => {
@@ -379,5 +406,69 @@ describe("TestCaseRoutes", () => {
       name: "Run Test",
     });
     expect(runTestCaseButton).toBeDisabled();
+  });
+
+  it("should not show CQL or population criteria errors for composite measures", async () => {
+    (mockMeasure as any).measureMetaData = { composite: true };
+    mockMeasure.cqlErrors = true;
+    mockMeasure.elmJson = undefined;
+    mockMeasure.groups = [];
+    mockMeasure.errors = [
+      MeasureErrorType.MISMATCH_CQL_POPULATION_RETURN_TYPES,
+      MeasureErrorType.MISMATCH_CQL_SUPPLEMENTAL_DATA,
+    ];
+    mockedAxios.get.mockImplementation(() => {
+      return Promise.resolve({
+        data: [
+          {
+            id: "id1",
+            title: "TC1",
+            description: "Desc1",
+            series: "IPP_Pass",
+            status: null,
+            lastModifiedAt: "2024-09-10T08:40:14.382Z",
+          },
+        ],
+      });
+    });
+    render(
+      <MemoryRouter
+        initialEntries={["/measures/m1234/edit/test-cases/list-page"]}
+      >
+        <ApiContextProvider value={serviceConfig}>
+          <Routes>
+            <Route
+              path="/measures/:measureId/edit/test-cases/*"
+              element={<TestCaseRoutes />}
+            />
+          </Routes>
+        </ApiContextProvider>
+      </MemoryRouter>
+    );
+
+    const testCaseListTable = (await screen.findByTestId(
+      "test-case-tbl"
+    )) as HTMLTableElement;
+    expect(testCaseListTable).toBeInTheDocument();
+    expect(
+      screen.queryByText(
+        "An error exists with the measure CQL, please review the CQL Editor tab."
+      )
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(
+        /No Population Criteria is associated with this measure/
+      )
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(
+        /One or more Population Criteria has a mismatch with CQL return types/
+      )
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(
+        /Supplemental Data Elements or Risk Adjustment Variables/
+      )
+    ).not.toBeInTheDocument();
   });
 });
