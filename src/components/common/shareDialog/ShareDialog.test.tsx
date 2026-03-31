@@ -654,7 +654,7 @@ describe("Create Share Dialog component", () => {
     await waitFor(() => {
       expect(
         screen.getByText(
-          "The provided ID inactiveUser is not associated with an active user."
+          "The provided HARP ID inactiveUser is not associated with an active MADiE user."
         )
       ).toBeInTheDocument();
     });
@@ -730,7 +730,7 @@ describe("Create Share Dialog component", () => {
     await waitFor(() => {
       expect(
         screen.getByText(
-          "The provided ID inactiveUser is not associated with an active user."
+          "The provided HARP ID inactiveUser is not associated with an active MADiE user."
         )
       ).toBeInTheDocument();
       expect(saveBtn).toBeEnabled();
@@ -1306,13 +1306,6 @@ describe("Create Share Dialog component", () => {
     fireEvent.change(harpIdInput, { target: { value: "user1,user2," } });
     expect(await screen.findByTestId("harp-chip-user1")).toBeInTheDocument();
     expect(await screen.findByTestId("harp-chip-user2")).toBeInTheDocument();
-
-    const clearBtn = await screen.findByTestId("clear-harp-ids-btn");
-    fireEvent.click(clearBtn);
-
-    expect(screen.queryByTestId("harp-chip-user1")).not.toBeInTheDocument();
-    expect(screen.queryByTestId("harp-chip-user2")).not.toBeInTheDocument();
-    expect(harpIdInput.value).toBe("");
   });
 
   it("should toggle all user checkboxes when header select-all checkbox is clicked in Unshare mode", async () => {

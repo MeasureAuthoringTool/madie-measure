@@ -6,14 +6,7 @@ import React, {
   useCallback,
 } from "react";
 import GlobalStyles from "../../../styles/GlobalStyles";
-import {
-  Backdrop,
-  Checkbox,
-  Chip,
-  IconButton,
-  Link,
-  Typography,
-} from "@mui/material";
+import { Backdrop, Checkbox, Link, Typography } from "@mui/material";
 import ClearIcon from "@mui/icons-material/Clear";
 import ExportIcon from "./ExportIcon.svg";
 import {
@@ -47,6 +40,7 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import FileSaver from "file-saver";
 import { generateTimestampedFileName } from "../../../utils/exportUtil";
+import MultiChipInput from "./MultiInputTextField";
 
 export const MEASURE_SHARING_EXPORT_SUCCESS =
   "Measure Sharing Report exported successfully.";
@@ -269,14 +263,14 @@ const ShareDialog = ({
         if (invalidUsers.length === 1) {
           formik.setFieldError(
             "harpId",
-            `The provided ID ${invalidUsers[0]} is not associated with an active user.`
+            `The provided HARP ID ${invalidUsers[0]} is not associated with an active MADiE user.`
           );
         } else {
           formik.setFieldError(
             "harpId",
-            `The provided IDs (${invalidUsers.join(
+            `The provided HARPIDs (${invalidUsers.join(
               ", "
-            )}) are not associated with active users.`
+            )}) are not associated with an active MADiE user.`
           );
         }
       }
@@ -750,49 +744,16 @@ const ShareDialog = ({
             <div id="add-user-id-search">
               <div className="harp-id-input-row">
                 <div className="harp-id-text-field">
-                  <TextField
-                    label="HARP ID"
+                  <MultiChipInput
                     id="harp-id-input"
-                    inputProps={{
-                      "data-testid": "harp-id-input",
-                    }}
-                    InputProps={{
-                      startAdornment:
-                        harpIds.length > 0 ? (
-                          <div className="harp-id-chips-inline">
-                            {harpIds.map((id) => (
-                              <Chip
-                                key={id}
-                                label={id}
-                                onDelete={() => handleDeleteChip(id)}
-                                data-testid={`harp-chip-${id}`}
-                                size="small"
-                                sx={{ margin: "2px" }}
-                              />
-                            ))}
-                          </div>
-                        ) : undefined,
-                      endAdornment:
-                        harpIds.length > 0 || harpInputValue ? (
-                          <IconButton
-                            size="small"
-                            data-testid="clear-harp-ids-btn"
-                            onClick={() => {
-                              setHarpIds([]);
-                              setHarpInputValue("");
-                            }}
-                            sx={{ padding: "2px" }}
-                          >
-                            <ClearIcon fontSize="small" />
-                          </IconButton>
-                        ) : undefined,
-                    }}
+                    label="HARP ID"
+                    value={harpIds}
+                    onChipsChange={setHarpIds}
+                    inputValue={harpInputValue}
+                    onInputValueChange={setHarpInputValue}
                     error={Boolean(formik.errors.harpId)}
-                    helperText={formik.errors.harpId}
+                    helperText={formik.errors.harpId as string}
                     onFocus={() => setSharedWithAllSelectedMeasures(false)}
-                    value={harpInputValue}
-                    onChange={handleHarpInputChange}
-                    onKeyDown={handleHarpInputKeyDown}
                     onBlur={formik.handleBlur("harpId")}
                   />
                   <Typography

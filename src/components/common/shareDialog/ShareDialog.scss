@@ -12,20 +12,6 @@
 .harp-id-text-field {
   flex: 1;
   max-width: 500px;
-
-  .MuiOutlinedInput-root {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    align-items: center;
-    height: auto !important;
-  }
-
-  .MuiInputBase-input {
-    flex: 1;
-    min-width: 40px;
-    margin: 0;
-  }
 }
 
 .harp-id-chips-inline {
