@@ -182,29 +182,6 @@ const ShareDialog = ({
     };
   };
 
-  const handleHarpInputChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const val = e.target.value;
-      if (val.includes(",")) {
-        const parts = val.split(",");
-        const newChips = parts
-          .slice(0, -1)
-          .map((p) => p.replace(/\s/g, ""))
-          .filter(Boolean);
-        if (newChips.length > 0) {
-          setHarpIds((prev) => {
-            const toAdd = newChips.filter((chip) => !prev.includes(chip));
-            return toAdd.length > 0 ? [...prev, ...toAdd] : prev;
-          });
-        }
-        setHarpInputValue(parts[parts.length - 1]);
-      } else {
-        setHarpInputValue(val);
-      }
-    },
-    []
-  );
-
   const handleAddUser = async () => {
     const allIds = [...harpIds];
     const remaining = harpInputValue.replace(/\s/g, "");
