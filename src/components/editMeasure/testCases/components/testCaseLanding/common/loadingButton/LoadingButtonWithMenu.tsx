@@ -78,6 +78,7 @@ export default function LoadingButtonWithMenu({
         anchorEl={anchorRef.current}
         placement="bottom-start"
         transition
+        sx={{ zIndex: 20 }}
       >
         {({ TransitionProps }) => (
           <Grow {...TransitionProps} style={{ transformOrigin: "left top" }}>
