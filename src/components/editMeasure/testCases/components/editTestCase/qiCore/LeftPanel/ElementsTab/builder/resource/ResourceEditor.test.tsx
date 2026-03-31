@@ -2,8 +2,6 @@ import * as React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import ResourceEditor, {
   deleteMultipleCardinalityElement,
-  getResourceName,
-  ProfileName,
 } from "./ResourceEditor";
 import { QiCoreResourceContext } from "../../../../../../../util/QiCorePatientProvider";
 import mockClaimResponseStructuredDef from "./mockSelectedResourceTree.json";
@@ -220,8 +218,8 @@ describe("ResourceEditor", () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByText("ID:")).toBeInTheDocument();
-      // or check for the resource id
+      expect(screen.getByText("QICore Patient")).toBeInTheDocument();
+      // check for the resource id
       expect(
         screen.getByText("446b20b5-dd46-415e-9b9f-9eba6b260743")
       ).toBeInTheDocument();
@@ -942,42 +940,5 @@ describe("Test the ResourceEditor utility functions", () => {
         "performer"
       );
     });
-  });
-
-  it("Should return correct resource name based on profile title and base resource type", async () => {
-    // profile title not present
-    expect(getResourceName(undefined, "Encounter")).toBe("Encounter");
-
-    // profile title present and starts with 'QI-Core'
-    expect(
-      getResourceName("QI-Core Condition Encounter Diagnosis", "Encounter")
-    ).toBe("Condition Encounter Diagnosis");
-
-    // profile title present and starts with 'QICore'
-    expect(
-      getResourceName("QICore Condition Encounter Diagnosis", "Encounter")
-    ).toBe("Condition Encounter Diagnosis");
-
-    // profile title present and starts with 'US Core'
-    expect(
-      getResourceName("US Core Condition Encounter Diagnosis", "Encounter")
-    ).toBe("Condition Encounter Diagnosis");
-
-    // profile title present but doesn't contain 'US Core' or 'QI-Core' or 'QICore'
-    expect(
-      getResourceName("Test Condition Encounter Diagnosis", "Encounter")
-    ).toBe("Test Condition Encounter Diagnosis");
-  });
-
-  it("Should render NA if profile url is absent", async () => {
-    render(<ProfileName profileUrl={undefined} />);
-    expect(screen.getByText(/Profile:/)).toBeInTheDocument();
-    expect(screen.getByText("NA")).toBeInTheDocument();
-  });
-
-  it("Should render Profile: USCore if profile url contains us-core", async () => {
-    render(<ProfileName profileUrl="StructuredDefinition/us-core-encounter" />);
-    expect(screen.getByText(/Profile:/)).toBeInTheDocument();
-    expect(screen.getByText("USCore")).toBeInTheDocument();
   });
 });
