@@ -107,34 +107,37 @@ const TestCaseRoutes = () => {
       // getValueSetAbortController.current.abort(); // this abort triggers a catch block that stops the rest of this.
       const localErrors: Array<string> = [];
       if (measure) {
-        if (measure.cqlErrors || !measure.elmJson) {
-          localErrors.push(
-            "An error exists with the measure CQL, please review the CQL Editor tab."
-          );
-        }
-        if (!measure?.groups?.length) {
-          localErrors.push(
-            "No Population Criteria is associated with this measure. Please review the Population Criteria tab."
-          );
-        }
-        if (measure?.errors) {
-          if (
-            measure.errors?.includes(
-              MeasureErrorType.MISMATCH_CQL_POPULATION_RETURN_TYPES
-            )
-          ) {
-            localErrors.push(CQL_RETURN_TYPES_MISMATCH_ERROR);
+        const isCompositeMeasure = measure?.measureMetaData?.composite;
+        if (!isCompositeMeasure) {
+          if (measure.cqlErrors || !measure.elmJson) {
+            localErrors.push(
+              "An error exists with the measure CQL, please review the CQL Editor tab."
+            );
           }
+          if (!measure?.groups?.length) {
+            localErrors.push(
+              "No Population Criteria is associated with this measure. Please review the Population Criteria tab."
+            );
+          }
+          if (measure?.errors) {
+            if (
+              measure.errors?.includes(
+                MeasureErrorType.MISMATCH_CQL_POPULATION_RETURN_TYPES
+              )
+            ) {
+              localErrors.push(CQL_RETURN_TYPES_MISMATCH_ERROR);
+            }
 
-          if (
-            measure.errors?.includes(
-              MeasureErrorType.MISMATCH_CQL_RISK_ADJUSTMENT
-            ) ||
-            measure.errors.includes(
-              MeasureErrorType.MISMATCH_CQL_SUPPLEMENTAL_DATA
-            )
-          ) {
-            localErrors.push(SDE_RAV_RETURN_TYPES_MISMATCH_ERROR);
+            if (
+              measure.errors?.includes(
+                MeasureErrorType.MISMATCH_CQL_RISK_ADJUSTMENT
+              ) ||
+              measure.errors.includes(
+                MeasureErrorType.MISMATCH_CQL_SUPPLEMENTAL_DATA
+              )
+            ) {
+              localErrors.push(SDE_RAV_RETURN_TYPES_MISMATCH_ERROR);
+            }
           }
         }
 

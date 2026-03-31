@@ -207,16 +207,25 @@ export function shouldDisableRunTestCaseButton(params: {
     executing,
   } = params;
 
-  const hasCqlErrors = !!measure?.cqlErrors;
+  const isCompositeMeasure = measure?.measureMetaData?.composite;
 
-  const hasMeasureErrors =
-    measure?.errors?.includes(
-      MeasureErrorType.MISMATCH_CQL_POPULATION_RETURN_TYPES
-    ) ||
-    measure?.errors?.includes(MeasureErrorType.MISMATCH_CQL_RISK_ADJUSTMENT) ||
-    measure?.errors?.includes(MeasureErrorType.MISMATCH_CQL_SUPPLEMENTAL_DATA);
+  const hasCqlErrors = isCompositeMeasure ? false : !!measure?.cqlErrors;
 
-  const hasNoGroups = _.isNil(measure?.groups) || measure?.groups.length === 0;
+  const hasMeasureErrors = isCompositeMeasure
+    ? false
+    : measure?.errors?.includes(
+        MeasureErrorType.MISMATCH_CQL_POPULATION_RETURN_TYPES
+      ) ||
+      measure?.errors?.includes(
+        MeasureErrorType.MISMATCH_CQL_RISK_ADJUSTMENT
+      ) ||
+      measure?.errors?.includes(
+        MeasureErrorType.MISMATCH_CQL_SUPPLEMENTAL_DATA
+      );
+
+  const hasNoGroups = isCompositeMeasure
+    ? false
+    : _.isNil(measure?.groups) || measure?.groups.length === 0;
 
   const canExecuteInvalidTestCases =
     measure?.testCaseConfiguration?.executeInvalidTestCases;
