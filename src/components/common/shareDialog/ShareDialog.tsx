@@ -741,9 +741,9 @@ const ShareDialog = ({
       >
         <div id="measure-landing" data-testid="measure-landing">
           {option === "Share With" && (
-            <div id="add-user-id-search">
-              <div className="harp-id-input-row">
-                <div className="harp-id-text-field">
+            <div id="measures-add-user-id-search">
+              <div className="measures-harp-id-input-row">
+                <div className="measures-harp-id-text-field">
                   <MultiChipInput
                     id="harp-id-input"
                     label="HARP ID"
@@ -765,7 +765,7 @@ const ShareDialog = ({
                   </Typography>
                 </div>
                 <Button
-                  id="add-user-btn"
+                  id="measures-add-user-btn"
                   data-testid="add-user-btn"
                   variant="outline"
                   disabled={
@@ -779,7 +779,7 @@ const ShareDialog = ({
               </div>
             </div>
           )}
-          <div className="share-unshare-dialog-info-text">
+          <div className="measures-share-unshare-dialog-info-text">
             <div style={{ display: "flex", flexDirection: "column" }}>
               <div>
                 <span>

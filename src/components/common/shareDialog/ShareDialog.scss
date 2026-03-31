@@ -1,24 +1,24 @@
-#add-user-id-search {
+#measures-add-user-id-search {
   margin: 0 32px 40px 32px;
 }
 
-.harp-id-input-row {
+.measures-harp-id-input-row {
   display: flex;
   flex-direction: row;
   align-items: flex-end;
   column-gap: 16px;
 }
 
-.harp-id-text-field {
+.measures-harp-id-text-field {
   flex: 1;
   max-width: 500px;
 }
 
-.harp-id-chips-inline {
+.measures-harp-id-chips-inline {
   display: contents;
 }
 
-#add-user-btn {
+#measures-add-user-btn {
   flex-shrink: 0;
   white-space: nowrap;
   margin-bottom: 22px;
