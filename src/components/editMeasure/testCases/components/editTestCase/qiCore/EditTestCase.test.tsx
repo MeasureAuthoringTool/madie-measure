@@ -3562,17 +3562,20 @@ describe("EditTestCase component", () => {
         [
           "/measures/623cacebe74613783378c17b/edit/test-cases/623cacffe74613783378c17c",
         ],
-        "/measures/:measureId/edit/test-cases/:id"
+        "/measures/:measureId/edit/test-cases/:id",
+        measure
       );
       userEvent.click(screen.getByTestId("details-tab"));
       // this is to make form dirty so that run test button is enabled
       const tcTitle = await screen.findByTestId("test-case-title");
       userEvent.type(tcTitle, "testTitle");
-      const runTestButton = screen.getByRole("button", {
-        name: "Run Test Case",
+      await waitFor(() => {
+        const runTestButton = screen.getByRole("button", {
+          name: "Run Test Case",
+        });
+        expect(runTestButton).not.toBeDisabled();
       });
-      expect(runTestButton).not.toBeDisabled();
-      userEvent.click(runTestButton);
+      userEvent.click(screen.getByRole("button", { name: "Run Test Case" }));
       expect(screen.getByText("CQL")).toBeInTheDocument();
 
       userEvent.click(screen.getByTestId("highlighting-tab"));
