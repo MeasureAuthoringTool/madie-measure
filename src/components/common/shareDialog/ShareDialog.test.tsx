@@ -660,6 +660,49 @@ describe("Create Share Dialog component", () => {
     });
   });
 
+  it("should clear field-error and re-enable Add User button when user types after an error", async () => {
+    mockUserServiceApi.getBulkUserDetails.mockResolvedValueOnce({
+      inactiveUser: { harpId: "inactiveUser", userStatus: "DEACTIVATED" },
+    });
+
+    render(
+      <ShareDialog
+        measures={[mockMeasure1]}
+        open={true}
+        option={"Share With"}
+        onClose={jest.fn()}
+        onSave={jest.fn()}
+      />
+    );
+    expect(await screen.findByTestId("share-dialog")).toBeInTheDocument();
+
+    const harpIdInput = (await screen.findByTestId(
+      "harp-id-input"
+    )) as HTMLInputElement;
+    const addUserBtn = await screen.findByTestId("add-user-btn");
+
+    await userEvent.type(harpIdInput, "inactiveUser");
+    await userEvent.click(addUserBtn);
+
+    await waitFor(() => {
+      expect(
+        screen.getByText(
+          "The provided HARP ID inactiveUser is not associated with an active MADiE user."
+        )
+      ).toBeInTheDocument();
+    });
+
+    await waitFor(() => {
+      userEvent.type(harpIdInput, "newUser");
+      expect(
+        screen.queryByText(
+          "The provided HARP ID inactiveUser is not associated with an active MADiE user."
+        )
+      ).not.toBeInTheDocument();
+      expect(addUserBtn).toBeEnabled();
+    });
+  });
+
   it("should add user when HARP ID is an active MADiE user", async () => {
     mockUserServiceApi.getBulkUserDetails.mockResolvedValueOnce({
       validUser: { harpId: "validUser", userStatus: "ACTIVE" },

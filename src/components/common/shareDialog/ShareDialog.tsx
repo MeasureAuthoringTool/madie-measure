@@ -748,9 +748,19 @@ const ShareDialog = ({
                     id="harp-id-input"
                     label="HARP ID"
                     value={harpIds}
-                    onChipsChange={setHarpIds}
+                    onChipsChange={(chips) => {
+                      setHarpIds(chips);
+                      if (formik.errors.harpId) {
+                        formik.setFieldError("harpId", undefined);
+                      }
+                    }}
                     inputValue={harpInputValue}
-                    onInputValueChange={setHarpInputValue}
+                    onInputValueChange={(val) => {
+                      setHarpInputValue(val);
+                      if (formik.errors.harpId) {
+                        formik.setFieldError("harpId", undefined);
+                      }
+                    }}
                     error={Boolean(formik.errors.harpId)}
                     helperText={formik.errors.harpId as string}
                     onFocus={() => setSharedWithAllSelectedMeasures(false)}
