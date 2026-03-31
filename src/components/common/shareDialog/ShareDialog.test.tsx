@@ -5,6 +5,8 @@ import ShareDialog, {
   convertDate,
   MEASURE_SHARING_EXPORT_SUCCESS,
   MEASURE_SHARING_EXPORT_ERROR,
+  INVALID_HARP_ID_MESSAGE,
+  HARP_ID_VALIDATION_FAILURE,
 } from "./ShareDialog";
 import { MeasureServiceApi } from "@madie/madie-util";
 import { Measure, MeasureMetadata } from "@madie/madie-models";
@@ -126,8 +128,25 @@ const mockMeasureServiceApi = {
     ),
 } as unknown as MeasureServiceApi;
 
+const mockUserServiceApi = {
+  getOwnerDetails: jest
+    .fn()
+    .mockResolvedValue({ harpId: "userId", userStatus: "ACTIVE" }),
+  getBulkUserDetails: jest
+    .fn()
+    .mockImplementation((harpIds: string[]) =>
+      Promise.resolve(
+        harpIds.reduce(
+          (acc, id) => ({ ...acc, [id]: { harpId: id, userStatus: "ACTIVE" } }),
+          {}
+        )
+      )
+    ),
+};
+
 jest.mock("@madie/madie-util", () => ({
   useMeasureServiceApi: jest.fn(() => mockMeasureServiceApi),
+  useUserServiceApi: jest.fn(() => mockUserServiceApi),
   useOktaTokens: jest.fn(() => ({
     getAccessToken: () => "test.jwt",
     getUserName: () => "test user",
@@ -548,6 +567,237 @@ describe("Create Share Dialog component", () => {
         )
       ).toBeInTheDocument();
     });
+  });
+
+  it("should show field-error when HARP ID is not a MADiE user", async () => {
+    mockUserServiceApi.getBulkUserDetails.mockRejectedValueOnce({
+      response: { status: 400 },
+    });
+
+    render(
+      <ShareDialog
+        measures={[mockMeasure1]}
+        open={true}
+        option={"Share With"}
+        onClose={jest.fn()}
+        onSave={jest.fn()}
+      />
+    );
+    expect(await screen.findByTestId("share-dialog")).toBeInTheDocument();
+
+    const harpIdInput = (await screen.findByTestId(
+      "harp-id-input"
+    )) as HTMLInputElement;
+    const addUserBtn = await screen.findByTestId("add-user-btn");
+
+    fireEvent.change(harpIdInput, { target: { value: "invalidUser" } });
+    fireEvent.click(addUserBtn);
+
+    await waitFor(() => {
+      expect(screen.getByText(INVALID_HARP_ID_MESSAGE)).toBeInTheDocument();
+    });
+  });
+
+  it("should show toast error when HARP ID validation fails due to a non-400 error", async () => {
+    mockUserServiceApi.getBulkUserDetails.mockRejectedValueOnce({
+      response: { status: 500 },
+    });
+
+    render(
+      <ShareDialog
+        measures={[mockMeasure1]}
+        open={true}
+        option={"Share With"}
+        onClose={jest.fn()}
+        onSave={jest.fn()}
+      />
+    );
+    expect(await screen.findByTestId("share-dialog")).toBeInTheDocument();
+
+    const harpIdInput = (await screen.findByTestId(
+      "harp-id-input"
+    )) as HTMLInputElement;
+    const addUserBtn = await screen.findByTestId("add-user-btn");
+
+    fireEvent.change(harpIdInput, { target: { value: "someUser" } });
+    fireEvent.click(addUserBtn);
+
+    await waitFor(() => {
+      expect(screen.getByText(HARP_ID_VALIDATION_FAILURE)).toBeInTheDocument();
+    });
+  });
+
+  it("should show field-error when HARP ID belongs to an inactive MADiE user", async () => {
+    mockUserServiceApi.getBulkUserDetails.mockResolvedValueOnce({
+      inactiveUser: { harpId: "inactiveUser", userStatus: "DEACTIVATED" },
+    });
+
+    render(
+      <ShareDialog
+        measures={[mockMeasure1]}
+        open={true}
+        option={"Share With"}
+        onClose={jest.fn()}
+        onSave={jest.fn()}
+      />
+    );
+    expect(await screen.findByTestId("share-dialog")).toBeInTheDocument();
+
+    const harpIdInput = (await screen.findByTestId(
+      "harp-id-input"
+    )) as HTMLInputElement;
+    const addUserBtn = await screen.findByTestId("add-user-btn");
+
+    fireEvent.change(harpIdInput, { target: { value: "inactiveUser" } });
+    fireEvent.click(addUserBtn);
+
+    await waitFor(() => {
+      expect(
+        screen.getByText(
+          "The provided ID inactiveUser is not associated with an active user."
+        )
+      ).toBeInTheDocument();
+    });
+  });
+
+  it("should add user when HARP ID is an active MADiE user", async () => {
+    mockUserServiceApi.getBulkUserDetails.mockResolvedValueOnce({
+      validUser: { harpId: "validUser", userStatus: "ACTIVE" },
+    });
+
+    render(
+      <ShareDialog
+        measures={[mockMeasure1]}
+        open={true}
+        option={"Share With"}
+        onClose={jest.fn()}
+        onSave={jest.fn()}
+      />
+    );
+    expect(await screen.findByTestId("share-dialog")).toBeInTheDocument();
+
+    const harpIdInput = (await screen.findByTestId(
+      "harp-id-input"
+    )) as HTMLInputElement;
+    const addUserBtn = await screen.findByTestId("add-user-btn");
+    const saveBtn = await screen.findByTestId("share-save-button");
+
+    fireEvent.change(harpIdInput, { target: { value: "validUser" } });
+    fireEvent.click(addUserBtn);
+
+    await waitFor(() => {
+      expect(saveBtn).toBeEnabled();
+      expect(harpIdInput.value).toBe("");
+    });
+  });
+
+  it("should add valid user to table and show error for inactive user when mixed IDs are provided", async () => {
+    mockUserServiceApi.getBulkUserDetails.mockResolvedValueOnce({
+      activeUser: { harpId: "activeUser", userStatus: "ACTIVE" },
+      inactiveUser: { harpId: "inactiveUser", userStatus: "DEACTIVATED" },
+    });
+
+    render(
+      <ShareDialog
+        measures={[mockMeasure1]}
+        open={true}
+        option={"Share With"}
+        onClose={jest.fn()}
+        onSave={jest.fn()}
+      />
+    );
+    expect(await screen.findByTestId("share-dialog")).toBeInTheDocument();
+    await screen.findByTestId("share-measure-tbl");
+
+    const harpIdInput = (await screen.findByTestId(
+      "harp-id-input"
+    )) as HTMLInputElement;
+    const addUserBtn = await screen.findByTestId("add-user-btn");
+    const saveBtn = await screen.findByTestId("share-save-button");
+
+    fireEvent.change(harpIdInput, {
+      target: { value: "activeUser,inactiveUser," },
+    });
+    expect(
+      await screen.findByTestId("harp-chip-activeUser")
+    ).toBeInTheDocument();
+    expect(
+      await screen.findByTestId("harp-chip-inactiveUser")
+    ).toBeInTheDocument();
+
+    fireEvent.click(addUserBtn);
+
+    await waitFor(() => {
+      expect(
+        screen.getByText(
+          "The provided ID inactiveUser is not associated with an active user."
+        )
+      ).toBeInTheDocument();
+      expect(saveBtn).toBeEnabled();
+      expect(harpIdInput.value).toBe("");
+    });
+
+    expect(
+      screen.getByTestId("TestMeasureId1 activeUser_userId")
+    ).toHaveTextContent("activeUser");
+  });
+
+  it("should silently ignore duplicate IDs and process only new ones when mixed input is provided", async () => {
+    mockUserServiceApi.getBulkUserDetails.mockResolvedValueOnce({
+      userId3: { harpId: "userId3", userStatus: "ACTIVE" },
+    });
+
+    mockMeasureServiceApi.getSharedMeasures = jest.fn().mockResolvedValue({
+      [mockMeasure2.id]: mockMeasure2.acls
+        ? mockMeasure2.acls.map(
+            (acl) =>
+              ({
+                userId: acl.userId,
+                performedAt: yesterday.toISOString(),
+              } as unknown as SharedUser)
+          )
+        : [],
+    });
+    mockMeasureServiceApi.getRecentMeasuresByMeasureSetId = jest
+      .fn()
+      .mockResolvedValue([mockMeasure2]);
+
+    render(
+      <ShareDialog
+        measures={[mockMeasure2]}
+        open={true}
+        option={"Share With"}
+        onClose={jest.fn()}
+        onSave={jest.fn()}
+      />
+    );
+    expect(await screen.findByTestId("share-dialog")).toBeInTheDocument();
+    await screen.findByTestId("share-measure-tbl");
+
+    const harpIdInput = (await screen.findByTestId(
+      "harp-id-input"
+    )) as HTMLInputElement;
+    const addUserBtn = await screen.findByTestId("add-user-btn");
+    const saveBtn = await screen.findByTestId("share-save-button");
+
+    fireEvent.change(harpIdInput, { target: { value: "userId1,userId3," } });
+    expect(await screen.findByTestId("harp-chip-userId1")).toBeInTheDocument();
+    expect(await screen.findByTestId("harp-chip-userId3")).toBeInTheDocument();
+
+    fireEvent.click(addUserBtn);
+
+    await waitFor(() => {
+      expect(
+        screen.queryByText(
+          "The selected measure(s) are already shared with the entered user(s)."
+        )
+      ).not.toBeInTheDocument();
+      expect(saveBtn).toBeEnabled();
+    });
+
+    expect(
+      screen.getByTestId("TestMeasureId2 userId3_userId")
+    ).toHaveTextContent("userId3");
   });
 
   it("should not add any user row to the grid for any measure if a string with all whitespace is entered", async () => {

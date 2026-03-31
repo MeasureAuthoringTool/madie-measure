@@ -32,13 +32,17 @@ import {
   getExpandedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { Measure } from "@madie/madie-models";
+import { Measure, UserDetails, UserStatus } from "@madie/madie-models";
 import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
 import CheckBoxIcon from "@mui/icons-material/CheckBox";
 import "../../measureLanding/MeasureLanding.scss";
 import tw from "twin.macro";
 import "styled-components/macro";
-import { useMeasureServiceApi, useOktaTokens } from "@madie/madie-util";
+import {
+  useMeasureServiceApi,
+  useOktaTokens,
+  useUserServiceApi,
+} from "@madie/madie-util";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import FileSaver from "file-saver";
@@ -48,6 +52,10 @@ export const MEASURE_SHARING_EXPORT_SUCCESS =
   "Measure Sharing Report exported successfully.";
 export const MEASURE_SHARING_EXPORT_ERROR =
   "Unable to export the user list. Please try again. If the issue persists, please contact the help desk.";
+export const INVALID_HARP_ID_MESSAGE =
+  "The provided HARP ID is not associated with an active MADiE user.";
+export const HARP_ID_VALIDATION_FAILURE =
+  "Unable to validate the provided HARP ID. If the error persists, please contact the help desk.";
 
 interface ShareDialogProps {
   measures: Measure[];
@@ -122,6 +130,7 @@ const ShareDialog = ({
   const showShareDialog = option === "Share With" || option === "Unshare";
 
   const measureServiceApi = useRef(useMeasureServiceApi()).current;
+  const userServiceApi = useRef(useUserServiceApi()).current;
 
   const [loading, setLoading] = useState<boolean>(false);
   const [saveDisabled, setSaveDisabled] = useState<boolean>(true);
@@ -212,7 +221,7 @@ const ShareDialog = ({
     setHarpIds((prev) => prev.filter((id) => id !== chipToDelete));
   };
 
-  const handleAddUser = () => {
+  const handleAddUser = async () => {
     const allIds = [...harpIds];
     const remaining = harpInputValue.replace(/\s/g, "");
     if (remaining) {
@@ -225,26 +234,61 @@ const ShareDialog = ({
       return;
     }
 
-    const alreadySharedIds: string[] = [];
-    let allSharedWithAll = true;
+    const existingUserIds = new Set(
+      sharedMeasures.flatMap((measure) =>
+        measure.subRows.map((subRow) => subRow.userId)
+      )
+    );
 
-    let updatedMeasures = [...sharedMeasures];
+    const newIds = uniqueIds.filter((id) => !existingUserIds.has(id));
+    if (newIds.length === 0) {
+      formik.setFieldError(
+        "harpId",
+        `The selected measure(s) are already shared with the entered user(s).`
+      );
+      return;
+    }
 
-    uniqueIds.forEach((harpId) => {
-      let sharedWithAll = true;
+    try {
+      const userDetails = await userServiceApi.getBulkUserDetails(newIds);
 
-      updatedMeasures = updatedMeasures.map((measure) => {
-        if (
-          measure.subRows.length &&
-          measure.subRows.some((subRow) => subRow.userId === harpId)
-        ) {
-          return { ...measure };
+      const validUsers: string[] = [];
+      const invalidUsers: string[] = [];
+
+      Object.entries(userDetails).forEach(
+        ([harpId, details]: [string, any]) => {
+          if (details.userStatus && String(details.userStatus) === "ACTIVE") {
+            validUsers.push(harpId);
+          } else {
+            invalidUsers.push(harpId);
+          }
+        }
+      );
+
+      if (invalidUsers.length > 0) {
+        if (invalidUsers.length === 1) {
+          formik.setFieldError(
+            "harpId",
+            `The provided ID ${invalidUsers[0]} is not associated with an active user.`
+          );
         } else {
-          sharedWithAll = false;
-          allSharedWithAll = false;
+          formik.setFieldError(
+            "harpId",
+            `The provided IDs (${invalidUsers.join(
+              ", "
+            )}) are not associated with active users.`
+          );
+        }
+      }
 
+      if (validUsers.length === 0) {
+        return;
+      }
+
+      let updatedMeasures = [...sharedMeasures];
+      validUsers.forEach((harpId) => {
+        updatedMeasures = updatedMeasures.map((measure) => {
           updateSharedMeasuresRequest(measure.measureId, harpId);
-
           return {
             ...measure,
             subRows: [
@@ -258,34 +302,27 @@ const ShareDialog = ({
               ...measure.subRows,
             ],
           };
-        }
+        });
       });
 
-      if (sharedWithAll) {
-        alreadySharedIds.push(harpId);
-      }
-    });
-
-    setSharedMeasures(updatedMeasures);
-    setSharedWithAllSelectedMeasures(allSharedWithAll);
-
-    if (
-      alreadySharedIds.length > 0 &&
-      alreadySharedIds.length < uniqueIds.length
-    ) {
-      formik.setFieldError(
-        "harpId",
-        `The selected measure(s) are already shared with: ${alreadySharedIds.join(
-          ", "
-        )}`
-      );
-    }
-
-    if (!allSharedWithAll) {
+      setSharedMeasures(updatedMeasures);
       setSaveDisabled(false);
       setHarpIds([]);
       setHarpInputValue("");
-      formik.resetForm();
+
+      if (invalidUsers.length === 0) {
+        formik.resetForm();
+      }
+    } catch (error) {
+      if (error?.response?.status === 400) {
+        formik.setFieldError("harpId", INVALID_HARP_ID_MESSAGE);
+      } else {
+        setToast({
+          open: true,
+          type: "danger",
+          message: HARP_ID_VALIDATION_FAILURE,
+        });
+      }
     }
   };
 
@@ -704,7 +741,7 @@ const ShareDialog = ({
           "data-testid": "share-save-button",
           disabled:
             option === "Share With"
-              ? saveDisabled || !formik.isValid || executing
+              ? saveDisabled || executing
               : table.getIsAllRowsSelected() || executing,
         }}
       >
