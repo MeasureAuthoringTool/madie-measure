@@ -189,19 +189,17 @@ const ShareDialog = ({
       allIds.push(remaining);
     }
     const uniqueIds = [...new Set(allIds)];
-
     if (uniqueIds.length === 0) {
       setHarpInputValue("");
       return;
     }
 
-    const existingUserIds = new Set(
-      sharedMeasures.flatMap((measure) =>
-        measure.subRows.map((subRow) => subRow.userId)
-      )
+    const newIds = uniqueIds.filter(
+      (id) =>
+        !sharedMeasures.every((measure) =>
+          measure.subRows.some((subRow) => subRow.userId === id)
+        )
     );
-
-    const newIds = uniqueIds.filter((id) => !existingUserIds.has(id));
     if (newIds.length === 0) {
       formik.setFieldError(
         "harpId",
@@ -248,6 +246,10 @@ const ShareDialog = ({
       let updatedMeasures = [...sharedMeasures];
       validUsers.forEach((harpId) => {
         updatedMeasures = updatedMeasures.map((measure) => {
+          // Skip measures where this user is already shared
+          if (measure.subRows.some((subRow) => subRow.userId === harpId)) {
+            return measure;
+          }
           updateSharedMeasuresRequest(measure.measureId, harpId);
           return {
             ...measure,
