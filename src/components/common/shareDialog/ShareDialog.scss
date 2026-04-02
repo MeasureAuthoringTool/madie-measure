@@ -1,20 +1,27 @@
-#add-user-id-search {
+#measures-add-user-id-search {
   margin: 0 32px 40px 32px;
-  display: flex;
-  flex-direction: row;
-  column-gap: 24px;
-
-  > div {
-    flex-basis: 1;
-    display: flex;
-    flex-direction: row;
-    flex-grow: 1;
-    max-width: 412px;
-  }
 }
 
-#add-user-btn {
-  margin-top: 40px;
+.measures-harp-id-input-row {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end;
+  column-gap: 16px;
+}
+
+.measures-harp-id-text-field {
+  flex: 1;
+  max-width: 500px;
+}
+
+.measures-harp-id-chips-inline {
+  display: contents;
+}
+
+#measures-add-user-btn {
+  flex-shrink: 0;
+  white-space: nowrap;
+  margin-bottom: 22px;
 }
 
 .confirmation-dialog-content {

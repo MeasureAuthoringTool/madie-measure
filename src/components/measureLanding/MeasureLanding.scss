@@ -166,7 +166,7 @@
   }
 }
 
-.share-unshare-dialog-info-text {
+.measures-share-unshare-dialog-info-text {
   color: #515151;
   font-weight: 400;
   font-family: Rubik, sans-serif;
@@ -175,9 +175,9 @@
   padding-bottom: 17px;
   flex-direction: row;
   display: flex;
-  gap: 40px;
+  gap: 10px;
   align-items: flex-end;
-  font-size: 16px;
+  font-size: 14px;
 
   .export-user-list-btn {
     display: flex;
