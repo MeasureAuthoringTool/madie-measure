@@ -84,35 +84,38 @@ const TestCaseRoutes = () => {
         return;
       }
       setLastMeasure(compareTo);
-      if (measure.cqlErrors || !measure.elmJson) {
-        localErrors.push(CQL_ERROR);
-      }
-      if (!measure?.groups?.length) {
-        localErrors.push(NO_PC_ERROR);
-      }
-
-      if (measure?.errors) {
-        if (
-          measure.errors?.includes(
-            MeasureErrorType.MISMATCH_CQL_POPULATION_RETURN_TYPES
-          )
-        ) {
-          localErrors.push(CQL_RETURN_TYPES_MISMATCH_ERROR);
+      const isCompositeMeasure = measure?.measureMetaData?.composite;
+      if (!isCompositeMeasure) {
+        if (measure.cqlErrors || !measure.elmJson) {
+          localErrors.push(CQL_ERROR);
+        }
+        if (!measure?.groups?.length) {
+          localErrors.push(NO_PC_ERROR);
         }
 
-        if (
-          measure.errors?.includes(
-            MeasureErrorType.MISMATCH_CQL_RISK_ADJUSTMENT
-          ) ||
-          measure.errors.includes(
-            MeasureErrorType.MISMATCH_CQL_SUPPLEMENTAL_DATA
-          )
-        ) {
-          localErrors.push(SDE_RAV_RETURN_TYPES_MISMATCH_ERROR);
+        if (measure?.errors) {
+          if (
+            measure.errors?.includes(
+              MeasureErrorType.MISMATCH_CQL_POPULATION_RETURN_TYPES
+            )
+          ) {
+            localErrors.push(CQL_RETURN_TYPES_MISMATCH_ERROR);
+          }
+
+          if (
+            measure.errors?.includes(
+              MeasureErrorType.MISMATCH_CQL_RISK_ADJUSTMENT
+            ) ||
+            measure.errors.includes(
+              MeasureErrorType.MISMATCH_CQL_SUPPLEMENTAL_DATA
+            )
+          ) {
+            localErrors.push(SDE_RAV_RETURN_TYPES_MISMATCH_ERROR);
+          }
         }
-      }
-      if (localErrors.length > 0) {
-        localErrors.push(TEST_CASE_EXECUTION_ERROR);
+        if (localErrors.length > 0) {
+          localErrors.push(TEST_CASE_EXECUTION_ERROR);
+        }
       }
       if (measure?.testCaseConfiguration?.executeInvalidTestCases) {
         setCustomWarningMessages([

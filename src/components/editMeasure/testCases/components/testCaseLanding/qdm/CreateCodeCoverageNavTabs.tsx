@@ -107,17 +107,21 @@ export default function CreateCodeCoverageNavTabs(props: NavTabProps) {
     );
   };
 
+  const isCompositeMeasure = measure?.measureMetaData?.composite;
   const hasErrors =
-    measure?.cqlErrors ||
-    measure?.errors?.includes(
-      MeasureErrorType.MISMATCH_CQL_POPULATION_RETURN_TYPES
-    ) ||
-    measure?.errors?.includes(MeasureErrorType.MISMATCH_CQL_RISK_ADJUSTMENT) ||
-    measure?.errors?.includes(
-      MeasureErrorType.MISMATCH_CQL_SUPPLEMENTAL_DATA
-    ) ||
-    _.isNil(measure?.groups) ||
-    measure?.groups.length === 0 ||
+    (!isCompositeMeasure &&
+      (measure?.cqlErrors ||
+        measure?.errors?.includes(
+          MeasureErrorType.MISMATCH_CQL_POPULATION_RETURN_TYPES
+        ) ||
+        measure?.errors?.includes(
+          MeasureErrorType.MISMATCH_CQL_RISK_ADJUSTMENT
+        ) ||
+        measure?.errors?.includes(
+          MeasureErrorType.MISMATCH_CQL_SUPPLEMENTAL_DATA
+        ) ||
+        _.isNil(measure?.groups) ||
+        measure?.groups.length === 0)) ||
     (measure?.testCaseConfiguration?.executeInvalidTestCases
       ? false
       : _.isEmpty(validTestCases)) ||
