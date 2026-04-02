@@ -339,4 +339,30 @@ describe("Create New Test Case Dialog", () => {
       expect(queryByTestId("server-error-alerts")).not.toBeVisible();
     });
   }, 16000);
+
+  it("should render title with 'Composite' when isComposite prop is true", async () => {
+    const measure: Measure = {
+      model: "QDM",
+      measureMetaData: {
+        composite: true,
+      },
+    } as unknown as Measure;
+    const { findByText } = render(
+      <MemoryRouter
+        initialEntries={[
+          `/measures/${mockMeasure.id}/edit/test-cases/list-page`,
+        ]}
+      >
+        <CreateNewTestCaseDialog
+          open={true}
+          onClose={jest.fn()}
+          onSuccess={jest.fn()}
+          measure={measure}
+        />
+      </MemoryRouter>
+    );
+
+    const titleElement = await findByText("Create Composite Test Case");
+    expect(titleElement).toBeInTheDocument();
+  });
 });
