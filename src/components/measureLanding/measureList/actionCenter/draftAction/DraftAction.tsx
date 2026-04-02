@@ -115,6 +115,7 @@ export default function DraftAction(props: PropTypes) {
       data-testid="draft-action-tooltip"
       title={tooltipMessage}
       arrow
+      placement="top"
       slotProps={{
         tooltip: {
           sx: {

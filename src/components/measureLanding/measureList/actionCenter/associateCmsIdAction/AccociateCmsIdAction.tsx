@@ -86,6 +86,7 @@ export default function AssociateCmsIdAction(props: PropTypes) {
       title={tooltipMessage}
       onMouseOver={validateAssociateCmsIdActionState}
       arrow
+      placement="top"
       slotProps={{
         tooltip: {
           sx: {
