@@ -471,4 +471,237 @@ describe("TestCaseRoutes", () => {
       )
     ).not.toBeInTheDocument();
   });
+
+  it("should show CQL error when measure has cqlErrors", async () => {
+    mockMeasure.cqlErrors = true;
+    mockMeasure.errors = [];
+    mockedAxios.get.mockImplementation(() => {
+      return Promise.resolve({
+        data: [
+          {
+            id: "id1",
+            title: "TC1",
+            description: "Desc1",
+            series: "IPP_Pass",
+            status: null,
+            lastModifiedAt: "2024-09-10T08:40:14.382Z",
+          },
+        ],
+      });
+    });
+    render(
+      <MemoryRouter
+        initialEntries={["/measures/m1234/edit/test-cases/list-page"]}
+      >
+        <ApiContextProvider value={serviceConfig}>
+          <Routes>
+            <Route
+              path="/measures/:measureId/edit/test-cases/*"
+              element={<TestCaseRoutes />}
+            />
+          </Routes>
+        </ApiContextProvider>
+      </MemoryRouter>
+    );
+
+    expect(
+      await screen.findByText(
+        "An error exists with the measure CQL, please review the CQL Editor tab."
+      )
+    ).toBeInTheDocument();
+  });
+
+  it("should show CQL error when measure has no elmJson", async () => {
+    mockMeasure.elmJson = undefined;
+    mockMeasure.errors = [];
+    mockedAxios.get.mockImplementation(() => {
+      return Promise.resolve({
+        data: [
+          {
+            id: "id1",
+            title: "TC1",
+            description: "Desc1",
+            series: "IPP_Pass",
+            status: null,
+            lastModifiedAt: "2024-09-10T08:40:14.382Z",
+          },
+        ],
+      });
+    });
+    render(
+      <MemoryRouter
+        initialEntries={["/measures/m1234/edit/test-cases/list-page"]}
+      >
+        <ApiContextProvider value={serviceConfig}>
+          <Routes>
+            <Route
+              path="/measures/:measureId/edit/test-cases/*"
+              element={<TestCaseRoutes />}
+            />
+          </Routes>
+        </ApiContextProvider>
+      </MemoryRouter>
+    );
+
+    expect(
+      await screen.findByText(
+        "An error exists with the measure CQL, please review the CQL Editor tab."
+      )
+    ).toBeInTheDocument();
+  });
+
+  it("should show population criteria error when measure has no groups", async () => {
+    mockMeasure.groups = [];
+    mockMeasure.errors = [];
+    mockedAxios.get.mockImplementation(() => {
+      return Promise.resolve({
+        data: [
+          {
+            id: "id1",
+            title: "TC1",
+            description: "Desc1",
+            series: "IPP_Pass",
+            status: null,
+            lastModifiedAt: "2024-09-10T08:40:14.382Z",
+          },
+        ],
+      });
+    });
+    render(
+      <MemoryRouter
+        initialEntries={["/measures/m1234/edit/test-cases/list-page"]}
+      >
+        <ApiContextProvider value={serviceConfig}>
+          <Routes>
+            <Route
+              path="/measures/:measureId/edit/test-cases/*"
+              element={<TestCaseRoutes />}
+            />
+          </Routes>
+        </ApiContextProvider>
+      </MemoryRouter>
+    );
+
+    expect(
+      await screen.findByText(
+        "No Population Criteria is associated with this measure. Please review the Population Criteria tab."
+      )
+    ).toBeInTheDocument();
+  });
+
+  it("should show CQL return type mismatch error", async () => {
+    mockMeasure.errors = [
+      MeasureErrorType.MISMATCH_CQL_POPULATION_RETURN_TYPES,
+    ];
+    mockedAxios.get.mockImplementation(() => {
+      return Promise.resolve({
+        data: [
+          {
+            id: "id1",
+            title: "TC1",
+            description: "Desc1",
+            series: "IPP_Pass",
+            status: null,
+            lastModifiedAt: "2024-09-10T08:40:14.382Z",
+          },
+        ],
+      });
+    });
+    render(
+      <MemoryRouter
+        initialEntries={["/measures/m1234/edit/test-cases/list-page"]}
+      >
+        <ApiContextProvider value={serviceConfig}>
+          <Routes>
+            <Route
+              path="/measures/:measureId/edit/test-cases/*"
+              element={<TestCaseRoutes />}
+            />
+          </Routes>
+        </ApiContextProvider>
+      </MemoryRouter>
+    );
+
+    expect(
+      await screen.findByText(
+        /One or more Population Criteria has a mismatch with CQL return types/
+      )
+    ).toBeInTheDocument();
+  });
+
+  it("should show SDE/RAV error for risk adjustment mismatch", async () => {
+    mockMeasure.errors = [MeasureErrorType.MISMATCH_CQL_RISK_ADJUSTMENT];
+    mockedAxios.get.mockImplementation(() => {
+      return Promise.resolve({
+        data: [
+          {
+            id: "id1",
+            title: "TC1",
+            description: "Desc1",
+            series: "IPP_Pass",
+            status: null,
+            lastModifiedAt: "2024-09-10T08:40:14.382Z",
+          },
+        ],
+      });
+    });
+    render(
+      <MemoryRouter
+        initialEntries={["/measures/m1234/edit/test-cases/list-page"]}
+      >
+        <ApiContextProvider value={serviceConfig}>
+          <Routes>
+            <Route
+              path="/measures/:measureId/edit/test-cases/*"
+              element={<TestCaseRoutes />}
+            />
+          </Routes>
+        </ApiContextProvider>
+      </MemoryRouter>
+    );
+
+    expect(
+      await screen.findByText(
+        /Supplemental Data Elements or Risk Adjustment Variables/
+      )
+    ).toBeInTheDocument();
+  });
+
+  it("should show SDE/RAV error for supplemental data mismatch", async () => {
+    mockMeasure.errors = [MeasureErrorType.MISMATCH_CQL_SUPPLEMENTAL_DATA];
+    mockedAxios.get.mockImplementation(() => {
+      return Promise.resolve({
+        data: [
+          {
+            id: "id1",
+            title: "TC1",
+            description: "Desc1",
+            series: "IPP_Pass",
+            status: null,
+            lastModifiedAt: "2024-09-10T08:40:14.382Z",
+          },
+        ],
+      });
+    });
+    render(
+      <MemoryRouter
+        initialEntries={["/measures/m1234/edit/test-cases/list-page"]}
+      >
+        <ApiContextProvider value={serviceConfig}>
+          <Routes>
+            <Route
+              path="/measures/:measureId/edit/test-cases/*"
+              element={<TestCaseRoutes />}
+            />
+          </Routes>
+        </ApiContextProvider>
+      </MemoryRouter>
+    );
+
+    expect(
+      await screen.findByText(
+        /Supplemental Data Elements or Risk Adjustment Variables/
+      )
+    ).toBeInTheDocument();
+  });
 });
