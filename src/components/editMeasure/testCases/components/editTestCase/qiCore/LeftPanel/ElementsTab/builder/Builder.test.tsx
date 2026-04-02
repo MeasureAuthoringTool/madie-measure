@@ -361,14 +361,46 @@ describe("Builder Component", () => {
     expect(rows).toHaveLength(4);
   });
 
-  it("does not render available content when not editable", () => {
+  it("does not render available content when not editable", async () => {
     renderBuilderComponent({
       bundleToAdd: mockBundle,
       activeTab: "available",
       canEdit: false,
     });
 
+    // wait for loading to complete, then verify no search input is shown
+    await waitFor(() =>
+      expect(
+        screen.queryByTestId("available-profiles-loading")
+      ).not.toBeInTheDocument()
+    );
     expect(screen.queryByLabelText("Search")).not.toBeInTheDocument();
+  });
+
+  it("shows a spinner while the available profiles tab is loading", () => {
+    renderBuilderComponent({ bundleToAdd: mockBundle, activeTab: "available" });
+
+    expect(
+      screen.getByTestId("available-profiles-loading")
+    ).toBeInTheDocument();
+    expect(screen.getByRole("progressbar")).toBeInTheDocument();
+  });
+
+  it("removes the spinner after the available profiles tab finishes loading", async () => {
+    renderBuilderComponent({ bundleToAdd: mockBundle, activeTab: "available" });
+
+    // spinner is visible during load
+    expect(
+      screen.getByTestId("available-profiles-loading")
+    ).toBeInTheDocument();
+
+    // wait for resources to load
+    await screen.findByLabelText("Search");
+
+    // spinner is gone and resource list is shown
+    expect(
+      screen.queryByTestId("available-profiles-loading")
+    ).not.toBeInTheDocument();
   });
 
   it("renders added content when activeTab is added", async () => {

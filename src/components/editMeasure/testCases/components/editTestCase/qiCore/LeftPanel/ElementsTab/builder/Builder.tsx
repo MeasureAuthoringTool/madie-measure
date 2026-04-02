@@ -104,6 +104,7 @@ const Builder = ({
   const [resources, setResources] = useState<ResourceIdentifier[]>([]);
   const [savedGridID, setSavedGridID] = useState(null);
   const [applyLoading, setApplyLoading] = useState(false);
+  const [resourcesLoading, setResourcesLoading] = useState(true);
   const [toastOpen, setToastOpen] = useState<boolean>(false);
   const [toastMessage, setToastMessage] = useState<string>("");
   const [toastType, setToastType] = useState<string>("danger");
@@ -151,7 +152,8 @@ const Builder = ({
             }
             setResources(sortedResources);
           }
-        });
+        })
+        .finally(() => setResourcesLoading(false));
     };
     fetchResources();
     // Cleanup: abort the request on unmounts or dependencies change
@@ -213,57 +215,74 @@ const Builder = ({
     >
       <div className="panel-content-pane" id="tc-builder-panel-content-pane">
         {/* available elements that we don't want to display when a resource is selected */}
-        {activeTab === "available" && canEdit && (
-          <ResourceList
-            resourceIdentifiers={resources.filter(
-              (res) =>
-                res.id.startsWith("qicore") || res.id.startsWith("us-core")
-            )}
-            onClick={async (resourceIdentifier: ResourceIdentifier) => {
-              const newEntry =
-                buildMadieResourceFromResourceIdentifier(resourceIdentifier);
-              await fhirDefinitionsService.current
-                .getResourceTree(resourceIdentifier.id)
-                .then((resourceTree) => {
-                  const selectedResource = {
-                    ...resourceTree,
-                    bundleEntry: newEntry,
-                  };
+        {activeTab === "available" &&
+          (resourcesLoading ? (
+            <div
+              data-testid="available-profiles-loading"
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                minHeight: "200px",
+              }}
+            >
+              <MadieSpinner style={{ height: 50, width: 50 }} />
+            </div>
+          ) : (
+            canEdit && (
+              <ResourceList
+                resourceIdentifiers={resources.filter(
+                  (res) =>
+                    res.id.startsWith("qicore") || res.id.startsWith("us-core")
+                )}
+                onClick={async (resourceIdentifier: ResourceIdentifier) => {
+                  const newEntry =
+                    buildMadieResourceFromResourceIdentifier(
+                      resourceIdentifier
+                    );
+                  await fhirDefinitionsService.current
+                    .getResourceTree(resourceIdentifier.id)
+                    .then((resourceTree) => {
+                      const selectedResource = {
+                        ...resourceTree,
+                        bundleEntry: newEntry,
+                      };
 
-                  const topElements = getTopLevelElements(selectedResource);
-                  const requiredElements = [
-                    ...topElements.filter((e) => e.min > 0),
-                  ];
+                      const topElements = getTopLevelElements(selectedResource);
+                      const requiredElements = [
+                        ...topElements.filter((e) => e.min > 0),
+                      ];
 
-                  requiredElements.forEach((element) => {
-                    if (element.min === 1 && element.max === "1") {
-                      if (element.patternCodeableConcept) {
-                        newEntry.resource[getLastPart(element.path)] =
-                          element.base.max === "*"
-                            ? [element.patternCodeableConcept]
-                            : element.patternCodeableConcept;
-                      } else if (element.fixedCode) {
-                        newEntry.resource[getLastPart(element.path)] =
-                          element.base.max === "*"
-                            ? [element.fixedCode]
-                            : element.fixedCode;
-                      }
-                    }
+                      requiredElements.forEach((element) => {
+                        if (element.min === 1 && element.max === "1") {
+                          if (element.patternCodeableConcept) {
+                            newEntry.resource[getLastPart(element.path)] =
+                              element.base.max === "*"
+                                ? [element.patternCodeableConcept]
+                                : element.patternCodeableConcept;
+                          } else if (element.fixedCode) {
+                            newEntry.resource[getLastPart(element.path)] =
+                              element.base.max === "*"
+                                ? [element.fixedCode]
+                                : element.fixedCode;
+                          }
+                        }
+                      });
+                    });
+                  dispatch({
+                    type: ResourceActionType.ADD_BUNDLE_ENTRY,
+                    payload: newEntry,
                   });
-                });
-              dispatch({
-                type: ResourceActionType.ADD_BUNDLE_ENTRY,
-                payload: newEntry,
-              });
-              setToastType("success");
-              setToastMessage(
-                `${resourceIdentifier.title} has successfully been applied to the test case. To save your changes please click 'Save'.`
-              );
-              setToastOpen(true);
-            }}
-            isPatientAdded={isPatientAdded}
-          />
-        )}
+                  setToastType("success");
+                  setToastMessage(
+                    `${resourceIdentifier.title} has successfully been applied to the test case. To save your changes please click 'Save'.`
+                  );
+                  setToastOpen(true);
+                }}
+                isPatientAdded={isPatientAdded}
+              />
+            )
+          ))}
         {activeTab === "added" && (
           <div style={{ position: "relative", minHeight: "400px" }}>
             {applyLoading && (
