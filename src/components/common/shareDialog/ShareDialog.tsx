@@ -7,7 +7,6 @@ import React, {
 } from "react";
 import GlobalStyles from "../../../styles/GlobalStyles";
 import { Backdrop, Checkbox, Link, Typography } from "@mui/material";
-import ClearIcon from "@mui/icons-material/Clear";
 import ExportIcon from "./ExportIcon.svg";
 import {
   TextField,
@@ -133,8 +132,6 @@ const ShareDialog = ({
 
   const [measureMap, setMeasureMap] = useState(new Map<string, Measure>());
   const [sharedMeasures, setSharedMeasures] = useState<SharedMeasure[]>([]);
-  const [sharedWithAllSelectedMeasures, setSharedWithAllSelectedMeasures] =
-    useState<boolean>(false);
   const [shareMeasuresRequest, setShareMeasuresRequest] = useState(
     new Map<string, string[]>()
   );
@@ -171,15 +168,6 @@ const ShareDialog = ({
 
       return map.set(measureId, current);
     });
-  };
-
-  const harpIdCheck = (isSharedWithAllSelectedMeasures: boolean) => {
-    return {
-      message: `The selected measure(s) are already shared with the entered user(s).`,
-      test: () => {
-        return !isSharedWithAllSelectedMeasures;
-      },
-    };
   };
 
   const handleAddUser = async () => {
@@ -227,12 +215,12 @@ const ShareDialog = ({
         if (invalidUsers.length === 1) {
           formik.setFieldError(
             "harpId",
-            `The provided HARP ID ${invalidUsers[0]} is not associated with an active MADiE user.`
+            `The provided HARP ID (${invalidUsers[0]}) is not associated with an active MADiE user.`
           );
         } else {
           formik.setFieldError(
             "harpId",
-            `The provided HARPIDs (${invalidUsers.join(
+            `The provided HARP IDs (${invalidUsers.join(
               ", "
             )}) are not associated with an active MADiE user.`
           );
@@ -478,9 +466,6 @@ const ShareDialog = ({
     initialValues: {
       harpId: "",
     },
-    validationSchema: Yup.object().shape({
-      harpId: Yup.string().test(harpIdCheck(sharedWithAllSelectedMeasures)),
-    }),
     enableReinitialize: true,
     onSubmit: handleSave,
   });
@@ -614,10 +599,6 @@ const ShareDialog = ({
   }, [getSharedMeasure]);
 
   useEffect(() => {
-    formik.validateForm();
-  }, [sharedWithAllSelectedMeasures]);
-
-  useEffect(() => {
     onRowSelectionChange();
   }, [rowSelection]);
 
@@ -731,7 +712,6 @@ const ShareDialog = ({
                     }}
                     error={Boolean(formik.errors.harpId)}
                     helperText={formik.errors.harpId as string}
-                    onFocus={() => setSharedWithAllSelectedMeasures(false)}
                     onBlur={formik.handleBlur("harpId")}
                   />
                   <Typography
@@ -771,8 +751,8 @@ const ShareDialog = ({
                   To unshare this measure,{" "}
                   <span>
                     <strong>
-                      deselect the usernames with whom you want to unshare the
-                      measure(s) with,{" "}
+                      deselect the usernames from whom you want to unshare the
+                      measure(s),{" "}
                     </strong>
                   </span>
                   then click the 'Unshare' button.
