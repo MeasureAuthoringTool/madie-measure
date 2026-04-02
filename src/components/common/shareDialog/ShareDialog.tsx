@@ -25,8 +25,6 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { Measure, UserDetails, UserStatus } from "@madie/madie-models";
-import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
-import KeyboardArrowRightIcon from "@mui/icons-material/KeyboardArrowRight";
 import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
 import CheckBoxIcon from "@mui/icons-material/CheckBox";
 import "../../measureLanding/MeasureLanding.scss";
@@ -41,6 +39,7 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import FileSaver from "file-saver";
 import { generateTimestampedFileName } from "../../../utils/exportUtil";
+import MultiChipInput from "./MultiInputTextField";
 
 export const MEASURE_SHARING_EXPORT_SUCCESS =
   "Measure Sharing Report exported successfully.";
@@ -76,11 +75,6 @@ export interface SharedUser {
 const TH = tw.th`p-3 text-left text-sm font-bold capitalize`;
 const icon = <CheckBoxOutlineBlankIcon fontSize="large" />;
 const checkedIcon = <CheckBoxIcon fontSize="large" />;
-const keyboardArrowStyles = {
-  color: "#0073C8",
-  width: 40,
-  height: 40,
-};
 
 //Convert date string to format of mm/dd/yyyy with no leading zeroes in month
 export const convertDate = (date: string) => {
@@ -138,8 +132,6 @@ const ShareDialog = ({
 
   const [measureMap, setMeasureMap] = useState(new Map<string, Measure>());
   const [sharedMeasures, setSharedMeasures] = useState<SharedMeasure[]>([]);
-  const [sharedWithAllSelectedMeasures, setSharedWithAllSelectedMeasures] =
-    useState<boolean>(false);
   const [shareMeasuresRequest, setShareMeasuresRequest] = useState(
     new Map<string, string[]>()
   );
@@ -150,6 +142,8 @@ const ShareDialog = ({
   const [rowSelection, setRowSelection] = useState({});
   const [initialRowIdsSelected, setInitialRowIdsSelected] = useState([]);
   const [confirmationDialogOpen, setConfirmationDialogOpen] = useState(false);
+  const [harpIds, setHarpIds] = useState<string[]>([]);
+  const [harpInputValue, setHarpInputValue] = useState<string>("");
 
   // Toast state
   const [toast, setToast] = useState({
@@ -176,33 +170,98 @@ const ShareDialog = ({
     });
   };
 
-  const harpIdCheck = (isSharedWithAllSelectedMeasures: boolean) => {
-    return {
-      message: `The selected measure(s) are already shared with this user.`,
-      test: () => {
-        return !isSharedWithAllSelectedMeasures;
-      },
-    };
-  };
-
   const handleAddUser = async () => {
-    // Remove all spaces from harpId
-    const harpId = formik.getFieldProps("harpId").value.replace(/\s/g, "");
+    const allIds = [...harpIds];
+    const remaining = harpInputValue.replace(/\s/g, "");
+    if (remaining) {
+      allIds.push(remaining);
+    }
+    const uniqueIds = [...new Set(allIds)];
+    if (uniqueIds.length === 0) {
+      setHarpInputValue("");
+      return;
+    }
 
-    // If no harpId is passed in (string with all whitespace), only clear out the harpId field
-    if (!harpId) {
-      formik.setFieldValue("harpId", "");
+    const newIds = uniqueIds.filter(
+      (id) =>
+        !sharedMeasures.every((measure) =>
+          measure.subRows.some((subRow) => subRow.userId === id)
+        )
+    );
+    if (newIds.length === 0) {
+      formik.setFieldError(
+        "harpId",
+        `The selected measure(s) are already shared with the entered user(s).`
+      );
       return;
     }
 
     try {
-      const userDetails: UserDetails = await userServiceApi.getOwnerDetails(
-        harpId.toLowerCase()
+      const userDetails = await userServiceApi.getBulkUserDetails(newIds);
+      const validUsers: string[] = [];
+      const invalidUsers: string[] = [];
+
+      Object.entries(userDetails).forEach(
+        ([harpId, details]: [string, any]) => {
+          if (details.userStatus && String(details.userStatus) === "ACTIVE") {
+            validUsers.push(harpId);
+          } else {
+            invalidUsers.push(harpId);
+          }
+        }
       );
 
-      if (String(userDetails.userStatus) !== "ACTIVE") {
-        formik.setFieldError("harpId", INVALID_HARP_ID_MESSAGE);
+      if (invalidUsers.length > 0) {
+        if (invalidUsers.length === 1) {
+          formik.setFieldError(
+            "harpId",
+            `The provided HARP ID (${invalidUsers[0]}) is not associated with an active MADiE user.`
+          );
+        } else {
+          formik.setFieldError(
+            "harpId",
+            `The provided HARP IDs (${invalidUsers.join(
+              ", "
+            )}) are not associated with an active MADiE user.`
+          );
+        }
+      }
+
+      if (validUsers.length === 0) {
         return;
+      }
+
+      let updatedMeasures = [...sharedMeasures];
+      validUsers.forEach((harpId) => {
+        updatedMeasures = updatedMeasures.map((measure) => {
+          // Skip measures where this user is already shared
+          if (measure.subRows.some((subRow) => subRow.userId === harpId)) {
+            return measure;
+          }
+          updateSharedMeasuresRequest(measure.measureId, harpId);
+          return {
+            ...measure,
+            subRows: [
+              {
+                measureId: measure.measureId,
+                measureName: "",
+                userId: harpId,
+                dateShared: new Date().toLocaleString(),
+                subRows: null,
+              },
+              ...measure.subRows,
+            ],
+          };
+        });
+      });
+
+      setSharedMeasures(updatedMeasures);
+      setSaveDisabled(false);
+      setHarpIds([]);
+      setHarpInputValue("");
+
+      if (invalidUsers.length === 0) {
+        formik.resetForm();
       }
     } catch (error) {
       if (error?.response?.status === 400) {
@@ -214,44 +273,6 @@ const ShareDialog = ({
           message: HARP_ID_VALIDATION_FAILURE,
         });
       }
-      return;
-    }
-
-    let sharedWithAllSelectedMeasures = true;
-
-    const updateSharedMeasures = sharedMeasures.map((measure) => {
-      if (
-        measure.subRows.length &&
-        measure.subRows.some((subRow) => subRow.userId === harpId)
-      ) {
-        return { ...measure };
-      } else {
-        sharedWithAllSelectedMeasures = false;
-
-        updateSharedMeasuresRequest(measure.measureId, harpId);
-
-        return {
-          ...measure,
-          subRows: [
-            {
-              measureId: measure.measureId,
-              measureName: "",
-              userId: harpId,
-              dateShared: new Date().toLocaleString(),
-              subRows: null,
-            },
-            ...measure.subRows,
-          ],
-        };
-      }
-    });
-
-    setSharedMeasures(updateSharedMeasures);
-    setSharedWithAllSelectedMeasures(sharedWithAllSelectedMeasures);
-
-    if (!sharedWithAllSelectedMeasures) {
-      setSaveDisabled(false);
-      formik.resetForm();
     }
   };
 
@@ -322,6 +343,8 @@ const ShareDialog = ({
     setShareMeasuresRequest(new Map<string, string[]>());
     setUnshareMeasuresRequest(new Map<string, string[]>());
     setInitialRowIdsSelected([]);
+    setHarpIds([]);
+    setHarpInputValue("");
     table.resetRowSelection();
     table.resetExpanded();
     formik.resetForm();
@@ -443,9 +466,7 @@ const ShareDialog = ({
     initialValues: {
       harpId: "",
     },
-    validationSchema: Yup.object().shape({
-      harpId: Yup.string().test(harpIdCheck(sharedWithAllSelectedMeasures)),
-    }),
+    enableReinitialize: true,
     onSubmit: handleSave,
   });
 
@@ -474,15 +495,7 @@ const ShareDialog = ({
               maxLength={120}
               dataTestId={`measure-name-${info.row.original.measureName}_${info.row.original.measureId}`}
             />
-          ) : (
-            <Checkbox
-              icon={icon}
-              checkedIcon={checkedIcon}
-              checked={info.row.getIsSelected()}
-              onChange={info.row.getToggleSelectedHandler()}
-              data-testid={`unshare-checkbox-${info.row.original.userId}_${info.row.original.measureId}`}
-            />
-          ),
+          ) : null,
         accessorKey: "measureName",
       });
     }
@@ -499,14 +512,48 @@ const ShareDialog = ({
     columnDefs = [
       ...columnDefs,
       {
-        header: "User",
-        cell: (info) => (
-          <TruncateText
-            text={info.row.original.userId}
-            maxLength={120}
-            dataTestId={`user-${info.row.original.userId}_${info.row.original.measureId}`}
-          />
-        ),
+        id: "userId",
+        header: ({ table: t }) =>
+          option === "Unshare" ? (
+            <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+              <Checkbox
+                icon={icon}
+                checkedIcon={checkedIcon}
+                checked={t.getIsAllRowsSelected()}
+                indeterminate={
+                  t.getIsSomeRowsSelected() && !t.getIsAllRowsSelected()
+                }
+                onChange={t.getToggleAllRowsSelectedHandler()}
+                data-testid="unshare-select-all-checkbox"
+              />
+              Shared With
+            </div>
+          ) : (
+            "Shared With"
+          ),
+        cell: (info) =>
+          option === "Unshare" && !info.row.original.measureName ? (
+            <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+              <Checkbox
+                icon={icon}
+                checkedIcon={checkedIcon}
+                checked={info.row.getIsSelected()}
+                onChange={info.row.getToggleSelectedHandler()}
+                data-testid={`unshare-checkbox-${info.row.original.userId}_${info.row.original.measureId}`}
+              />
+              <TruncateText
+                text={info.row.original.userId}
+                maxLength={120}
+                dataTestId={`user-${info.row.original.userId}_${info.row.original.measureId}`}
+              />
+            </div>
+          ) : (
+            <TruncateText
+              text={info.row.original.userId}
+              maxLength={120}
+              dataTestId={`user-${info.row.original.userId}_${info.row.original.measureId}`}
+            />
+          ),
         accessorKey: "userId",
       },
       {
@@ -520,31 +567,10 @@ const ShareDialog = ({
         ),
         accessorKey: "dateShared",
       },
-      {
-        cell: ({ row }) => (
-          <>
-            {row.getCanExpand() ? (
-              <button
-                type="button"
-                data-testid={`expand-button-${row.original.measureId}`}
-                onClick={row.getToggleExpandedHandler()}
-                style={{ cursor: "pointer" }}
-              >
-                {row.getIsExpanded() ? (
-                  <KeyboardArrowDownIcon sx={keyboardArrowStyles} />
-                ) : (
-                  <KeyboardArrowRightIcon sx={keyboardArrowStyles} />
-                )}
-              </button>
-            ) : null}
-          </>
-        ),
-        id: "expandButton",
-      },
     ];
 
     return columnDefs;
-  }, [measures]);
+  }, [measures, option]);
 
   const table = useReactTable({
     data: sharedMeasures,
@@ -558,7 +584,10 @@ const ShareDialog = ({
     getCoreRowModel: getCoreRowModel(),
     getExpandedRowModel: getExpandedRowModel(),
     getSubRows: (row) => row.subRows,
-    enableRowSelection: true,
+    initialState: {
+      expanded: true,
+    },
+    enableRowSelection: (row) => !row.original.measureName,
     onRowSelectionChange: setRowSelection,
     state: {
       rowSelection,
@@ -568,10 +597,6 @@ const ShareDialog = ({
   useEffect(() => {
     getSharedMeasure();
   }, [getSharedMeasure]);
-
-  useEffect(() => {
-    formik.validateForm();
-  }, [sharedWithAllSelectedMeasures]);
 
   useEffect(() => {
     onRowSelectionChange();
@@ -628,7 +653,13 @@ const ShareDialog = ({
       <GlobalStyles />
       <MadieDialog
         form
-        title={option}
+        title={
+          option === "Share With"
+            ? "Share With..."
+            : option === "Unshare"
+            ? "Unshare From..."
+            : option
+        }
         dialogProps={{
           onClose: handleShareDialogClose,
           open: showShareDialog && open,
@@ -653,51 +684,78 @@ const ShareDialog = ({
           "data-testid": "share-save-button",
           disabled:
             option === "Share With"
-              ? saveDisabled || !formik.isValid || executing
+              ? saveDisabled || executing
               : table.getIsAllRowsSelected() || executing,
         }}
       >
         <div id="measure-landing" data-testid="measure-landing">
           {option === "Share With" && (
-            <div id="add-user-id-search">
-              <div>
-                <TextField
-                  label="HARP ID"
-                  id="harp-id-input"
-                  inputProps={{
-                    "data-testid": "harp-id-input",
-                  }}
-                  error={Boolean(formik.errors.harpId)}
-                  helperText={formik.errors.harpId}
-                  onFocus={() => setSharedWithAllSelectedMeasures(false)}
-                  {...formik.getFieldProps("harpId")}
-                />
-              </div>
-              <div>
+            <div id="measures-add-user-id-search">
+              <div className="measures-harp-id-input-row">
+                <div className="measures-harp-id-text-field">
+                  <MultiChipInput
+                    id="harp-id-input"
+                    label="HARP ID"
+                    value={harpIds}
+                    onChipsChange={(chips) => {
+                      setHarpIds(chips);
+                      if (formik.errors.harpId) {
+                        formik.setFieldError("harpId", undefined);
+                      }
+                    }}
+                    inputValue={harpInputValue}
+                    onInputValueChange={(val) => {
+                      setHarpInputValue(val);
+                      if (formik.errors.harpId) {
+                        formik.setFieldError("harpId", undefined);
+                      }
+                    }}
+                    error={Boolean(formik.errors.harpId)}
+                    helperText={formik.errors.harpId as string}
+                    onBlur={formik.handleBlur("harpId")}
+                  />
+                  <Typography
+                    variant="caption"
+                    sx={{ color: "#666", mt: 0.5, display: "block" }}
+                    data-testid="harp-id-helper-text"
+                  >
+                    Hit comma (,) to add multiple
+                  </Typography>
+                </div>
                 <Button
-                  id="add-user-btn"
+                  id="measures-add-user-btn"
                   data-testid="add-user-btn"
                   variant="outline"
                   disabled={
-                    !formik.getFieldProps("harpId").value || !formik.isValid
+                    (harpIds.length === 0 && !harpInputValue.trim()) ||
+                    !formik.isValid
                   }
                   onClick={handleAddUser}
                 >
-                  Add User
+                  Add User(s)
                 </Button>
               </div>
             </div>
           )}
-          <div className="share-unshare-dialog-info-text">
+          <div className="measures-share-unshare-dialog-info-text">
             <div style={{ display: "flex", flexDirection: "column" }}>
               <div>
-                When sharing a measure, all versions and drafts are shared, so
-                only the most recent measure name appears here.
+                <span>
+                  <strong>Please note: </strong>
+                </span>
+                When sharing a measure, all versions and drafts are shared, but
+                only the most recent measure name appears below.
               </div>
               {option === "Unshare" && (
-                <div>
-                  Deselect the users with whom you want to unshare the
-                  measure(s).
+                <div style={{ marginTop: "10px" }}>
+                  To unshare this measure,{" "}
+                  <span>
+                    <strong>
+                      deselect the usernames from whom you want to unshare the
+                      measure(s),{" "}
+                    </strong>
+                  </span>
+                  then click the 'Unshare' button.
                 </div>
               )}
             </div>
