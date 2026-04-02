@@ -127,7 +127,7 @@ export class CalculationService {
     const testCaseBundle: Bundle = JSON.parse(testCase.json);
     testCaseBundle.entry
       ?.filter((entry) => {
-        return entry.resource.resourceType === "Patient";
+        return entry.resource?.resourceType === "Patient";
       })
       .forEach((entry) => {
         entry.resource.id = testCase.id;
@@ -492,6 +492,10 @@ export class CalculationService {
           // find result
           const measureGroupPopulation: Population =
             this.findMeasureGroupPopulation(measureGroup, tcPopVal);
+          if (!measureGroupPopulation) {
+            tcPopVal.actual = patientBased ? null : 0;
+            return;
+          }
           const result =
             processedResults?.populations[measureGroupPopulation.displayId]
               ?.result;

@@ -793,15 +793,17 @@ const TestCaseList = (props: TestCaseListProps) => {
               </div>
             )}
 
-            {activeTab === "coverage" && coverageHTML && (
-              <CodeCoverageHighlighting
-                coverageHTML={
-                  coverageHTML[selectedPopCriteria.displayId]
-                    ? coverageHTML[selectedPopCriteria.displayId]
-                    : coverageHTML[selectedPopCriteria.id]
-                }
-              />
-            )}
+            {activeTab === "coverage" &&
+              coverageHTML &&
+              selectedPopCriteria && (
+                <CodeCoverageHighlighting
+                  coverageHTML={
+                    coverageHTML[selectedPopCriteria.displayId]
+                      ? coverageHTML[selectedPopCriteria.displayId]
+                      : coverageHTML[selectedPopCriteria.id]
+                  }
+                />
+              )}
           </div>
         </>
       )}

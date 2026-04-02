@@ -1838,6 +1838,143 @@ describe("CalculationService Tests", () => {
       );
       expect(popVals[4].actual).toEqual(null);
     });
+
+    it("should set actual to null for patient-based population not found in measure group", () => {
+      const testCase = {
+        id: "TC1",
+        name: "TestCase1",
+        title: "TestCase1",
+        description: "first",
+        validResource: true,
+        groupPopulations: [
+          {
+            groupId: "groupID",
+            scoring: MeasureScoring.COHORT,
+            populationBasis: "boolean",
+            populationValues: [
+              {
+                id: "nonexistentPopId",
+                name: PopulationType.INITIAL_POPULATION,
+                expected: false,
+              },
+            ],
+            stratificationValues: [],
+          },
+        ],
+        createdAt: "",
+        createdBy: "",
+        lastModifiedAt: "",
+        lastModifiedBy: "",
+        executionStatus: "NA",
+        series: undefined,
+        hapiOperationOutcome: undefined,
+      } as unknown as TestCase;
+      const groups: Group[] = [
+        {
+          id: "groupID",
+          displayId: "groupID",
+          scoring: MeasureScoring.COHORT,
+          populationBasis: "boolean",
+          populations: [
+            {
+              id: "pop1ID",
+              displayId: "pop1ID",
+              name: PopulationType.INITIAL_POPULATION,
+              definition: "boolIpp",
+            },
+          ],
+          stratifications: [],
+          measureObservations: [],
+          measureGroupTypes: [MeasureGroupTypes.OUTCOME],
+        },
+      ];
+      const popGroupResults: DetailedPopulationGroupResult[] = [
+        {
+          groupId: "groupID",
+          statementResults: [],
+          populationResults: [
+            {
+              populationId: "pop1ID",
+              populationType: FqmPopulationType.IPP,
+              criteriaExpression: "boolIpp",
+              result: true,
+            },
+          ],
+        },
+      ];
+      const output = calculationService.processTestCaseResults(
+        testCase,
+        groups,
+        popGroupResults
+      );
+      expect(output).toBeTruthy();
+      expect(output.groupPopulations[0].populationValues[0].actual).toBeNull();
+    });
+
+    it("should set actual to 0 for episode-based population not found in measure group", () => {
+      const testCase = {
+        id: "TC1",
+        name: "TestCase1",
+        title: "TestCase1",
+        description: "first",
+        validResource: true,
+        groupPopulations: [
+          {
+            groupId: "groupID",
+            scoring: MeasureScoring.COHORT,
+            populationBasis: "Encounter",
+            populationValues: [
+              {
+                id: "nonexistentPopId",
+                name: PopulationType.INITIAL_POPULATION,
+                expected: 0,
+              },
+            ],
+            stratificationValues: [],
+          },
+        ],
+        createdAt: "",
+        createdBy: "",
+        lastModifiedAt: "",
+        lastModifiedBy: "",
+        executionStatus: "NA",
+        series: undefined,
+        hapiOperationOutcome: undefined,
+      } as unknown as TestCase;
+      const groups: Group[] = [
+        {
+          id: "groupID",
+          displayId: "groupID",
+          scoring: MeasureScoring.COHORT,
+          populationBasis: "Encounter",
+          populations: [
+            {
+              id: "pop1ID",
+              displayId: "pop1ID",
+              name: PopulationType.INITIAL_POPULATION,
+              definition: "boolIpp",
+            },
+          ],
+          stratifications: [],
+          measureObservations: [],
+          measureGroupTypes: [MeasureGroupTypes.OUTCOME],
+        },
+      ];
+      const popGroupResults: DetailedPopulationGroupResult[] = [
+        {
+          groupId: "groupID",
+          statementResults: [],
+          episodeResults: [],
+        },
+      ];
+      const output = calculationService.processTestCaseResults(
+        testCase,
+        groups,
+        popGroupResults
+      );
+      expect(output).toBeTruthy();
+      expect(output.groupPopulations[0].populationValues[0].actual).toEqual(0);
+    });
   });
 
   describe("CalculationService.findMeasureGroupPopulationDisplayId", () => {
