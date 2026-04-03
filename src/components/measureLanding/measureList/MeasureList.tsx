@@ -13,7 +13,6 @@ import { Measure, Model } from "@madie/madie-models";
 import {
   useMeasureServiceApi,
   checkUserCanEdit,
-  useFeatureFlags,
   useUserRoles,
 } from "@madie/madie-util";
 import { useNavigate } from "react-router-dom";
@@ -54,6 +53,7 @@ import {
 } from "../../../icons/MeasureListTableRightArrowIcons";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import { exportMeasure as downloadMeasureExport } from "../../../utils/exportUtil";
 import { MeasureSearchCriteria } from "../MeasureLanding";
 import Search from "./measureSearch/Search";
@@ -78,6 +78,42 @@ export function customSort(a: string, b: string) {
   if (aComp > bComp) return 1;
   return 0;
 }
+
+// Display chips for draft, composite and in-composite state
+const MeasureStatusChips = ({ measure }) => {
+  return (
+    <div style={{ display: "inline-flex", gap: 4, flexWrap: "wrap" }}>
+      {measure.measureMetaData?.draft && (
+        <Chip className="chip-draft" label="Draft" />
+      )}
+      {measure.measureMetaData?.composite && (
+        <Chip className="chip-composite" label="Composite" />
+      )}
+      {measure.component && (
+        <Chip
+          className="chip-in-composite"
+          label={
+            <span
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 4,
+              }}
+            >
+              In Composite
+              <Tooltip
+                title="This measure is a component of a composite measure"
+                arrow
+              >
+                <InfoOutlinedIcon sx={{ fontSize: 16 }} />
+              </Tooltip>
+            </span>
+          }
+        />
+      )}
+    </div>
+  );
+};
 
 export default function MeasureList(props: {
   retrieveMeasures?: (
@@ -121,7 +157,6 @@ export default function MeasureList(props: {
   const { searchCriteria, setSearchCriteria, retrieveMeasures } = { ...props };
   const measureServiceApi = useRef(useMeasureServiceApi()).current; //needs to be ref or triggers jest. throws warn
   const [hoveredHeader, setHoveredHeader] = useState<string>("");
-  const featureFlags = useFeatureFlags();
 
   const navigate = useNavigate();
   // Popover utilities
@@ -266,11 +301,7 @@ export default function MeasureList(props: {
     {
       header: "Status",
       cell: (info) => (
-        <>
-          {`${info.row.original.actions.measureMetaData?.draft}` === "true" && (
-            <Chip className="chip-draft" label="Draft" />
-          )}
-        </>
+        <MeasureStatusChips measure={info.row.original.actions} />
       ),
       accessorKey: "measureMetaData.draft",
     },

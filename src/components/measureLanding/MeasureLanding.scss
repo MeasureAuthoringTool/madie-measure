@@ -125,7 +125,17 @@
       }
 
       .chip-draft {
+        height: 24px;
         background-color: #e1f3f8;
+      }
+
+      .chip-composite {
+        height: 24px;
+        background-color: #f8e1f8;
+      }
+      .chip-in-composite {
+        height: 24px;
+        background-color: #c1f6f8;
       }
     }
   }
