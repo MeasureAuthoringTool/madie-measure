@@ -67,6 +67,28 @@ describe("applyCode test cases", () => {
       "Code 24353-5 has already been defined in CQL."
     );
     expect(result.status).toBe("info");
+    // CQL should be unchanged when duplicate is detected
+    const firstApplyResult = applyCode(cql, code);
+    expect(result.cql).toBe(firstApplyResult.cql);
+  });
+
+  it("Should not modify CQL when adding a duplicate code", () => {
+    const cql = fs.readFileSync(
+      "src/components/editMeasure/editor/__mocks__/LoincTest.cql",
+      "utf8"
+    );
+    const codeJson = fs.readFileSync(
+      "src/components/editMeasure/editor/__mocks__/LoincCode.json",
+      "utf8"
+    );
+    const code = JSON.parse(codeJson);
+    // First apply: adds the code
+    const firstResult: CqlApplyActionResult = applyCode(cql, code);
+    expect(firstResult.status).toBe("success");
+    // Second apply: duplicate detected, CQL should be identical
+    const secondResult: CqlApplyActionResult = applyCode(firstResult.cql, code);
+    expect(secondResult.status).toBe("info");
+    expect(secondResult.cql).toBe(firstResult.cql);
   });
 
   it("Should add CodeSystem and Code if necessary", () => {
