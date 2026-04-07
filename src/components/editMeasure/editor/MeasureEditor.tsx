@@ -874,7 +874,7 @@ const MeasureEditor = ({ measureCanEdit, measureLockedBy }) => {
               {valuesetMsg}
             </SuccessText>
           )}
-          {!processing && (
+          <div style={{ position: "relative" }}>
             <MadieTerminologyEditor
               handleApplyCode={handleApplyCode}
               handleApplyValueSet={handleUpdateVs}
@@ -908,18 +908,26 @@ const MeasureEditor = ({ measureCanEdit, measureLockedBy }) => {
               getCqlDefinitionReturnTypes={getCqlDefinitionReturnTypes}
               hasCqlError={error}
             />
-          )}
-          {processing && (
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "center",
-                height: "calc(100vh)",
-              }}
-            >
-              <MadieSpinner style={{ height: 50, width: 50 }} />
-            </div>
-          )}
+            {processing && (
+              <div
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  background: "rgba(255, 255, 255, 0.7)",
+                  zIndex: 10,
+                }}
+                data-testid="cql-saving-overlay"
+              >
+                <MadieSpinner style={{ height: 50, width: 50 }} />
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
