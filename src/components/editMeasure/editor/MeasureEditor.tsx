@@ -907,6 +907,7 @@ const MeasureEditor = ({ measureCanEdit, measureLockedBy }) => {
               resetCql={resetCql}
               getCqlDefinitionReturnTypes={getCqlDefinitionReturnTypes}
               hasCqlError={error}
+              measureId={measureId}
             />
           )}
           {processing && (

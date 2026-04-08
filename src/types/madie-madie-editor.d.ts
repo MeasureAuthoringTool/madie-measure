@@ -130,6 +130,7 @@ declare module "@madie/madie-editor" {
     // conditional props used to pass up annotations outside of the editor
     setOutboundAnnotations?: Function;
     hasCqlError?: boolean;
+    measureId?: string;
   }
 
   export type ElmTranslationError = {
