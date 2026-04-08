@@ -119,7 +119,7 @@ export default function ShareAction(props: PropTypes) {
       data-testid="share-action-tooltip"
       title={tooltipMessage}
       onMouseOver={validateShareActionState}
-      placement="bottom"
+      placement="top"
       arrow
       slotProps={{
         tooltip: {

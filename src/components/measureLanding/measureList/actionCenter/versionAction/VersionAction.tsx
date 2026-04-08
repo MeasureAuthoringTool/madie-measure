@@ -56,6 +56,7 @@ export default function VersionAction(props: PropTypes) {
       title={tooltipMessage}
       onMouseOver={validateVersionActionState}
       arrow
+      placement="top"
       slotProps={{
         tooltip: {
           sx: {

@@ -75,6 +75,7 @@ export default function ExportAction(props: PropTypes) {
         title={tooltipMessage}
         onMouseOver={validateExportActionState}
         arrow
+        placement="top"
         slotProps={{
           tooltip: {
             sx: {
@@ -103,7 +104,6 @@ export default function ExportAction(props: PropTypes) {
         open={open}
         anchorEl={anchorRef.current}
         role={undefined}
-        placement="bottom-start"
         transition
         sx={{
           zIndex: 99,
