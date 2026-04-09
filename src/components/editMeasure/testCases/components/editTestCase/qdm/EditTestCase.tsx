@@ -443,17 +443,18 @@ const EditTestCase = () => {
               data-testid="qdm-test-case-run-button"
               onClick={calculateQdmTestCases}
               disabled={
-                !!measure?.cqlErrors ||
-                _.isEmpty(measure?.groups) ||
-                measure?.errors?.includes(
-                  MeasureErrorType.MISMATCH_CQL_POPULATION_RETURN_TYPES
-                ) ||
-                measure?.errors?.includes(
-                  MeasureErrorType.MISMATCH_CQL_RISK_ADJUSTMENT
-                ) ||
-                measure?.errors?.includes(
-                  MeasureErrorType.MISMATCH_CQL_SUPPLEMENTAL_DATA
-                ) ||
+                (!measure?.measureMetaData?.composite &&
+                  (!!measure?.cqlErrors ||
+                    _.isEmpty(measure?.groups) ||
+                    measure?.errors?.includes(
+                      MeasureErrorType.MISMATCH_CQL_POPULATION_RETURN_TYPES
+                    ) ||
+                    measure?.errors?.includes(
+                      MeasureErrorType.MISMATCH_CQL_RISK_ADJUSTMENT
+                    ) ||
+                    measure?.errors?.includes(
+                      MeasureErrorType.MISMATCH_CQL_SUPPLEMENTAL_DATA
+                    ))) ||
                 !formik.values?.json ||
                 !executionContextReady ||
                 executing

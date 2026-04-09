@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import * as React from "react";
 import ShareDialog, {
   SharedUser,
@@ -132,6 +132,16 @@ const mockUserServiceApi = {
   getOwnerDetails: jest
     .fn()
     .mockResolvedValue({ harpId: "userId", userStatus: "ACTIVE" }),
+  getBulkUserDetails: jest
+    .fn()
+    .mockImplementation((harpIds: string[]) =>
+      Promise.resolve(
+        harpIds.reduce(
+          (acc, id) => ({ ...acc, [id]: { harpId: id, userStatus: "ACTIVE" } }),
+          {}
+        )
+      )
+    ),
 };
 
 jest.mock("@madie/madie-util", () => ({
@@ -282,12 +292,12 @@ describe("Create Share Dialog component", () => {
       />
     );
     expect(await screen.findByTestId("share-dialog")).toBeInTheDocument();
-    expect(await screen.findByText("Share With")).toBeInTheDocument();
+    expect(await screen.findByText("Share With...")).toBeInTheDocument();
 
     const cancelButton = screen.getByTestId("share-cancel-button");
     expect(cancelButton).toBeEnabled();
 
-    fireEvent.click(cancelButton);
+    await userEvent.click(cancelButton);
 
     expect(mockOnClose).toHaveBeenCalled();
   });
@@ -303,7 +313,7 @@ describe("Create Share Dialog component", () => {
       />
     );
     expect(await screen.findByTestId("share-dialog")).toBeInTheDocument();
-    expect(await screen.findByText("Unshare")).toBeInTheDocument();
+    expect(await screen.findByText("Unshare From...")).toBeInTheDocument();
   });
 
   it("should render share dialog and show HARP ID input if option is Share With", async () => {
@@ -381,10 +391,8 @@ describe("Create Share Dialog component", () => {
     const tableHeaders = table.querySelectorAll("thead th");
 
     expect(tableHeaders[0]).toHaveTextContent("Measure");
-    expect(tableHeaders[1]).toHaveTextContent("User");
+    expect(tableHeaders[1]).toHaveTextContent("Shared With");
     expect(tableHeaders[2]).toHaveTextContent("Date Shared");
-    //Expand row column has no header
-    expect(tableHeaders[3]).toHaveTextContent("");
 
     const tableRows = table.querySelectorAll("tbody tr");
 
@@ -392,11 +400,6 @@ describe("Create Share Dialog component", () => {
     expect(screen.queryByTestId(`expand-button-${mockMeasure1.id}`)).toBeNull();
 
     expect(tableRows[1]).toHaveTextContent(mockMeasure2.measureName);
-
-    const expandButton = await screen.findByTestId(
-      `expand-button-${mockMeasure2.id}`
-    );
-    fireEvent.click(expandButton);
 
     //Only display checkboxes in subrows when the Unshare dialog is opened
     expect(
@@ -451,12 +454,12 @@ describe("Create Share Dialog component", () => {
     const exportButtons = screen.queryAllByText(/Export User List/i);
     expect(exportButtons.length).toBe(0);
     expect(screen.queryByText(/Export User List/i)).not.toBeInTheDocument();
-    expect(await screen.findByText("Unshare")).toBeInTheDocument();
+    expect(await screen.findByText("Unshare From...")).toBeInTheDocument();
 
     const cancelButton = screen.getByTestId("share-cancel-button");
     expect(cancelButton).toBeEnabled();
 
-    fireEvent.click(cancelButton);
+    await userEvent.click(cancelButton);
 
     expect(mockOnClose).toHaveBeenCalled();
   });
@@ -480,10 +483,8 @@ describe("Create Share Dialog component", () => {
     const tableHeaders = table.querySelectorAll("thead th");
 
     expect(tableHeaders[0]).toHaveTextContent("Measure");
-    expect(tableHeaders[1]).toHaveTextContent("User");
+    expect(tableHeaders[1]).toHaveTextContent("Shared With");
     expect(tableHeaders[2]).toHaveTextContent("Date Shared");
-    //Expand row column has no header
-    expect(tableHeaders[3]).toHaveTextContent("");
 
     const tableRows = table.querySelectorAll("tbody tr");
 
@@ -491,11 +492,6 @@ describe("Create Share Dialog component", () => {
     expect(screen.queryByTestId(`expand-button-${mockMeasure1.id}`)).toBeNull();
 
     expect(tableRows[1]).toHaveTextContent(mockMeasure2.measureName);
-
-    const expandButton = await screen.findByTestId(
-      `expand-button-${mockMeasure2.id}`
-    );
-    fireEvent.click(expandButton);
 
     expect(
       screen.queryByTestId(
@@ -556,25 +552,25 @@ describe("Create Share Dialog component", () => {
     )) as HTMLInputElement;
     expect(harpIdInput).toBeInTheDocument();
 
-    fireEvent.change(harpIdInput, { target: { value: "userId1" } });
+    await userEvent.type(harpIdInput, "userId1");
     expect(harpIdInput.value).toBe("userId1");
     expect(addUserBtn).toBeEnabled();
 
-    fireEvent.click(addUserBtn);
+    await userEvent.click(addUserBtn);
 
     await waitFor(() => {
       expect(saveBtn).toBeDisabled();
       expect(harpIdInput.value).toBe("userId1");
       expect(
         screen.getByText(
-          "The selected measure(s) are already shared with this user."
+          "The selected measure(s) are already shared with the entered user(s)."
         )
       ).toBeInTheDocument();
     });
   });
 
   it("should show field-error when HARP ID is not a MADiE user", async () => {
-    mockUserServiceApi.getOwnerDetails.mockRejectedValueOnce({
+    mockUserServiceApi.getBulkUserDetails.mockRejectedValueOnce({
       response: { status: 400 },
     });
 
@@ -594,8 +590,8 @@ describe("Create Share Dialog component", () => {
     )) as HTMLInputElement;
     const addUserBtn = await screen.findByTestId("add-user-btn");
 
-    fireEvent.change(harpIdInput, { target: { value: "invalidUser" } });
-    fireEvent.click(addUserBtn);
+    await userEvent.type(harpIdInput, "invalidUser");
+    await userEvent.click(addUserBtn);
 
     await waitFor(() => {
       expect(screen.getByText(INVALID_HARP_ID_MESSAGE)).toBeInTheDocument();
@@ -603,7 +599,7 @@ describe("Create Share Dialog component", () => {
   });
 
   it("should show toast error when HARP ID validation fails due to a non-400 error", async () => {
-    mockUserServiceApi.getOwnerDetails.mockRejectedValueOnce({
+    mockUserServiceApi.getBulkUserDetails.mockRejectedValueOnce({
       response: { status: 500 },
     });
 
@@ -623,8 +619,8 @@ describe("Create Share Dialog component", () => {
     )) as HTMLInputElement;
     const addUserBtn = await screen.findByTestId("add-user-btn");
 
-    fireEvent.change(harpIdInput, { target: { value: "someUser" } });
-    fireEvent.click(addUserBtn);
+    await userEvent.type(harpIdInput, "someUser");
+    await userEvent.click(addUserBtn);
 
     await waitFor(() => {
       expect(screen.getByText(HARP_ID_VALIDATION_FAILURE)).toBeInTheDocument();
@@ -632,9 +628,8 @@ describe("Create Share Dialog component", () => {
   });
 
   it("should show field-error when HARP ID belongs to an inactive MADiE user", async () => {
-    mockUserServiceApi.getOwnerDetails.mockResolvedValueOnce({
-      harpId: "inactiveUser",
-      userStatus: "DEACTIVATED",
+    mockUserServiceApi.getBulkUserDetails.mockResolvedValueOnce({
+      inactiveUser: { harpId: "inactiveUser", userStatus: "DEACTIVATED" },
     });
 
     render(
@@ -653,18 +648,64 @@ describe("Create Share Dialog component", () => {
     )) as HTMLInputElement;
     const addUserBtn = await screen.findByTestId("add-user-btn");
 
-    fireEvent.change(harpIdInput, { target: { value: "inactiveUser" } });
-    fireEvent.click(addUserBtn);
+    await userEvent.type(harpIdInput, "inactiveUser");
+    await userEvent.click(addUserBtn);
 
     await waitFor(() => {
-      expect(screen.getByText(INVALID_HARP_ID_MESSAGE)).toBeInTheDocument();
+      expect(
+        screen.getByText(
+          "The provided HARP ID (inactiveUser) is not associated with an active MADiE user."
+        )
+      ).toBeInTheDocument();
+    });
+  });
+
+  it("should clear field-error and re-enable Add User button when user types after an error", async () => {
+    mockUserServiceApi.getBulkUserDetails.mockResolvedValueOnce({
+      inactiveUser: { harpId: "inactiveUser", userStatus: "DEACTIVATED" },
+    });
+
+    render(
+      <ShareDialog
+        measures={[mockMeasure1]}
+        open={true}
+        option={"Share With"}
+        onClose={jest.fn()}
+        onSave={jest.fn()}
+      />
+    );
+    expect(await screen.findByTestId("share-dialog")).toBeInTheDocument();
+
+    const harpIdInput = (await screen.findByTestId(
+      "harp-id-input"
+    )) as HTMLInputElement;
+    const addUserBtn = await screen.findByTestId("add-user-btn");
+
+    await userEvent.type(harpIdInput, "inactiveUser");
+    await userEvent.click(addUserBtn);
+
+    await waitFor(() => {
+      expect(
+        screen.getByText(
+          "The provided HARP ID (inactiveUser) is not associated with an active MADiE user."
+        )
+      ).toBeInTheDocument();
+    });
+
+    await waitFor(() => {
+      userEvent.type(harpIdInput, "newUser");
+      expect(
+        screen.queryByText(
+          "The provided HARP ID (inactiveUser) is not associated with an active MADiE user."
+        )
+      ).not.toBeInTheDocument();
+      expect(addUserBtn).toBeEnabled();
     });
   });
 
   it("should add user when HARP ID is an active MADiE user", async () => {
-    mockUserServiceApi.getOwnerDetails.mockResolvedValueOnce({
-      harpId: "validUser",
-      userStatus: "ACTIVE",
+    mockUserServiceApi.getBulkUserDetails.mockResolvedValueOnce({
+      validUser: { harpId: "validUser", userStatus: "ACTIVE" },
     });
 
     render(
@@ -684,13 +725,120 @@ describe("Create Share Dialog component", () => {
     const addUserBtn = await screen.findByTestId("add-user-btn");
     const saveBtn = await screen.findByTestId("share-save-button");
 
-    fireEvent.change(harpIdInput, { target: { value: "validUser" } });
-    fireEvent.click(addUserBtn);
+    await userEvent.type(harpIdInput, "validUser");
+    await userEvent.click(addUserBtn);
 
     await waitFor(() => {
       expect(saveBtn).toBeEnabled();
       expect(harpIdInput.value).toBe("");
     });
+  });
+
+  it("should add valid user to table and show error for inactive user when mixed IDs are provided", async () => {
+    mockUserServiceApi.getBulkUserDetails.mockResolvedValueOnce({
+      activeUser: { harpId: "activeUser", userStatus: "ACTIVE" },
+      inactiveUser: { harpId: "inactiveUser", userStatus: "DEACTIVATED" },
+    });
+
+    render(
+      <ShareDialog
+        measures={[mockMeasure1]}
+        open={true}
+        option={"Share With"}
+        onClose={jest.fn()}
+        onSave={jest.fn()}
+      />
+    );
+    expect(await screen.findByTestId("share-dialog")).toBeInTheDocument();
+    await screen.findByTestId("share-measure-tbl");
+
+    const harpIdInput = (await screen.findByTestId(
+      "harp-id-input"
+    )) as HTMLInputElement;
+    const addUserBtn = await screen.findByTestId("add-user-btn");
+    const saveBtn = await screen.findByTestId("share-save-button");
+
+    await userEvent.type(harpIdInput, "activeUser,inactiveUser,");
+    expect(
+      await screen.findByTestId("harp-chip-activeUser")
+    ).toBeInTheDocument();
+    expect(
+      await screen.findByTestId("harp-chip-inactiveUser")
+    ).toBeInTheDocument();
+
+    await userEvent.click(addUserBtn);
+
+    await waitFor(() => {
+      expect(
+        screen.getByText(
+          "The provided HARP ID (inactiveUser) is not associated with an active MADiE user."
+        )
+      ).toBeInTheDocument();
+      expect(saveBtn).toBeEnabled();
+      expect(harpIdInput.value).toBe("");
+    });
+
+    expect(
+      screen.getByTestId("TestMeasureId1 activeUser_userId")
+    ).toHaveTextContent("activeUser");
+  });
+
+  it("should silently ignore duplicate IDs and process only new ones when mixed input is provided", async () => {
+    mockUserServiceApi.getBulkUserDetails.mockResolvedValueOnce({
+      userId3: { harpId: "userId3", userStatus: "ACTIVE" },
+    });
+
+    mockMeasureServiceApi.getSharedMeasures = jest.fn().mockResolvedValue({
+      [mockMeasure2.id]: mockMeasure2.acls
+        ? mockMeasure2.acls.map(
+            (acl) =>
+              ({
+                userId: acl.userId,
+                performedAt: yesterday.toISOString(),
+              } as unknown as SharedUser)
+          )
+        : [],
+    });
+    mockMeasureServiceApi.getRecentMeasuresByMeasureSetId = jest
+      .fn()
+      .mockResolvedValue([mockMeasure2]);
+
+    render(
+      <ShareDialog
+        measures={[mockMeasure2]}
+        open={true}
+        option={"Share With"}
+        onClose={jest.fn()}
+        onSave={jest.fn()}
+      />
+    );
+    expect(await screen.findByTestId("share-dialog")).toBeInTheDocument();
+    await screen.findByTestId("share-measure-tbl");
+
+    const harpIdInput = (await screen.findByTestId(
+      "harp-id-input"
+    )) as HTMLInputElement;
+    const addUserBtn = await screen.findByTestId("add-user-btn");
+    const saveBtn = await screen.findByTestId("share-save-button");
+
+    await userEvent.type(harpIdInput, "userId1,userId3,");
+    expect(await screen.findByTestId("harp-chip-userId1")).toBeInTheDocument();
+    expect(await screen.findByTestId("harp-chip-userId3")).toBeInTheDocument();
+
+    await userEvent.click(addUserBtn);
+
+    await waitFor(() => {
+      expect(
+        screen.queryByText(
+          "The selected measure(s) are already shared with the entered user(s)."
+        )
+      ).not.toBeInTheDocument();
+      expect(saveBtn).toBeEnabled();
+    });
+
+    expect(
+      screen.getByTestId("TestMeasureId2 userId3_userId")
+    ).toHaveTextContent("userId3");
   });
 
   it("should not add any user row to the grid for any measure if a string with all whitespace is entered", async () => {
@@ -718,19 +866,9 @@ describe("Create Share Dialog component", () => {
 
     const userIdWithAllwhiteSpace = "    ";
 
-    fireEvent.change(harpIdInput, {
-      target: { value: userIdWithAllwhiteSpace },
-    });
+    await userEvent.type(harpIdInput, userIdWithAllwhiteSpace);
     expect(harpIdInput.value).toBe(userIdWithAllwhiteSpace);
-    expect(addUserBtn).toBeEnabled();
-
-    fireEvent.click(addUserBtn);
-
-    await waitFor(() => {
-      expect(addUserBtn).toBeDisabled();
-      expect(saveBtn).toBeDisabled();
-      expect(harpIdInput.value).toBe("");
-    });
+    expect(addUserBtn).toBeDisabled();
   });
 
   it("should add a user row to the grid for each measure that does not already have that user", async () => {
@@ -779,27 +917,17 @@ describe("Create Share Dialog component", () => {
     )) as HTMLInputElement;
     expect(harpIdInput).toBeInTheDocument();
 
-    fireEvent.change(harpIdInput, { target: { value: "userId3" } });
+    await userEvent.type(harpIdInput, "userId3");
     expect(harpIdInput.value).toBe("userId3");
     expect(addUserBtn).toBeEnabled();
 
-    fireEvent.click(addUserBtn);
+    await userEvent.click(addUserBtn);
 
     await waitFor(() => {
       expect(addUserBtn).toBeDisabled();
       expect(saveBtn).toBeEnabled();
       expect(harpIdInput.value).toBe("");
     });
-
-    const expandButtonMockMeasure1 = screen.getByTestId(
-      `expand-button-TestMeasureId1`
-    );
-    fireEvent.click(expandButtonMockMeasure1);
-
-    const expandButtonMockMeasure2 = screen.getByTestId(
-      `expand-button-TestMeasureId2`
-    );
-    fireEvent.click(expandButtonMockMeasure2);
 
     //Row 1
     expect(screen.getByTestId("TestMeasureId1_measureName")).toHaveTextContent(
@@ -865,28 +993,17 @@ describe("Create Share Dialog component", () => {
 
     const userIdWithExtraSpaces = " userId 3 ";
 
-    fireEvent.change(harpIdInput, { target: { value: userIdWithExtraSpaces } });
+    await userEvent.type(harpIdInput, userIdWithExtraSpaces);
     expect(harpIdInput.value).toBe(userIdWithExtraSpaces);
     expect(addUserBtn).toBeEnabled();
 
-    fireEvent.click(addUserBtn);
+    await userEvent.click(addUserBtn);
 
     await waitFor(() => {
       expect(addUserBtn).toBeDisabled();
       expect(saveBtn).toBeEnabled();
       expect(harpIdInput.value).toBe("");
     });
-
-    const expandButtonMockMeasure1 = screen.getByTestId(
-      `expand-button-TestMeasureId1`
-    );
-    fireEvent.click(expandButtonMockMeasure1);
-
-    const expandButtonMockMeasure2 = screen.getByTestId(
-      `expand-button-TestMeasureId2`
-    );
-    fireEvent.click(expandButtonMockMeasure2);
-
     //Row 1
     expect(screen.getByTestId("TestMeasureId1_measureName")).toHaveTextContent(
       "The Measure for Testing 1"
@@ -951,11 +1068,11 @@ describe("Create Share Dialog component", () => {
     )) as HTMLInputElement;
     expect(harpIdInput).toBeInTheDocument();
 
-    fireEvent.change(harpIdInput, { target: { value: "userId3" } });
+    await userEvent.type(harpIdInput, "userId3");
     expect(harpIdInput.value).toBe("userId3");
     expect(addUserBtn).toBeEnabled();
 
-    fireEvent.click(addUserBtn);
+    await userEvent.click(addUserBtn);
 
     await waitFor(() => {
       expect(addUserBtn).toBeDisabled();
@@ -963,7 +1080,7 @@ describe("Create Share Dialog component", () => {
       expect(harpIdInput.value).toBe("");
     });
 
-    fireEvent.click(saveBtn);
+    await userEvent.click(saveBtn);
 
     await waitFor(async () => {
       expect(mockMeasureServiceApi.shareMeasures).toBeCalled();
@@ -1029,11 +1146,11 @@ describe("Create Share Dialog component", () => {
     )) as HTMLInputElement;
     expect(harpIdInput).toBeInTheDocument();
 
-    fireEvent.change(harpIdInput, { target: { value: "userId3" } });
+    await userEvent.type(harpIdInput, "userId3");
     expect(harpIdInput.value).toBe("userId3");
     expect(addUserBtn).toBeEnabled();
 
-    fireEvent.click(addUserBtn);
+    await userEvent.click(addUserBtn);
 
     await waitFor(() => {
       expect(addUserBtn).toBeDisabled();
@@ -1041,7 +1158,7 @@ describe("Create Share Dialog component", () => {
       expect(harpIdInput.value).toBe("");
     });
 
-    fireEvent.click(saveBtn);
+    await userEvent.click(saveBtn);
 
     await waitFor(async () => {
       expect(mockMeasureServiceApi.shareMeasures).toBeCalled();
@@ -1072,23 +1189,18 @@ describe("Create Share Dialog component", () => {
 
     const saveBtn = await screen.findByTestId("share-save-button");
     expect(saveBtn).toBeDisabled();
-
-    const expandButton = await screen.findByTestId(
-      `expand-button-${mockMeasure2.id}`
-    );
-    fireEvent.click(expandButton);
-
     const checkBoxes = await screen.findAllByRole("checkbox");
-    expect(checkBoxes.length).toBe(2);
+    expect(checkBoxes.length).toBe(3);
     expect(checkBoxes[0]).toBeChecked();
     expect(checkBoxes[1]).toBeChecked();
+    expect(checkBoxes[2]).toBeChecked();
 
-    fireEvent.click(checkBoxes[0]);
+    await userEvent.click(checkBoxes[1]);
 
-    await waitFor(() => expect(checkBoxes[0]).not.toBeChecked());
+    await waitFor(() => expect(checkBoxes[1]).not.toBeChecked());
     expect(saveBtn).toBeEnabled();
 
-    fireEvent.click(saveBtn);
+    await userEvent.click(saveBtn);
 
     expect(await screen.findByText("Are you sure?")).toBeInTheDocument();
 
@@ -1097,7 +1209,7 @@ describe("Create Share Dialog component", () => {
     );
     expect(acceptBtn).toBeEnabled();
 
-    fireEvent.click(acceptBtn);
+    await userEvent.click(acceptBtn);
     await waitFor(async () => {
       expect(mockMeasureServiceApi.unshareMeasures).toBeCalled();
       expect(mockOnSave).toHaveBeenCalledWith({
@@ -1156,23 +1268,18 @@ describe("Create Share Dialog component", () => {
 
     const saveBtn = await screen.findByTestId("share-save-button");
     expect(saveBtn).toBeDisabled();
-
-    const expandButton = await screen.findByTestId(
-      `expand-button-${mockMeasure2.id}`
-    );
-    fireEvent.click(expandButton);
-
     const checkBoxes = await screen.findAllByRole("checkbox");
-    expect(checkBoxes.length).toBe(2);
+    expect(checkBoxes.length).toBe(3);
     expect(checkBoxes[0]).toBeChecked();
     expect(checkBoxes[1]).toBeChecked();
+    expect(checkBoxes[2]).toBeChecked();
 
-    fireEvent.click(checkBoxes[0]);
+    await userEvent.click(checkBoxes[1]);
 
-    await waitFor(() => expect(checkBoxes[0]).not.toBeChecked());
+    await waitFor(() => expect(checkBoxes[1]).not.toBeChecked());
     expect(saveBtn).toBeEnabled();
 
-    fireEvent.click(saveBtn);
+    await userEvent.click(saveBtn);
 
     expect(await screen.findByText("Are you sure?")).toBeInTheDocument();
 
@@ -1181,7 +1288,7 @@ describe("Create Share Dialog component", () => {
     );
     expect(acceptBtn).toBeEnabled();
 
-    fireEvent.click(acceptBtn);
+    await userEvent.click(acceptBtn);
     await waitFor(async () => {
       expect(mockMeasureServiceApi.unshareMeasures).toBeCalled();
       expect(mockOnSave).toHaveBeenCalledWith({
@@ -1190,6 +1297,125 @@ describe("Create Share Dialog component", () => {
         toastOpen: true,
       });
     });
+  });
+
+  it("should create chips when comma is used as delimiter in HARP ID field", async () => {
+    render(
+      <ShareDialog
+        measures={[mockMeasure1]}
+        open={true}
+        option={"Share With"}
+        onClose={jest.fn()}
+        onSave={jest.fn()}
+      />
+    );
+    expect(await screen.findByTestId("share-dialog")).toBeInTheDocument();
+
+    const harpIdInput = (await screen.findByTestId(
+      "harp-id-input"
+    )) as HTMLInputElement;
+
+    // Typing "user1,user2," creates chips for user1 and user2, input cleared
+    await userEvent.type(harpIdInput, "user1,user2,");
+
+    expect(await screen.findByTestId("harp-chip-user1")).toBeInTheDocument();
+    expect(await screen.findByTestId("harp-chip-user2")).toBeInTheDocument();
+    expect(harpIdInput.value).toBe("");
+
+    const addUserBtn = screen.getByTestId("add-user-btn");
+    expect(addUserBtn).toBeEnabled();
+  });
+
+  it("should clear all chips and input value when clear button is clicked", async () => {
+    render(
+      <ShareDialog
+        measures={[mockMeasure1]}
+        open={true}
+        option={"Share With"}
+        onClose={jest.fn()}
+        onSave={jest.fn()}
+      />
+    );
+    expect(await screen.findByTestId("share-dialog")).toBeInTheDocument();
+
+    const harpIdInput = (await screen.findByTestId(
+      "harp-id-input"
+    )) as HTMLInputElement;
+
+    await userEvent.type(harpIdInput, "user1,user2,");
+    expect(await screen.findByTestId("harp-chip-user1")).toBeInTheDocument();
+    expect(await screen.findByTestId("harp-chip-user2")).toBeInTheDocument();
+
+    const clearButton = screen.getByTitle("Clear");
+    await userEvent.click(clearButton);
+    expect(screen.queryByTestId("harp-chip-user1")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("harp-chip-user2")).not.toBeInTheDocument();
+    expect(harpIdInput.value).toBe("");
+  });
+
+  it("should toggle all user checkboxes when header select-all checkbox is clicked in Unshare mode", async () => {
+    render(
+      <ShareDialog
+        measures={[mockMeasure1, mockMeasure2]}
+        open={true}
+        option={"Unshare"}
+        onClose={jest.fn()}
+        onSave={jest.fn()}
+      />
+    );
+    expect(await screen.findByTestId("share-dialog")).toBeInTheDocument();
+
+    // header checkbox + 2 sub-row checkboxes (mockMeasure2 has userId1, userId2)
+    const checkBoxes = await screen.findAllByRole("checkbox");
+    expect(checkBoxes.length).toBe(3);
+
+    // Initially all rows are selected
+    expect(checkBoxes[0]).toBeChecked();
+    expect(checkBoxes[1]).toBeChecked();
+    expect(checkBoxes[2]).toBeChecked();
+
+    // Click header to deselect all
+    await userEvent.click(checkBoxes[0]);
+    await waitFor(() => {
+      expect(checkBoxes[0]).not.toBeChecked();
+      expect(checkBoxes[1]).not.toBeChecked();
+      expect(checkBoxes[2]).not.toBeChecked();
+    });
+
+    // Click header again to re-select all
+    await userEvent.click(checkBoxes[0]);
+    await waitFor(() => {
+      expect(checkBoxes[0]).toBeChecked();
+      expect(checkBoxes[1]).toBeChecked();
+      expect(checkBoxes[2]).toBeChecked();
+    });
+  });
+
+  it("should show header checkbox unchecked when only some rows are selected in Unshare mode", async () => {
+    render(
+      <ShareDialog
+        measures={[mockMeasure1, mockMeasure2]}
+        open={true}
+        option={"Unshare"}
+        onClose={jest.fn()}
+        onSave={jest.fn()}
+      />
+    );
+    expect(await screen.findByTestId("share-dialog")).toBeInTheDocument();
+
+    const checkBoxes = await screen.findAllByRole("checkbox");
+    expect(checkBoxes.length).toBe(3);
+
+    // All checked initially
+    expect(checkBoxes[0]).toBeChecked();
+
+    // Uncheck one sub-row
+    await userEvent.click(checkBoxes[1]);
+    await waitFor(() => expect(checkBoxes[1]).not.toBeChecked());
+
+    // Header should no longer be fully checked
+    expect(checkBoxes[0]).not.toBeChecked();
+    expect(checkBoxes[2]).toBeChecked();
   });
 });
 describe("UnshareFromMe Confirmation Dialog component", () => {
@@ -1229,7 +1455,7 @@ describe("UnshareFromMe Confirmation Dialog component", () => {
     expect(screen.queryByTestId("share-confirmation-dialog")).toBeNull();
 
     const cancelButton = screen.getByTestId("share-cancel-button");
-    fireEvent.click(cancelButton);
+    await userEvent.click(cancelButton);
 
     expect(onCloseMock).toHaveBeenCalled();
     expect(screen.queryByTestId("share-confirmation-dialog")).toBeNull();
@@ -1252,7 +1478,7 @@ describe("UnshareFromMe Confirmation Dialog component", () => {
     expect(screen.queryByTestId("share-confirmation-dialog")).toBeNull();
 
     const cancelButton = screen.getByTestId("share-cancel-button");
-    fireEvent.click(cancelButton);
+    await userEvent.click(cancelButton);
 
     expect(onCloseMock).toHaveBeenCalled();
     expect(screen.queryByTestId("share-confirmation-dialog")).toBeNull();
@@ -1277,7 +1503,7 @@ describe("UnshareFromMe Confirmation Dialog component", () => {
     const cancelButton = screen.getByTestId(
       "share-confirmation-dialog-cancel-button"
     );
-    fireEvent.click(cancelButton);
+    await userEvent.click(cancelButton);
 
     expect(onCloseMock).toHaveBeenCalled();
     expect(screen.queryByTestId("share-dialog")).toBeNull();
@@ -1307,7 +1533,7 @@ describe("UnshareFromMe Confirmation Dialog component", () => {
     );
     expect(acceptBtn).toBeEnabled();
 
-    fireEvent.click(acceptBtn);
+    await userEvent.click(acceptBtn);
 
     await waitFor(() => {
       expect(mockMeasureServiceApi.unshareMeasures).toBeCalled();
@@ -1344,7 +1570,7 @@ describe("UnshareFromMe Confirmation Dialog component", () => {
     );
     expect(acceptBtn).toBeEnabled();
 
-    fireEvent.click(acceptBtn);
+    await userEvent.click(acceptBtn);
 
     await waitFor(() => {
       expect(mockMeasureServiceApi.unshareMeasures).toBeCalled();
@@ -1429,7 +1655,7 @@ describe("Export user list", () => {
     await screen.findByTestId("share-measure-tbl");
 
     const exportButton = await screen.findByText(/Export User List/i);
-    fireEvent.click(exportButton);
+    await userEvent.click(exportButton);
 
     await waitFor(() => {
       expect(
@@ -1465,7 +1691,7 @@ describe("Export user list", () => {
     await screen.findByTestId("share-measure-tbl");
 
     const exportButton = await screen.findByText(/Export User List/i);
-    fireEvent.click(exportButton);
+    await userEvent.click(exportButton);
 
     await waitFor(() => {
       expect(
@@ -1492,7 +1718,7 @@ describe("Export user list", () => {
     await screen.findByTestId("share-measure-tbl");
 
     const exportButton = await screen.findByText(/Export User List/i);
-    fireEvent.click(exportButton);
+    await userEvent.click(exportButton);
 
     await waitFor(() => {
       expect(

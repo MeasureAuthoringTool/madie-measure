@@ -56,6 +56,7 @@ export default function DeleteAction(props: PropTypes) {
       title={tooltipMessage}
       onMouseOver={validateDeleteActionState}
       arrow
+      placement="top"
       slotProps={{
         tooltip: {
           sx: {
