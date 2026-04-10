@@ -1302,6 +1302,252 @@ define function MeasureObservation(e Encounter):
     );
   });
 
+  it("should apply code successfully", async () => {
+    const testCql =
+      "library ApplyCodeTest version '0.0.000'\n" + "using QDM version '5.6'\n";
+    (synchingEditorCqlContent as jest.Mock)
+      .mockClear()
+      .mockImplementation(() => ({
+        cql: testCql,
+        isLibraryStatementChanged: false,
+        isUsingStatementChanged: false,
+        isValueSetChanged: false,
+      }));
+    (validateContent as jest.Mock).mockClear().mockImplementation(() =>
+      Promise.resolve({
+        errors: [],
+        translation: null,
+        externalErrors: [],
+      })
+    );
+
+    const measureWithCql = {
+      ...measure,
+      model: Model.QDM_5_6,
+      cql: testCql,
+    } as Measure;
+
+    renderEditor(measureWithCql);
+
+    const applyCodeBtn = await screen.findByTestId("apply-code");
+    userEvent.click(applyCodeBtn);
+    await waitFor(() => {
+      const editor = screen.getByTestId(
+        "measure-editor"
+      ) as HTMLTextAreaElement;
+      expect(editor.value).toContain("204504");
+    });
+    expect(screen.getByTestId("measure-editor-toast")).toHaveTextContent(
+      "Code 204504 has been successfully added to the CQL."
+    );
+  });
+
+  it("should show info toast when applying duplicate code", async () => {
+    const testCql =
+      "library ApplyCodeTest version '0.0.000'\n" +
+      "using QDM version '5.6'\n" +
+      "codesystem \"RXNORM:2022-05\": 'urn:oid:2.16.840.1.113883.6.88' version 'urn:hl7:version:2022-05'\n" +
+      "code \"1 ML digoxin 0.1 MG/ML Injection\": '204504' from \"RXNORM:2022-05\" display '1 ML digoxin 0.1 MG/ML Injection'\n";
+    (synchingEditorCqlContent as jest.Mock)
+      .mockClear()
+      .mockImplementation(() => ({
+        cql: testCql,
+        isLibraryStatementChanged: false,
+        isUsingStatementChanged: false,
+        isValueSetChanged: false,
+      }));
+    (validateContent as jest.Mock).mockClear().mockImplementation(() =>
+      Promise.resolve({
+        errors: [],
+        translation: null,
+        externalErrors: [],
+      })
+    );
+
+    const measureWithCql = {
+      ...measure,
+      model: Model.QDM_5_6,
+      cql: testCql,
+    } as Measure;
+
+    renderEditor(measureWithCql);
+
+    const applyCodeBtn = await screen.findByTestId("apply-code");
+    userEvent.click(applyCodeBtn);
+    await waitFor(() => {
+      expect(screen.getByTestId("measure-editor-toast")).toHaveTextContent(
+        "Code 204504 has already been defined in CQL."
+      );
+    });
+    // CQL should remain unchanged
+    const editor = screen.getByTestId("measure-editor");
+    expect(editor).toHaveValue(testCql);
+  });
+
+  it("should apply parameter successfully", async () => {
+    const testCql =
+      "library ApplyParamTest version '0.0.000'\n" +
+      "using QDM version '5.6'\n";
+    (synchingEditorCqlContent as jest.Mock)
+      .mockClear()
+      .mockImplementation(() => ({
+        cql: testCql,
+        isLibraryStatementChanged: false,
+        isUsingStatementChanged: false,
+        isValueSetChanged: false,
+      }));
+    (validateContent as jest.Mock).mockClear().mockImplementation(() =>
+      Promise.resolve({
+        errors: [],
+        translation: null,
+        externalErrors: [],
+      })
+    );
+
+    const measureWithCql = {
+      ...measure,
+      model: Model.QDM_5_6,
+      cql: testCql,
+    } as Measure;
+
+    renderEditor(measureWithCql);
+
+    const applyParamBtn = await screen.findByTestId("apply-parameter");
+    userEvent.click(applyParamBtn);
+    await waitFor(() => {
+      const editor = screen.getByTestId(
+        "measure-editor"
+      ) as HTMLTextAreaElement;
+      expect(editor.value).toContain("Measurement Period");
+    });
+    expect(screen.getByTestId("measure-editor-toast")).toHaveTextContent(
+      "Parameter Measurement Period has been successfully added to the CQL."
+    );
+  });
+
+  it("should show info toast when applying duplicate parameter", async () => {
+    const testCql =
+      "library ApplyParamTest version '0.0.000'\n" +
+      "using QDM version '5.6'\n" +
+      'parameter "Measurement Period" Interval<System.DateTime\n';
+    (synchingEditorCqlContent as jest.Mock)
+      .mockClear()
+      .mockImplementation(() => ({
+        cql: testCql,
+        isLibraryStatementChanged: false,
+        isUsingStatementChanged: false,
+        isValueSetChanged: false,
+      }));
+    (validateContent as jest.Mock).mockClear().mockImplementation(() =>
+      Promise.resolve({
+        errors: [],
+        translation: null,
+        externalErrors: [],
+      })
+    );
+
+    const measureWithCql = {
+      ...measure,
+      model: Model.QDM_5_6,
+      cql: testCql,
+    } as Measure;
+
+    renderEditor(measureWithCql);
+
+    const applyParamBtn = await screen.findByTestId("apply-parameter");
+    userEvent.click(applyParamBtn);
+    await waitFor(() => {
+      expect(screen.getByTestId("measure-editor-toast")).toHaveTextContent(
+        "Parameter Measurement Period has already been defined in CQL."
+      );
+    });
+    // CQL should remain unchanged
+    const editor = screen.getByTestId("measure-editor");
+    expect(editor).toHaveValue(testCql);
+  });
+
+  it("should apply function successfully", async () => {
+    const testCql =
+      "library ApplyFuncTest version '0.0.000'\n" + "using QDM version '5.6'\n";
+    (synchingEditorCqlContent as jest.Mock)
+      .mockClear()
+      .mockImplementation(() => ({
+        cql: testCql,
+        isLibraryStatementChanged: false,
+        isUsingStatementChanged: false,
+        isValueSetChanged: false,
+      }));
+    (validateContent as jest.Mock).mockClear().mockImplementation(() =>
+      Promise.resolve({
+        errors: [],
+        translation: null,
+        externalErrors: [],
+      })
+    );
+
+    const measureWithCql = {
+      ...measure,
+      model: Model.QDM_5_6,
+      cql: testCql,
+    } as Measure;
+
+    renderEditor(measureWithCql);
+
+    const applyFuncBtn = await screen.findByTestId("apply-function");
+    userEvent.click(applyFuncBtn);
+    await waitFor(() => {
+      const editor = screen.getByTestId(
+        "measure-editor"
+      ) as HTMLTextAreaElement;
+      expect(editor.value).toContain("MeasureObservation");
+    });
+    expect(screen.getByTestId("measure-editor-toast")).toHaveTextContent(
+      "Function MeasureObservation has been successfully added to the CQL."
+    );
+  });
+
+  it("should show info toast when applying duplicate function", async () => {
+    const testCql =
+      "library ApplyFuncTest version '0.0.000'\n" +
+      "using QDM version '5.6'\n" +
+      'define function "MeasureObservation"("e" "Encounter"):\n' +
+      "  2\n";
+    (synchingEditorCqlContent as jest.Mock)
+      .mockClear()
+      .mockImplementation(() => ({
+        cql: testCql,
+        isLibraryStatementChanged: false,
+        isUsingStatementChanged: false,
+        isValueSetChanged: false,
+      }));
+    (validateContent as jest.Mock).mockClear().mockImplementation(() =>
+      Promise.resolve({
+        errors: [],
+        translation: null,
+        externalErrors: [],
+      })
+    );
+
+    const measureWithCql = {
+      ...measure,
+      model: Model.QDM_5_6,
+      cql: testCql,
+    } as Measure;
+
+    renderEditor(measureWithCql);
+
+    const applyFuncBtn = await screen.findByTestId("apply-function");
+    userEvent.click(applyFuncBtn);
+    await waitFor(() => {
+      expect(screen.getByTestId("measure-editor-toast")).toHaveTextContent(
+        "Function MeasureObservation has already been defined in CQL."
+      );
+    });
+    // CQL should remain unchanged
+    const editor = screen.getByTestId("measure-editor");
+    expect(editor).toHaveValue(testCql);
+  });
+
   it("Should successfully lock", async () => {
     mockMeasureServiceApi.updateMeasure.mockResolvedValueOnce(measure);
     mockMeasureServiceApi.unlockMeasure.mockResolvedValueOnce({

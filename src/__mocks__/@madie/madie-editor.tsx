@@ -29,11 +29,14 @@ export function MadieTerminologyEditor({
   value,
   inboundAnnotations,
   handleCodeDelete,
+  handleApplyCode,
   handleApplyLibrary,
   handleEditLibrary,
   handleDeleteLibrary,
+  handleApplyParameter,
   handleParameterEdit,
   handleParameterDelete,
+  handleApplyFunction,
   handleFunctionDelete,
   handleFunctionEdit,
 }) {
@@ -72,6 +75,7 @@ export function MadieTerminologyEditor({
   const functionToDelete = {
     functionName: "MeasureObservation",
     fluentFunction: false,
+    functionsArguments: [{ argumentName: "e", dataType: "Encounter" }],
     expressionValue: "define function MeasureObservation(e Encounter):\n  2",
     expression: "define function MeasureObservation(e Encounter):\n  2",
   };
@@ -79,6 +83,7 @@ export function MadieTerminologyEditor({
   const functionToEdit = {
     functionName: "MeasureObservation1",
     fluentFunction: false,
+    functionsArguments: [{ argumentName: "e", dataType: "Encounter" }],
     expressionValue: "define function MeasureObservation(e Encounter):\n  2",
     expression: "define function MeasureObservation(e Encounter):\n  2",
   };
@@ -99,6 +104,10 @@ export function MadieTerminologyEditor({
       )}
       <button data-testid="delete-code" onClick={() => handleCodeDelete(code)}>
         Remove code
+      </button>
+
+      <button data-testid="apply-code" onClick={() => handleApplyCode(code)}>
+        Apply Code
       </button>
 
       <button
@@ -123,6 +132,12 @@ export function MadieTerminologyEditor({
       </button>
 
       <button
+        data-testid="apply-parameter"
+        onClick={() => handleApplyParameter(parameter)}
+      >
+        Apply Parameter
+      </button>
+      <button
         data-testid="edit-parameter"
         onClick={() => handleParameterEdit(parameter, parameterToApply)}
       >
@@ -133,6 +148,12 @@ export function MadieTerminologyEditor({
         onClick={() => handleParameterDelete(parameter)}
       >
         Delete Parameter
+      </button>
+      <button
+        data-testid="apply-function"
+        onClick={() => handleApplyFunction(functionToDelete)}
+      >
+        Apply Function
       </button>
       <button
         data-testid="delete-function"
