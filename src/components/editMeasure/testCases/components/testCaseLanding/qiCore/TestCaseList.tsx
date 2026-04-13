@@ -712,6 +712,7 @@ const TestCaseList = (props: TestCaseListProps) => {
               open={createOpen}
               onClose={handleClose}
               onSuccess={insertTestCases}
+              measure={measure}
             />
             {activeTab === "passing" && (
               <div
