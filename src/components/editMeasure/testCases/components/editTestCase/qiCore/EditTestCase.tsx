@@ -211,17 +211,12 @@ export function shouldDisableRunTestCaseButton(params: {
 
   const hasCqlErrors = isCompositeMeasure ? false : !!measure?.cqlErrors;
 
-  const hasMeasureErrors = isCompositeMeasure
-    ? false
-    : measure?.errors?.includes(
-        MeasureErrorType.MISMATCH_CQL_POPULATION_RETURN_TYPES
-      ) ||
-      measure?.errors?.includes(
-        MeasureErrorType.MISMATCH_CQL_RISK_ADJUSTMENT
-      ) ||
-      measure?.errors?.includes(
-        MeasureErrorType.MISMATCH_CQL_SUPPLEMENTAL_DATA
-      );
+  const hasMeasureErrors =
+    measure?.errors?.includes(
+      MeasureErrorType.MISMATCH_CQL_POPULATION_RETURN_TYPES
+    ) ||
+    measure?.errors?.includes(MeasureErrorType.MISMATCH_CQL_RISK_ADJUSTMENT) ||
+    measure?.errors?.includes(MeasureErrorType.MISMATCH_CQL_SUPPLEMENTAL_DATA);
 
   const hasNoGroups = isCompositeMeasure
     ? false

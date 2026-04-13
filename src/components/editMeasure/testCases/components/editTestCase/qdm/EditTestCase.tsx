@@ -444,17 +444,16 @@ const EditTestCase = () => {
               onClick={calculateQdmTestCases}
               disabled={
                 (!measure?.measureMetaData?.composite &&
-                  (!!measure?.cqlErrors ||
-                    _.isEmpty(measure?.groups) ||
-                    measure?.errors?.includes(
-                      MeasureErrorType.MISMATCH_CQL_POPULATION_RETURN_TYPES
-                    ) ||
-                    measure?.errors?.includes(
-                      MeasureErrorType.MISMATCH_CQL_RISK_ADJUSTMENT
-                    ) ||
-                    measure?.errors?.includes(
-                      MeasureErrorType.MISMATCH_CQL_SUPPLEMENTAL_DATA
-                    ))) ||
+                  (!!measure?.cqlErrors || _.isEmpty(measure?.groups))) ||
+                measure?.errors?.includes(
+                  MeasureErrorType.MISMATCH_CQL_POPULATION_RETURN_TYPES
+                ) ||
+                measure?.errors?.includes(
+                  MeasureErrorType.MISMATCH_CQL_RISK_ADJUSTMENT
+                ) ||
+                measure?.errors?.includes(
+                  MeasureErrorType.MISMATCH_CQL_SUPPLEMENTAL_DATA
+                ) ||
                 !formik.values?.json ||
                 !executionContextReady ||
                 executing
