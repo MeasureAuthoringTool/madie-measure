@@ -3722,5 +3722,44 @@ describe("Measure lock functionality", () => {
       expect(screen.getByText("Draft")).toBeInTheDocument();
       expect(screen.getByText("In Composite")).toBeInTheDocument();
     });
+
+    it("should display 'Composite' chip when measure is composite", async () => {
+      renderComponentMeasure({
+        measureMetaData: { draft: false, composite: true },
+      });
+
+      await screen.findByText(measures[0].measureName);
+
+      const compositeChip = screen.getByRole("status", {
+        name: "Composite",
+      });
+      expect(compositeChip).toBeInTheDocument();
+      expect(compositeChip).toHaveClass("chip-composite");
+    });
+
+    it("should NOT display 'Composite' chip when composite is false", async () => {
+      renderComponentMeasure({
+        measureMetaData: { draft: false, composite: false },
+      });
+
+      await screen.findByText(measures[0].measureName);
+
+      expect(
+        screen.queryByRole("status", { name: "Composite" })
+      ).not.toBeInTheDocument();
+    });
+
+    it("should display both 'Draft' and 'Composite' chips when measure is draft and composite", async () => {
+      renderComponentMeasure({
+        measureMetaData: { draft: true, composite: true },
+      });
+
+      await screen.findByText(measures[0].measureName);
+
+      expect(screen.getByRole("status", { name: "Draft" })).toBeInTheDocument();
+      expect(
+        screen.getByRole("status", { name: "Composite" })
+      ).toBeInTheDocument();
+    });
   });
 });
