@@ -3636,4 +3636,130 @@ describe("Measure lock functionality", () => {
       expect(headerCell).toBeInTheDocument();
     });
   });
+
+  describe("MeasureStatusChips - component measure chip", () => {
+    const renderComponentMeasure = (measureOverrides = {}) => {
+      const componentMeasure = {
+        ...measures[0],
+        measureMetaData: { draft: false, composite: false },
+        ...measureOverrides,
+      };
+      return render(
+        <ServiceContext.Provider value={serviceConfig}>
+          <MeasureList
+            measureList={[componentMeasure]}
+            setMeasureList={setMeasureListMock}
+            setTotalPages={setTotalPagesMock}
+            setTotalItems={setTotalItemsMock}
+            setVisibleItems={setVisibleItemsMock}
+            setOffset={setOffsetMock}
+            setLoading={setLoadingMock}
+            activeTab={0}
+            searchCriteria={null}
+            setSearchCriteria={setSearchCriteriaMock}
+            currentLimit={10}
+            currentPage={0}
+            currentSort="lastModifiedAt"
+            currentDirection="DESC"
+            setCurrentSort={setCurrentSortMock}
+            setCurrentDirection={setCurrentDirectionMock}
+            handlePageChange={handlePageChangeMock}
+            search=""
+            toastOpen={false}
+            toastMessage=""
+            toastType="danger"
+            setToastOpen={setToastOpenMock}
+            setToastMessage={setToastMessageMock}
+            setToastType={setToastTypeMock}
+            onToastClose={onToastCloseMock}
+            setStatusHandler={undefined}
+          />
+        </ServiceContext.Provider>
+      );
+    };
+
+    it("should display 'In Composite' chip when measure is a component measure", async () => {
+      renderComponentMeasure({ component: true });
+
+      await screen.findByText(measures[0].measureName);
+
+      const inCompositeChip = screen.getByText("In Composite").closest("div");
+      expect(inCompositeChip).toBeInTheDocument();
+      // The info icon should be present alongside the label
+      expect(
+        inCompositeChip.querySelector('[data-testid="InfoOutlinedIcon"]')
+      ).toBeInTheDocument();
+    });
+
+    it("should NOT display 'In Composite' chip when measure is not a component measure", async () => {
+      renderComponentMeasure({ component: false });
+
+      await screen.findByText(measures[0].measureName);
+
+      expect(screen.queryByText("In Composite")).not.toBeInTheDocument();
+    });
+
+    it("should NOT display 'In Composite' chip when component field is absent", async () => {
+      const { component: _removed, ...measureWithoutComponent } = {
+        ...measures[0],
+        measureMetaData: { draft: false, composite: false },
+      } as any;
+      renderComponentMeasure(measureWithoutComponent);
+
+      await screen.findByText(measures[0].measureName);
+
+      expect(screen.queryByText("In Composite")).not.toBeInTheDocument();
+    });
+
+    it("should display 'Draft' chip alongside 'In Composite' chip when measure is draft and component", async () => {
+      renderComponentMeasure({
+        component: true,
+        measureMetaData: { draft: true, composite: false },
+      });
+
+      await screen.findByText(measures[0].measureName);
+
+      expect(screen.getByText("Draft")).toBeInTheDocument();
+      expect(screen.getByText("In Composite")).toBeInTheDocument();
+    });
+
+    it("should display 'Composite' chip when measure is composite", async () => {
+      renderComponentMeasure({
+        measureMetaData: { draft: false, composite: true },
+      });
+
+      await screen.findByText(measures[0].measureName);
+
+      const compositeChip = screen.getByRole("status", {
+        name: "Composite",
+      });
+      expect(compositeChip).toBeInTheDocument();
+      expect(compositeChip).toHaveClass("chip-composite");
+    });
+
+    it("should NOT display 'Composite' chip when composite is false", async () => {
+      renderComponentMeasure({
+        measureMetaData: { draft: false, composite: false },
+      });
+
+      await screen.findByText(measures[0].measureName);
+
+      expect(
+        screen.queryByRole("status", { name: "Composite" })
+      ).not.toBeInTheDocument();
+    });
+
+    it("should display both 'Draft' and 'Composite' chips when measure is draft and composite", async () => {
+      renderComponentMeasure({
+        measureMetaData: { draft: true, composite: true },
+      });
+
+      await screen.findByText(measures[0].measureName);
+
+      expect(screen.getByRole("status", { name: "Draft" })).toBeInTheDocument();
+      expect(
+        screen.getByRole("status", { name: "Composite" })
+      ).toBeInTheDocument();
+    });
+  });
 });
