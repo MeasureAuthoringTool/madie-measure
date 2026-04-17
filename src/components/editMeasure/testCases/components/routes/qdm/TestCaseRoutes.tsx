@@ -119,25 +119,25 @@ const TestCaseRoutes = () => {
               "No Population Criteria is associated with this measure. Please review the Population Criteria tab."
             );
           }
-          if (measure?.errors) {
-            if (
-              measure.errors?.includes(
-                MeasureErrorType.MISMATCH_CQL_POPULATION_RETURN_TYPES
-              )
-            ) {
-              localErrors.push(CQL_RETURN_TYPES_MISMATCH_ERROR);
-            }
+        }
+        if (measure?.errors) {
+          if (
+            measure.errors?.includes(
+              MeasureErrorType.MISMATCH_CQL_POPULATION_RETURN_TYPES
+            )
+          ) {
+            localErrors.push(CQL_RETURN_TYPES_MISMATCH_ERROR);
+          }
 
-            if (
-              measure.errors?.includes(
-                MeasureErrorType.MISMATCH_CQL_RISK_ADJUSTMENT
-              ) ||
-              measure.errors.includes(
-                MeasureErrorType.MISMATCH_CQL_SUPPLEMENTAL_DATA
-              )
-            ) {
-              localErrors.push(SDE_RAV_RETURN_TYPES_MISMATCH_ERROR);
-            }
+          if (
+            measure.errors?.includes(
+              MeasureErrorType.MISMATCH_CQL_RISK_ADJUSTMENT
+            ) ||
+            measure.errors.includes(
+              MeasureErrorType.MISMATCH_CQL_SUPPLEMENTAL_DATA
+            )
+          ) {
+            localErrors.push(SDE_RAV_RETURN_TYPES_MISMATCH_ERROR);
           }
         }
 

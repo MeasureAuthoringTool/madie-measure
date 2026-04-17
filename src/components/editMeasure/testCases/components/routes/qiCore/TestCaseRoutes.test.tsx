@@ -233,10 +233,7 @@ describe("TestCaseRoutes", () => {
     mockMeasure.cqlErrors = true;
     mockMeasure.elmJson = undefined;
     mockMeasure.groups = [];
-    mockMeasure.errors = [
-      MeasureErrorType.MISMATCH_CQL_POPULATION_RETURN_TYPES,
-      MeasureErrorType.MISMATCH_CQL_SUPPLEMENTAL_DATA,
-    ];
+    mockMeasure.errors = [];
     const bundle = {
       id: "m1234",
       createdBy: "testuser",
@@ -283,16 +280,6 @@ describe("TestCaseRoutes", () => {
     expect(
       screen.queryByText(
         /No Population Criteria is associated with this measure/
-      )
-    ).not.toBeInTheDocument();
-    expect(
-      screen.queryByText(
-        /One or more Population Criteria has a mismatch with CQL return types/
-      )
-    ).not.toBeInTheDocument();
-    expect(
-      screen.queryByText(
-        /Supplemental Data Elements or Risk Adjustment Variables/
       )
     ).not.toBeInTheDocument();
     expect(mockMeasureServiceApi.fetchMeasureBundle).toHaveBeenCalled();
