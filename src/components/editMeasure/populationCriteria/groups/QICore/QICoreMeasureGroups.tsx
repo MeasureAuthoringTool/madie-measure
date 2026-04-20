@@ -71,7 +71,6 @@ import {
 } from "../../../../../styles/editMeasure/populationCriteria/groups/index";
 import CompletionIndicator from "../CompletionIndicator";
 import CompositeComponent from "../Composite/CompositeComponent";
-import { components } from "react-select";
 import QICoreStratifications, {
   getEmptyStrat,
   associationSelect,

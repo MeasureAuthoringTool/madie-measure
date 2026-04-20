@@ -97,10 +97,11 @@ import EditorCalculator from "../calculator/EditorCalculator";
 import CalculatorDialog from "../calculator/CalculatorDialog";
 import LockedMessageModal from "../../../../../common/lockedMessageModal/LockedMessageModal";
 import { CustomWarningMessage } from "../../statusHandler/StatusHandler";
+import EditCompositeTestCase from "./EditCompositeTestCase";
 
 const TestCaseForm = tw.form`m-3`;
 
-interface AlertProps {
+export interface AlertProps {
   status?: "success" | "warning" | "error" | "info" | "meta" | null;
   message?: any;
 }
@@ -128,12 +129,12 @@ error: #BA1C32 vs #FBC4AB 4.1 fail red to red orange
 default: #2469B7 vs #b0EEFF  d-L  teal 4.4:1
 */
 
-const Alert = styled.div<AlertProps>(({ status = "default" }) => [
+export const Alert = styled.div<AlertProps>(({ status = "default" }) => [
   styles[status],
   tw`rounded-lg p-2 m-2 text-base inline-flex items-center w-11/12`,
 ]);
 
-const testCaseSeriesStyles = {
+export const testCaseSeriesStyles = {
   border: "1px solid #8c8c8c",
   "& .MuiOutlinedInput-notchedOutline": {
     borderRadius: "3px",
@@ -1166,398 +1167,422 @@ const EditTestCase = (props: EditTestCaseProps) => {
           measureId={measureId}
           canEdit={canEdit}
         />
-        {/* this needs to have a conditional class depending if qi-core 6 or 4, otherwise it qi-core4 will become fouled. */}
-        <div className={`allotment-wrapper ${isQICore6 ? "fullvh" : ""}`}>
-          <Allotment
-            ref={allotmentRef}
-            defaultSizes={[48, 48, 4]}
-            vertical={false}
-          >
-            <Allotment.Pane>
-              <div className="nav-panel">
-                {featureFlags?.qiCoreElementsTab && isQICore6 ? (
-                  <>
-                    <QiCoreResourceProvider>
-                      <LeftPanelContent
-                        leftPanelActiveTab={leftPanelActiveTab}
-                        setLeftPanelActiveTab={setLeftPanelActiveTab}
-                        isQICore6={isQICore6}
-                        dirty={formikStu6Context.dirty}
-                        setCalculationDialogOpen={setCalculationDialogOpen}
-                        testCaseCanEdit={testCaseCanEdit}
-                        editorVal={editorVal}
-                        setEditorVal={setEditorVal}
-                        testCase={testCase}
-                        formikStu6Context={formikStu6Context}
-                        setValidationSchema={setValidationSchema}
-                        setInitialFormikValuesStu6={setInitialFormikValuesStu6}
-                      />
-                    </QiCoreResourceProvider>
-                  </>
-                ) : (
-                  <>
-                    <div tw="float-right mr-4">
-                      <EditorCalculator
-                        onClick={() => setCalculationDialogOpen(true)}
-                      />
-                      <EditorSearch />
-                    </div>
-                    <Editor
-                      onChange={(val: string) => setEditorVal(val)}
-                      value={editorVal}
-                      readOnly={!testCaseCanEdit || _.isNil(testCase)}
-                      height="100%"
-                    />
-                  </>
-                )}
-              </div>
-            </Allotment.Pane>
-            <Allotment.Pane>
-              <div className="right-panel">
-                <CreateTestCaseRightPanelNavTabs
-                  rightPanelActiveTab={rightPanelActiveTab}
-                  isCompositeMeasure={isCompositeMeasure}
-                  setRightPanelActiveTab={setRightPanelActiveTab}
-                />
-                {rightPanelActiveTab === "measurecql" &&
-                  (!measure?.cqlErrors ? (
-                    <div
-                      data-testid="test-case-cql-editor"
-                      id="test-case-cql-editor"
-                      style={{ height: "calc(100% - 24px)" }}
-                    >
-                      <MadieEditor
-                        value={measure?.cql}
-                        height="100%"
-                        readOnly={true}
-                        validationsEnabled={false}
-                      />
-                    </div>
+
+        {/* Composite Measures segmented to prevent excessive conditional rendering everywhere. 
+        May come at the cost of some code duplication. */}
+        {isCompositeMeasure ? (
+          <FormikProvider value={formik}>
+            <EditCompositeTestCase
+              setDiscardDialogOpen={setDiscardDialogOpen}
+              isModified={isModified}
+              seriesState={seriesState}
+              allotmentRef={allotmentRef}
+              editorVal={editorVal}
+              setEditorVal={setEditorVal}
+              testCaseCanEdit={testCaseCanEdit}
+            />
+          </FormikProvider>
+        ) : (
+          <div className={`allotment-wrapper ${isQICore6 ? "fullvh" : ""}`}>
+            <Allotment
+              ref={allotmentRef}
+              defaultSizes={[48, 48, 4]}
+              vertical={false}
+            >
+              <Allotment.Pane>
+                <div className="nav-panel">
+                  {featureFlags?.qiCoreElementsTab && isQICore6 ? (
+                    <>
+                      <QiCoreResourceProvider>
+                        <LeftPanelContent
+                          leftPanelActiveTab={leftPanelActiveTab}
+                          setLeftPanelActiveTab={setLeftPanelActiveTab}
+                          isQICore6={isQICore6}
+                          dirty={formikStu6Context.dirty}
+                          setCalculationDialogOpen={setCalculationDialogOpen}
+                          testCaseCanEdit={testCaseCanEdit}
+                          editorVal={editorVal}
+                          setEditorVal={setEditorVal}
+                          testCase={testCase}
+                          formikStu6Context={formikStu6Context}
+                          setValidationSchema={setValidationSchema}
+                          setInitialFormikValuesStu6={
+                            setInitialFormikValuesStu6
+                          }
+                        />
+                      </QiCoreResourceProvider>
+                    </>
                   ) : (
-                    <div data-testid="test-case-cql-has-errors-message">
-                      An error exists with the measure CQL, please review the
-                      CQL Editor tab
-                    </div>
-                  ))}
-                {rightPanelActiveTab === "highlighting" && (
-                  <div
-                    className="panel-content"
-                    style={{ marginRight: "15px" }}
-                  >
-                    {executing ? (
+                    <>
+                      <div tw="float-right mr-4">
+                        <EditorCalculator
+                          onClick={() => setCalculationDialogOpen(true)}
+                        />
+                        <EditorSearch />
+                      </div>
+                      <Editor
+                        onChange={(val: string) => setEditorVal(val)}
+                        value={editorVal}
+                        readOnly={!testCaseCanEdit || _.isNil(testCase)}
+                        height="100%"
+                      />
+                    </>
+                  )}
+                </div>
+              </Allotment.Pane>
+              <Allotment.Pane>
+                <div className="right-panel">
+                  <div className="tab-container">
+                    <CreateTestCaseRightPanelNavTabs
+                      rightPanelActiveTab={rightPanelActiveTab}
+                      isCompositeMeasure={isCompositeMeasure}
+                      setRightPanelActiveTab={setRightPanelActiveTab}
+                    />
+                  </div>
+                  {rightPanelActiveTab === "measurecql" &&
+                    (!measure?.cqlErrors ? (
                       <div
-                        style={{ display: "flex", justifyContent: "center" }}
+                        data-testid="test-case-cql-editor"
+                        id="test-case-cql-editor"
+                        style={{ height: "calc(100% - 24px)" }}
                       >
-                        <MadieSpinner style={{ height: 50, width: 50 }} />
+                        <MadieEditor
+                          value={measure?.cql}
+                          height="100%"
+                          readOnly={true}
+                          validationsEnabled={false}
+                        />
                       </div>
                     ) : (
-                      <CalculationResults
-                        mainCqlLibraryName={measure?.cqlLibraryName}
-                        calculationResults={populationGroupResults}
-                        calculationErrors={calculationErrors}
+                      <div data-testid="test-case-cql-has-errors-message">
+                        An error exists with the measure CQL, please review the
+                        CQL Editor tab
+                      </div>
+                    ))}
+                  {rightPanelActiveTab === "highlighting" && (
+                    <div
+                      className="panel-content"
+                      style={{ marginRight: "15px" }}
+                    >
+                      {executing ? (
+                        <div
+                          style={{ display: "flex", justifyContent: "center" }}
+                        >
+                          <MadieSpinner style={{ height: 50, width: 50 }} />
+                        </div>
+                      ) : (
+                        <CalculationResults
+                          mainCqlLibraryName={measure?.cqlLibraryName}
+                          calculationResults={populationGroupResults}
+                          calculationErrors={calculationErrors}
+                          groupPopulations={groupPopulations}
+                          cqlDefinitionCallstack={callstackMap}
+                          includeSDE={
+                            measure?.testCaseConfiguration?.sdeIncluded
+                          }
+                          includeRAV={
+                            measure?.testCaseConfiguration?.ravIncluded
+                          }
+                          supplementalData={measure?.supplementalData}
+                          riskAdjustments={measure?.riskAdjustments}
+                          groups={measure?.groups}
+                        />
+                      )}
+                    </div>
+                  )}
+                  {rightPanelActiveTab === "actual" && (
+                    <div className="panel-content">
+                      Composite actual results in progress...
+                    </div>
+                  )}
+                  {rightPanelActiveTab === "expectoractual" && (
+                    <div className="panel-content">
+                      <ExpectedActual
+                        canEdit={testCaseCanEdit}
                         groupPopulations={groupPopulations}
-                        cqlDefinitionCallstack={callstackMap}
-                        includeSDE={measure?.testCaseConfiguration?.sdeIncluded}
-                        includeRAV={measure?.testCaseConfiguration?.ravIncluded}
-                        supplementalData={measure?.supplementalData}
-                        riskAdjustments={measure?.riskAdjustments}
-                        groups={measure?.groups}
+                        isTestCaseExecuted={!_.isNil(populationGroupResults)}
+                        clearTestResults={() => {
+                          setPopulationGroupResults(undefined);
+                        }}
+                        errors={formik.errors.groupPopulations}
+                        groupsStratificationAssociationMap={stratificationsMap}
+                        groups={measure.groups}
+                        onChange={(
+                          groupPopulations,
+                          changedGroupId,
+                          changedPopulation
+                        ) => {
+                          const stratOutput = triggerPopChanges(
+                            groupPopulations,
+                            changedGroupId,
+                            changedPopulation,
+                            measure?.groups
+                          );
+                          formik.setFieldValue(
+                            "groupPopulations",
+                            stratOutput as GroupPopulation[]
+                          );
+                        }}
+                        onStratificationChange={(
+                          groupPopulations,
+                          changedGroupId,
+                          changedStratification
+                        ) => {
+                          const stratOutput = triggerPopChanges(
+                            groupPopulations,
+                            changedGroupId,
+                            changedStratification,
+                            measure?.groups
+                          );
+                          formik.setFieldValue(
+                            "groupPopulations",
+                            stratOutput as GroupPopulation[]
+                          );
+                        }}
                       />
-                    )}
-                  </div>
-                )}
-                {rightPanelActiveTab === "actual" && (
-                  <div className="panel-content">
-                    Composite actual results in progress...
-                  </div>
-                )}
-                {rightPanelActiveTab === "expectoractual" && (
-                  <div className="panel-content">
-                    <ExpectedActual
-                      canEdit={testCaseCanEdit}
-                      groupPopulations={groupPopulations}
-                      isTestCaseExecuted={!_.isNil(populationGroupResults)}
-                      clearTestResults={() => {
-                        setPopulationGroupResults(undefined);
-                      }}
-                      errors={formik.errors.groupPopulations}
-                      groupsStratificationAssociationMap={stratificationsMap}
-                      groups={measure.groups}
-                      onChange={(
-                        groupPopulations,
-                        changedGroupId,
-                        changedPopulation
-                      ) => {
-                        const stratOutput = triggerPopChanges(
-                          groupPopulations,
-                          changedGroupId,
-                          changedPopulation,
-                          measure?.groups
-                        );
-                        formik.setFieldValue(
-                          "groupPopulations",
-                          stratOutput as GroupPopulation[]
-                        );
-                      }}
-                      onStratificationChange={(
-                        groupPopulations,
-                        changedGroupId,
-                        changedStratification
-                      ) => {
-                        const stratOutput = triggerPopChanges(
-                          groupPopulations,
-                          changedGroupId,
-                          changedStratification,
-                          measure?.groups
-                        );
-                        formik.setFieldValue(
-                          "groupPopulations",
-                          stratOutput as GroupPopulation[]
-                        );
-                      }}
-                    />
-                  </div>
-                )}
-                {/*
+                    </div>
+                  )}
+                  {/*
             Independent views should be their own components when possible
             This will allow for independent unit testing and help render performance.
            */}
 
-                {rightPanelActiveTab === "details" && (
-                  <div className="panel-content">
-                    {alert && (
-                      <Alert
-                        status={alert?.status}
-                        role="alert"
-                        aria-label="Create Alert"
-                        data-testid="create-test-case-alert"
-                      >
-                        {alert?.message}
-                        <button
-                          data-testid="close-create-test-case-alert"
-                          type="button"
-                          tw="box-content h-4 p-1 ml-3 mb-1.5"
-                          data-bs-dismiss="alert"
-                          aria-label="Close Alert"
-                          onClick={() => setAlert(null)}
+                  {rightPanelActiveTab === "details" && (
+                    <div className="panel-content">
+                      {alert && (
+                        <Alert
+                          status={alert?.status}
+                          role="alert"
+                          aria-label="Create Alert"
+                          data-testid="create-test-case-alert"
                         >
-                          <FontAwesomeIcon icon={faTimes} />
-                        </button>
-                      </Alert>
-                    )}
+                          {alert?.message}
+                          <button
+                            data-testid="close-create-test-case-alert"
+                            type="button"
+                            tw="box-content h-4 p-1 ml-3 mb-1.5"
+                            data-bs-dismiss="alert"
+                            aria-label="Close Alert"
+                            onClick={() => setAlert(null)}
+                          >
+                            <FontAwesomeIcon icon={faTimes} />
+                          </button>
+                        </Alert>
+                      )}
 
-                    {/* TODO Replace with re-usable form component
+                      {/* TODO Replace with re-usable form component
                label, input, and error => single input control component */}
 
-                    <div id="details-panel">
-                      <TextField
-                        placeholder="Test Case Title"
-                        required
-                        readOnly={!testCaseCanEdit}
-                        label="Title"
-                        id="test-case-title"
-                        inputProps={{
-                          "data-testid": "test-case-title",
-                          "aria-describedby": "title-helper-text",
-                          "aria-required": true,
-                          required: true,
-                        }}
-                        helperText={formikErrorHandler("title")}
-                        size="small"
-                        error={
-                          formik.touched.title && Boolean(formik.errors.title)
-                        }
-                        {...formik.getFieldProps("title")}
-                        maxLength={250}
-                      />
-                      <div tw="mt-6">
-                        <TextArea
-                          placeholder="Test Case Description"
-                          id="test-case-description"
-                          data-testid="test-case-description"
+                      <div id="details-panel">
+                        <TextField
+                          placeholder="Test Case Title"
+                          required
                           readOnly={!testCaseCanEdit}
-                          {...formik.getFieldProps("description")}
-                          label="Description"
-                          required={false}
+                          label="Title"
+                          id="test-case-title"
                           inputProps={{
-                            "data-testid": "test-case-description",
-                            "aria-describedby": "description-helper-text",
+                            "data-testid": "test-case-title",
+                            "aria-describedby": "title-helper-text",
+                            "aria-required": true,
+                            required: true,
                           }}
-                          onChange={formik.handleChange}
-                          value={formik.values.description}
+                          helperText={formikErrorHandler("title")}
+                          size="small"
                           error={
-                            formik.touched.description &&
-                            Boolean(formik.errors.description)
+                            formik.touched.title && Boolean(formik.errors.title)
                           }
-                          helperText={formikErrorHandler("description")}
+                          {...formik.getFieldProps("title")}
                           maxLength={250}
                         />
-                      </div>
+                        <div tw="mt-6">
+                          <TextArea
+                            placeholder="Test Case Description"
+                            id="test-case-description"
+                            data-testid="test-case-description"
+                            readOnly={!testCaseCanEdit}
+                            {...formik.getFieldProps("description")}
+                            label="Description"
+                            required={false}
+                            inputProps={{
+                              "data-testid": "test-case-description",
+                              "aria-describedby": "description-helper-text",
+                            }}
+                            onChange={formik.handleChange}
+                            value={formik.values.description}
+                            error={
+                              formik.touched.description &&
+                              Boolean(formik.errors.description)
+                            }
+                            helperText={formikErrorHandler("description")}
+                            maxLength={250}
+                          />
+                        </div>
 
-                      <div tw="mt-6">
-                        <TestCaseSeries
-                          readOnly={!testCaseCanEdit}
-                          value={formik.values.series}
-                          onChange={(nextValue) => {
-                            formik.setFieldTouched("series", true);
-                            formik.setFieldValue("series", nextValue, true);
-                          }}
-                          error={Boolean(formik.errors.series)}
-                          helperText={formikErrorHandler("series")}
-                          seriesOptions={seriesState.series}
-                          sx={testCaseSeriesStyles}
-                        />
+                        <div tw="mt-6">
+                          <TestCaseSeries
+                            readOnly={!testCaseCanEdit}
+                            value={formik.values.series}
+                            onChange={(nextValue) => {
+                              formik.setFieldTouched("series", true);
+                              formik.setFieldValue("series", nextValue, true);
+                            }}
+                            error={Boolean(formik.errors.series)}
+                            helperText={formikErrorHandler("series")}
+                            seriesOptions={seriesState.series}
+                            sx={testCaseSeriesStyles}
+                          />
+                        </div>
                       </div>
                     </div>
-                  </div>
-                )}
-              </div>
-            </Allotment.Pane>
+                  )}
+                </div>
+              </Allotment.Pane>
 
-            <Allotment.Pane minSize={4}>
-              <div
-                className={`validation-panel ${
-                  showValidationErrors ? "open" : "closed"
-                }`}
-              >
-                {showValidationErrors ? (
-                  <>
-                    <div className="flex justify-between items-center w-full mb-2">
-                      <div className="validation-header">
-                        <div className="header-left">
+              <Allotment.Pane minSize={4}>
+                <div
+                  className={`validation-panel ${
+                    showValidationErrors ? "open" : "closed"
+                  }`}
+                >
+                  {showValidationErrors ? (
+                    <>
+                      <div className="flex justify-between items-center w-full mb-2">
+                        <div className="validation-header">
+                          <div className="header-left">
+                            <ValidationStatusIcon
+                              validationStatus={testCase?.validationStatus}
+                            />
+                            <span className="ml-2">
+                              Validations (
+                              {validationErrors?.filter(
+                                (error) => !/^information/.test(error?.severity)
+                              ).length || 0}
+                              )
+                            </span>
+                          </div>
+
+                          <Button
+                            variant="action"
+                            data-testid="hide-json-validation-errors-button"
+                            onClick={() => {
+                              setShowValidationErrors(false);
+                              setTimeout(() => {
+                                allotmentRef.current.resize([48, 48, 4]);
+                              }, 0);
+                            }}
+                            className="validation-panel-toggle-button"
+                            title="Close Panel"
+                          >
+                            <KeyboardTabIcon />
+                          </Button>
+                        </div>
+                      </div>
+                      <div
+                        className="validation-content"
+                        data-testid="json-validation-errors-list"
+                      >
+                        <ValidationPanel
+                          testCase={testCase}
+                          validationErrors={validationErrors}
+                          isQiCoreV6={isQICore6}
+                        />
+                      </div>
+                    </>
+                  ) : (
+                    <div data-testid="closed-json-validation-errors-aside">
+                      <div className="closed-header">
+                        <Button
+                          size="small"
+                          data-testid="show-json-validation-errors-button"
+                          onClick={() => {
+                            setShowValidationErrors(true);
+                            allotmentRef.current.resize([34, 33, 33]);
+                          }}
+                          className="validation-panel-toggle-button"
+                          title={
+                            testCase?.validationStatus
+                              ? testCase?.validationStatus
+                              : "Open Validations"
+                          }
+                        >
                           <ValidationStatusIcon
                             validationStatus={testCase?.validationStatus}
                           />
-                          <span className="ml-2">
-                            Validations (
-                            {validationErrors?.filter(
-                              (error) => !/^information/.test(error?.severity)
-                            ).length || 0}
-                            )
-                          </span>
-                        </div>
-
-                        <Button
-                          variant="action"
-                          data-testid="hide-json-validation-errors-button"
-                          onClick={() => {
-                            setShowValidationErrors(false);
-                            setTimeout(() => {
-                              allotmentRef.current.resize([48, 48, 4]);
-                            }, 0);
-                          }}
-                          className="validation-panel-toggle-button"
-                          title="Close Panel"
-                        >
-                          <KeyboardTabIcon />
                         </Button>
                       </div>
+                      <div className="closed-body"></div>
                     </div>
-                    <div
-                      className="validation-content"
-                      data-testid="json-validation-errors-list"
-                    >
-                      <ValidationPanel
-                        testCase={testCase}
-                        validationErrors={validationErrors}
-                        isQiCoreV6={isQICore6}
-                      />
-                    </div>
-                  </>
-                ) : (
-                  <div data-testid="closed-json-validation-errors-aside">
-                    <div className="closed-header">
-                      <Button
-                        size="small"
-                        data-testid="show-json-validation-errors-button"
-                        onClick={() => {
-                          setShowValidationErrors(true);
-                          allotmentRef.current.resize([34, 33, 33]);
-                        }}
-                        className="validation-panel-toggle-button"
-                        title={
-                          testCase?.validationStatus
-                            ? testCase?.validationStatus
-                            : "Open Validations"
-                        }
-                      >
-                        <ValidationStatusIcon
-                          validationStatus={testCase?.validationStatus}
-                        />
-                      </Button>
-                    </div>
-                    <div className="closed-body"></div>
-                  </div>
-                )}
-              </div>
-            </Allotment.Pane>
-          </Allotment>
+                  )}
+                </div>
+              </Allotment.Pane>
+            </Allotment>
 
-          {/* button wrap in context */}
-          <div tw="bg-gray-75 w-full sticky bottom-0 left-0 z-40">
-            <div
-              tw="w-1/2 flex justify-end py-6 float-right"
-              style={{ alignItems: "end" }}
-            >
-              <FormikProvider value={formikStu6Context}>
-                <Button
-                  tw="m-2"
-                  variant="outline"
-                  onClick={() => setDiscardDialogOpen(true)}
-                  data-testid="edit-test-case-discard-button"
-                  disabled={!isModified()}
-                >
-                  Discard Changes
-                </Button>
-                <Button
-                  tw="m-2"
-                  type="button"
-                  onClick={calculate}
-                  disabled={shouldDisableRunTestCaseButton({
-                    measure,
-                    validationErrors,
-                    editorVal,
-                    executionContextReady,
-                    executing,
-                  })}
-                  data-testid="run-test-case-button"
-                >
-                  Run Test Case
-                </Button>
-                {testCaseCanEdit && (
-                  <Tooltip
-                    title={getSaveButtonTooltip()}
-                    data-testid="save-button-tooltip"
-                    arrow
-                    slotProps={{
-                      tooltip: {
-                        sx: {
-                          zIndex: 99,
-                          backgroundColor: "#333",
-                          "& .MuiTooltip-arrow": {
-                            color: "#333",
+            {/* button wrap in context */}
+            <div tw="bg-gray-75 w-full sticky bottom-0 left-0 z-40">
+              <div
+                tw="w-1/2 flex justify-end py-6 float-right"
+                style={{ alignItems: "end" }}
+              >
+                <FormikProvider value={formikStu6Context}>
+                  <Button
+                    tw="m-2"
+                    variant="outline"
+                    onClick={() => setDiscardDialogOpen(true)}
+                    data-testid="edit-test-case-discard-button"
+                    disabled={!isModified()}
+                  >
+                    Discard Changes
+                  </Button>
+                  <Button
+                    tw="m-2"
+                    type="button"
+                    onClick={calculate}
+                    disabled={shouldDisableRunTestCaseButton({
+                      measure,
+                      validationErrors,
+                      editorVal,
+                      executionContextReady,
+                      executing,
+                    })}
+                    data-testid="run-test-case-button"
+                  >
+                    Run Test Case
+                  </Button>
+                  {testCaseCanEdit && (
+                    <Tooltip
+                      title={getSaveButtonTooltip()}
+                      data-testid="save-button-tooltip"
+                      arrow
+                      slotProps={{
+                        tooltip: {
+                          sx: {
+                            zIndex: 99,
+                            backgroundColor: "#333",
+                            "& .MuiTooltip-arrow": {
+                              color: "#333",
+                            },
                           },
                         },
-                      },
-                    }}
-                  >
-                    <span>
-                      <Button
-                        tw="m-2"
-                        variant="cyan"
-                        type="submit"
-                        data-testid="edit-test-case-save-button"
-                        disabled={!isModified()}
-                      >
-                        Save
-                      </Button>
-                    </span>
-                  </Tooltip>
-                )}
-              </FormikProvider>
+                      }}
+                    >
+                      <span>
+                        <Button
+                          tw="m-2"
+                          variant="cyan"
+                          type="submit"
+                          data-testid="edit-test-case-save-button"
+                          disabled={!isModified()}
+                        >
+                          Save
+                        </Button>
+                      </span>
+                    </Tooltip>
+                  )}
+                </FormikProvider>
+              </div>
             </div>
           </div>
-        </div>
+        )}
         <MadieDiscardDialog
           open={discardDialogOpen}
           onClose={() => setDiscardDialogOpen(false)}

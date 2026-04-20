@@ -12,6 +12,7 @@ import { MemoryRouter, Route, Routes } from "react-router-dom";
 import EditTestCase, {
   findEpisodeActualValue,
   isEmptyTestCaseJsonString,
+  Alert,
 } from "./EditTestCase";
 import userEvent from "@testing-library/user-event";
 import { AxiosError, AxiosResponse } from "axios";
@@ -4905,5 +4906,18 @@ describe("Composite Measure Edit test case functionality", () => {
     // CQL and Highlighting tabs should not be present
     expect(screen.queryByTestId("measurecql-tab")).not.toBeInTheDocument();
     expect(screen.queryByTestId("highlighting-tab")).not.toBeInTheDocument();
+  });
+});
+
+describe("Alert styled component", () => {
+  it("renders Alert and covers styled export line", () => {
+    render(
+      <Alert status="default" role="alert" data-testid="alert">
+        Hello
+      </Alert>
+    );
+
+    expect(screen.getByTestId("alert")).toBeInTheDocument();
+    expect(screen.getByRole("alert")).toHaveTextContent("Hello");
   });
 });
