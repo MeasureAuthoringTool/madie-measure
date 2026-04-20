@@ -13,7 +13,6 @@ describe("MultipleSelectDropDown Component", () => {
     onClose: jest.fn(),
     value: [],
   };
-
   it("Should provide auto complete selection", () => {
     render(<MultipleSelectDropDown {...props} />);
 
