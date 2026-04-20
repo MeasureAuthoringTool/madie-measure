@@ -58,7 +58,7 @@ jobs:
 
   # ─── Parallel test shards ──────────────────────────────────────────────────
   test:
-    name: Test shard – ${{ matrix.shard.name }}
+    name: Shard – ${{ matrix.shard.name }}
     needs: lint-and-build
     runs-on: ubuntu-latest
 
