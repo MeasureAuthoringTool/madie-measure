@@ -3,6 +3,7 @@ import CreateCompositeTestCaseLeftPanelNavTabs from "./CreateCompositeTestCaseLe
 import Editor from "../../../editor/Editor";
 import _ from "lodash";
 import CompositeMeasuresTable from "./CompositeMeasuresTable";
+import HowItWorks from "../LeftPanel/ElementsTab/builder/HowItWorks/HowItWorks";
 import "./CompositeLeftPanelContent.scss";
 
 const CompositeLeftPanelContent = ({
@@ -23,6 +24,7 @@ const CompositeLeftPanelContent = ({
       {leftPanelActiveTab === "elements" && (
         <div className="panel-content">
           <div id="elements-panel">
+            <HowItWorks />
             <div className="elements-panel-header">
               <h3>Select Which Measures to choose Test Case Profiles from:</h3>
 

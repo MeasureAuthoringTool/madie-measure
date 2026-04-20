@@ -1,5 +1,8 @@
 .how-it-works-container {
   padding: 8px 16px;
+  margin-bottom: 8px;
+  display: flex;
+  justify-content: flex-end;
 
   .how-it-works-link {
     background: none;
@@ -33,10 +36,13 @@
     display: flex;
     align-items: flex-start;
     background-color: #e8f4fd;
+    border: 1px solid #b3d7f2;
     border-left: 4px solid #0073c8;
     border-radius: 4px;
     padding: 12px 16px;
     gap: 12px;
+    width: 100%;
+    margin-bottom: 8px;
 
     .how-it-works-icon {
       color: #0073c8;
