@@ -41,9 +41,7 @@ describe("HowItWorks", () => {
     expect(
       screen.getByText("Select which test case to choose profiles from.")
     ).toBeInTheDocument();
-    expect(
-      screen.getByText("Select test case profiles.")
-    ).toBeInTheDocument();
+    expect(screen.getByText("Select test case profiles.")).toBeInTheDocument();
   });
 
   it("closes the info section when the X button is clicked", async () => {
