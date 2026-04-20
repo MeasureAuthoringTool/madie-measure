@@ -25,8 +25,6 @@ export default function CompositeMeasuresTable({
   measures: Measure[];
 }) {
   const [hoveredHeader, setHoveredHeader] = useState<string>("");
-  const [loading, setLoading] = useState(false);
-
   const [selectedGroupForExpansion, setSelectedGroupForExpansion] =
     useState(null);
 
