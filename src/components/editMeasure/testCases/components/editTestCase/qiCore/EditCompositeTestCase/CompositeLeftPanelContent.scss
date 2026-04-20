@@ -1,0 +1,19 @@
+#elements-panel {
+  > .elements-panel-header {
+    border-bottom: solid 1px #d1d5db;
+    padding-bottom: 16px;
+
+    > h3 {
+      font-size: 18px;
+      font-weight: 500;
+    }
+
+    .sub-heading {
+      margin-top: 16px;
+      margin-bottom: 0;
+      font-size: 14px;
+      font-weight: 400;
+      color: #717171;
+    }
+  }
+}
