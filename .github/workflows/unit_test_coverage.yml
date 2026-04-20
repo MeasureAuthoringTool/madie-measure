@@ -1,5 +1,5 @@
 # This workflow will do the following:
-# - perform a clean install of node dependencies
+# - perform a clean installation of node dependencies
 # - lint the source code for errors
 # - build the source code
 # - run tests in parallel shards and capture code coverage
@@ -63,7 +63,7 @@ jobs:
     runs-on: ubuntu-latest
 
     strategy:
-      fail-fast: false   # let all shards finish so we always get full coverage
+      fail-fast: false # let all shards finish so we always get full coverage
       matrix:
         shard:
           # Shard 1 – test-case editor (largest area)
