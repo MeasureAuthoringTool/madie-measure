@@ -146,6 +146,7 @@ jobs:
 
       - name: Merge lcov reports
         run: |
+          mkdir -p coverage
           lcov-result-merger 'coverage-shards/**/lcov.info' coverage/lcov.info
           echo "Merged coverage report created:"
           ls -lh coverage/lcov.info
