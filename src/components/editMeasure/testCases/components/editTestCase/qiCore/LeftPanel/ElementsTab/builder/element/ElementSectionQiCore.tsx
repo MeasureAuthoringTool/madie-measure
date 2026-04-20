@@ -62,7 +62,9 @@ const ElementSectionQiCore = (props: ElementSectionProps) => {
             {`${props.title}`}
           </h4>
           {props.canBeMultipleCardinality && (
+            
             <div style={{ marginLeft: "auto" }}>
+              {console.log("handleAddElement", props.canBeMultipleCardinality)}
               <AddElementButton
                 name="Element"
                 onClick={props.handleAddElement}

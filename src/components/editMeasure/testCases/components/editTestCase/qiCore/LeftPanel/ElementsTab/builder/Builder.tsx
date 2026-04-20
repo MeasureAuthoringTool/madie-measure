@@ -231,10 +231,7 @@ const Builder = ({
           ) : (
             canEdit && (
               <ResourceList
-                resourceIdentifiers={resources.filter(
-                  (res) =>
-                    res.id.startsWith("qicore") || res.id.startsWith("us-core")
-                )}
+                resourceIdentifiers={resources}
                 onClick={async (resourceIdentifier: ResourceIdentifier) => {
                   const newEntry =
                     buildMadieResourceFromResourceIdentifier(

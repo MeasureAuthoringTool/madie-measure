@@ -14,7 +14,7 @@ const AddElementButton = ({ name, onClick }: PropTypes) => {
       id={`element-add-${name}`}
       data-testId={`add-element-${name}`}
     >
-      <IconButton
+      {/* <IconButton
         sx={{
           width: "100%",
           fontSize: "0.875rem",
@@ -31,7 +31,7 @@ const AddElementButton = ({ name, onClick }: PropTypes) => {
       >
         <AddCircleOutlineIcon sx={{ marginRight: 1 }} />
         <span>Add {name}</span>
-      </IconButton>
+      </IconButton> */}
     </div>
   );
 };

@@ -74,7 +74,7 @@ export const wrapWithSection = (
   if ((isRoot && !title.endsWith("[x]")) || noWrap) {
     return <>{node}</>;
   }
-
+console.log("here")
   // Otherwise wrap
   return (
     <ElementSectionQiCore
@@ -157,7 +157,9 @@ const TypeEditor = ({
           structureDefinition.contentReference
         );
       }
+      console.log(strippedLabel)
       const elements = getFirstChildren(strippedLabel, formInfo);
+      console.log("child elements", elements)
       if (elements?.length) {
         return elements.map((el) => {
           const lastPart = el.id.split(".").pop();
@@ -242,6 +244,7 @@ const TypeEditor = ({
   };
 
   const isRoot = structureDefinition?.id?.split?.(".")?.length === 2;
+  console.log(structureDefinition)
   const canBeMultipleCardinality = structureDefinition?.max === "*";
   const addTitle = structureDefinition?.id
     ? _.startCase(getLastPart(structureDefinition.id))
@@ -1298,6 +1301,7 @@ const TypeEditor = ({
                     : [childDefValues]
                   : [null]
                 ).map((el, index) => {
+                  console.log("here", childDef)
                   return (
                     <ElementSectionQiCore
                       key={index}

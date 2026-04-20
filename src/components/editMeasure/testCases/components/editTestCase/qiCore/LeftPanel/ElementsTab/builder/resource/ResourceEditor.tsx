@@ -151,6 +151,7 @@ const ResourceEditor = ({
           const uniqueElements = _.uniq(
             _.concat(requiredElements, elementsWithValues)
           );
+          console.log(uniqueElements)
           const elementsModifiedForCardinality = uniqueElements.flatMap(
             (el) => {
               const path = stripResourcePath(
@@ -181,6 +182,7 @@ const ResourceEditor = ({
             selectedResource,
             elementsModifiedForCardinality
           );
+          console.log("displayed elements", displayedElements)
           setDisplayedElements(displayedElements);
           // this is not the best way to do this, but I'm unsure of a better way without a lot more overhead.
           const index = _.findLastIndex(
