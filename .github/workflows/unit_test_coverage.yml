@@ -16,33 +16,16 @@ on:
     branches: [main, develop]
 
 jobs:
-  # ─── Lint & Build (runs once, independent of test shards) ─────────────────
-  lint-and-build:
-    name: Lint, format check, and build
+  # ─── Lint & format check (parallel with build) ────────────────────────────
+  lint:
+    name: Lint and format check
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Use Node.js 20.x
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20.x
-
-      - name: Cache node modules
-        uses: actions/cache@v4
-        env:
-          cache-name: cache-node-modules
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-build-${{ env.cache-name }}-
-            ${{ runner.os }}-build-
-            ${{ runner.os }}-
-
-      - name: Install node dependencies
-        run: npm ci
+      - name: Setup Node and install dependencies
+        uses: ./.github/actions/setup-node-deps
 
       - name: Audit dependencies for security vulnerabilities
         run: npm audit --omit=dev --audit-level=${{ secrets.NPM_AUDIT_LEVEL }}
@@ -53,13 +36,24 @@ jobs:
       - name: Check prettier formatting
         run: npm run-script check-format
 
+  # ─── Build (parallel with lint) ───────────────────────────────────────────
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node and install dependencies
+        uses: ./.github/actions/setup-node-deps
+
       - name: Build the source code
         run: npm run build
 
   # ─── Parallel test shards ──────────────────────────────────────────────────
   test:
     name: Shard – ${{ matrix.shard.name }}
-    needs: lint-and-build
+    needs: [lint, build]
     runs-on: ubuntu-latest
 
     strategy:
@@ -86,25 +80,8 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Use Node.js 20.x
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20.x
-
-      - name: Cache node modules
-        uses: actions/cache@v4
-        env:
-          cache-name: cache-node-modules
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-build-${{ env.cache-name }}-
-            ${{ runner.os }}-build-
-            ${{ runner.os }}-
-
-      - name: Install node dependencies
-        run: npm ci
+      - name: Setup Node and install dependencies
+        uses: ./.github/actions/setup-node-deps
 
       - name: Execute test coverage for shard
         run: |
@@ -119,6 +96,7 @@ jobs:
         with:
           name: coverage-${{ matrix.shard.name }}
           path: coverage/lcov.info
+          retention-days: 1  # intermediate artifact, only needed for the merge step
 
   # ─── Merge all shard coverage reports ─────────────────────────────────────
   merge-coverage:
@@ -129,10 +107,8 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Use Node.js 20.x
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20.x
+      - name: Setup Node and install dependencies
+        uses: ./.github/actions/setup-node-deps
 
       - name: Download all shard coverage artifacts
         uses: actions/download-artifact@v4

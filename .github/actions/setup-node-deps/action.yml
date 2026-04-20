@@ -1,0 +1,27 @@
+name: Setup Node and install dependencies
+description: Installs Node.js 20.x, restores npm cache, and runs npm ci
+
+runs:
+  using: composite
+  steps:
+    - name: Use Node.js 20.x
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20.x
+
+    - name: Cache node modules
+      uses: actions/cache@v4
+      env:
+        cache-name: cache-node-modules
+      with:
+        path: ~/.npm
+        key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-build-${{ env.cache-name }}-
+          ${{ runner.os }}-build-
+          ${{ runner.os }}-
+
+    - name: Install node dependencies
+      run: npm ci
+      shell: bash
+
