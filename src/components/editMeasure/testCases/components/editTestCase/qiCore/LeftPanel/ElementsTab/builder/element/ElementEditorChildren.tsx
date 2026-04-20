@@ -51,7 +51,6 @@ const ElementEditorChildren = ({
     });
     setLastAddedElemPath(rootDefinition.path);
   };
-  console.log("rendering element editor children",rootDefinition)
   return (
     <div
       className="test-case-tab-heading"

@@ -55,9 +55,9 @@ module.exports = (webpackConfigEnv, argv) => {
       "@madie/madie-editor",
       "@madie/madie-util",
       // Shared singleton libraries — loaded once via import map
-      "@emotion/react",
-      "@emotion/styled",
-      "styled-components",
+      // "@emotion/react",
+      // "@emotion/styled",
+      // "styled-components",
     ],
   };
   // We need to override the css loading rule from the parent configuration

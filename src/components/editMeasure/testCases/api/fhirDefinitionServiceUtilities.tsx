@@ -187,8 +187,6 @@ export const filterUnusedExtensionsFromElements = (
   selectedResource,
   allDisplayedElements
 ) => {
-  console.log("filtering extensions for resource", selectedResource)
-  console.log("all elements before filter", allDisplayedElements)
   const extensions = selectedResource?.bundleEntry?.resource?.extension || [];
   // now we can filter out extensions not present on the extensions variable, from the topElements.
   const filteredElements = allDisplayedElements?.filter((el) => {
@@ -664,7 +662,6 @@ export function getParentDefinition(path, formInfo) {
 
 // given a path, and formInfo, get all property paths one .[property] deep Patient.name -> Patient.name.given, Patient.name.family
 export function getFirstChildren(path, formInfo) {
-  console.log(path, formInfo);
   return formInfo
     .filter(
       ([key, value]) =>
