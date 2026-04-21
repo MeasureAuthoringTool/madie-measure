@@ -5650,8 +5650,8 @@ describe("TypeEditor Component", () => {
     );
 
     // "Category" and "Reason" elements from the referenced definition must be rendered
-    expect(screen.queryByText("Category 1")).toBeInTheDocument();
-    expect(screen.queryByText("Reason 1")).toBeInTheDocument();
+    expect(screen.queryByText("Category")).toBeInTheDocument();
+    expect(screen.queryByText("Reason")).toBeInTheDocument();
     // Restore the original mock
     jest.restoreAllMocks();
   });
