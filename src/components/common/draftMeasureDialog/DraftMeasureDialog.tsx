@@ -133,7 +133,7 @@ const DraftMeasureDialog = ({ open, onClose, onSubmit, measure, loading }) => {
                 }}
                 readOnly={
                   featureFlags?.qiCore7
-                    ? measure?.model === "QI-Core v7.0.0"
+                    ? measure?.model === "QI-Core v7.0.2"
                     : measure?.model === "QI-Core v6.0.0"
                 }
                 SelectDisplayProps={{
@@ -150,17 +150,17 @@ const DraftMeasureDialog = ({ open, onClose, onSubmit, measure, loading }) => {
                     if (measure?.model === "QI-Core v6.0.0") {
                       return (
                         modelKey === "QICORE_6_0_0" ||
-                        modelKey === "QICORE_7_0_0"
+                        modelKey === "QICORE_7_0_2"
                       );
-                    } else if (measure?.model === "QI-Core v7.0.0") {
-                      return modelKey === "QICORE_7_0_0";
+                    } else if (measure?.model === "QI-Core v7.0.2") {
+                      return modelKey === "QICORE_7_0_2";
                     }
                     return true; // Include all other cases
                   })
                   .map((modelKey) => {
                     if (
                       !modelKey.startsWith("QDM") &&
-                      (featureFlags?.qiCore7 || modelKey != "QICORE_7_0_0")
+                      (featureFlags?.qiCore7 || modelKey != "QICORE_7_0_2")
                     ) {
                       return (
                         <MenuItem
