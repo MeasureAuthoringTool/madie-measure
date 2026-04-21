@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import InfoIcon from "@mui/icons-material/Info";
 import ClearIcon from "@mui/icons-material/Clear";
 import PrivacyTipIcon from "@mui/icons-material/PrivacyTip";
 import { IconButton } from "@mui/material";
@@ -35,7 +34,7 @@ const HowItWorks = () => {
         role="region"
         aria-label="How it works information"
       >
-        <InfoIcon className="how-it-works-icon" />
+        <PrivacyTipIcon className="how-it-works-icon" />
         <div className="how-it-works-body">
           <strong>How it Works</strong>
           <p>
