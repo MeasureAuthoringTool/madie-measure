@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import InfoIcon from "@mui/icons-material/Info";
 import ClearIcon from "@mui/icons-material/Clear";
+import PrivacyTipIcon from "@mui/icons-material/PrivacyTip";
 import { IconButton } from "@mui/material";
 import "./HowItWorks.scss";
 
@@ -18,7 +19,7 @@ const HowItWorks = () => {
           aria-controls="how-it-works-content"
           onClick={() => setIsOpen(true)}
         >
-          <InfoIcon className="how-it-works-privacy-icon" />
+          <PrivacyTipIcon className="how-it-works-privacy-icon" />
           How it works
         </button>
       </div>
