@@ -337,9 +337,9 @@ export default function CompositeTestCasesTable({
                                       "asc"
                                       ? "Sort ascending"
                                       : header.column.getNextSortingOrder() ===
-                                          "desc"
-                                        ? "Sort descending"
-                                        : "Clear sort"
+                                        "desc"
+                                      ? "Sort descending"
+                                      : "Clear sort"
                                     : undefined
                                 }
                               >
@@ -429,4 +429,3 @@ export default function CompositeTestCasesTable({
     </div>
   );
 }
-
