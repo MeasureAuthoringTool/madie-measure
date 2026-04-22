@@ -209,10 +209,10 @@ describe("DraftMeasureDialog component", () => {
     userEvent.click(modelSelectDropdown);
 
     fireEvent.change(modelInput, {
-      target: { value: "QI-Core v7.0.0" },
+      target: { value: "QI-Core v7.0.2" },
     });
 
-    expect(modelInput.value).toBe("QI-Core v7.0.0");
+    expect(modelInput.value).toBe("QI-Core v7.0.2");
 
     expect(screen.getByTestId("create-draft-continue-button")).toBeEnabled();
   });
@@ -248,7 +248,7 @@ describe("DraftMeasureDialog component", () => {
     (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
       qiCore7: true,
     }));
-    const QICore6Measure = { ...measure, model: Model.QICORE_7_0_0 };
+    const QICore6Measure = { ...measure, model: Model.QICORE_7_0_2 };
     render(
       <DraftMeasureDialog
         open={true}
@@ -268,6 +268,6 @@ describe("DraftMeasureDialog component", () => {
       "measure-model-select"
     ) as HTMLInputElement;
     expect(modelSelect).toHaveProperty("readOnly", true);
-    expect(modelSelect).toHaveTextContent("QI-Core v7.0.0");
+    expect(modelSelect).toHaveTextContent("QI-Core v7.0.2");
   });
 });

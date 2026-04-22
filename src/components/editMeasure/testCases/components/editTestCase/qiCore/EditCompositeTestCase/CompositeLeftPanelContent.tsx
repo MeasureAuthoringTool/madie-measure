@@ -6,6 +6,7 @@ import CompositeTestCasesTable from "./CompositeTestCasesTable";
 import useTestCaseServiceApi from "../../../../api/useTestCaseServiceApi";
 import { Measure, TestCase } from "@madie/madie-models";
 import { MadieSpinner } from "@madie/madie-design-system/dist/react";
+import HowItWorks from "../LeftPanel/ElementsTab/builder/HowItWorks/HowItWorks";
 import "./CompositeLeftPanelContent.scss";
 
 const CompositeLeftPanelContent = ({
@@ -53,6 +54,7 @@ const CompositeLeftPanelContent = ({
       {leftPanelActiveTab === "elements" && (
         <div className="panel-content">
           <div id="elements-panel">
+            <HowItWorks />
             {loadingTestCases ? (
               <div
                 style={{
