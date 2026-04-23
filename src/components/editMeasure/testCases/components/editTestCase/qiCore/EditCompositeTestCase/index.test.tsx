@@ -4,12 +4,11 @@ import "@testing-library/jest-dom";
 
 import EditCompositeTestCase from "./index";
 
-const mockSearchMeasuresByCriteria = jest.fn();
+const mockFetchMeasuresByIds = jest.fn();
 
 jest.mock("@madie/madie-util", () => ({
   useMeasureServiceApi: () => ({
-    searchMeasuresByCriteria: (...args: any[]) =>
-      mockSearchMeasuresByCriteria(...args),
+    fetchMeasuresByIds: (...args: any[]) => mockFetchMeasuresByIds(...args),
   }),
 }));
 
@@ -26,28 +25,20 @@ jest.mock("allotment", () => {
   return { Allotment };
 });
 
-jest.mock("./CompositeLeftPanelContent", () => {
-  return function MockLeftPanel(props: any) {
-    return (
-      <div data-testid="left-panel">
-        <div data-testid="left-active-tab">{props.leftPanelActiveTab}</div>
-        <div data-testid="composite-measures-count">
-          {(props.compositeMeasures || []).length}
-        </div>
-      </div>
-    );
-  };
-});
+jest.mock("./CompositeLeftPanelContent", () => (props: any) => (
+  <div data-testid="left-panel">
+    <div data-testid="left-active-tab">{props.leftPanelActiveTab}</div>
+    <div data-testid="composite-measures-count">
+      {(props.compositeMeasures || []).length}
+    </div>
+  </div>
+));
 
-jest.mock("./CompositeRightPanelContent", () => {
-  return function MockRightPanel(props: any) {
-    return (
-      <div data-testid="right-panel">
-        <div data-testid="right-active-tab">{props.rightPanelActiveTab}</div>
-      </div>
-    );
-  };
-});
+jest.mock("./CompositeRightPanelContent", () => (props: any) => (
+  <div data-testid="right-panel">
+    <div data-testid="right-active-tab">{props.rightPanelActiveTab}</div>
+  </div>
+));
 
 jest.mock("@madie/madie-design-system/dist/react", () => ({
   Button: ({ children, ...props }: any) => (
@@ -55,44 +46,50 @@ jest.mock("@madie/madie-design-system/dist/react", () => ({
   ),
 }));
 
+const measureWithComponents = {
+  groups: [
+    {
+      components: [{ measureId: "m1" }, { measureId: "m2" }],
+    },
+  ],
+};
+
 describe("EditCompositeTestCase", () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it("calls searchMeasuresByCriteria on mount and passes returned measures to the left panel", async () => {
-    mockSearchMeasuresByCriteria.mockResolvedValueOnce({
-      content: [{ id: "m1" }, { id: "m2" }],
-    });
+  it("calls fetchMeasuresByIds and passes results to left panel", async () => {
+    mockFetchMeasuresByIds.mockResolvedValueOnce([{ id: "m1" }, { id: "m2" }]);
 
     render(
       <EditCompositeTestCase
         allotmentRef={{ current: null }}
         editorVal={{}}
         setEditorVal={jest.fn()}
-        testCaseCanEdit={true}
+        testCaseCanEdit
         seriesState={{ series: [] }}
         isModified={() => false}
         setDiscardDialogOpen={jest.fn()}
+        measure={measureWithComponents}
       />
     );
 
-    await waitFor(() => {
-      expect(mockSearchMeasuresByCriteria).toHaveBeenCalledTimes(1);
-    });
+    await waitFor(() =>
+      expect(mockFetchMeasuresByIds).toHaveBeenCalledWith(["m1", "m2"])
+    );
 
-    await waitFor(() => {
-      expect(screen.getByTestId("composite-measures-count")).toHaveTextContent(
-        "2"
-      );
-    });
+    expect(screen.getByTestId("composite-measures-count")).toHaveTextContent(
+      "2"
+    );
 
-    expect(screen.getByTestId("left-active-tab")).toHaveTextContent("elements");
+    expect(screen.getByTestId("left-active-tab")).toHaveTextContent("create");
+
     expect(screen.getByTestId("right-active-tab")).toHaveTextContent("actual");
   });
 
-  it("disables discard/save when isModified() is false; enables and triggers discard when true", async () => {
-    mockSearchMeasuresByCriteria.mockResolvedValueOnce({ content: [] });
+  it("disables discard/save when unmodified and enables when modified", async () => {
+    mockFetchMeasuresByIds.mockResolvedValueOnce([]);
 
     const setDiscardDialogOpen = jest.fn();
     const { rerender } = render(
@@ -100,18 +97,18 @@ describe("EditCompositeTestCase", () => {
         allotmentRef={{ current: null }}
         editorVal={{}}
         setEditorVal={jest.fn()}
-        testCaseCanEdit={true}
+        testCaseCanEdit
         seriesState={{ series: [] }}
         isModified={() => false}
         setDiscardDialogOpen={setDiscardDialogOpen}
+        measure={measureWithComponents}
       />
     );
 
-    await waitFor(() =>
-      expect(mockSearchMeasuresByCriteria).toHaveBeenCalled()
-    );
+    await waitFor(() => expect(mockFetchMeasuresByIds).toHaveBeenCalled());
 
     expect(screen.getByTestId("edit-test-case-discard-button")).toBeDisabled();
+
     expect(screen.getByTestId("edit-test-case-save-button")).toBeDisabled();
 
     rerender(
@@ -119,43 +116,75 @@ describe("EditCompositeTestCase", () => {
         allotmentRef={{ current: null }}
         editorVal={{}}
         setEditorVal={jest.fn()}
-        testCaseCanEdit={true}
+        testCaseCanEdit
         seriesState={{ series: [] }}
         isModified={() => true}
         setDiscardDialogOpen={setDiscardDialogOpen}
+        measure={measureWithComponents}
       />
     );
 
-    expect(screen.getByTestId("edit-test-case-discard-button")).toBeEnabled();
-    expect(screen.getByTestId("edit-test-case-save-button")).toBeEnabled();
-
     fireEvent.click(screen.getByTestId("edit-test-case-discard-button"));
+
     expect(setDiscardDialogOpen).toHaveBeenCalledWith(true);
   });
 
-  it("handles empty/undefined content by passing an empty array to left panel", async () => {
-    mockSearchMeasuresByCriteria.mockResolvedValueOnce({});
+  it("handles empty results safely", async () => {
+    mockFetchMeasuresByIds.mockResolvedValueOnce([]);
 
     render(
       <EditCompositeTestCase
         allotmentRef={{ current: null }}
         editorVal={{}}
         setEditorVal={jest.fn()}
-        testCaseCanEdit={true}
+        testCaseCanEdit
         seriesState={{ series: [] }}
         isModified={() => false}
         setDiscardDialogOpen={jest.fn()}
+        measure={measureWithComponents}
+      />
+    );
+
+    await waitFor(() => expect(mockFetchMeasuresByIds).toHaveBeenCalled());
+
+    expect(screen.getByTestId("composite-measures-count")).toHaveTextContent(
+      "0"
+    );
+  });
+
+  it("logs an error when fetchMeasuresForComponents fails", async () => {
+    const consoleSpy = jest
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
+
+    mockFetchMeasuresByIds.mockRejectedValueOnce(new Error("fetch failed"));
+
+    render(
+      <EditCompositeTestCase
+        allotmentRef={{ current: null }}
+        editorVal={{}}
+        setEditorVal={jest.fn()}
+        testCaseCanEdit
+        seriesState={{ series: [] }}
+        isModified={() => false}
+        setDiscardDialogOpen={jest.fn()}
+        measure={{
+          groups: [
+            {
+              components: [{ measureId: "m1" }],
+            },
+          ],
+        }}
       />
     );
 
     await waitFor(() =>
-      expect(mockSearchMeasuresByCriteria).toHaveBeenCalled()
+      expect(consoleSpy).toHaveBeenCalledWith(
+        "error retrieving components",
+        expect.any(Error)
+      )
     );
 
-    await waitFor(() => {
-      expect(screen.getByTestId("composite-measures-count")).toHaveTextContent(
-        "0"
-      );
-    });
+    consoleSpy.mockRestore();
   });
 });

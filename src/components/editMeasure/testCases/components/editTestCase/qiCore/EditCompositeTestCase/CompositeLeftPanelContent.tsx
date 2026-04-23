@@ -5,6 +5,8 @@ import _ from "lodash";
 import CompositeMeasuresTable from "./CompositeMeasuresTable";
 import HowItWorks from "../LeftPanel/ElementsTab/builder/HowItWorks/HowItWorks";
 import "./CompositeLeftPanelContent.scss";
+import { FormikProvider } from "formik";
+import ElementsTab from "../LeftPanel/ElementsTab/ElementsTab";
 
 const CompositeLeftPanelContent = ({
   leftPanelActiveTab,
@@ -12,6 +14,11 @@ const CompositeLeftPanelContent = ({
   editorVal,
   setEditorVal,
   compositeMeasures,
+  testCaseCanEdit,
+  formikStu6Context,
+  testCase,
+  setValidationSchema,
+  setInitialFormikValuesStu6,
 }) => {
   return (
     <>
@@ -19,9 +26,10 @@ const CompositeLeftPanelContent = ({
         <CreateCompositeTestCaseLeftPanelNavTabs
           leftPanelActiveTab={leftPanelActiveTab}
           setLeftPanelActiveTab={setLeftPanelActiveTab}
+          testCaseCanEdit={testCaseCanEdit}
         />
       </div>
-      {leftPanelActiveTab === "elements" && (
+      {leftPanelActiveTab === "create" && (
         <div className="panel-content">
           <div id="elements-panel">
             <HowItWorks />
@@ -39,6 +47,22 @@ const CompositeLeftPanelContent = ({
             </div>
             <CompositeMeasuresTable measures={compositeMeasures} />
           </div>
+        </div>
+      )}
+      {leftPanelActiveTab === "added" && (
+        <div className="panel-content">
+          <FormikProvider value={formikStu6Context}>
+            <ElementsTab
+              setValidationSchema={setValidationSchema}
+              setInitialFormikValuesStu6={setInitialFormikValuesStu6}
+              setEditorVal={setEditorVal}
+              // currently locking to readOnly MAT-9905
+              canEdit={false}
+              editorVal={editorVal}
+              testCase={testCase}
+              activeTab={leftPanelActiveTab}
+            />
+          </FormikProvider>
         </div>
       )}
       {leftPanelActiveTab === "json" && (
