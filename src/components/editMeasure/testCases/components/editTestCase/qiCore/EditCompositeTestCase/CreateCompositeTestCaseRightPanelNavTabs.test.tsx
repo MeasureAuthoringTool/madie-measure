@@ -1,5 +1,6 @@
 import React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
 import CreateCompositeTestCaseRightPanelTabs from "./CreateCompositeTestCaseRightPanelTabs";
@@ -23,7 +24,7 @@ describe("CreateCompositeTestCaseRightPanelTabs", () => {
     expect(setRightPanelActiveTab).toHaveBeenCalledWith("details");
   });
 
-  it("allows switching back to actual tab", () => {
+  it("allows switching back to actual tab", async () => {
     const setRightPanelActiveTab = jest.fn();
 
     render(
@@ -35,7 +36,7 @@ describe("CreateCompositeTestCaseRightPanelTabs", () => {
 
     const actualTab = screen.getByTestId("actual-tab");
 
-    fireEvent.click(actualTab);
+    await userEvent.click(actualTab);
 
     expect(setRightPanelActiveTab).toHaveBeenCalledWith("actual");
   });
