@@ -30,7 +30,7 @@ const CompositeLeftPanelContent = ({
         />
       </div>
       {leftPanelActiveTab === "create" && (
-        <div className="panel-content">
+        <div className="panel-content" data-testid="create-panel">
           <div id="elements-panel">
             <HowItWorks />
             <div className="elements-panel-header">
@@ -50,7 +50,7 @@ const CompositeLeftPanelContent = ({
         </div>
       )}
       {leftPanelActiveTab === "added" && (
-        <div className="panel-content">
+        <div className="panel-content" data-testid="added-panel">
           <FormikProvider value={formikStu6Context}>
             <ElementsTab
               setValidationSchema={setValidationSchema}

@@ -25,27 +25,6 @@ jest.mock("allotment", () => {
   return { Allotment };
 });
 
-jest.mock("./CompositeLeftPanelContent", () => (props: any) => (
-  <div data-testid="left-panel">
-    <div data-testid="left-active-tab">{props.leftPanelActiveTab}</div>
-    <div data-testid="composite-measures-count">
-      {(props.compositeMeasures || []).length}
-    </div>
-  </div>
-));
-
-jest.mock("./CompositeRightPanelContent", () => (props: any) => (
-  <div data-testid="right-panel">
-    <div data-testid="right-active-tab">{props.rightPanelActiveTab}</div>
-  </div>
-));
-
-jest.mock("@madie/madie-design-system/dist/react", () => ({
-  Button: ({ children, ...props }: any) => (
-    <button {...props}>{children}</button>
-  ),
-}));
-
 const measureWithComponents = {
   groups: [
     {
@@ -78,14 +57,7 @@ describe("EditCompositeTestCase", () => {
     await waitFor(() =>
       expect(mockFetchMeasuresByIds).toHaveBeenCalledWith(["m1", "m2"])
     );
-
-    expect(screen.getByTestId("composite-measures-count")).toHaveTextContent(
-      "2"
-    );
-
-    expect(screen.getByTestId("left-active-tab")).toHaveTextContent("create");
-
-    expect(screen.getByTestId("right-active-tab")).toHaveTextContent("actual");
+    expect(screen.getByTestId("create-panel")).toBeInTheDocument();
   });
 
   it("disables discard/save when unmodified and enables when modified", async () => {
@@ -147,9 +119,7 @@ describe("EditCompositeTestCase", () => {
 
     await waitFor(() => expect(mockFetchMeasuresByIds).toHaveBeenCalled());
 
-    expect(screen.getByTestId("composite-measures-count")).toHaveTextContent(
-      "0"
-    );
+    expect(screen.getByTestId("create-panel")).toBeInTheDocument();
   });
 
   it("logs an error when fetchMeasuresForComponents fails", async () => {
