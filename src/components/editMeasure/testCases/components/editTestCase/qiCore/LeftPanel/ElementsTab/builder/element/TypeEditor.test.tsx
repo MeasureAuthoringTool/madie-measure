@@ -5630,6 +5630,26 @@ describe("TypeEditor Component", () => {
           canBeMultipleCardinality: false,
         },
       ],
+      [
+        "ClaimResponse.item.adjudication.reasonTime",
+        {
+          id: "ClaimResponse.item.adjudication.reasonTime",
+          type: [{ code: "CodeableConcept" }],
+          max: "0",
+          min: 0,
+          canBeMultipleCardinality: false,
+        },
+      ],
+      [
+        "ClaimResponse.item.adjudication.response",
+        {
+          id: "ClaimResponse.item.adjudication.response",
+          type: [{ code: "CodeableConcept" }],
+          max: "*",
+          min: 0,
+          canBeMultipleCardinality: false,
+        },
+      ],
     ];
     // Override the global mock to return false for this test
     const fhirUtils = require("../../../../../../../api/fhirDefinitionServiceUtilities");
@@ -5650,8 +5670,10 @@ describe("TypeEditor Component", () => {
     );
 
     // "Category" and "Reason" elements from the referenced definition must be rendered
-    expect(screen.queryByText("Category 1")).toBeInTheDocument();
-    expect(screen.queryByText("Reason 1")).toBeInTheDocument();
+    expect(screen.queryByText("Category")).toBeInTheDocument();
+    expect(screen.queryByText("Reason")).toBeInTheDocument();
+    expect(screen.queryByText("ReasonTime")).not.toBeInTheDocument();
+    expect(screen.queryByText("Response 1")).toBeInTheDocument();
     // Restore the original mock
     jest.restoreAllMocks();
   });
