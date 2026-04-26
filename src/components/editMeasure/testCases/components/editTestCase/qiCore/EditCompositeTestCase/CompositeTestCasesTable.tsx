@@ -106,6 +106,7 @@ export default function CompositeTestCasesTable({
       {
         header: "Group",
         accessorKey: "series",
+        size: 10,
         cell: (info) => (
           <TruncateText
             text={info.row.original.series || "-"}
@@ -117,17 +118,25 @@ export default function CompositeTestCasesTable({
       {
         header: "Title",
         accessorKey: "title",
+        size: 38,
         cell: (info) => (
-          <TruncateText
-            text={info.row.original.title}
-            maxLength={120}
-            dataTestId={`tc-title-${info.row.original.id}`}
-          />
+          <span
+            style={{
+              wordBreak: "break-word",
+              overflowWrap: "break-word",
+              display: "inline-block",
+              maxWidth: "100%",
+            }}
+            data-testid={`tc-title-${info.row.original.id}`}
+          >
+            {info.row.original.title}
+          </span>
         ),
       },
       {
         header: "Description",
         accessorKey: "description",
+        size: 35,
         cell: (info) => (
           <TruncateText
             text={info.row.original.description || "-"}
@@ -139,6 +148,7 @@ export default function CompositeTestCasesTable({
       {
         id: "actions",
         header: null,
+        size: 15,
         cell: (info) => (
           <Button
             tw="m-2"
@@ -166,6 +176,9 @@ export default function CompositeTestCasesTable({
     getSortedRowModel: getSortedRowModel(),
     onSortingChange: setSorting,
     state: { sorting },
+    defaultColumn: {
+      minSize: 50,
+    },
   });
 
   const cmsId = (selectedMeasure as any)?.measureSet?.cmsId;
@@ -191,16 +204,24 @@ export default function CompositeTestCasesTable({
       <h3 style={{ fontSize: 18, fontWeight: 500 }}>
         2. Select which Test Case to choose Test Case Profiles from:
       </h3>
-      <hr style={{ margin: "12px 0" }} />
+      <hr
+        style={{
+          margin: "12px 0",
+          border: "none",
+          borderTop: "1px solid #d1d5db",
+        }}
+      />
 
       {/* Measure info */}
       <div tw="mb-4">
         <p style={{ fontWeight: 700, margin: 0 }}>
           {selectedMeasure.measureName}
+          {cmsId && (
+            <span style={{ fontWeight: 400, color: "#717171", marginLeft: 8 }}>
+              (CMS ID: {cmsId})
+            </span>
+          )}
         </p>
-        {cmsId && (
-          <p style={{ fontWeight: 700, margin: 0 }}>(CMS ID: {cmsId})</p>
-        )}
         <p
           style={{
             fontSize: 14,
@@ -307,7 +328,11 @@ export default function CompositeTestCasesTable({
                 tw="min-w-full"
                 data-testid="composite-test-cases-tbl"
                 className="ml-table"
-                style={{ borderSpacing: "0 2em !important" }}
+                style={{
+                  borderSpacing: "0 2em !important",
+                  tableLayout: "fixed",
+                  width: "100%",
+                }}
               >
                 <thead tw="bg-slate">
                   {table.getHeaderGroups().map((headerGroup) => (
@@ -322,6 +347,9 @@ export default function CompositeTestCasesTable({
                             onMouseEnter={() => setHoveredHeader(header.id)}
                             onMouseLeave={() => setHoveredHeader(null)}
                             className="header-cell"
+                            style={{
+                              width: `${header.column.getSize()}%`,
+                            }}
                           >
                             {header.isPlaceholder ? null : (
                               <button
@@ -381,7 +409,15 @@ export default function CompositeTestCasesTable({
                         }}
                       >
                         {row.getVisibleCells().map((cell) => (
-                          <td key={cell.id} data-testid={`tc-cell-${cell.id}`}>
+                          <td
+                            key={cell.id}
+                            data-testid={`tc-cell-${cell.id}`}
+                            style={{
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                              maxWidth: 0,
+                            }}
+                          >
                             {flexRender(
                               cell.column.columnDef.cell,
                               cell.getContext()
