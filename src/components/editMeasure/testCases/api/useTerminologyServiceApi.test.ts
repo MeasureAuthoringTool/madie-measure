@@ -23,9 +23,11 @@ const testManifestExpansion: ManifestExpansion = {
 
 describe("TerminologyServiceApi Tests", () => {
   let terminologyService: TerminologyServiceApi;
+  let abortController: AbortController;
   beforeEach(() => {
     const getAccessToken = jest.fn();
     terminologyService = new TerminologyServiceApi("test.url", getAccessToken);
+    abortController = new AbortController();
   });
 
   it("gives no ValueSets when no bundle provided", () => {
@@ -62,7 +64,7 @@ describe("TerminologyServiceApi Tests", () => {
     expect(axios.put).toBeCalledWith(
       "test.url/terminology/value-sets/expansion/fhir",
       {
-        includeDraft: "yes",
+        includeDraft: "true",
         manifestExpansion: undefined,
         activeOnly: "false",
         valueSetParams: [{ oid: "2.16.840.1.113883.3.464.1003.101.12.1001" }],
@@ -88,7 +90,7 @@ describe("TerminologyServiceApi Tests", () => {
     expect(axios.put).toBeCalledWith(
       "test.url/terminology/value-sets/expansion/fhir",
       {
-        includeDraft: "yes",
+        includeDraft: "true",
         manifestExpansion: {
           fullUrl: "https://cts.nlm.nih.gov/fhir/Library/mu2-update-2015-05-01",
           id: "mu2-update-2015-05-01",
@@ -222,7 +224,11 @@ describe("TerminologyServiceApi Tests", () => {
 
   it("gives no ValueSets when no cqm measure provided", () => {
     terminologyService
-      .getQdmValueSetsExpansion(null, testManifestExpansion, false)
+      .getQdmValueSetsExpansion(
+        null,
+        testManifestExpansion,
+        abortController.signal
+      )
       .then((data) => {
         expect(data).toBeNull();
       });
@@ -232,10 +238,10 @@ describe("TerminologyServiceApi Tests", () => {
     axios.put = jest
       .fn()
       .mockResolvedValue({ data: cqm_measure_basic_valueset });
-    const result = terminologyService.getQdmValueSetsExpansion(
+    terminologyService.getQdmValueSetsExpansion(
       cqm_measure_basic,
       testManifestExpansion,
-      true
+      abortController.signal
     );
     expect(axios.put).toBeCalledWith(
       "test.url/terminology/value-sets/expansion/qdm",
@@ -251,7 +257,10 @@ describe("TerminologyServiceApi Tests", () => {
           { oid: "2.16.840.1.113883.3.464.1003.103.12.1001" },
         ],
       },
-      { headers: { Authorization: "Bearer undefined" }, signal: true }
+      {
+        headers: { Authorization: "Bearer undefined" },
+        signal: abortController.signal,
+      }
     );
   });
 
@@ -259,10 +268,10 @@ describe("TerminologyServiceApi Tests", () => {
     axios.put = jest
       .fn()
       .mockResolvedValue({ data: cqm_measure_basic_valueset });
-    const result = terminologyService.getQdmValueSetsExpansion(
+    terminologyService.getQdmValueSetsExpansion(
       cqm_measure_basic,
       null,
-      true
+      abortController.signal
     );
     expect(axios.put).toBeCalledWith(
       "test.url/terminology/value-sets/expansion/qdm",
@@ -275,7 +284,10 @@ describe("TerminologyServiceApi Tests", () => {
           { oid: "2.16.840.1.113883.3.464.1003.103.12.1001" },
         ],
       },
-      { headers: { Authorization: "Bearer undefined" }, signal: true }
+      {
+        headers: { Authorization: "Bearer undefined" },
+        signal: abortController.signal,
+      }
     );
   });
 
@@ -285,7 +297,11 @@ describe("TerminologyServiceApi Tests", () => {
       .mockResolvedValueOnce({ data: cqm_measure_basic_valueset });
 
     terminologyService
-      .getQdmValueSetsExpansion(cqm_measure_basic, testManifestExpansion, false)
+      .getQdmValueSetsExpansion(
+        cqm_measure_basic,
+        testManifestExpansion,
+        abortController.signal
+      )
       .then((data: ValueSet[]) => {
         expect(axios.put).toBeCalledWith(
           "test.url/terminology/value-sets/expansion/qdm",
@@ -302,7 +318,10 @@ describe("TerminologyServiceApi Tests", () => {
               { oid: "2.16.840.1.113883.3.464.1003.103.12.1001" },
             ],
           },
-          { headers: { Authorization: "Bearer undefined" }, signal: false }
+          {
+            headers: { Authorization: "Bearer undefined" },
+            signal: abortController.signal,
+          }
         );
         expect(data.length).toEqual(2);
         expect(data[0].display_name).toEqual("Encounter Inpatient");
@@ -312,7 +331,7 @@ describe("TerminologyServiceApi Tests", () => {
   });
 
   it("throws an error if the request was cancelled during QDM expansions with manifest", async () => {
-    const error = new Error("Request canceled");
+    const error: Error & { code?: string } = new Error("Request canceled");
     error.code = "ERR_CANCELED";
 
     axios.put = jest.fn().mockRejectedValue(error);
@@ -321,10 +340,10 @@ describe("TerminologyServiceApi Tests", () => {
       await terminologyService.getQdmValueSetsExpansion(
         cqm_measure_basic,
         testManifestExpansion,
-        false
+        abortController.signal
       );
-    } catch (error) {
-      expect(error.code).toBe("ERR_CANCELED");
+    } catch (err: any) {
+      expect(err.code).toBe("ERR_CANCELED");
     }
   });
 
@@ -345,7 +364,7 @@ describe("TerminologyServiceApi Tests", () => {
       await terminologyService.getQdmValueSetsExpansion(
         cqm_measure_basic,
         testManifestExpansion,
-        false
+        abortController.signal
       );
     } catch (error) {
       expect(error.message).toContain(message);
@@ -376,7 +395,7 @@ describe("TerminologyServiceApi Tests", () => {
       await terminologyService.getQdmValueSetsExpansion(
         cqm_measure_basic,
         testManifestExpansion,
-        true
+        abortController.signal
       );
     } catch (error) {
       expect(error.message).toContain(response.valueSetOid);
@@ -410,7 +429,7 @@ describe("TerminologyServiceApi Tests", () => {
       await terminologyService.getQdmValueSetsExpansion(
         cqm_measure_basic,
         null,
-        true
+        abortController.signal
       );
     } catch (error) {
       expect(error.message).toContain(response.valueSetOid);
@@ -425,7 +444,7 @@ describe("TerminologyServiceApi Tests", () => {
     const result = await terminologyService.getQdmValueSetsExpansion(
       testCqmMeasure,
       testManifestExpansion,
-      true
+      abortController.signal
     );
     expect(_.isEmpty(result)).toBe(true);
   });

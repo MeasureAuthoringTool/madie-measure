@@ -15,7 +15,7 @@ export type ValueSetSearchParams = {
 };
 
 type ValueSetsSearchCriteria = {
-  includeDraft: "yes" | "no";
+  includeDraft: string;
   activeOnly: string;
   manifestExpansion: ManifestExpansion;
   valueSetParams: ValueSetSearchParams[];
@@ -38,7 +38,7 @@ export class TerminologyServiceApi {
     }
 
     const searchCriteria = {
-      includeDraft: "yes", // always yes for now
+      includeDraft: "true",
       activeOnly: manifestExpansion ? "true" : "false",
       manifestExpansion: manifestExpansion,
       valueSetParams: valueSetParams,
