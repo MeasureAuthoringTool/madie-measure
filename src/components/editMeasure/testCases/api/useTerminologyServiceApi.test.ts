@@ -64,7 +64,7 @@ describe("TerminologyServiceApi Tests", () => {
     expect(axios.put).toBeCalledWith(
       "test.url/terminology/value-sets/expansion/fhir",
       {
-        includeDraft: "true",
+        includeDraft: true,
         manifestExpansion: undefined,
         activeOnly: "false",
         valueSetParams: [{ oid: "2.16.840.1.113883.3.464.1003.101.12.1001" }],
@@ -90,7 +90,7 @@ describe("TerminologyServiceApi Tests", () => {
     expect(axios.put).toBeCalledWith(
       "test.url/terminology/value-sets/expansion/fhir",
       {
-        includeDraft: "true",
+        includeDraft: true,
         manifestExpansion: {
           fullUrl: "https://cts.nlm.nih.gov/fhir/Library/mu2-update-2015-05-01",
           id: "mu2-update-2015-05-01",
@@ -246,7 +246,7 @@ describe("TerminologyServiceApi Tests", () => {
     expect(axios.put).toBeCalledWith(
       "test.url/terminology/value-sets/expansion/qdm",
       {
-        includeDraft: "yes",
+        includeDraft: true,
         manifestExpansion: {
           fullUrl: "https://cts.nlm.nih.gov/fhir/Library/mu2-update-2015-05-01",
           id: "mu2-update-2015-05-01",
@@ -276,7 +276,7 @@ describe("TerminologyServiceApi Tests", () => {
     expect(axios.put).toBeCalledWith(
       "test.url/terminology/value-sets/expansion/qdm",
       {
-        includeDraft: "yes",
+        includeDraft: true,
         manifestExpansion: null,
         activeOnly: "false",
         valueSetParams: [

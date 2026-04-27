@@ -15,7 +15,7 @@ export type ValueSetSearchParams = {
 };
 
 type ValueSetsSearchCriteria = {
-  includeDraft: string;
+  includeDraft: boolean;
   activeOnly: string;
   manifestExpansion: ManifestExpansion;
   valueSetParams: ValueSetSearchParams[];
@@ -38,7 +38,7 @@ export class TerminologyServiceApi {
     }
 
     const searchCriteria = {
-      includeDraft: "true",
+      includeDraft: true,
       activeOnly: manifestExpansion ? "true" : "false",
       manifestExpansion: manifestExpansion,
       valueSetParams: valueSetParams,
@@ -105,7 +105,7 @@ export class TerminologyServiceApi {
       return null;
     }
     const searchCriteria: ValueSetsSearchCriteria = {
-      includeDraft: "yes", // always yes for now
+      includeDraft: true, // always yes for now
       activeOnly: manifestExpansion ? "true" : "false",
       manifestExpansion: manifestExpansion,
       valueSetParams: this.getValueSetsOIDsFromCqmMeasure(
