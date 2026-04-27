@@ -109,4 +109,3 @@ export const getOidFromString = (
   }
   return oidString?.split("ValueSet/")[1];
 };
-
