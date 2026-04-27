@@ -157,4 +157,50 @@ describe("EditCompositeTestCase", () => {
 
     consoleSpy.mockRestore();
   });
+
+  it("triggers an empty block on request", async () => {
+    mockFetchMeasuresByIds.mockResolvedValueOnce([{ id: "m1" }, { id: "m2" }]);
+
+    render(
+      <EditCompositeTestCase
+        allotmentRef={{ current: null }}
+        editorVal={{}}
+        setEditorVal={jest.fn()}
+        testCaseCanEdit
+        seriesState={{ series: [] }}
+        isModified={() => false}
+        setDiscardDialogOpen={jest.fn()}
+        measure={{}}
+      />
+    );
+
+    await waitFor(() => expect(mockFetchMeasuresByIds).not.toHaveBeenCalled());
+    expect(screen.getByTestId("create-panel")).toBeInTheDocument();
+  });
+
+  it("fails to trigger a measureID push in the memo map", async () => {
+    mockFetchMeasuresByIds.mockResolvedValueOnce([{ id: "m1" }, { id: "m2" }]);
+
+    render(
+      <EditCompositeTestCase
+        allotmentRef={{ current: null }}
+        editorVal={{}}
+        setEditorVal={jest.fn()}
+        testCaseCanEdit
+        seriesState={{ series: [] }}
+        isModified={() => false}
+        setDiscardDialogOpen={jest.fn()}
+        measure={{
+          groups: [
+            {
+              components: [{}],
+            },
+          ],
+        }}
+      />
+    );
+
+    await waitFor(() => expect(mockFetchMeasuresByIds).not.toHaveBeenCalled());
+    expect(screen.getByTestId("create-panel")).toBeInTheDocument();
+  });
 });
