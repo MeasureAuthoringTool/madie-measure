@@ -285,6 +285,54 @@ export const getQuantityValidator = (required: boolean) => {
   And we should get a validation that fits our object. 
 */
 
+export const getCodingValidator = (required) => {
+  const baseValidator = Yup.object()
+    .nullable()
+    .test(
+      "coding-complete",
+      "Both Code System and Code are required",
+      (val: any) => {
+        if (!val) return !required;
+        const hasSystem = !!val.system;
+        const hasCode = !!val.code;
+        // Reject if system or code key exists but value is incomplete
+        if ("system" in val || "code" in val) {
+          return hasSystem && hasCode;
+        }
+        return true;
+      }
+    );
+  if (required) {
+    return baseValidator.required("This field is required");
+  }
+  return baseValidator;
+};
+
+export const getCodeableConceptValidator = (required) => {
+  const baseValidator = Yup.object()
+    .nullable()
+    .test(
+      "codeable-concept-complete",
+      "Both Code System and Code are required for each coding",
+      (val: any) => {
+        if (!val) return !required;
+        const codings = val.coding;
+        if (!Array.isArray(codings)) return true;
+        return codings.every((coding) => {
+          if (!coding) return true;
+          if ("system" in coding || "code" in coding) {
+            return !!coding.system && !!coding.code;
+          }
+          return true;
+        });
+      }
+    );
+  if (required) {
+    return baseValidator.required("This field is required");
+  }
+  return baseValidator;
+};
+
 export const validationLookup = {
   "http://hl7.org/fhirpath/System.Integer": getSignedIntegerValidator,
   integer: getSignedIntegerValidator,
@@ -303,6 +351,8 @@ export const validationLookup = {
   instant: getInstantValidator,
   base64Binary: getBinaryValidator,
   Quantity: getQuantityValidator,
+  Coding: getCodingValidator,
+  CodeableConcept: getCodeableConceptValidator,
 };
 
 export const getValidation = (type, required, label?) => {
