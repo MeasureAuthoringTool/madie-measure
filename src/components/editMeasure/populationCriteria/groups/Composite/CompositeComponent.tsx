@@ -20,7 +20,6 @@ export default function CompositeComponent({
 }) {
   const measureServiceApi = useRef(useMeasureServiceApi()).current;
   const [componentDetails, setComponentDetails] = useState([]);
-
   const fetchMeasuresForComponents = useCallback(async () => {
     if (!components?.length) {
       setComponentDetails([]);
