@@ -8,6 +8,8 @@ import { Measure, TestCase } from "@madie/madie-models";
 import { MadieSpinner } from "@madie/madie-design-system/dist/react";
 import HowItWorks from "../LeftPanel/ElementsTab/builder/HowItWorks/HowItWorks";
 import "./CompositeLeftPanelContent.scss";
+import { FormikProvider } from "formik";
+import ElementsTab from "../LeftPanel/ElementsTab/ElementsTab";
 
 const CompositeLeftPanelContent = ({
   leftPanelActiveTab,
@@ -15,6 +17,11 @@ const CompositeLeftPanelContent = ({
   editorVal,
   setEditorVal,
   compositeMeasures,
+  testCaseCanEdit,
+  formikStu6Context,
+  testCase,
+  setValidationSchema,
+  setInitialFormikValuesStu6,
 }) => {
   const testCaseService = useRef(useTestCaseServiceApi());
   const [selectedMeasure, setSelectedMeasure] = useState<Measure | null>(null);
@@ -49,10 +56,11 @@ const CompositeLeftPanelContent = ({
         <CreateCompositeTestCaseLeftPanelNavTabs
           leftPanelActiveTab={leftPanelActiveTab}
           setLeftPanelActiveTab={setLeftPanelActiveTab}
+          testCaseCanEdit={testCaseCanEdit}
         />
       </div>
-      {leftPanelActiveTab === "elements" && (
-        <div className="panel-content">
+      {leftPanelActiveTab === "create" && (
+        <div className="panel-content" data-testid="create-panel">
           <div id="elements-panel">
             <HowItWorks />
             {loadingTestCases ? (
@@ -93,6 +101,22 @@ const CompositeLeftPanelContent = ({
               </>
             )}
           </div>
+        </div>
+      )}
+      {leftPanelActiveTab === "added" && (
+        <div className="panel-content" data-testid="added-panel">
+          <FormikProvider value={formikStu6Context}>
+            <ElementsTab
+              setValidationSchema={setValidationSchema}
+              setInitialFormikValuesStu6={setInitialFormikValuesStu6}
+              setEditorVal={setEditorVal}
+              // currently locking to readOnly MAT-9905
+              canEdit={false}
+              editorVal={editorVal}
+              testCase={testCase}
+              activeTab={leftPanelActiveTab}
+            />
+          </FormikProvider>
         </div>
       )}
       {leftPanelActiveTab === "json" && (

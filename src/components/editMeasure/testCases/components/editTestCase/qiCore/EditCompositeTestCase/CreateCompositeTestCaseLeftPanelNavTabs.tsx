@@ -8,6 +8,7 @@ import EditorSearch from "../../../editTestCase/qiCore/LeftPanel/EditorSearch";
 export interface NavTabProps {
   leftPanelActiveTab: string;
   setLeftPanelActiveTab: (value: string) => void;
+  testCaseCanEdit: boolean;
 }
 export default function CreateCompositeTestCaseLeftPanelNavTabs(
   props: NavTabProps
@@ -27,11 +28,19 @@ export default function CreateCompositeTestCaseLeftPanelNavTabs(
           >
             <Tab
               tabIndex={0}
+              aria-label="create tab panel"
+              type="D"
+              label={`Create`}
+              data-testid="create-tab"
+              value="create"
+            />
+            <Tab
+              tabIndex={0}
               aria-label="elements tab panel"
               type="D"
               label={`Elements`}
               data-testid="elements-tab"
-              value="elements"
+              value="added"
             />
             <Tab
               tabIndex={0}
