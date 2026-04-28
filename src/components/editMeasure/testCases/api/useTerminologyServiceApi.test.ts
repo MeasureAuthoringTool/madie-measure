@@ -30,26 +30,23 @@ describe("TerminologyServiceApi Tests", () => {
     abortController = new AbortController();
   });
 
-  it("gives no ValueSets when no bundle provided", () => {
-    terminologyService.getValueSetsExpansionForBundle(null).then((data) => {
-      expect(data.length).toEqual(0);
-    });
+  it("gives no ValueSets when no bundle provided", async () => {
+    const data = await terminologyService.getValueSetsExpansionForBundle(null);
+    expect(data.length).toEqual(0);
   });
 
-  it("gives expanded ValueSets for ValueSets in measure bundle", () => {
+  it("gives expanded ValueSets for ValueSets in measure bundle", async () => {
     axios.put = jest
       .fn()
       .mockResolvedValueOnce({ data: [officeVisitValueSet] });
 
-    terminologyService
-      .getValueSetsExpansionForBundle(officeVisitMeasureBundle)
-      .then((data) => {
-        expect(data.length).toEqual(1);
-        expect(data[0].name).toEqual("Office Visit");
-        expect(data[0].name).toEqual("Office Visit");
-        expect(data[0].id).toEqual("2.16.840.1.113883.3.464.1003.101.12.1001");
-        expect(data[0].compose.include[0].concept.length).toEqual(5);
-      });
+    const data = await terminologyService.getValueSetsExpansionForBundle(
+      officeVisitMeasureBundle
+    );
+    expect(data.length).toEqual(1);
+    expect(data[0].name).toEqual("Office Visit");
+    expect(data[0].id).toEqual("2.16.840.1.113883.3.464.1003.101.12.1001");
+    expect(data[0].compose.include[0].concept.length).toEqual(5);
   });
 
   it("gives expanded ValueSets for ValueSets in measure bundle when manifestExpansion is not provided (expansion type is Latest)", async () => {
@@ -195,43 +192,35 @@ describe("TerminologyServiceApi Tests", () => {
     }
   });
 
-  it("Should return expansions for value set oids", () => {
+  it("Should return expansions for value set oids", async () => {
     axios.put = jest
       .fn()
       .mockResolvedValue({ status: 200, data: [officeVisitValueSet] });
     const oid = "2.16.840.1.113883.3.464.1003.101.12.1001";
-    terminologyService
-      .getValueSetsExpansionForOids([oid])
-      .then((valueSets: ValueSet[]) => {
-        expect(valueSets.length).toEqual(1);
-        expect(valueSets[0].name).toEqual("Office Visit");
-        expect(valueSets[0].name).toEqual("Office Visit");
-        expect(valueSets[0].id).toEqual(oid);
-        expect(valueSets[0].compose.include[0].concept.length).toEqual(5);
-      });
+    const valueSets: ValueSet[] =
+      await terminologyService.getValueSetsExpansionForOids([oid]);
+    expect(valueSets.length).toEqual(1);
+    expect(valueSets[0].name).toEqual("Office Visit");
+    expect(valueSets[0].id).toEqual(oid);
+    expect(valueSets[0].compose.include[0].concept.length).toEqual(5);
   });
 
-  it("Should return empty expansion list if oids not provided", () => {
+  it("Should return empty expansion list if oids not provided", async () => {
     axios.put = jest
       .fn()
       .mockResolvedValue({ status: 200, data: [officeVisitValueSet] });
-    terminologyService
-      .getValueSetsExpansionForOids([])
-      .then((valueSets: ValueSet[]) => {
-        expect(valueSets.length).toEqual(0);
-      });
+    const valueSets: ValueSet[] =
+      await terminologyService.getValueSetsExpansionForOids([]);
+    expect(valueSets.length).toEqual(0);
   });
 
-  it("gives no ValueSets when no cqm measure provided", () => {
-    terminologyService
-      .getQdmValueSetsExpansion(
-        null,
-        testManifestExpansion,
-        abortController.signal
-      )
-      .then((data) => {
-        expect(data).toBeNull();
-      });
+  it("gives no ValueSets when no cqm measure provided", async () => {
+    const data = await terminologyService.getQdmValueSetsExpansion(
+      null,
+      testManifestExpansion,
+      abortController.signal
+    );
+    expect(data).toBeNull();
   });
 
   it("Should call Terminology Service URL to fetch value set expansions when manifest Expansion feature flag is true and activeOnly is set to 'true' when manifestExpansion is truthy (expansion type is Manifest)", () => {
@@ -291,43 +280,40 @@ describe("TerminologyServiceApi Tests", () => {
     );
   });
 
-  it("gives expanded ValueSets for ValueSets in cqm measure", () => {
+  it("gives expanded ValueSets for ValueSets in cqm measure", async () => {
     axios.put = jest
       .fn()
       .mockResolvedValueOnce({ data: cqm_measure_basic_valueset });
 
-    terminologyService
-      .getQdmValueSetsExpansion(
-        cqm_measure_basic,
-        testManifestExpansion,
-        abortController.signal
-      )
-      .then((data: ValueSet[]) => {
-        expect(axios.put).toBeCalledWith(
-          "test.url/terminology/value-sets/expansion/qdm",
-          {
-            includeDraft: "yes",
-            manifestExpansion: {
-              fullUrl:
-                "https://cts.nlm.nih.gov/fhir/Library/mu2-update-2015-05-01",
-              id: "mu2-update-2015-05-01",
-            },
-            activeOnly: "true",
-            valueSetParams: [
-              { oid: "2.16.840.1.113883.3.666.5.307" },
-              { oid: "2.16.840.1.113883.3.464.1003.103.12.1001" },
-            ],
-          },
-          {
-            headers: { Authorization: "Bearer undefined" },
-            signal: abortController.signal,
-          }
-        );
-        expect(data.length).toEqual(2);
-        expect(data[0].display_name).toEqual("Encounter Inpatient");
-        expect(data[0].oid).toEqual("2.16.840.1.113883.3.666.5.307");
-        expect(data[0].concepts.length).toEqual(3);
-      });
+    const data: ValueSet[] = await terminologyService.getQdmValueSetsExpansion(
+      cqm_measure_basic,
+      testManifestExpansion,
+      abortController.signal
+    );
+    expect(axios.put).toBeCalledWith(
+      "test.url/terminology/value-sets/expansion/qdm",
+      {
+        includeDraft: true,
+        manifestExpansion: {
+          fullUrl:
+            "https://cts.nlm.nih.gov/fhir/Library/mu2-update-2015-05-01",
+          id: "mu2-update-2015-05-01",
+        },
+        activeOnly: "true",
+        valueSetParams: [
+          { oid: "2.16.840.1.113883.3.666.5.307" },
+          { oid: "2.16.840.1.113883.3.464.1003.103.12.1001" },
+        ],
+      },
+      {
+        headers: { Authorization: "Bearer undefined" },
+        signal: abortController.signal,
+      }
+    );
+    expect(data.length).toEqual(2);
+    expect(data[0].display_name).toEqual("Encounter Inpatient");
+    expect(data[0].oid).toEqual("2.16.840.1.113883.3.666.5.307");
+    expect(data[0].concepts.length).toEqual(3);
   });
 
   it("throws an error if the request was cancelled during QDM expansions with manifest", async () => {
