@@ -1172,15 +1172,22 @@ const EditTestCase = (props: EditTestCaseProps) => {
         May come at the cost of some code duplication. */}
         {isCompositeMeasure ? (
           <FormikProvider value={formik}>
-            <EditCompositeTestCase
-              setDiscardDialogOpen={setDiscardDialogOpen}
-              isModified={isModified}
-              seriesState={seriesState}
-              allotmentRef={allotmentRef}
-              editorVal={editorVal}
-              setEditorVal={setEditorVal}
-              testCaseCanEdit={testCaseCanEdit}
-            />
+            <QiCoreResourceProvider>
+              <EditCompositeTestCase
+                measure={measure}
+                setDiscardDialogOpen={setDiscardDialogOpen}
+                isModified={isModified}
+                seriesState={seriesState}
+                allotmentRef={allotmentRef}
+                editorVal={editorVal}
+                setEditorVal={setEditorVal}
+                testCaseCanEdit={testCaseCanEdit}
+                formikStu6Context={formikStu6Context}
+                testCase={testCase}
+                setValidationSchema={setValidationSchema}
+                setInitialFormikValuesStu6={setInitialFormikValuesStu6}
+              />
+            </QiCoreResourceProvider>
           </FormikProvider>
         ) : (
           <div className={`allotment-wrapper ${isQICore6 ? "fullvh" : ""}`}>
