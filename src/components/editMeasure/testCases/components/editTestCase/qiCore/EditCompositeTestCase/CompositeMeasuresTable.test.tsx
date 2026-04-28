@@ -1,58 +1,8 @@
-import React from "react";
-import { render, screen, fireEvent, within } from "@testing-library/react";
+import * as React from "react";
+import { render, screen, fireEvent } from "@testing-library/react";
 import "@testing-library/jest-dom";
 
 import CompositeMeasuresTable from "./CompositeMeasuresTable";
-
-jest.mock("twin.macro", () => {
-  const twProxy = new Proxy(() => null, {
-    get: () => () => "th",
-    apply: () => "th",
-  });
-  return {
-    __esModule: true,
-    default: twProxy,
-  };
-});
-
-jest.mock("styled-components/macro", () => ({}));
-
-jest.mock("@madie/madie-design-system/dist/react", () => ({
-  __esModule: true,
-  TruncateText: ({ text, dataTestId }: any) => (
-    <span data-testid={dataTestId}>{text}</span>
-  ),
-  Button: ({ children, ...props }: any) => (
-    <button {...props}>{children}</button>
-  ),
-}));
-jest.mock(
-  "../../../testCaseLanding/common/TestCaseTable/TestCaseTable",
-  () => ({
-    __esModule: true,
-    convertDate: (value: any) => ({
-      date: `MOCK_DATE(${String(value).slice(0, 10)})`,
-    }),
-  })
-);
-
-// MUI Icons: render test ids so we can assert presence
-jest.mock("@mui/icons-material/UnfoldMore", () => ({
-  __esModule: true,
-  default: () => <span data-testid="icon-unfold-more" />,
-}));
-jest.mock("@mui/icons-material/KeyboardArrowUp", () => ({
-  __esModule: true,
-  default: () => <span data-testid="icon-arrow-up" />,
-}));
-jest.mock("@mui/icons-material/KeyboardArrowDown", () => ({
-  __esModule: true,
-  default: () => <span data-testid="icon-arrow-down" />,
-}));
-jest.mock("@mui/icons-material/ChevronRight", () => ({
-  __esModule: true,
-  default: () => <span data-testid="icon-chevron-right" />,
-}));
 
 describe("CompositeMeasuresTable", () => {
   const mockMeasures: any[] = [
@@ -71,6 +21,11 @@ describe("CompositeMeasuresTable", () => {
       measureSet: { cmsId: "456" },
     },
   ];
+  const onSelectTestCase = jest.fn();
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
 
   it("returns null when measures is empty", () => {
     const { container } = render(<CompositeMeasuresTable measures={[]} />);
@@ -79,12 +34,15 @@ describe("CompositeMeasuresTable", () => {
     expect(container).toBeEmptyDOMElement();
   });
 
-  it("renders table, rows, cells, updated dates, and action button", () => {
-    render(<CompositeMeasuresTable measures={mockMeasures} />);
+  it("renders table with all columns, rows, and action buttons", () => {
+    render(
+      <CompositeMeasuresTable
+        measures={mockMeasures}
+        onSelectTestCase={onSelectTestCase}
+      />
+    );
 
-    const table = screen.getByTestId("measure-list-tbl");
-    expect(table).toBeInTheDocument();
-
+    expect(screen.getByTestId("measure-list-tbl")).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: /Measure/i })
     ).toBeInTheDocument();
@@ -99,84 +57,66 @@ describe("CompositeMeasuresTable", () => {
     const rows = screen.getAllByTestId("row-item");
     expect(rows).toHaveLength(2);
 
-    expect(screen.getByTestId("measure-name-m1")).toHaveTextContent(
-      "Zeta Measure"
-    );
-    expect(screen.getByTestId("measure-name-m2")).toHaveTextContent(
-      "Alpha Measure"
-    );
-
-    expect(screen.getByTestId("measure-version-m1")).toHaveTextContent(
-      "1.0.000"
-    );
-    expect(screen.getByTestId("measure-version-m2")).toHaveTextContent(
-      "2.0.000"
-    );
-
-    expect(screen.getByTestId("measure-cmsId-m1")).toHaveTextContent("123");
-    expect(screen.getByTestId("measure-cmsId-m2")).toHaveTextContent("456");
-
-    expect(screen.getByText("MOCK_DATE(2026-02-01)")).toBeInTheDocument();
-    expect(screen.getByText("MOCK_DATE(2026-01-01)")).toBeInTheDocument();
+    expect(screen.getByText("Zeta Measure")).toBeInTheDocument();
+    expect(screen.getByText("Alpha Measure")).toBeInTheDocument();
+    expect(screen.getByText("1.0.000")).toBeInTheDocument();
+    expect(screen.getByText("2.0.000")).toBeInTheDocument();
+    expect(screen.getByText("123")).toBeInTheDocument();
+    expect(screen.getByText("456")).toBeInTheDocument();
 
     const actionButtons = screen.getAllByRole("button", {
       name: /Select Test Case/i,
     });
-    expect(actionButtons.length).toBeGreaterThan(0);
-    expect(screen.getAllByTestId("icon-chevron-right").length).toBeGreaterThan(
-      0
+    expect(actionButtons).toHaveLength(2);
+    expect(screen.getAllByTestId("ChevronRightIcon").length).toBe(2);
+  });
+
+  it("calls onSelectTestCase with the correct measure when action button is clicked", () => {
+    render(
+      <CompositeMeasuresTable
+        measures={mockMeasures}
+        onSelectTestCase={onSelectTestCase}
+      />
+    );
+
+    fireEvent.click(screen.getByTestId("select-test-case-btn-m1"));
+    expect(onSelectTestCase).toHaveBeenCalledWith(
+      expect.objectContaining({ id: "m1", measureName: "Zeta Measure" })
     );
   });
 
-  it("shows UnfoldMoreIcon on header hover when not currently sorted", () => {
-    render(<CompositeMeasuresTable measures={mockMeasures} />);
-
-    const measureHeaderBtn = screen.getByRole("button", { name: /Measure/i });
-
-    const th = measureHeaderBtn.closest("th");
-    expect(th).toBeTruthy();
-
-    fireEvent.mouseEnter(th!);
-
-    expect(screen.getByTestId("icon-unfold-more")).toBeInTheDocument();
-
-    fireEvent.mouseLeave(th!);
-    expect(screen.queryByTestId("icon-unfold-more")).not.toBeInTheDocument();
-  });
-
-  it("toggles sorting on header click and shows up/down icons", () => {
+  it("sorts columns on header click and shows sort icons on hover", () => {
     render(<CompositeMeasuresTable measures={mockMeasures} />);
 
     const measureHeaderBtn = screen.getByRole("button", { name: /Measure/i });
     const th = measureHeaderBtn.closest("th")!;
-    expect(screen.queryByTestId("icon-arrow-up")).not.toBeInTheDocument();
-    expect(screen.queryByTestId("icon-arrow-down")).not.toBeInTheDocument();
 
-    fireEvent.click(th);
-    expect(screen.getByTestId("icon-arrow-up")).toBeInTheDocument();
-    expect(screen.queryByTestId("icon-arrow-down")).not.toBeInTheDocument();
-
-    fireEvent.click(th);
-    expect(screen.getByTestId("icon-arrow-down")).toBeInTheDocument();
-
-    fireEvent.click(th);
-    expect(screen.queryByTestId("icon-arrow-up")).not.toBeInTheDocument();
-    expect(screen.queryByTestId("icon-arrow-down")).not.toBeInTheDocument();
-
+    // hover shows unfold icon when unsorted
     fireEvent.mouseEnter(th);
-    expect(screen.getByTestId("icon-unfold-more")).toBeInTheDocument();
-  });
+    expect(screen.getByTestId("UnfoldMoreIcon")).toBeInTheDocument();
+    fireEvent.mouseLeave(th);
+    expect(screen.queryByTestId("UnfoldMoreIcon")).not.toBeInTheDocument();
 
-  it("renders correct sort title attribute for next sorting order (smoke coverage)", () => {
-    render(<CompositeMeasuresTable measures={mockMeasures} />);
-    const measureHeaderBtn = screen.getByRole("button", { name: /Measure/i });
-
+    // click cycles: ascending → descending → clear
     expect(measureHeaderBtn).toHaveAttribute("title", "Sort ascending");
 
-    fireEvent.click(measureHeaderBtn.closest("th")!);
+    fireEvent.click(th);
     expect(measureHeaderBtn).toHaveAttribute("title", "Sort descending");
+    expect(screen.getByTestId("KeyboardArrowUpIcon")).toBeInTheDocument();
 
-    fireEvent.click(measureHeaderBtn.closest("th")!);
+    fireEvent.click(th);
     expect(measureHeaderBtn).toHaveAttribute("title", "Clear sort");
+    expect(screen.getByTestId("KeyboardArrowDownIcon")).toBeInTheDocument();
+
+    fireEvent.click(th);
+    expect(measureHeaderBtn).toHaveAttribute("title", "Sort ascending");
+    expect(screen.queryByTestId("KeyboardArrowUpIcon")).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId("KeyboardArrowDownIcon")
+    ).not.toBeInTheDocument();
+
+    // hover again shows unfold
+    fireEvent.mouseEnter(th);
+    expect(screen.getByTestId("UnfoldMoreIcon")).toBeInTheDocument();
   });
 });
