@@ -96,11 +96,16 @@ const mockTestCases = [
 ];
 
 const defaultProps = {
-  leftPanelActiveTab: "elements",
+  leftPanelActiveTab: "create",
   setLeftPanelActiveTab: jest.fn(),
   editorVal: '{"resourceType":"Bundle"}',
   setEditorVal: jest.fn(),
   compositeMeasures: mockMeasures,
+  testCaseCanEdit: true,
+  formikStu6Context: null,
+  testCase: null,
+  setValidationSchema: jest.fn(),
+  setInitialFormikValuesStu6: jest.fn(),
 };
 
 describe("CompositeLeftPanelContent", () => {
