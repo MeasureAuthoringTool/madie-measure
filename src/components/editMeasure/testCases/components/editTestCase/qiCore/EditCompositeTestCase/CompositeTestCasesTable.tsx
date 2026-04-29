@@ -25,6 +25,7 @@ import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { TestCase, Measure } from "@madie/madie-models";
+import HowItWorks from "../LeftPanel/ElementsTab/builder/HowItWorks/HowItWorks";
 
 const TH = tw.th`p-3 text-left text-sm font-bold capitalize`;
 
@@ -41,6 +42,7 @@ export default function CompositeTestCasesTable({
   onBackToMeasures: () => void;
   onSelectProfile?: (testCase: TestCase) => void;
 }) {
+  const [howItWorksOpen, setHowItWorksOpen] = useState<boolean>(false);
   const [hoveredHeader, setHoveredHeader] = useState<string>("");
   const [sorting, setSorting] = useState<SortingState>([]);
   const [filterBy, setFilterBy] = useState<string>("");
@@ -185,20 +187,55 @@ export default function CompositeTestCasesTable({
 
   return (
     <div data-testid="composite-test-cases-panel">
-      {/* Back button */}
-      <div tw="mb-4">
-        <Button
-          variant="outline"
-          type="button"
-          data-testid="back-to-measures-btn"
-          onClick={onBackToMeasures}
+      {/* Back button + How it works */}
+      {howItWorksOpen ? (
+        <>
+          <div tw="mb-4">
+            <Button
+              variant="outline"
+              type="button"
+              data-testid="back-to-measures-btn"
+              onClick={onBackToMeasures}
+            >
+              <ArrowBackIcon
+                style={{ height: "18px", width: "18px", marginRight: 4 }}
+              />
+              Back to All Measures
+            </Button>
+          </div>
+          <div tw="mb-4" className="how-it-works-flush-left">
+            <HowItWorks
+              isOpen={howItWorksOpen}
+              onOpenChange={setHowItWorksOpen}
+            />
+          </div>
+        </>
+      ) : (
+        <div
+          tw="mb-4"
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
         >
-          <ArrowBackIcon
-            style={{ height: "18px", width: "18px", marginRight: 4 }}
+          <Button
+            variant="outline"
+            type="button"
+            data-testid="back-to-measures-btn"
+            onClick={onBackToMeasures}
+          >
+            <ArrowBackIcon
+              style={{ height: "18px", width: "18px", marginRight: 4 }}
+            />
+            Back to All Measures
+          </Button>
+          <HowItWorks
+            isOpen={howItWorksOpen}
+            onOpenChange={setHowItWorksOpen}
           />
-          Back to All Measures
-        </Button>
-      </div>
+        </div>
+      )}
 
       {/* Header */}
       <h3 style={{ fontSize: 18, fontWeight: 500 }}>

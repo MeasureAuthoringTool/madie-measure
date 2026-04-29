@@ -1,5 +1,6 @@
 import * as React from "react";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 import CompositeTestCasesTable from "./CompositeTestCasesTable";
 
@@ -260,5 +261,167 @@ describe("CompositeTestCasesTable", () => {
     // default limit is 10
     expect(screen.getAllByTestId("tc-row-item")).toHaveLength(10);
     expect(screen.getByText("15 Test Cases")).toBeInTheDocument();
+  });
+
+  // --- Search trigger (Enter key & icon click) ---
+
+  it("triggers search on Enter keypress (resetting page to 1)", () => {
+    const manyTcs = Array.from({ length: 15 }, (_, i) =>
+      makeTestCase({
+        id: `tc-${i}`,
+        title: `TC ${i}`,
+        series: `G${i}`,
+        description: `Desc ${i}`,
+      })
+    );
+    render(<CompositeTestCasesTable {...defaultProps} testCases={manyTcs} />);
+    const searchInput = screen.getByTestId("tc-search-input");
+    // Pressing Enter should call handleSearch (covers the Enter branch)
+    fireEvent.keyPress(searchInput, {
+      key: "Enter",
+      code: "Enter",
+      charCode: 13,
+    });
+    // Pressing a non-Enter key should NOT throw and is a no-op for search
+    fireEvent.keyPress(searchInput, { key: "a", code: "KeyA", charCode: 97 });
+    expect(screen.getByText("15 Test Cases")).toBeInTheDocument();
+  });
+
+  it("triggers search when the search adornment icon is clicked", () => {
+    render(<CompositeTestCasesTable {...defaultProps} />);
+    const searchInput = screen.getByTestId("tc-search-input");
+    fireEvent.change(searchInput, { target: { value: "Alpha" } });
+    fireEvent.click(screen.getByTestId("tc-trigger-search"));
+    expect(screen.getAllByTestId("tc-row-item")).toHaveLength(1);
+  });
+
+  // --- Header hover (sort indicator) ---
+
+  it("shows the unfold (sort) icon on header hover when not sorted", () => {
+    render(<CompositeTestCasesTable {...defaultProps} />);
+    const titleHeader = screen.getByRole("button", { name: /^Title$/i });
+    const th = titleHeader.closest("th")!;
+    fireEvent.mouseEnter(th);
+    // UnfoldMoreIcon should appear in the hovered, unsorted header
+    expect(th.querySelector('[data-testid="UnfoldMoreIcon"]')).toBeTruthy();
+    fireEvent.mouseLeave(th);
+    expect(th.querySelector('[data-testid="UnfoldMoreIcon"]')).toBeFalsy();
+  });
+
+  // --- Pagination interaction ---
+
+  it("changes page when next/prev pagination buttons are clicked", async () => {
+    const manyTcs = Array.from({ length: 15 }, (_, i) =>
+      makeTestCase({
+        id: `tc-${i}`,
+        title: `TC ${i}`,
+        series: `G${i}`,
+        description: `Desc ${i}`,
+      })
+    );
+    render(<CompositeTestCasesTable {...defaultProps} testCases={manyTcs} />);
+
+    // page 1: 10 rows shown
+    expect(screen.getAllByTestId("tc-row-item")).toHaveLength(10);
+    expect(screen.getByText("TC 0")).toBeInTheDocument();
+    expect(screen.queryByText("TC 14")).not.toBeInTheDocument();
+
+    const nextButton = await screen.findByLabelText("Go to next page");
+    userEvent.click(nextButton);
+
+    await waitFor(() => {
+      // page 2: only 5 rows
+      expect(screen.getAllByTestId("tc-row-item")).toHaveLength(5);
+    });
+    expect(screen.getByText("TC 14")).toBeInTheDocument();
+
+    const prevButton = await screen.findByLabelText("Go to previous page");
+    userEvent.click(prevButton);
+    await waitFor(() => {
+      expect(screen.getAllByTestId("tc-row-item")).toHaveLength(10);
+    });
+  });
+
+  it("changes the page size when a numeric limit is selected", async () => {
+    const manyTcs = Array.from({ length: 30 }, (_, i) =>
+      makeTestCase({
+        id: `tc-${i}`,
+        title: `TC ${i}`,
+        series: `G${i}`,
+        description: `Desc ${i}`,
+      })
+    );
+    render(<CompositeTestCasesTable {...defaultProps} testCases={manyTcs} />);
+    expect(screen.getAllByTestId("tc-row-item")).toHaveLength(10);
+
+    // There are two comboboxes on the page (Filter By + page-limit). The
+    // page-limit combobox is the last one rendered (inside Pagination).
+    const comboboxes = await screen.findAllByRole("combobox", {
+      expanded: false,
+    });
+    const limitCombobox = comboboxes[comboboxes.length - 1];
+    userEvent.click(limitCombobox);
+    // limitOptions are [10, 25, 50, "All"] — pick 25
+    const options = await screen.findAllByRole("option");
+    expect(options).toHaveLength(4);
+    userEvent.click(options[1]);
+
+    await waitFor(() => {
+      expect(screen.getAllByTestId("tc-row-item")).toHaveLength(25);
+    });
+  });
+
+  it("shows all rows when 'All' is selected as the page size", async () => {
+    const manyTcs = Array.from({ length: 30 }, (_, i) =>
+      makeTestCase({
+        id: `tc-${i}`,
+        title: `TC ${i}`,
+        series: `G${i}`,
+        description: `Desc ${i}`,
+      })
+    );
+    render(<CompositeTestCasesTable {...defaultProps} testCases={manyTcs} />);
+
+    const comboboxes = await screen.findAllByRole("combobox", {
+      expanded: false,
+    });
+    const limitCombobox = comboboxes[comboboxes.length - 1];
+    userEvent.click(limitCombobox);
+    const options = await screen.findAllByRole("option");
+    // last option == "All"
+    userEvent.click(options[options.length - 1]);
+
+    await waitFor(() => {
+      expect(screen.getAllByTestId("tc-row-item")).toHaveLength(30);
+    });
+  });
+
+  // --- HowItWorks integration (controlled state) ---
+
+  it("renders HowItWorks closed (link visible, panel hidden) by default", () => {
+    render(<CompositeTestCasesTable {...defaultProps} />);
+    expect(screen.getByTestId("how-it-works-link")).toBeInTheDocument();
+    expect(
+      screen.queryByTestId("how-it-works-content")
+    ).not.toBeInTheDocument();
+  });
+
+  it("opens HowItWorks panel when the link is clicked, and the back button stays visible", async () => {
+    render(<CompositeTestCasesTable {...defaultProps} />);
+    await userEvent.click(screen.getByTestId("how-it-works-link"));
+    expect(screen.getByTestId("how-it-works-content")).toBeInTheDocument();
+    // Back button must still be present (it moves to its own row, not removed)
+    expect(screen.getByTestId("back-to-measures-btn")).toBeInTheDocument();
+  });
+
+  it("closes HowItWorks panel when the close button is clicked", async () => {
+    render(<CompositeTestCasesTable {...defaultProps} />);
+    await userEvent.click(screen.getByTestId("how-it-works-link"));
+    expect(screen.getByTestId("how-it-works-content")).toBeInTheDocument();
+    await userEvent.click(screen.getByTestId("how-it-works-close"));
+    expect(
+      screen.queryByTestId("how-it-works-content")
+    ).not.toBeInTheDocument();
+    expect(screen.getByTestId("how-it-works-link")).toBeInTheDocument();
   });
 });

@@ -7,6 +7,7 @@ import {
   act,
 } from "@testing-library/react";
 import "@testing-library/jest-dom";
+import { useFormik } from "formik";
 import CompositeLeftPanelContent from "./CompositeLeftPanelContent";
 
 // --- Mocks ---
@@ -21,6 +22,21 @@ jest.mock("../../../editor/Editor", () => ({
       value={value}
       readOnly={readOnly}
       onChange={(e) => onChange?.(e.target.value)}
+    />
+  ),
+}));
+
+// ElementsTab -> Builder requires the full ApiContext + fhirService config
+// and QiCoreResourceProvider. Setting all of that up just to verify the
+// "added" branch renders pulls in significantly more than what this suite
+// covers, so we replace it with a marker component.
+jest.mock("../LeftPanel/ElementsTab/ElementsTab", () => ({
+  __esModule: true,
+  default: (props: any) => (
+    <div
+      data-testid="elements-tab-mock"
+      data-can-edit={String(props.canEdit)}
+      data-active-tab={props.activeTab}
     />
   ),
 }));
@@ -260,5 +276,76 @@ describe("CompositeLeftPanelContent", () => {
     expect(mockGetTestCasesByMeasureId).toHaveBeenCalledWith("m2");
     expect(screen.getByText("Measure Two")).toBeInTheDocument();
     expect(screen.getAllByTestId("tc-row-item")).toHaveLength(1);
+  });
+
+  // --- "added" tab (ElementsTab branch) ---
+
+  describe("added tab", () => {
+    // Helper component that provides a real formik bag to satisfy FormikProvider.
+    const AddedTabHarness = () => {
+      const formik = useFormik({
+        initialValues: { foo: "" },
+        onSubmit: () => undefined,
+      });
+      return (
+        <CompositeLeftPanelContent
+          {...defaultProps}
+          leftPanelActiveTab="added"
+          formikStu6Context={formik}
+          testCase={{ id: "tc1" } as any}
+        />
+      );
+    };
+
+    it("renders ElementsTab inside the added panel and forwards key props", () => {
+      render(<AddedTabHarness />);
+
+      expect(screen.getByTestId("added-panel")).toBeInTheDocument();
+      const elementsTab = screen.getByTestId("elements-tab-mock");
+      expect(elementsTab).toBeInTheDocument();
+      // canEdit is currently locked to false (MAT-9905)
+      expect(elementsTab).toHaveAttribute("data-can-edit", "false");
+      expect(elementsTab).toHaveAttribute("data-active-tab", "added");
+
+      // Other panels should not render
+      expect(screen.queryByTestId("create-panel")).not.toBeInTheDocument();
+      expect(screen.queryByTestId("json-editor")).not.toBeInTheDocument();
+    });
+  });
+
+  // --- HowItWorks integration on the no-measure-selected view ---
+
+  describe("HowItWorks on measures view", () => {
+    it("renders HowItWorks closed (link visible) by default", () => {
+      render(<CompositeLeftPanelContent {...defaultProps} />);
+      expect(screen.getByTestId("how-it-works-link")).toBeInTheDocument();
+      expect(
+        screen.queryByTestId("how-it-works-content")
+      ).not.toBeInTheDocument();
+    });
+
+    it("opens the HowItWorks panel when the link is clicked", async () => {
+      render(<CompositeLeftPanelContent {...defaultProps} />);
+      await act(async () => {
+        fireEvent.click(screen.getByTestId("how-it-works-link"));
+      });
+      expect(screen.getByTestId("how-it-works-content")).toBeInTheDocument();
+    });
+
+    it("closes the HowItWorks panel when the close button is clicked", async () => {
+      render(<CompositeLeftPanelContent {...defaultProps} />);
+      await act(async () => {
+        fireEvent.click(screen.getByTestId("how-it-works-link"));
+      });
+      expect(screen.getByTestId("how-it-works-content")).toBeInTheDocument();
+
+      await act(async () => {
+        fireEvent.click(screen.getByTestId("how-it-works-close"));
+      });
+      expect(
+        screen.queryByTestId("how-it-works-content")
+      ).not.toBeInTheDocument();
+      expect(screen.getByTestId("how-it-works-link")).toBeInTheDocument();
+    });
   });
 });

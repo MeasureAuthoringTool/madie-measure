@@ -20,3 +20,16 @@
     }
   }
 }
+
+// When HowItWorks is shown below the "Back to All Measures" button, align it
+// flush-left with the button (override the default container padding/justify).
+.how-it-works-flush-left {
+  width: 100%;
+
+  .how-it-works-container {
+    padding-left: 0;
+    padding-right: 0;
+    justify-content: flex-start;
+    width: 100%;
+  }
+}

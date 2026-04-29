@@ -28,6 +28,7 @@ const CompositeLeftPanelContent = ({
   const [testCases, setTestCases] = useState<TestCase[]>([]);
   const [loadingTestCases, setLoadingTestCases] = useState(false);
   const [completedMeasureCount, setCompletedMeasureCount] = useState(0);
+  const [howItWorksOpen, setHowItWorksOpen] = useState<boolean>(false);
 
   const handleSelectTestCase = async (measure: Measure) => {
     setLoadingTestCases(true);
@@ -62,7 +63,6 @@ const CompositeLeftPanelContent = ({
       {leftPanelActiveTab === "create" && (
         <div className="panel-content" data-testid="create-panel">
           <div id="elements-panel">
-            <HowItWorks />
             {loadingTestCases ? (
               <div
                 style={{
@@ -81,6 +81,20 @@ const CompositeLeftPanelContent = ({
               />
             ) : (
               <>
+                <div
+                  className={howItWorksOpen ? "how-it-works-flush-left" : ""}
+                  style={{
+                    display: "flex",
+                    justifyContent: howItWorksOpen ? "flex-start" : "flex-end",
+                    alignItems: "center",
+                    width: "100%",
+                  }}
+                >
+                  <HowItWorks
+                    isOpen={howItWorksOpen}
+                    onOpenChange={setHowItWorksOpen}
+                  />
+                </div>
                 <div className="elements-panel-header">
                   <h3>
                     Select Which Measures to choose Test Case Profiles from:
