@@ -1,8 +1,11 @@
-import React from "react";
+import React, { useRef, useState } from "react";
 import CreateCompositeTestCaseLeftPanelNavTabs from "./CreateCompositeTestCaseLeftPanelNavTabs";
 import Editor from "../../../editor/Editor";
-import _ from "lodash";
 import CompositeMeasuresTable from "./CompositeMeasuresTable";
+import CompositeTestCasesTable from "./CompositeTestCasesTable";
+import useTestCaseServiceApi from "../../../../api/useTestCaseServiceApi";
+import { Measure, TestCase } from "@madie/madie-models";
+import { MadieSpinner } from "@madie/madie-design-system/dist/react";
 import HowItWorks from "../LeftPanel/ElementsTab/builder/HowItWorks/HowItWorks";
 import "./CompositeLeftPanelContent.scss";
 import { FormikProvider } from "formik";
@@ -20,6 +23,34 @@ const CompositeLeftPanelContent = ({
   setValidationSchema,
   setInitialFormikValuesStu6,
 }) => {
+  const testCaseService = useRef(useTestCaseServiceApi());
+  const [selectedMeasure, setSelectedMeasure] = useState<Measure | null>(null);
+  const [testCases, setTestCases] = useState<TestCase[]>([]);
+  const [loadingTestCases, setLoadingTestCases] = useState(false);
+  const [completedMeasureCount, setCompletedMeasureCount] = useState(0);
+  const [howItWorksOpen, setHowItWorksOpen] = useState<boolean>(false);
+
+  const handleSelectTestCase = async (measure: Measure) => {
+    setLoadingTestCases(true);
+    setSelectedMeasure(measure);
+    try {
+      const cases = await testCaseService.current.getTestCasesByMeasureId(
+        measure.id
+      );
+      setTestCases(cases);
+    } catch (error) {
+      console.error("Failed to fetch test cases:", error);
+      setTestCases([]);
+    } finally {
+      setLoadingTestCases(false);
+    }
+  };
+
+  const handleBackToMeasures = () => {
+    setSelectedMeasure(null);
+    setTestCases([]);
+  };
+
   return (
     <>
       <div className="tab-container">
@@ -32,20 +63,57 @@ const CompositeLeftPanelContent = ({
       {leftPanelActiveTab === "create" && (
         <div className="panel-content" data-testid="create-panel">
           <div id="elements-panel">
-            <HowItWorks />
-            <div className="elements-panel-header">
-              <h3>Select Which Measures to choose Test Case Profiles from:</h3>
-
-              <div>
-                {compositeMeasures.length && (
-                  <p className="sub-heading">
-                    0 of {compositeMeasures.length} Measures (Components)
-                    complete
-                  </p>
-                )}
+            {loadingTestCases ? (
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  padding: 40,
+                }}
+              >
+                <MadieSpinner style={{ height: 50, width: 50 }} />
               </div>
-            </div>
-            <CompositeMeasuresTable measures={compositeMeasures} />
+            ) : selectedMeasure ? (
+              <CompositeTestCasesTable
+                testCases={testCases}
+                selectedMeasure={selectedMeasure}
+                onBackToMeasures={handleBackToMeasures}
+              />
+            ) : (
+              <>
+                <div
+                  className={howItWorksOpen ? "how-it-works-flush-left" : ""}
+                  style={{
+                    display: "flex",
+                    justifyContent: howItWorksOpen ? "flex-start" : "flex-end",
+                    alignItems: "center",
+                    width: "100%",
+                  }}
+                >
+                  <HowItWorks
+                    isOpen={howItWorksOpen}
+                    onOpenChange={setHowItWorksOpen}
+                  />
+                </div>
+                <div className="elements-panel-header">
+                  <h3>
+                    Select Which Measures to choose Test Case Profiles from:
+                  </h3>
+                  <div>
+                    {compositeMeasures.length > 0 && (
+                      <p className="sub-heading">
+                        {completedMeasureCount} of {compositeMeasures.length}{" "}
+                        Measures (Components) complete
+                      </p>
+                    )}
+                  </div>
+                </div>
+                <CompositeMeasuresTable
+                  measures={compositeMeasures}
+                  onSelectTestCase={handleSelectTestCase}
+                />
+              </>
+            )}
           </div>
         </div>
       )}

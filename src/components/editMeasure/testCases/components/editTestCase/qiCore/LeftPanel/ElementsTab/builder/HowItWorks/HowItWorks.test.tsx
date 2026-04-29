@@ -1,4 +1,4 @@
-import React from "react";
+import * as React from "react";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import HowItWorks from "./HowItWorks";
@@ -60,5 +60,58 @@ describe("HowItWorks", () => {
     render(<HowItWorks />);
     const link = screen.getByTestId("how-it-works-link");
     expect(link).toHaveAttribute("aria-expanded", "false");
+  });
+
+  // --- Controlled mode ---
+
+  describe("controlled mode", () => {
+    it("respects an external isOpen=true prop without internal state", () => {
+      render(<HowItWorks isOpen={true} />);
+      expect(screen.getByTestId("how-it-works-content")).toBeInTheDocument();
+      expect(screen.queryByTestId("how-it-works-link")).not.toBeInTheDocument();
+    });
+
+    it("respects an external isOpen=false prop", () => {
+      render(<HowItWorks isOpen={false} />);
+      expect(screen.getByTestId("how-it-works-link")).toBeInTheDocument();
+      expect(
+        screen.queryByTestId("how-it-works-content")
+      ).not.toBeInTheDocument();
+    });
+
+    it("invokes onOpenChange(true) when link is clicked in controlled mode", async () => {
+      const onOpenChange = jest.fn();
+      render(<HowItWorks isOpen={false} onOpenChange={onOpenChange} />);
+      await userEvent.click(screen.getByTestId("how-it-works-link"));
+      expect(onOpenChange).toHaveBeenCalledWith(true);
+    });
+
+    it("invokes onOpenChange(false) when close button is clicked in controlled mode", async () => {
+      const onOpenChange = jest.fn();
+      render(<HowItWorks isOpen={true} onOpenChange={onOpenChange} />);
+      await userEvent.click(screen.getByTestId("how-it-works-close"));
+      expect(onOpenChange).toHaveBeenCalledWith(false);
+    });
+
+    it("does not toggle internally when controlled (parent must update isOpen)", async () => {
+      // isOpen stays false; clicking link should not open the content
+      const onOpenChange = jest.fn();
+      render(<HowItWorks isOpen={false} onOpenChange={onOpenChange} />);
+      await userEvent.click(screen.getByTestId("how-it-works-link"));
+      expect(onOpenChange).toHaveBeenCalledWith(true);
+      // still closed because parent did not flip isOpen
+      expect(
+        screen.queryByTestId("how-it-works-content")
+      ).not.toBeInTheDocument();
+    });
+
+    it("calls onOpenChange in uncontrolled mode as well (when provided)", async () => {
+      const onOpenChange = jest.fn();
+      render(<HowItWorks onOpenChange={onOpenChange} />);
+      await userEvent.click(screen.getByTestId("how-it-works-link"));
+      expect(onOpenChange).toHaveBeenCalledWith(true);
+      // uncontrolled: state did flip
+      expect(screen.getByTestId("how-it-works-content")).toBeInTheDocument();
+    });
   });
 });

@@ -1,4 +1,4 @@
-import React from "react";
+import * as React from "react";
 import { render, screen, waitFor, fireEvent } from "@testing-library/react";
 import "@testing-library/jest-dom";
 
@@ -7,6 +7,7 @@ import EditCompositeTestCase from "./index";
 const mockFetchMeasuresByIds = jest.fn();
 
 jest.mock("@madie/madie-util", () => ({
+  ...jest.requireActual("@madie/madie-util"),
   useMeasureServiceApi: () => ({
     fetchMeasuresByIds: (...args: any[]) => mockFetchMeasuresByIds(...args),
   }),
@@ -33,6 +34,21 @@ const measureWithComponents = {
   ],
 };
 
+const defaultProps = {
+  allotmentRef: { current: null },
+  editorVal: {},
+  setEditorVal: jest.fn(),
+  testCaseCanEdit: true,
+  seriesState: { series: [] },
+  isModified: () => false,
+  setDiscardDialogOpen: jest.fn(),
+  measure: measureWithComponents,
+  formikStu6Context: null,
+  testCase: null,
+  setValidationSchema: jest.fn(),
+  setInitialFormikValuesStu6: jest.fn(),
+};
+
 describe("EditCompositeTestCase", () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -41,18 +57,7 @@ describe("EditCompositeTestCase", () => {
   it("calls fetchMeasuresByIds and passes results to left panel", async () => {
     mockFetchMeasuresByIds.mockResolvedValueOnce([{ id: "m1" }, { id: "m2" }]);
 
-    render(
-      <EditCompositeTestCase
-        allotmentRef={{ current: null }}
-        editorVal={{}}
-        setEditorVal={jest.fn()}
-        testCaseCanEdit
-        seriesState={{ series: [] }}
-        isModified={() => false}
-        setDiscardDialogOpen={jest.fn()}
-        measure={measureWithComponents}
-      />
-    );
+    render(<EditCompositeTestCase {...defaultProps} />);
 
     await waitFor(() =>
       expect(mockFetchMeasuresByIds).toHaveBeenCalledWith(["m1", "m2"])
@@ -66,14 +71,8 @@ describe("EditCompositeTestCase", () => {
     const setDiscardDialogOpen = jest.fn();
     const { rerender } = render(
       <EditCompositeTestCase
-        allotmentRef={{ current: null }}
-        editorVal={{}}
-        setEditorVal={jest.fn()}
-        testCaseCanEdit
-        seriesState={{ series: [] }}
-        isModified={() => false}
+        {...defaultProps}
         setDiscardDialogOpen={setDiscardDialogOpen}
-        measure={measureWithComponents}
       />
     );
 
@@ -85,14 +84,9 @@ describe("EditCompositeTestCase", () => {
 
     rerender(
       <EditCompositeTestCase
-        allotmentRef={{ current: null }}
-        editorVal={{}}
-        setEditorVal={jest.fn()}
-        testCaseCanEdit
-        seriesState={{ series: [] }}
+        {...defaultProps}
         isModified={() => true}
         setDiscardDialogOpen={setDiscardDialogOpen}
-        measure={measureWithComponents}
       />
     );
 
@@ -104,18 +98,7 @@ describe("EditCompositeTestCase", () => {
   it("handles empty results safely", async () => {
     mockFetchMeasuresByIds.mockResolvedValueOnce([]);
 
-    render(
-      <EditCompositeTestCase
-        allotmentRef={{ current: null }}
-        editorVal={{}}
-        setEditorVal={jest.fn()}
-        testCaseCanEdit
-        seriesState={{ series: [] }}
-        isModified={() => false}
-        setDiscardDialogOpen={jest.fn()}
-        measure={measureWithComponents}
-      />
-    );
+    render(<EditCompositeTestCase {...defaultProps} />);
 
     await waitFor(() => expect(mockFetchMeasuresByIds).toHaveBeenCalled());
 
@@ -131,13 +114,7 @@ describe("EditCompositeTestCase", () => {
 
     render(
       <EditCompositeTestCase
-        allotmentRef={{ current: null }}
-        editorVal={{}}
-        setEditorVal={jest.fn()}
-        testCaseCanEdit
-        seriesState={{ series: [] }}
-        isModified={() => false}
-        setDiscardDialogOpen={jest.fn()}
+        {...defaultProps}
         measure={{
           groups: [
             {
@@ -161,18 +138,7 @@ describe("EditCompositeTestCase", () => {
   it("triggers an empty block on request", async () => {
     mockFetchMeasuresByIds.mockResolvedValueOnce([{ id: "m1" }, { id: "m2" }]);
 
-    render(
-      <EditCompositeTestCase
-        allotmentRef={{ current: null }}
-        editorVal={{}}
-        setEditorVal={jest.fn()}
-        testCaseCanEdit
-        seriesState={{ series: [] }}
-        isModified={() => false}
-        setDiscardDialogOpen={jest.fn()}
-        measure={{}}
-      />
-    );
+    render(<EditCompositeTestCase {...defaultProps} measure={{}} />);
 
     await waitFor(() => expect(mockFetchMeasuresByIds).not.toHaveBeenCalled());
     expect(screen.getByTestId("create-panel")).toBeInTheDocument();
@@ -183,13 +149,7 @@ describe("EditCompositeTestCase", () => {
 
     render(
       <EditCompositeTestCase
-        allotmentRef={{ current: null }}
-        editorVal={{}}
-        setEditorVal={jest.fn()}
-        testCaseCanEdit
-        seriesState={{ series: [] }}
-        isModified={() => false}
-        setDiscardDialogOpen={jest.fn()}
+        {...defaultProps}
         measure={{
           groups: [
             {

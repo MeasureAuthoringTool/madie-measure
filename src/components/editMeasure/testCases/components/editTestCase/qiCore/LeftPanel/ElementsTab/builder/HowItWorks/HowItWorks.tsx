@@ -4,8 +4,22 @@ import PrivacyTipIcon from "@mui/icons-material/PrivacyTip";
 import { IconButton } from "@mui/material";
 import "./HowItWorks.scss";
 
-const HowItWorks = () => {
-  const [isOpen, setIsOpen] = useState(false);
+interface HowItWorksProps {
+  isOpen?: boolean;
+  onOpenChange?: (open: boolean) => void;
+}
+
+const HowItWorks = ({
+  isOpen: isOpenProp,
+  onOpenChange,
+}: HowItWorksProps = {}) => {
+  const [internalOpen, setInternalOpen] = useState(false);
+  const isControlled = isOpenProp !== undefined;
+  const isOpen = isControlled ? isOpenProp : internalOpen;
+  const setIsOpen = (next: boolean) => {
+    if (!isControlled) setInternalOpen(next);
+    onOpenChange?.(next);
+  };
 
   if (!isOpen) {
     return (

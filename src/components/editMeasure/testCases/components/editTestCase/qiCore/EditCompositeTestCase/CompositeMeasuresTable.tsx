@@ -21,8 +21,10 @@ const TH = tw.th`p-3 text-left text-sm font-bold capitalize`;
 
 export default function CompositeMeasuresTable({
   measures,
+  onSelectTestCase,
 }: {
   measures: Measure[];
+  onSelectTestCase?: (measure: Measure) => void;
 }) {
   const [hoveredHeader, setHoveredHeader] = useState<string>("");
   const [selectedGroupForExpansion, setSelectedGroupForExpansion] =
@@ -78,7 +80,12 @@ export default function CompositeMeasuresTable({
         id: "actions",
         header: null,
         cell: (info) => (
-          <Button tw="m-2" type="button">
+          <Button
+            tw="m-2"
+            type="button"
+            data-testid={`select-test-case-btn-${info.row.original.id}`}
+            onClick={() => onSelectTestCase?.(info.row.original)}
+          >
             Select Test Case
             <ChevronRightIcon style={{ height: "20px", width: "20px" }} />
           </Button>
