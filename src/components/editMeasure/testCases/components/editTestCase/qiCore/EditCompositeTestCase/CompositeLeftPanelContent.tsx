@@ -62,7 +62,6 @@ const CompositeLeftPanelContent = ({
       {leftPanelActiveTab === "create" && (
         <div className="panel-content" data-testid="create-panel">
           <div id="elements-panel">
-            <HowItWorks />
             {loadingTestCases ? (
               <div
                 style={{
@@ -81,6 +80,15 @@ const CompositeLeftPanelContent = ({
               />
             ) : (
               <>
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "flex-end",
+                    alignItems: "center",
+                  }}
+                >
+                  <HowItWorks />
+                </div>
                 <div className="elements-panel-header">
                   <h3>
                     Select Which Measures to choose Test Case Profiles from:
