@@ -203,7 +203,7 @@ export default function CompositeTestCasesTable({
               Back to All Measures
             </Button>
           </div>
-          <div tw="mb-4">
+          <div tw="mb-4" className="how-it-works-flush-left">
             <HowItWorks
               isOpen={howItWorksOpen}
               onOpenChange={setHowItWorksOpen}
