@@ -295,8 +295,7 @@ describe("TerminologyServiceApi Tests", () => {
       {
         includeDraft: true,
         manifestExpansion: {
-          fullUrl:
-            "https://cts.nlm.nih.gov/fhir/Library/mu2-update-2015-05-01",
+          fullUrl: "https://cts.nlm.nih.gov/fhir/Library/mu2-update-2015-05-01",
           id: "mu2-update-2015-05-01",
         },
         activeOnly: "true",
