@@ -99,3 +99,13 @@ export const userRolesStore = {
 
 // Mock useUserRoles hook
 export const useUserRoles = () => ({ roles: [], isAdmin: false });
+
+export const getOidFromString = (
+  oidString: string,
+  dataModel: string
+): string => {
+  if (dataModel === "QDM") {
+    return oidString?.split("urn:oid:")[1];
+  }
+  return oidString?.split("ValueSet/")[1];
+};
