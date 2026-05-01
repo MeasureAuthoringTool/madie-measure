@@ -1,5 +1,5 @@
 import * as React from "react";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import ElementEditorChildren from "./ElementEditorChildren";
 import {
@@ -9,6 +9,13 @@ import {
 import { FormikProvider } from "formik";
 
 jest.mock("./TypeEditor", () => () => <div data-testid="type-editor" />);
+
+jest.mock("./RequiredFieldsContext", () => ({
+  useRequiredFields: jest.fn(),
+}));
+
+import { useRequiredFields } from "./RequiredFieldsContext";
+
 const mockPatientState = {
   bundle: {
     id: "46062e7b-b57a-4e40-a9bf-2343080b94a2",
@@ -33,6 +40,13 @@ const mockPatientState = {
   },
 };
 describe("ElementEditorChildren", () => {
+  beforeEach(() => {
+    (useRequiredFields as jest.Mock).mockReturnValue({
+      requiredFields: {},
+      formInfo: [],
+    });
+  });
+
   const defaultProps = {
     setLastAddedElemPath: jest.fn(),
     selectedResourceID: "6fb9d817-76c5-4b68-ba06-92c7429e6b5c",
@@ -102,5 +116,137 @@ describe("ElementEditorChildren", () => {
     expect(
       screen.queryByTestId("elements-action-center-actual-icon")
     ).not.toBeInTheDocument();
+  });
+
+  it("does not render Expand All / Collapse All buttons when attribute has no sub-attributes", () => {
+    const dispatch = jest.fn();
+    // formInfo has no children for Patient.name
+    (useRequiredFields as jest.Mock).mockReturnValue({
+      requiredFields: {},
+      formInfo: [],
+    });
+
+    render(
+      <FormikProvider value={{}}>
+        <QiCoreResourceContext.Provider
+          value={{ state: mockPatientState, dispatch }}
+        >
+          <ElementEditorChildren {...defaultProps} />
+        </QiCoreResourceContext.Provider>
+      </FormikProvider>
+    );
+
+    expect(screen.queryByTestId("expand-all-button")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("collapse-all-button")).not.toBeInTheDocument();
+  });
+
+  it("renders Expand All and Collapse All buttons when attribute has sub-attributes", () => {
+    const dispatch = jest.fn();
+    (useRequiredFields as jest.Mock).mockReturnValue({
+      requiredFields: {},
+      formInfo: [
+        [
+          "Patient.name.use",
+          {
+            id: "Patient.name.use",
+            type: [{ code: "code" }],
+            required: false,
+            max: "1",
+            min: 0,
+          },
+        ],
+        [
+          "Patient.name.text",
+          {
+            id: "Patient.name.text",
+            type: [{ code: "string" }],
+            required: false,
+            max: "1",
+            min: 0,
+          },
+        ],
+      ],
+    });
+
+    render(
+      <FormikProvider value={{}}>
+        <QiCoreResourceContext.Provider
+          value={{ state: mockPatientState, dispatch }}
+        >
+          <ElementEditorChildren {...defaultProps} />
+        </QiCoreResourceContext.Provider>
+      </FormikProvider>
+    );
+
+    expect(screen.getByTestId("expand-all-button")).toBeInTheDocument();
+    expect(screen.getByTestId("collapse-all-button")).toBeInTheDocument();
+    expect(screen.getByText("Expand All")).toBeInTheDocument();
+    expect(screen.getByText("Collapse All")).toBeInTheDocument();
+  });
+
+  it("clicking Expand All button does not throw", () => {
+    const dispatch = jest.fn();
+    (useRequiredFields as jest.Mock).mockReturnValue({
+      requiredFields: {},
+      formInfo: [
+        [
+          "Patient.name.use",
+          {
+            id: "Patient.name.use",
+            type: [{ code: "code" }],
+            required: false,
+            max: "1",
+            min: 0,
+          },
+        ],
+      ],
+    });
+
+    render(
+      <FormikProvider value={{}}>
+        <QiCoreResourceContext.Provider
+          value={{ state: mockPatientState, dispatch }}
+        >
+          <ElementEditorChildren {...defaultProps} />
+        </QiCoreResourceContext.Provider>
+      </FormikProvider>
+    );
+
+    expect(() =>
+      fireEvent.click(screen.getByTestId("expand-all-button"))
+    ).not.toThrow();
+  });
+
+  it("clicking Collapse All button does not throw", () => {
+    const dispatch = jest.fn();
+    (useRequiredFields as jest.Mock).mockReturnValue({
+      requiredFields: {},
+      formInfo: [
+        [
+          "Patient.name.use",
+          {
+            id: "Patient.name.use",
+            type: [{ code: "code" }],
+            required: false,
+            max: "1",
+            min: 0,
+          },
+        ],
+      ],
+    });
+
+    render(
+      <FormikProvider value={{}}>
+        <QiCoreResourceContext.Provider
+          value={{ state: mockPatientState, dispatch }}
+        >
+          <ElementEditorChildren {...defaultProps} />
+        </QiCoreResourceContext.Provider>
+      </FormikProvider>
+    );
+
+    expect(() =>
+      fireEvent.click(screen.getByTestId("collapse-all-button"))
+    ).not.toThrow();
   });
 });
