@@ -1,0 +1,90 @@
+{
+  "name": "madie-measure",
+  "version": "1.0.0",
+  "description": "MADiE Measure front end",
+  "longDescription": "MADiE Measure is the front-end application supporting digital measure authoring within CMS.",
+  "status": "Production",
+  "permissions": {
+    "licenses": [
+      {
+        "name": "CC0-1.0",
+        "URL": "https://github.com/MeasureAuthoringTool/madie-measure/blob/main/LICENSE"
+      }
+    ],
+    "usageType": [
+      "openSource"
+    ],
+    "exemptionText": ""
+  },
+  "organization": "Centers for Medicare & Medicaid Services",
+  "repositoryURL": "https://github.com/MeasureAuthoringTool/madie-measure",
+  "repositoryHost": "github.com",
+  "repositoryVisibility": "public",
+  "homepageURL": "",
+  "downloadURL": "",
+  "disclaimerURL": "",
+  "disclaimerText": "",
+  "vcs": "git",
+  "laborHours": 24758,
+  "reuseFrequency": {
+    "forks": 3,
+    "clones": 0
+  },
+  "platforms": [
+    "web"
+  ],
+  "categories": [
+    "design",
+    "application-development"
+  ],
+  "softwareType": "standalone/web",
+  "languages": [
+    "TypeScript",
+    "SCSS",
+    "JavaScript",
+    "CQL",
+    "Shell",
+    "CSS"
+  ],
+  "maintenance": "internal",
+  "contractNumber": [],
+  "SBOM": "https://github.com/MeasureAuthoringTool/madie-measure/network/dependencies",
+  "relatedCode": [],
+  "reusedCode": [],
+  "partners": [],
+  "date": {
+    "created": "2021-11-01T15:16:07Z",
+    "lastModified": "2026-04-29T17:09:30Z",
+    "metadataLastUpdated": "2026-05-01T00:56:29.315Z"
+  },
+  "tags": [
+    "clinical-quality-measures",
+    "cms",
+    "react",
+    "typescript",
+    "healthcare",
+    "frontend"
+  ],
+  "contact": {
+    "email": "semanticbits-madie-help@icf.com",
+    "name": "MADiE Support Team"
+  },
+  "feedbackMechanism": "https://github.com/MeasureAuthoringTool/madie-measure/issues",
+  "AIUseCaseID": "0",
+  "localisation": false,
+  "repositoryType": "application",
+  "userInput": true,
+  "fismaLevel": "low",
+  "group": "CCSQ",
+  "projects": [
+    "MADiE"
+  ],
+  "systems": [],
+  "subsetInHealthcare": [
+    "operational"
+  ],
+  "userType": [
+    "government"
+  ],
+  "maturityModelTier": 0
+}
