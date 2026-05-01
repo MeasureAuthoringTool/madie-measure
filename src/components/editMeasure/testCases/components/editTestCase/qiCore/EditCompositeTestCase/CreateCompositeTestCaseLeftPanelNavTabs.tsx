@@ -13,7 +13,7 @@ export interface NavTabProps {
 export default function CreateCompositeTestCaseLeftPanelNavTabs(
   props: NavTabProps
 ) {
-  const { leftPanelActiveTab, setLeftPanelActiveTab } = props;
+  const { leftPanelActiveTab, setLeftPanelActiveTab, testCaseCanEdit } = props;
   return (
     <>
       <div tw="flex flex-row w-full">
@@ -26,14 +26,16 @@ export default function CreateCompositeTestCaseLeftPanelNavTabs(
             }}
             type="D"
           >
-            <Tab
-              tabIndex={0}
-              aria-label="create tab panel"
-              type="D"
-              label={`Create`}
-              data-testid="create-tab"
-              value="create"
-            />
+            {testCaseCanEdit && (
+              <Tab
+                tabIndex={0}
+                aria-label="create tab panel"
+                type="D"
+                label={`Create`}
+                data-testid="create-tab"
+                value="create"
+              />
+            )}
             <Tab
               tabIndex={0}
               aria-label="elements tab panel"
