@@ -438,7 +438,7 @@ export class TestCaseServiceApi {
     try {
       const response = await axios.put(
         `${this.baseUrl}/measures/${measureId}/test-cases/qicore/shift-all-dates`,
-        null,
+        {},
         {
           headers: {
             Authorization: `Bearer ${this.getAccessToken()}`,
@@ -488,7 +488,7 @@ export class TestCaseServiceApi {
     try {
       const response = await axios.post<String>(
         `${this.baseUrl}/measures/${measureId}/test-cases/${testCaseId}/lock`,
-        null,
+        {},
         {
           headers: {
             Authorization: `Bearer ${this.getAccessToken()}`,
