@@ -1287,12 +1287,13 @@ const TypeEditor = ({
             return contentRef;
             // return wrapWithSection(childDef.id, contentRef);
           } else if (!isComponentDataType(childDef?.type?.[0]?.code)) {
+            const childIsMultipleCardinality = childDef.max === "*";
             const childDefValues = values?.[childDef.id.split(".").pop()] || [
               {},
             ];
             return (
               <>
-                {(canBeMultipleCardinality
+                {(childIsMultipleCardinality
                   ? Array.isArray(childDefValues)
                     ? childDefValues
                     : [childDefValues]
@@ -1326,7 +1327,11 @@ const TypeEditor = ({
                               parentStructureDefinition={structureDefinition}
                               structureDefinition={childDef}
                               canEdit={canEdit}
-                              label={childDef.id + `[${index}]`}
+                              label={
+                                childIsMultipleCardinality
+                                  ? childDef.id + `[${index}]`
+                                  : childDef.id
+                              }
                             />
                           </Box>
                         }

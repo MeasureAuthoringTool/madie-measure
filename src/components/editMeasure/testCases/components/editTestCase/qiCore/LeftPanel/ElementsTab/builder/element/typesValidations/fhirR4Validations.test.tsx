@@ -6,6 +6,8 @@ import {
   getUnsignedIntegerValidator,
   getPositiveIntegerValidator,
   getQuantityValidator,
+  getCodingValidator,
+  getCodeableConceptValidator,
 } from "./fhirR4Validations";
 
 describe("Validation Functions", () => {
@@ -387,5 +389,144 @@ describe("OID & UUID Validation Functions", () => {
         "urn:uuid:c757873d-ec9a-4326-a141-556f43239520"
       )
     ).resolves.toBe("urn:uuid:c757873d-ec9a-4326-a141-556f43239520");
+  });
+});
+
+describe("getCodingValidator", () => {
+  it("passes when value is null and not required", async () => {
+    const schema = getCodingValidator(false);
+    await expect(schema.validate(null)).resolves.toBeNull();
+  });
+
+  it("fails when value is null and required", async () => {
+    const schema = getCodingValidator(true);
+    await expect(schema.validate(null)).rejects.toThrow();
+  });
+
+  it("passes when coding has both system and code", async () => {
+    const schema = getCodingValidator(false);
+    const valid = { system: "http://example.org", code: "abc" };
+    await expect(schema.validate(valid)).resolves.toEqual(valid);
+  });
+
+  it("fails when system is set but code is empty", async () => {
+    const schema = getCodingValidator(false);
+    const partial = { system: "http://example.org", code: "" };
+    await expect(schema.validate(partial)).rejects.toThrow(
+      "Both Code System and Code are required"
+    );
+  });
+
+  it("fails when code is set but system is empty", async () => {
+    const schema = getCodingValidator(false);
+    const partial = { system: "", code: "abc" };
+    await expect(schema.validate(partial)).rejects.toThrow(
+      "Both Code System and Code are required"
+    );
+  });
+
+  it("fails when both system and code keys exist but are empty", async () => {
+    const schema = getCodingValidator(false);
+    const marker = { system: "", code: "", display: "" };
+    await expect(schema.validate(marker)).rejects.toThrow(
+      "Both Code System and Code are required"
+    );
+  });
+
+  it("passes for an object without system or code keys", async () => {
+    const schema = getCodingValidator(false);
+    const obj = { display: "Something" };
+    await expect(schema.validate(obj)).resolves.toEqual(obj);
+  });
+
+  it("is accessible via getValidation with type Coding", () => {
+    const schema = getValidation("Coding", false);
+    expect(schema).toBeInstanceOf(Yup.ObjectSchema);
+  });
+});
+
+describe("getCodeableConceptValidator", () => {
+  it("passes when value is null and not required", async () => {
+    const schema = getCodeableConceptValidator(false);
+    await expect(schema.validate(null)).resolves.toBeNull();
+  });
+
+  it("fails when value is null and required", async () => {
+    const schema = getCodeableConceptValidator(true);
+    await expect(schema.validate(null)).rejects.toThrow();
+  });
+
+  it("passes when coding array has a complete coding", async () => {
+    const schema = getCodeableConceptValidator(false);
+    const valid = {
+      coding: [{ system: "http://example.org", code: "abc", display: "Abc" }],
+    };
+    await expect(schema.validate(valid)).resolves.toEqual(valid);
+  });
+
+  it("fails when coding array has system but no code", async () => {
+    const schema = getCodeableConceptValidator(false);
+    const partial = {
+      coding: [{ system: "http://example.org", code: "" }],
+    };
+    await expect(schema.validate(partial)).rejects.toThrow(
+      "Both Code System and Code are required for each coding"
+    );
+  });
+
+  it("fails when coding array has code but no system", async () => {
+    const schema = getCodeableConceptValidator(false);
+    const partial = {
+      coding: [{ system: "", code: "abc" }],
+    };
+    await expect(schema.validate(partial)).rejects.toThrow(
+      "Both Code System and Code are required for each coding"
+    );
+  });
+
+  it("fails when any coding in the array is incomplete", async () => {
+    const schema = getCodeableConceptValidator(false);
+    const mixed = {
+      coding: [
+        { system: "http://example.org", code: "abc", display: "Abc" },
+        { system: "http://example.org", code: "" },
+      ],
+    };
+    await expect(schema.validate(mixed)).rejects.toThrow(
+      "Both Code System and Code are required for each coding"
+    );
+  });
+
+  it("passes when coding array is empty", async () => {
+    const schema = getCodeableConceptValidator(false);
+    const empty = { coding: [] };
+    await expect(schema.validate(empty)).resolves.toEqual(empty);
+  });
+
+  it("passes when coding has null entry", async () => {
+    const schema = getCodeableConceptValidator(false);
+    const val = { coding: [null] };
+    await expect(schema.validate(val)).resolves.toEqual(val);
+  });
+
+  it("passes when no coding property exists", async () => {
+    const schema = getCodeableConceptValidator(false);
+    const val = { text: "some text" };
+    await expect(schema.validate(val)).resolves.toEqual(val);
+  });
+
+  it("fails when marker coding with empty system and code exists", async () => {
+    const schema = getCodeableConceptValidator(false);
+    const marker = {
+      coding: [{ system: "", code: "", display: "" }],
+    };
+    await expect(schema.validate(marker)).rejects.toThrow(
+      "Both Code System and Code are required for each coding"
+    );
+  });
+
+  it("is accessible via getValidation with type CodeableConcept", () => {
+    const schema = getValidation("CodeableConcept", false);
+    expect(schema).toBeInstanceOf(Yup.ObjectSchema);
   });
 });

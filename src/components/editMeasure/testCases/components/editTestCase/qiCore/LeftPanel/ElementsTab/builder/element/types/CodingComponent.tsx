@@ -56,10 +56,8 @@ const CodingComponent = ({
       const valueSet = allValueSets.find(
         (vs) => vs.url === value?.extension?.[0]?.valueUri
       );
-      if (valueSet?.name !== selectedValueSet?.name) {
-        setSelectedValueSet(
-          allValueSets.find((vs) => vs.url === value?.extension?.[0]?.valueUri)
-        );
+      if (valueSet && valueSet?.name !== selectedValueSet?.name) {
+        setSelectedValueSet(valueSet);
       }
     }
   }, [structureDefinition, allValueSets, value]);
@@ -119,6 +117,8 @@ const CodingComponent = ({
   const handleValueSetChange = (value: string) => {
     // clear code system and code
     setSelectedConcept(undefined);
+    // Write a marker to Formik so Yup validation catches the incomplete state
+    onChange({ system: "", code: "", display: "" });
     if (value === "Custom Code") {
       setSelectedValueSet({
         title: "Custom Code",
@@ -131,11 +131,10 @@ const CodingComponent = ({
   };
 
   const handleCodeSystemChange = (codeSystem: string) => {
-    setSelectedConcept({
-      system: codeSystem,
-      code: "",
-      display: "",
-    });
+    const partial = { system: codeSystem, code: "", display: "" };
+    setSelectedConcept(partial);
+    // Push partial coding to Formik so Yup rejects it (system set, code missing)
+    onChange(partial);
   };
 
   const handleCodeChange = (code: string) => {
