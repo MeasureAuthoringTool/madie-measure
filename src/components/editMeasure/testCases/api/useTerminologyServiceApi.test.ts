@@ -652,4 +652,195 @@ describe("TerminologyServiceApi Tests", () => {
       expect(error.message).not.toContain("Per VSAC");
     }
   });
+
+  it("should shorten cqlCode.system in title and group by system for FHIR DRCs", async () => {
+    const measureBundle = {
+      entry: [
+        {
+          resource: {
+            resourceType: "Library",
+            extension: [
+              {
+                url: "http://example.com/directReferenceCode",
+                valueCoding: {
+                  code: "code1",
+                  system: "http://snomed.info/sct",
+                  display: "SNOMED Code",
+                },
+              },
+              {
+                url: "http://example.com/directReferenceCode",
+                valueCoding: {
+                  code: "code2",
+                  system: "http://snomed.info/sct",
+                  display: "Another SNOMED Code",
+                },
+              },
+              {
+                url: "http://example.com/directReferenceCode",
+                valueCoding: {
+                  code: "code3",
+                  system: "http://loinc.org",
+                  display: "LOINC Code",
+                },
+              },
+            ],
+          },
+        },
+      ],
+    } as fhir4.Bundle;
+
+    const getAccessToken = jest.fn().mockReturnValue("test-token");
+    const terminologyService = new TerminologyServiceApi(
+      "test.url",
+      getAccessToken
+    );
+
+    const result = terminologyService.getFhirValueSetsForDRCs(measureBundle);
+
+    expect(result.length).toBe(2);
+    expect(result[0].title).toBe("sct");
+    expect(result[0].expansion.contains.length).toBe(2);
+    expect(result[0].expansion.contains[0].code).toBe("code1");
+    expect(result[0].expansion.contains[1].code).toBe("code2");
+    expect(result[1].title).toBe("loinc.org");
+    expect(result[1].expansion.contains.length).toBe(1);
+  });
+
+  it("should remove whitespace from system values when creating FHIR DRC valuesets", async () => {
+    const measureBundle = {
+      entry: [
+        {
+          resource: {
+            resourceType: "Library",
+            extension: [
+              {
+                url: "http://example.com/directReferenceCode",
+                valueCoding: {
+                  code: "code1",
+                  system: "  http://snomed.info/sct  ",
+                  display: "SNOMED Code",
+                },
+              },
+            ],
+          },
+        },
+      ],
+    } as fhir4.Bundle;
+
+    const getAccessToken = jest.fn().mockReturnValue("test-token");
+    const terminologyService = new TerminologyServiceApi(
+      "test.url",
+      getAccessToken
+    );
+
+    const result = terminologyService.getFhirValueSetsForDRCs(measureBundle);
+
+    expect(result[0].expansion.contains[0].system).toBe(
+      "  http://snomed.info/sct  "
+    );
+  });
+
+  it("should return empty array when no direct reference codes found in FHIR bundle", async () => {
+    const measureBundle = {
+      entry: [
+        {
+          resource: {
+            resourceType: "Library",
+            extension: [],
+          },
+        },
+      ],
+    } as fhir4.Bundle;
+
+    const getAccessToken = jest.fn().mockReturnValue("test-token");
+    const terminologyService = new TerminologyServiceApi(
+      "test.url",
+      getAccessToken
+    );
+
+    const result = terminologyService.getFhirValueSetsForDRCs(measureBundle);
+
+    expect(result.length).toBe(0);
+  });
+
+  it("should handle FHIR bundle with multiple libraries containing DRCs", async () => {
+    const measureBundle = {
+      entry: [
+        {
+          resource: {
+            resourceType: "Library",
+            extension: [
+              {
+                url: "http://example.com/directReferenceCode",
+                valueCoding: {
+                  code: "code1",
+                  system: "http://snomed.info/sct",
+                  display: "SNOMED Code",
+                },
+              },
+            ],
+          },
+        },
+        {
+          resource: {
+            resourceType: "Library",
+            extension: [
+              {
+                url: "http://example.com/directReferenceCode",
+                valueCoding: {
+                  code: "code2",
+                  system: "http://snomed.info/sct",
+                  display: "Another SNOMED Code",
+                },
+              },
+            ],
+          },
+        },
+      ],
+    } as fhir4.Bundle;
+
+    const getAccessToken = jest.fn().mockReturnValue("test-token");
+    const terminologyService = new TerminologyServiceApi(
+      "test.url",
+      getAccessToken
+    );
+
+    const result = terminologyService.getFhirValueSetsForDRCs(measureBundle);
+
+    expect(result.length).toBe(1);
+    expect(result[0].expansion.contains.length).toBe(2);
+  });
+
+  it("should create name without whitespace from system title for FHIR DRCs", async () => {
+    const measureBundle = {
+      entry: [
+        {
+          resource: {
+            resourceType: "Library",
+            extension: [
+              {
+                url: "http://example.com/directReferenceCode",
+                valueCoding: {
+                  code: "code1",
+                  system: "http://snomed.info/sct/version/code",
+                  display: "SNOMED Code",
+                },
+              },
+            ],
+          },
+        },
+      ],
+    } as fhir4.Bundle;
+
+    const getAccessToken = jest.fn().mockReturnValue("test-token");
+    const terminologyService = new TerminologyServiceApi(
+      "test.url",
+      getAccessToken
+    );
+
+    const result = terminologyService.getFhirValueSetsForDRCs(measureBundle);
+
+    expect(result[0].name).toBe("code");
+  });
 });

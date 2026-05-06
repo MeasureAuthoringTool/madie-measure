@@ -215,6 +215,43 @@ export class TerminologyServiceApi {
     return [];
   }
 
+  getFhirValueSetsForDRCs(measureBundle: Bundle): ValueSet[] {
+    const drcValueSets = [];
+    const cqlCodeWithCodeSystemOid: CQLCodeWithCodeSystemOid[] =
+      this.getFhirCqlCodesForDRCs(measureBundle);
+    if (cqlCodeWithCodeSystemOid) {
+      const groupedBySystem = cqlCodeWithCodeSystemOid.reduce((acc, item) => {
+        const key = item.cqlCode.system;
+        if (!acc[key]) {
+          acc[key] = [];
+        }
+        acc[key].push(item);
+        return acc;
+      }, {} as Record<string, CQLCodeWithCodeSystemOid[]>);
+
+      Object.entries(groupedBySystem).forEach(([system, items]) => {
+        const shortTitle = system.split("/").pop() || system;
+        const valueSet = {
+          id: `drc-${md5(system)}`,
+          version: items[0].cqlCode.version,
+          expansion: {
+            contains: items.map(({ cqlCode }) => ({
+              code: cqlCode.code,
+              system: cqlCode.system,
+              version: cqlCode.version,
+              display: cqlCode.display,
+            })),
+          },
+          title: shortTitle,
+          name: shortTitle.replace(/\s/g, ""),
+        };
+        drcValueSets.push(valueSet);
+      });
+    }
+
+    return drcValueSets;
+  }
+
   getOidFromString(oidString: string): string {
     const oidRegex = /[0-2](\.(0|[1-9][0-9]*))+/;
     const match = oidString?.match(oidRegex);
@@ -251,6 +288,33 @@ export class TerminologyServiceApi {
       });
     }
     return drcValueSets;
+  }
+
+  getFhirCqlCodesForDRCs(measureBundle: Bundle): CQLCodeWithCodeSystemOid[] {
+    const cqlCodeWithCodeSystemOid: CQLCodeWithCodeSystemOid[] = [];
+    measureBundle?.entry
+      ?.filter((entry) => entry.resource?.resourceType === "Library")
+      .forEach((library) => {
+        const libraryResource = library.resource as Library;
+        const codeDefs = libraryResource?.extension?.filter((ext) =>
+          ext.url.endsWith("directReferenceCode")
+        );
+        if (!_.isEmpty(codeDefs)) {
+          codeDefs.forEach((def) => {
+            const cqlCode = new CQL.Code(
+              def?.valueCoding.code, //code
+              def.valueCoding.system, //system
+              def.valueCoding.version ? def.valueCoding.version : "N/A", //version,
+              def.valueCoding.display //display
+            );
+            cqlCodeWithCodeSystemOid.push({
+              cqlCode: cqlCode,
+              codeSystemOid: def.valueCoding.system,
+            });
+          });
+        }
+      });
+    return cqlCodeWithCodeSystemOid;
   }
 
   getCqlCodesForDRCs(cqmMeasure: CqmMeasure): CQLCodeWithCodeSystemOid[] {
