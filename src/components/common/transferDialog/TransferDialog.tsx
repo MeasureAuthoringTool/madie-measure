@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useRef, useEffect } from "react";
 import {
   MadieDialog,
   TextField,
@@ -109,6 +109,12 @@ const TransferDialog = ({
     }),
     onSubmit: handleSave,
   });
+
+  useEffect(() => {
+    if (!open) {
+      formik.resetForm();
+    }
+  }, [open]);
 
   return (
     <>
