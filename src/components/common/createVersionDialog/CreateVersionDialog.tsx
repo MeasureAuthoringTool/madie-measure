@@ -80,6 +80,13 @@ const CreateVersionDialog = ({
     getNewVersion(formik.values.type, measureId);
   }, [currentVersion, formik.values.type]);
 
+  useEffect(() => {
+    if (!open) {
+      formik.resetForm();
+      setNewVersionNumber("");
+    }
+  }, [open]);
+
   const error = !!versionHelperText;
   return (
     <MadieDialog

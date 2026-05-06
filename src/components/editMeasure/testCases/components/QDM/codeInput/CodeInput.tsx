@@ -153,7 +153,7 @@ const CodeInput = ({
 
   return (
     <div>
-      <h4 className="header" tw="text-blue-800">
+      <h4 className="header" tw="text-blue-800 pt-4 pb-2">
         {title}
       </h4>
       <Select
