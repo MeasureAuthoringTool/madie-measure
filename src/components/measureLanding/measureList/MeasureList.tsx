@@ -1175,6 +1175,7 @@ export default function MeasureList(props: {
           onSearchTrigger={handleSearchTrigger}
           onSearchClear={handleSearchClear}
           filterByOpts={["Measure", "Model", "Version", "CMS ID"]}
+          textFieldID={"measure"}
         />
         <div>
           <ActionCenter
