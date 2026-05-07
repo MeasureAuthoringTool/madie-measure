@@ -184,10 +184,12 @@ export default function MeasureList(props: {
     searchField,
     handleFilter,
     handleSearch,
+    finalizeSearchCriteria,
     blankSearchCriteria: resetFilterSearch,
   } = useMeasureFilterSearch();
 
   const handleSearchTrigger = () => {
+    finalizeSearchCriteria();
     const optionalSearchProperties: string[] = [];
     if (filterBy && filterMap[filterBy as keyof typeof filterMap]) {
       optionalSearchProperties.push(

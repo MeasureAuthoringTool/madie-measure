@@ -418,66 +418,65 @@ export default function MeasureLanding() {
           )}
 
           {/* spin or display */}
-          {!loading && (
-            <div className="table">
-              <MeasureList
-                retrieveMeasures={retrieveMeasures}
-                measureList={measureList}
-                setMeasureList={setMeasureList}
-                setTotalPages={setTotalPages}
-                setTotalItems={setTotalItems}
-                setVisibleItems={setVisibleItems}
-                setOffset={setOffset}
-                setLoading={setLoading}
-                activeTab={activeTab}
-                searchCriteria={searchCriteria}
-                setSearchCriteria={setSearchCriteria}
-                currentLimit={currentLimit}
-                currentPage={currentPage}
-                setCurrentPage={setCurrentPage}
-                handlePageChange={handlePageChange}
-                currentSort={currentSort}
-                setCurrentSort={setCurrentSort}
-                currentDirection={currentDirection}
-                setCurrentDirection={setCurrentDirection}
-                setStatusHandler={setStatusHandler}
-                search={search}
-                // Toast props
-                toastOpen={toastOpen}
-                toastMessage={toastMessage}
-                toastType={toastType}
-                setToastOpen={setToastOpen}
-                setToastMessage={setToastMessage}
-                setToastType={setToastType}
-                onToastClose={onToastClose}
-              />
-              <div className="pagination-container">
-                {totalItems > 0 && (
-                  <Pagination
-                    totalItems={totalItems}
-                    visibleItems={visibleItems}
-                    limitOptions={[
-                      10,
-                      25,
-                      50,
-                      ...(totalItems > 50 && activeTab === 0 ? ["All"] : []),
-                    ]}
-                    offset={offset}
-                    handlePageChange={handlePageChange}
-                    handleLimitChange={handleLimitChange}
-                    page={curPage}
-                    limit={
-                      curLimit === "All" && totalItems <= 50 ? 50 : curLimit
-                    }
-                    count={totalPages}
-                    shape="rounded"
-                    hideNextButton={!canGoNext}
-                    hidePrevButton={!canGoPrev}
-                  />
-                )}
-              </div>
+          <div
+            className="table"
+            style={{ display: loading ? "none" : "block" }}
+          >
+            <MeasureList
+              retrieveMeasures={retrieveMeasures}
+              measureList={measureList}
+              setMeasureList={setMeasureList}
+              setTotalPages={setTotalPages}
+              setTotalItems={setTotalItems}
+              setVisibleItems={setVisibleItems}
+              setOffset={setOffset}
+              setLoading={setLoading}
+              activeTab={activeTab}
+              searchCriteria={searchCriteria}
+              setSearchCriteria={setSearchCriteria}
+              currentLimit={currentLimit}
+              currentPage={currentPage}
+              setCurrentPage={setCurrentPage}
+              handlePageChange={handlePageChange}
+              currentSort={currentSort}
+              setCurrentSort={setCurrentSort}
+              currentDirection={currentDirection}
+              setCurrentDirection={setCurrentDirection}
+              setStatusHandler={setStatusHandler}
+              search={search}
+              // Toast props
+              toastOpen={toastOpen}
+              toastMessage={toastMessage}
+              toastType={toastType}
+              setToastOpen={setToastOpen}
+              setToastMessage={setToastMessage}
+              setToastType={setToastType}
+              onToastClose={onToastClose}
+            />
+            <div className="pagination-container">
+              {totalItems > 0 && (
+                <Pagination
+                  totalItems={totalItems}
+                  visibleItems={visibleItems}
+                  limitOptions={[
+                    10,
+                    25,
+                    50,
+                    ...(totalItems > 50 && activeTab === 0 ? ["All"] : []),
+                  ]}
+                  offset={offset}
+                  handlePageChange={handlePageChange}
+                  handleLimitChange={handleLimitChange}
+                  page={curPage}
+                  limit={curLimit === "All" && totalItems <= 50 ? 50 : curLimit}
+                  count={totalPages}
+                  shape="rounded"
+                  hideNextButton={!canGoNext}
+                  hidePrevButton={!canGoPrev}
+                />
+              )}
             </div>
-          )}
+          </div>
         </div>
         {loading && (
           <div style={{ display: "flex", justifyContent: "center" }}>
