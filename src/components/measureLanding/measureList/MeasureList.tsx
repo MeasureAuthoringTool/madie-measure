@@ -21,14 +21,14 @@ import {
   Button,
   TruncateText,
   MadieTooltipIcon,
+  MadieTable,
+  SearchAndFilter,
 } from "@madie/madie-design-system/dist/react";
-import MadieTable from "../../../../../madie-design-system/react/components/MadieTable";
-import SearchAndFilter from "../../../../../madie-design-system/react/components/SearchAndFilter";
 import {
-  useMeasureFilterSearch,
+  useFilterSearch,
   filterMap,
   filterByOptions,
-} from "../../../../../madie-design-system/react/components/SearchAndFilter/useMeasureFilterSearch";
+} from "@madie/madie-design-system/components/SearchAndFilter/useFilterSearch";
 import {
   useReactTable,
   ColumnDef,
@@ -186,7 +186,7 @@ export default function MeasureList(props: {
     handleSearch,
     finalizeSearchCriteria,
     blankSearchCriteria: resetFilterSearch,
-  } = useMeasureFilterSearch();
+  } = useFilterSearch();
 
   const handleSearchTrigger = () => {
     finalizeSearchCriteria();
