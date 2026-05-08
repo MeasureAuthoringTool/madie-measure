@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { DialogContent, MenuItem, Typography, Backdrop } from "@mui/material";
 import { Box } from "@mui/system";
 import { makeStyles } from "@mui/styles";
@@ -48,6 +48,12 @@ const DraftMeasureDialog = ({ open, onClose, onSubmit, measure, loading }) => {
       return onSubmit(measureName, model);
     },
   });
+
+  useEffect(() => {
+    if (!open) {
+      formik.resetForm();
+    }
+  }, [open]);
 
   const row = {
     display: "flex",
