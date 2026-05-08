@@ -28,6 +28,13 @@ const ElementSectionQiCore = (props: ElementSectionProps) => {
   const [open, setOpen] = useState(startOpen);
   const expandCollapseCtx = useExpandCollapse();
   useEffect(() => {
+    expandCollapseCtx?.registerSection();
+    return () => {
+      expandCollapseCtx?.unregisterSection();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  useEffect(() => {
     if (
       expandCollapseCtx?.command !== null &&
       expandCollapseCtx?.command !== undefined
