@@ -23,12 +23,10 @@ import {
   MadieTooltipIcon,
   MadieTable,
   SearchAndFilter,
-} from "@madie/madie-design-system/dist/react";
-import {
   useFilterSearch,
   filterMap,
   filterByOptions,
-} from "@madie/madie-design-system/components/SearchAndFilter/useFilterSearch";
+} from "@madie/madie-design-system/dist/react";
 import {
   useReactTable,
   ColumnDef,
