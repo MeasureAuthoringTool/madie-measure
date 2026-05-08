@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import "./ElementSectionQiCore.scss";
 import { IconButton } from "@mui/material";
 import AddElementButton from "../../../../../../common/UIOnlyModelAgnostic/AddElementButton";
+import { useExpandCollapse } from "./ExpandCollapseContext";
 // Tab heading to display weather or not we can see contents
 
 interface ElementSectionProps {
@@ -25,6 +26,15 @@ const ElementSectionQiCore = (props: ElementSectionProps) => {
     required = false,
   } = props;
   const [open, setOpen] = useState(startOpen);
+  const expandCollapseCtx = useExpandCollapse();
+  useEffect(() => {
+    if (
+      expandCollapseCtx?.command !== null &&
+      expandCollapseCtx?.command !== undefined
+    ) {
+      setOpen(expandCollapseCtx.command.value);
+    }
+  }, [expandCollapseCtx?.command]);
   const chevronClass = open ? "chevron-display open" : "chevron-display";
   const growingDivClass = open
     ? "growing-div-qi-core open"
