@@ -12,7 +12,7 @@ import {
 import tw from "twin.macro";
 import "styled-components/macro";
 import { Measure } from "@madie/madie-models";
-import * as _ from "lodash";
+import { formatCmsId } from "../../../utils/cmsIdFormatter";
 
 const TH = tw.th`p-3 text-left text-sm`;
 const TD = tw.td`p-3 text-left text-sm break-keep`;
@@ -122,11 +122,7 @@ export const TransferredMeasuresTable = ({
         accessorKey: "cmsId",
         header: "CMS ID",
         cell: (info) =>
-          _.toString(info.getValue()).concat(
-            info.row.original.model.startsWith("QI-Core") && info.getValue()
-              ? "FHIR"
-              : ""
-          ),
+          formatCmsId(info.getValue() as number, info.row.original.model),
       },
     ];
 

@@ -10,6 +10,7 @@ import React, {
 import tw from "twin.macro";
 import "styled-components/macro";
 import { Measure, Model } from "@madie/madie-models";
+import { formatCmsId, padCmsId } from "../../../utils/cmsIdFormatter";
 import {
   useMeasureServiceApi,
   checkUserCanEdit,
@@ -396,15 +397,10 @@ export default function MeasureList(props: {
       header: "CMS ID",
       cell: (info) => (
         <TruncateText
-          text={(() => {
-            const cmsId =
-              info.row.original.actions?.measureSet?.cmsId?.toString();
-            const model = info.row.original.actions?.model;
-
-            if (!cmsId) return "";
-
-            return model?.startsWith("QI-Core") ? `${cmsId}FHIR` : cmsId;
-          })()}
+          text={formatCmsId(
+            info.row.original.actions?.measureSet?.cmsId,
+            info.row.original.actions?.model
+          )}
           maxLength={60}
           dataTestId={`measure-cmsId-${info.row.original.id}`}
         />
@@ -1131,9 +1127,9 @@ export default function MeasureList(props: {
         props.setToastOpen(true);
         props.setToastType("success");
         props.setToastMessage(
-          `Measures successfully associated with CMS ID ${measureSet?.cmsId}${
-            copyMetaData ? " and meta data is copied over" : ""
-          }.`
+          `Measures successfully associated with CMS ID ${padCmsId(
+            measureSet?.cmsId
+          )}${copyMetaData ? " and meta data is copied over" : ""}.`
         );
         handleDialogClose();
       })

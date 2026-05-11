@@ -27,6 +27,7 @@ import {
 } from "../../../../../../icons/MeasureListTableRightArrowIcons";
 import { Measure, MeasureScoring, OwnershipType } from "@madie/madie-models";
 import * as _ from "lodash";
+import { formatCmsId, padCmsId } from "../../../../../../utils/cmsIdFormatter";
 import tw from "twin.macro";
 import "styled-components/macro";
 import { useMeasureServiceApi } from "@madie/madie-util";
@@ -329,7 +330,7 @@ export default function AddComponentsDialog({
         header: "CMS ID",
         cell: (info) => (
           <TruncateText
-            text={_.toString(info.row.original?.measureSet?.cmsId)}
+            text={padCmsId(info.row.original?.measureSet?.cmsId)}
             maxLength={20}
             dataTestId={`measure-cmsId-${info.row.original.id}`}
           />
@@ -611,14 +612,10 @@ export default function AddComponentsDialog({
         header: "CMS ID",
         cell: (info) => (
           <TruncateText
-            text={(() => {
-              const cmsId =
-                info.row.original.actions?.measureSet?.cmsId?.toString();
-              const model = info.row.original.actions?.model;
-
-              if (!cmsId) return "";
-              return model?.startsWith("QI-Core") ? `${cmsId}FHIR` : cmsId;
-            })()}
+            text={formatCmsId(
+              info.row.original.actions?.measureSet?.cmsId,
+              info.row.original.actions?.model
+            )}
             maxLength={60}
             dataTestId={`measure-cmsId-${info.row.original.id}`}
           />

@@ -17,14 +17,14 @@ const measuresFixture: any[] = [
     id: "m1",
     measureName: "Alpha Measure",
     version: "1.0.0",
-    measureSet: { cmsId: "CMS111" },
+    measureSet: { cmsId: "111" },
     lastModifiedAt: "2024-01-15",
   },
   {
     id: "m2",
     measureName: "Beta Measure",
     version: "2.0.0",
-    measureSet: { cmsId: "CMS222" },
+    measureSet: { cmsId: "222" },
     lastModifiedAt: "2024-02-20",
   },
 ];
@@ -68,8 +68,8 @@ describe("AddedComponentsTable", () => {
     expect(screen.getByText("2.0.0")).toBeInTheDocument();
 
     // CMS ID column
-    expect(screen.getByText("CMS111")).toBeInTheDocument();
-    expect(screen.getByText("CMS222")).toBeInTheDocument();
+    expect(screen.getByText("0111")).toBeInTheDocument();
+    expect(screen.getByText("0222")).toBeInTheDocument();
 
     // Updated column uses mocked convertDate
     expect(screen.getAllByText("Jan 15, 2024").length).toBeGreaterThan(0);
