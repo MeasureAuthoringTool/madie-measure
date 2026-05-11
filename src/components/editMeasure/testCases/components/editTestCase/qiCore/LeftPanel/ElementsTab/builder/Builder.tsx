@@ -131,7 +131,12 @@ const Builder = ({
             (relevantElement) => relevantElement.profile
           );
           if (!_.isEmpty(resourceIdentifiers)) {
-            const uniqueResources = _.uniq(resourceIdentifiers.sort());
+            // "uniq" alone does not prevent duplicates. Correct sorting.
+            const uniqueResources = _.uniqBy(
+              resourceIdentifiers,
+              "profile"
+            ).sort((a, b) => a.title.localeCompare(b.title));
+
             const filteredResources = _.isEmpty(profiles)
               ? uniqueResources
               : uniqueResources.filter(
