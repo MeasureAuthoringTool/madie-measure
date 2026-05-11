@@ -28,7 +28,7 @@ export const MeasureSearchFilters: React.FC<MeasureFilterSearchProps> = ({
   onSearchClear,
 }) => {
   return (
-    <div className="measure-search-filters">
+    <div className="dialog-measure-search-filters measure-search-filters">
       <div>
         <Select
           label="Filter By"
