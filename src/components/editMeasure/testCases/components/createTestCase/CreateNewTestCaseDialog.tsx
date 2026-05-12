@@ -115,6 +115,12 @@ const CreateNewTestCaseDialog = ({
   });
 
   useEffect(() => {
+    if (!open) {
+      formik.resetForm();
+    }
+  }, [open]);
+
+  useEffect(() => {
     if (!seriesState.loaded) {
       testCaseService.current
         .getTestCaseSeriesForMeasure(measureId)

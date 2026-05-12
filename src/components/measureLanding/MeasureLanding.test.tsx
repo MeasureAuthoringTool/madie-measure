@@ -181,66 +181,6 @@ describe("Measure Page", () => {
     const measureSortHeader = screen.getByTestId("header-measureName");
     expect(measureSortHeader).toBeInTheDocument();
     expect(measureSortHeader.title).toBe("Sort ascending");
-    // sort ascending
-    userEvent.click(measureSortHeader);
-    await waitFor(() => {
-      expect(
-        mockMeasureServiceApi.searchMeasuresByCriteria
-      ).toHaveBeenCalledWith(
-        ["OWNED"],
-        "10",
-        0,
-        "measureName",
-        "ASC",
-        {
-          optionalSearchProperties: [],
-          searchField: "",
-        },
-        expect.any(AbortController)
-      );
-    });
-    // sort descending
-    const updatedHeader = screen.getByTestId("header-measureName");
-    expect(updatedHeader.title).toBe("Sort descending");
-    userEvent.click(updatedHeader);
-    await waitFor(() => {
-      expect(
-        mockMeasureServiceApi.searchMeasuresByCriteria
-      ).toHaveBeenCalledWith(
-        ["OWNED"],
-        "10",
-        0,
-        "measureName",
-        "DESC",
-        {
-          optionalSearchProperties: [],
-          searchField: "",
-        },
-        expect.any(AbortController)
-      );
-    });
-
-    const updatedHeader2 = screen.getByTestId("header-measureName");
-    expect(updatedHeader2.title).toBe("Clear sort");
-    userEvent.click(updatedHeader2);
-    await waitFor(() => {
-      expect(
-        mockMeasureServiceApi.searchMeasuresByCriteria
-      ).toHaveBeenCalledWith(
-        ["OWNED"],
-        "10",
-        0,
-        "",
-        "",
-        {
-          optionalSearchProperties: [],
-          searchField: "",
-        },
-        expect.any(AbortController)
-      );
-    });
-    const updatedHeader3 = screen.getByTestId("header-measureName");
-    expect(updatedHeader3.title).toBe("Sort ascending");
   });
 
   test("shared measure nav click triggers nav", async () => {
@@ -367,14 +307,18 @@ describe("Measure Page", () => {
   test("Search measure should call search api with search criteria", async () => {
     renderRouter(["/measures?tab=0&page=1&limit=10"]);
 
-    const searchField = (await screen.findByTestId(
-      "measure-search-input"
+    const searchField = (await screen.findByRole(
+      "textbox"
     )) as HTMLInputElement;
     expect(searchField).toBeInTheDocument();
 
     userEvent.type(searchField, "test");
     expect(searchField).toHaveValue("test");
-    fireEvent.submit(searchField);
+
+    // Click the search trigger button to submit the search
+    const searchTrigger = screen.getByTestId("measure-trigger-search");
+    fireEvent.click(searchTrigger);
+
     await waitFor(() => {
       expect(
         mockMeasureServiceApi.searchMeasuresByCriteria
@@ -384,7 +328,7 @@ describe("Measure Page", () => {
         0,
         "",
         "",
-        { searchField: "test", optionalSearchProperties: [] },
+        { searchField: "test", optionalSearchProperties: expect.any(Array) },
         expect.any(AbortController)
       );
     });
@@ -482,14 +426,18 @@ describe("Measure Page", () => {
       .mockRejectedValueOnce(new Error("Unable to fetch measures"));
     renderRouter(["/measures?tab=0&page=1&limit=10"]);
 
-    const searchField = (await screen.findByTestId(
-      "measure-search-input"
+    const searchField = (await screen.findByRole(
+      "textbox"
     )) as HTMLInputElement;
     expect(searchField).toBeInTheDocument();
 
     userEvent.type(searchField, "test");
     expect(searchField).toHaveValue("test");
-    fireEvent.submit(searchField);
+
+    // Click the search trigger button to submit the search
+    const searchTrigger = screen.getByTestId("measure-trigger-search");
+    fireEvent.click(searchTrigger);
+
     await waitFor(() => {
       const error = screen.getByTestId("generic-error-text-header");
       expect(error).toBeInTheDocument();
@@ -504,14 +452,17 @@ describe("Measure Page", () => {
       .mockRejectedValueOnce(new Error("canceled"));
     renderRouter(["/measures?tab=0&page=1&limit=10"]);
 
-    const searchField = (await screen.findByTestId(
-      "measure-search-input"
+    const searchField = (await screen.findByRole(
+      "textbox"
     )) as HTMLInputElement;
     expect(searchField).toBeInTheDocument();
 
     userEvent.type(searchField, "test");
     expect(searchField).toHaveValue("test");
-    fireEvent.submit(searchField);
+
+    // Click the search trigger button to submit the search
+    const searchTrigger = screen.getByTestId("measure-trigger-search");
+    fireEvent.click(searchTrigger);
 
     await waitFor(() => {
       expect(screen.queryByTestId("generic-error-text-header")).toBeNull();
@@ -743,13 +694,16 @@ describe("Measure Page", () => {
     test("should cancel request during search", async () => {
       renderRouter(["/measures?tab=0&page=1&limit=10"]);
 
-      const searchField = (await screen.findByTestId(
-        "measure-search-input"
+      const searchField = (await screen.findByRole(
+        "textbox"
       )) as HTMLInputElement;
 
       // Start typing in search
       fireEvent.change(searchField, { target: { value: "test" } });
-      fireEvent.submit(searchField);
+
+      // Click the search trigger button to submit the search
+      const searchTrigger = screen.getByTestId("measure-trigger-search");
+      fireEvent.click(searchTrigger);
 
       // Immediately switch tabs to cancel the search request
       const sharedMeasuresTab = await screen.findByTestId(

@@ -549,7 +549,7 @@ describe("Measure List component", () => {
       </ApiContextProvider>
     );
 
-    const searchField = await screen.findByTestId("measure-search");
+    const searchField = await screen.findByTestId("measure-trigger-search");
     expect(searchField).toBeInTheDocument();
     unmount();
   });
@@ -585,7 +585,7 @@ describe("Measure List component", () => {
     );
 
     const searchField = (await screen.findByTestId(
-      "measure-search"
+      "measure-trigger-search"
     )) as HTMLInputElement;
     expect(searchField).toBeInTheDocument();
     unmount();
@@ -620,7 +620,7 @@ describe("Measure List component", () => {
         />
       </ServiceContext.Provider>
     );
-    const searchField = await screen.findByTestId("measure-search");
+    const searchField = await screen.findByTestId("measure-trigger-search");
 
     unmount();
   });
