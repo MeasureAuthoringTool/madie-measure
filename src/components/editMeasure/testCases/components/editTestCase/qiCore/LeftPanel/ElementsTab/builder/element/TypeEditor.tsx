@@ -1308,7 +1308,7 @@ const TypeEditor = ({
                           ` ${childDef.max === "*" ? index + 1 : ""}`
                         }
                         elementDefinition={childDef}
-                        startOpen={false}
+                        startOpen={true}
                         handleAddElement={() =>
                           handleAddComplexElement(childDef.id)
                         }
