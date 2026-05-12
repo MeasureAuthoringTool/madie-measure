@@ -117,11 +117,6 @@ const applyCode = (
     parseResults.codeSystems,
     measureModel
   );
-  // Add code system to CQL if it does not exist
-  if (!previousCodeSystem) {
-    let newCodeSystem = createCodeSystemDeclaration(code, measureModel);
-    cqlArr.splice(findCodeSystemInsertPoint(parseResults), 0, newCodeSystem);
-  }
 
   let status = "success";
   let message: string;
@@ -135,6 +130,11 @@ const applyCode = (
     status = "info";
   } //if code exists, update it
   else if (previousCode) {
+    // Add code system to CQL if it does not exist
+    if (!previousCodeSystem) {
+      let newCodeSystem = createCodeSystemDeclaration(code, measureModel);
+      cqlArr.splice(findCodeSystemInsertPoint(parseResults), 0, newCodeSystem);
+    }
     if (previousCodeSystem) {
       cqlArr[previousCode.stop.line - 1] = newCode;
     } else {
@@ -143,6 +143,11 @@ const applyCode = (
     message = `Code ${code.name} has been updated successfully.`;
   } // Add new code
   else {
+    // Add code system to CQL if it does not exist
+    if (!previousCodeSystem) {
+      let newCodeSystem = createCodeSystemDeclaration(code, measureModel);
+      cqlArr.splice(findCodeSystemInsertPoint(parseResults), 0, newCodeSystem);
+    }
     if (previousCodeSystem) {
       cqlArr.splice(findCodeInsertPoint(parseResults), 0, newCode);
     } else {

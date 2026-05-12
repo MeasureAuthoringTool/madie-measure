@@ -130,20 +130,44 @@ export const getValueSetsForDemographic = (
   if (!sourceDataCriteria) {
     return null;
   }
+
+  // When multiple source_data_criteria match the same qdmStatus, the resulting
+  // valueSets may contain overlapping concepts. We deduplicate concepts across
+  // all valueSets using a composite key of (code + code_system_oid).
+  //
+  // - If two valueSets both have a concept with the same code AND same
+  //   code_system_oid, we treat them as the same concept and only keep the
+  //   first occurrence (from the first valueSet encountered).
+  // - If two valueSets have a concept with the same code but DIFFERENT
+  //   code_system_oid values, they are considered distinct concepts and both
+  //   are kept. This allows the user to see options from different code systems.
+  const seenConcepts = new Set<string>();
+
   const valueSets = cqmMeasure?.value_sets
     ?.filter((valueSet) => sourceDataCriteria.includes(valueSet.oid))
     .map((valueSet) => ({
       name: valueSet?.display_name,
       oid: valueSet?.oid,
-      concepts: valueSet?.concepts.map((concept) => {
-        return {
-          system: concept?.code_system_oid,
-          version: concept?.code_system_version,
-          code: concept?.code,
-          display: concept?.display_name,
-        };
-      }),
-    }));
+      concepts: valueSet?.concepts
+        .filter((concept) => {
+          const key = `${concept?.code}__${concept?.code_system_oid}`;
+          if (seenConcepts.has(key)) {
+            return false;
+          }
+          seenConcepts.add(key);
+          return true;
+        })
+        .map((concept) => {
+          return {
+            system: concept?.code_system_oid,
+            version: concept?.code_system_version,
+            code: concept?.code,
+            display: concept?.display_name,
+          };
+        }),
+    }))
+    // Remove valueSets that have no concepts left after deduplication
+    .filter((valueSet) => valueSet.concepts.length > 0);
   if (!valueSets) {
     return null;
   }

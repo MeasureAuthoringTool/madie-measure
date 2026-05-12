@@ -115,6 +115,12 @@ const CreateNewTestCaseDialog = ({
   });
 
   useEffect(() => {
+    if (!open) {
+      formik.resetForm();
+    }
+  }, [open]);
+
+  useEffect(() => {
     if (!seriesState.loaded) {
       testCaseService.current
         .getTestCaseSeriesForMeasure(measureId)
@@ -202,11 +208,12 @@ const CreateNewTestCaseDialog = ({
       return `${formik.errors[name]}`;
     }
   }
+  const isComposite = measure?.measureMetaData?.composite;
   return (
     <div data-testid="create-test-case-dialog">
       <MadieDialog
         form
-        title="Create Test Case"
+        title={`Create ${isComposite ? "Composite " : ""}Test Case`}
         dialogProps={{
           onClose,
           open,

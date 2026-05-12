@@ -37,6 +37,7 @@ export default function ViewHRAction(props: PropTypes) {
       title={tooltipMessage}
       onMouseOver={validateViewHRActionState}
       arrow
+      placement="top"
       slotProps={{
         tooltip: {
           sx: {

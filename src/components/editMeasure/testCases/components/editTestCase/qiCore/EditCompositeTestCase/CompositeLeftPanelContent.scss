@@ -1,0 +1,35 @@
+#elements-panel {
+  > .elements-panel-header {
+    border-bottom: solid 1px #d1d5db;
+    padding-bottom: 16px;
+
+    > h3 {
+      font-size: 18px;
+      font-weight: 500;
+      line-height: 24px;
+      white-space: normal;
+      overflow-wrap: break-word;
+    }
+
+    .sub-heading {
+      margin-top: 16px;
+      margin-bottom: 0;
+      font-size: 14px;
+      font-weight: 400;
+      color: #717171;
+    }
+  }
+}
+
+// When HowItWorks is shown below the "Back to All Measures" button, align it
+// flush-left with the button (override the default container padding/justify).
+.how-it-works-flush-left {
+  width: 100%;
+
+  .how-it-works-container {
+    padding-left: 0;
+    padding-right: 0;
+    justify-content: flex-start;
+    width: 100%;
+  }
+}

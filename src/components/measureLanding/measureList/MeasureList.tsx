@@ -13,7 +13,6 @@ import { Measure, Model } from "@madie/madie-models";
 import {
   useMeasureServiceApi,
   checkUserCanEdit,
-  useFeatureFlags,
   useUserRoles,
 } from "@madie/madie-util";
 import { useNavigate } from "react-router-dom";
@@ -22,6 +21,11 @@ import {
   Button,
   TruncateText,
   MadieTooltipIcon,
+  MadieTable,
+  SearchAndFilter,
+  useFilterSearch,
+  filterMap,
+  filterByOptions,
 } from "@madie/madie-design-system/dist/react";
 import {
   useReactTable,
@@ -31,9 +35,6 @@ import {
   getSortedRowModel,
   SortingState,
 } from "@tanstack/react-table";
-import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore";
-import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
-import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import "../../editMeasure/testCases/components/testCaseLanding/common/TestCase.scss";
 import InvalidTestCaseDialog from "../../common/invalidTestCaseDialog/InvalidTestCaseDialog";
 import CreatVersionDialog from "../../common/createVersionDialog/CreateVersionDialog";
@@ -54,16 +55,17 @@ import {
 } from "../../../icons/MeasureListTableRightArrowIcons";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import { exportMeasure as downloadMeasureExport } from "../../../utils/exportUtil";
 import { MeasureSearchCriteria } from "../MeasureLanding";
-import Search from "./measureSearch/Search";
 import queryString from "query-string";
 import _ from "lodash";
 import { getTabStorageKey } from "../measureLandingUtils";
 import TransferDialog from "../../common/transferDialog/TransferDialog";
 import CompareVersionsDialog from "../../common/compareVersionsDialog/CompareVersionsDialog";
 
-const TH = tw.th`p-3 text-left text-sm font-bold capitalize`;
+const COMPONENT_MEASURE_MSG =
+  "This measure is a component of a composite measure";
 
 // Export customSort for testing purposes
 export function customSort(a: string, b: string) {
@@ -78,6 +80,60 @@ export function customSort(a: string, b: string) {
   if (aComp > bComp) return 1;
   return 0;
 }
+
+// Display chips for draft, composite and in-composite state
+const MeasureStatusChips = ({ measure }) => {
+  return (
+    <div
+      style={{ display: "inline-flex", gap: 4, flexWrap: "wrap" }}
+      aria-label="Measure status"
+    >
+      {measure.measureMetaData?.draft && (
+        <Chip
+          className="chip-draft"
+          label="Draft"
+          role="status"
+          aria-label="Draft"
+        />
+      )}
+      {measure.measureMetaData?.composite && (
+        <Chip
+          className="chip-composite"
+          label="Composite"
+          role="status"
+          aria-label="Composite"
+        />
+      )}
+      {measure.component && (
+        <Chip
+          className="chip-in-composite"
+          role="status"
+          aria-label={`In Composite: ${COMPONENT_MEASURE_MSG}`} // for 508
+          label={
+            <span
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 4,
+              }}
+            >
+              In Composite
+              <Tooltip title={`${COMPONENT_MEASURE_MSG}`} arrow>
+                <InfoOutlinedIcon
+                  sx={{ fontSize: 16 }}
+                  aria-label={`${COMPONENT_MEASURE_MSG}`}
+                  role="img"
+                  tabIndex={0}
+                  focusable="true"
+                />
+              </Tooltip>
+            </span>
+          }
+        />
+      )}
+    </div>
+  );
+};
 
 export default function MeasureList(props: {
   retrieveMeasures?: (
@@ -120,8 +176,45 @@ export default function MeasureList(props: {
 }) {
   const { searchCriteria, setSearchCriteria, retrieveMeasures } = { ...props };
   const measureServiceApi = useRef(useMeasureServiceApi()).current; //needs to be ref or triggers jest. throws warn
-  const [hoveredHeader, setHoveredHeader] = useState<string>("");
-  const featureFlags = useFeatureFlags();
+
+  const {
+    filterBy,
+    searchField,
+    handleFilter,
+    handleSearch,
+    finalizeSearchCriteria,
+    blankSearchCriteria: resetFilterSearch,
+  } = useFilterSearch();
+
+  const handleSearchTrigger = () => {
+    finalizeSearchCriteria();
+    const optionalSearchProperties: string[] = [];
+    if (filterBy && filterMap[filterBy as keyof typeof filterMap]) {
+      optionalSearchProperties.push(
+        filterMap[filterBy as keyof typeof filterMap]
+      );
+    }
+    if (!filterBy && searchField) {
+      filterByOptions.forEach((condition) => {
+        optionalSearchProperties.push(
+          filterMap[condition as keyof typeof filterMap]
+        );
+      });
+    }
+    setSearchCriteria({
+      searchField: searchField,
+      optionalSearchProperties,
+    });
+    props.handlePageChange(null, 1);
+  };
+
+  const handleSearchClear = () => {
+    resetFilterSearch();
+    setSearchCriteria({
+      searchField: "",
+      optionalSearchProperties: [],
+    });
+  };
 
   const navigate = useNavigate();
   // Popover utilities
@@ -266,11 +359,7 @@ export default function MeasureList(props: {
     {
       header: "Status",
       cell: (info) => (
-        <>
-          {`${info.row.original.actions.measureMetaData?.draft}` === "true" && (
-            <Chip className="chip-draft" label="Draft" />
-          )}
-        </>
+        <MeasureStatusChips measure={info.row.original.actions} />
       ),
       accessorKey: "measureMetaData.draft",
     },
@@ -1076,10 +1165,15 @@ export default function MeasureList(props: {
           zIndex: 20,
         }}
       >
-        <Search
-          searchCriteria={searchCriteria}
-          setSearchCriteria={setSearchCriteria}
-          handlePageChange={props.handlePageChange}
+        <SearchAndFilter
+          filterBy={filterBy}
+          searchField={searchField}
+          onFilterChange={handleFilter}
+          onSearchChange={handleSearch}
+          onSearchTrigger={handleSearchTrigger}
+          onSearchClear={handleSearchClear}
+          filterByOpts={["Measure", "Model", "Version", "CMS ID"]}
+          textFieldID={"measure"}
         />
         <div>
           <ActionCenter
@@ -1100,146 +1194,33 @@ export default function MeasureList(props: {
           />
         </div>
       </div>
-      <table
-        tw="min-w-full"
-        data-testid="measure-list-tbl"
-        className="tcl-table"
-        id="testCaseListTable"
-        style={{
-          borderSpacing: "0 2em !important",
-          overflow: "visible",
-          backgroundColor: "#fff",
-          opacity: 1,
-        }}
-      >
-        <thead className="sticky-table" style={{ overflow: "visible" }}>
-          {table.getHeaderGroups().map((headerGroup) => (
-            <tr key={headerGroup.id}>
-              {headerGroup.headers.map((header) => {
-                const isHovered = hoveredHeader?.includes(header.id);
-                return (
-                  <TH
-                    key={header.id}
-                    scope="col"
-                    onClick={() => header.column.getToggleSortingHandler()}
-                    onMouseEnter={() => setHoveredHeader(header.id)}
-                    onMouseLeave={() => setHoveredHeader(null)}
-                    className="header-cell"
-                  >
-                    {/* Only render a <button> for sortable columns.
-                        For non-sortable columns like "Action", render the header content directly, not inside a <button>.
-                    */}
-                    {header.isPlaceholder ? null : header.column.getCanSort() ? (
-                      <button
-                        className={
-                          header.column.getCanSort()
-                            ? "cursor-pointer select-none header-button"
-                            : "header-button"
-                        }
-                        disabled={!header.column.getCanSort()}
-                        onClick={() => handleSort(header.id.replace("_", "."))}
-                        data-testid={`header-${header.id.replace("_", ".")}`}
-                        title={
-                          header.column.getCanSort()
-                            ? props.currentSort ===
-                              header.column.id.replace("_", ".")
-                              ? props.currentSort &&
-                                props.currentDirection &&
-                                props.currentDirection === "ASC"
-                                ? "Sort descending"
-                                : props.currentDirection === "DESC"
-                                ? "Clear sort"
-                                : "Sort ascending"
-                              : "Sort ascending"
-                            : undefined
-                        }
-                      >
-                        {flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
-                        <span className="arrowDisplay">
-                          {header.column.getCanSort() ? (
-                            props.currentSort ===
-                            header.column.id.replace("_", ".") ? (
-                              props.currentSort &&
-                              props.currentDirection &&
-                              props.currentDirection === "ASC" ? (
-                                <KeyboardArrowUpIcon />
-                              ) : (
-                                <KeyboardArrowDownIcon />
-                              )
-                            ) : isHovered ? (
-                              <UnfoldMoreIcon />
-                            ) : (
-                              ""
-                            )
-                          ) : (
-                            ""
-                          )}
-                        </span>
-                      </button>
-                    ) : (
-                      flexRender(
-                        header.column.columnDef.header,
-                        header.getContext()
-                      )
-                    )}
-                  </TH>
-                );
-              })}
-            </tr>
-          ))}
-        </thead>
-        <tbody className="table-body measures-list" style={{ padding: 20 }}>
-          {table.getRowModel().rows.length === 0 && (
-            <tr>
-              <td
-                colSpan={table.getAllColumns().length}
-                style={{ padding: "40px 0", textAlign: "center" }}
-              >
-                <span>No results were found</span>
-              </td>
-            </tr>
-          )}
-          {table.getRowModel().rows.map((row) => (
-            <React.Fragment key={row.id}>
-              <tr
-                key={row.id}
-                className="ml-tr"
-                data-testid={`row-item`}
-                style={{
-                  borderBottom: "solid 1px #8c8c8c",
-                  borderSpacing: "0 2em !important",
-                }}
-              >
-                {row.getVisibleCells().map((cell) => (
-                  <td key={cell.id} data-testid={`measure-name-${cell.id}`}>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+      <MadieTable
+        table={table}
+        currentSort={props.currentSort}
+        currentDirection={props.currentDirection}
+        handleSort={handleSort}
+        id="measureListTable"
+        dataTestId="measure-list-tbl"
+        renderExpandedRow={(row) =>
+          selectedIdForExpansion === row.original.actions?.measureSetId &&
+          expandedSectionData?.map((subRow) => (
+            <tr key={subRow.id} className="expanded-row">
+              {expandedcolumns.map((column: any) =>
+                column?.accessorKey === "expandArrow" ? (
+                  <td key={`${subRow.id}-expand`}></td>
+                ) : (
+                  <td key={column?.accessorKey || column.id}>
+                    {flexRender(column.cell ?? column.accessorKey, {
+                      row: { original: subRow },
+                      getValue: () => subRow[column.accessorKey],
+                    })}
                   </td>
-                ))}
-              </tr>
-              {selectedIdForExpansion === row.original.actions?.measureSetId &&
-                expandedSectionData?.map((subRow) => (
-                  <tr key={subRow.id} className="expanded-row">
-                    {expandedcolumns.map((column: any) =>
-                      column?.accessorKey === "expandArrow" ? (
-                        <td></td>
-                      ) : (
-                        <td key={column?.accessorKey || column.id}>
-                          {flexRender(column.cell ?? column.accessorKey, {
-                            row: { original: subRow },
-                            getValue: () => subRow[column.accessorKey],
-                          })}
-                        </td>
-                      )
-                    )}
-                  </tr>
-                ))}
-            </React.Fragment>
-          ))}
-        </tbody>
-      </table>
+                )
+              )}
+            </tr>
+          ))
+        }
+      />
       <CreatVersionDialog
         currentVersion={targetMeasure?.current?.version}
         open={createVersionDialog.open}

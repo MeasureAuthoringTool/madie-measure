@@ -1287,48 +1287,56 @@ const TypeEditor = ({
             return contentRef;
             // return wrapWithSection(childDef.id, contentRef);
           } else if (!isComponentDataType(childDef?.type?.[0]?.code)) {
+            const childIsMultipleCardinality = childDef.max === "*";
             const childDefValues = values?.[childDef.id.split(".").pop()] || [
               {},
             ];
             return (
               <>
-                {(canBeMultipleCardinality
+                {(childIsMultipleCardinality
                   ? Array.isArray(childDefValues)
                     ? childDefValues
                     : [childDefValues]
                   : [null]
                 ).map((el, index) => {
                   return (
-                    <ElementSectionQiCore
-                      key={index}
-                      title={
-                        formatAttributeLabel(childDef.id) + ` ${index + 1}`
-                      }
-                      elementDefinition={childDef}
-                      startOpen={false}
-                      handleAddElement={() =>
-                        handleAddComplexElement(childDef.id)
-                      }
-                      canBeMultipleCardinality={
-                        canBeMultipleCardinality &&
-                        childDefValues.length - 1 === index
-                      }
-                      children={
-                        <Box
-                          style={{
-                            paddingLeft: "16px",
-                          }}
-                        >
-                          <TypeEditor
-                            resource={resource}
-                            parentStructureDefinition={structureDefinition}
-                            structureDefinition={childDef}
-                            canEdit={canEdit}
-                            label={childDef.id + `[${index}]`}
-                          />
-                        </Box>
-                      }
-                    />
+                    !(childDef.max === "0" && childDef.min === 0) && (
+                      <ElementSectionQiCore
+                        key={index}
+                        title={
+                          formatAttributeLabel(childDef.id) +
+                          ` ${childDef.max === "*" ? index + 1 : ""}`
+                        }
+                        elementDefinition={childDef}
+                        startOpen={false}
+                        handleAddElement={() =>
+                          handleAddComplexElement(childDef.id)
+                        }
+                        canBeMultipleCardinality={
+                          childDef.max === "*" &&
+                          childDefValues.length - 1 === index
+                        }
+                        children={
+                          <Box
+                            style={{
+                              paddingLeft: "16px",
+                            }}
+                          >
+                            <TypeEditor
+                              resource={resource}
+                              parentStructureDefinition={structureDefinition}
+                              structureDefinition={childDef}
+                              canEdit={canEdit}
+                              label={
+                                childIsMultipleCardinality
+                                  ? childDef.id + `[${index}]`
+                                  : childDef.id
+                              }
+                            />
+                          </Box>
+                        }
+                      />
+                    )
                   );
                 })}
               </>

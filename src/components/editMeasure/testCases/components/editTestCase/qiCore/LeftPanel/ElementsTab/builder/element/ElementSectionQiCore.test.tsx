@@ -4,6 +4,10 @@ import { describe, expect, test } from "@jest/globals";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { act } from "react-dom/test-utils";
 import ElementSectionQiCore from "./ElementSectionQiCore";
+import {
+  ExpandCollapseProvider,
+  useExpandCollapse,
+} from "./ExpandCollapseContext";
 
 const { findByText, findByTestId, queryByTestId } = screen;
 
@@ -70,5 +74,116 @@ describe("TabHeadings", () => {
     render(<ElementSectionQiCore title="Optional Title" required={false} />);
     const asterisk = screen.queryByText("*");
     expect(asterisk).not.toBeInTheDocument();
+  });
+});
+
+// Helper component that triggers expand/collapse from context
+const ExpandCollapseTestHarness = ({ title, startOpen = false }) => {
+  const ctx = useExpandCollapse();
+  return (
+    <>
+      <button data-testid="trigger-expand" onClick={() => ctx.expandAll()} />
+      <button
+        data-testid="trigger-collapse"
+        onClick={() => ctx.collapseAll()}
+      />
+      <ElementSectionQiCore title={title} startOpen={startOpen}>
+        <span data-testid="child-content">child</span>
+      </ElementSectionQiCore>
+    </>
+  );
+};
+
+describe("ElementSectionQiCore with ExpandCollapseContext", () => {
+  test("expandAll opens a collapsed section", async () => {
+    render(
+      <ExpandCollapseProvider>
+        <ExpandCollapseTestHarness title="Name" startOpen={false} />
+      </ExpandCollapseProvider>
+    );
+    expect(screen.queryByTestId("elements-header-content-Name")).toBeNull();
+    act(() => {
+      fireEvent.click(screen.getByTestId("trigger-expand"));
+    });
+    expect(
+      await screen.findByTestId("elements-header-content-Name")
+    ).toBeInTheDocument();
+  });
+
+  test("collapseAll closes an open section", async () => {
+    render(
+      <ExpandCollapseProvider>
+        <ExpandCollapseTestHarness title="Name" startOpen={true} />
+      </ExpandCollapseProvider>
+    );
+    expect(
+      await screen.findByTestId("elements-header-content-Name")
+    ).toBeInTheDocument();
+    act(() => {
+      fireEvent.click(screen.getByTestId("trigger-collapse"));
+    });
+    await waitFor(() => {
+      expect(
+        screen.queryByTestId("elements-header-content-Name")
+      ).not.toBeInTheDocument();
+    });
+  });
+
+  test("expandAll can be triggered multiple times consecutively", async () => {
+    render(
+      <ExpandCollapseProvider>
+        <ExpandCollapseTestHarness title="Name" startOpen={false} />
+      </ExpandCollapseProvider>
+    );
+    act(() => {
+      fireEvent.click(screen.getByTestId("trigger-expand"));
+    });
+    expect(
+      await screen.findByTestId("elements-header-content-Name")
+    ).toBeInTheDocument();
+    // Manually collapse via chevron
+    act(() => {
+      fireEvent.click(
+        screen.getByTestId("elements-heading-expansion-button-Name")
+      );
+    });
+    await waitFor(() => {
+      expect(
+        screen.queryByTestId("elements-header-content-Name")
+      ).not.toBeInTheDocument();
+    });
+    // Expand All again should re-open
+    act(() => {
+      fireEvent.click(screen.getByTestId("trigger-expand"));
+    });
+    expect(
+      await screen.findByTestId("elements-header-content-Name")
+    ).toBeInTheDocument();
+  });
+
+  test("section still toggles via its own chevron when context is present", async () => {
+    render(
+      <ExpandCollapseProvider>
+        <ExpandCollapseTestHarness title="Name" startOpen={false} />
+      </ExpandCollapseProvider>
+    );
+    expect(screen.queryByTestId("elements-header-content-Name")).toBeNull();
+    act(() => {
+      fireEvent.click(
+        screen.getByTestId("elements-heading-expansion-button-Name")
+      );
+    });
+    expect(
+      await screen.findByTestId("elements-header-content-Name")
+    ).toBeInTheDocument();
+  });
+
+  test("section renders without error when used outside ExpandCollapseProvider", async () => {
+    render(
+      <ElementSectionQiCore title="Standalone" startOpen={false}>
+        <span>content</span>
+      </ElementSectionQiCore>
+    );
+    expect(screen.getByText("Standalone")).toBeInTheDocument();
   });
 });

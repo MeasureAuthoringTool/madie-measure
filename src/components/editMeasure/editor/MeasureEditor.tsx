@@ -576,16 +576,15 @@ const MeasureEditor = ({ measureCanEdit, measureLockedBy }) => {
 
   const handleApplyCode = (code: Code) => {
     const result = applyCode(editorVal, code, measure.model);
-    if (result.status) {
-      // if result status is true, we modified the CQL
-      // let's store off the codeSystem/code/version
+    if (result.status === "success") {
+      // we modified the CQL, store off the codeSystem/code/version
       const codeMap = new Map<string, Code>();
       codeMap.set(code.name, code);
       setCodeMap(codeMap);
       // we can send it with the measure when it's saved
       handleMadieEditorValue(result.cql);
     }
-    // if result status is false, we didn't modify. so CQL didn't change,
+    // if result status is not success, CQL didn't change,
     // but confirmation messages can still be displayed
     setToastMessage(result.message);
     setToastType(result.status);
@@ -594,7 +593,7 @@ const MeasureEditor = ({ measureCanEdit, measureLockedBy }) => {
 
   const handleApplyParameter = (parameter: Parameter) => {
     const result = applyParameter(editorVal, parameter);
-    if (result.status) {
+    if (result.status === "success") {
       handleMadieEditorValue(result.cql);
     }
     setToastMessage(result.message);
@@ -605,7 +604,7 @@ const MeasureEditor = ({ measureCanEdit, measureLockedBy }) => {
 
   const handleApplyFunction = (cqlFunction) => {
     const result = applyCQLFunction(editorVal, cqlFunction);
-    if (result.status) {
+    if (result.status === "success") {
       handleMadieEditorValue(result.cql);
     }
     setToastMessage(result.message);
@@ -790,7 +789,7 @@ const MeasureEditor = ({ measureCanEdit, measureLockedBy }) => {
       prevSelectedValueSetDetails?.current
     ); // should have updated editorVal but doesn't
     setRefValueSetDetails(vs);
-    if (result.status !== "danger") {
+    if (result.status === "success") {
       handleMadieEditorValue(result.cql);
       setEditorVal(result.cql);
     }
