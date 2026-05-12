@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React from "react";
 import * as _ from "lodash";
 import TypeEditor from "./TypeEditor";
 import {
@@ -8,8 +8,6 @@ import {
   stripAllIndexes,
   addCardinalityToElement,
   formatChoiceType,
-  getFirstChildren,
-  isComponentDataType,
 } from "../../../../../../../api/fhirDefinitionServiceUtilities";
 import ElementEditorActionCenter from "./elementEditorActionCenter/ElementEditorActionCenter";
 import {
@@ -23,7 +21,6 @@ import {
   ExpandCollapseProvider,
   useExpandCollapse,
 } from "./ExpandCollapseContext";
-import { useRequiredFields } from "./RequiredFieldsContext";
 
 const ElementEditorChildrenInner = ({
   setLastAddedElemPath,
@@ -35,14 +32,14 @@ const ElementEditorChildrenInner = ({
   canEdit,
   resourcePath,
   deleteElement,
-  hasSubAttributes,
 }) => {
+  const expandCollapseCtx = useExpandCollapse();
+  const hasSubAttributes = (expandCollapseCtx?.sectionCount ?? 0) > 0;
   currentDepth = currentDepth + 1;
   const elemPath = stripResourcePath(resourcePath, rootDefinition.path);
   const { values } = useFormikContext();
   let elementValue = _.get(resource, elemPath);
   const { dispatch, state } = useQiCoreResource();
-  const expandCollapseCtx = useExpandCollapse();
   const addElementOfMultipleCardinality = () => {
     const nextEntry = _.cloneDeep(
       state.bundle?.entry?.find(
@@ -157,20 +154,9 @@ const ElementEditorChildrenInner = ({
 };
 
 const ElementEditorChildren = (props) => {
-  const { formInfo } = useRequiredFields();
-  const type = props.rootDefinition?.type?.[0]?.code;
-  const hasSubAttributes = useMemo(() => {
-    if (!formInfo || isComponentDataType(type)) return false;
-    const strippedId = stripAllIndexes(props.rootDefinition?.id ?? "");
-    return getFirstChildren(strippedId, formInfo).length > 0;
-  }, [formInfo, type, props.rootDefinition?.id]);
-
   return (
-    <ExpandCollapseProvider>
-      <ElementEditorChildrenInner
-        {...props}
-        hasSubAttributes={hasSubAttributes}
-      />
+    <ExpandCollapseProvider key={props.rootDefinition?.id}>
+      <ElementEditorChildrenInner {...props} />
     </ExpandCollapseProvider>
   );
 };
