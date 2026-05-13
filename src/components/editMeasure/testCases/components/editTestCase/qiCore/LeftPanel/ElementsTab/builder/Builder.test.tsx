@@ -639,9 +639,9 @@ describe("scrollToElementByIdWhenAvailable", () => {
 
     const resourceTitles = rows.map((row) => row.textContent);
     expect(resourceTitles[0]).toContain("QICore Patient");
-    expect(resourceTitles[1]).toContain("QICore ServiceRequest");
+    expect(resourceTitles[1]).toContain("QICore Encounter");
     expect(resourceTitles[2]).toContain("QICore Procedure");
-    expect(resourceTitles[3]).toContain("QICore Encounter");
+    expect(resourceTitles[3]).toContain("QICore ServiceRequest");
   });
 
   it("renders loading spinner overlay container in Added tab", async () => {
