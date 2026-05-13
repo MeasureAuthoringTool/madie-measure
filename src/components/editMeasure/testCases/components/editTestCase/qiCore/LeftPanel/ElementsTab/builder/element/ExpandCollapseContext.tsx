@@ -15,6 +15,9 @@ interface ExpandCollapseContextValue {
   command: ExpandCollapseCommand | null;
   expandAll: () => void;
   collapseAll: () => void;
+  registerSection: () => void;
+  unregisterSection: () => void;
+  sectionCount: number;
 }
 
 const ExpandCollapseContext = createContext<ExpandCollapseContextValue | null>(
@@ -31,6 +34,7 @@ export const ExpandCollapseProvider = ({
   children: ReactNode;
 }) => {
   const [command, setCommand] = useState<ExpandCollapseCommand | null>(null);
+  const [sectionCount, setSectionCount] = useState(0);
 
   const expandAll = useCallback(() => {
     setCommand((prev) => ({ value: true, id: (prev?.id ?? 0) + 1 }));
@@ -40,8 +44,25 @@ export const ExpandCollapseProvider = ({
     setCommand((prev) => ({ value: false, id: (prev?.id ?? 0) + 1 }));
   }, []);
 
+  const registerSection = useCallback(() => {
+    setSectionCount((c) => c + 1);
+  }, []);
+
+  const unregisterSection = useCallback(() => {
+    setSectionCount((c) => Math.max(0, c - 1));
+  }, []);
+
   return (
-    <ExpandCollapseContext.Provider value={{ command, expandAll, collapseAll }}>
+    <ExpandCollapseContext.Provider
+      value={{
+        command,
+        expandAll,
+        collapseAll,
+        registerSection,
+        unregisterSection,
+        sectionCount,
+      }}
+    >
       {children}
     </ExpandCollapseContext.Provider>
   );
