@@ -137,6 +137,7 @@ const CopyTestCaseDialog = ({ open, onClose, measure, selectedTestCases }) => {
       model: measure.model,
       excludeByMeasureIds: [measure.id],
       optionalSearchProperties,
+      excludeCompositeMeasures: true,
     };
 
     // Always allow searching all measures (including versioned ones)
