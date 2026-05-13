@@ -1,5 +1,11 @@
 import * as React from "react";
-import { render, screen, waitFor, fireEvent } from "@testing-library/react";
+import {
+  render,
+  screen,
+  waitFor,
+  fireEvent,
+  act,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import ElementEditorChildren from "./ElementEditorChildren";
 import {
@@ -8,13 +14,28 @@ import {
 } from "../../../../../../../util/QiCorePatientProvider";
 import { FormikProvider } from "formik";
 
-jest.mock("./TypeEditor", () => () => <div data-testid="type-editor" />);
+// Controls whether the TypeEditor mock renders real ElementSectionQiCore panels
+let mockRenderSections = false;
 
-jest.mock("./RequiredFieldsContext", () => ({
-  useRequiredFields: jest.fn(),
-}));
-
-import { useRequiredFields } from "./RequiredFieldsContext";
+jest.mock("./TypeEditor", () => {
+  return {
+    __esModule: true,
+    default: () => {
+      const React = require("react");
+      if (mockRenderSections) {
+        const ElementSectionQiCore = jest.requireActual(
+          "./ElementSectionQiCore"
+        ).default;
+        return React.createElement(
+          ElementSectionQiCore,
+          { title: "mock-sub-section", startOpen: true },
+          React.createElement("span", null, "child content")
+        );
+      }
+      return React.createElement("div", { "data-testid": "type-editor" });
+    },
+  };
+});
 
 const mockPatientState = {
   bundle: {
@@ -41,10 +62,7 @@ const mockPatientState = {
 };
 describe("ElementEditorChildren", () => {
   beforeEach(() => {
-    (useRequiredFields as jest.Mock).mockReturnValue({
-      requiredFields: {},
-      formInfo: [],
-    });
+    mockRenderSections = false;
   });
 
   const defaultProps = {
@@ -118,13 +136,9 @@ describe("ElementEditorChildren", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("does not render Expand All / Collapse All buttons when attribute has no sub-attributes", () => {
+  it("does not render Expand All / Collapse All buttons when no sub-attribute panels are rendered", () => {
     const dispatch = jest.fn();
-    // formInfo has no children for Patient.name
-    (useRequiredFields as jest.Mock).mockReturnValue({
-      requiredFields: {},
-      formInfo: [],
-    });
+    mockRenderSections = false;
 
     render(
       <FormikProvider value={{}}>
@@ -140,33 +154,9 @@ describe("ElementEditorChildren", () => {
     expect(screen.queryByTestId("collapse-all-button")).not.toBeInTheDocument();
   });
 
-  it("renders Expand All and Collapse All buttons when attribute has sub-attributes", () => {
+  it("renders Expand All and Collapse All buttons when sub-attribute panels are rendered", async () => {
     const dispatch = jest.fn();
-    (useRequiredFields as jest.Mock).mockReturnValue({
-      requiredFields: {},
-      formInfo: [
-        [
-          "Patient.name.use",
-          {
-            id: "Patient.name.use",
-            type: [{ code: "code" }],
-            required: false,
-            max: "1",
-            min: 0,
-          },
-        ],
-        [
-          "Patient.name.text",
-          {
-            id: "Patient.name.text",
-            type: [{ code: "string" }],
-            required: false,
-            max: "1",
-            min: 0,
-          },
-        ],
-      ],
-    });
+    mockRenderSections = true;
 
     render(
       <FormikProvider value={{}}>
@@ -178,29 +168,15 @@ describe("ElementEditorChildren", () => {
       </FormikProvider>
     );
 
-    expect(screen.getByTestId("expand-all-button")).toBeInTheDocument();
+    expect(await screen.findByTestId("expand-all-button")).toBeInTheDocument();
     expect(screen.getByTestId("collapse-all-button")).toBeInTheDocument();
     expect(screen.getByText("Expand All")).toBeInTheDocument();
     expect(screen.getByText("Collapse All")).toBeInTheDocument();
   });
 
-  it("clicking Expand All button does not throw", () => {
+  it("clicking Expand All button does not throw", async () => {
     const dispatch = jest.fn();
-    (useRequiredFields as jest.Mock).mockReturnValue({
-      requiredFields: {},
-      formInfo: [
-        [
-          "Patient.name.use",
-          {
-            id: "Patient.name.use",
-            type: [{ code: "code" }],
-            required: false,
-            max: "1",
-            min: 0,
-          },
-        ],
-      ],
-    });
+    mockRenderSections = true;
 
     render(
       <FormikProvider value={{}}>
@@ -212,28 +188,13 @@ describe("ElementEditorChildren", () => {
       </FormikProvider>
     );
 
-    expect(() =>
-      fireEvent.click(screen.getByTestId("expand-all-button"))
-    ).not.toThrow();
+    const expandBtn = await screen.findByTestId("expand-all-button");
+    expect(() => fireEvent.click(expandBtn)).not.toThrow();
   });
 
-  it("clicking Collapse All button does not throw", () => {
+  it("clicking Collapse All button does not throw", async () => {
     const dispatch = jest.fn();
-    (useRequiredFields as jest.Mock).mockReturnValue({
-      requiredFields: {},
-      formInfo: [
-        [
-          "Patient.name.use",
-          {
-            id: "Patient.name.use",
-            type: [{ code: "code" }],
-            required: false,
-            max: "1",
-            min: 0,
-          },
-        ],
-      ],
-    });
+    mockRenderSections = true;
 
     render(
       <FormikProvider value={{}}>
@@ -245,8 +206,7 @@ describe("ElementEditorChildren", () => {
       </FormikProvider>
     );
 
-    expect(() =>
-      fireEvent.click(screen.getByTestId("collapse-all-button"))
-    ).not.toThrow();
+    const collapseBtn = await screen.findByTestId("collapse-all-button");
+    expect(() => fireEvent.click(collapseBtn)).not.toThrow();
   });
 });

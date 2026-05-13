@@ -182,10 +182,16 @@ export default function ReferenceComponent({
   );
 
   const finalResourceOptionForAddNew = finalList[0];
-  const finalListMappedOptions = finalList.map((res) => ({
-    label: res.title,
-    value: res.profile,
-  }));
+  // enforce uniqueness on profile.
+  const finalListMappedOptions = finalList
+    .filter(
+      (res, index, self) =>
+        index === self.findIndex((r) => r.profile === res.profile)
+    )
+    .map((res) => ({
+      label: res.title,
+      value: res.profile,
+    }));
 
   // Store selected profile URL instead of just type
   const [selectedProfileUrl, setSelectedProfileUrl] = useState<string>(
