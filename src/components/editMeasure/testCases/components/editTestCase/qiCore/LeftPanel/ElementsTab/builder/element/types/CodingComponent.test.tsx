@@ -718,4 +718,154 @@ describe("CodingComponent Tests", () => {
       expect(options).toHaveLength(2);
     });
   });
+
+  it("should add extension to coding when selected value set is not DRC", async () => {
+    const mockOnChange = jest.fn();
+    mockedAxios.get.mockResolvedValue({
+      data: mockMeasureValueSet,
+    });
+
+    render(
+      <ApiContextProvider value={mockConfig}>
+        <ExecutionContextProvider
+          value={{
+            measureState: [null, jest.fn()],
+            bundleState: [null, jest.fn()],
+            valueSetsState: [null, jest.fn()],
+            executionContextReady: true,
+            executing: false,
+            setExecuting: jest.fn(),
+            contextFailure: false,
+          }}
+        >
+          <CodingComponent
+            canEdit={true}
+            structureDefinition={mockStructureDefinition}
+            label="test-label"
+            value={null}
+            onChange={mockOnChange}
+          />
+        </ExecutionContextProvider>
+      </ApiContextProvider>
+    );
+
+    const valueSetSelect = screen.getByRole("combobox", {
+      name: "Value Set / Direct Reference Code",
+    });
+    userEvent.click(valueSetSelect);
+
+    await waitFor(() => {
+      expect(screen.getByRole("option")).toHaveTextContent(
+        mockMeasureValueSet.title
+      );
+    });
+    userEvent.click(screen.getByRole("option"));
+
+    const systemSelect = screen.getByRole("combobox", {
+      name: "Code System",
+    });
+    userEvent.click(systemSelect);
+
+    await waitFor(() => {
+      expect(screen.getAllByRole("option").length).toBeGreaterThan(0);
+    });
+    userEvent.click(screen.getAllByRole("option")[0]);
+
+    const codeSelect = screen.getByRole("combobox", {
+      name: "Code",
+    });
+    userEvent.click(codeSelect);
+
+    await waitFor(() => {
+      expect(screen.getAllByRole("option").length).toBeGreaterThan(0);
+    });
+    userEvent.click(screen.getAllByRole("option")[0]);
+
+    await waitFor(() => {
+      expect(mockOnChange).toHaveBeenCalledWith(
+        expect.objectContaining({
+          extension: [
+            {
+              url: "http://hl7.org/fhir/StructureDefinition/valueset-reference",
+              valueUri: mockMeasureValueSet.url,
+            },
+          ],
+        })
+      );
+    });
+  });
+
+  it("should not add extension to coding when selected value set is DRC", async () => {
+    const drcValueSet = {
+      ...mockMeasureValueSet,
+      id: "drc-test123",
+      url: "drc-test123",
+    };
+    const mockOnChange = jest.fn();
+    mockedAxios.get.mockResolvedValue({
+      data: drcValueSet,
+    });
+
+    render(
+      <ApiContextProvider value={mockConfig}>
+        <ExecutionContextProvider
+          value={{
+            measureState: [null, jest.fn()],
+            bundleState: [null, jest.fn()],
+            valueSetsState: [null, jest.fn()],
+            executionContextReady: true,
+            executing: false,
+            setExecuting: jest.fn(),
+            contextFailure: false,
+          }}
+        >
+          <CodingComponent
+            canEdit={true}
+            structureDefinition={mockStructureDefinition}
+            label="test-label"
+            value={null}
+            onChange={mockOnChange}
+          />
+        </ExecutionContextProvider>
+      </ApiContextProvider>
+    );
+
+    const valueSetSelect = screen.getByRole("combobox", {
+      name: "Value Set / Direct Reference Code",
+    });
+    userEvent.click(valueSetSelect);
+
+    await waitFor(() => {
+      expect(screen.getByRole("option")).toHaveTextContent(drcValueSet.title);
+    });
+    userEvent.click(screen.getByRole("option"));
+
+    const systemSelect = screen.getByRole("combobox", {
+      name: "Code System",
+    });
+    userEvent.click(systemSelect);
+
+    await waitFor(() => {
+      expect(screen.getAllByRole("option").length).toBeGreaterThan(0);
+    });
+    userEvent.click(screen.getAllByRole("option")[0]);
+
+    const codeSelect = screen.getByRole("combobox", {
+      name: "Code",
+    });
+    userEvent.click(codeSelect);
+
+    await waitFor(() => {
+      expect(screen.getAllByRole("option").length).toBeGreaterThan(0);
+    });
+    userEvent.click(screen.getAllByRole("option")[0]);
+
+    await waitFor(() => {
+      expect(mockOnChange).toHaveBeenCalledWith(
+        expect.not.objectContaining({
+          extension: expect.any(Array),
+        })
+      );
+    });
+  });
 });
