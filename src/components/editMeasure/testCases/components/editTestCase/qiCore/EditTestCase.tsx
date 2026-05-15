@@ -702,13 +702,13 @@ const EditTestCase = (props: EditTestCaseProps) => {
   useEffect(() => {
     if (
       !initialTabSet.current &&
-      testCase !== null &&
+      (testCase !== null || !id) &&
       testCaseCanEdit !== undefined
     ) {
       setLeftPanelActiveTab(testCaseCanEdit ? "available" : "added");
       initialTabSet.current = true;
     }
-  }, [testCase, testCaseCanEdit]);
+  }, [id, testCase, testCaseCanEdit]);
 
   // Update right panel tab when measure type changes
   useEffect(() => {
