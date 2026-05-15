@@ -27,7 +27,7 @@ import {
 } from "../../../../../../icons/MeasureListTableRightArrowIcons";
 import { Measure, MeasureScoring, OwnershipType } from "@madie/madie-models";
 import * as _ from "lodash";
-import { formatCmsId, padCmsId } from "../../../../../../utils/cmsIdFormatter";
+import { formatCmsId } from "../../../../../../utils/cmsIdFormatter";
 import tw from "twin.macro";
 import "styled-components/macro";
 import { useMeasureServiceApi } from "@madie/madie-util";
@@ -330,7 +330,10 @@ export default function AddComponentsDialog({
         header: "CMS ID",
         cell: (info) => (
           <TruncateText
-            text={padCmsId(info.row.original?.measureSet?.cmsId)}
+            text={formatCmsId(
+              info.row.original?.measureSet?.cmsId,
+              info.row.original?.model
+            )}
             maxLength={20}
             dataTestId={`measure-cmsId-${info.row.original.id}`}
           />

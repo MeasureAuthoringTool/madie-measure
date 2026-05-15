@@ -2060,4 +2060,97 @@ describe("AddComponentsDialog", () => {
       });
     });
   });
+
+  it("renders padded CMS ID with FHIR suffix for QI-Core in main rows and expanded rows", async () => {
+    const mainRowData = [
+      {
+        id: "main-qicore",
+        measureName: "QI-Core Main",
+        version: "1.0.0",
+        model: "QI-Core v4.1.1",
+        measureSet: { cmsId: 111 },
+        measureSetId: "set-qi",
+        lastModifiedAt: "2024-01-01",
+        hasAssociatedMeasures: true,
+      },
+      {
+        id: "main-qdm",
+        measureName: "QDM Main",
+        version: "1.0.0",
+        model: "QDM v5.6",
+        measureSet: { cmsId: 222 },
+        measureSetId: "set-qdm",
+        lastModifiedAt: "2024-01-01",
+        hasAssociatedMeasures: true,
+      },
+    ];
+
+    const mockSearchMeasures = jest.fn().mockResolvedValue({
+      content: mainRowData,
+      totalPages: 1,
+      totalElements: 2,
+      numberOfElements: 2,
+      pageable: { offset: 0 },
+    });
+
+    const mockGetMeasuresBySetId = jest.fn((setId: string) => {
+      if (setId === "set-qi") {
+        return Promise.resolve([
+          {
+            id: "child-qi",
+            measureName: "QI-Core Child",
+            version: "1.0.0",
+            model: "QI-Core v4.1.1",
+            measureSet: { cmsId: 333 },
+            lastModifiedAt: "2024-01-15",
+          },
+        ]);
+      }
+      return Promise.resolve([
+        {
+          id: "child-qdm",
+          measureName: "QDM Child",
+          version: "1.0.0",
+          model: "QDM v5.6",
+          measureSet: { cmsId: 444 },
+          lastModifiedAt: "2024-01-15",
+        },
+      ]);
+    });
+
+    useMeasureServiceApi.mockReturnValue({
+      searchMeasuresByCriteria: mockSearchMeasures,
+      getMeasuresByMeasureSetId: mockGetMeasuresBySetId,
+    });
+
+    render(
+      <AddComponentsDialog
+        open={true}
+        onClose={onCloseMock}
+        measure={mockMeasure}
+        compositeScoring="Opportunity"
+        components={[]}
+        submitComponentForm={jest.fn()}
+      />
+    );
+
+    await waitFor(() => {
+      expect(mockSearchMeasures).toHaveBeenCalled();
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText("0111FHIR")).toBeInTheDocument();
+    });
+    expect(screen.getByText("0222")).toBeInTheDocument();
+    expect(screen.queryByText("0222FHIR")).not.toBeInTheDocument();
+
+    const qiCoreRow = screen.getByText("QI-Core Main").closest("tr")!;
+    const qiExpandButton = qiCoreRow.querySelector("span[role='button']");
+    if (qiExpandButton) {
+      await userEvent.click(qiExpandButton);
+      await waitFor(() => {
+        expect(screen.getByText("0333FHIR")).toBeInTheDocument();
+      });
+    }
+  });
 });

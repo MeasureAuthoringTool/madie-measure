@@ -356,4 +356,38 @@ describe("AddedComponentsTable", () => {
       ).not.toBeInTheDocument();
     });
   });
+
+  it("appends FHIR suffix to padded CMS ID for QI-Core measures", () => {
+    const qiCoreAndQdmMix: any[] = [
+      {
+        id: "qicore-1",
+        measureName: "QI-Core Measure",
+        version: "1.0.0",
+        model: "QI-Core v4.1.1",
+        measureSet: { cmsId: 333 },
+        lastModifiedAt: "2024-01-15",
+      },
+      {
+        id: "qdm-1",
+        measureName: "QDM Measure",
+        version: "1.0.0",
+        model: "QDM v5.6",
+        measureSet: { cmsId: 444 },
+        lastModifiedAt: "2024-01-15",
+      },
+    ];
+
+    render(
+      <AddedComponentsTable
+        components={qiCoreAndQdmMix}
+        onDeleteComponent={mockDelete}
+      />
+    );
+
+    // QI-Core row: padded + "FHIR" suffix
+    expect(screen.getByText("0333FHIR")).toBeInTheDocument();
+    // QDM row: padded only, no FHIR suffix
+    expect(screen.getByText("0444")).toBeInTheDocument();
+    expect(screen.queryByText("0444FHIR")).not.toBeInTheDocument();
+  });
 });

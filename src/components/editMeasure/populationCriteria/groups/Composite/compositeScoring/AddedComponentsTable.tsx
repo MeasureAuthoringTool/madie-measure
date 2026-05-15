@@ -18,7 +18,7 @@ import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import { Measure } from "@madie/madie-models";
 import { IconButton, Tooltip } from "@mui/material";
-import { padCmsId } from "../../../../../../utils/cmsIdFormatter";
+import { formatCmsId } from "../../../../../../utils/cmsIdFormatter";
 import {
   CollapseIcon,
   ExpandIcon,
@@ -94,7 +94,10 @@ export default function AddedComponentsTable({
         header: "CMS ID",
         cell: (info) => (
           <TruncateText
-            text={padCmsId(info.row.original?.measureSet?.cmsId)}
+            text={formatCmsId(
+              info.row.original?.measureSet?.cmsId,
+              info.row.original?.model
+            )}
             maxLength={20}
             dataTestId={`measure-cmsId-${info.row.original.id}`}
           />
