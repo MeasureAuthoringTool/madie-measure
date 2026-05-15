@@ -24,14 +24,11 @@ declare module "@madie/madie-util" {
 
   export interface FeatureFlags {
     enableQdmRepeatTransfer: boolean;
-    qiCoreElementsTab: boolean;
     qdmHideJson: boolean;
     qiCore7: boolean;
     QICoreCompositeMeasure: boolean;
     DisplayOwner: boolean;
     MakeJSONMatchUI: boolean;
-    AdminShareMeasures: boolean;
-    AdminTransferMeasure: boolean;
   }
 
   export interface UserRoles {
@@ -52,13 +49,11 @@ declare module "@madie/madie-util" {
     features?: {
       export?: boolean;
       qdmToFhirConversion?: boolean;
-      qiCoreElementsTab?: boolean;
       qdmHideJson?: boolean;
       enableQdmRepeatTransfer?: boolean;
       EnhancedTextFormatting?: boolean;
       qiCore7?: boolean;
       QICoreCompositeMeasure?: boolean;
-      AdminTransferMeasure?: boolean;
     };
   }
 
@@ -89,8 +84,6 @@ declare module "@madie/madie-util" {
   export function useFeatureFlags(): FeatureFlags;
 
   export function useUserRoles(): UserRoles;
-
-  export function useIsAdminTransferEnabled(): boolean;
 
   export const featureFlagsStore: {
     subscribe: (

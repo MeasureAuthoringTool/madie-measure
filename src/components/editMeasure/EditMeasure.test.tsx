@@ -24,7 +24,6 @@ import {
   useMeasureServiceApi,
   MeasureServiceApi,
   measureStore,
-  useFeatureFlags,
 } from "@madie/madie-util";
 import { oneItemResponse } from "../__mocks__/mockMeasureResponses";
 import userEvent from "@testing-library/user-event";
@@ -199,9 +198,7 @@ jest.mock("@madie/madie-util", () => ({
     getUserName: () => "test user",
   })),
   checkUserCanEdit: jest.fn().mockImplementation(() => true),
-  useFeatureFlags: jest.fn(() => ({
-    AdminTransferMeasure: false,
-  })),
+  useFeatureFlags: jest.fn(() => ({})),
   useUserRoles: jest.fn(() => ({
     roles: [],
     isAdmin: false,

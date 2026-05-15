@@ -87,9 +87,6 @@ export const checkUserCanDelete = (owner: string): boolean => {
   return owner === username;
 };
 
-// Mock for admin transfer enabled check
-export const useIsAdminTransferEnabled = () => false;
-
 // Mock userRolesStore
 export const userRolesStore = {
   getState: () => ({ roles: [], isAdmin: false }),

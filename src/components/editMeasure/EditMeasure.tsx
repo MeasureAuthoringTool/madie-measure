@@ -19,9 +19,7 @@ import {
   routeHandlerStore,
   useMeasureServiceApi,
   checkUserCanEdit,
-  useFeatureFlags,
   useUserRoles,
-  useIsAdminTransferEnabled,
   useOktaTokens,
 } from "@madie/madie-util";
 import CreateVersionDialog from "../common/createVersionDialog/CreateVersionDialog";
@@ -68,7 +66,6 @@ export default function EditMeasure() {
   let navigate = useNavigate();
   const location = useLocation();
   const [currentMeasureId, setCurrentMeasureId] = useState<string>(measureId);
-  const featureFlags = useFeatureFlags();
   const userRoles = useUserRoles();
 
   // Required by every single spa application that has internal routing
@@ -266,9 +263,7 @@ export default function EditMeasure() {
     const transferListener = () => {
       // Check if user is admin and doesn't own the measure
       const isOwner = checkUserCanEdit(measure?.measureSet?.owner, []);
-      const isAdminTransferEnabled =
-        featureFlags?.AdminTransferMeasure && userRoles?.isAdmin;
-      const isAdminTransfer = isAdminTransferEnabled && !isOwner;
+      const isAdminTransfer = userRoles?.isAdmin && !isOwner;
       setTransferDialog({
         open: true,
         measures: [measure],
@@ -279,7 +274,7 @@ export default function EditMeasure() {
     return () => {
       window.removeEventListener("transfer-measure", transferListener, false);
     };
-  }, [measure, featureFlags, userRoles]);
+  }, [measure, userRoles]);
 
   useEffect(() => {
     const subscription = measureStore.subscribe(setMeasure);

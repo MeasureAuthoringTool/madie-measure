@@ -119,7 +119,6 @@ jest.mock("@madie/madie-util", () => {
     useFeatureFlags: jest.fn(() => {
       return {
         applyDefaults: mockApplyDefaults,
-        qiCoreElementsTab: true,
       };
     }),
     measureStore: {
