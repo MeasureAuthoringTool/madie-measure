@@ -652,4 +652,255 @@ describe("TerminologyServiceApi Tests", () => {
       expect(error.message).not.toContain("Per VSAC");
     }
   });
+
+  it("should extract FHIR CQL codes for DRCs from measure bundle", () => {
+    const measureBundle = {
+      entry: [
+        {
+          resource: {
+            resourceType: "Measure",
+            contained: [
+              {
+                resourceType: "Library",
+                extension: [
+                  {
+                    url: "http://example.com/directReferenceCode",
+                    valueCoding: {
+                      code: "code1",
+                      system: "http://snomed.info/sct",
+                      display: "SNOMED Code",
+                    },
+                  },
+                  {
+                    url: "http://example.com/directReferenceCode",
+                    valueCoding: {
+                      code: "code2",
+                      system: "http://loinc.org",
+                      display: "LOINC Code",
+                    },
+                  },
+                ],
+              },
+            ],
+          },
+        },
+      ],
+    } as fhir4.Bundle;
+
+    const result = terminologyService.getFhirCqlCodesForDRCs(measureBundle);
+
+    expect(result.length).toBe(2);
+    expect(result[0].cqlCode.code).toBe("code1");
+    expect(result[0].cqlCode.system).toBe("http://snomed.info/sct");
+    expect(result[0].codeSystemOid).toBe("http://snomed.info/sct");
+    expect(result[1].cqlCode.code).toBe("code2");
+    expect(result[1].cqlCode.system).toBe("http://loinc.org");
+    expect(result[1].codeSystemOid).toBe("http://loinc.org");
+  });
+
+  it("should return empty array when no DRCs in FHIR measure bundle", () => {
+    const measureBundle = {
+      entry: [
+        {
+          resource: {
+            resourceType: "Measure",
+            contained: [
+              {
+                resourceType: "Library",
+                extension: [],
+              },
+            ],
+          },
+        },
+      ],
+    } as fhir4.Bundle;
+
+    const result = terminologyService.getFhirCqlCodesForDRCs(measureBundle);
+
+    expect(result.length).toBe(0);
+  });
+
+  it("should handle FHIR measure bundle with no contained libraries", () => {
+    const measureBundle = {
+      entry: [
+        {
+          resource: {
+            resourceType: "Measure",
+            contained: [],
+          },
+        },
+      ],
+    } as fhir4.Bundle;
+
+    const result = terminologyService.getFhirCqlCodesForDRCs(measureBundle);
+
+    expect(result.length).toBe(0);
+  });
+
+  it("should handle FHIR DRCs with version in valueCoding", () => {
+    const measureBundle = {
+      entry: [
+        {
+          resource: {
+            resourceType: "Measure",
+            contained: [
+              {
+                resourceType: "Library",
+                extension: [
+                  {
+                    url: "http://example.com/directReferenceCode",
+                    valueCoding: {
+                      code: "code1",
+                      system: "http://snomed.info/sct",
+                      version: "2023-03-01",
+                      display: "SNOMED Code",
+                    },
+                  },
+                ],
+              },
+            ],
+          },
+        },
+      ],
+    } as fhir4.Bundle;
+
+    const result = terminologyService.getFhirCqlCodesForDRCs(measureBundle);
+
+    expect(result[0].cqlCode.version).toBe("2023-03-01");
+  });
+
+  it("should handle FHIR DRCs without version in valueCoding", () => {
+    const measureBundle = {
+      entry: [
+        {
+          resource: {
+            resourceType: "Measure",
+            contained: [
+              {
+                resourceType: "Library",
+                extension: [
+                  {
+                    url: "http://example.com/directReferenceCode",
+                    valueCoding: {
+                      code: "code1",
+                      system: "http://snomed.info/sct",
+                      display: "SNOMED Code",
+                    },
+                  },
+                ],
+              },
+            ],
+          },
+        },
+      ],
+    } as fhir4.Bundle;
+
+    const result = terminologyService.getFhirCqlCodesForDRCs(measureBundle);
+
+    expect(result[0].cqlCode.version).toBe("N/A");
+  });
+
+  it("should create DRC value sets with correct structure from FHIR bundle", () => {
+    const measureBundle = {
+      resourceType: "Bundle",
+      entry: [
+        {
+          resource: {
+            resourceType: "Measure",
+            contained: [
+              {
+                resourceType: "Library",
+                id: "lib1",
+                extension: [
+                  {
+                    name: "DRC",
+                    url: "http://example.com/directReferenceCode",
+                    valueCoding: {
+                      code: "code1",
+                      system: "http://snomed.info/sct",
+                      display: "Test Code 1",
+                    },
+                  },
+                ],
+              },
+            ],
+          },
+        } as fhir4.BundleEntry,
+      ],
+    } as unknown as Bundle;
+
+    const result = terminologyService.getFhirValueSetsForDRCs(measureBundle);
+
+    expect(result.length).toBeGreaterThan(0);
+    result.forEach((vs) => {
+      expect(vs.id).toMatch(/^drc-/);
+      expect(vs.expansion).toBeDefined();
+      expect(vs.expansion.contains).toBeDefined();
+      expect(vs.expansion.contains.length).toBeGreaterThan(0);
+      expect(vs.url).toMatch(/^drc-/);
+      expect(vs.title).toBeDefined();
+      expect(vs.name).toBeDefined();
+    });
+  });
+
+  it("should return empty array when FHIR bundle has no DRC codes", () => {
+    const emptyBundle = {
+      resourceType: "Bundle",
+      entry: [],
+    } as unknown as Bundle;
+
+    const result = terminologyService.getFhirValueSetsForDRCs(emptyBundle);
+
+    expect(result).toEqual([]);
+  });
+
+  it("should return empty array when FHIR bundle is null", () => {
+    const result = terminologyService.getFhirValueSetsForDRCs(null);
+
+    expect(result).toEqual([]);
+  });
+
+  it("should create separate DRC value sets for different CQL codes", () => {
+    const measureBundle = officeVisitMeasureBundle;
+
+    const result = terminologyService.getFhirValueSetsForDRCs(measureBundle);
+
+    const uniqueIds = new Set(result.map((vs) => vs.id));
+    expect(uniqueIds.size).toBe(result.length);
+  });
+
+  it("should handle FHIR bundle without contained libraries", () => {
+    const bundleWithoutLibraries = {
+      resourceType: "Bundle",
+      entry: [
+        {
+          resource: {
+            resourceType: "Measure",
+            id: "test-measure",
+            contained: [],
+          },
+        } as fhir4.BundleEntry,
+      ],
+    } as unknown as Bundle;
+
+    const result = terminologyService.getFhirValueSetsForDRCs(
+      bundleWithoutLibraries
+    );
+
+    expect(result).toEqual([]);
+  });
+
+  it("should set all required FHIR ValueSet properties for DRC", () => {
+    const measureBundle = officeVisitMeasureBundle;
+
+    const result = terminologyService.getFhirValueSetsForDRCs(measureBundle);
+
+    result.forEach((vs) => {
+      expect(vs).toHaveProperty("id");
+      expect(vs).toHaveProperty("expansion");
+      expect(vs).toHaveProperty("url");
+      expect(vs).toHaveProperty("title");
+      expect(vs).toHaveProperty("name");
+    });
+  });
 });
