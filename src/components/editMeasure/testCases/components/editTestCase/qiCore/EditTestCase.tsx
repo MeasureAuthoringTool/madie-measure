@@ -700,11 +700,15 @@ const EditTestCase = (props: EditTestCaseProps) => {
   // Set initial tab based on edit permissions
   const initialTabSet = useRef(false);
   useEffect(() => {
-    if (!initialTabSet.current && testCaseCanEdit !== undefined) {
+    if (
+      !initialTabSet.current &&
+      testCase !== null &&
+      testCaseCanEdit !== undefined
+    ) {
       setLeftPanelActiveTab(testCaseCanEdit ? "available" : "added");
       initialTabSet.current = true;
     }
-  }, [testCaseCanEdit]);
+  }, [testCase, testCaseCanEdit]);
 
   // Update right panel tab when measure type changes
   useEffect(() => {

@@ -88,9 +88,11 @@ const EditTestCaseBreadCrumbs = (props: EditTestCaseBreadCrumbsProps) => {
                   : "Test Case is locked"
               }
               slotProps={{
+                popper: {
+                  style: { zIndex: 1500 },
+                },
                 tooltip: {
                   sx: {
-                    zIndex: 99,
                     backgroundColor: "#333",
                     "& .MuiTooltip-arrow": {
                       color: "#333",
