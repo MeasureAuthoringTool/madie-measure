@@ -154,13 +154,16 @@ const CodingComponent = ({
         system: concept.system,
         code: concept.code,
         display: concept.display,
-        extension: [
+      } as Coding;
+
+      if (!selectedValueSet.id?.startsWith("drc")) {
+        coding.extension = [
           {
             url: "http://hl7.org/fhir/StructureDefinition/valueset-reference",
             valueUri: selectedValueSet.url,
           },
-        ] as Extension[],
-      } as Coding;
+        ] as Extension[];
+      }
     }
     setSelectedConcept(coding);
     if (coding?.code && coding?.system) {

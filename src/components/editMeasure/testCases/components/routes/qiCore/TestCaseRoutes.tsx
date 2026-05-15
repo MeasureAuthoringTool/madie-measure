@@ -148,6 +148,8 @@ const TestCaseRoutes = () => {
     if (measureBundle && measure) {
       setErrors(() => []);
       setContextFailure(false);
+      const drcValueSets: ValueSet[] =
+        terminologyService.current.getFhirValueSetsForDRCs(measureBundle);
 
       terminologyService.current
         .getValueSetsExpansionForBundle(
@@ -155,7 +157,7 @@ const TestCaseRoutes = () => {
           measure.testCaseConfiguration?.manifestExpansion
         )
         .then((vs: ValueSet[]) => {
-          setValueSets(vs);
+          setValueSets([...drcValueSets, ...vs]);
         })
         .catch((err) => {
           setContextFailure(true);
