@@ -2,7 +2,7 @@ import axios from "../../../../api/axios-instance";
 import useServiceConfig from "../../../../api/useServiceConfig";
 import { ServiceConfig } from "../../../../api/ServiceContext";
 import { getOidFromString, useOktaTokens } from "@madie/madie-util";
-import { Bundle, Library, ValueSet } from "fhir/r4";
+import { Bundle, Library, Measure, ValueSet } from "fhir/r4";
 import { CqmMeasure, CQL, ValueSet as QdmValueSet } from "cqm-models";
 import * as _ from "lodash";
 import md5 from "blueimp-md5";
@@ -215,6 +215,40 @@ export class TerminologyServiceApi {
     return [];
   }
 
+  getFhirValueSetsForDRCs(measureBundle: Bundle): ValueSet[] {
+    const drcValueSets = [];
+    const cqlCodeWithCodeSystemOid: CQLCodeWithCodeSystemOid[] =
+      this.getFhirCqlCodesForDRCs(measureBundle);
+    if (cqlCodeWithCodeSystemOid) {
+      cqlCodeWithCodeSystemOid.forEach(({ cqlCode, codeSystemOid }) => {
+        const drcOid = `drc-${md5(
+          cqlCode.system + cqlCode.code + cqlCode.version
+        )}`;
+        const valueSet = {
+          id: drcOid,
+          version: cqlCode.version,
+          expansion: {
+            contains: [
+              {
+                code: cqlCode.code,
+                system: cqlCode.system,
+                version: cqlCode.version,
+                display: cqlCode.display,
+              },
+            ],
+          },
+
+          url: drcOid,
+          title: cqlCode.display,
+          name: cqlCode.display,
+        };
+        drcValueSets.push(valueSet);
+      });
+    }
+
+    return drcValueSets;
+  }
+
   getOidFromString(oidString: string): string {
     const oidRegex = /[0-2](\.(0|[1-9][0-9]*))+/;
     const match = oidString?.match(oidRegex);
@@ -251,6 +285,39 @@ export class TerminologyServiceApi {
       });
     }
     return drcValueSets;
+  }
+
+  getFhirCqlCodesForDRCs(measureBundle: Bundle): CQLCodeWithCodeSystemOid[] {
+    const cqlCodeWithCodeSystemOid: CQLCodeWithCodeSystemOid[] = [];
+    measureBundle?.entry
+      ?.filter((entry) => entry.resource?.resourceType === "Measure")
+      .forEach((measure) => {
+        const measureResource = measure.resource as Measure;
+        measureResource.contained
+          ?.filter((libraryEntry) => libraryEntry.resourceType === "Library")
+          .forEach((library) => {
+            const libraryResource = library as Library;
+
+            const codeDefs = libraryResource?.extension?.filter((ext) =>
+              ext.url.endsWith("directReferenceCode")
+            );
+            if (!_.isEmpty(codeDefs)) {
+              codeDefs.forEach((def) => {
+                const cqlCode = new CQL.Code(
+                  def?.valueCoding.code, //code
+                  def.valueCoding.system, //system
+                  def.valueCoding.version ? def.valueCoding.version : "N/A", //version,
+                  def.valueCoding.display //display
+                );
+                cqlCodeWithCodeSystemOid.push({
+                  cqlCode: cqlCode,
+                  codeSystemOid: def.valueCoding.system,
+                });
+              });
+            }
+          });
+      });
+    return cqlCodeWithCodeSystemOid;
   }
 
   getCqlCodesForDRCs(cqmMeasure: CqmMeasure): CQLCodeWithCodeSystemOid[] {
