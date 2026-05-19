@@ -87,7 +87,7 @@ describe("TransferredMeasuresTable component", () => {
       />
     );
 
-    expect(screen.getByText("1FHIR")).toBeInTheDocument();
+    expect(screen.getByText("0001FHIR")).toBeInTheDocument();
   });
 
   it("should display CMS ID without FHIR suffix for QDM measures", () => {

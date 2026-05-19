@@ -26,6 +26,7 @@ import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { TestCase, Measure } from "@madie/madie-models";
 import HowItWorks from "../LeftPanel/ElementsTab/builder/HowItWorks/HowItWorks";
+import { formatCmsId } from "../../../../../../../utils/cmsIdFormatter";
 
 const TH = tw.th`p-3 text-left text-sm font-bold capitalize`;
 
@@ -255,7 +256,7 @@ export default function CompositeTestCasesTable({
           {selectedMeasure.measureName}
           {cmsId && (
             <span style={{ fontWeight: 400, color: "#717171", marginLeft: 8 }}>
-              (CMS ID: {cmsId})
+              (CMS ID: {formatCmsId(cmsId, selectedMeasure?.model)})
             </span>
           )}
         </p>

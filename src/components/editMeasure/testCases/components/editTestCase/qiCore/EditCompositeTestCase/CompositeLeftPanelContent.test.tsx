@@ -78,14 +78,14 @@ const mockMeasures: any[] = [
     measureName: "Measure One",
     version: "1.0.000",
     lastModifiedAt: "2026-02-01T00:00:00Z",
-    measureSet: { cmsId: "CMS111" },
+    measureSet: { cmsId: 111 },
   },
   {
     id: "m2",
     measureName: "Measure Two",
     version: "2.0.000",
     lastModifiedAt: "2026-01-01T00:00:00Z",
-    measureSet: { cmsId: "CMS222" },
+    measureSet: { cmsId: 222 },
   },
 ];
 
@@ -190,7 +190,7 @@ describe("CompositeLeftPanelContent", () => {
     expect(screen.getAllByTestId("tc-row-item")).toHaveLength(2);
     expect(screen.queryByText("Test Case Gamma")).not.toBeInTheDocument();
     expect(screen.getByText("Measure One")).toBeInTheDocument();
-    expect(screen.getByText("(CMS ID: CMS111)")).toBeInTheDocument();
+    expect(screen.getByText("(CMS ID: 0111)")).toBeInTheDocument();
     expect(screen.getByText("2 Test Cases")).toBeInTheDocument();
   });
 
