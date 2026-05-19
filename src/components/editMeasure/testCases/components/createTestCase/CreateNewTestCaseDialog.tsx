@@ -16,6 +16,7 @@ import useTestCaseServiceApi from "../../api/useTestCaseServiceApi";
 import TestCaseSeries from "./TestCaseSeries";
 import { sanitizeUserInput } from "../../util/Utils";
 import { defaultTestCaseJson } from "../../util/QdmTestCaseHelper";
+import { defaultQiCoreTestCaseJson } from "../../util/QiCoreTestCaseHelper";
 import checkSpecialCharacters from "../../util/checkSpecialCharacters";
 
 interface Toast {
@@ -151,6 +152,8 @@ const CreateNewTestCaseDialog = ({
 
     if (measure?.model?.includes("QDM")) {
       testCase = defaultTestCaseJson(testCase);
+    } else if (measure?.model?.includes("QI-Core")) {
+      testCase = defaultQiCoreTestCaseJson(testCase);
     }
 
     await createTestCase(testCase);
