@@ -17,14 +17,14 @@ const measuresFixture: any[] = [
     id: "m1",
     measureName: "Alpha Measure",
     version: "1.0.0",
-    measureSet: { cmsId: "CMS111" },
+    measureSet: { cmsId: "111" },
     lastModifiedAt: "2024-01-15",
   },
   {
     id: "m2",
     measureName: "Beta Measure",
     version: "2.0.0",
-    measureSet: { cmsId: "CMS222" },
+    measureSet: { cmsId: "222" },
     lastModifiedAt: "2024-02-20",
   },
 ];
@@ -68,8 +68,8 @@ describe("AddedComponentsTable", () => {
     expect(screen.getByText("2.0.0")).toBeInTheDocument();
 
     // CMS ID column
-    expect(screen.getByText("CMS111")).toBeInTheDocument();
-    expect(screen.getByText("CMS222")).toBeInTheDocument();
+    expect(screen.getByText("0111")).toBeInTheDocument();
+    expect(screen.getByText("0222")).toBeInTheDocument();
 
     // Updated column uses mocked convertDate
     expect(screen.getAllByText("Jan 15, 2024").length).toBeGreaterThan(0);
@@ -355,5 +355,39 @@ describe("AddedComponentsTable", () => {
         screen.queryByTestId("expanded-group-row")
       ).not.toBeInTheDocument();
     });
+  });
+
+  it("appends FHIR suffix to padded CMS ID for QI-Core measures", () => {
+    const qiCoreAndQdmMix: any[] = [
+      {
+        id: "qicore-1",
+        measureName: "QI-Core Measure",
+        version: "1.0.0",
+        model: "QI-Core v4.1.1",
+        measureSet: { cmsId: 333 },
+        lastModifiedAt: "2024-01-15",
+      },
+      {
+        id: "qdm-1",
+        measureName: "QDM Measure",
+        version: "1.0.0",
+        model: "QDM v5.6",
+        measureSet: { cmsId: 444 },
+        lastModifiedAt: "2024-01-15",
+      },
+    ];
+
+    render(
+      <AddedComponentsTable
+        components={qiCoreAndQdmMix}
+        onDeleteComponent={mockDelete}
+      />
+    );
+
+    // QI-Core row: padded + "FHIR" suffix
+    expect(screen.getByText("0333FHIR")).toBeInTheDocument();
+    // QDM row: padded only, no FHIR suffix
+    expect(screen.getByText("0444")).toBeInTheDocument();
+    expect(screen.queryByText("0444FHIR")).not.toBeInTheDocument();
   });
 });

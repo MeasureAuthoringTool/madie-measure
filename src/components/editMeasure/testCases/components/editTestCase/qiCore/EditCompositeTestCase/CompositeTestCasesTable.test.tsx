@@ -29,7 +29,7 @@ const makeTestCase = (overrides: any = {}): any => ({
 const mockMeasure: any = {
   id: "m1",
   measureName: "My Composite Measure",
-  measureSet: { cmsId: "CMS123" },
+  measureSet: { cmsId: 123 },
 };
 
 const testCases = [
@@ -85,7 +85,7 @@ describe("CompositeTestCasesTable", () => {
       )
     ).toBeInTheDocument();
     expect(screen.getByText("My Composite Measure")).toBeInTheDocument();
-    expect(screen.getByText("(CMS ID: CMS123)")).toBeInTheDocument();
+    expect(screen.getByText("(CMS ID: 0123)")).toBeInTheDocument();
     expect(screen.getByTestId("tc-filter-by-select")).toBeInTheDocument();
     expect(screen.getByTestId("tc-search")).toBeInTheDocument();
     expect(screen.getByTestId("tc-search-input")).toBeInTheDocument();

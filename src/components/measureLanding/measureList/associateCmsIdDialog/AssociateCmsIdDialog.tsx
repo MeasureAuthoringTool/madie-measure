@@ -7,6 +7,7 @@ import { FormControlLabel, Checkbox } from "@mui/material";
 import WarningIcon from "@mui/icons-material/Warning";
 import AssociateCmsIdConfirmationDialog from "../associateCmsIdConfirmationDialog/AssociateCmsIdConfirmationDialog";
 import "./AssociateCmsIdDialog.scss";
+import { padCmsId } from "../../../../utils/cmsIdFormatter";
 
 interface PropTypes {
   measures: Measure[];
@@ -87,7 +88,7 @@ export default function AssociateCmsIdDialog(props: PropTypes) {
                 <td>{qdmMeasure?.measureName}</td>
                 <td>{qdmMeasure?.version}</td>
                 <td>{qdmMeasure?.model}</td>
-                <td>{qdmMeasure?.measureSet?.cmsId}</td>
+                <td>{padCmsId(qdmMeasure?.measureSet?.cmsId)}</td>
               </tr>
               <tr>
                 <td>{qiCoreMeasure?.measureName}</td>

@@ -6,6 +6,7 @@ import {
   ReadOnlyTextField,
 } from "@madie/madie-design-system/dist/react";
 import GenerateCmsID from "../../../../icons/GenerateCmsID";
+import { formatCmsId } from "../../../../utils/cmsIdFormatter";
 
 export default function CmsIdentifier({
   canEdit,
@@ -34,7 +35,7 @@ export default function CmsIdentifier({
           data-testid="cms-id-text-field"
           inputProps={{ "data-testid": "cms-id-input" }}
           size="small"
-          value={model.startsWith("QI-Core") ? `${cmsId}FHIR` : String(cmsId)}
+          value={formatCmsId(cmsId, model)}
           area-describedby="cms-id-tooltip"
         />
       ) : (
