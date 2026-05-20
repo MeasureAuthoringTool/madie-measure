@@ -52,7 +52,6 @@ import {
   routeHandlerStore,
   useDocumentTitle,
   checkUserCanEdit,
-  useFeatureFlags,
 } from "@madie/madie-util";
 import useExecutionContext from "../../routes/qiCore/useExecutionContext";
 import { MadieEditor } from "@madie/madie-editor";
@@ -390,7 +389,6 @@ export interface EditTestCaseProps {
 const EditTestCase = (props: EditTestCaseProps) => {
   useDocumentTitle("MADiE Edit Measure Edit Test Case");
   const navigate = useNavigate();
-  const featureFlags = useFeatureFlags();
   const { measureId, id } = useParams<
     keyof navigationParams
   >() as navigationParams;
@@ -1202,7 +1200,7 @@ const EditTestCase = (props: EditTestCaseProps) => {
             >
               <Allotment.Pane>
                 <div className="nav-panel">
-                  {featureFlags?.qiCoreElementsTab && isQICore6 ? (
+                  {isQICore6 ? (
                     <>
                       <QiCoreResourceProvider>
                         <LeftPanelContent
