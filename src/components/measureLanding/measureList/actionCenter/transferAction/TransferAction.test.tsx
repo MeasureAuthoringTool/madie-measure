@@ -11,9 +11,7 @@ import { Measure, MeasureSet, Model } from "@madie/madie-models";
 import {
   checkUserCanEdit,
   useOktaTokens,
-  useFeatureFlags,
   useUserRoles,
-  useIsAdminTransferEnabled,
 } from "@madie/madie-util";
 
 const mockUser = "test user";
@@ -32,7 +30,6 @@ const mockMeasure = {
 } as unknown as Measure;
 
 jest.mock("@madie/madie-util", () => ({
-  useIsAdminTransferEnabled: jest.fn(() => false),
   checkUserCanEdit: jest.fn(() => {
     return true;
   }),
@@ -41,9 +38,6 @@ jest.mock("@madie/madie-util", () => ({
       getUserName: mockUser,
     };
   }),
-  useFeatureFlags: jest.fn(() => ({
-    AdminTransferMeasure: false,
-  })),
   useUserRoles: jest.fn(() => ({
     roles: [],
     isAdmin: false,
@@ -53,10 +47,6 @@ jest.mock("@madie/madie-util", () => ({
 describe("TransferAction", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    (useIsAdminTransferEnabled as jest.Mock).mockReturnValue(false);
-    (useFeatureFlags as jest.Mock).mockReturnValue({
-      AdminTransferMeasure: false,
-    });
     (useUserRoles as jest.Mock).mockReturnValue({
       roles: [],
       isAdmin: false,
@@ -147,12 +137,8 @@ describe("TransferAction", () => {
   });
 
   // Admin user tests
-  describe("Admin user with AdminTransferMeasure feature flag enabled", () => {
+  describe("Admin user transfer measure", () => {
     beforeEach(() => {
-      (useIsAdminTransferEnabled as jest.Mock).mockReturnValue(true);
-      (useFeatureFlags as jest.Mock).mockReturnValue({
-        AdminTransferMeasure: true,
-      });
       (useUserRoles as jest.Mock).mockReturnValue({
         roles: ["MADiE-Admin"],
         isAdmin: true,
@@ -213,33 +199,6 @@ describe("TransferAction", () => {
       expect(screen.getByTestId("transfer-action-tooltip")).toHaveAttribute(
         "aria-label",
         TRANSFER
-      );
-    });
-  });
-
-  describe("Admin user with AdminTransferMeasure feature flag disabled", () => {
-    beforeEach(() => {
-      (useFeatureFlags as jest.Mock).mockReturnValue({
-        AdminTransferMeasure: false,
-      });
-      (useUserRoles as jest.Mock).mockReturnValue({
-        roles: ["MADiE-Admin"],
-        isAdmin: true,
-      });
-    });
-
-    it("Should disable action btn on Shared Measures tab even for admin when flag is off", () => {
-      render(
-        <TransferAction
-          measures={[mockMeasure]}
-          onClick={() => {}}
-          activeTab={1}
-        />
-      );
-      expect(screen.getByTestId("transfer-action-btn")).toBeDisabled();
-      expect(screen.getByTestId("transfer-action-tooltip")).toHaveAttribute(
-        "aria-label",
-        CANNOT_TRANSFER
       );
     });
   });

@@ -10,7 +10,6 @@ import {
   checkUserCanEdit,
   checkUserCanDelete,
   useUserRoles,
-  useFeatureFlags,
 } from "@madie/madie-util";
 import ShareAction from "./shareAction/ShareAction";
 import TransferAction from "./transferAction/TransferAction";
@@ -47,7 +46,6 @@ export default function ActionCenter(props: PropTypes) {
   const [canEdit, setCanEdit] = useState<boolean>(false);
   const [isOwner, setIsOwner] = useState<boolean>(false);
   const [isSharedWithUser, setIsSharedWithUser] = useState<boolean>(false);
-  const featureFlags = useFeatureFlags();
   const userRoles = useUserRoles();
 
   const versionMeasure = useCallback(() => {
@@ -86,8 +84,7 @@ export default function ActionCenter(props: PropTypes) {
   const transferMeasure = useCallback(() => {
     if (props.measures?.length > 0) {
       // Use admin transfer if user is admin and doesn't own all selected measures
-      const isAdminTransferEnabled =
-        featureFlags?.AdminTransferMeasure && userRoles?.isAdmin;
+      const isAdminTransferEnabled = userRoles?.isAdmin;
       const needsAdminTransfer =
         isAdminTransferEnabled && !isOwnerOfAllMeasures(props.measures);
       props.setTransferDialog({
@@ -95,7 +92,7 @@ export default function ActionCenter(props: PropTypes) {
         isAdminTransfer: needsAdminTransfer,
       });
     }
-  }, [props.measures, props.setTransferDialog, featureFlags, userRoles]);
+  }, [props.measures, props.setTransferDialog, userRoles]);
 
   const exportMeasure = useCallback(
     (exportType: string) => {
