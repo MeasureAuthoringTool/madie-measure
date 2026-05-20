@@ -17,6 +17,7 @@ import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import { Measure } from "@madie/madie-models";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import { formatCmsId } from "../../../../../../../utils/cmsIdFormatter";
 const TH = tw.th`p-3 text-left text-sm font-bold capitalize`;
 
 export default function CompositeMeasuresTable({
@@ -60,7 +61,10 @@ export default function CompositeMeasuresTable({
         header: "CMS ID",
         cell: (info) => (
           <TruncateText
-            text={_.toString(info.row.original?.measureSet?.cmsId)}
+            text={formatCmsId(
+              info.row.original?.measureSet?.cmsId,
+              info.row.original?.model
+            )}
             maxLength={20}
             dataTestId={`measure-cmsId-${info.row.original.id}`}
           />

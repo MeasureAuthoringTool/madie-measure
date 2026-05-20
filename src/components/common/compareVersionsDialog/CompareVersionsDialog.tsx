@@ -10,6 +10,7 @@ import "./CompareVersionsDialog.scss";
 import CqlDiffViewer from "./CqlDiffViewer";
 import MeasureNameDiff from "./MeasureNameDiff";
 import HumanReadableDiffViewer from "./HumanReadableDiffViewer";
+import { formatCmsId } from "../../../utils/cmsIdFormatter";
 
 interface CompareVersionsDialogProps {
   measures: Measure[] | null | undefined;
@@ -81,7 +82,10 @@ const CompareVersionsDialog = ({
               />
             </span>{" "}
             <span className="measure-cmsid" data-testid="measure-cmsid">
-              (CMS ID: {newMeasure.measureSet?.cmsId ?? "-"})
+              (CMS ID:{" "}
+              {formatCmsId(newMeasure.measureSet?.cmsId, newMeasure.model) ||
+                "-"}
+              )
             </span>
           </Typography>
         </div>

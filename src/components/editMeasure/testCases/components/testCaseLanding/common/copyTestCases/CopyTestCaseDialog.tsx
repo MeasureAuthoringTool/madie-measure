@@ -16,6 +16,7 @@ import {
 } from "@madie/madie-design-system/dist/react";
 
 import * as _ from "lodash";
+import { formatCmsId } from "../../../../../../../utils/cmsIdFormatter";
 import "../../../../../../measureLanding/MeasureLanding.scss";
 import {
   ColumnDef,
@@ -316,7 +317,10 @@ const CopyTestCaseDialog = ({ open, onClose, measure, selectedTestCases }) => {
         header: "CMS ID",
         cell: (info) => (
           <TruncateText
-            text={_.toString(info.row.original?.measureSet?.cmsId)}
+            text={formatCmsId(
+              info.row.original?.measureSet?.cmsId,
+              info.row.original?.model
+            )}
             maxLength={20}
             dataTestId={`measure-cmsId-${info.row.original.id}`}
           />
@@ -627,7 +631,10 @@ const CopyTestCaseDialog = ({ open, onClose, measure, selectedTestCases }) => {
                               {expandedColumns.map((column: any) => (
                                 <td key={column?.accessorKey || column.id}>
                                   {column.accessorKey === "cmsId"
-                                    ? subRow?.actions?.measureSet?.cmsId || ""
+                                    ? formatCmsId(
+                                        subRow?.actions?.measureSet?.cmsId,
+                                        subRow?.actions?.model
+                                      )
                                     : flexRender(
                                         column.cell ?? column.accessorKey,
                                         {

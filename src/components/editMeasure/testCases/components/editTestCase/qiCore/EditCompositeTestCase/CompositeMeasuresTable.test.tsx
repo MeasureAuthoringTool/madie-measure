@@ -61,8 +61,8 @@ describe("CompositeMeasuresTable", () => {
     expect(screen.getByText("Alpha Measure")).toBeInTheDocument();
     expect(screen.getByText("1.0.000")).toBeInTheDocument();
     expect(screen.getByText("2.0.000")).toBeInTheDocument();
-    expect(screen.getByText("123")).toBeInTheDocument();
-    expect(screen.getByText("456")).toBeInTheDocument();
+    expect(screen.getByText("0123")).toBeInTheDocument();
+    expect(screen.getByText("0456")).toBeInTheDocument();
 
     const actionButtons = screen.getAllByRole("button", {
       name: /Select Test Case/i,

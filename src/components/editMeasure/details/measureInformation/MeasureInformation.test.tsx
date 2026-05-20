@@ -603,7 +603,7 @@ describe("MeasureInformation component", () => {
       const cmsId = screen.getByRole("textbox", {
         name: "CMS ID",
       }) as HTMLInputElement;
-      expect(cmsId.value).toBe("23FHIR");
+      expect(cmsId.value).toBe("0023FHIR");
       expect(cmsId).toHaveProperty("readOnly", true);
       const cqlLibraryNameText = getByTestId(
         "cql-library-name-input"
@@ -724,7 +724,7 @@ describe("MeasureInformation component", () => {
     const cmsId = screen.getByRole("textbox", {
       name: "CMS ID",
     }) as HTMLInputElement;
-    expect(cmsId.value).toBe("2");
+    expect(cmsId.value).toBe("0002");
     expect(cmsId).toHaveProperty("readOnly", true);
   });
 
