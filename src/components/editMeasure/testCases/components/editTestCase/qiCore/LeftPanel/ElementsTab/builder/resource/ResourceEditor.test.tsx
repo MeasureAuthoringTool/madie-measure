@@ -722,7 +722,54 @@ describe("ResourceEditor", () => {
     );
     userEvent.click(closeButton);
     expect(mockOnCancel).toHaveBeenCalledTimes(1);
+    expect(resetForm).toHaveBeenCalledTimes(1);
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
+
+  it("shows discard dialog when switching tabs with dirty form, then switches tab on confirm", async () => {
+    (useFormikContext as jest.Mock).mockReturnValue(localMockFormikObj); // dirty: true
+
+    render(
+      <ExecutionContextProvider
+        value={{
+          valueSetsState: localMockckValueSetsState,
+          executionContextReady: true,
+        }}
+      >
+        <ApiContextProvider value={mockConfig}>
+          <QiCoreResourceContext.Provider
+            value={{ state: localMockResourceState, dispatch: jest.fn() }}
+          >
+            <ResourceEditor
+              selectedResourceID="446b20b5-dd46-415e-9b9f-9eba6b260743"
+              setValidationSchema={mockSetValidationSchema}
+              setInitialFormikValuesStu6={mockSetInitialFormikValuesStu6}
+              onCancel={mockOnCancel}
+              canEdit={true}
+              applyLoading={false}
+              setApplyLoading={jest.fn()}
+            />
+          </QiCoreResourceContext.Provider>
+        </ApiContextProvider>
+      </ExecutionContextProvider>
+    );
+
+    const tabs = await screen.findAllByRole("tab");
+    expect(tabs.length).toBeGreaterThan(1);
+
+    // Click the second tab — dirty form should open discard dialog, not switch yet
+    userEvent.click(tabs[1]);
+    expect(tabs[1]).not.toHaveAttribute("aria-selected", "true");
+    await waitFor(() => {
+      expect(screen.getByRole("dialog")).toBeInTheDocument();
+    });
+
+    // Confirm discard — tab should switch and form should reset
+    userEvent.click(screen.getByText("Yes, Discard All Changes"));
+    await waitFor(() => {
+      expect(resetForm).toHaveBeenCalledTimes(1);
+      expect(tabs[1]).toHaveAttribute("aria-selected", "true");
+    });
   });
 
   it("changes active tab when form is not dirty", async () => {
