@@ -344,6 +344,7 @@ describe("Copy Test Case Dialog Component", () => {
       "DESC",
       {
         excludeByMeasureIds: ["1"],
+        excludeCompositeMeasures: true,
         model: "QDM v5.6",
         optionalSearchProperties: ["measureName"],
         searchField: "test",
@@ -365,6 +366,7 @@ describe("Copy Test Case Dialog Component", () => {
       "DESC",
       {
         excludeByMeasureIds: ["1"],
+        excludeCompositeMeasures: true,
         model: "QDM v5.6",
         optionalSearchProperties: [],
         searchField: "",
@@ -385,6 +387,7 @@ describe("Copy Test Case Dialog Component", () => {
       "DESC",
       {
         excludeByMeasureIds: ["1"],
+        excludeCompositeMeasures: true,
         model: "QDM v5.6",
         optionalSearchProperties: ["measureName", "version", "cmsId"],
         searchField: "test",
