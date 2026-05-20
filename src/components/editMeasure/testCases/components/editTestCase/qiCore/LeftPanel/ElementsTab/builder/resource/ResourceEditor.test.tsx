@@ -643,8 +643,54 @@ describe("ResourceEditor", () => {
     });
   });
 
-  it("handles onCancel button click", async () => {
-    (useFormikContext as jest.Mock).mockReturnValue(localMockFormikObj);
+  it("shows discard dialog when close button is clicked with dirty form", async () => {
+    (useFormikContext as jest.Mock).mockReturnValue(localMockFormikObj); // dirty: true
+
+    render(
+      <ExecutionContextProvider
+        value={{
+          valueSetsState: localMockckValueSetsState,
+          executionContextReady: true,
+        }}
+      >
+        <ApiContextProvider value={mockConfig}>
+          <QiCoreResourceContext.Provider
+            value={{ state: localMockResourceState, dispatch: jest.fn() }}
+          >
+            <ResourceEditor
+              selectedResourceID="446b20b5-dd46-415e-9b9f-9eba6b260743"
+              setValidationSchema={mockSetValidationSchema}
+              setInitialFormikValuesStu6={mockSetInitialFormikValuesStu6}
+              onCancel={mockOnCancel}
+              canEdit={true}
+              applyLoading={false}
+              setApplyLoading={jest.fn()}
+            />
+          </QiCoreResourceContext.Provider>
+        </ApiContextProvider>
+      </ExecutionContextProvider>
+    );
+
+    const closeButton = await screen.findByTestId(
+      "close-resource-editor-button"
+    );
+    userEvent.click(closeButton);
+    // dirty check modal should appear, onCancel should NOT be called yet
+    expect(mockOnCancel).not.toHaveBeenCalled();
+    await waitFor(() => {
+      expect(screen.getByRole("dialog")).toBeInTheDocument();
+    });
+    // confirm discard — onCancel should now be called and form reset
+    userEvent.click(screen.getByText("Yes, Discard All Changes"));
+    await waitFor(() => {
+      expect(mockOnCancel).toHaveBeenCalledTimes(1);
+      expect(resetForm).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  it("handles onCancel button click when form is not dirty", async () => {
+    const cleanFormMock = { ...localMockFormikObj, dirty: false };
+    (useFormikContext as jest.Mock).mockReturnValue(cleanFormMock);
 
     render(
       <ExecutionContextProvider
@@ -676,6 +722,7 @@ describe("ResourceEditor", () => {
     );
     userEvent.click(closeButton);
     expect(mockOnCancel).toHaveBeenCalledTimes(1);
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 
   it("changes active tab when form is not dirty", async () => {
