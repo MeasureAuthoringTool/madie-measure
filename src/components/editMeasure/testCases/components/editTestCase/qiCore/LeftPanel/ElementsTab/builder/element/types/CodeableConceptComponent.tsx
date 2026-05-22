@@ -36,6 +36,9 @@ const CodeableConceptComponent: React.FC<CodeableConceptComponentProps> = ({
 }) => {
   const formik = useFormikContext();
 
+  /**
+   * Adds a new coding element to the CodeableConcept
+   */
   const handleAddCoding = useCallback(() => {
     const currentValue = _.get(formik.values, label) as CodeableConcept;
     const currentCoding = currentValue?.coding || [undefined];
@@ -48,6 +51,10 @@ const CodeableConceptComponent: React.FC<CodeableConceptComponentProps> = ({
     formik.setFieldValue(label, updatedValue);
   }, [formik, label]);
 
+  /**
+   * Removes a coding element at the specified index from the CodeableConcept
+   * If it's the last element, clears its value instead of removing it
+   */
   const handleDeleteElement = useCallback(
     (index: number) => {
       const currentValue = _.get(formik.values, label) as CodeableConcept;
@@ -61,14 +68,15 @@ const CodeableConceptComponent: React.FC<CodeableConceptComponentProps> = ({
           const hadInitialCodingData =
             initialCodingValue && Object.keys(initialCodingValue).length > 0;
           if (hadInitialCodingData) {
-            // Saved value — clear it so the user can save the deletion
+            // Has a saved value, clear it so the user can save the deletion
             formik.setFieldValue(codingLabel, {});
           } else {
-            // Freshly entered — restore initial value so form goes clean
+            // Freshly entered, restore initial value so form goes clean
             formik.setFieldValue(label, _.get(formik.initialValues, label));
           }
         }
       } else {
+        // If there are multiple elements, remove this one from the array
         const updatedCoding = currentCoding.filter((_, i) => i !== index);
         const updatedValue: CodeableConcept = {
           ...currentValue,
@@ -80,6 +88,9 @@ const CodeableConceptComponent: React.FC<CodeableConceptComponentProps> = ({
     [formik, label]
   );
 
+  /**
+   * Memoize codings array to avoid unnecessary recalculations
+   */
   const codings = useMemo(() => {
     return value?.coding && value.coding.length > 0
       ? value.coding
@@ -103,7 +114,7 @@ const CodeableConceptComponent: React.FC<CodeableConceptComponentProps> = ({
               addTitle={addTitle}
               label={codingLabel}
               canEdit={canEdit}
-              showDeleteButton={true}
+              showDeleteButton={true} // Always show delete button for coding elements
               handleDeleteElement={() => handleDeleteElement(index)}
               showAddAttributeButton={isLastElement}
               structureDefinition={structureDefinition}
