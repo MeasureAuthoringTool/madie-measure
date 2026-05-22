@@ -49,10 +49,11 @@ const CodingComponent = ({
 
   useEffect(() => {
     setSelectedConcept(value);
-  }, [value]);
-
-  useEffect(() => {
-    if (value && allValueSets && selectedValueSet?.name !== "Custom Code") {
+    if (!value || Object.keys(value).length === 0) {
+      setSelectedValueSet(undefined);
+      return;
+    }
+    if (allValueSets && selectedValueSet?.name !== "Custom Code") {
       const valueSet = allValueSets.find(
         (vs) => vs.url === value?.extension?.[0]?.valueUri
       );
@@ -396,38 +397,41 @@ const CodingComponent = ({
           )}
         </div>
       )}
-      {!selectedValueSet && value && !value.extension && (
-        <>
-          <div tw="flex mt-3">
-            <div tw="w-1/2">
-              <ReadOnlyTextField
-                label="Code System"
-                id="code-system"
-                data-testid={`code-system-${value.code}`}
-                value={value.system}
-              />
+      {!selectedValueSet &&
+        value &&
+        (value.system || value.code) &&
+        !value.extension && (
+          <>
+            <div tw="flex mt-3">
+              <div tw="w-1/2">
+                <ReadOnlyTextField
+                  label="Code System"
+                  id="code-system"
+                  data-testid={`code-system-${value.code}`}
+                  value={value.system}
+                />
+              </div>
+              <div tw="w-1/2 pl-3">
+                <ReadOnlyTextField
+                  label="Code"
+                  id="code"
+                  data-testid={`code-${value.code}`}
+                  value={`${value.code} ${
+                    value.display ? `- ${value.display}` : ""
+                  }`}
+                />
+              </div>
             </div>
-            <div tw="w-1/2 pl-3">
-              <ReadOnlyTextField
-                label="Code"
-                id="code"
-                data-testid={`code-${value.code}`}
-                value={`${value.code} ${
-                  value.display ? `- ${value.display}` : ""
-                }`}
-              />
-            </div>
-          </div>
-          {canEdit && (
-            <div
-              tw="mt-3 text-sm text-red-500"
-              data-testid={`select-valueset-warning-${value.code}`}
-            >
-              To update code system or code please select a valid value set.
-            </div>
-          )}
-        </>
-      )}
+            {canEdit && (
+              <div
+                tw="mt-3 text-sm text-red-500"
+                data-testid={`select-valueset-warning-${value.code}`}
+              >
+                To update code system or code please select a valid value set.
+              </div>
+            )}
+          </>
+        )}
     </div>
   );
 };

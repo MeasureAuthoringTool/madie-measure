@@ -57,6 +57,7 @@ const mockStructureDefinition = {
 const createMockFormik = (values: any): FormikContextType<any> =>
   ({
     values,
+    initialValues: values,
     touched: {},
     errors: {},
     setFieldValue: mockSetFieldValue,
@@ -363,11 +364,11 @@ describe("CodeableConceptComponent Tests", () => {
 
     userEvent.click(deleteButton);
 
-    // Should clear the value of the last element instead of removing it
+    // Should clear the value of the last element to an empty object so the fields remain visible
     await waitFor(() => {
       expect(mockSetFieldValue).toHaveBeenCalledWith(
         "test-label.coding[0]",
-        undefined
+        {}
       );
     });
   });
