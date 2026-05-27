@@ -85,8 +85,10 @@ import useFormikResetOnEvent from "../../../../../common/useFormikResetOnEvent";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import {
+  createUnresolvedPatientReferenceWarningDetails,
   extractValidationErrorsFromOutcome,
   isHapiOutcomeIssueCodeInformational,
+  upsertExecuteInvalidTestCaseWarning,
 } from "./EditTestCaseUtil";
 import { useTestCasePolling } from "../../../hooks/useTestCasePolling";
 import KeyboardTabIcon from "@mui/icons-material/KeyboardTab";
@@ -388,6 +390,7 @@ export interface EditTestCaseProps {
 
 const EditTestCase = (props: EditTestCaseProps) => {
   useDocumentTitle("MADiE Edit Measure Edit Test Case");
+  const { setCustomWarningMessages } = props;
   const navigate = useNavigate();
   const { measureId, id } = useParams<
     keyof navigationParams
@@ -451,7 +454,8 @@ const EditTestCase = (props: EditTestCaseProps) => {
   const [discardDialogOpen, setDiscardDialogOpen] = useState(false);
   const [calculationDialogOpen, setCalculationDialogOpen] = useState(false);
   const { updateMeasure } = measureStore;
-
+  const executeInvalidTestCases =
+    measure?.testCaseConfiguration?.executeInvalidTestCases;
   const canEdit = checkUserCanEdit(
     measure?.measureSet?.owner,
     measure?.measureSet?.acls
@@ -483,6 +487,22 @@ const EditTestCase = (props: EditTestCaseProps) => {
   useFormikResetOnEvent(formikStu6Context);
   const [shouldPoll, setShouldPoll] = useState(false);
 
+  const updateUnresolvedPatientReferenceWarnings = useCallback(
+    (errors: any[]) => {
+      const warningMessages = createUnresolvedPatientReferenceWarningDetails(
+        errors,
+        (resourceId) =>
+          `Resource ${resourceId} contains a reference that does not resolve within the bundle`
+      );
+
+      upsertExecuteInvalidTestCaseWarning(
+        setCustomWarningMessages,
+        warningMessages
+      );
+    },
+    [setCustomWarningMessages]
+  );
+
   const isQiCoreV6 = measure?.model === "QI-Core v6.0.0";
   // testCase polling, gets triggered when validationStatus is either Pending or Validating
   useTestCasePolling({
@@ -491,7 +511,10 @@ const EditTestCase = (props: EditTestCaseProps) => {
     shouldStart: shouldPoll,
     onUpdate: (updatedTc: TestCase) => {
       const nextTc = _.cloneDeep(updatedTc);
-      handleHapiOutcome(nextTc?.hapiOperationOutcome);
+      const validationErrors = handleHapiOutcome(nextTc?.hapiOperationOutcome);
+      if (executeInvalidTestCases) {
+        updateUnresolvedPatientReferenceWarnings(validationErrors);
+      }
       nextTc.json = standardizeJson(nextTc);
       setTestCase(nextTc);
     },
@@ -611,10 +634,16 @@ const EditTestCase = (props: EditTestCaseProps) => {
             tc.validationStatus
           )
         ) {
+          updateUnresolvedPatientReferenceWarnings([]);
           setShouldPoll(true);
         } else {
           setShouldPoll(false);
-          handleHapiOutcome(nextTc?.hapiOperationOutcome);
+          const validationErrors = handleHapiOutcome(
+            nextTc?.hapiOperationOutcome
+          );
+          if (executeInvalidTestCases) {
+            updateUnresolvedPatientReferenceWarnings(validationErrors);
+          }
         }
       })
       .catch((error) => {
@@ -686,6 +715,7 @@ const EditTestCase = (props: EditTestCaseProps) => {
     mapMeasureGroups,
     seriesState.loaded,
     canEdit,
+    updateUnresolvedPatientReferenceWarnings,
   ]);
 
   const testCaseCanEdit = canEdit && !testCase?.testCaseLock;
@@ -868,16 +898,14 @@ const EditTestCase = (props: EditTestCaseProps) => {
     }
     let modifiedTestCase = { ...testCase, json: editorVal };
     // validate the JSON iff executeInvalidTestCases is false and JSON has been modified
-    if (
-      !measure?.testCaseConfiguration?.executeInvalidTestCases &&
-      isJsonModified()
-    ) {
+    if (!executeInvalidTestCases && isJsonModified()) {
       try {
         // Validate test case JSON prior to execution
         const validationResult =
           await testCaseService.current.validateTestCaseBundle(
             JSON.parse(editorVal),
-            measure.model
+            measure.model,
+            executeInvalidTestCases
           );
         const errors = handleHapiOutcome(validationResult);
         if (
@@ -905,17 +933,14 @@ const EditTestCase = (props: EditTestCaseProps) => {
     }
 
     try {
-      let executionBundle: any = [modifiedTestCase];
-      if (!measure?.testCaseConfiguration?.executeInvalidTestCases) {
-        // Filter any resources with invalid references.
-        const updatedTestCaseExecutionBundle =
-          await fhirDefinitionServiceApi.current.getTestCaseExecutionBundle(
-            measure.model,
-            [modifiedTestCase]
-          );
-        executionBundle = updatedTestCaseExecutionBundle?.testCases;
-      }
-
+      // Filter any resources with invalid references.
+      const updatedTestCaseExecutionBundle =
+        await fhirDefinitionServiceApi.current.getTestCaseExecutionBundle(
+          measure.model,
+          [modifiedTestCase],
+          executeInvalidTestCases
+        );
+      const executionBundle = updatedTestCaseExecutionBundle?.testCases;
       const calculationOutput: CalculationOutput<any> =
         await calculation.current.calculateTestCases(
           measure,
@@ -1015,7 +1040,7 @@ const EditTestCase = (props: EditTestCaseProps) => {
     }
 
     if (customMessage.length > 0) {
-      props.setCustomWarningMessages([
+      setCustomWarningMessages([
         {
           message: `Test case ${action}d successfully!`,
           details: [...customMessage],

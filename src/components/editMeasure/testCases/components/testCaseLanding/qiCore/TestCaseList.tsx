@@ -46,6 +46,11 @@ import { generateQiCoreReport } from "../../../util/OverlappingCodesUtils";
 import OverlappingCodesDialog from "../common/overLappingCodes/OverlappingCodesDialog";
 import getModelFamily from "../../../../../../utils/measureModelHelpers";
 import useFhirDefinitionsServiceApi from "../../../api/useFhirDefinitionsService";
+import {
+  createUnresolvedPatientReferenceWarningDetails,
+  extractValidationErrorsFromOutcome,
+  upsertExecuteInvalidTestCaseWarning,
+} from "../../editTestCase/qiCore/EditTestCaseUtil";
 
 export const IMPORT_ERROR =
   "An error occurred while importing your test cases. Please try again, or reach out to the Help Desk.";
@@ -217,6 +222,8 @@ const TestCaseList = (props: TestCaseListProps) => {
   const [openMakeJsonMatchUiSpinner, setOpenMakeJsonMatchUiSpinner] =
     useState<boolean>(false);
 
+  const executeInvalidTestCases =
+    measure?.testCaseConfiguration?.executeInvalidTestCases;
   const fhirDefinitionServiceApi = useRef(useFhirDefinitionsServiceApi());
 
   useEffect(() => {
@@ -225,6 +232,34 @@ const TestCaseList = (props: TestCaseListProps) => {
       updateMeasure(newMeasure);
     }
   }, [testCases]);
+
+  useEffect(() => {
+    if (!setCustomWarningMessages || !executeInvalidTestCases) {
+      return;
+    }
+
+    const unresolvedReferenceWarningDetails = (testCases || []).flatMap(
+      (testCase) => {
+        const validationErrors = extractValidationErrorsFromOutcome(
+          testCase?.hapiOperationOutcome
+        );
+        const groupName = _.trim(testCase?.series) || "";
+        const testCaseTitle = _.trim(testCase?.title) || testCase?.id || "";
+
+        return createUnresolvedPatientReferenceWarningDetails(
+          validationErrors,
+          (resourceId) =>
+            `Test case ${groupName} ${testCaseTitle} with resource ${resourceId} contains a reference that does not resolve within the bundle`
+        );
+      }
+    );
+
+    upsertExecuteInvalidTestCaseWarning(
+      setCustomWarningMessages,
+      unresolvedReferenceWarningDetails
+    );
+  }, [testCases, setCustomWarningMessages, executeInvalidTestCases]);
+
   useEffect(() => {
     setExecuteAllTestCases(false);
     if (
@@ -274,8 +309,7 @@ const TestCaseList = (props: TestCaseListProps) => {
   }, [measure]);
 
   useEffect(() => {
-    const validTestCases = measure?.testCaseConfiguration
-      ?.executeInvalidTestCases
+    const validTestCases = executeInvalidTestCases
       ? sortedTestCases
       : sortedTestCases?.filter((tc) => tc.validResource);
     if (validTestCases && calculationOutput?.results && selectedPopCriteria) {
@@ -475,25 +509,21 @@ const TestCaseList = (props: TestCaseListProps) => {
       return null;
     }
 
-    const filteredTestCases = measure?.testCaseConfiguration
-      ?.executeInvalidTestCases
+    const filteredTestCases = executeInvalidTestCases
       ? sortedTestCases
       : sortedTestCases?.filter((tc) => tc.validResource);
 
     if (filteredTestCases && filteredTestCases.length > 0 && measureBundle) {
       setExecuting(true);
       try {
-        let executionBundle = filteredTestCases;
-        if (!measure?.testCaseConfiguration?.executeInvalidTestCases) {
-          //filter any resources with invalid references.
-          const updatedTestCaseExecutionBundle =
-            await fhirDefinitionServiceApi.current.getTestCaseExecutionBundle(
-              measure.model,
-              filteredTestCases
-            );
-          executionBundle = updatedTestCaseExecutionBundle?.testCases;
-        }
-
+        //filter any resources with invalid references.
+        const updatedTestCaseExecutionBundle =
+          await fhirDefinitionServiceApi.current.getTestCaseExecutionBundle(
+            measure.model,
+            filteredTestCases,
+            executeInvalidTestCases
+          );
+        const executionBundle = updatedTestCaseExecutionBundle?.testCases;
         const calculationOutput: CalculationOutput<any> =
           await calculation.current.calculateTestCases(
             measure,

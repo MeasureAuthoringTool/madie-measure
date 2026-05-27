@@ -76,7 +76,8 @@ export class FhirDefinitionsServiceApi {
 
   async getTestCaseExecutionBundle(
     model: string,
-    testCases: TestCase[]
+    testCases: TestCase[],
+    allowInvalidRefsForPatient: boolean
   ): Promise<TestCaseExecutionBundlesDTO> {
     try {
       const versionModel = qicoreVerionModelTypeMap(model);
@@ -84,6 +85,7 @@ export class FhirDefinitionsServiceApi {
         `${this.baseUrl}/fhir/test-cases/qicore/${versionModel}/execution-bundles`,
         testCases,
         {
+          params: { allowInvalidRefsForPatient },
           headers: {
             Authorization: `Bearer ${this.getAccessToken()}`,
           },

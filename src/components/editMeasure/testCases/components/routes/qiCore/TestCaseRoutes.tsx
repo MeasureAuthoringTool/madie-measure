@@ -122,7 +122,7 @@ const TestCaseRoutes = () => {
           {
             message:
               "Execution of invalid test cases is enabled. You may receive inaccurate pass/fail results. You can update this setting in Execution Configuration tab.",
-            testDataId: "test-cases-in-use-warning",
+            testDataId: "test-cases-execute-invalid-test-cases-warning",
           },
         ]);
       }

@@ -15,6 +15,11 @@ import { FormControlLabel, Checkbox } from "@mui/material";
 import useFormikResetOnEvent from "../../../../../common/useFormikResetOnEvent";
 import { Measure } from "@madie/madie-models";
 
+export const EXECUTE_INVALID_TEST_WARNING_TEST_DATA_ID =
+  "test-cases-execute-invalid-test-cases-warning";
+export const EXECUTE_INVALID_TEST_CASES_WARNING =
+  "Execution of invalid test cases is enabled. You may receive inaccurate pass/fail results. You can update this setting in Execution Configuration tab.";
+
 export default function ExecutionOptions({ setCustomWarningMessages }) {
   const [measure, setMeasure] = useState<Measure>(measureStore.state);
   const measureServiceApi = useMeasureServiceApi();
@@ -67,8 +72,7 @@ export default function ExecutionOptions({ setCustomWarningMessages }) {
         if (newMeasure?.testCaseConfiguration?.executeInvalidTestCases) {
           setCustomWarningMessages([
             {
-              message:
-                "Execution of invalid test cases is enabled. You may receive inaccurate pass/fail results. You can update this setting in Execution Configuration tab.",
+              message: EXECUTE_INVALID_TEST_CASES_WARNING,
               testDataId: "test-cases-execute-invalid-test-cases-warning",
             },
           ]);

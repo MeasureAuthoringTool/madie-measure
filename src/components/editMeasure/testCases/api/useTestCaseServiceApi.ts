@@ -224,13 +224,17 @@ export class TestCaseServiceApi {
     );
   }
 
-  async validateTestCaseBundle(bundle: any, model: string) {
+  async validateTestCaseBundle(
+    bundle: any,
+    model: string,
+    lenientPatientRefs: boolean
+  ): Promise<HapiOperationOutcome> {
     try {
       const response = await axios.post<HapiOperationOutcome>(
         `${this.baseUrl}/validations/bundles`,
         bundle,
         {
-          params: { model: model },
+          params: { model: model, lenientPatientRefs: lenientPatientRefs },
           headers: {
             Authorization: `Bearer ${this.getAccessToken()}`,
           },
