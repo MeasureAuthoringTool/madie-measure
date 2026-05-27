@@ -16,7 +16,7 @@ import useFormikResetOnEvent from "../../../../../common/useFormikResetOnEvent";
 import { Measure } from "@madie/madie-models";
 
 export const EXECUTE_INVALID_TEST_WARNING_TEST_DATA_ID =
-  "test-cases-execute-invalid-test-cases-warning";
+  "execute-invalid-test-cases-warning";
 export const EXECUTE_INVALID_TEST_CASES_WARNING =
   "Execution of invalid test cases is enabled. You may receive inaccurate pass/fail results. You can update this setting in Execution Configuration tab.";
 
@@ -73,7 +73,7 @@ export default function ExecutionOptions({ setCustomWarningMessages }) {
           setCustomWarningMessages([
             {
               message: EXECUTE_INVALID_TEST_CASES_WARNING,
-              testDataId: "test-cases-execute-invalid-test-cases-warning",
+              testDataId: EXECUTE_INVALID_TEST_WARNING_TEST_DATA_ID,
             },
           ]);
         } else {

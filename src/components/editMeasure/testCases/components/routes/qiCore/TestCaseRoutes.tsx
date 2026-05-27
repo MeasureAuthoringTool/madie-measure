@@ -26,7 +26,10 @@ import TestCaseData from "../../testCaseConfiguration/testCaseData/TestCaseData"
 import SDEPage from "../../testCaseConfiguration/sde/SDEPage";
 import Expansion from "../../testCaseConfiguration/expansion/Expansion";
 import RAVPage from "../../testCaseConfiguration/rav/RAVPage";
-import ExecutionOptions from "../../testCaseConfiguration/executionOptions/ExecutionOptions";
+import ExecutionOptions, {
+  EXECUTE_INVALID_TEST_CASES_WARNING,
+  EXECUTE_INVALID_TEST_WARNING_TEST_DATA_ID,
+} from "../../testCaseConfiguration/executionOptions/ExecutionOptions";
 
 // error messages
 export const TEST_CASE_EXECUTION_ERROR =
@@ -120,9 +123,8 @@ const TestCaseRoutes = () => {
       if (measure?.testCaseConfiguration?.executeInvalidTestCases) {
         setCustomWarningMessages([
           {
-            message:
-              "Execution of invalid test cases is enabled. You may receive inaccurate pass/fail results. You can update this setting in Execution Configuration tab.",
-            testDataId: "test-cases-execute-invalid-test-cases-warning",
+            message: EXECUTE_INVALID_TEST_CASES_WARNING,
+            testDataId: EXECUTE_INVALID_TEST_WARNING_TEST_DATA_ID,
           },
         ]);
       }
