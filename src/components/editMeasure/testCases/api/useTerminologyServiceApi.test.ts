@@ -64,7 +64,12 @@ describe("TerminologyServiceApi Tests", () => {
         includeDraft: true,
         manifestExpansion: undefined,
         activeOnly: "false",
-        valueSetParams: [{ oid: "2.16.840.1.113883.3.464.1003.101.12.1001" }],
+        valueSetParams: [
+          {
+            oid: "2.16.840.1.113883.3.464.1003.101.12.1001",
+            url: "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1001",
+          },
+        ],
       },
       { headers: { Authorization: "Bearer undefined" } }
     );
@@ -93,7 +98,12 @@ describe("TerminologyServiceApi Tests", () => {
           id: "mu2-update-2015-05-01",
         },
         activeOnly: "true",
-        valueSetParams: [{ oid: "2.16.840.1.113883.3.464.1003.101.12.1001" }],
+        valueSetParams: [
+          {
+            oid: "2.16.840.1.113883.3.464.1003.101.12.1001",
+            url: "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1001",
+          },
+        ],
       },
       { headers: { Authorization: "Bearer undefined" } }
     );
