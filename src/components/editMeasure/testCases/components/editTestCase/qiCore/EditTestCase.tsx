@@ -933,7 +933,9 @@ const EditTestCase = (props: EditTestCaseProps) => {
     }
 
     try {
-      // Filter any resources with invalid references.
+      // Filter resources with invalid references based on executeInvalidTestCases.
+      // for executeInvalidTestCases=true, filter out non-patient resources with invalid refs
+      // for executeInvalidTestCases=false, filter out all resources with invalid refs
       const updatedTestCaseExecutionBundle =
         await fhirDefinitionServiceApi.current.getTestCaseExecutionBundle(
           measure.model,
