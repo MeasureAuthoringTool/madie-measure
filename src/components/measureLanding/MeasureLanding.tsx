@@ -24,7 +24,6 @@ import { useDocumentTitle, useMeasureServiceApi } from "@madie/madie-util";
 import StatusHandler, {
   INITIAL_STATUS_HANDLER,
 } from "../editMeasure/editor/StatusHandler";
-import _ from "lodash";
 import { getTabStorageKey } from "./measureLandingUtils";
 
 export interface MeasureSearchCriteria {
@@ -180,21 +179,13 @@ export default function MeasureLanding() {
       const currentRequestId = ++requestIdRef.current;
 
       try {
-        const optionalParams = searchCriteria?.optionalSearchProperties ?? [];
-        const firstParam = _.trim(optionalParams[0]);
-
-        const modifiedSearchCriteria = {
-          ...searchCriteria,
-          optionalSearchProperties:
-            firstParam && firstParam !== "-" ? [_.camelCase(firstParam)] : [],
-        };
         const data = await measureServiceApi.searchMeasuresByCriteria(
           ownershipTypeMap[tab] ? [ownershipTypeMap[tab]] : [OwnershipType.ALL],
           limit,
           page,
           sort,
           direction,
-          modifiedSearchCriteria,
+          searchCriteria,
           abortController.current as AbortController
         );
 
