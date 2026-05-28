@@ -61,9 +61,20 @@ const CodeableConceptComponent: React.FC<CodeableConceptComponentProps> = ({
       const currentCoding = currentValue?.coding || [undefined];
 
       if (currentCoding.length === 1) {
-        // If it's the last element, just clear its value
-        const codingLabel = `${label}.coding[${index}]`;
-        formik.setFieldValue(codingLabel, undefined);
+        const existingCoding = currentCoding[0];
+        if (existingCoding && Object.keys(existingCoding).length > 0) {
+          const codingLabel = `${label}.coding[${index}]`;
+          const initialCodingValue = _.get(formik.initialValues, codingLabel);
+          const hadInitialCodingData =
+            initialCodingValue && Object.keys(initialCodingValue).length > 0;
+          if (hadInitialCodingData) {
+            // Has a saved value, clear it so the user can save the deletion
+            formik.setFieldValue(codingLabel, {});
+          } else {
+            // Freshly entered, restore initial value so form goes clean
+            formik.setFieldValue(label, _.get(formik.initialValues, label));
+          }
+        }
       } else {
         // If there are multiple elements, remove this one from the array
         const updatedCoding = currentCoding.filter((_, i) => i !== index);
