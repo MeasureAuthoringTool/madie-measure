@@ -57,6 +57,7 @@ const mockStructureDefinition = {
 const createMockFormik = (values: any): FormikContextType<any> =>
   ({
     values,
+    initialValues: values,
     touched: {},
     errors: {},
     setFieldValue: mockSetFieldValue,
@@ -363,11 +364,78 @@ describe("CodeableConceptComponent Tests", () => {
 
     userEvent.click(deleteButton);
 
-    // Should clear the value of the last element instead of removing it
+    // Should clear the value of the last element to an empty object so the fields remain visible
     await waitFor(() => {
       expect(mockSetFieldValue).toHaveBeenCalledWith(
         "test-label.coding[0]",
-        undefined
+        {}
+      );
+    });
+  });
+
+  it("restores initial value when deleting freshly entered coding (no initial data)", async () => {
+    // Simulate: element was newly added (initial value is null), user typed something
+    const initialLabelValue = null;
+    const currentValue = {
+      coding: [
+        {
+          code: "B1",
+          system: "http://example.com/system1",
+          display: "B1 Code",
+        },
+      ],
+    };
+
+    const mockFormik = {
+      values: { "test-label": currentValue },
+      initialValues: { "test-label": initialLabelValue },
+      touched: {},
+      errors: {},
+      setFieldValue: mockSetFieldValue,
+      setFieldTouched: mockSetFieldTouched,
+      getFieldProps: jest.fn(),
+      dirty: true,
+      isValid: true,
+    } as unknown as FormikContextType<any>;
+
+    mockedAxios.get.mockResolvedValue({ data: mockBindingValueSet });
+
+    render(
+      <ApiContextProvider value={mockConfig}>
+        <ExecutionContextProvider
+          value={{
+            measureState: [null, jest.fn()],
+            bundleState: [null, jest.fn()],
+            valueSetsState: [null, jest.fn()],
+            executionContextReady: true,
+            executing: false,
+            setExecuting: jest.fn(),
+            contextFailure: false,
+          }}
+        >
+          <FormikProvider value={mockFormik}>
+            <CodeableConceptComponent
+              canEdit={true}
+              structureDefinition={mockStructureDefinition}
+              label="test-label"
+              value={currentValue}
+              addTitle={"Codeable"}
+            />
+          </FormikProvider>
+        </ExecutionContextProvider>
+      </ApiContextProvider>
+    );
+
+    const deleteButton = screen.getByTestId(
+      "delete-button-test-label.coding[0]"
+    );
+    userEvent.click(deleteButton);
+
+    // Should restore the initial value (null) so form goes clean
+    await waitFor(() => {
+      expect(mockSetFieldValue).toHaveBeenCalledWith(
+        "test-label",
+        initialLabelValue
       );
     });
   });

@@ -25,8 +25,6 @@ import {
   MadieTable,
   SearchAndFilter,
   useFilterSearch,
-  filterMap,
-  filterByOptions,
 } from "@madie/madie-design-system/dist/react";
 import {
   useReactTable,
@@ -60,13 +58,20 @@ import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import { exportMeasure as downloadMeasureExport } from "../../../utils/exportUtil";
 import { MeasureSearchCriteria } from "../MeasureLanding";
 import queryString from "query-string";
-import _ from "lodash";
 import { getTabStorageKey } from "../measureLandingUtils";
 import TransferDialog from "../../common/transferDialog/TransferDialog";
 import CompareVersionsDialog from "../../common/compareVersionsDialog/CompareVersionsDialog";
 
 const COMPONENT_MEASURE_MSG =
   "This measure is a component of a composite measure";
+
+const filterByOpts = ["Measure", "Model", "Version", "CMS ID"];
+const filterMap: Record<string, string> = {
+  Measure: "measureName",
+  Model: "model",
+  Version: "version",
+  "CMS ID": "cmsId",
+};
 
 // Export customSort for testing purposes
 export function customSort(a: string, b: string) {
@@ -190,16 +195,12 @@ export default function MeasureList(props: {
   const handleSearchTrigger = () => {
     finalizeSearchCriteria();
     const optionalSearchProperties: string[] = [];
-    if (filterBy && filterMap[filterBy as keyof typeof filterMap]) {
-      optionalSearchProperties.push(
-        filterMap[filterBy as keyof typeof filterMap]
-      );
+    if (filterBy && filterMap[filterBy]) {
+      optionalSearchProperties.push(filterMap[filterBy]);
     }
     if (!filterBy && searchField) {
-      filterByOptions.forEach((condition) => {
-        optionalSearchProperties.push(
-          filterMap[condition as keyof typeof filterMap]
-        );
+      filterByOpts.forEach((condition) => {
+        optionalSearchProperties.push(filterMap[condition]);
       });
     }
     setSearchCriteria({
@@ -689,18 +690,10 @@ export default function MeasureList(props: {
   const handleRowClick = async (actions) => {
     if (!isRowExpanded || selectedIdForExpansion !== actions?.measureSetId) {
       setSelectedIdForExpansion(actions?.measureSetId);
-      const optionalParams = searchCriteria?.optionalSearchProperties ?? [];
-      const firstParam = _.trim(optionalParams[0]);
-
-      const modifiedSearchCriteria = {
-        ...searchCriteria,
-        optionalSearchProperties:
-          firstParam && firstParam !== "-" ? [_.camelCase(firstParam)] : [],
-      };
       const results = await measureServiceApi.getMeasuresByMeasureSetId(
         actions?.measureSetId,
         true,
-        modifiedSearchCriteria
+        searchCriteria
       );
       const filteredResults = results.filter(
         (result) => result.id !== actions?.id
@@ -1168,7 +1161,7 @@ export default function MeasureList(props: {
           onSearchChange={handleSearch}
           onSearchTrigger={handleSearchTrigger}
           onSearchClear={handleSearchClear}
-          filterByOpts={["Measure", "Model", "Version", "CMS ID"]}
+          filterByOpts={filterByOpts}
           textFieldID={"measure"}
         />
         <div>
