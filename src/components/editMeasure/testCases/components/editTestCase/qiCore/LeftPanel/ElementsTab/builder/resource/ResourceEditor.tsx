@@ -90,8 +90,12 @@ const ResourceEditor = ({
   const [pendingTab, setPendingTab] = useState(0);
   const onContinue = () => {
     setDialogOpen(false);
-    setActiveTab(pendingTab);
     resetForm();
+    if (pendingTab === -1) {
+      onCancel();
+    } else {
+      setActiveTab(pendingTab);
+    }
   };
   const [dialogOpen, setDialogOpen] = useState<boolean>(false);
   const [addDialogOpen, setAddDialogOpen] = useState<boolean>(false);
@@ -291,7 +295,15 @@ const ResourceEditor = ({
             </Typography>
             <IconButton
               data-testid="close-resource-editor-button"
-              onClick={onCancel}
+              onClick={() => {
+                if (dirty) {
+                  setPendingTab(-1);
+                  setDialogOpen(true);
+                } else {
+                  resetForm();
+                  onCancel();
+                }
+              }}
             >
               <CloseIcon sx={{ color: "#D92F2F" }} />
             </IconButton>
