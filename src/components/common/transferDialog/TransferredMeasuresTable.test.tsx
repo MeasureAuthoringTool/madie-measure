@@ -79,6 +79,26 @@ describe("TransferredMeasuresTable component", () => {
     expect(screen.getByText("owner2")).toBeInTheDocument();
   });
 
+  it("should display formatted owner name in owner column for admin transfers", () => {
+    const measureWithDisplayName = {
+      ...mockMeasure1,
+      ownerDisplayName: "John Doe",
+      measureSet: {
+        ...mockMeasure1.measureSet,
+        owner: "john_doe",
+      },
+    };
+
+    render(
+      <TransferredMeasuresTable
+        measures={[measureWithDisplayName]}
+        showOwnerColumn={true}
+      />
+    );
+
+    expect(screen.getByText("John Doe (john_doe)")).toBeInTheDocument();
+  });
+
   it("should display CMS ID with FHIR suffix for QI-Core measures", () => {
     render(
       <TransferredMeasuresTable
