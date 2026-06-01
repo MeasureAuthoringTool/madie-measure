@@ -115,6 +115,7 @@ const renderWithResourceContext = (ui: React.ReactElement) =>
 describe("TestCaseSummaryGrid", () => {
   const mockOnRowEdit = jest.fn();
   const mockOnRowDelete = jest.fn();
+  const mockOnRowClone = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -226,6 +227,32 @@ describe("TestCaseSummaryGrid", () => {
       name: "Remove",
     });
     expect(deleteAction).toBeInTheDocument();
+  });
+
+  it("should render Clone action that invokes onRowClone with the entry", async () => {
+    renderWithResourceContext(
+      <TestCaseSummaryGrid
+        gridData={gridData}
+        onRowEdit={mockOnRowEdit}
+        onRowDelete={mockOnRowDelete}
+        onRowClone={mockOnRowClone}
+        testCaseCanEdit={true}
+        readOnly={false}
+      />
+    );
+
+    const actionCenterButton = screen.getByTestId("action-center-button-ec-1");
+    userEvent.click(actionCenterButton);
+
+    const cloneAction = await screen.findByRole("menuitem", { name: "Clone" });
+    expect(cloneAction).toBeInTheDocument();
+    expect(cloneAction).not.toHaveAttribute("aria-disabled", "true");
+
+    userEvent.click(cloneAction);
+    await waitFor(() => {
+      expect(mockOnRowClone).toHaveBeenCalledTimes(1);
+    });
+    expect(mockOnRowClone).toHaveBeenCalledWith(mockBundle.entry[0]);
   });
 
   it("should render ActionCenter with disabled Edit action for Unsupported Profile", async () => {

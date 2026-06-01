@@ -24,7 +24,12 @@ import {
   MadieAlert,
   Toast,
 } from "@madie/madie-design-system/dist/react";
-import { handleCancel, handleRowDelete, handleRowEdit } from "./BuilderUtils";
+import {
+  handleCancel,
+  handleRowClone,
+  handleRowDelete,
+  handleRowEdit,
+} from "./BuilderUtils";
 import "./Builder.scss";
 import {
   getTopLevelElements,
@@ -355,6 +360,7 @@ const Builder = ({
                       onRowDelete={(row) =>
                         handleRowDelete(row, setSelectedResourceId, dispatch)
                       }
+                      onRowClone={(row) => handleRowClone(row, dispatch)}
                       testCaseCanEdit={canEdit}
                       selectedRowId={selectedResourceID}
                       readOnly={!canEdit}

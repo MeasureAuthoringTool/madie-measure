@@ -1,3 +1,5 @@
+import _ from "lodash";
+import { v4 as uuidv4 } from "uuid";
 import { scrollToElementByIdWhenAvailable } from "./Builder";
 import { ResourceActionType } from "../../../../../../util/QiCorePatientProvider";
 
@@ -29,5 +31,23 @@ export function handleRowDelete(
   dispatch({
     type: ResourceActionType.REMOVE_BUNDLE_ENTRY,
     payload: row,
+  });
+}
+
+export function handleRowClone(
+  row: any,
+  dispatch: (action: { type: string; payload: any }) => void
+) {
+  const clonedEntry = _.cloneDeep(row);
+  const newId = uuidv4();
+  if (clonedEntry?.resource) {
+    clonedEntry.resource.id = newId;
+  }
+  if (clonedEntry?.fullUrl) {
+    clonedEntry.fullUrl = `urn:uuid:${newId}`;
+  }
+  dispatch({
+    type: ResourceActionType.ADD_BUNDLE_ENTRY,
+    payload: clonedEntry,
   });
 }

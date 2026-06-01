@@ -1,4 +1,9 @@
-import { handleCancel, handleRowDelete, handleRowEdit } from "./BuilderUtils";
+import {
+  handleCancel,
+  handleRowClone,
+  handleRowDelete,
+  handleRowEdit,
+} from "./BuilderUtils";
 import { scrollToElementByIdWhenAvailable } from "./Builder";
 import { ResourceActionType } from "../../../../../../util/QiCorePatientProvider";
 
@@ -49,5 +54,52 @@ describe("Builder handler functions", () => {
       type: ResourceActionType.REMOVE_BUNDLE_ENTRY,
       payload: row,
     });
+  });
+
+  it("handleRowClone dispatches ADD_BUNDLE_ENTRY with a deep-cloned entry and a new resource id", () => {
+    const row = {
+      fullUrl: "urn:uuid:abc-123",
+      resource: {
+        resourceType: "Encounter",
+        id: "abc-123",
+        meta: { profile: ["http://example.com/profile"] },
+      },
+    };
+    const dispatch = jest.fn();
+
+    handleRowClone(row, dispatch);
+
+    expect(dispatch).toHaveBeenCalledTimes(1);
+    const call = dispatch.mock.calls[0][0];
+    expect(call.type).toBe(ResourceActionType.ADD_BUNDLE_ENTRY);
+    // Cloned payload is a new object
+    expect(call.payload).not.toBe(row);
+    expect(call.payload.resource).not.toBe(row.resource);
+    // Same shape but new id
+    expect(call.payload.resource.resourceType).toBe("Encounter");
+    expect(call.payload.resource.meta.profile).toEqual([
+      "http://example.com/profile",
+    ]);
+    expect(call.payload.resource.id).toBeDefined();
+    expect(call.payload.resource.id).not.toBe("abc-123");
+    // fullUrl is updated to match new id
+    expect(call.payload.fullUrl).toBe(`urn:uuid:${call.payload.resource.id}`);
+    // Original row is untouched
+    expect(row.resource.id).toBe("abc-123");
+    expect(row.fullUrl).toBe("urn:uuid:abc-123");
+  });
+
+  it("handleRowClone handles entry without fullUrl", () => {
+    const row = {
+      resource: { resourceType: "Procedure", id: "pd-1" },
+    };
+    const dispatch = jest.fn();
+
+    handleRowClone(row, dispatch);
+
+    const call = dispatch.mock.calls[0][0];
+    expect(call.type).toBe(ResourceActionType.ADD_BUNDLE_ENTRY);
+    expect(call.payload.fullUrl).toBeUndefined();
+    expect(call.payload.resource.id).not.toBe("pd-1");
   });
 });
