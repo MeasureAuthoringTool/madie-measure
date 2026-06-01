@@ -95,7 +95,10 @@ export const TransferredMeasuresTable = ({
         measureName: measure.measureName,
         model: measure.model,
         cmsId: measure.measureSet?.cmsId,
-        owner: formatOwner(measure.ownerDisplayName, measure.measureSet?.owner),
+        owner: formatOwner(
+          (measure as any).ownerDisplayName,
+          measure.measureSet?.owner
+        ),
       })),
     [visibleMeasures]
   );
