@@ -74,7 +74,8 @@ describe("MeasureServiceApi", () => {
     await expect(
       fhirDefinitionsServiceApi.getTestCaseExecutionBundle(
         "QI-Core v4.1.1",
-        mockTestCases
+        mockTestCases,
+        false
       )
     ).rejects.toThrow(
       "An error occurred while generating test case execution bundle. Please try again."
@@ -103,7 +104,8 @@ describe("MeasureServiceApi", () => {
     await expect(
       fhirDefinitionsServiceApi.getTestCaseExecutionBundle(
         "QI-Core v4.1.1",
-        mockTestCases
+        mockTestCases,
+        false
       )
     ).rejects.toThrow(
       "Test case execution was cancelled because Unknown element 'entryd' found during parse. If this error persists, please contact support."
@@ -125,7 +127,8 @@ describe("MeasureServiceApi", () => {
     await expect(
       fhirDefinitionsServiceApi.getTestCaseExecutionBundle(
         "QI-Core v4.1.1",
-        mockTestCases
+        mockTestCases,
+        false
       )
     ).rejects.toThrow(
       "An error occurred while generating test case execution bundle. Please try again."
