@@ -1,8 +1,6 @@
 import * as _ from "lodash";
 import { codeCoverageHighlighting } from "./CodeCoverageHighlighting";
 import { passFailCoverage } from "./CodeCoverageHighlightingPassFail";
-import { CqmExecutionPatientResultsByPopulationSet } from "../../api/QdmCalculationService";
-import { CqmMeasure, IndividualResult } from "cqm-models";
 
 export interface StatementCoverageResult {
   type: string;
@@ -68,11 +66,8 @@ export function mergeCalcResults(calcResults1, calcResults2) {
 }
 
 /**
- * Returns the coverage results for each cql definition that is being used in measure groups.
- * Definition is considered to be used iff it is used in one of the populations either directly or indirectly.
- * Builds highlighting for single test case.
- * @param groupResults - calculation results for each measure group.
- * @param cqmMeasure - measure
+ * Restructures and merges statement/clause results across all test cases.
+ * @param calculationOutput - calculation output grouped by patient id, then group id.
  */
 
 export function updateAllGroupResults(calculationOutput) {
@@ -176,7 +171,7 @@ export function buildHighlightingForGroups(
         );
       }
       // ignore statement without annotations e.g. context Patient
-      if (_.isNil(statementDef.annotation)) {
+      if (_.isEmpty(statementDef.annotation)) {
         return result;
       }
       let clauseResultCopy = clauseResults;
@@ -263,7 +258,7 @@ export function buildHighlightingForAllGroups(
         );
       }
       // ignore statement without annotations e.g. context Patient
-      if (_.isNil(statementDef.annotation)) {
+      if (_.isEmpty(statementDef.annotation)) {
         return result;
       }
 
