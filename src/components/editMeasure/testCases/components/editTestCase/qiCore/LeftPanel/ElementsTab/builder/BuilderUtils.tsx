@@ -44,7 +44,7 @@ export function handleRowClone(
     clonedEntry.resource.id = newId;
   }
   if (clonedEntry?.fullUrl) {
-    clonedEntry.fullUrl = `urn:uuid:${newId}`;
+    clonedEntry.fullUrl = `https://madie.cms.gov/${clonedEntry.resource.resourceType}/${newId}`;
   }
   dispatch({
     type: ResourceActionType.ADD_BUNDLE_ENTRY,

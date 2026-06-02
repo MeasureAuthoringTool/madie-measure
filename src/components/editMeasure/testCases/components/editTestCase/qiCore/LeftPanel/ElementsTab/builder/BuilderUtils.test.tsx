@@ -83,7 +83,9 @@ describe("Builder handler functions", () => {
     expect(call.payload.resource.id).toBeDefined();
     expect(call.payload.resource.id).not.toBe("abc-123");
     // fullUrl is updated to match new id
-    expect(call.payload.fullUrl).toBe(`urn:uuid:${call.payload.resource.id}`);
+    expect(call.payload.fullUrl).toBe(
+      `https://madie.cms.gov/Encounter/${call.payload.resource.id}`
+    );
     // Original row is untouched
     expect(row.resource.id).toBe("abc-123");
     expect(row.fullUrl).toBe("urn:uuid:abc-123");
