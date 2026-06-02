@@ -10,6 +10,7 @@ import { ManifestExpansion } from "@madie/madie-models";
 
 export type ValueSetSearchParams = {
   oid: string;
+  url?: string;
   release?: string;
   version?: string;
 };
@@ -198,7 +199,7 @@ export class TerminologyServiceApi {
               ) {
                 const oid = this.getOidFromString(artifact.resource);
                 if (oid) {
-                  libVs.push({ oid: oid });
+                  libVs.push({ oid: oid, url: artifact.resource });
                 }
               }
               return libVs;
