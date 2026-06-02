@@ -8,7 +8,7 @@ import {
   buildHighlightingForAllGroups,
   updateAllGroupResults,
 } from "./CqlCoverageBuilder";
-import ControllingHighBloodPressureResults from "../../mockdata/qdm/controllingHBPCalculationResults.json";
+const ControllingHighBloodPressureResults = require("../../mockdata/qdm/controllingHBPCalculationResults.json");
 import {
   stratificationTestMeasure,
   stratificationExecutionResults,
@@ -54,6 +54,33 @@ describe("CQL Coverage Builder", () => {
     );
 
     expect(coverageResults["group-2"].length).toEqual(6);
+  });
+
+  it("skips statements when annotation is an empty array", () => {
+    const libraryWithEmptyAnnotation = JSON.parse(
+      JSON.stringify(testMeasureLibrary)
+    );
+
+    const initialPopulation =
+      libraryWithEmptyAnnotation.elm.library.statements.def.find(
+        (statement) => statement.name === "Initial Population"
+      );
+    initialPopulation.annotation = [];
+
+    const coverageResults = buildHighlightingForGroups(
+      testMeasureCalculationResult,
+      {
+        ...cqmMeasure,
+        cql_libraries: [libraryWithEmptyAnnotation],
+      }
+    );
+
+    expect(coverageResults["group-1"].length).toEqual(5);
+    expect(
+      coverageResults["group-1"].find(
+        (result) => result.name === "Initial Population"
+      )
+    ).toBeUndefined();
   });
 });
 
