@@ -1960,6 +1960,108 @@ describe("TestCaseList component", () => {
     await waitFor(() => expect(executeAllTestCasesButton).toBeDisabled());
   });
 
+  it("renders spinner overlay when openMakeJsonMatchUiSpinner is true", async () => {
+    renderTestCaseListComponent();
+
+    await waitFor(() => {
+      const selectButton = screen.getByTestId(`test-case-title-0_select`);
+      const checkboxButton = within(selectButton).getByRole("checkbox");
+      expect(checkboxButton).toBeInTheDocument();
+      fireEvent.click(checkboxButton);
+      expect(checkboxButton).toBeChecked();
+    });
+
+    const makeJsonMatchUiButton = screen.getByTestId(
+      "make-json-match-ui-action-icon"
+    );
+    expect(makeJsonMatchUiButton).toBeEnabled();
+    fireEvent.click(makeJsonMatchUiButton);
+
+    const continueButton = screen.getByTestId(
+      "make-json-match-ui-continue-button"
+    );
+    userEvent.click(continueButton);
+
+    // Note: the spinner appears too short, might need to use advance timer
+    // await waitFor(() =>
+    //   expect(
+    //     screen.getByTestId("make-json-match-ui-spinner")
+    //   ).toBeInTheDocument()
+    // );
+  });
+
+  describe("unresolvedReferenceWarningDetails useEffect", () => {
+    it("should not call setCustomWarningMessages when executeInvalidTestCases is falsy", async () => {
+      const measureWithoutConfig = {
+        ...mockMeasure,
+        testCaseConfiguration: { executeInvalidTestCases: undefined },
+      } as unknown as Measure;
+
+      setCustomWarningMessages.mockClear();
+      renderTestCaseListComponent([], ["test"], false, measureWithoutConfig);
+
+      await waitFor(() => {
+        expect(screen.getByTestId("test-case-tbl")).toBeInTheDocument();
+      });
+
+      expect(setCustomWarningMessages).not.toHaveBeenCalled();
+    });
+
+    it("should call setCustomWarningMessages with warning details when test cases have unresolved patient references", async () => {
+      const measureWithConfig = {
+        ...mockMeasure,
+        testCaseConfiguration: { executeInvalidTestCases: true },
+        testCases: testCases,
+      } as unknown as Measure;
+
+      useTestCaseServiceMock.mockImplementation(() => {
+        return {
+          ...useTestCaseServiceMockResolved,
+          getTestCasesByMeasureId: jest.fn().mockResolvedValue([
+            {
+              ...testCases[0],
+              hapiOperationOutcome: {
+                code: 400,
+                successful: false,
+                outcomeResponse: {
+                  issue: [
+                    {
+                      diagnostics:
+                        "Unable to resolve resource with ID 'Patient/invalid-ref' that does not resolve within the bundle",
+                    },
+                  ],
+                },
+              },
+            },
+            testCases[1],
+          ]),
+        } as unknown as TestCaseServiceApi;
+      });
+
+      setCustomWarningMessages.mockClear();
+      renderTestCaseListComponent([], ["test"], false, measureWithConfig);
+
+      await waitFor(() => {
+        expect(setCustomWarningMessages).toHaveBeenCalled();
+      });
+    });
+
+    it("should call setCustomWarningMessages with empty warnings when test cases have no unresolved references", async () => {
+      const measureWithConfig = {
+        ...mockMeasure,
+        testCaseConfiguration: { executeInvalidTestCases: true },
+        testCases: testCases,
+      } as unknown as Measure;
+
+      setCustomWarningMessages.mockClear();
+      renderTestCaseListComponent([], ["test"], false, measureWithConfig);
+
+      await waitFor(() => {
+        expect(setCustomWarningMessages).toHaveBeenCalled();
+      });
+    });
+  });
+
   describe("TestCaseList component with deleteMultipleTestCases", () => {
     it("should delete selected test cases", async () => {
       useTestCaseServiceMock.mockImplementation(() => {
@@ -1996,36 +2098,6 @@ describe("TestCaseList component", () => {
       expect(toastMessage).toHaveTextContent("Test cases successfully deleted");
       expect(screen.queryByTestId("delete-dialog-body")).toBeNull();
     }, 15000);
-  });
-
-  test("renders spinner overlay when openMakeJsonMatchUiSpinner is true", async () => {
-    renderTestCaseListComponent();
-
-    await waitFor(() => {
-      const selectButton = screen.getByTestId(`test-case-title-0_select`);
-      const checkboxButton = within(selectButton).getByRole("checkbox");
-      expect(checkboxButton).toBeInTheDocument();
-      fireEvent.click(checkboxButton);
-      expect(checkboxButton).toBeChecked();
-    });
-
-    const makeJsonMatchUiButton = screen.getByTestId(
-      "make-json-match-ui-action-icon"
-    );
-    expect(makeJsonMatchUiButton).toBeEnabled();
-    fireEvent.click(makeJsonMatchUiButton);
-
-    const continueButton = screen.getByTestId(
-      "make-json-match-ui-continue-button"
-    );
-    userEvent.click(continueButton);
-
-    // Note: the spinner appears too short, might need to use advance timer
-    // await waitFor(() =>
-    //   expect(
-    //     screen.getByTestId("make-json-match-ui-spinner")
-    //   ).toBeInTheDocument()
-    // );
   });
 });
 
