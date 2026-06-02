@@ -99,6 +99,7 @@ import CalculatorDialog from "../calculator/CalculatorDialog";
 import LockedMessageModal from "../../../../../common/lockedMessageModal/LockedMessageModal";
 import { CustomWarningMessage } from "../../statusHandler/StatusHandler";
 import EditCompositeTestCase from "./EditCompositeTestCase";
+import useServiceConfig from "../../../../../../api/useServiceConfig";
 
 const TestCaseForm = tw.form`m-3`;
 
@@ -1183,7 +1184,7 @@ const EditTestCase = (props: EditTestCaseProps) => {
     }
     return map;
   }, [measure?.groups]);
-
+  const serviceConfig = useServiceConfig();
   return (
     <>
       <TestCaseForm
@@ -1283,10 +1284,12 @@ const EditTestCase = (props: EditTestCaseProps) => {
                         style={{ height: "calc(100% - 24px)" }}
                       >
                         <MadieEditor
+                          serviceConfig={serviceConfig}
                           value={measure?.cql}
                           height="100%"
                           readOnly={true}
                           validationsEnabled={false}
+
                         />
                       </div>
                     ) : (
