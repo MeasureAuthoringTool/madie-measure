@@ -46,11 +46,7 @@ import { multiGroupMeasureFixture } from "../../createTestCase/__mocks__/multiGr
 import { nonBoolTestCaseFixture } from "../../createTestCase/__mocks__/nonBoolTestCaseFixture";
 import { TestCaseValidator } from "../../../validators/TestCaseValidator";
 // @ts-ignore
-import {
-  checkUserCanEdit,
-  useFeatureFlags,
-  MeasureServiceApi,
-} from "@madie/madie-util";
+import { checkUserCanEdit, MeasureServiceApi } from "@madie/madie-util";
 import { PopulationType as FqmPopulationType } from "fqm-execution/build/types/Enums";
 import { ResourceIdentifier } from "../../../api/models/ResourceIdentifier";
 
@@ -3126,6 +3122,114 @@ describe("EditTestCase component", () => {
       });
 
       expect(mockedAxios.get).toHaveBeenCalledTimes(3);
+    });
+
+    it("should call onUpdate and update the test case when polling returns a completed validation", async () => {
+      jest.useFakeTimers("modern");
+      const testCaseJson = JSON.stringify({
+        resourceType: "Bundle",
+        type: "collection",
+        entry: [
+          {
+            resource: {
+              resourceType: "Patient",
+              id: "patient-1",
+            },
+          },
+        ],
+      });
+      const testCase = {
+        id: "1234",
+        createdBy: MEASURE_CREATEDBY,
+        description: "Test IPP",
+        series: "SeriesA",
+        title: "TestIPP",
+        name: "TestIPP",
+        json: testCaseJson,
+        validationStatus: ValidationStatus.PENDING,
+        hapiOperationOutcome: null,
+        groupPopulations: [
+          {
+            groupId: "Group1_ID",
+            scoring: "Cohort",
+            populationValues: [
+              {
+                id: "id-1",
+                name: PopulationType.INITIAL_POPULATION,
+                expected: false,
+                actual: false,
+              },
+            ],
+          },
+        ],
+      } as unknown as TestCase;
+
+      const updatedTestCase = {
+        ...testCase,
+        validationStatus: ValidationStatus.VALID,
+        hapiOperationOutcome: hapiOperationSuccessOutcome,
+      };
+
+      const measure = {
+        id: "m1234",
+        createdBy: MEASURE_CREATEDBY,
+        model: Model.QICORE,
+        testCases: [],
+        groups: [
+          {
+            id: "Group1_ID",
+            scoring: "Cohort",
+            populations: [
+              {
+                id: "id-1",
+                name: PopulationType.INITIAL_POPULATION,
+                definition: "Pop1",
+              },
+            ],
+          },
+        ],
+      } as unknown as Measure;
+
+      let testCaseGetCount = 0;
+      mockedAxios.get.mockClear().mockImplementation((args) => {
+        if (args && args.endsWith("series")) {
+          return Promise.resolve({ data: ["SeriesA"] });
+        } else if (args && args.endsWith("resources")) {
+          return Promise.resolve({ data: [...resourceIdentifiers] });
+        }
+        testCaseGetCount++;
+        if (testCaseGetCount === 1) {
+          return Promise.resolve({ data: testCase });
+        }
+        return Promise.resolve({ data: updatedTestCase });
+      });
+
+      await act(async () => {
+        renderWithRouter(
+          ["/measures/m1234/edit/test-cases/1234"],
+          "/measures/:measureId/edit/test-cases/:id",
+          measure
+        );
+      });
+
+      // Initial state should show pending/validating spinner since status is PENDING
+      expect(testCaseGetCount).toBeGreaterThanOrEqual(1);
+
+      // Advance timers to trigger polling which returns VALID status
+      await act(async () => {
+        jest.advanceTimersByTime(5000);
+      });
+
+      // onUpdate should have been invoked - assert the polling fetched the updated test case
+      expect(testCaseGetCount).toBeGreaterThanOrEqual(2);
+
+      // After onUpdate processes the result, the validation status icon should change to valid
+      await act(async () => {
+        jest.advanceTimersByTime(0);
+      });
+
+      const validIcon = screen.queryByTestId("validation-header-valid-icon");
+      expect(validIcon).toBeInTheDocument();
     });
 
     it("should handle displaying a test case with null groupPopulation data", async () => {
