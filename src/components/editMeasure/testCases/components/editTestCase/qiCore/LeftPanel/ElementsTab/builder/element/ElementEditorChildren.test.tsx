@@ -319,7 +319,9 @@ describe("ElementEditorChildren", () => {
 
     await waitFor(() => {
       expect(dispatch).toHaveBeenCalledWith(
-        expect.objectContaining({ type: ResourceActionType.MODIFY_BUNDLE_ENTRY })
+        expect.objectContaining({
+          type: ResourceActionType.MODIFY_BUNDLE_ENTRY,
+        })
       );
     });
 
@@ -331,6 +333,6 @@ describe("ElementEditorChildren", () => {
     expect(updatedName).toHaveLength(2);
     expect(updatedName[0]).toEqual({ family: "Jones" }); // original preserved
     expect(updatedName[1]).toEqual({ family: "Jones" }); // deep clone
-    expect(updatedName[0]).not.toBe(updatedName[1]);     // different references
+    expect(updatedName[0]).not.toBe(updatedName[1]); // different references
   });
 });
