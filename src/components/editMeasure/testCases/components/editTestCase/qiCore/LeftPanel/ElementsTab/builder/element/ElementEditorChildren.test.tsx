@@ -269,4 +269,68 @@ describe("ElementEditorChildren", () => {
     expect(updatedName).toHaveLength(3);
     expect(updatedName[2]).toEqual({ family: "Smith" }); // clone of index 0
   });
+
+  it("wraps a non-array value into [original, clone] when cloning a multi-cardinality element stored as a plain object", async () => {
+    // This covers the else-if branch: rootDefinition.id has no bracket index
+    // (ResourceEditor returns an element without [N] when the JSON value is not yet an array),
+    // so getIndexFromPathWithoutBrackets returns null. The clone handler should wrap the
+    // existing single value together with its deep copy into an array.
+    const dispatch = jest.fn();
+    const stateWithSingleObject = {
+      bundle: {
+        ...mockPatientState.bundle,
+        entry: [
+          {
+            ...mockPatientState.bundle.entry[0],
+            resource: {
+              ...mockPatientState.bundle.entry[0].resource,
+              name: { family: "Jones" }, // plain object, not an array
+            },
+          },
+        ],
+      },
+    };
+    const propsNoIndex = {
+      ...defaultProps,
+      rootDefinition: {
+        id: "Patient.name", // no [N] — index will be null
+        path: "Patient.name",
+        min: "0",
+        max: "*",
+      },
+      resource: {
+        name: { family: "Jones" },
+      },
+    };
+
+    render(
+      <FormikProvider value={{}}>
+        <QiCoreResourceContext.Provider
+          value={{ state: stateWithSingleObject, dispatch }}
+        >
+          <ElementEditorChildren {...propsNoIndex} />
+        </QiCoreResourceContext.Provider>
+      </FormikProvider>
+    );
+
+    userEvent.click(screen.getByTestId("elements-action-center-actual-icon"));
+    const cloneButton = await screen.findByTestId("elements-clone");
+    userEvent.click(cloneButton);
+
+    await waitFor(() => {
+      expect(dispatch).toHaveBeenCalledWith(
+        expect.objectContaining({ type: ResourceActionType.MODIFY_BUNDLE_ENTRY })
+      );
+    });
+
+    const call = dispatch.mock.calls.find(
+      (c) => c[0].type === ResourceActionType.MODIFY_BUNDLE_ENTRY
+    );
+    const updatedName = call[0].payload.resource.name;
+    expect(Array.isArray(updatedName)).toBe(true);
+    expect(updatedName).toHaveLength(2);
+    expect(updatedName[0]).toEqual({ family: "Jones" }); // original preserved
+    expect(updatedName[1]).toEqual({ family: "Jones" }); // deep clone
+    expect(updatedName[0]).not.toBe(updatedName[1]);     // different references
+  });
 });
