@@ -866,6 +866,62 @@ describe("ResourceEditor", () => {
     expect(mockDispatch).toHaveBeenCalledWith(expectedPayload);
   });
 
+  it("should apply [0] index for element with isMultiCardinalityElement (base max '*' without existing values)", async () => {
+    const mockDispatch = jest.fn();
+
+    // Create a resource state where the Patient has no 'name' property at all
+    // but the structure definition declares name with base.max = '*'
+    const localMockResourceState = _.cloneDeep(mockResourceState);
+    delete localMockResourceState.bundle.entry[0].resource.name;
+
+    // Mock Formik context without the name property
+    const mockFormikObjWithoutName = {
+      ...localMockFormikObj,
+      dirty: false,
+      values: {
+        Patient: {
+          ...mockFormikObj.values.Patient,
+        },
+      },
+    };
+    delete mockFormikObjWithoutName.values.Patient.name;
+    (useFormikContext as jest.Mock).mockReturnValue(mockFormikObjWithoutName);
+
+    render(
+      <ExecutionContextProvider
+        value={{
+          valueSetsState: mockValueSetsState,
+          executionContextReady: true,
+        }}
+      >
+        <ApiContextProvider value={mockConfig}>
+          <QiCoreResourceContext.Provider
+            value={{ state: localMockResourceState, dispatch: mockDispatch }}
+          >
+            <ResourceEditor
+              selectedResourceID="446b20b5-dd46-415e-9b9f-9eba6b260743"
+              setValidationSchema={jest.fn()}
+              setInitialFormikValuesStu6={jest.fn()}
+              onCancel={jest.fn()}
+              canEdit={true}
+              applyLoading={false}
+              setApplyLoading={jest.fn()}
+            />
+          </QiCoreResourceContext.Provider>
+        </ApiContextProvider>
+      </ExecutionContextProvider>
+    );
+
+    // Wait for the component to render - the element with base max '*'
+    // and no value in the resource should still be rendered with [0] index
+    await waitFor(() => {
+      expect(screen.getByText("ID:")).toBeInTheDocument();
+      expect(
+        screen.getByText("446b20b5-dd46-415e-9b9f-9eba6b260743")
+      ).toBeInTheDocument();
+    });
+  });
+
   it("should return a single object with id [0] for empty name array", async () => {
     const mockDispatch = jest.fn();
 
