@@ -101,7 +101,7 @@ const TransferDialog = ({
   const formik = useFormik({
     initialValues: {
       currentUser: formatOwner(
-        (measures?.[0] as any)?.ownerDisplayName,
+        measures?.[0]?.ownerDisplayName,
         measures?.[0]?.measureSet?.owner
       ),
       harpId: "",
