@@ -468,6 +468,49 @@ describe("Builder Component", () => {
     });
   });
 
+  it("calls handleRowClone when clone action is clicked", async () => {
+    (useFormikContext as jest.Mock).mockReturnValue({
+      resetForm: jest.fn(),
+      dirty: false,
+    });
+
+    const mockDispatch = jest.fn();
+    renderBuilderComponent({
+      bundleToAdd: mockBundle,
+      activeTab: "added",
+      dispatch: mockDispatch,
+    });
+
+    await screen.findByText("QICore Encounter");
+
+    const actionCenterButton = screen.getByTestId("action-center-button-ec-1");
+    userEvent.click(actionCenterButton);
+
+    const cloneAction = await screen.findByRole("menuitem", {
+      name: "Clone",
+    });
+    userEvent.click(cloneAction);
+
+    await waitFor(() => {
+      expect(mockDispatch).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: "AddBundleEntry",
+          payload: expect.objectContaining({
+            resource: expect.objectContaining({
+              resourceType: "Encounter",
+            }),
+          }),
+        })
+      );
+    });
+
+    // Ensure cloned entry has a different id
+    const call = mockDispatch.mock.calls.find(
+      (c) => c[0].type === "AddBundleEntry"
+    );
+    expect(call[0].payload.resource.id).not.toBe("ec-1");
+  });
+
   it("places qicore patient first even when service returns it later", async () => {
     mockGetResources.mockReturnValue([
       defaultResourceIdentifiers[1],
