@@ -52,13 +52,24 @@ const HowItWorks = ({
         <div className="how-it-works-body">
           <strong>How it Works</strong>
           <p>
-            To combine profiles from one test case from each component, follow
-            the steps below:
+            This workflow allows you to insert all profiles from a selected test
+            case into the current test case.
           </p>
+          <p>To complete this process:</p>
           <ol>
-            <li>Select which measures to choose test case profiles from.</li>
-            <li>Select which test case to choose profiles from.</li>
-            <li>Select test case profiles.</li>
+            <li>
+              Select the measure that contains the test case you want to insert.
+            </li>
+            <li>
+              Select the test case you want to insert profiles from.
+              <ul className="how-it-works-sub-list">
+                <li>
+                  You can select View Test Case to review details before
+                  proceeding.
+                </li>
+              </ul>
+            </li>
+            <li>Select Insert.</li>
           </ol>
         </div>
         <IconButton
