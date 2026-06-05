@@ -8,6 +8,7 @@ import {
   ExpandCollapseProvider,
   useExpandCollapse,
 } from "./ExpandCollapseContext";
+import { Formik } from "formik";
 
 const { findByText, findByTestId, queryByTestId } = screen;
 
@@ -185,5 +186,122 @@ describe("ElementSectionQiCore with ExpandCollapseContext", () => {
       </ElementSectionQiCore>
     );
     expect(screen.getByText("Standalone")).toBeInTheDocument();
+  });
+});
+
+// Triggers expandPopulated from context, wrapped in Formik.
+const ExpandPopulatedTestHarness = ({
+  title,
+  fieldPath,
+  startOpen = false,
+  values,
+}) => {
+  const ctx = useExpandCollapse();
+  return (
+    <Formik initialValues={values} onSubmit={jest.fn()}>
+      <>
+        <button
+          data-testid="trigger-expand-populated"
+          onClick={() => ctx.expandPopulated()}
+        />
+        <ElementSectionQiCore
+          title={title}
+          fieldPath={fieldPath}
+          startOpen={startOpen}
+        >
+          <span data-testid="child-content">child</span>
+        </ElementSectionQiCore>
+      </>
+    </Formik>
+  );
+};
+
+describe("ElementSectionQiCore expandPopulated", () => {
+  test("expandPopulated opens a collapsed section that has data", async () => {
+    render(
+      <ExpandCollapseProvider>
+        <ExpandPopulatedTestHarness
+          title="Value"
+          fieldPath="Patient.value"
+          startOpen={false}
+          values={{ Patient: { value: "some data" } }}
+        />
+      </ExpandCollapseProvider>
+    );
+    expect(screen.queryByTestId("elements-header-content-Value")).toBeNull();
+    act(() => {
+      fireEvent.click(screen.getByTestId("trigger-expand-populated"));
+    });
+    expect(
+      await screen.findByTestId("elements-header-content-Value")
+    ).toBeInTheDocument();
+  });
+
+  test("expandPopulated closes an open section that has no data", async () => {
+    render(
+      <ExpandCollapseProvider>
+        <ExpandPopulatedTestHarness
+          title="Value"
+          fieldPath="Patient.value"
+          startOpen={true}
+          values={{ Patient: { value: "" } }}
+        />
+      </ExpandCollapseProvider>
+    );
+    expect(
+      await screen.findByTestId("elements-header-content-Value")
+    ).toBeInTheDocument();
+    act(() => {
+      fireEvent.click(screen.getByTestId("trigger-expand-populated"));
+    });
+    await waitFor(() => {
+      expect(
+        screen.queryByTestId("elements-header-content-Value")
+      ).not.toBeInTheDocument();
+    });
+  });
+
+  test("expandPopulated treats nested non-empty objects as populated", async () => {
+    render(
+      <ExpandCollapseProvider>
+        <ExpandPopulatedTestHarness
+          title="Period"
+          fieldPath="Patient.period"
+          startOpen={false}
+          values={{ Patient: { period: { start: "2020-01-01" } } }}
+        />
+      </ExpandCollapseProvider>
+    );
+    expect(screen.queryByTestId("elements-header-content-Period")).toBeNull();
+    act(() => {
+      fireEvent.click(screen.getByTestId("trigger-expand-populated"));
+    });
+    expect(
+      await screen.findByTestId("elements-header-content-Period")
+    ).toBeInTheDocument();
+  });
+
+  test("expandPopulated treats empty nested objects as not populated", async () => {
+    render(
+      <ExpandCollapseProvider>
+        <ExpandPopulatedTestHarness
+          title="Period"
+          fieldPath="Patient.period"
+          startOpen={true}
+          values={{ Patient: { period: { start: "", end: "" } } }}
+        />
+      </ExpandCollapseProvider>
+    );
+    expect(
+      await screen.findByTestId("elements-header-content-Period")
+    ).toBeInTheDocument();
+    act(() => {
+      fireEvent.click(screen.getByTestId("trigger-expand-populated"));
+    });
+    await waitFor(() => {
+      expect(
+        screen.queryByTestId("elements-header-content-Period")
+      ).not.toBeInTheDocument();
+    });
   });
 });

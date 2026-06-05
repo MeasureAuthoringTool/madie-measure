@@ -137,6 +137,23 @@ const ElementEditorChildrenInner = ({
           >
             Collapse All
           </button>
+          |
+          <button
+            type="button"
+            data-testid="expand-populated-fields-button"
+            onClick={() => expandCollapseCtx?.expandPopulated()}
+            style={{
+              background: "none",
+              border: "none",
+              padding: 0,
+              color: "#3171C2",
+              cursor: "pointer",
+              fontSize: "14px",
+              fontFamily: "'Roboto', 'Helvetica', 'Arial', sans-serif",
+            }}
+          >
+            Expand Populated Fields
+          </button>
         </div>
       )}
       <Box sx={{ rowGap: 0 }}>

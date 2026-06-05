@@ -152,6 +152,9 @@ describe("ElementEditorChildren", () => {
 
     expect(screen.queryByTestId("expand-all-button")).not.toBeInTheDocument();
     expect(screen.queryByTestId("collapse-all-button")).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId("expand-populated-fields-button")
+    ).not.toBeInTheDocument();
   });
 
   it("renders Expand All and Collapse All buttons when sub-attribute panels are rendered", async () => {
@@ -170,8 +173,12 @@ describe("ElementEditorChildren", () => {
 
     expect(await screen.findByTestId("expand-all-button")).toBeInTheDocument();
     expect(screen.getByTestId("collapse-all-button")).toBeInTheDocument();
+    expect(
+      screen.getByTestId("expand-populated-fields-button")
+    ).toBeInTheDocument();
     expect(screen.getByText("Expand All")).toBeInTheDocument();
     expect(screen.getByText("Collapse All")).toBeInTheDocument();
+    expect(screen.getByText("Expand Populated Fields")).toBeInTheDocument();
   });
 
   it("clicking Expand All button does not throw", async () => {
@@ -208,5 +215,25 @@ describe("ElementEditorChildren", () => {
 
     const collapseBtn = await screen.findByTestId("collapse-all-button");
     expect(() => fireEvent.click(collapseBtn)).not.toThrow();
+  });
+
+  it("clicking Expand Populated Fields button does not throw", async () => {
+    const dispatch = jest.fn();
+    mockRenderSections = true;
+
+    render(
+      <FormikProvider value={{}}>
+        <QiCoreResourceContext.Provider
+          value={{ state: mockPatientState, dispatch }}
+        >
+          <ElementEditorChildren {...defaultProps} />
+        </QiCoreResourceContext.Provider>
+      </FormikProvider>
+    );
+
+    const expandPopulatedBtn = await screen.findByTestId(
+      "expand-populated-fields-button"
+    );
+    expect(() => fireEvent.click(expandPopulatedBtn)).not.toThrow();
   });
 });
