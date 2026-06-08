@@ -13,6 +13,7 @@ import tw from "twin.macro";
 import "styled-components/macro";
 import { Measure } from "@madie/madie-models";
 import { formatCmsId } from "../../../utils/cmsIdFormatter";
+import { formatOwner } from "../../../utils/ownerFormatter";
 
 const TH = tw.th`p-3 text-left text-sm`;
 const TD = tw.td`p-3 text-left text-sm break-keep`;
@@ -94,7 +95,7 @@ export const TransferredMeasuresTable = ({
         measureName: measure.measureName,
         model: measure.model,
         cmsId: measure.measureSet?.cmsId,
-        owner: measure.measureSet?.owner,
+        owner: formatOwner(measure.ownerDisplayName, measure.measureSet?.owner),
       })),
     [visibleMeasures]
   );
