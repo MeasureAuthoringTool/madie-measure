@@ -6,6 +6,7 @@ import {
   ColumnDef,
 } from "@tanstack/react-table";
 import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import EditIcon from "../../../../../../../../../common/EditIcon";
 import ActionCenter, {
   ActionItemDef,
@@ -65,6 +66,7 @@ export interface GridDataEntry {
 interface TestCaseSummaryGridProps {
   onRowEdit: (row: any) => void;
   onRowDelete: (row: any) => void;
+  onRowClone?: (row: any) => void;
   gridData: GridDataEntry[];
   testCaseCanEdit: boolean;
   selectedRowId?: string;
@@ -138,6 +140,7 @@ const TestCaseSummaryGrid = ({
   gridData,
   onRowEdit,
   onRowDelete,
+  onRowClone,
   testCaseCanEdit,
   selectedRowId,
   readOnly,
@@ -164,12 +167,17 @@ const TestCaseSummaryGrid = ({
         onClick: (targetContext: any) => onRowEdit(targetContext),
       },
       {
+        name: "Clone",
+        icon: <ContentCopyIcon sx={{ color: "#0073C8" }} />,
+        onClick: (targetContext: any) => onRowClone?.(targetContext),
+      },
+      {
         name: "Remove",
         icon: <DeleteOutlinedIcon sx={{ color: "#D92F2F" }} />,
         onClick: (targetContext: any) => onRowDelete(targetContext),
       },
     ],
-    [onRowEdit, onRowDelete]
+    [onRowEdit, onRowDelete, onRowClone]
   );
 
   const viewAction = React.useMemo<ActionItemDef[]>(
