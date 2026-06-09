@@ -939,3 +939,19 @@ export function stripOutUsedAttributesForElements(elements) {
     })
     .filter(Boolean);
 }
+
+/**
+ * Determines if an ElementDefinition represents an element with multiple cardinality (i.e., max > 1 or max = "*").
+ * Checks both the element and its base definition cardinality
+ * because sometime base is 0/1...* but profiles constrains it to be 0/1..1.
+ * In this case we need to initialize element as an array
+ */
+export function isMultiCardinalityElement(element: ElementDefinition) {
+  // first check if element itself has multiple cardinality
+  if (element.max === "*" || (element.max && parseInt(element.max) > 1)) {
+    return true;
+  }
+  // check if base element has multiple cardinality
+  const baseCardinality = element.base?.max;
+  return baseCardinality == "*" || (element.max && parseInt(element.max) > 1);
+}

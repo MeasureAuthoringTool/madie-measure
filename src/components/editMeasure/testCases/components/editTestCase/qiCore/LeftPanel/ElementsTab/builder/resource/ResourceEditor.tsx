@@ -28,6 +28,7 @@ import {
   PRIMITIVE_DEFAULT_VALUES,
   isPrimitiveType,
   stripOutUnusedAttributes,
+  isMultiCardinalityElement,
 } from "../../../../../../../api/fhirDefinitionServiceUtilities";
 import { useFormikContext } from "formik";
 import {
@@ -170,7 +171,8 @@ const ResourceEditor = ({
                 }));
               } else if (
                 // Return a single object with id `[0]` to represent the first element
-                Array.isArray(jsonValuesAtPath)
+                Array.isArray(jsonValuesAtPath) ||
+                isMultiCardinalityElement(el)
               ) {
                 return [{ ...el, id: `${el.id}[0]` }];
               } else {
