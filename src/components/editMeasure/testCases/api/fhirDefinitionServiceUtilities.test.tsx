@@ -37,6 +37,7 @@ import {
   getEditableExtensionSubElements,
   stripOutUnusedAttributes,
   stripOutUsedAttributesForElements,
+  isMultiCardinalityElement,
 } from "./fhirDefinitionServiceUtilities";
 import { StructureDefinitionDto } from "./models/StructureDefinitionDto";
 
@@ -2056,5 +2057,100 @@ describe("stripOutUnusedAttributes", () => {
     ];
     const result = stripOutUsedAttributesForElements(elements);
     expect(result).toHaveLength(1);
+  });
+});
+
+describe("isMultiCardinalityElement", () => {
+  it("should return true when element max is '*'", () => {
+    const element = {
+      id: "Patient.name",
+      path: "Patient.name",
+      max: "*",
+      type: [{ code: "HumanName" }],
+    } as ElementDefinition;
+    expect(isMultiCardinalityElement(element)).toBe(true);
+  });
+
+  it("should return true when element max is greater than 1", () => {
+    const element = {
+      id: "Patient.identifier",
+      path: "Patient.identifier",
+      max: "5",
+      type: [{ code: "Identifier" }],
+    } as ElementDefinition;
+    expect(isMultiCardinalityElement(element)).toBe(true);
+  });
+
+  it("should return false when element max is '1' and base max is '1'", () => {
+    const element = {
+      id: "Patient.gender",
+      path: "Patient.gender",
+      max: "1",
+      base: { path: "Patient.gender", min: 0, max: "1" },
+      type: [{ code: "code" }],
+    } as ElementDefinition;
+    expect(isMultiCardinalityElement(element)).toBe(false);
+  });
+
+  it("should return true when base max is '*' even if element max is '1'", () => {
+    const element = {
+      id: "Patient.name",
+      path: "Patient.name",
+      max: "1",
+      base: { path: "Patient.name", min: 0, max: "*" },
+      type: [{ code: "HumanName" }],
+    } as ElementDefinition;
+    expect(isMultiCardinalityElement(element)).toBe(true);
+  });
+
+  it("should return false when element max is '0'", () => {
+    const element = {
+      id: "Patient.deceased[x]",
+      path: "Patient.deceased[x]",
+      max: "0",
+      base: { path: "Patient.deceased[x]", min: 0, max: "1" },
+      type: [{ code: "boolean" }],
+    } as ElementDefinition;
+    expect(isMultiCardinalityElement(element)).toBe(false);
+  });
+
+  it("should return false when element max is undefined and base max is '1'", () => {
+    const element = {
+      id: "Patient.active",
+      path: "Patient.active",
+      base: { path: "Patient.active", min: 0, max: "1" },
+      type: [{ code: "boolean" }],
+    } as ElementDefinition;
+    expect(isMultiCardinalityElement(element)).toBeFalsy();
+  });
+
+  it("should return false when both max and base are undefined", () => {
+    const element = {
+      id: "Patient.active",
+      path: "Patient.active",
+      type: [{ code: "boolean" }],
+    } as ElementDefinition;
+    expect(isMultiCardinalityElement(element)).toBeFalsy();
+  });
+
+  it("should return true when element max is '2'", () => {
+    const element = {
+      id: "Patient.contact",
+      path: "Patient.contact",
+      max: "2",
+      base: { path: "Patient.contact", min: 0, max: "2" },
+      type: [{ code: "BackboneElement" }],
+    } as ElementDefinition;
+    expect(isMultiCardinalityElement(element)).toBe(true);
+  });
+
+  it("should return false when element max is '1' and base is undefined", () => {
+    const element = {
+      id: "Patient.birthDate",
+      path: "Patient.birthDate",
+      max: "1",
+      type: [{ code: "date" }],
+    } as ElementDefinition;
+    expect(isMultiCardinalityElement(element)).toBe(false);
   });
 });
