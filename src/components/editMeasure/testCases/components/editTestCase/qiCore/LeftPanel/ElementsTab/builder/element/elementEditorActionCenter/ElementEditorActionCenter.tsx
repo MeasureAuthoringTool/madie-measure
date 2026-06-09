@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { SpeedDial, SpeedDialAction } from "@mui/material";
 import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import { MadieDeleteDialog } from "@madie/madie-design-system/dist/react";
 
 interface PropTypes {
@@ -11,6 +12,7 @@ interface PropTypes {
   elementName: string;
   handleDelete: (path: string, element: any, elementName: string) => void;
   addElementOfMultipleCardinality: () => void;
+  cloneElementOfMultipleCardinality?: () => void;
 }
 interface Action {
   name: string;
@@ -30,6 +32,13 @@ const ElementEditorActionCenter = (props: PropTypes) => {
     icon: <AddCircleOutlineIcon sx={{ color: "#3171C2" }} />,
     onClick: () => {
       props.addElementOfMultipleCardinality();
+    },
+  };
+  const cloneAction = {
+    name: "Clone",
+    icon: <ContentCopyIcon sx={{ color: "#3171C2" }} />,
+    onClick: () => {
+      props.cloneElementOfMultipleCardinality?.();
     },
   };
   const deleteAction = {
@@ -56,6 +65,7 @@ const ElementEditorActionCenter = (props: PropTypes) => {
       localActions.push(deleteAction);
     }
     if (max == "*") {
+      localActions.push(cloneAction);
       localActions.push(addAction);
     }
     setActions(localActions);
