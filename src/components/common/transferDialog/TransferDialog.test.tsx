@@ -558,6 +558,49 @@ describe("Transfer Measures Dialog component", () => {
     expect(screen.queryByTestId("current-owner")).not.toBeInTheDocument();
   });
 
+  it("should display formatted owner name in Current Measure Owner field for non-admin transfers", async () => {
+    const measureWithOwner = {
+      ...mockMeasure1,
+      ownerDisplayName: "John Doe",
+      measureSet: {
+        ...mockMeasure1.measureSet,
+        owner: "john_doe",
+      },
+    };
+
+    render(
+      <TransferDialog
+        measures={[measureWithOwner]}
+        open={true}
+        onClose={jest.fn()}
+        setStatusHandler={jest.fn()}
+      />
+    );
+
+    expect(await screen.findByText("John Doe (john_doe)")).toBeInTheDocument();
+  });
+
+  it("should fall back to harpId in Current Measure Owner field when ownerDisplayName is missing", async () => {
+    const measureWithOwner = {
+      ...mockMeasure1,
+      measureSet: {
+        ...mockMeasure1.measureSet,
+        owner: "john_doe",
+      },
+    };
+
+    render(
+      <TransferDialog
+        measures={[measureWithOwner]}
+        open={true}
+        onClose={jest.fn()}
+        setStatusHandler={jest.fn()}
+      />
+    );
+
+    expect(await screen.findByText("john_doe")).toBeInTheDocument();
+  });
+
   it("should display green Transfer button for admin transfers", () => {
     render(
       <TransferDialog
