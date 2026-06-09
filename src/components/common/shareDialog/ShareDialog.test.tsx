@@ -358,6 +358,7 @@ describe("Create Share Dialog component", () => {
             (acl) =>
               ({
                 userId: acl.userId,
+                displayName: acl.userId,
                 performedAt: yesterday.toISOString(),
               } as unknown as SharedUser)
           )
@@ -367,6 +368,7 @@ describe("Create Share Dialog component", () => {
             (acl) =>
               ({
                 userId: acl.userId,
+                displayName: acl.userId,
                 performedAt: yesterday.toISOString(),
               } as unknown as SharedUser)
           )
@@ -421,6 +423,7 @@ describe("Create Share Dialog component", () => {
             (acl) =>
               ({
                 userId: acl.userId,
+                displayName: acl.userId,
                 performedAt: yesterday.toISOString(),
               } as unknown as SharedUser)
           )
@@ -430,6 +433,7 @@ describe("Create Share Dialog component", () => {
             (acl) =>
               ({
                 userId: acl.userId,
+                displayName: acl.userId,
                 performedAt: yesterday.toISOString(),
               } as unknown as SharedUser)
           )
@@ -505,6 +509,47 @@ describe("Create Share Dialog component", () => {
     ).toBeInTheDocument();
   });
 
+  it("should display display name format for API-loaded users in grid", async () => {
+    mockMeasureServiceApi.getSharedMeasures = jest.fn().mockResolvedValue({
+      [mockMeasure1.id]: [],
+      [mockMeasure2.id]: mockMeasure2.acls
+        ? mockMeasure2.acls.map(
+            (acl) =>
+              ({
+                userId: acl.userId,
+                displayName: `John Doe (${acl.userId})`,
+                performedAt: yesterday.toISOString(),
+              } as unknown as SharedUser)
+          )
+        : [],
+    });
+    mockMeasureServiceApi.getRecentMeasuresByMeasureSetId =
+      mockGetRecentMeasuresByMeasureSetId;
+
+    render(
+      <ShareDialog
+        measures={[mockMeasure1, mockMeasure2]}
+        open={true}
+        option={"Share With"}
+        onClose={jest.fn()}
+        onSave={jest.fn()}
+      />
+    );
+
+    expect(await screen.findByTestId("share-dialog")).toBeInTheDocument();
+
+    expect(
+      screen.getByTestId(
+        `${mockMeasure2.id} ${mockMeasure2.acls![0].userId}_userId`
+      )
+    ).toHaveTextContent(`John Doe (${mockMeasure2.acls![0].userId})`);
+    expect(
+      screen.getByTestId(
+        `${mockMeasure2.id} ${mockMeasure2.acls![1].userId}_userId`
+      )
+    ).toHaveTextContent(`John Doe (${mockMeasure2.acls![1].userId})`);
+  });
+
   it("should not add any user row to the grid for any measure if all measures already have that user", async () => {
     mockMeasureServiceApi.getSharedMeasures = jest.fn().mockResolvedValue({
       [mockMeasure1.id]: mockMeasure1.acls
@@ -512,6 +557,7 @@ describe("Create Share Dialog component", () => {
             (acl) =>
               ({
                 userId: acl.userId,
+                displayName: acl.userId,
                 performedAt: yesterday.toISOString(),
               } as unknown as SharedUser)
           )
@@ -521,6 +567,7 @@ describe("Create Share Dialog component", () => {
             (acl) =>
               ({
                 userId: acl.userId,
+                displayName: acl.userId,
                 performedAt: yesterday.toISOString(),
               } as unknown as SharedUser)
           )
@@ -794,6 +841,7 @@ describe("Create Share Dialog component", () => {
             (acl) =>
               ({
                 userId: acl.userId,
+                displayName: acl.userId,
                 performedAt: yesterday.toISOString(),
               } as unknown as SharedUser)
           )
@@ -878,6 +926,7 @@ describe("Create Share Dialog component", () => {
             (acl) =>
               ({
                 userId: acl.userId,
+                displayName: acl.userId,
                 performedAt: yesterday.toISOString(),
               } as unknown as SharedUser)
           )
@@ -887,6 +936,7 @@ describe("Create Share Dialog component", () => {
             (acl) =>
               ({
                 userId: acl.userId,
+                displayName: acl.userId,
                 performedAt: yesterday.toISOString(),
               } as unknown as SharedUser)
           )
@@ -921,6 +971,14 @@ describe("Create Share Dialog component", () => {
     expect(harpIdInput.value).toBe("userId3");
     expect(addUserBtn).toBeEnabled();
 
+    mockUserServiceApi.getBulkUserDetails.mockResolvedValueOnce({
+      userId3: {
+        harpId: "userId3",
+        userStatus: "ACTIVE",
+        firstName: "John",
+        lastName: "Doe",
+      },
+    });
     await userEvent.click(addUserBtn);
 
     await waitFor(() => {
@@ -936,7 +994,7 @@ describe("Create Share Dialog component", () => {
     //Subrow 1 of Row 1
     expect(
       screen.getByTestId("TestMeasureId1 userId3_userId")
-    ).toHaveTextContent("userId3");
+    ).toHaveTextContent("John Doe (userId3)");
     expect(
       screen.getByTestId("TestMeasureId1 userId3_dateShared")
     ).toHaveTextContent(convertDate(today.toUTCString()));
@@ -948,7 +1006,7 @@ describe("Create Share Dialog component", () => {
     //Subrow 1 of Row 2
     expect(
       screen.getByTestId("TestMeasureId2 userId3_userId")
-    ).toHaveTextContent("userId3");
+    ).toHaveTextContent("John Doe (userId3)");
     expect(
       screen.getByTestId("TestMeasureId2 userId3_dateShared")
     ).toHaveTextContent(convertDate(today.toUTCString()));
@@ -1102,6 +1160,7 @@ describe("Create Share Dialog component", () => {
             (acl) =>
               ({
                 userId: acl.userId,
+                displayName: acl.userId,
                 performedAt: yesterday.toISOString(),
               } as unknown as SharedUser)
           )
@@ -1111,6 +1170,7 @@ describe("Create Share Dialog component", () => {
             (acl) =>
               ({
                 userId: acl.userId,
+                displayName: acl.userId,
                 performedAt: yesterday.toISOString(),
               } as unknown as SharedUser)
           )
@@ -1220,6 +1280,48 @@ describe("Create Share Dialog component", () => {
     });
   });
 
+  it("should show display name in confirmation dialog when unsharing", async () => {
+    mockMeasureServiceApi.getSharedMeasures = jest.fn().mockResolvedValue({
+      [mockMeasure1.id]: [],
+      [mockMeasure2.id]: mockMeasure2.acls
+        ? mockMeasure2.acls.map(
+            (acl) =>
+              ({
+                userId: acl.userId,
+                displayName: `John Doe (${acl.userId})`,
+                performedAt: yesterday.toISOString(),
+              } as unknown as SharedUser)
+          )
+        : [],
+    });
+    mockMeasureServiceApi.getRecentMeasuresByMeasureSetId =
+      mockGetRecentMeasuresByMeasureSetId;
+
+    render(
+      <ShareDialog
+        measures={[mockMeasure1, mockMeasure2]}
+        open={true}
+        option={"Unshare"}
+        onClose={jest.fn()}
+        onSave={jest.fn()}
+      />
+    );
+
+    expect(await screen.findByTestId("share-dialog")).toBeInTheDocument();
+
+    const checkBoxes = await screen.findAllByRole("checkbox");
+    await userEvent.click(checkBoxes[1]);
+    await waitFor(() => expect(checkBoxes[1]).not.toBeChecked());
+
+    await userEvent.click(await screen.findByTestId("share-save-button"));
+    expect(await screen.findByText("Are you sure?")).toBeInTheDocument();
+
+    const userListItems = screen.getAllByRole("listitem");
+    expect(userListItems[0]).toHaveTextContent(
+      `John Doe (${mockMeasure2.acls![0].userId})`
+    );
+  });
+
   it("should fail to unshare a user from a measure.", async () => {
     const errorMessage =
       "Unable to unshare the selected measure(s) with the users who were unchecked. If the error persists, please contact the help desk.";
@@ -1230,6 +1332,7 @@ describe("Create Share Dialog component", () => {
             (acl) =>
               ({
                 userId: acl.userId,
+                displayName: acl.userId,
                 performedAt: yesterday.toISOString(),
               } as unknown as SharedUser)
           )
@@ -1239,6 +1342,7 @@ describe("Create Share Dialog component", () => {
             (acl) =>
               ({
                 userId: acl.userId,
+                displayName: acl.userId,
                 performedAt: yesterday.toISOString(),
               } as unknown as SharedUser)
           )
@@ -1612,6 +1716,43 @@ describe("UnshareFromMe Confirmation Dialog component", () => {
     expect(userListItems[0]).toHaveTextContent("test user");
     expect(userListItems[1]).toHaveTextContent("test user");
   });
+
+  it("should show display name in confirmation dialog for UnshareFromMe action", async () => {
+    mockMeasureServiceApi.getSharedMeasures = jest.fn().mockResolvedValue({
+      [mockMeasure1.id]: [
+        {
+          userId: testUser,
+          displayName: `Test User (${testUser})`,
+          performedAt: yesterday.toISOString(),
+        } as unknown as SharedUser,
+      ],
+      [mockMeasure2.id]: [
+        {
+          userId: testUser,
+          displayName: `Test User (${testUser})`,
+          performedAt: yesterday.toISOString(),
+        } as unknown as SharedUser,
+      ],
+    });
+    mockMeasureServiceApi.getRecentMeasuresByMeasureSetId =
+      mockGetRecentMeasuresByMeasureSetId;
+
+    render(
+      <ShareDialog
+        measures={[mockMeasure1, mockMeasure2]}
+        open={true}
+        option="UnshareFromMe"
+        onClose={jest.fn()}
+        onSave={jest.fn()}
+      />
+    );
+
+    await waitFor(() => {
+      const userListItems = screen.getAllByRole("listitem");
+      expect(userListItems[0]).toHaveTextContent(`Test User (${testUser})`);
+      expect(userListItems[1]).toHaveTextContent(`Test User (${testUser})`);
+    });
+  });
 });
 
 describe("Export user list", () => {
@@ -1624,6 +1765,7 @@ describe("Export user list", () => {
             (acl) =>
               ({
                 userId: acl.userId,
+                displayName: acl.userId,
                 performedAt: yesterday.toISOString(),
               } as unknown as SharedUser)
           )
