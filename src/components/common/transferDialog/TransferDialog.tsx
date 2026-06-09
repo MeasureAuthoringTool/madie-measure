@@ -14,6 +14,7 @@ import * as Yup from "yup";
 import { useMeasureServiceApi } from "@madie/madie-util";
 import { INITIAL_STATUS_HANDLER } from "../../editMeasure/editor/StatusHandler";
 import TransferredMeasuresTable from "./TransferredMeasuresTable";
+import { formatOwner } from "../../../utils/ownerFormatter";
 
 export const TRANSFER_MEASURE_SUCCESS =
   "The measure(s) were successfully transferred. If you chose to retain share access, you will still be able to edit the measures.";
@@ -99,7 +100,10 @@ const TransferDialog = ({
 
   const formik = useFormik({
     initialValues: {
-      currentUser: measures?.[0]?.measureSet?.owner,
+      currentUser: formatOwner(
+        measures?.[0]?.ownerDisplayName,
+        measures?.[0]?.measureSet?.owner
+      ),
       harpId: "",
       retainShareAccess: false,
     },
