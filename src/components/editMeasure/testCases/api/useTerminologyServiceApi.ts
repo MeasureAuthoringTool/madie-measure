@@ -84,7 +84,21 @@ export class TerminologyServiceApi {
       return [];
     }
     const valueSetSearchParams = this.getValueSetsOIdsFromBundle(measureBundle);
-    return this.getExpansion(valueSetSearchParams, manifestExpansion);
+    if (!valueSetSearchParams?.length) {
+      return [];
+    }
+
+    const batchSize = 10;
+    const batches: ValueSetSearchParams[][] = _.chunk(
+      valueSetSearchParams,
+      batchSize
+    );
+
+    const results = await Promise.all(
+      batches.map((batch) => this.getExpansion(batch, manifestExpansion))
+    );
+
+    return results.flat();
   }
 
   async getValueSetsExpansionForOids(oids: string[]): Promise<ValueSet[]> {
