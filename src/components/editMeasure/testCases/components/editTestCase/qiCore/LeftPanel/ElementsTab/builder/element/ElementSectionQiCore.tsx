@@ -82,23 +82,29 @@ const ElementSectionQiCore = (props: ElementSectionProps) => {
             )}
             {`${props.title}`}
           </h4>
-          {showAddButton && (
-            <div style={{ marginLeft: "auto" }}>
-              <AddElementButton
-                name="Element"
-                onClick={props.handleAddElement}
-              />
-            </div>
-          )}
-          {canBeMultipleCardinality && (
-            <div style={{ marginLeft: "auto" }}>
-              <IconButton
-                data-testid={`elements-delete-button-${title}`}
-                onClick={props.handleDeleteElement}
-                disabled={!props.handleDeleteElement}
-              >
-                <DeleteOutlineIcon color="error" />
-              </IconButton>
+          {(showAddButton || canBeMultipleCardinality) && (
+            <div
+              style={{
+                marginLeft: "auto",
+                display: "flex",
+                alignItems: "center",
+              }}
+            >
+              {showAddButton && (
+                <AddElementButton
+                  name="Element"
+                  onClick={props.handleAddElement}
+                />
+              )}
+              {canBeMultipleCardinality && (
+                <IconButton
+                  data-testid={`elements-delete-button-${title}`}
+                  onClick={props.handleDeleteElement}
+                  disabled={!props.handleDeleteElement}
+                >
+                  <DeleteOutlineIcon color="error" />
+                </IconButton>
+              )}
             </div>
           )}
         </div>

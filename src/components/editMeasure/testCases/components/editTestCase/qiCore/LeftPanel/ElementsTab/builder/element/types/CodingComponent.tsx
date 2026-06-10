@@ -54,9 +54,18 @@ const CodingComponent = ({
       return;
     }
     if (allValueSets && selectedValueSet?.name !== "Custom Code") {
-      const valueSet = allValueSets.find(
+      let valueSet = allValueSets.find(
         (vs) => vs.url === value?.extension?.[0]?.valueUri
       );
+      // Direct Reference Codes have no extension, so fall back to matching
+      // by code + system so the right value set still shows after a delete.
+      if (!valueSet && value?.code && value?.system) {
+        valueSet = allValueSets.find((vs) =>
+          vs.expansion?.contains?.some(
+            (c) => c.code === value.code && c.system === value.system
+          )
+        );
+      }
       if (valueSet && valueSet?.name !== selectedValueSet?.name) {
         setSelectedValueSet(valueSet);
       }
