@@ -4,6 +4,7 @@ import "./ElementSectionQiCore.scss";
 import { IconButton } from "@mui/material";
 import AddElementButton from "../../../../../../common/UIOnlyModelAgnostic/AddElementButton";
 import { useExpandCollapse } from "./ExpandCollapseContext";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 // Tab heading to display weather or not we can see contents
 
 interface ElementSectionProps {
@@ -12,7 +13,9 @@ interface ElementSectionProps {
   children?: any;
   startOpen?: any;
   canBeMultipleCardinality?: boolean;
+  showAddButton?: boolean;
   handleAddElement?: () => void;
+  handleDeleteElement?: () => void;
   required?: boolean;
 }
 
@@ -22,6 +25,7 @@ const ElementSectionQiCore = (props: ElementSectionProps) => {
     children,
     startOpen,
     canBeMultipleCardinality,
+    showAddButton = canBeMultipleCardinality,
     handleAddElement = true,
     required = false,
   } = props;
@@ -78,12 +82,23 @@ const ElementSectionQiCore = (props: ElementSectionProps) => {
             )}
             {`${props.title}`}
           </h4>
-          {props.canBeMultipleCardinality && (
+          {showAddButton && (
             <div style={{ marginLeft: "auto" }}>
               <AddElementButton
                 name="Element"
                 onClick={props.handleAddElement}
               />
+            </div>
+          )}
+          {canBeMultipleCardinality && (
+            <div style={{ marginLeft: "auto" }}>
+              <IconButton
+                data-testid={`elements-delete-button-${title}`}
+                onClick={props.handleDeleteElement}
+                disabled={!props.handleDeleteElement}
+              >
+                <DeleteOutlineIcon color="error" />
+              </IconButton>
             </div>
           )}
         </div>

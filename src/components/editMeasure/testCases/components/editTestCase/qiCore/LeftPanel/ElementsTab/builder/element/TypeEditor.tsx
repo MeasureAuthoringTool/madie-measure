@@ -1302,7 +1302,7 @@ const TypeEditor = ({
                   return (
                     !(childDef.max === "0" && childDef.min === 0) && (
                       <ElementSectionQiCore
-                        key={index}
+                        key={`${childDef.id}-${childDefValues.length}-${index}`}
                         title={
                           formatAttributeLabel(childDef.id) +
                           ` ${childDef.max === "*" ? index + 1 : ""}`
@@ -1312,7 +1312,20 @@ const TypeEditor = ({
                         handleAddElement={() =>
                           handleAddComplexElement(childDef.id)
                         }
+                        handleDeleteElement={() => {
+                          const currentValues =
+                            _.get(formik.values, childDef.id) || [];
+                          formik.setFieldValue(
+                            childDef.id,
+                            currentValues.filter(
+                              (_v: any, i: number) => i !== index
+                            )
+                          );
+                        }}
                         canBeMultipleCardinality={
+                          childDef.max === "*" && childDefValues.length > 1
+                        }
+                        showAddButton={
                           childDef.max === "*" &&
                           childDefValues.length - 1 === index
                         }
