@@ -63,12 +63,14 @@ interface SharedMeasure {
   measureId: string;
   measureName: string;
   userId: string;
+  displayName?: string;
   dateShared: string;
   subRows: SharedMeasure[];
 }
 
 export interface SharedUser {
   userId: string;
+  displayName: string;
   performedAt: Date;
 }
 
@@ -200,11 +202,18 @@ const ShareDialog = ({
       const userDetails = await userServiceApi.getBulkUserDetails(newIds);
       const validUsers: string[] = [];
       const invalidUsers: string[] = [];
+      const displayNameMap = new Map<string, string>();
 
       Object.entries(userDetails).forEach(
         ([harpId, details]: [string, any]) => {
           if (details.userStatus && String(details.userStatus) === "ACTIVE") {
             validUsers.push(harpId);
+
+            const name = [details.firstName, details.lastName]
+              .filter(Boolean)
+              .join(" ");
+
+            displayNameMap.set(harpId, name ? `${name} (${harpId})` : harpId);
           } else {
             invalidUsers.push(harpId);
           }
@@ -246,6 +255,7 @@ const ShareDialog = ({
                 measureId: measure.measureId,
                 measureName: "",
                 userId: harpId,
+                displayName: displayNameMap.get(harpId) ?? harpId,
                 dateShared: new Date().toLocaleString(),
                 subRows: null,
               },
@@ -315,6 +325,7 @@ const ShareDialog = ({
             .map((sharedUser: SharedUser) => ({
               measureId,
               userId: sharedUser.userId,
+              displayName: sharedUser.displayName,
               dateShared: sharedUser.performedAt
                 ? sharedUser.performedAt.toLocaleString()
                 : "-",
@@ -451,9 +462,23 @@ const ShareDialog = ({
               </div>
               <div> with the following users:</div>
               <ul>
-                {userIds.map((userId) => (
-                  <li>{userId}</li>
-                ))}
+                {userIds.map((userId) => {
+                  const sharedUser =
+                    option === "UnshareFromMe"
+                      ? sharedMeasures
+                          .flatMap((measure) => measure.subRows)
+                          .find(
+                            (row) =>
+                              row.userId.toLowerCase() === userId.toLowerCase()
+                          )
+                      : sharedMeasures
+                          .find((measure) => measure.measureId === measureId)
+                          ?.subRows.find((row) => row.userId === userId);
+
+                  const displayName = sharedUser?.displayName ?? userId;
+
+                  return <li key={userId}>{displayName}</li>;
+                })}
               </ul>
             </div>
           </>
@@ -542,14 +567,14 @@ const ShareDialog = ({
                 data-testid={`unshare-checkbox-${info.row.original.userId}_${info.row.original.measureId}`}
               />
               <TruncateText
-                text={info.row.original.userId}
+                text={info.row.original.displayName ?? info.row.original.userId}
                 maxLength={120}
                 dataTestId={`user-${info.row.original.userId}_${info.row.original.measureId}`}
               />
             </div>
           ) : (
             <TruncateText
-              text={info.row.original.userId}
+              text={info.row.original.displayName}
               maxLength={120}
               dataTestId={`user-${info.row.original.userId}_${info.row.original.measureId}`}
             />

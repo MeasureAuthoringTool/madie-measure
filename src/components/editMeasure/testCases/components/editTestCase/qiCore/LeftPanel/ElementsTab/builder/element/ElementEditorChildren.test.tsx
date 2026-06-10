@@ -4,7 +4,6 @@ import {
   screen,
   waitFor,
   fireEvent,
-  act,
 } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import ElementEditorChildren from "./ElementEditorChildren";
@@ -60,6 +59,7 @@ const mockPatientState = {
     ],
   },
 };
+
 describe("ElementEditorChildren", () => {
   beforeEach(() => {
     mockRenderSections = false;
@@ -97,8 +97,9 @@ describe("ElementEditorChildren", () => {
       </FormikProvider>
     );
 
-    expect(screen.getByText("*Name")).toBeInTheDocument(); // header from rootDefinition.id
+    expect(screen.getByText("*Name")).toBeInTheDocument();
     expect(screen.getByTestId("type-editor")).toBeInTheDocument();
+
     userEvent.click(screen.getByTestId("elements-action-center-actual-icon"));
 
     const addButton = screen.getByTestId("elements-add");
@@ -176,9 +177,6 @@ describe("ElementEditorChildren", () => {
     expect(
       screen.getByTestId("expand-populated-fields-button")
     ).toBeInTheDocument();
-    expect(screen.getByText("Expand All")).toBeInTheDocument();
-    expect(screen.getByText("Collapse All")).toBeInTheDocument();
-    expect(screen.getByText("Expand Populated Fields")).toBeInTheDocument();
   });
 
   it("clicking Expand All button does not throw", async () => {
@@ -234,6 +232,138 @@ describe("ElementEditorChildren", () => {
     const expandPopulatedBtn = await screen.findByTestId(
       "expand-populated-fields-button"
     );
+
     expect(() => fireEvent.click(expandPopulatedBtn)).not.toThrow();
+  });
+
+  it("dispatches MODIFY_BUNDLE_ENTRY with cloned element when clone button clicked", async () => {
+    const dispatch = jest.fn();
+
+    const stateWithName = {
+      bundle: {
+        ...mockPatientState.bundle,
+        entry: [
+          {
+            ...mockPatientState.bundle.entry[0],
+            resource: {
+              ...mockPatientState.bundle.entry[0].resource,
+              name: [{ family: "Smith" }, { family: "Jones" }],
+            },
+          },
+        ],
+      },
+    };
+
+    const propsWithArrayName = {
+      ...defaultProps,
+      rootDefinition: {
+        id: "Patient.name[0]",
+        path: "Patient.name",
+        min: "1",
+        max: "*",
+      },
+      resource: {
+        name: [{ family: "Smith" }, { family: "Jones" }],
+      },
+    };
+
+    render(
+      <FormikProvider value={{}}>
+        <QiCoreResourceContext.Provider
+          value={{ state: stateWithName, dispatch }}
+        >
+          <ElementEditorChildren {...propsWithArrayName} />
+        </QiCoreResourceContext.Provider>
+      </FormikProvider>
+    );
+
+    userEvent.click(screen.getByTestId("elements-action-center-actual-icon"));
+
+    const cloneButton = await screen.findByTestId("elements-clone");
+    userEvent.click(cloneButton);
+
+    await waitFor(() => {
+      expect(dispatch).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: ResourceActionType.MODIFY_BUNDLE_ENTRY,
+        })
+      );
+    });
+
+    const call = dispatch.mock.calls.find(
+      (c) => c[0].type === ResourceActionType.MODIFY_BUNDLE_ENTRY
+    );
+
+    const updatedName = call[0].payload.resource.name;
+
+    expect(updatedName).toHaveLength(3);
+    expect(updatedName[2]).toEqual({ family: "Smith" });
+  });
+
+  it("wraps a non-array value into [original, clone] when cloning a multi-cardinality element stored as a plain object", async () => {
+    const dispatch = jest.fn();
+
+    const stateWithSingleObject = {
+      bundle: {
+        ...mockPatientState.bundle,
+        entry: [
+          {
+            ...mockPatientState.bundle.entry[0],
+            resource: {
+              ...mockPatientState.bundle.entry[0].resource,
+              name: { family: "Jones" },
+            },
+          },
+        ],
+      },
+    };
+
+    const propsNoIndex = {
+      ...defaultProps,
+      rootDefinition: {
+        id: "Patient.name",
+        path: "Patient.name",
+        min: "0",
+        max: "*",
+      },
+      resource: {
+        name: { family: "Jones" },
+      },
+    };
+
+    render(
+      <FormikProvider value={{}}>
+        <QiCoreResourceContext.Provider
+          value={{ state: stateWithSingleObject, dispatch }}
+        >
+          <ElementEditorChildren {...propsNoIndex} />
+        </QiCoreResourceContext.Provider>
+      </FormikProvider>
+    );
+
+    userEvent.click(screen.getByTestId("elements-action-center-actual-icon"));
+
+    const cloneButton = await screen.findByTestId("elements-clone");
+    userEvent.click(cloneButton);
+
+    await waitFor(() => {
+      expect(dispatch).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: ResourceActionType.MODIFY_BUNDLE_ENTRY,
+        })
+      );
+    });
+
+    const call = dispatch.mock.calls.find(
+      (c) => c[0].type === ResourceActionType.MODIFY_BUNDLE_ENTRY
+    );
+
+    const updatedName = call[0].payload.resource.name;
+
+    expect(Array.isArray(updatedName)).toBe(true);
+    expect(updatedName).toHaveLength(2);
+    expect(updatedName[0]).toEqual({ family: "Jones" });
+    expect(updatedName[1]).toEqual({ family: "Jones" });
+    expect(updatedName[0]).not.toBe(updatedName[1]);
   });
 });

@@ -8,6 +8,7 @@ import {
   stripAllIndexes,
   addCardinalityToElement,
   formatChoiceType,
+  getIndexFromPathWithoutBrackets,
 } from "../../../../../../../api/fhirDefinitionServiceUtilities";
 import ElementEditorActionCenter from "./elementEditorActionCenter/ElementEditorActionCenter";
 import {
@@ -57,6 +58,27 @@ const ElementEditorChildrenInner = ({
     });
     setLastAddedElemPath(rootDefinition.path);
   };
+  const cloneElementOfMultipleCardinality = () => {
+    const nextEntry = _.cloneDeep(
+      state.bundle?.entry?.find(
+        (entry) => entry.resource.id === selectedResourceID
+      )
+    );
+    const index = getIndexFromPathWithoutBrackets(rootDefinition.id);
+    const currentValue = nextEntry.resource[elemPath];
+    if (Array.isArray(currentValue) && index !== null) {
+      const elementToClone = _.cloneDeep(currentValue[Number(index)]);
+      nextEntry.resource[elemPath] = [...currentValue, elementToClone];
+    } else if (currentValue !== undefined) {
+      const elementToClone = _.cloneDeep(currentValue);
+      nextEntry.resource[elemPath] = [currentValue, elementToClone];
+    }
+    dispatch({
+      type: ResourceActionType.MODIFY_BUNDLE_ENTRY,
+      payload: nextEntry,
+    });
+    setLastAddedElemPath(rootDefinition.path);
+  };
   return (
     <div
       className="test-case-tab-heading"
@@ -93,6 +115,9 @@ const ElementEditorChildrenInner = ({
               )}`}
               elementValue={elementValue}
               addElementOfMultipleCardinality={addElementOfMultipleCardinality}
+              cloneElementOfMultipleCardinality={
+                cloneElementOfMultipleCardinality
+              }
               rootDefinition={rootDefinition}
               handleDelete={deleteElement}
             />
