@@ -172,6 +172,32 @@ const CodingComponent = ({
     }
   };
 
+  // Helper function to sort menu items alphabetically by display value
+  const sortMenuItems = (
+    items: JSX.Element[],
+    getDisplayValue: (item: JSX.Element) => string,
+    customCodeFirst: boolean = false
+  ): JSX.Element[] => {
+    if (!items || items.length === 0) return items;
+
+    const customCodeItem = customCodeFirst
+      ? items.find((item) => getDisplayValue(item) === "Custom Code")
+      : null;
+    const otherItems = customCodeFirst
+      ? items.filter((item) => getDisplayValue(item) !== "Custom Code")
+      : items;
+
+    const sortedOtherItems = otherItems.sort((a, b) => {
+      const aDisplay = getDisplayValue(a).toLowerCase();
+      const bDisplay = getDisplayValue(b).toLowerCase();
+      return aDisplay.localeCompare(bDisplay);
+    });
+
+    return customCodeItem
+      ? [customCodeItem, ...sortedOtherItems]
+      : sortedOtherItems;
+  };
+
   // Menu options
   const getValueSetMenuOptions = () => {
     if (expansionStatus == ExpansionStatusType.EXPANDING) {
@@ -205,21 +231,25 @@ const CodingComponent = ({
         );
       }) || [];
 
-    // for required bindings, show only the binding value set
+    // for required bindings, show only the binding value set (sorted)
     if (isBindingRequired && menuOptions.length > 0) {
-      return menuOptions;
+      return sortMenuItems(menuOptions, (item) => item.props.children, false);
       // for non-required bindings, allow custom coding, binding value set and value sets used in CQL
     } else {
-      return [
+      const customCodeItem = (
         <MenuItem
           key="custom-code"
           value="Custom Code"
           data-testid="value-set-option-custom-code"
         >
           Custom Code
-        </MenuItem>,
-        ...menuOptions,
-      ];
+        </MenuItem>
+      );
+      return sortMenuItems(
+        [customCodeItem, ...menuOptions],
+        (item) => item.props.children,
+        true
+      );
     }
   };
 
@@ -228,7 +258,8 @@ const CodingComponent = ({
       (concept) => concept.system
     );
     if (codeSystems) {
-      return [...new Set(codeSystems)].map((codeSystem) => {
+      const uniqueCodeSystems = [...new Set(codeSystems)];
+      const menuItems = uniqueCodeSystems.map((codeSystem) => {
         return (
           <MenuItem
             key={codeSystem}
@@ -239,12 +270,13 @@ const CodingComponent = ({
           </MenuItem>
         );
       });
+      return sortMenuItems(menuItems, (item) => item.props.children, false);
     }
     return [];
   };
 
   const getCodeMenuOptions = () => {
-    return (
+    const codeItems =
       selectedValueSet?.expansion?.contains
         ?.filter((concept) => concept.system === selectedConcept?.system)
         .map((concept) => {
@@ -257,8 +289,8 @@ const CodingComponent = ({
               {`${concept.code} - ${concept.display}`}
             </MenuItem>
           );
-        }) || []
-    );
+        }) || [];
+    return sortMenuItems(codeItems, (item) => item.props.children, false);
   };
   return (
     <div

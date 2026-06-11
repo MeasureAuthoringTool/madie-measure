@@ -93,12 +93,17 @@ export const getFinalOptions = (
     );
   });
   if (filtered.length === 0) return emptyOption;
-  const filterResult = filtered
-    .map((res) => ({
-      label: `${selectedReferenceType}/${res.resource.id}`,
-      value: `${selectedReferenceType}/${res.resource.id}`,
-    }))
-    .concat(emptyOption);
+  const mappedResults = filtered.map((res) => ({
+    label: `${selectedReferenceType}/${res.resource.id}`,
+    value: `${selectedReferenceType}/${res.resource.id}`,
+  }));
+
+  // Sort alphabetically by label
+  const sortedResults = mappedResults.sort((a, b) =>
+    a.label.toLowerCase().localeCompare(b.label.toLowerCase())
+  );
+
+  const filterResult = sortedResults.concat(emptyOption);
   // easier to remove the empty option then conditionally add it.
   if (isPatient && hasPatient) {
     // remove last entry
@@ -137,7 +142,7 @@ export default function ReferenceComponent({
         (type: { code: string }) => type.code === "Reference"
       )?.targetProfile || [];
 
-    return (
+    const options =
       allResourceProfiles
         ?.filter((r) => targetProfiles.includes(r.profile))
         .filter(
@@ -148,7 +153,11 @@ export default function ReferenceComponent({
           label: resourceProfile.title,
           value: resourceProfile.type,
           profile: resourceProfile.profile,
-        })) || []
+        })) || [];
+
+    // Sort alphabetically by label
+    return options.sort((a, b) =>
+      a.label.toLowerCase().localeCompare(b.label.toLowerCase())
     );
   }, [allResourceProfiles, structureDefinition.type]);
 
