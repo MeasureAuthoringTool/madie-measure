@@ -8,6 +8,7 @@ import {
   ExpandCollapseProvider,
   useExpandCollapse,
 } from "./ExpandCollapseContext";
+import { Formik } from "formik";
 
 const { findByText, findByTestId, queryByTestId } = screen;
 
@@ -185,5 +186,212 @@ describe("ElementSectionQiCore with ExpandCollapseContext", () => {
       </ElementSectionQiCore>
     );
     expect(screen.getByText("Standalone")).toBeInTheDocument();
+  });
+});
+
+// Triggers expandPopulated from context, wrapped in Formik.
+const ExpandPopulatedTestHarness = ({
+  title,
+  fieldPath,
+  startOpen = false,
+  values,
+}) => {
+  const ctx = useExpandCollapse();
+  return (
+    <Formik initialValues={values} onSubmit={jest.fn()}>
+      <>
+        <button
+          data-testid="trigger-expand-populated"
+          onClick={() => ctx.expandPopulated()}
+        />
+        <ElementSectionQiCore
+          title={title}
+          fieldPath={fieldPath}
+          startOpen={startOpen}
+        >
+          <span data-testid="child-content">child</span>
+        </ElementSectionQiCore>
+      </>
+    </Formik>
+  );
+};
+
+describe("ElementSectionQiCore expandPopulated", () => {
+  test("expandPopulated opens a collapsed section that has data", async () => {
+    render(
+      <ExpandCollapseProvider>
+        <ExpandPopulatedTestHarness
+          title="Value"
+          fieldPath="Patient.value"
+          startOpen={false}
+          values={{ Patient: { value: "some data" } }}
+        />
+      </ExpandCollapseProvider>
+    );
+    expect(screen.queryByTestId("elements-header-content-Value")).toBeNull();
+    act(() => {
+      fireEvent.click(screen.getByTestId("trigger-expand-populated"));
+    });
+    expect(
+      await screen.findByTestId("elements-header-content-Value")
+    ).toBeInTheDocument();
+  });
+
+  test("expandPopulated closes an open section that has no data", async () => {
+    render(
+      <ExpandCollapseProvider>
+        <ExpandPopulatedTestHarness
+          title="Value"
+          fieldPath="Patient.value"
+          startOpen={true}
+          values={{ Patient: { value: "" } }}
+        />
+      </ExpandCollapseProvider>
+    );
+    expect(
+      await screen.findByTestId("elements-header-content-Value")
+    ).toBeInTheDocument();
+    act(() => {
+      fireEvent.click(screen.getByTestId("trigger-expand-populated"));
+    });
+    await waitFor(() => {
+      expect(
+        screen.queryByTestId("elements-header-content-Value")
+      ).not.toBeInTheDocument();
+    });
+  });
+
+  test("expandPopulated treats nested non-empty objects as populated", async () => {
+    render(
+      <ExpandCollapseProvider>
+        <ExpandPopulatedTestHarness
+          title="Period"
+          fieldPath="Patient.period"
+          startOpen={false}
+          values={{ Patient: { period: { start: "2020-01-01" } } }}
+        />
+      </ExpandCollapseProvider>
+    );
+    expect(screen.queryByTestId("elements-header-content-Period")).toBeNull();
+    act(() => {
+      fireEvent.click(screen.getByTestId("trigger-expand-populated"));
+    });
+    expect(
+      await screen.findByTestId("elements-header-content-Period")
+    ).toBeInTheDocument();
+  });
+
+  test("expandPopulated treats empty nested objects as not populated", async () => {
+    render(
+      <ExpandCollapseProvider>
+        <ExpandPopulatedTestHarness
+          title="Period"
+          fieldPath="Patient.period"
+          startOpen={true}
+          values={{ Patient: { period: { start: "", end: "" } } }}
+        />
+      </ExpandCollapseProvider>
+    );
+    expect(
+      await screen.findByTestId("elements-header-content-Period")
+    ).toBeInTheDocument();
+    act(() => {
+      fireEvent.click(screen.getByTestId("trigger-expand-populated"));
+    });
+    await waitFor(() => {
+      expect(
+        screen.queryByTestId("elements-header-content-Period")
+      ).not.toBeInTheDocument();
+    });
+  });
+});
+
+describe("ElementSectionQiCore delete button", () => {
+  test("renders the delete button when canBeMultipleCardinality is true", async () => {
+    render(
+      <ElementSectionQiCore
+        title="DeleteMe"
+        canBeMultipleCardinality={true}
+        handleDeleteElement={jest.fn()}
+      />
+    );
+    expect(
+      await screen.findByTestId("elements-delete-button-DeleteMe")
+    ).toBeInTheDocument();
+  });
+
+  test("does not render the delete button when canBeMultipleCardinality is false", () => {
+    render(
+      <ElementSectionQiCore
+        title="NoDelete"
+        canBeMultipleCardinality={false}
+        handleDeleteElement={jest.fn()}
+      />
+    );
+    expect(
+      screen.queryByTestId("elements-delete-button-NoDelete")
+    ).not.toBeInTheDocument();
+  });
+
+  test("calls handleDeleteElement when the delete button is clicked", async () => {
+    const handleDeleteElementMock = jest.fn();
+    render(
+      <ElementSectionQiCore
+        title="ClickMe"
+        canBeMultipleCardinality={true}
+        handleDeleteElement={handleDeleteElementMock}
+      />
+    );
+    const deleteButton = await screen.findByTestId(
+      "elements-delete-button-ClickMe"
+    );
+    fireEvent.click(deleteButton);
+    expect(handleDeleteElementMock).toHaveBeenCalledTimes(1);
+  });
+
+  test("disables the delete button when handleDeleteElement is not provided", async () => {
+    render(
+      <ElementSectionQiCore title="Disabled" canBeMultipleCardinality={true} />
+    );
+    const deleteButton = await screen.findByTestId(
+      "elements-delete-button-Disabled"
+    );
+    expect(deleteButton).toBeDisabled();
+  });
+
+  test("Add Element and Delete buttons share a single right-aligned flex group", async () => {
+    render(
+      <ElementSectionQiCore
+        title="SideBySide"
+        canBeMultipleCardinality={true}
+        showAddButton={true}
+        handleAddElement={jest.fn()}
+        handleDeleteElement={jest.fn()}
+      />
+    );
+    const addButton = await screen.findByText("Add Element");
+    const deleteButton = await screen.findByTestId(
+      "elements-delete-button-SideBySide"
+    );
+
+    const addContainer = addButton.closest(".element-add-container");
+    expect(addContainer).not.toBeNull();
+    expect(addContainer!.parentElement).toBe(deleteButton.parentElement);
+    expect(addContainer!.parentElement).toHaveStyle({ display: "flex" });
+  });
+
+  test("renders only the Add Element button when delete is not allowed", () => {
+    render(
+      <ElementSectionQiCore
+        title="AddOnly"
+        canBeMultipleCardinality={false}
+        showAddButton={true}
+        handleAddElement={jest.fn()}
+      />
+    );
+    expect(screen.getByText("Add Element")).toBeInTheDocument();
+    expect(
+      screen.queryByTestId("elements-delete-button-AddOnly")
+    ).not.toBeInTheDocument();
   });
 });

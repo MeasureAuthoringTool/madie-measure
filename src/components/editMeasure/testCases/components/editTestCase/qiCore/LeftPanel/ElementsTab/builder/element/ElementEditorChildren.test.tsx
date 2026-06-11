@@ -1,11 +1,5 @@
 import * as React from "react";
-import {
-  render,
-  screen,
-  waitFor,
-  fireEvent,
-  act,
-} from "@testing-library/react";
+import { render, screen, waitFor, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import ElementEditorChildren from "./ElementEditorChildren";
 import {
@@ -60,6 +54,7 @@ const mockPatientState = {
     ],
   },
 };
+
 describe("ElementEditorChildren", () => {
   beforeEach(() => {
     mockRenderSections = false;
@@ -97,8 +92,9 @@ describe("ElementEditorChildren", () => {
       </FormikProvider>
     );
 
-    expect(screen.getByText("*Name")).toBeInTheDocument(); // header from rootDefinition.id
+    expect(screen.getByText("*Name")).toBeInTheDocument();
     expect(screen.getByTestId("type-editor")).toBeInTheDocument();
+
     userEvent.click(screen.getByTestId("elements-action-center-actual-icon"));
 
     const addButton = screen.getByTestId("elements-add");
@@ -152,6 +148,9 @@ describe("ElementEditorChildren", () => {
 
     expect(screen.queryByTestId("expand-all-button")).not.toBeInTheDocument();
     expect(screen.queryByTestId("collapse-all-button")).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId("expand-populated-fields-button")
+    ).not.toBeInTheDocument();
   });
 
   it("renders Expand All and Collapse All buttons when sub-attribute panels are rendered", async () => {
@@ -170,8 +169,9 @@ describe("ElementEditorChildren", () => {
 
     expect(await screen.findByTestId("expand-all-button")).toBeInTheDocument();
     expect(screen.getByTestId("collapse-all-button")).toBeInTheDocument();
-    expect(screen.getByText("Expand All")).toBeInTheDocument();
-    expect(screen.getByText("Collapse All")).toBeInTheDocument();
+    expect(
+      screen.getByTestId("expand-populated-fields-button")
+    ).toBeInTheDocument();
   });
 
   it("clicking Expand All button does not throw", async () => {
@@ -210,8 +210,30 @@ describe("ElementEditorChildren", () => {
     expect(() => fireEvent.click(collapseBtn)).not.toThrow();
   });
 
+  it("clicking Expand Populated Fields button does not throw", async () => {
+    const dispatch = jest.fn();
+    mockRenderSections = true;
+
+    render(
+      <FormikProvider value={{}}>
+        <QiCoreResourceContext.Provider
+          value={{ state: mockPatientState, dispatch }}
+        >
+          <ElementEditorChildren {...defaultProps} />
+        </QiCoreResourceContext.Provider>
+      </FormikProvider>
+    );
+
+    const expandPopulatedBtn = await screen.findByTestId(
+      "expand-populated-fields-button"
+    );
+
+    expect(() => fireEvent.click(expandPopulatedBtn)).not.toThrow();
+  });
+
   it("dispatches MODIFY_BUNDLE_ENTRY with cloned element when clone button clicked", async () => {
     const dispatch = jest.fn();
+
     const stateWithName = {
       bundle: {
         ...mockPatientState.bundle,
@@ -226,6 +248,7 @@ describe("ElementEditorChildren", () => {
         ],
       },
     };
+
     const propsWithArrayName = {
       ...defaultProps,
       rootDefinition: {
@@ -265,17 +288,16 @@ describe("ElementEditorChildren", () => {
     const call = dispatch.mock.calls.find(
       (c) => c[0].type === ResourceActionType.MODIFY_BUNDLE_ENTRY
     );
+
     const updatedName = call[0].payload.resource.name;
+
     expect(updatedName).toHaveLength(3);
-    expect(updatedName[2]).toEqual({ family: "Smith" }); // clone of index 0
+    expect(updatedName[2]).toEqual({ family: "Smith" });
   });
 
   it("wraps a non-array value into [original, clone] when cloning a multi-cardinality element stored as a plain object", async () => {
-    // This covers the else-if branch: rootDefinition.id has no bracket index
-    // (ResourceEditor returns an element without [N] when the JSON value is not yet an array),
-    // so getIndexFromPathWithoutBrackets returns null. The clone handler should wrap the
-    // existing single value together with its deep copy into an array.
     const dispatch = jest.fn();
+
     const stateWithSingleObject = {
       bundle: {
         ...mockPatientState.bundle,
@@ -284,16 +306,17 @@ describe("ElementEditorChildren", () => {
             ...mockPatientState.bundle.entry[0],
             resource: {
               ...mockPatientState.bundle.entry[0].resource,
-              name: { family: "Jones" }, // plain object, not an array
+              name: { family: "Jones" },
             },
           },
         ],
       },
     };
+
     const propsNoIndex = {
       ...defaultProps,
       rootDefinition: {
-        id: "Patient.name", // no [N] — index will be null
+        id: "Patient.name",
         path: "Patient.name",
         min: "0",
         max: "*",
@@ -314,6 +337,7 @@ describe("ElementEditorChildren", () => {
     );
 
     userEvent.click(screen.getByTestId("elements-action-center-actual-icon"));
+
     const cloneButton = await screen.findByTestId("elements-clone");
     userEvent.click(cloneButton);
 
@@ -328,11 +352,13 @@ describe("ElementEditorChildren", () => {
     const call = dispatch.mock.calls.find(
       (c) => c[0].type === ResourceActionType.MODIFY_BUNDLE_ENTRY
     );
+
     const updatedName = call[0].payload.resource.name;
+
     expect(Array.isArray(updatedName)).toBe(true);
     expect(updatedName).toHaveLength(2);
-    expect(updatedName[0]).toEqual({ family: "Jones" }); // original preserved
-    expect(updatedName[1]).toEqual({ family: "Jones" }); // deep clone
-    expect(updatedName[0]).not.toBe(updatedName[1]); // different references
+    expect(updatedName[0]).toEqual({ family: "Jones" });
+    expect(updatedName[1]).toEqual({ family: "Jones" });
+    expect(updatedName[0]).not.toBe(updatedName[1]);
   });
 });
