@@ -5,6 +5,8 @@ import { IconButton } from "@mui/material";
 import AddElementButton from "../../../../../../common/UIOnlyModelAgnostic/AddElementButton";
 import { useExpandCollapse } from "./ExpandCollapseContext";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import { FormikContext, getIn } from "formik";
+import { hasNonEmptyValue } from "./TypeEditorUtils";
 // Tab heading to display weather or not we can see contents
 
 interface ElementSectionProps {
@@ -17,6 +19,7 @@ interface ElementSectionProps {
   handleAddElement?: () => void;
   handleDeleteElement?: () => void;
   required?: boolean;
+  fieldPath?: string;
 }
 
 const ElementSectionQiCore = (props: ElementSectionProps) => {
@@ -28,9 +31,12 @@ const ElementSectionQiCore = (props: ElementSectionProps) => {
     showAddButton = canBeMultipleCardinality,
     handleAddElement = true,
     required = false,
+    fieldPath,
   } = props;
   const [open, setOpen] = useState(startOpen);
   const expandCollapseCtx = useExpandCollapse();
+  // useContext so this works standalone (no Formik provider) in tests.
+  const formik = React.useContext(FormikContext) as any;
   useEffect(() => {
     expandCollapseCtx?.registerSection();
     return () => {
@@ -39,12 +45,16 @@ const ElementSectionQiCore = (props: ElementSectionProps) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   useEffect(() => {
-    if (
-      expandCollapseCtx?.command !== null &&
-      expandCollapseCtx?.command !== undefined
-    ) {
-      setOpen(expandCollapseCtx.command.value);
+    const command = expandCollapseCtx?.command;
+    if (command !== null && command !== undefined) {
+      if (command.mode === "populated") {
+        const value = fieldPath ? getIn(formik?.values, fieldPath) : undefined;
+        setOpen(hasNonEmptyValue(value));
+      } else {
+        setOpen(command.value);
+      }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [expandCollapseCtx?.command]);
   const chevronClass = open ? "chevron-display open" : "chevron-display";
   const growingDivClass = open

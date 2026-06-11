@@ -7,6 +7,7 @@ import { cqm_measure_basic_valueset } from "../mockdata/qdm/CMS108/cqm_measure_b
 import { Measure as CqmMeasure, ValueSet } from "cqm-models";
 import * as _ from "lodash";
 import { ManifestExpansion } from "@madie/madie-models";
+import { Bundle } from "fhir/r4";
 
 jest.mock("../../../../api/axios-instance");
 
@@ -35,6 +36,26 @@ describe("TerminologyServiceApi Tests", () => {
     expect(data.length).toEqual(0);
   });
 
+  it("gives empty array when bundle has no value set params", async () => {
+    const emptyBundle = {
+      resourceType: "Bundle",
+      entry: [
+        {
+          resource: {
+            resourceType: "Library",
+            id: "test-lib",
+            type: { coding: [] },
+          },
+        } as fhir4.BundleEntry,
+      ],
+    } as fhir4.Bundle;
+    const data = await terminologyService.getValueSetsExpansionForBundle(
+      emptyBundle
+    );
+    expect(data.length).toEqual(0);
+    expect(axios.put).not.toHaveBeenCalled();
+  });
+
   it("gives expanded ValueSets for ValueSets in measure bundle", async () => {
     axios.put = jest
       .fn()
@@ -47,6 +68,115 @@ describe("TerminologyServiceApi Tests", () => {
     expect(data[0].name).toEqual("Office Visit");
     expect(data[0].id).toEqual("2.16.840.1.113883.3.464.1003.101.12.1001");
     expect(data[0].compose.include[0].concept.length).toEqual(5);
+  });
+
+  it("batches value set params into chunks of 10 and combines results", async () => {
+    // Create a bundle with 25 value set OIDs to trigger batching (3 batches: 10, 10, 5)
+    const relatedArtifacts = Array.from({ length: 25 }, (_, i) => ({
+      type: "depends-on" as const,
+      resource: `http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.${
+        1001 + i
+      }`,
+    }));
+
+    const largeMeasureBundle = {
+      resourceType: "Bundle",
+      entry: [
+        {
+          resource: {
+            resourceType: "Library",
+            id: "test-lib",
+            type: { coding: [] },
+            relatedArtifact: relatedArtifacts,
+          },
+        } as fhir4.BundleEntry,
+      ],
+    } as fhir4.Bundle;
+
+    // Mock 3 batched responses
+    const batch1Response = Array.from({ length: 10 }, (_, i) => ({
+      id: `2.16.840.1.113883.3.464.1003.101.12.${1001 + i}`,
+      name: `ValueSet ${i + 1}`,
+    }));
+    const batch2Response = Array.from({ length: 10 }, (_, i) => ({
+      id: `2.16.840.1.113883.3.464.1003.101.12.${1011 + i}`,
+      name: `ValueSet ${i + 11}`,
+    }));
+    const batch3Response = Array.from({ length: 5 }, (_, i) => ({
+      id: `2.16.840.1.113883.3.464.1003.101.12.${1021 + i}`,
+      name: `ValueSet ${i + 21}`,
+    }));
+
+    axios.put = jest
+      .fn()
+      .mockResolvedValueOnce({ data: batch1Response })
+      .mockResolvedValueOnce({ data: batch2Response })
+      .mockResolvedValueOnce({ data: batch3Response });
+
+    const data = await terminologyService.getValueSetsExpansionForBundle(
+      largeMeasureBundle,
+      testManifestExpansion
+    );
+
+    // Should have made 3 separate API calls (batches of 10, 10, 5)
+    expect(axios.put).toHaveBeenCalledTimes(3);
+
+    // Each call should have at most 10 valueSetParams
+    const firstCallParams = (axios.put as jest.Mock).mock.calls[0][1];
+    const secondCallParams = (axios.put as jest.Mock).mock.calls[1][1];
+    const thirdCallParams = (axios.put as jest.Mock).mock.calls[2][1];
+    expect(firstCallParams.valueSetParams.length).toBe(10);
+    expect(secondCallParams.valueSetParams.length).toBe(10);
+    expect(thirdCallParams.valueSetParams.length).toBe(5);
+
+    // Combined results should have all 25 value sets
+    expect(data.length).toEqual(25);
+    expect(data[0].id).toEqual("2.16.840.1.113883.3.464.1003.101.12.1001");
+    expect(data[24].id).toEqual("2.16.840.1.113883.3.464.1003.101.12.1025");
+  });
+
+  it("handles error in one batch and propagates it", async () => {
+    const relatedArtifacts = Array.from({ length: 15 }, (_, i) => ({
+      type: "depends-on" as const,
+      resource: `http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.${
+        1001 + i
+      }`,
+    }));
+
+    const largeMeasureBundle = {
+      resourceType: "Bundle",
+      entry: [
+        {
+          resource: {
+            resourceType: "Library",
+            id: "test-lib",
+            type: { coding: [] },
+            relatedArtifact: relatedArtifacts,
+          },
+        } as fhir4.BundleEntry,
+      ],
+    } as fhir4.Bundle;
+
+    const response = {
+      message: "Failed to fetch batch resources from VSAC",
+      status: 500,
+      error: "Internal Server Error",
+    };
+
+    axios.put = jest
+      .fn()
+      .mockResolvedValueOnce({ data: [{ id: "vs1" }] })
+      .mockRejectedValueOnce({ response: { status: 500, data: response } });
+
+    try {
+      await terminologyService.getValueSetsExpansionForBundle(
+        largeMeasureBundle
+      );
+      fail("Expected error to be thrown");
+    } catch (error) {
+      expect(error.message).toContain("(003)");
+      expect(error.message).toContain(response.message);
+    }
   });
 
   it("gives expanded ValueSets for ValueSets in measure bundle when manifestExpansion is not provided (expansion type is Latest)", async () => {
@@ -835,7 +965,7 @@ describe("TerminologyServiceApi Tests", () => {
               },
             ],
           },
-        } as fhir4.BundleEntry,
+        } as unknown as fhir4.BundleEntry,
       ],
     } as unknown as Bundle;
 
