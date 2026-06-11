@@ -31,16 +31,16 @@ export default function CreateCompositeTestCaseLeftPanelNavTabs(
                 tabIndex={0}
                 aria-label="create tab panel"
                 type="D"
-                label={`Create`}
+                label={`Available`}
                 data-testid="create-tab"
-                value="create"
+                value="available"
               />
             )}
             <Tab
               tabIndex={0}
               aria-label="elements tab panel"
               type="D"
-              label={`Elements`}
+              label={`Added`}
               data-testid="elements-tab"
               value="added"
             />

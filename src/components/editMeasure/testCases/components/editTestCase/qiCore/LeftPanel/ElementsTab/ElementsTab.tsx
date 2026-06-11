@@ -14,6 +14,8 @@ const ElementsTab = ({
   setValidationSchema,
   setInitialFormikValuesStu6,
   activeTab,
+  isComposite = false,
+  onInsertTCClick = () => {},
 }) => {
   const { state, dispatch } = useQiCoreResource();
   const lastJsonRef = useRef(null);
@@ -48,6 +50,8 @@ const ElementsTab = ({
         setInitialFormikValuesStu6={setInitialFormikValuesStu6}
         setValidationSchema={setValidationSchema}
         activeTab={activeTab}
+        isComposite={isComposite}
+        onInsertTCClick={onInsertTCClick}
       />
     </>
   );

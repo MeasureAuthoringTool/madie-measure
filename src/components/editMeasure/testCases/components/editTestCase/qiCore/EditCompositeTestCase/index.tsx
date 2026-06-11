@@ -66,7 +66,7 @@ const EditCompositeTestCase = ({
   const [rightPanelActiveTab, setRightPanelActiveTab] =
     useState<string>("actual");
   const [leftPanelActiveTab, setLeftPanelActiveTab] =
-    useState<string>("create");
+    useState<string>("available");
   return (
     <div className={`allotment-wrapper`}>
       <Allotment ref={allotmentRef} defaultSizes={[48, 48, 4]} vertical={false}>
