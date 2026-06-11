@@ -118,6 +118,13 @@ const TypeEditor = ({
   // Ref to track formik.values for use in closures (prevents stale state issues when rapidly clicking Add)
   const valuesRef = useRef<object>(formik.values as object);
   valuesRef.current = formik.values as object;
+  // Per-child-path deletion counter. Used in row keys so a delete forces
+  // surviving rows to remount (clearing stale inner state), while an add
+  // leaves keys for existing rows untouched (so their formik state is not
+  // disturbed by a remount).
+  const [deletionTicks, setDeletionTicks] = useState<Record<string, number>>(
+    {}
+  );
 
   const { requiredFields, formInfo } = useRequiredFields();
   let required = getRequired(requiredFields, stripAllIndexes(label));
@@ -1303,7 +1310,9 @@ const TypeEditor = ({
                   return (
                     !(childDef.max === "0" && childDef.min === 0) && (
                       <ElementSectionQiCore
-                        key={index}
+                        key={`${childDef.id}-d${
+                          deletionTicks[childDef.id] || 0
+                        }-${index}`}
                         title={
                           formatAttributeLabel(childDef.id) +
                           ` ${childDef.max === "*" ? index + 1 : ""}`
@@ -1318,7 +1327,24 @@ const TypeEditor = ({
                         handleAddElement={() =>
                           handleAddComplexElement(childDef.id)
                         }
+                        handleDeleteElement={() => {
+                          const currentValues =
+                            _.get(formik.values, childDef.id) || [];
+                          formik.setFieldValue(
+                            childDef.id,
+                            currentValues.filter(
+                              (_v: any, i: number) => i !== index
+                            )
+                          );
+                          setDeletionTicks((prev) => ({
+                            ...prev,
+                            [childDef.id]: (prev[childDef.id] || 0) + 1,
+                          }));
+                        }}
                         canBeMultipleCardinality={
+                          childDef.max === "*" && childDefValues.length > 1
+                        }
+                        showAddButton={
                           childDef.max === "*" &&
                           childDefValues.length - 1 === index
                         }
