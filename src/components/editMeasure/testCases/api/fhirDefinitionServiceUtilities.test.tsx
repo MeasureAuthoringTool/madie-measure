@@ -23,6 +23,7 @@ import {
   mergePathWithIndex,
   removeIndicesFromPath,
   buildFullValidationSchema,
+  buildSchemaRecursive,
   recursiveAddYupObject,
   addCardinalityToElement,
   formatChoiceType,
@@ -915,10 +916,7 @@ describe("buildFullValidationSchema", () => {
     }
   });
 
-  it("filters out choice-type fields ([x]) from validation schema", () => {
-    // For BackboneElements with choice types like value[x], we should skip validation
-    // for the [x] field itself since it doesn't exist in actual FHIR data.
-    // Only concrete variants like valueMoney, valueQuantity should be validated.
+  it("excludes abstract choice-type ([x]) keys from the shape but enforces the required choice via a concrete variant", () => {
     const formInfo = {
       "Coverage.costToBeneficiary": {
         id: "Coverage.costToBeneficiary",
@@ -934,33 +932,35 @@ describe("buildFullValidationSchema", () => {
         id: "Coverage.costToBeneficiary[0].type",
         validation: Yup.object().required("Type is required"),
       },
-      // Choice type should NOT be included in schema validation
+      // Abstract choice type: never a literal data key, only concrete variants
+      // (valueMoney, valueQuantity, ...) exist in real FHIR data. It is required.
       "Coverage.costToBeneficiary[0].value[x]": {
         id: "Coverage.costToBeneficiary[0].value[x]",
-        validation: Yup.mixed(),
-      },
-      // Concrete variant is OK if included, but [x] should be filtered
-      "Coverage.costToBeneficiary[0].valueMoney": {
-        id: "Coverage.costToBeneficiary[0].valueMoney",
-        validation: Yup.object(),
+        min: 1,
+        required: true,
+        validation: Yup.object().required("Value is required"),
       },
     };
 
-    const schema = buildFullValidationSchema(formInfo, "Coverage");
+    const schema = buildSchemaRecursive(
+      formInfo,
+      "Coverage.costToBeneficiary[0]"
+    );
 
-    // Data with valueMoney should validate without errors (choice type field is skipped)
+    // A concrete variant (valueMoney) satisfies the required choice.
     const validData = {
-      Coverage: {
-        costToBeneficiary: [
-          {
-            type: { coding: [{ system: "test", code: "test" }] },
-            valueMoney: { value: 30, currency: "USD" },
-          },
-        ],
-      },
+      type: { coding: [{ system: "test", code: "test" }] },
+      valueMoney: { value: 30, currency: "USD" },
     };
 
     expect(() => schema.validateSync(validData)).not.toThrow();
+
+    // No concrete value* variant present -> required choice fails.
+    const invalidData = {
+      type: { coding: [{ system: "test", code: "test" }] },
+    };
+
+    expect(() => schema.validateSync(invalidData)).toThrow("Value is required");
   });
 });
 
