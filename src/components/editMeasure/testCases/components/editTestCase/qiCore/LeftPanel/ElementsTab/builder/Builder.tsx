@@ -48,6 +48,8 @@ interface BuilderProps {
   setInitialFormikValuesStu6: Dispatch<SetStateAction<Object>>;
   setValidationSchema: Dispatch<SetStateAction<Object>>;
   activeTab: string;
+  isComposite?: boolean;
+  onInsertTCClick?: () => void;
 }
 
 export function scrollToElementByIdWhenAvailable(
@@ -96,6 +98,8 @@ const Builder = ({
   setInitialFormikValuesStu6,
   setValidationSchema,
   activeTab,
+  isComposite = false,
+  onInsertTCClick,
 }: BuilderProps) => {
   const fhirDefinitionsService = useRef(useFhirDefinitionsServiceApi());
   const fhirElmTranslationService = useRef(useFhirElmTranslationServiceApi());
@@ -212,7 +216,7 @@ const Builder = ({
   const duplicateResourceIds = resourceIds?.filter(
     (id, index) => resourceIds.indexOf(id) !== index
   );
-
+  console.log("activetab", activeTab);
   return numberOfPatientsAdded > 1 ? (
     displayBuilderAlert(ERROR_MULTIPLE_PATIENTS, "multiple-patients")
   ) : duplicateResourceIds?.length > 0 ? (
@@ -241,6 +245,8 @@ const Builder = ({
           ) : (
             canEdit && (
               <ResourceList
+                isComposite
+                onInsertTCClick={onInsertTCClick}
                 resourceIdentifiers={resources.filter(
                   (res) =>
                     res.id.startsWith("qicore") || res.id.startsWith("us-core")
@@ -284,6 +290,7 @@ const Builder = ({
                     payload: newEntry,
                   });
                   setToastType("success");
+                  console.log("builder", resourceIdentifier);
                   setToastMessage(
                     `${resourceIdentifier.title} has successfully been applied to the test case. To save your changes please click 'Save'.`
                   );

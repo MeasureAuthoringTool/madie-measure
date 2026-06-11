@@ -4,6 +4,7 @@ import "../../../../../../../../../measureLanding/MeasureLanding.scss";
 import tw from "twin.macro";
 import "styled-components/macro";
 import {
+  Button,
   TruncateText,
   Pagination,
   TextField,
@@ -32,6 +33,8 @@ export interface ResourceListProps {
   resourceIdentifiers?: ResourceIdentifier[];
   onClick: (resourceIdentifier: ResourceIdentifier) => void;
   isPatientAdded?: boolean;
+  isComposite?: boolean;
+  onInsertTCClick?: () => void;
 }
 const TH = tw.th`p-3 text-left text-sm font-bold capitalize`;
 
@@ -39,6 +42,8 @@ const ResourceList = ({
   resourceIdentifiers,
   onClick,
   isPatientAdded,
+  isComposite = false,
+  onInsertTCClick,
 }: ResourceListProps) => {
   // Load saved pagination state from localStorage
   const resourcePageOptions = JSON.parse(
@@ -205,7 +210,7 @@ const ResourceList = ({
   };
   return (
     <div id="qi-core-6-tc-builder">
-      <div id="search-container">
+      <div id="search-container" className={`${isComposite && "flex-row-gap"}`}>
         <TextField
           onChange={({ target }) => {
             setSearchTerm(target.value);
@@ -230,6 +235,16 @@ const ResourceList = ({
           }}
           InputProps={searchInputProps}
         />
+        {isComposite && (
+          <Button
+            tw="m-2"
+            type="button"
+            data-testid={`insert-test-case-button`}
+            onClick={onInsertTCClick}
+          >
+            Insert Existing Test Case
+          </Button>
+        )}
       </div>
 
       {/* we want to render the table if visibleResources. We want to render the spinner if no resourceIdentifiers, and an empty div if no results */}

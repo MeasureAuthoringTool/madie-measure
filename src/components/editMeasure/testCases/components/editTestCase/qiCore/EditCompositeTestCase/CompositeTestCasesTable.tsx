@@ -201,7 +201,7 @@ export default function CompositeTestCasesTable({
               <ArrowBackIcon
                 style={{ height: "18px", width: "18px", marginRight: 4 }}
               />
-              Back to All Measures
+              Back to All Profiles
             </Button>
           </div>
           <div tw="mb-4" className="how-it-works-flush-left">
