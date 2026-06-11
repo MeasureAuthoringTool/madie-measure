@@ -293,8 +293,12 @@ export function buildSchemaRecursive(formInfo, path) {
   const children = getChildren(formInfo, path);
   // assume this returns an array of paths like "Patient.name[0].given" , {}
 
+  // Filter out choice-type fields (IDs containing [x]) since they don't exist in actual FHIR data.
+  // Only concrete variants like valueMoney, valueQuantity, etc. exist in the actual resource.
+  const filteredChildren = children.filter(([id]) => !id.includes("[x]"));
+
   // Case has a validation
-  if (node.validation && children.length === 0) {
+  if (node.validation && filteredChildren.length === 0) {
     if (node.max === "*") {
       return Yup.array().of(node.validation);
     }
@@ -304,11 +308,11 @@ export function buildSchemaRecursive(formInfo, path) {
   // Array case
   if (
     node.max === "*" &&
-    children.length > 0 &&
+    filteredChildren.length > 0 &&
     node.id.split(".").length > 1
   ) {
     const shape = {};
-    children.forEach(([id]) => {
+    filteredChildren.forEach(([id]) => {
       const lastKey = id.split(".").pop();
       shape[lastKey] = buildSchemaRecursive(formInfo, id);
     });
@@ -316,9 +320,9 @@ export function buildSchemaRecursive(formInfo, path) {
   }
 
   // objects with children
-  if (children.length > 0) {
+  if (filteredChildren.length > 0) {
     const shape = {};
-    children.forEach(([id]) => {
+    filteredChildren.forEach(([id]) => {
       const lastKey = id.split(".").pop();
       shape[lastKey] = buildSchemaRecursive(formInfo, id);
     });

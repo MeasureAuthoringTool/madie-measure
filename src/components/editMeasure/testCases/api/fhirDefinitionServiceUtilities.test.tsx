@@ -914,6 +914,54 @@ describe("buildFullValidationSchema", () => {
       ]);
     }
   });
+
+  it("filters out choice-type fields ([x]) from validation schema", () => {
+    // For BackboneElements with choice types like value[x], we should skip validation
+    // for the [x] field itself since it doesn't exist in actual FHIR data.
+    // Only concrete variants like valueMoney, valueQuantity should be validated.
+    const formInfo = {
+      "Coverage.costToBeneficiary": {
+        id: "Coverage.costToBeneficiary",
+        max: "*",
+        min: 0,
+      },
+      "Coverage.costToBeneficiary[0]": {
+        id: "Coverage.costToBeneficiary[0]",
+        max: "1",
+        min: 0,
+      },
+      "Coverage.costToBeneficiary[0].type": {
+        id: "Coverage.costToBeneficiary[0].type",
+        validation: Yup.object().required("Type is required"),
+      },
+      // Choice type should NOT be included in schema validation
+      "Coverage.costToBeneficiary[0].value[x]": {
+        id: "Coverage.costToBeneficiary[0].value[x]",
+        validation: Yup.mixed(),
+      },
+      // Concrete variant is OK if included, but [x] should be filtered
+      "Coverage.costToBeneficiary[0].valueMoney": {
+        id: "Coverage.costToBeneficiary[0].valueMoney",
+        validation: Yup.object(),
+      },
+    };
+
+    const schema = buildFullValidationSchema(formInfo, "Coverage");
+
+    // Data with valueMoney should validate without errors (choice type field is skipped)
+    const validData = {
+      Coverage: {
+        costToBeneficiary: [
+          {
+            type: { coding: [{ system: "test", code: "test" }] },
+            valueMoney: { value: 30, currency: "USD" },
+          },
+        ],
+      },
+    };
+
+    expect(() => schema.validateSync(validData)).not.toThrow();
+  });
 });
 
 describe("getParentDefinition", () => {
