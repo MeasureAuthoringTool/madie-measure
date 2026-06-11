@@ -244,7 +244,7 @@ const Builder = ({
           ) : (
             canEdit && (
               <ResourceList
-                isComposite
+                isComposite={isComposite}
                 onInsertTCClick={onInsertTCClick}
                 resourceIdentifiers={resources.filter(
                   (res) =>
