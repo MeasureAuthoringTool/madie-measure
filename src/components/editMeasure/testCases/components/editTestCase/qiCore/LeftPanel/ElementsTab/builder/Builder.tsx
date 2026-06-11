@@ -216,7 +216,6 @@ const Builder = ({
   const duplicateResourceIds = resourceIds?.filter(
     (id, index) => resourceIds.indexOf(id) !== index
   );
-  console.log("activetab", activeTab);
   return numberOfPatientsAdded > 1 ? (
     displayBuilderAlert(ERROR_MULTIPLE_PATIENTS, "multiple-patients")
   ) : duplicateResourceIds?.length > 0 ? (
@@ -290,7 +289,6 @@ const Builder = ({
                     payload: newEntry,
                   });
                   setToastType("success");
-                  console.log("builder", resourceIdentifier);
                   setToastMessage(
                     `${resourceIdentifier.title} has successfully been applied to the test case. To save your changes please click 'Save'.`
                   );
