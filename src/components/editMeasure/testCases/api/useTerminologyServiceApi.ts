@@ -119,24 +119,45 @@ export class TerminologyServiceApi {
     if (!cqmMeasure) {
       return null;
     }
-    const searchCriteria: ValueSetsSearchCriteria = {
-      includeDraft: true, // always yes for now
-      activeOnly: manifestExpansion ? "true" : "false",
-      manifestExpansion: manifestExpansion,
-      valueSetParams: this.getValueSetsOIDsFromCqmMeasure(
-        JSON.parse(JSON.stringify(cqmMeasure))
-      ),
-    };
 
-    let path = "/terminology/value-sets/expansion/qdm";
+    const valueSetParams = this.getValueSetsOIDsFromCqmMeasure(
+      JSON.parse(JSON.stringify(cqmMeasure))
+    );
 
-    if (_.isEmpty(searchCriteria.valueSetParams)) {
+    if (_.isEmpty(valueSetParams)) {
       return [];
     }
 
+    const batchSize = 10;
+    const batches: ValueSetSearchParams[][] = _.chunk(
+      valueSetParams,
+      batchSize
+    );
+
+    const results = await Promise.all(
+      batches.map((batch) =>
+        this.getQdmExpansionBatch(batch, manifestExpansion, signal)
+      )
+    );
+
+    return results.flat();
+  }
+
+  private async getQdmExpansionBatch(
+    valueSetParams: ValueSetSearchParams[],
+    manifestExpansion: ManifestExpansion,
+    signal: AbortSignal
+  ): Promise<QdmValueSet[]> {
+    const searchCriteria: ValueSetsSearchCriteria = {
+      includeDraft: true,
+      activeOnly: manifestExpansion ? "true" : "false",
+      manifestExpansion: manifestExpansion,
+      valueSetParams: valueSetParams,
+    };
+
     try {
       const response = await axios.put(
-        `${this.baseUrl}${path}`,
+        `${this.baseUrl}/terminology/value-sets/expansion/qdm`,
         searchCriteria,
         {
           headers: {
