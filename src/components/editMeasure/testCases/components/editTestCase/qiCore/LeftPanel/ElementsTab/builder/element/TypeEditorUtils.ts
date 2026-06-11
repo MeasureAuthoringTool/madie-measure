@@ -37,3 +37,23 @@ export const getEmptyValueForType = (type: string) => {
       return {};
   }
 };
+
+// True if value contains any user-entered data (deep check).
+export const hasNonEmptyValue = (value: any): boolean => {
+  if (value === null || value === undefined) {
+    return false;
+  }
+  if (typeof value === "string") {
+    return value.trim() !== "";
+  }
+  if (typeof value === "boolean" || typeof value === "number") {
+    return true;
+  }
+  if (Array.isArray(value)) {
+    return value.some((entry) => hasNonEmptyValue(entry));
+  }
+  if (typeof value === "object") {
+    return Object.values(value).some((entry) => hasNonEmptyValue(entry));
+  }
+  return Boolean(value);
+};

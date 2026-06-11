@@ -67,7 +67,7 @@ export const wrapWithSection = (
   isRoot?: boolean,
   noWrap?: boolean,
   required?: boolean,
-  opts?: { key?: React.Key }
+  opts?: { key?: React.Key; fieldPath?: string }
 ): React.ReactElement => {
   // If root, don't wrap
   // choice types fall under root in many cases. we'll also check to see if the label is terminated with an [x]
@@ -82,6 +82,7 @@ export const wrapWithSection = (
       title={getMultipleCardinalityLabel(title)}
       startOpen={true}
       required={required}
+      fieldPath={opts?.fieldPath ?? title}
     >
       {node}
     </ElementSectionQiCore>
@@ -1309,6 +1310,11 @@ const TypeEditor = ({
                         }
                         elementDefinition={childDef}
                         startOpen={true}
+                        fieldPath={
+                          childIsMultipleCardinality
+                            ? childDef.id + `[${index}]`
+                            : childDef.id
+                        }
                         handleAddElement={() =>
                           handleAddComplexElement(childDef.id)
                         }
