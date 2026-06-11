@@ -187,3 +187,93 @@ describe("ElementSectionQiCore with ExpandCollapseContext", () => {
     expect(screen.getByText("Standalone")).toBeInTheDocument();
   });
 });
+
+describe("ElementSectionQiCore delete button", () => {
+  test("renders the delete button when canBeMultipleCardinality is true", async () => {
+    render(
+      <ElementSectionQiCore
+        title="DeleteMe"
+        canBeMultipleCardinality={true}
+        handleDeleteElement={jest.fn()}
+      />
+    );
+    expect(
+      await screen.findByTestId("elements-delete-button-DeleteMe")
+    ).toBeInTheDocument();
+  });
+
+  test("does not render the delete button when canBeMultipleCardinality is false", () => {
+    render(
+      <ElementSectionQiCore
+        title="NoDelete"
+        canBeMultipleCardinality={false}
+        handleDeleteElement={jest.fn()}
+      />
+    );
+    expect(
+      screen.queryByTestId("elements-delete-button-NoDelete")
+    ).not.toBeInTheDocument();
+  });
+
+  test("calls handleDeleteElement when the delete button is clicked", async () => {
+    const handleDeleteElementMock = jest.fn();
+    render(
+      <ElementSectionQiCore
+        title="ClickMe"
+        canBeMultipleCardinality={true}
+        handleDeleteElement={handleDeleteElementMock}
+      />
+    );
+    const deleteButton = await screen.findByTestId(
+      "elements-delete-button-ClickMe"
+    );
+    fireEvent.click(deleteButton);
+    expect(handleDeleteElementMock).toHaveBeenCalledTimes(1);
+  });
+
+  test("disables the delete button when handleDeleteElement is not provided", async () => {
+    render(
+      <ElementSectionQiCore title="Disabled" canBeMultipleCardinality={true} />
+    );
+    const deleteButton = await screen.findByTestId(
+      "elements-delete-button-Disabled"
+    );
+    expect(deleteButton).toBeDisabled();
+  });
+
+  test("Add Element and Delete buttons share a single right-aligned flex group", async () => {
+    render(
+      <ElementSectionQiCore
+        title="SideBySide"
+        canBeMultipleCardinality={true}
+        showAddButton={true}
+        handleAddElement={jest.fn()}
+        handleDeleteElement={jest.fn()}
+      />
+    );
+    const addButton = await screen.findByText("Add Element");
+    const deleteButton = await screen.findByTestId(
+      "elements-delete-button-SideBySide"
+    );
+
+    const addContainer = addButton.closest(".element-add-container");
+    expect(addContainer).not.toBeNull();
+    expect(addContainer!.parentElement).toBe(deleteButton.parentElement);
+    expect(addContainer!.parentElement).toHaveStyle({ display: "flex" });
+  });
+
+  test("renders only the Add Element button when delete is not allowed", () => {
+    render(
+      <ElementSectionQiCore
+        title="AddOnly"
+        canBeMultipleCardinality={false}
+        showAddButton={true}
+        handleAddElement={jest.fn()}
+      />
+    );
+    expect(screen.getByText("Add Element")).toBeInTheDocument();
+    expect(
+      screen.queryByTestId("elements-delete-button-AddOnly")
+    ).not.toBeInTheDocument();
+  });
+});

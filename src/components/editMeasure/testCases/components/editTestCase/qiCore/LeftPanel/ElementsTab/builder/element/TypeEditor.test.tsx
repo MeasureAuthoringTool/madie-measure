@@ -5851,4 +5851,305 @@ describe("TypeEditor Component", () => {
       )
     );
   });
+
+  describe("handleDeleteElement", () => {
+    beforeEach(() => {
+      jest.spyOn(fhirUtils, "isComponentDataType").mockReturnValue(true);
+    });
+
+    const makeStringFormik = (values: string[]) => ({
+      handleChange: jest.fn(),
+      setFieldValue: jest.fn(),
+      setFieldTouched: jest.fn(),
+      values: {
+        Patient: { name: [{ given: values }] },
+      },
+      getFieldProps: (label: string) => {
+        const match = label.match(/given\[(\d+)]/);
+        const index = match ? parseInt(match[1]) : 0;
+        return {
+          value: values[index],
+          name: label,
+          onChange: jest.fn(),
+          onBlur: jest.fn(),
+        };
+      },
+    });
+
+    const renderGivenNameEditor = (formik: any) =>
+      render(
+        <FormikProvider value={formik}>
+          <RequiredFieldsProvider
+            requiredFields={mockRequiredFields}
+            formInfo={mockFormInfo}
+          >
+            <TypeEditor
+              resource={null}
+              structureDefinition={{
+                id: "Patient.name.given",
+                path: "Patient.name.given",
+                min: 0,
+                max: "*",
+                type: [{ code: "string" }],
+              }}
+              label="Patient.name[0].given"
+              canEdit={true}
+              parentStructureDefinition={null}
+            />
+          </RequiredFieldsProvider>
+        </FormikProvider>
+      );
+
+    test("deleting index 0 shifts later values up and persists the filtered array", () => {
+      const formik = makeStringFormik(["Male", "Female"]);
+      renderGivenNameEditor(formik);
+
+      userEvent.click(
+        screen.getByTestId("delete-button-Patient.name[0].given[0]")
+      );
+
+      expect(formik.setFieldValue).toHaveBeenCalledWith(
+        "Patient.name[0].given",
+        ["Female"]
+      );
+    });
+
+    test("deleting a middle index preserves the order of the surrounding values", () => {
+      const formik = makeStringFormik(["A", "B", "C", "D"]);
+      renderGivenNameEditor(formik);
+
+      userEvent.click(
+        screen.getByTestId("delete-button-Patient.name[0].given[1]")
+      );
+
+      expect(formik.setFieldValue).toHaveBeenCalledWith(
+        "Patient.name[0].given",
+        ["A", "C", "D"]
+      );
+    });
+
+    test("deleting the last index trims the array without disturbing earlier values", () => {
+      const formik = makeStringFormik(["A", "B", "C"]);
+      renderGivenNameEditor(formik);
+
+      userEvent.click(
+        screen.getByTestId("delete-button-Patient.name[0].given[2]")
+      );
+
+      expect(formik.setFieldValue).toHaveBeenCalledWith(
+        "Patient.name[0].given",
+        ["A", "B"]
+      );
+    });
+
+    test("deleting the only remaining element clears it with an empty string instead of removing it", () => {
+      const formik = makeStringFormik(["Solo"]);
+      renderGivenNameEditor(formik);
+
+      userEvent.click(
+        screen.getByTestId("delete-button-Patient.name[0].given[0]")
+      );
+
+      expect(formik.setFieldValue).toHaveBeenCalledWith(
+        "Patient.name[0].given",
+        [""]
+      );
+    });
+
+    test("delete handler is wired up for every row when multiple elements are present", () => {
+      const formik = makeStringFormik(["X", "Y", "Z"]);
+      renderGivenNameEditor(formik);
+
+      expect(
+        screen.getByTestId("delete-button-Patient.name[0].given[0]")
+      ).toBeInTheDocument();
+      expect(
+        screen.getByTestId("delete-button-Patient.name[0].given[1]")
+      ).toBeInTheDocument();
+      expect(
+        screen.getByTestId("delete-button-Patient.name[0].given[2]")
+      ).toBeInTheDocument();
+    });
+
+    test("deleting a Boolean element from a multi-cardinality array filters the array", () => {
+      const booleanFormik = {
+        handleChange: jest.fn(),
+        setFieldValue: jest.fn(),
+        setFieldTouched: jest.fn(),
+        values: {
+          Observation: { component: [{ valueBoolean: [true, false, true] }] },
+        },
+        getFieldProps: (label: string) => {
+          const match = label.match(/valueBoolean\[(\d+)]/);
+          const index = match ? parseInt(match[1]) : 0;
+          return {
+            value: [true, false, true][index],
+            name: label,
+            onChange: jest.fn(),
+            onBlur: jest.fn(),
+          };
+        },
+      };
+
+      render(
+        <FormikProvider value={booleanFormik as any}>
+          <RequiredFieldsProvider
+            requiredFields={mockRequiredFields}
+            formInfo={mockFormInfo}
+          >
+            <TypeEditor
+              resource={null}
+              structureDefinition={{
+                id: "Observation.component.valueBoolean",
+                path: "Observation.component.valueBoolean",
+                min: 0,
+                max: "*",
+                type: [{ code: "boolean" }],
+              }}
+              label="Observation.component[0].valueBoolean"
+              canEdit={true}
+              parentStructureDefinition={null}
+            />
+          </RequiredFieldsProvider>
+        </FormikProvider>
+      );
+
+      userEvent.click(
+        screen.getByTestId(
+          "delete-button-Observation.component[0].valueBoolean[0]"
+        )
+      );
+
+      expect(booleanFormik.setFieldValue).toHaveBeenCalledWith(
+        "Observation.component[0].valueBoolean",
+        [false, true]
+      );
+    });
+
+    test("deleting an Integer element from a multi-cardinality array filters the array", () => {
+      const integerFormik = {
+        handleChange: jest.fn(),
+        setFieldValue: jest.fn(),
+        setFieldTouched: jest.fn(),
+        values: {
+          ClaimResponse: { item: [{ noteNumber: [1, 2, 3] }] },
+        },
+        getFieldProps: (label: string) => {
+          const match = label.match(/noteNumber\[(\d+)]/);
+          const index = match ? parseInt(match[1]) : 0;
+          return {
+            value: [1, 2, 3][index],
+            name: label,
+            onChange: jest.fn(),
+            onBlur: jest.fn(),
+          };
+        },
+      };
+
+      render(
+        <FormikProvider value={integerFormik as any}>
+          <RequiredFieldsProvider
+            requiredFields={mockRequiredFields}
+            formInfo={mockFormInfo}
+          >
+            <TypeEditor
+              resource={null}
+              structureDefinition={{
+                id: "ClaimResponse.item.noteNumber",
+                path: "ClaimResponse.item.noteNumber",
+                min: 0,
+                max: "*",
+                type: [{ code: "integer" }],
+              }}
+              label="ClaimResponse.item[0].noteNumber"
+              canEdit={true}
+              parentStructureDefinition={null}
+            />
+          </RequiredFieldsProvider>
+        </FormikProvider>
+      );
+
+      userEvent.click(
+        screen.getByTestId("delete-button-ClaimResponse.item[0].noteNumber[1]")
+      );
+
+      expect(integerFormik.setFieldValue).toHaveBeenCalledWith(
+        "ClaimResponse.item[0].noteNumber",
+        [1, 3]
+      );
+    });
+
+    test("consecutive deletes on the same array each filter from the latest formik state", () => {
+      // any stale-closure regression in handleDeleteElement.
+      let givenValues = ["A", "B", "C"];
+      const formik: any = {
+        handleChange: jest.fn(),
+        setFieldValue: jest.fn((path: string, next: string[]) => {
+          if (path === "Patient.name[0].given") {
+            givenValues = next;
+            formik.values = {
+              Patient: { name: [{ given: givenValues }] },
+            };
+          }
+        }),
+        setFieldTouched: jest.fn(),
+        values: { Patient: { name: [{ given: givenValues }] } },
+        getFieldProps: (label: string) => {
+          const match = label.match(/given\[(\d+)]/);
+          const index = match ? parseInt(match[1]) : 0;
+          return {
+            value: givenValues[index],
+            name: label,
+            onChange: jest.fn(),
+            onBlur: jest.fn(),
+          };
+        },
+      };
+
+      const { rerender } = renderGivenNameEditor(formik);
+
+      userEvent.click(
+        screen.getByTestId("delete-button-Patient.name[0].given[0]")
+      );
+      expect(formik.setFieldValue).toHaveBeenNthCalledWith(
+        1,
+        "Patient.name[0].given",
+        ["B", "C"]
+      );
+
+      // Re-render with the updated formik values so the second click sees the
+      // post-first-delete state — the delete handler reads from formik.values.
+      rerender(
+        <FormikProvider value={formik}>
+          <RequiredFieldsProvider
+            requiredFields={mockRequiredFields}
+            formInfo={mockFormInfo}
+          >
+            <TypeEditor
+              resource={null}
+              structureDefinition={{
+                id: "Patient.name.given",
+                path: "Patient.name.given",
+                min: 0,
+                max: "*",
+                type: [{ code: "string" }],
+              }}
+              label="Patient.name[0].given"
+              canEdit={true}
+              parentStructureDefinition={null}
+            />
+          </RequiredFieldsProvider>
+        </FormikProvider>
+      );
+
+      userEvent.click(
+        screen.getByTestId("delete-button-Patient.name[0].given[0]")
+      );
+      expect(formik.setFieldValue).toHaveBeenNthCalledWith(
+        2,
+        "Patient.name[0].given",
+        ["C"]
+      );
+    });
+  });
 });
