@@ -574,6 +574,154 @@ describe("TerminologyServiceApi Tests", () => {
     expect(_.isEmpty(result)).toBe(true);
   });
 
+  it("batches QDM value set params into chunks of 10 and combines results", async () => {
+    // Build a cqmMeasure with 25 value set OIDs to trigger batching (3 batches: 10, 10, 5)
+    const valueSetDefs = Array.from({ length: 25 }, (_, i) => ({
+      localId: String(i + 1),
+      name: `ValueSet ${i + 1}`,
+      id: `urn:oid:2.16.840.1.113883.3.464.1003.101.12.${1001 + i}`,
+      accessLevel: "Public",
+    }));
+    const largeCqmMeasure = {
+      cql_libraries: [
+        {
+          elm: {
+            library: {
+              valueSets: { def: valueSetDefs },
+            },
+          },
+        },
+      ],
+    };
+
+    const batch1Response = Array.from({ length: 10 }, (_, i) => ({
+      oid: `2.16.840.1.113883.3.464.1003.101.12.${1001 + i}`,
+      display_name: `ValueSet ${i + 1}`,
+    }));
+    const batch2Response = Array.from({ length: 10 }, (_, i) => ({
+      oid: `2.16.840.1.113883.3.464.1003.101.12.${1011 + i}`,
+      display_name: `ValueSet ${i + 11}`,
+    }));
+    const batch3Response = Array.from({ length: 5 }, (_, i) => ({
+      oid: `2.16.840.1.113883.3.464.1003.101.12.${1021 + i}`,
+      display_name: `ValueSet ${i + 21}`,
+    }));
+
+    axios.put = jest
+      .fn()
+      .mockResolvedValueOnce({ data: batch1Response })
+      .mockResolvedValueOnce({ data: batch2Response })
+      .mockResolvedValueOnce({ data: batch3Response });
+
+    const data = await terminologyService.getQdmValueSetsExpansion(
+      largeCqmMeasure as any,
+      testManifestExpansion,
+      abortController.signal
+    );
+
+    // Should have made 3 separate API calls (batches of 10, 10, 5)
+    expect(axios.put).toHaveBeenCalledTimes(3);
+
+    const firstCallParams = (axios.put as jest.Mock).mock.calls[0][1];
+    const secondCallParams = (axios.put as jest.Mock).mock.calls[1][1];
+    const thirdCallParams = (axios.put as jest.Mock).mock.calls[2][1];
+    expect(firstCallParams.valueSetParams.length).toBe(10);
+    expect(secondCallParams.valueSetParams.length).toBe(10);
+    expect(thirdCallParams.valueSetParams.length).toBe(5);
+
+    // Each batch preserves the full search criteria shape
+    expect(firstCallParams.includeDraft).toBe(true);
+    expect(firstCallParams.activeOnly).toBe("true");
+    expect(firstCallParams.manifestExpansion).toEqual(testManifestExpansion);
+
+    // Combined results should contain all 25 value sets
+    expect(data.length).toEqual(25);
+    expect(data[0].oid).toEqual("2.16.840.1.113883.3.464.1003.101.12.1001");
+    expect(data[24].oid).toEqual("2.16.840.1.113883.3.464.1003.101.12.1025");
+  });
+
+  it("handles error in one QDM batch and propagates it", async () => {
+    const valueSetDefs = Array.from({ length: 15 }, (_, i) => ({
+      localId: String(i + 1),
+      name: `ValueSet ${i + 1}`,
+      id: `urn:oid:2.16.840.1.113883.3.464.1003.101.12.${1001 + i}`,
+      accessLevel: "Public",
+    }));
+    const largeCqmMeasure = {
+      cql_libraries: [
+        {
+          elm: {
+            library: {
+              valueSets: { def: valueSetDefs },
+            },
+          },
+        },
+      ],
+    };
+
+    const response = {
+      message: "Failed to fetch batch resources from VSAC",
+      status: 500,
+      error: "Internal Server Error",
+    };
+
+    axios.put = jest
+      .fn()
+      .mockResolvedValueOnce({
+        data: Array.from({ length: 10 }, (_, i) => ({ oid: `oid-${i}` })),
+      })
+      .mockRejectedValueOnce({ response: { status: 500, data: response } });
+
+    try {
+      await terminologyService.getQdmValueSetsExpansion(
+        largeCqmMeasure as any,
+        testManifestExpansion,
+        abortController.signal
+      );
+      fail("Expected error to be thrown");
+    } catch (error) {
+      expect(error.message).toContain("(004)");
+      expect(error.message).toContain(response.message);
+    }
+  });
+
+  it("propagates ERR_CANCELED in multi-batch QDM expansion", async () => {
+    const valueSetDefs = Array.from({ length: 15 }, (_, i) => ({
+      localId: String(i + 1),
+      name: `ValueSet ${i + 1}`,
+      id: `urn:oid:2.16.840.1.113883.3.464.1003.101.12.${1001 + i}`,
+      accessLevel: "Public",
+    }));
+    const largeCqmMeasure = {
+      cql_libraries: [
+        {
+          elm: {
+            library: {
+              valueSets: { def: valueSetDefs },
+            },
+          },
+        },
+      ],
+    };
+
+    const cancelError: Error & { code?: string } = new Error(
+      "Request canceled"
+    );
+    cancelError.code = "ERR_CANCELED";
+
+    axios.put = jest.fn().mockRejectedValue(cancelError);
+
+    try {
+      await terminologyService.getQdmValueSetsExpansion(
+        largeCqmMeasure as any,
+        testManifestExpansion,
+        abortController.signal
+      );
+    } catch (err: any) {
+      expect(err.code).toBe("ERR_CANCELED");
+    }
+  });
+
   it("test getOidFromString no match", () => {
     const result = terminologyService.getOidFromString("test");
     expect(result).toBeNull();
