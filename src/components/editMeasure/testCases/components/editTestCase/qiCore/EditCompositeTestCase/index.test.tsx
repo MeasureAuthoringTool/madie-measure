@@ -13,6 +13,18 @@ jest.mock("@madie/madie-util", () => ({
   }),
 }));
 
+jest.mock("./CompositeLeftPanelContent", () => ({
+  __esModule: true,
+  default: (props: any) => (
+    <div data-testid="create-panel">mock left panel</div>
+  ),
+}));
+
+jest.mock("./CompositeRightPanelContent", () => ({
+  __esModule: true,
+  default: () => <div data-testid="right-panel">mock right panel</div>,
+}));
+
 jest.mock("allotment", () => {
   const React = require("react");
   const Allotment = React.forwardRef(({ children }: any, ref: any) => (

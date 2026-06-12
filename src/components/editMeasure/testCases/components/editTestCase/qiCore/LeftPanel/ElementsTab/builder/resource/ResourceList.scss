@@ -5,7 +5,22 @@
 
   > #search-container {
     margin: 24px 0;
-    max-width: 400px;
+    // max-width: 400px;
+    &.flex-row-gap {
+      display: flex;
+      flex-direction: row;
+      flex-grow: 1;
+      justify-content: space-between;
+      align-items: flex-end;
+      column-gap: 25px;
+      > div {
+        max-width: 400px;
+      }
+      > button {
+        width: 250ox;
+        margin: 0;
+      }
+    }
   }
 
   #tc-builder-pagination-container {
