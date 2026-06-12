@@ -7,6 +7,7 @@ import React, {
 } from "react";
 
 interface ExpandCollapseCommand {
+  mode: "all" | "populated";
   value: boolean;
   id: number;
 }
@@ -15,6 +16,7 @@ interface ExpandCollapseContextValue {
   command: ExpandCollapseCommand | null;
   expandAll: () => void;
   collapseAll: () => void;
+  expandPopulated: () => void;
   registerSection: () => void;
   unregisterSection: () => void;
   sectionCount: number;
@@ -37,11 +39,27 @@ export const ExpandCollapseProvider = ({
   const [sectionCount, setSectionCount] = useState(0);
 
   const expandAll = useCallback(() => {
-    setCommand((prev) => ({ value: true, id: (prev?.id ?? 0) + 1 }));
+    setCommand((prev) => ({
+      mode: "all",
+      value: true,
+      id: (prev?.id ?? 0) + 1,
+    }));
   }, []);
 
   const collapseAll = useCallback(() => {
-    setCommand((prev) => ({ value: false, id: (prev?.id ?? 0) + 1 }));
+    setCommand((prev) => ({
+      mode: "all",
+      value: false,
+      id: (prev?.id ?? 0) + 1,
+    }));
+  }, []);
+
+  const expandPopulated = useCallback(() => {
+    setCommand((prev) => ({
+      mode: "populated",
+      value: false,
+      id: (prev?.id ?? 0) + 1,
+    }));
   }, []);
 
   const registerSection = useCallback(() => {
@@ -58,6 +76,7 @@ export const ExpandCollapseProvider = ({
         command,
         expandAll,
         collapseAll,
+        expandPopulated,
         registerSection,
         unregisterSection,
         sectionCount,

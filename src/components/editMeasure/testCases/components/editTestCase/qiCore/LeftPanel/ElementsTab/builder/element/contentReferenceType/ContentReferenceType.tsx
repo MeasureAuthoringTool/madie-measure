@@ -140,6 +140,7 @@ const MultiCardinalityElement = ({
     <ElementSectionQiCore
       title={_.startCase(getLastPart(parentPath))}
       startOpen={true}
+      fieldPath={parentPathMap.path}
       children={
         <div className="nested-element-section">
           {values.map((v: any, i: number) => {
@@ -262,6 +263,7 @@ const ContentReferenceType = ({
               `${sectionLabel} ${values.length > 1 ? index + 1 : ""}`
             )}
             startOpen={true}
+            fieldPath={prefix}
             children={
               <>
                 <Typography

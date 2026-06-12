@@ -104,11 +104,19 @@ const IdentifierComponent = ({
         gap: "1rem",
       }}
     >
-      {wrapWithSection("Use", codes, false, false)}
+      {wrapWithSection("Use", codes, false, false, false, {
+        fieldPath: `${label}.use`,
+      })}
       {wrapWithSection(`${label}.type`, codeableConcept, false, false)}
-      {wrapWithSection("System", uri, false, false)}
-      {wrapWithSection("Value", string, false, false)}
-      {wrapWithSection("Period", period, false, false)}
+      {wrapWithSection("System", uri, false, false, false, {
+        fieldPath: `${label}.system`,
+      })}
+      {wrapWithSection("Value", string, false, false, false, {
+        fieldPath: `${label}.value`,
+      })}
+      {wrapWithSection("Period", period, false, false, false, {
+        fieldPath: `${label}.period`,
+      })}
       {wrapWithSection("Assigner", assigner, false, false)}
     </div>
   );
