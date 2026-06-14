@@ -128,7 +128,7 @@ export class TerminologyServiceApi {
       return [];
     }
 
-    const batchSize = 10;
+    const batchSize = 100;
     const batches: ValueSetSearchParams[][] = _.chunk(
       valueSetParams,
       batchSize
@@ -157,7 +157,7 @@ export class TerminologyServiceApi {
 
     try {
       const response = await axios.put(
-        `${this.baseUrl}/terminology/value-sets/expansion/qdm`,
+        `http://localhost:8079/terminology/value-sets/expansion/qdm`,
         searchCriteria,
         {
           headers: {
