@@ -18,13 +18,7 @@ const CompositeProfileViews = ({
     <>
       {howItWorksOpen ? (
         <>
-          <div
-            tw="mt-4 mb-4"
-            style={{
-              marginTop: 15,
-              marginBottom: 15,
-            }}
-          >
+          <div tw="mt-4 mb-4">
             <Button
               variant="outline"
               type="button"
@@ -52,8 +46,6 @@ const CompositeProfileViews = ({
             justifyContent: "space-between",
             alignItems: "center",
             width: "100%",
-            marginTop: 15,
-            marginBottom: 15,
           }}
         >
           <Button
