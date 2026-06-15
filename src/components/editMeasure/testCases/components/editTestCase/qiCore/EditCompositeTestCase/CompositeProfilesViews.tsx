@@ -13,25 +13,49 @@ const CompositeProfileViews = ({
 }) => {
   return (
     <>
-      <div
-        className={howItWorksOpen ? "how-it-works-flush-left" : ""}
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          width: "100%",
-        }}
-      >
-        <Button
-          variant="outline"
-          type="button"
-          data-testid="back-to-all-profiles-button"
-          onClick={() => setAvailableTab("profiles")}
+      {howItWorksOpen ? (
+        <>
+          <div style={{ marginBottom: 16 }}>
+            <Button
+              variant="outline"
+              type="button"
+              data-testid="back-to-all-profiles-button"
+              onClick={() => setAvailableTab("profiles")}
+            >
+              Back to All Profiles
+            </Button>
+          </div>
+          <div className="how-it-works-flush-left" style={{ marginBottom: 16 }}>
+            <HowItWorks
+              isOpen={howItWorksOpen}
+              onOpenChange={setHowItWorksOpen}
+            />
+          </div>
+        </>
+      ) : (
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            width: "100%",
+            marginBottom: 16,
+          }}
         >
-          Back to All Profiles
-        </Button>
-        <HowItWorks isOpen={howItWorksOpen} onOpenChange={setHowItWorksOpen} />
-      </div>
+          <Button
+            variant="outline"
+            type="button"
+            data-testid="back-to-all-profiles-button"
+            onClick={() => setAvailableTab("profiles")}
+          >
+            Back to All Profiles
+          </Button>
+          <HowItWorks
+            isOpen={howItWorksOpen}
+            onOpenChange={setHowItWorksOpen}
+          />
+        </div>
+      )}
 
       <div className="elements-panel-header">
         <h3>Select Which Measures to choose Test Case Profiles from:</h3>

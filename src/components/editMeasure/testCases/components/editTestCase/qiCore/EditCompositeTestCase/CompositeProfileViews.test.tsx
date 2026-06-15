@@ -1,4 +1,4 @@
-import React from "react";
+import * as React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
 import CompositeProfilesViews from "./CompositeProfilesViews";
 
@@ -64,11 +64,10 @@ describe("CompositeProfileViews", () => {
   it("applies class when howItWorksOpen is true", () => {
     render(<CompositeProfilesViews {...defaultProps} howItWorksOpen={true} />);
 
-    const container = screen
-      .getByTestId("back-to-all-profiles-button")
-      .closest("div");
+    const howItWorksContainer =
+      screen.getByTestId("how-it-works").parentElement;
 
-    expect(container).toHaveClass("how-it-works-flush-left");
+    expect(howItWorksContainer).toHaveClass("how-it-works-flush-left");
   });
 
   it("does not render completion text when no measures", () => {
