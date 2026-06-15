@@ -4,6 +4,7 @@ import "styled-components/macro";
 import CompositeMeasuresTable from "./CompositeMeasuresTable";
 import HowItWorks from "../LeftPanel/ElementsTab/builder/HowItWorks/HowItWorks";
 import { Button } from "@madie/madie-design-system/dist/react";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 
 const CompositeProfileViews = ({
   howItWorksOpen,
