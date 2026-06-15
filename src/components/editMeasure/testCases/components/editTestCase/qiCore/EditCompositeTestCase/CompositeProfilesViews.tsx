@@ -1,7 +1,10 @@
 import React from "react";
+import tw from "twin.macro";
+import "styled-components/macro";
 import CompositeMeasuresTable from "./CompositeMeasuresTable";
 import HowItWorks from "../LeftPanel/ElementsTab/builder/HowItWorks/HowItWorks";
 import { Button } from "@madie/madie-design-system/dist/react";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 
 const CompositeProfileViews = ({
   howItWorksOpen,
@@ -13,25 +16,55 @@ const CompositeProfileViews = ({
 }) => {
   return (
     <>
-      <div
-        className={howItWorksOpen ? "how-it-works-flush-left" : ""}
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          width: "100%",
-        }}
-      >
-        <Button
-          variant="outline"
-          type="button"
-          data-testid="back-to-all-profiles-button"
-          onClick={() => setAvailableTab("profiles")}
+      {howItWorksOpen ? (
+        <>
+          <div tw="mt-4 mb-4">
+            <Button
+              variant="outline"
+              type="button"
+              data-testid="back-to-all-profiles-button"
+              onClick={() => setAvailableTab("profiles")}
+            >
+              <ArrowBackIcon
+                style={{ height: "18px", width: "18px", marginRight: 4 }}
+              />
+              Back to All Profiles
+            </Button>
+          </div>
+          <div tw="mb-4" className="how-it-works-flush-left">
+            <HowItWorks
+              isOpen={howItWorksOpen}
+              onOpenChange={setHowItWorksOpen}
+            />
+          </div>
+        </>
+      ) : (
+        <div
+          tw="mt-4 mb-4"
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            width: "100%",
+          }}
         >
-          Back to All Profiles
-        </Button>
-        <HowItWorks isOpen={howItWorksOpen} onOpenChange={setHowItWorksOpen} />
-      </div>
+          <Button
+            variant="outline"
+            type="button"
+            data-testid="back-to-all-profiles-button"
+            onClick={() => setAvailableTab("profiles")}
+          >
+            <ArrowBackIcon
+              style={{ height: "18px", width: "18px", marginRight: 4 }}
+            />
+            Back to All Profiles
+          </Button>
+          <HowItWorks
+            isOpen={howItWorksOpen}
+            onOpenChange={setHowItWorksOpen}
+          />
+        </div>
+      )}
 
       <div className="elements-panel-header">
         <h3>Select Which Measures to choose Test Case Profiles from:</h3>
