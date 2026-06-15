@@ -18,13 +18,22 @@ const CompositeProfileViews = ({
     <>
       {howItWorksOpen ? (
         <>
-          <div tw="mt-4 mb-4">
+          <div
+            tw="mt-4 mb-4"
+            style={{
+              marginTop: 15,
+              marginBottom: 15,
+            }}
+          >
             <Button
               variant="outline"
               type="button"
               data-testid="back-to-all-profiles-button"
               onClick={() => setAvailableTab("profiles")}
             >
+              <ArrowBackIcon
+                style={{ height: "18px", width: "18px", marginRight: 4 }}
+              />
               Back to All Profiles
             </Button>
           </div>
@@ -43,6 +52,8 @@ const CompositeProfileViews = ({
             justifyContent: "space-between",
             alignItems: "center",
             width: "100%",
+            marginTop: 15,
+            marginBottom: 15,
           }}
         >
           <Button
@@ -51,6 +62,9 @@ const CompositeProfileViews = ({
             data-testid="back-to-all-profiles-button"
             onClick={() => setAvailableTab("profiles")}
           >
+            <ArrowBackIcon
+              style={{ height: "18px", width: "18px", marginRight: 4 }}
+            />
             Back to All Profiles
           </Button>
           <HowItWorks
