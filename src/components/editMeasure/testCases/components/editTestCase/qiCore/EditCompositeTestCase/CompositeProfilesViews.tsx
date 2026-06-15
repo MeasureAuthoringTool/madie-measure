@@ -4,6 +4,7 @@ import "styled-components/macro";
 import CompositeMeasuresTable from "./CompositeMeasuresTable";
 import HowItWorks from "../LeftPanel/ElementsTab/builder/HowItWorks/HowItWorks";
 import { Button } from "@madie/madie-design-system/dist/react";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 
 const CompositeProfileViews = ({
   howItWorksOpen,
@@ -24,6 +25,9 @@ const CompositeProfileViews = ({
               data-testid="back-to-all-profiles-button"
               onClick={() => setAvailableTab("profiles")}
             >
+              <ArrowBackIcon
+                style={{ height: "18px", width: "18px", marginRight: 4 }}
+              />
               Back to All Profiles
             </Button>
           </div>
@@ -50,6 +54,9 @@ const CompositeProfileViews = ({
             data-testid="back-to-all-profiles-button"
             onClick={() => setAvailableTab("profiles")}
           >
+            <ArrowBackIcon
+              style={{ height: "18px", width: "18px", marginRight: 4 }}
+            />
             Back to All Profiles
           </Button>
           <HowItWorks
