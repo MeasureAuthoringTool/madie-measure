@@ -17,39 +17,40 @@ describe("HowItWorks", () => {
   it("opens the info section when the link is clicked", async () => {
     render(<HowItWorks />);
     const link = screen.getByTestId("how-it-works-link");
-    await userEvent.click(link);
+    userEvent.click(link);
 
     const content = screen.getByTestId("how-it-works-content");
     expect(content).toBeInTheDocument();
     expect(screen.getByText("How it Works")).toBeInTheDocument();
-    expect(
-      screen.getByText(
-        /To combine profiles from one test case from each component, follow the steps below:/
-      )
-    ).toBeInTheDocument();
+    expect(screen.getByText(/To complete this process:/)).toBeInTheDocument();
   });
 
-  it("displays all three steps in the expanded info section", async () => {
+  it("displays steps including the nested view-test-case guidance", async () => {
     render(<HowItWorks />);
-    await userEvent.click(screen.getByTestId("how-it-works-link"));
+    userEvent.click(screen.getByTestId("how-it-works-link"));
 
     expect(
       screen.getByText(
-        "Select which measures to choose test case profiles from."
+        "Select the measure that contains the test case you want to insert."
       )
     ).toBeInTheDocument();
     expect(
-      screen.getByText("Select which test case to choose profiles from.")
+      screen.getByText("Select the test case you want to insert profiles from.")
     ).toBeInTheDocument();
-    expect(screen.getByText("Select test case profiles.")).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "You can select View Test Case to review details before proceeding."
+      )
+    ).toBeInTheDocument();
+    expect(screen.getByText("Select Insert.")).toBeInTheDocument();
   });
 
   it("closes the info section when the X button is clicked", async () => {
     render(<HowItWorks />);
-    await userEvent.click(screen.getByTestId("how-it-works-link"));
+    userEvent.click(screen.getByTestId("how-it-works-link"));
     expect(screen.getByTestId("how-it-works-content")).toBeInTheDocument();
 
-    await userEvent.click(screen.getByTestId("how-it-works-close"));
+    userEvent.click(screen.getByTestId("how-it-works-close"));
     expect(
       screen.queryByTestId("how-it-works-content")
     ).not.toBeInTheDocument();
@@ -82,14 +83,14 @@ describe("HowItWorks", () => {
     it("invokes onOpenChange(true) when link is clicked in controlled mode", async () => {
       const onOpenChange = jest.fn();
       render(<HowItWorks isOpen={false} onOpenChange={onOpenChange} />);
-      await userEvent.click(screen.getByTestId("how-it-works-link"));
+      userEvent.click(screen.getByTestId("how-it-works-link"));
       expect(onOpenChange).toHaveBeenCalledWith(true);
     });
 
     it("invokes onOpenChange(false) when close button is clicked in controlled mode", async () => {
       const onOpenChange = jest.fn();
       render(<HowItWorks isOpen={true} onOpenChange={onOpenChange} />);
-      await userEvent.click(screen.getByTestId("how-it-works-close"));
+      userEvent.click(screen.getByTestId("how-it-works-close"));
       expect(onOpenChange).toHaveBeenCalledWith(false);
     });
 
@@ -97,7 +98,7 @@ describe("HowItWorks", () => {
       // isOpen stays false; clicking link should not open the content
       const onOpenChange = jest.fn();
       render(<HowItWorks isOpen={false} onOpenChange={onOpenChange} />);
-      await userEvent.click(screen.getByTestId("how-it-works-link"));
+      userEvent.click(screen.getByTestId("how-it-works-link"));
       expect(onOpenChange).toHaveBeenCalledWith(true);
       // still closed because parent did not flip isOpen
       expect(
@@ -108,7 +109,7 @@ describe("HowItWorks", () => {
     it("calls onOpenChange in uncontrolled mode as well (when provided)", async () => {
       const onOpenChange = jest.fn();
       render(<HowItWorks onOpenChange={onOpenChange} />);
-      await userEvent.click(screen.getByTestId("how-it-works-link"));
+      userEvent.click(screen.getByTestId("how-it-works-link"));
       expect(onOpenChange).toHaveBeenCalledWith(true);
       // uncontrolled: state did flip
       expect(screen.getByTestId("how-it-works-content")).toBeInTheDocument();
