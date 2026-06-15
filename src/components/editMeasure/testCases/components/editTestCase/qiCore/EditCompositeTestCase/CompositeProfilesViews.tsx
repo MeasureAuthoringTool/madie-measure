@@ -1,4 +1,6 @@
 import React from "react";
+import tw from "twin.macro";
+import "styled-components/macro";
 import CompositeMeasuresTable from "./CompositeMeasuresTable";
 import HowItWorks from "../LeftPanel/ElementsTab/builder/HowItWorks/HowItWorks";
 import { Button } from "@madie/madie-design-system/dist/react";
@@ -15,7 +17,7 @@ const CompositeProfileViews = ({
     <>
       {howItWorksOpen ? (
         <>
-          <div style={{ marginBottom: 16 }}>
+          <div tw="mt-4 mb-4">
             <Button
               variant="outline"
               type="button"
@@ -25,7 +27,7 @@ const CompositeProfileViews = ({
               Back to All Profiles
             </Button>
           </div>
-          <div className="how-it-works-flush-left" style={{ marginBottom: 16 }}>
+          <div tw="mb-4" className="how-it-works-flush-left">
             <HowItWorks
               isOpen={howItWorksOpen}
               onOpenChange={setHowItWorksOpen}
@@ -34,12 +36,12 @@ const CompositeProfileViews = ({
         </>
       ) : (
         <div
+          tw="mt-4 mb-4"
           style={{
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
             width: "100%",
-            marginBottom: 16,
           }}
         >
           <Button
