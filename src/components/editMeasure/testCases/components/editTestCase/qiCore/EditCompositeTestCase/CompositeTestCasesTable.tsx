@@ -191,7 +191,7 @@ export default function CompositeTestCasesTable({
       {/* Back button + How it works */}
       {howItWorksOpen ? (
         <>
-          <div tw="mb-4">
+          <div tw="mt-4 mb-4">
             <Button
               variant="outline"
               type="button"
@@ -213,7 +213,7 @@ export default function CompositeTestCasesTable({
         </>
       ) : (
         <div
-          tw="mb-4"
+          tw="mt-4 mb-4"
           style={{
             display: "flex",
             justifyContent: "space-between",
