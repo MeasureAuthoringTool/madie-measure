@@ -23,6 +23,7 @@ import {
   mergePathWithIndex,
   removeIndicesFromPath,
   buildFullValidationSchema,
+  buildSchemaRecursive,
   recursiveAddYupObject,
   addCardinalityToElement,
   formatChoiceType,
@@ -913,6 +914,53 @@ describe("buildFullValidationSchema", () => {
         "Patient.birthDate",
       ]);
     }
+  });
+
+  it("excludes abstract choice-type ([x]) keys from the shape but enforces the required choice via a concrete variant", () => {
+    const formInfo = {
+      "Coverage.costToBeneficiary": {
+        id: "Coverage.costToBeneficiary",
+        max: "*",
+        min: 0,
+      },
+      "Coverage.costToBeneficiary[0]": {
+        id: "Coverage.costToBeneficiary[0]",
+        max: "1",
+        min: 0,
+      },
+      "Coverage.costToBeneficiary[0].type": {
+        id: "Coverage.costToBeneficiary[0].type",
+        validation: Yup.object().required("Type is required"),
+      },
+      // Abstract choice type: never a literal data key, only concrete variants
+      // (valueMoney, valueQuantity, ...) exist in real FHIR data. It is required.
+      "Coverage.costToBeneficiary[0].value[x]": {
+        id: "Coverage.costToBeneficiary[0].value[x]",
+        min: 1,
+        required: true,
+        validation: Yup.object().required("Value is required"),
+      },
+    };
+
+    const schema = buildSchemaRecursive(
+      formInfo,
+      "Coverage.costToBeneficiary[0]"
+    );
+
+    // A concrete variant (valueMoney) satisfies the required choice.
+    const validData = {
+      type: { coding: [{ system: "test", code: "test" }] },
+      valueMoney: { value: 30, currency: "USD" },
+    };
+
+    expect(() => schema.validateSync(validData)).not.toThrow();
+
+    // No concrete value* variant present -> required choice fails.
+    const invalidData = {
+      type: { coding: [{ system: "test", code: "test" }] },
+    };
+
+    expect(() => schema.validateSync(invalidData)).toThrow("Value is required");
   });
 });
 
