@@ -1,4 +1,5 @@
 import React, {
+  useCallback,
   useRef,
   useState,
   useEffect,
@@ -48,7 +49,7 @@ interface ElementEditorProps {
   setInitialFormikValuesStu6: Dispatch<SetStateAction<Object>>;
   setValidationSchema: Dispatch<SetStateAction<Object>>;
   deleteElement?: (path: string, element: any, elementName: string) => void;
-  setLastAddedElemPath: (string) => void;
+  setLastAddedElemPath: (path: string) => void;
   applyLoading: boolean;
   setApplyLoading: Dispatch<SetStateAction<boolean>>;
 }
@@ -74,6 +75,7 @@ export function simplifySnapshotElements(data) {
     },
   ]);
 }
+
 const ElementEditor = ({
   setLastAddedElemPath,
   selectedResource, // this will always be a stale reference because we set it one time. we need the id and to look at the provider
@@ -101,9 +103,7 @@ const ElementEditor = ({
   const [loading, setLoading] = useState(true);
   // We want to dispatch an action that contains a payload of our updated selectedResource.entry
   // The resource reducer will in turn update the testcase json string
-  const { dispatch, state } = useQiCoreResource();
-  // const statefulSelectedResource = selectedResource.bundleEntry.resource;
-  const selectedResourceOnBundleEntry = selectedResource.bundleEntry.resource;
+  const { dispatch } = useQiCoreResource();
   // The reducer that we use in the provider always returns a new object. This allows us to use that object as a reference object in use effects
   // Whenever a javascript object changes it's memory address, it will be seen as a new object and rerender. Mutating objects do not trigger downstream rerenders.
   // We need this reference instead of the selectedResource prop since it's being preserved in state only on selection.
@@ -114,112 +114,133 @@ const ElementEditor = ({
   const requiredFields = mapElementsRequired(selectedResource); // this includes stuff like name.
   const [formInfo, setFormInfo] = useState(null);
 
-  const buildNode = async (
-    child,
-    resourcePath,
-    resource,
-    nodeList = [],
-    ctx
-  ) => {
-    const type = child?.type?.[0]?.code;
+  const buildNode = useCallback(
+    async (child, resourcePath, resource, nodeList = [], ctx) => {
+      const type = child?.type?.[0]?.code;
 
-    // Check to see if the prefix has been expanded already from previous entries
-    const hasInlineChildren = !!ctx?.prefixSet?.has(child?.id);
+      // Check to see if the prefix has been expanded already from previous entries
+      const hasInlineChildren = !!ctx?.prefixSet?.has(child?.id);
 
-    if (!isComponentDataType(type)) {
-      // Fetch the resource tree asynchronously
-      // nesting these ifs to avoid a crash in deeply nested ClaimResponse.item. Might cause issue elsewhere.
-      if (type) {
-        // snapshot already has child.id.* nodes, do NOT expand by datatype.
-        if (!hasInlineChildren) {
-          const def = await fhirDefinitionsService.current.getResourceTree(
-            type
-          );
-          if (def) {
-            const elements = getTopLevelElements(def, true);
-            const updatedElements = updateChildrenPaths(child, elements);
-            if (updatedElements) {
-              if (ctx?.skipPrefixes) ctx.skipPrefixes.add(child?.id);
+      if (!isComponentDataType(type)) {
+        // Fetch the resource tree asynchronously
+        // nesting these ifs to avoid a crash in deeply nested ClaimResponse.item. Might cause issue elsewhere.
+        if (type) {
+          // snapshot already has child.id.* nodes, do NOT expand by datatype.
+          if (!hasInlineChildren) {
+            const def = await fhirDefinitionsService.current.getResourceTree(
+              type
+            );
+            if (def) {
+              const elements = getTopLevelElements(def, true);
+              const updatedElements = updateChildrenPaths(child, elements);
+              if (updatedElements) {
+                if (ctx?.skipPrefixes) ctx.skipPrefixes.add(child?.id);
 
-              for (const element of updatedElements) {
-                nodeList = await buildNode(
-                  element,
-                  resourcePath,
-                  resource,
-                  nodeList,
-                  ctx // pass ctx through recursion
-                );
+                for (const element of updatedElements) {
+                  nodeList = await buildNode(
+                    element,
+                    resourcePath,
+                    resource,
+                    nodeList,
+                    ctx // pass ctx through recursion
+                  );
+                }
               }
+              const {
+                max,
+                min,
+                type,
+                id,
+                // need binding for extensions
+                binding,
+                // need for extension valueElement. Should probably be depreicated
+                definition,
+                // need for profiledExtension to map Extension children.
+                snapshot,
+              } = child;
+              return nodeList.concat({
+                id,
+                type: type,
+                max,
+                required: min > 0,
+                binding,
+                definition,
+                snapshot,
+              });
             }
-            const {
-              max,
-              min,
-              type,
-              id,
-              // need binding for extensions
-              binding,
-              // need for extension valueElement. Should probably be depreicated
-              definition,
-              // need for profiledExtension to map Extension children.
-              snapshot,
-            } = child;
-            return nodeList.concat({
-              id,
-              type: type,
-              max,
-              required: min > 0,
-              binding,
-              definition,
-              snapshot,
-            });
           }
         }
+
+        // This is the edge case for when we're providing the root of the structure like ClaimResponse as it's not a componentDataType and there is no type
+        const required = +child?.min > 0;
+        const elemPath = child?.path;
+        const value = _.get(resource, elemPath); // we need to update this getter.
+        const canBeMultipleCardinality = child?.max === "*";
+        const builtNode = {
+          id: child?.id,
+          binding: child?.binding,
+          value,
+          type: child?.type,
+          required,
+          validation: null,
+          canBeMultipleCardinality,
+          max: child.max,
+          min: child.min,
+          contentReference: child.contentReference,
+        };
+        return nodeList.concat(builtNode);
+      } else {
+        // It's a single node. Add it to the node list
+        const required = +child.min > 0;
+        const elemPath = stripResourcePath(resourcePath, child.path);
+        const canBeMultipleCardinality = child?.max === "*";
+
+        const value = _.get(resource, elemPath);
+        const label = child.path.split(".").pop(); // should only be used for validation. dont pass
+
+        const builtNode = {
+          id: child?.id,
+          binding: child?.binding,
+          value,
+          type: child?.type,
+          required,
+          validation: getValidation(type, required, label),
+          canBeMultipleCardinality,
+          snapshot: child.snapshot,
+          max: child.max,
+          min: child.min,
+        };
+        return nodeList.concat(builtNode);
       }
+    },
+    [fhirDefinitionsService]
+  );
 
-      // This is the edge case for when we're providing the root of the structure like ClaimResponse as it's not a componentDataType and there is no type
-      const required = +child?.min > 0;
-      const elemPath = child?.path;
-      const value = _.get(resource, elemPath); // we need to update this getter.
-      const canBeMultipleCardinality = child?.max === "*";
-      const builtNode = {
-        id: child?.id,
-        binding: child?.binding,
-        value,
-        type: child?.type,
-        required,
-        validation: null,
-        canBeMultipleCardinality,
-        max: child.max,
-        min: child.min,
-        contentReference: child.contentReference,
-      };
-      return nodeList.concat(builtNode);
-    } else {
-      // It's a single node. Add it to the node list
-      const required = +child.min > 0;
-      const elemPath = stripResourcePath(resourcePath, child.path);
-      const canBeMultipleCardinality = child?.max === "*";
+  // we need to know not only the properties that have values,
+  // but also the ones that don't since a user can enter values into those fields
+  const buildSchemaAndInitialValues = useCallback(
+    (formInfo, resource) => {
+      setFormInfo(simplifySnapshotElements(Object.entries(formInfo)));
+      // Get the correct initial values more simply.
+      const correctInitialValues = {}; // set a root
+      correctInitialValues[resource.resourceType] = {}; // establish root property so we can add more properties to it
+      const entries = Object.entries(resource);
+      for (const [key, value] of entries) {
+        correctInitialValues[resource.resourceType][key] = value;
+      }
+      const validationSchemaObject = buildFullValidationSchema(
+        formInfo,
+        resource.resourceType
+      );
+      setInitialFormikValuesStu6(correctInitialValues);
+      setValidationSchema(validationSchemaObject);
+      // need a loading toggle or formikProvider dies violently.
+      setLoading(false);
+    },
+    [setInitialFormikValuesStu6, setValidationSchema]
+  );
 
-      const value = _.get(resource, elemPath);
-      const label = child.path.split(".").pop(); // should only be used for validation. dont pass
-
-      const builtNode = {
-        id: child?.id,
-        binding: child?.binding,
-        value,
-        type: child?.type,
-        required,
-        validation: getValidation(type, required, label),
-        canBeMultipleCardinality,
-        snapshot: child.snapshot,
-        max: child.max,
-        min: child.min,
-      };
-      return nodeList.concat(builtNode);
-    }
-  };
-
-  const buildForm = async () => {
+  const buildForm = useCallback(async () => {
     const formInfo = {};
     const nodeList = [];
     const rootDefinition = selectedResource.definition?.snapshot?.element?.[0];
@@ -248,35 +269,14 @@ const ElementEditor = ({
       formInfo[builtNode.id] = builtNode;
     }
     buildSchemaAndInitialValues(formInfo, resource);
-  };
-
-  // we need to know not only the properties that have values,
-  // but also the ones that don't since a user can enter values into those fields
-  const buildSchemaAndInitialValues = (formInfo, resource) => {
-    setFormInfo(simplifySnapshotElements(Object.entries(formInfo)));
-    // Get the correct initial values more simply.
-    const correctInitialValues = {}; // set a root
-    correctInitialValues[resource.resourceType] = {}; // establish root property so we can add more properties to it
-    const entries = Object.entries(resource);
-    for (const [key, value] of entries) {
-      correctInitialValues[resource.resourceType][key] = value;
-    }
-    const validationSchemaObject = buildFullValidationSchema(
-      formInfo,
-      resource.resourceType
-    );
-    setInitialFormikValuesStu6(correctInitialValues);
-    setValidationSchema(validationSchemaObject);
-    // need a loading toggle or formikProvider dies violently.
-    setLoading(false);
-  };
+  }, [buildNode, buildSchemaAndInitialValues, resourcePath, selectedResource]);
 
   // Whenever the displayedElements list changes in volume, we need to rebuild the form.
   useEffect(() => {
     if (selectedResource) {
       buildForm();
     }
-  }, [selectedResource]); // buildForm is excluded because it only uses stable setState functions
+  }, [buildForm, selectedResource]);
 
   useEffect(() => {
     if (loading) return;

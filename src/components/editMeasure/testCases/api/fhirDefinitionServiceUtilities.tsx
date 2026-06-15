@@ -283,6 +283,7 @@ export function recursiveAddYupObject(schemaObject) {
   }
   return schemaObject;
 }
+
 // had to remake schema builder again.
 export function buildSchemaRecursive(formInfo, path) {
   // it previously failed when running into a case where a schema was already at object property for Encounter
@@ -293,8 +294,54 @@ export function buildSchemaRecursive(formInfo, path) {
   const children = getChildren(formInfo, path);
   // assume this returns an array of paths like "Patient.name[0].given" , {}
 
+  // Choice-type fields (IDs containing [x], e.g. "value[x]") are abstract FHIR placeholders.
+  // They never exist as literal keys in actual resource data — only chosen types do
+  // (e.g. valueMoney, valueQuantity). So we exclude them from the validation, but still
+  // enforce their "required" rule separately via requiredChoiceChildren below.
+  const nonChoiceChildren = children.filter(([id]) => !id.includes("[x]"));
+  const requiredChoiceChildren = children.filter(([id, child]) => {
+    const childNode = child as { required?: boolean; min?: number };
+    return id.includes("[x]") && (childNode?.required || childNode?.min > 0);
+  });
+
+  // Builds a Yup object schema from non-choice children, then layers on a required-choice
+  // test for each required value[x]-style field. The test passes when at least one concrete
+  // variant key (e.g. valueMoney, valueQuantity) is present and non-empty on the object.
+  const buildObjectShapeWithRequiredChoices = () => {
+    const shape = {};
+    nonChoiceChildren.forEach(([id]) => {
+      const lastKey = id.split(".").pop();
+      shape[lastKey] = buildSchemaRecursive(formInfo, id);
+    });
+
+    let objectSchema = Yup.object().shape(shape);
+
+    requiredChoiceChildren.forEach(([id]) => {
+      // "Coverage.costToBeneficiary.value[x]" -> "value"
+      const choicePrefix = id.split(".").pop().replace("[x]", "");
+      objectSchema = objectSchema.test(
+        `required-choice-${choicePrefix}`,
+        `${_.startCase(choicePrefix)} is required`,
+        (value) => {
+          if (!value || typeof value !== "object") {
+            return false;
+          }
+          return Object.keys(value).some(
+            (key) =>
+              key.startsWith(choicePrefix) &&
+              key !== choicePrefix &&
+              !_.isNil(value[key]) &&
+              !(typeof value[key] === "object" && _.isEmpty(value[key]))
+          );
+        }
+      );
+    });
+
+    return objectSchema;
+  };
+
   // Case has a validation
-  if (node.validation && children.length === 0) {
+  if (node.validation && nonChoiceChildren.length === 0) {
     if (node.max === "*") {
       return Yup.array().of(node.validation);
     }
@@ -304,25 +351,15 @@ export function buildSchemaRecursive(formInfo, path) {
   // Array case
   if (
     node.max === "*" &&
-    children.length > 0 &&
+    nonChoiceChildren.length > 0 &&
     node.id.split(".").length > 1
   ) {
-    const shape = {};
-    children.forEach(([id]) => {
-      const lastKey = id.split(".").pop();
-      shape[lastKey] = buildSchemaRecursive(formInfo, id);
-    });
-    return Yup.array().of(Yup.object().shape(shape));
+    return Yup.array().of(buildObjectShapeWithRequiredChoices());
   }
 
   // objects with children
-  if (children.length > 0) {
-    const shape = {};
-    children.forEach(([id]) => {
-      const lastKey = id.split(".").pop();
-      shape[lastKey] = buildSchemaRecursive(formInfo, id);
-    });
-    return Yup.object().shape(shape);
+  if (nonChoiceChildren.length > 0) {
+    return buildObjectShapeWithRequiredChoices();
   }
 
   return Yup.mixed();
