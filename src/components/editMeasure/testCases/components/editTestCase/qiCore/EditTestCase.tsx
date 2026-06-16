@@ -1289,7 +1289,6 @@ const EditTestCase = (props: EditTestCaseProps) => {
                           height="100%"
                           readOnly={true}
                           validationsEnabled={false}
-
                         />
                       </div>
                     ) : (

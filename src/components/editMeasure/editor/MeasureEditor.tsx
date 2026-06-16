@@ -239,7 +239,7 @@ const MeasureEditor = ({ measureCanEdit, measureLockedBy }) => {
 
   const [refValueSetDetails, setRefValueSetDetails] = useState();
   const prevSelectedValueSetDetails = useRef();
-  const terminologyServiceApi = useRef(useTerminologyServiceApi())
+  const terminologyServiceApi = useRef(useTerminologyServiceApi());
   // on load fetch elm translations results to display errors on editor not just on load..
   useEffect(() => {
     //validateCql(measure, setToastOpen, setToastMessage);
@@ -260,7 +260,11 @@ const MeasureEditor = ({ measureCanEdit, measureLockedBy }) => {
     // setElmTranslationError(null); ? set Error false?
     setError(false);
     if (cql && cql.trim().length > 0) {
-      const result = await validateContent(cql, true, terminologyServiceApi.current);
+      const result = await validateContent(
+        cql,
+        true,
+        terminologyServiceApi.current
+      );
       const { errors, externalErrors } = result;
       // right now we are only displaying the external errors related to included libraries
       // and only the first error returned by elm translator
