@@ -120,9 +120,18 @@ jest.mock("@madie/madie-util", () => ({
   },
 }));
 
-jest.mock("use-resize-observer", () => {
-  return jest.requireActual("use-resize-observer/polyfilled");
-});
+jest.mock(
+  "use-resize-observer",
+  () => ({
+    __esModule: true,
+    default: () => ({
+      ref: jest.fn(),
+      width: 0,
+      height: 0,
+    }),
+  }),
+  { virtual: true }
+);
 
 jest.mock("../../../api/CqmModelConversionService");
 const CQMConversionMock =
