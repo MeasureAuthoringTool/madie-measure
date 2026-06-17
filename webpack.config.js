@@ -52,7 +52,8 @@ module.exports = (webpackConfigEnv, argv) => {
   // or any other package to be loaded externally
   const externalsConfig = {
     externals: [
-      "@madie/madie-editor",
+      "react",
+      "react-dom",
       "@madie/madie-util",
       // Shared singleton libraries — loaded once via import map
       "@emotion/react",
@@ -116,13 +117,6 @@ module.exports = (webpackConfigEnv, argv) => {
             "node_modules/@madie/madie-root/dist/"
           ),
           publicPath: "/",
-        },
-        {
-          directory: path.join(
-            __dirname,
-            "node_modules/@madie/madie-editor/dist/"
-          ),
-          publicPath: "/madie-editor",
         },
         {
           directory: path.join(

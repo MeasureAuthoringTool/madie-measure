@@ -33,6 +33,9 @@ import {
   PopulationType,
   TestCase,
 } from "@madie/madie-models";
+import { TextEncoder, TextDecoder } from "util";
+global.TextEncoder = TextEncoder;
+global.TextDecoder = TextDecoder;
 
 describe("CalculationService Tests", () => {
   let calculationService: CalculationService;
