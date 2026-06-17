@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import "twin.macro";
 import { Endorsement, Measure, Model, MeasureLock } from "@madie/madie-models";
 import "styled-components/macro";
@@ -40,6 +40,7 @@ import useQdmElmTranslationServiceApi from "../../../../api/useQdmElmTranslation
 import useFhirElmTranslationServiceApi from "../../../../api/useFhirElmTranslationServiceApi";
 import GenerateCmsIdConfirmationDialog from "../cmsIdentifier/GenerateCmsIdConfirmationDialog";
 import _ from "lodash";
+import useTerminologyServiceApi from "../../testCases/api/useTerminologyServiceApi";
 
 interface measureInformationForm {
   versionId: string;
@@ -355,6 +356,7 @@ export default function MeasureInformation(props: MeasureInformationProps) {
     return true;
   };
 
+  const terminologyServiceApi = useRef(useTerminologyServiceApi());
   const handleSubmit = async (values) => {
     let endorsersValid = true;
     // we only want to validate this field if it's not an empty array.
@@ -383,7 +385,8 @@ export default function MeasureInformation(props: MeasureInformationProps) {
           const cqlErrors = parseContent(updatedCqlOb.cql);
           const { errors, translation } = await validateContent(
             updatedCqlOb.cql,
-            true
+            true,
+            terminologyServiceApi.current
           );
           if (cqlErrors.length === 0 && errors.length === 0) {
             var updatedElm = JSON.stringify(translation);

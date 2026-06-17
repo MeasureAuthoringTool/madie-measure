@@ -148,6 +148,11 @@ const axiosError: AxiosError = {
   toJSON: jest.fn(),
 } as unknown as AxiosError;
 
+jest.mock("../../testCases/api/useTerminologyServiceApi", () => ({
+  __esModule: true,
+  default: jest.fn(() => ({})),
+}));
+
 describe("MeasureInformation component", () => {
   beforeEach(() => {
     const qdmElmTranslationServiceApiMock = {

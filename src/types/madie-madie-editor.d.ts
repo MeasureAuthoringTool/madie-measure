@@ -1,6 +1,5 @@
 declare module "@madie/madie-editor" {
   import { FC } from "react";
-  import { LifeCycleFn } from "single-spa";
 
   export type EditorAnnotation = {
     row?: number;
@@ -86,6 +85,7 @@ declare module "@madie/madie-editor" {
   }
 
   export interface EditorPropsType {
+    serviceConfig: any;
     value: string;
     onChange?: (value: string) => void;
     handleApplyCode?: (code: Code) => void;
@@ -179,7 +179,8 @@ declare module "@madie/madie-editor" {
   export const parseContent: (content: string) => CqlError[];
   export const validateContent: (
     content: string,
-    checkContext: boolean
+    checkContext: boolean,
+    terminologyServiceApi: TerminologyServiceApi
   ) => Promise<ValidationResult>;
   export const synchingEditorCqlContent: (
     editorVal: string,
@@ -197,8 +198,4 @@ declare module "@madie/madie-editor" {
 
   export const MadieTerminologyEditor: FC<EditorPropsType>;
   export const MadieEditor: FC<EditorPropsType>;
-
-  export const bootstrap: LifeCycleFn<void>;
-  export const mount: LifeCycleFn<void>;
-  export const unmount: LifeCycleFn<void>;
 }
