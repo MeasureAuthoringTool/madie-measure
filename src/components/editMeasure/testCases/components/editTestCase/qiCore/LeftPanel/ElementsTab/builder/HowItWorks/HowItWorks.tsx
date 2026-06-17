@@ -71,6 +71,12 @@ const HowItWorks = ({
             </li>
             <li>Select Insert.</li>
           </ol>
+          <p>
+            MADiE will add all profiles from the selected test case into the
+            current test case. During this process, patient references are
+            updated to the patient in the current test case, and new profile IDs
+            are generated for each resource.
+          </p>
         </div>
         <IconButton
           data-testid="how-it-works-close"
