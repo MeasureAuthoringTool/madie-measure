@@ -6,6 +6,7 @@ import GroupPopulations from "../populations/GroupPopulations";
 import DetailsSection from "./DetailsTab/DetailsSection";
 import CalculationResults from "./calculationResults/CalculationResults";
 import { MadieEditor } from "@madie/madie-editor";
+import useServiceConfig from "../../../../../../../api/useServiceConfig";
 
 const RightPanel = ({
   canEdit,
@@ -27,7 +28,7 @@ const RightPanel = ({
   riskAdjustments,
 }) => {
   const [activeTab, setActiveTab] = useState<string>("measurecql");
-
+  const serviceConfig = useServiceConfig();
   return (
     <div className="right-panel">
       <div className="tab-container">
@@ -74,6 +75,7 @@ const RightPanel = ({
           (!cqlErrors ? (
             <div data-testid="test-case-cql-editor" id="test-case-cql-editor">
               <MadieEditor
+                serviceConfig={serviceConfig}
                 value={measureCql}
                 height="100%"
                 readOnly={true}
