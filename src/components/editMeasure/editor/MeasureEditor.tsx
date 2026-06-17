@@ -49,6 +49,7 @@ import {
   useDocumentTitle,
   routeHandlerStore,
   useMeasureServiceApi,
+  useTerminologyServiceApi,
 } from "@madie/madie-util";
 import StatusHandler from "./StatusHandler";
 import "./StatusHandler.scss";
@@ -72,6 +73,7 @@ import applyCQLFunction, {
 } from "./cqlFunctionApplier";
 import { useParams } from "react-router";
 import LockedMessageModal from "../../common/lockedMessageModal/LockedMessageModal";
+import useServiceConfig from "../../../api/useServiceConfig";
 
 export const mapErrorsToAceAnnotations = (
   errors: ElmTranslationError[]
@@ -237,7 +239,7 @@ const MeasureEditor = ({ measureCanEdit, measureLockedBy }) => {
 
   const [refValueSetDetails, setRefValueSetDetails] = useState();
   const prevSelectedValueSetDetails = useRef();
-
+  const terminologyServiceApi = useRef(useTerminologyServiceApi());
   // on load fetch elm translations results to display errors on editor not just on load..
   useEffect(() => {
     //validateCql(measure, setToastOpen, setToastMessage);
@@ -258,7 +260,11 @@ const MeasureEditor = ({ measureCanEdit, measureLockedBy }) => {
     // setElmTranslationError(null); ? set Error false?
     setError(false);
     if (cql && cql.trim().length > 0) {
-      const result = await validateContent(cql, true);
+      const result = await validateContent(
+        cql,
+        true,
+        terminologyServiceApi.current
+      );
       const { errors, externalErrors } = result;
       // right now we are only displaying the external errors related to included libraries
       // and only the first error returned by elm translator
@@ -854,7 +860,7 @@ const MeasureEditor = ({ measureCanEdit, measureLockedBy }) => {
       measure?.elmJson
     );
   }, [measure?.elmJson, measureServiceApi]);
-
+  const serviceConfig = useServiceConfig();
   return (
     <>
       <div id="status-handler">
@@ -875,6 +881,7 @@ const MeasureEditor = ({ measureCanEdit, measureLockedBy }) => {
           )}
           {!processing && (
             <MadieTerminologyEditor
+              serviceConfig={serviceConfig}
               handleApplyCode={handleApplyCode}
               handleApplyValueSet={handleUpdateVs}
               handleApplyLibrary={handleApplyLibrary}
