@@ -19,7 +19,9 @@ import Typography from "@mui/material/Typography";
 import ResourceContext from "../ResourceContext";
 import { Button } from "@madie/madie-design-system/dist/react";
 import { ResourceIdentifier } from "../../../../../../../api/models/ResourceIdentifier";
-import { Box } from "@mui/material";
+import { Box, IconButton } from "@mui/material";
+import OpenInNewIcon from "@mui/icons-material/OpenInNew";
+import getHl7ProfileLink from "../../../../../../../../../../utils/hl7Links";
 
 export const UI_BUILDER_VIEW_MESSAGE =
   "Viewing this in the UI builder is unsupported.";
@@ -69,6 +71,7 @@ interface TestCaseSummaryGridProps {
   onRowClone?: (row: any) => void;
   gridData: GridDataEntry[];
   testCaseCanEdit: boolean;
+  measureModel: any;
   selectedRowId?: string;
   readOnly: boolean;
 }
@@ -142,6 +145,7 @@ const TestCaseSummaryGrid = ({
   onRowDelete,
   onRowClone,
   testCaseCanEdit,
+  measureModel,
   selectedRowId,
   readOnly,
 }: TestCaseSummaryGridProps) => {
@@ -236,6 +240,38 @@ const TestCaseSummaryGrid = ({
                 </Tooltip>
               )}
             </div>
+          );
+        },
+      },
+      {
+        header: "HL7",
+        id: "hl7",
+        size: 90,
+        minSize: 90,
+        maxSize: 90,
+        cell: ({ row }) => {
+          const { original } = row;
+          const resourceIdentifier = allResourceProfiles?.find(
+            (resource) =>
+              resource.title === original.title ||
+              resource.type === original.entry.resource.resourceType
+          );
+          const hl7ProfileId = resourceIdentifier?.id;
+          const link = getHl7ProfileLink(hl7ProfileId, measureModel);
+          const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+            e.stopPropagation();
+            if (link) {
+              window.open(link, "_blank");
+            }
+          };
+          return (
+            <IconButton
+              data-testid={`hl7-link-${hl7ProfileId}`}
+              aria-label={`Open HL7 profile for ${hl7ProfileId}`}
+              onClick={handleClick}
+            >
+              <OpenInNewIcon />
+            </IconButton>
           );
         },
       },
@@ -336,6 +372,13 @@ const TestCaseSummaryGrid = ({
                 <th
                   key={header.id}
                   colSpan={header.colSpan}
+                  className={
+                    header.column.id === "id"
+                      ? "hl7-id-divider"
+                      : header.column.id === "hl7"
+                      ? "hl7-column"
+                      : ""
+                  }
                   style={{ position: "relative", width: header.getSize() }}
                 >
                   {flexRender(
@@ -353,6 +396,13 @@ const TestCaseSummaryGrid = ({
               {row.getVisibleCells().map((cell) => (
                 <td
                   key={cell.id}
+                  className={
+                    cell.column.id === "id"
+                      ? "hl7-id-divider"
+                      : cell.column.id === "hl7"
+                      ? "hl7-column"
+                      : ""
+                  }
                   style={{
                     backgroundColor:
                       row.original.entry.resource.id === selectedRowId

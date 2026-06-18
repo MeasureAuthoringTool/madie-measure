@@ -128,13 +128,15 @@ describe("TestCaseSummaryGrid", () => {
         onRowEdit={mockOnRowEdit}
         onRowDelete={mockOnRowDelete}
         testCaseCanEdit={true}
+        measureModel="QI-Core 6.0"
         readOnly={false}
       />
     );
 
     const columnHeaders = screen.getAllByRole("columnheader");
     expect(within(columnHeaders[0]).getByText("Profile")).toBeInTheDocument();
-    expect(within(columnHeaders[1]).getByText("ID")).toBeInTheDocument();
+    expect(within(columnHeaders[1]).getByText("HL7")).toBeInTheDocument();
+    expect(within(columnHeaders[2]).getByText("ID")).toBeInTheDocument();
 
     const rows = screen.getAllByRole("row");
     expect(
@@ -144,7 +146,7 @@ describe("TestCaseSummaryGrid", () => {
     ).toBeInTheDocument();
 
     expect(
-      within(rows[1].querySelector("td:nth-child(2)")).getByText("ec-1")
+      within(rows[1].querySelector("td:nth-child(3)")).getByText("ec-1")
     ).toBeInTheDocument();
 
     expect(
@@ -154,7 +156,7 @@ describe("TestCaseSummaryGrid", () => {
     ).toBeInTheDocument();
 
     expect(
-      within(rows[2].querySelector("td:nth-child(2)")).getByText("pd-1")
+      within(rows[2].querySelector("td:nth-child(3)")).getByText("pd-1")
     ).toBeInTheDocument();
 
     // Verify unsupported message/tooltip is present for unsupported profile
@@ -169,6 +171,29 @@ describe("TestCaseSummaryGrid", () => {
         UNSUPPORTED_RESOURCE_ERROR
       )
     ).toBeInTheDocument();
+  });
+
+  it("opens the HL7 profile link when the HL7 icon is clicked", async () => {
+    window.open = jest.fn();
+
+    renderWithResourceContext(
+      <TestCaseSummaryGrid
+        gridData={gridData}
+        onRowEdit={mockOnRowEdit}
+        onRowDelete={mockOnRowDelete}
+        testCaseCanEdit={true}
+        measureModel="QI-Core 6.0"
+        readOnly={false}
+      />
+    );
+
+    const hl7Button = await screen.findByTestId("hl7-link-qicore-encounter");
+    await userEvent.click(hl7Button);
+
+    expect(window.open).toHaveBeenCalledWith(
+      "https://hl7.org/fhir/us/qicore/STU6/StructureDefinition-qicore-encounter.html",
+      "_blank"
+    );
   });
 
   it("should render the table with no data", () => {

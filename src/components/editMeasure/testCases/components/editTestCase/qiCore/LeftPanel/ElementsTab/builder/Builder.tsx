@@ -371,6 +371,7 @@ const Builder = ({
                       testCaseCanEdit={canEdit}
                       selectedRowId={selectedResourceID}
                       readOnly={!canEdit}
+                      measureModel={measure?.model}
                     />
                   </>
                 )}
