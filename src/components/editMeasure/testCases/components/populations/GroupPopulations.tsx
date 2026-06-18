@@ -30,6 +30,7 @@ export interface PopulationsProps {
   groupsStratificationAssociationMap?: any;
   errors?: any[];
   groups: Group[];
+  observationResources?: any[];
 }
 
 const GroupPopulations = ({
@@ -43,6 +44,7 @@ const GroupPopulations = ({
   onStratificationChange,
   errors,
   groups,
+  observationResources,
 }: PopulationsProps) => (
   <>
     {groupPopulations && groupPopulations.length > 0 ? (
@@ -55,8 +57,10 @@ const GroupPopulations = ({
               scoring={gp.scoring}
               errors={errors?.[i]}
               disableExpected={disableExpected}
+              group={groups?.find((group) => group.id === gp?.groupId)}
               isTestCaseExecuted={isTestCaseExecuted}
               setIsTestCaseExecuted={setIsTestCaseExecuted}
+              observationResources={observationResources}
               populations={gp.populationValues}
               populationBasis={gp?.populationBasis}
               onChange={(populations, type, changedPopulation) => {
