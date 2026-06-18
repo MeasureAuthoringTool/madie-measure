@@ -144,66 +144,63 @@ const CompositeLeftPanelContent = ({
         />
       </div>
 
-      <div>
-        {leftPanelActiveTab === "available" && (
-          <div className="panel-content" data-testid="create-panel">
-            <div id="elements-panel">
-              {availableTab === "profiles" && (
-                <div className="panel-content" data-testid="available-panel">
-                  <FormikProvider value={formikStu6Context}>
-                    <ElementsTab
-                      setValidationSchema={setValidationSchema}
-                      setInitialFormikValuesStu6={setInitialFormikValuesStu6}
-                      setEditorVal={setEditorVal}
-                      // currently locking to readOnly MAT-9905
-                      canEdit={testCaseCanEdit}
-                      editorVal={editorVal}
-                      testCase={testCase}
-                      activeTab={leftPanelActiveTab}
-                      isComposite={true}
-                      onInsertTCClick={() => setAvailableTab("insert")}
-                    />
-                  </FormikProvider>
-                </div>
-              )}
+      {leftPanelActiveTab === "available" && (
+        <div className="panel-content" data-testid="create-panel">
+          <div id="elements-panel">
+            {availableTab === "profiles" && (
+              <div className="panel-content" data-testid="available-panel">
+                <FormikProvider value={formikStu6Context}>
+                  <ElementsTab
+                    setValidationSchema={setValidationSchema}
+                    setInitialFormikValuesStu6={setInitialFormikValuesStu6}
+                    setEditorVal={setEditorVal}
+                    // currently locking to readOnly MAT-9905
+                    canEdit={testCaseCanEdit}
+                    editorVal={editorVal}
+                    testCase={testCase}
+                    activeTab={leftPanelActiveTab}
+                    isComposite={true}
+                    onInsertTCClick={() => setAvailableTab("insert")}
+                  />
+                </FormikProvider>
+              </div>
+            )}
 
-              {availableTab === "insert" && (
-                <>
-                  {loadingTestCases ? (
-                    <div
-                      style={{
-                        display: "flex",
-                        justifyContent: "center",
-                        padding: 40,
-                      }}
-                    >
-                      <MadieSpinner style={{ height: 50, width: 50 }} />
-                    </div>
-                  ) : selectedMeasure ? (
-                    <CompositeTestCasesTable
-                      testCases={testCases}
-                      selectedMeasure={selectedMeasure}
-                      onBackToMeasures={handleBackToMeasures}
+            {availableTab === "insert" && (
+              <>
+                {loadingTestCases ? (
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "center",
+                      padding: 40,
+                    }}
+                  >
+                    <MadieSpinner style={{ height: 50, width: 50 }} />
+                  </div>
+                ) : selectedMeasure ? (
+                  <CompositeTestCasesTable
+                    testCases={testCases}
+                    selectedMeasure={selectedMeasure}
+                    onBackToMeasures={handleBackToMeasures}
+                  />
+                ) : (
+                  <>
+                    <CompositeProfileViews
+                      howItWorksOpen={howItWorksOpen}
+                      setAvailableTab={setAvailableTab}
+                      setHowItWorksOpen={setHowItWorksOpen}
+                      compositeMeasures={compositeMeasures}
+                      completedMeasureCount={completedMeasureCount}
+                      handleSelectTestCase={handleSelectTestCase}
                     />
-                  ) : (
-                    <>
-                      <CompositeProfileViews
-                        howItWorksOpen={howItWorksOpen}
-                        setAvailableTab={setAvailableTab}
-                        setHowItWorksOpen={setHowItWorksOpen}
-                        compositeMeasures={compositeMeasures}
-                        completedMeasureCount={completedMeasureCount}
-                        handleSelectTestCase={handleSelectTestCase}
-                      />
-                    </>
-                  )}
-                </>
-              )}
-            </div>
+                  </>
+                )}
+              </>
+            )}
           </div>
-        )}
-      </div>
-
+        </div>
+      )}
       {leftPanelActiveTab === "added" && (
         <div className="panel-content" data-testid="added-panel">
           <FormikProvider value={formikStu6Context}>
