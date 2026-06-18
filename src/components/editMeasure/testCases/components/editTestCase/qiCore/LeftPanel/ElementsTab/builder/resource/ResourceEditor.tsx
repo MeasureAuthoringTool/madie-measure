@@ -8,6 +8,7 @@ import React, {
 import { Box, IconButton } from "@mui/material";
 import Typography from "@mui/material/Typography";
 import CloseIcon from "@mui/icons-material/Close";
+import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import ElementEditor from "../element/ElementEditor";
 import * as _ from "lodash";
@@ -41,6 +42,7 @@ import useFhirDefinitionsServiceApi from "../../../../../../../api/useFhirDefini
 import tw from "twin.macro";
 import "../../../../../../../../../../styles/VerticalSideBarNav.scss";
 import "./ResourceEditor.scss";
+import { getHl7ProfileLink } from "../../../../../../../../../../utils/hl7Links";
 
 const InnerWrapper = tw.div`flex-grow flex flex-col`;
 
@@ -52,6 +54,7 @@ interface ResourceEditorProps {
   selectedResourceID: string;
   applyLoading: boolean;
   setApplyLoading: Dispatch<SetStateAction<boolean>>;
+  measureModel?: string;
 }
 
 // Builds the element path used to access values in the resource JSON, with special handling for choice types and array types
@@ -79,6 +82,7 @@ const ResourceEditor = ({
   setValidationSchema,
   applyLoading,
   setApplyLoading,
+  measureModel,
 }: ResourceEditorProps) => {
   const fhirDefinitionsService = useRef(useFhirDefinitionsServiceApi());
   const { dispatch, state } = useQiCoreResource();
@@ -280,11 +284,35 @@ const ResourceEditor = ({
       {selectedResource && (
         <div className="resource-editor">
           <div className="resource-header">
-            <Typography>
-              {selectedResource?.definition?.title
-                ? selectedResource?.definition?.title
-                : resourceBasePath}
-            </Typography>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <Typography>
+                {selectedResource?.definition?.title
+                  ? selectedResource?.definition?.title
+                  : resourceBasePath}
+              </Typography>
+              {selectedResource &&
+                (() => {
+                  const profile =
+                    selectedResource.bundleEntry?.resource?.meta?.profile;
+                  const profileId =
+                    (Array.isArray(profile) ? profile[0] : profile)
+                      ?.split("/")
+                      .pop() ||
+                    selectedResource.bundleEntry?.resource?.resourceType;
+                  const link = getHl7ProfileLink(profileId, measureModel);
+                  return (
+                    <IconButton
+                      data-testid={`edit-hl7-link-${profileId}`}
+                      aria-label={`Open HL7 profile for ${profileId}`}
+                      onClick={() => {
+                        link ? window.open(link, "_blank") : "";
+                      }}
+                    >
+                      <OpenInNewIcon />
+                    </IconButton>
+                  );
+                })()}
+            </div>
             <div className="spacer" />
             <Typography sx={{ fontSize: "14px" }}>
               <span style={{ color: "125496", fontWeight: 700 }}>
