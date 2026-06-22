@@ -1,5 +1,11 @@
 import * as React from "react";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import {
+  render,
+  screen,
+  fireEvent,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 import CompositeTestCasesTable from "./CompositeTestCasesTable";
@@ -67,6 +73,7 @@ describe("CompositeTestCasesTable", () => {
     onBackToMeasures: jest.fn(),
     onViewTestCase: jest.fn(),
     onInsertTestCase: jest.fn(),
+    onInsertProfilesFromTestCase: jest.fn(),
   };
 
   beforeEach(() => {
@@ -99,6 +106,7 @@ describe("CompositeTestCasesTable", () => {
     expect(
       screen.getByRole("button", { name: /^Description$/i })
     ).toBeInTheDocument();
+    expect(screen.getAllByText(/^Insert$/i)).toHaveLength(3);
   });
 
   it("does not show CMS ID when measureSet.cmsId is absent", () => {
@@ -136,22 +144,22 @@ describe("CompositeTestCasesTable", () => {
 
   it("calls onBackToMeasures when back button is clicked", () => {
     render(<CompositeTestCasesTable {...defaultProps} />);
-    fireEvent.click(screen.getByTestId("back-to-measures-btn"));
+    userEvent.click(screen.getByTestId("back-to-measures-btn"));
     expect(defaultProps.onBackToMeasures).toHaveBeenCalledTimes(1);
   });
 
   it("calls onViewTestCase with the correct test case", () => {
     render(<CompositeTestCasesTable {...defaultProps} />);
-    fireEvent.click(screen.getByTestId("view-test-case-btn-tc2"));
+    userEvent.click(screen.getByTestId("view-test-case-btn-tc2"));
     expect(defaultProps.onViewTestCase).toHaveBeenCalledWith(
       expect.objectContaining({ id: "tc2", title: "Test Case Beta" })
     );
   });
 
-  it("calls onInsertTestCase with the correct test case", () => {
+  it("calls onInsertProfilesFromTestCase with the correct test case", () => {
     render(<CompositeTestCasesTable {...defaultProps} />);
-    fireEvent.click(screen.getByTestId("insert-test-case-btn-tc2"));
-    expect(defaultProps.onInsertTestCase).toHaveBeenCalledWith(
+    userEvent.click(screen.getByTestId("insert-test-case-btn-tc2"));
+    expect(defaultProps.onInsertProfilesFromTestCase).toHaveBeenCalledWith(
       expect.objectContaining({ id: "tc2", title: "Test Case Beta" })
     );
   });
@@ -166,6 +174,15 @@ describe("CompositeTestCasesTable", () => {
     expect(screen.getByTestId("insert-test-case-btn-tc1")).toHaveAttribute(
       "title",
       "Insert test case"
+    );
+  });
+
+  it("shows insert tooltip on hover", async () => {
+    render(<CompositeTestCasesTable {...defaultProps} />);
+    const alphaRow = screen.getByText("Test Case Alpha").closest("tr");
+    userEvent.hover(within(alphaRow).getByTestId("insert-test-case-btn-tc1"));
+    expect(await screen.findByRole("tooltip")).toHaveTextContent(
+      "Insert Profiles from Test Case"
     );
   });
 
@@ -242,7 +259,7 @@ describe("CompositeTestCasesTable", () => {
     fireEvent.change(searchInput, { target: { value: "Beta" } });
     expect(screen.getAllByTestId("tc-row-item")).toHaveLength(1);
 
-    fireEvent.click(screen.getByTestId("tc-clear-search"));
+    userEvent.click(screen.getByTestId("tc-clear-search"));
     expect(screen.getAllByTestId("tc-row-item")).toHaveLength(3);
     expect(searchInput).toHaveValue("");
   });
@@ -255,15 +272,15 @@ describe("CompositeTestCasesTable", () => {
     const th = titleHeader.closest("th")!;
 
     // ascending
-    fireEvent.click(th);
+    userEvent.click(th);
     expect(titleHeader).toHaveAttribute("title", "Sort descending");
 
     // descending
-    fireEvent.click(th);
+    userEvent.click(th);
     expect(titleHeader).toHaveAttribute("title", "Clear sort");
 
     // clear sort
-    fireEvent.click(th);
+    userEvent.click(th);
     expect(titleHeader).toHaveAttribute("title", "Sort ascending");
   });
 
@@ -313,7 +330,7 @@ describe("CompositeTestCasesTable", () => {
     render(<CompositeTestCasesTable {...defaultProps} />);
     const searchInput = screen.getByTestId("tc-search-input");
     fireEvent.change(searchInput, { target: { value: "Alpha" } });
-    fireEvent.click(screen.getByTestId("tc-trigger-search"));
+    userEvent.click(screen.getByTestId("tc-trigger-search"));
     expect(screen.getAllByTestId("tc-row-item")).toHaveLength(1);
   });
 
@@ -430,7 +447,7 @@ describe("CompositeTestCasesTable", () => {
 
   it("opens HowItWorks panel when the link is clicked, and the back button stays visible", async () => {
     render(<CompositeTestCasesTable {...defaultProps} />);
-    await userEvent.click(screen.getByTestId("how-it-works-link"));
+    userEvent.click(screen.getByTestId("how-it-works-link"));
     expect(screen.getByTestId("how-it-works-content")).toBeInTheDocument();
     // Back button must still be present (it moves to its own row, not removed)
     expect(screen.getByTestId("back-to-measures-btn")).toBeInTheDocument();
@@ -438,9 +455,9 @@ describe("CompositeTestCasesTable", () => {
 
   it("closes HowItWorks panel when the close button is clicked", async () => {
     render(<CompositeTestCasesTable {...defaultProps} />);
-    await userEvent.click(screen.getByTestId("how-it-works-link"));
+    userEvent.click(screen.getByTestId("how-it-works-link"));
     expect(screen.getByTestId("how-it-works-content")).toBeInTheDocument();
-    await userEvent.click(screen.getByTestId("how-it-works-close"));
+    userEvent.click(screen.getByTestId("how-it-works-close"));
     expect(
       screen.queryByTestId("how-it-works-content")
     ).not.toBeInTheDocument();

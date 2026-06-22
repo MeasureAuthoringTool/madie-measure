@@ -16,7 +16,7 @@ import {
 } from "@madie/madie-design-system/dist/react";
 import tw from "twin.macro";
 import "styled-components/macro";
-import { InputAdornment, IconButton, MenuItem } from "@mui/material";
+import { InputAdornment, IconButton, MenuItem, Tooltip } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import ClearIcon from "@mui/icons-material/Clear";
 import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore";
@@ -37,13 +37,14 @@ export default function CompositeTestCasesTable({
   selectedMeasure,
   onBackToMeasures,
   onViewTestCase,
-  onInsertTestCase,
+  onInsertProfilesFromTestCase,
 }: {
   testCases: TestCase[];
   selectedMeasure: Measure;
   onBackToMeasures: () => void;
   onViewTestCase?: (testCase: TestCase) => void;
   onInsertTestCase?: (testCase: TestCase) => void;
+  onInsertProfilesFromTestCase?: (testCase: TestCase) => void;
 }) {
   const [howItWorksOpen, setHowItWorksOpen] = useState<boolean>(false);
   const [hoveredHeader, setHoveredHeader] = useState<string>("");
@@ -59,7 +60,7 @@ export default function CompositeTestCasesTable({
     [testCases]
   );
 
-  // Filter
+  // Filter and return only valid test cases
   const filteredTestCases = useMemo(() => {
     if (!searchText.trim()) return validTestCases;
     const lowerSearch = searchText.toLowerCase();
@@ -165,24 +166,30 @@ export default function CompositeTestCasesTable({
             >
               View Test Case
             </Button>
-            <Button
-              tw="m-2"
-              type="button"
-              title="Insert test case"
-              data-testid={`insert-test-case-btn-${info.row.original.id}`}
-              disabled={!validTestCases.includes(info.row.original)}
-              onClick={() => onInsertTestCase?.(info.row.original)}
-            >
-              Insert
-              <ChevronRightIcon style={{ height: "20px", width: "20px" }} />
-            </Button>
+            <Tooltip title="Insert Profiles from Test Case" arrow>
+              <span>
+                <Button
+                  tw="m-2"
+                  type="button"
+                  title="Insert test case"
+                  data-testid={`insert-test-case-btn-${info.row.original.id}`}
+                  disabled={!validTestCases.includes(info.row.original)}
+                  onClick={() =>
+                    onInsertProfilesFromTestCase?.(info.row.original)
+                  }
+                >
+                  Insert
+                  <ChevronRightIcon style={{ height: "20px", width: "20px" }} />
+                </Button>
+              </span>
+            </Tooltip>
           </>
         ),
         accessorKey: "actions",
         enableSorting: false,
       },
     ],
-    [onViewTestCase, onInsertTestCase, validTestCases]
+    [onViewTestCase, onInsertProfilesFromTestCase, validTestCases]
   );
 
   const table = useReactTable({

@@ -4,19 +4,22 @@ import Editor from "../../../editor/Editor";
 import CompositeTestCasesTable from "./CompositeTestCasesTable";
 import useTestCaseServiceApi from "../../../../api/useTestCaseServiceApi";
 import { Measure, TestCase } from "@madie/madie-models";
-import { MadieSpinner } from "@madie/madie-design-system/dist/react";
+import { MadieSpinner, Toast } from "@madie/madie-design-system/dist/react";
 import "./CompositeLeftPanelContent.scss";
 import { FormikProvider } from "formik";
 import ElementsTab from "../LeftPanel/ElementsTab/ElementsTab";
 import useFhirDefinitionsServiceApi from "../../../../api/useFhirDefinitionsService";
 import useFhirElmTranslationServiceApi from "../../../../../../../api/useFhirElmTranslationServiceApi";
-
 import { ResourceIdentifier } from "../../../../api/models/ResourceIdentifier";
 import _ from "lodash";
 import useExecutionContext from "../../../routes/qiCore/useExecutionContext";
-import { useQiCoreResource } from "../../../../util/QiCorePatientProvider";
+import {
+  ResourceActionType,
+  useQiCoreResource,
+} from "../../../../util/QiCorePatientProvider";
 import CompositeProfileViews from "./CompositeProfilesViews";
 import ViewTestCaseModal from "./ViewTestCaseModal";
+import { buildBundleWithInsertedProfiles } from "./insertProfilesFromTestCase";
 
 const CompositeLeftPanelContent = ({
   leftPanelActiveTab,
@@ -38,14 +41,15 @@ const CompositeLeftPanelContent = ({
   const [howItWorksOpen, setHowItWorksOpen] = useState<boolean>(false);
   const [viewTestCaseModalOpen, setViewTestCaseModalOpen] =
     useState<boolean>(false);
+  const [toastOpen, setToastOpen] = useState<boolean>(false);
+  const [toastMessage, setToastMessage] = useState<string>("");
+  const [toastType, setToastType] = useState<string>("danger");
 
   // builder utilities for available elements tab
   const [resources, setResources] = useState<ResourceIdentifier[]>([]);
   const [resourcesLoading, setResourcesLoading] = useState(true);
   const fhirDefinitionsService = useRef(useFhirDefinitionsServiceApi());
-  // const [resourceIdentifiers, setResourceIdentifiers] = useState([]); // likely needed later when readding features
   const fhirElmTranslationService = useRef(useFhirElmTranslationServiceApi());
-  const [selectedResourceID, setSelectedResourceId] = useState<string>(null); // one single source of truth.
   const [selectedTestCase, setSelectedTestCase] = useState<TestCase | null>(
     null
   );
@@ -135,6 +139,75 @@ const CompositeLeftPanelContent = ({
     }
   };
 
+  const showToast = (message: string, type: "danger" | "success") => {
+    setToastOpen(true);
+    setToastMessage(message);
+    setToastType(type);
+  };
+
+  const handleInsertingProfilesIntoTestCase = (selectedTestCase: TestCase) => {
+    const currentJson =
+      editorVal || formikStu6Context?.values?.json || testCase?.json || "";
+    const selectedJson = selectedTestCase?.json || "";
+
+    const generatedBundle = buildBundleWithInsertedProfiles(
+      currentJson,
+      selectedJson
+    );
+
+    if (!generatedBundle) {
+      showToast(
+        "Unable to insert profiles from selected testcase into the bundle, please try again later, if the problem persists contact helpdesk",
+        "danger"
+      );
+      return;
+    }
+
+    const newTestCaseJson = JSON.stringify(generatedBundle, null, 2);
+
+    // Initial debug visibility for generated payload.
+    // eslint-disable-next-line no-console
+    console.log("Generated NewTestCase.json", generatedBundle);
+
+    setEditorVal(newTestCaseJson);
+
+    if (!dispatch) return;
+
+    // Replace patient entry in the existing bundle with the one from the generated bundle.
+    const patientEntry = generatedBundle.entry?.find(
+      (entry) => entry?.resource?.resourceType === "Patient"
+    );
+    if (patientEntry) {
+      dispatch({
+        type: ResourceActionType.MODIFY_BUNDLE_ENTRY,
+        payload: patientEntry,
+      });
+    }
+
+    // Collect IDs already in the current bundle to avoid re-adding anything that exists.
+    const existingIds = new Set<string>(
+      state?.bundle?.entry
+        ?.map((e) => e?.resource?.id)
+        .filter(Boolean) as string[]
+    );
+
+    // Add only new non-patient entries (the profiles copied from the selected test case).
+    generatedBundle.entry
+      ?.filter(
+        (entry) =>
+          entry?.resource?.resourceType !== "Patient" &&
+          !existingIds.has(entry?.resource?.id)
+      )
+      .forEach((entry) => {
+        dispatch({
+          type: ResourceActionType.ADD_BUNDLE_ENTRY,
+          payload: entry,
+        });
+      });
+
+    showToast("Profiles were inserted successfully.", "success");
+  };
+
   const handleBackToMeasures = () => {
     setSelectedMeasure(null);
     setTestCases([]);
@@ -147,6 +220,22 @@ const CompositeLeftPanelContent = ({
 
   return (
     <>
+      <Toast
+        toastKey="composite-profile-insert-toast"
+        toastType={toastType}
+        testId="composite-profile-insert-toast"
+        open={toastOpen}
+        message={toastMessage}
+        onClose={() => {
+          setToastOpen(false);
+          setToastMessage("");
+          setToastType("danger");
+        }}
+        closeButtonProps={{
+          "data-testid": "close-composite-profile-insert-toast",
+        }}
+        autoHideDuration={6000}
+      />
       <div className="tab-container">
         <CreateCompositeTestCaseLeftPanelNavTabs
           leftPanelActiveTab={leftPanelActiveTab}
@@ -194,6 +283,9 @@ const CompositeLeftPanelContent = ({
                     testCases={testCases}
                     selectedMeasure={selectedMeasure}
                     onBackToMeasures={handleBackToMeasures}
+                    onInsertProfilesFromTestCase={
+                      handleInsertingProfilesIntoTestCase
+                    }
                     onViewTestCase={handleViewTestCase}
                   />
                 ) : (
