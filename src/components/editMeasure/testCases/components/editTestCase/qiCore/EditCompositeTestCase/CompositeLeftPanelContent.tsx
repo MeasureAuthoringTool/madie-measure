@@ -16,6 +16,7 @@ import _ from "lodash";
 import useExecutionContext from "../../../routes/qiCore/useExecutionContext";
 import { useQiCoreResource } from "../../../../util/QiCorePatientProvider";
 import CompositeProfileViews from "./CompositeProfilesViews";
+import ViewTestCaseModal from "./ViewTestCaseModal";
 
 const CompositeLeftPanelContent = ({
   leftPanelActiveTab,
@@ -35,6 +36,8 @@ const CompositeLeftPanelContent = ({
   const [loadingTestCases, setLoadingTestCases] = useState(false);
   const [completedMeasureCount, setCompletedMeasureCount] = useState(0);
   const [howItWorksOpen, setHowItWorksOpen] = useState<boolean>(false);
+  const [viewTestCaseModalOpen, setViewTestCaseModalOpen] =
+    useState<boolean>(false);
 
   // builder utilities for available elements tab
   const [resources, setResources] = useState<ResourceIdentifier[]>([]);
@@ -43,6 +46,9 @@ const CompositeLeftPanelContent = ({
   // const [resourceIdentifiers, setResourceIdentifiers] = useState([]); // likely needed later when readding features
   const fhirElmTranslationService = useRef(useFhirElmTranslationServiceApi());
   const [selectedResourceID, setSelectedResourceId] = useState<string>(null); // one single source of truth.
+  const [selectedTestCase, setSelectedTestCase] = useState<TestCase | null>(
+    null
+  );
   const { measureState } = useExecutionContext();
   const { state, dispatch } = useQiCoreResource();
   const [measure] = measureState;
@@ -134,6 +140,11 @@ const CompositeLeftPanelContent = ({
     setTestCases([]);
   };
 
+  const handleViewTestCase = (testCase: TestCase) => {
+    setSelectedTestCase(testCase);
+    setViewTestCaseModalOpen(true);
+  };
+
   return (
     <>
       <div className="tab-container">
@@ -144,66 +155,64 @@ const CompositeLeftPanelContent = ({
         />
       </div>
 
-      <div>
-        {leftPanelActiveTab === "available" && (
-          <div className="panel-content" data-testid="create-panel">
-            <div id="elements-panel">
-              {availableTab === "profiles" && (
-                <div className="panel-content" data-testid="available-panel">
-                  <FormikProvider value={formikStu6Context}>
-                    <ElementsTab
-                      setValidationSchema={setValidationSchema}
-                      setInitialFormikValuesStu6={setInitialFormikValuesStu6}
-                      setEditorVal={setEditorVal}
-                      // currently locking to readOnly MAT-9905
-                      canEdit={testCaseCanEdit}
-                      editorVal={editorVal}
-                      testCase={testCase}
-                      activeTab={leftPanelActiveTab}
-                      isComposite={true}
-                      onInsertTCClick={() => setAvailableTab("insert")}
-                    />
-                  </FormikProvider>
-                </div>
-              )}
+      {leftPanelActiveTab === "available" && (
+        <div className="panel-content" data-testid="create-panel">
+          <div id="elements-panel">
+            {availableTab === "profiles" && (
+              <div className="panel-content" data-testid="available-panel">
+                <FormikProvider value={formikStu6Context}>
+                  <ElementsTab
+                    setValidationSchema={setValidationSchema}
+                    setInitialFormikValuesStu6={setInitialFormikValuesStu6}
+                    setEditorVal={setEditorVal}
+                    // currently locking to readOnly MAT-9905
+                    canEdit={testCaseCanEdit}
+                    editorVal={editorVal}
+                    testCase={testCase}
+                    activeTab={leftPanelActiveTab}
+                    isComposite={true}
+                    onInsertTCClick={() => setAvailableTab("insert")}
+                  />
+                </FormikProvider>
+              </div>
+            )}
 
-              {availableTab === "insert" && (
-                <>
-                  {loadingTestCases ? (
-                    <div
-                      style={{
-                        display: "flex",
-                        justifyContent: "center",
-                        padding: 40,
-                      }}
-                    >
-                      <MadieSpinner style={{ height: 50, width: 50 }} />
-                    </div>
-                  ) : selectedMeasure ? (
-                    <CompositeTestCasesTable
-                      testCases={testCases}
-                      selectedMeasure={selectedMeasure}
-                      onBackToMeasures={handleBackToMeasures}
+            {availableTab === "insert" && (
+              <>
+                {loadingTestCases ? (
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "center",
+                      padding: 40,
+                    }}
+                  >
+                    <MadieSpinner style={{ height: 50, width: 50 }} />
+                  </div>
+                ) : selectedMeasure ? (
+                  <CompositeTestCasesTable
+                    testCases={testCases}
+                    selectedMeasure={selectedMeasure}
+                    onBackToMeasures={handleBackToMeasures}
+                    onViewTestCase={handleViewTestCase}
+                  />
+                ) : (
+                  <>
+                    <CompositeProfileViews
+                      howItWorksOpen={howItWorksOpen}
+                      setAvailableTab={setAvailableTab}
+                      setHowItWorksOpen={setHowItWorksOpen}
+                      compositeMeasures={compositeMeasures}
+                      completedMeasureCount={completedMeasureCount}
+                      handleSelectTestCase={handleSelectTestCase}
                     />
-                  ) : (
-                    <>
-                      <CompositeProfileViews
-                        howItWorksOpen={howItWorksOpen}
-                        setAvailableTab={setAvailableTab}
-                        setHowItWorksOpen={setHowItWorksOpen}
-                        compositeMeasures={compositeMeasures}
-                        completedMeasureCount={completedMeasureCount}
-                        handleSelectTestCase={handleSelectTestCase}
-                      />
-                    </>
-                  )}
-                </>
-              )}
-            </div>
+                  </>
+                )}
+              </>
+            )}
           </div>
-        )}
-      </div>
-
+        </div>
+      )}
       {leftPanelActiveTab === "added" && (
         <div className="panel-content" data-testid="added-panel">
           <FormikProvider value={formikStu6Context}>
@@ -228,6 +237,11 @@ const CompositeLeftPanelContent = ({
           height="100%"
         />
       )}
+      <ViewTestCaseModal
+        open={viewTestCaseModalOpen}
+        onClose={() => setViewTestCaseModalOpen(false)}
+        testCase={selectedTestCase}
+      />
     </>
   );
 };
