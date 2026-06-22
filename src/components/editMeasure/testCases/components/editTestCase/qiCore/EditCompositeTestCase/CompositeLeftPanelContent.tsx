@@ -16,6 +16,7 @@ import _ from "lodash";
 import useExecutionContext from "../../../routes/qiCore/useExecutionContext";
 import { useQiCoreResource } from "../../../../util/QiCorePatientProvider";
 import CompositeProfileViews from "./CompositeProfilesViews";
+import ViewTestCaseModal from "./ViewTestCaseModal";
 
 const CompositeLeftPanelContent = ({
   leftPanelActiveTab,
@@ -35,6 +36,8 @@ const CompositeLeftPanelContent = ({
   const [loadingTestCases, setLoadingTestCases] = useState(false);
   const [completedMeasureCount, setCompletedMeasureCount] = useState(0);
   const [howItWorksOpen, setHowItWorksOpen] = useState<boolean>(false);
+  const [viewTestCaseModalOpen, setViewTestCaseModalOpen] =
+    useState<boolean>(false);
 
   // builder utilities for available elements tab
   const [resources, setResources] = useState<ResourceIdentifier[]>([]);
@@ -43,6 +46,9 @@ const CompositeLeftPanelContent = ({
   // const [resourceIdentifiers, setResourceIdentifiers] = useState([]); // likely needed later when readding features
   const fhirElmTranslationService = useRef(useFhirElmTranslationServiceApi());
   const [selectedResourceID, setSelectedResourceId] = useState<string>(null); // one single source of truth.
+  const [selectedTestCase, setSelectedTestCase] = useState<TestCase | null>(
+    null
+  );
   const { measureState } = useExecutionContext();
   const { state, dispatch } = useQiCoreResource();
   const [measure] = measureState;
@@ -134,6 +140,11 @@ const CompositeLeftPanelContent = ({
     setTestCases([]);
   };
 
+  const handleViewTestCase = (testCase: TestCase) => {
+    setSelectedTestCase(testCase);
+    setViewTestCaseModalOpen(true);
+  };
+
   return (
     <>
       <div className="tab-container">
@@ -183,6 +194,7 @@ const CompositeLeftPanelContent = ({
                     testCases={testCases}
                     selectedMeasure={selectedMeasure}
                     onBackToMeasures={handleBackToMeasures}
+                    onViewTestCase={handleViewTestCase}
                   />
                 ) : (
                   <>
@@ -225,6 +237,11 @@ const CompositeLeftPanelContent = ({
           height="100%"
         />
       )}
+      <ViewTestCaseModal
+        open={viewTestCaseModalOpen}
+        onClose={() => setViewTestCaseModalOpen(false)}
+        testCase={selectedTestCase}
+      />
     </>
   );
 };
