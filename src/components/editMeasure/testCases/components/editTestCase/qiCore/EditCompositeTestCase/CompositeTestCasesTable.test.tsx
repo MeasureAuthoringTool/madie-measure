@@ -65,7 +65,8 @@ describe("CompositeTestCasesTable", () => {
     testCases,
     selectedMeasure: mockMeasure,
     onBackToMeasures: jest.fn(),
-    onSelectProfile: jest.fn(),
+    onViewTestCase: jest.fn(),
+    onInsertTestCase: jest.fn(),
   };
 
   beforeEach(() => {
@@ -81,7 +82,7 @@ describe("CompositeTestCasesTable", () => {
     expect(screen.getByTestId("back-to-measures-btn")).toBeInTheDocument();
     expect(
       screen.getByText(
-        "2. Select which Test Case to choose Test Case Profiles from:"
+        "2. Select which Test Case to insert into composite test case:"
       )
     ).toBeInTheDocument();
     expect(screen.getByText("My Composite Measure")).toBeInTheDocument();
@@ -139,11 +140,32 @@ describe("CompositeTestCasesTable", () => {
     expect(defaultProps.onBackToMeasures).toHaveBeenCalledTimes(1);
   });
 
-  it("calls onSelectProfile with the correct test case", () => {
+  it("calls onViewTestCase with the correct test case", () => {
     render(<CompositeTestCasesTable {...defaultProps} />);
-    fireEvent.click(screen.getByTestId("select-profile-btn-tc2"));
-    expect(defaultProps.onSelectProfile).toHaveBeenCalledWith(
+    fireEvent.click(screen.getByTestId("view-test-case-btn-tc2"));
+    expect(defaultProps.onViewTestCase).toHaveBeenCalledWith(
       expect.objectContaining({ id: "tc2", title: "Test Case Beta" })
+    );
+  });
+
+  it("calls onInsertTestCase with the correct test case", () => {
+    render(<CompositeTestCasesTable {...defaultProps} />);
+    fireEvent.click(screen.getByTestId("insert-test-case-btn-tc2"));
+    expect(defaultProps.onInsertTestCase).toHaveBeenCalledWith(
+      expect.objectContaining({ id: "tc2", title: "Test Case Beta" })
+    );
+  });
+
+  it("renders title attributes for view and insert action buttons", () => {
+    render(<CompositeTestCasesTable {...defaultProps} />);
+
+    expect(screen.getByTestId("view-test-case-btn-tc1")).toHaveAttribute(
+      "title",
+      "View test case"
+    );
+    expect(screen.getByTestId("insert-test-case-btn-tc1")).toHaveAttribute(
+      "title",
+      "Insert test case"
     );
   });
 
