@@ -228,6 +228,48 @@ describe("TestCasePopulationList component", () => {
     });
   });
 
+  it("should display tooltip for observation population when tooltip is provided", async () => {
+    const testCasePopulations = [
+      {
+        id: "obs-1",
+        name: PopulationType.MEASURE_POPULATION_OBSERVATION,
+        expected: 1,
+        actual: 1,
+      },
+    ];
+
+    const tooltipText = "tooltip-text";
+
+    render(
+      <MemoryRouter>
+        <TestCasePopulationList
+          populations={testCasePopulations}
+          populationBasis="number"
+          content="population"
+          i={0}
+          scoring={MeasureScoring.RATIO}
+          disableExpected={false}
+          observationResources={
+            [
+              {
+                groupId: "group-1",
+                resources: [tooltipText],
+              },
+            ] as any
+          }
+          group={{ displayId: "group-1" } as any}
+          isTestCaseExecuted={true}
+        />
+      </MemoryRouter>
+    );
+
+    const labelCell = screen.getByText("Measure Observation");
+    await userEvent.hover(labelCell);
+
+    // MUI Tooltip will render into the DOM; TestCasePopulation sets title via html-react-parser
+    expect(await screen.findByLabelText(tooltipText)).toBeInTheDocument();
+  });
+
   it("should render ratio observations", async () => {
     const testCasePopulations = [
       {
