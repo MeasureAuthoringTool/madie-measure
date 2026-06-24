@@ -6,6 +6,8 @@ import {
   ExecutionResult,
   PopulationResult,
 } from "fqm-execution/build/types/Calculator";
+import { prettyFHIRObject } from "fqm-execution/build/calculation/ClauseResultsBuilder";
+import { FHIRWrapper } from "cql-exec-fhir";
 import {
   Group,
   Measure,
@@ -53,6 +55,11 @@ export interface ProcessedResultType {
   observations: any;
 }
 
+export interface ObservationResources {
+  groupId: any;
+  resources: any[];
+}
+
 export const findMeasureGroupPopulationDisplayId = (
   measureGroup: Group,
   id: string
@@ -89,6 +96,17 @@ export const findMeasureObservationDisplayIdByReferenceId = (
   );
   return observations?.displayId;
 };
+
+/**
+ * Pretty prints a FHIR resource from a test case bundle using fqm-execution's prettyResult.
+ * This formats the resource with type annotations and structured indentation.
+ * For simple JSON formatting, use JSON.stringify(resource, null, 2) instead.
+ */
+export function prettyPrintFhirResource(resource: any): string {
+  const fhirWrapper = FHIRWrapper.FHIRv401();
+  const fhirObject = fhirWrapper.wrap(resource, resource?.resourceType);
+  return prettyFHIRObject(fhirObject, true, 1, 1);
+}
 
 // TODO consider converting into a context.
 // OR a re-usable hook.
@@ -584,6 +602,38 @@ export class CalculationService {
 
     return updatedTestCase;
   }
+
+  getObservationResources = (
+    testCase: TestCase,
+    populationGroupResults: DetailedPopulationGroupResult
+  ) => {
+    const testCaseBundle = JSON.parse(testCase.json);
+    let resources: any[] = [];
+
+    populationGroupResults.episodeResults?.forEach((episodeResult) => {
+      episodeResult.populationResults?.find((populationResult) => {
+        if (populationResult.populationType === FqmPopulationType.OBSERV) {
+          testCaseBundle.entry?.find((entry) => {
+            if (entry.resource.id === episodeResult.episodeId) {
+              resources.push(entry.resource);
+            }
+          });
+        }
+      });
+    });
+
+    const result: ObservationResources = {
+      groupId: populationGroupResults.groupId,
+      resources: [],
+    };
+    if (resources && resources.length > 0) {
+      resources.forEach((resource) => {
+        result.resources.push(prettyPrintFhirResource(resource));
+      });
+      return result;
+    }
+    return null;
+  };
 
   findMeasureGroupPopulation(
     measureGroup: Group,

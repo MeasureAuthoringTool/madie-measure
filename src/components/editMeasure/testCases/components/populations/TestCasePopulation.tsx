@@ -2,7 +2,10 @@ import React from "react";
 import "styled-components/macro";
 import { DisplayPopulationValue, PopulationType } from "@madie/madie-models";
 import _ from "lodash";
+import Tooltip from "@mui/material/Tooltip";
 import ExpectActualInput from "./ExpectActualInput";
+import { isTestCasePopulationObservation } from "../../util/Utils";
+import parse from "html-react-parser";
 
 /* eslint-disable jsx-a11y/no-interactive-element-to-noninteractive-role */
 
@@ -18,6 +21,7 @@ export interface TestCasePopulationProps {
   initialPopulationCount: number;
   error: any;
   content: string;
+  tooltip?: string;
 }
 
 const TestCasePopulation = ({
@@ -31,6 +35,7 @@ const TestCasePopulation = ({
   initialPopulationCount,
   error,
   content,
+  tooltip,
 }: TestCasePopulationProps) => {
   const populationNameTemplate = (prop) => {
     if (prop === PopulationType.INITIAL_POPULATION) {
@@ -89,7 +94,31 @@ const TestCasePopulation = ({
             -
           </span>
         </td>
-        <td role="cell">{label}</td>
+        <td role="cell">
+          {isTestCasePopulationObservation(population) && tooltip ? (
+            <Tooltip
+              data-testid={`population-tooltip-${population.name}`}
+              title={parse(tooltip)}
+              placement="top"
+              arrow
+              slotProps={{
+                tooltip: {
+                  sx: {
+                    zIndex: 99,
+                    backgroundColor: "#333",
+                    "& .MuiTooltip-arrow": {
+                      color: "#333",
+                    },
+                  },
+                },
+              }}
+            >
+              <span>{label}</span>
+            </Tooltip>
+          ) : (
+            label
+          )}
+        </td>
         <td role="cell">
           <ExpectActualInput
             id={`${population.id}-expected-cb`}
