@@ -72,7 +72,6 @@ const replaceIdInFullUrl = (fullUrl: string, newId: string): string => {
   return parts.join("/");
 };
 
-// Todo Check if this reference is good enough or overkill
 const replaceReferenceValue = (
   ref: string,
   referenceMap: Record<string, string>

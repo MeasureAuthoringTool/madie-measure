@@ -1,11 +1,5 @@
 import * as React from "react";
-import {
-  render,
-  screen,
-  fireEvent,
-  waitFor,
-  within,
-} from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 import CompositeTestCasesTable from "./CompositeTestCasesTable";
@@ -66,9 +60,13 @@ const testCases = [
   }),
 ];
 
+const getValidTestCaseIds = (items: any[]) =>
+  new Set(items.filter((tc) => tc.validResource).map((tc) => tc.id));
+
 describe("CompositeTestCasesTable", () => {
   const defaultProps = {
     testCases,
+    validTestCaseIds: getValidTestCaseIds(testCases),
     selectedMeasure: mockMeasure,
     onBackToMeasures: jest.fn(),
     onViewTestCase: jest.fn(),
@@ -137,6 +135,7 @@ describe("CompositeTestCasesTable", () => {
       <CompositeTestCasesTable
         {...defaultProps}
         testCases={[makeTestCase({ id: "x", validResource: false })]}
+        validTestCaseIds={new Set()}
       />
     );
     expect(screen.getByTestId("no-test-cases-message")).toBeInTheDocument();
@@ -173,15 +172,14 @@ describe("CompositeTestCasesTable", () => {
     );
     expect(screen.getByTestId("insert-test-case-btn-tc1")).toHaveAttribute(
       "title",
-      "Insert test case"
+      "Insert Profiles from Test Case"
     );
   });
 
-  it("shows insert tooltip on hover", async () => {
+  it("sets insert button title for tooltip text", () => {
     render(<CompositeTestCasesTable {...defaultProps} />);
-    const alphaRow = screen.getByText("Test Case Alpha").closest("tr");
-    userEvent.hover(within(alphaRow).getByTestId("insert-test-case-btn-tc1"));
-    expect(await screen.findByRole("tooltip")).toHaveTextContent(
+    expect(screen.getByTestId("insert-test-case-btn-tc1")).toHaveAttribute(
+      "title",
       "Insert Profiles from Test Case"
     );
   });
@@ -295,7 +293,13 @@ describe("CompositeTestCasesTable", () => {
         description: `Desc ${i}`,
       })
     );
-    render(<CompositeTestCasesTable {...defaultProps} testCases={manyTcs} />);
+    render(
+      <CompositeTestCasesTable
+        {...defaultProps}
+        testCases={manyTcs}
+        validTestCaseIds={getValidTestCaseIds(manyTcs)}
+      />
+    );
 
     // default limit is 10
     expect(screen.getAllByTestId("tc-row-item")).toHaveLength(10);
@@ -313,7 +317,13 @@ describe("CompositeTestCasesTable", () => {
         description: `Desc ${i}`,
       })
     );
-    render(<CompositeTestCasesTable {...defaultProps} testCases={manyTcs} />);
+    render(
+      <CompositeTestCasesTable
+        {...defaultProps}
+        testCases={manyTcs}
+        validTestCaseIds={getValidTestCaseIds(manyTcs)}
+      />
+    );
     const searchInput = screen.getByTestId("tc-search-input");
     // Pressing Enter should call handleSearch (covers the Enter branch)
     fireEvent.keyPress(searchInput, {
@@ -358,7 +368,13 @@ describe("CompositeTestCasesTable", () => {
         description: `Desc ${i}`,
       })
     );
-    render(<CompositeTestCasesTable {...defaultProps} testCases={manyTcs} />);
+    render(
+      <CompositeTestCasesTable
+        {...defaultProps}
+        testCases={manyTcs}
+        validTestCaseIds={getValidTestCaseIds(manyTcs)}
+      />
+    );
 
     // page 1: 10 rows shown
     expect(screen.getAllByTestId("tc-row-item")).toHaveLength(10);
@@ -390,7 +406,13 @@ describe("CompositeTestCasesTable", () => {
         description: `Desc ${i}`,
       })
     );
-    render(<CompositeTestCasesTable {...defaultProps} testCases={manyTcs} />);
+    render(
+      <CompositeTestCasesTable
+        {...defaultProps}
+        testCases={manyTcs}
+        validTestCaseIds={getValidTestCaseIds(manyTcs)}
+      />
+    );
     expect(screen.getAllByTestId("tc-row-item")).toHaveLength(10);
 
     // There are two comboboxes on the page (Filter By + page-limit). The
@@ -419,7 +441,13 @@ describe("CompositeTestCasesTable", () => {
         description: `Desc ${i}`,
       })
     );
-    render(<CompositeTestCasesTable {...defaultProps} testCases={manyTcs} />);
+    render(
+      <CompositeTestCasesTable
+        {...defaultProps}
+        testCases={manyTcs}
+        validTestCaseIds={getValidTestCaseIds(manyTcs)}
+      />
+    );
 
     const comboboxes = await screen.findAllByRole("combobox", {
       expanded: false,

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import CreateCompositeTestCaseLeftPanelNavTabs from "./CreateCompositeTestCaseLeftPanelNavTabs";
 import Editor from "../../../editor/Editor";
 import CompositeTestCasesTable from "./CompositeTestCasesTable";
@@ -218,6 +218,12 @@ const CompositeLeftPanelContent = ({
     setViewTestCaseModalOpen(true);
   };
 
+  const validTestCaseIds = useMemo(
+    () =>
+      new Set(testCases.filter((tc) => tc.validResource).map((tc) => tc.id)),
+    [testCases]
+  );
+
   return (
     <>
       <Toast
@@ -281,6 +287,7 @@ const CompositeLeftPanelContent = ({
                 ) : selectedMeasure ? (
                   <CompositeTestCasesTable
                     testCases={testCases}
+                    validTestCaseIds={validTestCaseIds}
                     selectedMeasure={selectedMeasure}
                     onBackToMeasures={handleBackToMeasures}
                     onInsertProfilesFromTestCase={
@@ -333,6 +340,10 @@ const CompositeLeftPanelContent = ({
         open={viewTestCaseModalOpen}
         onClose={() => setViewTestCaseModalOpen(false)}
         testCase={selectedTestCase}
+        isInsertEnabled={Boolean(
+          selectedTestCase && validTestCaseIds.has(selectedTestCase.id)
+        )}
+        onInsert={handleInsertingProfilesIntoTestCase}
       />
     </>
   );

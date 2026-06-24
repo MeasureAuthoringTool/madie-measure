@@ -16,6 +16,7 @@ jest.mock("../../../routes/qiCore/useExecutionContext", () => ({
 
 jest.mock("../../../../util/QiCorePatientProvider", () => ({
   useQiCoreResource: jest.fn(),
+  QiCoreResourceProvider: ({ children }: any) => <>{children}</>,
   ResourceActionType: {
     MODIFY_BUNDLE_ENTRY: "ModifyBundleEntry",
     ADD_BUNDLE_ENTRY: "AddBundleEntry",
