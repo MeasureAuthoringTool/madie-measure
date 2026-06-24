@@ -2048,4 +2048,27 @@ describe("CalculationService Tests", () => {
       expect(result).toEqual("original-id");
     });
   });
+
+  describe("CalculationService.getObservationResources", () => {
+    it("getObservationResources Pass", () => {
+      const output = calculationService.getObservationResources(
+        ContinuousVariable_Encounter_Pass.testCase,
+        ContinuousVariable_Encounter_Pass.populationGroupResults[0]
+      );
+      expect(output).toBeTruthy();
+      expect(output.groupId).toBe(
+        ContinuousVariable_Encounter_Pass.measureGroups[0].displayId
+      );
+      expect(output.resources).toHaveLength(2);
+      expect(output.resources[0]).toContain("Encounter");
+    });
+
+    it("should return null when bad results", () => {
+      const output = calculationService.getObservationResources(
+        ContinuousVariable_Encounter_Pass.testCase,
+        ContinuousVariable_Encounter_Fail.populationGroupResults
+      );
+      expect(output).toBeNull();
+    });
+  });
 });

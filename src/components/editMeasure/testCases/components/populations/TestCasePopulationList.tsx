@@ -16,6 +16,7 @@ import {
   faCheckCircle,
   faTimesCircle,
 } from "@fortawesome/free-solid-svg-icons";
+import { ObservationResources } from "../../api/CalculationService";
 
 export interface TestCasePopulationListProps {
   content: string;
@@ -40,6 +41,7 @@ export interface TestCasePopulationListProps {
   errors?: any;
   groupsStratificationAssociationMap?: any;
   group?: Group;
+  observationResources?: ObservationResources[];
 }
 const StyledIcon = styled(FontAwesomeIcon)(
   ({ errors }: { errors: boolean }) => [
@@ -122,6 +124,7 @@ const TestCasePopulationList = ({
   errors,
   groupsStratificationAssociationMap,
   group,
+  observationResources,
 }: TestCasePopulationListProps) => {
   let measureObservations = [];
   let numeratorObservations = [];
@@ -294,6 +297,13 @@ const TestCasePopulationList = ({
               initialPopulationCount={getIppCount(population)}
               error={errors?.populationValues?.[j]}
               content={content}
+              tooltip={
+                observationResources && observationResources.length > 0
+                  ? observationResources
+                      .find((value) => value.groupId === group?.displayId)
+                      .resources.join()
+                  : null
+              }
             />
           ))}
 
