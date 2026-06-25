@@ -106,9 +106,9 @@ describe("buildBundleWithInsertedProfiles", () => {
     );
 
     expect(patientEntry.resource.id).toBe("current-patient-id");
-    expect(patientEntry.resource.gender).toBe("female");
-    expect(patientEntry.resource.name[0].family).toBe("FromSelected");
-    expect(patientEntry.resource.birthDate).toBeUndefined();
+    expect(patientEntry.resource.birthDate).toBe("1900-01-01");
+    expect(patientEntry.resource.gender).toBeUndefined();
+    expect(patientEntry.resource.name).toBeUndefined();
 
     expect(copiedEncounter.resource.id).toBe("new-enc-id");
     expect(copiedObservation.resource.id).toBe("new-obs-id");
@@ -325,7 +325,7 @@ describe("buildBundleWithInsertedProfiles", () => {
     const patientEntry = result.entry.find(
       (entry) => entry.resource?.resourceType === "Patient"
     );
-    expect(patientEntry.fullUrl).toBe("urn:uuid:current-patient-id");
+    expect(patientEntry.fullUrl).toBe("urn:uuid:current-patient-uuid");
 
     const encEntry = result.entry.find(
       (entry) => entry.resource?.resourceType === "Encounter"
@@ -380,7 +380,7 @@ describe("buildBundleWithInsertedProfiles", () => {
     const patientEntry = result.entry.find(
       (entry) => entry.resource?.resourceType === "Patient"
     );
-    expect(patientEntry.fullUrl).toMatch(/urn:uuid:/);
+    expect(patientEntry.fullUrl).toBe("http");
 
     const encEntry = result.entry.find(
       (entry) => entry.resource?.resourceType === "Encounter"
@@ -388,7 +388,7 @@ describe("buildBundleWithInsertedProfiles", () => {
     expect(encEntry.fullUrl).toMatch(/urn:uuid:/);
   });
 
-  it("appends new entries to existing non-patient entries and replaces patient", () => {
+  it("appends new entries to existing non-patient entries and keeps current patient", () => {
     const currentBundle = {
       resourceType: "Bundle",
       type: "collection",
@@ -445,9 +445,9 @@ describe("buildBundleWithInsertedProfiles", () => {
       (entry) => entry.resource?.resourceType === "Patient"
     );
     expect(patient.resource.id).toBe("current-patient-id");
-    expect(patient.resource.birthDate).toBeUndefined();
-    expect(patient.resource.gender).toBe("male");
-    expect(patient.resource.name[0].family).toBe("Selected");
+    expect(patient.resource.birthDate).toBe("1950-01-01");
+    expect(patient.resource.gender).toBeUndefined();
+    expect(patient.resource.name[0].family).toBe("Current");
 
     const existingCondition = result.entry.find(
       (entry) => entry.resource?.resourceType === "Condition"
@@ -572,6 +572,6 @@ describe("buildBundleWithInsertedProfiles", () => {
       (entry) => entry.resource?.resourceType === "Patient"
     );
     expect(patient.resource.id).toBe("current-patient-id");
-    expect(patient.resource.name[0].family).toBe("Source");
+    expect(patient.resource.name[0].family).toBe("Current");
   });
 });

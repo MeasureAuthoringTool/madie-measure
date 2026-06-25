@@ -205,7 +205,9 @@ const CompositeLeftPanelContent = ({
         });
       });
 
+    setViewTestCaseModalOpen(false);
     showToast("Profiles were inserted successfully.", "success");
+    // Todo Rohit Add these new profiles metadata into DB
   };
 
   const handleBackToMeasures = () => {

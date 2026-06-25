@@ -49,13 +49,6 @@ const getPatientIdFromBundle = (bundle: FhirBundle): string | null => {
   return patientEntry?.resource?.id ?? null;
 };
 
-const getPatientEntryFromBundle = (bundle: FhirBundle): BundleEntry | null => {
-  return (
-    bundle?.entry?.find((entry) => entry?.resource?.resourceType === PATIENT) ??
-    null
-  );
-};
-
 const replaceIdInFullUrl = (fullUrl: string, newId: string): string => {
   if (!fullUrl) return `urn:uuid:${newId}`;
 
@@ -129,8 +122,6 @@ export const buildBundleWithInsertedProfiles = (
     return null;
   }
 
-  const selectedPatientEntry = getPatientEntryFromBundle(selectedBundle);
-
   const referenceMap: Record<string, string> = {};
 
   selectedBundle.entry?.forEach((entry) => {
@@ -183,27 +174,8 @@ export const buildBundleWithInsertedProfiles = (
     ? _.cloneDeep(currentBundle.entry)
     : [];
 
-  const replacedCurrentEntries = currentEntries.map((entry) => {
-    if (entry?.resource?.resourceType !== PATIENT) {
-      return entry;
-    }
-
-    if (!selectedPatientEntry?.resource) {
-      return entry;
-    }
-
-    const replacedPatientEntry = _.cloneDeep(selectedPatientEntry);
-    replacedPatientEntry.resource.id = currentPatientId;
-    replacedPatientEntry.fullUrl = replaceIdInFullUrl(
-      replacedPatientEntry.fullUrl,
-      currentPatientId
-    );
-
-    return replacedPatientEntry;
-  });
-
   return {
     ..._.cloneDeep(currentBundle),
-    entry: [...replacedCurrentEntries, ...copiedEntries],
+    entry: [...currentEntries, ...copiedEntries],
   };
 };
