@@ -41,6 +41,7 @@ import {
   triggerPopChanges,
 } from "../../../util/PopulationsMap";
 import calculationService, {
+  ObservationResources,
   PopulationEpisodeResult,
 } from "../../../api/CalculationService";
 import {
@@ -438,6 +439,8 @@ const EditTestCase = (props: EditTestCaseProps) => {
   const [groupPopulations, setGroupPopulations] = useState<GroupPopulation[]>(
     []
   );
+  const [observationResources, setObservationResources] =
+    useState<ObservationResources[]>();
   const [callstackMap, setCallstackMap] = useState<CqlDefinitionCallstack>();
   const fhirDefinitionServiceApi = useRef(useFhirDefinitionsServiceApi());
 
@@ -542,6 +545,25 @@ const EditTestCase = (props: EditTestCaseProps) => {
       );
     }
   }, [formik.values.groupPopulations, populationGroupResults]);
+
+  useEffect(() => {
+    if (_.isNil(populationGroupResults) || _.isEmpty(populationGroupResults)) {
+      setObservationResources([]);
+    } else {
+      const results: ObservationResources[] = [];
+      for (const populationGroupResult of populationGroupResults) {
+        const observationResources =
+          calculation.current.getObservationResources(
+            testCase,
+            populationGroupResult
+          );
+        if (observationResources) {
+          results.push(observationResources);
+        }
+      }
+      setObservationResources(results);
+    }
+  }, [populationGroupResults]);
 
   const mapMeasureGroup = (group: Group): GroupPopulation => {
     const calculateEpisodes = group.populationBasis === "boolean";
@@ -1339,6 +1361,7 @@ const EditTestCase = (props: EditTestCaseProps) => {
                         canEdit={testCaseCanEdit}
                         groupPopulations={groupPopulations}
                         isTestCaseExecuted={!_.isNil(populationGroupResults)}
+                        observationResources={observationResources}
                         clearTestResults={() => {
                           setPopulationGroupResults(undefined);
                         }}

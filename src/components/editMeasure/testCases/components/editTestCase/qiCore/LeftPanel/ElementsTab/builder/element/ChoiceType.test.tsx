@@ -139,4 +139,28 @@ describe("ChoiceType", () => {
     );
     expect(select).toHaveAttribute("readonly");
   });
+
+  it("displays choice type options in alphabetical order", async () => {
+    renderWithFormik(
+      {
+        childDef: getChildDef(),
+        label: "Observation.component[0].value[x]",
+        canEdit: true,
+      },
+      getFormikValues()
+    );
+
+    const select = await screen.findByRole("combobox");
+    await act(async () => {
+      await userEvent.click(select);
+    });
+
+    const listbox = screen.getByRole("listbox");
+    const options = within(listbox).getAllByRole("option");
+
+    expect(options).toHaveLength(3);
+    expect(options[0]).toHaveTextContent("Boolean");
+    expect(options[1]).toHaveTextContent("Integer");
+    expect(options[2]).toHaveTextContent("String");
+  });
 });
