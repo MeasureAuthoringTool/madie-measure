@@ -11,6 +11,7 @@ const ExpectedActual = ({
   clearTestResults,
   groupsStratificationAssociationMap,
   groups,
+  observationResources,
 }) => {
   return (
     <div
@@ -27,6 +28,7 @@ const ExpectedActual = ({
         isTestCaseExecuted={isTestCaseExecuted}
         setIsTestCaseExecuted={clearTestResults}
         groups={groups}
+        observationResources={observationResources}
       />
     </div>
   );

@@ -45,6 +45,12 @@ export const simpleMeasureFixture: Measure = {
           name: PopulationType.NUMERATOR,
           definition: "third",
         },
+        {
+          id: "id-4",
+          displayId: "MeasureObservation_1",
+          name: PopulationType.MEASURE_OBSERVATION,
+          definition: "fourth",
+        },
       ],
       stratifications: [
         {

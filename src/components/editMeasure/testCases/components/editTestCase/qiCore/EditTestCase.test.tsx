@@ -3764,6 +3764,121 @@ describe("EditTestCase component", () => {
       ).not.toBeChecked();
     });
 
+    it("Execute a test case successfully populates observation resources", async () => {
+      jest.mock("../../../api/CalculationService", () => {
+        const calculateOutput: any = {
+          results: [
+            {
+              detailedResults: [
+                {
+                  groupId: "Group_1",
+                  html: "<h2>Population Group: Group_1</h2>",
+                  statementResults: [],
+                  populationRelevance: [],
+                  stratifierResults: [],
+                  populationResults: [],
+                  episodeResults: [],
+                },
+              ],
+            },
+          ],
+        };
+
+        return {
+          __esModule: true,
+          default: jest.fn(() => {
+            return {
+              calculateTestCases: jest.fn().mockResolvedValue(calculateOutput),
+              calculate: jest.fn().mockResolvedValue(calculateOutput),
+              processTestCaseResults: jest
+                .fn()
+                .mockImplementation((tc: any) => ({
+                  ...tc,
+                  executionStatus: "pass",
+                })),
+              getObservationResources: jest.fn().mockReturnValue({
+                groupId: "Group_1",
+                resources: ["Encounter"],
+              }),
+              findMeasureGroupPopulationDisplayId: jest.fn().mockResolvedValue({
+                displayId: "IPP",
+              }),
+            };
+          }),
+        };
+      });
+      mockedAxios.get.mockClear().mockImplementation((args) => {
+        if (args && args.endsWith("series")) {
+          return Promise.resolve({ data: ["DENOM_Pass", "NUMER_Pass"] });
+        } else if (args && args.endsWith("resources")) {
+          return Promise.resolve({
+            data: [...resourceIdentifiers],
+          });
+        }
+        return Promise.resolve({
+          data: { ...testCaseFixture, createdBy: MEASURE_CREATEDBY },
+        });
+      });
+      mockedAxios.post.mockClear().mockImplementation((args) => {
+        if (args && args.endsWith("execution-bundles")) {
+          return Promise.resolve({
+            data: {
+              testCases: [testCaseFixture],
+              modifiedTestCaseIds: [testCaseFixture.id],
+            },
+          });
+        }
+        return Promise.resolve({
+          data: {
+            code: 200,
+            message: null,
+            successful: true,
+            outcomeResponse: {
+              resourceType: "OperationOutcome",
+              issue: [
+                {
+                  severity: "informational",
+                  code: "processing",
+                  diagnostics: "No issues!",
+                },
+              ],
+            },
+          },
+        });
+      });
+      const measure = { ...simpleMeasureFixture, createdBy: MEASURE_CREATEDBY };
+      renderWithRouter(
+        [
+          "/measures/623cacebe74613783378c17b/edit/test-cases/623cacffe74613783378c17c",
+        ],
+        "/measures/:measureId/edit/test-cases/:id",
+        measure
+      );
+      userEvent.click(screen.getByTestId("details-tab"));
+
+      // this is to make form dirty so that run test button is enabled
+      const tcTitle = await screen.findByTestId("test-case-title");
+      userEvent.type(tcTitle, "testTitle");
+
+      userEvent.click(screen.getByTestId("expectoractual-tab"));
+
+      await waitFor(async () => {
+        userEvent.click(
+          await screen.findByRole("button", { name: "Run Test Case" })
+        );
+      });
+
+      userEvent.click(screen.getByTestId("expectoractual-tab"));
+      expect(
+        await screen.findByTestId("test-population-initialPopulation-actual")
+      ).toBeInTheDocument();
+      expect(
+        screen.getByTestId("test-population-numerator-actual")
+      ).not.toBeChecked();
+
+      expect(screen.getByText("Measure Observation")).toBeInTheDocument();
+    });
+
     it("disables run button when CQL return type mismatch error exists on measure", async () => {
       mockedAxios.get.mockClear().mockImplementation((args) => {
         if (args && args.endsWith("series")) {
