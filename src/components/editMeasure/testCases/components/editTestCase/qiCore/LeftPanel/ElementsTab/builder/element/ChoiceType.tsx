@@ -50,15 +50,20 @@ export const ChoiceType = (props: ChoiceTypePropsInterface) => {
         }}
         data-testid={`choice-type-${updatedLabel}`}
         readOnly={!canEdit}
-        options={childDef?.type?.map((ref) => (
-          <MenuItem
-            key={ref.code}
-            data-testid={`${ref.code}-option`}
-            value={ref.code}
-          >
-            {_.upperFirst(ref.code)}
-          </MenuItem>
-        ))}
+        options={childDef?.type
+          ?.slice()
+          .sort((a: { code: string }, b: { code: string }) =>
+            a.code.toLowerCase().localeCompare(b.code.toLowerCase())
+          )
+          .map((ref: { code: string }) => (
+            <MenuItem
+              key={ref.code}
+              data-testid={`${ref.code}-option`}
+              value={ref.code}
+            >
+              {_.upperFirst(ref.code)}
+            </MenuItem>
+          ))}
         value={_.upperFirst(selectedChoiceType)}
         onChange={(e) => {
           // clear previous choice type value
