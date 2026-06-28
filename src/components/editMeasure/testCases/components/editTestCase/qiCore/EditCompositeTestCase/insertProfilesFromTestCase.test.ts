@@ -1,14 +1,20 @@
-import { buildBundleWithInsertedProfiles } from "./insertProfilesFromTestCase";
+import { buildInsertedProfiles } from "./insertProfilesFromTestCase";
 
 jest.mock("uuid", () => {
   let idx = 0;
-  const ids = ["new-enc-id", "new-obs-id", "new-prac-id", "new-med-id"];
+  const ids = [
+    "test-case-set-id",
+    "new-enc-id",
+    "new-obs-id",
+    "new-prac-id",
+    "new-med-id",
+  ];
   return {
     v4: jest.fn(() => ids[idx++]),
   };
 });
 
-describe("buildBundleWithInsertedProfiles", () => {
+describe("buildInsertedProfiles", () => {
   it("copies non-patient resources, regenerates ids, and remaps references", () => {
     const currentBundle = {
       resourceType: "Bundle",
@@ -80,28 +86,40 @@ describe("buildBundleWithInsertedProfiles", () => {
       ],
     };
 
-    const result = buildBundleWithInsertedProfiles(
+    const insertedProfiles = buildInsertedProfiles(
       JSON.stringify(currentBundle),
-      JSON.stringify(selectedBundle)
+      JSON.stringify(selectedBundle),
+      {
+        measureName: "Measure Alpha",
+        measureVersion: "1.0.0",
+        measureId: "measure-1",
+        testCaseGroup: "Group A",
+        testCaseTitle: "Selected Test Case",
+        testCaseDescription: "Selected description",
+        testCaseId: "tc-source",
+      }
     );
+    const bundle = insertedProfiles?.bundle;
+    const componentProfiles = insertedProfiles?.componentProfiles ?? [];
 
-    expect(result).toBeTruthy();
-    expect(result.entry).toHaveLength(5);
+    expect(bundle).toBeTruthy();
+    expect((bundle as any).componentProfiles).toBeUndefined();
+    expect(bundle!.entry).toHaveLength(5);
 
-    const patientEntry = result.entry.find(
+    const patientEntry = bundle!.entry.find(
       (entry) => entry.resource?.resourceType === "Patient"
     );
 
-    const copiedEncounter = result.entry.find(
+    const copiedEncounter = bundle!.entry.find(
       (entry) => entry.resource?.resourceType === "Encounter"
     );
-    const copiedObservation = result.entry.find(
+    const copiedObservation = bundle!.entry.find(
       (entry) => entry.resource?.resourceType === "Observation"
     );
-    const copiedPractitioner = result.entry.find(
+    const copiedPractitioner = bundle!.entry.find(
       (entry) => entry.resource?.resourceType === "Practitioner"
     );
-    const copiedMedication = result.entry.find(
+    const copiedMedication = bundle!.entry.find(
       (entry) => entry.resource?.resourceType === "Medication"
     );
 
@@ -130,10 +148,28 @@ describe("buildBundleWithInsertedProfiles", () => {
     expect(copiedObservation.resource.suspectEntity[0].instance.reference).toBe(
       "Medication/new-med-id"
     );
+
+    expect(componentProfiles).toHaveLength(4);
+    expect(componentProfiles).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          measureName: "Measure Alpha",
+          measureVersion: "1.0.0",
+          measureId: "measure-1",
+          testCaseGroup: "Group A",
+          testCaseTitle: "Selected Test Case",
+          testCaseDescription: "Selected description",
+          testCaseId: "tc-source",
+          testCaseSetId: expect.any(String),
+          originalProfileId: "source-enc-id",
+          newProfileId: "new-enc-id",
+        }),
+      ])
+    );
   });
 
   it("returns null for invalid bundle json", () => {
-    const result = buildBundleWithInsertedProfiles("not-json", "{}");
+    const result = buildInsertedProfiles("not-json", "{}");
     expect(result).toBeNull();
   });
 
@@ -167,7 +203,7 @@ describe("buildBundleWithInsertedProfiles", () => {
       ],
     };
 
-    const result = buildBundleWithInsertedProfiles(
+    const result = buildInsertedProfiles(
       JSON.stringify(currentBundleNoPatient),
       JSON.stringify(selectedBundle)
     );
@@ -205,15 +241,15 @@ describe("buildBundleWithInsertedProfiles", () => {
       ],
     };
 
-    const result = buildBundleWithInsertedProfiles(
+    const result = buildInsertedProfiles(
       JSON.stringify(currentBundle),
       JSON.stringify(selectedBundleNoPatient)
     );
 
     expect(result).toBeTruthy();
-    expect(result.entry).toHaveLength(2);
+    expect(result.bundle.entry).toHaveLength(2);
 
-    const patientEntry = result.entry.find(
+    const patientEntry = result.bundle.entry.find(
       (entry) => entry.resource?.resourceType === "Patient"
     );
     expect(patientEntry.resource.id).toBe("current-pat-id");
@@ -258,14 +294,14 @@ describe("buildBundleWithInsertedProfiles", () => {
       ],
     };
 
-    const result = buildBundleWithInsertedProfiles(
+    const result = buildInsertedProfiles(
       JSON.stringify(currentBundle),
       JSON.stringify(selectedBundle)
     );
 
     expect(result).toBeTruthy();
 
-    const obsEntry = result.entry.find(
+    const obsEntry = result.bundle.entry.find(
       (entry) => entry.resource?.resourceType === "Observation"
     );
 
@@ -315,19 +351,19 @@ describe("buildBundleWithInsertedProfiles", () => {
       ],
     };
 
-    const result = buildBundleWithInsertedProfiles(
+    const result = buildInsertedProfiles(
       JSON.stringify(currentBundle),
       JSON.stringify(selectedBundle)
     );
 
     expect(result).toBeTruthy();
 
-    const patientEntry = result.entry.find(
+    const patientEntry = result.bundle.entry.find(
       (entry) => entry.resource?.resourceType === "Patient"
     );
     expect(patientEntry.fullUrl).toBe("urn:uuid:current-patient-uuid");
 
-    const encEntry = result.entry.find(
+    const encEntry = result.bundle.entry.find(
       (entry) => entry.resource?.resourceType === "Encounter"
     );
     expect(encEntry.fullUrl).toMatch(/urn:uuid:/);
@@ -370,19 +406,19 @@ describe("buildBundleWithInsertedProfiles", () => {
       ],
     };
 
-    const result = buildBundleWithInsertedProfiles(
+    const result = buildInsertedProfiles(
       JSON.stringify(currentBundle),
       JSON.stringify(selectedBundle)
     );
 
     expect(result).toBeTruthy();
 
-    const patientEntry = result.entry.find(
+    const patientEntry = result.bundle.entry.find(
       (entry) => entry.resource?.resourceType === "Patient"
     );
     expect(patientEntry.fullUrl).toBe("http");
 
-    const encEntry = result.entry.find(
+    const encEntry = result.bundle.entry.find(
       (entry) => entry.resource?.resourceType === "Encounter"
     );
     expect(encEntry.fullUrl).toMatch(/urn:uuid:/);
@@ -433,15 +469,15 @@ describe("buildBundleWithInsertedProfiles", () => {
       ],
     };
 
-    const result = buildBundleWithInsertedProfiles(
+    const result = buildInsertedProfiles(
       JSON.stringify(currentBundle),
       JSON.stringify(selectedBundle)
     );
 
     expect(result).toBeTruthy();
-    expect(result.entry).toHaveLength(3);
+    expect(result.bundle.entry).toHaveLength(3);
 
-    const patient = result.entry.find(
+    const patient = result.bundle.entry.find(
       (entry) => entry.resource?.resourceType === "Patient"
     );
     expect(patient.resource.id).toBe("current-patient-id");
@@ -449,12 +485,12 @@ describe("buildBundleWithInsertedProfiles", () => {
     expect(patient.resource.gender).toBeUndefined();
     expect(patient.resource.name[0].family).toBe("Current");
 
-    const existingCondition = result.entry.find(
+    const existingCondition = result.bundle.entry.find(
       (entry) => entry.resource?.resourceType === "Condition"
     );
     expect(existingCondition.resource.id).toBe("existing-condition-id");
 
-    const encounter = result.entry.find(
+    const encounter = result.bundle.entry.find(
       (entry) => entry.resource?.resourceType === "Encounter"
     );
     expect(encounter.resource.id).not.toBe("enc-id");
@@ -504,20 +540,20 @@ describe("buildBundleWithInsertedProfiles", () => {
       ],
     };
 
-    const result = buildBundleWithInsertedProfiles(
+    const result = buildInsertedProfiles(
       JSON.stringify(currentBundle),
       JSON.stringify(selectedBundle)
     );
 
     expect(result).toBeTruthy();
-    expect(result.entry).toHaveLength(3);
+    expect(result.bundle.entry).toHaveLength(3);
 
-    const patient = result.entry.find(
+    const patient = result.bundle.entry.find(
       (entry) => entry.resource?.resourceType === "Patient"
     );
     expect(patient.resource.id).toBe("current-patient-id");
 
-    const encounter = result.entry.find(
+    const encounter = result.bundle.entry.find(
       (entry) => entry.resource?.resourceType === "Encounter"
     );
     expect(encounter).toBeTruthy();
@@ -525,7 +561,7 @@ describe("buildBundleWithInsertedProfiles", () => {
       "Patient/current-patient-id"
     );
 
-    const medication = result.entry.find(
+    const medication = result.bundle.entry.find(
       (entry) => entry.resource?.resourceType === "Medication"
     );
     expect(medication).toBeTruthy();
@@ -560,15 +596,15 @@ describe("buildBundleWithInsertedProfiles", () => {
       ],
     };
 
-    const result = buildBundleWithInsertedProfiles(
+    const result = buildInsertedProfiles(
       JSON.stringify(currentBundle),
       JSON.stringify(selectedBundle)
     );
 
     expect(result).toBeTruthy();
-    expect(result.entry).toHaveLength(1);
+    expect(result.bundle.entry).toHaveLength(1);
 
-    const patient = result.entry.find(
+    const patient = result.bundle.entry.find(
       (entry) => entry.resource?.resourceType === "Patient"
     );
     expect(patient.resource.id).toBe("current-patient-id");

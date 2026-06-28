@@ -21,6 +21,34 @@ export interface FhirBundle {
   [key: string]: any;
 }
 
+export interface ComponentProfile {
+  measureName: string;
+  measureVersion: string;
+  measureId: string;
+  testCaseGroup: string;
+  testCaseTitle: string;
+  testCaseDescription: string;
+  testCaseId: string;
+  testCaseSetId: string;
+  originalProfileId: string;
+  newProfileId: string;
+}
+
+export interface ComponentProfileMetadata {
+  measureName?: string;
+  measureVersion?: string;
+  measureId?: string;
+  testCaseGroup?: string;
+  testCaseTitle?: string;
+  testCaseDescription?: string;
+  testCaseId?: string;
+}
+
+export interface InsertedProfilesResult {
+  bundle: FhirBundle;
+  componentProfiles: ComponentProfile[];
+}
+
 const PATIENT = "Patient";
 const FHIR_REFERENCE_PATTERN = /^[A-Za-z][A-Za-z0-9]+\/[A-Za-z0-9\-.]{1,}$/;
 
@@ -103,10 +131,11 @@ const updateReferencesInObject = (
   return value;
 };
 
-export const buildBundleWithInsertedProfiles = (
+export const buildInsertedProfiles = (
   currentJson: string,
-  selectedJson: string
-): FhirBundle | null => {
+  selectedJson: string,
+  metadata: ComponentProfileMetadata = {}
+): InsertedProfilesResult | null => {
   const currentBundle = safeParseBundle(currentJson);
   const selectedBundle = safeParseBundle(selectedJson);
 
@@ -123,6 +152,9 @@ export const buildBundleWithInsertedProfiles = (
   }
 
   const referenceMap: Record<string, string> = {};
+  const testCaseSetId = uuidv4();
+
+  const copiedProfiles: ComponentProfile[] = [];
 
   selectedBundle.entry?.forEach((entry) => {
     const resource = entry?.resource;
@@ -135,7 +167,23 @@ export const buildBundleWithInsertedProfiles = (
     if (resourceType === PATIENT) {
       referenceMap[oldReference] = buildReferenceKey(PATIENT, currentPatientId);
     } else {
-      referenceMap[oldReference] = buildReferenceKey(resourceType, uuidv4());
+      const newProfileId = uuidv4();
+      referenceMap[oldReference] = buildReferenceKey(
+        resourceType,
+        newProfileId
+      );
+      copiedProfiles.push({
+        measureName: metadata.measureName ?? "",
+        measureVersion: metadata.measureVersion ?? "",
+        measureId: metadata.measureId ?? "",
+        testCaseGroup: metadata.testCaseGroup ?? "",
+        testCaseTitle: metadata.testCaseTitle ?? "",
+        testCaseDescription: metadata.testCaseDescription ?? "",
+        testCaseId: metadata.testCaseId ?? "",
+        testCaseSetId,
+        originalProfileId: resourceId,
+        newProfileId,
+      });
     }
   });
 
@@ -175,7 +223,10 @@ export const buildBundleWithInsertedProfiles = (
     : [];
 
   return {
-    ..._.cloneDeep(currentBundle),
-    entry: [...currentEntries, ...copiedEntries],
+    bundle: {
+      ..._.cloneDeep(currentBundle),
+      entry: [...currentEntries, ...copiedEntries],
+    },
+    componentProfiles: copiedProfiles,
   };
 };

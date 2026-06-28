@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import CreateCompositeTestCaseLeftPanelNavTabs from "./CreateCompositeTestCaseLeftPanelNavTabs";
 import Editor from "../../../editor/Editor";
 import CompositeTestCasesTable from "./CompositeTestCasesTable";
@@ -6,20 +6,15 @@ import useTestCaseServiceApi from "../../../../api/useTestCaseServiceApi";
 import { Measure, TestCase } from "@madie/madie-models";
 import { MadieSpinner, Toast } from "@madie/madie-design-system/dist/react";
 import "./CompositeLeftPanelContent.scss";
-import { FormikProvider } from "formik";
+import { FormikProvider, useFormikContext } from "formik";
 import ElementsTab from "../LeftPanel/ElementsTab/ElementsTab";
-import useFhirDefinitionsServiceApi from "../../../../api/useFhirDefinitionsService";
-import useFhirElmTranslationServiceApi from "../../../../../../../api/useFhirElmTranslationServiceApi";
-import { ResourceIdentifier } from "../../../../api/models/ResourceIdentifier";
-import _ from "lodash";
-import useExecutionContext from "../../../routes/qiCore/useExecutionContext";
 import {
   ResourceActionType,
   useQiCoreResource,
 } from "../../../../util/QiCorePatientProvider";
 import CompositeProfileViews from "./CompositeProfilesViews";
 import ViewTestCaseModal from "./ViewTestCaseModal";
-import { buildBundleWithInsertedProfiles } from "./insertProfilesFromTestCase";
+import { buildInsertedProfiles } from "./insertProfilesFromTestCase";
 
 const CompositeLeftPanelContent = ({
   leftPanelActiveTab,
@@ -37,92 +32,23 @@ const CompositeLeftPanelContent = ({
   const [selectedMeasure, setSelectedMeasure] = useState<Measure | null>(null);
   const [testCases, setTestCases] = useState<TestCase[]>([]);
   const [loadingTestCases, setLoadingTestCases] = useState(false);
-  const [completedMeasureCount, setCompletedMeasureCount] = useState(0);
   const [howItWorksOpen, setHowItWorksOpen] = useState<boolean>(false);
   const [viewTestCaseModalOpen, setViewTestCaseModalOpen] =
     useState<boolean>(false);
   const [toastOpen, setToastOpen] = useState<boolean>(false);
   const [toastMessage, setToastMessage] = useState<string>("");
   const [toastType, setToastType] = useState<string>("danger");
-
-  // builder utilities for available elements tab
-  const [resources, setResources] = useState<ResourceIdentifier[]>([]);
-  const [resourcesLoading, setResourcesLoading] = useState(true);
-  const fhirDefinitionsService = useRef(useFhirDefinitionsServiceApi());
-  const fhirElmTranslationService = useRef(useFhirElmTranslationServiceApi());
   const [selectedTestCase, setSelectedTestCase] = useState<TestCase | null>(
     null
   );
-  const { measureState } = useExecutionContext();
   const { state, dispatch } = useQiCoreResource();
-  const [measure] = measureState;
-  const abortController = useRef(null);
+  const formik = useFormikContext<any>();
 
   // local state for managing views under available tab
 
   type AvailableTab = "profiles" | "insert";
   const [availableTab, setAvailableTab] = useState<AvailableTab>("profiles"); // default profileView, allow insertView
 
-  useEffect(() => {
-    const fetchResources = async () => {
-      // we want to filter out base fhir resources, by checking if the id does not start with qicore or us-core
-      const resourceIdentifiers =
-        await fhirDefinitionsService.current.getResources();
-      // setResourceIdentifiers(resourceIdentifiers); // likely needed later when readding features
-      abortController.current = new AbortController();
-      fhirElmTranslationService.current
-        .fetchRelevantDataElements(measure, abortController.current.signal)
-        .then((relevantElements) => {
-          const profiles = relevantElements?.map(
-            (relevantElement) => relevantElement.profile
-          );
-          if (!_.isEmpty(resourceIdentifiers)) {
-            // "uniq" alone does not prevent duplicates. Correct sorting.
-            const uniqueResources = _.uniqBy(
-              resourceIdentifiers,
-              "profile"
-            ).sort((a, b) => a.title.localeCompare(b.title));
-
-            const filteredResources = _.isEmpty(profiles)
-              ? uniqueResources
-              : uniqueResources.filter(
-                  (r) =>
-                    profiles.includes(r.profile) ||
-                    "PATIENT" === r.type.toUpperCase()
-                );
-            const patientIdx = filteredResources.findIndex(
-              (r) => r.id === "qicore-patient"
-            );
-            let sortedResources = filteredResources;
-            if (patientIdx > 0) {
-              sortedResources = [
-                filteredResources[patientIdx],
-                ...filteredResources.slice(0, patientIdx),
-                ...filteredResources.slice(patientIdx + 1),
-              ];
-            }
-            setResources(sortedResources);
-          }
-        })
-        .finally(() => setResourcesLoading(false));
-    };
-    fetchResources();
-    // Cleanup: abort the request on unmounts or dependencies change
-    return () => {
-      if (abortController.current) {
-        abortController.current.abort();
-      }
-    };
-  }, [measure]);
-
-  const numberOfPatientsAdded = state?.bundle?.entry?.filter(
-    (e) => e.resource?.resourceType === "Patient"
-  )?.length;
-  const isPatientAdded = numberOfPatientsAdded > 0;
-  const resourceIds = state?.bundle?.entry?.map((e) => e.resource?.id);
-  const duplicateResourceIds = resourceIds?.filter(
-    (id, index) => resourceIds.indexOf(id) !== index
-  );
   const handleSelectTestCase = async (measure: Measure) => {
     setLoadingTestCases(true);
     setSelectedMeasure(measure);
@@ -150,10 +76,17 @@ const CompositeLeftPanelContent = ({
       editorVal || formikStu6Context?.values?.json || testCase?.json || "";
     const selectedJson = selectedTestCase?.json || "";
 
-    const generatedBundle = buildBundleWithInsertedProfiles(
-      currentJson,
-      selectedJson
-    );
+    const insertedProfiles = buildInsertedProfiles(currentJson, selectedJson, {
+      measureName: selectedMeasure?.measureName ?? "",
+      measureVersion: selectedMeasure?.version ?? "",
+      measureId: selectedMeasure?.id ?? "",
+      testCaseGroup: selectedTestCase?.series ?? "",
+      testCaseTitle: selectedTestCase?.title ?? "",
+      testCaseDescription: selectedTestCase?.description ?? "",
+      testCaseId: selectedTestCase?.id ?? "",
+    });
+    const generatedBundle = insertedProfiles?.bundle;
+    const componentProfiles = insertedProfiles?.componentProfiles;
 
     if (!generatedBundle) {
       showToast(
@@ -171,18 +104,18 @@ const CompositeLeftPanelContent = ({
 
     setEditorVal(newTestCaseJson);
 
-    if (!dispatch) return;
-
-    // Replace patient entry in the existing bundle with the one from the generated bundle.
-    const patientEntry = generatedBundle.entry?.find(
-      (entry) => entry?.resource?.resourceType === "Patient"
+    const existingComponentProfiles = Array.isArray(
+      formik?.values?.componentProfiles
+    )
+      ? formik.values.componentProfiles
+      : [];
+    formik?.setFieldValue(
+      "componentProfiles",
+      [...existingComponentProfiles, ...(componentProfiles ?? [])],
+      false
     );
-    if (patientEntry) {
-      dispatch({
-        type: ResourceActionType.MODIFY_BUNDLE_ENTRY,
-        payload: patientEntry,
-      });
-    }
+
+    if (!dispatch) return;
 
     // Collect IDs already in the current bundle to avoid re-adding anything that exists.
     const existingIds = new Set<string>(
@@ -303,7 +236,7 @@ const CompositeLeftPanelContent = ({
                       setAvailableTab={setAvailableTab}
                       setHowItWorksOpen={setHowItWorksOpen}
                       compositeMeasures={compositeMeasures}
-                      completedMeasureCount={completedMeasureCount}
+                      completedMeasureCount={0}
                       handleSelectTestCase={handleSelectTestCase}
                     />
                   </>

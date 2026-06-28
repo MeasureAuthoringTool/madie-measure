@@ -2,6 +2,7 @@ import * as React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
+import { useFormikContext } from "formik";
 import CompositeLeftPanelContent from "./CompositeLeftPanelContent";
 import { useQiCoreResource } from "../../../../util/QiCorePatientProvider";
 
@@ -13,6 +14,14 @@ jest.mock("../../../routes/qiCore/useExecutionContext", () => ({
     measureState: [{}],
   }),
 }));
+
+jest.mock("formik", () => {
+  const actual = jest.requireActual("formik");
+  return {
+    ...actual,
+    useFormikContext: jest.fn(),
+  };
+});
 
 jest.mock("../../../../util/QiCorePatientProvider", () => ({
   useQiCoreResource: jest.fn(),
@@ -60,7 +69,27 @@ jest.mock("./CompositeTestCasesTable", () => ({
         onClick={() =>
           onInsertProfilesFromTestCase?.({
             id: "tc-source",
-            json: '{"resourceType":"Bundle","entry":[]}',
+            title: "Selected Test Case",
+            description: "Selected description",
+            series: "Group A",
+            json: JSON.stringify({
+              resourceType: "Bundle",
+              entry: [
+                {
+                  resource: {
+                    resourceType: "Patient",
+                    id: "source-patient-id",
+                  },
+                },
+                {
+                  resource: {
+                    resourceType: "Encounter",
+                    id: "source-enc-id",
+                    subject: { reference: "Patient/source-patient-id" },
+                  },
+                },
+              ],
+            }),
           })
         }
       >
@@ -75,7 +104,13 @@ jest.mock("./CompositeProfilesViews", () => ({
   default: ({ handleSelectTestCase }) => (
     <button
       data-testid="select-measure-for-test-cases"
-      onClick={() => handleSelectTestCase({ id: "measure-1" })}
+      onClick={() =>
+        handleSelectTestCase({
+          id: "measure-1",
+          measureName: "Measure Alpha",
+          version: "1.0.0",
+        })
+      }
     >
       Select Measure
     </button>
@@ -111,6 +146,13 @@ const baseProps = {
   setInitialFormikValuesStu6: jest.fn(),
 };
 
+const mockFormikContext = {
+  values: {
+    componentProfiles: [],
+  },
+  setFieldValue: jest.fn(),
+};
+
 describe("CompositeLeftPanelContent", () => {
   const mockDispatch = jest.fn();
 
@@ -122,10 +164,12 @@ describe("CompositeLeftPanelContent", () => {
 
   beforeEach(() => {
     jest.spyOn(console, "log").mockImplementation(() => undefined);
+    (useFormikContext as jest.Mock).mockReturnValue(mockFormikContext);
   });
 
   afterEach(() => {
     jest.restoreAllMocks();
+    jest.clearAllMocks();
   });
 
   it("renders available tab with measures table", () => {
@@ -202,6 +246,11 @@ describe("CompositeLeftPanelContent", () => {
 
   it("calls setEditorVal and shows success when bundle insert succeeds", async () => {
     const setEditorVal = jest.fn();
+    const setFieldValue = jest.fn();
+    (useFormikContext as jest.Mock).mockReturnValue({
+      values: { componentProfiles: [{ testCaseSetId: "existing-set" }] },
+      setFieldValue,
+    });
     (useQiCoreResource as jest.Mock).mockReturnValue({
       state: {
         bundle: {
@@ -229,6 +278,13 @@ describe("CompositeLeftPanelContent", () => {
             gender: "female",
           },
         },
+        {
+          resource: {
+            resourceType: "Encounter",
+            id: "source-enc-id",
+            subject: { reference: "Patient/source-patient-id" },
+          },
+        },
       ],
     };
 
@@ -246,6 +302,23 @@ describe("CompositeLeftPanelContent", () => {
     await waitFor(() => {
       expect(setEditorVal).toHaveBeenCalled();
     });
+    expect(setFieldValue).toHaveBeenCalledWith(
+      "componentProfiles",
+      expect.arrayContaining([
+        expect.objectContaining({
+          measureName: "Measure Alpha",
+          measureVersion: "1.0.0",
+          measureId: "measure-1",
+          testCaseGroup: "Group A",
+          testCaseTitle: "Selected Test Case",
+          testCaseDescription: "Selected description",
+          testCaseId: "tc-source",
+          originalProfileId: "source-enc-id",
+          newProfileId: expect.any(String),
+        }),
+      ]),
+      false
+    );
     expect(
       await screen.findByTestId("composite-profile-insert-toast")
     ).toHaveTextContent("Profiles were inserted successfully");
