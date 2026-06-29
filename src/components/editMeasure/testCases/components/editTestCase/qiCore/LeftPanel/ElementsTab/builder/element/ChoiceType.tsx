@@ -52,6 +52,10 @@ export const ChoiceType = (props: ChoiceTypePropsInterface) => {
         readOnly={!canEdit}
         options={childDef?.type
           ?.slice()
+          .filter(
+            (type: { code: string }, index: number, self: { code: string }[]) =>
+              index === self.findIndex((t) => t.code === type.code)
+          )
           .sort((a: { code: string }, b: { code: string }) =>
             a.code.toLowerCase().localeCompare(b.code.toLowerCase())
           )
