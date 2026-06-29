@@ -13,6 +13,8 @@ interface ViewTestCaseModalProps {
   open: boolean;
   onClose: () => void;
   testCase: TestCase | null;
+  isInsertEnabled: boolean;
+  onInsert: (testCase: TestCase) => void;
 }
 
 function standardizeJson(json: string | undefined | null): string {
@@ -44,6 +46,8 @@ export default function ViewTestCaseModal({
   open,
   onClose,
   testCase,
+  isInsertEnabled,
+  onInsert,
 }: ViewTestCaseModalProps) {
   const [activeTab, setActiveTab] = useState<"added" | "json">("added");
   const [editorVal, setEditorVal] = useState<string>("");
@@ -84,7 +88,17 @@ export default function ViewTestCaseModal({
         cancelText: "Close",
         "data-testid": "view-test-case-modal-close-button",
       }}
-      continueButtonProps={""}
+      continueButtonProps={{
+        type: "button",
+        continueText: "Insert",
+        disabled: !testCase || !isInsertEnabled,
+        onClick: () => {
+          if (testCase && isInsertEnabled) {
+            onInsert(testCase);
+          }
+        },
+        "data-testid": "insert-button",
+      }}
     >
       <DialogContent>
         <div data-testid="view-test-case-modal" style={{ minHeight: 480 }}>
