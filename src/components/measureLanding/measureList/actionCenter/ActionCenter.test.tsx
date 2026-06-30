@@ -8,7 +8,6 @@ import {
   useOktaTokens,
   checkUserCanDelete,
   MeasureServiceApi,
-  userMeasureServiceApi,
 } from "@madie/madie-util";
 
 const mockMeasureServiceApi = {
@@ -117,6 +116,7 @@ describe("ActionCenter", () => {
     ).toBeInTheDocument();
     expect(screen.getByTestId("view-hr-action-btn")).toBeInTheDocument();
     expect(screen.getByTestId("transfer-action-btn")).toBeInTheDocument();
+    expect(screen.getByTestId("review-action-btn")).toBeInTheDocument();
   });
 
   it("should call updateTargetMeasure and setCreateVersionDialog when version action is triggered", async () => {
@@ -305,6 +305,7 @@ describe("ActionCenter", () => {
     expect(screen.getByTestId("draft-action-btn")).toBeDisabled();
     expect(screen.getByTestId("version-action-btn")).toBeDisabled();
     expect(screen.getByTestId("view-hr-action-btn")).toBeEnabled();
+    expect(screen.getByTestId("review-action-btn")).toBeDisabled();
   });
 
   it("should call view human readable when view human readable action is triggered", async () => {
