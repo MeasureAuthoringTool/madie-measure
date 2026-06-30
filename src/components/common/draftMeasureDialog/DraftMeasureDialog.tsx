@@ -138,9 +138,11 @@ const DraftMeasureDialog = ({ open, onClose, onSubmit, measure, loading }) => {
                   required: true,
                 }}
                 readOnly={
-                  featureFlags?.qiCore7
+                  measure?.model === "US Quality Core v0.5.0" ||
+                  (featureFlags?.qiCore7
                     ? measure?.model === "QI-Core v7.0.2"
-                    : measure?.model === "QI-Core v6.0.0"
+                    : measure?.model === "QI-Core v6.0.0" &&
+                      !featureFlags?.usQualityCore)
                 }
                 SelectDisplayProps={{
                   "aria-required": "true",
@@ -156,17 +158,24 @@ const DraftMeasureDialog = ({ open, onClose, onSubmit, measure, loading }) => {
                     if (measure?.model === "QI-Core v6.0.0") {
                       return (
                         modelKey === "QICORE_6_0_0" ||
-                        modelKey === "QICORE_7_0_2"
+                        modelKey === "QICORE_7_0_2" ||
+                        modelKey === "US_QUALITY_0_5_0"
                       );
                     } else if (measure?.model === "QI-Core v7.0.2") {
                       return modelKey === "QICORE_7_0_2";
+                    } else if (measure?.model === "US Quality Core v0.5.0") {
+                      return modelKey === "US_QUALITY_0_5_0";
                     }
                     return true; // Include all other cases
                   })
                   .map((modelKey) => {
                     if (
                       !modelKey.startsWith("QDM") &&
-                      (featureFlags?.qiCore7 || modelKey != "QICORE_7_0_2")
+                      modelKey !== "FHIR_4_0_1" &&
+                      modelKey !== "US_CORE_6_1_0" &&
+                      (featureFlags?.qiCore7 || modelKey != "QICORE_7_0_2") &&
+                      (featureFlags?.usQualityCore ||
+                        modelKey != "US_QUALITY_0_5_0")
                     ) {
                       return (
                         <MenuItem
