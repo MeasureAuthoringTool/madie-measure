@@ -54,10 +54,20 @@ const testCase = {
 } as any;
 
 describe("ViewTestCaseModal", () => {
+  const defaultProps = {
+    open: true,
+    onClose: jest.fn(),
+    testCase,
+    isInsertEnabled: true,
+    onInsert: jest.fn(),
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it("renders shared left-panel tabs with added and json states", () => {
-    render(
-      <ViewTestCaseModal open={true} onClose={jest.fn()} testCase={testCase} />
-    );
+    render(<ViewTestCaseModal {...defaultProps} />);
 
     expect(screen.getByText("Added (2)")).toBeInTheDocument();
     expect(screen.getByText("JSON")).toBeInTheDocument();
@@ -69,9 +79,7 @@ describe("ViewTestCaseModal", () => {
   });
 
   it("switches to json and exposes json search", async () => {
-    render(
-      <ViewTestCaseModal open={true} onClose={jest.fn()} testCase={testCase} />
-    );
+    render(<ViewTestCaseModal {...defaultProps} />);
 
     await userEvent.click(screen.getByText("JSON"));
 
@@ -80,9 +88,7 @@ describe("ViewTestCaseModal", () => {
   });
 
   it("opens calculator dialog from the shared tabs", async () => {
-    render(
-      <ViewTestCaseModal open={true} onClose={jest.fn()} testCase={testCase} />
-    );
+    render(<ViewTestCaseModal {...defaultProps} />);
 
     await userEvent.click(screen.getByTestId("editor-calculator-button"));
 
@@ -96,11 +102,7 @@ describe("ViewTestCaseModal", () => {
     } as any;
 
     render(
-      <ViewTestCaseModal
-        open={true}
-        onClose={jest.fn()}
-        testCase={undefinedJsonTestCase}
-      />
+      <ViewTestCaseModal {...defaultProps} testCase={undefinedJsonTestCase} />
     );
 
     await userEvent.click(screen.getByText("JSON"));
@@ -115,13 +117,26 @@ describe("ViewTestCaseModal", () => {
         throw new Error("stringify failed");
       });
 
-    render(
-      <ViewTestCaseModal open={true} onClose={jest.fn()} testCase={testCase} />
-    );
+    render(<ViewTestCaseModal {...defaultProps} />);
 
     await userEvent.click(screen.getByText("JSON"));
 
     expect(screen.getByTestId("json-editor")).toHaveValue("");
     stringifySpy.mockRestore();
+  });
+
+  it("calls onInsert with selected test case when Insert is clicked", async () => {
+    const onInsert = jest.fn();
+    render(<ViewTestCaseModal {...defaultProps} onInsert={onInsert} />);
+
+    await userEvent.click(screen.getByTestId("insert-button"));
+
+    expect(onInsert).toHaveBeenCalledWith(testCase);
+  });
+
+  it("disables Insert button when test case is not valid", () => {
+    render(<ViewTestCaseModal {...defaultProps} isInsertEnabled={false} />);
+
+    expect(screen.getByTestId("insert-button")).toBeDisabled();
   });
 });

@@ -43,16 +43,19 @@ const filterByOptions = ["Group", "Title", "Description"];
 
 export default function CompositeTestCasesTable({
   testCases,
+  validTestCaseIds,
   selectedMeasure,
   onBackToMeasures,
   onViewTestCase,
-  onInsertTestCase,
+  onInsertProfilesFromTestCase,
 }: {
   testCases: TestCase[];
+  validTestCaseIds: Set<string>;
   selectedMeasure: Measure;
   onBackToMeasures: () => void;
   onViewTestCase?: (testCase: TestCase) => void;
   onInsertTestCase?: (testCase: TestCase) => void;
+  onInsertProfilesFromTestCase?: (testCase: TestCase) => void;
 }) {
   const [howItWorksOpen, setHowItWorksOpen] = useState<boolean>(false);
   const [hoveredHeader, setHoveredHeader] = useState<string>("");

@@ -250,6 +250,7 @@ const Builder = ({
                   (res) =>
                     res.id.startsWith("qicore") || res.id.startsWith("us-core")
                 )}
+                measureModel={measure?.model}
                 onClick={async (resourceIdentifier: ResourceIdentifier) => {
                   const newEntry =
                     buildMadieResourceFromResourceIdentifier(
@@ -348,6 +349,7 @@ const Builder = ({
                         canEdit={canEdit}
                         applyLoading={applyLoading}
                         setApplyLoading={setApplyLoading}
+                        measureModel={measure?.model}
                       />
                     )}
                     <TestCaseSummaryGrid
