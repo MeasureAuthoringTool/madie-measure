@@ -163,16 +163,22 @@ const CodesComponent = ({
             }}
             readOnly={!canEdit}
             options={
-              codes
-                ? codes.map((concept) => (
-                    <MenuItem
-                      key={concept.code}
-                      value={concept.code}
-                      data-testid={`code-option-${concept.code}`}
-                    >
-                      {concept.display}
-                    </MenuItem>
-                  ))
+              codes && codes.length > 0
+                ? [...codes]
+                    .sort((a, b) =>
+                      (a.display || "")
+                        .toLowerCase()
+                        .localeCompare((b.display || "").toLowerCase())
+                    )
+                    .map((concept) => (
+                      <MenuItem
+                        key={concept.code}
+                        value={concept.code}
+                        data-testid={`code-option-${concept.code}`}
+                      >
+                        {concept.display}
+                      </MenuItem>
+                    ))
                 : []
             }
             value={value}
