@@ -20,8 +20,10 @@ import {
 } from "@tanstack/react-table";
 
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
+import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 import SearchIcon from "@mui/icons-material/Search";
 import { IconButton, InputAdornment } from "@mui/material";
+import { getHl7ProfileLink } from "../../../../../../../../../../utils/hl7Links";
 // Add in later for sorting icons
 // import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore";
 // import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
@@ -35,6 +37,7 @@ export interface ResourceListProps {
   isPatientAdded?: boolean;
   isComposite?: boolean;
   onInsertTCClick?: () => void;
+  measureModel?: string;
 }
 const TH = tw.th`p-3 text-left text-sm font-bold capitalize`;
 
@@ -44,6 +47,7 @@ const ResourceList = ({
   isPatientAdded,
   isComposite = false,
   onInsertTCClick,
+  measureModel,
 }: ResourceListProps) => {
   // Load saved pagination state from localStorage
   const resourcePageOptions = JSON.parse(
@@ -134,6 +138,29 @@ const ResourceList = ({
         //   customSort(rowA.original.profile, rowB.original.title),
       },
       {
+        header: "HL7",
+        cell: ({ row }) => {
+          const { original } = row;
+          const link = getHl7ProfileLink(original.id, measureModel);
+          const handleClick = (e) => {
+            e.stopPropagation();
+            if (link) {
+              window.open(link, "_blank");
+            }
+          };
+          return (
+            <IconButton
+              data-testid={`hl7-link-${original.id}`}
+              aria-label={`Open HL7 profile for ${original.id}`}
+              onClick={handleClick}
+            >
+              <OpenInNewIcon />
+            </IconButton>
+          );
+        },
+        accessorKey: "hl7",
+      },
+      {
         header: "",
         cell: ({ row }) => {
           const { original } = row;
@@ -160,7 +187,7 @@ const ResourceList = ({
         accessorKey: "action",
       },
     ];
-  }, [visibleResources, isPatientAdded]);
+  }, [visibleResources, isPatientAdded, measureModel]);
   const canGoNext = (() => {
     return page < totalPages;
   })();
