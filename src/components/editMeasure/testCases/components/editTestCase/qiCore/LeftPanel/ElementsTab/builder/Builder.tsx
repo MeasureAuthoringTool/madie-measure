@@ -349,6 +349,7 @@ const Builder = ({
                         canEdit={canEdit}
                         applyLoading={applyLoading}
                         setApplyLoading={setApplyLoading}
+                        measureModel={measure?.model}
                       />
                     )}
                     <TestCaseSummaryGrid
