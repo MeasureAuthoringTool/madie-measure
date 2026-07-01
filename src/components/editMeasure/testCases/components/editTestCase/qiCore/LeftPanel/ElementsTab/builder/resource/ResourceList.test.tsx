@@ -45,9 +45,100 @@ describe("ResourceList component", () => {
     const table = await screen.findByTestId("measure-list-tbl");
     const tableHeaders = table.querySelectorAll("thead th");
     expect(tableHeaders[0]).toHaveTextContent("Profile");
+    expect(tableHeaders[1]).toHaveTextContent("HL7");
     userEvent.click(tableHeaders[0]); // doesn't do anything right now, but i have a prevent default in there so i want the code coverage.
     const tableRows = table.querySelectorAll("tbody tr");
     expect(tableRows.length).toBe(5);
+  });
+
+  it("should render an HL7 icon and open the correct QI-Core STU6 profile URL", async () => {
+    const resourceList = [
+      {
+        id: "qicore-patient",
+        title: "QI Core Patient",
+        type: "Patient",
+        category: "Demo",
+        profile: "profile-patient",
+      },
+    ];
+    const onClick = jest.fn();
+    window.open = jest.fn();
+
+    render(
+      <ResourceList
+        resourceIdentifiers={resourceList}
+        onClick={onClick}
+        measureModel="QI-Core 6.0"
+      />
+    );
+
+    const hl7Button = await screen.findByTestId("hl7-link-qicore-patient");
+    expect(hl7Button).toBeInTheDocument();
+    userEvent.click(hl7Button);
+    expect(window.open).toHaveBeenCalledWith(
+      "https://hl7.org/fhir/us/qicore/STU6/StructureDefinition-qicore-patient.html",
+      "_blank"
+    );
+  });
+
+  it("should render an HL7 icon and open the correct QI-Core STU7 profile URL", async () => {
+    const resourceList = [
+      {
+        id: "qicore-patient",
+        title: "QI Core Patient",
+        type: "Patient",
+        category: "Demo",
+        profile: "profile-patient",
+      },
+    ];
+    const onClick = jest.fn();
+    window.open = jest.fn();
+
+    render(
+      <ResourceList
+        resourceIdentifiers={resourceList}
+        onClick={onClick}
+        measureModel="QI-Core 7.0"
+      />
+    );
+
+    const hl7Button = await screen.findByTestId("hl7-link-qicore-patient");
+    expect(hl7Button).toBeInTheDocument();
+    userEvent.click(hl7Button);
+    expect(window.open).toHaveBeenCalledWith(
+      "https://hl7.org/fhir/us/qicore/STU7/StructureDefinition-qicore-patient.html",
+      "_blank"
+    );
+  });
+
+  it("should open a US Core profile link when the id starts with us-core", async () => {
+    const resourceList = [
+      {
+        id: "us-core-patient",
+        title: "US Core Patient",
+        type: "Patient",
+        category: "Demo",
+        profile: "profile-patient",
+      },
+    ];
+    const onClick = jest.fn();
+    window.open = jest.fn();
+
+    render(
+      <ResourceList
+        resourceIdentifiers={resourceList}
+        onClick={onClick}
+        measureModel="QI-Core 6.0"
+      />
+    );
+
+    const hl7Button = await screen.findByTestId("hl7-link-us-core-patient");
+    expect(hl7Button).toBeInTheDocument();
+    userEvent.click(hl7Button);
+    expect(window.open).toHaveBeenCalledWith(
+      "https://hl7.org/fhir/us/core/StructureDefinition-us-core-patient.html",
+      "_blank"
+    );
   });
 
   it("should display list of resources limited to 4", async () => {
