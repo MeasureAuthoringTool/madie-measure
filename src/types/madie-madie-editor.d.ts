@@ -1,5 +1,6 @@
 declare module "@madie/madie-editor" {
   import { FC } from "react";
+  import { Code } from "@madie/madie-models";
 
   export type EditorAnnotation = {
     row?: number;

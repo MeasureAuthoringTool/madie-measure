@@ -606,9 +606,9 @@ describe("Action Center Tests", () => {
     expect(transferSaveButton).toBeEnabled();
     fireEvent.click(transferSaveButton);
 
-    await waitFor(() => {
-      expect(screen.queryByTestId("transfer-dialog")).not.toBeInTheDocument();
-    });
+    await waitForElementToBeRemoved(() =>
+      screen.queryByTestId("transfer-dialog")
+    );
 
     expect(mockMeasureServiceApi.transferMeasures).toHaveBeenCalledWith(
       ["IDIDID1"],
@@ -650,9 +650,9 @@ describe("Action Center Tests", () => {
     const transferSaveButton = screen.getByTestId("transfer-save-button");
     fireEvent.click(transferSaveButton);
 
-    await waitFor(() => {
-      expect(screen.queryByTestId("transfer-dialog")).not.toBeInTheDocument();
-    });
+    await waitForElementToBeRemoved(() =>
+      screen.queryByTestId("transfer-dialog")
+    );
 
     expect(mockMeasureServiceApi.transferMeasures).toHaveBeenCalledWith(
       ["IDIDID1"],

@@ -34,14 +34,19 @@ const filterByOptions = ["Group", "Title", "Description"];
 
 export default function CompositeTestCasesTable({
   testCases,
+  validTestCaseIds,
   selectedMeasure,
   onBackToMeasures,
-  onSelectProfile,
+  onViewTestCase,
+  onInsertProfilesFromTestCase,
 }: {
   testCases: TestCase[];
+  validTestCaseIds: Set<string>;
   selectedMeasure: Measure;
   onBackToMeasures: () => void;
-  onSelectProfile?: (testCase: TestCase) => void;
+  onViewTestCase?: (testCase: TestCase) => void;
+  onInsertTestCase?: (testCase: TestCase) => void;
+  onInsertProfilesFromTestCase?: (testCase: TestCase) => void;
 }) {
   const [howItWorksOpen, setHowItWorksOpen] = useState<boolean>(false);
   const [hoveredHeader, setHoveredHeader] = useState<string>("");
@@ -51,13 +56,13 @@ export default function CompositeTestCasesTable({
   const [page, setPage] = useState<number>(1);
   const [limit, setLimit] = useState<number>(10);
 
-  // Only show valid test cases
+  // Only show valid test cases provided by parent-level validation logic.
   const validTestCases = useMemo(
-    () => testCases.filter((tc) => tc.validResource),
-    [testCases]
+    () => testCases.filter((tc) => validTestCaseIds.has(tc.id)),
+    [testCases, validTestCaseIds]
   );
 
-  // Filter
+  // Filter and return only valid test cases
   const filteredTestCases = useMemo(() => {
     if (!searchText.trim()) return validTestCases;
     const lowerSearch = searchText.toLowerCase();
@@ -153,21 +158,34 @@ export default function CompositeTestCasesTable({
         header: null,
         size: 15,
         cell: (info) => (
-          <Button
-            tw="m-2"
-            type="button"
-            data-testid={`select-profile-btn-${info.row.original.id}`}
-            onClick={() => onSelectProfile?.(info.row.original)}
-          >
-            Select Profile(s)
-            <ChevronRightIcon style={{ height: "20px", width: "20px" }} />
-          </Button>
+          <>
+            <Button
+              tw="m-2"
+              type="button"
+              title="View test case"
+              data-testid={`view-test-case-btn-${info.row.original.id}`}
+              onClick={() => onViewTestCase?.(info.row.original)}
+            >
+              View Test Case
+            </Button>
+            <Button
+              tw="m-2"
+              type="button"
+              title="Insert Profiles from Test Case"
+              data-testid={`insert-test-case-btn-${info.row.original.id}`}
+              disabled={!validTestCaseIds.has(info.row.original.id)}
+              onClick={() => onInsertProfilesFromTestCase?.(info.row.original)}
+            >
+              Insert
+              <ChevronRightIcon style={{ height: "20px", width: "20px" }} />
+            </Button>
+          </>
         ),
         accessorKey: "actions",
         enableSorting: false,
       },
     ],
-    [onSelectProfile]
+    [onViewTestCase, onInsertProfilesFromTestCase, validTestCaseIds]
   );
 
   const table = useReactTable({
@@ -240,7 +258,7 @@ export default function CompositeTestCasesTable({
 
       {/* Header */}
       <h3 style={{ fontSize: 18, fontWeight: 500 }}>
-        2. Select which Test Case to choose Test Case Profiles from:
+        2. Select which Test Case to insert into composite test case:
       </h3>
       <hr
         style={{

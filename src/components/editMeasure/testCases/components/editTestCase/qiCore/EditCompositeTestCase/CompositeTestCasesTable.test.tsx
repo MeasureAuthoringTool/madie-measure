@@ -60,12 +60,18 @@ const testCases = [
   }),
 ];
 
+const getValidTestCaseIds = (items: any[]) =>
+  new Set(items.filter((tc) => tc.validResource).map((tc) => tc.id));
+
 describe("CompositeTestCasesTable", () => {
   const defaultProps = {
     testCases,
+    validTestCaseIds: getValidTestCaseIds(testCases),
     selectedMeasure: mockMeasure,
     onBackToMeasures: jest.fn(),
-    onSelectProfile: jest.fn(),
+    onViewTestCase: jest.fn(),
+    onInsertTestCase: jest.fn(),
+    onInsertProfilesFromTestCase: jest.fn(),
   };
 
   beforeEach(() => {
@@ -81,7 +87,7 @@ describe("CompositeTestCasesTable", () => {
     expect(screen.getByTestId("back-to-measures-btn")).toBeInTheDocument();
     expect(
       screen.getByText(
-        "2. Select which Test Case to choose Test Case Profiles from:"
+        "2. Select which Test Case to insert into composite test case:"
       )
     ).toBeInTheDocument();
     expect(screen.getByText("My Composite Measure")).toBeInTheDocument();
@@ -98,6 +104,7 @@ describe("CompositeTestCasesTable", () => {
     expect(
       screen.getByRole("button", { name: /^Description$/i })
     ).toBeInTheDocument();
+    expect(screen.getAllByText(/^Insert$/i)).toHaveLength(3);
   });
 
   it("does not show CMS ID when measureSet.cmsId is absent", () => {
@@ -128,6 +135,7 @@ describe("CompositeTestCasesTable", () => {
       <CompositeTestCasesTable
         {...defaultProps}
         testCases={[makeTestCase({ id: "x", validResource: false })]}
+        validTestCaseIds={new Set()}
       />
     );
     expect(screen.getByTestId("no-test-cases-message")).toBeInTheDocument();
@@ -135,15 +143,44 @@ describe("CompositeTestCasesTable", () => {
 
   it("calls onBackToMeasures when back button is clicked", () => {
     render(<CompositeTestCasesTable {...defaultProps} />);
-    fireEvent.click(screen.getByTestId("back-to-measures-btn"));
+    userEvent.click(screen.getByTestId("back-to-measures-btn"));
     expect(defaultProps.onBackToMeasures).toHaveBeenCalledTimes(1);
   });
 
-  it("calls onSelectProfile with the correct test case", () => {
+  it("calls onViewTestCase with the correct test case", () => {
     render(<CompositeTestCasesTable {...defaultProps} />);
-    fireEvent.click(screen.getByTestId("select-profile-btn-tc2"));
-    expect(defaultProps.onSelectProfile).toHaveBeenCalledWith(
+    userEvent.click(screen.getByTestId("view-test-case-btn-tc2"));
+    expect(defaultProps.onViewTestCase).toHaveBeenCalledWith(
       expect.objectContaining({ id: "tc2", title: "Test Case Beta" })
+    );
+  });
+
+  it("calls onInsertProfilesFromTestCase with the correct test case", () => {
+    render(<CompositeTestCasesTable {...defaultProps} />);
+    userEvent.click(screen.getByTestId("insert-test-case-btn-tc2"));
+    expect(defaultProps.onInsertProfilesFromTestCase).toHaveBeenCalledWith(
+      expect.objectContaining({ id: "tc2", title: "Test Case Beta" })
+    );
+  });
+
+  it("renders title attributes for view and insert action buttons", () => {
+    render(<CompositeTestCasesTable {...defaultProps} />);
+
+    expect(screen.getByTestId("view-test-case-btn-tc1")).toHaveAttribute(
+      "title",
+      "View test case"
+    );
+    expect(screen.getByTestId("insert-test-case-btn-tc1")).toHaveAttribute(
+      "title",
+      "Insert Profiles from Test Case"
+    );
+  });
+
+  it("sets insert button title for tooltip text", () => {
+    render(<CompositeTestCasesTable {...defaultProps} />);
+    expect(screen.getByTestId("insert-test-case-btn-tc1")).toHaveAttribute(
+      "title",
+      "Insert Profiles from Test Case"
     );
   });
 
@@ -220,7 +257,7 @@ describe("CompositeTestCasesTable", () => {
     fireEvent.change(searchInput, { target: { value: "Beta" } });
     expect(screen.getAllByTestId("tc-row-item")).toHaveLength(1);
 
-    fireEvent.click(screen.getByTestId("tc-clear-search"));
+    userEvent.click(screen.getByTestId("tc-clear-search"));
     expect(screen.getAllByTestId("tc-row-item")).toHaveLength(3);
     expect(searchInput).toHaveValue("");
   });
@@ -233,15 +270,15 @@ describe("CompositeTestCasesTable", () => {
     const th = titleHeader.closest("th")!;
 
     // ascending
-    fireEvent.click(th);
+    userEvent.click(th);
     expect(titleHeader).toHaveAttribute("title", "Sort descending");
 
     // descending
-    fireEvent.click(th);
+    userEvent.click(th);
     expect(titleHeader).toHaveAttribute("title", "Clear sort");
 
     // clear sort
-    fireEvent.click(th);
+    userEvent.click(th);
     expect(titleHeader).toHaveAttribute("title", "Sort ascending");
   });
 
@@ -256,7 +293,13 @@ describe("CompositeTestCasesTable", () => {
         description: `Desc ${i}`,
       })
     );
-    render(<CompositeTestCasesTable {...defaultProps} testCases={manyTcs} />);
+    render(
+      <CompositeTestCasesTable
+        {...defaultProps}
+        testCases={manyTcs}
+        validTestCaseIds={getValidTestCaseIds(manyTcs)}
+      />
+    );
 
     // default limit is 10
     expect(screen.getAllByTestId("tc-row-item")).toHaveLength(10);
@@ -274,7 +317,13 @@ describe("CompositeTestCasesTable", () => {
         description: `Desc ${i}`,
       })
     );
-    render(<CompositeTestCasesTable {...defaultProps} testCases={manyTcs} />);
+    render(
+      <CompositeTestCasesTable
+        {...defaultProps}
+        testCases={manyTcs}
+        validTestCaseIds={getValidTestCaseIds(manyTcs)}
+      />
+    );
     const searchInput = screen.getByTestId("tc-search-input");
     // Pressing Enter should call handleSearch (covers the Enter branch)
     fireEvent.keyPress(searchInput, {
@@ -291,7 +340,7 @@ describe("CompositeTestCasesTable", () => {
     render(<CompositeTestCasesTable {...defaultProps} />);
     const searchInput = screen.getByTestId("tc-search-input");
     fireEvent.change(searchInput, { target: { value: "Alpha" } });
-    fireEvent.click(screen.getByTestId("tc-trigger-search"));
+    userEvent.click(screen.getByTestId("tc-trigger-search"));
     expect(screen.getAllByTestId("tc-row-item")).toHaveLength(1);
   });
 
@@ -319,7 +368,13 @@ describe("CompositeTestCasesTable", () => {
         description: `Desc ${i}`,
       })
     );
-    render(<CompositeTestCasesTable {...defaultProps} testCases={manyTcs} />);
+    render(
+      <CompositeTestCasesTable
+        {...defaultProps}
+        testCases={manyTcs}
+        validTestCaseIds={getValidTestCaseIds(manyTcs)}
+      />
+    );
 
     // page 1: 10 rows shown
     expect(screen.getAllByTestId("tc-row-item")).toHaveLength(10);
@@ -351,7 +406,13 @@ describe("CompositeTestCasesTable", () => {
         description: `Desc ${i}`,
       })
     );
-    render(<CompositeTestCasesTable {...defaultProps} testCases={manyTcs} />);
+    render(
+      <CompositeTestCasesTable
+        {...defaultProps}
+        testCases={manyTcs}
+        validTestCaseIds={getValidTestCaseIds(manyTcs)}
+      />
+    );
     expect(screen.getAllByTestId("tc-row-item")).toHaveLength(10);
 
     // There are two comboboxes on the page (Filter By + page-limit). The
@@ -380,7 +441,13 @@ describe("CompositeTestCasesTable", () => {
         description: `Desc ${i}`,
       })
     );
-    render(<CompositeTestCasesTable {...defaultProps} testCases={manyTcs} />);
+    render(
+      <CompositeTestCasesTable
+        {...defaultProps}
+        testCases={manyTcs}
+        validTestCaseIds={getValidTestCaseIds(manyTcs)}
+      />
+    );
 
     const comboboxes = await screen.findAllByRole("combobox", {
       expanded: false,
@@ -408,7 +475,7 @@ describe("CompositeTestCasesTable", () => {
 
   it("opens HowItWorks panel when the link is clicked, and the back button stays visible", async () => {
     render(<CompositeTestCasesTable {...defaultProps} />);
-    await userEvent.click(screen.getByTestId("how-it-works-link"));
+    userEvent.click(screen.getByTestId("how-it-works-link"));
     expect(screen.getByTestId("how-it-works-content")).toBeInTheDocument();
     // Back button must still be present (it moves to its own row, not removed)
     expect(screen.getByTestId("back-to-measures-btn")).toBeInTheDocument();
@@ -416,9 +483,9 @@ describe("CompositeTestCasesTable", () => {
 
   it("closes HowItWorks panel when the close button is clicked", async () => {
     render(<CompositeTestCasesTable {...defaultProps} />);
-    await userEvent.click(screen.getByTestId("how-it-works-link"));
+    userEvent.click(screen.getByTestId("how-it-works-link"));
     expect(screen.getByTestId("how-it-works-content")).toBeInTheDocument();
-    await userEvent.click(screen.getByTestId("how-it-works-close"));
+    userEvent.click(screen.getByTestId("how-it-works-close"));
     expect(
       screen.queryByTestId("how-it-works-content")
     ).not.toBeInTheDocument();
