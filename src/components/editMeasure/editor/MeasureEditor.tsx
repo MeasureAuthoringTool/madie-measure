@@ -74,6 +74,8 @@ import applyCQLFunction, {
 import { useParams } from "react-router";
 import LockedMessageModal from "../../common/lockedMessageModal/LockedMessageModal";
 import useServiceConfig from "../../../api/useServiceConfig";
+import useFhirElmTranslationServiceApi from "../../../api/useFhirElmTranslationServiceApi";
+import useQdmElmTranslationServiceApi from "../../../api/useQdmElmTranslationServiceApi";
 
 export const mapErrorsToAceAnnotations = (
   errors: ElmTranslationError[]
@@ -240,6 +242,8 @@ const MeasureEditor = ({ measureCanEdit, measureLockedBy }) => {
   const [refValueSetDetails, setRefValueSetDetails] = useState();
   const prevSelectedValueSetDetails = useRef();
   const terminologyServiceApi = useRef(useTerminologyServiceApi());
+  const fhirServiceApi = useRef(useFhirElmTranslationServiceApi());
+  const qdmElmTranslationApi = useRef(useQdmElmTranslationServiceApi());
   // on load fetch elm translations results to display errors on editor not just on load..
   useEffect(() => {
     //validateCql(measure, setToastOpen, setToastMessage);
@@ -263,7 +267,9 @@ const MeasureEditor = ({ measureCanEdit, measureLockedBy }) => {
       const result = await validateContent(
         cql,
         true,
-        terminologyServiceApi.current
+        terminologyServiceApi.current,
+        fhirServiceApi.current,
+        qdmElmTranslationApi.current
       );
       const { errors, externalErrors } = result;
       // right now we are only displaying the external errors related to included libraries
