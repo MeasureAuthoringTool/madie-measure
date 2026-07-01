@@ -165,6 +165,10 @@ const CodesComponent = ({
             options={
               codes && codes.length > 0
                 ? [...codes]
+                    .filter(
+                      (concept, index, self) =>
+                        index === self.findIndex((t) => t.code === concept.code)
+                    )
                     .sort((a, b) =>
                       (a.display || "")
                         .toLowerCase()
