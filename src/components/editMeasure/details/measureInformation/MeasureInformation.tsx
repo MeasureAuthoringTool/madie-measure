@@ -386,7 +386,9 @@ export default function MeasureInformation(props: MeasureInformationProps) {
           const { errors, translation } = await validateContent(
             updatedCqlOb.cql,
             true,
-            terminologyServiceApi.current
+            terminologyServiceApi.current,
+            fhirElmTranslationService,
+            qdmElmTranslationService
           );
           if (cqlErrors.length === 0 && errors.length === 0) {
             var updatedElm = JSON.stringify(translation);
