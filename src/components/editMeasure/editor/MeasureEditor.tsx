@@ -241,9 +241,9 @@ const MeasureEditor = ({ measureCanEdit, measureLockedBy }) => {
 
   const [refValueSetDetails, setRefValueSetDetails] = useState();
   const prevSelectedValueSetDetails = useRef();
-  const terminologyServiceApi = useRef(useTerminologyServiceApi());
-  const fhirServiceApi = useRef(useFhirElmTranslationServiceApi());
-  const qdmElmTranslationApi = useRef(useQdmElmTranslationServiceApi());
+  const terminologyServiceApi = useTerminologyServiceApi();
+  const fhirServiceApi = useFhirElmTranslationServiceApi();
+  const qdmElmTranslationApi = useQdmElmTranslationServiceApi();
   // on load fetch elm translations results to display errors on editor not just on load..
   useEffect(() => {
     //validateCql(measure, setToastOpen, setToastMessage);
@@ -267,9 +267,9 @@ const MeasureEditor = ({ measureCanEdit, measureLockedBy }) => {
       const result = await validateContent(
         cql,
         true,
-        terminologyServiceApi.current,
-        fhirServiceApi.current,
-        qdmElmTranslationApi.current
+        terminologyServiceApi,
+        qdmElmTranslationApi,
+        fhirServiceApi
       );
       const { errors, externalErrors } = result;
       // right now we are only displaying the external errors related to included libraries

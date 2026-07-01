@@ -356,7 +356,7 @@ export default function MeasureInformation(props: MeasureInformationProps) {
     return true;
   };
 
-  const terminologyServiceApi = useRef(useTerminologyServiceApi());
+  const terminologyServiceApi = useTerminologyServiceApi();
   const handleSubmit = async (values) => {
     let endorsersValid = true;
     // we only want to validate this field if it's not an empty array.
@@ -386,9 +386,9 @@ export default function MeasureInformation(props: MeasureInformationProps) {
           const { errors, translation } = await validateContent(
             updatedCqlOb.cql,
             true,
-            terminologyServiceApi.current,
-            fhirElmTranslationService,
-            qdmElmTranslationService
+            terminologyServiceApi,
+            qdmElmTranslationService,
+            fhirElmTranslationService
           );
           if (cqlErrors.length === 0 && errors.length === 0) {
             var updatedElm = JSON.stringify(translation);
