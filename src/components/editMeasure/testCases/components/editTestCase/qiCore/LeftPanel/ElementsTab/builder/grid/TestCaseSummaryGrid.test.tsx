@@ -57,6 +57,17 @@ export const mockBundle = {
         id: "unknown",
       }, // Unsupported resource type
     },
+    {
+      resource: {
+        resourceType: "Patient",
+        id: "patient-123",
+        meta: {
+          profile: [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient",
+          ],
+        },
+      }, // Valid patient profile
+    },
   ],
 };
 
@@ -73,6 +84,10 @@ const gridData = [
   {
     title: "Unknown Resource",
     entry: mockBundle.entry[4], // Unsupported
+  },
+  {
+    title: "QICore Patient",
+    entry: mockBundle.entry[5], // Patient profile
   },
 ] as GridDataEntry[];
 
@@ -229,7 +244,7 @@ describe("TestCaseSummaryGrid", () => {
     expect(deleteAction).toBeInTheDocument();
   });
 
-  it("should render Clone action that invokes onRowClone with the entry", async () => {
+  it("should render Clone action that invokes onRowClone with the GridDataEntry", async () => {
     renderWithResourceContext(
       <TestCaseSummaryGrid
         gridData={gridData}
@@ -252,7 +267,12 @@ describe("TestCaseSummaryGrid", () => {
     await waitFor(() => {
       expect(mockOnRowClone).toHaveBeenCalledTimes(1);
     });
-    expect(mockOnRowClone).toHaveBeenCalledWith(mockBundle.entry[0]);
+    // Now expects GridDataEntry with entry and title
+    expect(mockOnRowClone).toHaveBeenCalledWith({
+      title: "QICore Encounter",
+      entry: mockBundle.entry[0],
+      validationResult: expect.any(Object),
+    });
   });
 
   it("should render ActionCenter with disabled Edit action for Unsupported Profile", async () => {
@@ -458,5 +478,64 @@ describe("TestCaseSummaryGrid", () => {
 
     userEvent.click(viewAction);
     expect(mockOnRowEdit).toHaveBeenCalledWith(mockBundle.entry[0]);
+  });
+
+  it("should NOT render Clone action for Patient profiles", async () => {
+    renderWithResourceContext(
+      <TestCaseSummaryGrid
+        gridData={gridData}
+        onRowEdit={mockOnRowEdit}
+        onRowDelete={mockOnRowDelete}
+        onRowClone={mockOnRowClone}
+        testCaseCanEdit={true}
+        readOnly={false}
+      />
+    );
+
+    const actionCenterButton = screen.getByTestId(
+      "action-center-button-patient-123"
+    );
+    userEvent.click(actionCenterButton);
+
+    // Clone action should NOT be present for Patient profiles
+    const cloneAction = screen.queryByRole("menuitem", { name: "Clone" });
+    expect(cloneAction).not.toBeInTheDocument();
+
+    // Edit and Remove should still be present
+    const editAction = await screen.findByRole("menuitem", { name: "Edit" });
+    expect(editAction).toBeInTheDocument();
+
+    const removeAction = await screen.findByRole("menuitem", {
+      name: "Remove",
+    });
+    expect(removeAction).toBeInTheDocument();
+  });
+
+  it("should render Clone action for non-Patient profiles", async () => {
+    renderWithResourceContext(
+      <TestCaseSummaryGrid
+        gridData={gridData}
+        onRowEdit={mockOnRowEdit}
+        onRowDelete={mockOnRowDelete}
+        onRowClone={mockOnRowClone}
+        testCaseCanEdit={true}
+        readOnly={false}
+      />
+    );
+
+    const actionCenterButton = screen.getByTestId("action-center-button-ec-1");
+    userEvent.click(actionCenterButton);
+
+    // Clone action SHOULD be present for non-Patient profiles (Encounter)
+    const cloneAction = await screen.findByRole("menuitem", { name: "Clone" });
+    expect(cloneAction).toBeInTheDocument();
+
+    const editAction = await screen.findByRole("menuitem", { name: "Edit" });
+    expect(editAction).toBeInTheDocument();
+
+    const removeAction = await screen.findByRole("menuitem", {
+      name: "Remove",
+    });
+    expect(removeAction).toBeInTheDocument();
   });
 });

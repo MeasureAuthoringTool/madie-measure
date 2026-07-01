@@ -164,7 +164,8 @@ const TestCaseSummaryGrid = ({
       {
         name: "Edit",
         icon: <EditIcon color="#0073C8" />,
-        onClick: (targetContext: any) => onRowEdit(targetContext),
+        onClick: (targetContext: any) =>
+          onRowEdit(targetContext?.entry || targetContext),
       },
       {
         name: "Clone",
@@ -174,7 +175,8 @@ const TestCaseSummaryGrid = ({
       {
         name: "Remove",
         icon: <DeleteOutlinedIcon sx={{ color: "#D92F2F" }} />,
-        onClick: (targetContext: any) => onRowDelete(targetContext),
+        onClick: (targetContext: any) =>
+          onRowDelete(targetContext?.entry || targetContext),
       },
     ],
     [onRowEdit, onRowDelete, onRowClone]
@@ -185,7 +187,8 @@ const TestCaseSummaryGrid = ({
       {
         name: "View",
         icon: <ViewHeadlineIcon />,
-        onClick: (targetContext: any) => onRowEdit(targetContext),
+        onClick: (targetContext: any) =>
+          onRowEdit(targetContext?.entry || targetContext),
       },
     ],
     [onRowEdit]
@@ -250,19 +253,25 @@ const TestCaseSummaryGrid = ({
         cell: ({ row }) => {
           const entry = row.original.entry;
           const validationResult = row.original.validationResult;
+          const isPatientProfile = entry?.resource?.resourceType === "Patient";
           // For edit action, disable if unsupported
+          // For Patient profiles, remove the Clone action
           const rowActions = testCaseCanEdit
-            ? actions.map((action) =>
-                action.name === "Edit"
-                  ? {
-                      ...action,
-                      disabled: !validationResult.isValid,
-                      tooltip: !validationResult.isValid
-                        ? validationResult.message
-                        : undefined,
-                    }
-                  : action
-              )
+            ? actions
+                .filter(
+                  (action) => !(action.name === "Clone" && isPatientProfile)
+                )
+                .map((action) =>
+                  action.name === "Edit"
+                    ? {
+                        ...action,
+                        disabled: !validationResult.isValid,
+                        tooltip: !validationResult.isValid
+                          ? validationResult.message
+                          : undefined,
+                      }
+                    : action
+                )
             : viewAction;
           return readOnly ? (
             <Tooltip
@@ -303,7 +312,7 @@ const TestCaseSummaryGrid = ({
             <ActionCenter
               actions={rowActions}
               testId={entry.resource.id}
-              target={entry}
+              target={row.original}
             />
           );
         },
