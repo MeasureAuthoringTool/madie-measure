@@ -20,7 +20,6 @@ export default function ReviewAction(props: PropTypes) {
   const [tooltipMessage, setTooltipMessage] = useState(
     SELECT_MEASURE_TO_UPDATE_REVIEW_STATUS
   );
-
   const validateReviewActionState = useCallback(() => {
     const shouldEnableReview = measures?.length === 1 && canEdit;
 

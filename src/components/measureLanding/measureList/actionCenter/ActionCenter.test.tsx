@@ -8,6 +8,7 @@ import {
   useOktaTokens,
   checkUserCanDelete,
   MeasureServiceApi,
+  useFeatureFlags,
 } from "@madie/madie-util";
 
 const mockMeasureServiceApi = {
@@ -49,6 +50,9 @@ jest.mock("@madie/madie-util", () => ({
     isAdmin: false,
   }),
   useOktaTokens: jest.fn(),
+  useFeatureFlags: jest.fn().mockReturnValue({
+    MeasureReviewStatus: true,
+  }),
   fetchMeasureDraftStatuses: jest.fn(),
   checkUserCanDelete: jest.fn(),
 }));
@@ -83,6 +87,35 @@ describe("ActionCenter", () => {
     (checkUserCanDelete as jest.Mock).mockImplementation(
       mockCheckUserCanDelete
     );
+    (useFeatureFlags as jest.Mock).mockReturnValue({
+      MeasureReviewStatus: true,
+    });
+  });
+
+  it("should not render review action when MeasureReviewStatus flag is disabled", () => {
+    mockCheckUserCanEdit.mockReturnValue(true);
+    (useFeatureFlags as jest.Mock).mockReturnValue({
+      MeasureReviewStatus: false,
+    });
+
+    render(
+      <ActionCenter
+        measures={[qdmMeasure]}
+        associateCmsId={jest.fn()}
+        exportMeasure={jest.fn()}
+        updateTargetMeasure={jest.fn()}
+        setCreateVersionDialog={jest.fn()}
+        setDraftMeasureDialog={jest.fn()}
+        setDeleteMeasureDialog={jest.fn()}
+        setShareDialog={jest.fn}
+        deleteMeasure={jest.fn()}
+        setViewHumanReadableModal={jest.fn()}
+        activeTab={0}
+        setTransferDialog={jest.fn()}
+      />
+    );
+
+    expect(screen.queryByTestId("review-action-btn")).not.toBeInTheDocument();
   });
 
   it("should render all action components", () => {

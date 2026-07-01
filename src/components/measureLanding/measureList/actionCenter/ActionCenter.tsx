@@ -10,6 +10,7 @@ import {
   checkUserCanEdit,
   checkUserCanDelete,
   useUserRoles,
+  useFeatureFlags,
 } from "@madie/madie-util";
 import ShareAction from "./shareAction/ShareAction";
 import TransferAction from "./transferAction/TransferAction";
@@ -63,6 +64,8 @@ export default function ActionCenter(props: PropTypes) {
   const [isOwner, setIsOwner] = useState<boolean>(false);
   const [isSharedWithUser, setIsSharedWithUser] = useState<boolean>(false);
   const userRoles = useUserRoles();
+
+  const featureFlags = useFeatureFlags();
 
   const versionMeasure = useCallback(() => {
     if (measures?.length === 1) {
@@ -230,11 +233,13 @@ export default function ActionCenter(props: PropTypes) {
       />
       <HistoryAction measures={measures} onClick={viewMeasureHistory} />
       <CompareVersionsAction measures={measures} onClick={compareVersions} />
-      <ReviewAction
-        measures={measures}
-        onClick={reviewMeasure}
-        canEdit={canEdit}
-      />
+      {featureFlags?.MeasureReviewStatus && (
+        <ReviewAction
+          measures={measures}
+          onClick={reviewMeasure}
+          canEdit={canEdit}
+        />
+      )}
     </div>
   );
 }
