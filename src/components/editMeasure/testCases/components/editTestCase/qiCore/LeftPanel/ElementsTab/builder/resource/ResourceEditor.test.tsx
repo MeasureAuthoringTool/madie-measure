@@ -205,6 +205,7 @@ describe("ResourceEditor", () => {
           >
             <ResourceEditor
               selectedResourceID="446b20b5-dd46-415e-9b9f-9eba6b260743"
+              measureModel="QI-Core 6.0"
               setValidationSchema={mockSetValidationSchema}
               setInitialFormikValuesStu6={mockSetInitialFormikValuesStu6}
               onCancel={mockOnCancel}
@@ -236,6 +237,15 @@ describe("ResourceEditor", () => {
       expect(screen.getByText("Active")).toBeInTheDocument();
       expect(screen.getByText("Birth Date")).toBeInTheDocument();
       expect(screen.queryByText("Address")).not.toBeInTheDocument();
+      // HL7 link should be present and open correct STU6 URL
+      window.open = jest.fn();
+      const hl7Btn = screen.getByTestId("edit-hl7-link-qicore-patient");
+      expect(hl7Btn).toBeInTheDocument();
+      userEvent.click(hl7Btn);
+      expect(window.open).toHaveBeenCalledWith(
+        "https://hl7.org/fhir/us/qicore/STU6/StructureDefinition-qicore-patient.html",
+        "_blank"
+      );
     });
   });
 
@@ -408,6 +418,7 @@ describe("ResourceEditor", () => {
           >
             <ResourceEditor
               selectedResourceID="446b20b5-dd46-415e-9b9f-9eba6b260743"
+              measureModel="QI-Core 6.0"
               setValidationSchema={mockSetValidationSchema}
               setInitialFormikValuesStu6={mockSetInitialFormikValuesStu6}
               onCancel={mockOnCancel}
@@ -471,6 +482,7 @@ describe("ResourceEditor", () => {
           >
             <ResourceEditor
               selectedResourceID="446b20b5-dd46-415e-9b9f-9eba6b260743"
+              measureModel="QI-Core 6.0"
               setValidationSchema={mockSetValidationSchema}
               setInitialFormikValuesStu6={mockSetInitialFormikValuesStu6}
               onCancel={mockOnCancel}
