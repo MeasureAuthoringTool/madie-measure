@@ -163,4 +163,44 @@ describe("ChoiceType", () => {
     expect(options[1]).toHaveTextContent("Integer");
     expect(options[2]).toHaveTextContent("String");
   });
+
+  it("filters out duplicate choice type options", async () => {
+    // Create a childDef with duplicate types
+    const childDefWithDuplicates = {
+      id: "Observation.component[0].value[x]",
+      path: "Observation.component[0].value[x]",
+      min: 0,
+      max: "1",
+      type: [
+        { code: "string" },
+        { code: "boolean" },
+        { code: "string" }, // duplicate
+        { code: "integer" },
+        { code: "boolean" }, // duplicate
+      ],
+    };
+
+    renderWithFormik(
+      {
+        childDef: childDefWithDuplicates,
+        label: "Observation.component[0].value[x]",
+        canEdit: true,
+      },
+      getFormikValues()
+    );
+
+    const select = await screen.findByRole("combobox");
+    await act(async () => {
+      await userEvent.click(select);
+    });
+
+    const listbox = screen.getByRole("listbox");
+    const options = within(listbox).getAllByRole("option");
+
+    // Verify duplicates are filtered out and only 3 unique options remain
+    expect(options).toHaveLength(3);
+    expect(options[0]).toHaveTextContent("Boolean");
+    expect(options[1]).toHaveTextContent("Integer");
+    expect(options[2]).toHaveTextContent("String");
+  });
 });

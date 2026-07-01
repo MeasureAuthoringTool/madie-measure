@@ -35,9 +35,14 @@ export function handleRowDelete(
 }
 
 export function handleRowClone(
-  row: any,
-  dispatch: (action: { type: string; payload: any }) => void
+  rowData: any,
+  dispatch: (action: { type: string; payload: any }) => void,
+  onSuccess?: (profileName: string) => void
 ) {
+  const row = rowData?.entry || rowData;
+  const profileName =
+    rowData?.title || row?.resource?.resourceType || "Profile";
+
   const clonedEntry = _.cloneDeep(row);
   const newId = uuidv4();
   if (clonedEntry?.resource) {
@@ -50,4 +55,8 @@ export function handleRowClone(
     type: ResourceActionType.ADD_BUNDLE_ENTRY,
     payload: clonedEntry,
   });
+
+  if (onSuccess) {
+    onSuccess(profileName);
+  }
 }

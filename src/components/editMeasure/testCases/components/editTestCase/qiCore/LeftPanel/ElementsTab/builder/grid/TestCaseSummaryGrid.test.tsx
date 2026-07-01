@@ -57,6 +57,17 @@ export const mockBundle = {
         id: "unknown",
       }, // Unsupported resource type
     },
+    {
+      resource: {
+        resourceType: "Patient",
+        id: "patient-123",
+        meta: {
+          profile: [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient",
+          ],
+        },
+      }, // Valid patient profile
+    },
   ],
 };
 
@@ -73,6 +84,10 @@ const gridData = [
   {
     title: "Unknown Resource",
     entry: mockBundle.entry[4], // Unsupported
+  },
+  {
+    title: "QICore Patient",
+    entry: mockBundle.entry[5], // Patient profile
   },
 ] as GridDataEntry[];
 
@@ -128,13 +143,15 @@ describe("TestCaseSummaryGrid", () => {
         onRowEdit={mockOnRowEdit}
         onRowDelete={mockOnRowDelete}
         testCaseCanEdit={true}
+        measureModel="QI-Core 6.0"
         readOnly={false}
       />
     );
 
     const columnHeaders = screen.getAllByRole("columnheader");
     expect(within(columnHeaders[0]).getByText("Profile")).toBeInTheDocument();
-    expect(within(columnHeaders[1]).getByText("ID")).toBeInTheDocument();
+    expect(within(columnHeaders[1]).getByText("HL7")).toBeInTheDocument();
+    expect(within(columnHeaders[2]).getByText("ID")).toBeInTheDocument();
 
     const rows = screen.getAllByRole("row");
     expect(
@@ -144,7 +161,7 @@ describe("TestCaseSummaryGrid", () => {
     ).toBeInTheDocument();
 
     expect(
-      within(rows[1].querySelector("td:nth-child(2)")).getByText("ec-1")
+      within(rows[1].querySelector("td:nth-child(3)")).getByText("ec-1")
     ).toBeInTheDocument();
 
     expect(
@@ -154,7 +171,7 @@ describe("TestCaseSummaryGrid", () => {
     ).toBeInTheDocument();
 
     expect(
-      within(rows[2].querySelector("td:nth-child(2)")).getByText("pd-1")
+      within(rows[2].querySelector("td:nth-child(3)")).getByText("pd-1")
     ).toBeInTheDocument();
 
     // Verify unsupported message/tooltip is present for unsupported profile
@@ -169,6 +186,29 @@ describe("TestCaseSummaryGrid", () => {
         UNSUPPORTED_RESOURCE_ERROR
       )
     ).toBeInTheDocument();
+  });
+
+  it("opens the HL7 profile link when the HL7 icon is clicked", async () => {
+    window.open = jest.fn();
+
+    renderWithResourceContext(
+      <TestCaseSummaryGrid
+        gridData={gridData}
+        onRowEdit={mockOnRowEdit}
+        onRowDelete={mockOnRowDelete}
+        testCaseCanEdit={true}
+        measureModel="QI-Core 6.0"
+        readOnly={false}
+      />
+    );
+
+    const hl7Button = await screen.findByTestId("hl7-link-qicore-encounter");
+    await userEvent.click(hl7Button);
+
+    expect(window.open).toHaveBeenCalledWith(
+      "https://hl7.org/fhir/us/qicore/STU6/StructureDefinition-qicore-encounter.html",
+      "_blank"
+    );
   });
 
   it("should render the table with no data", () => {
@@ -229,7 +269,7 @@ describe("TestCaseSummaryGrid", () => {
     expect(deleteAction).toBeInTheDocument();
   });
 
-  it("should render Clone action that invokes onRowClone with the entry", async () => {
+  it("should render Clone action that invokes onRowClone with the GridDataEntry", async () => {
     renderWithResourceContext(
       <TestCaseSummaryGrid
         gridData={gridData}
@@ -252,7 +292,12 @@ describe("TestCaseSummaryGrid", () => {
     await waitFor(() => {
       expect(mockOnRowClone).toHaveBeenCalledTimes(1);
     });
-    expect(mockOnRowClone).toHaveBeenCalledWith(mockBundle.entry[0]);
+    // Now expects GridDataEntry with entry and title
+    expect(mockOnRowClone).toHaveBeenCalledWith({
+      title: "QICore Encounter",
+      entry: mockBundle.entry[0],
+      validationResult: expect.any(Object),
+    });
   });
 
   it("should render ActionCenter with disabled Edit action for Unsupported Profile", async () => {
@@ -458,5 +503,64 @@ describe("TestCaseSummaryGrid", () => {
 
     userEvent.click(viewAction);
     expect(mockOnRowEdit).toHaveBeenCalledWith(mockBundle.entry[0]);
+  });
+
+  it("should NOT render Clone action for Patient profiles", async () => {
+    renderWithResourceContext(
+      <TestCaseSummaryGrid
+        gridData={gridData}
+        onRowEdit={mockOnRowEdit}
+        onRowDelete={mockOnRowDelete}
+        onRowClone={mockOnRowClone}
+        testCaseCanEdit={true}
+        readOnly={false}
+      />
+    );
+
+    const actionCenterButton = screen.getByTestId(
+      "action-center-button-patient-123"
+    );
+    userEvent.click(actionCenterButton);
+
+    // Clone action should NOT be present for Patient profiles
+    const cloneAction = screen.queryByRole("menuitem", { name: "Clone" });
+    expect(cloneAction).not.toBeInTheDocument();
+
+    // Edit and Remove should still be present
+    const editAction = await screen.findByRole("menuitem", { name: "Edit" });
+    expect(editAction).toBeInTheDocument();
+
+    const removeAction = await screen.findByRole("menuitem", {
+      name: "Remove",
+    });
+    expect(removeAction).toBeInTheDocument();
+  });
+
+  it("should render Clone action for non-Patient profiles", async () => {
+    renderWithResourceContext(
+      <TestCaseSummaryGrid
+        gridData={gridData}
+        onRowEdit={mockOnRowEdit}
+        onRowDelete={mockOnRowDelete}
+        onRowClone={mockOnRowClone}
+        testCaseCanEdit={true}
+        readOnly={false}
+      />
+    );
+
+    const actionCenterButton = screen.getByTestId("action-center-button-ec-1");
+    userEvent.click(actionCenterButton);
+
+    // Clone action SHOULD be present for non-Patient profiles (Encounter)
+    const cloneAction = await screen.findByRole("menuitem", { name: "Clone" });
+    expect(cloneAction).toBeInTheDocument();
+
+    const editAction = await screen.findByRole("menuitem", { name: "Edit" });
+    expect(editAction).toBeInTheDocument();
+
+    const removeAction = await screen.findByRole("menuitem", {
+      name: "Remove",
+    });
+    expect(removeAction).toBeInTheDocument();
   });
 });

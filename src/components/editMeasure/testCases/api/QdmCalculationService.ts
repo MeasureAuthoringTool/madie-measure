@@ -1,3 +1,4 @@
+//@ts-ignore
 import { Calculator } from "cqm-execution";
 import { CqmMeasure, IndividualResult } from "cqm-models";
 import {
