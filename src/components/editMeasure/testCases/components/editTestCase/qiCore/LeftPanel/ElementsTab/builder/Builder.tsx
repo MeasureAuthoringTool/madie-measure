@@ -367,7 +367,15 @@ const Builder = ({
                       onRowDelete={(row) =>
                         handleRowDelete(row, setSelectedResourceId, dispatch)
                       }
-                      onRowClone={(row) => handleRowClone(row, dispatch)}
+                      onRowClone={(row) =>
+                        handleRowClone(row, dispatch, (profileName) => {
+                          setToastMessage(
+                            `${profileName} has successfully been cloned`
+                          );
+                          setToastType("success");
+                          setToastOpen(true);
+                        })
+                      }
                       testCaseCanEdit={canEdit}
                       selectedRowId={selectedResourceID}
                       readOnly={!canEdit}

@@ -104,4 +104,41 @@ describe("Builder handler functions", () => {
     expect(call.payload.fullUrl).toBeUndefined();
     expect(call.payload.resource.id).not.toBe("pd-1");
   });
+
+  it("handleRowClone calls onSuccess callback with profile name when provided", () => {
+    const row = {
+      resource: {
+        resourceType: "Encounter",
+        id: "abc-123",
+      },
+    };
+    const dispatch = jest.fn();
+    const onSuccess = jest.fn();
+
+    handleRowClone(row, dispatch, onSuccess);
+
+    expect(dispatch).toHaveBeenCalledTimes(1);
+    expect(onSuccess).toHaveBeenCalledTimes(1);
+    expect(onSuccess).toHaveBeenCalledWith("Encounter");
+  });
+
+  it("handleRowClone uses GridDataEntry title when available", () => {
+    const gridDataEntry = {
+      title: "QICore Encounter",
+      entry: {
+        resource: {
+          resourceType: "Encounter",
+          id: "abc-123",
+        },
+      },
+    };
+    const dispatch = jest.fn();
+    const onSuccess = jest.fn();
+
+    handleRowClone(gridDataEntry, dispatch, onSuccess);
+
+    expect(dispatch).toHaveBeenCalledTimes(1);
+    expect(onSuccess).toHaveBeenCalledTimes(1);
+    expect(onSuccess).toHaveBeenCalledWith("QICore Encounter");
+  });
 });
