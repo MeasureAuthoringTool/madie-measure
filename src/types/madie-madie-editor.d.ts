@@ -181,7 +181,9 @@ declare module "@madie/madie-editor" {
   export const validateContent: (
     content: string,
     checkContext: boolean,
-    terminologyServiceApi: TerminologyServiceApi
+    terminologyServiceApi: TerminologyServiceApi,
+    qdmApi: QdmElmTranslationServiceApi,
+    fhirApi: FhirElmTranslationServiceApi
   ) => Promise<ValidationResult>;
   export const synchingEditorCqlContent: (
     editorVal: string,
