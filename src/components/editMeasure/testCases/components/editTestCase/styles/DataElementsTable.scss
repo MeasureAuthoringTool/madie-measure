@@ -76,6 +76,13 @@ $header-weight: 500;
     }
   }
 
+  > thead > tr >,
+  > tbody > tr > {
+    > div {
+      box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
+    }
+  }
+
   > thead {
     border-bottom: solid 1px #8c8c8c;
     > tr > th {
@@ -207,6 +214,36 @@ $header-weight: 500;
 
   // Only for QI Core6 data elements table
   &.test-case-summary-table {
+    > thead > tr > th.hl7-column,
+    > tbody > tr > td.hl7-column {
+      width: 40px;
+      min-width: 40px;
+      max-width: 40px;
+    }
+
+    > tbody > tr > td.hl7-column > div {
+      padding: 8px;
+      display: flex;
+      justify-content: center;
+    }
+
+    // Add a single visual divider/shadow between HL7 and ID columns.
+    > tbody > tr > td.hl7-id-divider {
+      position: relative;
+
+      &::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 1px;
+        background: #c7c7c7;
+        box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
+        pointer-events: none;
+      }
+    }
+
     > tbody > tr > td > div {
       height: -webkit-fill-available;
     }
