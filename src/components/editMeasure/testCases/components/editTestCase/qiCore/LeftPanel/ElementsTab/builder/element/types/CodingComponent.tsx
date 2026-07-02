@@ -196,7 +196,13 @@ const CodingComponent = ({
       ? items.filter((item) => getDisplayValue(item) !== "Custom Code")
       : items;
 
-    const sortedOtherItems = otherItems.sort((a, b) => {
+    const uniqueItems = otherItems.filter(
+      (item, index, self) =>
+        index ===
+        self.findIndex((t) => getDisplayValue(t) === getDisplayValue(item))
+    );
+
+    const sortedOtherItems = uniqueItems.sort((a, b) => {
       const aDisplay = getDisplayValue(a).toLowerCase();
       const bDisplay = getDisplayValue(b).toLowerCase();
       return aDisplay.localeCompare(bDisplay);

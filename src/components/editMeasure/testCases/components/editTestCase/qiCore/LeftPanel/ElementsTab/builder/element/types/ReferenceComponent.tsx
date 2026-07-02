@@ -98,8 +98,11 @@ export const getFinalOptions = (
     value: `${selectedReferenceType}/${res.resource.id}`,
   }));
 
-  // Sort alphabetically by label
-  const sortedResults = mappedResults.sort((a, b) =>
+  const uniqueResults = mappedResults.filter(
+    (item, index, self) =>
+      index === self.findIndex((t) => t.label === item.label)
+  );
+  const sortedResults = uniqueResults.sort((a, b) =>
     a.label.toLowerCase().localeCompare(b.label.toLowerCase())
   );
 
