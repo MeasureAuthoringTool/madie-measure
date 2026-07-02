@@ -74,6 +74,38 @@ export function scrollToElementByIdWhenAvailable(
 }
 
 // prepare data for summary grid by adding profile titles
+const normalizeProfileKey = (profile?: string) => {
+  if (!profile) return "";
+
+  const cleaned = profile
+    .split("?")[0]
+    .replace(/\.html$/i, "")
+    .trim();
+  if (!cleaned) return "";
+
+  const lastSegment = cleaned.includes("/")
+    ? cleaned.split("/").pop() || ""
+    : cleaned;
+
+  return lastSegment.replace(/^StructureDefinition[-/]/i, "").toLowerCase();
+};
+
+const getFallbackProfileTitle = (entry: BundleEntry) => {
+  const resourceType = entry?.resource?.resourceType;
+  const firstProfile = entry?.resource?.meta?.profile?.[0];
+  const profileKey = normalizeProfileKey(firstProfile);
+
+  if (profileKey.startsWith("qicore-") && resourceType) {
+    return `QICore ${resourceType}`;
+  }
+
+  if (profileKey.startsWith("us-core-") && resourceType) {
+    return `US Core ${resourceType}`;
+  }
+
+  return resourceType;
+};
+
 const prepareSummaryGridData = (
   entries: Array<BundleEntry>,
   resourceIdentifiers: Array<ResourceIdentifier>
@@ -83,13 +115,18 @@ const prepareSummaryGridData = (
   }
 
   return entries?.map((entry: BundleEntry) => {
+    const entryProfiles = entry?.resource?.meta?.profile || [];
+    const normalizedEntryProfiles = entryProfiles.map(normalizeProfileKey);
     const resourceDef = resourceIdentifiers?.find(
-      (res) => res.profile === entry.resource.meta?.profile?.[0]
+      (res) =>
+        entryProfiles.includes(res.profile) ||
+        normalizedEntryProfiles.includes(normalizeProfileKey(res.profile)) ||
+        normalizedEntryProfiles.includes(normalizeProfileKey(res.id))
     );
     if (resourceDef) {
       return { entry, title: resourceDef.title };
     }
-    return { entry, title: entry.resource.resourceType };
+    return { entry, title: getFallbackProfileTitle(entry) };
   });
 };
 
