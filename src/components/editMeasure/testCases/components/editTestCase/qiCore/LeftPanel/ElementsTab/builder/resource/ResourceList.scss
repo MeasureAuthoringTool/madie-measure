@@ -31,4 +31,28 @@
       flex-direction: row-reverse;
     }
   }
+
+  .ml-table {
+    th.hl7-column,
+    td.hl7-column,
+    th.action-column,
+    td.action-column {
+      text-align: center;
+      vertical-align: middle;
+    }
+
+    th.hl7-column,
+    td.hl7-column {
+      width: 90px;
+      min-width: 90px;
+      max-width: 90px;
+    }
+
+    td.hl7-column,
+    td.action-column {
+      .MuiIconButton-root {
+        margin: 0 auto;
+      }
+    }
+  }
 }

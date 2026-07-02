@@ -53,6 +53,13 @@ const getResourceTypeMismatchMessage = (canEdit: boolean) => {
   return `${RESOURCE_TYPE_MISMATCH_ERROR}. ${UI_BUILDER_VIEW_MESSAGE}`;
 };
 
+const getProfileIdFromCanonicalUrl = (profileUrl?: string) => {
+  if (!profileUrl) return "";
+  const cleaned = profileUrl.split("?")[0].replace(/\.html$/i, "");
+  const lastSegment = cleaned.split("/").pop() || "";
+  return lastSegment.replace(/^StructureDefinition[-/]/i, "").trim();
+};
+
 interface ProfileValidationResult {
   isValid: boolean;
   error: string;
@@ -254,12 +261,21 @@ const TestCaseSummaryGrid = ({
         maxSize: 90,
         cell: ({ row }) => {
           const { original } = row;
+          const resourceProfiles = original.entry.resource.meta?.profile || [];
+          const firstProfile = resourceProfiles[0];
+
+          const profileMatch = allResourceProfiles?.find((resource) =>
+            resourceProfiles.includes(resource.profile)
+          );
           const resourceIdentifier = allResourceProfiles?.find(
             (resource) =>
               resource.title === original.title ||
               resource.type === original.entry.resource.resourceType
           );
-          const hl7ProfileId = resourceIdentifier?.id;
+          const hl7ProfileId =
+            profileMatch?.id ||
+            resourceIdentifier?.id ||
+            getProfileIdFromCanonicalUrl(firstProfile);
           const link = getHl7ProfileLink(hl7ProfileId, measureModel);
           const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
             e.stopPropagation();
@@ -269,8 +285,12 @@ const TestCaseSummaryGrid = ({
           };
           return (
             <IconButton
-              data-testid={`hl7-link-${hl7ProfileId}`}
-              aria-label={`Open HL7 profile for ${hl7ProfileId}`}
+              data-testid={`hl7-link-${
+                hl7ProfileId || original.entry.resource.id
+              }`}
+              aria-label={`Open HL7 profile for ${
+                hl7ProfileId || original.entry.resource.id
+              }`}
               onClick={handleClick}
             >
               <OpenInNewIcon />
@@ -354,7 +374,17 @@ const TestCaseSummaryGrid = ({
         },
       },
     ],
-    []
+    [
+      allResourceProfiles,
+      measureModel,
+      testCaseCanEdit,
+      actions,
+      viewAction,
+      readOnly,
+      onRowEdit,
+      onRowDelete,
+      onRowClone,
+    ]
   );
 
   const table = useReactTable({

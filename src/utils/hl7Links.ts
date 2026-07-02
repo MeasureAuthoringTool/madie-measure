@@ -1,10 +1,26 @@
+const normalizeProfileId = (profileId?: string) => {
+  if (!profileId) return "";
+
+  // Supports plain ids and canonical profile URLs.
+  if (profileId.includes("/")) {
+    const cleaned = profileId.split("?")[0].replace(/\.html$/i, "");
+    const structureDefinitionSegment = cleaned.split("/").pop() || "";
+    return structureDefinitionSegment
+      .replace(/^StructureDefinition[-/]/i, "")
+      .trim();
+  }
+
+  return profileId.trim();
+};
+
 export const getHl7ProfileLink = (
   profileId?: string,
   measureModel?: string
 ) => {
-  if (!profileId) return "";
+  const normalizedProfileId = normalizeProfileId(profileId);
+  if (!normalizedProfileId) return "";
 
-  const id = profileId.toLowerCase();
+  const id = normalizedProfileId.toLowerCase();
 
   // QI-Core profiles live under STU6 or STU7
   if (id.startsWith("qicore-")) {
@@ -12,15 +28,15 @@ export const getHl7ProfileLink = (
     const versionNum = measureModel?.match(/(\d+)(?:\.\d+)?/);
     const major = versionNum ? parseInt(versionNum[1], 10) : 6;
     const stu = major >= 7 ? "STU7" : "STU6";
-    return `https://hl7.org/fhir/us/qicore/${stu}/StructureDefinition-${profileId}.html`;
+    return `https://hl7.org/fhir/us/qicore/${stu}/StructureDefinition-${normalizedProfileId}.html`;
   }
   if (id.startsWith("us-core-")) {
-    return `https://hl7.org/fhir/us/core/StructureDefinition-${profileId}.html`;
+    return `https://hl7.org/fhir/us/core/StructureDefinition-${normalizedProfileId}.html`;
   }
 
   // Fallback
-  const parts = profileId.split("-");
-  const last = parts.length > 0 ? parts[parts.length - 1] : profileId;
+  const parts = normalizedProfileId.split("-");
+  const last = parts.length > 0 ? parts[parts.length - 1] : normalizedProfileId;
   const resource = last.charAt(0).toUpperCase() + last.slice(1);
   return `https://hl7.org/fhir/${resource}.html`;
 };
