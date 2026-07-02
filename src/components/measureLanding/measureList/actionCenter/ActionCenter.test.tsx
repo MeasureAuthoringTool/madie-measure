@@ -8,7 +8,7 @@ import {
   useOktaTokens,
   checkUserCanDelete,
   MeasureServiceApi,
-  userMeasureServiceApi,
+  useFeatureFlags,
 } from "@madie/madie-util";
 
 const mockMeasureServiceApi = {
@@ -50,6 +50,9 @@ jest.mock("@madie/madie-util", () => ({
     isAdmin: false,
   }),
   useOktaTokens: jest.fn(),
+  useFeatureFlags: jest.fn().mockReturnValue({
+    MeasureReviewStatus: true,
+  }),
   fetchMeasureDraftStatuses: jest.fn(),
   checkUserCanDelete: jest.fn(),
 }));
@@ -84,6 +87,35 @@ describe("ActionCenter", () => {
     (checkUserCanDelete as jest.Mock).mockImplementation(
       mockCheckUserCanDelete
     );
+    (useFeatureFlags as jest.Mock).mockReturnValue({
+      MeasureReviewStatus: true,
+    });
+  });
+
+  it("should not render review action when MeasureReviewStatus flag is disabled", () => {
+    mockCheckUserCanEdit.mockReturnValue(true);
+    (useFeatureFlags as jest.Mock).mockReturnValue({
+      MeasureReviewStatus: false,
+    });
+
+    render(
+      <ActionCenter
+        measures={[qdmMeasure]}
+        associateCmsId={jest.fn()}
+        exportMeasure={jest.fn()}
+        updateTargetMeasure={jest.fn()}
+        setCreateVersionDialog={jest.fn()}
+        setDraftMeasureDialog={jest.fn()}
+        setDeleteMeasureDialog={jest.fn()}
+        setShareDialog={jest.fn}
+        deleteMeasure={jest.fn()}
+        setViewHumanReadableModal={jest.fn()}
+        activeTab={0}
+        setTransferDialog={jest.fn()}
+      />
+    );
+
+    expect(screen.queryByTestId("review-action-btn")).not.toBeInTheDocument();
   });
 
   it("should render all action components", () => {
@@ -117,6 +149,7 @@ describe("ActionCenter", () => {
     ).toBeInTheDocument();
     expect(screen.getByTestId("view-hr-action-btn")).toBeInTheDocument();
     expect(screen.getByTestId("transfer-action-btn")).toBeInTheDocument();
+    expect(screen.getByTestId("review-action-btn")).toBeInTheDocument();
   });
 
   it("should call updateTargetMeasure and setCreateVersionDialog when version action is triggered", async () => {
@@ -305,6 +338,7 @@ describe("ActionCenter", () => {
     expect(screen.getByTestId("draft-action-btn")).toBeDisabled();
     expect(screen.getByTestId("version-action-btn")).toBeDisabled();
     expect(screen.getByTestId("view-hr-action-btn")).toBeEnabled();
+    expect(screen.getByTestId("review-action-btn")).toBeDisabled();
   });
 
   it("should call view human readable when view human readable action is triggered", async () => {

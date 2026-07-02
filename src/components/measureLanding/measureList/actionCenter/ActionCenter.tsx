@@ -10,11 +10,13 @@ import {
   checkUserCanEdit,
   checkUserCanDelete,
   useUserRoles,
+  useFeatureFlags,
 } from "@madie/madie-util";
 import ShareAction from "./shareAction/ShareAction";
 import TransferAction from "./transferAction/TransferAction";
 import HistoryAction from "./historyAction/HistoryAction";
 import CompareVersionsAction from "./compareVersionsAction/CompareVersionsAction";
+import ReviewAction from "./reviewAction/ReviewAction";
 
 // Helper to check if user owns all selected measures
 const isOwnerOfAllMeasures = (measures: Measure[]) => {
@@ -30,111 +32,128 @@ interface PropTypes {
   measures: Measure[];
   associateCmsId: any;
   exportMeasure: (elmErrorSeverity: string) => void;
-  updateTargetMeasure: (Measure) => void;
+  updateTargetMeasure: (measure: Measure) => void;
   setCreateVersionDialog: any;
   setDraftMeasureDialog: any;
   setDeleteMeasureDialog: any;
-  setViewMeasureHistoryDialog: any;
+  setViewMeasureHistoryDialog?: any;
   setShareDialog: any;
   deleteMeasure: () => void;
   setViewHumanReadableModal: any;
   activeTab: number;
   setTransferDialog: any;
-  setCompareVersionsDialog: any;
+  setCompareVersionsDialog?: any;
 }
 export default function ActionCenter(props: PropTypes) {
+  const {
+    measures,
+    activeTab,
+    associateCmsId,
+    exportMeasure: onExportMeasure,
+    setCompareVersionsDialog,
+    setCreateVersionDialog,
+    setDeleteMeasureDialog,
+    setDraftMeasureDialog,
+    setShareDialog,
+    setTransferDialog,
+    setViewHumanReadableModal,
+    setViewMeasureHistoryDialog,
+    updateTargetMeasure,
+  } = props;
   const [canEdit, setCanEdit] = useState<boolean>(false);
   const [isOwner, setIsOwner] = useState<boolean>(false);
   const [isSharedWithUser, setIsSharedWithUser] = useState<boolean>(false);
   const userRoles = useUserRoles();
 
+  const featureFlags = useFeatureFlags();
+
   const versionMeasure = useCallback(() => {
-    if (props.measures?.length === 1) {
-      props.updateTargetMeasure(props.measures[0]);
-      props.setCreateVersionDialog({
+    if (measures?.length === 1) {
+      updateTargetMeasure(measures[0]);
+      setCreateVersionDialog({
         open: true,
-        measureId: props.measures[0]?.measureSetId,
+        measureId: measures[0]?.measureSetId,
       });
     }
-  }, [props.measures, props.setCreateVersionDialog, props.updateTargetMeasure]);
+  }, [measures, setCreateVersionDialog, updateTargetMeasure]);
 
   const viewHumanReadable = useCallback(() => {
-    if (props.measures?.length === 1) {
-      props.updateTargetMeasure(props.measures[0]);
-      props.setViewHumanReadableModal({
+    if (measures?.length === 1) {
+      updateTargetMeasure(measures[0]);
+      setViewHumanReadableModal({
         open: true,
-        measureId: props.measures[0]?.measureSetId,
+        measureId: measures[0]?.measureSetId,
       });
     }
-  }, [
-    props.measures,
-    props.setViewHumanReadableModal,
-    props.updateTargetMeasure,
-  ]);
+  }, [measures, setViewHumanReadableModal, updateTargetMeasure]);
 
   const draftMeasure = useCallback(() => {
-    if (props.measures?.length === 1) {
-      props.updateTargetMeasure(props.measures[0]);
-      props.setDraftMeasureDialog({
+    if (measures?.length === 1) {
+      updateTargetMeasure(measures[0]);
+      setDraftMeasureDialog({
         open: true,
       });
     }
-  }, [props.measures, props.setDraftMeasureDialog, props.updateTargetMeasure]);
+  }, [measures, setDraftMeasureDialog, updateTargetMeasure]);
 
   const transferMeasure = useCallback(() => {
-    if (props.measures?.length > 0) {
+    if (measures?.length > 0) {
       // Use admin transfer if user is admin and doesn't own all selected measures
       const isAdminTransferEnabled = userRoles?.isAdmin;
       const needsAdminTransfer =
-        isAdminTransferEnabled && !isOwnerOfAllMeasures(props.measures);
-      props.setTransferDialog({
+        isAdminTransferEnabled && !isOwnerOfAllMeasures(measures);
+      setTransferDialog({
         open: true,
         isAdminTransfer: needsAdminTransfer,
       });
     }
-  }, [props.measures, props.setTransferDialog, userRoles]);
+  }, [measures, setTransferDialog, userRoles]);
 
   const exportMeasure = useCallback(
     (exportType: string) => {
       const elmErrorSeverity = exportType === "Export" ? "Info" : "Error";
-      if (props.measures?.length === 1) {
-        props.updateTargetMeasure(props.measures[0]);
-        props.exportMeasure(elmErrorSeverity);
+      if (measures?.length === 1) {
+        updateTargetMeasure(measures[0]);
+        onExportMeasure(elmErrorSeverity);
       }
     },
-    [props.measures, props.exportMeasure, props.updateTargetMeasure]
+    [measures, onExportMeasure, updateTargetMeasure]
   );
 
   const deleteMeasure = useCallback(() => {
-    if (props.measures?.length === 1) {
-      props.updateTargetMeasure(props.measures[0]);
-      props.setDeleteMeasureDialog(true);
+    if (measures?.length === 1) {
+      updateTargetMeasure(measures[0]);
+      setDeleteMeasureDialog(true);
     }
-  }, [props.measures, props.updateTargetMeasure, props.setDeleteMeasureDialog]);
+  }, [measures, updateTargetMeasure, setDeleteMeasureDialog]);
 
   const shareMeasure = useCallback(
     (actionType: string) => {
       const shareOption =
-        actionType === "Unshare" && props.activeTab === 1
+        actionType === "Unshare" && activeTab === 1
           ? "UnshareFromMe"
           : actionType;
 
-      props.setShareDialog({ open: true, option: shareOption });
+      setShareDialog({ open: true, option: shareOption });
     },
-    [props.setShareDialog, props.activeTab]
+    [setShareDialog, activeTab]
   );
 
   const viewMeasureHistory = useCallback(() => {
-    if (props.measures?.length === 1) {
-      props.setViewMeasureHistoryDialog(true);
+    if (measures?.length === 1) {
+      setViewMeasureHistoryDialog?.(true);
     }
-  }, [props.setViewMeasureHistoryDialog, props.measures]);
+  }, [measures, setViewMeasureHistoryDialog]);
 
   const compareVersions = useCallback(() => {
-    if (props.measures?.length === 2) {
-      props.setCompareVersionsDialog(true);
+    if (measures?.length === 2) {
+      setCompareVersionsDialog?.(true);
     }
-  }, [props.measures, props.setCompareVersionsDialog]);
+  }, [measures, setCompareVersionsDialog]);
+
+  const reviewMeasure = useCallback(() => {
+    // Review click handling, will be implemented in a follow-up story.
+  }, []);
 
   const isSelectedMeasureEditable = (measures) => {
     return (
@@ -167,59 +186,60 @@ export default function ActionCenter(props: PropTypes) {
   };
 
   useEffect(() => {
-    setCanEdit(isSelectedMeasureEditable(props.measures));
-    setIsOwner(isOwnerOfSelectedMeasures(props.measures));
-    setIsSharedWithUser(isSelectedMeasuresSharedWithUser(props.measures));
-  }, [props.measures]);
+    setCanEdit(isSelectedMeasureEditable(measures));
+    setIsOwner(isOwnerOfSelectedMeasures(measures));
+    setIsSharedWithUser(isSelectedMeasuresSharedWithUser(measures));
+  }, [measures]);
 
   return (
     <div data-testid="action-center">
       <DeleteAction
-        measures={props.measures}
+        measures={measures}
         onClick={deleteMeasure}
         canEdit={
           canEdit &&
           checkUserCanDelete(
-            props.measures?.[0]?.measureSet?.owner,
-            props.measures?.[0]?.measureMetaData?.draft
+            measures?.[0]?.measureSet?.owner,
+            measures?.[0]?.measureMetaData?.draft
           )
         }
       />
-      <ExportAction measures={props.measures} onClick={exportMeasure} />
+      <ExportAction measures={measures} onClick={exportMeasure} />
 
       <ShareAction
-        measures={props.measures}
+        measures={measures}
         onClick={shareMeasure}
         isOwner={isOwner}
         isSharedWithUser={isSharedWithUser}
-        activeTab={props?.activeTab}
+        activeTab={activeTab}
       />
 
-      <AssociateCmsIdAction
-        measures={props.measures}
-        onClick={props.associateCmsId}
-      />
+      <AssociateCmsIdAction measures={measures} onClick={associateCmsId} />
       <VersionAction
-        measures={props.measures}
+        measures={measures}
         onClick={versionMeasure}
         canEdit={canEdit}
       />
       <DraftAction
-        measures={props.measures}
+        measures={measures}
         onClick={draftMeasure}
         canEdit={canEdit}
       />
-      <ViewHRAction measures={props.measures} onClick={viewHumanReadable} />
+      <ViewHRAction measures={measures} onClick={viewHumanReadable} />
       <TransferAction
-        measures={props.measures}
+        measures={measures}
         onClick={transferMeasure}
-        activeTab={props?.activeTab}
+        activeTab={activeTab}
       />
-      <HistoryAction measures={props.measures} onClick={viewMeasureHistory} />
-      <CompareVersionsAction
-        measures={props.measures}
-        onClick={compareVersions}
-      />
+      <HistoryAction measures={measures} onClick={viewMeasureHistory} />
+      <CompareVersionsAction measures={measures} onClick={compareVersions} />
+      {featureFlags?.MeasureReviewStatus && (
+        <ReviewAction
+          measures={measures}
+          onClick={reviewMeasure}
+          canEdit={canEdit}
+        />
+      )}
     </div>
   );
 }
