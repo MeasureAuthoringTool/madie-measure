@@ -30,6 +30,7 @@ declare module "@madie/madie-util" {
     DisplayOwner: boolean;
     MakeJSONMatchUI: boolean;
     usQualityCore?: boolean;
+    MeasureReviewStatus?: boolean;
   }
 
   export interface UserRoles {
