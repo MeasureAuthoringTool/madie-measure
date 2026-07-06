@@ -34,6 +34,20 @@ jest.mock("./CompositeRightPanelContent", () => ({
   default: () => <div data-testid="right-panel">mock right panel</div>,
 }));
 
+const mockValidationPanelPane = jest.fn();
+jest.mock("../ValidationPanelPane", () => ({
+  __esModule: true,
+  default: (props: any) => {
+    mockValidationPanelPane(props);
+    return (
+      <div data-testid="validation-panel-pane">
+        isQICore6:{String(props.isQICore6)} errors:
+        {props.validationErrors?.length ?? 0}
+      </div>
+    );
+  },
+}));
+
 jest.mock("allotment", () => {
   const React = require("react");
   const Allotment = React.forwardRef(({ children }: any, ref: any) => (
@@ -280,5 +294,64 @@ describe("EditCompositeTestCase", () => {
 
     await waitFor(() => expect(mockFetchMeasuresByIds).toHaveBeenCalled());
     expect(screen.getByTestId("run-test-case-button")).not.toBeDisabled();
+  });
+
+  it("renders the ValidationPanelPane with validationErrors and testCase", async () => {
+    mockFetchMeasuresByIds.mockResolvedValueOnce([]);
+    const testCase = { validationStatus: "VALID" };
+    const validationErrors = [{ severity: "error" }, { severity: "warning" }];
+
+    render(
+      <EditCompositeTestCase
+        {...defaultProps}
+        testCase={testCase}
+        validationErrors={validationErrors}
+      />
+    );
+
+    await waitFor(() => expect(mockFetchMeasuresByIds).toHaveBeenCalled());
+
+    expect(screen.getByTestId("validation-panel-pane")).toBeInTheDocument();
+    expect(mockValidationPanelPane).toHaveBeenCalledWith(
+      expect.objectContaining({
+        testCase,
+        validationErrors,
+        allotmentRef: defaultProps.allotmentRef,
+      })
+    );
+  });
+
+  it("passes isQICore6=true when measure model is QI-Core v6.0.0", async () => {
+    mockFetchMeasuresByIds.mockResolvedValueOnce([]);
+
+    render(
+      <EditCompositeTestCase
+        {...defaultProps}
+        measure={{ ...measureWithComponents, model: "QI-Core v6.0.0" }}
+      />
+    );
+
+    await waitFor(() => expect(mockFetchMeasuresByIds).toHaveBeenCalled());
+
+    expect(screen.getByTestId("validation-panel-pane")).toHaveTextContent(
+      "isQICore6:true"
+    );
+  });
+
+  it("passes isQICore6=false when measure model is not QI-Core v6.0.0", async () => {
+    mockFetchMeasuresByIds.mockResolvedValueOnce([]);
+
+    render(
+      <EditCompositeTestCase
+        {...defaultProps}
+        measure={{ ...measureWithComponents, model: "QI-Core v4.1.1" }}
+      />
+    );
+
+    await waitFor(() => expect(mockFetchMeasuresByIds).toHaveBeenCalled());
+
+    expect(screen.getByTestId("validation-panel-pane")).toHaveTextContent(
+      "isQICore6:false"
+    );
   });
 });

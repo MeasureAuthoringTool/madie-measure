@@ -92,9 +92,7 @@ import {
   upsertExecuteInvalidTestCaseWarning,
 } from "./EditTestCaseUtil";
 import { useTestCasePolling } from "../../../hooks/useTestCasePolling";
-import KeyboardTabIcon from "@mui/icons-material/KeyboardTab";
-import ValidationPanel from "./ValidationPanel";
-import ValidationStatusIcon from "./ValidationStatusIcon";
+import ValidationPanelPane from "./ValidationPanelPane";
 import EditorCalculator from "../calculator/EditorCalculator";
 import CalculatorDialog from "../calculator/CalculatorDialog";
 import LockedMessageModal from "../../../../../common/lockedMessageModal/LockedMessageModal";
@@ -430,7 +428,6 @@ const EditTestCase = (props: EditTestCaseProps) => {
     loaded: false,
     series: [],
   });
-  const [showValidationErrors, setShowValidationErrors] = useState(false);
   const [populationGroupResults, setPopulationGroupResults] =
     useState<DetailedPopulationGroupResult[]>();
   const [calculationErrors, setCalculationErrors] = useState<AlertProps>();
@@ -1500,83 +1497,12 @@ const EditTestCase = (props: EditTestCaseProps) => {
                 </div>
               </Allotment.Pane>
 
-              <Allotment.Pane minSize={4}>
-                <div
-                  className={`validation-panel ${
-                    showValidationErrors ? "open" : "closed"
-                  }`}
-                >
-                  {showValidationErrors ? (
-                    <>
-                      <div className="flex justify-between items-center w-full mb-2">
-                        <div className="validation-header">
-                          <div className="header-left">
-                            <ValidationStatusIcon
-                              validationStatus={testCase?.validationStatus}
-                            />
-                            <span className="ml-2">
-                              Validations (
-                              {validationErrors?.filter(
-                                (error) => !/^information/.test(error?.severity)
-                              ).length || 0}
-                              )
-                            </span>
-                          </div>
-
-                          <Button
-                            variant="action"
-                            data-testid="hide-json-validation-errors-button"
-                            onClick={() => {
-                              setShowValidationErrors(false);
-                              setTimeout(() => {
-                                allotmentRef.current.resize([48, 48, 4]);
-                              }, 0);
-                            }}
-                            className="validation-panel-toggle-button"
-                            title="Close Panel"
-                          >
-                            <KeyboardTabIcon />
-                          </Button>
-                        </div>
-                      </div>
-                      <div
-                        className="validation-content"
-                        data-testid="json-validation-errors-list"
-                      >
-                        <ValidationPanel
-                          testCase={testCase}
-                          validationErrors={validationErrors}
-                          isQiCoreV6={isQICore6}
-                        />
-                      </div>
-                    </>
-                  ) : (
-                    <div data-testid="closed-json-validation-errors-aside">
-                      <div className="closed-header">
-                        <Button
-                          size="small"
-                          data-testid="show-json-validation-errors-button"
-                          onClick={() => {
-                            setShowValidationErrors(true);
-                            allotmentRef.current.resize([34, 33, 33]);
-                          }}
-                          className="validation-panel-toggle-button"
-                          title={
-                            testCase?.validationStatus
-                              ? testCase?.validationStatus
-                              : "Open Validations"
-                          }
-                        >
-                          <ValidationStatusIcon
-                            validationStatus={testCase?.validationStatus}
-                          />
-                        </Button>
-                      </div>
-                      <div className="closed-body"></div>
-                    </div>
-                  )}
-                </div>
-              </Allotment.Pane>
+              <ValidationPanelPane
+                allotmentRef={allotmentRef}
+                testCase={testCase}
+                validationErrors={validationErrors}
+                isQICore6={isQICore6}
+              />
             </Allotment>
 
             {/* button wrap in context */}

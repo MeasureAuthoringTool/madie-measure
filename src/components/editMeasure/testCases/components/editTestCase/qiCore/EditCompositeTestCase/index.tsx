@@ -20,6 +20,8 @@ import tw, { styled } from "twin.macro";
 import "styled-components/macro";
 import useExecutionContext from "../../../routes/qiCore/useExecutionContext";
 import { Measure } from "@madie/madie-models/dist/Measure";
+import { Model } from "@madie/madie-models";
+import ValidationPanelPane from "../ValidationPanelPane";
 
 const EditCompositeTestCase = ({
   allotmentRef,
@@ -128,6 +130,12 @@ const EditCompositeTestCase = ({
             />
           </div>
         </Allotment.Pane>
+        <ValidationPanelPane
+          allotmentRef={allotmentRef}
+          testCase={testCase}
+          validationErrors={validationErrors}
+          isQICore6={measure?.model === Model.QICORE_6_0_0}
+        />
       </Allotment>
 
       {/* button wrap in context */}
