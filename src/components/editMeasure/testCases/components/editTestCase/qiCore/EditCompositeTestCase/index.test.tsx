@@ -13,6 +13,15 @@ jest.mock("@madie/madie-util", () => ({
   }),
 }));
 
+let mockExecutionContextReady = true;
+jest.mock("../../../routes/qiCore/useExecutionContext", () => ({
+  __esModule: true,
+  default: () => ({
+    executionContextReady: mockExecutionContextReady,
+    measureState: [{}],
+  }),
+}));
+
 jest.mock("./CompositeLeftPanelContent", () => ({
   __esModule: true,
   default: (props: any) => (
@@ -59,11 +68,13 @@ const defaultProps = {
   testCase: null,
   setValidationSchema: jest.fn(),
   setInitialFormikValuesStu6: jest.fn(),
+  validationErrors: [],
 };
 
 describe("EditCompositeTestCase", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockExecutionContextReady = true;
   });
 
   it("calls fetchMeasuresByIds and passes results to left panel", async () => {
@@ -174,5 +185,100 @@ describe("EditCompositeTestCase", () => {
 
     await waitFor(() => expect(mockFetchMeasuresByIds).not.toHaveBeenCalled());
     expect(screen.getByTestId("create-panel")).toBeInTheDocument();
+  });
+
+  it("disables Run Test Case when editor JSON is empty", async () => {
+    mockFetchMeasuresByIds.mockResolvedValueOnce([]);
+
+    render(
+      <EditCompositeTestCase
+        {...defaultProps}
+        editorVal=""
+        validationErrors={[]}
+      />
+    );
+
+    await waitFor(() => expect(mockFetchMeasuresByIds).toHaveBeenCalled());
+    expect(screen.getByTestId("run-test-case-button")).toBeDisabled();
+  });
+
+  it("disables Run Test Case when execution context is not ready", async () => {
+    mockExecutionContextReady = false;
+    mockFetchMeasuresByIds.mockResolvedValueOnce([]);
+
+    render(
+      <EditCompositeTestCase
+        {...defaultProps}
+        editorVal='{"resourceType":"Bundle"}'
+        validationErrors={[]}
+      />
+    );
+
+    await waitFor(() => expect(mockFetchMeasuresByIds).toHaveBeenCalled());
+    expect(screen.getByTestId("run-test-case-button")).toBeDisabled();
+  });
+
+  it("disables Run Test Case when validation errors have error severity", async () => {
+    mockFetchMeasuresByIds.mockResolvedValueOnce([]);
+
+    render(
+      <EditCompositeTestCase
+        {...defaultProps}
+        editorVal='{"resourceType":"Bundle"}'
+        validationErrors={[{ severity: "error" }]}
+      />
+    );
+
+    await waitFor(() => expect(mockFetchMeasuresByIds).toHaveBeenCalled());
+    expect(screen.getByTestId("run-test-case-button")).toBeDisabled();
+  });
+
+  it("enables Run Test Case despite validation errors when executeInvalidTestCases is true", async () => {
+    mockFetchMeasuresByIds.mockResolvedValueOnce([]);
+
+    render(
+      <EditCompositeTestCase
+        {...defaultProps}
+        editorVal='{"resourceType":"Bundle"}'
+        validationErrors={[{ severity: "error" }]}
+        measure={{
+          ...measureWithComponents,
+          testCaseConfiguration: { executeInvalidTestCases: true },
+        }}
+      />
+    );
+
+    await waitFor(() => expect(mockFetchMeasuresByIds).toHaveBeenCalled());
+    expect(screen.getByTestId("run-test-case-button")).not.toBeDisabled();
+  });
+
+  it("enables Run Test Case when JSON is valid, no validation errors, and context is ready", async () => {
+    mockFetchMeasuresByIds.mockResolvedValueOnce([]);
+
+    render(
+      <EditCompositeTestCase
+        {...defaultProps}
+        editorVal='{"resourceType":"Bundle"}'
+        validationErrors={[]}
+      />
+    );
+
+    await waitFor(() => expect(mockFetchMeasuresByIds).toHaveBeenCalled());
+    expect(screen.getByTestId("run-test-case-button")).not.toBeDisabled();
+  });
+
+  it("ignores validation errors with non-error severity", async () => {
+    mockFetchMeasuresByIds.mockResolvedValueOnce([]);
+
+    render(
+      <EditCompositeTestCase
+        {...defaultProps}
+        editorVal='{"resourceType":"Bundle"}'
+        validationErrors={[{ severity: "warning" }, { severity: "info" }]}
+      />
+    );
+
+    await waitFor(() => expect(mockFetchMeasuresByIds).toHaveBeenCalled());
+    expect(screen.getByTestId("run-test-case-button")).not.toBeDisabled();
   });
 });

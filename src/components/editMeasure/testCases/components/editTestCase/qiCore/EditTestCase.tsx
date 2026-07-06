@@ -1238,6 +1238,7 @@ const EditTestCase = (props: EditTestCaseProps) => {
                 testCase={testCase}
                 setValidationSchema={setValidationSchema}
                 setInitialFormikValuesStu6={setInitialFormikValuesStu6}
+                validationErrors={validationErrors}
               />
             </QiCoreResourceProvider>
           </FormikProvider>
