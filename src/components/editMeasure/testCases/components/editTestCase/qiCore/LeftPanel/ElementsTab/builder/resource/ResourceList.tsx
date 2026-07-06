@@ -141,8 +141,9 @@ const ResourceList = ({
         header: "HL7",
         cell: ({ row }) => {
           const { original } = row;
-          const link = getHl7ProfileLink(original.id, measureModel);
-          const handleClick = (e) => {
+          const hl7ProfileId = original.id || original.profile;
+          const link = getHl7ProfileLink(hl7ProfileId, measureModel);
+          const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
             e.stopPropagation();
             if (link) {
               window.open(link, "_blank");
@@ -150,18 +151,22 @@ const ResourceList = ({
           };
           return (
             <IconButton
-              data-testid={`hl7-link-${original.id}`}
-              aria-label={`Open HL7 profile for ${original.id}`}
+              data-testid={`hl7-link-${original.id || original.type}`}
+              aria-label={`Open HL7 profile for ${
+                original.id || original.type
+              }`}
               onClick={handleClick}
             >
               <OpenInNewIcon />
             </IconButton>
           );
         },
+        id: "hl7",
         accessorKey: "hl7",
       },
       {
         header: "",
+        id: "action",
         cell: ({ row }) => {
           const { original } = row;
           const isPatient =
@@ -300,7 +305,13 @@ const ResourceList = ({
                             // onClick={header.column.getToggleSortingHandler()} //add in later
                             // onMouseEnter={() => setHoveredHeader(header.id)}
                             // onMouseLeave={() => setHoveredHeader(null)}
-                            className="header-cell"
+                            className={`header-cell ${
+                              header.column.id === "hl7"
+                                ? "hl7-column"
+                                : header.column.id === "action"
+                                ? "action-column"
+                                : ""
+                            }`}
                           >
                             {header.isPlaceholder ? null : (
                               <button
@@ -366,6 +377,13 @@ const ResourceList = ({
                         <td
                           key={cell.id}
                           data-testid={`measure-name-${cell.id}`}
+                          className={
+                            cell.column.id === "hl7"
+                              ? "hl7-column"
+                              : cell.column.id === "action"
+                              ? "action-column"
+                              : ""
+                          }
                         >
                           {flexRender(
                             cell.column.columnDef.cell,

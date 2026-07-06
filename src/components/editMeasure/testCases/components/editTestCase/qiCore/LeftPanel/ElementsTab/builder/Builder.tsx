@@ -24,6 +24,7 @@ import {
   MadieAlert,
   Toast,
 } from "@madie/madie-design-system/dist/react";
+import { normalizeProfileId } from "../../../../../../../../../utils/hl7Links";
 import {
   handleCancel,
   handleRowClone,
@@ -74,6 +75,22 @@ export function scrollToElementByIdWhenAvailable(
 }
 
 // prepare data for summary grid by adding profile titles
+const getFallbackProfileTitle = (entry: BundleEntry) => {
+  const resourceType = entry?.resource?.resourceType;
+  const firstProfile = entry?.resource?.meta?.profile?.[0];
+  const profileKey = normalizeProfileId(firstProfile).toLowerCase();
+
+  if (profileKey.startsWith("qicore-") && resourceType) {
+    return `QICore ${resourceType}`;
+  }
+
+  if (profileKey.startsWith("us-core-") && resourceType) {
+    return `US Core ${resourceType}`;
+  }
+
+  return resourceType;
+};
+
 const prepareSummaryGridData = (
   entries: Array<BundleEntry>,
   resourceIdentifiers: Array<ResourceIdentifier>
@@ -83,13 +100,24 @@ const prepareSummaryGridData = (
   }
 
   return entries?.map((entry: BundleEntry) => {
+    const entryProfiles = entry?.resource?.meta?.profile || [];
+    const normalizedEntryProfiles = entryProfiles.map((p) =>
+      normalizeProfileId(p).toLowerCase()
+    );
     const resourceDef = resourceIdentifiers?.find(
-      (res) => res.profile === entry.resource.meta?.profile?.[0]
+      (res) =>
+        entryProfiles.includes(res.profile) ||
+        normalizedEntryProfiles.includes(
+          normalizeProfileId(res.profile).toLowerCase()
+        ) ||
+        normalizedEntryProfiles.includes(
+          normalizeProfileId(res.id).toLowerCase()
+        )
     );
     if (resourceDef) {
       return { entry, title: resourceDef.title };
     }
-    return { entry, title: entry.resource.resourceType };
+    return { entry, title: getFallbackProfileTitle(entry) };
   });
 };
 
