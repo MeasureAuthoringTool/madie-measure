@@ -21,7 +21,9 @@ import { Button } from "@madie/madie-design-system/dist/react";
 import { ResourceIdentifier } from "../../../../../../../api/models/ResourceIdentifier";
 import { Box, IconButton } from "@mui/material";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
-import getHl7ProfileLink from "../../../../../../../../../../utils/hl7Links";
+import getHl7ProfileLink, {
+  normalizeProfileId,
+} from "../../../../../../../../../../utils/hl7Links";
 
 export const UI_BUILDER_VIEW_MESSAGE =
   "Viewing this in the UI builder is unsupported.";
@@ -51,13 +53,6 @@ const getResourceTypeMismatchMessage = (canEdit: boolean) => {
     return `${RESOURCE_TYPE_MISMATCH_ERROR}. ${UI_BUILDER_EDIT_MESSAGE}`;
   }
   return `${RESOURCE_TYPE_MISMATCH_ERROR}. ${UI_BUILDER_VIEW_MESSAGE}`;
-};
-
-const getProfileIdFromCanonicalUrl = (profileUrl?: string) => {
-  if (!profileUrl) return "";
-  const cleaned = profileUrl.split("?")[0].replace(/\.html$/i, "");
-  const lastSegment = cleaned.split("/").pop() || "";
-  return lastSegment.replace(/^StructureDefinition[-/]/i, "").trim();
 };
 
 interface ProfileValidationResult {
@@ -275,7 +270,7 @@ const TestCaseSummaryGrid = ({
           const hl7ProfileId =
             profileMatch?.id ||
             resourceIdentifier?.id ||
-            getProfileIdFromCanonicalUrl(firstProfile);
+            normalizeProfileId(firstProfile);
           const link = getHl7ProfileLink(hl7ProfileId, measureModel);
           const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
             e.stopPropagation();

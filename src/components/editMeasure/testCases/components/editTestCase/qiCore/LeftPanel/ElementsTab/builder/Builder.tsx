@@ -24,6 +24,7 @@ import {
   MadieAlert,
   Toast,
 } from "@madie/madie-design-system/dist/react";
+import { normalizeProfileId } from "../../../../../../../../../utils/hl7Links";
 import {
   handleCancel,
   handleRowClone,
@@ -74,26 +75,10 @@ export function scrollToElementByIdWhenAvailable(
 }
 
 // prepare data for summary grid by adding profile titles
-const normalizeProfileKey = (profile?: string) => {
-  if (!profile) return "";
-
-  const cleaned = profile
-    .split("?")[0]
-    .replace(/\.html$/i, "")
-    .trim();
-  if (!cleaned) return "";
-
-  const lastSegment = cleaned.includes("/")
-    ? cleaned.split("/").pop() || ""
-    : cleaned;
-
-  return lastSegment.replace(/^StructureDefinition[-/]/i, "").toLowerCase();
-};
-
 const getFallbackProfileTitle = (entry: BundleEntry) => {
   const resourceType = entry?.resource?.resourceType;
   const firstProfile = entry?.resource?.meta?.profile?.[0];
-  const profileKey = normalizeProfileKey(firstProfile);
+  const profileKey = normalizeProfileId(firstProfile).toLowerCase();
 
   if (profileKey.startsWith("qicore-") && resourceType) {
     return `QICore ${resourceType}`;
@@ -116,12 +101,18 @@ const prepareSummaryGridData = (
 
   return entries?.map((entry: BundleEntry) => {
     const entryProfiles = entry?.resource?.meta?.profile || [];
-    const normalizedEntryProfiles = entryProfiles.map(normalizeProfileKey);
+    const normalizedEntryProfiles = entryProfiles.map((p) =>
+      normalizeProfileId(p).toLowerCase()
+    );
     const resourceDef = resourceIdentifiers?.find(
       (res) =>
         entryProfiles.includes(res.profile) ||
-        normalizedEntryProfiles.includes(normalizeProfileKey(res.profile)) ||
-        normalizedEntryProfiles.includes(normalizeProfileKey(res.id))
+        normalizedEntryProfiles.includes(
+          normalizeProfileId(res.profile).toLowerCase()
+        ) ||
+        normalizedEntryProfiles.includes(
+          normalizeProfileId(res.id).toLowerCase()
+        )
     );
     if (resourceDef) {
       return { entry, title: resourceDef.title };

@@ -1,4 +1,4 @@
-const normalizeProfileId = (profileId?: string) => {
+export const normalizeProfileId = (profileId?: string) => {
   if (!profileId) return "";
 
   // Supports plain ids and canonical profile URLs.
