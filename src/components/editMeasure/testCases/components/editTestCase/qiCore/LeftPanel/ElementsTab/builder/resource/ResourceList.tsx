@@ -295,7 +295,7 @@ const ResourceList = ({
           </Button>
         </div>
       )}
-      <div id="search-container" className={`${isComposite && "flex-row-gap"}`}>
+      <div id="search-container" tw="mb-5 mt-3">
         <div className="search-field-wrapper">
           <TextField
             onChange={({ target }) => {
