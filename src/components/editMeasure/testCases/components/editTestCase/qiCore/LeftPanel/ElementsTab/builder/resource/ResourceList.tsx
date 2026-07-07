@@ -284,6 +284,17 @@ const ResourceList = ({
   };
   return (
     <div id="qi-core-6-tc-builder">
+      {isComposite && (
+        <div style={{ display: "flex", justifyContent: "flex-end" }}>
+          <Button
+            type="button"
+            data-testid={`insert-test-case-button`}
+            onClick={onInsertTCClick}
+          >
+            Insert Existing Test Case
+          </Button>
+        </div>
+      )}
       <div id="search-container" className={`${isComposite && "flex-row-gap"}`}>
         <div className="search-field-wrapper">
           <TextField
@@ -321,16 +332,6 @@ const ResourceList = ({
             onChange={handleProfileDisplayModeChange}
           />
         </div>
-        {isComposite && (
-          <Button
-            tw="m-2"
-            type="button"
-            data-testid={`insert-test-case-button`}
-            onClick={onInsertTCClick}
-          >
-            Insert Existing Test Case
-          </Button>
-        )}
       </div>
 
       {/* we want to render the table if visibleResources. We want to render the spinner if no resourceIdentifiers, and an empty div if no results */}
