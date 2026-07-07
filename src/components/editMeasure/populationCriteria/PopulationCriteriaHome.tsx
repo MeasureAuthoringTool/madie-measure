@@ -263,6 +263,7 @@ export function PopulationCriteriaHome({ measureCanEdit }) {
           measureId={measure?.id}
           isFormDirty={isFormDirty}
           isQDM={isQDM}
+          isComposite={measure?.measureMetaData?.composite}
           baseConfigPopulated={checkBaseConfigPopulated()}
           reportingStatus={checkReporting()}
           supplementalDataStatus={checkSupplementalData()}

@@ -24,6 +24,7 @@ export interface PopulationCriteriaSideNavProp {
   measureId: string;
   isFormDirty: boolean;
   isQDM: boolean;
+  isComposite?: boolean;
   baseConfigPopulated?: boolean;
   reportingStatus?: string;
   supplementalDataStatus?: string;
@@ -40,6 +41,7 @@ export default function PopulationCriteriaSideNav(
     measureId,
     measureGroupNumber,
     isQDM,
+    isComposite = false,
     baseConfigPopulated,
     reportingStatus,
     supplementalDataStatus,
@@ -103,7 +105,7 @@ export default function PopulationCriteriaSideNav(
     "/measures/" + measureId + "/edit/supplemental-data";
   const riskAdjustmentBaseUrl =
     "/measures/" + measureId + "/edit/risk-adjustment";
-  const additionalLinks = [
+  const allAdditionalLinks = [
     {
       label: "Supplemental Data",
       value: supplementalDataBaseUrl,
@@ -119,6 +121,8 @@ export default function PopulationCriteriaSideNav(
       status: riskAdjustmentStatus,
     },
   ];
+  // Filter out SDE and RAV tabs for composite measures
+  const additionalLinks = isComposite ? [] : allAdditionalLinks;
   const getCompletedIcon = () => {
     return (
       <span style={{ position: "absolute", left: "0" }}>
