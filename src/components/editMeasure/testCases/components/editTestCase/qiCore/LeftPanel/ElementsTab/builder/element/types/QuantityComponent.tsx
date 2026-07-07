@@ -2,7 +2,10 @@ import React, { useMemo } from "react";
 import { TextField, InputLabel } from "@madie/madie-design-system/dist/react/";
 import "twin.macro";
 import "styled-components/macro";
-import { validate } from "../../../../../../../common/quantityInput/validate";
+import {
+  validate,
+  getUcumCodeForTimingDisplay,
+} from "../../../../../../../common/quantityInput/validate";
 import { TypeComponentProps } from "./TypeComponentProps";
 import { getIn, useFormikContext } from "formik";
 import CodesComponent from "./CodesComponent";
@@ -114,6 +117,17 @@ const QuantityComponent = ({
                 if (!inputCode) {
                   // Code cleared so remove code, unit, system
                   updateQuantityCode(undefined, undefined, undefined);
+                  return;
+                }
+
+                // Check if input is a QI-Core timing display value (e.g. "days" → "d")
+                const mappedCode = getUcumCodeForTimingDisplay(inputCode);
+                if (mappedCode) {
+                  updateQuantityCode(
+                    mappedCode,
+                    inputCode.trim(),
+                    "http://unitsofmeasure.org"
+                  );
                   return;
                 }
 

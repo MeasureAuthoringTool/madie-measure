@@ -42,6 +42,48 @@ jest.mock("../../../../../../../common/quantityInput/validate", () => ({
     error = false;
   },
   ADDITIONAL_UCUM_UNIT_SUPPORT: {},
+  QICORE_TIMING_DISPLAY_TO_UCUM_CODE: {
+    years: "a",
+    year: "a",
+    months: "mo",
+    month: "mo",
+    weeks: "wk",
+    week: "wk",
+    days: "d",
+    day: "d",
+    hours: "h",
+    hour: "h",
+    minutes: "min",
+    minute: "min",
+    seconds: "s",
+    second: "s",
+    milliseconds: "ms",
+    millisecond: "ms",
+  },
+  getUcumCodeForTimingDisplay: (input?: string) => {
+    if (!input) {
+      return undefined;
+    }
+    const map: Record<string, string> = {
+      years: "a",
+      year: "a",
+      months: "mo",
+      month: "mo",
+      weeks: "wk",
+      week: "wk",
+      days: "d",
+      day: "d",
+      hours: "h",
+      hour: "h",
+      minutes: "min",
+      minute: "min",
+      seconds: "s",
+      second: "s",
+      milliseconds: "ms",
+      millisecond: "ms",
+    };
+    return map[input.trim().toLowerCase()];
+  },
 }));
 
 const useFhirDefinitionsServiceApiMock =
@@ -513,6 +555,178 @@ describe("QuantityComponent", () => {
       expect(updatedQuantity.code).toBeUndefined();
       expect(updatedQuantity.unit).toBeUndefined();
       expect(updatedQuantity.system).toBeUndefined();
+    });
+  });
+
+  test("maps QI-Core timing display value 'days' to UCUM code 'd' on blur, preserving display value as unit", async () => {
+    let formikValues: any;
+    const initialValues = {
+      Observation: {
+        quantity: { value: 1, code: "", comparator: "" },
+      },
+    };
+
+    render(
+      <ExecutionContextProvider
+        value={{
+          measureState: [null, jest.fn()],
+          bundleState: [null, jest.fn()],
+          valueSetsState: [[], jest.fn()],
+          executionContextReady: true,
+          executing: false,
+          setExecuting: jest.fn(),
+          contextFailure: false,
+        }}
+      >
+        <Formik initialValues={initialValues} onSubmit={jest.fn()}>
+          {(formik) => {
+            formikValues = formik.values;
+            return (
+              <QuantityComponent
+                label="Observation.quantity"
+                canEdit={true}
+                showComparator={true}
+                fieldRequired={false}
+              />
+            );
+          }}
+        </Formik>
+      </ExecutionContextProvider>
+    );
+
+    const codeInput = (await screen.findByTestId(
+      "code-input-input"
+    )) as HTMLInputElement;
+
+    fireEvent.change(codeInput, { target: { value: "days" } });
+
+    await waitFor(() => {
+      const updatedQuantity = formikValues.Observation.quantity;
+      expect(updatedQuantity.code).toBe("d");
+      expect(updatedQuantity.unit).toBe("days");
+      expect(updatedQuantity.system).toBe("http://unitsofmeasure.org");
+      expect(updatedQuantity.value).toBe(1);
+    });
+  });
+
+  test.each([
+    ["years", "a"],
+    ["year", "a"],
+    ["months", "mo"],
+    ["month", "mo"],
+    ["weeks", "wk"],
+    ["week", "wk"],
+    ["days", "d"],
+    ["day", "d"],
+    ["hours", "h"],
+    ["hour", "h"],
+    ["minutes", "min"],
+    ["minute", "min"],
+    ["seconds", "s"],
+    ["second", "s"],
+    ["milliseconds", "ms"],
+    ["millisecond", "ms"],
+  ])(
+    "maps QI-Core timing display value '%s' to UCUM code '%s' on blur",
+    async (display, expectedCode) => {
+      let formikValues: any;
+      const initialValues = {
+        Observation: {
+          quantity: { value: 2, code: "", comparator: "" },
+        },
+      };
+
+      render(
+        <ExecutionContextProvider
+          value={{
+            measureState: [null, jest.fn()],
+            bundleState: [null, jest.fn()],
+            valueSetsState: [[], jest.fn()],
+            executionContextReady: true,
+            executing: false,
+            setExecuting: jest.fn(),
+            contextFailure: false,
+          }}
+        >
+          <Formik initialValues={initialValues} onSubmit={jest.fn()}>
+            {(formik) => {
+              formikValues = formik.values;
+              return (
+                <QuantityComponent
+                  label="Observation.quantity"
+                  canEdit={true}
+                  showComparator={true}
+                  fieldRequired={false}
+                />
+              );
+            }}
+          </Formik>
+        </ExecutionContextProvider>
+      );
+
+      const codeInput = (await screen.findByTestId(
+        "code-input-input"
+      )) as HTMLInputElement;
+
+      fireEvent.change(codeInput, { target: { value: display } });
+
+      await waitFor(() => {
+        const updatedQuantity = formikValues.Observation.quantity;
+        expect(updatedQuantity.code).toBe(expectedCode);
+        expect(updatedQuantity.unit).toBe(display);
+        expect(updatedQuantity.system).toBe("http://unitsofmeasure.org");
+      });
+    }
+  );
+
+  test("does not remap a valid UCUM code on blur", async () => {
+    let formikValues: any;
+    const initialValues = {
+      Observation: {
+        quantity: { value: 10, code: "", comparator: "" },
+      },
+    };
+
+    render(
+      <ExecutionContextProvider
+        value={{
+          measureState: [null, jest.fn()],
+          bundleState: [null, jest.fn()],
+          valueSetsState: [[], jest.fn()],
+          executionContextReady: true,
+          executing: false,
+          setExecuting: jest.fn(),
+          contextFailure: false,
+        }}
+      >
+        <Formik initialValues={initialValues} onSubmit={jest.fn()}>
+          {(formik) => {
+            formikValues = formik.values;
+            return (
+              <QuantityComponent
+                label="Observation.quantity"
+                canEdit={true}
+                showComparator={true}
+                fieldRequired={false}
+              />
+            );
+          }}
+        </Formik>
+      </ExecutionContextProvider>
+    );
+
+    const codeInput = (await screen.findByTestId(
+      "code-input-input"
+    )) as HTMLInputElement;
+
+    fireEvent.change(codeInput, { target: { value: "mg" } });
+
+    await waitFor(() => {
+      const updatedQuantity = formikValues.Observation.quantity;
+      // valid UCUM code, existing behavior preserved (not a timing display value)
+      expect(updatedQuantity.code).toBe("mg");
+      expect(updatedQuantity.unit).toBe("milligram");
+      expect(updatedQuantity.system).toBe("http://unitsofmeasure.org");
     });
   });
 

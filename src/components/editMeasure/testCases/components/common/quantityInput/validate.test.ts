@@ -1,4 +1,8 @@
-import { validate } from "./validate";
+import {
+  validate,
+  getUcumCodeForTimingDisplay,
+  TIMING_DISPLAY_TO_UCUM_CODE,
+} from "./validate";
 
 describe("validate", () => {
   it("should return a passing ValidationResult when additional supported unit is entered", () => {
@@ -23,5 +27,29 @@ describe("validate", () => {
     expect(result.error).toBe(false);
     expect(result.ucumUnitCode).toBe(1);
     expect(result.label).toBe(1);
+  });
+});
+
+describe("getUcumCodeForTimingDisplay", () => {
+  it.each(Object.entries(TIMING_DISPLAY_TO_UCUM_CODE))(
+    "maps timing display value '%s' to UCUM code '%s'",
+    (display, code) => {
+      expect(getUcumCodeForTimingDisplay(display)).toBe(code);
+    }
+  );
+
+  it("normalizes casing and surrounding whitespace before lookup", () => {
+    expect(getUcumCodeForTimingDisplay("  Days ")).toBe("d");
+    expect(getUcumCodeForTimingDisplay("MONTHS")).toBe("mo");
+  });
+
+  it("returns undefined for non-timing values", () => {
+    expect(getUcumCodeForTimingDisplay("mg")).toBeUndefined();
+    expect(getUcumCodeForTimingDisplay("gram")).toBeUndefined();
+  });
+
+  it("returns undefined for empty or missing input", () => {
+    expect(getUcumCodeForTimingDisplay("")).toBeUndefined();
+    expect(getUcumCodeForTimingDisplay(undefined)).toBeUndefined();
   });
 });

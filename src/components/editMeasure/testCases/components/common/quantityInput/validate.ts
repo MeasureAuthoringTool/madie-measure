@@ -7,24 +7,45 @@ export class ValidationResult {
   error: boolean;
 }
 
-// users want additional support for non ucum units
-export const ADDITIONAL_UCUM_UNIT_SUPPORT = {
-  years: true, // this would be a_ as a ucum unit, but not intuitive.
-  year: true,
-  months: true,
-  month: true,
-  weeks: true,
-  week: true,
-  days: true,
-  day: true,
-  hours: true,
-  hour: true,
-  minutes: true,
-  minute: true,
-  seconds: true,
-  second: true,
-  milliseconds: true,
-  millisecond: true,
+// QI-Core only: maps easier-to-remember timing display values (e.g. "days")
+// to the correct UCUM code (e.g. "d"). Also serves as the list of additional
+// non-UCUM units we explicitly support (any key present here is valid).
+export const TIMING_DISPLAY_TO_UCUM_CODE: Record<string, string> = {
+  years: "a", // this would be a_ as a ucum unit, but not intuitive.
+  year: "a",
+  months: "mo",
+  month: "mo",
+  weeks: "wk",
+  week: "wk",
+  days: "d",
+  day: "d",
+  hours: "h",
+  hour: "h",
+  minutes: "min",
+  minute: "min",
+  seconds: "s",
+  second: "s",
+  milliseconds: "ms",
+  millisecond: "ms",
+};
+
+// Derived from TIMING_DISPLAY_TO_UCUM_CODE for backward compatibility.
+export const ADDITIONAL_UCUM_UNIT_SUPPORT: Record<string, boolean> =
+  Object.fromEntries(
+    Object.keys(TIMING_DISPLAY_TO_UCUM_CODE).map((key) => [key, true])
+  );
+
+// Returns the UCUM code for a QI-Core timing display value, or undefined when
+// the input is not one of the supported timing display values. Input is
+// normalized (trimmed + lower-cased) before lookup so casing/whitespace is safe.
+export const getUcumCodeForTimingDisplay = (
+  input?: string
+): string | undefined => {
+  if (!input) {
+    return undefined;
+  }
+  const normalized = input.trim().toLowerCase();
+  return TIMING_DISPLAY_TO_UCUM_CODE[normalized];
 };
 
 export const validate = (code): ValidationResult => {
