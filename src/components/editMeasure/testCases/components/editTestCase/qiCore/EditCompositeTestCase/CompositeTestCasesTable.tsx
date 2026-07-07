@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import {
   ColumnDef,
   getCoreRowModel,
@@ -16,12 +16,21 @@ import {
 } from "@madie/madie-design-system/dist/react";
 import tw from "twin.macro";
 import "styled-components/macro";
-import { InputAdornment, IconButton, MenuItem } from "@mui/material";
+import {
+  InputAdornment,
+  IconButton,
+  MenuItem,
+  FormControlLabel,
+  Checkbox,
+  Chip,
+  Tooltip,
+} from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import ClearIcon from "@mui/icons-material/Clear";
 import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { TestCase, Measure } from "@madie/madie-models";
@@ -55,19 +64,30 @@ export default function CompositeTestCasesTable({
   const [searchText, setSearchText] = useState<string>("");
   const [page, setPage] = useState<number>(1);
   const [limit, setLimit] = useState<number>(10);
+  const [hideInvalidTestCases, setHideInvalidTestCases] =
+    useState<boolean>(false);
 
-  // Only show valid test cases provided by parent-level validation logic.
-  const validTestCases = useMemo(
-    () => testCases.filter((tc) => validTestCaseIds.has(tc.id)),
-    [testCases, validTestCaseIds]
-  );
+  useEffect(() => {
+    const savedSetting = localStorage.getItem(
+      `hideInvalidTestCases-${selectedMeasure.id}`
+    );
+    if (savedSetting !== null) {
+      setHideInvalidTestCases(savedSetting === "true");
+    }
+  }, [selectedMeasure.id]);
 
-  // Filter and return only valid test cases
+  const visibleTestCases = useMemo(() => {
+    if (hideInvalidTestCases) {
+      return testCases.filter((tc) => validTestCaseIds.has(tc.id));
+    }
+    return testCases;
+  }, [testCases, hideInvalidTestCases, validTestCaseIds]);
+
   const filteredTestCases = useMemo(() => {
-    if (!searchText.trim()) return validTestCases;
+    if (!searchText.trim()) return visibleTestCases;
     const lowerSearch = searchText.toLowerCase();
 
-    return validTestCases.filter((tc) => {
+    return visibleTestCases.filter((tc) => {
       if (!filterBy || filterBy === "") {
         // Search across all 3 fields when "-" (empty) is selected
         const group = (tc.series || "").toLowerCase();
@@ -90,7 +110,7 @@ export default function CompositeTestCasesTable({
       const value = (tc[field] ?? "").toString().toLowerCase();
       return value.includes(lowerSearch);
     });
-  }, [validTestCases, searchText, filterBy]);
+  }, [visibleTestCases, searchText, filterBy]);
 
   // Pagination
   const totalItems = filteredTestCases.length;
@@ -115,72 +135,128 @@ export default function CompositeTestCasesTable({
         header: "Group",
         accessorKey: "series",
         size: 10,
-        cell: (info) => (
-          <TruncateText
-            text={info.row.original.series || "-"}
-            maxLength={60}
-            dataTestId={`tc-group-${info.row.original.id}`}
-          />
-        ),
+        cell: (info) => {
+          const isInvalid = !validTestCaseIds.has(info.row.original.id);
+          return (
+            <div>
+              <span style={{ color: isInvalid ? "#757575" : "inherit" }}>
+                <TruncateText
+                  text={info.row.original.series || "-"}
+                  maxLength={60}
+                  dataTestId={`tc-group-${info.row.original.id}`}
+                />
+              </span>
+              {isInvalid && (
+                <Tooltip
+                  title="This test case is invalid for composite use. Please correct it at the component measure in order to select profiles from it."
+                  placement="top"
+                  arrow
+                >
+                  <Chip
+                    icon={<ErrorOutlineIcon style={{ color: "#fff" }} />}
+                    label="Invalid"
+                    size="small"
+                    data-testid={`tc-invalid-chip-${info.row.original.id}`}
+                    style={{
+                      backgroundColor: "#9370DB",
+                      color: "#fff",
+                      height: "20px",
+                      fontSize: "11px",
+                      marginTop: "4px",
+                    }}
+                  />
+                </Tooltip>
+              )}
+            </div>
+          );
+        },
       },
       {
         header: "Title",
         accessorKey: "title",
         size: 38,
-        cell: (info) => (
-          <span
-            style={{
-              wordBreak: "break-word",
-              overflowWrap: "break-word",
-              display: "inline-block",
-              maxWidth: "100%",
-            }}
-            data-testid={`tc-title-${info.row.original.id}`}
-          >
-            {info.row.original.title}
-          </span>
-        ),
+        cell: (info) => {
+          const isInvalid = !validTestCaseIds.has(info.row.original.id);
+          return (
+            <span
+              style={{
+                wordBreak: "break-word",
+                overflowWrap: "break-word",
+                display: "inline-block",
+                maxWidth: "100%",
+                color: isInvalid ? "#757575" : "inherit",
+              }}
+              data-testid={`tc-title-${info.row.original.id}`}
+            >
+              {info.row.original.title}
+            </span>
+          );
+        },
       },
       {
         header: "Description",
         accessorKey: "description",
         size: 35,
-        cell: (info) => (
-          <TruncateText
-            text={info.row.original.description || "-"}
-            maxLength={120}
-            dataTestId={`tc-description-${info.row.original.id}`}
-          />
-        ),
+        cell: (info) => {
+          const isInvalid = !validTestCaseIds.has(info.row.original.id);
+          return (
+            <span style={{ color: isInvalid ? "#757575" : "inherit" }}>
+              <TruncateText
+                text={info.row.original.description || "-"}
+                maxLength={120}
+                dataTestId={`tc-description-${info.row.original.id}`}
+              />
+            </span>
+          );
+        },
       },
       {
         id: "actions",
         header: null,
         size: 15,
-        cell: (info) => (
-          <>
-            <Button
-              tw="m-2"
-              type="button"
-              title="View test case"
-              data-testid={`view-test-case-btn-${info.row.original.id}`}
-              onClick={() => onViewTestCase?.(info.row.original)}
-            >
-              View Test Case
-            </Button>
-            <Button
-              tw="m-2"
-              type="button"
-              title="Insert Profiles from Test Case"
-              data-testid={`insert-test-case-btn-${info.row.original.id}`}
-              disabled={!validTestCaseIds.has(info.row.original.id)}
-              onClick={() => onInsertProfilesFromTestCase?.(info.row.original)}
-            >
-              Insert
-              <ChevronRightIcon style={{ height: "20px", width: "20px" }} />
-            </Button>
-          </>
-        ),
+        cell: (info) => {
+          const isInvalid = !validTestCaseIds.has(info.row.original.id);
+          return (
+            <>
+              <Button
+                tw="m-2"
+                type="button"
+                title="View test case"
+                data-testid={`view-test-case-btn-${info.row.original.id}`}
+                onClick={() => onViewTestCase?.(info.row.original)}
+              >
+                View Test Case
+              </Button>
+              <Tooltip
+                title={
+                  isInvalid
+                    ? "This test case is invalid for composite use. Please correct it at the component measure in order to select profiles from it."
+                    : "Insert test case"
+                }
+                placement="top"
+                arrow
+              >
+                <span>
+                  <Button
+                    tw="m-2"
+                    type="button"
+                    title="Insert Profiles from Test Case"
+                    data-testid={`insert-test-case-btn-${info.row.original.id}`}
+                    disabled={isInvalid}
+                    onClick={() =>
+                      onInsertProfilesFromTestCase?.(info.row.original)
+                    }
+                  >
+                    Insert
+                    <ChevronRightIcon
+                      style={{ height: "20px", width: "20px" }}
+                    />
+                  </Button>
+                </span>
+              </Tooltip>
+            </>
+          );
+        },
         accessorKey: "actions",
         enableSorting: false,
       },
@@ -373,6 +449,35 @@ export default function CompositeTestCasesTable({
             />
           </div>
         </div>
+        {/* Hide Invalid Test Cases Toggle */}
+        <div tw="flex items-center" style={{ marginTop: "25px" }}>
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={hideInvalidTestCases}
+                onChange={(e) => {
+                  const newValue = e.target.checked;
+                  setHideInvalidTestCases(newValue);
+                  localStorage.setItem(
+                    `hideInvalidTestCases-${selectedMeasure.id}`,
+                    String(newValue)
+                  );
+                  setPage(1);
+                }}
+                data-testid="hide-invalid-test-cases-checkbox"
+                sx={{
+                  width: 24,
+                  height: 24,
+                }}
+              />
+            }
+            label="Hide invalid test cases"
+            sx={{
+              color: "#515151",
+              textTransform: "none",
+            }}
+          />
+        </div>
       </div>
 
       {/* Table */}
@@ -515,7 +620,9 @@ export default function CompositeTestCasesTable({
           data-testid="no-test-cases-message"
           style={{ textAlign: "center", color: "#717171", marginTop: 24 }}
         >
-          No valid test cases found.
+          {hideInvalidTestCases
+            ? "No valid test cases found."
+            : "No test cases found."}
         </p>
       )}
     </div>
