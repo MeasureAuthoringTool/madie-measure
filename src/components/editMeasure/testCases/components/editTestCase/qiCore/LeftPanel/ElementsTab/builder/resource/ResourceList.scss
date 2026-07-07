@@ -33,9 +33,11 @@
     &.flex-row-gap {
       justify-content: space-between;
       column-gap: 25px;
+
       > .search-field-wrapper {
         max-width: 400px;
       }
+
       > button {
         margin: 0;
         flex-shrink: 0;
