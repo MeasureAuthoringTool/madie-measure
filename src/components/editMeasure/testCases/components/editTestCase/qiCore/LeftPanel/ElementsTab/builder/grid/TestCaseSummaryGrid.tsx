@@ -21,7 +21,9 @@ import { Button } from "@madie/madie-design-system/dist/react";
 import { ResourceIdentifier } from "../../../../../../../api/models/ResourceIdentifier";
 import { Box, IconButton } from "@mui/material";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
-import getHl7ProfileLink from "../../../../../../../../../../utils/hl7Links";
+import getHl7ProfileLink, {
+  normalizeProfileId,
+} from "../../../../../../../../../../utils/hl7Links";
 
 export const UI_BUILDER_VIEW_MESSAGE =
   "Viewing this in the UI builder is unsupported.";
@@ -254,12 +256,21 @@ const TestCaseSummaryGrid = ({
         maxSize: 90,
         cell: ({ row }) => {
           const { original } = row;
+          const resourceProfiles = original.entry.resource.meta?.profile || [];
+          const firstProfile = resourceProfiles[0];
+
+          const profileMatch = allResourceProfiles?.find((resource) =>
+            resourceProfiles.includes(resource.profile)
+          );
           const resourceIdentifier = allResourceProfiles?.find(
             (resource) =>
               resource.title === original.title ||
               resource.type === original.entry.resource.resourceType
           );
-          const hl7ProfileId = resourceIdentifier?.id;
+          const hl7ProfileId =
+            profileMatch?.id ||
+            resourceIdentifier?.id ||
+            normalizeProfileId(firstProfile);
           const link = getHl7ProfileLink(hl7ProfileId, measureModel);
           const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
             e.stopPropagation();
@@ -269,8 +280,12 @@ const TestCaseSummaryGrid = ({
           };
           return (
             <IconButton
-              data-testid={`hl7-link-${hl7ProfileId}`}
-              aria-label={`Open HL7 profile for ${hl7ProfileId}`}
+              data-testid={`hl7-link-${
+                hl7ProfileId || original.entry.resource.id
+              }`}
+              aria-label={`Open HL7 profile for ${
+                hl7ProfileId || original.entry.resource.id
+              }`}
               onClick={handleClick}
             >
               <OpenInNewIcon />
@@ -354,7 +369,17 @@ const TestCaseSummaryGrid = ({
         },
       },
     ],
-    []
+    [
+      allResourceProfiles,
+      measureModel,
+      testCaseCanEdit,
+      actions,
+      viewAction,
+      readOnly,
+      onRowEdit,
+      onRowDelete,
+      onRowClone,
+    ]
   );
 
   const table = useReactTable({

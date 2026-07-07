@@ -573,11 +573,9 @@ describe("Builder Component", () => {
       activeTab: "added",
     });
 
-    expect(await screen.findByText("QICore Encounter")).toBeInTheDocument();
-    expect(await screen.findByText("Observation")).toBeInTheDocument();
-    expect(
-      await screen.findByText("QICore ServiceRequest")
-    ).toBeInTheDocument();
+    expect(screen.getByText("QICore Encounter")).toBeInTheDocument();
+    expect(screen.getByText("Observation")).toBeInTheDocument();
+    expect(screen.getByText("QICore ServiceRequest")).toBeInTheDocument();
   });
 
   it("handles empty bundle entries without rendering data rows", async () => {

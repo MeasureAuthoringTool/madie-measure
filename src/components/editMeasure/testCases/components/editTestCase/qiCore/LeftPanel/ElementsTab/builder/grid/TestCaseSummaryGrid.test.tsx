@@ -211,6 +211,48 @@ describe("TestCaseSummaryGrid", () => {
     );
   });
 
+  it("opens the US Core HL7 link using canonical meta.profile when context matching is unavailable", async () => {
+    window.open = jest.fn();
+
+    const compositeLikeGridData = [
+      {
+        title: "US Core Blood Pressure Profile",
+        entry: {
+          resource: {
+            resourceType: "Observation",
+            id: "obs-1",
+            meta: {
+              profile: [
+                "http://hl7.org/fhir/us/core/StructureDefinition/us-core-blood-pressure",
+              ],
+            },
+          },
+        },
+      },
+    ] as GridDataEntry[];
+
+    renderWithResourceContext(
+      <TestCaseSummaryGrid
+        gridData={compositeLikeGridData}
+        onRowEdit={mockOnRowEdit}
+        onRowDelete={mockOnRowDelete}
+        testCaseCanEdit={true}
+        measureModel="QI-Core 6.0"
+        readOnly={false}
+      />
+    );
+
+    const hl7Button = await screen.findByTestId(
+      "hl7-link-us-core-blood-pressure"
+    );
+    await userEvent.click(hl7Button);
+
+    expect(window.open).toHaveBeenCalledWith(
+      "https://hl7.org/fhir/us/core/StructureDefinition-us-core-blood-pressure.html",
+      "_blank"
+    );
+  });
+
   it("should render the table with no data", () => {
     renderWithResourceContext(
       <TestCaseSummaryGrid
