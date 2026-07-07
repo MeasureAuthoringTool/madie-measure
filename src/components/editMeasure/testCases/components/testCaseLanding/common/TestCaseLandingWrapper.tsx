@@ -51,6 +51,7 @@ const TestCaseLandingWrapper = (props) => {
       <TestCaseListSideBarNav
         allPopulationCriteria={measure?.groups}
         qdm={props.qdm}
+        isComposite={measure?.measureMetaData?.composite}
         isCollapsed={isCollapsed}
         setIsCollapsed={setIsCollapsed}
       />
