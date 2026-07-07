@@ -278,6 +278,8 @@ const Builder = ({
                   (res) =>
                     res.id.startsWith("qicore") || res.id.startsWith("us-core")
                 )}
+                allResourceIdentifiers={resourceIdentifiers}
+                measureId={measure?.id}
                 measureModel={measure?.model}
                 onClick={async (resourceIdentifier: ResourceIdentifier) => {
                   const newEntry =

@@ -44,7 +44,7 @@ describe("ResourceList component", () => {
 
     const table = await screen.findByTestId("measure-list-tbl");
     const tableHeaders = table.querySelectorAll("thead th");
-    expect(tableHeaders[0]).toHaveTextContent("Profile");
+    expect(tableHeaders[0]).toHaveTextContent("Relevant Profiles");
     expect(tableHeaders[1]).toHaveTextContent("HL7");
     userEvent.click(tableHeaders[0]); // doesn't do anything right now, but i have a prevent default in there so i want the code coverage.
     const tableRows = table.querySelectorAll("tbody tr");
@@ -170,7 +170,9 @@ describe("ResourceList component", () => {
     const table = await screen.findByTestId("measure-list-tbl");
     const tableRows = table.querySelectorAll("tbody tr");
     expect(tableRows.length).toBe(5);
-    const searchFieldInput = getByTestId("search-elements-input-input");
+    const searchFieldInput = getByTestId(
+      "search-elements-input-input"
+    ) as HTMLInputElement;
     expect(searchFieldInput.value).toBe("");
     userEvent.type(searchFieldInput, "test{enter}");
     Simulate.change(searchFieldInput);
@@ -321,5 +323,192 @@ describe("ResourceList component", () => {
     // Add button for us-core-patient resource should be disabled
     const addBtnOther = screen.getByTestId("add-element-us-core-patient");
     expect(addBtnOther).toBeDisabled();
+  });
+
+  describe("Profile Display Mode", () => {
+    const relevantResources: ResourceIdentifier[] = [
+      {
+        id: "qicore-patient",
+        title: "QICore Patient",
+        type: "Patient",
+        category: "Base",
+        profile: "profile-patient",
+      },
+      {
+        id: "qicore-encounter",
+        title: "QICore Encounter",
+        type: "Encounter",
+        category: "Base",
+        profile: "profile-encounter",
+      },
+    ];
+
+    const allResources: ResourceIdentifier[] = [
+      ...relevantResources,
+      {
+        id: "fhir-observation",
+        title: "FHIR Observation",
+        type: "Observation",
+        category: "Clinical",
+        profile: "profile-observation",
+      },
+      {
+        id: "fhir-condition",
+        title: "FHIR Condition",
+        type: "Condition",
+        category: "Clinical",
+        profile: "profile-condition",
+      },
+    ];
+
+    beforeEach(() => {
+      localStorage.clear();
+    });
+
+    it("defaults to Measure-relevant profiles when no saved mode exists", () => {
+      const onClick = jest.fn();
+      render(
+        <ResourceList
+          resourceIdentifiers={relevantResources}
+          allResourceIdentifiers={allResources}
+          onClick={onClick}
+          measureId="measure-1"
+        />
+      );
+
+      expect(screen.getByLabelText(/Measure-relevant profiles/i)).toBeChecked();
+      expect(screen.getByLabelText(/All Profiles/i)).not.toBeChecked();
+    });
+
+    it("displays correct profile counts", () => {
+      const onClick = jest.fn();
+      render(
+        <ResourceList
+          resourceIdentifiers={relevantResources}
+          allResourceIdentifiers={allResources}
+          onClick={onClick}
+          measureId="measure-1"
+        />
+      );
+
+      expect(screen.getByText(/All Profiles \(4\)/)).toBeInTheDocument();
+      expect(
+        screen.getByText(/Measure-relevant profiles \(2\)/)
+      ).toBeInTheDocument();
+    });
+
+    it("displays Relevant Profiles header in relevant mode", async () => {
+      const onClick = jest.fn();
+      render(
+        <ResourceList
+          resourceIdentifiers={relevantResources}
+          allResourceIdentifiers={allResources}
+          onClick={onClick}
+          measureId="measure-1"
+        />
+      );
+
+      const table = await screen.findByTestId("measure-list-tbl");
+      const tableHeaders = table.querySelectorAll("thead th");
+      expect(tableHeaders[0]).toHaveTextContent("Relevant Profiles");
+    });
+
+    it("displays All Profiles header when All Profiles is selected", async () => {
+      localStorage.setItem("available-elements-profile-mode-measure-1", "ALL");
+      const onClick = jest.fn();
+      render(
+        <ResourceList
+          resourceIdentifiers={relevantResources}
+          allResourceIdentifiers={allResources}
+          onClick={onClick}
+          measureId="measure-1"
+        />
+      );
+
+      const table = await screen.findByTestId("measure-list-tbl");
+      const tableHeaders = table.querySelectorAll("thead th");
+      expect(tableHeaders[0]).toHaveTextContent("All Profiles");
+    });
+
+    it("shows all profiles when All Profiles mode is selected", async () => {
+      localStorage.setItem("available-elements-profile-mode-measure-1", "ALL");
+      const onClick = jest.fn();
+      render(
+        <ResourceList
+          resourceIdentifiers={relevantResources}
+          allResourceIdentifiers={allResources}
+          onClick={onClick}
+          measureId="measure-1"
+        />
+      );
+
+      const table = await screen.findByTestId("measure-list-tbl");
+      const tableRows = table.querySelectorAll("tbody tr");
+      expect(tableRows.length).toBe(4);
+    });
+
+    it("shows only relevant profiles in relevant mode", async () => {
+      const onClick = jest.fn();
+      render(
+        <ResourceList
+          resourceIdentifiers={relevantResources}
+          allResourceIdentifiers={allResources}
+          onClick={onClick}
+          measureId="measure-1"
+        />
+      );
+
+      const table = await screen.findByTestId("measure-list-tbl");
+      const tableRows = table.querySelectorAll("tbody tr");
+      expect(tableRows.length).toBe(2);
+    });
+
+    it("persists selected mode per measure", async () => {
+      const onClick = jest.fn();
+      render(
+        <ResourceList
+          resourceIdentifiers={relevantResources}
+          allResourceIdentifiers={allResources}
+          onClick={onClick}
+          measureId="measure-1"
+        />
+      );
+
+      userEvent.click(screen.getByLabelText(/All Profiles/i));
+
+      expect(
+        localStorage.getItem("available-elements-profile-mode-measure-1")
+      ).toBe("ALL");
+    });
+
+    it("loads saved mode from localStorage", () => {
+      localStorage.setItem("available-elements-profile-mode-measure-1", "ALL");
+      const onClick = jest.fn();
+      render(
+        <ResourceList
+          resourceIdentifiers={relevantResources}
+          allResourceIdentifiers={allResources}
+          onClick={onClick}
+          measureId="measure-1"
+        />
+      );
+
+      expect(screen.getByLabelText(/All Profiles/i)).toBeChecked();
+    });
+
+    it("does not reuse mode across different measures", () => {
+      localStorage.setItem("available-elements-profile-mode-measure-1", "ALL");
+      const onClick = jest.fn();
+      render(
+        <ResourceList
+          resourceIdentifiers={relevantResources}
+          allResourceIdentifiers={allResources}
+          onClick={onClick}
+          measureId="measure-2"
+        />
+      );
+
+      expect(screen.getByLabelText(/Measure-relevant profiles/i)).toBeChecked();
+    });
   });
 });
