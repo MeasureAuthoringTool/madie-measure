@@ -52,7 +52,8 @@ export const deduplicateAndSortResources = (
 ): ResourceIdentifier[] => {
   const sorted = _.uniqBy(identifiers, "profile")
     .filter(
-      (res) => res.id.startsWith("qicore") || res.id.startsWith("us-core")
+      (res) =>
+        res.profile.includes("/us/qicore") || res.profile.includes("/us/core")
     )
     .sort((a, b) => a.title.localeCompare(b.title));
   const patientIdx = sorted.findIndex((r) => r.id === "qicore-patient");

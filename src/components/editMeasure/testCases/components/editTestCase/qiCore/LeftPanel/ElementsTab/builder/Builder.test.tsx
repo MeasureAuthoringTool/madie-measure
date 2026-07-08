@@ -774,49 +774,55 @@ describe("deduplicateAndSortResources", () => {
     title: "QICore Patient",
     type: "Patient",
     category: "Base",
-    profile: "profile-patient",
+    profile:
+      "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient",
   };
   const mockEncounter = {
     id: "qicore-encounter",
     title: "QICore Encounter",
     type: "Encounter",
     category: "Base",
-    profile: "profile-encounter",
+    profile:
+      "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-encounter",
   };
   const mockAllergyIntolerance = {
     id: "qicore-allergyintolerance",
     title: "QICore AllergyIntolerance",
     type: "AllergyIntolerance",
     category: "Clinical",
-    profile: "profile-allergy",
+    profile:
+      "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-allergyintolerance",
   };
   const mockCondition = {
     id: "qicore-condition",
     title: "QICore Condition",
     type: "Condition",
     category: "Clinical",
-    profile: "profile-condition",
+    profile:
+      "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-condition",
   };
   const mockProcedure = {
     id: "qicore-procedure",
     title: "QICore Procedure",
     type: "Procedure",
     category: "Clinical",
-    profile: "profile-procedure",
+    profile:
+      "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-procedure",
   };
   const mockUsCoreCondition = {
     id: "us-core-condition",
     title: "US Core Condition",
     type: "Condition",
     category: "Clinical",
-    profile: "profile-us-core-condition",
+    profile:
+      "http://hl7.org/fhir/us/core/StructureDefinition/us-core-condition",
   };
   const mockFhirObservation = {
     id: "fhir-observation",
     title: "FHIR Observation",
     type: "Observation",
     category: "Clinical",
-    profile: "profile-observation",
+    profile: "http://hl7.org/fhir/StructureDefinition/Observation",
   };
 
   it("should remove duplicate profiles", () => {
