@@ -891,6 +891,79 @@ describe("ResourceEditor", () => {
     expect(mockDispatch).toHaveBeenCalledWith(expectedPayload);
   });
 
+  it("shows selected choice type label in Add Attribute(s) dialog based on saved data", async () => {
+    const fhirDefinitionsServiceApiMock = {
+      getResourceTree: jest
+        .fn()
+        .mockResolvedValue(mockAllergyIntoleranceStructuredDef),
+      getValueSetDefinition: jest.fn().mockResolvedValue(mockValueSetsState),
+    } as unknown as FhirDefinitionsServiceApi;
+    useFhirDefinitionsServiceApiMock.mockImplementation(
+      () => fhirDefinitionsServiceApiMock
+    );
+
+    const stateWithOnsetPeriod = _.cloneDeep(mockResourceState);
+    const allergyEntry = stateWithOnsetPeriod.bundle.entry.find(
+      (entry) => entry.resource.id === "6fb9d817"
+    );
+    delete allergyEntry.resource.onsetDateTime;
+    allergyEntry.resource.onsetPeriod = {
+      start: "2020-01-01T00:00:00Z",
+    };
+
+    const formikWithOnsetPeriod = {
+      ...localMockFormikObj,
+      dirty: false,
+      values: {
+        AllergyIntolerance: {
+          id: "6fb9d817",
+          onsetPeriod: {
+            start: "2020-01-01T00:00:00Z",
+          },
+        },
+      },
+    };
+    (useFormikContext as jest.Mock).mockReturnValue(formikWithOnsetPeriod);
+
+    render(
+      <ExecutionContextProvider
+        value={
+          {
+            valueSetsState: localMockckValueSetsState,
+            executionContextReady: true,
+          } as any
+        }
+      >
+        <ApiContextProvider value={mockConfig}>
+          <QiCoreResourceContext.Provider
+            value={{ state: stateWithOnsetPeriod, dispatch: jest.fn() }}
+          >
+            <ResourceEditor
+              selectedResourceID="6fb9d817"
+              setValidationSchema={mockSetValidationSchema}
+              setInitialFormikValuesStu6={mockSetInitialFormikValuesStu6}
+              onCancel={mockOnCancel}
+              canEdit={true}
+              applyLoading={false}
+              setApplyLoading={jest.fn()}
+            />
+          </QiCoreResourceContext.Provider>
+        </ApiContextProvider>
+      </ExecutionContextProvider>
+    );
+
+    const addAttributeButton = await screen.findByTestId(
+      "add-attribute-dialog-button"
+    );
+    userEvent.click(addAttributeButton);
+
+    await waitFor(() => {
+      expect(screen.getByText("Attribute Selector")).toBeInTheDocument();
+      expect(screen.getAllByText("onsetPeriod").length).toBeGreaterThan(0);
+      expect(screen.queryByText("onsetDateTime")).not.toBeInTheDocument();
+    });
+  });
+
   it("should apply [0] index for element with isMultiCardinalityElement (base max '*' without existing values)", async () => {
     const mockDispatch = jest.fn();
 

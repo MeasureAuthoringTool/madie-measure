@@ -122,15 +122,79 @@ const consolidateTopLevelChoiceTypes = (
       return;
     }
 
-    const mergedTypes = _.uniqBy(
+    existing.type = _.uniqBy(
       [...(existing.type || []), ...(element.type || [])],
       (type) => type.code
     );
-    existing.type = mergedTypes;
     consolidated.set(key, existing);
   });
 
   return Array.from(consolidated.values());
+};
+
+const getChoiceTypePath = (
+  element: ElementDefinition,
+  typeCode: string
+): string => {
+  const resourceName = element.path.split(".")[0];
+  const elemPath = stripResourcePath(resourceName, element.path);
+  const cleanPath = elemPath.substring(0, elemPath.lastIndexOf("["));
+  return _.camelCase(cleanPath + _.upperFirst(typeCode));
+};
+
+const getSelectedChoiceTypeCode = (
+  resource: any,
+  element: ElementDefinition
+): string | undefined => {
+  if (!isChoiceTypeElement(element) || !element?.type?.length) {
+    return undefined;
+  }
+
+  const matchedType = element.type.find(
+    (type) =>
+      !_.isUndefined(_.get(resource, getChoiceTypePath(element, type.code)))
+  );
+  return matchedType?.code;
+};
+
+const prioritizeChoiceTypeByResourceValue = (
+  element: ElementDefinition,
+  resource: any
+): ElementDefinition => {
+  if (!isChoiceTypeElement(element) || !element?.type?.length) {
+    return element;
+  }
+
+  const selectedTypeCode = getSelectedChoiceTypeCode(resource, element);
+  if (!selectedTypeCode) {
+    return element;
+  }
+
+  const selectedType = element.type.find(
+    (type) => type.code === selectedTypeCode
+  );
+  if (!selectedType) {
+    return element;
+  }
+
+  const reorderedTypes = [
+    selectedType,
+    ...element.type.filter((type) => type.code !== selectedTypeCode),
+  ];
+
+  return {
+    ...element,
+    type: reorderedTypes,
+  };
+};
+
+const applyChoiceTypeSelectionOrder = (
+  elements: ElementDefinition[],
+  resource: any
+): ElementDefinition[] => {
+  return elements.map((element) =>
+    prioritizeChoiceTypeByResourceValue(element, resource)
+  );
 };
 
 const ResourceEditor = ({
@@ -196,8 +260,11 @@ const ResourceEditor = ({
             bundleEntry: selectedEntry,
           };
 
-          const topElements = consolidateTopLevelChoiceTypes(
-            getTopLevelElements(selectedResource)
+          const topElements = applyChoiceTypeSelectionOrder(
+            consolidateTopLevelChoiceTypes(
+              getTopLevelElements(selectedResource)
+            ),
+            selectedResource.bundleEntry.resource
           );
           //the topElements from the selectedResource contains elements from resource.definition.snapshot.element
 
