@@ -44,6 +44,12 @@ export const NO_PROFILES_MESSAGE =
   "No Profiles have been added to the test case. Navigate to the Available Elements tab to add profiles.";
 
 /**
+ * Returns true if the resource profile belongs to qicore or us-core.
+ */
+export const isQiCoreOrUsCoreResource = (res: ResourceIdentifier): boolean =>
+  res.profile.includes("/us/qicore") || res.profile.includes("/us/core");
+
+/**
  * Deduplicates, filters to qicore/us-core, sorts alphabetically,
  * and moves QI-Core Patient to the front of the list.
  */
@@ -51,10 +57,7 @@ export const deduplicateAndSortResources = (
   identifiers: ResourceIdentifier[]
 ): ResourceIdentifier[] => {
   const sorted = _.uniqBy(identifiers, "profile")
-    .filter(
-      (res) =>
-        res.profile.includes("/us/qicore") || res.profile.includes("/us/core")
-    )
+    .filter(isQiCoreOrUsCoreResource)
     .sort((a, b) => a.title.localeCompare(b.title));
   const patientIdx = sorted.findIndex((r) => r.id === "qicore-patient");
   if (patientIdx > 0) {
@@ -284,10 +287,7 @@ const Builder = ({
               <ResourceList
                 isComposite={isComposite}
                 onInsertTCClick={onInsertTCClick}
-                resourceIdentifiers={resources.filter(
-                  (res) =>
-                    res.id.startsWith("qicore") || res.id.startsWith("us-core")
-                )}
+                resourceIdentifiers={resources.filter(isQiCoreOrUsCoreResource)}
                 allResourceIdentifiers={deduplicateAndSortResources(
                   resourceIdentifiers
                 )}
