@@ -2514,5 +2514,47 @@ describe("Measure Groups Page", () => {
       expect(compositeOption).not.toBeInTheDocument();
       expect(cohortOption).not.toBeInTheDocument();
     });
+
+    test("should hide Stratifications tab for composite measures", async () => {
+      measure.measureMetaData.composite = true;
+      renderMeasureGroupComponent(customProps);
+
+      // Components tab should be present
+      const componentTab = screen.getByRole("tab", {
+        name: "Components",
+      });
+      expect(componentTab).toBeInTheDocument();
+
+      // Reporting tab should be present
+      const reportingTab = screen.getByRole("tab", {
+        name: /Reporting/i,
+      });
+      expect(reportingTab).toBeInTheDocument();
+
+      // Stratifications tab should NOT be present
+      const stratificationsTab = screen.queryByTestId("stratifications-tab");
+      expect(stratificationsTab).not.toBeInTheDocument();
+    });
+
+    test("should show Stratifications tab for non-composite measures", async () => {
+      measure.measureMetaData.composite = false;
+      renderMeasureGroupComponent(customProps);
+
+      // Populations tab should be present
+      const populationsTab = screen.getByRole("tab", {
+        name: /Populations/i,
+      });
+      expect(populationsTab).toBeInTheDocument();
+
+      // Reporting tab should be present
+      const reportingTab = screen.getByRole("tab", {
+        name: /Reporting/i,
+      });
+      expect(reportingTab).toBeInTheDocument();
+
+      // Stratifications tab should be present
+      const stratificationsTab = screen.queryByTestId("stratifications-tab");
+      expect(stratificationsTab).toBeInTheDocument();
+    });
   });
 });
