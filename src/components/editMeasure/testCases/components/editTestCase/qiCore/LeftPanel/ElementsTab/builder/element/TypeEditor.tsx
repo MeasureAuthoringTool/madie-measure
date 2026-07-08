@@ -270,6 +270,53 @@ const TypeEditor = ({
       : null;
   }, [extensionProfileDef]);
 
+  // For top-level choice types, always render the ChoiceType selector by path
+  // so UI does not depend on whichever concrete type happens to be selected.
+  const isChoiceTypePath = _.endsWith(structureDefinition?.id, "[x]");
+  const shouldRenderChoiceType = isChoiceTypePath && label?.includes("[x]");
+
+  if (shouldRenderChoiceType) {
+    const excludedTypes = [
+      "base64Binary",
+      "markdown",
+      "Expression",
+      "ParameterDefinition",
+      "Annotation",
+      "Attachment",
+      "Contributor",
+      "SampledData",
+      "HumanName",
+      "RelatedArtifact",
+      "TriggerDefinition",
+      "UsageContext",
+      "Meta",
+      "Address",
+      "ContactPoint",
+      "ContactDetail",
+      "DataRequirement",
+    ];
+
+    const filteredStructureDefinition = {
+      ...structureDefinition,
+      type: (structureDefinition?.type || []).filter(
+        (typeItem) =>
+          !excludedTypes.some(
+            (excluded) => typeItem.code.toLowerCase() === excluded.toLowerCase()
+          )
+      ),
+    };
+
+    return (
+      <ChoiceType
+        childDef={filteredStructureDefinition}
+        resource={resource}
+        parentStructureDefinition={parentStructureDefinition}
+        canEdit={canEdit}
+        label={label}
+      />
+    );
+  }
+
   if (isComponentDataType(type)) {
     switch (type) {
       case "string":

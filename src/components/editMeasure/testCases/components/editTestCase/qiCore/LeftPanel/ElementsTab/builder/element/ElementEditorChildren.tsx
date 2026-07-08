@@ -41,6 +41,10 @@ const ElementEditorChildrenInner = ({
   const { values } = useFormikContext();
   let elementValue = _.get(resource, elemPath);
   const { dispatch, state } = useQiCoreResource();
+  const typeEditorLabel =
+    rootDefinition?.id?.endsWith("[x]") || rootDefinition?.path?.endsWith("[x]")
+      ? rootDefinition.id
+      : formatChoiceType(rootDefinition);
   const addElementOfMultipleCardinality = () => {
     const nextEntry = _.cloneDeep(
       state.bundle?.entry?.find(
@@ -183,12 +187,12 @@ const ElementEditorChildrenInner = ({
       )}
       <Box sx={{ rowGap: 0 }}>
         <TypeEditor
-          key={formatChoiceType(rootDefinition)} //React uses the key to determine whether a component instance should be reused or recreated when re-rendering.
+          key={typeEditorLabel} //React uses the key to determine whether a component instance should be reused or recreated when re-rendering.
           resource={resource}
           structureDefinition={rootDefinition}
           parentStructureDefinition={parentStructureDefinition}
           canEdit={canEdit}
-          label={formatChoiceType(rootDefinition)}
+          label={typeEditorLabel}
         />
       </Box>
     </div>
