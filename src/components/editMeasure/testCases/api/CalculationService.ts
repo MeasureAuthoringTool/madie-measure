@@ -164,25 +164,33 @@ export class CalculationService {
     const TestCaseBundles = testCases.map((testCase) => {
       return this.buildPatientBundle(testCase);
     });
-    return await calculateMeasureReports(
-      measureBundle,
-      TestCaseBundles,
-      {
-        trustMetaProfile: true,
-        measurementPeriodStart: measure?.measurementPeriodStart
-          ? new Date(measure.measurementPeriodStart)
-              .toISOString()
-              .substring(0, 10)
-          : undefined,
-        measurementPeriodEnd: measure?.measurementPeriodEnd
-          ? new Date(measure.measurementPeriodEnd)
-              .toISOString()
-              .substring(0, 10)
-          : undefined,
-        reportType: "summary",
-      },
-      valueSets
-    );
+    const calculationOutput: MRCalculationOutput =
+      await calculateMeasureReports(
+        measureBundle,
+        TestCaseBundles,
+        {
+          trustMetaProfile: true,
+          measurementPeriodStart: measure?.measurementPeriodStart
+            ? new Date(measure.measurementPeriodStart)
+                .toISOString()
+                .substring(0, 10)
+            : undefined,
+          measurementPeriodEnd: measure?.measurementPeriodEnd
+            ? new Date(measure.measurementPeriodEnd)
+                .toISOString()
+                .substring(0, 10)
+            : undefined,
+          reportType: "summary",
+        },
+        valueSets
+      );
+
+    // set onto window for any environment debug purposes
+    if (localStorage.getItem("madieDebug") || (window as any).madieDebug) {
+      // eslint-disable-next-line no-console
+      console.log(_.cloneDeep(calculationOutput?.results));
+    }
+    return calculationOutput;
   }
 
   async calculate(
