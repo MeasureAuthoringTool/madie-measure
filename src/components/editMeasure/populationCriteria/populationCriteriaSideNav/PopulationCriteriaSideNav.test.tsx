@@ -258,4 +258,60 @@ describe("PopulationCriteriaSideNav", () => {
     });
     expect(criteria2).toBeInTheDocument();
   });
+
+  it("should hide Supplemental Data and Risk Adjustment tabs when isComposite is true", () => {
+    const compositeProps = {
+      ...initialProps,
+      isComposite: true,
+    };
+    RenderPopulationCriteriaSideNav(compositeProps);
+
+    // Verify SDE and RAV tabs are not present
+    expect(
+      screen.queryByRole("tab", {
+        name: /supplemental data/i,
+      })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("tab", {
+        name: /risk adjustment/i,
+      })
+    ).not.toBeInTheDocument();
+  });
+
+  it("should show Supplemental Data and Risk Adjustment tabs when isComposite is false", () => {
+    const nonCompositeProps = {
+      ...initialProps,
+      isComposite: false,
+    };
+    RenderPopulationCriteriaSideNav(nonCompositeProps);
+
+    // Verify SDE and RAV tabs are present
+    expect(
+      screen.getByRole("tab", {
+        name: /supplemental data/i,
+      })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("tab", {
+        name: /risk adjustment/i,
+      })
+    ).toBeInTheDocument();
+  });
+
+  it("should show Supplemental Data and Risk Adjustment tabs when isComposite is not provided (defaults to false)", () => {
+    RenderPopulationCriteriaSideNav(initialProps);
+
+    // Verify SDE and RAV tabs are present (default behavior)
+    expect(
+      screen.getByRole("tab", {
+        name: /supplemental data/i,
+      })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("tab", {
+        name: /risk adjustment/i,
+      })
+    ).toBeInTheDocument();
+  });
 });

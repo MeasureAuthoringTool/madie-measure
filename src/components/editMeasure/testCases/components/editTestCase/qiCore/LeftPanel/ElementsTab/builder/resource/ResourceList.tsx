@@ -31,23 +31,34 @@ import { getHl7ProfileLink } from "../../../../../../../../../../utils/hl7Links"
 import { ClearIcon } from "@mui/x-date-pickers";
 import "./ResourceList.scss";
 
+import ProfileDisplayToggle from "./profileDisplayToggle/ProfileDisplayToggle";
+import {
+  ProfileDisplayMode,
+  getProfileDisplayMode,
+  saveProfileDisplayMode,
+} from "./profileDisplayToggle/ProfileDisplayMode";
+
 export interface ResourceListProps {
   resourceIdentifiers?: ResourceIdentifier[];
+  allResourceIdentifiers?: ResourceIdentifier[];
   onClick: (resourceIdentifier: ResourceIdentifier) => void;
   isPatientAdded?: boolean;
   isComposite?: boolean;
   onInsertTCClick?: () => void;
   measureModel?: string;
+  measureId?: string;
 }
 const TH = tw.th`p-3 text-left text-sm font-bold capitalize`;
 
 const ResourceList = ({
   resourceIdentifiers,
+  allResourceIdentifiers,
   onClick,
   isPatientAdded,
   isComposite = false,
   onInsertTCClick,
   measureModel,
+  measureId,
 }: ResourceListProps) => {
   // Load saved pagination state from localStorage
   const resourcePageOptions = JSON.parse(
@@ -72,9 +83,40 @@ const ResourceList = ({
   // measures owned or shared for the current user excluding the current measure
   const [offset, setOffset] = useState<number>(0);
 
+  // Profile display mode state
+  const [profileDisplayMode, setProfileDisplayMode] =
+    useState<ProfileDisplayMode>(() => {
+      if (!measureId) return ProfileDisplayMode.RELEVANT;
+      return getProfileDisplayMode(measureId);
+    });
+
+  const handleProfileDisplayModeChange = useCallback(
+    (mode: ProfileDisplayMode) => {
+      setProfileDisplayMode(mode);
+      if (measureId) {
+        saveProfileDisplayMode(measureId, mode);
+      }
+      setPage(1);
+    },
+    [measureId]
+  );
+
+  const activeResourceIdentifiers = useMemo(() => {
+    if (profileDisplayMode === ProfileDisplayMode.ALL) {
+      return allResourceIdentifiers || resourceIdentifiers;
+    }
+    return resourceIdentifiers;
+  }, [profileDisplayMode, allResourceIdentifiers, resourceIdentifiers]);
+
+  const profileTableHeader = useMemo(() => {
+    return profileDisplayMode === ProfileDisplayMode.ALL
+      ? "All Profiles"
+      : "Relevant Profiles";
+  }, [profileDisplayMode]);
+
   const managePagination = useCallback(() => {
     const filter = resourceFilter?.trim().toLowerCase() || "";
-    const filteredResources = resourceIdentifiers.filter((resource) =>
+    const filteredResources = activeResourceIdentifiers.filter((resource) =>
       resource.title.toLowerCase().includes(filter)
     );
     if (filteredResources.length < limit) {
@@ -96,7 +138,7 @@ const ResourceList = ({
   }, [
     limit,
     page,
-    resourceIdentifiers,
+    activeResourceIdentifiers,
     setOffset,
     setVisibleResources,
     setVisibleItems,
@@ -106,10 +148,10 @@ const ResourceList = ({
   ]);
 
   useEffect(() => {
-    if (resourceIdentifiers) {
+    if (activeResourceIdentifiers) {
       managePagination();
     }
-  }, [resourceIdentifiers, page, limit, resourceFilter]);
+  }, [activeResourceIdentifiers, page, limit, resourceFilter]);
 
   // Save pagination state to localStorage whenever it changes
   useEffect(() => {
@@ -124,7 +166,7 @@ const ResourceList = ({
     return [
       ...columnDefs,
       {
-        header: "Profile",
+        header: profileTableHeader,
         cell: (info) => (
           <TruncateText
             text={info.row.original.title}
@@ -192,7 +234,7 @@ const ResourceList = ({
         accessorKey: "action",
       },
     ];
-  }, [visibleResources, isPatientAdded, measureModel]);
+  }, [visibleResources, isPatientAdded, measureModel, profileTableHeader]);
   const canGoNext = (() => {
     return page < totalPages;
   })();
@@ -242,41 +284,54 @@ const ResourceList = ({
   };
   return (
     <div id="qi-core-6-tc-builder">
-      <div id="search-container" className={`${isComposite && "flex-row-gap"}`}>
-        <TextField
-          onChange={({ target }) => {
-            setSearchTerm(target.value);
-          }}
-          onKeyPress={(e) => {
-            if (e.key === "Enter") {
-              e.preventDefault();
-              setResourceFilter(e.target.value);
-            }
-          }}
-          id="search-elements-input"
-          name="searchElements"
-          placeholder="Search"
-          type="search"
-          data-testid="elements-search-input"
-          label="Search"
-          value={searchTerm}
-          variant="outlined"
-          inputProps={{
-            "data-testid": "search-elements-input-input",
-            "aria-required": "false",
-          }}
-          InputProps={searchInputProps}
-        />
-        {isComposite && (
+      {isComposite && (
+        <div style={{ display: "flex", justifyContent: "flex-end" }}>
           <Button
-            tw="m-2"
             type="button"
             data-testid={`insert-test-case-button`}
             onClick={onInsertTCClick}
           >
             Insert Existing Test Case
           </Button>
-        )}
+        </div>
+      )}
+      <div id="search-container" tw="mb-5 mt-3">
+        <div className="search-field-wrapper">
+          <TextField
+            onChange={({ target }) => {
+              setSearchTerm(target.value);
+            }}
+            onKeyPress={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                setResourceFilter(e.target.value);
+              }
+            }}
+            id="search-elements-input"
+            name="searchElements"
+            placeholder="Search"
+            type="search"
+            data-testid="elements-search-input"
+            label="Search"
+            value={searchTerm}
+            variant="outlined"
+            inputProps={{
+              "data-testid": "search-elements-input-input",
+              "aria-required": "false",
+            }}
+            InputProps={searchInputProps}
+          />
+        </div>
+        <div className="profile-toggle-wrapper">
+          <ProfileDisplayToggle
+            mode={profileDisplayMode}
+            allProfileCount={
+              (allResourceIdentifiers || resourceIdentifiers)?.length || 0
+            }
+            relevantProfileCount={resourceIdentifiers?.length || 0}
+            onChange={handleProfileDisplayModeChange}
+          />
+        </div>
       </div>
 
       {/* we want to render the table if visibleResources. We want to render the spinner if no resourceIdentifiers, and an empty div if no results */}
@@ -415,7 +470,7 @@ const ResourceList = ({
           </div>
         </div>
       )}
-      {!resourceIdentifiers && (
+      {!activeResourceIdentifiers && (
         <div style={{ display: "flex", justifyContent: "center" }}>
           <MadieSpinner
             data-testId="madie-loading-spinner"
