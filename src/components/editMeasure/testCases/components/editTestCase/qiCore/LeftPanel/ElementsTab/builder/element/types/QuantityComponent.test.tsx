@@ -486,7 +486,7 @@ describe("QuantityComponent", () => {
     });
   });
 
-  test("maps QI-Core timing display value 'days' to UCUM code 'd' on blur, preserving display value as unit", async () => {
+  test("maps QI-Core timing display value 'days' to UCUM code 'd' preserving display value as unit", async () => {
     let formikValues: any;
     const initialValues = {
       Observation: {
@@ -555,7 +555,7 @@ describe("QuantityComponent", () => {
     ["milliseconds", "ms"],
     ["millisecond", "ms"],
   ])(
-    "maps QI-Core timing display value '%s' to UCUM code '%s' on blur",
+    "maps QI-Core timing display value '%s' to UCUM code '%s'",
     async (display, expectedCode) => {
       let formikValues: any;
       const initialValues = {
@@ -607,7 +607,7 @@ describe("QuantityComponent", () => {
     }
   );
 
-  test("does not remap a valid UCUM code on blur", async () => {
+  test("does not remap a valid UCUM code", async () => {
     let formikValues: any;
     const initialValues = {
       Observation: {
