@@ -215,4 +215,69 @@ describe("TestCase component", () => {
     fireEvent.click(screen.getByTestId("test-case-sidebar-collapse-icon"));
     expect(setIsCollapsed).toHaveBeenCalledWith(true);
   });
+
+  it("should hide SDE and RAV tabs for composite measures", async () => {
+    render(
+      <MemoryRouter>
+        <TestCaseListSideBarNav {...defaultProps} isComposite={true} />
+      </MemoryRouter>
+    );
+
+    expect(screen.getByRole("navigation")).toBeInTheDocument();
+
+    // SDE and RAV tabs should NOT be present
+    expect(screen.queryByTestId("nav-link-sde")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("nav-link-rav")).not.toBeInTheDocument();
+
+    // Other tabs should still be present
+    expect(screen.queryByTestId("nav-link-expansion")).toBeInTheDocument();
+    expect(
+      screen.queryByTestId("nav-link-execution-options")
+    ).toBeInTheDocument();
+    expect(screen.queryByTestId("test-case-data")).toBeInTheDocument();
+
+    // Total tabs should be 5 (2 population criteria + 3 configuration tabs)
+    expect(screen.getAllByRole("tab").length).toEqual(5);
+  });
+
+  it("should show SDE and RAV tabs for non-composite measures", async () => {
+    render(
+      <MemoryRouter>
+        <TestCaseListSideBarNav {...defaultProps} isComposite={false} />
+      </MemoryRouter>
+    );
+
+    expect(screen.getByRole("navigation")).toBeInTheDocument();
+
+    // SDE and RAV tabs should be present
+    expect(screen.queryByTestId("nav-link-sde")).toBeInTheDocument();
+    expect(screen.queryByTestId("nav-link-rav")).toBeInTheDocument();
+
+    // Other tabs should also be present
+    expect(screen.queryByTestId("nav-link-expansion")).toBeInTheDocument();
+    expect(
+      screen.queryByTestId("nav-link-execution-options")
+    ).toBeInTheDocument();
+    expect(screen.queryByTestId("test-case-data")).toBeInTheDocument();
+
+    // Total tabs should be 7 (2 population criteria + 5 configuration tabs)
+    expect(screen.getAllByRole("tab").length).toEqual(7);
+  });
+
+  it("should show SDE and RAV tabs when isComposite is not provided (defaults to false)", async () => {
+    render(
+      <MemoryRouter>
+        <TestCaseListSideBarNav {...defaultProps} />
+      </MemoryRouter>
+    );
+
+    expect(screen.getByRole("navigation")).toBeInTheDocument();
+
+    // SDE and RAV tabs should be present (default behavior)
+    expect(screen.queryByTestId("nav-link-sde")).toBeInTheDocument();
+    expect(screen.queryByTestId("nav-link-rav")).toBeInTheDocument();
+
+    // Total tabs should be 7 (2 population criteria + 5 configuration tabs)
+    expect(screen.getAllByRole("tab").length).toEqual(7);
+  });
 });
