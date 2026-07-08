@@ -2,6 +2,7 @@ import * as React from "react";
 import Builder, {
   NO_PROFILES_MESSAGE,
   scrollToElementByIdWhenAvailable,
+  deduplicateAndSortResources,
 } from "./Builder";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
@@ -764,5 +765,113 @@ describe("scrollToElementByIdWhenAvailable", () => {
       "json-error-alert-duplicate-resource-ids"
     );
     expect(duplicateResourceError).toBeInTheDocument();
+  });
+});
+
+describe("deduplicateAndSortResources", () => {
+  const mockPatient = {
+    id: "qicore-patient",
+    title: "QICore Patient",
+    type: "Patient",
+    category: "Base",
+    profile: "profile-patient",
+  };
+  const mockEncounter = {
+    id: "qicore-encounter",
+    title: "QICore Encounter",
+    type: "Encounter",
+    category: "Base",
+    profile: "profile-encounter",
+  };
+  const mockAllergyIntolerance = {
+    id: "qicore-allergyintolerance",
+    title: "QICore AllergyIntolerance",
+    type: "AllergyIntolerance",
+    category: "Clinical",
+    profile: "profile-allergy",
+  };
+  const mockCondition = {
+    id: "qicore-condition",
+    title: "QICore Condition",
+    type: "Condition",
+    category: "Clinical",
+    profile: "profile-condition",
+  };
+  const mockProcedure = {
+    id: "qicore-procedure",
+    title: "QICore Procedure",
+    type: "Procedure",
+    category: "Clinical",
+    profile: "profile-procedure",
+  };
+  const mockUsCoreCondition = {
+    id: "us-core-condition",
+    title: "US Core Condition",
+    type: "Condition",
+    category: "Clinical",
+    profile: "profile-us-core-condition",
+  };
+  const mockFhirObservation = {
+    id: "fhir-observation",
+    title: "FHIR Observation",
+    type: "Observation",
+    category: "Clinical",
+    profile: "profile-observation",
+  };
+
+  it("should remove duplicate profiles", () => {
+    const input = [mockEncounter, mockEncounter, mockPatient];
+    const result = deduplicateAndSortResources(input);
+    expect(result).toHaveLength(2);
+    expect(result.map((r) => r.title)).toEqual([
+      "QICore Patient",
+      "QICore Encounter",
+    ]);
+  });
+
+  it("should place QICore Patient first regardless of alphabetical order", () => {
+    const input = [mockAllergyIntolerance, mockCondition, mockPatient];
+    const result = deduplicateAndSortResources(input);
+    expect(result[0].id).toBe("qicore-patient");
+  });
+
+  it("should filter out non-qicore and non-us-core resources", () => {
+    const input = [mockPatient, mockFhirObservation, mockUsCoreCondition];
+    const result = deduplicateAndSortResources(input);
+    expect(result).toHaveLength(2);
+    expect(result.map((r) => r.id)).toEqual([
+      "qicore-patient",
+      "us-core-condition",
+    ]);
+  });
+
+  it("should not produce duplicates when called multiple times with the same input", () => {
+    const input = [mockPatient, mockEncounter, mockEncounter];
+    // Simulate toggling between modes — calling the function multiple times
+    const result1 = deduplicateAndSortResources(input);
+    const result2 = deduplicateAndSortResources(input);
+    expect(result1).toEqual(result2);
+    expect(result1).toHaveLength(2);
+  });
+
+  it("should sort alphabetically (after placing Patient first)", () => {
+    const input = [
+      mockProcedure,
+      mockPatient,
+      mockAllergyIntolerance,
+      mockEncounter,
+    ];
+    const result = deduplicateAndSortResources(input);
+    expect(result.map((r) => r.title)).toEqual([
+      "QICore Patient",
+      "QICore AllergyIntolerance",
+      "QICore Encounter",
+      "QICore Procedure",
+    ]);
+  });
+
+  it("should handle empty input", () => {
+    const result = deduplicateAndSortResources([]);
+    expect(result).toEqual([]);
   });
 });

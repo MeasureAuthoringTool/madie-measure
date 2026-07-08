@@ -47,7 +47,7 @@ export const NO_PROFILES_MESSAGE =
  * Deduplicates, filters to qicore/us-core, sorts alphabetically,
  * and moves QI-Core Patient to the front of the list.
  */
-const deduplicateAndSortResources = (
+export const deduplicateAndSortResources = (
   identifiers: ResourceIdentifier[]
 ): ResourceIdentifier[] => {
   const sorted = _.uniqBy(identifiers, "profile")
