@@ -774,8 +774,7 @@ describe("deduplicateAndSortResources", () => {
     title: "QICore Patient",
     type: "Patient",
     category: "Base",
-    profile:
-      "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient",
+    profile: "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient",
   };
   const mockEncounter = {
     id: "qicore-encounter",
