@@ -18,6 +18,7 @@ import {
   SortingState,
   useReactTable,
 } from "@tanstack/react-table";
+import { Tooltip } from "@mui/material";
 
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
@@ -47,6 +48,7 @@ export interface ResourceListProps {
   onInsertTCClick?: () => void;
   measureModel?: string;
   measureId?: string;
+  profileMap?: Record<string, number>;
 }
 const TH = tw.th`p-3 text-left text-sm font-bold capitalize`;
 
@@ -59,6 +61,7 @@ const ResourceList = ({
   onInsertTCClick,
   measureModel,
   measureId,
+  profileMap = {},
 }: ResourceListProps) => {
   // Load saved pagination state from localStorage
   const resourcePageOptions = JSON.parse(
@@ -207,7 +210,7 @@ const ResourceList = ({
         accessorKey: "hl7",
       },
       {
-        header: "",
+        header: "action",
         id: "action",
         cell: ({ row }) => {
           const { original } = row;
@@ -217,21 +220,54 @@ const ResourceList = ({
           const isDisabled = isPatient && isPatientAdded;
           return (
             <>
-              <IconButton
-                data-testId={`add-element-${original.id}`}
-                onClick={() => {
-                  onClick(original);
+              <Tooltip
+                data-testid="original.id-tooltip"
+                title={
+                  isDisabled
+                    ? "Only one Patient profile is supported per test case. This test case already includes a Patient profile."
+                    : "Click to add this profile to the test case."
+                }
+                placement="top"
+                arrow
+                slotProps={{
+                  tooltip: {
+                    sx: {
+                      zIndex: 9999,
+                      backgroundColor: "#333",
+                      "& .MuiTooltip-arrow": {
+                        color: "#333",
+                      },
+                    },
+                  },
                 }}
-                disabled={isDisabled}
               >
-                <AddCircleOutlineIcon
-                  sx={{ color: isDisabled ? "#BDBDBD" : "#0073C8" }}
-                />
-              </IconButton>
+                <span>
+                  <Button
+                    data-testId={`add-element-${original.id}`}
+                    onClick={() => {
+                      onClick(original);
+                    }}
+                    variant="outline"
+                    disabled={isDisabled}
+                  >
+                    Add
+                  </Button>
+                </span>
+              </Tooltip>
             </>
           );
         },
         accessorKey: "action",
+      },
+      {
+        header: "# Added",
+        id: "added",
+        cell: ({ row }) => {
+          const { original } = row;
+          const { profile } = original;
+          const numberOfEntries = profileMap?.[profile] ?? "-";
+          return <div className="number-of-profiles">{numberOfEntries}</div>;
+        },
       },
     ];
   }, [visibleResources, isPatientAdded, measureModel, profileTableHeader]);
