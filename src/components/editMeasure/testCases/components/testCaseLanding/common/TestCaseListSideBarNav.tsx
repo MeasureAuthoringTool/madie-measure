@@ -14,6 +14,7 @@ const InnerWrapper = tw.div`flex flex-grow flex-col`;
 export interface TestCaseListSideBarNavProps {
   allPopulationCriteria: Group[];
   qdm?: Boolean;
+  isComposite?: boolean;
   isCollapsed: boolean;
   setIsCollapsed: Function;
 }
@@ -21,6 +22,7 @@ export interface TestCaseListSideBarNavProps {
 const TestCaseListSideBarNav = ({
   allPopulationCriteria,
   qdm,
+  isComposite = false,
   isCollapsed,
   setIsCollapsed,
 }: TestCaseListSideBarNavProps) => {
@@ -179,22 +181,26 @@ const TestCaseListSideBarNav = ({
                   onChange={handleChange}
                   value={endRoute}
                 >
-                  <Tab
-                    label="SDE"
-                    value="sde"
-                    data-testid="nav-link-sde"
-                    type="C"
-                    orientation="vertical"
-                    onChange={handleChange}
-                  />
-                  <Tab
-                    label="RAV"
-                    value="rav"
-                    data-testid="nav-link-rav"
-                    type="C"
-                    orientation="vertical"
-                    onChange={handleChange}
-                  />
+                  {!isComposite && (
+                    <>
+                      <Tab
+                        label="SDE"
+                        value="sde"
+                        data-testid="nav-link-sde"
+                        type="C"
+                        orientation="vertical"
+                        onChange={handleChange}
+                      />
+                      <Tab
+                        label="RAV"
+                        value="rav"
+                        data-testid="nav-link-rav"
+                        type="C"
+                        orientation="vertical"
+                        onChange={handleChange}
+                      />
+                    </>
+                  )}
                   <Tab
                     label="Expansion"
                     value="expansion"
