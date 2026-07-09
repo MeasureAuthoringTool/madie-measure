@@ -56,9 +56,9 @@ export const isQiCoreOrUsCoreResource = (res: ResourceIdentifier): boolean =>
 export const deduplicateAndSortResources = (
   identifiers: ResourceIdentifier[]
 ): ResourceIdentifier[] => {
-  const sorted = _.uniqBy(identifiers, "profile")
-    .filter(isQiCoreOrUsCoreResource)
-    .sort((a, b) => a.title.localeCompare(b.title));
+  const sorted = _.uniqBy(identifiers, "profile").sort((a, b) =>
+    a.title.localeCompare(b.title)
+  );
   const patientIdx = sorted.findIndex((r) => r.id === "qicore-patient");
   if (patientIdx > 0) {
     return [

@@ -840,16 +840,6 @@ describe("deduplicateAndSortResources", () => {
     expect(result[0].id).toBe("qicore-patient");
   });
 
-  it("should filter out non-qicore and non-us-core resources", () => {
-    const input = [mockPatient, mockFhirObservation, mockUsCoreCondition];
-    const result = deduplicateAndSortResources(input);
-    expect(result).toHaveLength(2);
-    expect(result.map((r) => r.id)).toEqual([
-      "qicore-patient",
-      "us-core-condition",
-    ]);
-  });
-
   it("should not produce duplicates when called multiple times with the same input", () => {
     const input = [mockPatient, mockEncounter, mockEncounter];
     // Simulate toggling between modes — calling the function multiple times
