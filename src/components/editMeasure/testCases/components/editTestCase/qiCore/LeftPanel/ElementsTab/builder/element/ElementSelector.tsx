@@ -4,7 +4,6 @@ import { Checkbox, TextField, Chip } from "@mui/material";
 import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
 import CheckBoxIcon from "@mui/icons-material/CheckBox";
 import { ElementDefinition } from "fhir/r4";
-import * as _ from "lodash";
 import { stripAllIndexes } from "../../../../../../../api/fhirDefinitionServiceUtilities";
 
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
@@ -33,9 +32,7 @@ export const getOptionLabel = (option: ElementDefinition, basePath: string) => {
     }
   }
   if (label.endsWith("[x]")) {
-    return `${label.substring(0, label.length - 3)}${_.upperFirst(
-      option.type[0].code
-    )}`;
+    return label;
   }
   return label;
 };

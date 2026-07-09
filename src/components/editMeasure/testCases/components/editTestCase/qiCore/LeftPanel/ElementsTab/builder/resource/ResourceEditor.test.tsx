@@ -1,5 +1,5 @@
 import * as React from "react";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import ResourceEditor, {
   deleteMultipleCardinalityElement,
 } from "./ResourceEditor";
@@ -530,11 +530,11 @@ describe("ResourceEditor", () => {
       expect(autocompleteInput).toHaveFocus();
     });
 
-    // select the deceasedBoolean attribute
+    // select the deceased[x] attribute (preserve the choice-type suffix, not the concrete type)
     userEvent.type(autocompleteInput, "deceased");
 
     await waitFor(() => {
-      const deceasedOption = screen.getByText(/deceasedBoolean/i);
+      const deceasedOption = screen.getByText("deceased[x]");
       expect(deceasedOption).toBeInTheDocument();
       userEvent.click(deceasedOption);
     });
@@ -859,9 +859,9 @@ describe("ResourceEditor", () => {
       </QiCoreResourceContext.Provider>
     );
 
-    // Top-level choice tabs are unified to a single base attribute label.
-    const onsetTab = await screen.findByTestId("Onset");
-    expect(onsetTab).toHaveTextContent("Onset");
+    // Top-level choice tabs are unified to a single [x]-suffixed attribute label.
+    const onsetTab = await screen.findByTestId("Onset[x]");
+    expect(onsetTab).toHaveTextContent("Onset[x]");
     expect(onsetTab).toHaveAttribute("aria-selected", "true");
     // userEvent.click(onsetDateTimeTab);
 
@@ -891,7 +891,7 @@ describe("ResourceEditor", () => {
     expect(mockDispatch).toHaveBeenCalledWith(expectedPayload);
   });
 
-  it("shows selected choice type label in Add Attribute(s) dialog based on saved data", async () => {
+  it("shows [x]-suffixed choice type label (not concrete type) in Add Attribute(s) dialog", async () => {
     const fhirDefinitionsServiceApiMock = {
       getResourceTree: jest
         .fn()
@@ -958,9 +958,16 @@ describe("ResourceEditor", () => {
     userEvent.click(addAttributeButton);
 
     await waitFor(() => {
-      expect(screen.getByText("Attribute Selector")).toBeInTheDocument();
-      expect(screen.getAllByText("onsetPeriod").length).toBeGreaterThan(0);
-      expect(screen.queryByText("onsetDateTime")).not.toBeInTheDocument();
+      const dialog = screen.getByRole("dialog");
+      expect(
+        within(dialog).getByText("Attribute Selector")
+      ).toBeInTheDocument();
+      // Dialog always shows the [x]-suffixed choice-type label, never the concrete type name
+      expect(within(dialog).getAllByText("onset[x]").length).toBeGreaterThan(0);
+      expect(within(dialog).queryByText("onsetPeriod")).not.toBeInTheDocument();
+      expect(
+        within(dialog).queryByText("onsetDateTime")
+      ).not.toBeInTheDocument();
     });
   });
 

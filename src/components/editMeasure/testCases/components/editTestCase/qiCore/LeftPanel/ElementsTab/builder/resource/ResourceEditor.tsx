@@ -78,6 +78,15 @@ const buildElementPath = (element: ElementDefinition) => {
 const isChoiceTypeElement = (element: ElementDefinition) =>
   element?.id?.endsWith("[x]") || element?.path?.endsWith("[x]");
 
+const getChoiceTypeDisplayLabel = (
+  element: ElementDefinition,
+  resourceBasePath: string
+) => {
+  const strippedPath = stripResourcePath(resourceBasePath, element.path);
+  const formattedLabel = formatAttributeLabel(strippedPath);
+  return strippedPath.endsWith("[x]") ? `${formattedLabel}[x]` : formattedLabel;
+};
+
 const getChoiceTypePaths = (element: ElementDefinition): string[] => {
   const resourceName = element.path.split(".")[0];
   const elemPath = stripResourcePath(resourceName, element.path);
@@ -508,8 +517,9 @@ const ResourceEditor = ({
                         const elementName = isChoiceTypeElement(element)
                           ? `${
                               element.min > 0 ? " *" : ""
-                            }${formatAttributeLabel(
-                              stripResourcePath(resourceBasePath, element.path)
+                            }${getChoiceTypeDisplayLabel(
+                              element,
+                              resourceBasePath
                             )}`
                           : getElementName(
                               element,
