@@ -474,7 +474,7 @@ describe("EditTestCase component", () => {
       expect(screen.getByTestId("test-case-json-editor")).toBeInTheDocument();
     });
 
-    it("Should display all elements if fetch of relevant elements fails", async () => {
+    it("Should display no elements if fetch of relevant elements fails", async () => {
       const measure = {
         ...defaultMeasure,
         model: Model.QICORE_6_0_0,
@@ -495,14 +495,7 @@ describe("EditTestCase component", () => {
       );
 
       expect(screen.getByTestId("elements-content")).toBeInTheDocument();
-      // only relevant elements should be displayed
-      expect(
-        await screen.findByText("QICore AdverseEvent")
-      ).toBeInTheDocument();
-      expect(screen.queryByText("QICore Procedure")).toBeInTheDocument();
-      expect(
-        await screen.findByText("QICore MedicationStatement")
-      ).toBeInTheDocument();
+      expect(await screen.findByText("No profiles found")).toBeInTheDocument();
       userEvent.click(screen.getByTestId("json-tab"));
       expect(screen.getByTestId("test-case-json-editor")).toBeInTheDocument();
     });
