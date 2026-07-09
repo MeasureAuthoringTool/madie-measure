@@ -191,6 +191,10 @@ const Builder = ({
       fhirElmTranslationService.current
         .fetchRelevantDataElements(measure, abortController.current.signal)
         .then((relevantElements) => {
+          if (_.isEmpty(relevantElements)) {
+            setResources([]);
+            return;
+          }
           const profiles = relevantElements?.map(
             (relevantElement) => relevantElement.profile
           );
