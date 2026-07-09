@@ -138,6 +138,7 @@ jest.mock("@madie/madie-util", () => ({
   checkUserCanEdit: jest.fn(() => {
     return true;
   }),
+  useTerminologyServiceApi: jest.fn(() => ({})),
 }));
 
 const axiosError: AxiosError = {
@@ -147,11 +148,6 @@ const axiosError: AxiosError = {
   } as AxiosResponse,
   toJSON: jest.fn(),
 } as unknown as AxiosError;
-
-jest.mock("../../testCases/api/useTerminologyServiceApi", () => ({
-  __esModule: true,
-  default: jest.fn(() => ({})),
-}));
 
 describe("MeasureInformation component", () => {
   beforeEach(() => {
