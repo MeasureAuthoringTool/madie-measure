@@ -631,4 +631,77 @@ describe("PopulationCriteriaHome", () => {
 
     errorSpy.mockRestore();
   });
+
+  it("should hide Supplemental Data and Risk Adjustment tabs for composite measures", async () => {
+    const compositeMeasure = {
+      ...QiCoreMeasure,
+      cql: MeasureCQL,
+      measureMetaData: { composite: true },
+    } as Measure;
+    const mockedMeasureState = measureStore as jest.Mocked<{ state }>;
+    mockedMeasureState.state = compositeMeasure;
+
+    await renderPopulationCriteriaHomeComponent(
+      "supplemental-data",
+      "supplemental-data"
+    );
+
+    // Wait for the component to render
+    await waitFor(() => {
+      expect(
+        screen.getByRole("button", {
+          name: /Population Criteria/i,
+        })
+      ).toBeInTheDocument();
+    });
+
+    // Verify SDE and RAV tabs are not present
+    expect(
+      screen.queryByRole("tab", {
+        name: /supplemental data/i,
+      })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("tab", {
+        name: /risk adjustment/i,
+      })
+    ).not.toBeInTheDocument();
+  });
+
+  it("should show Supplemental Data and Risk Adjustment tabs for non-composite measures", async () => {
+    // Explicitly set a non-composite measure to ensure the state is correct
+    const nonCompositeMeasure = {
+      ...QiCoreMeasure,
+      cql: MeasureCQL,
+      measureMetaData: { composite: false },
+    } as Measure;
+    const mockedMeasureState = measureStore as jest.Mocked<{ state }>;
+    mockedMeasureState.state = nonCompositeMeasure;
+
+    await renderPopulationCriteriaHomeComponent(
+      "supplemental-data",
+      "supplemental-data"
+    );
+
+    // Wait for the component to render
+    await waitFor(() => {
+      expect(
+        screen.getByRole("button", {
+          name: /Population Criteria/i,
+        })
+      ).toBeInTheDocument();
+    });
+
+    // Verify SDE and RAV tabs are present
+    expect(
+      screen.getByRole("tab", {
+        name: /supplemental data/i,
+      })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("tab", {
+        name: /risk adjustment/i,
+      })
+    ).toBeInTheDocument();
+  });
 });

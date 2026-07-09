@@ -1071,44 +1071,46 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                           }}
                         />
                       )}
-                      <Tab
-                        tabIndex={0}
-                        label={
-                          <CompletionIndicator
-                            label="Stratifications"
-                            hasErrors={formik.errors.stratifications}
-                            displayIcon={
-                              formik.values.stratifications?.filter(
-                                (value) =>
-                                  value.association !== null ||
-                                  value.associations.length !== 0 ||
-                                  value.cqlDefinition !== "" ||
-                                  value.description !== ""
-                              ).length > 0
-                            }
-                          />
-                        }
-                        value="stratification"
-                        type="B"
-                        data-testid="stratifications-tab"
-                        onClick={() => {
-                          setActiveTab("stratification");
-                          if (!!formik.values.stratifications) {
-                            while (formik.values.stratifications.length < 2) {
-                              formik.values.stratifications.push(
-                                getEmptyStrat()
-                              );
+                      {!isCompositeMeasure && (
+                        <Tab
+                          tabIndex={0}
+                          label={
+                            <CompletionIndicator
+                              label="Stratifications"
+                              hasErrors={formik.errors.stratifications}
+                              displayIcon={
+                                formik.values.stratifications?.filter(
+                                  (value) =>
+                                    value.association !== null ||
+                                    value.associations.length !== 0 ||
+                                    value.cqlDefinition !== "" ||
+                                    value.description !== ""
+                                ).length > 0
+                              }
+                            />
+                          }
+                          value="stratification"
+                          type="B"
+                          data-testid="stratifications-tab"
+                          onClick={() => {
+                            setActiveTab("stratification");
+                            if (!!formik.values.stratifications) {
+                              while (formik.values.stratifications.length < 2) {
+                                formik.values.stratifications.push(
+                                  getEmptyStrat()
+                                );
+                                setVisibleStrats(2);
+                              }
+                            } else {
+                              formik.values.stratifications = [
+                                getEmptyStrat(),
+                                getEmptyStrat(),
+                              ];
                               setVisibleStrats(2);
                             }
-                          } else {
-                            formik.values.stratifications = [
-                              getEmptyStrat(),
-                              getEmptyStrat(),
-                            ];
-                            setVisibleStrats(2);
-                          }
-                        }}
-                      />
+                          }}
+                        />
+                      )}
                       <Tab
                         type="B"
                         label={

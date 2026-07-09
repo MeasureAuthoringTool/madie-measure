@@ -239,70 +239,72 @@ export const measureGroupSchemaValidator = (
         }
       }
     ),
-    stratifications: Yup.object().when("populationBasis", (populationBasis) => {
-      return Yup.array()
-        .of(
-          Yup.object().shape({
-            cqlDefinition: Yup.string()
-              .test(
-                returnTypeCheckOptions(populationBasis, definitionDataTypes)
-              )
-              .test({
-                name: "cqlDefinitionCheck",
-                message: "CQL Definition is required.",
-                test: function () {
-                  const {
-                    cqlDefinition,
-                    description,
-                    associations,
-                    association,
-                  } = this.parent;
-                  if (
-                    (description && description.trim() !== "") ||
-                    (associations && !_.isEmpty(associations)) ||
-                    (association && association.trim() !== "")
-                  ) {
-                    return cqlDefinition && cqlDefinition.length > 0;
-                  }
-                  return true;
-                },
-              }),
-            // we need to make sure Associations have at least 1 value when Definition exists
-            associations: Yup.array()
-              .test({
-                name: "associationCheck",
-                message:
-                  "Associations are required when CQL Definition is provided.",
-                test: function (associations) {
-                  const { cqlDefinition } = this.parent;
-                  if (cqlDefinition && cqlDefinition.trim() !== "") {
-                    return associations && associations.length > 0;
-                  }
-                  return true;
-                },
+    stratifications: isCompositeMeasure
+      ? Yup.mixed().notRequired()
+      : Yup.object().when("populationBasis", (populationBasis) => {
+          return Yup.array()
+            .of(
+              Yup.object().shape({
+                cqlDefinition: Yup.string()
+                  .test(
+                    returnTypeCheckOptions(populationBasis, definitionDataTypes)
+                  )
+                  .test({
+                    name: "cqlDefinitionCheck",
+                    message: "CQL Definition is required.",
+                    test: function () {
+                      const {
+                        cqlDefinition,
+                        description,
+                        associations,
+                        association,
+                      } = this.parent;
+                      if (
+                        (description && description.trim() !== "") ||
+                        (associations && !_.isEmpty(associations)) ||
+                        (association && association.trim() !== "")
+                      ) {
+                        return cqlDefinition && cqlDefinition.length > 0;
+                      }
+                      return true;
+                    },
+                  }),
+                // we need to make sure Associations have at least 1 value when Definition exists
+                associations: Yup.array()
+                  .test({
+                    name: "associationCheck",
+                    message:
+                      "Associations are required when CQL Definition is provided.",
+                    test: function (associations) {
+                      const { cqlDefinition } = this.parent;
+                      if (cqlDefinition && cqlDefinition.trim() !== "") {
+                        return associations && associations.length > 0;
+                      }
+                      return true;
+                    },
+                  })
+                  .test({
+                    name: "ratioCheck",
+                    message:
+                      "Ratio measures with two IPs must have one population for associations",
+                    test: function (associations) {
+                      const { from } = this as Yup.TestContext &
+                        TestContextExtended;
+                      if (from[1].value.scoring === GroupScoring.RATIO) {
+                        const ipCount = from[1].value.populations.filter(
+                          (p) => p.name === "initialPopulation"
+                        ).length;
+                        if (ipCount > 1) {
+                          return associations.length < 2;
+                        }
+                        return true;
+                      }
+                      return true;
+                    },
+                  }),
               })
-              .test({
-                name: "ratioCheck",
-                message:
-                  "Ratio measures with two IPs must have one population for associations",
-                test: function (associations) {
-                  const { from } = this as Yup.TestContext &
-                    TestContextExtended;
-                  if (from[1].value.scoring === GroupScoring.RATIO) {
-                    const ipCount = from[1].value.populations.filter(
-                      (p) => p.name === "initialPopulation"
-                    ).length;
-                    if (ipCount > 1) {
-                      return associations.length < 2;
-                    }
-                    return true;
-                  }
-                  return true;
-                },
-              }),
-          })
-        )
-        .nullable();
-    }),
+            )
+            .nullable();
+        }),
   });
 };
