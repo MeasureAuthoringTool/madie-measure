@@ -35,6 +35,37 @@ describe("ResourceList component", () => {
     });
   });
 
+  it("should display 'No profiles found' when resourceIdentifiers is an empty array", async () => {
+    const onClick = jest.fn();
+    render(<ResourceList resourceIdentifiers={[]} onClick={onClick} />);
+    expect(screen.getByTestId("no-profiles-found")).toBeInTheDocument();
+    expect(screen.getByText("No profiles found")).toBeInTheDocument();
+    expect(screen.queryByTestId("measure-list-tbl")).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId("madie-loading-spinner")
+    ).not.toBeInTheDocument();
+  });
+
+  it("should display 'No profiles found' when search yields no results", async () => {
+    const resourceList = generateResources(5);
+    const onClick = jest.fn();
+    render(
+      <ResourceList resourceIdentifiers={resourceList} onClick={onClick} />
+    );
+    const table = await screen.findByTestId("measure-list-tbl");
+    expect(table).toBeInTheDocument();
+
+    const searchFieldInput = getByTestId(
+      "search-elements-input-input"
+    ) as HTMLInputElement;
+    userEvent.type(searchFieldInput, "nonexistent{enter}");
+
+    await waitFor(() => {
+      expect(screen.getByTestId("no-profiles-found")).toBeInTheDocument();
+      expect(screen.getByText("No profiles found")).toBeInTheDocument();
+    });
+  });
+
   it("should display list of resources limited to 5", async () => {
     const resourceList = generateResources(50);
     const onClick = jest.fn();
