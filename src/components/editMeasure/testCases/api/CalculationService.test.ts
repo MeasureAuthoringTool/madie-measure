@@ -2152,5 +2152,93 @@ describe("CalculationService Tests", () => {
         )
       ).rejects.toThrow("boom");
     });
+
+    it("builds a patient bundle for each test case", async () => {
+      mockedCalculateMeasureReports.mockResolvedValue({ results: [] } as any);
+      const secondTestCase = {
+        ...testCaseOfficeVisit,
+        id: "second-tc-id",
+      };
+
+      await calculationService.calculateCompositeTestCases(
+        officeVisitMeasure,
+        [testCaseOfficeVisit, secondTestCase],
+        officeVisitMeasureBundle,
+        [officeVisitValueSet]
+      );
+
+      const patientBundlesArg = mockedCalculateMeasureReports.mock.calls[0][1];
+      expect(patientBundlesArg).toHaveLength(2);
+      const patientIds = patientBundlesArg.map(
+        (bundle: any) =>
+          bundle.entry?.find((e: any) => e.resource?.resourceType === "Patient")
+            ?.resource?.id
+      );
+      expect(patientIds).toEqual([testCaseOfficeVisit.id, "second-tc-id"]);
+    });
+
+    it("logs the results when madieDebug is enabled in localStorage", async () => {
+      const results = [{ id: "mr-1" }];
+      mockedCalculateMeasureReports.mockResolvedValue({ results } as any);
+      const consoleSpy = jest
+        .spyOn(console, "log")
+        .mockImplementation(() => {});
+      // localStorageMock is seeded with madieDebug: "true"
+      window.localStorage.setItem("madieDebug", "true");
+      (window as any).madieDebug = undefined;
+
+      await calculationService.calculateCompositeTestCases(
+        officeVisitMeasure,
+        [testCaseOfficeVisit],
+        officeVisitMeasureBundle,
+        [officeVisitValueSet]
+      );
+
+      expect(consoleSpy).toHaveBeenCalledWith(results);
+      consoleSpy.mockRestore();
+    });
+
+    it("logs the results when window.madieDebug is set but localStorage is not", async () => {
+      const results = [{ id: "mr-2" }];
+      mockedCalculateMeasureReports.mockResolvedValue({ results } as any);
+      const consoleSpy = jest
+        .spyOn(console, "log")
+        .mockImplementation(() => {});
+      window.localStorage.removeItem("madieDebug");
+      (window as any).madieDebug = true;
+
+      await calculationService.calculateCompositeTestCases(
+        officeVisitMeasure,
+        [testCaseOfficeVisit],
+        officeVisitMeasureBundle,
+        [officeVisitValueSet]
+      );
+
+      expect(consoleSpy).toHaveBeenCalledWith(results);
+      consoleSpy.mockRestore();
+      window.localStorage.setItem("madieDebug", "true");
+    });
+
+    it("does not log when madieDebug is disabled", async () => {
+      mockedCalculateMeasureReports.mockResolvedValue({
+        results: [{ id: "mr-3" }],
+      } as any);
+      const consoleSpy = jest
+        .spyOn(console, "log")
+        .mockImplementation(() => {});
+      window.localStorage.removeItem("madieDebug");
+      (window as any).madieDebug = undefined;
+
+      await calculationService.calculateCompositeTestCases(
+        officeVisitMeasure,
+        [testCaseOfficeVisit],
+        officeVisitMeasureBundle,
+        [officeVisitValueSet]
+      );
+
+      expect(consoleSpy).not.toHaveBeenCalled();
+      consoleSpy.mockRestore();
+      window.localStorage.setItem("madieDebug", "true");
+    });
   });
 });
