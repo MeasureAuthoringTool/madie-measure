@@ -31,9 +31,6 @@ export const getOptionLabel = (option: ElementDefinition, basePath: string) => {
       return label;
     }
   }
-  if (label.endsWith("[x]")) {
-    return label;
-  }
   return label;
 };
 
