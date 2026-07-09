@@ -526,7 +526,7 @@ describe("QuantityComponent", () => {
       "code-input-input"
     )) as HTMLInputElement;
 
-    fireEvent.change(codeInput, { target: { value: "days" } });
+    userEvent.type(codeInput, "days");
 
     await waitFor(() => {
       const updatedQuantity = formikValues.Observation.quantity;
@@ -596,7 +596,7 @@ describe("QuantityComponent", () => {
         "code-input-input"
       )) as HTMLInputElement;
 
-      fireEvent.change(codeInput, { target: { value: display } });
+      userEvent.type(codeInput, display);
 
       await waitFor(() => {
         const updatedQuantity = formikValues.Observation.quantity;
@@ -647,7 +647,7 @@ describe("QuantityComponent", () => {
       "code-input-input"
     )) as HTMLInputElement;
 
-    fireEvent.change(codeInput, { target: { value: "mg" } });
+    userEvent.type(codeInput, "mg");
 
     await waitFor(() => {
       const updatedQuantity = formikValues.Observation.quantity;

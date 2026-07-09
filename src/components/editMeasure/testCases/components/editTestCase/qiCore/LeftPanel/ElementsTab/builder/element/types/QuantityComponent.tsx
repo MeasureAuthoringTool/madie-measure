@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState, useEffect, useRef } from "react";
 import { TextField, InputLabel } from "@madie/madie-design-system/dist/react/";
 import "twin.macro";
 import "styled-components/macro";
@@ -57,6 +57,28 @@ const QuantityComponent = ({
   const valuePath = `${label}.value`;
   const codePath = `${label}.code`;
   const code = getIn(formik.values, codePath);
+  const unitPath = `${label}.unit`;
+  const unit = getIn(formik.values, unitPath);
+
+  // Prefer the human-readable "unit" (e.g. "year") over "code" (e.g. "a").
+  const [displayValue, setDisplayValue] = useState<string>(unit ?? code ?? "");
+
+  // Track whether the user is actively typing so we don't override their input.
+  const isUserTypingRef = useRef(false);
+
+  // Keep displayValue in sync when formik code/unit changes externally
+  // (e.g. form reset, programmatic update), but not when the user is
+  // actively typing.
+  useEffect(() => {
+    if (isUserTypingRef.current) {
+      // Change originated from user typing — don't override displayValue.
+      isUserTypingRef.current = false;
+      return;
+    }
+    const formikCode = code ?? "";
+    // Prefer unit (human-readable) over code when available
+    setDisplayValue(unit ?? formikCode);
+  }, [code, unit]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const validationResult = useMemo(() => validate(code), [code]);
 
@@ -110,9 +132,11 @@ const QuantityComponent = ({
               tooltipText="Enter the UCUM (Unified Code for Units of Measure) code value."
               error={!!validationResult.error}
               helperText={validationResult.helperText}
-              value={code ?? ""}
+              value={displayValue}
               onChange={(e) => {
                 const inputCode = e.target.value;
+                setDisplayValue(inputCode);
+                isUserTypingRef.current = true;
 
                 if (!inputCode) {
                   // Code cleared so remove code, unit, system
