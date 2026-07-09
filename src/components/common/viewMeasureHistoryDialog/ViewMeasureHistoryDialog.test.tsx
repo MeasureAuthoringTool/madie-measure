@@ -231,7 +231,7 @@ describe("ViewMeasureHistoryDialog", () => {
     expect(screen.getByText("Additional Info")).toBeInTheDocument();
   });
 
-  it("renames the HarpID column to User", async () => {
+  it("Displaying User column in the history dialog", async () => {
     mockMeasureServiceApi.getMeasureHistoryLogs = jest
       .fn()
       .mockResolvedValue(historyData);
