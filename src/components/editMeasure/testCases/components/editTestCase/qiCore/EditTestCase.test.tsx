@@ -34,7 +34,10 @@ import {
   ValidationStatus,
 } from "@madie/madie-models";
 import TestCaseRoutes from "../../routes/qiCore/TestCaseRoutes";
-import { PopulationEpisodeResult } from "../../../api/CalculationService";
+import {
+  CalculationService,
+  PopulationEpisodeResult,
+} from "../../../api/CalculationService";
 import { simpleMeasureFixture } from "../../createTestCase/__mocks__/simpleMeasureFixture";
 import { testCaseFixture } from "../../createTestCase/__mocks__/testCaseFixture";
 import {
@@ -5056,6 +5059,9 @@ describe("Composite Measure Edit test case functionality", () => {
   } as unknown as Measure;
 
   beforeEach(() => {
+    // Earlier suites enable jest.useFakeTimers("modern") without restoring
+    // real timers; ensure these tests run with real timers so waitFor works.
+    jest.useRealTimers();
     (checkUserCanEdit as jest.Mock).mockClear().mockImplementation(() => {
       return true;
     });
@@ -5124,6 +5130,117 @@ describe("Composite Measure Edit test case functionality", () => {
     // CQL and Highlighting tabs should not be present
     expect(screen.queryByTestId("measurecql-tab")).not.toBeInTheDocument();
     expect(screen.queryByTestId("highlighting-tab")).not.toBeInTheDocument();
+  });
+
+  it("invokes calculateCompositeTestCases when the composite Run Test Case button is clicked", async () => {
+    mockedAxios.get.mockClear().mockImplementation((args: any) => {
+      if (args && args.endsWith("series")) {
+        return Promise.resolve({ data: ["DENOM_Pass", "NUMER_Pass"] });
+      } else if (args && args.endsWith("resources")) {
+        return Promise.resolve({ data: [...resourceIdentifiers] });
+      }
+      return Promise.resolve({
+        data: { ...testCaseFixture, createdBy: MEASURE_CREATEDBY },
+      });
+    });
+
+    mockedAxios.post.mockImplementation((args: any) => {
+      if (args && args.endsWith("lock")) {
+        return Promise.resolve({
+          data: { isLocked: false, lockedBy: MEASURE_CREATEDBY },
+        });
+      }
+      if (args && args.endsWith("execution-bundles")) {
+        return Promise.resolve({
+          data: {
+            testCases: [testCaseFixture],
+            modifiedTestCaseIds: [testCaseFixture.id],
+          },
+        });
+      }
+      return Promise.resolve({ data: {} });
+    });
+
+    const compositeOutput = { results: [] } as any;
+    const compositeSpy = jest
+      .spyOn(CalculationService.prototype, "calculateCompositeTestCases")
+      .mockResolvedValue(compositeOutput);
+
+    renderWithRouter(
+      ["/measures/m1234/edit/test-cases/tc123"],
+      "/measures/:measureId/edit/test-cases/:id",
+      compositeMeasure
+    );
+
+    const runButton = await screen.findByTestId("run-test-case-button");
+    await waitFor(() => expect(runButton).not.toBeDisabled());
+    userEvent.click(runButton);
+
+    await waitFor(() => expect(compositeSpy).toHaveBeenCalledTimes(1));
+    const callArgs = compositeSpy.mock.calls[0];
+    expect(callArgs[0]).toEqual(compositeMeasure);
+    expect(callArgs[1]).toEqual([testCaseFixture]);
+
+    compositeSpy.mockRestore();
+  });
+
+  it("Throws an error when calculateCompositeTestCases rejects", async () => {
+    mockedAxios.get.mockClear().mockImplementation((args: any) => {
+      if (args && args.endsWith("series")) {
+        return Promise.resolve({ data: ["DENOM_Pass", "NUMER_Pass"] });
+      } else if (args && args.endsWith("resources")) {
+        return Promise.resolve({ data: [...resourceIdentifiers] });
+      }
+      return Promise.resolve({
+        data: { ...testCaseFixture, createdBy: MEASURE_CREATEDBY },
+      });
+    });
+    mockedAxios.post.mockImplementation((args: any) => {
+      if (args && args.endsWith("lock")) {
+        return Promise.resolve({
+          data: { isLocked: false, lockedBy: MEASURE_CREATEDBY },
+        });
+      }
+      if (args && args.endsWith("execution-bundles")) {
+        return Promise.resolve({
+          data: {
+            testCases: [testCaseFixture],
+            modifiedTestCaseIds: [testCaseFixture.id],
+          },
+        });
+      }
+      return Promise.resolve({ data: {} });
+    });
+
+    const consoleErrorSpy = jest
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
+    const compositeSpy = jest
+      .spyOn(CalculationService.prototype, "calculateCompositeTestCases")
+      .mockRejectedValue(new Error("composite boom"));
+
+    renderWithRouter(
+      ["/measures/m1234/edit/test-cases/tc123"],
+      "/measures/:measureId/edit/test-cases/:id",
+      compositeMeasure
+    );
+
+    const runButton = await screen.findByTestId("run-test-case-button");
+    await waitFor(() => expect(runButton).not.toBeDisabled());
+    userEvent.click(runButton);
+
+    await waitFor(() => expect(compositeSpy).toHaveBeenCalledTimes(1));
+    await waitFor(() =>
+      expect(setError).toHaveBeenCalledWith(
+        expect.arrayContaining(["composite boom"])
+      )
+    );
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      "calculateTestCases: error.message = composite boom"
+    );
+
+    compositeSpy.mockRestore();
+    consoleErrorSpy.mockRestore();
   });
 });
 
