@@ -470,6 +470,20 @@ const ResourceList = ({
           </div>
         </div>
       )}
+      {activeResourceIdentifiers && visibleResources?.length === 0 && (
+        <div
+          data-testid="no-profiles-found"
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            padding: "20px",
+            color: "#333",
+            fontSize: "14px",
+          }}
+        >
+          No profiles found
+        </div>
+      )}
       {!activeResourceIdentifiers && (
         <div style={{ display: "flex", justifyContent: "center" }}>
           <MadieSpinner
