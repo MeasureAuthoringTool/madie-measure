@@ -18,12 +18,10 @@ import {
   SortingState,
   useReactTable,
 } from "@tanstack/react-table";
-import { Tooltip } from "@mui/material";
-
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 import SearchIcon from "@mui/icons-material/Search";
-import { IconButton, InputAdornment } from "@mui/material";
+import { IconButton, InputAdornment, Tooltip } from "@mui/material";
 import { getHl7ProfileLink } from "../../../../../../../../../../utils/hl7Links";
 // Add in later for sorting icons
 // import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore";
