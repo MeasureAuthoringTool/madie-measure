@@ -4745,8 +4745,8 @@ describe("TypeEditor Component", () => {
       expect(comparatorInputs[0]).toHaveValue(">");
       expect(comparatorInputs[1]).toHaveValue("<=");
 
-      expect(codeInputs[0]).toHaveValue("mg");
-      expect(codeInputs[1]).toHaveValue("g");
+      expect(codeInputs[0]).toHaveValue("milligram");
+      expect(codeInputs[1]).toHaveValue("gram");
 
       const addButtons = screen.getAllByText("Add Value Quantity");
       expect(addButtons).toHaveLength(1);
