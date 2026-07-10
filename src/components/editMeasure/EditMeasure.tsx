@@ -50,6 +50,7 @@ import ViewHRModal from "../common/viewHumanReadableModal/ViewHRModal";
 import ShareDialog from "../common/shareDialog/ShareDialog";
 import TransferDialog from "../common/transferDialog/TransferDialog";
 import ViewMeasureHistoryDialog from "../common/viewMeasureHistoryDialog/ViewMeasureHistoryDialog";
+import ReviewDialog from "../common/reviewDialog/ReviewDialog";
 import StatusHandler, { INITIAL_STATUS_HANDLER } from "./editor/StatusHandler";
 
 const OBJECT_ID_REGEX = /\/[a-f0-9]{24}/g;
@@ -146,6 +147,9 @@ export default function EditMeasure() {
   });
   const [viewMeasureHistoryDialog, setViewMeasureHistoryDialog] =
     useState(false);
+  const [reviewDialog, setReviewDialog] = useState({
+    open: false,
+  });
 
   const [versionHelperText, setVersionHelperText] = useState("");
   const [invalidTestCaseOpen, setInvalidTestCaseOpen] =
@@ -355,6 +359,20 @@ export default function EditMeasure() {
     };
   }, []);
 
+  useEffect(() => {
+    const reviewMeasureListener = () => {
+      setReviewDialog({
+        open: true,
+      });
+    };
+    window.addEventListener("review-measure", reviewMeasureListener, {
+      passive: true,
+    });
+    return () => {
+      window.removeEventListener("review-measure", reviewMeasureListener);
+    };
+  }, []);
+
   // whenever measureID changes we need to update all pagination items except for limit which should be retained as a user preference
   useEffect(() => {
     return () => {
@@ -417,6 +435,15 @@ export default function EditMeasure() {
       isAdminTransfer: false,
     });
     setViewMeasureHistoryDialog(false);
+    setReviewDialog({
+      open: false,
+    });
+  };
+
+  const handleReviewDialogClose = () => {
+    setReviewDialog({
+      open: false,
+    });
   };
 
   const handleShareDialogClose = () => {
@@ -795,6 +822,11 @@ export default function EditMeasure() {
             measures={[measure]}
             open={viewMeasureHistoryDialog}
             onClose={handleDialogClose}
+          />
+          <ReviewDialog
+            open={reviewDialog.open}
+            measure={measure}
+            onClose={handleReviewDialogClose}
           />
           <Toast
             toastKey="measure-information-toast"

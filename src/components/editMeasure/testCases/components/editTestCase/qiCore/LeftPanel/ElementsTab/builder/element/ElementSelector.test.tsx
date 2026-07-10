@@ -1,5 +1,5 @@
 import * as React from "react";
-import { render, screen, cleanup, waitFor } from "@testing-library/react";
+import { render, screen, cleanup } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import ElementSelector, {
   getOptionLabel,
@@ -96,10 +96,9 @@ describe("ElementSelector", () => {
     const genderOption = screen.getAllByText("gender")[1].closest("li");
     expect(genderOption).toHaveAttribute("aria-disabled", "true");
 
-    // Find the deceasedBoolean option from deceased[x] choice type and check if it's disabled
-    const deceasedOption = screen
-      .getAllByText("deceasedBoolean")[1]
-      .closest("li");
+    // Find the deceased[x] option from deceased[x] choice type and check if it's disabled
+    // Index 0 = chip, index 1 = first dropdown list item
+    const deceasedOption = screen.getAllByText("deceased[x]")[1].closest("li");
     expect(deceasedOption).toHaveAttribute("aria-disabled", "true");
   });
 
@@ -220,7 +219,7 @@ describe("ElementSelector", () => {
       ],
     };
     const label = getOptionLabel(eleDefinition, "Patient");
-    expect(label).toBe("multipleBirthInteger");
+    expect(label).toBe("multipleBirth[x]");
   });
 
   it("disables related choice types using FHIR datatype matching", () => {
@@ -271,13 +270,14 @@ describe("ElementSelector", () => {
     const input = screen.getByPlaceholderText("Attributes");
     userEvent.click(input);
 
-    const deceasedDateTimeOption = screen.getByText("deceasedDateTime");
+    const deceasedDateTimeOption = screen.getAllByText("deceased[x]")[2];
     expect(deceasedDateTimeOption.closest("li")).toHaveAttribute(
       "aria-disabled",
       "true"
     );
 
-    const multipleBirthBooleanOption = screen.getByText("multipleBirthBoolean");
+    const multipleBirthBooleanOption =
+      screen.getAllByText("multipleBirth[x]")[0];
     expect(multipleBirthBooleanOption.closest("li")).not.toHaveAttribute(
       "aria-disabled",
       "true"
@@ -301,13 +301,14 @@ describe("ElementSelector", () => {
     const inputMultipleBirth = screen.getByPlaceholderText("Attributes");
     userEvent.click(inputMultipleBirth);
 
-    const multipleBirthIntegerOption = screen.getByText("multipleBirthInteger");
+    const multipleBirthIntegerOption =
+      screen.getAllByText("multipleBirth[x]")[2];
     expect(multipleBirthIntegerOption.closest("li")).toHaveAttribute(
       "aria-disabled",
       "true"
     );
 
-    const deceasedBooleanOption = screen.getByText("deceasedBoolean");
+    const deceasedBooleanOption = screen.getAllByText("deceased[x]")[0];
     expect(deceasedBooleanOption.closest("li")).not.toHaveAttribute(
       "aria-disabled",
       "true"
@@ -341,16 +342,16 @@ describe("ElementSelector", () => {
     render(<ElementSelector {...props} />);
     userEvent.click(screen.getByPlaceholderText("Attributes"));
 
-    // Get the first option i.e. deceasedBoolean which is selected choice
-    const deceasedBoolean = screen
-      .getAllByText("deceasedBoolean")[1]
-      .closest("li");
+    // Get the first dropdown option for deceased[x] (index 1 since index 0 is the chip)
+    const deceasedBoolean = screen.getAllByText("deceased[x]")[1].closest("li");
 
     expect(deceasedBoolean).toHaveAttribute("aria-selected", "true");
     expect(deceasedBoolean).toHaveAttribute("aria-disabled", "true");
 
-    // Get the label of the related (second) option i.e. deceasedDateTime
-    const deceasedDateTime = screen.getByText("deceasedDateTime").closest("li");
+    // Get the second dropdown option for deceased[x] (dateTime variant)
+    const deceasedDateTime = screen
+      .getAllByText("deceased[x]")[2]
+      .closest("li");
 
     expect(deceasedDateTime).toHaveAttribute("aria-selected", "false");
     expect(deceasedDateTime).toHaveAttribute("aria-disabled", "true");

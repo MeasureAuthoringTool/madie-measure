@@ -61,6 +61,7 @@ import queryString from "query-string";
 import { getTabStorageKey } from "../measureLandingUtils";
 import TransferDialog from "../../common/transferDialog/TransferDialog";
 import CompareVersionsDialog from "../../common/compareVersionsDialog/CompareVersionsDialog";
+import ReviewDialog from "../../common/reviewDialog/ReviewDialog";
 
 const COMPONENT_MEASURE_MSG =
   "This measure is a component of a composite measure";
@@ -267,6 +268,10 @@ export default function MeasureList(props: {
   });
   const [compareVersionsDialog, setCompareVersionsDialog] =
     useState<boolean>(false);
+  const [reviewDialog, setReviewDialog] = useState({
+    open: false,
+    measureId: "",
+  });
   const userRoles = useUserRoles();
 
   const transFormData = (measureList): TCRow[] => {
@@ -777,6 +782,10 @@ export default function MeasureList(props: {
       isAdminTransfer: false,
     });
     setViewMeasureHistoryDialog(false);
+    setReviewDialog({
+      open: false,
+      measureId: "",
+    });
   };
 
   const handleViewDialogClose = () => {
@@ -850,6 +859,13 @@ export default function MeasureList(props: {
 
   const handleCompareVersionsDialogClose = () => {
     setCompareVersionsDialog(false);
+  };
+
+  const handleReviewDialogClose = () => {
+    setReviewDialog({
+      open: false,
+      measureId: "",
+    });
   };
 
   const updateTargetMeasure = (newValue) => {
@@ -1180,6 +1196,7 @@ export default function MeasureList(props: {
             activeTab={props.activeTab}
             setTransferDialog={setTransferDialog}
             setCompareVersionsDialog={setCompareVersionsDialog}
+            setReviewDialog={setReviewDialog}
           />
         </div>
       </div>
@@ -1289,6 +1306,11 @@ export default function MeasureList(props: {
         measures={selectedMeasures}
         open={compareVersionsDialog}
         onClose={handleCompareVersionsDialogClose}
+      />
+      <ReviewDialog
+        open={reviewDialog.open}
+        measure={targetMeasure.current}
+        onClose={handleReviewDialogClose}
       />
     </div>
   );
