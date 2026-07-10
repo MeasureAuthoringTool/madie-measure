@@ -363,6 +363,19 @@ describe("FhirDefinitionServiceUtilities", () => {
       const result = getTopLevelElements(testResource);
       expect(result).toEqual([]);
     });
+
+    it("should filter out Patient.link element", () => {
+      const resourceWithLink = _.cloneDeep(mockResource);
+      (resourceWithLink.definition.snapshot.element as any[]).push({
+        id: "Patient.link",
+        path: "Patient.link",
+        min: 0,
+        type: [{ code: "BackboneElement" }],
+      });
+      const result = getTopLevelElements(resourceWithLink);
+      expect(result.find((el) => el.id === "Patient.link")).toBeUndefined();
+      expect(result.find((el) => el.path === "Patient.link")).toBeUndefined();
+    });
   });
 
   describe("getRequiredElements", () => {
