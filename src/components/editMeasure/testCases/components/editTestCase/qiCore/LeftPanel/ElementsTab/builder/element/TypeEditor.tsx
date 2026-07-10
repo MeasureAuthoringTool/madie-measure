@@ -31,6 +31,7 @@ import {
   getRequired,
   isComponentDataType,
   stripAllIndexes,
+  TYPE_CODE_NOT_USED,
 } from "../../../../../../../api/fhirDefinitionServiceUtilities";
 import CodingComponent from "./types/CodingComponent";
 import { useRequiredFields } from "./RequiredFieldsContext";
@@ -53,6 +54,10 @@ import { StructureDefinitionDto } from "../../../../../../../api/models/Structur
 import { ElementDefinition, StructureDefinition } from "fhir/r4";
 import useFhirDefinitionsServiceApi from "../../../../../../../api/useFhirDefinitionsService";
 import RatioComponent from "./types/RatioComponent";
+
+const TYPE_EDITOR_EXCLUDED_TYPES = new Set(
+  TYPE_CODE_NOT_USED.map((code) => code.toLowerCase())
+);
 
 export const formikErrorHandler = (name: string, formik) => {
   const touched = getNestedProperty(formik.touched, name);
@@ -276,33 +281,11 @@ const TypeEditor = ({
   const shouldRenderChoiceType = isChoiceTypePath && label?.includes("[x]");
 
   if (shouldRenderChoiceType) {
-    const excludedTypes = [
-      "base64Binary",
-      "markdown",
-      "Expression",
-      "ParameterDefinition",
-      "Annotation",
-      "Attachment",
-      "Contributor",
-      "SampledData",
-      "HumanName",
-      "RelatedArtifact",
-      "TriggerDefinition",
-      "UsageContext",
-      "Meta",
-      "Address",
-      "ContactPoint",
-      "ContactDetail",
-      "DataRequirement",
-    ];
-
     const filteredStructureDefinition = {
       ...structureDefinition,
       type: (structureDefinition?.type || []).filter(
         (typeItem) =>
-          !excludedTypes.some(
-            (excluded) => typeItem.code.toLowerCase() === excluded.toLowerCase()
-          )
+          !TYPE_EDITOR_EXCLUDED_TYPES.has(typeItem.code.toLowerCase())
       ),
     };
 
@@ -1282,34 +1265,11 @@ const TypeEditor = ({
         {childDefs?.map((childDef) => {
           // if it's not a component dataType, we should render a header since it will have it's own property paths
           if (_.endsWith(childDef.id, "[x]") && childDef?.type?.length > 1) {
-            const excludedTypes = [
-              "base64Binary",
-              "markdown",
-              "Expression",
-              "ParameterDefinition",
-              "Annotation",
-              "Attachment",
-              "Contributor",
-              "SampledData",
-              "HumanName",
-              "RelatedArtifact",
-              "TriggerDefinition",
-              "UsageContext",
-              "Meta",
-              "Address",
-              "ContactPoint",
-              "ContactDetail",
-              "DataRequirement",
-            ];
-
             const filteredChildDef = {
               ...childDef,
               type: childDef.type.filter(
                 (typeItem) =>
-                  !excludedTypes.some(
-                    (excluded) =>
-                      typeItem.code.toLowerCase() === excluded.toLowerCase()
-                  )
+                  !TYPE_EDITOR_EXCLUDED_TYPES.has(typeItem.code.toLowerCase())
               ),
             };
             //Let's render a select that allows us to select the type of childDef we want to render.
