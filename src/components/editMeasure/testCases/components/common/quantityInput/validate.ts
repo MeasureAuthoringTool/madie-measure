@@ -11,7 +11,7 @@ export class ValidationResult {
 // to the correct UCUM code (e.g. "d"). Also serves as the list of additional
 // non-UCUM units we explicitly support (any key present here is valid).
 export const TIMING_DISPLAY_TO_UCUM_CODE: Record<string, string> = {
-  years: "a", // this would be a_ as a ucum unit, but not intuitive.
+  years: "a",
   year: "a",
   months: "mo",
   month: "mo",
