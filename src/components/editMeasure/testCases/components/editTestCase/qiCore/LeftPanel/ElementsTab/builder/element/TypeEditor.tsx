@@ -448,14 +448,18 @@ const TypeEditor = ({
         );
         return wrapWithSection(label, markdown, isRoot, noWrap, required);
       case "Quantity":
-        // Show comparator for Quantity types that are NOT SimpleQuantity
-        const isSimpleQuantity = structureDefinition?.type?.some(
-          ({ code, profile }) =>
-            code === "Quantity" &&
-            profile?.includes(
-              "http://hl7.org/fhir/StructureDefinition/SimpleQuantity"
-            )
-        );
+      case "Duration":
+        // Show comparator for Quantity types that are NOT SimpleQuantity.
+        // Duration is always treated like a SimpleQuantity (no comparator)
+        const isSimpleQuantity =
+          type === "Duration" ||
+          structureDefinition?.type?.some(
+            ({ code, profile }) =>
+              code === "Quantity" &&
+              profile?.includes(
+                "http://hl7.org/fhir/StructureDefinition/SimpleQuantity"
+              )
+          );
         return (
           <>
             {(isArrayMode ? values : [null]).map((el, index) => {
