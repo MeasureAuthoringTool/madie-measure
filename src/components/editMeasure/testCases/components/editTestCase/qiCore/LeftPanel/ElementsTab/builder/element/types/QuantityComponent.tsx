@@ -157,7 +157,6 @@ const QuantityComponent = ({
 
                 // Validate the input code
                 const validation = validate(inputCode);
-                console.log(validation)
                 if (validation.label) {
                   // Valid code so set code, unit, system
                   // For bracketed code (ucumUnitCode === 1), set the unit (human readable name) to the input code too
