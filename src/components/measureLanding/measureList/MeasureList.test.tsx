@@ -90,6 +90,12 @@ jest.mock("../../common/shareDialog/ShareDialog", () => ({
   formikErrorHandler: jest.fn(),
 }));
 
+jest.mock("../../common/reviewDialog/ReviewDialog", () => ({
+  __esModule: true,
+  default: ({ open }: { open: boolean }) =>
+    open ? <div data-testid="review-dialog">Review Dialog</div> : null,
+}));
+
 jest.mock("../../common/viewHumanReadableModal/ViewHRModal", () => ({
   __esModule: true,
   default: ({ open, onClose }: { open: boolean; onClose: () => void }) =>
