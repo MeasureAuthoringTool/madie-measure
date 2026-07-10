@@ -1,6 +1,15 @@
 #qi-core-6-tc-builder {
   > #measure-landing > .measure-table {
     margin: 0;
+
+    tr {
+      td:first-child,
+      td:last-child {
+        > * {
+          margin-top: 14px;
+        }
+      }
+    }
   }
 
   > #search-container {
@@ -51,7 +60,7 @@
       padding: 0;
       border: none;
       display: flex;
-      flex-direction: row-reverse;
+      flex-direction: row;
     }
   }
 
