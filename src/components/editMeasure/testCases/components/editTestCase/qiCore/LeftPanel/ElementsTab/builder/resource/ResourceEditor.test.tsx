@@ -1,5 +1,5 @@
 import * as React from "react";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import ResourceEditor, {
   deleteMultipleCardinalityElement,
 } from "./ResourceEditor";
@@ -9,7 +9,7 @@ import mockSelectedPatientTree from "./mockSelectedPatientTree.json";
 import mockResourceState from "./mockResourceState.json";
 import mockValueSetsState from "./mockValueSetsState.json";
 import mockAllergyIntoleranceStructuredDef from "./mockAllergyIntoleranceStructuredDefinition.json";
-import _ from "lodash";
+import * as _ from "lodash";
 
 import userEvent from "@testing-library/user-event";
 import { useFormikContext } from "formik";
@@ -194,10 +194,12 @@ describe("ResourceEditor", () => {
 
     render(
       <ExecutionContextProvider
-        value={{
-          valueSetsState: localMockckValueSetsState,
-          executionContextReady: true,
-        }}
+        value={
+          {
+            valueSetsState: localMockckValueSetsState,
+            executionContextReady: true,
+          } as any
+        }
       >
         <ApiContextProvider value={mockConfig}>
           <QiCoreResourceContext.Provider
@@ -407,10 +409,12 @@ describe("ResourceEditor", () => {
 
     render(
       <ExecutionContextProvider
-        value={{
-          valueSetsState: localMockckValueSetsState,
-          executionContextReady: true,
-        }}
+        value={
+          {
+            valueSetsState: localMockckValueSetsState,
+            executionContextReady: true,
+          } as any
+        }
       >
         <ApiContextProvider value={mockConfig}>
           <QiCoreResourceContext.Provider
@@ -471,10 +475,12 @@ describe("ResourceEditor", () => {
 
     render(
       <ExecutionContextProvider
-        value={{
-          valueSetsState: localMockckValueSetsState,
-          executionContextReady: true,
-        }}
+        value={
+          {
+            valueSetsState: localMockckValueSetsState,
+            executionContextReady: true,
+          } as any
+        }
       >
         <ApiContextProvider value={mockConfig}>
           <QiCoreResourceContext.Provider
@@ -524,11 +530,11 @@ describe("ResourceEditor", () => {
       expect(autocompleteInput).toHaveFocus();
     });
 
-    // select the deceasedBoolean attribute
+    // select the deceased[x] attribute (preserve the choice-type suffix, not the concrete type)
     userEvent.type(autocompleteInput, "deceased");
 
     await waitFor(() => {
-      const deceasedOption = screen.getByText(/deceasedBoolean/i);
+      const deceasedOption = screen.getByText("deceased[x]");
       expect(deceasedOption).toBeInTheDocument();
       userEvent.click(deceasedOption);
     });
@@ -568,13 +574,14 @@ describe("ResourceEditor", () => {
 
   it("does NOT render the Add Attribute(s) button when canEdit is false", async () => {
     (useFormikContext as jest.Mock).mockReturnValue(localMockFormikObj);
-    const mockDispatch = jest.fn();
     render(
       <ExecutionContextProvider
-        value={{
-          valueSetsState: mockValueSetsState,
-          executionContextReady: true,
-        }}
+        value={
+          {
+            valueSetsState: mockValueSetsState,
+            executionContextReady: true,
+          } as any
+        }
       >
         <ApiContextProvider value={mockConfig}>
           <QiCoreResourceContext.Provider
@@ -660,10 +667,12 @@ describe("ResourceEditor", () => {
 
     render(
       <ExecutionContextProvider
-        value={{
-          valueSetsState: localMockckValueSetsState,
-          executionContextReady: true,
-        }}
+        value={
+          {
+            valueSetsState: localMockckValueSetsState,
+            executionContextReady: true,
+          } as any
+        }
       >
         <ApiContextProvider value={mockConfig}>
           <QiCoreResourceContext.Provider
@@ -706,10 +715,12 @@ describe("ResourceEditor", () => {
 
     render(
       <ExecutionContextProvider
-        value={{
-          valueSetsState: localMockckValueSetsState,
-          executionContextReady: true,
-        }}
+        value={
+          {
+            valueSetsState: localMockckValueSetsState,
+            executionContextReady: true,
+          } as any
+        }
       >
         <ApiContextProvider value={mockConfig}>
           <QiCoreResourceContext.Provider
@@ -761,10 +772,12 @@ describe("ResourceEditor", () => {
 
     render(
       <ExecutionContextProvider
-        value={{
-          valueSetsState: localMockckValueSetsState,
-          executionContextReady: true,
-        }}
+        value={
+          {
+            valueSetsState: localMockckValueSetsState,
+            executionContextReady: true,
+          } as any
+        }
       >
         <ApiContextProvider value={mockConfig}>
           <QiCoreResourceContext.Provider
@@ -846,10 +859,10 @@ describe("ResourceEditor", () => {
       </QiCoreResourceContext.Provider>
     );
 
-    // Wait for the AllergyIntolerance resource to load and find the onsetDateTime tab
-    const onsetDateTimeTab = await screen.findByTestId("onsetDateTime");
-    expect(onsetDateTimeTab).toHaveTextContent("onsetDateTime");
-    expect(onsetDateTimeTab).toHaveAttribute("aria-selected", "true");
+    // Top-level choice tabs are unified to a single [x]-suffixed attribute label.
+    const onsetTab = await screen.findByTestId("Onset[x]");
+    expect(onsetTab).toHaveTextContent("Onset[x]");
+    expect(onsetTab).toHaveAttribute("aria-selected", "true");
     // userEvent.click(onsetDateTimeTab);
 
     const actionCenter = await screen.findByTestId(
@@ -878,6 +891,86 @@ describe("ResourceEditor", () => {
     expect(mockDispatch).toHaveBeenCalledWith(expectedPayload);
   });
 
+  it("shows [x]-suffixed choice type label (not concrete type) in Add Attribute(s) dialog", async () => {
+    const fhirDefinitionsServiceApiMock = {
+      getResourceTree: jest
+        .fn()
+        .mockResolvedValue(mockAllergyIntoleranceStructuredDef),
+      getValueSetDefinition: jest.fn().mockResolvedValue(mockValueSetsState),
+    } as unknown as FhirDefinitionsServiceApi;
+    useFhirDefinitionsServiceApiMock.mockImplementation(
+      () => fhirDefinitionsServiceApiMock
+    );
+
+    const stateWithOnsetPeriod = _.cloneDeep(mockResourceState);
+    const allergyEntry = stateWithOnsetPeriod.bundle.entry.find(
+      (entry) => entry.resource.id === "6fb9d817"
+    );
+    delete allergyEntry.resource.onsetDateTime;
+    allergyEntry.resource.onsetPeriod = {
+      start: "2020-01-01T00:00:00Z",
+    };
+
+    const formikWithOnsetPeriod = {
+      ...localMockFormikObj,
+      dirty: false,
+      values: {
+        AllergyIntolerance: {
+          id: "6fb9d817",
+          onsetPeriod: {
+            start: "2020-01-01T00:00:00Z",
+          },
+        },
+      },
+    };
+    (useFormikContext as jest.Mock).mockReturnValue(formikWithOnsetPeriod);
+
+    render(
+      <ExecutionContextProvider
+        value={
+          {
+            valueSetsState: localMockckValueSetsState,
+            executionContextReady: true,
+          } as any
+        }
+      >
+        <ApiContextProvider value={mockConfig}>
+          <QiCoreResourceContext.Provider
+            value={{ state: stateWithOnsetPeriod, dispatch: jest.fn() }}
+          >
+            <ResourceEditor
+              selectedResourceID="6fb9d817"
+              setValidationSchema={mockSetValidationSchema}
+              setInitialFormikValuesStu6={mockSetInitialFormikValuesStu6}
+              onCancel={mockOnCancel}
+              canEdit={true}
+              applyLoading={false}
+              setApplyLoading={jest.fn()}
+            />
+          </QiCoreResourceContext.Provider>
+        </ApiContextProvider>
+      </ExecutionContextProvider>
+    );
+
+    const addAttributeButton = await screen.findByTestId(
+      "add-attribute-dialog-button"
+    );
+    userEvent.click(addAttributeButton);
+
+    await waitFor(() => {
+      const dialog = screen.getByRole("dialog");
+      expect(
+        within(dialog).getByText("Attribute Selector")
+      ).toBeInTheDocument();
+      // Dialog always shows the [x]-suffixed choice-type label, never the concrete type name
+      expect(within(dialog).getAllByText("onset[x]").length).toBeGreaterThan(0);
+      expect(within(dialog).queryByText("onsetPeriod")).not.toBeInTheDocument();
+      expect(
+        within(dialog).queryByText("onsetDateTime")
+      ).not.toBeInTheDocument();
+    });
+  });
+
   it("should apply [0] index for element with isMultiCardinalityElement (base max '*' without existing values)", async () => {
     const mockDispatch = jest.fn();
 
@@ -901,10 +994,12 @@ describe("ResourceEditor", () => {
 
     render(
       <ExecutionContextProvider
-        value={{
-          valueSetsState: mockValueSetsState,
-          executionContextReady: true,
-        }}
+        value={
+          {
+            valueSetsState: mockValueSetsState,
+            executionContextReady: true,
+          } as any
+        }
       >
         <ApiContextProvider value={mockConfig}>
           <QiCoreResourceContext.Provider
@@ -954,10 +1049,12 @@ describe("ResourceEditor", () => {
 
     render(
       <ExecutionContextProvider
-        value={{
-          valueSetsState: mockValueSetsState,
-          executionContextReady: true,
-        }}
+        value={
+          {
+            valueSetsState: mockValueSetsState,
+            executionContextReady: true,
+          } as any
+        }
       >
         <ApiContextProvider value={mockConfig}>
           <QiCoreResourceContext.Provider

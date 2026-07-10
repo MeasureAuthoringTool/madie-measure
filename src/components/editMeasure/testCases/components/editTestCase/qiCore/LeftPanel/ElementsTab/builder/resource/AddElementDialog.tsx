@@ -22,10 +22,13 @@ const AddElementDialog = (props: AddElementDialogProps) => {
   }, [value]);
   const handleChange = useCallback(
     (event, newValue: ElementDefinition[] | null) => {
-      newValue[newValue.length - 1].path =
-        basePath +
-        "." +
-        getOptionLabel(newValue[newValue.length - 1], basePath);
+      const lastElement = newValue[newValue.length - 1];
+      // For choice-type elements (path ends with [x]), preserve the original path so
+      // buildElementPath can correctly derive the concrete key (e.g. effectiveDateTime).
+      if (!lastElement.path?.endsWith("[x]")) {
+        lastElement.path =
+          basePath + "." + getOptionLabel(lastElement, basePath);
+      }
       setSelectedElements(newValue);
     },
     [basePath]
