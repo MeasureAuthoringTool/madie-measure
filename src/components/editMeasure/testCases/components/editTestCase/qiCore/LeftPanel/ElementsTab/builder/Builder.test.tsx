@@ -135,28 +135,31 @@ jest.mock("../../../../../../api/useFhirDefinitionsService", () => {
     getResourceTree: mockGetResourceTree,
   });
 });
+const mockFetchRelevantDataElements = jest.fn(() =>
+  Promise.resolve([
+    {
+      profile:
+        "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-servicerequest",
+      type: "ServiceRequest",
+    },
+    {
+      profile:
+        "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-procedure",
+      type: "Procedure",
+    },
+    {
+      profile:
+        "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-encounter",
+      type: "Encounter",
+    },
+  ])
+);
 jest.mock(
   "../../../../../../../../../api/useFhirElmTranslationServiceApi",
   () => {
     return () => ({
-      fetchRelevantDataElements: () =>
-        Promise.resolve([
-          {
-            profile:
-              "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-servicerequest",
-            type: "ServiceRequest",
-          },
-          {
-            profile:
-              "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-procedure",
-            type: "Procedure",
-          },
-          {
-            profile:
-              "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-encounter",
-            type: "Encounter",
-          },
-        ]),
+      fetchRelevantDataElements: (...args) =>
+        mockFetchRelevantDataElements(...args),
     });
   }
 );
@@ -595,6 +598,50 @@ describe("Builder Component", () => {
     expect(noProfilesAlert).toHaveTextContent(NO_PROFILES_MESSAGE);
 
     expect(screen.queryByRole("table")).not.toBeInTheDocument();
+  });
+
+  it("sets resources to empty array when relevantElements is empty", async () => {
+    mockFetchRelevantDataElements.mockResolvedValueOnce([]);
+
+    renderBuilderComponent({ bundleToAdd: mockBundle, activeTab: "available" });
+
+    // wait for loading to finish
+    await waitFor(() =>
+      expect(
+        screen.queryByTestId("available-profiles-loading")
+      ).not.toBeInTheDocument()
+    );
+
+    // no resource rows should be rendered since resources is empty
+    expect(screen.queryAllByRole("row")).toHaveLength(0);
+  });
+
+  it("sets resources to empty array when relevantElements is undefined", async () => {
+    mockFetchRelevantDataElements.mockResolvedValueOnce(undefined);
+
+    renderBuilderComponent({ bundleToAdd: mockBundle, activeTab: "available" });
+
+    await waitFor(() =>
+      expect(
+        screen.queryByTestId("available-profiles-loading")
+      ).not.toBeInTheDocument()
+    );
+
+    expect(screen.queryAllByRole("row")).toHaveLength(0);
+  });
+
+  it("sets resources to empty array when relevantElements is null", async () => {
+    mockFetchRelevantDataElements.mockResolvedValueOnce(null);
+
+    renderBuilderComponent({ bundleToAdd: mockBundle, activeTab: "available" });
+
+    await waitFor(() =>
+      expect(
+        screen.queryByTestId("available-profiles-loading")
+      ).not.toBeInTheDocument()
+    );
+
+    expect(screen.queryAllByRole("row")).toHaveLength(0);
   });
 
   it("triggers resource addition logic with required elements and spinner overlay", async () => {
