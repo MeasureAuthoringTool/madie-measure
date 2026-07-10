@@ -182,6 +182,39 @@ describe("ActionCenter", () => {
     });
   });
 
+  it("should call updateTargetMeasure and setReviewDialog when review action is triggered", async () => {
+    const updateTargetMeasure = jest.fn();
+    const setReviewDialog = jest.fn();
+
+    render(
+      <ActionCenter
+        measures={[qdmMeasure]}
+        associateCmsId={jest.fn()}
+        exportMeasure={jest.fn()}
+        updateTargetMeasure={updateTargetMeasure}
+        setCreateVersionDialog={jest.fn()}
+        setDraftMeasureDialog={jest.fn()}
+        setDeleteMeasureDialog={jest.fn()}
+        setShareDialog={jest.fn}
+        deleteMeasure={jest.fn()}
+        setViewHumanReadableModal={jest.fn()}
+        activeTab={0}
+        setTransferDialog={jest.fn()}
+        setReviewDialog={setReviewDialog}
+      />
+    );
+
+    const reviewButton = await screen.findByTestId("review-action-btn");
+    expect(reviewButton).toBeEnabled();
+    await userEvent.click(reviewButton);
+
+    expect(updateTargetMeasure).toHaveBeenCalledWith(qdmMeasure);
+    expect(setReviewDialog).toHaveBeenCalledWith({
+      open: true,
+      measureId: qdmMeasure.id,
+    });
+  });
+
   it("should call updateTargetMeasure and setDraftMeasureDialog when draft action is triggered", async () => {
     const updateTargetMeasure = jest.fn();
     const setDraftMeasureDialog = jest.fn();
