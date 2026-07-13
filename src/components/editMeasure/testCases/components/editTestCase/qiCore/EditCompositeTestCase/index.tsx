@@ -11,9 +11,12 @@ import { Button } from "@madie/madie-design-system/dist/react";
 import CompositeLeftPanelContent from "./CompositeLeftPanelContent";
 import CompositeRightPanelContent from "./CompositeRightPanelContent";
 import { useMeasureServiceApi } from "@madie/madie-util";
-import { AlertProps } from "../EditTestCase";
+import { AlertProps, shouldDisableRunTestCaseButton } from "../EditTestCase";
 import tw, { styled } from "twin.macro";
 import "styled-components/macro";
+import useExecutionContext from "../../../routes/qiCore/useExecutionContext";
+import { Model } from "@madie/madie-models";
+import ValidationPanelPane from "../ValidationPanelPane";
 
 const EditCompositeTestCase = ({
   allotmentRef,
@@ -28,9 +31,11 @@ const EditCompositeTestCase = ({
   testCase,
   setValidationSchema,
   setInitialFormikValuesStu6,
+  validationErrors,
 }) => {
   const measureServiceApi = useRef(useMeasureServiceApi()).current;
   const [alert, setAlert] = useState<AlertProps>(null);
+  const { executionContextReady, executing } = useExecutionContext();
   const [components, setComponents] = useState([]);
   const componentMeasureIds = useMemo(() => {
     if (!measure?.groups?.length) return [];
@@ -67,6 +72,7 @@ const EditCompositeTestCase = ({
     useState<string>("actual");
   const [leftPanelActiveTab, setLeftPanelActiveTab] =
     useState<string>("available");
+
   return (
     <div className={`allotment-wrapper`}>
       <Allotment ref={allotmentRef} defaultSizes={[48, 48, 4]} vertical={false}>
@@ -98,6 +104,12 @@ const EditCompositeTestCase = ({
             />
           </div>
         </Allotment.Pane>
+        <ValidationPanelPane
+          allotmentRef={allotmentRef}
+          testCase={testCase}
+          validationErrors={validationErrors}
+          isQICore6={measure?.model === Model.QICORE_6_0_0}
+        />
       </Allotment>
 
       {/* button wrap in context */}
@@ -119,7 +131,13 @@ const EditCompositeTestCase = ({
             tw="m-2"
             type="button"
             data-testid="run-test-case-button"
-            disabled
+            disabled={shouldDisableRunTestCaseButton({
+              measure,
+              validationErrors,
+              editorVal,
+              executionContextReady,
+              executing,
+            })}
           >
             Run Test Case
           </Button>
