@@ -3,24 +3,19 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import LockedMessageModal from "./LockedMessageModal";
 import { MemoryRouter } from "react-router-dom";
 
-const mockGetOwnerDetails = jest.fn();
+const mockUseOwnerName = jest.fn();
 jest.mock("@madie/madie-util", () => ({
-  useUserServiceApi: jest.fn(() => ({
-    getOwnerDetails: mockGetOwnerDetails,
-  })),
+  useOwnerName: (harpId) => mockUseOwnerName(harpId),
 }));
 
 describe("LockedMessageModal component", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockGetOwnerDetails.mockResolvedValue({});
+    mockUseOwnerName.mockImplementation((harpId) => harpId);
   });
 
-  it("renders the owner's display name and harpId when open", async () => {
-    mockGetOwnerDetails.mockResolvedValueOnce({
-      firstName: "John",
-      lastName: "Doe",
-    });
+  it("renders the owner's display name and harpId when open", () => {
+    mockUseOwnerName.mockReturnValue("John Doe");
     render(
       <MemoryRouter>
         <LockedMessageModal
@@ -34,19 +29,17 @@ describe("LockedMessageModal component", () => {
 
     expect(screen.getByText("Measure currently In-Use")).toBeInTheDocument();
     const message = screen.getByTestId("measure-locked-modal-message");
-    await waitFor(() => {
-      expect(message).toHaveTextContent(
-        "This measure is currently being edited by John Doe (user123)."
-      );
-    });
+    expect(message).toHaveTextContent(
+      "This measure is currently being edited by John Doe (user123)."
+    );
     expect(message).toHaveTextContent(
       "You will be unable to make changes at this time."
     );
-    expect(mockGetOwnerDetails).toHaveBeenCalledWith("user123");
+    expect(mockUseOwnerName).toHaveBeenCalledWith("user123");
   });
 
-  it("falls back to the harpId as the display name when no name is available", async () => {
-    mockGetOwnerDetails.mockResolvedValueOnce({ harpId: "user123" });
+  it("falls back to the harpId as the display name when no name is available", () => {
+    mockUseOwnerName.mockReturnValue("user123");
     render(
       <MemoryRouter>
         <LockedMessageModal
@@ -59,32 +52,9 @@ describe("LockedMessageModal component", () => {
     );
 
     const message = screen.getByTestId("measure-locked-modal-message");
-    await waitFor(() => {
-      expect(message).toHaveTextContent(
-        "This measure is currently being edited by user123 (user123)."
-      );
-    });
-  });
-
-  it("falls back to the harpId when owner details cannot be retrieved", async () => {
-    mockGetOwnerDetails.mockRejectedValueOnce(new Error("fail"));
-    render(
-      <MemoryRouter>
-        <LockedMessageModal
-          lockedType="measure"
-          lockedBy="user123"
-          lockedModalOpen={true}
-          setLockedModalOpen={jest.fn()}
-        />
-      </MemoryRouter>
+    expect(message).toHaveTextContent(
+      "This measure is currently being edited by user123 (user123)."
     );
-
-    const message = screen.getByTestId("measure-locked-modal-message");
-    await waitFor(() => {
-      expect(message).toHaveTextContent(
-        "This measure is currently being edited by user123 (user123)."
-      );
-    });
   });
 
   it("does not render when closed", () => {
@@ -104,15 +74,15 @@ describe("LockedMessageModal component", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("calls setLockedMeasurePopupOpen with false when Close button is clicked", async () => {
-    const setLockedMeasurePopupOpen = jest.fn();
+  it("calls setLockedModalOpen with false when Close button is clicked", async () => {
+    const setLockedModalOpen = jest.fn();
     render(
       <MemoryRouter>
         <LockedMessageModal
           lockedType="measure"
           lockedBy="user123"
           lockedModalOpen={true}
-          setLockedModalOpen={setLockedMeasurePopupOpen}
+          setLockedModalOpen={setLockedModalOpen}
         />
       </MemoryRouter>
     );
@@ -120,7 +90,7 @@ describe("LockedMessageModal component", () => {
     fireEvent.click(screen.getByText("Close"));
 
     await waitFor(() => {
-      expect(setLockedMeasurePopupOpen).toHaveBeenCalledWith(false);
+      expect(setLockedModalOpen).toHaveBeenCalledWith(false);
     });
   });
 });

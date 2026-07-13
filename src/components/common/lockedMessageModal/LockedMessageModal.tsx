@@ -1,18 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { MadieDialog } from "@madie/madie-design-system/dist/react";
 import { DialogContent, Typography } from "@mui/material";
-import { useUserServiceApi } from "@madie/madie-util";
+import { useOwnerName } from "@madie/madie-util";
 
 const capitalizeFirstLetter = (string) => {
   if (!string) return ""; // Handle empty or null strings
   return string.charAt(0).toUpperCase() + string.slice(1);
-};
-
-const getDisplayName = (response, harpId) => {
-  const names = [response?.firstName, response?.lastName]
-    .map((name) => name?.trim())
-    .filter(Boolean);
-  return names.length ? names.join(" ") : harpId;
 };
 
 const LockedMessageModal = ({
@@ -21,22 +14,7 @@ const LockedMessageModal = ({
   lockedModalOpen,
   setLockedModalOpen,
 }) => {
-  const userServiceApi = useUserServiceApi();
-  const [displayName, setDisplayName] = useState<string>(lockedBy);
-
-  useEffect(() => {
-    if (lockedBy) {
-      userServiceApi
-        .getOwnerDetails(lockedBy)
-        .then((response) => {
-          setDisplayName(getDisplayName(response, lockedBy));
-        })
-        .catch(() => {
-          setDisplayName(lockedBy);
-        });
-    }
-  }, [lockedBy]);
-
+  const displayName = useOwnerName(lockedBy);
   return (
     <MadieDialog
       title={`${capitalizeFirstLetter(lockedType)} currently In-Use`}

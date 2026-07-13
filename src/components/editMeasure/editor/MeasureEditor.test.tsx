@@ -49,9 +49,7 @@ const mockMeasureServiceApi = {
 
 jest.mock("@madie/madie-util", () => ({
   useMeasureServiceApi: jest.fn(() => mockMeasureServiceApi),
-  useUserServiceApi: jest.fn(() => ({
-    getOwnerDetails: jest.fn().mockResolvedValue({}),
-  })),
+  useOwnerName: jest.fn((harpId) => harpId),
   useTerminologyServiceApi: jest.fn(() => mockMeasureServiceApi),
   useDocumentTitle: jest.fn(),
   useOktaTokens: jest.fn(() => ({

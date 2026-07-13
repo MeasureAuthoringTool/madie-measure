@@ -111,9 +111,7 @@ let mockApplyDefaults = false;
 jest.mock("@madie/madie-util", () => {
   return {
     useMeasureServiceApi: jest.fn(() => mockMeasureServiceApi),
-    useUserServiceApi: jest.fn(() => ({
-      getOwnerDetails: jest.fn().mockResolvedValue({}),
-    })),
+    useOwnerName: jest.fn((harpId) => harpId),
     useDocumentTitle: jest.fn(),
     useFeatureFlags: jest.fn(() => {
       return {
