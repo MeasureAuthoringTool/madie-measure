@@ -1,12 +1,13 @@
-import { Calculator, StratifierResult } from "fqm-execution";
 import {
+  Calculator,
+  StratifierResult,
   CalculationOutput,
   DetailedPopulationGroupResult,
   EpisodeResults,
   ExecutionResult,
   MRCalculationOutput,
   PopulationResult,
-} from "fqm-execution/build/types/Calculator";
+} from "fqm-execution";
 import { prettyFHIRObject } from "fqm-execution/build/calculation/ClauseResultsBuilder";
 import { FHIRWrapper } from "cql-exec-fhir";
 import {
@@ -161,13 +162,13 @@ export class CalculationService {
     measureBundle: Bundle,
     valueSets: ValueSet[]
   ): Promise<MRCalculationOutput> {
-    const TestCaseBundles = testCases.map((testCase) => {
+    const testCaseBundles = testCases.map((testCase) => {
       return this.buildPatientBundle(testCase);
     });
     const calculationOutput: MRCalculationOutput =
-      await calculateMeasureReports(
+      await Calculator.calculateMeasureReports(
         measureBundle,
-        TestCaseBundles,
+        testCaseBundles,
         {
           trustMetaProfile: true,
           measurementPeriodStart: measure?.measurementPeriodStart
