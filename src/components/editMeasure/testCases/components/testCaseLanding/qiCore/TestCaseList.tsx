@@ -103,6 +103,9 @@ export const getCoverageValueFromHtml = (
   groupId: string,
   displayId: string
 ): number => {
+  if (!coverageHtml) {
+    return 0;
+  }
   let coverageHtmlByGroup = coverageHtml[groupId];
   if (!coverageHtmlByGroup) {
     coverageHtmlByGroup = coverageHtml[displayId];
