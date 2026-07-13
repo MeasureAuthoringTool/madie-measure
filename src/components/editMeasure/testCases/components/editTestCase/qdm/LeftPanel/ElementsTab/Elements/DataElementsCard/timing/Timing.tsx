@@ -27,25 +27,29 @@ const Timing = ({ canEdit, onChange, selectedDataElement }) => {
     onChange(selectedDataElement);
   };
 
-  // MAT-10157: Medication, Active can have either Relevant Period OR Relevant Datetime, not both.
+  // This "either/or" rule only applies to Medication, Active, so scope the whole
+  // calculation to that type and leave the flags disabled/false for every other element.
   const isMedicationActive =
     selectedDataElement?._type === MEDICATION_ACTIVE_TYPE;
-  const relevantPeriod = selectedDataElement?.get?.("relevantPeriod");
-  const relevantDatetime = selectedDataElement?.get?.("relevantDatetime");
-  const relevantPeriodHasValue = !!(
-    relevantPeriod &&
-    (relevantPeriod.low || relevantPeriod.high)
-  );
-  const relevantDatetimeHasValue = !!relevantDatetime;
-  const bothTimingsPresent =
-    isMedicationActive && relevantPeriodHasValue && relevantDatetimeHasValue;
+  let bothTimingsPresent = false;
+  let disableRelevantPeriod = false;
+  let disableRelevantDatetime = false;
 
-  // Only disable the "other" timing when a single timing has been entered.
-  // When both already exist (legacy data) leave both enabled and warn instead.
-  const disableRelevantPeriod =
-    isMedicationActive && relevantDatetimeHasValue && !bothTimingsPresent;
-  const disableRelevantDatetime =
-    isMedicationActive && relevantPeriodHasValue && !bothTimingsPresent;
+  if (isMedicationActive) {
+    const relevantPeriod = selectedDataElement?.get?.("relevantPeriod");
+    const relevantDatetime = selectedDataElement?.get?.("relevantDatetime");
+    const relevantPeriodHasValue = !!(
+      relevantPeriod &&
+      (relevantPeriod.low || relevantPeriod.high)
+    );
+    const relevantDatetimeHasValue = !!relevantDatetime;
+    bothTimingsPresent = relevantPeriodHasValue && relevantDatetimeHasValue;
+
+    // Only disable the "other" timing when a single timing has been entered.
+    // When both already exist (legacy data) leave both enabled and warn instead.
+    disableRelevantPeriod = relevantDatetimeHasValue && !bothTimingsPresent;
+    disableRelevantDatetime = relevantPeriodHasValue && !bothTimingsPresent;
+  }
 
   const dateFormatToDisplay = (date) => {
     if (date) {
