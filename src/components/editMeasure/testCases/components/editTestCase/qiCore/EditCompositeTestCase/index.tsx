@@ -11,15 +11,10 @@ import { Button } from "@madie/madie-design-system/dist/react";
 import CompositeLeftPanelContent from "./CompositeLeftPanelContent";
 import CompositeRightPanelContent from "./CompositeRightPanelContent";
 import { useMeasureServiceApi } from "@madie/madie-util";
-import {
-  AlertProps,
-  hasValidationErrorSeverity,
-  isEmptyTestCaseJsonString,
-} from "../EditTestCase";
+import { AlertProps, shouldDisableRunTestCaseButton } from "../EditTestCase";
 import tw, { styled } from "twin.macro";
 import "styled-components/macro";
 import useExecutionContext from "../../../routes/qiCore/useExecutionContext";
-import { Measure } from "@madie/madie-models/dist/Measure";
 import { Model } from "@madie/madie-models";
 import ValidationPanelPane from "../ValidationPanelPane";
 
@@ -40,7 +35,7 @@ const EditCompositeTestCase = ({
 }) => {
   const measureServiceApi = useRef(useMeasureServiceApi()).current;
   const [alert, setAlert] = useState<AlertProps>(null);
-  const { executionContextReady } = useExecutionContext();
+  const { executionContextReady, executing } = useExecutionContext();
   const [components, setComponents] = useState([]);
   const componentMeasureIds = useMemo(() => {
     if (!measure?.groups?.length) return [];
@@ -78,27 +73,6 @@ const EditCompositeTestCase = ({
   const [leftPanelActiveTab, setLeftPanelActiveTab] =
     useState<string>("available");
 
-  function shouldDisableRunTestCaseButton(params: {
-    measure: Measure | undefined;
-    validationErrors: any[];
-    editorVal: string;
-    executionContextReady: boolean;
-  }): boolean {
-    const { editorVal, executionContextReady, measure, validationErrors } =
-      params;
-    const isEmptyJson = isEmptyTestCaseJsonString(editorVal);
-    const isNotReady = !executionContextReady;
-
-    const canExecuteInvalidTestCases =
-      measure?.testCaseConfiguration?.executeInvalidTestCases;
-
-    // do not check for validation errors if invalid test cases execution is enabled
-    const hasValidationErrors = canExecuteInvalidTestCases
-      ? false
-      : hasValidationErrorSeverity(validationErrors);
-
-    return hasValidationErrors || isEmptyJson || isNotReady;
-  }
   return (
     <div className={`allotment-wrapper`}>
       <Allotment ref={allotmentRef} defaultSizes={[48, 48, 4]} vertical={false}>
@@ -162,6 +136,7 @@ const EditCompositeTestCase = ({
               validationErrors,
               editorVal,
               executionContextReady,
+              executing,
             })}
           >
             Run Test Case
