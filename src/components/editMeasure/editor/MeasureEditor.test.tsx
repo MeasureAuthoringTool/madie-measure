@@ -49,6 +49,9 @@ const mockMeasureServiceApi = {
 
 jest.mock("@madie/madie-util", () => ({
   useMeasureServiceApi: jest.fn(() => mockMeasureServiceApi),
+  useUserServiceApi: jest.fn(() => ({
+    getOwnerDetails: jest.fn().mockResolvedValue({}),
+  })),
   useTerminologyServiceApi: jest.fn(() => mockMeasureServiceApi),
   useDocumentTitle: jest.fn(),
   useOktaTokens: jest.fn(() => ({
@@ -1617,7 +1620,7 @@ describe("Measure Editor - measure locked", () => {
     await waitFor(() => {
       const message = screen.getByTestId("measure-locked-modal-message");
       expect(message).toHaveTextContent(
-        /This measure is currently edited by HARP ID/i
+        /This measure is currently being edited by/i
       );
       expect(message).toHaveTextContent("testuser@example.com");
       expect(message).toHaveTextContent(
