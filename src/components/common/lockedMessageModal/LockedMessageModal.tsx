@@ -15,6 +15,7 @@ const LockedMessageModal = ({
   setLockedModalOpen,
 }) => {
   const displayName = useOwnerName(lockedBy);
+  const hasName = displayName !== lockedBy;
   return (
     <MadieDialog
       title={`${capitalizeFirstLetter(lockedType)} currently In-Use`}
@@ -34,9 +35,9 @@ const LockedMessageModal = ({
         <div data-testid={`${lockedType}-locked-modal-message`}>
           <Typography>
             <div aria-describedby={`${lockedType}-locked-modal-message`}>
-              This {lockedType} is currently being edited by {displayName} (
-              {lockedBy}).<br></br>You will be unable to make changes at this
-              time.
+              This {lockedType} is currently being edited by{" "}
+              {hasName ? `${displayName} (${lockedBy})` : `${lockedBy}`}.
+              <br></br>You will be unable to make changes at this time.
             </div>
           </Typography>
         </div>

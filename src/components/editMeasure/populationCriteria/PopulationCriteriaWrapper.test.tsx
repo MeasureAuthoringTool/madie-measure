@@ -79,7 +79,7 @@ describe("PopulationCriteriaWrapper", () => {
     const message = screen.getByTestId("measure-locked-modal-message");
     await waitFor(() => {
       expect(message).toHaveTextContent(
-        "This measure is currently being edited by user123 (user123)."
+        "This measure is currently being edited by user123."
       );
     });
 

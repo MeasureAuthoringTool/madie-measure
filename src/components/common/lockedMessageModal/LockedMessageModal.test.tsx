@@ -38,7 +38,7 @@ describe("LockedMessageModal component", () => {
     expect(mockUseOwnerName).toHaveBeenCalledWith("user123");
   });
 
-  it("falls back to the harpId as the display name when no name is available", () => {
+  it("falls back to the HARP ID wording when no name is available", () => {
     mockUseOwnerName.mockReturnValue("user123");
     render(
       <MemoryRouter>
@@ -53,8 +53,9 @@ describe("LockedMessageModal component", () => {
 
     const message = screen.getByTestId("measure-locked-modal-message");
     expect(message).toHaveTextContent(
-      "This measure is currently being edited by user123 (user123)."
+      "This measure is currently being edited by user123."
     );
+    expect(message).not.toHaveTextContent("(user123)");
   });
 
   it("does not render when closed", () => {
