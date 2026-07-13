@@ -294,20 +294,11 @@ describe("TestCaseSummaryGrid", () => {
       />
     );
 
-    // ec-1 is Supported
-    const firstActionCenterButton = screen.getByTestId(
-      "action-center-button-ec-1"
-    );
-    userEvent.click(firstActionCenterButton);
-
     // Edit should be available and named "Edit"
-    const editAction = await screen.findByRole("menuitem", { name: "Edit" });
+    const editAction = screen.getByTestId("action-ec-1-Edit");
     expect(editAction).toBeInTheDocument();
     expect(editAction).not.toHaveAttribute("aria-disabled", "true");
-
-    const deleteAction = await screen.findByRole("menuitem", {
-      name: "Remove",
-    });
+    const deleteAction = screen.getByTestId("action-ec-1-Remove");
     expect(deleteAction).toBeInTheDocument();
   });
 
@@ -323,10 +314,7 @@ describe("TestCaseSummaryGrid", () => {
       />
     );
 
-    const actionCenterButton = screen.getByTestId("action-center-button-ec-1");
-    userEvent.click(actionCenterButton);
-
-    const cloneAction = await screen.findByRole("menuitem", { name: "Clone" });
+    const cloneAction = screen.getByTestId("action-ec-1-Clone");
     expect(cloneAction).toBeInTheDocument();
     expect(cloneAction).not.toHaveAttribute("aria-disabled", "true");
 
@@ -353,25 +341,18 @@ describe("TestCaseSummaryGrid", () => {
       />
     );
 
-    // pd-1 is Unsupported
-    const actionCenterButton = screen.getByTestId("action-center-button-pd-1");
-    userEvent.click(actionCenterButton);
-
     // Edit should be disabled.
-    const editAction = await screen.findByTestId("action-center-pd-1_Edit");
+    const editAction = screen.getByTestId("action-pd-1-Edit");
     expect(editAction).toBeInTheDocument();
-    expect(editAction).toHaveAttribute("aria-disabled", "true");
+    expect(editAction).toBeDisabled();
 
     // Delete should still be enabled
-    const deleteAction = await screen.findByRole("menuitem", {
-      name: "Remove",
-    });
+    const deleteAction = screen.getByTestId("action-pd-1-Remove");
     expect(deleteAction).toBeInTheDocument();
     expect(deleteAction).not.toHaveAttribute("aria-disabled", "true");
 
     // Ensure clicking it does NOT call edit
-    userEvent.click(editAction);
-    expect(mockOnRowEdit).not.toHaveBeenCalled();
+    expect(editAction).toBeDisabled();
   });
 
   it("should display error message if Profile doesn't match with correct resource type", async () => {
@@ -393,27 +374,17 @@ describe("TestCaseSummaryGrid", () => {
       />
     );
 
-    const actionCenterButton = screen.getByTestId(
-      "action-center-button-patient-1"
-    );
-    userEvent.click(actionCenterButton);
-
     // Edit should be disabled.
-    const editAction = await screen.findByTestId(
-      "action-center-patient-1_Edit"
-    );
-    expect(editAction).toHaveAttribute("aria-disabled", "true");
-
+    const editAction = screen.getByTestId("action-patient-1-Edit");
+    expect(editAction).toBeDisabled();
     // Delete should still be enabled
-    const deleteAction = await screen.findByRole("menuitem", {
-      name: "Remove",
-    });
+    const deleteAction = screen.getByTestId("action-ec-1-Remove");
+
     expect(deleteAction).not.toHaveAttribute("aria-disabled", "true");
     expect(screen.getByText(RESOURCE_TYPE_MISMATCH_ERROR)).toBeInTheDocument();
 
     // Ensure clicking it does NOT call edit
-    userEvent.click(editAction);
-    expect(mockOnRowEdit).not.toHaveBeenCalled();
+    expect(editAction).toBeDisabled();
   });
 
   it("should display error message for mismatched profile without edit permissions", async () => {
@@ -454,11 +425,7 @@ describe("TestCaseSummaryGrid", () => {
       />
     );
 
-    const firstActionCenterButton = screen.getByTestId(
-      "action-center-button-ec-1"
-    );
-    userEvent.click(firstActionCenterButton);
-    const editAction = await screen.findByRole("menuitem", { name: "Edit" });
+    const editAction = screen.getByTestId("action-ec-1-Edit");
     expect(editAction).toBeInTheDocument();
     userEvent.click(editAction);
     expect(mockOnRowEdit).toHaveBeenCalledWith(mockBundle.entry[0]);
@@ -490,14 +457,8 @@ describe("TestCaseSummaryGrid", () => {
         readOnly={false}
       />
     );
+    const deleteButton = screen.getByTestId("action-ec-1-Remove");
 
-    const firstActionCenterButton = screen.getByTestId(
-      "action-center-button-ec-1"
-    );
-    userEvent.click(firstActionCenterButton);
-    const deleteButton = await screen.findByRole("menuitem", {
-      name: "Remove",
-    });
     expect(deleteButton).toBeInTheDocument();
     userEvent.click(deleteButton);
     expect(mockOnRowDelete).not.toHaveBeenCalledWith(mockBundle.entry[0]);
@@ -532,12 +493,9 @@ describe("TestCaseSummaryGrid", () => {
       />
     );
 
-    const firstActionCenterButton = screen.getByTestId(
-      "action-center-button-ec-1"
-    );
-    userEvent.click(firstActionCenterButton);
-    const viewAction = await screen.findByRole("menuitem", { name: "View" });
+    const viewAction = screen.getByTestId("action-ec-1-View");
     expect(viewAction).toBeInTheDocument();
+
     const deleteAction = screen.queryByRole("menuitem", {
       name: "Delete",
     });
@@ -559,22 +517,15 @@ describe("TestCaseSummaryGrid", () => {
       />
     );
 
-    const actionCenterButton = screen.getByTestId(
-      "action-center-button-patient-123"
-    );
-    userEvent.click(actionCenterButton);
-
     // Clone action should NOT be present for Patient profiles
-    const cloneAction = screen.queryByRole("menuitem", { name: "Clone" });
+    const cloneAction = screen.queryByTestId("action-patient-123-Clone");
     expect(cloneAction).not.toBeInTheDocument();
 
     // Edit and Remove should still be present
-    const editAction = await screen.findByRole("menuitem", { name: "Edit" });
+    const editAction = screen.getByTestId("action-ec-1-Edit");
     expect(editAction).toBeInTheDocument();
 
-    const removeAction = await screen.findByRole("menuitem", {
-      name: "Remove",
-    });
+    const removeAction = screen.getByTestId("action-ec-1-Remove");
     expect(removeAction).toBeInTheDocument();
   });
 
@@ -590,19 +541,13 @@ describe("TestCaseSummaryGrid", () => {
       />
     );
 
-    const actionCenterButton = screen.getByTestId("action-center-button-ec-1");
-    userEvent.click(actionCenterButton);
-
     // Clone action SHOULD be present for non-Patient profiles (Encounter)
-    const cloneAction = await screen.findByRole("menuitem", { name: "Clone" });
+    const cloneAction = screen.getByTestId("action-ec-1-Clone");
     expect(cloneAction).toBeInTheDocument();
 
-    const editAction = await screen.findByRole("menuitem", { name: "Edit" });
+    const editAction = screen.getByTestId("action-ec-1-Edit");
     expect(editAction).toBeInTheDocument();
-
-    const removeAction = await screen.findByRole("menuitem", {
-      name: "Remove",
-    });
+    const removeAction = screen.getByTestId("action-ec-1-Remove");
     expect(removeAction).toBeInTheDocument();
   });
 });
