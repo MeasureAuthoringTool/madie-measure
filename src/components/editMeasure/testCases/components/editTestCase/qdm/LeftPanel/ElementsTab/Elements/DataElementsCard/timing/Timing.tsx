@@ -11,6 +11,12 @@ import dayjs from "dayjs";
 import { InputLabel } from "@mui/material";
 import { labelStyle } from "./TimingStyles";
 
+export const MEDICATION_ACTIVE_TYPE = "QDM::MedicationActive";
+export const TIMING_TOOLTIP =
+  "Only Relevant Date Time or Relevant Period can be entered, not both";
+export const TIMING_WARNING =
+  "Only Relevant Date Time or Relevant Period can be entered, not both. Please clear one timing out.";
+
 const Timing = ({ canEdit, onChange, selectedDataElement }) => {
   const handleChange = (newValue, attributeName) => {
     if (newValue === null || newValue === undefined) {
@@ -20,6 +26,30 @@ const Timing = ({ canEdit, onChange, selectedDataElement }) => {
     }
     onChange(selectedDataElement);
   };
+
+  // This "either/or" rule only applies to Medication, Active, so scope the whole
+  // calculation to that type and leave the flags disabled/false for every other element.
+  const isMedicationActive =
+    selectedDataElement?._type === MEDICATION_ACTIVE_TYPE;
+  let bothTimingsPresent = false;
+  let disableRelevantPeriod = false;
+  let disableRelevantDatetime = false;
+
+  if (isMedicationActive) {
+    const relevantPeriod = selectedDataElement?.get?.("relevantPeriod");
+    const relevantDatetime = selectedDataElement?.get?.("relevantDatetime");
+    const relevantPeriodHasValue = !!(
+      relevantPeriod &&
+      (relevantPeriod.low || relevantPeriod.high)
+    );
+    const relevantDatetimeHasValue = !!relevantDatetime;
+    bothTimingsPresent = relevantPeriodHasValue && relevantDatetimeHasValue;
+
+    // Only disable the "other" timing when a single timing has been entered.
+    // When both already exist (legacy data) leave both enabled and warn instead.
+    disableRelevantPeriod = relevantDatetimeHasValue && !bothTimingsPresent;
+    disableRelevantDatetime = relevantPeriodHasValue && !bothTimingsPresent;
+  }
 
   const dateFormatToDisplay = (date) => {
     if (date) {
@@ -38,6 +68,8 @@ const Timing = ({ canEdit, onChange, selectedDataElement }) => {
       const timingAttr = selectedDataElement?.schema?.paths?.[attr];
       if (timingAttr) {
         if (timingAttr.instance == "Interval") {
+          const disabled =
+            timingAttr.path === "relevantPeriod" && disableRelevantPeriod;
           displayTimingArray.push(
             <div style={{ paddingRight: "30px", paddingBottom: "12px" }}>
               <DateTimeInterval
@@ -46,10 +78,14 @@ const Timing = ({ canEdit, onChange, selectedDataElement }) => {
                 onDateTimeIntervalChange={handleChange}
                 canEdit={canEdit}
                 attributeName={timingAttr.path}
+                disabled={disabled}
+                tooltipText={disabled ? TIMING_TOOLTIP : undefined}
               />
             </div>
           );
         } else if (timingAttr.instance == "DateTime") {
+          const disabled =
+            timingAttr.path === "relevantDatetime" && disableRelevantDatetime;
           displayTimingArray.push(
             <div style={{ paddingRight: "30px", paddingBottom: "12px" }}>
               <DateTimeInput
@@ -58,6 +94,8 @@ const Timing = ({ canEdit, onChange, selectedDataElement }) => {
                 dateTime={selectedDataElement.get(timingAttr.path)}
                 onDateTimeChange={handleChange}
                 attributeName={timingAttr.path}
+                disabled={disabled}
+                tooltipText={disabled ? TIMING_TOOLTIP : undefined}
               />
             </div>
           );
@@ -103,6 +141,16 @@ const Timing = ({ canEdit, onChange, selectedDataElement }) => {
     <>
       <h4>Timing</h4>
       <div className="box">{displayTiming()}</div>
+      {bothTimingsPresent && (
+        <div
+          className="timing-warning"
+          data-testid="timing-warning"
+          role="alert"
+          style={{ color: "#D92F2F", paddingBottom: "12px" }}
+        >
+          {TIMING_WARNING}
+        </div>
+      )}
     </>
   );
 };

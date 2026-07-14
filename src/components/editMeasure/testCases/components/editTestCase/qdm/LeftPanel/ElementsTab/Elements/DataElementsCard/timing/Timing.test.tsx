@@ -1,15 +1,19 @@
 import * as React from "react";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import "@testing-library/jest-dom";
-import Timing from "./Timing";
+import Timing, { TIMING_WARNING } from "./Timing";
 import {
   AssessmentPerformed,
   Symptom,
   Participation,
   DiagnosticStudyPerformed,
+  MedicationActive,
+  CQL,
 } from "cqm-models";
 
 const updateDataElement = jest.fn();
+
+const buildDateTime = () => new CQL.DateTime(2023, 8, 2, 7, 49, 0, 0, 0);
 
 describe("Timing", () => {
   it("should not render any timing when selected DataElement is null", () => {
@@ -289,5 +293,87 @@ describe("Timing", () => {
     await waitFor(() => {
       expect(inputs[1].value).toBe("");
     });
+  });
+});
+
+describe("Timing - Medication, Active single timing restriction", () => {
+  it("disables Relevant Datetime when Relevant Period has a value", () => {
+    const medicationActive: MedicationActive = new MedicationActive();
+    medicationActive.set("relevantPeriod", { low: buildDateTime() });
+
+    render(
+      <Timing
+        onChange={updateDataElement}
+        selectedDataElement={medicationActive}
+        canEdit={true}
+      />
+    );
+
+    expect(
+      screen.getByTestId("relevant-period-start-input")
+    ).not.toBeDisabled();
+    expect(screen.getByTestId("relevant-period-end-input")).not.toBeDisabled();
+    expect(screen.getByTestId("relevant-datetime-input")).toBeDisabled();
+    expect(screen.queryByTestId("timing-warning")).not.toBeInTheDocument();
+  });
+
+  it("disables Relevant Period (start and end) when Relevant Datetime has a value", () => {
+    const medicationActive: MedicationActive = new MedicationActive();
+    medicationActive.set("relevantDatetime", buildDateTime());
+
+    render(
+      <Timing
+        onChange={updateDataElement}
+        selectedDataElement={medicationActive}
+        canEdit={true}
+      />
+    );
+
+    expect(screen.getByTestId("relevant-period-start-input")).toBeDisabled();
+    expect(screen.getByTestId("relevant-period-end-input")).toBeDisabled();
+    expect(screen.getByTestId("relevant-datetime-input")).not.toBeDisabled();
+    expect(screen.queryByTestId("timing-warning")).not.toBeInTheDocument();
+  });
+
+  it("keeps both fields enabled and shows a warning when both timings exist", () => {
+    const medicationActive: MedicationActive = new MedicationActive();
+    medicationActive.set("relevantPeriod", { low: buildDateTime() });
+    medicationActive.set("relevantDatetime", buildDateTime());
+
+    render(
+      <Timing
+        onChange={updateDataElement}
+        selectedDataElement={medicationActive}
+        canEdit={true}
+      />
+    );
+
+    expect(
+      screen.getByTestId("relevant-period-start-input")
+    ).not.toBeDisabled();
+    expect(screen.getByTestId("relevant-period-end-input")).not.toBeDisabled();
+    expect(screen.getByTestId("relevant-datetime-input")).not.toBeDisabled();
+    expect(screen.getByTestId("timing-warning")).toHaveTextContent(
+      TIMING_WARNING
+    );
+  });
+
+  it("keeps both timings enabled with no warning when neither has a value", () => {
+    const medicationActive: MedicationActive = new MedicationActive();
+
+    render(
+      <Timing
+        onChange={updateDataElement}
+        selectedDataElement={medicationActive}
+        canEdit={true}
+      />
+    );
+
+    expect(
+      screen.getByTestId("relevant-period-start-input")
+    ).not.toBeDisabled();
+    expect(screen.getByTestId("relevant-period-end-input")).not.toBeDisabled();
+    expect(screen.getByTestId("relevant-datetime-input")).not.toBeDisabled();
+    expect(screen.queryByTestId("timing-warning")).not.toBeInTheDocument();
   });
 });
