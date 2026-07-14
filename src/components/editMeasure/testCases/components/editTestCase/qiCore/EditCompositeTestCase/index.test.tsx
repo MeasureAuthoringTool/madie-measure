@@ -354,4 +354,48 @@ describe("EditCompositeTestCase", () => {
       "isQICore6:false"
     );
   });
+
+  it("invokes calculateCompositeTestCase prop when Run Test Case is clicked", async () => {
+    mockFetchMeasuresByIds.mockResolvedValueOnce([]);
+    const calculateCompositeTestCase = jest.fn();
+
+    render(
+      <EditCompositeTestCase
+        {...defaultProps}
+        editorVal='{"resourceType":"Bundle"}'
+        validationErrors={[]}
+        calculateCompositeTestCase={calculateCompositeTestCase}
+      />
+    );
+
+    await waitFor(() => expect(mockFetchMeasuresByIds).toHaveBeenCalled());
+
+    const runBtn = screen.getByTestId("run-test-case-button");
+    expect(runBtn).not.toBeDisabled();
+    fireEvent.click(runBtn);
+
+    expect(calculateCompositeTestCase).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not invoke calculateCompositeTestCase when the button is disabled", async () => {
+    mockFetchMeasuresByIds.mockResolvedValueOnce([]);
+    const calculateCompositeTestCase = jest.fn();
+
+    render(
+      <EditCompositeTestCase
+        {...defaultProps}
+        editorVal=""
+        validationErrors={[]}
+        calculateCompositeTestCase={calculateCompositeTestCase}
+      />
+    );
+
+    await waitFor(() => expect(mockFetchMeasuresByIds).toHaveBeenCalled());
+
+    const runBtn = screen.getByTestId("run-test-case-button");
+    expect(runBtn).toBeDisabled();
+    fireEvent.click(runBtn);
+
+    expect(calculateCompositeTestCase).not.toHaveBeenCalled();
+  });
 });
