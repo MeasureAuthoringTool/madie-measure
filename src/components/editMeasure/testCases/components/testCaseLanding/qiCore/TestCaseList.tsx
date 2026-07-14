@@ -17,6 +17,7 @@ import calculationService from "../../../api/CalculationService";
 import {
   CalculationOutput,
   DetailedPopulationGroupResult,
+  MRCalculationOutput,
 } from "fqm-execution/build/types/Calculator";
 import { ObjectId } from "bson";
 import { checkUserCanEdit, measureStore } from "@madie/madie-util";
@@ -500,6 +501,33 @@ const TestCaseList = (props: TestCaseListProps) => {
     setCreateOpen(false);
   };
 
+  const executeCompositeTestCases = async () => {
+    const filteredTestCases = executeInvalidTestCases
+      ? sortedTestCases
+      : sortedTestCases?.filter((tc) => tc.validResource);
+
+    if (filteredTestCases && filteredTestCases.length > 0 && measureBundle) {
+      try {
+        const updatedTestCaseExecutionBundle =
+          await fhirDefinitionServiceApi.current.getTestCaseExecutionBundle(
+            measure.model,
+            filteredTestCases,
+            executeInvalidTestCases
+          );
+        const executionBundle: any = updatedTestCaseExecutionBundle?.testCases;
+        const calculationOutput: MRCalculationOutput =
+          await calculation.current.calculateCompositeTestCases(
+            measure,
+            executionBundle,
+            measureBundle,
+            valueSets
+          );
+      } catch (error) {
+        console.error("calculateTestCases: error.message = " + error?.message);
+      }
+    }
+  };
+
   const executeTestCases = async () => {
     if (measure && measure.cqlErrors) {
       console.error(
@@ -721,6 +749,7 @@ const TestCaseList = (props: TestCaseListProps) => {
                 measure={measure}
                 createNewTestCase={createNewTestCase}
                 executeTestCases={executeTestCases}
+                executeCompositeTestCases={executeCompositeTestCases}
                 onGenerateOverlappingCodesReport={
                   handleGenerateOverlappingCodesReport
                 }
