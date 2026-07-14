@@ -620,8 +620,13 @@ const mockGetPassingPercentageForTestCases = jest
   .fn()
   .mockReturnValue({ passPercentage: 50, passFailRatio: "1/2" });
 
+const mockCalculateCompositeTestCases = jest
+  .fn()
+  .mockResolvedValue({ results: [] });
+
 const calculationServiceMockResolved = {
   calculateTestCases: jest.fn().mockResolvedValue(executionResults),
+  calculateCompositeTestCases: mockCalculateCompositeTestCases,
   processTestCaseResults: mockProcessTestCaseResults,
   getPassingPercentageForTestCases: mockGetPassingPercentageForTestCases,
 } as unknown as CalculationService;
@@ -2098,6 +2103,107 @@ describe("TestCaseList component", () => {
       expect(toastMessage).toHaveTextContent("Test cases successfully deleted");
       expect(screen.queryByTestId("delete-dialog-body")).toBeNull();
     }, 15000);
+  });
+
+  describe("executeCompositeTestCases (composite measure)", () => {
+    const compositeMeasure = {
+      ...mockMeasure,
+      measureMetaData: { ...mockMeasure.measureMetaData, composite: true },
+    } as unknown as Measure;
+
+    it("routes the Run Test(s) button through calculateCompositeTestCases for a composite measure", async () => {
+      mockCalculateCompositeTestCases.mockClear().mockResolvedValue({
+        results: [],
+      });
+
+      renderTestCaseListComponent([], ["test"], false, compositeMeasure);
+
+      await waitFor(() =>
+        expect(screen.getByTestId("test-case-tbl")).toBeInTheDocument()
+      );
+
+      const runButton = screen.getByRole("button", { name: "Run Test(s)" });
+      await waitFor(() => expect(runButton).not.toBeDisabled());
+      userEvent.click(runButton);
+
+      await waitFor(() =>
+        expect(mockCalculateCompositeTestCases).toHaveBeenCalledTimes(1)
+      );
+      const [measureArg, executionBundleArg, measureBundleArg, valueSetsArg] =
+        mockCalculateCompositeTestCases.mock.calls[0];
+      expect((measureArg as any).measureMetaData.composite).toBe(true);
+      expect(executionBundleArg).toBeDefined();
+      expect(measureBundleArg).toBe(measureBundle);
+      expect(valueSetsArg).toBe(valueSets);
+      expect(
+        calculationServiceMockResolved.calculateTestCases
+      ).not.toHaveBeenCalled();
+    });
+
+    it("filters out invalid resources when executeInvalidTestCases is false", async () => {
+      mockCalculateCompositeTestCases.mockClear().mockResolvedValue({
+        results: [],
+      });
+      const getBundleMock = jest.fn().mockResolvedValue({
+        testCases: testCases.filter((tc) => tc.validResource),
+        modifiedTestCaseIds: [],
+      });
+      useFhirDefinitionsServiceMock.mockImplementation(
+        () =>
+          ({
+            getTestCaseExecutionBundle: getBundleMock,
+          } as any)
+      );
+
+      const measure = {
+        ...compositeMeasure,
+        testCaseConfiguration: { executeInvalidTestCases: false },
+      } as unknown as Measure;
+
+      renderTestCaseListComponent([], ["test"], false, measure);
+
+      await waitFor(() =>
+        expect(screen.getByTestId("test-case-tbl")).toBeInTheDocument()
+      );
+
+      const runButton = screen.getByRole("button", { name: "Run Test(s)" });
+      await waitFor(() => expect(runButton).not.toBeDisabled());
+      userEvent.click(runButton);
+
+      await waitFor(() =>
+        expect(mockCalculateCompositeTestCases).toHaveBeenCalledTimes(1)
+      );
+      const filteredList = getBundleMock.mock.calls[0][1];
+      expect(filteredList.every((tc: TestCase) => tc.validResource)).toBe(true);
+      expect(filteredList.some((tc: TestCase) => tc.id === "3")).toBe(false);
+    });
+
+    it("logs but does not throw when calculateCompositeTestCases rejects", async () => {
+      const consoleErrorSpy = jest
+        .spyOn(console, "error")
+        .mockImplementation(() => {});
+      mockCalculateCompositeTestCases
+        .mockClear()
+        .mockRejectedValue(new Error("boom"));
+
+      renderTestCaseListComponent([], ["test"], false, compositeMeasure);
+
+      await waitFor(() =>
+        expect(screen.getByTestId("test-case-tbl")).toBeInTheDocument()
+      );
+
+      const runButton = screen.getByRole("button", { name: "Run Test(s)" });
+      await waitFor(() => expect(runButton).not.toBeDisabled());
+      userEvent.click(runButton);
+
+      await waitFor(() =>
+        expect(consoleErrorSpy).toHaveBeenCalledWith(
+          "calculateTestCases: error.message = boom"
+        )
+      );
+
+      consoleErrorSpy.mockRestore();
+    });
   });
 });
 

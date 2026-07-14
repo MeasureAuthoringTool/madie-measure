@@ -2824,12 +2824,12 @@ describe("TypeEditor Component", () => {
       </FormikProvider>
     );
     const filteredChildDef = screen.getByTestId(
-      "string-field-input-SomeResource.value[x]"
+      "string-field-input-SomeResource.valueString"
     );
     expect(filteredChildDef).toBeInTheDocument();
     expect(filteredChildDef.value).toBe("");
     const valueInput = (await screen.findByTestId(
-      "string-field-input-SomeResource.value[x]"
+      "string-field-input-SomeResource.valueString"
     )) as HTMLInputElement;
     await userEvent.type(valueInput, "250");
   });

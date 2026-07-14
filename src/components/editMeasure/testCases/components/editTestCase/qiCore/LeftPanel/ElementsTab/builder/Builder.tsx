@@ -261,6 +261,14 @@ const Builder = ({
   const duplicateResourceIds = resourceIds?.filter(
     (id, index) => resourceIds.indexOf(id) !== index
   );
+
+  const profileMap: Record<string, number> = {};
+  state?.bundle?.entry?.forEach((entry) => {
+    const profile = entry.resource?.meta?.profile?.[0];
+    if (!profile) return;
+    profileMap[profile] = (profileMap[profile] || 0) + 1;
+  });
+
   return numberOfPatientsAdded > 1 ? (
     displayBuilderAlert(ERROR_MULTIPLE_PATIENTS, "multiple-patients")
   ) : duplicateResourceIds?.length > 0 ? (
@@ -289,6 +297,7 @@ const Builder = ({
           ) : (
             canEdit && (
               <ResourceList
+                profileMap={profileMap}
                 isComposite={isComposite}
                 onInsertTCClick={onInsertTCClick}
                 resourceIdentifiers={resources.filter(isQiCoreOrUsCoreResource)}
