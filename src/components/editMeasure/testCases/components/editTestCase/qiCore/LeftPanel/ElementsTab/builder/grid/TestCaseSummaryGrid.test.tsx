@@ -1,5 +1,5 @@
 import * as React from "react";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, fireEvent } from "@testing-library/react";
 import TestCaseSummaryGrid, {
   GridDataEntry,
   RESOURCE_TYPE_MISMATCH_ERROR,
@@ -549,5 +549,62 @@ describe("TestCaseSummaryGrid", () => {
     expect(editAction).toBeInTheDocument();
     const removeAction = screen.getByTestId("action-ec-1-Remove");
     expect(removeAction).toBeInTheDocument();
+  });
+
+  it("should show hover icon and toggle sorting for Profile header", async () => {
+    renderWithResourceContext(
+      <TestCaseSummaryGrid
+        gridData={gridData}
+        onRowEdit={mockOnRowEdit}
+        onRowDelete={mockOnRowDelete}
+        testCaseCanEdit={true}
+        measureModel="QI-Core 6.0"
+        readOnly={false}
+      />
+    );
+
+    const profileHeader = screen.getByRole("columnheader", {
+      name: /profile/i,
+    });
+
+    const profileButton = within(profileHeader).getByRole("button");
+
+    // Initial state
+    expect(profileButton).toHaveAttribute("title", "Sort ascending");
+
+    // Cover onMouseEnter
+    fireEvent.mouseEnter(profileHeader);
+
+    expect(
+      document.querySelector('[data-testid="UnfoldMoreIcon"]')
+    ).toBeInTheDocument();
+
+    // Cover onMouseLeave
+    fireEvent.mouseLeave(profileHeader);
+
+    expect(
+      document.querySelector('[data-testid="UnfoldMoreIcon"]')
+    ).not.toBeInTheDocument();
+
+    // Cover e.preventDefault() + toggleSorting()
+    fireEvent.click(profileButton);
+
+    await waitFor(() => {
+      expect(profileButton).toHaveAttribute("title", "Sort descending");
+    });
+
+    expect(
+      document.querySelector('[data-testid="KeyboardArrowUpIcon"]')
+    ).toBeInTheDocument();
+
+    fireEvent.click(profileButton);
+
+    await waitFor(() => {
+      expect(profileButton).toHaveAttribute("title", "Clear sort");
+    });
+
+    expect(
+      document.querySelector('[data-testid="KeyboardArrowDownIcon"]')
+    ).toBeInTheDocument();
   });
 });
