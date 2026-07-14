@@ -32,6 +32,7 @@ const EditCompositeTestCase = ({
   setValidationSchema,
   setInitialFormikValuesStu6,
   validationErrors,
+  calculateCompositeTestCase,
 }) => {
   const measureServiceApi = useRef(useMeasureServiceApi()).current;
   const [alert, setAlert] = useState<AlertProps>(null);
@@ -131,6 +132,7 @@ const EditCompositeTestCase = ({
             tw="m-2"
             type="button"
             data-testid="run-test-case-button"
+            onClick={calculateCompositeTestCase}
             disabled={shouldDisableRunTestCaseButton({
               measure,
               validationErrors,
