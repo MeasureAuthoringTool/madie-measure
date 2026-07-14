@@ -447,6 +447,11 @@ describe("FhirDefinitionServiceUtilities", () => {
       expect(isComponentDataType("Extension")).toBe(true);
     });
 
+    it("should return true for Duration regardless of casing", () => {
+      expect(isComponentDataType("Duration")).toBe(true);
+      expect(isComponentDataType("duration")).toBe(true);
+    });
+
     it("should return false for invalid data types", () => {
       expect(isComponentDataType("customType")).toBe(false);
       expect(isComponentDataType("unknown")).toBe(false);
