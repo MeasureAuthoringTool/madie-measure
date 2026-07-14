@@ -47,6 +47,7 @@ import calculationService, {
 import {
   CalculationOutput,
   DetailedPopulationGroupResult,
+  MRCalculationOutput,
 } from "fqm-execution/build/types/Calculator";
 import {
   measureStore,
@@ -92,9 +93,7 @@ import {
   upsertExecuteInvalidTestCaseWarning,
 } from "./EditTestCaseUtil";
 import { useTestCasePolling } from "../../../hooks/useTestCasePolling";
-import KeyboardTabIcon from "@mui/icons-material/KeyboardTab";
-import ValidationPanel from "./ValidationPanel";
-import ValidationStatusIcon from "./ValidationStatusIcon";
+import ValidationPanelPane from "./ValidationPanelPane";
 import EditorCalculator from "../calculator/EditorCalculator";
 import CalculatorDialog from "../calculator/CalculatorDialog";
 import LockedMessageModal from "../../../../../common/lockedMessageModal/LockedMessageModal";
@@ -430,7 +429,6 @@ const EditTestCase = (props: EditTestCaseProps) => {
     loaded: false,
     series: [],
   });
-  const [showValidationErrors, setShowValidationErrors] = useState(false);
   const [populationGroupResults, setPopulationGroupResults] =
     useState<DetailedPopulationGroupResult[]>();
   const [calculationErrors, setCalculationErrors] = useState<AlertProps>();
@@ -906,66 +904,78 @@ const EditTestCase = (props: EditTestCaseProps) => {
     }
   };
 
+  const validateJsonBeforeExecution = async (): Promise<boolean> => {
+    if (executeInvalidTestCases || !isJsonModified()) {
+      return true;
+    }
+    try {
+      const validationResult =
+        await testCaseService.current.validateTestCaseBundle(
+          JSON.parse(editorVal),
+          measure.model,
+          executeInvalidTestCases
+        );
+      const errors = handleHapiOutcome(validationResult);
+      if (
+        !_.isNil(errors) &&
+        errors.length > 0 &&
+        hasValidationErrorSeverity(errors)
+      ) {
+        setCalculationErrors({
+          status: "warning",
+          message:
+            "Test case execution was aborted due to errors with the test case JSON.",
+        });
+        return false;
+      }
+      return true;
+    } catch (error) {
+      setCalculationErrors({
+        status: "error",
+        message:
+          "Test case execution was aborted because JSON could not be validated. If this error persists, please contact the help desk.",
+      });
+      return false;
+    }
+  };
+
+  // Filter resources with invalid references based on executeInvalidTestCases.
+  // for executeInvalidTestCases=true, filter out non-patient resources with invalid refs
+  // for executeInvalidTestCases=false, filter out all resources with invalid refs
+  const buildExecutionBundle = async () => {
+    const modifiedTestCase = { ...testCase, json: editorVal };
+    const updatedTestCaseExecutionBundle =
+      await fhirDefinitionServiceApi.current.getTestCaseExecutionBundle(
+        measure.model,
+        [modifiedTestCase],
+        executeInvalidTestCases
+      );
+    return updatedTestCaseExecutionBundle?.testCases;
+  };
+
   const calculate = async (e) => {
     e.preventDefault();
     setExecuting(true);
     setErrors([]);
     setPopulationGroupResults(() => undefined);
+
     if (measure && measure.cqlErrors) {
       setCalculationErrors({
         status: "warning",
         message:
           "Cannot execute test case while errors exist in the measure CQL.",
       });
+      setExecuting(false);
       return;
     }
-    let modifiedTestCase = { ...testCase, json: editorVal };
-    // validate the JSON iff executeInvalidTestCases is false and JSON has been modified
-    if (!executeInvalidTestCases && isJsonModified()) {
-      try {
-        // Validate test case JSON prior to execution
-        const validationResult =
-          await testCaseService.current.validateTestCaseBundle(
-            JSON.parse(editorVal),
-            measure.model,
-            executeInvalidTestCases
-          );
-        const errors = handleHapiOutcome(validationResult);
-        if (
-          !_.isNil(errors) &&
-          errors.length > 0 &&
-          hasValidationErrorSeverity(errors)
-        ) {
-          setCalculationErrors({
-            status: "warning",
-            message:
-              "Test case execution was aborted due to errors with the test case JSON.",
-          });
-          return;
-        }
-      } catch (error) {
-        setCalculationErrors({
-          status: "error",
-          message:
-            "Test case execution was aborted because JSON could not be validated. If this error persists, please contact the help desk.",
-        });
-        return;
-      } finally {
-        setExecuting(false);
-      }
+
+    if (!(await validateJsonBeforeExecution())) {
+      setExecuting(false);
+      return;
     }
 
     try {
-      // Filter resources with invalid references based on executeInvalidTestCases.
-      // for executeInvalidTestCases=true, filter out non-patient resources with invalid refs
-      // for executeInvalidTestCases=false, filter out all resources with invalid refs
-      const updatedTestCaseExecutionBundle =
-        await fhirDefinitionServiceApi.current.getTestCaseExecutionBundle(
-          measure.model,
-          [modifiedTestCase],
-          executeInvalidTestCases
-        );
-      const executionBundle = updatedTestCaseExecutionBundle?.testCases;
+      const executionBundle = await buildExecutionBundle();
       const calculationOutput: CalculationOutput<any> =
         await calculation.current.calculateTestCases(
           measure,
@@ -993,6 +1003,34 @@ const EditTestCase = (props: EditTestCaseProps) => {
             message: error.message,
           };
       setCalculationErrors(calculationError);
+      setErrors([...errors, error.message]);
+    } finally {
+      setExecuting(false);
+    }
+  };
+
+  const calculateCompositeTestCase = async (e) => {
+    e.preventDefault();
+    setExecuting(true);
+    setErrors([]);
+
+    if (!(await validateJsonBeforeExecution())) {
+      setExecuting(false);
+      return;
+    }
+
+    try {
+      const executionBundle = await buildExecutionBundle();
+      const calculationOutput: MRCalculationOutput =
+        await calculation.current.calculateCompositeTestCases(
+          measure,
+          executionBundle,
+          measureBundle,
+          valueSets
+        );
+    } catch (error) {
+      console.error("calculateTestCases: error.message = " + error?.message);
+      setCalculationErrors(error);
       setErrors([...errors, error.message]);
     } finally {
       setExecuting(false);
@@ -1238,6 +1276,8 @@ const EditTestCase = (props: EditTestCaseProps) => {
                 testCase={testCase}
                 setValidationSchema={setValidationSchema}
                 setInitialFormikValuesStu6={setInitialFormikValuesStu6}
+                validationErrors={validationErrors}
+                calculateCompositeTestCase={calculateCompositeTestCase}
               />
             </QiCoreResourceProvider>
           </FormikProvider>
@@ -1499,83 +1539,12 @@ const EditTestCase = (props: EditTestCaseProps) => {
                 </div>
               </Allotment.Pane>
 
-              <Allotment.Pane minSize={4}>
-                <div
-                  className={`validation-panel ${
-                    showValidationErrors ? "open" : "closed"
-                  }`}
-                >
-                  {showValidationErrors ? (
-                    <>
-                      <div className="flex justify-between items-center w-full mb-2">
-                        <div className="validation-header">
-                          <div className="header-left">
-                            <ValidationStatusIcon
-                              validationStatus={testCase?.validationStatus}
-                            />
-                            <span className="ml-2">
-                              Validations (
-                              {validationErrors?.filter(
-                                (error) => !/^information/.test(error?.severity)
-                              ).length || 0}
-                              )
-                            </span>
-                          </div>
-
-                          <Button
-                            variant="action"
-                            data-testid="hide-json-validation-errors-button"
-                            onClick={() => {
-                              setShowValidationErrors(false);
-                              setTimeout(() => {
-                                allotmentRef.current.resize([48, 48, 4]);
-                              }, 0);
-                            }}
-                            className="validation-panel-toggle-button"
-                            title="Close Panel"
-                          >
-                            <KeyboardTabIcon />
-                          </Button>
-                        </div>
-                      </div>
-                      <div
-                        className="validation-content"
-                        data-testid="json-validation-errors-list"
-                      >
-                        <ValidationPanel
-                          testCase={testCase}
-                          validationErrors={validationErrors}
-                          isQiCoreV6={isQICore6}
-                        />
-                      </div>
-                    </>
-                  ) : (
-                    <div data-testid="closed-json-validation-errors-aside">
-                      <div className="closed-header">
-                        <Button
-                          size="small"
-                          data-testid="show-json-validation-errors-button"
-                          onClick={() => {
-                            setShowValidationErrors(true);
-                            allotmentRef.current.resize([34, 33, 33]);
-                          }}
-                          className="validation-panel-toggle-button"
-                          title={
-                            testCase?.validationStatus
-                              ? testCase?.validationStatus
-                              : "Open Validations"
-                          }
-                        >
-                          <ValidationStatusIcon
-                            validationStatus={testCase?.validationStatus}
-                          />
-                        </Button>
-                      </div>
-                      <div className="closed-body"></div>
-                    </div>
-                  )}
-                </div>
-              </Allotment.Pane>
+              <ValidationPanelPane
+                allotmentRef={allotmentRef}
+                testCase={testCase}
+                validationErrors={validationErrors}
+                isQICore6={isQICore6}
+              />
             </Allotment>
 
             {/* button wrap in context */}

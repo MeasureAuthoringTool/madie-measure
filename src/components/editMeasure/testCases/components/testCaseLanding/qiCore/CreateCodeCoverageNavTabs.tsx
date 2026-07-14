@@ -31,6 +31,7 @@ export interface NavTabProps {
   measure: Measure;
   createNewTestCase: (value: string) => void;
   executeTestCases: () => void;
+  executeCompositeTestCases: () => void;
   onImportTestCases?: () => void;
   testCasePassFailStats: TestCasesPassingDetailsProps;
   coveragePercentage: number;
@@ -66,6 +67,7 @@ export default function CreateCodeCoverageNavTabs(props: NavTabProps) {
     createNewTestCase,
     measure,
     executeTestCases,
+    executeCompositeTestCases,
     onImportTestCases,
     testCasePassFailStats,
     coveragePercentage,
@@ -256,7 +258,9 @@ export default function CreateCodeCoverageNavTabs(props: NavTabProps) {
         <LoadingButton
           hasErrors={hasErrors}
           isExecutionContextReady={executionContextReady}
-          onClick={executeTestCases}
+          onClick={
+            isCompositeMeasure ? executeCompositeTestCases : executeTestCases
+          }
           dataTestId="execute-test-cases-button"
           primary={true}
           label="Run Test(s)"
