@@ -22,6 +22,7 @@ import "styled-components/macro";
 import LoadingButton from "../common/loadingButton/LoadingButton";
 import LoadingButtonWithMenu from "../common/loadingButton/LoadingButtonWithMenu";
 import { Tooltip } from "@mui/material";
+import CompositeMeasureNavTabs from "./CompositeMeasureNavTabs";
 
 export interface NavTabProps {
   activeTab: string;
@@ -152,64 +153,72 @@ export default function CreateCodeCoverageNavTabs(props: NavTabProps) {
 
   return (
     <div tw="flex justify-between items-center" style={{ overflow: "visible" }}>
-      <Tabs
-        value={activeTab}
-        onChange={(e, v) => {
-          if (v === "validation") {
-            e.preventDefault();
-            return;
-          }
-          setActiveTab(v);
-        }}
-        type="B"
-        orientation="horizontal"
-      >
-        <Tab
-          type="B"
-          tabIndex={0}
-          aria-label="Passing tab panel"
-          sx={defaultStyle}
-          label={executionResultsDisplayTemplate("Passing")}
-          data-testid="passing-tab"
-          value="passing"
+      {isCompositeMeasure ? (
+        <CompositeMeasureNavTabs
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          getValidationResultsDisplay={getValidationResultsDisplay}
         />
-
-        <Tab
+      ) : (
+        <Tabs
+          value={activeTab}
+          onChange={(e, v) => {
+            if (v === "validation") {
+              e.preventDefault();
+              return;
+            }
+            setActiveTab(v);
+          }}
           type="B"
-          tabIndex={0}
-          aria-label="Coverage tab panel"
-          sx={defaultStyle}
-          label={
-            <Tooltip
-              data-testid={`action-center-tooltip-`}
-              //@ts-ignore
-              title={
-                open
-                  ? `${clauseResults?.covered}/${clauseResults?.total} logical clauses in your CQL are covered`
-                  : "More"
-              }
-              placement="top"
-              arrow
-              disableHoverListener={!clauseResults}
-            >
-              {executionResultsDisplayTemplate("Coverage")}
-            </Tooltip>
-          }
-          data-testid="coverage-tab"
-          value="coverage"
-        />
-        {_.isEqual(measure?.model, Model.QICORE_6_0_0) && (
+          orientation="horizontal"
+        >
           <Tab
             type="B"
             tabIndex={0}
-            aria-label="Validation tab panel"
+            aria-label="Passing tab panel"
             sx={defaultStyle}
-            label={getValidationResultsDisplay("Valid")}
-            data-testid="validation-tab"
-            value="validation"
+            label={executionResultsDisplayTemplate("Passing")}
+            data-testid="passing-tab"
+            value="passing"
           />
-        )}
-      </Tabs>
+
+          <Tab
+            type="B"
+            tabIndex={0}
+            aria-label="Coverage tab panel"
+            sx={defaultStyle}
+            label={
+              <Tooltip
+                data-testid={`action-center-tooltip-`}
+                //@ts-ignore
+                title={
+                  open
+                    ? `${clauseResults?.covered}/${clauseResults?.total} logical clauses in your CQL are covered`
+                    : "More"
+                }
+                placement="top"
+                arrow
+                disableHoverListener={!clauseResults}
+              >
+                {executionResultsDisplayTemplate("Coverage")}
+              </Tooltip>
+            }
+            data-testid="coverage-tab"
+            value="coverage"
+          />
+          {_.isEqual(measure?.model, Model.QICORE_6_0_0) && (
+            <Tab
+              type="B"
+              tabIndex={0}
+              aria-label="Validation tab panel"
+              sx={defaultStyle}
+              label={getValidationResultsDisplay("Valid")}
+              data-testid="validation-tab"
+              value="validation"
+            />
+          )}
+        </Tabs>
+      )}
       <div
         tw="flex flex-wrap space-x-4 justify-end"
         style={{ overflow: "visible" }}

@@ -183,9 +183,10 @@ const TestCaseList = (props: TestCaseListProps) => {
   const calculation = useRef(calculationService());
   const { updateMeasure } = measureStore;
   const [canEdit, setCanEdit] = useState<boolean>(false);
-  const [activeTab, setActiveTab] = useState<string>("passing");
   const [calculationOutput, setCalculationOutput] =
     useState<CalculationOutput<any>>();
+  const [compositeCalculationOutput, setCompositeCalculationOutput] =
+    useState<MRCalculationOutput>();
   const [executeAllTestCases, setExecuteAllTestCases] =
     useState<boolean>(false);
   const [coverageHTML, setCoverageHTML] = useState<Record<string, string>>();
@@ -200,6 +201,10 @@ const TestCaseList = (props: TestCaseListProps) => {
     useExecutionContext();
   const [measure] = measureState;
   const [measureBundle] = bundleState;
+  // Composite measures show their own tab set, so default onto its first tab.
+  const [activeTab, setActiveTab] = useState<string>(
+    measure?.measureMetaData?.composite ? "compositeScore" : "passing"
+  );
   const [valueSets] = valueSetsState;
   const [selectedPopCriteria, setSelectedPopCriteria] = useState<Group>();
 
@@ -522,6 +527,7 @@ const TestCaseList = (props: TestCaseListProps) => {
             measureBundle,
             valueSets
           );
+        setCompositeCalculationOutput(calculationOutput);
       } catch (error) {
         console.error("calculateTestCases: error.message = " + error?.message);
       }
@@ -776,7 +782,7 @@ const TestCaseList = (props: TestCaseListProps) => {
               onSuccess={insertTestCases}
               measure={measure}
             />
-            {activeTab === "passing" && (
+            {(activeTab === "passing" || activeTab === "compositeScore") && (
               <div
                 tw="overflow-x-auto sm:-mx-6 lg:-mx-8"
                 style={{ overflow: "visible" }}
