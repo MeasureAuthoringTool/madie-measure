@@ -47,6 +47,7 @@ import calculationService, {
 import {
   CalculationOutput,
   DetailedPopulationGroupResult,
+  MRCalculationOutput,
 } from "fqm-execution/build/types/Calculator";
 import {
   measureStore,
@@ -903,66 +904,78 @@ const EditTestCase = (props: EditTestCaseProps) => {
     }
   };
 
+  const validateJsonBeforeExecution = async (): Promise<boolean> => {
+    if (executeInvalidTestCases || !isJsonModified()) {
+      return true;
+    }
+    try {
+      const validationResult =
+        await testCaseService.current.validateTestCaseBundle(
+          JSON.parse(editorVal),
+          measure.model,
+          executeInvalidTestCases
+        );
+      const errors = handleHapiOutcome(validationResult);
+      if (
+        !_.isNil(errors) &&
+        errors.length > 0 &&
+        hasValidationErrorSeverity(errors)
+      ) {
+        setCalculationErrors({
+          status: "warning",
+          message:
+            "Test case execution was aborted due to errors with the test case JSON.",
+        });
+        return false;
+      }
+      return true;
+    } catch (error) {
+      setCalculationErrors({
+        status: "error",
+        message:
+          "Test case execution was aborted because JSON could not be validated. If this error persists, please contact the help desk.",
+      });
+      return false;
+    }
+  };
+
+  // Filter resources with invalid references based on executeInvalidTestCases.
+  // for executeInvalidTestCases=true, filter out non-patient resources with invalid refs
+  // for executeInvalidTestCases=false, filter out all resources with invalid refs
+  const buildExecutionBundle = async () => {
+    const modifiedTestCase = { ...testCase, json: editorVal };
+    const updatedTestCaseExecutionBundle =
+      await fhirDefinitionServiceApi.current.getTestCaseExecutionBundle(
+        measure.model,
+        [modifiedTestCase],
+        executeInvalidTestCases
+      );
+    return updatedTestCaseExecutionBundle?.testCases;
+  };
+
   const calculate = async (e) => {
     e.preventDefault();
     setExecuting(true);
     setErrors([]);
     setPopulationGroupResults(() => undefined);
+
     if (measure && measure.cqlErrors) {
       setCalculationErrors({
         status: "warning",
         message:
           "Cannot execute test case while errors exist in the measure CQL.",
       });
+      setExecuting(false);
       return;
     }
-    let modifiedTestCase = { ...testCase, json: editorVal };
-    // validate the JSON iff executeInvalidTestCases is false and JSON has been modified
-    if (!executeInvalidTestCases && isJsonModified()) {
-      try {
-        // Validate test case JSON prior to execution
-        const validationResult =
-          await testCaseService.current.validateTestCaseBundle(
-            JSON.parse(editorVal),
-            measure.model,
-            executeInvalidTestCases
-          );
-        const errors = handleHapiOutcome(validationResult);
-        if (
-          !_.isNil(errors) &&
-          errors.length > 0 &&
-          hasValidationErrorSeverity(errors)
-        ) {
-          setCalculationErrors({
-            status: "warning",
-            message:
-              "Test case execution was aborted due to errors with the test case JSON.",
-          });
-          return;
-        }
-      } catch (error) {
-        setCalculationErrors({
-          status: "error",
-          message:
-            "Test case execution was aborted because JSON could not be validated. If this error persists, please contact the help desk.",
-        });
-        return;
-      } finally {
-        setExecuting(false);
-      }
+
+    if (!(await validateJsonBeforeExecution())) {
+      setExecuting(false);
+      return;
     }
 
     try {
-      // Filter resources with invalid references based on executeInvalidTestCases.
-      // for executeInvalidTestCases=true, filter out non-patient resources with invalid refs
-      // for executeInvalidTestCases=false, filter out all resources with invalid refs
-      const updatedTestCaseExecutionBundle =
-        await fhirDefinitionServiceApi.current.getTestCaseExecutionBundle(
-          measure.model,
-          [modifiedTestCase],
-          executeInvalidTestCases
-        );
-      const executionBundle = updatedTestCaseExecutionBundle?.testCases;
+      const executionBundle = await buildExecutionBundle();
       const calculationOutput: CalculationOutput<any> =
         await calculation.current.calculateTestCases(
           measure,
@@ -990,6 +1003,34 @@ const EditTestCase = (props: EditTestCaseProps) => {
             message: error.message,
           };
       setCalculationErrors(calculationError);
+      setErrors([...errors, error.message]);
+    } finally {
+      setExecuting(false);
+    }
+  };
+
+  const calculateCompositeTestCase = async (e) => {
+    e.preventDefault();
+    setExecuting(true);
+    setErrors([]);
+
+    if (!(await validateJsonBeforeExecution())) {
+      setExecuting(false);
+      return;
+    }
+
+    try {
+      const executionBundle = await buildExecutionBundle();
+      const calculationOutput: MRCalculationOutput =
+        await calculation.current.calculateCompositeTestCases(
+          measure,
+          executionBundle,
+          measureBundle,
+          valueSets
+        );
+    } catch (error) {
+      console.error("calculateTestCases: error.message = " + error?.message);
+      setCalculationErrors(error);
       setErrors([...errors, error.message]);
     } finally {
       setExecuting(false);
@@ -1236,6 +1277,7 @@ const EditTestCase = (props: EditTestCaseProps) => {
                 setValidationSchema={setValidationSchema}
                 setInitialFormikValuesStu6={setInitialFormikValuesStu6}
                 validationErrors={validationErrors}
+                calculateCompositeTestCase={calculateCompositeTestCase}
               />
             </QiCoreResourceProvider>
           </FormikProvider>
