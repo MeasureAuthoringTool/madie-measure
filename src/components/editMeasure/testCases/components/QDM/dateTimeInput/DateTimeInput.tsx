@@ -1,5 +1,6 @@
 import React from "react";
 import { DateTimeField } from "@madie/madie-design-system/dist/react";
+import { Tooltip } from "@mui/material";
 import dayjs from "dayjs";
 import { CQL } from "cqm-models";
 import utc from "dayjs/plugin/utc";
@@ -51,6 +52,8 @@ interface DateTimeInputProps {
   onDateTimeChange: Function;
   canEdit: boolean;
   attributeName: string;
+  disabled?: boolean;
+  tooltipText?: string;
 }
 
 const DateTimeInput = ({
@@ -59,6 +62,8 @@ const DateTimeInput = ({
   onDateTimeChange,
   canEdit,
   attributeName,
+  disabled = false,
+  tooltipText,
 }: DateTimeInputProps) => {
   const handleDateTimeChange = (newValue, context) => {
     // Use MUI validation to identify complete dateTime entry.
@@ -68,9 +73,12 @@ const DateTimeInput = ({
     }
     onDateTimeChange(getCQLDateTime(newValue, !dateTime), attributeName);
   };
-  return (
+  const dateTimeField = (
     <div
       onPaste={(e) => {
+        if (disabled) {
+          return;
+        }
         const pastedValue = e.clipboardData.getData("text");
         const parsedDate = toDayJS(pastedValue).hour(0).minute(0).second(0);
         if (parsedDate && parsedDate.isValid()) {
@@ -84,12 +92,21 @@ const DateTimeInput = ({
       <DateTimeField
         id={kebabCase(label)}
         readOnly={!canEdit}
+        disabled={disabled}
         label={label}
         handleDateTimeChange={handleDateTimeChange}
         dateTimeValue={toDayJS(dateTime)}
       />
     </div>
   );
+  if (disabled && tooltipText) {
+    return (
+      <Tooltip title={tooltipText} arrow>
+        {dateTimeField}
+      </Tooltip>
+    );
+  }
+  return dateTimeField;
 };
 
 export default DateTimeInput;
