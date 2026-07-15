@@ -39,7 +39,6 @@ import CodeableConceptComponent from "./types/CodeableConceptComponent";
 import PeriodDateTimeComponent from "./types/PeriodDateTimeComponent";
 import ChoiceType from "./ChoiceType";
 import QuantityComponent from "./types/QuantityComponent";
-import IdentifierComponent from "./types/IdentifierComponent";
 import MoneyComponent from "./types/MoneyComponent";
 import TimingComponent from "./types/TimingComponent";
 import RangeComponent from "./types/RangeComponent";
@@ -51,7 +50,7 @@ import ElementSectionQiCore from "./ElementSectionQiCore";
 import { getEmptyValueForType } from "./TypeEditorUtils";
 import { getMultipleCardinalityLabel } from "./types/TypeUtil";
 import { StructureDefinitionDto } from "../../../../../../../api/models/StructureDefinitionDto";
-import { ElementDefinition, StructureDefinition } from "fhir/r4";
+import { ElementDefinition } from "fhir/r4";
 import useFhirDefinitionsServiceApi from "../../../../../../../api/useFhirDefinitionsService";
 import RatioComponent from "./types/RatioComponent";
 
@@ -479,14 +478,18 @@ const TypeEditor = ({
         );
         return wrapWithSection(label, markdown, isRoot, noWrap, required);
       case "Quantity":
-        // Show comparator for Quantity types that are NOT SimpleQuantity
-        const isSimpleQuantity = structureDefinition?.type?.some(
-          ({ code, profile }) =>
-            code === "Quantity" &&
-            profile?.includes(
-              "http://hl7.org/fhir/StructureDefinition/SimpleQuantity"
-            )
-        );
+      case "Duration":
+        // Show comparator for Quantity types that are NOT SimpleQuantity.
+        // Duration is always treated like a SimpleQuantity (no comparator)
+        const isSimpleQuantity =
+          type === "Duration" ||
+          structureDefinition?.type?.some(
+            ({ code, profile }) =>
+              code === "Quantity" &&
+              profile?.includes(
+                "http://hl7.org/fhir/StructureDefinition/SimpleQuantity"
+              )
+          );
         return (
           <>
             {(isArrayMode ? values : [null]).map((el, index) => {

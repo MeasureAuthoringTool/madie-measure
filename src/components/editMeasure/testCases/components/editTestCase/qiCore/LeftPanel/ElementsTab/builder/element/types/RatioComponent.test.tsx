@@ -25,6 +25,7 @@ jest.mock("../../../../../../../common/quantityInput/validate", () => ({
     }
     return { error: false, helperText: "" };
   },
+  getUcumCodeForTimingDisplay: () => jest.fn(),
   ValidationResult: class {
     label?: string;
     helperText?: string;
