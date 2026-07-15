@@ -208,7 +208,7 @@ const ResourceList = ({
         accessorKey: "hl7",
       },
       {
-        header: "action",
+        header: "Action",
         id: "action",
         cell: ({ row }) => {
           const { original } = row;
