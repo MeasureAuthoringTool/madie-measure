@@ -288,12 +288,12 @@ describe("EditMeasure Component", () => {
       window.dispatchEvent(new Event("delete-measure"));
     });
     await waitFor(() =>
-      expect(queryByTestId("delete-measure-dialog-button")).toBeInTheDocument()
+      expect(queryByTestId("delete-dialog")).toBeInTheDocument()
     );
-    const cancelButton = await findByTestId("cancel-delete-measure-button");
+    const cancelButton = await findByTestId("delete-dialog-cancel-button");
     fireEvent.click(cancelButton);
     await waitFor(() => {
-      expect(queryByText("Are you sure you want to delete")).not.toBeVisible();
+      expect(queryByTestId("delete-dialog")).not.toBeInTheDocument();
     });
   });
 
@@ -379,9 +379,9 @@ describe("EditMeasure Component", () => {
       window.dispatchEvent(new Event("delete-measure"));
     });
     await waitFor(() =>
-      expect(queryByTestId("delete-measure-dialog-button")).toBeInTheDocument()
+      expect(queryByTestId("delete-dialog")).toBeInTheDocument()
     );
-    const continueButton = await findByTestId("delete-measure-button-2");
+    const continueButton = await findByTestId("delete-dialog-continue-button");
     fireEvent.click(continueButton);
     await waitFor(() => {
       expect(
@@ -415,9 +415,9 @@ describe("EditMeasure Component", () => {
       window.dispatchEvent(new Event("delete-measure"));
     });
     await waitFor(() =>
-      expect(queryByTestId("delete-measure-dialog-button")).toBeInTheDocument()
+      expect(queryByTestId("delete-dialog")).toBeInTheDocument()
     );
-    const continueButton = await findByTestId("delete-measure-button-2");
+    const continueButton = await findByTestId("delete-dialog-continue-button");
     fireEvent.click(continueButton);
     await waitFor(() => {
       expect(screen.getByRole("alert")).toHaveTextContent("update failed");
@@ -439,9 +439,9 @@ describe("EditMeasure Component", () => {
       window.dispatchEvent(new Event("delete-measure"));
     });
     await waitFor(() =>
-      expect(queryByTestId("delete-measure-dialog-button")).toBeInTheDocument()
+      expect(queryByTestId("delete-dialog")).toBeInTheDocument()
     );
-    const continueButton = await findByTestId("delete-measure-button-2");
+    const continueButton = await findByTestId("delete-dialog-continue-button");
     fireEvent.click(continueButton);
     await waitFor(() => {
       expect(screen.getByRole("alert")).toHaveTextContent("I'm an error");
