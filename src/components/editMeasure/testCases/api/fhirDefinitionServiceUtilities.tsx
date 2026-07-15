@@ -898,6 +898,7 @@ export function isComponentDataType(datatype) {
     case "range":
     case "ratio":
     case "period":
+    case "duration":
       return true;
     default:
       return false;
