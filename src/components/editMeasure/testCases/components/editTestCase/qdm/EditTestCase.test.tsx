@@ -295,6 +295,7 @@ const qdmCalculationServiceMockResolved = {
 } as unknown as QdmCalculationService;
 
 jest.mock("@madie/madie-util", () => ({
+  useOwnerName: jest.fn((harpId) => harpId),
   useDocumentTitle: jest.fn(),
   useFeatureFlags: jest.fn(() => {
     return {
