@@ -425,10 +425,7 @@ describe("Builder Component", () => {
 
     await screen.findByText("QICore Encounter");
 
-    const actionCenterButton = screen.getByTestId("action-center-button-ec-1");
-    userEvent.click(actionCenterButton);
-
-    const editAction = await screen.findByRole("menuitem", { name: "Edit" });
+    const editAction = screen.getByTestId("action-ec-1-Edit");
     userEvent.click(editAction);
 
     expect(
@@ -450,13 +447,7 @@ describe("Builder Component", () => {
     });
 
     await screen.findByText("QICore Encounter");
-
-    const actionCenterButton = screen.getByTestId("action-center-button-ec-1");
-    userEvent.click(actionCenterButton);
-
-    const deleteAction = await screen.findByRole("menuitem", {
-      name: "Remove",
-    });
+    const deleteAction = screen.getByTestId("action-ec-1-Remove");
     userEvent.click(deleteAction);
 
     const continueButton = await screen.findByTestId(
@@ -487,12 +478,8 @@ describe("Builder Component", () => {
 
     await screen.findByText("QICore Encounter");
 
-    const actionCenterButton = screen.getByTestId("action-center-button-ec-1");
-    userEvent.click(actionCenterButton);
+    const cloneAction = screen.getByTestId("action-ec-1-Clone");
 
-    const cloneAction = await screen.findByRole("menuitem", {
-      name: "Clone",
-    });
     userEvent.click(cloneAction);
 
     await waitFor(() => {
