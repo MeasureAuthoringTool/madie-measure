@@ -108,6 +108,10 @@ jest.mock("./measureInformation/MeasureInformation");
 jest.mock("./measureMetadata/MeasureMetadata");
 jest.mock("@madie/madie-util", () => ({
   useMeasureServiceApi: jest.fn(() => mockMeasureServiceApi),
+  useUserServiceApi: jest.fn(() => ({
+    getOwnerDetails: jest.fn().mockResolvedValue({}),
+  })),
+  useOwnerName: jest.fn((harpId) => harpId),
   useDocumentTitle: jest.fn(),
   useFeatureFlags: jest.fn(() => mockUseFeatureFlags()),
   measureStore: {
