@@ -34,7 +34,8 @@ const ElementsTab = ({
           payload: bundle,
         });
       } catch (error) {
-        console.log("error is", error);
+        // eslint-disable-next-line no-console
+        console.error("error is", error);
       }
     }
   }, [dispatch, editorVal]);
