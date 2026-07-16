@@ -97,7 +97,7 @@ export default function ViewMeasureHistoryDialog(
         ),
       },
       {
-        header: "HarpID",
+        header: "User",
         accessorKey: "performedBy",
         cell: (info) => (
           <TruncateText

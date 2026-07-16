@@ -210,6 +210,47 @@ describe("ViewMeasureHistoryDialog", () => {
     expect(screen.getByText("Updated measure")).toBeInTheDocument();
   });
 
+  it("renders table headers with the User column", async () => {
+    mockMeasureServiceApi.getMeasureHistoryLogs = jest
+      .fn()
+      .mockResolvedValue(historyData);
+
+    render(
+      <ViewMeasureHistoryDialog
+        measures={[measure]}
+        open={true}
+        onClose={jest.fn()}
+      />
+    );
+
+    await waitFor(() =>
+      expect(screen.getAllByTestId("row-item").length).toBe(2)
+    );
+    expect(screen.getByText("Date")).toBeInTheDocument();
+    expect(screen.getByText("User Action")).toBeInTheDocument();
+    expect(screen.getByText("Additional Info")).toBeInTheDocument();
+  });
+
+  it("Displaying User column in the history dialog", async () => {
+    mockMeasureServiceApi.getMeasureHistoryLogs = jest
+      .fn()
+      .mockResolvedValue(historyData);
+
+    render(
+      <ViewMeasureHistoryDialog
+        measures={[measure]}
+        open={true}
+        onClose={jest.fn()}
+      />
+    );
+
+    await waitFor(() =>
+      expect(screen.getAllByTestId("row-item").length).toBe(2)
+    );
+    expect(screen.getByText("User")).toBeInTheDocument();
+    expect(screen.queryByText("HarpID")).not.toBeInTheDocument();
+  });
+
   it("handles pagination and limit change", async () => {
     const manyHistory = Array.from({ length: 12 }, (_, i) => ({
       performedAt: `2024-06-0${i + 1}T12:00:00Z`,

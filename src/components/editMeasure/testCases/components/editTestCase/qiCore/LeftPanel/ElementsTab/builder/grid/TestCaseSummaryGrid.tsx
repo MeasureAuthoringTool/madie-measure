@@ -4,26 +4,32 @@ import {
   getCoreRowModel,
   flexRender,
   ColumnDef,
+  SortingState,
+  getSortedRowModel,
 } from "@tanstack/react-table";
 import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import EditIcon from "../../../../../../../../../common/EditIcon";
-import ActionCenter, {
-  ActionItemDef,
-} from "../../../../../../../../../common/actionCenter/ActionCenter";
+import { ActionItemDef } from "../../../../../../../../../common/actionCenter/ActionCenter";
 import "../../../../../styles/DataElementsTable.scss";
 import { BundleEntry } from "fhir/r4";
 import ViewHeadlineIcon from "@mui/icons-material/ViewHeadline";
 import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
 import ResourceContext from "../ResourceContext";
-import { Button } from "@madie/madie-design-system/dist/react";
+import {
+  Button,
+  MadieDeleteDialog,
+} from "@madie/madie-design-system/dist/react";
 import { ResourceIdentifier } from "../../../../../../../api/models/ResourceIdentifier";
 import { Box, IconButton } from "@mui/material";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 import getHl7ProfileLink, {
   normalizeProfileId,
 } from "../../../../../../../../../../utils/hl7Links";
+import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore";
+import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
+import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 
 export const UI_BUILDER_VIEW_MESSAGE =
   "Viewing this in the UI builder is unsupported.";
@@ -151,7 +157,13 @@ const TestCaseSummaryGrid = ({
   selectedRowId,
   readOnly,
 }: TestCaseSummaryGridProps) => {
+  const [sorting, setSorting] = React.useState<SortingState>([]);
+  const [hoveredHeader, setHoveredHeader] = React.useState<string | null>(null);
   const allResourceProfiles = useContext(ResourceContext); // get all profiles loaded from builder
+  const [deleteTarget, setDeleteTarget] = React.useState<any>(null);
+  const [deleteAction, setDeleteAction] = React.useState<ActionItemDef | null>(
+    null
+  );
   const data = React.useMemo(
     () =>
       gridData?.map((gridItem) => ({
@@ -205,6 +217,7 @@ const TestCaseSummaryGrid = ({
       {
         header: "Profile",
         id: "resourceType",
+        accessorFn: (row) => row.title,
         cell: ({ row }) => {
           const validationResult = row.original.validationResult;
           return (
@@ -251,6 +264,7 @@ const TestCaseSummaryGrid = ({
       {
         header: "HL7",
         id: "hl7",
+        enableSorting: false,
         size: 90,
         minSize: 90,
         maxSize: 90,
@@ -296,11 +310,13 @@ const TestCaseSummaryGrid = ({
       {
         header: "ID",
         id: "id",
+        enableSorting: false,
         cell: ({ row }) => <div>{row.original.entry.resource.id}</div>,
       },
       {
-        header: "",
+        header: "Actions",
         id: "actions",
+        enableSorting: false,
         cell: ({ row }) => {
           const entry = row.original.entry;
           const validationResult = row.original.validationResult;
@@ -360,11 +376,44 @@ const TestCaseSummaryGrid = ({
               </Box>
             </Tooltip>
           ) : (
-            <ActionCenter
-              actions={rowActions}
-              testId={entry.resource.id}
-              target={row.original}
-            />
+            <div style={{ display: "flex", gap: "8px" }}>
+              {rowActions.map((action) => (
+                <Tooltip
+                  key={action.name}
+                  title={
+                    action.disabled && action.tooltip
+                      ? action.tooltip
+                      : action.name
+                  }
+                  placement="top"
+                >
+                  <span>
+                    <IconButton
+                      data-testid={`action-${entry.resource.id}-${action.name}`}
+                      aria-label={action.name}
+                      disabled={action.disabled}
+                      onClick={() => {
+                        if (action.disabled) return;
+
+                        if (action.name === "Remove") {
+                          setDeleteTarget(row.original);
+                          setDeleteAction(action);
+                        } else {
+                          action.onClick(row.original);
+                        }
+                      }}
+                    >
+                      {action.disabled && React.isValidElement(action.icon)
+                        ? React.cloneElement(action.icon as any, {
+                            color: "#8C8C8C",
+                            htmlColor: "#8C8C8C",
+                          })
+                        : action.icon}
+                    </IconButton>
+                  </span>
+                </Tooltip>
+              ))}
+            </div>
           );
         },
       },
@@ -386,7 +435,12 @@ const TestCaseSummaryGrid = ({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    onSortingChange: setSorting,
     // stabalize state to prevent animations from triggering on every rerender.
+    state: {
+      sorting,
+    },
     meta: {
       testCaseCanEdit,
       readOnly,
@@ -402,25 +456,77 @@ const TestCaseSummaryGrid = ({
         <thead>
           {table.getHeaderGroups().map((headerGroup) => (
             <tr key={headerGroup.id}>
-              {headerGroup.headers.map((header) => (
-                <th
-                  key={header.id}
-                  colSpan={header.colSpan}
-                  className={
-                    header.column.id === "id"
-                      ? "hl7-id-divider"
-                      : header.column.id === "hl7"
-                      ? "hl7-column"
-                      : ""
-                  }
-                  style={{ position: "relative", width: header.getSize() }}
-                >
-                  {flexRender(
-                    header.column.columnDef.header,
-                    header.getContext()
-                  )}
-                </th>
-              ))}
+              {headerGroup.headers.map((header) => {
+                const isHovered = hoveredHeader === header.id;
+
+                return (
+                  <th
+                    key={header.id}
+                    colSpan={header.colSpan}
+                    className={
+                      header.column.id === "id"
+                        ? "hl7-id-divider"
+                        : header.column.id === "hl7"
+                        ? "hl7-column"
+                        : ""
+                    }
+                    style={{
+                      position: "relative",
+                      width: header.getSize(),
+                    }}
+                    onMouseEnter={() => setHoveredHeader(header.id)}
+                    onMouseLeave={() => setHoveredHeader(null)}
+                  >
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        header.column.toggleSorting();
+                      }}
+                      title={
+                        header.column.getCanSort()
+                          ? header.column.getNextSortingOrder() === "asc"
+                            ? "Sort ascending"
+                            : header.column.getNextSortingOrder() === "desc"
+                            ? "Sort descending"
+                            : "Clear sort"
+                          : undefined
+                      }
+                      style={{
+                        background: "none",
+                        border: "none",
+                        cursor: header.column.getCanSort()
+                          ? "pointer"
+                          : "default",
+                        fontWeight: "inherit",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "4px",
+                      }}
+                    >
+                      <span
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                        }}
+                      >
+                        {header.column.getCanSort() &&
+                          isHovered &&
+                          !header.column.getIsSorted() && <UnfoldMoreIcon />}
+
+                        {{
+                          asc: <KeyboardArrowUpIcon />,
+                          desc: <KeyboardArrowDownIcon />,
+                        }[header.column.getIsSorted() as string] ?? null}
+                      </span>
+
+                      {flexRender(
+                        header.column.columnDef.header,
+                        header.getContext()
+                      )}
+                    </button>
+                  </th>
+                );
+              })}
             </tr>
           ))}
         </thead>
@@ -451,6 +557,22 @@ const TestCaseSummaryGrid = ({
           ))}
         </tbody>
       </table>
+      <MadieDeleteDialog
+        open={!!deleteTarget}
+        onContinue={() => {
+          deleteAction?.onClick(deleteTarget);
+          setDeleteTarget(null);
+          setDeleteAction(null);
+        }}
+        onClose={() => {
+          setDeleteTarget(null);
+          setDeleteAction(null);
+        }}
+        dialogTitle="Remove Element"
+        name={deleteTarget?.entry?.resource?.resourceType}
+        hideWarning={true}
+        alternateText="Remove"
+      />
     </div>
   );
 };

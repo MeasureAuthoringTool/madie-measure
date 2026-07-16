@@ -226,6 +226,8 @@ declare module "@madie/madie-util" {
 
   export function wafIntercept(): void;
 
+  export function useOwnerName(harpId: string): string;
+
   export function getOidFromString(
     oidString: string,
     dataModel: string

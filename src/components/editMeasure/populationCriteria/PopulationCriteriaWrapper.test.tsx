@@ -39,6 +39,7 @@ const mockMeasureServiceApi = {
 
 jest.mock("@madie/madie-util", () => ({
   useMeasureServiceApi: jest.fn(() => mockMeasureServiceApi),
+  useOwnerName: jest.fn((harpId) => harpId),
   useDocumentTitle: jest.fn(),
   measureStore: {
     updateMeasure: (measure: Measure) => measure,
@@ -76,10 +77,11 @@ describe("PopulationCriteriaWrapper", () => {
     );
 
     const message = screen.getByTestId("measure-locked-modal-message");
-    expect(message).toHaveTextContent(
-      /This measure is currently edited by HARP ID/i
-    );
-    expect(message).toHaveTextContent("user123");
+    await waitFor(() => {
+      expect(message).toHaveTextContent(
+        "This measure is currently being edited by user123."
+      );
+    });
 
     userEvent.click(screen.getByText("Close"));
 
@@ -102,7 +104,7 @@ describe("PopulationCriteriaWrapper", () => {
     );
 
     expect(
-      screen.queryByText("This measure is currently edited by HARP ID")
+      screen.queryByText(/This measure is currently being edited by/i)
     ).not.toBeInTheDocument();
   });
 });
