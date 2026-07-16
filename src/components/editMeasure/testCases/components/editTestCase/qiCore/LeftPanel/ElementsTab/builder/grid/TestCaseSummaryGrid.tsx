@@ -482,12 +482,9 @@ const TestCaseSummaryGrid = ({
                     <button
                       onClick={(e) => {
                         e.preventDefault();
-
-                        if (!canSort) {
-                          return;
+                        if (canSort) {
+                          header.column.toggleSorting();
                         }
-
-                        header.column.toggleSorting();
                       }}
                       title={
                         canSort
