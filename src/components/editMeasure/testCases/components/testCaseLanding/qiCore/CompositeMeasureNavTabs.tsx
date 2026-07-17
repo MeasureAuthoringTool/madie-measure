@@ -30,8 +30,6 @@ const defaultStyle = {
   overflow: "visible",
 };
 
-// Scores default to "-" until execution results are available, mirroring the
-// Passing tab's display in CreateCodeCoverageNavTabs.
 const scoreDisplayTemplate = (
   label: string,
   value?: number,
@@ -57,7 +55,6 @@ export default function CompositeMeasureNavTabs({
         COMPOSITE_TAB_VALUES.includes(activeTab) ? activeTab : "compositeScore"
       }
       onChange={(e, v) => {
-        // "validation" is a display-only stats tab, mirroring the non-composite view.
         if (v === "validation") {
           e.preventDefault();
           return;

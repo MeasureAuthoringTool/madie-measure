@@ -202,7 +202,6 @@ const TestCaseList = (props: TestCaseListProps) => {
     useExecutionContext();
   const [measure] = measureState;
   const [measureBundle] = bundleState;
-  // Composite measures show their own tab set, so default onto its first tab.
   const [activeTab, setActiveTab] = useState<string>(
     measure?.measureMetaData?.composite ? "compositeScore" : "passing"
   );
