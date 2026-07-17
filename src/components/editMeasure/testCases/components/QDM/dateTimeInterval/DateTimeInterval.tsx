@@ -12,6 +12,8 @@ interface DateTimeIntervalProps {
   attributeName: string;
   canEdit: boolean;
   displayAttributeName?: boolean;
+  disabled?: boolean;
+  tooltipText?: string;
 }
 
 const DateTimeInterval = ({
@@ -21,6 +23,8 @@ const DateTimeInterval = ({
   onDateTimeIntervalChange,
   attributeName,
   displayAttributeName,
+  disabled = false,
+  tooltipText,
 }: DateTimeIntervalProps) => {
   const handleStartDateTimeChange = (newValue) => {
     if (
@@ -67,6 +71,8 @@ const DateTimeInterval = ({
             attributeName={attributeName}
             onDateTimeChange={handleStartDateTimeChange}
             dateTime={dateTimeInterval?.low}
+            disabled={disabled}
+            tooltipText={tooltipText}
           />
           <DateTimeInput
             canEdit={canEdit}
@@ -74,6 +80,8 @@ const DateTimeInterval = ({
             attributeName={attributeName}
             onDateTimeChange={handleEndDateTimeChange}
             dateTime={dateTimeInterval?.high}
+            disabled={disabled}
+            tooltipText={tooltipText}
           />
         </div>
       </FormControl>

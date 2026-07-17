@@ -14,36 +14,6 @@ import useTerminologyServiceApi, {
 jest.mock("../../../../../../../../api/useFhirDefinitionsService");
 jest.mock("../../../../../../../../api/useTerminologyServiceApi");
 
-jest.mock("../../../../../../../common/quantityInput/validate", () => ({
-  validate: (codeInput: string) => {
-    if (codeInput === "z") {
-      return {
-        error: true,
-        helperText: "z is not a valid UCUM code. No alternatives were found.",
-      };
-    }
-
-    if (codeInput === "mg") {
-      return { error: false, label: "milligram", ucumUnitCode: 0 };
-    }
-
-    if (codeInput === "{bracketedCode}") {
-      return { error: false, label: 1, ucumUnitCode: 1 };
-    }
-
-    return {
-      error: false,
-      helperText: "",
-    };
-  },
-  ValidationResult: class {
-    label?: string;
-    helperText?: string;
-    error = false;
-  },
-  ADDITIONAL_UCUM_UNIT_SUPPORT: {},
-}));
-
 const useFhirDefinitionsServiceApiMock =
   useFhirDefinitionsServiceApi as jest.Mock<FhirDefinitionsServiceApi>;
 
@@ -513,6 +483,178 @@ describe("QuantityComponent", () => {
       expect(updatedQuantity.code).toBeUndefined();
       expect(updatedQuantity.unit).toBeUndefined();
       expect(updatedQuantity.system).toBeUndefined();
+    });
+  });
+
+  test("maps QI-Core timing display value 'days' to UCUM code 'd' preserving display value as unit", async () => {
+    let formikValues: any;
+    const initialValues = {
+      Observation: {
+        quantity: { value: 1, code: "", comparator: "" },
+      },
+    };
+
+    render(
+      <ExecutionContextProvider
+        value={{
+          measureState: [null, jest.fn()],
+          bundleState: [null, jest.fn()],
+          valueSetsState: [[], jest.fn()],
+          executionContextReady: true,
+          executing: false,
+          setExecuting: jest.fn(),
+          contextFailure: false,
+        }}
+      >
+        <Formik initialValues={initialValues} onSubmit={jest.fn()}>
+          {(formik) => {
+            formikValues = formik.values;
+            return (
+              <QuantityComponent
+                label="Observation.quantity"
+                canEdit={true}
+                showComparator={true}
+                fieldRequired={false}
+              />
+            );
+          }}
+        </Formik>
+      </ExecutionContextProvider>
+    );
+
+    const codeInput = (await screen.findByTestId(
+      "code-input-input"
+    )) as HTMLInputElement;
+
+    userEvent.type(codeInput, "days");
+
+    await waitFor(() => {
+      const updatedQuantity = formikValues.Observation.quantity;
+      expect(updatedQuantity.code).toBe("d");
+      expect(updatedQuantity.unit).toBe("days");
+      expect(updatedQuantity.system).toBe("http://unitsofmeasure.org");
+      expect(updatedQuantity.value).toBe(1);
+    });
+  });
+
+  test.each([
+    ["years", "a"],
+    ["year", "a"],
+    ["months", "mo"],
+    ["month", "mo"],
+    ["weeks", "wk"],
+    ["week", "wk"],
+    ["days", "d"],
+    ["day", "d"],
+    ["hours", "h"],
+    ["hour", "h"],
+    ["minutes", "min"],
+    ["minute", "min"],
+    ["seconds", "s"],
+    ["second", "s"],
+    ["milliseconds", "ms"],
+    ["millisecond", "ms"],
+  ])(
+    "maps QI-Core timing display value '%s' to UCUM code '%s'",
+    async (display, expectedCode) => {
+      let formikValues: any;
+      const initialValues = {
+        Observation: {
+          quantity: { value: 2, code: "", comparator: "" },
+        },
+      };
+
+      render(
+        <ExecutionContextProvider
+          value={{
+            measureState: [null, jest.fn()],
+            bundleState: [null, jest.fn()],
+            valueSetsState: [[], jest.fn()],
+            executionContextReady: true,
+            executing: false,
+            setExecuting: jest.fn(),
+            contextFailure: false,
+          }}
+        >
+          <Formik initialValues={initialValues} onSubmit={jest.fn()}>
+            {(formik) => {
+              formikValues = formik.values;
+              return (
+                <QuantityComponent
+                  label="Observation.quantity"
+                  canEdit={true}
+                  showComparator={true}
+                  fieldRequired={false}
+                />
+              );
+            }}
+          </Formik>
+        </ExecutionContextProvider>
+      );
+
+      const codeInput = (await screen.findByTestId(
+        "code-input-input"
+      )) as HTMLInputElement;
+
+      userEvent.type(codeInput, display);
+
+      await waitFor(() => {
+        const updatedQuantity = formikValues.Observation.quantity;
+        expect(updatedQuantity.code).toBe(expectedCode);
+        expect(updatedQuantity.unit).toBe(display);
+        expect(updatedQuantity.system).toBe("http://unitsofmeasure.org");
+      });
+    }
+  );
+
+  test("does not remap a valid UCUM code", async () => {
+    let formikValues: any;
+    const initialValues = {
+      Observation: {
+        quantity: { value: 10, code: "", comparator: "" },
+      },
+    };
+
+    render(
+      <ExecutionContextProvider
+        value={{
+          measureState: [null, jest.fn()],
+          bundleState: [null, jest.fn()],
+          valueSetsState: [[], jest.fn()],
+          executionContextReady: true,
+          executing: false,
+          setExecuting: jest.fn(),
+          contextFailure: false,
+        }}
+      >
+        <Formik initialValues={initialValues} onSubmit={jest.fn()}>
+          {(formik) => {
+            formikValues = formik.values;
+            return (
+              <QuantityComponent
+                label="Observation.quantity"
+                canEdit={true}
+                showComparator={true}
+                fieldRequired={false}
+              />
+            );
+          }}
+        </Formik>
+      </ExecutionContextProvider>
+    );
+
+    const codeInput = (await screen.findByTestId(
+      "code-input-input"
+    )) as HTMLInputElement;
+
+    userEvent.type(codeInput, "mg");
+
+    await waitFor(() => {
+      const updatedQuantity = formikValues.Observation.quantity;
+      // valid UCUM code, existing behavior preserved (not a timing display value)
+      expect(updatedQuantity.code).toBe("mg");
+      expect(updatedQuantity.unit).toBe("milligram");
+      expect(updatedQuantity.system).toBe("http://unitsofmeasure.org");
     });
   });
 

@@ -43,6 +43,7 @@ interface PropTypes {
   activeTab: number;
   setTransferDialog: any;
   setCompareVersionsDialog?: any;
+  setReviewDialog?: any;
 }
 export default function ActionCenter(props: PropTypes) {
   const {
@@ -58,6 +59,7 @@ export default function ActionCenter(props: PropTypes) {
     setTransferDialog,
     setViewHumanReadableModal,
     setViewMeasureHistoryDialog,
+    setReviewDialog,
     updateTargetMeasure,
   } = props;
   const [canEdit, setCanEdit] = useState<boolean>(false);
@@ -152,8 +154,13 @@ export default function ActionCenter(props: PropTypes) {
   }, [measures, setCompareVersionsDialog]);
 
   const reviewMeasure = useCallback(() => {
-    // Review click handling, will be implemented in a follow-up story.
-  }, []);
+    if (measures?.length === 1) {
+      setReviewDialog?.({
+        open: true,
+        measureId: measures[0]?.id,
+      });
+    }
+  }, [measures, setReviewDialog]);
 
   const isSelectedMeasureEditable = (measures) => {
     return (

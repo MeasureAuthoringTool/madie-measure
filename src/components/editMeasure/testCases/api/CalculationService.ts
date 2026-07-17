@@ -1,11 +1,13 @@
-import { Calculator, StratifierResult } from "fqm-execution";
 import {
+  Calculator,
+  StratifierResult,
   CalculationOutput,
   DetailedPopulationGroupResult,
   EpisodeResults,
   ExecutionResult,
+  MRCalculationOutput,
   PopulationResult,
-} from "fqm-execution/build/types/Calculator";
+} from "fqm-execution";
 import { prettyFHIRObject } from "fqm-execution/build/calculation/ClauseResultsBuilder";
 import { FHIRWrapper } from "cql-exec-fhir";
 import {
@@ -23,6 +25,7 @@ import { PopulationType as FqmPopulationType } from "fqm-execution/build/types/E
 import { getPopulationTypesForScoring } from "../util/PopulationsMap";
 import { isTestCasePopulationObservation } from "../util/Utils";
 import { GroupPopulation } from "@madie/madie-models/dist/TestCase";
+import { calculateMeasureReports } from "fqm-execution/build/calculation/Calculator";
 
 export enum ExecutionStatusType {
   NA = "NA",
@@ -156,6 +159,44 @@ export class CalculationService {
         entry.resource.id = testCase.id;
       });
     return testCaseBundle;
+  }
+
+  async calculateCompositeTestCases(
+    measure: Measure,
+    testCases: TestCase[],
+    measureBundle: Bundle,
+    valueSets: ValueSet[]
+  ): Promise<MRCalculationOutput> {
+    const testCaseBundles = testCases.map((testCase) => {
+      return this.buildPatientBundle(testCase);
+    });
+    const calculationOutput: MRCalculationOutput =
+      await Calculator.calculateMeasureReports(
+        measureBundle,
+        testCaseBundles,
+        {
+          trustMetaProfile: true,
+          measurementPeriodStart: measure?.measurementPeriodStart
+            ? new Date(measure.measurementPeriodStart)
+                .toISOString()
+                .substring(0, 10)
+            : undefined,
+          measurementPeriodEnd: measure?.measurementPeriodEnd
+            ? new Date(measure.measurementPeriodEnd)
+                .toISOString()
+                .substring(0, 10)
+            : undefined,
+          reportType: "summary",
+        },
+        valueSets
+      );
+
+    // set onto window for any environment debug purposes
+    if (localStorage.getItem("madieDebug") || (window as any).madieDebug) {
+      // eslint-disable-next-line no-console
+      console.log(_.cloneDeep(calculationOutput?.results));
+    }
+    return calculationOutput;
   }
 
   async calculate(

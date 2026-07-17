@@ -2,6 +2,7 @@ import * as React from "react";
 import Builder, {
   NO_PROFILES_MESSAGE,
   scrollToElementByIdWhenAvailable,
+  deduplicateAndSortResources,
 } from "./Builder";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
@@ -134,28 +135,31 @@ jest.mock("../../../../../../api/useFhirDefinitionsService", () => {
     getResourceTree: mockGetResourceTree,
   });
 });
+const mockFetchRelevantDataElements = jest.fn(() =>
+  Promise.resolve([
+    {
+      profile:
+        "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-servicerequest",
+      type: "ServiceRequest",
+    },
+    {
+      profile:
+        "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-procedure",
+      type: "Procedure",
+    },
+    {
+      profile:
+        "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-encounter",
+      type: "Encounter",
+    },
+  ])
+);
 jest.mock(
   "../../../../../../../../../api/useFhirElmTranslationServiceApi",
   () => {
     return () => ({
-      fetchRelevantDataElements: () =>
-        Promise.resolve([
-          {
-            profile:
-              "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-servicerequest",
-            type: "ServiceRequest",
-          },
-          {
-            profile:
-              "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-procedure",
-            type: "Procedure",
-          },
-          {
-            profile:
-              "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-encounter",
-            type: "Encounter",
-          },
-        ]),
+      fetchRelevantDataElements: (...args) =>
+        mockFetchRelevantDataElements(...args),
     });
   }
 );
@@ -421,10 +425,7 @@ describe("Builder Component", () => {
 
     await screen.findByText("QICore Encounter");
 
-    const actionCenterButton = screen.getByTestId("action-center-button-ec-1");
-    userEvent.click(actionCenterButton);
-
-    const editAction = await screen.findByRole("menuitem", { name: "Edit" });
+    const editAction = screen.getByTestId("action-ec-1-Edit");
     userEvent.click(editAction);
 
     expect(
@@ -446,13 +447,7 @@ describe("Builder Component", () => {
     });
 
     await screen.findByText("QICore Encounter");
-
-    const actionCenterButton = screen.getByTestId("action-center-button-ec-1");
-    userEvent.click(actionCenterButton);
-
-    const deleteAction = await screen.findByRole("menuitem", {
-      name: "Remove",
-    });
+    const deleteAction = screen.getByTestId("action-ec-1-Remove");
     userEvent.click(deleteAction);
 
     const continueButton = await screen.findByTestId(
@@ -483,12 +478,8 @@ describe("Builder Component", () => {
 
     await screen.findByText("QICore Encounter");
 
-    const actionCenterButton = screen.getByTestId("action-center-button-ec-1");
-    userEvent.click(actionCenterButton);
+    const cloneAction = screen.getByTestId("action-ec-1-Clone");
 
-    const cloneAction = await screen.findByRole("menuitem", {
-      name: "Clone",
-    });
     userEvent.click(cloneAction);
 
     await waitFor(() => {
@@ -594,6 +585,50 @@ describe("Builder Component", () => {
     expect(noProfilesAlert).toHaveTextContent(NO_PROFILES_MESSAGE);
 
     expect(screen.queryByRole("table")).not.toBeInTheDocument();
+  });
+
+  it("sets resources to empty array when relevantElements is empty", async () => {
+    mockFetchRelevantDataElements.mockResolvedValueOnce([]);
+
+    renderBuilderComponent({ bundleToAdd: mockBundle, activeTab: "available" });
+
+    // wait for loading to finish
+    await waitFor(() =>
+      expect(
+        screen.queryByTestId("available-profiles-loading")
+      ).not.toBeInTheDocument()
+    );
+
+    // no resource rows should be rendered since resources is empty
+    expect(screen.queryAllByRole("row")).toHaveLength(0);
+  });
+
+  it("sets resources to empty array when relevantElements is undefined", async () => {
+    mockFetchRelevantDataElements.mockResolvedValueOnce(undefined);
+
+    renderBuilderComponent({ bundleToAdd: mockBundle, activeTab: "available" });
+
+    await waitFor(() =>
+      expect(
+        screen.queryByTestId("available-profiles-loading")
+      ).not.toBeInTheDocument()
+    );
+
+    expect(screen.queryAllByRole("row")).toHaveLength(0);
+  });
+
+  it("sets resources to empty array when relevantElements is null", async () => {
+    mockFetchRelevantDataElements.mockResolvedValueOnce(null);
+
+    renderBuilderComponent({ bundleToAdd: mockBundle, activeTab: "available" });
+
+    await waitFor(() =>
+      expect(
+        screen.queryByTestId("available-profiles-loading")
+      ).not.toBeInTheDocument()
+    );
+
+    expect(screen.queryAllByRole("row")).toHaveLength(0);
   });
 
   it("triggers resource addition logic with required elements and spinner overlay", async () => {
@@ -764,5 +799,108 @@ describe("scrollToElementByIdWhenAvailable", () => {
       "json-error-alert-duplicate-resource-ids"
     );
     expect(duplicateResourceError).toBeInTheDocument();
+  });
+});
+
+describe("deduplicateAndSortResources", () => {
+  const mockPatient = {
+    id: "qicore-patient",
+    title: "QICore Patient",
+    type: "Patient",
+    category: "Base",
+    profile: "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient",
+  };
+  const mockEncounter = {
+    id: "qicore-encounter",
+    title: "QICore Encounter",
+    type: "Encounter",
+    category: "Base",
+    profile:
+      "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-encounter",
+  };
+  const mockAllergyIntolerance = {
+    id: "qicore-allergyintolerance",
+    title: "QICore AllergyIntolerance",
+    type: "AllergyIntolerance",
+    category: "Clinical",
+    profile:
+      "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-allergyintolerance",
+  };
+  const mockCondition = {
+    id: "qicore-condition",
+    title: "QICore Condition",
+    type: "Condition",
+    category: "Clinical",
+    profile:
+      "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-condition",
+  };
+  const mockProcedure = {
+    id: "qicore-procedure",
+    title: "QICore Procedure",
+    type: "Procedure",
+    category: "Clinical",
+    profile:
+      "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-procedure",
+  };
+  const mockUsCoreCondition = {
+    id: "us-core-condition",
+    title: "US Core Condition",
+    type: "Condition",
+    category: "Clinical",
+    profile:
+      "http://hl7.org/fhir/us/core/StructureDefinition/us-core-condition",
+  };
+  const mockFhirObservation = {
+    id: "fhir-observation",
+    title: "FHIR Observation",
+    type: "Observation",
+    category: "Clinical",
+    profile: "http://hl7.org/fhir/StructureDefinition/Observation",
+  };
+
+  it("should remove duplicate profiles", () => {
+    const input = [mockEncounter, mockEncounter, mockPatient];
+    const result = deduplicateAndSortResources(input);
+    expect(result).toHaveLength(2);
+    expect(result.map((r) => r.title)).toEqual([
+      "QICore Patient",
+      "QICore Encounter",
+    ]);
+  });
+
+  it("should place QICore Patient first regardless of alphabetical order", () => {
+    const input = [mockAllergyIntolerance, mockCondition, mockPatient];
+    const result = deduplicateAndSortResources(input);
+    expect(result[0].id).toBe("qicore-patient");
+  });
+
+  it("should not produce duplicates when called multiple times with the same input", () => {
+    const input = [mockPatient, mockEncounter, mockEncounter];
+    // Simulate toggling between modes — calling the function multiple times
+    const result1 = deduplicateAndSortResources(input);
+    const result2 = deduplicateAndSortResources(input);
+    expect(result1).toEqual(result2);
+    expect(result1).toHaveLength(2);
+  });
+
+  it("should sort alphabetically (after placing Patient first)", () => {
+    const input = [
+      mockProcedure,
+      mockPatient,
+      mockAllergyIntolerance,
+      mockEncounter,
+    ];
+    const result = deduplicateAndSortResources(input);
+    expect(result.map((r) => r.title)).toEqual([
+      "QICore Patient",
+      "QICore AllergyIntolerance",
+      "QICore Encounter",
+      "QICore Procedure",
+    ]);
+  });
+
+  it("should handle empty input", () => {
+    const result = deduplicateAndSortResources([]);
+    expect(result).toEqual([]);
   });
 });

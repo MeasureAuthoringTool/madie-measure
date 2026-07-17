@@ -13,6 +13,15 @@ jest.mock("@madie/madie-util", () => ({
   }),
 }));
 
+let mockExecutionContextReady = true;
+jest.mock("../../../routes/qiCore/useExecutionContext", () => ({
+  __esModule: true,
+  default: () => ({
+    executionContextReady: mockExecutionContextReady,
+    measureState: [{}],
+  }),
+}));
+
 jest.mock("./CompositeLeftPanelContent", () => ({
   __esModule: true,
   default: (props: any) => (
@@ -23,6 +32,20 @@ jest.mock("./CompositeLeftPanelContent", () => ({
 jest.mock("./CompositeRightPanelContent", () => ({
   __esModule: true,
   default: () => <div data-testid="right-panel">mock right panel</div>,
+}));
+
+const mockValidationPanelPane = jest.fn();
+jest.mock("../ValidationPanelPane", () => ({
+  __esModule: true,
+  default: (props: any) => {
+    mockValidationPanelPane(props);
+    return (
+      <div data-testid="validation-panel-pane">
+        isQICore6:{String(props.isQICore6)} errors:
+        {props.validationErrors?.length ?? 0}
+      </div>
+    );
+  },
 }));
 
 jest.mock("allotment", () => {
@@ -59,11 +82,13 @@ const defaultProps = {
   testCase: null,
   setValidationSchema: jest.fn(),
   setInitialFormikValuesStu6: jest.fn(),
+  validationErrors: [],
 };
 
 describe("EditCompositeTestCase", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockExecutionContextReady = true;
   });
 
   it("calls fetchMeasuresByIds and passes results to left panel", async () => {
@@ -174,5 +199,203 @@ describe("EditCompositeTestCase", () => {
 
     await waitFor(() => expect(mockFetchMeasuresByIds).not.toHaveBeenCalled());
     expect(screen.getByTestId("create-panel")).toBeInTheDocument();
+  });
+
+  it("disables Run Test Case when editor JSON is empty", async () => {
+    mockFetchMeasuresByIds.mockResolvedValueOnce([]);
+
+    render(
+      <EditCompositeTestCase
+        {...defaultProps}
+        editorVal=""
+        validationErrors={[]}
+      />
+    );
+
+    await waitFor(() => expect(mockFetchMeasuresByIds).toHaveBeenCalled());
+    expect(screen.getByTestId("run-test-case-button")).toBeDisabled();
+  });
+
+  it("disables Run Test Case when execution context is not ready", async () => {
+    mockExecutionContextReady = false;
+    mockFetchMeasuresByIds.mockResolvedValueOnce([]);
+
+    render(
+      <EditCompositeTestCase
+        {...defaultProps}
+        editorVal='{"resourceType":"Bundle"}'
+        validationErrors={[]}
+      />
+    );
+
+    await waitFor(() => expect(mockFetchMeasuresByIds).toHaveBeenCalled());
+    expect(screen.getByTestId("run-test-case-button")).toBeDisabled();
+  });
+
+  it("disables Run Test Case when validation errors have error severity", async () => {
+    mockFetchMeasuresByIds.mockResolvedValueOnce([]);
+
+    render(
+      <EditCompositeTestCase
+        {...defaultProps}
+        editorVal='{"resourceType":"Bundle"}'
+        validationErrors={[{ severity: "error" }]}
+      />
+    );
+
+    await waitFor(() => expect(mockFetchMeasuresByIds).toHaveBeenCalled());
+    expect(screen.getByTestId("run-test-case-button")).toBeDisabled();
+  });
+
+  it("enables Run Test Case despite validation errors when executeInvalidTestCases is true", async () => {
+    mockFetchMeasuresByIds.mockResolvedValueOnce([]);
+
+    render(
+      <EditCompositeTestCase
+        {...defaultProps}
+        editorVal='{"resourceType":"Bundle"}'
+        validationErrors={[{ severity: "error" }]}
+        measure={{
+          ...measureWithComponents,
+          testCaseConfiguration: { executeInvalidTestCases: true },
+        }}
+      />
+    );
+
+    await waitFor(() => expect(mockFetchMeasuresByIds).toHaveBeenCalled());
+    expect(screen.getByTestId("run-test-case-button")).not.toBeDisabled();
+  });
+
+  it("enables Run Test Case when JSON is valid, no validation errors, and context is ready", async () => {
+    mockFetchMeasuresByIds.mockResolvedValueOnce([]);
+
+    render(
+      <EditCompositeTestCase
+        {...defaultProps}
+        editorVal='{"resourceType":"Bundle"}'
+        validationErrors={[]}
+      />
+    );
+
+    await waitFor(() => expect(mockFetchMeasuresByIds).toHaveBeenCalled());
+    expect(screen.getByTestId("run-test-case-button")).not.toBeDisabled();
+  });
+
+  it("ignores validation errors with non-error severity", async () => {
+    mockFetchMeasuresByIds.mockResolvedValueOnce([]);
+
+    render(
+      <EditCompositeTestCase
+        {...defaultProps}
+        editorVal='{"resourceType":"Bundle"}'
+        validationErrors={[{ severity: "warning" }, { severity: "info" }]}
+      />
+    );
+
+    await waitFor(() => expect(mockFetchMeasuresByIds).toHaveBeenCalled());
+    expect(screen.getByTestId("run-test-case-button")).not.toBeDisabled();
+  });
+
+  it("renders the ValidationPanelPane with validationErrors and testCase", async () => {
+    mockFetchMeasuresByIds.mockResolvedValueOnce([]);
+    const testCase = { validationStatus: "VALID" };
+    const validationErrors = [{ severity: "error" }, { severity: "warning" }];
+
+    render(
+      <EditCompositeTestCase
+        {...defaultProps}
+        testCase={testCase}
+        validationErrors={validationErrors}
+      />
+    );
+
+    await waitFor(() => expect(mockFetchMeasuresByIds).toHaveBeenCalled());
+
+    expect(screen.getByTestId("validation-panel-pane")).toBeInTheDocument();
+    expect(mockValidationPanelPane).toHaveBeenCalledWith(
+      expect.objectContaining({
+        testCase,
+        validationErrors,
+        allotmentRef: defaultProps.allotmentRef,
+      })
+    );
+  });
+
+  it("passes isQICore6=true when measure model is QI-Core v6.0.0", async () => {
+    mockFetchMeasuresByIds.mockResolvedValueOnce([]);
+
+    render(
+      <EditCompositeTestCase
+        {...defaultProps}
+        measure={{ ...measureWithComponents, model: "QI-Core v6.0.0" }}
+      />
+    );
+
+    await waitFor(() => expect(mockFetchMeasuresByIds).toHaveBeenCalled());
+
+    expect(screen.getByTestId("validation-panel-pane")).toHaveTextContent(
+      "isQICore6:true"
+    );
+  });
+
+  it("passes isQICore6=false when measure model is not QI-Core v6.0.0", async () => {
+    mockFetchMeasuresByIds.mockResolvedValueOnce([]);
+
+    render(
+      <EditCompositeTestCase
+        {...defaultProps}
+        measure={{ ...measureWithComponents, model: "QI-Core v4.1.1" }}
+      />
+    );
+
+    await waitFor(() => expect(mockFetchMeasuresByIds).toHaveBeenCalled());
+
+    expect(screen.getByTestId("validation-panel-pane")).toHaveTextContent(
+      "isQICore6:false"
+    );
+  });
+
+  it("invokes calculateCompositeTestCase prop when Run Test Case is clicked", async () => {
+    mockFetchMeasuresByIds.mockResolvedValueOnce([]);
+    const calculateCompositeTestCase = jest.fn();
+
+    render(
+      <EditCompositeTestCase
+        {...defaultProps}
+        editorVal='{"resourceType":"Bundle"}'
+        validationErrors={[]}
+        calculateCompositeTestCase={calculateCompositeTestCase}
+      />
+    );
+
+    await waitFor(() => expect(mockFetchMeasuresByIds).toHaveBeenCalled());
+
+    const runBtn = screen.getByTestId("run-test-case-button");
+    expect(runBtn).not.toBeDisabled();
+    fireEvent.click(runBtn);
+
+    expect(calculateCompositeTestCase).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not invoke calculateCompositeTestCase when the button is disabled", async () => {
+    mockFetchMeasuresByIds.mockResolvedValueOnce([]);
+    const calculateCompositeTestCase = jest.fn();
+
+    render(
+      <EditCompositeTestCase
+        {...defaultProps}
+        editorVal=""
+        validationErrors={[]}
+        calculateCompositeTestCase={calculateCompositeTestCase}
+      />
+    );
+
+    await waitFor(() => expect(mockFetchMeasuresByIds).toHaveBeenCalled());
+
+    const runBtn = screen.getByTestId("run-test-case-button");
+    expect(runBtn).toBeDisabled();
+    fireEvent.click(runBtn);
+
+    expect(calculateCompositeTestCase).not.toHaveBeenCalled();
   });
 });

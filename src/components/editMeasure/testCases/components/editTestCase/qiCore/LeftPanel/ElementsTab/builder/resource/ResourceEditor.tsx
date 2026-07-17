@@ -22,6 +22,7 @@ import {
   getBasePath,
   stripResourcePath,
   getElementName,
+  formatAttributeLabel,
   removeUndefinedProperties,
   getNestedProperty,
   stripAllIndexes,
@@ -72,6 +73,137 @@ const buildElementPath = (element: ElementDefinition) => {
     return _.camelCase(cleanPath + _.upperFirst(element.type[0].code));
   }
   return elemPath;
+};
+
+const isChoiceTypeElement = (element: ElementDefinition) =>
+  element?.id?.endsWith("[x]") || element?.path?.endsWith("[x]");
+
+const getChoiceTypeDisplayLabel = (
+  element: ElementDefinition,
+  resourceBasePath: string
+) => {
+  const strippedPath = stripResourcePath(resourceBasePath, element.path);
+  const formattedLabel = formatAttributeLabel(strippedPath);
+  return strippedPath.endsWith("[x]") ? `${formattedLabel}[x]` : formattedLabel;
+};
+
+const getChoiceTypePaths = (element: ElementDefinition): string[] => {
+  const resourceName = element.path.split(".")[0];
+  const elemPath = stripResourcePath(resourceName, element.path);
+  const cleanPath = elemPath.substring(0, elemPath.lastIndexOf("["));
+
+  return (element?.type || []).map((type) =>
+    _.camelCase(cleanPath + _.upperFirst(type.code))
+  );
+};
+
+const hasElementValue = (
+  resource: any,
+  element: ElementDefinition
+): boolean => {
+  if (!isChoiceTypeElement(element)) {
+    return !_.isUndefined(_.get(resource, buildElementPath(element)));
+  }
+
+  return getChoiceTypePaths(element).some(
+    (choicePath) => !_.isUndefined(_.get(resource, choicePath))
+  );
+};
+
+const consolidateTopLevelChoiceTypes = (
+  elements: ElementDefinition[]
+): ElementDefinition[] => {
+  const consolidated = new Map<string, ElementDefinition>();
+
+  elements.forEach((element) => {
+    if (!isChoiceTypeElement(element)) {
+      consolidated.set(`${element.id}|${element.path}`, element);
+      return;
+    }
+
+    const key = `${element.id}|${element.path}`;
+    const existing = consolidated.get(key);
+    if (!existing) {
+      consolidated.set(key, {
+        ...element,
+        type: [...(element.type || [])],
+      });
+      return;
+    }
+
+    existing.type = _.uniqBy(
+      [...(existing.type || []), ...(element.type || [])],
+      (type) => type.code
+    );
+    consolidated.set(key, existing);
+  });
+
+  return Array.from(consolidated.values());
+};
+
+const getChoiceTypePath = (
+  element: ElementDefinition,
+  typeCode: string
+): string => {
+  const resourceName = element.path.split(".")[0];
+  const elemPath = stripResourcePath(resourceName, element.path);
+  const cleanPath = elemPath.substring(0, elemPath.lastIndexOf("["));
+  return _.camelCase(cleanPath + _.upperFirst(typeCode));
+};
+
+const getSelectedChoiceTypeCode = (
+  resource: any,
+  element: ElementDefinition
+): string | undefined => {
+  if (!isChoiceTypeElement(element) || !element?.type?.length) {
+    return undefined;
+  }
+
+  const matchedType = element.type.find(
+    (type) =>
+      !_.isUndefined(_.get(resource, getChoiceTypePath(element, type.code)))
+  );
+  return matchedType?.code;
+};
+
+const prioritizeChoiceTypeByResourceValue = (
+  element: ElementDefinition,
+  resource: any
+): ElementDefinition => {
+  if (!isChoiceTypeElement(element) || !element?.type?.length) {
+    return element;
+  }
+
+  const selectedTypeCode = getSelectedChoiceTypeCode(resource, element);
+  if (!selectedTypeCode) {
+    return element;
+  }
+
+  const selectedType = element.type.find(
+    (type) => type.code === selectedTypeCode
+  );
+  if (!selectedType) {
+    return element;
+  }
+
+  const reorderedTypes = [
+    selectedType,
+    ...element.type.filter((type) => type.code !== selectedTypeCode),
+  ];
+
+  return {
+    ...element,
+    type: reorderedTypes,
+  };
+};
+
+const applyChoiceTypeSelectionOrder = (
+  elements: ElementDefinition[],
+  resource: any
+): ElementDefinition[] => {
+  return elements.map((element) =>
+    prioritizeChoiceTypeByResourceValue(element, resource)
+  );
 };
 
 const ResourceEditor = ({
@@ -137,19 +269,19 @@ const ResourceEditor = ({
             bundleEntry: selectedEntry,
           };
 
-          const topElements = getTopLevelElements(selectedResource);
+          const topElements = applyChoiceTypeSelectionOrder(
+            consolidateTopLevelChoiceTypes(
+              getTopLevelElements(selectedResource)
+            ),
+            selectedResource.bundleEntry.resource
+          );
           //the topElements from the selectedResource contains elements from resource.definition.snapshot.element
 
           const requiredElements = [...topElements.filter((e) => e.min > 0)];
           const elementsWithValues = [
             ...topElements.filter((e) => {
-              const elemPath = buildElementPath(e);
-              const elemValue = _.get(
-                selectedResource.bundleEntry.resource,
-                elemPath
-              );
               // null or empty string/arrays/objects are valid values, so only filter out undefined
-              return !_.isUndefined(elemValue);
+              return hasElementValue(selectedResource.bundleEntry.resource, e);
             }),
           ];
 
@@ -274,7 +406,6 @@ const ResourceEditor = ({
   };
 
   const resourceBasePath = getBasePath(selectedResource);
-
   return (
     <Box
       className="resource-container"
@@ -383,11 +514,21 @@ const ResourceEditor = ({
                       aria-label="Resource element tabs"
                     >
                       {displayedElements.map((element, index) => {
-                        const elementName = getElementName(
-                          element,
-                          resourceBasePath,
-                          getNestedProperty(values, stripAllIndexes(element.id))
-                        );
+                        const elementName = isChoiceTypeElement(element)
+                          ? `${
+                              element.min > 0 ? " *" : ""
+                            }${getChoiceTypeDisplayLabel(
+                              element,
+                              resourceBasePath
+                            )}`
+                          : getElementName(
+                              element,
+                              resourceBasePath,
+                              getNestedProperty(
+                                values,
+                                stripAllIndexes(element.id)
+                              )
+                            );
 
                         return (
                           <Tab

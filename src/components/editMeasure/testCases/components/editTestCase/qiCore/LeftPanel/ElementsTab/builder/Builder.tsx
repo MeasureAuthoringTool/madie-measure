@@ -43,6 +43,33 @@ import { ResourceContextProvider } from "./ResourceContext";
 export const NO_PROFILES_MESSAGE =
   "No Profiles have been added to the test case. Navigate to the Available Elements tab to add profiles.";
 
+/**
+ * Returns true if the resource profile belongs to qicore or us-core.
+ */
+export const isQiCoreOrUsCoreResource = (res: ResourceIdentifier): boolean =>
+  res.profile.includes("/us/qicore") || res.profile.includes("/us/core");
+
+/**
+ * Deduplicates, filters to qicore/us-core, sorts alphabetically,
+ * and moves QI-Core Patient to the front of the list.
+ */
+export const deduplicateAndSortResources = (
+  identifiers: ResourceIdentifier[]
+): ResourceIdentifier[] => {
+  const sorted = _.uniqBy(identifiers, "profile").sort((a, b) =>
+    a.title.localeCompare(b.title)
+  );
+  const patientIdx = sorted.findIndex((r) => r.id === "qicore-patient");
+  if (patientIdx > 0) {
+    return [
+      sorted[patientIdx],
+      ...sorted.slice(0, patientIdx),
+      ...sorted.slice(patientIdx + 1),
+    ];
+  }
+  return sorted;
+};
+
 interface BuilderProps {
   testCase: TestCase;
   canEdit: boolean;
@@ -164,15 +191,16 @@ const Builder = ({
       fhirElmTranslationService.current
         .fetchRelevantDataElements(measure, abortController.current.signal)
         .then((relevantElements) => {
+          if (_.isEmpty(relevantElements)) {
+            setResources([]);
+            return;
+          }
           const profiles = relevantElements?.map(
             (relevantElement) => relevantElement.profile
           );
           if (!_.isEmpty(resourceIdentifiers)) {
-            // "uniq" alone does not prevent duplicates. Correct sorting.
-            const uniqueResources = _.uniqBy(
-              resourceIdentifiers,
-              "profile"
-            ).sort((a, b) => a.title.localeCompare(b.title));
+            const uniqueResources =
+              deduplicateAndSortResources(resourceIdentifiers);
 
             const filteredResources = _.isEmpty(profiles)
               ? uniqueResources
@@ -181,18 +209,7 @@ const Builder = ({
                     profiles.includes(r.profile) ||
                     "PATIENT" === r.type.toUpperCase()
                 );
-            const patientIdx = filteredResources.findIndex(
-              (r) => r.id === "qicore-patient"
-            );
-            let sortedResources = filteredResources;
-            if (patientIdx > 0) {
-              sortedResources = [
-                filteredResources[patientIdx],
-                ...filteredResources.slice(0, patientIdx),
-                ...filteredResources.slice(patientIdx + 1),
-              ];
-            }
-            setResources(sortedResources);
+            setResources(filteredResources);
           }
         })
         .finally(() => setResourcesLoading(false));
@@ -244,6 +261,14 @@ const Builder = ({
   const duplicateResourceIds = resourceIds?.filter(
     (id, index) => resourceIds.indexOf(id) !== index
   );
+
+  const profileMap: Record<string, number> = {};
+  state?.bundle?.entry?.forEach((entry) => {
+    const profile = entry.resource?.meta?.profile?.[0];
+    if (!profile) return;
+    profileMap[profile] = (profileMap[profile] || 0) + 1;
+  });
+
   return numberOfPatientsAdded > 1 ? (
     displayBuilderAlert(ERROR_MULTIPLE_PATIENTS, "multiple-patients")
   ) : duplicateResourceIds?.length > 0 ? (
@@ -272,13 +297,13 @@ const Builder = ({
           ) : (
             canEdit && (
               <ResourceList
+                profileMap={profileMap}
                 isComposite={isComposite}
                 onInsertTCClick={onInsertTCClick}
-                resourceIdentifiers={resources.filter(
-                  (res) =>
-                    res.id.startsWith("qicore") || res.id.startsWith("us-core")
+                resourceIdentifiers={resources.filter(isQiCoreOrUsCoreResource)}
+                allResourceIdentifiers={deduplicateAndSortResources(
+                  resourceIdentifiers
                 )}
-                allResourceIdentifiers={resourceIdentifiers}
                 measureId={measure?.id}
                 measureModel={measure?.model}
                 onClick={async (resourceIdentifier: ResourceIdentifier) => {

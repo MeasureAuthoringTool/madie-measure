@@ -31,6 +31,7 @@ import {
   getRequired,
   isComponentDataType,
   stripAllIndexes,
+  TYPE_CODE_NOT_USED,
 } from "../../../../../../../api/fhirDefinitionServiceUtilities";
 import CodingComponent from "./types/CodingComponent";
 import { useRequiredFields } from "./RequiredFieldsContext";
@@ -38,7 +39,6 @@ import CodeableConceptComponent from "./types/CodeableConceptComponent";
 import PeriodDateTimeComponent from "./types/PeriodDateTimeComponent";
 import ChoiceType from "./ChoiceType";
 import QuantityComponent from "./types/QuantityComponent";
-import IdentifierComponent from "./types/IdentifierComponent";
 import MoneyComponent from "./types/MoneyComponent";
 import TimingComponent from "./types/TimingComponent";
 import RangeComponent from "./types/RangeComponent";
@@ -50,9 +50,13 @@ import ElementSectionQiCore from "./ElementSectionQiCore";
 import { getEmptyValueForType } from "./TypeEditorUtils";
 import { getMultipleCardinalityLabel } from "./types/TypeUtil";
 import { StructureDefinitionDto } from "../../../../../../../api/models/StructureDefinitionDto";
-import { ElementDefinition, StructureDefinition } from "fhir/r4";
+import { ElementDefinition } from "fhir/r4";
 import useFhirDefinitionsServiceApi from "../../../../../../../api/useFhirDefinitionsService";
 import RatioComponent from "./types/RatioComponent";
+
+const TYPE_EDITOR_EXCLUDED_TYPES = new Set(
+  TYPE_CODE_NOT_USED.map((code) => code.toLowerCase())
+);
 
 export const formikErrorHandler = (name: string, formik) => {
   const touched = getNestedProperty(formik.touched, name);
@@ -270,6 +274,31 @@ const TypeEditor = ({
       : null;
   }, [extensionProfileDef]);
 
+  // For top-level choice types, always render the ChoiceType selector by path
+  // so UI does not depend on whichever concrete type happens to be selected.
+  const isChoiceTypePath = _.endsWith(structureDefinition?.id, "[x]");
+  const shouldRenderChoiceType = isChoiceTypePath && label?.includes("[x]");
+
+  if (shouldRenderChoiceType) {
+    const filteredStructureDefinition = {
+      ...structureDefinition,
+      type: (structureDefinition?.type || []).filter(
+        (typeItem) =>
+          !TYPE_EDITOR_EXCLUDED_TYPES.has(typeItem.code.toLowerCase())
+      ),
+    };
+
+    return (
+      <ChoiceType
+        childDef={filteredStructureDefinition}
+        resource={resource}
+        parentStructureDefinition={parentStructureDefinition}
+        canEdit={canEdit}
+        label={label}
+      />
+    );
+  }
+
   if (isComponentDataType(type)) {
     switch (type) {
       case "string":
@@ -449,14 +478,18 @@ const TypeEditor = ({
         );
         return wrapWithSection(label, markdown, isRoot, noWrap, required);
       case "Quantity":
-        // Show comparator for Quantity types that are NOT SimpleQuantity
-        const isSimpleQuantity = structureDefinition?.type?.some(
-          ({ code, profile }) =>
-            code === "Quantity" &&
-            profile?.includes(
-              "http://hl7.org/fhir/StructureDefinition/SimpleQuantity"
-            )
-        );
+      case "Duration":
+        // Show comparator for Quantity types that are NOT SimpleQuantity.
+        // Duration is always treated like a SimpleQuantity (no comparator)
+        const isSimpleQuantity =
+          type === "Duration" ||
+          structureDefinition?.type?.some(
+            ({ code, profile }) =>
+              code === "Quantity" &&
+              profile?.includes(
+                "http://hl7.org/fhir/StructureDefinition/SimpleQuantity"
+              )
+          );
         return (
           <>
             {(isArrayMode ? values : [null]).map((el, index) => {
@@ -1235,34 +1268,11 @@ const TypeEditor = ({
         {childDefs?.map((childDef) => {
           // if it's not a component dataType, we should render a header since it will have it's own property paths
           if (_.endsWith(childDef.id, "[x]") && childDef?.type?.length > 1) {
-            const excludedTypes = [
-              "base64Binary",
-              "markdown",
-              "Expression",
-              "ParameterDefinition",
-              "Annotation",
-              "Attachment",
-              "Contributor",
-              "SampledData",
-              "HumanName",
-              "RelatedArtifact",
-              "TriggerDefinition",
-              "UsageContext",
-              "Meta",
-              "Address",
-              "ContactPoint",
-              "ContactDetail",
-              "DataRequirement",
-            ];
-
             const filteredChildDef = {
               ...childDef,
               type: childDef.type.filter(
                 (typeItem) =>
-                  !excludedTypes.some(
-                    (excluded) =>
-                      typeItem.code.toLowerCase() === excluded.toLowerCase()
-                  )
+                  !TYPE_EDITOR_EXCLUDED_TYPES.has(typeItem.code.toLowerCase())
               ),
             };
             //Let's render a select that allows us to select the type of childDef we want to render.

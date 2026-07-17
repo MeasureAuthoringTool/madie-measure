@@ -26,6 +26,7 @@ import {
   checkUserCanEdit,
   useMeasureServiceApi,
   useUserServiceApi,
+  useTerminologyServiceApi,
 } from "@madie/madie-util";
 import { Box } from "@mui/system";
 import {
@@ -40,7 +41,6 @@ import useQdmElmTranslationServiceApi from "../../../../api/useQdmElmTranslation
 import useFhirElmTranslationServiceApi from "../../../../api/useFhirElmTranslationServiceApi";
 import GenerateCmsIdConfirmationDialog from "../cmsIdentifier/GenerateCmsIdConfirmationDialog";
 import _ from "lodash";
-import useTerminologyServiceApi from "../../testCases/api/useTerminologyServiceApi";
 
 interface measureInformationForm {
   versionId: string;

@@ -2824,12 +2824,12 @@ describe("TypeEditor Component", () => {
       </FormikProvider>
     );
     const filteredChildDef = screen.getByTestId(
-      "string-field-input-SomeResource.value[x]"
+      "string-field-input-SomeResource.valueString"
     );
     expect(filteredChildDef).toBeInTheDocument();
     expect(filteredChildDef.value).toBe("");
     const valueInput = (await screen.findByTestId(
-      "string-field-input-SomeResource.value[x]"
+      "string-field-input-SomeResource.valueString"
     )) as HTMLInputElement;
     await userEvent.type(valueInput, "250");
   });
@@ -4745,8 +4745,8 @@ describe("TypeEditor Component", () => {
       expect(comparatorInputs[0]).toHaveValue(">");
       expect(comparatorInputs[1]).toHaveValue("<=");
 
-      expect(codeInputs[0]).toHaveValue("mg");
-      expect(codeInputs[1]).toHaveValue("g");
+      expect(codeInputs[0]).toHaveValue("milligram");
+      expect(codeInputs[1]).toHaveValue("gram");
 
       const addButtons = screen.getAllByText("Add Value Quantity");
       expect(addButtons).toHaveLength(1);
