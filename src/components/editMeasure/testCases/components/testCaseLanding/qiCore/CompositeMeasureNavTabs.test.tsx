@@ -1,5 +1,6 @@
 import * as React from "react";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import CompositeMeasureNavTabs, {
   COMPOSITE_TAB_VALUES,
 } from "./CompositeMeasureNavTabs";
@@ -96,20 +97,19 @@ describe("CompositeMeasureNavTabs", () => {
   it("changes to a score tab via setActiveTab when clicked", () => {
     const setActiveTab = jest.fn();
     renderNavTabs("compositeScore", undefined, setActiveTab);
-    fireEvent.click(screen.getByTestId("denominator-score-tab"));
+    userEvent.click(screen.getByTestId("denominator-score-tab"));
     expect(setActiveTab).toHaveBeenCalledWith("denominatorScore");
   });
 
   it("does not switch to the display-only validation tab when clicked", () => {
     const setActiveTab = jest.fn();
     renderNavTabs("compositeScore", undefined, setActiveTab);
-    fireEvent.click(screen.getByTestId("validation-tab"));
+    userEvent.click(screen.getByTestId("validation-tab"));
     expect(setActiveTab).not.toHaveBeenCalled();
   });
 
   it("falls back to the composite score tab for an unknown active tab", () => {
     renderNavTabs("coverage", undefined);
-    // The design-system Tabs marks the active tab with aria-selected.
     expect(screen.getByTestId("composite-score-tab")).toHaveAttribute(
       "aria-selected",
       "true"

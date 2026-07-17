@@ -6,8 +6,8 @@ export interface CompositeScores {
   numeratorScore?: number;
 }
 
-// Parses a composite MeasureReport for the group matching the selected groupDisplayId, returning
-// the composite score as a percentage and the denominator/numerator counts.
+// Parses a composite MeasureReport for the group matching the selected groupDisplayId,
+// returning the composite score as a percentage and the denominator/numerator counts.
 export const parseCompositeScores = (
   calculationOutput: MRCalculationOutput | undefined,
   groupDisplayId: string | undefined
@@ -30,8 +30,7 @@ export const parseCompositeScores = (
   return {
     compositeScore:
       measureScore != null
-        ? // Round to avoid floating point noise (e.g. 0.1 * 100).
-          Math.round(measureScore * 100 * 100) / 100
+        ? Math.round(measureScore * 100 * 100) / 100
         : undefined,
     denominatorScore: getPopulationCount("denominator"),
     numeratorScore: getPopulationCount("numerator"),
