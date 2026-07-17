@@ -2057,10 +2057,10 @@ describe("CalculationService Tests", () => {
       );
       expect(output).toBeTruthy();
       expect(output.groupId).toBe(
-        ContinuousVariable_Encounter_Pass.measureGroups[0].displayId
+        ContinuousVariable_Encounter_Pass.populationGroupResults[0].groupId
       );
-      expect(output.resources).toHaveLength(2);
-      expect(output.resources[0]).toContain("Encounter");
+      expect(output.relations).toHaveLength(2);
+      expect(output.relations[0].resources[0]).toContain("Encounter");
     });
 
     it("should return null when bad results", () => {
