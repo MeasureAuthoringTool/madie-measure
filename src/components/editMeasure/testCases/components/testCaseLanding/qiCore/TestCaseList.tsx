@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import "twin.macro";
 import "styled-components/macro";
 import * as _ from "lodash";
@@ -23,6 +23,7 @@ import { ObjectId } from "bson";
 import { checkUserCanEdit, measureStore } from "@madie/madie-util";
 import useExecutionContext from "../../routes/qiCore/useExecutionContext";
 import CreateCodeCoverageNavTabs from "./CreateCodeCoverageNavTabs";
+import { parseCompositeScores } from "./compositeScores";
 import CodeCoverageHighlighting from "../common/CodeCoverageHighlighting";
 import CreateNewTestCaseDialog from "../../createTestCase/CreateNewTestCaseDialog";
 import {
@@ -316,6 +317,15 @@ const TestCaseList = (props: TestCaseListProps) => {
       checkUserCanEdit(measure?.measureSet?.owner, measure?.measureSet?.acls)
     );
   }, [measure]);
+
+  const compositeScores = useMemo(
+    () =>
+      parseCompositeScores(
+        compositeCalculationOutput,
+        selectedPopCriteria?.displayId
+      ),
+    [compositeCalculationOutput, selectedPopCriteria?.displayId]
+  );
 
   useEffect(() => {
     const validTestCases = executeInvalidTestCases
@@ -774,6 +784,7 @@ const TestCaseList = (props: TestCaseListProps) => {
                 validationPercentage={validationPercentage}
                 validationPercentageFraction={validationPercentageFraction}
                 clauseResults={clauseResults}
+                compositeScores={compositeScores}
               />
             </div>
             <CreateNewTestCaseDialog

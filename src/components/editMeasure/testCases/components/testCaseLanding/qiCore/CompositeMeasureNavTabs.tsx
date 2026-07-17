@@ -2,6 +2,7 @@ import React from "react";
 import { Tab, Tabs } from "@madie/madie-design-system/dist/react";
 import "twin.macro";
 import "styled-components/macro";
+import { CompositeScores } from "./compositeScores";
 
 export const COMPOSITE_TAB_VALUES = [
   "compositeScore",
@@ -14,6 +15,7 @@ export interface CompositeMeasureNavTabsProps {
   activeTab: string;
   setActiveTab: (value: string) => void;
   getValidationResultsDisplay: (label: string) => React.ReactNode;
+  compositeScores?: CompositeScores;
 }
 
 const defaultStyle = {
@@ -30,10 +32,14 @@ const defaultStyle = {
 
 // Scores default to "-" until execution results are available, mirroring the
 // Passing tab's display in CreateCodeCoverageNavTabs.
-const scoreDisplayTemplate = (label: string, percentage?: number) => (
+const scoreDisplayTemplate = (
+  label: string,
+  value?: number,
+  isPercentage = false
+) => (
   <div>
     <div style={{ fontSize: "29px", fontWeight: "600" }}>
-      {percentage != null ? `${percentage}%` : "-"}
+      {value != null ? (isPercentage ? `${value}%` : value) : "-"}
     </div>
     <div style={{ fontSize: "19px" }}>{label}</div>
   </div>
@@ -43,6 +49,7 @@ export default function CompositeMeasureNavTabs({
   activeTab,
   setActiveTab,
   getValidationResultsDisplay,
+  compositeScores,
 }: CompositeMeasureNavTabsProps) {
   return (
     <Tabs
@@ -65,7 +72,11 @@ export default function CompositeMeasureNavTabs({
         tabIndex={0}
         aria-label="Composite Score tab panel"
         sx={defaultStyle}
-        label={scoreDisplayTemplate("Composite Score")}
+        label={scoreDisplayTemplate(
+          "Composite Score",
+          compositeScores?.compositeScore,
+          true
+        )}
         data-testid="composite-score-tab"
         value="compositeScore"
       />
@@ -74,7 +85,10 @@ export default function CompositeMeasureNavTabs({
         tabIndex={0}
         aria-label="Denominator Score tab panel"
         sx={defaultStyle}
-        label={scoreDisplayTemplate("Denominator Score")}
+        label={scoreDisplayTemplate(
+          "Denominator Score",
+          compositeScores?.denominatorScore
+        )}
         data-testid="denominator-score-tab"
         value="denominatorScore"
       />
@@ -83,7 +97,10 @@ export default function CompositeMeasureNavTabs({
         tabIndex={0}
         aria-label="Numerator Score tab panel"
         sx={defaultStyle}
-        label={scoreDisplayTemplate("Numerator Score")}
+        label={scoreDisplayTemplate(
+          "Numerator Score",
+          compositeScores?.numeratorScore
+        )}
         data-testid="numerator-score-tab"
         value="numeratorScore"
       />

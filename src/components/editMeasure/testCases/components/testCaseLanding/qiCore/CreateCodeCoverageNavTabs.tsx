@@ -23,6 +23,7 @@ import LoadingButton from "../common/loadingButton/LoadingButton";
 import LoadingButtonWithMenu from "../common/loadingButton/LoadingButtonWithMenu";
 import { Tooltip } from "@mui/material";
 import CompositeMeasureNavTabs from "./CompositeMeasureNavTabs";
+import { CompositeScores } from "./compositeScores";
 
 export interface NavTabProps {
   activeTab: string;
@@ -44,6 +45,7 @@ export interface NavTabProps {
   setShowReportOptions: (show: boolean) => void;
   validationPercentageFraction: string;
   clauseResults?: { total: number; covered: number } | null;
+  compositeScores?: CompositeScores;
 }
 
 const defaultStyle = {
@@ -78,6 +80,7 @@ export default function CreateCodeCoverageNavTabs(props: NavTabProps) {
     onGenerateOverlappingCodesReport,
     validationPercentageFraction,
     clauseResults,
+    compositeScores,
   } = props;
   const [optionsOpen, setOptionsOpen] = useState<boolean>(false);
   const [anchorEl, setAnchorEl] = useState(null);
@@ -158,6 +161,7 @@ export default function CreateCodeCoverageNavTabs(props: NavTabProps) {
           activeTab={activeTab}
           setActiveTab={setActiveTab}
           getValidationResultsDisplay={getValidationResultsDisplay}
+          compositeScores={compositeScores}
         />
       ) : (
         <Tabs
