@@ -38,7 +38,11 @@ jest.mock("../../../../../../../api/fhirDefinitionServiceUtilities", () => {
     ]),
     isComponentDataType: jest.fn().mockReturnValue(false),
     getTopLevelElements: jest.fn().mockReturnValue([]),
-    stripResourcePath: jest.fn().mockReturnValue("ClaimResponse.id"),
+    stripResourcePath: jest
+      .fn()
+      .mockImplementation((resourcePath: string, path: string) =>
+        path?.replace(`${resourcePath}.`, "")
+      ),
     updateChildrenPaths: jest.fn().mockReturnValue([]),
   };
 });
@@ -619,6 +623,93 @@ describe("ElementEditor Component", () => {
         })
       );
     });
+
+    jest.useRealTimers();
+  });
+
+  it("replaces previous top-level choice key when applying a new choice type value", async () => {
+    jest.useFakeTimers();
+    const setApplyLoading = jest.fn();
+    const dispatch = jest.fn();
+    mockFormikObj.dirty = true;
+    mockFormikObj.values = {
+      ClaimResponse: {
+        id: "test",
+        effectivePeriod: {
+          start: "2026-07-01",
+        },
+      },
+    };
+
+    const selectedResourceWithChoice = {
+      ...mockSelectedResource,
+      bundleEntry: {
+        resource: {
+          id: "test",
+          resourceType: "ClaimResponse",
+          effectiveDateTime: "2026-06-01T00:00:00Z",
+        },
+      },
+      definition: {
+        ...mockElementDefinition,
+        type: "ClaimResponse",
+        snapshot: {
+          element: [
+            { id: "ClaimResponse", path: "ClaimResponse" },
+            {
+              id: "ClaimResponse.effective[x]",
+              path: "ClaimResponse.effective[x]",
+              type: [{ code: "dateTime" }, { code: "Period" }],
+            },
+          ],
+        },
+      },
+    };
+
+    renderElementEditor(
+      selectedResourceWithChoice,
+      selectedResourceWithChoice.bundleEntry.resource,
+      mockElementDefinition,
+      "ClaimResponse",
+      mockOnChange,
+      true,
+      jest.fn(),
+      jest.fn(),
+      dispatch,
+      jest.fn(),
+      false,
+      setApplyLoading
+    );
+
+    await waitFor(() =>
+      expect(mockFhirDefinitionsService.getResourceTree).toHaveBeenCalled()
+    );
+
+    const submitButton = screen.getByTestId("element-editor-submit-button");
+    userEvent.click(submitButton);
+    jest.advanceTimersByTime(100);
+
+    await waitFor(() => {
+      expect(dispatch).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: "ModifyBundleEntry",
+          payload: expect.objectContaining({
+            resource: expect.objectContaining({
+              effectivePeriod: {
+                start: "2026-07-01",
+              },
+            }),
+          }),
+        })
+      );
+    });
+
+    const dispatchedAction = dispatch.mock.calls.find(
+      (call) => call[0]?.type === "ModifyBundleEntry"
+    )?.[0];
+    expect(dispatchedAction.payload.resource).not.toHaveProperty(
+      "effectiveDateTime"
+    );
 
     jest.useRealTimers();
   });
