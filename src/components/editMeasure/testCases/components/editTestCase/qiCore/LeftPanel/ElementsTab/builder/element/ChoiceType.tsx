@@ -20,7 +20,6 @@ export const ChoiceType = (props: ChoiceTypePropsInterface) => {
     props;
   const [selectedChoiceType, setSelectedChoiceType] = useState<string>();
   const [updatedLabel, setUpdatedLabel] = useState<string>();
-  const value = _.get(formik.values, label);
   // get path of choice type attribute e.g. Observation.commentType[0].value
   const choiceBase = label.replace(/\[x]/, "");
 
@@ -70,10 +69,17 @@ export const ChoiceType = (props: ChoiceTypePropsInterface) => {
           ))}
         value={_.upperFirst(selectedChoiceType)}
         onChange={(e) => {
-          // clear previous choice type value
-          _.unset(formik.values, choiceBase + _.upperFirst(selectedChoiceType));
+          const newChoice = _.lowerFirst(String(e.target.value));
+          // keep only the currently selected top-level choice type key in formik values
+          _.uniq(
+            (childDef?.type || []).map((type: { code: string }) => type.code)
+          )
+            .filter((typeCode: string) => typeCode !== newChoice)
+            .forEach((typeCode: string) => {
+              _.unset(formik.values, choiceBase + _.upperFirst(typeCode));
+            });
+
           // update label and selected choice type based on the new selection
-          const newChoice: any = e.target.value;
           setUpdatedLabel(`${choiceBase}${_.upperFirst(newChoice)}`);
           setSelectedChoiceType(newChoice);
         }}
