@@ -4,7 +4,11 @@ import Editor from "../../../editor/Editor";
 import CompositeTestCasesTable from "./CompositeTestCasesTable";
 import useTestCaseServiceApi from "../../../../api/useTestCaseServiceApi";
 import { Measure, TestCase } from "@madie/madie-models";
-import { MadieSpinner, Toast } from "@madie/madie-design-system/dist/react";
+import {
+  MadieAlert,
+  MadieSpinner,
+  Toast,
+} from "@madie/madie-design-system/dist/react";
 import "./CompositeLeftPanelContent.scss";
 import { FormikProvider, useFormikContext } from "formik";
 import ElementsTab from "../LeftPanel/ElementsTab/ElementsTab";
@@ -15,6 +19,7 @@ import {
 import CompositeProfileViews from "./CompositeProfilesViews";
 import ViewTestCaseModal from "./ViewTestCaseModal";
 import { buildInsertedProfiles } from "./insertProfilesFromTestCase";
+import { isValidJson } from "../EditTestCase";
 
 const CompositeLeftPanelContent = ({
   leftPanelActiveTab,
@@ -43,7 +48,7 @@ const CompositeLeftPanelContent = ({
   );
   const { state, dispatch } = useQiCoreResource();
   const formik = useFormikContext<any>();
-
+  const jsonIsValid = isValidJson(editorVal);
   // local state for managing views under available tab
 
   type AvailableTab = "profiles" | "insert";
@@ -157,6 +162,13 @@ const CompositeLeftPanelContent = ({
       new Set(testCases.filter((tc) => tc.validResource).map((tc) => tc.id)),
     [testCases]
   );
+  const showAvailableTab = leftPanelActiveTab === "available" && jsonIsValid;
+
+  const showAddedTab = leftPanelActiveTab === "added" && jsonIsValid;
+
+  const showInvalidJson =
+    (leftPanelActiveTab === "available" || leftPanelActiveTab === "added") &&
+    !jsonIsValid;
 
   return (
     <>
@@ -183,8 +195,8 @@ const CompositeLeftPanelContent = ({
           testCaseCanEdit={testCaseCanEdit}
         />
       </div>
-
-      {leftPanelActiveTab === "available" && (
+      {/* should only display when available and json is valid */}
+      {showAvailableTab && (
         <div className="panel-content" data-testid="create-panel">
           <div id="elements-panel">
             {availableTab === "profiles" && (
@@ -246,7 +258,8 @@ const CompositeLeftPanelContent = ({
           </div>
         </div>
       )}
-      {leftPanelActiveTab === "added" && (
+      {/* should only display when added and json is valid */}
+      {showAddedTab && (
         <div className="panel-content" data-testid="added-panel">
           <FormikProvider value={formikStu6Context}>
             <ElementsTab
@@ -262,6 +275,35 @@ const CompositeLeftPanelContent = ({
           </FormikProvider>
         </div>
       )}
+      {/* should render when json is invalid and leftpanelActiveTab is either added, or available */}
+      {showInvalidJson && (
+        <div style={{ width: "98%" }}>
+          <MadieAlert
+            type="error"
+            content={
+              <div
+                aria-live="polite"
+                role="alert"
+                data-testid="json-error-alert-div"
+                style={{
+                  paddingTop: "10px",
+                  paddingBottom: "8px",
+                }}
+              >
+                <h3>JSON Failing</h3>
+                All JSON errors must be cleared before the UI Builder can be
+                used.
+              </div>
+            }
+            alertProps={{
+              "data-testid": "json-error-alert",
+            }}
+            canClose={false}
+          />
+        </div>
+      )}
+
+      {/* should display when leftPanelActiveTab is json */}
       {leftPanelActiveTab === "json" && (
         <Editor
           onChange={(val: string) => setEditorVal(val)}
@@ -270,6 +312,7 @@ const CompositeLeftPanelContent = ({
           height="100%"
         />
       )}
+
       <ViewTestCaseModal
         open={viewTestCaseModalOpen}
         onClose={() => setViewTestCaseModalOpen(false)}
