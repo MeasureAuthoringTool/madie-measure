@@ -28,6 +28,7 @@ import {
   useQiCoreResource,
   ResourceActionType,
 } from "../../../../../../../util/QiCorePatientProvider";
+import { ElementDefinition } from "fhir/r4";
 import { useFormikContext } from "formik";
 import {
   Button,
@@ -75,6 +76,42 @@ export function simplifySnapshotElements(data) {
     },
   ]);
 }
+
+const isTopLevelChoiceTypeElement = (element: ElementDefinition) =>
+  element?.id?.endsWith("[x]") && element?.path?.split(".")?.length === 2;
+
+const getChoiceTypePaths = (element: ElementDefinition): string[] => {
+  const resourceName = element.path.split(".")[0];
+  const elementPath = stripResourcePath(resourceName, element.path);
+  const cleanPath = elementPath.substring(0, elementPath.lastIndexOf("["));
+
+  return (element?.type || []).map((type) =>
+    _.camelCase(cleanPath + _.upperFirst(type.code))
+  );
+};
+
+const removeUnselectedTopLevelChoiceTypeValues = (
+  resource: any,
+  cleanedResource: any,
+  snapshotElements: ElementDefinition[] = []
+) => {
+  snapshotElements
+    .filter(isTopLevelChoiceTypeElement)
+    .forEach((element: ElementDefinition) => {
+      const choicePaths = _.uniq(getChoiceTypePaths(element));
+      const selectedChoicePath = choicePaths.find(
+        (path) => !_.isUndefined(_.get(cleanedResource, path))
+      );
+
+      if (!selectedChoicePath) {
+        return;
+      }
+
+      choicePaths
+        .filter((path) => path !== selectedChoicePath)
+        .forEach((path) => _.unset(resource, path));
+    });
+};
 
 const ElementEditor = ({
   setLastAddedElemPath,
@@ -317,6 +354,11 @@ const ElementEditor = ({
             ...cleanedResource,
             resourceType: type,
           };
+          removeUnselectedTopLevelChoiceTypeValues(
+            bundleEntry.resource,
+            cleanedResource,
+            selectedResource?.definition?.snapshot?.element
+          );
 
           // @ts-ignore
           const { add_new_resources } = formik.values;
