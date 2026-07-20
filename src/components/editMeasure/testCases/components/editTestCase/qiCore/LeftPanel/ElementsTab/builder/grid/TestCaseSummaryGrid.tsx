@@ -458,6 +458,8 @@ const TestCaseSummaryGrid = ({
             <tr key={headerGroup.id}>
               {headerGroup.headers.map((header) => {
                 const isHovered = hoveredHeader === header.id;
+                const canSort = header.column.id === "resourceType";
+                const isSorted = header.column.getIsSorted();
 
                 return (
                   <th
@@ -480,10 +482,12 @@ const TestCaseSummaryGrid = ({
                     <button
                       onClick={(e) => {
                         e.preventDefault();
-                        header.column.toggleSorting();
+                        if (canSort) {
+                          header.column.toggleSorting();
+                        }
                       }}
                       title={
-                        header.column.getCanSort()
+                        canSort
                           ? header.column.getNextSortingOrder() === "asc"
                             ? "Sort ascending"
                             : header.column.getNextSortingOrder() === "desc"
@@ -494,9 +498,7 @@ const TestCaseSummaryGrid = ({
                       style={{
                         background: "none",
                         border: "none",
-                        cursor: header.column.getCanSort()
-                          ? "pointer"
-                          : "default",
+                        cursor: canSort ? "pointer" : "default",
                         fontWeight: "inherit",
                         display: "flex",
                         alignItems: "center",
@@ -509,14 +511,16 @@ const TestCaseSummaryGrid = ({
                           alignItems: "center",
                         }}
                       >
-                        {header.column.getCanSort() &&
-                          isHovered &&
-                          !header.column.getIsSorted() && <UnfoldMoreIcon />}
+                        {canSort && isHovered && !isSorted && (
+                          <UnfoldMoreIcon />
+                        )}
 
-                        {{
-                          asc: <KeyboardArrowUpIcon />,
-                          desc: <KeyboardArrowDownIcon />,
-                        }[header.column.getIsSorted() as string] ?? null}
+                        {canSort &&
+                          ({
+                            asc: <KeyboardArrowUpIcon />,
+                            desc: <KeyboardArrowDownIcon />,
+                          }[isSorted as string] ??
+                            null)}
                       </span>
 
                       {flexRender(

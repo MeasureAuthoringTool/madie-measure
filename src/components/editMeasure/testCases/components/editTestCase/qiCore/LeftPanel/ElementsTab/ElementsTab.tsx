@@ -26,11 +26,17 @@ const ElementsTab = ({
       (_.isNil(lastJsonRef.current) || editorVal !== lastJsonRef.current)
     ) {
       lastJsonRef.current = editorVal;
-      const bundle = JSON.parse(editorVal);
-      dispatch({
-        type: ResourceActionType.LOAD_BUNDLE,
-        payload: bundle,
-      });
+      // error being caused here
+      try {
+        const bundle = JSON.parse(editorVal);
+        dispatch({
+          type: ResourceActionType.LOAD_BUNDLE,
+          payload: bundle,
+        });
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error("error is", error);
+      }
     }
   }, [dispatch, editorVal]);
 
