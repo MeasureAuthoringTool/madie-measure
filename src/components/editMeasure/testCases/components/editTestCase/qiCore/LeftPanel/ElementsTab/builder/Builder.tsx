@@ -185,7 +185,7 @@ const Builder = ({
     const fetchResources = async () => {
       // we want to filter out base fhir resources, by checking if the id does not start with qicore or us-core
       const resourceIdentifiers =
-        await fhirDefinitionsService.current.getResources();
+        await fhirDefinitionsService.current.getResources(measure?.model);
       setResourceIdentifiers(resourceIdentifiers);
       abortController.current = new AbortController();
       fhirElmTranslationService.current
@@ -312,7 +312,7 @@ const Builder = ({
                       resourceIdentifier
                     );
                   await fhirDefinitionsService.current
-                    .getResourceTree(resourceIdentifier.id)
+                    .getResourceTree(resourceIdentifier.id, measure?.model)
                     .then((resourceTree) => {
                       const selectedResource = {
                         ...resourceTree,

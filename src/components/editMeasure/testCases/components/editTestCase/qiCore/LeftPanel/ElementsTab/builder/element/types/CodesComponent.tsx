@@ -26,6 +26,7 @@ const CodesComponent = ({
   handleAddElement,
   showDeleteButton = false,
   handleDeleteElement,
+  measureModel,
 }: TypeComponentProps) => {
   const [codes, setCodes] = useState([]);
   const fhirDefinitionServiceApi = useRef(useFhirDefinitionsServiceApi());
@@ -108,7 +109,7 @@ const CodesComponent = ({
         // e.g. http://hl7.org/fhir/us/core/ValueSet/birthsex
         // e.g. http://hl7.org/fhir/ValueSet/administrative-gender
         fhirDefinitionServiceApi.current
-          .getValueSetDefinition(valueSetUrl)
+          .getValueSetDefinition(valueSetUrl, measureModel)
           .then((valueSet) => {
             /*
               does NOT have valueSet?.expansion?.contains for birthsex

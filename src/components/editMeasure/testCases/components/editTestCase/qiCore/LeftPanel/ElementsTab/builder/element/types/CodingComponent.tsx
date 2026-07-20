@@ -35,6 +35,7 @@ const CodingComponent = ({
   handleAddElement,
   showDeleteButton = false,
   handleDeleteElement,
+  measureModel = undefined,
 }) => {
   const [allValueSets, setAllValueSets] = useState<ValueSet[]>();
   const [selectedValueSet, setSelectedValueSet] = useState<ValueSet>();
@@ -94,7 +95,7 @@ const CodingComponent = ({
         );
         setExpansionStatus(ExpansionStatusType.EXPANDING);
         fhirDefinitionService.current
-          .getValueSetDefinition(valueSetUrl)
+          .getValueSetDefinition(valueSetUrl, measureModel)
           .then((valueSet) => {
             if (valueSet.expansion) {
               setAllValueSets((prev) => {

@@ -2,6 +2,7 @@ import * as React from "react";
 import { render, screen, waitFor, fireEvent } from "@testing-library/react";
 import CodingComponent from "./CodingComponent";
 import { ElementDefinition, ValueSet } from "fhir/r4";
+import { Model } from "@madie/madie-models";
 import userEvent from "@testing-library/user-event";
 import { ExecutionContextProvider } from "../../../../../../../routes/qiCore/ExecutionContext";
 import axios from "../../../../../../../../../../../api/axios-instance";
@@ -93,6 +94,7 @@ describe("CodingComponent Tests", () => {
           <CodingComponent
             canEdit={true}
             structureDefinition={mockStructureDefinition}
+            measureModel={Model.QICORE}
             label="test-label"
             value={null}
             onChange={mockOnChange}
@@ -129,6 +131,7 @@ describe("CodingComponent Tests", () => {
           <CodingComponent
             canEdit={true}
             structureDefinition={mockStructureDefinition}
+            measureModel={Model.QICORE}
             label="actuality"
             value={null}
             onChange={mockOnChange}
@@ -179,6 +182,7 @@ describe("CodingComponent Tests", () => {
           <CodingComponent
             canEdit={true}
             structureDefinition={mockStructureDefinition}
+            measureModel={Model.QICORE}
             label="test-label"
             value={null}
             onChange={mockOnChange}
@@ -215,6 +219,7 @@ describe("CodingComponent Tests", () => {
           <CodingComponent
             canEdit={true}
             structureDefinition={mockStructureDefinition}
+            measureModel={Model.QICORE}
             label="test-label"
             value={null}
             onChange={mockOnChange}
@@ -296,6 +301,7 @@ describe("CodingComponent Tests", () => {
           <CodingComponent
             canEdit={true}
             structureDefinition={mockStructureDefinition}
+            measureModel={Model.QICORE}
             label="test-label"
             value={null}
             onChange={mockOnChange}
@@ -366,6 +372,7 @@ describe("CodingComponent Tests", () => {
           <CodingComponent
             canEdit={true}
             structureDefinition={mockStructureDefinition}
+            measureModel={Model.QICORE}
             label="test-label"
             value={value}
             onChange={mockOnChange}
@@ -454,6 +461,7 @@ describe("CodingComponent Tests", () => {
           <CodingComponent
             canEdit={true}
             structureDefinition={mockStructureDefinition}
+            measureModel={Model.QICORE}
             label="test-label"
             value={coding}
             onChange={mockOnChange}
@@ -517,6 +525,7 @@ describe("CodingComponent Tests", () => {
           <CodingComponent
             canEdit={undefined}
             structureDefinition={mockStructureDefinition}
+            measureModel={Model.QICORE}
             label="test-label"
             value={coding}
             onChange={mockOnChange}
@@ -574,6 +583,7 @@ describe("CodingComponent Tests", () => {
           <CodingComponent
             canEdit={true}
             structureDefinition={mockStructureDefinition}
+            measureModel={Model.QICORE}
             label="test-label"
             value={coding}
             onChange={mockOnChange}
@@ -623,6 +633,7 @@ describe("CodingComponent Tests", () => {
           <CodingComponent
             canEdit={true}
             structureDefinition={mockStructureDefinition}
+            measureModel={Model.QICORE}
             label="test-label"
             value={null}
             onChange={mockOnChange}
@@ -693,6 +704,7 @@ describe("CodingComponent Tests", () => {
           <CodingComponent
             canEdit={true}
             structureDefinition={mockStructureDefinition}
+            measureModel={Model.QICORE}
             label="test-label"
             value={null}
             onChange={mockOnChange}
@@ -741,6 +753,7 @@ describe("CodingComponent Tests", () => {
           <CodingComponent
             canEdit={true}
             structureDefinition={mockStructureDefinition}
+            measureModel={Model.QICORE}
             label="test-label"
             value={null}
             onChange={mockOnChange}
@@ -822,6 +835,7 @@ describe("CodingComponent Tests", () => {
           <CodingComponent
             canEdit={true}
             structureDefinition={mockStructureDefinition}
+            measureModel={Model.QICORE}
             label="test-label"
             value={null}
             onChange={mockOnChange}

@@ -44,6 +44,7 @@ import tw from "twin.macro";
 import "../../../../../../../../../../styles/VerticalSideBarNav.scss";
 import "./ResourceEditor.scss";
 import { getHl7ProfileLink } from "../../../../../../../../../../utils/hl7Links";
+import { Model } from "@madie/madie-models";
 
 const InnerWrapper = tw.div`flex-grow flex flex-col`;
 
@@ -55,7 +56,7 @@ interface ResourceEditorProps {
   selectedResourceID: string;
   applyLoading: boolean;
   setApplyLoading: Dispatch<SetStateAction<boolean>>;
-  measureModel?: string;
+  measureModel?: Model;
 }
 
 // Builds the element path used to access values in the resource JSON, with special handling for choice types and array types
@@ -262,7 +263,7 @@ const ResourceEditor = ({
         ? profile.substring(profile.lastIndexOf("/") + 1)
         : selectedEntry?.resource?.resourceType;
       fhirDefinitionsService.current
-        .getResourceTree(resourceId)
+        .getResourceTree(resourceId, measureModel)
         .then((resourceTree) => {
           const selectedResource = {
             ...stripOutUnusedAttributes(resourceTree),
@@ -556,6 +557,7 @@ const ResourceEditor = ({
               resourcePath={resourceBasePath}
               applyLoading={applyLoading}
               setApplyLoading={setApplyLoading}
+              measureModel={measureModel}
               onChange={(path, value) => {
                 const nextEntry = _.cloneDeep(selectedResource.bundleEntry);
                 _.set(nextEntry.resource, path, value);

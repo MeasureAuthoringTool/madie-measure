@@ -2,6 +2,7 @@ import React, { useCallback, useMemo } from "react";
 import "twin.macro";
 import "styled-components/macro";
 import { Coding, CodeableConcept, ElementDefinition } from "fhir/r4";
+import { Model } from "@madie/madie-models";
 import CodingComponent from "./CodingComponent";
 import { Box } from "@mui/system";
 import { InputLabel } from "@madie/madie-design-system/dist/react";
@@ -20,6 +21,7 @@ interface CodeableConceptComponentProps {
   showDeleteButton?: boolean;
   handleDeleteElement?: Function;
   onChangeForExtension?: (value: CodeableConcept) => void;
+  measureModel?: Model;
 }
 
 const CodeableConceptComponent: React.FC<CodeableConceptComponentProps> = ({
@@ -32,6 +34,7 @@ const CodeableConceptComponent: React.FC<CodeableConceptComponentProps> = ({
   handleAddElement,
   showDeleteButton,
   onChangeForExtension,
+  measureModel,
   // handleDeleteElement,
 }) => {
   const formik = useFormikContext();
@@ -118,6 +121,7 @@ const CodeableConceptComponent: React.FC<CodeableConceptComponentProps> = ({
               handleDeleteElement={() => handleDeleteElement(index)}
               showAddAttributeButton={isLastElement}
               structureDefinition={structureDefinition}
+              measureModel={measureModel}
               onChange={(newValue: Coding) => {
                 const currentValue = _.get(
                   formik.values,

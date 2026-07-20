@@ -8,6 +8,7 @@ import {
   ServiceConfig,
 } from "../../../../../../../../../../../api/ServiceContext";
 import { ElementDefinition } from "fhir/r4";
+import { Model } from "@madie/madie-models";
 
 const mockConfig = {
   fhirService: {
@@ -271,11 +272,12 @@ describe("Codes Component", () => {
           onChange={onChangeMock}
           fieldRequired
           structureDefinition={structureDefinition}
+          measureModel={Model.QICORE}
         />
       </ApiContextProvider>
     );
     expect(axios.get).toHaveBeenCalledWith(
-      "fhirService.com/qicore/resources/value-set-definition?url=" +
+      "fhirService.com/fhir/models/qicore/resources/value-set-definition?url=" +
         valueSetUrl,
       { headers: { Authorization: "Bearer test.jwt" } }
     );
@@ -307,11 +309,12 @@ describe("Codes Component", () => {
           onChange={onChangeMock}
           fieldRequired
           structureDefinition={structureDefinition}
+          measureModel={Model.QICORE}
         />
       </ApiContextProvider>
     );
     expect(axios.get).toHaveBeenCalledWith(
-      "fhirService.com/qicore/resources/value-set-definition?url=" +
+      "fhirService.com/fhir/models/qicore/resources/value-set-definition?url=" +
         valueSetUrl,
       { headers: { Authorization: "Bearer test.jwt" } }
     );
@@ -338,11 +341,12 @@ describe("Codes Component", () => {
           onChange={onChangeMock}
           fieldRequired
           structureDefinition={structureDefinition}
+          measureModel={Model.QICORE}
         />
       </ApiContextProvider>
     );
     expect(axios.get).toHaveBeenCalledWith(
-      "fhirService.com/qicore/resources/value-set-definition?url=" +
+      "fhirService.com/fhir/models/qicore/resources/value-set-definition?url=" +
         valueSetUrl,
       { headers: { Authorization: "Bearer test.jwt" } }
     );
@@ -360,7 +364,7 @@ describe("Codes Component", () => {
       mockedAxios.get.mockImplementation((url) => {
         if (
           url ===
-          "fhirService.com/qicore/resources/value-set-definition?url=http://hl7.org/fhir/us/core/ValueSet/birthsex"
+          "fhirService.com/fhir/models/qicore/resources/value-set-definition?url=http://hl7.org/fhir/us/core/ValueSet/birthsex"
         ) {
           return Promise.resolve({ data: mockExpansionResponseWithExtension });
         }
@@ -389,12 +393,13 @@ describe("Codes Component", () => {
             onChange={onChangeMock}
             fieldRequired
             structureDefinition={structureDefinitionWithExtension}
+            measureModel={Model.QICORE}
             resource={resource}
           />
         </ApiContextProvider>
       );
       expect(axios.get).toHaveBeenCalledWith(
-        "fhirService.com/qicore/resources/value-set-definition?url=http://hl7.org/fhir/us/core/ValueSet/birthsex",
+        "fhirService.com/fhir/models/qicore/resources/value-set-definition?url=http://hl7.org/fhir/us/core/ValueSet/birthsex",
         { headers: { Authorization: "Bearer test.jwt" } }
       );
 
@@ -413,6 +418,7 @@ describe("Codes Component", () => {
             onChange={onChangeMock}
             fieldRequired
             structureDefinition={structureDefinitionWithExtension}
+            measureModel={Model.QICORE}
             resource={resource}
           />
         </ApiContextProvider>
@@ -428,7 +434,7 @@ describe("Codes Component", () => {
       mockedAxios.get.mockImplementation((url) => {
         if (
           url ===
-          "fhirService.com/qicore/resources/value-set-definition?url=http://hl7.org/fhir/us/core/ValueSet/birthsex"
+          "fhirService.com/fhir/models/qicore/resources/value-set-definition?url=http://hl7.org/fhir/us/core/ValueSet/birthsex"
         ) {
           return Promise.reject({ error: "error" });
         }
@@ -442,12 +448,13 @@ describe("Codes Component", () => {
             onChange={onChangeMock}
             fieldRequired
             structureDefinition={structureDefinitionWithExtension}
+            measureModel={Model.QICORE}
             resource={resource}
           />
         </ApiContextProvider>
       );
       expect(axios.get).toHaveBeenCalledWith(
-        "fhirService.com/qicore/resources/value-set-definition?url=http://hl7.org/fhir/us/core/ValueSet/birthsex",
+        "fhirService.com/fhir/models/qicore/resources/value-set-definition?url=http://hl7.org/fhir/us/core/ValueSet/birthsex",
         { headers: { Authorization: "Bearer test.jwt" } }
       );
       await waitFor(() => {

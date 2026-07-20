@@ -53,6 +53,7 @@ import { StructureDefinitionDto } from "../../../../../../../api/models/Structur
 import { ElementDefinition } from "fhir/r4";
 import useFhirDefinitionsServiceApi from "../../../../../../../api/useFhirDefinitionsService";
 import RatioComponent from "./types/RatioComponent";
+import { Model } from "@madie/madie-models";
 
 const TYPE_EDITOR_EXCLUDED_TYPES = new Set(
   TYPE_CODE_NOT_USED.map((code) => code.toLowerCase())
@@ -104,6 +105,7 @@ interface TypeEditorProps {
   label: string;
   noWrap?: boolean;
   onChangeForExtension?: (value: any) => void;
+  measureModel?: Model;
 }
 
 // onChange is being deprecated as no updates to the resource are tracked.
@@ -117,6 +119,7 @@ const TypeEditor = ({
   label,
   noWrap = false,
   onChangeForExtension,
+  measureModel,
 }: TypeEditorProps): JSX.Element | null => {
   const formik = useFormikContext();
   // Ref to track formik.values for use in closures (prevents stale state issues when rapidly clicking Add)
@@ -194,7 +197,10 @@ const TypeEditor = ({
       if (!_.isEmpty(type?.profile)) {
         const loadProfiles = type.profile.map((profile: string) => {
           const resourceId = profile.split("/").pop();
-          return fhirDefinitionsService.current.getResourceTree(resourceId);
+          return fhirDefinitionsService.current.getResourceTree(
+            resourceId,
+            measureModel
+          );
         });
         try {
           const profileDefinitions = await Promise.all(loadProfiles);
@@ -911,6 +917,7 @@ const TypeEditor = ({
                   {/* Observation.category , AuditEvent.type 0..*, but base fhir only. Revisit this render once base fhir is supported. */}
                   <CodesComponent
                     key={index}
+                    measureModel={measureModel}
                     canEdit={canEdit}
                     structureDefinition={structureDefinition}
                     fieldRequired={required}
@@ -976,6 +983,7 @@ const TypeEditor = ({
       case "Coding":
         const coding = (
           <CodingComponent
+            measureModel={measureModel}
             handleDeleteElement={handleDeleteElement}
             handleAddElement={handleAddElement}
             label={label}
@@ -1011,6 +1019,7 @@ const TypeEditor = ({
                   key={index}
                   canEdit={canEdit}
                   structureDefinition={structureDefinition}
+                  measureModel={measureModel}
                   label={fieldLabel}
                   showAddAttributeButton={
                     showMultipleCardinalityActionCenter &&

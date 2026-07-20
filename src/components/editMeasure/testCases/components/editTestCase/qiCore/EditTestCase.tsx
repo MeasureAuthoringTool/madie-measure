@@ -284,7 +284,7 @@ const isValidJson = (str) => {
 interface LeftPanelContentProps {
   leftPanelActiveTab: string;
   setLeftPanelActiveTab: (value: string) => void;
-  isQICore6: boolean;
+  isBuilderEnabled: boolean;
   dirty: boolean;
   setCalculationDialogOpen: (value: boolean) => void;
   testCaseCanEdit: boolean;
@@ -299,7 +299,7 @@ interface LeftPanelContentProps {
 const LeftPanelContent = ({
   leftPanelActiveTab,
   setLeftPanelActiveTab,
-  isQICore6,
+  isBuilderEnabled,
   dirty,
   setCalculationDialogOpen,
   testCaseCanEdit,
@@ -321,7 +321,7 @@ const LeftPanelContent = ({
         <CreateTestCaseLeftPanelNavTabs
           leftPanelActiveTab={leftPanelActiveTab}
           setLeftPanelActiveTab={setLeftPanelActiveTab}
-          isQICore6={isQICore6}
+          isBuilderEnabled={isBuilderEnabled}
           dirty={dirty}
           setCalculationDialogOpen={setCalculationDialogOpen}
           canEdit={testCaseCanEdit}
@@ -1205,6 +1205,9 @@ const EditTestCase = (props: EditTestCaseProps) => {
   }
 
   const isQICore6 = measure?.model === Model.QICORE_6_0_0;
+  const isBuilderEnabled =
+    measure?.model === Model.QICORE_6_0_0 ||
+    measure?.model === Model.US_QUALITY_0_5_0;
 
   const severityOfValidationErrors = (validationErrors) => {
     const errorsWithNoSeverity = validationErrors?.filter(
@@ -1282,7 +1285,9 @@ const EditTestCase = (props: EditTestCaseProps) => {
             </QiCoreResourceProvider>
           </FormikProvider>
         ) : (
-          <div className={`allotment-wrapper ${isQICore6 ? "fullvh" : ""}`}>
+          <div
+            className={`allotment-wrapper ${isBuilderEnabled ? "fullvh" : ""}`}
+          >
             <Allotment
               ref={allotmentRef}
               defaultSizes={[48, 48, 4]}
@@ -1290,13 +1295,13 @@ const EditTestCase = (props: EditTestCaseProps) => {
             >
               <Allotment.Pane>
                 <div className="nav-panel">
-                  {isQICore6 ? (
+                  {isBuilderEnabled ? (
                     <>
                       <QiCoreResourceProvider>
                         <LeftPanelContent
                           leftPanelActiveTab={leftPanelActiveTab}
                           setLeftPanelActiveTab={setLeftPanelActiveTab}
-                          isQICore6={isQICore6}
+                          isBuilderEnabled={isBuilderEnabled}
                           dirty={formikStu6Context.dirty}
                           setCalculationDialogOpen={setCalculationDialogOpen}
                           testCaseCanEdit={testCaseCanEdit}

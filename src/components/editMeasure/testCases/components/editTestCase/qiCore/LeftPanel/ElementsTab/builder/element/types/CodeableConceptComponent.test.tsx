@@ -1,6 +1,7 @@
 import * as React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import { ElementDefinition, ValueSet } from "fhir/r4";
+import { Model } from "@madie/madie-models";
 import userEvent from "@testing-library/user-event";
 import { ExecutionContextProvider } from "../../../../../../../routes/qiCore/ExecutionContext";
 import axios from "../../../../../../../../../../../api/axios-instance";
@@ -110,6 +111,7 @@ describe("CodeableConceptComponent Tests", () => {
             <CodeableConceptComponent
               canEdit={true}
               structureDefinition={mockStructureDefinition}
+              measureModel={Model.QICORE}
               label="test-label"
               value={value}
               addTitle={"Codeable"}
@@ -213,6 +215,7 @@ describe("CodeableConceptComponent Tests", () => {
             <CodeableConceptComponent
               canEdit={true}
               structureDefinition={mockStructureDefinition}
+              measureModel={Model.QICORE}
               label="test-label"
               value={value}
               addTitle={"Codeable"}
@@ -278,6 +281,7 @@ describe("CodeableConceptComponent Tests", () => {
             <CodeableConceptComponent
               canEdit={true}
               structureDefinition={mockStructureDefinition}
+              measureModel={Model.QICORE}
               label="test-label"
               value={value}
               addTitle={"Codeable"}
@@ -347,6 +351,7 @@ describe("CodeableConceptComponent Tests", () => {
             <CodeableConceptComponent
               canEdit={true}
               structureDefinition={mockStructureDefinition}
+              measureModel={Model.QICORE}
               label="test-label"
               value={value}
               addTitle={"Codeable"}
@@ -417,6 +422,7 @@ describe("CodeableConceptComponent Tests", () => {
             <CodeableConceptComponent
               canEdit={true}
               structureDefinition={mockStructureDefinition}
+              measureModel={Model.QICORE}
               label="test-label"
               value={currentValue}
               addTitle={"Codeable"}
@@ -481,6 +487,7 @@ describe("CodeableConceptComponent Tests", () => {
             <CodeableConceptComponent
               canEdit={true}
               structureDefinition={mockStructureDefinition}
+              measureModel={Model.QICORE}
               label="Patient.extension[0].valueCodeableConcept"
               value={value}
               addTitle={"Codeable"}

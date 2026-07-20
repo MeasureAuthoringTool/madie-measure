@@ -36,6 +36,7 @@ import {
 } from "@madie/madie-design-system/dist/react";
 import useFormikResetOnEvent from "../../../../../../../../../common/useFormikResetOnEvent";
 import { RequiredFieldsProvider } from "./RequiredFieldsContext";
+import { Model } from "@madie/madie-models";
 
 interface ElementEditorProps {
   resource?: any;
@@ -52,6 +53,7 @@ interface ElementEditorProps {
   setLastAddedElemPath: (path: string) => void;
   applyLoading: boolean;
   setApplyLoading: Dispatch<SetStateAction<boolean>>;
+  measureModel?: Model;
 }
 /*
   TO DO: We have too many copies of state.
@@ -89,6 +91,7 @@ const ElementEditor = ({
   deleteElement,
   applyLoading,
   setApplyLoading,
+  measureModel,
 }: ElementEditorProps) => {
   const [toastOpen, setToastOpen] = useState<boolean>(false);
   const [toastMessage, setToastMessage] = useState<string>("");
@@ -128,7 +131,8 @@ const ElementEditor = ({
           // snapshot already has child.id.* nodes, do NOT expand by datatype.
           if (!hasInlineChildren) {
             const def = await fhirDefinitionsService.current.getResourceTree(
-              type
+              type,
+              measureModel
             );
             if (def) {
               const elements = getTopLevelElements(def, true);
@@ -373,6 +377,7 @@ const ElementEditor = ({
             resource={resource}
             canEdit={canEdit}
             deleteElement={deleteElement}
+            measureModel={measureModel}
           />
           {canEdit && (
             <div className="element-editor-submission">
