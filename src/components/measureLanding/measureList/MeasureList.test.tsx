@@ -2451,7 +2451,9 @@ describe("Measure List component", () => {
     expect(dialogTitle).toBeInTheDocument();
 
     // Find and click the confirm delete button - use the correct test ID
-    const confirmDeleteButton = screen.getByTestId("delete-measure-button-2");
+    const confirmDeleteButton = screen.getByTestId(
+      "delete-dialog-continue-button"
+    );
     expect(confirmDeleteButton).toBeInTheDocument();
 
     // Click the button with fireEvent to ensure the click is processed
@@ -2522,7 +2524,9 @@ describe("Measure List component", () => {
     await findByText("Delete Measure");
 
     // Find and click the confirm delete button
-    const confirmDeleteButton = screen.getByTestId("delete-measure-button-2");
+    const confirmDeleteButton = screen.getByTestId(
+      "delete-dialog-continue-button"
+    );
     fireEvent.click(confirmDeleteButton);
 
     // Wait for the deleteMeasure API call to be made and error to be handled

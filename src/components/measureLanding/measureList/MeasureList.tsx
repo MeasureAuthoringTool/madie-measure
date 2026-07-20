@@ -24,6 +24,7 @@ import {
   TruncateText,
   MadieTooltipIcon,
   MadieTable,
+  MadieDeleteDialog,
   SearchAndFilter,
   useFilterSearch,
 } from "@madie/madie-design-system/dist/react";
@@ -45,7 +46,6 @@ import InvalidMeasureNameDialog from "./InvalidMeasureNameDialog/InvalidMeasureN
 import getLibraryNameErrors from "./InvalidMeasureNameDialog/getLibraryNameErrors";
 import AssociateCmsIdDialog from "./associateCmsIdDialog/AssociateCmsIdDialog";
 import ActionCenter from "./actionCenter/ActionCenter";
-import DeleteDialog from "../../editMeasure/DeleteDialog";
 import ViewHRModal from "../../common/viewHumanReadableModal/ViewHRModal";
 import ViewMeasureHistoryDialog from "../../common/viewMeasureHistoryDialog/ViewMeasureHistoryDialog";
 import ShareDialog from "../../common/shareDialog/ShareDialog";
@@ -1322,11 +1322,20 @@ export default function MeasureList(props: {
         onSave={handleShareDialogSave}
         isAdmin={userRoles?.isAdmin}
       />
-      <DeleteDialog
+      <MadieDeleteDialog
         open={deleteMeasureDialog}
         onClose={handleDialogClose}
-        measureName={targetMeasure?.current?.measureName}
-        deleteMeasure={deleteMeasure}
+        onContinue={deleteMeasure}
+        dialogTitle="Delete Measure"
+        statement
+        customDialogBody={
+          <>
+            Are you sure you want to delete draft of{" "}
+            <span className="strong">
+              {targetMeasure?.current?.measureName}
+            </span>
+          </>
+        }
       />
       <AssociateCmsIdDialog
         measures={selectedMeasures}

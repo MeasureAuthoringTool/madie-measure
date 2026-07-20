@@ -31,10 +31,10 @@ import getLibraryNameErrors from "../measureLanding/measureList/InvalidMeasureNa
 import {
   Toast,
   MadieAlert,
+  MadieDeleteDialog,
   MadieDiscardDialog,
   MadieSpinner,
 } from "@madie/madie-design-system/dist/react";
-import DeleteDialog from "./DeleteDialog";
 import NotFound from "../notfound/NotFound";
 import ReviewInfo from "./reviewInfo/ReviewInfo";
 import "./EditMeasure.scss";
@@ -758,11 +758,18 @@ export default function EditMeasure() {
               <Route path="*" element={<NotFound />} />
             </Routes>
           </div>
-          <DeleteDialog
+          <MadieDeleteDialog
             open={deleteOpen}
             onClose={() => setDeleteOpen(false)}
-            measureName={measure?.measureName}
-            deleteMeasure={deleteMeasure}
+            onContinue={deleteMeasure}
+            dialogTitle="Delete Measure"
+            statement
+            customDialogBody={
+              <>
+                Are you sure you want to delete draft of{" "}
+                <span className="strong">{measure?.measureName}</span>
+              </>
+            }
           />
 
           <ShareDialog
