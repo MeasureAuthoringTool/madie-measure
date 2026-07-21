@@ -1,9 +1,9 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { TestCase } from "@madie/madie-models";
 import { Select, MenuItem } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import { measureStore } from "@madie/madie-util";
+import { measureStore, useUserServiceApi } from "@madie/madie-util";
 import "./EditTestCaseBreadCrumbs.scss";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import Tooltip from "@mui/material/Tooltip";
@@ -21,6 +21,10 @@ const EditTestCaseBreadCrumbs = (props: EditTestCaseBreadCrumbsProps) => {
   const [testCases, setTestCases] = React.useState(null);
   const [selectedIndex, setSelectedIndex] = React.useState(0);
   const [measure, setMeasure] = useState<any>(measureStore.state);
+  const userServiceApi = useRef(useUserServiceApi()).current; //needs to be ref or triggers jest. throws warn
+  const [lockedByDisplayNames, setLockedByDisplayNames] = useState<
+    Record<string, string>
+  >({});
 
   const generateTestCaseString = useCallback((testCase) => {
     let testCaseString = "";
@@ -68,6 +72,40 @@ const EditTestCaseBreadCrumbs = (props: EditTestCaseBreadCrumbsProps) => {
     }
   }, [measure, testCaseString]);
 
+  // Real names of users who currently have a test case locked for editing,
+  // similar to the "in use" chip on the Page Header.
+  useEffect(() => {
+    const lockedByHarpIds = Array.from(
+      new Set(
+        (measure?.testCases || [])
+          .map((tc) => tc?.testCaseLock?.lockedBy)
+          .filter((harpId): harpId is string => !!harpId)
+      )
+    );
+    if (lockedByHarpIds.length === 0 || !userServiceApi) {
+      return;
+    }
+    userServiceApi
+      .getBulkUserDetails(lockedByHarpIds)
+      .then((userDetails: any) => {
+        setLockedByDisplayNames((prev) => {
+          const next = { ...prev };
+          Object.entries(userDetails || {}).forEach(
+            ([harpId, details]: [string, any]) => {
+              const name = [details?.firstName, details?.lastName]
+                .filter(Boolean)
+                .join(" ");
+              next[harpId] = name ? `${name} (${harpId})` : harpId;
+            }
+          );
+          return next;
+        });
+      })
+      .catch(() => {
+        // fall back to displaying the raw HARP ID if the lookup fails
+      });
+  }, [measure, userServiceApi]);
+
   const handleMenuItemClick = (index: number) => {
     const newPath = `/measures/${measure.id}/edit/test-cases/${testCases[index].id}`;
     navigate(newPath);
@@ -78,13 +116,17 @@ const EditTestCaseBreadCrumbs = (props: EditTestCaseBreadCrumbsProps) => {
     testCase: TestCase
   ) => {
     if (props.canEdit && testCase.testCaseLock) {
+      const lockedBy = testCase.testCaseLock?.lockedBy;
+      const lockedByDisplayName = lockedBy
+        ? lockedByDisplayNames[lockedBy] || lockedBy
+        : undefined;
       return (
         <Box component="span" display="inline-flex" alignItems="center">
           {props.canEdit && testCase.testCaseLock && (
             <Tooltip
               title={
-                testCase.testCaseLock?.lockedBy
-                  ? `Locked while being edited by ${testCase.testCaseLock.lockedBy}`
+                lockedByDisplayName
+                  ? `Locked while being edited by ${lockedByDisplayName}`
                   : "Test Case is locked"
               }
               slotProps={{
