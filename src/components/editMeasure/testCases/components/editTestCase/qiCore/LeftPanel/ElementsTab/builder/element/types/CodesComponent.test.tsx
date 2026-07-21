@@ -39,6 +39,25 @@ const mockExpansionResponse = {
   },
 };
 
+const mockNestedExpansionResponse = {
+  expansion: {
+    contains: [
+      {
+        code: "parent",
+        display: "Parent",
+        contains: [
+          { code: "child-a", display: "Child A" },
+          {
+            code: "child-b",
+            display: "Child B",
+            contains: [{ code: "grandchild", display: "Grandchild" }],
+          },
+        ],
+      },
+    ],
+  },
+};
+
 const structureDefinitionWithExtension = {
   id: "Extension.value[x]",
   path: "Extension.value[x]",
@@ -339,6 +358,41 @@ describe("Codes Component", () => {
       const options = screen.queryAllByRole("option");
       expect(options).toHaveLength(0);
     });
+  });
+
+  it("Should flatten nested contains entries into selectable options", async () => {
+    mockedAxios.get.mockImplementation((url) => {
+      if (url.endsWith("/value-set-definition?url=" + valueSetUrl)) {
+        return Promise.resolve({ data: mockNestedExpansionResponse });
+      }
+    });
+
+    renderWithExecutionContext(
+      <ApiContextProvider value={mockConfig}>
+        <CodesComponent
+          canEdit={true}
+          label={"Gender"}
+          value={"child-a"}
+          onChange={onChangeMock}
+          fieldRequired
+          structureDefinition={structureDefinition}
+        />
+      </ApiContextProvider>
+    );
+
+    const codeSelect = screen.getByRole("combobox", { name: "Gender" });
+    userEvent.click(codeSelect);
+
+    expect(await screen.findByTestId("code-option-parent")).toBeInTheDocument();
+    expect(
+      await screen.findByTestId("code-option-child-a")
+    ).toBeInTheDocument();
+    expect(
+      await screen.findByTestId("code-option-child-b")
+    ).toBeInTheDocument();
+    expect(
+      await screen.findByTestId("code-option-grandchild")
+    ).toBeInTheDocument();
   });
 
   it("Should disable the input if user cannot edit", async () => {
