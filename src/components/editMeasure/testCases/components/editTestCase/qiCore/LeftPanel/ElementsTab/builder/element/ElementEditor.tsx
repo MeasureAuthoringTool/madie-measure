@@ -37,7 +37,7 @@ import {
 } from "@madie/madie-design-system/dist/react";
 import useFormikResetOnEvent from "../../../../../../../../../common/useFormikResetOnEvent";
 import { RequiredFieldsProvider } from "./RequiredFieldsContext";
-import { Model } from "@madie/madie-models";
+import useMeasureModel from "../../../../../../routes/qiCore/useMeasureModel";
 
 interface ElementEditorProps {
   resource?: any;
@@ -54,7 +54,6 @@ interface ElementEditorProps {
   setLastAddedElemPath: (path: string) => void;
   applyLoading: boolean;
   setApplyLoading: Dispatch<SetStateAction<boolean>>;
-  measureModel?: Model;
 }
 /*
   TO DO: We have too many copies of state.
@@ -128,8 +127,8 @@ const ElementEditor = ({
   deleteElement,
   applyLoading,
   setApplyLoading,
-  measureModel,
 }: ElementEditorProps) => {
+  const measureModel = useMeasureModel();
   const [toastOpen, setToastOpen] = useState<boolean>(false);
   const [toastMessage, setToastMessage] = useState<string>("");
   const [toastType, setToastType] = useState<string>("danger");
@@ -419,7 +418,6 @@ const ElementEditor = ({
             resource={resource}
             canEdit={canEdit}
             deleteElement={deleteElement}
-            measureModel={measureModel}
           />
           {canEdit && (
             <div className="element-editor-submission">

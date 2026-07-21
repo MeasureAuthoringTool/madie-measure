@@ -9,6 +9,7 @@ import {
 } from "../../../../../../../../../../../api/ServiceContext";
 import { ElementDefinition } from "fhir/r4";
 import { Model } from "@madie/madie-models";
+import { ExecutionContextProvider } from "../../../../../../../routes/qiCore/ExecutionContext";
 
 const mockConfig = {
   fhirService: {
@@ -247,6 +248,17 @@ const onChangeMock = jest.fn();
 jest.mock("../../../../../../../../../../../api/axios-instance");
 const mockedAxios = axios as jest.Mocked<typeof axios>;
 
+const renderWithExecutionContext = (ui: React.ReactElement) =>
+  render(
+    <ExecutionContextProvider
+      value={
+        { measureState: [{ model: Model.QICORE } as any, jest.fn()] } as any
+      }
+    >
+      {ui}
+    </ExecutionContextProvider>
+  );
+
 jest.mock("@madie/madie-util", () => ({
   useOktaTokens: () => ({ getAccessToken: () => "test.jwt" }),
 }));
@@ -263,7 +275,7 @@ describe("Codes Component", () => {
     });
   });
   it("Should render codes component with appropriate options retrieved from API", async () => {
-    render(
+    renderWithExecutionContext(
       <ApiContextProvider value={mockConfig}>
         <CodesComponent
           canEdit={true}
@@ -272,7 +284,6 @@ describe("Codes Component", () => {
           onChange={onChangeMock}
           fieldRequired
           structureDefinition={structureDefinition}
-          measureModel={Model.QICORE}
         />
       </ApiContextProvider>
     );
@@ -300,7 +311,7 @@ describe("Codes Component", () => {
         return Promise.reject({ data: "unknown error" });
       }
     });
-    render(
+    renderWithExecutionContext(
       <ApiContextProvider value={mockConfig}>
         <CodesComponent
           canEdit={true}
@@ -309,7 +320,6 @@ describe("Codes Component", () => {
           onChange={onChangeMock}
           fieldRequired
           structureDefinition={structureDefinition}
-          measureModel={Model.QICORE}
         />
       </ApiContextProvider>
     );
@@ -332,7 +342,7 @@ describe("Codes Component", () => {
   });
 
   it("Should disable the input if user cannot edit", async () => {
-    render(
+    renderWithExecutionContext(
       <ApiContextProvider value={mockConfig}>
         <CodesComponent
           canEdit={false}
@@ -341,7 +351,6 @@ describe("Codes Component", () => {
           onChange={onChangeMock}
           fieldRequired
           structureDefinition={structureDefinition}
-          measureModel={Model.QICORE}
         />
       </ApiContextProvider>
     );
@@ -384,7 +393,7 @@ describe("Codes Component", () => {
       });
     });
     it("should fetch value set expansion", async () => {
-      render(
+      renderWithExecutionContext(
         <ApiContextProvider value={mockConfig}>
           <CodesComponent
             canEdit={true}
@@ -393,7 +402,6 @@ describe("Codes Component", () => {
             onChange={onChangeMock}
             fieldRequired
             structureDefinition={structureDefinitionWithExtension}
-            measureModel={Model.QICORE}
             resource={resource}
           />
         </ApiContextProvider>
@@ -409,7 +417,7 @@ describe("Codes Component", () => {
     });
 
     it("should render the codes component with options from the value set expansion", async () => {
-      render(
+      renderWithExecutionContext(
         <ApiContextProvider value={mockConfig}>
           <CodesComponent
             canEdit={true}
@@ -418,7 +426,6 @@ describe("Codes Component", () => {
             onChange={onChangeMock}
             fieldRequired
             structureDefinition={structureDefinitionWithExtension}
-            measureModel={Model.QICORE}
             resource={resource}
           />
         </ApiContextProvider>
@@ -439,7 +446,7 @@ describe("Codes Component", () => {
           return Promise.reject({ error: "error" });
         }
       });
-      render(
+      renderWithExecutionContext(
         <ApiContextProvider value={mockConfig}>
           <CodesComponent
             canEdit={true}
@@ -448,7 +455,6 @@ describe("Codes Component", () => {
             onChange={onChangeMock}
             fieldRequired
             structureDefinition={structureDefinitionWithExtension}
-            measureModel={Model.QICORE}
             resource={resource}
           />
         </ApiContextProvider>

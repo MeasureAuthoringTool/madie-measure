@@ -196,6 +196,7 @@ describe("ResourceEditor", () => {
       <ExecutionContextProvider
         value={
           {
+            measureState: [{ model: "QI-Core 6.0" }, jest.fn()],
             valueSetsState: localMockckValueSetsState,
             executionContextReady: true,
           } as any
@@ -207,7 +208,6 @@ describe("ResourceEditor", () => {
           >
             <ResourceEditor
               selectedResourceID="446b20b5-dd46-415e-9b9f-9eba6b260743"
-              measureModel="QI-Core 6.0"
               setValidationSchema={mockSetValidationSchema}
               setInitialFormikValuesStu6={mockSetInitialFormikValuesStu6}
               onCancel={mockOnCancel}
@@ -411,6 +411,7 @@ describe("ResourceEditor", () => {
       <ExecutionContextProvider
         value={
           {
+            measureState: [{ model: "QI-Core 6.0" }, jest.fn()],
             valueSetsState: localMockckValueSetsState,
             executionContextReady: true,
           } as any
@@ -422,7 +423,6 @@ describe("ResourceEditor", () => {
           >
             <ResourceEditor
               selectedResourceID="446b20b5-dd46-415e-9b9f-9eba6b260743"
-              measureModel="QI-Core 6.0"
               setValidationSchema={mockSetValidationSchema}
               setInitialFormikValuesStu6={mockSetInitialFormikValuesStu6}
               onCancel={mockOnCancel}
@@ -477,6 +477,7 @@ describe("ResourceEditor", () => {
       <ExecutionContextProvider
         value={
           {
+            measureState: [{ model: "QI-Core 6.0" }, jest.fn()],
             valueSetsState: localMockckValueSetsState,
             executionContextReady: true,
           } as any
@@ -488,7 +489,6 @@ describe("ResourceEditor", () => {
           >
             <ResourceEditor
               selectedResourceID="446b20b5-dd46-415e-9b9f-9eba6b260743"
-              measureModel="QI-Core 6.0"
               setValidationSchema={mockSetValidationSchema}
               setInitialFormikValuesStu6={mockSetInitialFormikValuesStu6}
               onCancel={mockOnCancel}

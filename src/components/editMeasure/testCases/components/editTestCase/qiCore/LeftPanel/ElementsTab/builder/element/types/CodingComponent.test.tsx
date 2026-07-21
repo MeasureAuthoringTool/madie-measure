@@ -82,7 +82,7 @@ describe("CodingComponent Tests", () => {
       <ApiContextProvider value={mockConfig}>
         <ExecutionContextProvider
           value={{
-            measureState: [null, jest.fn()],
+            measureState: [{ model: Model.QICORE } as any, jest.fn()],
             bundleState: [null, jest.fn()],
             valueSetsState: [null, jest.fn()],
             executionContextReady: true,
@@ -94,7 +94,6 @@ describe("CodingComponent Tests", () => {
           <CodingComponent
             canEdit={true}
             structureDefinition={mockStructureDefinition}
-            measureModel={Model.QICORE}
             label="test-label"
             value={null}
             onChange={mockOnChange}
@@ -119,7 +118,7 @@ describe("CodingComponent Tests", () => {
       <ApiContextProvider value={mockConfig}>
         <ExecutionContextProvider
           value={{
-            measureState: [null, jest.fn()],
+            measureState: [{ model: Model.QICORE } as any, jest.fn()],
             bundleState: [null, jest.fn()],
             valueSetsState: [null, jest.fn()],
             executionContextReady: true,
@@ -131,7 +130,6 @@ describe("CodingComponent Tests", () => {
           <CodingComponent
             canEdit={true}
             structureDefinition={mockStructureDefinition}
-            measureModel={Model.QICORE}
             label="actuality"
             value={null}
             onChange={mockOnChange}
@@ -170,7 +168,7 @@ describe("CodingComponent Tests", () => {
       <ApiContextProvider value={mockConfig}>
         <ExecutionContextProvider
           value={{
-            measureState: [null, jest.fn()],
+            measureState: [{ model: Model.QICORE } as any, jest.fn()],
             bundleState: [null, jest.fn()],
             valueSetsState: [null, jest.fn()],
             executionContextReady: true,
@@ -182,7 +180,6 @@ describe("CodingComponent Tests", () => {
           <CodingComponent
             canEdit={true}
             structureDefinition={mockStructureDefinition}
-            measureModel={Model.QICORE}
             label="test-label"
             value={null}
             onChange={mockOnChange}
@@ -207,7 +204,7 @@ describe("CodingComponent Tests", () => {
       <ApiContextProvider value={mockConfig}>
         <ExecutionContextProvider
           value={{
-            measureState: [null, jest.fn()],
+            measureState: [{ model: Model.QICORE } as any, jest.fn()],
             bundleState: [null, jest.fn()],
             valueSetsState: [null, jest.fn()],
             executionContextReady: true,
@@ -219,7 +216,6 @@ describe("CodingComponent Tests", () => {
           <CodingComponent
             canEdit={true}
             structureDefinition={mockStructureDefinition}
-            measureModel={Model.QICORE}
             label="test-label"
             value={null}
             onChange={mockOnChange}
@@ -289,7 +285,7 @@ describe("CodingComponent Tests", () => {
       <ApiContextProvider value={mockConfig}>
         <ExecutionContextProvider
           value={{
-            measureState: [null, jest.fn()],
+            measureState: [{ model: Model.QICORE } as any, jest.fn()],
             bundleState: [null, jest.fn()],
             valueSetsState: [[mockMeasureValueSet], jest.fn()],
             executionContextReady: true,
@@ -301,7 +297,6 @@ describe("CodingComponent Tests", () => {
           <CodingComponent
             canEdit={true}
             structureDefinition={mockStructureDefinition}
-            measureModel={Model.QICORE}
             label="test-label"
             value={null}
             onChange={mockOnChange}
@@ -360,7 +355,7 @@ describe("CodingComponent Tests", () => {
       <ApiContextProvider value={mockConfig}>
         <ExecutionContextProvider
           value={{
-            measureState: [null, jest.fn()],
+            measureState: [{ model: Model.QICORE } as any, jest.fn()],
             bundleState: [null, jest.fn()],
             valueSetsState: [null, jest.fn()],
             executionContextReady: true,
@@ -372,7 +367,6 @@ describe("CodingComponent Tests", () => {
           <CodingComponent
             canEdit={true}
             structureDefinition={mockStructureDefinition}
-            measureModel={Model.QICORE}
             label="test-label"
             value={value}
             onChange={mockOnChange}
@@ -449,7 +443,7 @@ describe("CodingComponent Tests", () => {
       <ApiContextProvider value={mockConfig}>
         <ExecutionContextProvider
           value={{
-            measureState: [null, jest.fn()],
+            measureState: [{ model: Model.QICORE } as any, jest.fn()],
             bundleState: [null, jest.fn()],
             valueSetsState: [null, jest.fn()],
             executionContextReady: true,
@@ -461,7 +455,6 @@ describe("CodingComponent Tests", () => {
           <CodingComponent
             canEdit={true}
             structureDefinition={mockStructureDefinition}
-            measureModel={Model.QICORE}
             label="test-label"
             value={coding}
             onChange={mockOnChange}
@@ -513,7 +506,7 @@ describe("CodingComponent Tests", () => {
       <ApiContextProvider value={mockConfig}>
         <ExecutionContextProvider
           value={{
-            measureState: [null, jest.fn()],
+            measureState: [{ model: Model.QICORE } as any, jest.fn()],
             bundleState: [null, jest.fn()],
             valueSetsState: [null, jest.fn()],
             executionContextReady: true,
@@ -525,7 +518,6 @@ describe("CodingComponent Tests", () => {
           <CodingComponent
             canEdit={undefined}
             structureDefinition={mockStructureDefinition}
-            measureModel={Model.QICORE}
             label="test-label"
             value={coding}
             onChange={mockOnChange}
@@ -571,7 +563,7 @@ describe("CodingComponent Tests", () => {
       <ApiContextProvider value={mockConfig}>
         <ExecutionContextProvider
           value={{
-            measureState: [null, jest.fn()],
+            measureState: [{ model: Model.QICORE } as any, jest.fn()],
             bundleState: [null, jest.fn()],
             valueSetsState: [null, jest.fn()],
             executionContextReady: true,
@@ -583,7 +575,6 @@ describe("CodingComponent Tests", () => {
           <CodingComponent
             canEdit={true}
             structureDefinition={mockStructureDefinition}
-            measureModel={Model.QICORE}
             label="test-label"
             value={coding}
             onChange={mockOnChange}
@@ -621,7 +612,7 @@ describe("CodingComponent Tests", () => {
       <ApiContextProvider value={mockConfig}>
         <ExecutionContextProvider
           value={{
-            measureState: [null, jest.fn()],
+            measureState: [{ model: Model.QICORE } as any, jest.fn()],
             bundleState: [null, jest.fn()],
             valueSetsState: [[mockMeasureValueSet], jest.fn()],
             executionContextReady: true,
@@ -633,7 +624,6 @@ describe("CodingComponent Tests", () => {
           <CodingComponent
             canEdit={true}
             structureDefinition={mockStructureDefinition}
-            measureModel={Model.QICORE}
             label="test-label"
             value={null}
             onChange={mockOnChange}
@@ -692,7 +682,7 @@ describe("CodingComponent Tests", () => {
       <ApiContextProvider value={mockConfig}>
         <ExecutionContextProvider
           value={{
-            measureState: [null, jest.fn()],
+            measureState: [{ model: Model.QICORE } as any, jest.fn()],
             bundleState: [null, jest.fn()],
             valueSetsState: [[mockMeasureValueSet], jest.fn()],
             executionContextReady: true,
@@ -704,7 +694,6 @@ describe("CodingComponent Tests", () => {
           <CodingComponent
             canEdit={true}
             structureDefinition={mockStructureDefinition}
-            measureModel={Model.QICORE}
             label="test-label"
             value={null}
             onChange={mockOnChange}
@@ -741,7 +730,7 @@ describe("CodingComponent Tests", () => {
       <ApiContextProvider value={mockConfig}>
         <ExecutionContextProvider
           value={{
-            measureState: [null, jest.fn()],
+            measureState: [{ model: Model.QICORE } as any, jest.fn()],
             bundleState: [null, jest.fn()],
             valueSetsState: [null, jest.fn()],
             executionContextReady: true,
@@ -753,7 +742,6 @@ describe("CodingComponent Tests", () => {
           <CodingComponent
             canEdit={true}
             structureDefinition={mockStructureDefinition}
-            measureModel={Model.QICORE}
             label="test-label"
             value={null}
             onChange={mockOnChange}
@@ -823,7 +811,7 @@ describe("CodingComponent Tests", () => {
       <ApiContextProvider value={mockConfig}>
         <ExecutionContextProvider
           value={{
-            measureState: [null, jest.fn()],
+            measureState: [{ model: Model.QICORE } as any, jest.fn()],
             bundleState: [null, jest.fn()],
             valueSetsState: [null, jest.fn()],
             executionContextReady: true,
@@ -835,7 +823,6 @@ describe("CodingComponent Tests", () => {
           <CodingComponent
             canEdit={true}
             structureDefinition={mockStructureDefinition}
-            measureModel={Model.QICORE}
             label="test-label"
             value={null}
             onChange={mockOnChange}

@@ -4,7 +4,20 @@ import { ResourceIdentifier } from "../../../../../../../api/models/ResourceIden
 import { render, screen, waitFor, act } from "@testing-library/react";
 import { Simulate } from "react-dom/test-utils";
 import userEvent from "@testing-library/user-event";
+import { ExecutionContextProvider } from "../../../../../../routes/qiCore/ExecutionContext";
 const { getByTestId } = screen;
+
+const renderWithExecutionContext = (
+  ui: React.ReactElement,
+  model = "QI-Core 6.0"
+) =>
+  render(
+    <ExecutionContextProvider
+      value={{ measureState: [{ model } as any, jest.fn()] } as any}
+    >
+      {ui}
+    </ExecutionContextProvider>
+  );
 
 const generateResources = (number: number): ResourceIdentifier[] => {
   const resourceList: ResourceIdentifier[] = [];
@@ -95,12 +108,8 @@ describe("ResourceList component", () => {
     const onClick = jest.fn();
     window.open = jest.fn();
 
-    render(
-      <ResourceList
-        resourceIdentifiers={resourceList}
-        onClick={onClick}
-        measureModel="QI-Core 6.0"
-      />
+    renderWithExecutionContext(
+      <ResourceList resourceIdentifiers={resourceList} onClick={onClick} />
     );
 
     const hl7Button = await screen.findByTestId("hl7-link-qicore-patient");
@@ -125,12 +134,9 @@ describe("ResourceList component", () => {
     const onClick = jest.fn();
     window.open = jest.fn();
 
-    render(
-      <ResourceList
-        resourceIdentifiers={resourceList}
-        onClick={onClick}
-        measureModel="QI-Core 7.0"
-      />
+    renderWithExecutionContext(
+      <ResourceList resourceIdentifiers={resourceList} onClick={onClick} />,
+      "QI-Core 7.0"
     );
 
     const hl7Button = await screen.findByTestId("hl7-link-qicore-patient");
@@ -155,12 +161,8 @@ describe("ResourceList component", () => {
     const onClick = jest.fn();
     window.open = jest.fn();
 
-    render(
-      <ResourceList
-        resourceIdentifiers={resourceList}
-        onClick={onClick}
-        measureModel="QI-Core 6.0"
-      />
+    renderWithExecutionContext(
+      <ResourceList resourceIdentifiers={resourceList} onClick={onClick} />
     );
 
     const hl7Button = await screen.findByTestId("hl7-link-us-core-patient");

@@ -98,7 +98,7 @@ describe("CodeableConceptComponent Tests", () => {
       <ApiContextProvider value={mockConfig}>
         <ExecutionContextProvider
           value={{
-            measureState: [null, jest.fn()],
+            measureState: [{ model: Model.QICORE } as any, jest.fn()],
             bundleState: [null, jest.fn()],
             valueSetsState: [null, jest.fn()],
             executionContextReady: true,
@@ -111,7 +111,6 @@ describe("CodeableConceptComponent Tests", () => {
             <CodeableConceptComponent
               canEdit={true}
               structureDefinition={mockStructureDefinition}
-              measureModel={Model.QICORE}
               label="test-label"
               value={value}
               addTitle={"Codeable"}
@@ -202,7 +201,7 @@ describe("CodeableConceptComponent Tests", () => {
       <ApiContextProvider value={mockConfig}>
         <ExecutionContextProvider
           value={{
-            measureState: [null, jest.fn()],
+            measureState: [{ model: Model.QICORE } as any, jest.fn()],
             bundleState: [null, jest.fn()],
             valueSetsState: [null, jest.fn()],
             executionContextReady: true,
@@ -215,7 +214,6 @@ describe("CodeableConceptComponent Tests", () => {
             <CodeableConceptComponent
               canEdit={true}
               structureDefinition={mockStructureDefinition}
-              measureModel={Model.QICORE}
               label="test-label"
               value={value}
               addTitle={"Codeable"}
@@ -268,7 +266,7 @@ describe("CodeableConceptComponent Tests", () => {
       <ApiContextProvider value={mockConfig}>
         <ExecutionContextProvider
           value={{
-            measureState: [null, jest.fn()],
+            measureState: [{ model: Model.QICORE } as any, jest.fn()],
             bundleState: [null, jest.fn()],
             valueSetsState: [null, jest.fn()],
             executionContextReady: true,
@@ -281,7 +279,6 @@ describe("CodeableConceptComponent Tests", () => {
             <CodeableConceptComponent
               canEdit={true}
               structureDefinition={mockStructureDefinition}
-              measureModel={Model.QICORE}
               label="test-label"
               value={value}
               addTitle={"Codeable"}
@@ -338,7 +335,7 @@ describe("CodeableConceptComponent Tests", () => {
       <ApiContextProvider value={mockConfig}>
         <ExecutionContextProvider
           value={{
-            measureState: [null, jest.fn()],
+            measureState: [{ model: Model.QICORE } as any, jest.fn()],
             bundleState: [null, jest.fn()],
             valueSetsState: [null, jest.fn()],
             executionContextReady: true,
@@ -351,7 +348,6 @@ describe("CodeableConceptComponent Tests", () => {
             <CodeableConceptComponent
               canEdit={true}
               structureDefinition={mockStructureDefinition}
-              measureModel={Model.QICORE}
               label="test-label"
               value={value}
               addTitle={"Codeable"}
@@ -409,7 +405,7 @@ describe("CodeableConceptComponent Tests", () => {
       <ApiContextProvider value={mockConfig}>
         <ExecutionContextProvider
           value={{
-            measureState: [null, jest.fn()],
+            measureState: [{ model: Model.QICORE } as any, jest.fn()],
             bundleState: [null, jest.fn()],
             valueSetsState: [null, jest.fn()],
             executionContextReady: true,
@@ -422,7 +418,6 @@ describe("CodeableConceptComponent Tests", () => {
             <CodeableConceptComponent
               canEdit={true}
               structureDefinition={mockStructureDefinition}
-              measureModel={Model.QICORE}
               label="test-label"
               value={currentValue}
               addTitle={"Codeable"}
@@ -474,7 +469,7 @@ describe("CodeableConceptComponent Tests", () => {
       <ApiContextProvider value={mockConfig}>
         <ExecutionContextProvider
           value={{
-            measureState: [null, jest.fn()],
+            measureState: [{ model: Model.QICORE } as any, jest.fn()],
             bundleState: [null, jest.fn()],
             valueSetsState: [null, jest.fn()],
             executionContextReady: true,
@@ -487,7 +482,6 @@ describe("CodeableConceptComponent Tests", () => {
             <CodeableConceptComponent
               canEdit={true}
               structureDefinition={mockStructureDefinition}
-              measureModel={Model.QICORE}
               label="Patient.extension[0].valueCodeableConcept"
               value={value}
               addTitle={"Codeable"}

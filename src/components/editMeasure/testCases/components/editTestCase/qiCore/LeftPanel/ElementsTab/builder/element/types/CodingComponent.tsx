@@ -9,6 +9,7 @@ import {
 import { IconButton, MenuItem, Tooltip } from "@mui/material";
 import useFhirDefinitionsServiceApi from "../../../../../../../../api/useFhirDefinitionsService";
 import useExecutionContext from "../../../../../../../routes/qiCore/useExecutionContext";
+import useMeasureModel from "../../../../../../../routes/qiCore/useMeasureModel";
 import { Coding, Extension, ValueSet } from "fhir/r4";
 import { getValueSetUrl } from "../../../../../../../../api/fhirDefinitionServiceUtilities";
 import AddElementButton from "../../../../../../../common/UIOnlyModelAgnostic/AddElementButton";
@@ -35,7 +36,6 @@ const CodingComponent = ({
   handleAddElement,
   showDeleteButton = false,
   handleDeleteElement,
-  measureModel = undefined,
 }) => {
   const [allValueSets, setAllValueSets] = useState<ValueSet[]>();
   const [selectedValueSet, setSelectedValueSet] = useState<ValueSet>();
@@ -44,6 +44,7 @@ const CodingComponent = ({
 
   const fhirDefinitionService = useRef(useFhirDefinitionsServiceApi());
   const { valueSetsState, executionContextReady } = useExecutionContext();
+  const measureModel = useMeasureModel();
 
   const isBindingRequired =
     structureDefinition.binding?.strength === "required";

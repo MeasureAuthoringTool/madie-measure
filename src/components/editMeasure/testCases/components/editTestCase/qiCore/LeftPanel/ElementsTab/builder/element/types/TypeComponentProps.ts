@@ -1,5 +1,4 @@
 import { ElementDefinition, Resource } from "fhir/r4";
-import { Model } from "@madie/madie-models";
 
 export interface TypeComponentProps {
   label?: string;
@@ -21,5 +20,4 @@ export interface TypeComponentProps {
   showDeleteButton?: boolean;
   handleDeleteElement?: () => void;
   containerStyle?: React.CSSProperties;
-  measureModel?: Model;
 }

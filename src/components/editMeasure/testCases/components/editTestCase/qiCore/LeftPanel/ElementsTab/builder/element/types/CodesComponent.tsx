@@ -13,6 +13,7 @@ import AddElementButton from "../../../../../../../common/UIOnlyModelAgnostic/Ad
 import "./CodesComponent.scss";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import { getMultipleCardinalityLabel } from "./TypeUtil";
+import useMeasureModel from "../../../../../../../routes/qiCore/useMeasureModel";
 const CodesComponent = ({
   canEdit,
   structureDefinition,
@@ -26,8 +27,8 @@ const CodesComponent = ({
   handleAddElement,
   showDeleteButton = false,
   handleDeleteElement,
-  measureModel,
 }: TypeComponentProps) => {
+  const measureModel = useMeasureModel();
   const [codes, setCodes] = useState([]);
   const fhirDefinitionServiceApi = useRef(useFhirDefinitionsServiceApi());
   const terminologyService = useRef(useTerminologyServiceApi());

@@ -305,7 +305,6 @@ const Builder = ({
                   resourceIdentifiers
                 )}
                 measureId={measure?.id}
-                measureModel={measure?.model}
                 onClick={async (resourceIdentifier: ResourceIdentifier) => {
                   const newEntry =
                     buildMadieResourceFromResourceIdentifier(
@@ -404,7 +403,6 @@ const Builder = ({
                         canEdit={canEdit}
                         applyLoading={applyLoading}
                         setApplyLoading={setApplyLoading}
-                        measureModel={measure?.model}
                       />
                     )}
                     <TestCaseSummaryGrid

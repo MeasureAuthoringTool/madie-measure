@@ -33,7 +33,6 @@ const ElementEditorChildrenInner = ({
   canEdit,
   resourcePath,
   deleteElement,
-  measureModel,
 }) => {
   const expandCollapseCtx = useExpandCollapse();
   const hasSubAttributes = (expandCollapseCtx?.sectionCount ?? 0) > 0;
@@ -194,7 +193,6 @@ const ElementEditorChildrenInner = ({
           parentStructureDefinition={parentStructureDefinition}
           canEdit={canEdit}
           label={typeEditorLabel}
-          measureModel={measureModel}
         />
       </Box>
     </div>
