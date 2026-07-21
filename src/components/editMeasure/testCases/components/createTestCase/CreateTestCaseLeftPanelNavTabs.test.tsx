@@ -12,7 +12,7 @@ describe("Create Test Case nav tabs", () => {
       <CreateTestCaseLeftPanelNavTabs
         leftPanelActiveTab="available"
         setLeftPanelActiveTab={mocksetLeftPanelActiveTab}
-        isQICore6={true}
+        isBuilderEnabled={true}
         dirty={true}
         setCalculationDialogOpen={jest.fn()}
         canEdit={true}
@@ -49,7 +49,7 @@ describe("Create Test Case nav tabs", () => {
       <CreateTestCaseLeftPanelNavTabs
         leftPanelActiveTab="available"
         setLeftPanelActiveTab={mocksetLeftPanelActiveTab}
-        isQICore6={true}
+        isBuilderEnabled={true}
         dirty={true}
         setCalculationDialogOpen={mocksetCalculationDialogOpen}
         canEdit={true}
@@ -73,7 +73,7 @@ describe("Create Test Case nav tabs", () => {
       <CreateTestCaseLeftPanelNavTabs
         leftPanelActiveTab="added"
         setLeftPanelActiveTab={mocksetLeftPanelActiveTab}
-        isQICore6={true}
+        isBuilderEnabled={true}
         dirty={false}
         setCalculationDialogOpen={jest.fn()}
         canEdit={false}
@@ -92,7 +92,7 @@ describe("Create Test Case nav tabs", () => {
       <CreateTestCaseLeftPanelNavTabs
         leftPanelActiveTab="available"
         setLeftPanelActiveTab={mocksetLeftPanelActiveTab}
-        isQICore6={true}
+        isBuilderEnabled={true}
         dirty={false}
         setCalculationDialogOpen={jest.fn()}
         canEdit={true}

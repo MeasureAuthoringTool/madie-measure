@@ -5,7 +5,7 @@ import axios from "../../../../api/axios-instance";
 import { ResourceIdentifier } from "./models/ResourceIdentifier";
 import { StructureDefinitionDto } from "./models/StructureDefinitionDto";
 import { ValueSet } from "fhir/r4";
-import { TestCase } from "@madie/madie-models";
+import { getModelShortName, Measure, TestCase } from "@madie/madie-models";
 import { qicoreVerionModelTypeMap } from "../util/CalculationTestHelpers";
 
 export interface TestCaseExecutionBundlesDTO {
@@ -15,10 +15,10 @@ export interface TestCaseExecutionBundlesDTO {
 
 export class FhirDefinitionsServiceApi {
   constructor(private baseUrl: string, private getAccessToken: () => string) {}
-  async getResources(): Promise<ResourceIdentifier[]> {
+  async getResources(model: Measure["model"]): Promise<ResourceIdentifier[]> {
     try {
       const response = await axios.get<any>(
-        `${this.baseUrl}/qicore/resources`,
+        `${this.baseUrl}/fhir/models/${getModelShortName(model)}/resources`,
         {
           headers: {
             Authorization: `Bearer ${this.getAccessToken()}`,
@@ -34,10 +34,15 @@ export class FhirDefinitionsServiceApi {
     }
   }
 
-  async getResourceTree(resourceId): Promise<StructureDefinitionDto> {
+  async getResourceTree(
+    resourceId,
+    model: Measure["model"]
+  ): Promise<StructureDefinitionDto> {
     try {
       const response = await axios.get<any>(
-        `${this.baseUrl}/qicore/resources/structure-definitions/${resourceId}`,
+        `${this.baseUrl}/fhir/models/${getModelShortName(
+          model
+        )}/resources/structure-definitions/${resourceId}`,
         {
           headers: {
             Authorization: `Bearer ${this.getAccessToken()}`,
@@ -54,10 +59,15 @@ export class FhirDefinitionsServiceApi {
     }
   }
 
-  async getValueSetDefinition(url: string): Promise<ValueSet> {
+  async getValueSetDefinition(
+    url: string,
+    model: Measure["model"]
+  ): Promise<ValueSet> {
     try {
       const response = await axios.get<ValueSet>(
-        `${this.baseUrl}/qicore/resources/value-set-definition?url=${url}`,
+        `${this.baseUrl}/fhir/models/${getModelShortName(
+          model
+        )}/resources/value-set-definition?url=${url}`,
         {
           headers: {
             Authorization: `Bearer ${this.getAccessToken()}`,

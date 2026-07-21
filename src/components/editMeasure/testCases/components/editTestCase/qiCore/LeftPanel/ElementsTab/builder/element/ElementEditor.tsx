@@ -37,6 +37,7 @@ import {
 } from "@madie/madie-design-system/dist/react";
 import useFormikResetOnEvent from "../../../../../../../../../common/useFormikResetOnEvent";
 import { RequiredFieldsProvider } from "./RequiredFieldsContext";
+import useMeasureModel from "../../../../../../routes/qiCore/useMeasureModel";
 
 interface ElementEditorProps {
   resource?: any;
@@ -127,6 +128,7 @@ const ElementEditor = ({
   applyLoading,
   setApplyLoading,
 }: ElementEditorProps) => {
+  const measureModel = useMeasureModel();
   const [toastOpen, setToastOpen] = useState<boolean>(false);
   const [toastMessage, setToastMessage] = useState<string>("");
   const [toastType, setToastType] = useState<string>("danger");
@@ -165,7 +167,8 @@ const ElementEditor = ({
           // snapshot already has child.id.* nodes, do NOT expand by datatype.
           if (!hasInlineChildren) {
             const def = await fhirDefinitionsService.current.getResourceTree(
-              type
+              type,
+              measureModel
             );
             if (def) {
               const elements = getTopLevelElements(def, true);

@@ -8,6 +8,8 @@ import {
   ServiceConfig,
 } from "../../../../../../../../../../../api/ServiceContext";
 import { ElementDefinition } from "fhir/r4";
+import { Model } from "@madie/madie-models";
+import { ExecutionContextProvider } from "../../../../../../../routes/qiCore/ExecutionContext";
 
 const mockConfig = {
   fhirService: {
@@ -246,6 +248,17 @@ const onChangeMock = jest.fn();
 jest.mock("../../../../../../../../../../../api/axios-instance");
 const mockedAxios = axios as jest.Mocked<typeof axios>;
 
+const renderWithExecutionContext = (ui: React.ReactElement) =>
+  render(
+    <ExecutionContextProvider
+      value={
+        { measureState: [{ model: Model.QICORE } as any, jest.fn()] } as any
+      }
+    >
+      {ui}
+    </ExecutionContextProvider>
+  );
+
 jest.mock("@madie/madie-util", () => ({
   useOktaTokens: () => ({ getAccessToken: () => "test.jwt" }),
 }));
@@ -262,7 +275,7 @@ describe("Codes Component", () => {
     });
   });
   it("Should render codes component with appropriate options retrieved from API", async () => {
-    render(
+    renderWithExecutionContext(
       <ApiContextProvider value={mockConfig}>
         <CodesComponent
           canEdit={true}
@@ -275,7 +288,7 @@ describe("Codes Component", () => {
       </ApiContextProvider>
     );
     expect(axios.get).toHaveBeenCalledWith(
-      "fhirService.com/qicore/resources/value-set-definition?url=" +
+      "fhirService.com/fhir/models/qicore/resources/value-set-definition?url=" +
         valueSetUrl,
       { headers: { Authorization: "Bearer test.jwt" } }
     );
@@ -298,7 +311,7 @@ describe("Codes Component", () => {
         return Promise.reject({ data: "unknown error" });
       }
     });
-    render(
+    renderWithExecutionContext(
       <ApiContextProvider value={mockConfig}>
         <CodesComponent
           canEdit={true}
@@ -311,7 +324,7 @@ describe("Codes Component", () => {
       </ApiContextProvider>
     );
     expect(axios.get).toHaveBeenCalledWith(
-      "fhirService.com/qicore/resources/value-set-definition?url=" +
+      "fhirService.com/fhir/models/qicore/resources/value-set-definition?url=" +
         valueSetUrl,
       { headers: { Authorization: "Bearer test.jwt" } }
     );
@@ -329,7 +342,7 @@ describe("Codes Component", () => {
   });
 
   it("Should disable the input if user cannot edit", async () => {
-    render(
+    renderWithExecutionContext(
       <ApiContextProvider value={mockConfig}>
         <CodesComponent
           canEdit={false}
@@ -342,7 +355,7 @@ describe("Codes Component", () => {
       </ApiContextProvider>
     );
     expect(axios.get).toHaveBeenCalledWith(
-      "fhirService.com/qicore/resources/value-set-definition?url=" +
+      "fhirService.com/fhir/models/qicore/resources/value-set-definition?url=" +
         valueSetUrl,
       { headers: { Authorization: "Bearer test.jwt" } }
     );
@@ -360,7 +373,7 @@ describe("Codes Component", () => {
       mockedAxios.get.mockImplementation((url) => {
         if (
           url ===
-          "fhirService.com/qicore/resources/value-set-definition?url=http://hl7.org/fhir/us/core/ValueSet/birthsex"
+          "fhirService.com/fhir/models/qicore/resources/value-set-definition?url=http://hl7.org/fhir/us/core/ValueSet/birthsex"
         ) {
           return Promise.resolve({ data: mockExpansionResponseWithExtension });
         }
@@ -380,7 +393,7 @@ describe("Codes Component", () => {
       });
     });
     it("should fetch value set expansion", async () => {
-      render(
+      renderWithExecutionContext(
         <ApiContextProvider value={mockConfig}>
           <CodesComponent
             canEdit={true}
@@ -394,7 +407,7 @@ describe("Codes Component", () => {
         </ApiContextProvider>
       );
       expect(axios.get).toHaveBeenCalledWith(
-        "fhirService.com/qicore/resources/value-set-definition?url=http://hl7.org/fhir/us/core/ValueSet/birthsex",
+        "fhirService.com/fhir/models/qicore/resources/value-set-definition?url=http://hl7.org/fhir/us/core/ValueSet/birthsex",
         { headers: { Authorization: "Bearer test.jwt" } }
       );
 
@@ -404,7 +417,7 @@ describe("Codes Component", () => {
     });
 
     it("should render the codes component with options from the value set expansion", async () => {
-      render(
+      renderWithExecutionContext(
         <ApiContextProvider value={mockConfig}>
           <CodesComponent
             canEdit={true}
@@ -428,12 +441,12 @@ describe("Codes Component", () => {
       mockedAxios.get.mockImplementation((url) => {
         if (
           url ===
-          "fhirService.com/qicore/resources/value-set-definition?url=http://hl7.org/fhir/us/core/ValueSet/birthsex"
+          "fhirService.com/fhir/models/qicore/resources/value-set-definition?url=http://hl7.org/fhir/us/core/ValueSet/birthsex"
         ) {
           return Promise.reject({ error: "error" });
         }
       });
-      render(
+      renderWithExecutionContext(
         <ApiContextProvider value={mockConfig}>
           <CodesComponent
             canEdit={true}
@@ -447,7 +460,7 @@ describe("Codes Component", () => {
         </ApiContextProvider>
       );
       expect(axios.get).toHaveBeenCalledWith(
-        "fhirService.com/qicore/resources/value-set-definition?url=http://hl7.org/fhir/us/core/ValueSet/birthsex",
+        "fhirService.com/fhir/models/qicore/resources/value-set-definition?url=http://hl7.org/fhir/us/core/ValueSet/birthsex",
         { headers: { Authorization: "Bearer test.jwt" } }
       );
       await waitFor(() => {

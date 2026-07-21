@@ -6,7 +6,7 @@ import Builder, {
 } from "./Builder";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { Measure, TestCase } from "@madie/madie-models";
+import { Measure, Model, TestCase } from "@madie/madie-models";
 import { QiCoreResourceContext } from "../../../../../../util/QiCorePatientProvider";
 import { ExecutionContextProvider } from "../../../../../routes/qiCore/ExecutionContext";
 import {
@@ -165,6 +165,7 @@ jest.mock(
 );
 const mockMeasure = {
   id: "test",
+  model: Model.QICORE,
   measureScoring: "scoring",
   createdBy: "test",
 } as unknown as Measure;
@@ -641,7 +642,10 @@ describe("Builder Component", () => {
 
     await screen.findByTestId("mock-resource-list");
 
-    expect(mockGetResourceTree).toHaveBeenCalledWith("qicore-patient");
+    expect(mockGetResourceTree).toHaveBeenCalledWith(
+      "qicore-patient",
+      Model.QICORE
+    );
 
     const successToast = await screen.findByTestId("builder-success-text");
     expect(successToast).toBeInTheDocument();
