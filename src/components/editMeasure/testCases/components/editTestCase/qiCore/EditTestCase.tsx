@@ -269,7 +269,7 @@ const INITIAL_VALUES = {
 
 // An empty string is also considered to be valid, as it is not malformed
 // and allows a user to edit for the first time
-const isValidJson = (str) => {
+export const isValidJson = (str) => {
   if (!_.isEmpty(str) && "Loading..." !== str) {
     try {
       JSON.parse(str);

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import "twin.macro";
 import "styled-components/macro";
 import * as _ from "lodash";
@@ -23,6 +23,7 @@ import { ObjectId } from "bson";
 import { checkUserCanEdit, measureStore } from "@madie/madie-util";
 import useExecutionContext from "../../routes/qiCore/useExecutionContext";
 import CreateCodeCoverageNavTabs from "./CreateCodeCoverageNavTabs";
+import { parseCompositeScores } from "./compositeScores";
 import CodeCoverageHighlighting from "../common/CodeCoverageHighlighting";
 import CreateNewTestCaseDialog from "../../createTestCase/CreateNewTestCaseDialog";
 import {
@@ -183,9 +184,10 @@ const TestCaseList = (props: TestCaseListProps) => {
   const calculation = useRef(calculationService());
   const { updateMeasure } = measureStore;
   const [canEdit, setCanEdit] = useState<boolean>(false);
-  const [activeTab, setActiveTab] = useState<string>("passing");
   const [calculationOutput, setCalculationOutput] =
     useState<CalculationOutput<any>>();
+  const [compositeCalculationOutput, setCompositeCalculationOutput] =
+    useState<MRCalculationOutput>();
   const [executeAllTestCases, setExecuteAllTestCases] =
     useState<boolean>(false);
   const [coverageHTML, setCoverageHTML] = useState<Record<string, string>>();
@@ -200,6 +202,9 @@ const TestCaseList = (props: TestCaseListProps) => {
     useExecutionContext();
   const [measure] = measureState;
   const [measureBundle] = bundleState;
+  const [activeTab, setActiveTab] = useState<string>(
+    measure?.measureMetaData?.composite ? "compositeScore" : "passing"
+  );
   const [valueSets] = valueSetsState;
   const [selectedPopCriteria, setSelectedPopCriteria] = useState<Group>();
 
@@ -311,6 +316,15 @@ const TestCaseList = (props: TestCaseListProps) => {
       checkUserCanEdit(measure?.measureSet?.owner, measure?.measureSet?.acls)
     );
   }, [measure]);
+
+  const compositeScores = useMemo(
+    () =>
+      parseCompositeScores(
+        compositeCalculationOutput,
+        selectedPopCriteria?.displayId
+      ),
+    [compositeCalculationOutput, selectedPopCriteria?.displayId]
+  );
 
   useEffect(() => {
     const validTestCases = executeInvalidTestCases
@@ -522,6 +536,7 @@ const TestCaseList = (props: TestCaseListProps) => {
             measureBundle,
             valueSets
           );
+        setCompositeCalculationOutput(calculationOutput);
       } catch (error) {
         console.error("calculateTestCases: error.message = " + error?.message);
       }
@@ -768,6 +783,7 @@ const TestCaseList = (props: TestCaseListProps) => {
                 validationPercentage={validationPercentage}
                 validationPercentageFraction={validationPercentageFraction}
                 clauseResults={clauseResults}
+                compositeScores={compositeScores}
               />
             </div>
             <CreateNewTestCaseDialog
@@ -776,7 +792,7 @@ const TestCaseList = (props: TestCaseListProps) => {
               onSuccess={insertTestCases}
               measure={measure}
             />
-            {activeTab === "passing" && (
+            {(activeTab === "passing" || activeTab === "compositeScore") && (
               <div
                 tw="overflow-x-auto sm:-mx-6 lg:-mx-8"
                 style={{ overflow: "visible" }}
