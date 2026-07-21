@@ -31,6 +31,7 @@ import { Simulate } from "react-dom/test-utils";
 import {
   useFeatureFlags,
   checkUserCanEdit,
+  useUserServiceApi,
   MeasureServiceApi,
   ServiceConfig,
 } from "@madie/madie-util";
@@ -53,7 +54,10 @@ const mockOktaTokenApi = {
 
 jest.mock("@madie/madie-util", () => ({
   useMeasureServiceApi: jest.fn(() => mockMeasureServiceApi),
-  useUserServiceApi: jest.fn(() => ({ getOwnerDetails: jest.fn() })),
+  useUserServiceApi: jest.fn(() => ({
+    getOwnerDetails: jest.fn(),
+    getBulkUserDetails: jest.fn().mockResolvedValue({}),
+  })),
   useOktaTokens: () => mockOktaTokenApi,
   checkUserCanEdit: jest.fn().mockImplementation(() => true),
   checkUserCanDelete: jest.fn().mockImplementation(() => true),
@@ -2447,7 +2451,9 @@ describe("Measure List component", () => {
     expect(dialogTitle).toBeInTheDocument();
 
     // Find and click the confirm delete button - use the correct test ID
-    const confirmDeleteButton = screen.getByTestId("delete-measure-button-2");
+    const confirmDeleteButton = screen.getByTestId(
+      "delete-dialog-continue-button"
+    );
     expect(confirmDeleteButton).toBeInTheDocument();
 
     // Click the button with fireEvent to ensure the click is processed
@@ -2518,7 +2524,9 @@ describe("Measure List component", () => {
     await findByText("Delete Measure");
 
     // Find and click the confirm delete button
-    const confirmDeleteButton = screen.getByTestId("delete-measure-button-2");
+    const confirmDeleteButton = screen.getByTestId(
+      "delete-dialog-continue-button"
+    );
     fireEvent.click(confirmDeleteButton);
 
     // Wait for the deleteMeasure API call to be made and error to be handled
@@ -2959,6 +2967,69 @@ describe("Measure lock functionality", () => {
       "aria-label",
       expect.stringContaining("Locked by AnotherUser")
     );
+  });
+
+  it("should display the locking user's real name when it can be resolved", async () => {
+    const lockedMeasure = {
+      ...measures[0],
+      measureLock: {
+        lockedBy: "AnotherUser",
+        lockedAt: new Date().toISOString(),
+        expiresAt: new Date(Date.now() + 900000).toISOString(),
+        measureId: measures[0].id,
+      },
+    };
+
+    (useUserServiceApi as jest.Mock).mockReturnValueOnce({
+      getOwnerDetails: jest.fn(),
+      getBulkUserDetails: jest.fn().mockResolvedValue({
+        AnotherUser: { firstName: "John", lastName: "Doe" },
+      }),
+    });
+
+    render(
+      <ServiceContext.Provider value={serviceConfig}>
+        <MeasureList
+          measureList={[lockedMeasure]}
+          setMeasureList={setMeasureListMock}
+          setTotalPages={setTotalPagesMock}
+          setTotalItems={setTotalItemsMock}
+          setVisibleItems={setVisibleItemsMock}
+          setOffset={setOffsetMock}
+          setLoading={setLoadingMock}
+          activeTab={0}
+          searchCriteria={null}
+          setSearchCriteria={setSearchCriteriaMock}
+          currentLimit={10}
+          currentPage={0}
+          setErrMsg={setErrMsgMock}
+          currentSort="lastModifiedAt"
+          currentDirection="DESC"
+          setCurrentSort={setCurrentSortMock}
+          setCurrentDirection={setCurrentDirectionMock}
+          handlePageChange={handlePageChangeMock}
+          search=""
+          toastOpen={false}
+          toastMessage=""
+          toastType="danger"
+          setToastOpen={setToastOpenMock}
+          setToastMessage={setToastMessageMock}
+          setToastType={setToastTypeMock}
+          onToastClose={onToastCloseMock}
+        />
+      </ServiceContext.Provider>
+    );
+
+    const actionButton = await screen.findByTestId(
+      `measure-action-${lockedMeasure.id}`
+    );
+
+    await waitFor(() => {
+      expect(actionButton).toHaveAttribute(
+        "aria-label",
+        expect.stringContaining("Locked by John Doe (AnotherUser)")
+      );
+    });
   });
 
   it("should display 'Edit' when user has edit permission and measure is not locked", async () => {

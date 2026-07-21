@@ -5,7 +5,7 @@ import { MemoryRouter, useNavigate } from "react-router-dom";
 import EditTestCaseBreadCrumbs from "./EditTestCaseBreadCrumbs";
 import { render, screen, cleanup, waitFor } from "@testing-library/react";
 // @ts-ignore
-import { measureStore } from "@madie/madie-util";
+import { measureStore, useUserServiceApi } from "@madie/madie-util";
 import { Measure, TestCase } from "@madie/madie-models";
 import userEvent from "@testing-library/user-event";
 
@@ -16,6 +16,10 @@ jest.mock("@madie/madie-util", () => ({
   })),
   checkUserCanEdit: jest.fn(),
   useFeatureFlags: () => ({}),
+  useUserServiceApi: jest.fn(() => ({
+    getOwnerDetails: jest.fn(),
+    getBulkUserDetails: jest.fn().mockResolvedValue({}),
+  })),
   measureStore: {
     updateMeasure: jest.fn((measure) => measure),
     state: jest.fn().mockImplementation(() => null),
@@ -116,6 +120,51 @@ describe("EditTestCaseBreadCrumbs", () => {
     await waitFor(() => {
       expect(
         screen.getByText("Locked while being edited by user1")
+      ).toBeInTheDocument();
+    });
+  });
+
+  it("should display the locking user's real name when it can be resolved", async () => {
+    const lockedMeasure = {
+      ...measure,
+      testCases: [
+        { ...testCases[0], testCaseLock: { lockedBy: "user1" } },
+        ...testCases.slice(1),
+      ],
+    } as Measure;
+    measureStore.state.mockImplementation(() => lockedMeasure);
+
+    (useUserServiceApi as jest.Mock).mockReturnValueOnce({
+      getOwnerDetails: jest.fn(),
+      getBulkUserDetails: jest.fn().mockResolvedValue({
+        user1: { firstName: "John", lastName: "Doe" },
+      }),
+    });
+
+    render(
+      <MemoryRouter>
+        <EditTestCaseBreadCrumbs
+          testCase={
+            {
+              title: "Case #1: Group1 - Title1",
+              series: "",
+              createdAt: "",
+              createdBy: "",
+              description: "",
+              testCaseLock: { lockedBy: "user1" },
+            } as TestCase
+          }
+          measureId="unknown"
+          canEdit={true}
+        />
+      </MemoryRouter>
+    );
+
+    const tooltipIcon = await screen.findByTestId("locked-icon");
+    userEvent.hover(tooltipIcon);
+    await waitFor(() => {
+      expect(
+        screen.getByText("Locked while being edited by John Doe (user1)")
       ).toBeInTheDocument();
     });
   });

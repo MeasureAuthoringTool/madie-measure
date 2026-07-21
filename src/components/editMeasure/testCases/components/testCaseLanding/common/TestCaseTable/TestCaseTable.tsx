@@ -29,7 +29,7 @@ import FiberManualRecord from "@mui/icons-material/FiberManualRecord";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import ShiftDatesDialog from "../shiftDates/ShiftDatesDialog";
 import { Tooltip } from "@mui/material";
-import { checkUserCanEdit } from "@madie/madie-util";
+import { checkUserCanEdit, useUserServiceApi } from "@madie/madie-util";
 import _ from "lodash";
 import { useNavigate } from "react-router-dom";
 import DeleteDisabledIcon from "../../../../../../common/DeleteDisabledIcon";
@@ -146,22 +146,32 @@ const TestCaseTable = (props: TestCaseTableProps) => {
 
   const navigate = useNavigate();
   const isQICore6 = measure?.model === Model.QICORE_6_0_0;
+  const userServiceApi = useRef(useUserServiceApi()).current; //needs to be ref or triggers jest. throws warn
 
   const TH = tw.th`p-3 text-left text-sm font-bold capitalize`;
 
-  const transFormData = (testCases: TestCase[]): TCRow[] => {
-    return testCases.map((tc: TestCase) => ({
-      id: tc.id,
-      status: tc.executionStatus,
-      validationStatus: tc.validationStatus,
-      group: tc.series,
-      title: tc.title,
-      description: tc.description,
-      lastSaved: tc.lastModifiedAt,
-      action: tc,
-      caseNumber: tc.caseNumber,
-      createdBeforeVersioning: tc.createdBeforeVersioning,
-    }));
+  const transFormData = (
+    testCases: TestCase[],
+    lockedByDisplayNames: Record<string, string> = {}
+  ): TCRow[] => {
+    return testCases.map((tc: TestCase) => {
+      const lockedBy = tc.testCaseLock?.lockedBy;
+      return {
+        id: tc.id,
+        status: tc.executionStatus,
+        validationStatus: tc.validationStatus,
+        group: tc.series,
+        title: tc.title,
+        description: tc.description,
+        lastSaved: tc.lastModifiedAt,
+        action: tc,
+        caseNumber: tc.caseNumber,
+        createdBeforeVersioning: tc.createdBeforeVersioning,
+        lockedByDisplayName: lockedBy
+          ? lockedByDisplayNames[lockedBy] || lockedBy
+          : undefined,
+      };
+    });
   };
 
   type TCRow = {
@@ -175,15 +185,55 @@ const TestCaseTable = (props: TestCaseTableProps) => {
     id: string;
     caseNumber: number;
     createdBeforeVersioning: boolean;
+    lockedByDisplayName?: string;
   };
 
   const [data, setData] = useState<TCRow[]>([]);
+  // Real names of users who currently have a test case locked for editing,
+  // similar to the "in use" chip on the Page Header. Baked into `data` (rather
+  // than read directly from the column defs) so resolving names doesn't force
+  // the memoized table columns/cells to be recreated and remounted.
+  const [lockedByDisplayNames, setLockedByDisplayNames] = useState<
+    Record<string, string>
+  >({});
 
   useEffect(() => {
     if (testCases) {
-      setData(transFormData(testCases));
+      setData(transFormData(testCases, lockedByDisplayNames));
     }
-  }, [testCases]);
+  }, [testCases, lockedByDisplayNames]);
+
+  useEffect(() => {
+    const lockedByHarpIds = Array.from(
+      new Set(
+        (testCases || [])
+          .map((tc) => tc?.testCaseLock?.lockedBy)
+          .filter((harpId): harpId is string => !!harpId)
+      )
+    );
+    if (lockedByHarpIds.length === 0 || !userServiceApi) {
+      return;
+    }
+    userServiceApi
+      .getBulkUserDetails(lockedByHarpIds)
+      .then((userDetails: any) => {
+        setLockedByDisplayNames((prev) => {
+          const next = { ...prev };
+          Object.entries(userDetails || {}).forEach(
+            ([harpId, details]: [string, any]) => {
+              const name = [details?.firstName, details?.lastName]
+                .filter(Boolean)
+                .join(" ");
+              next[harpId] = name ? `${name} (${harpId})` : harpId;
+            }
+          );
+          return next;
+        });
+      })
+      .catch(() => {
+        // fall back to displaying the raw HARP ID if the lookup fails
+      });
+  }, [testCases, userServiceApi]);
 
   const columns = useMemo<ColumnDef<TCRow>[]>(() => {
     const columnDefs = [];
@@ -382,6 +432,9 @@ const TestCaseTable = (props: TestCaseTableProps) => {
             (tc) => tc.id === info.row.original.id
           );
           const isLockedByOther = canEdit && !!testCase?.testCaseLock;
+          const lockedByDisplayName =
+            info.row.original.lockedByDisplayName ||
+            testCase?.testCaseLock?.lockedBy;
 
           const buttonText = isLockedByOther
             ? "View"
@@ -395,11 +448,7 @@ const TestCaseTable = (props: TestCaseTableProps) => {
               data-testid={`view-edit-test-case-button-${info.row.original.id}`}
               aria-label={`${buttonText} Test Case ${info.row.original.group} ${
                 info.row.original.title
-              }${
-                isLockedByOther
-                  ? `(Locked by ${testCase.testCaseLock.lockedBy})`
-                  : ""
-              }`}
+              }${isLockedByOther ? `(Locked by ${lockedByDisplayName})` : ""}`}
               onClick={() => {
                 const editTestCaseUrl = _.isEmpty(measure?.groups)
                   ? `../${info.row.original.id}`
@@ -423,7 +472,7 @@ const TestCaseTable = (props: TestCaseTableProps) => {
                   <>
                     Locked while being edited by
                     <br />
-                    {testCase.testCaseLock.lockedBy}
+                    {lockedByDisplayName}
                   </>
                 }
                 arrow
