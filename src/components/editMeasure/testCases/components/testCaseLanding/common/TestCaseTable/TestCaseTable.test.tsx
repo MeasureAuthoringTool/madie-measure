@@ -10,7 +10,11 @@ import {
   Model,
 } from "@madie/madie-models";
 // @ts-ignore
-import { useFeatureFlags, checkUserCanEdit } from "@madie/madie-util";
+import {
+  useFeatureFlags,
+  checkUserCanEdit,
+  useUserServiceApi,
+} from "@madie/madie-util";
 import userEvent from "@testing-library/user-event";
 import { within } from "@testing-library/dom";
 
@@ -225,6 +229,10 @@ jest.mock("@madie/madie-util", () => ({
   useOktaTokens: () => ({
     getAccessToken: () => "test.jwt",
   }),
+  useUserServiceApi: jest.fn(() => ({
+    getOwnerDetails: jest.fn(),
+    getBulkUserDetails: jest.fn().mockResolvedValue({}),
+  })),
 }));
 
 const mockPush = jest.fn();
@@ -972,6 +980,43 @@ describe("TestCase component", () => {
         expect(actionButton).toHaveAttribute(
           "aria-label",
           `View Test Case ${lockedTestCase.series} ${lockedTestCase.title}(Locked by ${lockedTestCase.testCaseLock?.lockedBy})`
+        );
+      });
+    });
+
+    it("should display the locking user's real name when it can be resolved", async () => {
+      const deleteTestCase = jest.fn();
+      const exportTestCase = jest.fn();
+      const onCloneTestCase = jest.fn();
+      const setSelectedTestCasesMock = jest.fn();
+
+      (useUserServiceApi as jest.Mock).mockReturnValueOnce({
+        getOwnerDetails: jest.fn(),
+        getBulkUserDetails: jest.fn().mockResolvedValue({
+          "another.user@example.com": { firstName: "John", lastName: "Doe" },
+        }),
+      });
+
+      renderWithTestCase(
+        [lockedTestCase],
+        true,
+        deleteTestCase,
+        exportTestCase,
+        onCloneTestCase,
+        defaultMeasure,
+        setSelectedTestCasesMock,
+        undefined,
+        []
+      );
+
+      const actionButton = await screen.findByTestId(
+        `view-edit-test-case-button-${lockedTestCase.id}`
+      );
+
+      await waitFor(() => {
+        expect(actionButton).toHaveAttribute(
+          "aria-label",
+          `View Test Case ${lockedTestCase.series} ${lockedTestCase.title}(Locked by John Doe (another.user@example.com))`
         );
       });
     });

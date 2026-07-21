@@ -137,6 +137,10 @@ jest.mock("@madie/madie-util", () => {
     checkUserCanEdit: jest.fn(() => {
       return true;
     }),
+    useUserServiceApi: jest.fn(() => ({
+      getOwnerDetails: jest.fn(),
+      getBulkUserDetails: jest.fn().mockResolvedValue({}),
+    })),
     routeHandlerStore: {
       subscribe: () => {
         return { unsubscribe: () => null };
