@@ -79,6 +79,10 @@ jest.mock("@madie/madie-util", () => ({
   useFeatureFlags: jest.fn().mockImplementation(() => ({
     applyDefaults: false,
   })),
+  useUserServiceApi: jest.fn(() => ({
+    getOwnerDetails: jest.fn(),
+    getBulkUserDetails: jest.fn().mockResolvedValue({}),
+  })),
 }));
 
 describe("TestCaseLanding component", () => {
