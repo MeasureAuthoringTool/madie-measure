@@ -1,12 +1,12 @@
-import React, { useEffect, useMemo, useRef } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useFormik } from "formik";
-import { Measure, ReviewStatus } from "@madie/madie-models";
+import { Measure, ReviewStatus, MeasureReview } from "@madie/madie-models";
 import {
   MadieDialog,
   RichTextEditor,
 } from "@madie/madie-design-system/dist/react";
 import { Divider, FormControlLabel, Switch } from "@mui/material";
-import { useMeasureServiceApi } from "@madie/madie-util";
+import { useMeasureReviewServiceApi } from "@madie/madie-util";
 
 interface ReviewDialogProps {
   open: boolean;
@@ -21,15 +21,52 @@ export default function ReviewDialog({
   measure,
   onClose,
 }: ReviewDialogProps) {
-  const measureServiceApi = useRef(useMeasureServiceApi()).current;
+  const measureReviewServiceApi = useRef(useMeasureReviewServiceApi()).current;
+  const [review, setReview] = useState<MeasureReview | null>(null);
+  const [isReviewLoading, setIsReviewLoading] = useState(false);
 
   const initialValues = useMemo(
     () => ({
-      markAsReady: measure?.review?.status === ReviewStatus.READY_FOR_REVIEW,
-      comments: measure?.review?.comment ?? EMPTY_REVIEW_COMMENT,
+      markAsReady: review?.status === ReviewStatus.READY_FOR_REVIEW,
+      comments: review?.comment ?? EMPTY_REVIEW_COMMENT,
     }),
-    [measure?.review?.status, measure?.review?.comment]
+    [review?.status, review?.comment]
   );
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchReview = async () => {
+      if (!open || !measure?.id) {
+        setReview(null);
+        return;
+      }
+
+      setIsReviewLoading(true);
+      try {
+        const reviewResponse = await measureReviewServiceApi.getMeasureReview(
+          measure.id
+        );
+        if (isMounted) {
+          setReview(reviewResponse);
+        }
+      } catch {
+        if (isMounted) {
+          setReview(null);
+        }
+      } finally {
+        if (isMounted) {
+          setIsReviewLoading(false);
+        }
+      }
+    };
+
+    fetchReview();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [open, measure?.id, measureReviewServiceApi]);
 
   const formik = useFormik({
     initialValues,
@@ -39,16 +76,27 @@ export default function ReviewDialog({
         return;
       }
 
-      const updatedMeasure: Measure = {
-        ...measure,
-        review: {
-          status: values.markAsReady
-            ? ReviewStatus.READY_FOR_REVIEW
-            : ReviewStatus.NOT_READY_FOR_REVIEW,
-          comment: values.comments || EMPTY_REVIEW_COMMENT,
-        },
+      const reviewPayload: MeasureReview = {
+        id: review?.id ?? "",
+        measureId: measure.id,
+        measureSetId: measure.measureSetId,
+        status: values.markAsReady
+          ? ReviewStatus.READY_FOR_REVIEW
+          : ReviewStatus.NOT_READY_FOR_REVIEW,
+        comment: values.comments || EMPTY_REVIEW_COMMENT,
       };
-      await measureServiceApi.updateMeasure(updatedMeasure);
+
+      const savedReview = review?.id
+        ? await measureReviewServiceApi.updateMeasureReview(
+            measure.id,
+            reviewPayload
+          )
+        : await measureReviewServiceApi.createMeasureReview(
+            measure.id,
+            reviewPayload
+          );
+
+      setReview(savedReview);
       onClose();
     },
   });
@@ -60,7 +108,7 @@ export default function ReviewDialog({
     }
   }, [open, initialValues, resetForm]);
 
-  const isSaveDisabled = !measure?.id || !formik.dirty;
+  const isSaveDisabled = !measure?.id || !formik.dirty || isReviewLoading;
 
   return (
     <MadieDialog

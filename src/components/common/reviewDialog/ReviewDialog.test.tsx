@@ -3,8 +3,9 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Measure, ReviewStatus } from "../../../../../madie-models/src";
 // @ts-ignore
-import { useMeasureServiceApi } from "@madie/madie-util";
+import { useMeasureReviewServiceApi } from "@madie/madie-util";
 import ReviewDialog from "./ReviewDialog";
+import { MeasureReview } from "@madie/madie-models";
 
 jest.mock("@madie/madie-design-system/dist/react", () => {
   const actual = jest.requireActual("@madie/madie-design-system/dist/react");
@@ -22,17 +23,27 @@ jest.mock("@madie/madie-design-system/dist/react", () => {
 });
 
 jest.mock("@madie/madie-util", () => ({
-  useMeasureServiceApi: jest.fn(),
+  useMeasureReviewServiceApi: jest.fn(),
 }));
 
 describe("ReviewDialog", () => {
-  const mockUpdateMeasure = jest.fn().mockResolvedValue({});
+  const mockGetMeasureReview = jest.fn().mockResolvedValue(null);
+  const mockCreateMeasureReview = jest.fn().mockResolvedValue({
+    id: "new-review-id",
+  });
+  const mockUpdateMeasureReview = jest.fn().mockResolvedValue({
+    id: "existing-review-id",
+  });
 
   beforeEach(() => {
-    (useMeasureServiceApi as jest.Mock).mockReturnValue({
-      updateMeasure: mockUpdateMeasure,
+    (useMeasureReviewServiceApi as jest.Mock).mockReturnValue({
+      getMeasureReview: mockGetMeasureReview,
+      createMeasureReview: mockCreateMeasureReview,
+      updateMeasureReview: mockUpdateMeasureReview,
     });
-    mockUpdateMeasure.mockClear();
+    mockGetMeasureReview.mockClear();
+    mockCreateMeasureReview.mockClear();
+    mockUpdateMeasureReview.mockClear();
   });
 
   const measure = {
@@ -57,7 +68,7 @@ describe("ReviewDialog", () => {
     baseConfigurationTypes: [],
   } as unknown as Measure;
 
-  it("renders required content when open", () => {
+  it("renders required content when open", async () => {
     render(<ReviewDialog open={true} measure={measure} onClose={jest.fn()} />);
 
     expect(
@@ -66,9 +77,13 @@ describe("ReviewDialog", () => {
     expect(screen.getByLabelText("Mark as Ready")).toBeInTheDocument();
     expect(screen.getByLabelText("Comments")).toBeInTheDocument();
     expect(screen.getByTestId("review-dialog-save-button")).toBeDisabled();
+
+    await waitFor(() => {
+      expect(mockGetMeasureReview).toHaveBeenCalledWith("measure-1");
+    });
   });
 
-  it("saves READY_FOR_REVIEW when mark-as-ready is selected", async () => {
+  it("creates READY_FOR_REVIEW when no existing review is found", async () => {
     const onClose = jest.fn();
     render(<ReviewDialog open={true} measure={measure} onClose={onClose} />);
 
@@ -80,16 +95,20 @@ describe("ReviewDialog", () => {
     userEvent.click(screen.getByTestId("review-dialog-save-button"));
 
     await waitFor(() => {
-      expect(mockUpdateMeasure).toHaveBeenCalledWith(
+      expect(mockCreateMeasureReview).toHaveBeenCalledWith(
+        "measure-1",
         expect.objectContaining({
-          id: "measure-1",
-          review: {
-            status: ReviewStatus.READY_FOR_REVIEW,
-            comment: "<p></p>",
-          },
+          id: "",
+          measureId: "measure-1",
+          measureSetId: "set-1",
+          status: ReviewStatus.READY_FOR_REVIEW,
+          comment: "<p></p>",
         })
       );
     });
+
+    expect(mockUpdateMeasureReview).not.toHaveBeenCalled();
+
     await waitFor(() => {
       expect(onClose).toHaveBeenCalledTimes(1);
     });
@@ -116,18 +135,21 @@ describe("ReviewDialog", () => {
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
-  it("saves NOT_READY_FOR_REVIEW when mark-as-ready remains off", async () => {
-    const readyMeasure = {
-      ...measure,
-      review: {
-        status: ReviewStatus.READY_FOR_REVIEW,
-        comment: "<p>already ready</p>",
-      },
-    } as Measure;
+  it("updates NOT_READY_FOR_REVIEW when existing review is modified", async () => {
+    const existingReview: MeasureReview = {
+      id: "existing-review-id",
+      measureId: "measure-1",
+      measureSetId: "set-1",
+      status: ReviewStatus.READY_FOR_REVIEW,
+      comment: "<p>already ready</p>",
+    };
+    mockGetMeasureReview.mockResolvedValueOnce(existingReview);
 
-    render(
-      <ReviewDialog open={true} measure={readyMeasure} onClose={jest.fn()} />
-    );
+    render(<ReviewDialog open={true} measure={measure} onClose={jest.fn()} />);
+
+    await waitFor(() => {
+      expect(screen.getByLabelText("Mark as Ready")).toBeChecked();
+    });
 
     userEvent.click(screen.getByTestId("review-dialog-mark-ready-switch"));
     await waitFor(() => {
@@ -137,14 +159,18 @@ describe("ReviewDialog", () => {
     userEvent.click(screen.getByTestId("review-dialog-save-button"));
 
     await waitFor(() => {
-      expect(mockUpdateMeasure).toHaveBeenCalledWith(
+      expect(mockUpdateMeasureReview).toHaveBeenCalledWith(
+        "measure-1",
         expect.objectContaining({
-          review: {
-            status: ReviewStatus.NOT_READY_FOR_REVIEW,
-            comment: "<p>already ready</p>",
-          },
+          id: "existing-review-id",
+          measureId: "measure-1",
+          measureSetId: "set-1",
+          status: ReviewStatus.NOT_READY_FOR_REVIEW,
+          comment: "<p>already ready</p>",
         })
       );
     });
+
+    expect(mockCreateMeasureReview).not.toHaveBeenCalled();
   });
 });

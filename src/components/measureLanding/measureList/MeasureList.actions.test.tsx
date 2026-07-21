@@ -54,8 +54,17 @@ const mockOktaTokenApi = {
   getUserName: jest.fn().mockReturnValue("test user"),
 };
 
+const mockMeasureReviewServiceApi = {
+  getMeasureReview: jest.fn().mockResolvedValue(null),
+  createMeasureReview: jest.fn().mockResolvedValue({ id: "new-review-id" }),
+  updateMeasureReview: jest
+    .fn()
+    .mockResolvedValue({ id: "existing-review-id" }),
+};
+
 jest.mock("@madie/madie-util", () => ({
   useMeasureServiceApi: jest.fn(() => mockMeasureServiceApi),
+  useMeasureReviewServiceApi: jest.fn(() => mockMeasureReviewServiceApi),
   useUserServiceApi: jest.fn(() => ({ getOwnerDetails: jest.fn() })),
   useOktaTokens: () => mockOktaTokenApi,
   checkUserCanEdit: jest.fn().mockImplementation(() => true),
