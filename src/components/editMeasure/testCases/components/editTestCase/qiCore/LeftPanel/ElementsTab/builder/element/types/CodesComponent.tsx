@@ -13,6 +13,7 @@ import AddElementButton from "../../../../../../../common/UIOnlyModelAgnostic/Ad
 import "./CodesComponent.scss";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import { getMultipleCardinalityLabel } from "./TypeUtil";
+import useMeasureModel from "../../../../../../../routes/qiCore/useMeasureModel";
 const CodesComponent = ({
   canEdit,
   structureDefinition,
@@ -27,6 +28,7 @@ const CodesComponent = ({
   showDeleteButton = false,
   handleDeleteElement,
 }: TypeComponentProps) => {
+  const measureModel = useMeasureModel();
   const [codes, setCodes] = useState([]);
   const fhirDefinitionServiceApi = useRef(useFhirDefinitionsServiceApi());
   const terminologyService = useRef(useTerminologyServiceApi());
@@ -108,7 +110,7 @@ const CodesComponent = ({
         // e.g. http://hl7.org/fhir/us/core/ValueSet/birthsex
         // e.g. http://hl7.org/fhir/ValueSet/administrative-gender
         fhirDefinitionServiceApi.current
-          .getValueSetDefinition(valueSetUrl)
+          .getValueSetDefinition(valueSetUrl, measureModel)
           .then((valueSet) => {
             /*
               does NOT have valueSet?.expansion?.contains for birthsex

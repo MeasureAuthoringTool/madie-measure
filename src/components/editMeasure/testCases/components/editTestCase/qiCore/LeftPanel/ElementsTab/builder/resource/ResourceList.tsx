@@ -36,6 +36,7 @@ import {
   getProfileDisplayMode,
   saveProfileDisplayMode,
 } from "./profileDisplayToggle/ProfileDisplayMode";
+import useMeasureModel from "../../../../../../routes/qiCore/useMeasureModel";
 
 export interface ResourceListProps {
   resourceIdentifiers?: ResourceIdentifier[];
@@ -44,7 +45,6 @@ export interface ResourceListProps {
   isPatientAdded?: boolean;
   isComposite?: boolean;
   onInsertTCClick?: () => void;
-  measureModel?: string;
   measureId?: string;
   profileMap?: Record<string, number>;
 }
@@ -57,10 +57,10 @@ const ResourceList = ({
   isPatientAdded,
   isComposite = false,
   onInsertTCClick,
-  measureModel,
   measureId,
   profileMap = {},
 }: ResourceListProps) => {
+  const measureModel = useMeasureModel();
   // Load saved pagination state from localStorage
   const resourcePageOptions = JSON.parse(
     localStorage.getItem("resourcePageOptions")

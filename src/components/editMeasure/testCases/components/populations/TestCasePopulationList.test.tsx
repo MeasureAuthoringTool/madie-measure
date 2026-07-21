@@ -12,6 +12,7 @@ import {
   PopulationType,
 } from "@madie/madie-models";
 import userEvent from "@testing-library/user-event";
+import { ObservationResources } from "../../api/CalculationService";
 
 describe("TestCasePopulationList component", () => {
   afterEach(() => {
@@ -231,7 +232,7 @@ describe("TestCasePopulationList component", () => {
   it("should display tooltip for observation population when tooltip is provided", async () => {
     const testCasePopulations = [
       {
-        id: "obs-1",
+        id: "obs-0",
         name: PopulationType.MEASURE_POPULATION_OBSERVATION,
         expected: 1,
         actual: 1,
@@ -253,9 +254,14 @@ describe("TestCasePopulationList component", () => {
             [
               {
                 groupId: "group-1",
-                resources: [tooltipText],
+                relations: [
+                  {
+                    index: 0,
+                    resources: [tooltipText],
+                  },
+                ],
               },
-            ] as any
+            ] as ObservationResources[]
           }
           group={{ displayId: "group-1" } as any}
           isTestCaseExecuted={true}

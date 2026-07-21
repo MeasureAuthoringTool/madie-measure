@@ -13,7 +13,7 @@ import EditorCalculator from "../editTestCase/calculator/EditorCalculator";
 export interface NavTabProps {
   leftPanelActiveTab: string;
   setLeftPanelActiveTab: (value: string) => void;
-  isQICore6: boolean;
+  isBuilderEnabled: boolean;
   dirty: boolean;
   setCalculationDialogOpen: any;
   canEdit?: boolean;
@@ -23,7 +23,7 @@ export default function CreateTestCaseNavTabs(props: NavTabProps) {
   const {
     leftPanelActiveTab,
     setLeftPanelActiveTab,
-    isQICore6,
+    isBuilderEnabled,
     dirty,
     setCalculationDialogOpen,
     canEdit,
@@ -38,7 +38,7 @@ export default function CreateTestCaseNavTabs(props: NavTabProps) {
   };
   return (
     <>
-      {isQICore6 && (
+      {isBuilderEnabled && (
         <div tw="flex flex-row w-full">
           <div tw="basis-11/12">
             <Tabs

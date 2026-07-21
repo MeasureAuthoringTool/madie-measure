@@ -1,5 +1,5 @@
 import React, { lazy, useMemo, useState, useEffect } from "react";
-import { Measure } from "@madie/madie-models";
+import { isFhirModel, Measure } from "@madie/madie-models";
 import { measureStore } from "@madie/madie-util";
 
 const TestCases = () => {
@@ -19,7 +19,7 @@ const TestCases = () => {
         if (measure?.model.includes("QDM")) {
           return import("./components/routes/qdm/TestCaseRoutes");
         }
-        if (measure?.model.includes("QI-Core")) {
+        if (isFhirModel(measure?.model)) {
           return import("./components/routes/qiCore/TestCaseRoutes");
         } else {
           return import("./components/routes/EmptyRoutes");
@@ -27,7 +27,12 @@ const TestCases = () => {
       }),
     [measure?.model]
   );
-
+  /**
+   *
+   *         if (measure?.model.includes("QI-Core")) {
+   *           return import("./components/routes/qiCore/TestCaseRoutes");
+   *         }
+   */
   return <TestCaseRoutesComponent />;
 };
 

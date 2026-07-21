@@ -1,6 +1,7 @@
 import * as React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import { ElementDefinition, ValueSet } from "fhir/r4";
+import { Model } from "@madie/madie-models";
 import userEvent from "@testing-library/user-event";
 import { ExecutionContextProvider } from "../../../../../../../routes/qiCore/ExecutionContext";
 import axios from "../../../../../../../../../../../api/axios-instance";
@@ -97,7 +98,7 @@ describe("CodeableConceptComponent Tests", () => {
       <ApiContextProvider value={mockConfig}>
         <ExecutionContextProvider
           value={{
-            measureState: [null, jest.fn()],
+            measureState: [{ model: Model.QICORE } as any, jest.fn()],
             bundleState: [null, jest.fn()],
             valueSetsState: [null, jest.fn()],
             executionContextReady: true,
@@ -200,7 +201,7 @@ describe("CodeableConceptComponent Tests", () => {
       <ApiContextProvider value={mockConfig}>
         <ExecutionContextProvider
           value={{
-            measureState: [null, jest.fn()],
+            measureState: [{ model: Model.QICORE } as any, jest.fn()],
             bundleState: [null, jest.fn()],
             valueSetsState: [null, jest.fn()],
             executionContextReady: true,
@@ -265,7 +266,7 @@ describe("CodeableConceptComponent Tests", () => {
       <ApiContextProvider value={mockConfig}>
         <ExecutionContextProvider
           value={{
-            measureState: [null, jest.fn()],
+            measureState: [{ model: Model.QICORE } as any, jest.fn()],
             bundleState: [null, jest.fn()],
             valueSetsState: [null, jest.fn()],
             executionContextReady: true,
@@ -334,7 +335,7 @@ describe("CodeableConceptComponent Tests", () => {
       <ApiContextProvider value={mockConfig}>
         <ExecutionContextProvider
           value={{
-            measureState: [null, jest.fn()],
+            measureState: [{ model: Model.QICORE } as any, jest.fn()],
             bundleState: [null, jest.fn()],
             valueSetsState: [null, jest.fn()],
             executionContextReady: true,
@@ -404,7 +405,7 @@ describe("CodeableConceptComponent Tests", () => {
       <ApiContextProvider value={mockConfig}>
         <ExecutionContextProvider
           value={{
-            measureState: [null, jest.fn()],
+            measureState: [{ model: Model.QICORE } as any, jest.fn()],
             bundleState: [null, jest.fn()],
             valueSetsState: [null, jest.fn()],
             executionContextReady: true,
@@ -468,7 +469,7 @@ describe("CodeableConceptComponent Tests", () => {
       <ApiContextProvider value={mockConfig}>
         <ExecutionContextProvider
           value={{
-            measureState: [null, jest.fn()],
+            measureState: [{ model: Model.QICORE } as any, jest.fn()],
             bundleState: [null, jest.fn()],
             valueSetsState: [null, jest.fn()],
             executionContextReady: true,
