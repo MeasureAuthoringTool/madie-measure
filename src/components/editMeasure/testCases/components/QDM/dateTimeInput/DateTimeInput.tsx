@@ -54,6 +54,9 @@ interface DateTimeInputProps {
   attributeName: string;
   disabled?: boolean;
   tooltipText?: string;
+  // Reports whether the field currently holds any content, including partial/invalid
+  // entries that never reach to onDateTimeChange.
+  onInputChange?: (hasContent: boolean) => void;
 }
 
 const DateTimeInput = ({
@@ -64,8 +67,11 @@ const DateTimeInput = ({
   attributeName,
   disabled = false,
   tooltipText,
+  onInputChange,
 }: DateTimeInputProps) => {
   const handleDateTimeChange = (newValue, context) => {
+    // Report presence of any content including invalid values
+    onInputChange?.(!!newValue);
     // Use MUI validation to identify complete dateTime entry.
     if (context?.validationError) {
       // Partial dateTime entry.
@@ -82,6 +88,7 @@ const DateTimeInput = ({
         const pastedValue = e.clipboardData.getData("text");
         const parsedDate = toDayJS(pastedValue).hour(0).minute(0).second(0);
         if (parsedDate && parsedDate.isValid()) {
+          onInputChange?.(true);
           onDateTimeChange(
             getCQLDateTime(parsedDate, !dateTime),
             attributeName
