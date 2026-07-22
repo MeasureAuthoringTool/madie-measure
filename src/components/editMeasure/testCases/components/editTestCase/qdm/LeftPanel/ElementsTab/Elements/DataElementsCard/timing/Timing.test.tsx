@@ -388,7 +388,7 @@ describe("Timing - Medication, Active single timing restriction", () => {
         canEdit={true}
       />
     );
-
+    // initially both dates are enabled
     expect(screen.getByTestId("relevant-period-start-input")).toBeEnabled();
     expect(screen.getByTestId("relevant-period-end-input")).toBeEnabled();
     expect(screen.getByTestId("relevant-datetime-input")).toBeEnabled();
