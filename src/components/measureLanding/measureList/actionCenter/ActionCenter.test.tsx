@@ -184,13 +184,14 @@ describe("ActionCenter", () => {
 
   it("should call updateTargetMeasure and setReviewDialog when review action is triggered", async () => {
     const setReviewDialog = jest.fn();
+    const updateTargetMeasure = jest.fn();
 
     render(
       <ActionCenter
         measures={[qdmMeasure]}
         associateCmsId={jest.fn()}
         exportMeasure={jest.fn()}
-        updateTargetMeasure={jest.fn()}
+        updateTargetMeasure={updateTargetMeasure}
         setCreateVersionDialog={jest.fn()}
         setDraftMeasureDialog={jest.fn()}
         setDeleteMeasureDialog={jest.fn()}
@@ -206,6 +207,8 @@ describe("ActionCenter", () => {
     const reviewButton = await screen.findByTestId("review-action-btn");
     expect(reviewButton).toBeEnabled();
     userEvent.click(reviewButton);
+
+    expect(updateTargetMeasure).toHaveBeenCalledWith(qdmMeasure);
 
     expect(setReviewDialog).toHaveBeenCalledWith({
       open: true,

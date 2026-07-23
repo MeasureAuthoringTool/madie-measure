@@ -1,10 +1,12 @@
-import React, { useEffect, useState } from "react";
-import { Measure } from "@madie/madie-models";
+import React, { useEffect, useMemo, useRef } from "react";
+import { useFormik } from "formik";
+import { Measure, ReviewStatus } from "@madie/madie-models";
 import {
   MadieDialog,
   RichTextEditor,
 } from "@madie/madie-design-system/dist/react";
 import { Divider, FormControlLabel, Switch } from "@mui/material";
+import { useMeasureServiceApi } from "@madie/madie-util";
 
 interface ReviewDialogProps {
   open: boolean;
@@ -12,26 +14,53 @@ interface ReviewDialogProps {
   onClose: () => void;
 }
 
+const EMPTY_REVIEW_COMMENT = "<p></p>";
+
 export default function ReviewDialog({
   open,
   measure,
   onClose,
 }: ReviewDialogProps) {
-  const [markAsReady, setMarkAsReady] = useState(false);
-  const [comments, setComments] = useState("");
+  const measureServiceApi = useRef(useMeasureServiceApi()).current;
 
-  // useEffect(() => {
-  //   if (open) {
-  //     // TODO: Once the Measure model includes reviewStatus enum, update this logic
-  //     // to check if measure?.reviewStatus === ReviewStatus.READY (or equivalent)
-  //     // For now, we default to false and clear comments
-  //     const isReady = measure?.reviewStatus === "READY";
-  //     setMarkAsReady(isReady);
-  //     setComments("");
-  //   }
-  // }, [open, measure?.reviewStatus]);
+  const initialValues = useMemo(
+    () => ({
+      markAsReady: measure?.review?.status === ReviewStatus.READY_FOR_REVIEW,
+      comments: measure?.review?.comment ?? EMPTY_REVIEW_COMMENT,
+    }),
+    [measure?.review?.status, measure?.review?.comment]
+  );
 
-  const isSaveDisabled = !markAsReady;
+  const formik = useFormik({
+    initialValues,
+    enableReinitialize: true,
+    onSubmit: async (values) => {
+      if (!measure?.id) {
+        return;
+      }
+
+      const updatedMeasure: Measure = {
+        ...measure,
+        review: {
+          status: values.markAsReady
+            ? ReviewStatus.READY_FOR_REVIEW
+            : ReviewStatus.NOT_READY_FOR_REVIEW,
+          comment: values.comments || EMPTY_REVIEW_COMMENT,
+        },
+      };
+      await measureServiceApi.updateMeasure(updatedMeasure);
+      onClose();
+    },
+  });
+  const { resetForm } = formik;
+
+  useEffect(() => {
+    if (open) {
+      resetForm({ values: initialValues });
+    }
+  }, [open, initialValues, resetForm]);
+
+  const isSaveDisabled = !measure?.id || !formik.dirty;
 
   return (
     <MadieDialog
@@ -53,9 +82,7 @@ export default function ReviewDialog({
         variant: "cyan",
         continueText: "Save",
         disabled: isSaveDisabled,
-        onClick: () => {
-          // Save behavior is intentionally out of scope for this story.
-        },
+        onClick: formik.submitForm,
         "data-testid": "review-dialog-save-button",
       }}
     >
@@ -66,8 +93,10 @@ export default function ReviewDialog({
           control={
             <Switch
               data-testid="review-dialog-mark-ready-switch"
-              checked={markAsReady}
-              onChange={(event) => setMarkAsReady(event.target.checked)}
+              checked={formik.values.markAsReady}
+              onChange={(event) =>
+                formik.setFieldValue("markAsReady", event.target.checked)
+              }
               slotProps={{
                 input: {
                   "aria-label": "Mark as Ready",
@@ -94,8 +123,10 @@ export default function ReviewDialog({
             id="review-comments"
             name="reviewComments"
             label="Comments"
-            content={comments}
-            onChange={(value: string) => setComments(value)}
+            content={formik.values.comments}
+            onChange={(value: string) =>
+              formik.setFieldValue("comments", value)
+            }
           />
         </div>
         <Divider sx={{ mt: 2 }} />
