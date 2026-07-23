@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { FormControl } from "@mui/material";
 import "twin.macro";
 import "styled-components/macro";
@@ -14,6 +14,9 @@ interface DateTimeIntervalProps {
   displayAttributeName?: boolean;
   disabled?: boolean;
   tooltipText?: string;
+  // Reports whether either the start or end field currently holds any content,
+  // including partial/invalid entries that never reach to onDateTimeIntervalChange.
+  onInputChange?: (hasContent: boolean) => void;
 }
 
 const DateTimeInterval = ({
@@ -25,7 +28,19 @@ const DateTimeInterval = ({
   displayAttributeName,
   disabled = false,
   tooltipText,
+  onInputChange,
 }: DateTimeIntervalProps) => {
+  const [startHasContent, setStartHasContent] = useState<boolean>(
+    !!dateTimeInterval?.low
+  );
+  const [endHasContent, setEndHasContent] = useState<boolean>(
+    !!dateTimeInterval?.high
+  );
+
+  useEffect(() => {
+    onInputChange?.(startHasContent || endHasContent);
+  }, [startHasContent, endHasContent]);
+
   const handleStartDateTimeChange = (newValue) => {
     if (
       (newValue === null || newValue === undefined) &&
@@ -73,6 +88,7 @@ const DateTimeInterval = ({
             dateTime={dateTimeInterval?.low}
             disabled={disabled}
             tooltipText={tooltipText}
+            onInputChange={setStartHasContent}
           />
           <DateTimeInput
             canEdit={canEdit}
@@ -82,6 +98,7 @@ const DateTimeInterval = ({
             dateTime={dateTimeInterval?.high}
             disabled={disabled}
             tooltipText={tooltipText}
+            onInputChange={setEndHasContent}
           />
         </div>
       </FormControl>

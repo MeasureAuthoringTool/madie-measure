@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import DateTimeInput from "../../../../../../../QDM/dateTimeInput/DateTimeInput";
 import DateTimeInterval from "../../../../../../../QDM/dateTimeInterval/DateTimeInterval";
 import { QDMDate } from "cqm-models";
@@ -13,9 +13,8 @@ import { labelStyle } from "./TimingStyles";
 
 export const MEDICATION_ACTIVE_TYPE = "QDM::MedicationActive";
 export const TIMING_TOOLTIP =
-  "Only Relevant Date Time or Relevant Period can be entered, not both";
-export const TIMING_WARNING =
-  "Only Relevant Date Time or Relevant Period can be entered, not both. Please clear one timing out.";
+  "Only Relevant Date Time or Relevant Period can be entered, not both.";
+export const TIMING_WARNING = `${TIMING_TOOLTIP} Please clear one timing out.`;
 
 const Timing = ({ canEdit, onChange, selectedDataElement }) => {
   const handleChange = (newValue, attributeName) => {
@@ -26,6 +25,19 @@ const Timing = ({ canEdit, onChange, selectedDataElement }) => {
     }
     onChange(selectedDataElement);
   };
+
+  // Tracks in-progress content for the two Medication, Active timings, including
+  // partial/invalid entries that never get persisted to the model. Without this,
+  // typing an invalid date (e.g. "02/12") leaves the model empty and both timings
+  // would remain editable.
+  const [periodHasInput, setPeriodHasInput] = useState(false);
+  const [datetimeHasInput, setDatetimeHasInput] = useState(false);
+
+  // Reset the pending-input flags whenever a different element is selected.
+  useEffect(() => {
+    setPeriodHasInput(false);
+    setDatetimeHasInput(false);
+  }, [selectedDataElement?.id]);
 
   // This "either/or" rule only applies to Medication, Active, so scope the whole
   // calculation to that type and leave the flags disabled/false for every other element.
@@ -38,17 +50,26 @@ const Timing = ({ canEdit, onChange, selectedDataElement }) => {
   if (isMedicationActive) {
     const relevantPeriod = selectedDataElement?.get?.("relevantPeriod");
     const relevantDatetime = selectedDataElement?.get?.("relevantDatetime");
+    // for valid values in the model.
     const relevantPeriodHasValue = !!(
       relevantPeriod &&
       (relevantPeriod.low || relevantPeriod.high)
     );
     const relevantDatetimeHasValue = !!relevantDatetime;
+
+    // "Both present" (legacy data) is based only on persisted values so a partial
+    // entry doesn't spuriously trigger the warning.
     bothTimingsPresent = relevantPeriodHasValue && relevantDatetimeHasValue;
+
+    // consider persisted values OR any in-progress including invalid input in the field.
+    const relevantPeriodHasInput = relevantPeriodHasValue || periodHasInput;
+    const relevantDatetimeHasInput =
+      relevantDatetimeHasValue || datetimeHasInput;
 
     // Only disable the "other" timing when a single timing has been entered.
     // When both already exist (legacy data) leave both enabled and warn instead.
-    disableRelevantPeriod = relevantDatetimeHasValue && !bothTimingsPresent;
-    disableRelevantDatetime = relevantPeriodHasValue && !bothTimingsPresent;
+    disableRelevantPeriod = relevantDatetimeHasInput && !bothTimingsPresent;
+    disableRelevantDatetime = relevantPeriodHasInput && !bothTimingsPresent;
   }
 
   const dateFormatToDisplay = (date) => {
@@ -80,6 +101,11 @@ const Timing = ({ canEdit, onChange, selectedDataElement }) => {
                 attributeName={timingAttr.path}
                 disabled={disabled}
                 tooltipText={disabled ? TIMING_TOOLTIP : undefined}
+                onInputChange={
+                  isMedicationActive && timingAttr.path === "relevantPeriod"
+                    ? setPeriodHasInput
+                    : undefined
+                }
               />
             </div>
           );
@@ -96,6 +122,11 @@ const Timing = ({ canEdit, onChange, selectedDataElement }) => {
                 attributeName={timingAttr.path}
                 disabled={disabled}
                 tooltipText={disabled ? TIMING_TOOLTIP : undefined}
+                onInputChange={
+                  isMedicationActive && timingAttr.path === "relevantDatetime"
+                    ? setDatetimeHasInput
+                    : undefined
+                }
               />
             </div>
           );

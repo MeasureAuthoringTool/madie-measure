@@ -10,6 +10,7 @@ import {
   MedicationActive,
   CQL,
 } from "cqm-models";
+import userEvent from "@testing-library/user-event";
 
 const updateDataElement = jest.fn();
 
@@ -375,5 +376,27 @@ describe("Timing - Medication, Active single timing restriction", () => {
     expect(screen.getByTestId("relevant-period-end-input")).not.toBeDisabled();
     expect(screen.getByTestId("relevant-datetime-input")).not.toBeDisabled();
     expect(screen.queryByTestId("timing-warning")).not.toBeInTheDocument();
+  });
+
+  it("disables Relevant Period (start and end) even if Relevant Datetime has invalid value", () => {
+    const medicationActive: MedicationActive = new MedicationActive();
+
+    render(
+      <Timing
+        onChange={updateDataElement}
+        selectedDataElement={medicationActive}
+        canEdit={true}
+      />
+    );
+    // initially both dates are enabled
+    expect(screen.getByTestId("relevant-period-start-input")).toBeEnabled();
+    expect(screen.getByTestId("relevant-period-end-input")).toBeEnabled();
+    expect(screen.getByTestId("relevant-datetime-input")).toBeEnabled();
+
+    // enter invalid value for relevantDatetime
+    userEvent.type(screen.getByTestId("relevant-datetime-input"), "08/02");
+    // relevantPeriod is disabled
+    expect(screen.getByTestId("relevant-period-start-input")).toBeDisabled();
+    expect(screen.getByTestId("relevant-period-end-input")).toBeDisabled();
   });
 });
