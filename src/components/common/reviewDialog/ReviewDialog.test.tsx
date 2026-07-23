@@ -1,11 +1,10 @@
 import * as React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { Measure, ReviewStatus } from "../../../../../madie-models/src";
-// @ts-ignore
+// @ts-ignore;
 import { useMeasureReviewServiceApi } from "@madie/madie-util";
 import ReviewDialog from "./ReviewDialog";
-import { MeasureReview } from "@madie/madie-models";
+import { Measure, ReviewStatus, MeasureReview } from "@madie/madie-models";
 
 jest.mock("@madie/madie-design-system/dist/react", () => {
   const actual = jest.requireActual("@madie/madie-design-system/dist/react");
