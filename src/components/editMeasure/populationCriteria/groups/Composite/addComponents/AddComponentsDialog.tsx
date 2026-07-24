@@ -27,10 +27,9 @@ import {
 } from "../../../../../../icons/MeasureListTableRightArrowIcons";
 import { Measure, MeasureScoring, OwnershipType } from "@madie/madie-models";
 import * as _ from "lodash";
-import { formatCmsId } from "../../../../../../utils/cmsIdFormatter";
 import tw from "twin.macro";
 import "styled-components/macro";
-import { useMeasureServiceApi } from "@madie/madie-util";
+import { useMeasureServiceApi, formatCmsId } from "@madie/madie-util";
 import "../../../../../measureLanding/MeasureLanding.scss";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";

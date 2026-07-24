@@ -16,7 +16,6 @@ import {
 } from "@madie/madie-design-system/dist/react";
 
 import * as _ from "lodash";
-import { formatCmsId } from "../../../../../../../utils/cmsIdFormatter";
 import "../../../../../../measureLanding/MeasureLanding.scss";
 import {
   ColumnDef,
@@ -42,7 +41,11 @@ import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import useTestCaseServiceApi from "../../../../api/useTestCaseServiceApi";
 import Typography from "@mui/material/Typography";
-import { useMeasureServiceApi, useFeatureFlags } from "@madie/madie-util";
+import {
+  useMeasureServiceApi,
+  useFeatureFlags,
+  formatCmsId,
+} from "@madie/madie-util";
 import {
   useMeasureFilterSearch,
   filterMap,

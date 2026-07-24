@@ -1,5 +1,7 @@
+import * as mockCmsIdStubs from "../../__mocks__/cmsIdFormatterStubs";
 import "@testing-library/jest-dom";
 import * as React from "react";
+import * as mockMeasureActionStubs from "../../__mocks__/measureActionStubs";
 import { render, screen, waitFor } from "@testing-library/react";
 import { createMemoryRouter, RouterProvider } from "react-router";
 import { routesConfig } from "./MeasureRoutes";
@@ -23,6 +25,8 @@ const serviceConfig = {
 
 const mockUser = "TestUser1";
 jest.mock("@madie/madie-util", () => ({
+  ...mockCmsIdStubs,
+  ...mockMeasureActionStubs,
   useMeasureServiceApi: jest.fn(() => mockMeasureServiceApi),
   useUserServiceApi: jest.fn(() => ({ getOwnerDetails: jest.fn() })),
   useDocumentTitle: jest.fn(),

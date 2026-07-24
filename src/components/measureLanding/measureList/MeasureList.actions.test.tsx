@@ -1,3 +1,4 @@
+import * as mockCmsIdStubs from "../../../__mocks__/cmsIdFormatterStubs";
 import * as React from "react";
 import {
   cleanup,
@@ -55,6 +56,7 @@ const mockOktaTokenApi = {
 };
 
 jest.mock("@madie/madie-util", () => ({
+  ...mockCmsIdStubs,
   useMeasureServiceApi: jest.fn(() => mockMeasureServiceApi),
   useUserServiceApi: jest.fn(() => ({ getOwnerDetails: jest.fn() })),
   useOktaTokens: () => mockOktaTokenApi,
@@ -73,6 +75,71 @@ jest.mock("@madie/madie-util", () => ({
       return { unsubscribe: () => null };
     },
   },
+  // Shared action-center icons + dialogs + export flow (moved to madie-util)
+  exportMeasure: jest.fn(),
+  getNewestMeasureInstance: jest.fn(),
+  ExportAction: () => <div data-testid="export-action">Export Action</div>,
+  ViewHRAction: ({ onClick }: any) => (
+    <button data-testid="view-hr-action-btn" onClick={onClick}>
+      View HR Action
+    </button>
+  ),
+  HistoryAction: ({ onClick }: any) => (
+    <button data-testid="history-action-btn" onClick={onClick}>
+      History Action
+    </button>
+  ),
+  CompareVersionsAction: ({ onClick }: any) => (
+    <button data-testid="compare-versions-action-btn" onClick={onClick}>
+      Compare Versions Action
+    </button>
+  ),
+  ExportDialog: ({ open }: any) =>
+    open ? <div data-testid="export-dialog">Export Dialog</div> : null,
+  ViewHRModal: ({ open, onClose }: any) =>
+    open ? (
+      <div data-testid="view-human-readable-modal">
+        View Human Readable Modal
+        <button data-testid="view-hr-close-btn" onClick={onClose}>
+          Close
+        </button>
+      </div>
+    ) : null,
+  ViewMeasureHistoryDialog: ({ open, onClose }: any) =>
+    open ? (
+      <div data-testid="view-measure-history-dialog">
+        View Measure History Dialog
+        <button data-testid="view-history-close-btn" onClick={onClose}>
+          Close
+        </button>
+      </div>
+    ) : null,
+  CompareVersionsDialog: ({ open }: any) =>
+    open ? (
+      <div data-testid="compare-versions-dialog">Compare Versions Dialog</div>
+    ) : null,
+  ShareAction: ({ measures, activeTab, onClick }: any) => {
+    const options = activeTab === 1 ? ["Unshare"] : ["Share With", "Unshare"];
+    return (
+      <div>
+        <button data-testid="share-action-btn" disabled={!measures?.length}>
+          Share
+        </button>
+        {options.map((option: string) => (
+          <div
+            key={option}
+            role="menuitem"
+            tabIndex={0}
+            onClick={() => onClick && onClick(option)}
+          >
+            {option}
+          </div>
+        ))}
+      </div>
+    );
+  },
+  ShareDialog: ({ open }: any) =>
+    open ? <div data-testid="share-dialog">Share Dialog</div> : null,
 }));
 
 jest.mock("../../common/createVersionDialog/CreateVersionDialog", () => ({
@@ -81,32 +148,9 @@ jest.mock("../../common/createVersionDialog/CreateVersionDialog", () => ({
   formikErrorHandler: jest.fn(),
 }));
 
-jest.mock("./exportDialog/ExportDialog", () => ({
-  __esModule: true,
-  default: () => <div data-testid="export-dialog">Export Dialog</div>,
-  formikErrorHandler: jest.fn(),
-}));
-
-jest.mock("../../common/shareDialog/ShareDialog", () => ({
-  __esModule: true,
-  default: () => <div data-testid="share-dialog">Share Dialog</div>,
-  formikErrorHandler: jest.fn(),
-}));
-
-jest.mock("../../common/viewHumanReadableModal/ViewHRModal", () => ({
-  __esModule: true,
-  default: () => (
-    <div data-testid="view-human-readable-modal">View Human Readable Modal</div>
-  ),
-  formikErrorHandler: jest.fn(),
-}));
 jest.mock("./actionCenter/draftAction/DraftAction", () => ({
   __esModule: true,
   default: () => <div data-testid="draft-action">Draft Action</div>,
-}));
-jest.mock("./actionCenter/exportAction/ExportAction", () => ({
-  __esModule: true,
-  default: () => <div data-testid="export-action">Export Action</div>,
 }));
 jest.mock("./measureSearch/Search", () => ({
   __esModule: true,

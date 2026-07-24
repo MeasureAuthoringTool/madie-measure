@@ -1,3 +1,4 @@
+import { formatCmsId } from "@madie/madie-util";
 import React, { useMemo, useState } from "react";
 import {
   ColumnDef,
@@ -17,7 +18,6 @@ import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import { Measure } from "@madie/madie-models";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
-import { formatCmsId } from "../../../../../../../utils/cmsIdFormatter";
 const TH = tw.th`p-3 text-left text-sm font-bold capitalize`;
 
 export default function CompositeMeasuresTable({

@@ -1,4 +1,5 @@
 import * as React from "react";
+import * as mockMeasureActionStubs from "../../../../../../__mocks__/measureActionStubs";
 import { render, screen, within } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import TestCaseRoutes from "./TestCaseRoutes";
@@ -85,6 +86,7 @@ jest.mock(
     <div data-testid="copy-test-case-dialog">Mock Copy Test Case Dialog</div>
 );
 jest.mock("@madie/madie-util", () => ({
+  ...mockMeasureActionStubs,
   // useMeasureServiceApi: jest.fn(() => ( {
   //   //fetchMeasureBundle: jest.fn().mockResolvedValue({}),
   // })) ,

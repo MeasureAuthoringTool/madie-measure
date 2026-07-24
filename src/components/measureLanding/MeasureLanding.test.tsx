@@ -1,6 +1,8 @@
+import * as mockCmsIdStubs from "../../__mocks__/cmsIdFormatterStubs";
 import "@testing-library/jest-dom";
 // NOTE: jest-dom adds handy assertions to Jest and is recommended, but not required
 import * as React from "react";
+import * as mockMeasureActionStubs from "../../__mocks__/measureActionStubs";
 import {
   render,
   screen,
@@ -40,6 +42,8 @@ const abortController = new AbortController();
 const mockUser = "TestUser1";
 
 jest.mock("@madie/madie-util", () => ({
+  ...mockCmsIdStubs,
+  ...mockMeasureActionStubs,
   useDocumentTitle: jest.fn(),
   useUserServiceApi: jest.fn(() => ({ getOwnerDetails: jest.fn() })),
   useOktaTokens: () => ({
@@ -87,6 +91,8 @@ const mockMeasureServiceApi = {
 } as unknown as MeasureServiceApi;
 
 jest.mock("@madie/madie-util", () => ({
+  ...mockMeasureActionStubs,
+  ...mockCmsIdStubs,
   useMeasureServiceApi: jest.fn(() => mockMeasureServiceApi),
   useUserServiceApi: jest.fn(() => ({ getOwnerDetails: jest.fn() })),
   useOktaTokens: jest.fn(() => ({

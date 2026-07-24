@@ -1,3 +1,4 @@
+import * as mockCmsIdStubs from "../../../../../../../__mocks__/cmsIdFormatterStubs";
 import CopyTestCaseDialog from "./CopyTestCaseDialog";
 import {
   render,
@@ -30,6 +31,8 @@ const { getByTestId, findByTestId, findByRole } = screen;
 const MEASURE_OWNER = "test.user";
 
 jest.mock("@madie/madie-util", () => ({
+  ...mockCmsIdStubs,
+
   useMeasureServiceApi: jest.fn(() => mockMeasureServiceApi),
   useFeatureFlags: jest.fn().mockReturnValue({}),
 }));

@@ -1,3 +1,4 @@
+import { formatCmsId } from "@madie/madie-util";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   useReactTable,
@@ -12,7 +13,6 @@ import {
 import tw from "twin.macro";
 import "styled-components/macro";
 import { Measure } from "@madie/madie-models";
-import { formatCmsId } from "../../../utils/cmsIdFormatter";
 import { formatOwner } from "../../../utils/ownerFormatter";
 
 const TH = tw.th`p-3 text-left text-sm`;

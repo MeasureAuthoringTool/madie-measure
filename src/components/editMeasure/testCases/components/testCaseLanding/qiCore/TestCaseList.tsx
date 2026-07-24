@@ -10,6 +10,7 @@ import {
   TestCaseImportOutcome,
   OverlappingCodeDto,
   ValidationStatus,
+  getModelFamily,
 } from "@madie/madie-models";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import queryString from "query-string";
@@ -46,7 +47,6 @@ import CopyTestCaseDialog from "../common/copyTestCases/CopyTestCaseDialog";
 import MakeJsonMatchUiDialog from "../../common/MakeJsonMatchUiDialog/MakeJsonMatchUiDialog";
 import { generateQiCoreReport } from "../../../util/OverlappingCodesUtils";
 import OverlappingCodesDialog from "../common/overLappingCodes/OverlappingCodesDialog";
-import getModelFamily from "../../../../../../utils/measureModelHelpers";
 import useFhirDefinitionsServiceApi from "../../../api/useFhirDefinitionsService";
 import {
   createUnresolvedPatientReferenceWarningDetails,
