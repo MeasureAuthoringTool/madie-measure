@@ -28,6 +28,7 @@ jest.mock("@madie/madie-util", () => ({
   ...mockCmsIdStubs,
   ...mockMeasureActionStubs,
   useMeasureServiceApi: jest.fn(() => mockMeasureServiceApi),
+  useMeasureReviewServiceApi: jest.fn(() => mockMeasureReviewServiceApi),
   useUserServiceApi: jest.fn(() => ({ getOwnerDetails: jest.fn() })),
   useDocumentTitle: jest.fn(),
   useOktaTokens: () => ({
@@ -59,6 +60,14 @@ const mockMeasureServiceApi = {
     allMeasures: 10,
   }),
 } as unknown as MeasureServiceApi;
+
+const mockMeasureReviewServiceApi = {
+  getMeasureReview: jest.fn().mockResolvedValue(null),
+  createMeasureReview: jest.fn().mockResolvedValue({ id: "new-review-id" }),
+  updateMeasureReview: jest
+    .fn()
+    .mockResolvedValue({ id: "existing-review-id" }),
+};
 
 const { findAllByTestId, findByTestId, queryByTestId } = screen;
 

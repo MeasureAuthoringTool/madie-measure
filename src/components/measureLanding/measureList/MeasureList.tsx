@@ -1369,7 +1369,7 @@ export default function MeasureList(props: {
       />
       <ReviewDialog
         open={reviewDialog.open}
-        measure={targetMeasure.current}
+        measure={selectedMeasures[0]}
         onClose={handleReviewDialogClose}
       />
     </div>

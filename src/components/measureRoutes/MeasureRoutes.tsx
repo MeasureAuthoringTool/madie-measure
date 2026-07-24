@@ -2,7 +2,6 @@ import React from "react";
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
 import EditMeasure from "../editMeasure/EditMeasure";
 import MeasureLanding from "../measureLanding/MeasureLanding";
-import TimeoutHandler from "./TimeoutHandler";
 import NotFound from "../notfound/NotFound";
 
 export const routesConfig = [
@@ -22,7 +21,6 @@ const router = createBrowserRouter(routesConfig);
 const MeasureBrowserRouter = () => {
   return (
     <div data-testid="browser-router">
-      <TimeoutHandler timeLeft={1500000} />
       <RouterProvider router={router} />
     </div>
   );

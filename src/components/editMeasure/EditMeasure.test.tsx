@@ -190,9 +190,18 @@ const mockMeasureServiceApi = {
   unshareMeasures: jest.fn().mockResolvedValue({ measureId1: [] }),
 } as unknown as MeasureServiceApi;
 
+const mockMeasureReviewServiceApi = {
+  getMeasureReview: jest.fn().mockResolvedValue(null),
+  createMeasureReview: jest.fn().mockResolvedValue({ id: "new-review-id" }),
+  updateMeasureReview: jest
+    .fn()
+    .mockResolvedValue({ id: "existing-review-id" }),
+};
+
 jest.mock("@madie/madie-util", () => ({
   ...mockCmsIdStubs,
   useMeasureServiceApi: jest.fn(() => mockMeasureServiceApi),
+  useMeasureReviewServiceApi: jest.fn(() => mockMeasureReviewServiceApi),
   useUserServiceApi: jest.fn(() => ({ getOwnerDetails: jest.fn() })),
   exportMeasure: jest.fn(),
   ExportDialog: ({ open }: any) =>

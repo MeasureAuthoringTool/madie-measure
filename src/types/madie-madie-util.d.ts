@@ -15,6 +15,7 @@ declare module "@madie/madie-util" {
     EndorsementOrganization,
     MeasureHistoryActions,
     OwnershipType,
+    ReviewStatus,
     MeasureSet,
   } from "@madie/madie-models";
   import { Bundle } from "fhir/r4";
@@ -68,6 +69,14 @@ declare module "@madie/madie-util" {
   export interface RouteHandlerState {
     canTravel: boolean;
     pendingRoute: string;
+  }
+
+  export interface MeasureReview {
+    id: string;
+    measureId: string;
+    measureSetId: string;
+    status: ReviewStatus;
+    comment: string;
   }
 
   export const measureStore: {
@@ -212,7 +221,24 @@ declare module "@madie/madie-util" {
     getHumanReadableDiff(oldMeasureId, newMeasureId): Promise<any>;
   }
 
+  export class MeasureReviewServiceApi {
+    constructor(baseUrl: string, getAccessToken: () => string);
+    createMeasureReview(
+      measureId: string,
+      review: MeasureReview
+    ): Promise<MeasureReview>;
+    updateMeasureReview(
+      measureId: string,
+      review: MeasureReview
+    ): Promise<MeasureReview>;
+    getMeasureReview(measureId: string): Promise<MeasureReview | null>;
+    getMeasureReviewsByMeasureSetId(
+      measureSetId: string
+    ): Promise<MeasureReview[]>;
+  }
+
   export function useMeasureServiceApi(): MeasureServiceApi;
+  export function useMeasureReviewServiceApi(): MeasureReviewServiceApi;
   export function useUserServiceApi(): UserServiceApi;
   export function useDocumentTitle(
     title: string,

@@ -155,12 +155,13 @@ export default function ActionCenter(props: PropTypes) {
 
   const reviewMeasure = useCallback(() => {
     if (measures?.length === 1) {
+      updateTargetMeasure(measures[0]);
       setReviewDialog?.({
         open: true,
         measureId: measures[0]?.id,
       });
     }
-  }, [measures, setReviewDialog]);
+  }, [measures, setReviewDialog, updateTargetMeasure]);
 
   const isSelectedMeasureEditable = (measures) => {
     return (
