@@ -13,6 +13,7 @@ import { Measure, Model } from "@madie/madie-models";
 import { formatCmsId, padCmsId } from "../../../utils/cmsIdFormatter";
 import {
   useMeasureServiceApi,
+  useUserServiceApi,
   checkUserCanEdit,
   useUserRoles,
 } from "@madie/madie-util";
@@ -23,6 +24,7 @@ import {
   TruncateText,
   MadieTooltipIcon,
   MadieTable,
+  MadieDeleteDialog,
   SearchAndFilter,
   useFilterSearch,
 } from "@madie/madie-design-system/dist/react";
@@ -44,7 +46,6 @@ import InvalidMeasureNameDialog from "./InvalidMeasureNameDialog/InvalidMeasureN
 import getLibraryNameErrors from "./InvalidMeasureNameDialog/getLibraryNameErrors";
 import AssociateCmsIdDialog from "./associateCmsIdDialog/AssociateCmsIdDialog";
 import ActionCenter from "./actionCenter/ActionCenter";
-import DeleteDialog from "../../editMeasure/DeleteDialog";
 import ViewHRModal from "../../common/viewHumanReadableModal/ViewHRModal";
 import ViewMeasureHistoryDialog from "../../common/viewMeasureHistoryDialog/ViewMeasureHistoryDialog";
 import ShareDialog from "../../common/shareDialog/ShareDialog";
@@ -183,6 +184,7 @@ export default function MeasureList(props: {
 }) {
   const { searchCriteria, setSearchCriteria, retrieveMeasures } = { ...props };
   const measureServiceApi = useRef(useMeasureServiceApi()).current; //needs to be ref or triggers jest. throws warn
+  const userServiceApi = useRef(useUserServiceApi()).current; //needs to be ref or triggers jest. throws warn
 
   const {
     filterBy,
@@ -274,16 +276,25 @@ export default function MeasureList(props: {
   });
   const userRoles = useUserRoles();
 
-  const transFormData = (measureList): TCRow[] => {
-    return measureList.map((measure) => ({
-      id: measure?.id,
-      measureName: measure?.measureName,
-      version: measure?.version,
-      model: measure?.model,
-      actions: measure,
-      hasAssociatedMeasures: measure?.hasAssociatedMeasures,
-      ownerDisplayName: measure?.ownerDisplayName,
-    }));
+  const transFormData = (
+    measureList,
+    lockedByDisplayNames: Record<string, string> = {}
+  ): TCRow[] => {
+    return measureList.map((measure) => {
+      const lockedBy = measure?.measureLock?.lockedBy;
+      return {
+        id: measure?.id,
+        measureName: measure?.measureName,
+        version: measure?.version,
+        model: measure?.model,
+        actions: measure,
+        hasAssociatedMeasures: measure?.hasAssociatedMeasures,
+        ownerDisplayName: measure?.ownerDisplayName,
+        lockedByDisplayName: lockedBy
+          ? lockedByDisplayNames[lockedBy] || lockedBy
+          : undefined,
+      };
+    });
   };
 
   type TCRow = {
@@ -295,15 +306,55 @@ export default function MeasureList(props: {
     actions: any;
     hasAssociatedMeasures: boolean;
     ownerDisplayName?: string;
+    lockedByDisplayName?: string;
   };
 
   const [data, setData] = useState<TCRow[]>([]);
   const [expandedSectionData, setExpandedSectionData] = useState<TCRow[]>([]);
+  // Real names of users who currently have a measure locked for editing,
+  // similar to the "in use" chip on the Page Header. Baked into `data` (rather
+  // than read directly from the column defs) so resolving names doesn't force
+  // the memoized table columns/cells to be recreated and remounted.
+  const [lockedByDisplayNames, setLockedByDisplayNames] = useState<
+    Record<string, string>
+  >({});
   useEffect(() => {
     if (props.measureList && measureServiceApi) {
-      setData(transFormData(props.measureList));
+      setData(transFormData(props.measureList, lockedByDisplayNames));
     }
-  }, [props.measureList, measureServiceApi]);
+  }, [props.measureList, measureServiceApi, lockedByDisplayNames]);
+
+  useEffect(() => {
+    const lockedByHarpIds = Array.from(
+      new Set(
+        (props.measureList || [])
+          .map((measure) => measure?.measureLock?.lockedBy)
+          .filter((harpId): harpId is string => !!harpId)
+      )
+    );
+    if (lockedByHarpIds.length === 0 || !userServiceApi) {
+      return;
+    }
+    userServiceApi
+      .getBulkUserDetails(lockedByHarpIds)
+      .then((userDetails) => {
+        setLockedByDisplayNames((prev) => {
+          const next = { ...prev };
+          Object.entries(userDetails || {}).forEach(
+            ([harpId, details]: [string, any]) => {
+              const name = [details?.firstName, details?.lastName]
+                .filter(Boolean)
+                .join(" ");
+              next[harpId] = name ? `${name} (${harpId})` : harpId;
+            }
+          );
+          return next;
+        });
+      })
+      .catch(() => {
+        // fall back to displaying the raw HARP ID if the lookup fails
+      });
+  }, [props.measureList, userServiceApi]);
 
   function IndeterminateCheckbox({
     indeterminate,
@@ -459,6 +510,9 @@ export default function MeasureList(props: {
           ) && info.row.original.actions.measureMetaData?.draft;
         const isLockedByOther =
           canEdit && !!info.row.original.actions?.measureLock;
+        const lockedByDisplayName =
+          info.row.original.lockedByDisplayName ||
+          info.row.original.actions?.measureLock?.lockedBy;
 
         const buttonText = isLockedByOther ? "View" : canEdit ? "Edit" : "View";
 
@@ -470,11 +524,7 @@ export default function MeasureList(props: {
               info.row.original.measureName
             } ${info.row.original.version}${
               info.row.original.actions.measureMetaData?.draft ? " Draft" : ""
-            }${
-              isLockedByOther
-                ? ` (Locked by ${info.row.original.actions.measureLock.lockedBy})`
-                : ""
-            }`}
+            }${isLockedByOther ? ` (Locked by ${lockedByDisplayName})` : ""}`}
             onClick={() => {
               navigate(`/measures/${info.row.original.id}/edit/details/`);
             }}
@@ -495,7 +545,7 @@ export default function MeasureList(props: {
                 <>
                   Locked while being edited by
                   <br />
-                  {info.row.original.actions.measureLock.lockedBy}
+                  {lockedByDisplayName}
                 </>
               }
               arrow
@@ -1272,11 +1322,20 @@ export default function MeasureList(props: {
         onSave={handleShareDialogSave}
         isAdmin={userRoles?.isAdmin}
       />
-      <DeleteDialog
+      <MadieDeleteDialog
         open={deleteMeasureDialog}
         onClose={handleDialogClose}
-        measureName={targetMeasure?.current?.measureName}
-        deleteMeasure={deleteMeasure}
+        onContinue={deleteMeasure}
+        dialogTitle="Delete Measure"
+        statement
+        customDialogBody={
+          <>
+            Are you sure you want to delete draft of{" "}
+            <span className="strong">
+              {targetMeasure?.current?.measureName}
+            </span>
+          </>
+        }
       />
       <AssociateCmsIdDialog
         measures={selectedMeasures}
@@ -1309,7 +1368,7 @@ export default function MeasureList(props: {
       />
       <ReviewDialog
         open={reviewDialog.open}
-        measure={targetMeasure.current}
+        measure={selectedMeasures[0]}
         onClose={handleReviewDialogClose}
       />
     </div>

@@ -53,6 +53,7 @@ import { StructureDefinitionDto } from "../../../../../../../api/models/Structur
 import { ElementDefinition } from "fhir/r4";
 import useFhirDefinitionsServiceApi from "../../../../../../../api/useFhirDefinitionsService";
 import RatioComponent from "./types/RatioComponent";
+import useMeasureModel from "../../../../../../routes/qiCore/useMeasureModel";
 
 const TYPE_EDITOR_EXCLUDED_TYPES = new Set(
   TYPE_CODE_NOT_USED.map((code) => code.toLowerCase())
@@ -118,6 +119,7 @@ const TypeEditor = ({
   noWrap = false,
   onChangeForExtension,
 }: TypeEditorProps): JSX.Element | null => {
+  const measureModel = useMeasureModel();
   const formik = useFormikContext();
   // Ref to track formik.values for use in closures (prevents stale state issues when rapidly clicking Add)
   const valuesRef = useRef<object>(formik.values as object);
@@ -194,7 +196,10 @@ const TypeEditor = ({
       if (!_.isEmpty(type?.profile)) {
         const loadProfiles = type.profile.map((profile: string) => {
           const resourceId = profile.split("/").pop();
-          return fhirDefinitionsService.current.getResourceTree(resourceId);
+          return fhirDefinitionsService.current.getResourceTree(
+            resourceId,
+            measureModel
+          );
         });
         try {
           const profileDefinitions = await Promise.all(loadProfiles);

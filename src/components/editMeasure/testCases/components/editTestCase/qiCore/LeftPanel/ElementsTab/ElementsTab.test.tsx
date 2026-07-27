@@ -9,6 +9,7 @@ import {
 import {
   Measure,
   MeasureScoring,
+  Model,
   PopulationType,
   TestCase,
 } from "@madie/madie-models";
@@ -125,6 +126,7 @@ const setEditorVal = jest.fn();
 const MEASURE_CREATEDBY = "testuser";
 const defaultMeasure = {
   id: "m1234",
+  model: Model.QICORE,
   measureScoring: MeasureScoring.COHORT,
   createdBy: MEASURE_CREATEDBY,
   groups: [
@@ -227,7 +229,7 @@ jest.mock("formik", () => ({
 describe("ElementsTab", () => {
   beforeEach(() => {
     mockedAxios.get.mockImplementation((args) => {
-      if (args && args.endsWith("resources")) {
+      if (args === "fhirservice.url/fhir/models/qicore/resources") {
         return Promise.resolve({
           data: [
             {
@@ -269,7 +271,7 @@ describe("ElementsTab", () => {
     });
 
     mockedAxios.put.mockImplementation((args) => {
-      if (args && args.endsWith("relevant-elements")) {
+      if (args === "fhir-cql-to-elm.com/fhir/cql/relevant-elements") {
         return Promise.resolve({
           data: [
             {

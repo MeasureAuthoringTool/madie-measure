@@ -41,8 +41,17 @@ const mockCheckUserCanEdit = jest.fn();
 const setViewHumanReadableModal = jest.fn();
 const mockCheckUserCanDelete = jest.fn();
 
+const mockMeasureReviewServiceApi = {
+  getMeasureReview: jest.fn().mockResolvedValue(null),
+  createMeasureReview: jest.fn().mockResolvedValue({ id: "new-review-id" }),
+  updateMeasureReview: jest
+    .fn()
+    .mockResolvedValue({ id: "existing-review-id" }),
+};
+
 jest.mock("@madie/madie-util", () => ({
   useMeasureServiceApi: jest.fn(() => mockMeasureServiceApi),
+  useMeasureReviewServiceApi: jest.fn(() => mockMeasureReviewServiceApi),
   useUserServiceApi: jest.fn(() => ({ getOwnerDetails: jest.fn() })),
   checkUserCanEdit: jest.fn(),
   useUserRoles: jest.fn().mockReturnValue({
@@ -184,13 +193,14 @@ describe("ActionCenter", () => {
 
   it("should call updateTargetMeasure and setReviewDialog when review action is triggered", async () => {
     const setReviewDialog = jest.fn();
+    const updateTargetMeasure = jest.fn();
 
     render(
       <ActionCenter
         measures={[qdmMeasure]}
         associateCmsId={jest.fn()}
         exportMeasure={jest.fn()}
-        updateTargetMeasure={jest.fn()}
+        updateTargetMeasure={updateTargetMeasure}
         setCreateVersionDialog={jest.fn()}
         setDraftMeasureDialog={jest.fn()}
         setDeleteMeasureDialog={jest.fn()}
@@ -206,6 +216,8 @@ describe("ActionCenter", () => {
     const reviewButton = await screen.findByTestId("review-action-btn");
     expect(reviewButton).toBeEnabled();
     userEvent.click(reviewButton);
+
+    expect(updateTargetMeasure).toHaveBeenCalledWith(qdmMeasure);
 
     expect(setReviewDialog).toHaveBeenCalledWith({
       open: true,

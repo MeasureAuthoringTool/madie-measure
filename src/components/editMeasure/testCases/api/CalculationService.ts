@@ -60,6 +60,11 @@ export interface ProcessedResultType {
 
 export interface ObservationResources {
   groupId: any;
+  relations: ObservationRelation[];
+}
+
+export interface ObservationRelation {
+  index: number;
   resources: any[];
 }
 
@@ -649,28 +654,31 @@ export class CalculationService {
     populationGroupResults: DetailedPopulationGroupResult
   ) => {
     const testCaseBundle = JSON.parse(testCase.json);
-    let resources: any[] = [];
+    let observationRelations: ObservationRelation[] = [];
 
     populationGroupResults.episodeResults?.forEach((episodeResult) => {
+      let resources: any[] = [];
       episodeResult.populationResults?.find((populationResult) => {
         if (populationResult.populationType === FqmPopulationType.OBSERV) {
           testCaseBundle.entry?.find((entry) => {
             if (entry.resource.id === episodeResult.episodeId) {
-              resources.push(entry.resource);
+              resources.push(prettyPrintFhirResource(entry.resource));
             }
           });
         }
+      });
+      observationRelations.push({
+        index: populationGroupResults.episodeResults.indexOf(episodeResult),
+        resources: resources,
       });
     });
 
     const result: ObservationResources = {
       groupId: populationGroupResults.groupId,
-      resources: [],
+      relations: observationRelations,
     };
-    if (resources && resources.length > 0) {
-      resources.forEach((resource) => {
-        result.resources.push(prettyPrintFhirResource(resource));
-      });
+
+    if (result.relations && result.relations.length > 0) {
       return result;
     }
     return null;

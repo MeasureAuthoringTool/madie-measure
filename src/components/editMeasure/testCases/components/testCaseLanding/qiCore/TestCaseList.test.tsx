@@ -166,6 +166,10 @@ jest.mock("@madie/madie-util", () => ({
     state: { canTravel: false, pendingPath: "" },
     initialState: { canTravel: false, pendingPath: "" },
   },
+  useUserServiceApi: jest.fn(() => ({
+    getOwnerDetails: jest.fn(),
+    getBulkUserDetails: jest.fn().mockResolvedValue({}),
+  })),
 }));
 global.ResizeObserver = jest.fn().mockImplementation(() => ({
   observe: jest.fn(),

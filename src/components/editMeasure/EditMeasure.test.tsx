@@ -189,8 +189,17 @@ const mockMeasureServiceApi = {
   unshareMeasures: jest.fn().mockResolvedValue({ measureId1: [] }),
 } as unknown as MeasureServiceApi;
 
+const mockMeasureReviewServiceApi = {
+  getMeasureReview: jest.fn().mockResolvedValue(null),
+  createMeasureReview: jest.fn().mockResolvedValue({ id: "new-review-id" }),
+  updateMeasureReview: jest
+    .fn()
+    .mockResolvedValue({ id: "existing-review-id" }),
+};
+
 jest.mock("@madie/madie-util", () => ({
   useMeasureServiceApi: jest.fn(() => mockMeasureServiceApi),
+  useMeasureReviewServiceApi: jest.fn(() => mockMeasureReviewServiceApi),
   useUserServiceApi: jest.fn(() => ({ getOwnerDetails: jest.fn() })),
   useDocumentTitle: jest.fn(),
   useOktaTokens: jest.fn(() => ({
@@ -288,12 +297,12 @@ describe("EditMeasure Component", () => {
       window.dispatchEvent(new Event("delete-measure"));
     });
     await waitFor(() =>
-      expect(queryByTestId("delete-measure-dialog-button")).toBeInTheDocument()
+      expect(queryByTestId("delete-dialog")).toBeInTheDocument()
     );
-    const cancelButton = await findByTestId("cancel-delete-measure-button");
+    const cancelButton = await findByTestId("delete-dialog-cancel-button");
     fireEvent.click(cancelButton);
     await waitFor(() => {
-      expect(queryByText("Are you sure you want to delete")).not.toBeVisible();
+      expect(queryByTestId("delete-dialog")).not.toBeInTheDocument();
     });
   });
 
@@ -379,9 +388,9 @@ describe("EditMeasure Component", () => {
       window.dispatchEvent(new Event("delete-measure"));
     });
     await waitFor(() =>
-      expect(queryByTestId("delete-measure-dialog-button")).toBeInTheDocument()
+      expect(queryByTestId("delete-dialog")).toBeInTheDocument()
     );
-    const continueButton = await findByTestId("delete-measure-button-2");
+    const continueButton = await findByTestId("delete-dialog-continue-button");
     fireEvent.click(continueButton);
     await waitFor(() => {
       expect(
@@ -415,9 +424,9 @@ describe("EditMeasure Component", () => {
       window.dispatchEvent(new Event("delete-measure"));
     });
     await waitFor(() =>
-      expect(queryByTestId("delete-measure-dialog-button")).toBeInTheDocument()
+      expect(queryByTestId("delete-dialog")).toBeInTheDocument()
     );
-    const continueButton = await findByTestId("delete-measure-button-2");
+    const continueButton = await findByTestId("delete-dialog-continue-button");
     fireEvent.click(continueButton);
     await waitFor(() => {
       expect(screen.getByRole("alert")).toHaveTextContent("update failed");
@@ -439,9 +448,9 @@ describe("EditMeasure Component", () => {
       window.dispatchEvent(new Event("delete-measure"));
     });
     await waitFor(() =>
-      expect(queryByTestId("delete-measure-dialog-button")).toBeInTheDocument()
+      expect(queryByTestId("delete-dialog")).toBeInTheDocument()
     );
-    const continueButton = await findByTestId("delete-measure-button-2");
+    const continueButton = await findByTestId("delete-dialog-continue-button");
     fireEvent.click(continueButton);
     await waitFor(() => {
       expect(screen.getByRole("alert")).toHaveTextContent("I'm an error");

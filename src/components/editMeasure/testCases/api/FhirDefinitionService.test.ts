@@ -1,7 +1,7 @@
 import { ValueSet } from "fhir/r4";
 import axios from "../../../../api/axios-instance";
 import { FhirDefinitionsServiceApi } from "./useFhirDefinitionsService";
-import { TestCase } from "@madie/madie-models";
+import { Model, TestCase } from "@madie/madie-models";
 
 jest.mock("../../../../api/axios-instance");
 const mockedAxios = axios as jest.Mocked<typeof axios>;
@@ -28,7 +28,7 @@ describe("MeasureServiceApi", () => {
     );
   });
 
-  it("should return value set definition for value set url", () => {
+  it("should return value set definition for value set url", async () => {
     const valueSet = {
       name: "USCoreObservationValueCodes",
       url: "http://hl7.org/fhir/us/core/ValueSet/us-core-observation-value-codes",
@@ -39,12 +39,13 @@ describe("MeasureServiceApi", () => {
 
     mockedAxios.get.mockResolvedValue({ data: valueSet });
 
-    fhirDefinitionsServiceApi
-      .getValueSetDefinition(valueSet.url)
-      .then((valueSetDefinition: ValueSet) => {
-        expect(valueSetDefinition.name).toEqual(valueSet.name);
-        expect(valueSetDefinition.url).toEqual(valueSet.url);
-      });
+    const valueSetDefinition =
+      await fhirDefinitionsServiceApi.getValueSetDefinition(
+        valueSet.url,
+        Model.QICORE
+      );
+    expect(valueSetDefinition.name).toEqual(valueSet.name);
+    expect(valueSetDefinition.url).toEqual(valueSet.url);
   });
 
   it("should return null if value set definition not found", async () => {
@@ -53,7 +54,8 @@ describe("MeasureServiceApi", () => {
     mockedAxios.get.mockRejectedValueOnce({ status: 404 });
 
     const definition = await fhirDefinitionsServiceApi.getValueSetDefinition(
-      url
+      url,
+      Model.QICORE
     );
     expect(definition).toBeNull();
   });

@@ -117,7 +117,7 @@ export default function ViewTestCaseModal({
                 setLeftPanelActiveTab={(value) =>
                   setActiveTab(value as "added" | "json")
                 }
-                isQICore6={true}
+                isBuilderEnabled={true}
                 dirty={false}
                 setCalculationDialogOpen={setCalculationDialogOpen}
                 canEdit={false}

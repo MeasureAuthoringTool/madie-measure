@@ -13,6 +13,7 @@ import AddElementButton from "../../../../../../../common/UIOnlyModelAgnostic/Ad
 import "./CodesComponent.scss";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import { getMultipleCardinalityLabel } from "./TypeUtil";
+import useMeasureModel from "../../../../../../../routes/qiCore/useMeasureModel";
 const CodesComponent = ({
   canEdit,
   structureDefinition,
@@ -27,7 +28,8 @@ const CodesComponent = ({
   showDeleteButton = false,
   handleDeleteElement,
 }: TypeComponentProps) => {
-  const [codes, setCodes] = useState([]);
+  const measureModel = useMeasureModel();
+  const [codes, setCodes] = useState<any[]>([]);
   const fhirDefinitionServiceApi = useRef(useFhirDefinitionsServiceApi());
   const terminologyService = useRef(useTerminologyServiceApi());
   const [codeValue, setCodeValue] = useState(value);
@@ -37,6 +39,13 @@ const CodesComponent = ({
   const testIdBase = name && name.includes("[") ? name : label;
   // Replace spaces with underscores to ensure a valid HTML id/data-testid
   const sanitizedId = testIdBase.replace(/\s+/g, "_");
+
+  const flattenContains = (contains: any[] = []): any[] => {
+    return contains.flatMap((concept) => [
+      concept,
+      ...flattenContains(concept?.contains || []),
+    ]);
+  };
 
   const getAndSetCodeValueFromResource = () => {
     // ["Patient", "extension[2]", "value[x]"]
@@ -72,8 +81,11 @@ const CodesComponent = ({
         if (!_.isEmpty(valueSets)) {
           valueSets.forEach((valueSet) => {
             if (valueSet?.expansion?.contains) {
+              const flattenedContains = flattenContains(
+                valueSet.expansion.contains
+              );
               setCodes((prevCodes) => {
-                const combined = [...prevCodes, ...valueSet.expansion.contains];
+                const combined = [...prevCodes, ...flattenedContains];
                 // Remove duplicates by 'code'
                 return combined.filter(
                   (item, index, self) =>
@@ -108,7 +120,7 @@ const CodesComponent = ({
         // e.g. http://hl7.org/fhir/us/core/ValueSet/birthsex
         // e.g. http://hl7.org/fhir/ValueSet/administrative-gender
         fhirDefinitionServiceApi.current
-          .getValueSetDefinition(valueSetUrl)
+          .getValueSetDefinition(valueSetUrl, measureModel)
           .then((valueSet) => {
             /*
               does NOT have valueSet?.expansion?.contains for birthsex
@@ -116,7 +128,7 @@ const CodesComponent = ({
               and http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1021.103 (Other or unknown or refused to answer)
             */
             if (valueSet?.expansion?.contains) {
-              setCodes(valueSet?.expansion?.contains);
+              setCodes(flattenContains(valueSet.expansion.contains));
             } else if (valueSet?.compose?.include) {
               /*
                 If the valueSet does not have an expansion, we can use the compose.include
