@@ -386,7 +386,7 @@ const EditTestCase = () => {
           onSubmit={formik.handleSubmit}
         >
           <div className="allotment-wrapper">
-            <Allotment defaultSizes={[175, 125]} vertical={false}>
+            <Allotment defaultSizes={[70, 30]} vertical={false}>
               <Allotment.Pane>
                 <LeftPanel
                   canEdit={testCaseCanEdit}
