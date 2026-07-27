@@ -222,6 +222,23 @@ jest.mock("@madie/madie-util", () => ({
   // ShareDialog behavior is covered by @madie/madie-util's ShareDialog.test.
   ShareDialog: ({ open }: any) =>
     open ? <div data-testid="share-dialog">Share Dialog</div> : null,
+  TransferDialog: ({ open, onClose }: any) =>
+    open ? (
+      <div data-testid="transfer-dialog">
+        Transfer Dialog
+        <button
+          data-testid="transfer-success"
+          onClick={() =>
+            onClose({ toastType: "success", toastMessage: "", toastOpen: true })
+          }
+        >
+          Transfer Success
+        </button>
+        <button data-testid="transfer-cancel-button" onClick={() => onClose()}>
+          Cancel
+        </button>
+      </div>
+    ) : null,
   useDocumentTitle: jest.fn(),
   useOktaTokens: jest.fn(() => ({
     getAccessToken: () => "test.jwt",
@@ -581,87 +598,13 @@ describe("EditMeasure Component", () => {
       expect(getByTestId("transfer-dialog")).toBeInTheDocument();
     });
 
-    const newHarpIdInput = getByTestId("harp-id-input");
-    fireEvent.change(newHarpIdInput, { target: { value: "newUser" } });
-
-    const transferBtn = getByTestId("transfer-save-button");
-    fireEvent.click(transferBtn);
+    fireEvent.click(getByTestId("transfer-success"));
 
     await waitFor(
       () => {
         expect(mockedNavigate).toHaveBeenCalledWith("/measures");
       },
       { timeout: 2000 }
-    );
-  });
-
-  it("should display transfer dialog when the event is triggered and not navigate to /measures when transfer fails", async () => {
-    mockMeasureServiceApi.transferMeasures = jest
-      .fn()
-      .mockRejectedValue(new Error("Transfer failed"));
-
-    renderRouter();
-
-    const result = await findByTestId("editMeasure");
-    expect(result).toBeInTheDocument();
-
-    act(() => {
-      window.dispatchEvent(new Event("transfer-measure"));
-    });
-
-    await waitFor(() => {
-      expect(getByTestId("transfer-dialog")).toBeInTheDocument();
-    });
-
-    const newHarpIdInput = getByTestId("harp-id-input");
-    fireEvent.change(newHarpIdInput, { target: { value: "newUser" } });
-
-    const transferBtn = getByTestId("transfer-save-button");
-    fireEvent.click(transferBtn);
-
-    await waitFor(() => {
-      expect(queryByTestId("transfer-dialog")).not.toBeInTheDocument();
-    });
-    expect(mockedNavigate).not.toHaveBeenCalledWith("/measures");
-  });
-
-  it("should display transfer dialog when the event is triggered and handle a successful transfer", async () => {
-    renderRouter();
-
-    const result = await findByTestId("editMeasure");
-    expect(result).toBeInTheDocument();
-
-    act(() => {
-      window.dispatchEvent(new Event("transfer-measure"));
-    });
-
-    await waitFor(() =>
-      setTimeout(() => {
-        expect(getByTestId("transfer-dialog")).toBeInTheDocument();
-
-        const newHarpIdInput = getByTestId("harp-id-input");
-        expect(newHarpIdInput).toBeInTheDocument();
-        expect(newHarpIdInput.value).toBe("");
-        const transferBtn = getByTestId("transfer-save-button");
-        expect(transferBtn).toBeInTheDocument();
-        expect(transferBtn).toBeDisabled();
-
-        fireEvent.change(newHarpIdInput, {
-          target: { value: "newUser" },
-        });
-        expect(newHarpIdInput.value).toBe("newUser");
-        expect(transferBtn).toBeEnabled();
-
-        fireEvent.click(transferBtn);
-
-        expect(mockMeasureServiceApi.transferMeasures).toBeCalledWith(
-          [measure.id],
-          "newUser",
-          false
-        );
-
-        expect(queryByTestId("transfer-dialog")).not.toBeInTheDocument();
-      }, 4500)
     );
   });
 

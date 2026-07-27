@@ -142,6 +142,17 @@ jest.mock("@madie/madie-util", () => ({
   },
   ShareDialog: ({ open }: any) =>
     open ? <div data-testid="share-dialog">Share Dialog</div> : null,
+  TransferAction: ({ measures, onClick }: any) => (
+    <button
+      data-testid="transfer-action-btn"
+      disabled={!measures?.length}
+      onClick={() => onClick && onClick()}
+    >
+      Transfer
+    </button>
+  ),
+  TransferDialog: ({ open }: any) =>
+    open ? <div data-testid="transfer-dialog">Transfer Dialog</div> : null,
 }));
 
 jest.mock("../../common/createVersionDialog/CreateVersionDialog", () => ({

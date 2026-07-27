@@ -14,8 +14,8 @@ import {
   HistoryAction,
   CompareVersionsAction,
   ShareAction,
+  TransferAction,
 } from "@madie/madie-util";
-import TransferAction from "./transferAction/TransferAction";
 import ReviewAction from "./reviewAction/ReviewAction";
 
 // Helper to check if user owns all selected measures

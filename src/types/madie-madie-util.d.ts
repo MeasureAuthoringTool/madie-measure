@@ -294,6 +294,11 @@ declare module "@madie/madie-util" {
     isSharedWithUser?: boolean;
     activeTab: number;
   }): React.ReactElement;
+  export function TransferAction(props: {
+    measures: Measure[];
+    onClick: () => void;
+    activeTab: number;
+  }): React.ReactElement;
 
   export function ExportDialog(props: {
     downloadState?: string | null;
@@ -329,6 +334,13 @@ declare module "@madie/madie-util" {
     onClose: Function;
     onSave: Function;
     isAdmin?: boolean;
+  }): React.ReactElement | null;
+  export function TransferDialog(props: {
+    measures: Measure[];
+    open: boolean;
+    onClose: Function;
+    setStatusHandler: Function;
+    isAdminTransfer?: boolean;
   }): React.ReactElement | null;
   export function getNewestMeasureInstance(measures: Measure[]): Measure;
 
