@@ -55,7 +55,11 @@ export default function CompositeMeasureNavTabs({
         COMPOSITE_TAB_VALUES.includes(activeTab) ? activeTab : "compositeScore"
       }
       onChange={(e, v) => {
-        if (v === "validation") {
+        if (
+          v === "denominatorScore" ||
+          v === "numeratorScore" ||
+          v === "validation"
+        ) {
           e.preventDefault();
           return;
         }
