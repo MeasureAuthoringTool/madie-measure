@@ -94,19 +94,26 @@ describe("CompositeMeasureNavTabs", () => {
     );
   });
 
-  it("changes to a score tab via setActiveTab when clicked", () => {
+  it("navigates to the composite score tab via setActiveTab when clicked", () => {
     const setActiveTab = jest.fn();
-    renderNavTabs("compositeScore", undefined, setActiveTab);
-    userEvent.click(screen.getByTestId("denominator-score-tab"));
-    expect(setActiveTab).toHaveBeenCalledWith("denominatorScore");
+    renderNavTabs("denominatorScore", undefined, setActiveTab);
+    userEvent.click(screen.getByTestId("composite-score-tab"));
+    expect(setActiveTab).toHaveBeenCalledWith("compositeScore");
   });
 
-  it("does not switch to the display-only validation tab when clicked", () => {
-    const setActiveTab = jest.fn();
-    renderNavTabs("compositeScore", undefined, setActiveTab);
-    userEvent.click(screen.getByTestId("validation-tab"));
-    expect(setActiveTab).not.toHaveBeenCalled();
-  });
+  it.each<string>([
+    "denominator-score-tab",
+    "numerator-score-tab",
+    "validation-tab",
+  ])(
+    "does not switch the active tab when the display-only %s is clicked",
+    (testId: string) => {
+      const setActiveTab = jest.fn();
+      renderNavTabs("compositeScore", undefined, setActiveTab);
+      userEvent.click(screen.getByTestId(testId));
+      expect(setActiveTab).not.toHaveBeenCalled();
+    }
+  );
 
   it("falls back to the composite score tab for an unknown active tab", () => {
     renderNavTabs("coverage", undefined);
