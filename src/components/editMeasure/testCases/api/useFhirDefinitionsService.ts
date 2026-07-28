@@ -90,9 +90,9 @@ export class FhirDefinitionsServiceApi {
     allowInvalidRefsForPatient: boolean
   ): Promise<TestCaseExecutionBundlesDTO> {
     try {
-      const versionModel = qicoreVerionModelTypeMap(model);
+      const modelShortName = getModelShortName(model);
       const response = await axios.post<TestCaseExecutionBundlesDTO>(
-        `${this.baseUrl}/fhir/test-cases/qicore/${versionModel}/execution-bundles`,
+        `${this.baseUrl}/fhir/test-cases/${modelShortName}/execution-bundles`,
         testCases,
         {
           params: { allowInvalidRefsForPatient },
