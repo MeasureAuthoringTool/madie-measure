@@ -25,6 +25,112 @@ export const FHIR_POPULATION_CODES = {
   "measure-observation": PopulationType.MEASURE_OBSERVATION,
 };
 
+// Define proportion scoring update rules to reduce conditional complexity
+const PROPORTION_UPDATE_RULES = {
+  denominator: {
+    true: [PopulationType.INITIAL_POPULATION],
+    false: [
+      PopulationType.NUMERATOR,
+      PopulationType.DENOMINATOR_EXCLUSION,
+      PopulationType.DENOMINATOR_EXCEPTION,
+      PopulationType.NUMERATOR_EXCLUSION,
+    ],
+  },
+  numerator: {
+    true: [PopulationType.INITIAL_POPULATION, PopulationType.DENOMINATOR],
+    false: [PopulationType.NUMERATOR_EXCLUSION],
+  },
+  denominatorExclusion: {
+    true: [PopulationType.INITIAL_POPULATION, PopulationType.DENOMINATOR],
+  },
+  denominatorException: {
+    true: [PopulationType.INITIAL_POPULATION, PopulationType.DENOMINATOR],
+  },
+  numeratorExclusion: {
+    true: [
+      PopulationType.INITIAL_POPULATION,
+      PopulationType.DENOMINATOR,
+      PopulationType.NUMERATOR,
+    ],
+  },
+  initialPopulation: {
+    false: [
+      PopulationType.DENOMINATOR,
+      PopulationType.NUMERATOR,
+      PopulationType.DENOMINATOR_EXCLUSION,
+      PopulationType.DENOMINATOR_EXCEPTION,
+      PopulationType.NUMERATOR_EXCLUSION,
+    ],
+  },
+};
+
+function updateProportionPopulations(
+  popMap: Record<string, PopulationExpectedValue>,
+  changedPopulationName: string,
+  expectedValue: boolean | number
+): void {
+  const rules = PROPORTION_UPDATE_RULES[changedPopulationName]?.[expectedValue];
+  if (!rules) return;
+
+  rules.forEach((popType) => {
+    if (popMap[popType] !== undefined) {
+      popMap[popType].expected = expectedValue;
+    }
+  });
+}
+
+function updateRatioPopulations(
+  targetGroup: GroupPopulation,
+  changedTarget: DisplayPopulationValue,
+  changedGroupId: string,
+  measureGroups: Group[]
+): void {
+  const { expected } = changedTarget;
+  const { populationValues } = targetGroup;
+  const targetMeasureGroup = measureGroups.find(
+    (groupPop) => groupPop.id === changedGroupId
+  );
+  const associationTarget = targetMeasureGroup?.populations?.find(
+    (item) => item?.id === changedTarget.id
+  );
+
+  const getMatchingPopulations = () => {
+    if (associationTarget?.associationType) {
+      // Match by association type name
+      return populationValues.filter(
+        (popValue) =>
+          _.startCase(popValue?.name) === associationTarget.associationType
+      );
+    } else {
+      // Match by population association type
+      const changedPopulationName = changedTarget.name as PopulationType;
+      const matchingIds = new Set(
+        targetMeasureGroup?.populations
+          ?.filter((item) =>
+            item?.associationType
+              ?.toLowerCase()
+              ?.includes(changedPopulationName)
+          )
+          ?.map((association) => association.id) ?? []
+      );
+      return populationValues.filter((popValue) =>
+        popValue?.id ? matchingIds.has(popValue.id) : false
+      );
+    }
+  };
+
+  const matchingPopulations = getMatchingPopulations();
+  matchingPopulations.forEach((popValue) => {
+    popValue.expected = expected;
+    targetGroup.populationValues = addRemoveObservationsForPopulationCriteria(
+      targetGroup.populationValues,
+      popValue.name as PopulationType,
+      changedGroupId,
+      measureGroups
+    );
+  });
+}
+
 export function triggerPopChanges(
   groupPopulations: GroupPopulation[],
   changedGroupId: string,
@@ -33,7 +139,6 @@ export function triggerPopChanges(
 ): GroupPopulation[] {
   let returnPops: GroupPopulation[] = [...groupPopulations];
 
-  // Find the modified Group/Population Criteria
   const targetGroup = returnPops.find(
     (groupPop) => groupPop.groupId === changedGroupId
   );
@@ -49,134 +154,40 @@ export function triggerPopChanges(
     (population) => population.name === changedPopulationName
   )?.expected;
 
-  let stratMap = buildStratificationMap(targetGroup, changedTarget);
-  let popMap = buildPopulationMap(targetGroup);
-  const targetPopulationValues = targetGroup.populationValues;
+  const popMap = buildPopulationMap(targetGroup);
+  // update Strata Map if changedTarget is a stratification value
+  updateStratificationMap(
+    targetGroup,
+    changedTarget as DisplayStratificationValue
+  );
+
+  if (targetGroup.scoring === MeasureScoring.RATIO) {
+    updateRatioPopulations(
+      targetGroup,
+      changedTarget,
+      changedGroupId,
+      measureGroups
+    );
+  } else if (targetGroup.scoring === "Proportion") {
+    updateProportionPopulations(popMap, changedPopulationName, expectedValue);
+  }
 
   targetGroup.populationValues = addRemoveObservationsForPopulationCriteria(
-    targetPopulationValues,
+    targetGroup.populationValues,
     changedPopulationName,
     changedGroupId,
     measureGroups
   );
-  // We want to auto update expected values for populations like initialpopulation when denom or numerator become cbecked.
-  if (targetGroup.scoring === MeasureScoring.RATIO) {
-    //update target group.populationValues off of associations. Associations live MeasureGroup level not in populationValues. We need to check up
-    const { expected } = changedTarget;
-    const { populationValues } = targetGroup;
-    const targedMeasureGroup = measureGroups.find(
-      (groupPop) => groupPop.id === changedGroupId
-    );
-    const associationTarget = targedMeasureGroup?.populations?.find((item) => {
-      return item?.id === changedTarget.id;
-    });
-    // if we can already get the associationType from it's id on the group, we can just look for the startCase of it on the names of other populations
-    if (associationTarget?.associationType) {
-      populationValues.forEach((popValue) => {
-        if (
-          _.startCase(popValue?.name) === associationTarget?.associationType
-        ) {
-          popValue.expected = expected;
-        }
-      });
-      // if we can't get the associationType, we need to look for it another way.
-    } else {
-      // works for denom and numer
-      const matchingAssociations = targedMeasureGroup?.populations?.filter(
-        (item) => {
-          return item?.associationType?.toLowerCase() === changedPopulationName;
-        }
-      );
-      const matchingIds = matchingAssociations?.map(
-        (association) => association.id
-      );
-      populationValues.forEach((popValue) => {
-        // if popValue.id is included in the matchingId's array, then update PpValue.expected to the new expected.
-        if (popValue?.id && matchingIds?.includes(popValue?.id)) {
-          popValue.expected = expected;
-        }
-      });
-    }
-  }
 
-  if (targetGroup.scoring === "Proportion") {
-    //denominator
-    if (changedPopulationName === "denominator") {
-      if (expectedValue === true) {
-        popMap[PopulationType.INITIAL_POPULATION].expected = true;
-      }
-
-      if (expectedValue === false) {
-        popMap[PopulationType.NUMERATOR].expected = false;
-        popMap[PopulationType.DENOMINATOR_EXCLUSION] !== undefined &&
-          (popMap[PopulationType.DENOMINATOR_EXCLUSION].expected = false);
-        popMap[PopulationType.DENOMINATOR_EXCEPTION] !== undefined &&
-          (popMap[PopulationType.DENOMINATOR_EXCEPTION].expected = false);
-        popMap[PopulationType.NUMERATOR_EXCLUSION] !== undefined &&
-          (popMap[PopulationType.NUMERATOR_EXCLUSION].expected = false);
-      }
-    }
-
-    //numerator
-    if (changedPopulationName === "numerator") {
-      if (expectedValue === true) {
-        popMap[PopulationType.INITIAL_POPULATION].expected = true;
-        popMap[PopulationType.DENOMINATOR].expected = true;
-      }
-      if (expectedValue === false) {
-        popMap[PopulationType.NUMERATOR_EXCLUSION] !== undefined &&
-          (popMap[PopulationType.NUMERATOR_EXCLUSION].expected = false);
-      }
-    }
-
-    //Denom Exclusion
-    if (changedPopulationName === "denominatorExclusion") {
-      if (expectedValue === true) {
-        popMap[PopulationType.INITIAL_POPULATION].expected = true;
-        popMap[PopulationType.DENOMINATOR].expected = true;
-      }
-    }
-    //Denom Exception
-    if (changedPopulationName === "denominatorException") {
-      if (expectedValue === true) {
-        popMap[PopulationType.INITIAL_POPULATION].expected = true;
-        popMap[PopulationType.DENOMINATOR].expected = true;
-      }
-    }
-
-    //Numer Exclusion
-    if (changedPopulationName === "numeratorExclusion") {
-      if (expectedValue === true) {
-        popMap[PopulationType.INITIAL_POPULATION].expected = true;
-        popMap[PopulationType.DENOMINATOR].expected = true;
-        popMap[PopulationType.NUMERATOR].expected = true;
-      }
-    }
-
-    //initialPopulation
-    if (
-      changedPopulationName === "initialPopulation" &&
-      expectedValue === false
-    ) {
-      popMap[PopulationType.DENOMINATOR].expected = false;
-      popMap[PopulationType.NUMERATOR].expected = false;
-      popMap[PopulationType.DENOMINATOR_EXCLUSION] !== undefined &&
-        (popMap[PopulationType.DENOMINATOR_EXCLUSION].expected = false);
-      popMap[PopulationType.DENOMINATOR_EXCEPTION] !== undefined &&
-        (popMap[PopulationType.DENOMINATOR_EXCEPTION].expected = false);
-      popMap[PopulationType.NUMERATOR_EXCLUSION] !== undefined &&
-        (popMap[PopulationType.NUMERATOR_EXCLUSION].expected = false);
-    }
-  }
   return returnPops;
 }
 
-const buildStratificationMap = (
-  populationCritiera: GroupPopulation,
+const updateStratificationMap = (
+  populationCriteria: GroupPopulation,
   changedStratification: DisplayStratificationValue
 ) => {
   let stratificationMap = {};
-  populationCritiera.stratificationValues?.forEach(
+  populationCriteria.stratificationValues?.forEach(
     (value: StratificationExpectedValue) => {
       stratificationMap[value.id] = value;
       if (
