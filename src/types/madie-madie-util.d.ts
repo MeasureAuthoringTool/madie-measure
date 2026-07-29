@@ -1,4 +1,10 @@
 declare module "@madie/madie-util" {
+  export function padCmsId(cmsId: number | string | null | undefined): string;
+  export function formatCmsId(
+    cmsId: number | string | null | undefined,
+    model: string | null | undefined
+  ): string;
+
   import { LifeCycleFn } from "single-spa";
   import {
     Measure,
@@ -264,4 +270,94 @@ declare module "@madie/madie-util" {
   export const unmount: LifeCycleFn<void>;
   export const ApiContextProvider: React.Provider<ServiceConfig>;
   export const ApiContextConsumer: React.Consumer<ServiceConfig>;
+
+  export function ExportAction(props: {
+    measures: Measure[];
+    onClick: (exportType: string) => void;
+  }): React.ReactElement;
+  export function ViewHRAction(props: {
+    measures: Measure[];
+    onClick: () => void;
+  }): React.ReactElement;
+  export function HistoryAction(props: {
+    measures: Measure[];
+    onClick: () => void;
+  }): React.ReactElement;
+  export function CompareVersionsAction(props: {
+    measures: Measure[];
+    onClick: () => void;
+  }): React.ReactElement;
+  export function ShareAction(props: {
+    measures: Measure[];
+    onClick: (option: string) => void;
+    isOwner?: boolean;
+    isSharedWithUser?: boolean;
+    activeTab: number;
+  }): React.ReactElement;
+
+  export function ExportDialog(props: {
+    downloadState?: string | null;
+    failureMessage?: string | string[] | null;
+    measureName?: string;
+    open: boolean;
+    handleContinueDialog?: () => void;
+    handleCancelDialog?: () => void;
+  }): React.ReactElement | null;
+  export function ExportIcon(props: {
+    downloadState: string;
+  }): React.ReactElement | null;
+  export function ViewHRModal(props: {
+    open: boolean;
+    onClose: () => void;
+    exportMeasure?: (elmErrorSeverity: string) => void;
+    measureId: string;
+  }): React.ReactElement | null;
+  export function ViewMeasureHistoryDialog(props: {
+    measures: Measure[];
+    open: boolean;
+    onClose: Function;
+  }): React.ReactElement | null;
+  export function CompareVersionsDialog(props: {
+    measures: Measure[] | null | undefined;
+    open: boolean;
+    onClose: Function;
+  }): React.ReactElement | null;
+  export function ShareDialog(props: {
+    measures: Measure[];
+    open: boolean;
+    option: string;
+    onClose: Function;
+    onSave: Function;
+    isAdmin?: boolean;
+  }): React.ReactElement | null;
+  export function getNewestMeasureInstance(measures: Measure[]): Measure;
+
+  export function exportMeasure(
+    setFailureMessage: (msg: string | string[] | null) => void,
+    setDownloadState: (state: string | null) => void,
+    abortController: { current: AbortController | null },
+    measure: Measure,
+    measureServiceApi: MeasureServiceApi,
+    setToastOpen: (open: boolean) => void,
+    setToastType: (type: string) => void,
+    setToastMessage: (message: string) => void,
+    elmErrorSeverity: string
+  ): Promise<void>;
+  export function downloadZipFile(
+    exportData: any,
+    ecqmTitle: string,
+    model: string,
+    version: string,
+    warn: boolean,
+    setToastOpen: (open: boolean) => void,
+    setToastType: (type: string) => void,
+    setToastMessage: (message: string) => void,
+    setDownloadState: (state: string | null) => void
+  ): void;
+  export function generateTimestampedFileName(
+    baseName: string,
+    extension: string
+  ): string;
+  export function parseErrorMessageFromBlob(blob: Blob): Promise<string | null>;
+  export const EXPORT_FAILURE_MESSAGE: string;
 }

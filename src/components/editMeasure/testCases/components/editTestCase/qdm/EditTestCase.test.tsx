@@ -1,4 +1,5 @@
 import * as React from "react";
+import * as mockMeasureActionStubs from "../../../../../../__mocks__/measureActionStubs";
 import {
   render,
   screen,
@@ -295,6 +296,7 @@ const qdmCalculationServiceMockResolved = {
 } as unknown as QdmCalculationService;
 
 jest.mock("@madie/madie-util", () => ({
+  ...mockMeasureActionStubs,
   useOwnerName: jest.fn((harpId) => harpId),
   useDocumentTitle: jest.fn(),
   useFeatureFlags: jest.fn(() => {

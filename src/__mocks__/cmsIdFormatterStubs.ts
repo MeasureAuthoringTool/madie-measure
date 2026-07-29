@@ -1,11 +1,11 @@
-export const CMS_ID_PAD_WIDTH = 4;
-export const FHIR_SUFFIX = "FHIR";
+// Shared jest stubs for @madie/madie-util's CMS-ID formatters. Bodies mirror
+// madie-util/src/util/cmsIdFormatter.ts. Import as a `mock`-prefixed namespace
+// and spread into an inline util mock factory:
+//   import * as mockCmsIdStubs from "<path>/__mocks__/cmsIdFormatterStubs";
+//   jest.mock("@madie/madie-util", () => ({ ...mockCmsIdStubs, ... }));
+const CMS_ID_PAD_WIDTH = 4;
+const FHIR_SUFFIX = "FHIR";
 
-/**
- * Zero-pads a CMS ID to {@link CMS_ID_PAD_WIDTH} digits. Values already wider
- * than the pad width are returned unchanged. Null / undefined / 0 / negative
- * inputs return an empty string.
- */
 export function padCmsId(cmsId: number | string | null | undefined): string {
   if (cmsId === null || cmsId === undefined || cmsId === "") {
     return "";
@@ -17,10 +17,6 @@ export function padCmsId(cmsId: number | string | null | undefined): string {
   return String(Math.trunc(n)).padStart(CMS_ID_PAD_WIDTH, "0");
 }
 
-/**
- * Display form of a CMS ID: zero-padded, with the "FHIR" suffix appended for
- * QI-Core measures. Returns an empty string when the CMS ID is missing.
- */
 export function formatCmsId(
   cmsId: number | string | null | undefined,
   model: string | null | undefined

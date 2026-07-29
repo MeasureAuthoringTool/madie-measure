@@ -1,3 +1,4 @@
+import { formatCmsId } from "@madie/madie-util";
 import React, { useMemo, useState } from "react";
 import {
   ColumnDef,
@@ -18,7 +19,6 @@ import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import { Measure } from "@madie/madie-models";
 import { IconButton, Tooltip } from "@mui/material";
-import { formatCmsId } from "../../../../../../utils/cmsIdFormatter";
 import {
   CollapseIcon,
   ExpandIcon,

@@ -1,3 +1,4 @@
+import * as mockCmsIdStubs from "../../../__mocks__/cmsIdFormatterStubs";
 import * as React from "react";
 import {
   fireEvent,
@@ -17,6 +18,7 @@ import userEvent from "@testing-library/user-event";
 import { MeasureServiceApi } from "@madie/madie-util";
 
 jest.mock("@madie/madie-util", () => ({
+  ...mockCmsIdStubs,
   useMeasureServiceApi: jest.fn(() => mockMeasureServiceApi),
   useOktaTokens: jest.fn(() => ({
     getAccessToken: () => "test.jwt",

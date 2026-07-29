@@ -1,4 +1,5 @@
 import * as React from "react";
+import * as mockMeasureActionStubs from "../../../../../../__mocks__/measureActionStubs";
 import {
   fireEvent,
   render,
@@ -137,6 +138,7 @@ const mockMeasureServiceApiResolved = {
     .mockResolvedValue(buildMeasureBundle(mockMeasure)),
 } as unknown as MeasureServiceApi;
 jest.mock("@madie/madie-util", () => ({
+  ...mockMeasureActionStubs,
   useMeasureServiceApi: jest.fn(() => mockMeasureServiceApiResolved),
   useDocumentTitle: jest.fn(),
   measureStore: {
