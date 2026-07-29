@@ -1290,7 +1290,7 @@ const EditTestCase = (props: EditTestCaseProps) => {
           >
             <Allotment
               ref={allotmentRef}
-              defaultSizes={[48, 48, 4]}
+              defaultSizes={[70, 26, 4]}
               vertical={false}
             >
               <Allotment.Pane>

@@ -568,7 +568,8 @@ describe("TimingComponent", () => {
 
     fireEvent.change(unitLow, { target: { value: "mm" } });
 
-    expect(setValuesMock).toHaveBeenCalled();
+    // this fails.
+    expect(setFieldValueMock).toHaveBeenCalled();
 
     const highContainer = screen.getByText("High").closest(".quantity-fields")!;
     const unitHigh = within(highContainer).getByTestId(
@@ -579,7 +580,7 @@ describe("TimingComponent", () => {
 
     fireEvent.change(unitHigh, { target: { value: "mm" } });
 
-    expect(setValuesMock).toHaveBeenCalled();
+    expect(setFieldValueMock).toHaveBeenCalled();
   });
 
   test("TimingComponent calls Formik setFieldValue when PeriodDateTimeComponent (Period) start/end values change", async () => {
