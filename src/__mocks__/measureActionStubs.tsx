@@ -95,3 +95,14 @@ export const ShareAction = ({ measures, activeTab, onClick }: any) => {
 };
 export const ShareDialog = ({ open }: any) =>
   open ? <div data-testid="share-dialog">Share Dialog</div> : null;
+export const TransferAction = ({ measures, onClick }: any) => (
+  <button
+    data-testid="transfer-action-btn"
+    disabled={!measures?.length}
+    onClick={() => onClick && onClick()}
+  >
+    Transfer
+  </button>
+);
+export const TransferDialog = ({ open }: any) =>
+  open ? <div data-testid="transfer-dialog">Transfer Dialog</div> : null;

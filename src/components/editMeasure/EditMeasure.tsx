@@ -26,6 +26,7 @@ import {
   ViewMeasureHistoryDialog,
   exportMeasure,
   ShareDialog,
+  TransferDialog,
 } from "@madie/madie-util";
 import CreateVersionDialog from "../common/createVersionDialog/CreateVersionDialog";
 import InvalidTestCaseDialog from "../common/invalidTestCaseDialog/InvalidTestCaseDialog";
@@ -49,7 +50,6 @@ import DraftMeasureDialog from "../common/draftMeasureDialog/DraftMeasureDialog"
 
 import TestCases from "./testCases/TestCases";
 import { AxiosResponse } from "axios";
-import TransferDialog from "../common/transferDialog/TransferDialog";
 import ReviewDialog from "../common/reviewDialog/ReviewDialog";
 import StatusHandler, { INITIAL_STATUS_HANDLER } from "./editor/StatusHandler";
 

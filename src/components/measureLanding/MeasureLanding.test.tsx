@@ -24,10 +24,6 @@ import { within } from "@testing-library/dom";
 // @ts-ignore
 import { MeasureServiceApi, useMeasureServiceApi } from "@madie/madie-util";
 import MeasureLanding from "./MeasureLanding";
-import {
-  TRANSFER_MEASURE_SUCCESS,
-  TRANSFER_MEASURE_FAILURE,
-} from "../common/transferDialog/TransferDialog";
 
 const serviceConfig = {
   fhirElmTranslationService: { baseUrl: "fhir/services" },

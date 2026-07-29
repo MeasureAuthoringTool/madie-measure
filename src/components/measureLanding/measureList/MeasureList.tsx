@@ -21,6 +21,7 @@ import {
   CompareVersionsDialog,
   exportMeasure as downloadMeasureExport,
   ShareDialog,
+  TransferDialog,
   formatCmsId,
   padCmsId,
 } from "@madie/madie-util";
@@ -62,7 +63,6 @@ import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import { MeasureSearchCriteria } from "../MeasureLanding";
 import queryString from "query-string";
 import { getTabStorageKey } from "../measureLandingUtils";
-import TransferDialog from "../../common/transferDialog/TransferDialog";
 import ReviewDialog from "../../common/reviewDialog/ReviewDialog";
 
 const COMPONENT_MEASURE_MSG =
