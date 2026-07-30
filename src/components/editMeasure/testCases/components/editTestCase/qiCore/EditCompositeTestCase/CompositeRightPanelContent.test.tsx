@@ -1,5 +1,6 @@
-import React from "react";
-import { render, screen, fireEvent } from "@testing-library/react";
+import * as React from "react";
+import { render, screen, fireEvent, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 import { Formik, Form } from "formik";
 
@@ -12,6 +13,7 @@ type RenderOpts = {
   seriesState?: any;
   initialTouched?: any;
   initialErrors?: any;
+  compositeScoresByGroup?: any[];
 };
 
 function renderWithFormik({
@@ -21,6 +23,7 @@ function renderWithFormik({
   seriesState = { series: ["Series A", "Series B"] },
   initialTouched = {},
   initialErrors = {},
+  compositeScoresByGroup = [],
 }: RenderOpts = {}) {
   const setRightPanelActiveTab = jest.fn();
   const setAlert = jest.fn();
@@ -44,6 +47,7 @@ function renderWithFormik({
           alert={alert}
           setAlert={setAlert}
           seriesState={seriesState}
+          compositeScoresByGroup={compositeScoresByGroup}
         />
       </Form>
     </Formik>
@@ -53,12 +57,119 @@ function renderWithFormik({
 }
 
 describe("CompositeRightPanelContent (no module mocks)", () => {
-  it("renders actual tab content when rightPanelActiveTab='actual'", () => {
-    renderWithFormik({ rightPanelActiveTab: "actual" });
+  it("renders dashes on the actual tab when no execution results are available", () => {
+    renderWithFormik({
+      rightPanelActiveTab: "actual",
+      compositeScoresByGroup: [
+        { groupId: "1", displayId: "Group_1", scores: {} },
+      ],
+    });
 
     expect(
-      screen.getByText("Composite actual results in progress...")
-    ).toBeInTheDocument();
+      screen.getByTestId("composite-denominator-score-Group_1")
+    ).toHaveTextContent("Denominator Score: -");
+    expect(
+      screen.getByTestId("composite-numerator-score-Group_1")
+    ).toHaveTextContent("Numerator Score: -");
+    expect(
+      screen.getByTestId("composite-composite-score-Group_1")
+    ).toHaveTextContent("Composite Score: -");
+  });
+
+  it("renders parsed execution results on the actual tab in denominator, numerator, composite order", () => {
+    renderWithFormik({
+      rightPanelActiveTab: "actual",
+      compositeScoresByGroup: [
+        {
+          groupId: "1",
+          displayId: "Group_1",
+          scores: {
+            denominatorScore: 4,
+            numeratorScore: 2,
+            compositeScore: 50,
+          },
+        },
+      ],
+    });
+
+    expect(
+      screen.getByTestId("composite-denominator-score-Group_1")
+    ).toHaveTextContent("Denominator Score: 4");
+    expect(
+      screen.getByTestId("composite-numerator-score-Group_1")
+    ).toHaveTextContent("Numerator Score: 2");
+    expect(
+      screen.getByTestId("composite-composite-score-Group_1")
+    ).toHaveTextContent("Composite Score: 50%");
+  });
+
+  it("renders a display id heading for each group when multiple groups are present", () => {
+    renderWithFormik({
+      rightPanelActiveTab: "actual",
+      compositeScoresByGroup: [
+        {
+          groupId: "1",
+          displayId: "Group_1",
+          scores: {
+            denominatorScore: 4,
+            numeratorScore: 2,
+            compositeScore: 50,
+          },
+        },
+        {
+          groupId: "2",
+          displayId: "Group_2",
+          scores: {
+            denominatorScore: 8,
+            numeratorScore: 6,
+            compositeScore: 75,
+          },
+        },
+      ],
+    });
+
+    // headings only render when there is more than one group
+    expect(screen.getByText("Group_1")).toBeInTheDocument();
+    expect(screen.getByText("Group_2")).toBeInTheDocument();
+
+    expect(
+      screen.getByTestId("composite-composite-score-Group_2")
+    ).toHaveTextContent("Composite Score: 75%");
+  });
+
+  it("falls back to displayId for the key and renders dashes when a group has no groupId or scores", () => {
+    renderWithFormik({
+      rightPanelActiveTab: "actual",
+      compositeScoresByGroup: [{ displayId: "Group_1" }],
+    });
+
+    // no heading because there is a single group
+    expect(screen.queryByText("Group_1")).not.toBeInTheDocument();
+    expect(
+      screen.getByTestId("composite-denominator-score-Group_1")
+    ).toHaveTextContent("Denominator Score: -");
+    expect(
+      screen.getByTestId("composite-numerator-score-Group_1")
+    ).toHaveTextContent("Numerator Score: -");
+    expect(
+      screen.getByTestId("composite-composite-score-Group_1")
+    ).toHaveTextContent("Composite Score: -");
+  });
+
+  it("updates formik series field when a series option is selected on the details tab", async () => {
+    renderWithFormik({ rightPanelActiveTab: "details" });
+
+    const seriesInput = screen
+      .getByTestId("test-case-series")
+      .querySelector("input") as HTMLInputElement;
+
+    userEvent.click(seriesInput);
+    const list = await screen.findByRole("listbox");
+    const options = within(list).getAllByRole("option");
+    userEvent.click(options[1]);
+
+    await screen.findByTestId("test-case-series");
+    expect(seriesInput).toHaveValue("Series B");
   });
 
   it("renders details tab content (title/description inputs) when rightPanelActiveTab='details'", () => {
@@ -112,5 +223,39 @@ describe("CompositeRightPanelContent (no module mocks)", () => {
     });
 
     expect(screen.getByText("Title is required")).toBeInTheDocument();
+  });
+
+  it("shows helper text for a touched description error", () => {
+    renderWithFormik({
+      rightPanelActiveTab: "details",
+      initialTouched: { description: true },
+      initialErrors: { description: "Description is invalid" },
+    });
+
+    expect(screen.getByText("Description is invalid")).toBeInTheDocument();
+  });
+
+  it("defaults compositeScoresByGroup to an empty list when the prop is omitted", () => {
+    render(
+      <Formik
+        initialValues={{ title: "", description: "", series: "" }}
+        onSubmit={() => {}}
+      >
+        <Form>
+          <CompositeRightPanelContent
+            rightPanelActiveTab="actual"
+            setRightPanelActiveTab={jest.fn()}
+            testCaseCanEdit={true}
+            alert={null}
+            setAlert={jest.fn()}
+            seriesState={{ series: [] }}
+          />
+        </Form>
+      </Formik>
+    );
+
+    const actual = screen.getByTestId("composite-actual");
+    expect(actual).toBeInTheDocument();
+    expect(actual).toBeEmptyDOMElement();
   });
 });

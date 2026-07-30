@@ -16,6 +16,7 @@ export default function CompositeRightPanelContent({
   alert,
   setAlert,
   seriesState,
+  compositeScoresByGroup = [],
 }) {
   const formik: any = useFormikContext();
   function formikErrorHandler(name: string) {
@@ -23,6 +24,15 @@ export default function CompositeRightPanelContent({
       return `${formik.errors[name]}`;
     }
   }
+
+  const formatValue = (value?: number, isPercentage = false): string => {
+    if (value == null) {
+      return "-";
+    }
+    return isPercentage ? `${value}%` : `${value}`;
+  };
+
+  const hasMultipleGroups = compositeScoresByGroup.length > 1;
   return (
     <>
       <div className="tab-container">
@@ -34,8 +44,35 @@ export default function CompositeRightPanelContent({
 
       <div className="panel-content">
         {rightPanelActiveTab === "actual" && (
-          <div data-testId="composite-actual">
-            Composite actual results in progress...
+          <div data-testid="composite-actual">
+            {compositeScoresByGroup.map((group) => (
+              <div
+                key={group.groupId ?? group.displayId}
+                data-testid={`composite-actual-results-${group.displayId}`}
+                tw="mb-4"
+              >
+                {hasMultipleGroups && (
+                  <div tw="font-semibold mb-1">{group.displayId}</div>
+                )}
+                <div
+                  data-testid={`composite-denominator-score-${group.displayId}`}
+                >
+                  Denominator Score:{" "}
+                  {formatValue(group.scores?.denominatorScore)}
+                </div>
+                <div
+                  data-testid={`composite-numerator-score-${group.displayId}`}
+                >
+                  Numerator Score: {formatValue(group.scores?.numeratorScore)}
+                </div>
+                <div
+                  data-testid={`composite-composite-score-${group.displayId}`}
+                >
+                  Composite Score:{" "}
+                  {formatValue(group.scores?.compositeScore, true)}
+                </div>
+              </div>
+            ))}
           </div>
         )}
         {rightPanelActiveTab === "details" && (
