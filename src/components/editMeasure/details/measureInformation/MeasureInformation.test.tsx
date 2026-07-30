@@ -1,3 +1,4 @@
+import * as mockCmsIdStubs from "../../../../__mocks__/cmsIdFormatterStubs";
 import * as React from "react";
 import {
   render,
@@ -109,6 +110,7 @@ const mockUserServiceApi = {
   getOwnerDetails: jest.fn().mockResolvedValue({}),
 } as unknown as UserServiceApi;
 jest.mock("@madie/madie-util", () => ({
+  ...mockCmsIdStubs,
   useMeasureServiceApi: jest.fn(() => mockMeasureServiceApi),
   useUserServiceApi: jest.fn(() => mockUserServiceApi),
   useFeatureFlags: jest.fn().mockReturnValue({}),

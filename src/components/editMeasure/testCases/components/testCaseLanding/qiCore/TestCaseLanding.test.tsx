@@ -1,4 +1,5 @@
 import * as React from "react";
+import * as mockMeasureActionStubs from "../../../../../../__mocks__/measureActionStubs";
 import { render, screen } from "@testing-library/react";
 import TestCaseLanding from "./TestCaseLanding";
 import { MemoryRouter, Routes, Route } from "react-router-dom";
@@ -113,6 +114,7 @@ const setExecuting = jest.fn();
 const setError = jest.fn();
 
 jest.mock("@madie/madie-util", () => ({
+  ...mockMeasureActionStubs,
   useDocumentTitle: jest.fn(),
   measureStore: {
     updateMeasure: jest.fn((measure) => measure),
