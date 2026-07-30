@@ -358,6 +358,40 @@ describe("ResourceList component", () => {
     expect(addBtnOther).toBeDisabled();
   });
 
+  it("disables insert existing testcase button when QICore Patient is not added on composite measure", async () => {
+    const onClick = jest.fn();
+
+    render(
+      <ResourceList
+        resourceIdentifiers={[]}
+        onClick={onClick}
+        isPatientAdded={false}
+        isComposite={true}
+      />
+    );
+
+    // Add button for qicore-patient should be disabled
+    const insertBtn = screen.getByTestId("insert-test-case-button");
+    expect(insertBtn).toBeDisabled();
+  });
+
+  it("enables insert existing testcase button when QICore Patient is added on composite measure", async () => {
+    const onClick = jest.fn();
+
+    render(
+      <ResourceList
+        resourceIdentifiers={[]}
+        onClick={onClick}
+        isPatientAdded={true}
+        isComposite={true}
+      />
+    );
+
+    // Add button for qicore-patient should be disabled
+    const insertBtn = screen.getByTestId("insert-test-case-button");
+    expect(insertBtn).toBeEnabled();
+  });
+
   describe("Profile Display Mode", () => {
     const relevantResources: ResourceIdentifier[] = [
       {
