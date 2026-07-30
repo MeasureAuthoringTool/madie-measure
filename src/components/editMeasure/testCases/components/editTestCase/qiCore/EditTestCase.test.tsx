@@ -1,4 +1,5 @@
 import * as React from "react";
+import * as mockMeasureActionStubs from "../../../../../../__mocks__/measureActionStubs";
 import { ChangeEvent } from "react";
 import {
   act,
@@ -113,6 +114,7 @@ const MEASURE_CREATEDBY = "testuser";
 let mockApplyDefaults = false;
 jest.mock("@madie/madie-util", () => {
   return {
+    ...mockMeasureActionStubs,
     useMeasureServiceApi: jest.fn(() => mockMeasureServiceApi),
     useOwnerName: jest.fn((harpId) => harpId),
     useDocumentTitle: jest.fn(),

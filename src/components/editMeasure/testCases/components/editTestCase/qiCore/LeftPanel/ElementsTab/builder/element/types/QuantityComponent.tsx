@@ -13,7 +13,6 @@ import "./QuantityComponent.scss";
 import AddElementButton from "../../../../../../../common/UIOnlyModelAgnostic/AddElementButton";
 import { IconButton, Tooltip } from "@mui/material";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
-import { set as lodashSet } from "lodash";
 import { getMultipleCardinalityLabel } from "./TypeUtil";
 import DecimalComponent from "./DecimalComponent";
 
@@ -41,13 +40,14 @@ const QuantityComponent = ({
   const formik = useFormikContext();
 
   const updateQuantityCode = (code: string, unit: string, system: string) => {
-    formik.setValues((prev) => {
-      const next = { ...prev };
-      lodashSet(next, `${label}.code`, code);
-      lodashSet(next, `${label}.unit`, unit);
-      lodashSet(next, `${label}.system`, system);
-      return next;
-    });
+    const currentQuantity = getIn(formik.values, label);
+    const newQuantity = {
+      ...currentQuantity,
+      code,
+      unit,
+      system,
+    };
+    formik.setFieldValue(label, newQuantity);
     formik.validateForm();
   };
 
