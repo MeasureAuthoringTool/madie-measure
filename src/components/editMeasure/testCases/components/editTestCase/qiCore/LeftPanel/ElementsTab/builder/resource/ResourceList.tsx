@@ -324,6 +324,7 @@ const ResourceList = ({
             type="button"
             data-testid={`insert-test-case-button`}
             onClick={onInsertTCClick}
+            disabled={!isPatientAdded}
           >
             Insert Existing Test Case
           </Button>
