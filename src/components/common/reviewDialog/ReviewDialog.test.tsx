@@ -84,6 +84,7 @@ describe("ReviewDialog", () => {
 
   it("creates READY_FOR_REVIEW when no existing review is found", async () => {
     const onClose = jest.fn();
+    const dispatchEventSpy = jest.spyOn(window, "dispatchEvent");
     render(<ReviewDialog open={true} measure={measure} onClose={onClose} />);
 
     expect(screen.getByTestId("review-dialog-save-button")).toBeDisabled();
@@ -111,6 +112,18 @@ describe("ReviewDialog", () => {
     await waitFor(() => {
       expect(onClose).toHaveBeenCalledTimes(1);
     });
+
+    // The header in the layout micro-frontend relies on this broadcast to
+    // refresh its status without re-querying the API.
+    await waitFor(() => {
+      expect(dispatchEventSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: "review-measure-saved",
+          detail: { id: "new-review-id" },
+        })
+      );
+    });
+    dispatchEventSpy.mockRestore();
 
     expect(
       await screen.findByText("Review information has been saved successfully.")
