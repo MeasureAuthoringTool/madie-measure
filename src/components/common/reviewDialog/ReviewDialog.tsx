@@ -117,6 +117,11 @@ export default function ReviewDialog({
           toastMessage: "Review information has been saved successfully.",
         });
         await onSuccess?.();
+        // The review status also surfaces in the PageHeader (madie-layout).
+        // Broadcast the persisted review so that the PageHeader can update its display accordingly.
+        window.dispatchEvent(
+          new CustomEvent("review-measure-saved", { detail: savedReview })
+        );
         onClose();
       } catch (error) {
         setToast({
