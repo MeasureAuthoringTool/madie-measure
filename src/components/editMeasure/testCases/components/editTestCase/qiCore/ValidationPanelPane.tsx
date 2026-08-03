@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Allotment } from "allotment";
 import { Button } from "@madie/madie-design-system/dist/react";
 import KeyboardTabIcon from "@mui/icons-material/KeyboardTab";
@@ -12,6 +12,9 @@ interface ValidationPanelPaneProps {
   isQICore6: boolean;
 }
 
+const EXPANDED_SIZES = [340, 330, 330];
+const COLLAPSED_SIZES = [700, 260, 40];
+
 const ValidationPanelPane = ({
   allotmentRef,
   testCase,
@@ -19,6 +22,17 @@ const ValidationPanelPane = ({
   isQICore6,
 }: ValidationPanelPaneProps) => {
   const [showValidationErrors, setShowValidationErrors] = useState(false);
+
+  const hasMounted = useRef(false);
+  useEffect(() => {
+    if (!hasMounted.current) {
+      hasMounted.current = true;
+      return;
+    }
+    allotmentRef.current?.resize(
+      showValidationErrors ? EXPANDED_SIZES : COLLAPSED_SIZES
+    );
+  }, [showValidationErrors, allotmentRef]);
 
   return (
     <Allotment.Pane minSize={4}>
@@ -47,12 +61,7 @@ const ValidationPanelPane = ({
                 <Button
                   variant="action"
                   data-testid="hide-json-validation-errors-button"
-                  onClick={() => {
-                    setShowValidationErrors(false);
-                    setTimeout(() => {
-                      allotmentRef.current.resize([48, 48, 4]);
-                    }, 0);
-                  }}
+                  onClick={() => setShowValidationErrors(false)}
                   className="validation-panel-toggle-button"
                   title="Close Panel"
                 >
@@ -77,10 +86,7 @@ const ValidationPanelPane = ({
               <Button
                 size="small"
                 data-testid="show-json-validation-errors-button"
-                onClick={() => {
-                  setShowValidationErrors(true);
-                  allotmentRef.current.resize([34, 33, 33]);
-                }}
+                onClick={() => setShowValidationErrors(true)}
                 className="validation-panel-toggle-button"
                 title={
                   testCase?.validationStatus
