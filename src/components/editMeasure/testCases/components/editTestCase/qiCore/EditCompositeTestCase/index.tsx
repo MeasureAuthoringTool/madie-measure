@@ -17,6 +17,7 @@ import "styled-components/macro";
 import useExecutionContext from "../../../routes/qiCore/useExecutionContext";
 import { Model } from "@madie/madie-models";
 import ValidationPanelPane from "../ValidationPanelPane";
+import { parseCompositeScores } from "../../../testCaseLanding/qiCore/compositeScores";
 
 const EditCompositeTestCase = ({
   allotmentRef,
@@ -33,6 +34,7 @@ const EditCompositeTestCase = ({
   setInitialFormikValuesStu6,
   validationErrors,
   calculateCompositeTestCase,
+  compositeCalculationOutput,
 }) => {
   const measureServiceApi = useRef(useMeasureServiceApi()).current;
   const [alert, setAlert] = useState<AlertProps>(null);
@@ -74,6 +76,21 @@ const EditCompositeTestCase = ({
   const [leftPanelActiveTab, setLeftPanelActiveTab] =
     useState<string>("available");
 
+  // Parse the execution results into per-group composite/denominator/numerator
+  // scores for display in the right panel
+  const compositeScoresByGroup = useMemo(
+    () =>
+      (measure?.groups ?? []).map((group) => ({
+        groupId: group.id,
+        displayId: group.displayId,
+        scores: parseCompositeScores(
+          compositeCalculationOutput,
+          group.displayId
+        ),
+      })),
+    [measure?.groups, compositeCalculationOutput]
+  );
+
   return (
     <div className={`allotment-wrapper`}>
       <Allotment ref={allotmentRef} defaultSizes={[70, 26, 4]} vertical={false}>
@@ -102,6 +119,7 @@ const EditCompositeTestCase = ({
               alert={alert}
               setAlert={setAlert}
               seriesState={seriesState}
+              compositeScoresByGroup={compositeScoresByGroup}
             />
           </div>
         </Allotment.Pane>
