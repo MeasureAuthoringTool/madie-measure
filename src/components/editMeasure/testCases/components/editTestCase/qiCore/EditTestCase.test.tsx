@@ -5065,6 +5065,16 @@ describe("Composite Measure Edit test case functionality", () => {
     (checkUserCanEdit as jest.Mock).mockClear().mockImplementation(() => {
       return true;
     });
+    mockedAxios.get.mockClear().mockImplementation((args: any) => {
+      if (args && args.endsWith("series")) {
+        return Promise.resolve({ data: ["DENOM_Pass", "NUMER_Pass"] });
+      } else if (args && args.endsWith("resources")) {
+        return Promise.resolve({ data: [...resourceIdentifiers] });
+      }
+      return Promise.resolve({
+        data: { ...testCaseFixture, createdBy: MEASURE_CREATEDBY },
+      });
+    });
     mockedAxios.post.mockImplementation((args) => {
       if (args && args.endsWith("lock")) {
         return Promise.resolve({
@@ -5108,10 +5118,20 @@ describe("Composite Measure Edit test case functionality", () => {
     await waitFor(() => {
       expect(actualTab).toHaveAttribute("aria-selected", "true");
     });
-    const actualContent = screen.getByText(
-      "Composite actual results in progress..."
-    );
+    // The actual tab renders the composite execution results (denominator,
+    // numerator and composite score) for each group, defaulting to "-" until
+    // a test case has been run.
+    const actualContent = screen.getByTestId("composite-actual");
     expect(actualContent).toBeInTheDocument();
+    expect(
+      screen.getByTestId("composite-denominator-score-Group1_ID")
+    ).toHaveTextContent("Denominator Score: -");
+    expect(
+      screen.getByTestId("composite-numerator-score-Group1_ID")
+    ).toHaveTextContent("Numerator Score: -");
+    expect(
+      screen.getByTestId("composite-composite-score-Group1_ID")
+    ).toHaveTextContent("Composite Score: -");
   });
 
   it("should show details tab but not CQL and Highlighting tabs for composite measure", async () => {

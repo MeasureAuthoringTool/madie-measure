@@ -84,6 +84,7 @@ describe("ReviewDialog", () => {
 
   it("creates READY_FOR_REVIEW when no existing review is found", async () => {
     const onClose = jest.fn();
+    const dispatchEventSpy = jest.spyOn(window, "dispatchEvent");
     render(<ReviewDialog open={true} measure={measure} onClose={onClose} />);
 
     expect(screen.getByTestId("review-dialog-save-button")).toBeDisabled();
@@ -111,6 +112,18 @@ describe("ReviewDialog", () => {
     await waitFor(() => {
       expect(onClose).toHaveBeenCalledTimes(1);
     });
+
+    // The header in the layout micro-frontend relies on this broadcast to
+    // refresh its status without re-querying the API.
+    await waitFor(() => {
+      expect(dispatchEventSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: "review-measure-saved",
+          detail: { id: "new-review-id" },
+        })
+      );
+    });
+    dispatchEventSpy.mockRestore();
 
     expect(
       await screen.findByText("Review information has been saved successfully.")
@@ -183,6 +196,118 @@ describe("ReviewDialog", () => {
     });
 
     expect(mockCreateMeasureReview).not.toHaveBeenCalled();
+  });
+
+  it("calls onSuccess before onClose so the list refreshes the Review column", async () => {
+    const callOrder: string[] = [];
+    const onSuccess = jest.fn(() => {
+      callOrder.push("onSuccess");
+    });
+    const onClose = jest.fn(() => {
+      callOrder.push("onClose");
+    });
+
+    render(
+      <ReviewDialog
+        open={true}
+        measure={measure}
+        onClose={onClose}
+        onSuccess={onSuccess}
+      />
+    );
+
+    userEvent.click(screen.getByTestId("review-dialog-mark-ready-switch"));
+    await waitFor(() => {
+      expect(screen.getByTestId("review-dialog-save-button")).toBeEnabled();
+    });
+    userEvent.click(screen.getByTestId("review-dialog-save-button"));
+
+    await waitFor(() => {
+      expect(onSuccess).toHaveBeenCalledTimes(1);
+    });
+    await waitFor(() => {
+      expect(onClose).toHaveBeenCalledTimes(1);
+    });
+    expect(callOrder).toEqual(["onSuccess", "onClose"]);
+  });
+
+  it("stays open until an async onSuccess resolves, so the refetch finishes first", async () => {
+    let resolveRefetch: () => void;
+    const onSuccess = jest.fn(
+      () =>
+        new Promise<void>((resolve) => {
+          resolveRefetch = resolve;
+        })
+    );
+    const onClose = jest.fn();
+
+    render(
+      <ReviewDialog
+        open={true}
+        measure={measure}
+        onClose={onClose}
+        onSuccess={onSuccess}
+      />
+    );
+
+    userEvent.click(screen.getByTestId("review-dialog-mark-ready-switch"));
+    await waitFor(() => {
+      expect(screen.getByTestId("review-dialog-save-button")).toBeEnabled();
+    });
+    userEvent.click(screen.getByTestId("review-dialog-save-button"));
+
+    await waitFor(() => {
+      expect(onSuccess).toHaveBeenCalledTimes(1);
+    });
+    // still pending -> dialog must stay open
+    expect(onClose).not.toHaveBeenCalled();
+
+    resolveRefetch();
+    await waitFor(() => {
+      expect(onClose).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  it("skips onSuccess when the save fails, so the list is not refreshed from an unsaved review", async () => {
+    const onSuccess = jest.fn();
+    mockCreateMeasureReview.mockRejectedValueOnce(new Error("save failed"));
+
+    render(
+      <ReviewDialog
+        open={true}
+        measure={measure}
+        onClose={jest.fn()}
+        onSuccess={onSuccess}
+      />
+    );
+
+    userEvent.click(screen.getByTestId("review-dialog-mark-ready-switch"));
+    await waitFor(() => {
+      expect(screen.getByTestId("review-dialog-save-button")).toBeEnabled();
+    });
+    userEvent.click(screen.getByTestId("review-dialog-save-button"));
+
+    expect(
+      await screen.findByText(
+        "An error occurred while saving the review. Please try again."
+      )
+    ).toBeInTheDocument();
+    expect(onSuccess).not.toHaveBeenCalled();
+  });
+
+  it("still saves and closes when the optional onSuccess is omitted", async () => {
+    const onClose = jest.fn();
+    render(<ReviewDialog open={true} measure={measure} onClose={onClose} />);
+
+    userEvent.click(screen.getByTestId("review-dialog-mark-ready-switch"));
+    await waitFor(() => {
+      expect(screen.getByTestId("review-dialog-save-button")).toBeEnabled();
+    });
+    userEvent.click(screen.getByTestId("review-dialog-save-button"));
+
+    await waitFor(() => {
+      expect(onClose).toHaveBeenCalledTimes(1);
+    });
   });
 
   it("shows an error toast when saving a review fails", async () => {

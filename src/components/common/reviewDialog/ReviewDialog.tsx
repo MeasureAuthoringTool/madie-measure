@@ -13,6 +13,7 @@ interface ReviewDialogProps {
   open: boolean;
   measure?: Measure;
   onClose: () => void;
+  onSuccess?: () => void | Promise<void>;
 }
 
 const EMPTY_REVIEW_COMMENT = "<p></p>";
@@ -21,6 +22,7 @@ export default function ReviewDialog({
   open,
   measure,
   onClose,
+  onSuccess,
 }: ReviewDialogProps) {
   const measureReviewServiceApi = useRef(useMeasureReviewServiceApi()).current;
   const [review, setReview] = useState<MeasureReview | null>(null);
@@ -114,6 +116,12 @@ export default function ReviewDialog({
           toastType: "success",
           toastMessage: "Review information has been saved successfully.",
         });
+        await onSuccess?.();
+        // The review status also surfaces in the PageHeader (madie-layout).
+        // Broadcast the persisted review so that the PageHeader can update its display accordingly.
+        window.dispatchEvent(
+          new CustomEvent("review-measure-saved", { detail: savedReview })
+        );
         onClose();
       } catch (error) {
         setToast({

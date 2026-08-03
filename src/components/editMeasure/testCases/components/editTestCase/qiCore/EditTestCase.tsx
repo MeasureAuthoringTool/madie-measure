@@ -432,6 +432,8 @@ const EditTestCase = (props: EditTestCaseProps) => {
   const [populationGroupResults, setPopulationGroupResults] =
     useState<DetailedPopulationGroupResult[]>();
   const [calculationErrors, setCalculationErrors] = useState<AlertProps>();
+  const [compositeCalculationOutput, setCompositeCalculationOutput] =
+    useState<MRCalculationOutput>();
   const [rightPanelActiveTab, setRightPanelActiveTab] = useState<string>();
   const [leftPanelActiveTab, setLeftPanelActiveTab] = useState<string>("added");
   const [groupPopulations, setGroupPopulations] = useState<GroupPopulation[]>(
@@ -1028,6 +1030,7 @@ const EditTestCase = (props: EditTestCaseProps) => {
           measureBundle,
           valueSets
         );
+      setCompositeCalculationOutput(calculationOutput);
     } catch (error) {
       console.error("calculateTestCases: error.message = " + error?.message);
       setCalculationErrors(error);
@@ -1281,6 +1284,7 @@ const EditTestCase = (props: EditTestCaseProps) => {
                 setInitialFormikValuesStu6={setInitialFormikValuesStu6}
                 validationErrors={validationErrors}
                 calculateCompositeTestCase={calculateCompositeTestCase}
+                compositeCalculationOutput={compositeCalculationOutput}
               />
             </QiCoreResourceProvider>
           </FormikProvider>
