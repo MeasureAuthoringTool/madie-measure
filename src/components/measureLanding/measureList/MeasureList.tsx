@@ -15,6 +15,7 @@ import {
   useUserServiceApi,
   checkUserCanEdit,
   useUserRoles,
+  useFeatureFlags,
   ExportDialog,
   ViewHRModal,
   ViewMeasureHistoryDialog,
@@ -67,14 +68,6 @@ import ReviewDialog from "../../common/reviewDialog/ReviewDialog";
 
 const COMPONENT_MEASURE_MSG =
   "This measure is a component of a composite measure";
-
-const filterByOpts = ["Measure", "Model", "Version", "CMS ID"];
-const filterMap: Record<string, string> = {
-  Measure: "measureName",
-  Model: "model",
-  Version: "version",
-  "CMS ID": "cmsId",
-};
 
 // Export customSort for testing purposes
 export function customSort(a: string, b: string) {
@@ -186,6 +179,24 @@ export default function MeasureList(props: {
   const { searchCriteria, setSearchCriteria, retrieveMeasures } = { ...props };
   const measureServiceApi = useRef(useMeasureServiceApi()).current; //needs to be ref or triggers jest. throws warn
   const userServiceApi = useRef(useUserServiceApi()).current; //needs to be ref or triggers jest. throws warn
+  const featureFlags = useFeatureFlags();
+
+  const filterByOpts = [
+    "Measure",
+    "Model",
+    "Version",
+    "CMS ID",
+    ...(featureFlags?.MeasureReviewStatus && props.activeTab !== 2
+      ? ["Review"]
+      : []),
+  ];
+  const filterMap: Record<string, string> = {
+    Measure: "measureName",
+    Model: "model",
+    Version: "version",
+    "CMS ID": "cmsId",
+    Review: "review",
+  };
 
   const {
     filterBy,
@@ -291,6 +302,7 @@ export default function MeasureList(props: {
         actions: measure,
         hasAssociatedMeasures: measure?.hasAssociatedMeasures,
         ownerDisplayName: measure?.ownerDisplayName,
+        reviewStatus: measure?.reviewStatus,
         lockedByDisplayName: lockedBy
           ? lockedByDisplayNames[lockedBy] || lockedBy
           : undefined,
@@ -308,6 +320,7 @@ export default function MeasureList(props: {
     hasAssociatedMeasures: boolean;
     ownerDisplayName?: string;
     lockedByDisplayName?: string;
+    reviewStatus?: string;
   };
 
   const [data, setData] = useState<TCRow[]>([]);
@@ -496,6 +509,18 @@ export default function MeasureList(props: {
         new Date(rowA.original.actions.lastModifiedAt).getTime() -
         new Date(rowB.original.actions.lastModifiedAt).getTime(),
     },
+    ...(featureFlags?.MeasureReviewStatus && props.activeTab !== 2
+      ? [
+          {
+            header: "Review",
+            accessorKey: "reviewStatus",
+            enableSorting: false,
+            cell: (info) => (
+              <p>{info.row.original.reviewStatus ? "Ready" : "-"}</p>
+            ),
+          },
+        ]
+      : []),
     {
       // Use tabIndex={0} for accessibility, and make sure it's not inside a button.
       header: () => (
@@ -701,7 +726,12 @@ export default function MeasureList(props: {
     });
 
     return t;
-  }, [selectedIdForExpansion, isRowExpanded, props.activeTab]);
+  }, [
+    selectedIdForExpansion,
+    isRowExpanded,
+    props.activeTab,
+    featureFlags?.MeasureReviewStatus,
+  ]);
 
   const expandedcolumns = useMemo<ColumnDef<TCRow>[]>(() => {
     return [
@@ -1371,6 +1401,15 @@ export default function MeasureList(props: {
         open={reviewDialog.open}
         measure={selectedMeasures[0]}
         onClose={handleReviewDialogClose}
+        onSuccess={() => {
+          // Refetch so the Review column reflects the status that was just saved
+          doUpdateList();
+          table.resetRowSelection();
+          setSelectedExpandedMeasuresIds([]);
+          setIsRowExpanded(false);
+          setExpandedSectionData([]);
+          setSelectedIdForExpansion(null);
+        }}
       />
     </div>
   );
