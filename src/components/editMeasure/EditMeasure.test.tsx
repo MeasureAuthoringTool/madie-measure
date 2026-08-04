@@ -1,3 +1,4 @@
+import * as mockCmsIdStubs from "../../__mocks__/cmsIdFormatterStubs";
 import * as React from "react";
 import {
   render,
@@ -156,6 +157,7 @@ const mockMeasureServiceApi = {
   fetchMeasures: jest.fn().mockResolvedValue(oneItemResponse),
   getRecentMeasuresByMeasureSetId: jest.fn().mockResolvedValue([measure]),
   fetchMeasure: jest.fn().mockResolvedValue(measure),
+  updateMeasureLock: jest.fn().mockResolvedValue({}),
   getAllPopulationBasisOptions: jest.fn().mockResolvedValue([]),
   getReturnTypesForAllCqlDefinitions: jest.fn().mockResolvedValue({}),
   updateMeasure: jest.fn().mockResolvedValueOnce({ status: 200 }),
@@ -198,9 +200,46 @@ const mockMeasureReviewServiceApi = {
 };
 
 jest.mock("@madie/madie-util", () => ({
+  ...mockCmsIdStubs,
   useMeasureServiceApi: jest.fn(() => mockMeasureServiceApi),
   useMeasureReviewServiceApi: jest.fn(() => mockMeasureReviewServiceApi),
   useUserServiceApi: jest.fn(() => ({ getOwnerDetails: jest.fn() })),
+  exportMeasure: jest.fn(),
+  ExportDialog: ({ open }: any) =>
+    open ? <div data-testid="export-dialog">Export Dialog</div> : null,
+  ViewHRModal: ({ open, onClose }: any) =>
+    open ? (
+      <div data-testid="hr-modal-container">
+        View HR Modal
+        <button data-testid="human-readable-cancel-button" onClick={onClose}>
+          Cancel
+        </button>
+      </div>
+    ) : null,
+  ViewMeasureHistoryDialog: ({ open }: any) =>
+    open ? (
+      <div data-testid="view-measure-history-dialog">Measure History</div>
+    ) : null,
+  // ShareDialog behavior is covered by @madie/madie-util's ShareDialog.test.
+  ShareDialog: ({ open }: any) =>
+    open ? <div data-testid="share-dialog">Share Dialog</div> : null,
+  TransferDialog: ({ open, onClose }: any) =>
+    open ? (
+      <div data-testid="transfer-dialog">
+        Transfer Dialog
+        <button
+          data-testid="transfer-success"
+          onClick={() =>
+            onClose({ toastType: "success", toastMessage: "", toastOpen: true })
+          }
+        >
+          Transfer Success
+        </button>
+        <button data-testid="transfer-cancel-button" onClick={() => onClose()}>
+          Cancel
+        </button>
+      </div>
+    ) : null,
   useDocumentTitle: jest.fn(),
   useOktaTokens: jest.fn(() => ({
     getAccessToken: () => "test.jwt",
@@ -485,121 +524,43 @@ describe("EditMeasure Component", () => {
     const modal = await findByTestId("hr-modal-container");
     expect(modal).toBeInTheDocument();
 
-    expect(screen.queryByText("test human readable")).toBeInTheDocument();
-
+    // ViewHRModal behavior is covered by @madie/madie-util's ViewHRModal.test.
     const cancelButton = await findByTestId("human-readable-cancel-button");
     fireEvent.click(cancelButton);
 
     await waitFor(() => {
-      expect(screen.queryByText("test human readable")).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId("hr-modal-container")
+      ).not.toBeInTheDocument();
     });
   });
 
-  it("should display a share dialog when the event is triggered and close dialog when cancel button is clicked", async () => {
+  // Share/unshare behavior is covered by @madie/madie-util's ShareDialog.test;
+  // these only verify the window events open the dialog.
+  it("should display the share dialog when the share-measure event is triggered", async () => {
     renderRouter();
-
-    const result = await findByTestId("editMeasure");
-    expect(result).toBeInTheDocument();
+    expect(await findByTestId("editMeasure")).toBeInTheDocument();
 
     act(() => {
       window.dispatchEvent(new Event("share-measure"));
     });
 
     await waitFor(() => {
-      expect(mockMeasureServiceApi.fetchMeasure).toHaveBeenCalled();
       expect(getByTestId("share-dialog")).toBeInTheDocument();
     });
-    expect(mockMeasureServiceApi.getSharedMeasures).toHaveBeenCalled();
-    expect(
-      mockMeasureServiceApi.getRecentMeasuresByMeasureSetId
-    ).toHaveBeenCalled();
-    const cancelButton = getByTestId("share-cancel-button");
-    fireEvent.click(cancelButton);
-    expect(queryByTestId("share-dialog")).toBeVisible();
   });
 
-  it("should display an unshare from me confirmation dialog when the event is triggered and close dialog when cancel button is clicked", async () => {
+  it("should display the share dialog when the unshare-measure-from-me event is triggered", async () => {
     renderRouter();
-
-    const result = await findByTestId("editMeasure");
-    expect(result).toBeInTheDocument();
+    expect(await findByTestId("editMeasure")).toBeInTheDocument();
 
     act(() => {
       window.dispatchEvent(new Event("unshare-measure-from-me"));
     });
 
     await waitFor(() => {
-      expect(getByTestId("share-confirmation-dialog")).toBeInTheDocument();
+      expect(getByTestId("share-dialog")).toBeInTheDocument();
     });
-
-    const cancelButton = getByTestId("share-confirmation-dialog-cancel-button");
-    fireEvent.click(cancelButton);
-
-    await waitFor(() => {
-      expect(
-        queryByTestId("share-confirmation-dialog")
-      ).not.toBeInTheDocument();
-    });
-  });
-
-  it("should display an unshare from me confirmation dialog when the event is triggered and successfully unshare when accept button is clicked", async () => {
-    renderRouter();
-
-    const result = await findByTestId("editMeasure");
-    expect(result).toBeInTheDocument();
-
-    act(() => {
-      window.dispatchEvent(new Event("unshare-measure-from-me"));
-    });
-
-    await waitFor(() => {
-      expect(getByTestId("share-confirmation-dialog")).toBeInTheDocument();
-    });
-
-    const acceptBtn = await screen.findByTestId(
-      "share-confirmation-dialog-accept-button"
-    );
-    expect(acceptBtn).toBeEnabled();
-
-    fireEvent.click(acceptBtn);
-
-    await waitFor(() => {
-      expect(
-        getByTestId("edit-measure-information-success-text")
-      ).toBeInTheDocument();
-    });
-  });
-
-  it("should display an unshare from me confirmation dialog when the event is triggered and fail to unshare when accept button is clicked", async () => {
-    mockMeasureServiceApi.unshareMeasures = jest.fn().mockRejectedValueOnce({
-      status: 500,
-      response: { data: { message: "update failed" } },
-    });
-    renderRouter();
-
-    const result = await findByTestId("editMeasure");
-    expect(result).toBeInTheDocument();
-
-    act(() => {
-      window.dispatchEvent(new Event("unshare-measure-from-me"));
-    });
-
-    await waitFor(() => {
-      expect(getByTestId("share-confirmation-dialog")).toBeInTheDocument();
-    });
-
-    const acceptBtn = await screen.findByTestId(
-      "share-confirmation-dialog-accept-button"
-    );
-    expect(acceptBtn).toBeEnabled();
-
-    fireEvent.click(acceptBtn);
-
-    const errorText = await screen.findByTestId(
-      "edit-measure-information-generic-error-text"
-    );
-    expect(errorText).toBeInTheDocument();
-    expect(errorText).toHaveTextContent("update failed");
   });
 
   it("should display transfer dialog when the event is triggered and not navigate to /measures when cancel is clicked", async () => {
@@ -638,87 +599,13 @@ describe("EditMeasure Component", () => {
       expect(getByTestId("transfer-dialog")).toBeInTheDocument();
     });
 
-    const newHarpIdInput = getByTestId("harp-id-input");
-    fireEvent.change(newHarpIdInput, { target: { value: "newUser" } });
-
-    const transferBtn = getByTestId("transfer-save-button");
-    fireEvent.click(transferBtn);
+    fireEvent.click(getByTestId("transfer-success"));
 
     await waitFor(
       () => {
         expect(mockedNavigate).toHaveBeenCalledWith("/measures");
       },
       { timeout: 2000 }
-    );
-  });
-
-  it("should display transfer dialog when the event is triggered and not navigate to /measures when transfer fails", async () => {
-    mockMeasureServiceApi.transferMeasures = jest
-      .fn()
-      .mockRejectedValue(new Error("Transfer failed"));
-
-    renderRouter();
-
-    const result = await findByTestId("editMeasure");
-    expect(result).toBeInTheDocument();
-
-    act(() => {
-      window.dispatchEvent(new Event("transfer-measure"));
-    });
-
-    await waitFor(() => {
-      expect(getByTestId("transfer-dialog")).toBeInTheDocument();
-    });
-
-    const newHarpIdInput = getByTestId("harp-id-input");
-    fireEvent.change(newHarpIdInput, { target: { value: "newUser" } });
-
-    const transferBtn = getByTestId("transfer-save-button");
-    fireEvent.click(transferBtn);
-
-    await waitFor(() => {
-      expect(queryByTestId("transfer-dialog")).not.toBeInTheDocument();
-    });
-    expect(mockedNavigate).not.toHaveBeenCalledWith("/measures");
-  });
-
-  it("should display transfer dialog when the event is triggered and handle a successful transfer", async () => {
-    renderRouter();
-
-    const result = await findByTestId("editMeasure");
-    expect(result).toBeInTheDocument();
-
-    act(() => {
-      window.dispatchEvent(new Event("transfer-measure"));
-    });
-
-    await waitFor(() =>
-      setTimeout(() => {
-        expect(getByTestId("transfer-dialog")).toBeInTheDocument();
-
-        const newHarpIdInput = getByTestId("harp-id-input");
-        expect(newHarpIdInput).toBeInTheDocument();
-        expect(newHarpIdInput.value).toBe("");
-        const transferBtn = getByTestId("transfer-save-button");
-        expect(transferBtn).toBeInTheDocument();
-        expect(transferBtn).toBeDisabled();
-
-        fireEvent.change(newHarpIdInput, {
-          target: { value: "newUser" },
-        });
-        expect(newHarpIdInput.value).toBe("newUser");
-        expect(transferBtn).toBeEnabled();
-
-        fireEvent.click(transferBtn);
-
-        expect(mockMeasureServiceApi.transferMeasures).toBeCalledWith(
-          [measure.id],
-          "newUser",
-          false
-        );
-
-        expect(queryByTestId("transfer-dialog")).not.toBeInTheDocument();
-      }, 4500)
     );
   });
 

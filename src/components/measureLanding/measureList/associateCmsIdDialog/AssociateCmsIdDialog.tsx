@@ -1,3 +1,4 @@
+import { padCmsId } from "@madie/madie-util";
 import React, { useState } from "react";
 import { Measure, Model } from "@madie/madie-models";
 import { MadieDialog } from "@madie/madie-design-system/dist/react";
@@ -7,7 +8,6 @@ import { FormControlLabel, Checkbox } from "@mui/material";
 import WarningIcon from "@mui/icons-material/Warning";
 import AssociateCmsIdConfirmationDialog from "../associateCmsIdConfirmationDialog/AssociateCmsIdConfirmationDialog";
 import "./AssociateCmsIdDialog.scss";
-import { padCmsId } from "../../../../utils/cmsIdFormatter";
 
 interface PropTypes {
   measures: Measure[];

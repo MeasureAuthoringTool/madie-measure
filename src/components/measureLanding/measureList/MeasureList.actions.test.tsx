@@ -1,3 +1,4 @@
+import * as mockCmsIdStubs from "../../../__mocks__/cmsIdFormatterStubs";
 import * as React from "react";
 import {
   cleanup,
@@ -6,7 +7,6 @@ import {
   render,
   screen,
   waitFor,
-  waitForElementToBeRemoved,
   act,
 } from "@testing-library/react";
 import { within } from "@testing-library/dom";
@@ -34,10 +34,6 @@ import {
   ServiceConfig,
 } from "@madie/madie-util";
 import { AxiosError, AxiosResponse } from "axios";
-import {
-  TRANSFER_MEASURE_FAILURE,
-  TRANSFER_MEASURE_SUCCESS,
-} from "../../common/transferDialog/TransferDialog";
 
 const EXPORT_FAILURE_MESSAGE =
   "Unable to Export measure. Package could not be generated. Please try again and contact the Help Desk if the problem persists.";
@@ -63,6 +59,7 @@ const mockMeasureReviewServiceApi = {
 };
 
 jest.mock("@madie/madie-util", () => ({
+  ...mockCmsIdStubs,
   useMeasureServiceApi: jest.fn(() => mockMeasureServiceApi),
   useMeasureReviewServiceApi: jest.fn(() => mockMeasureReviewServiceApi),
   useUserServiceApi: jest.fn(() => ({ getOwnerDetails: jest.fn() })),
@@ -82,6 +79,89 @@ jest.mock("@madie/madie-util", () => ({
       return { unsubscribe: () => null };
     },
   },
+  // Shared action-center icons + dialogs + export flow (moved to madie-util)
+  exportMeasure: jest.fn(),
+  getNewestMeasureInstance: jest.fn(),
+  ExportAction: () => <div data-testid="export-action">Export Action</div>,
+  ViewHRAction: ({ onClick }: any) => (
+    <button data-testid="view-hr-action-btn" onClick={onClick}>
+      View HR Action
+    </button>
+  ),
+  HistoryAction: ({ onClick }: any) => (
+    <button data-testid="history-action-btn" onClick={onClick}>
+      History Action
+    </button>
+  ),
+  CompareVersionsAction: ({ onClick }: any) => (
+    <button data-testid="compare-versions-action-btn" onClick={onClick}>
+      Compare Versions Action
+    </button>
+  ),
+  ExportDialog: ({ open }: any) =>
+    open ? <div data-testid="export-dialog">Export Dialog</div> : null,
+  ViewHRModal: ({ open, onClose }: any) =>
+    open ? (
+      <div data-testid="view-human-readable-modal">
+        View Human Readable Modal
+        <button data-testid="view-hr-close-btn" onClick={onClose}>
+          Close
+        </button>
+      </div>
+    ) : null,
+  ViewMeasureHistoryDialog: ({ open, onClose }: any) =>
+    open ? (
+      <div data-testid="view-measure-history-dialog">
+        View Measure History Dialog
+        <button data-testid="view-history-close-btn" onClick={onClose}>
+          Close
+        </button>
+      </div>
+    ) : null,
+  CompareVersionsDialog: ({ open }: any) =>
+    open ? (
+      <div data-testid="compare-versions-dialog">Compare Versions Dialog</div>
+    ) : null,
+  ShareAction: ({ measures, activeTab, onClick }: any) => {
+    const options = activeTab === 1 ? ["Unshare"] : ["Share With", "Unshare"];
+    return (
+      <div>
+        <button data-testid="share-action-btn" disabled={!measures?.length}>
+          Share
+        </button>
+        {options.map((option: string) => (
+          <div
+            key={option}
+            role="menuitem"
+            tabIndex={0}
+            onClick={() => onClick && onClick(option)}
+          >
+            {option}
+          </div>
+        ))}
+      </div>
+    );
+  },
+  ShareDialog: ({ open }: any) =>
+    open ? <div data-testid="share-dialog">Share Dialog</div> : null,
+  TransferAction: ({ measures, onClick }: any) => (
+    <button
+      data-testid="transfer-action-btn"
+      disabled={!measures?.length}
+      onClick={() => onClick && onClick()}
+    >
+      Transfer
+    </button>
+  ),
+  TransferDialog: ({ open, onClose }: any) =>
+    open ? (
+      <div data-testid="transfer-dialog">
+        Transfer Dialog
+        <button data-testid="transfer-cancel-button" onClick={() => onClose()}>
+          Cancel
+        </button>
+      </div>
+    ) : null,
 }));
 
 jest.mock("../../common/createVersionDialog/CreateVersionDialog", () => ({
@@ -90,32 +170,9 @@ jest.mock("../../common/createVersionDialog/CreateVersionDialog", () => ({
   formikErrorHandler: jest.fn(),
 }));
 
-jest.mock("./exportDialog/ExportDialog", () => ({
-  __esModule: true,
-  default: () => <div data-testid="export-dialog">Export Dialog</div>,
-  formikErrorHandler: jest.fn(),
-}));
-
-jest.mock("../../common/shareDialog/ShareDialog", () => ({
-  __esModule: true,
-  default: () => <div data-testid="share-dialog">Share Dialog</div>,
-  formikErrorHandler: jest.fn(),
-}));
-
-jest.mock("../../common/viewHumanReadableModal/ViewHRModal", () => ({
-  __esModule: true,
-  default: () => (
-    <div data-testid="view-human-readable-modal">View Human Readable Modal</div>
-  ),
-  formikErrorHandler: jest.fn(),
-}));
 jest.mock("./actionCenter/draftAction/DraftAction", () => ({
   __esModule: true,
   default: () => <div data-testid="draft-action">Draft Action</div>,
-}));
-jest.mock("./actionCenter/exportAction/ExportAction", () => ({
-  __esModule: true,
-  default: () => <div data-testid="export-action">Export Action</div>,
 }));
 jest.mock("./measureSearch/Search", () => ({
   __esModule: true,
@@ -585,149 +642,6 @@ describe("Action Center Tests", () => {
     userEvent.click(screen.getByRole("menuitem", { name: "Share With" }));
     const shareDialog = screen.getByTestId("share-dialog");
     expect(shareDialog).toBeInTheDocument();
-
-    unmount();
-  });
-
-  it("opens transfer dialog and successfully transfers selected measure and shows success toast", async () => {
-    const { unmount } = render(
-      <ServiceContext.Provider value={serviceConfig}>
-        <MeasureList {...baseProps} />
-      </ServiceContext.Provider>
-    );
-
-    const checkBoxes = await screen.findAllByRole("checkbox");
-    expect(checkBoxes.length).toBe(6);
-    userEvent.click(checkBoxes[1]);
-
-    const transferActionButton = screen.getByTestId("transfer-action-btn");
-    expect(transferActionButton).toBeInTheDocument();
-    userEvent.click(transferActionButton);
-
-    const transferDialog = await screen.findByTestId("transfer-dialog");
-    expect(transferDialog).toBeInTheDocument();
-
-    const newHarpIdInput = screen.getByTestId("harp-id-input");
-    fireEvent.change(newHarpIdInput, { target: { value: "newUser" } });
-    expect(newHarpIdInput.value).toBe("newUser");
-
-    const transferSaveButton = screen.getByTestId("transfer-save-button");
-    expect(transferSaveButton).toBeEnabled();
-    fireEvent.click(transferSaveButton);
-
-    await waitForElementToBeRemoved(() =>
-      screen.queryByTestId("transfer-dialog")
-    );
-
-    expect(mockMeasureServiceApi.transferMeasures).toHaveBeenCalledWith(
-      ["IDIDID1"],
-      "newUser",
-      false
-    );
-
-    // Verify that the success toast is shown
-    expect(setToastOpenMock).toHaveBeenCalledWith(true);
-    expect(setToastTypeMock).toHaveBeenCalledWith("success");
-    expect(setToastMessageMock).toHaveBeenCalledWith(TRANSFER_MEASURE_SUCCESS);
-
-    unmount();
-  });
-
-  it("opens transfer dialog and shows error toast when transfer fails", async () => {
-    mockMeasureServiceApi.transferMeasures = jest
-      .fn()
-      .mockRejectedValue(new Error("Transfer failed"));
-
-    const { unmount } = render(
-      <ServiceContext.Provider value={serviceConfig}>
-        <MeasureList {...baseProps} />
-      </ServiceContext.Provider>
-    );
-
-    const checkBoxes = await screen.findAllByRole("checkbox");
-    userEvent.click(checkBoxes[1]);
-
-    const transferActionButton = screen.getByTestId("transfer-action-btn");
-    userEvent.click(transferActionButton);
-
-    const transferDialog = await screen.findByTestId("transfer-dialog");
-    expect(transferDialog).toBeInTheDocument();
-
-    const newHarpIdInput = screen.getByTestId("harp-id-input");
-    fireEvent.change(newHarpIdInput, { target: { value: "newUser" } });
-
-    const transferSaveButton = screen.getByTestId("transfer-save-button");
-    fireEvent.click(transferSaveButton);
-
-    await waitForElementToBeRemoved(() =>
-      screen.queryByTestId("transfer-dialog")
-    );
-
-    expect(mockMeasureServiceApi.transferMeasures).toHaveBeenCalledWith(
-      ["IDIDID1"],
-      "newUser",
-      false
-    );
-
-    // Verify that the failure toast is shown
-    expect(setToastOpenMock).toHaveBeenCalledWith(true);
-    expect(setToastTypeMock).toHaveBeenCalledWith("danger");
-    expect(setToastMessageMock).toHaveBeenCalledWith(TRANSFER_MEASURE_FAILURE);
-
-    unmount();
-  });
-
-  it("opens transfer dialog and updates status handler for partial transfer failure", async () => {
-    mockMeasureServiceApi.transferMeasures = jest.fn().mockResolvedValue({
-      status: 207,
-      data: ["IDIDID1"], // ID of measure that failed
-    });
-
-    const setStatusHandlerMock = jest.fn();
-
-    const { unmount } = render(
-      <ServiceContext.Provider value={serviceConfig}>
-        <MeasureList {...baseProps} setStatusHandler={setStatusHandlerMock} />
-      </ServiceContext.Provider>
-    );
-
-    const checkBoxes = await screen.findAllByRole("checkbox");
-    userEvent.click(checkBoxes[1]);
-
-    const transferButton = screen.getByTestId("transfer-action-btn");
-    userEvent.click(transferButton);
-
-    const transferDialog = await screen.findByTestId("transfer-dialog");
-    expect(transferDialog).toBeInTheDocument();
-
-    const newHarpIdInput = screen.getByTestId("harp-id-input");
-    fireEvent.change(newHarpIdInput, { target: { value: "newUser" } });
-    expect(newHarpIdInput.value).toBe("newUser");
-
-    const transferSaveButton = screen.getByTestId("transfer-save-button");
-    fireEvent.click(transferSaveButton);
-
-    await waitFor(() => {
-      expect(screen.queryByTestId("transfer-dialog")).not.toBeInTheDocument();
-    });
-
-    expect(mockMeasureServiceApi.transferMeasures).toHaveBeenCalledWith(
-      ["IDIDID1"],
-      "newUser",
-      false
-    );
-
-    // Verify status handler is called with warning
-    expect(setStatusHandlerMock).toHaveBeenCalledWith({
-      warning: {
-        status: true,
-        primaryMessage:
-          "1 Measures could not be transferred. Please try again, or contact help desk if the issue persists.",
-        secondaryMessages: ["new measure - A"],
-      },
-    });
-
-    expect(setToastOpenMock).toHaveBeenCalledWith(false);
 
     unmount();
   });

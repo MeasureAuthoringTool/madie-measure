@@ -1,4 +1,5 @@
 import * as React from "react";
+import * as mockMeasureActionStubs from "../../../../../../__mocks__/measureActionStubs";
 import { render, screen } from "@testing-library/react";
 import TestCaseLanding from "./TestCaseLanding";
 import { MemoryRouter, Routes, Route } from "react-router-dom";
@@ -64,6 +65,7 @@ const mockMeasureServiceApi: MeasureServiceApi = {
 } as unknown as MeasureServiceApi;
 
 jest.mock("@madie/madie-util", () => ({
+  ...mockMeasureActionStubs,
   useMeasureServiceApi: jest.fn(() => mockMeasureServiceApi),
 
   useDocumentTitle: jest.fn(),

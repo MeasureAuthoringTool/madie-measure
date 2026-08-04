@@ -21,6 +21,12 @@ import {
   checkUserCanEdit,
   useUserRoles,
   useOktaTokens,
+  ExportDialog,
+  ViewHRModal,
+  ViewMeasureHistoryDialog,
+  exportMeasure,
+  ShareDialog,
+  TransferDialog,
 } from "@madie/madie-util";
 import CreateVersionDialog from "../common/createVersionDialog/CreateVersionDialog";
 import InvalidTestCaseDialog from "../common/invalidTestCaseDialog/InvalidTestCaseDialog";
@@ -42,14 +48,8 @@ import PopulationCriteriaWrapper from "./populationCriteria/PopulationCriteriaWr
 
 import DraftMeasureDialog from "../common/draftMeasureDialog/DraftMeasureDialog";
 
-import ExportDialog from "../measureLanding/measureList/exportDialog/ExportDialog";
-import { exportMeasure } from "../../utils/exportUtil";
 import TestCases from "./testCases/TestCases";
 import { AxiosResponse } from "axios";
-import ViewHRModal from "../common/viewHumanReadableModal/ViewHRModal";
-import ShareDialog from "../common/shareDialog/ShareDialog";
-import TransferDialog from "../common/transferDialog/TransferDialog";
-import ViewMeasureHistoryDialog from "../common/viewMeasureHistoryDialog/ViewMeasureHistoryDialog";
 import ReviewDialog from "../common/reviewDialog/ReviewDialog";
 import StatusHandler, { INITIAL_STATUS_HANDLER } from "./editor/StatusHandler";
 
@@ -164,6 +164,18 @@ export default function EditMeasure() {
   const [downloadState, setDownloadState] = useState(null);
   const [failureMessage, setFailureMessage] = useState(null);
   const abortController = useRef(null);
+  // Holds the ref to any redirect (transfer/delete/draft)
+  // so it can be cleared on unmount and never fires navigate() on an unmounted
+  // component (which would also leak the timer across tests).
+  const redirectTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
+
+  useEffect(() => {
+    return () => {
+      if (redirectTimeoutRef.current) {
+        clearTimeout(redirectTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const measureCanEdit: boolean = checkUserCanEdit(
     measure?.measureSet?.owner,
@@ -557,7 +569,7 @@ export default function EditMeasure() {
         setToastType("success");
         setToastMessage("New draft created successfully.");
         setCurrentMeasureId(response.data.id);
-        setTimeout(() => {
+        redirectTimeoutRef.current = setTimeout(() => {
           navigate(`/measures/${response.data.id}/edit${subRoute}`);
         }, 3000);
       })
@@ -580,7 +592,7 @@ export default function EditMeasure() {
       const result = await measureServiceApi.deleteMeasure(deletedMeasure.id);
       if (result.status === 200) {
         handleToast("success", "Measure successfully deleted", true);
-        setTimeout(() => {
+        redirectTimeoutRef.current = setTimeout(() => {
           navigate("/measures");
         }, 1000);
       }
@@ -606,7 +618,7 @@ export default function EditMeasure() {
     handleToast(toastType, toastMessage, toastOpen);
 
     if (toastType === "success") {
-      setTimeout(() => {
+      redirectTimeoutRef.current = setTimeout(() => {
         navigate("/measures");
       }, 1000);
     }

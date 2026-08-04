@@ -680,8 +680,7 @@ it("return the input matches output with strat expected change", () => {
     name: "strata-2",
     expected: false,
   };
-  const populationValues: DisplayPopulationValue[] = [];
-  populationValues.push(populationVal);
+  const populationValues: DisplayPopulationValue[] = [populationVal];
   const groupPop1: GroupPopulation = {
     groupId: "initialPopulation",
     populationBasis: "boolean",
@@ -690,8 +689,6 @@ it("return the input matches output with strat expected change", () => {
     stratificationValues: [stratVal1, stratVal2],
   };
   const groupPopulations: GroupPopulation[] = [groupPop1];
-  const measure = {} as Measure;
-  const group1 = {} as Group;
 
   const resultPops = triggerPopChanges(
     groupPopulations,

@@ -8,7 +8,7 @@ import {
   DialogTitle,
   Divider,
 } from "@mui/material";
-import ExportIcon from "../exportDialog/ExportIcon";
+import { ExportIcon } from "@madie/madie-util";
 
 import "../exportDialog/ExportDialog.scss";
 const InvalidMeasureNameDialog = ({

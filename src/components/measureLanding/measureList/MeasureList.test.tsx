@@ -1,3 +1,4 @@
+import * as mockCmsIdStubs from "../../../__mocks__/cmsIdFormatterStubs";
 import * as React from "react";
 import {
   cleanup,
@@ -53,6 +54,8 @@ const mockOktaTokenApi = {
 };
 
 jest.mock("@madie/madie-util", () => ({
+  ...mockCmsIdStubs,
+
   useMeasureServiceApi: jest.fn(() => mockMeasureServiceApi),
   useUserServiceApi: jest.fn(() => ({
     getOwnerDetails: jest.fn(),
@@ -74,35 +77,28 @@ jest.mock("@madie/madie-util", () => ({
       return { unsubscribe: () => null };
     },
   },
-}));
-
-jest.mock("../../common/createVersionDialog/CreateVersionDialog", () => ({
-  __esModule: true,
-  default: () => <div data-testid="create-version-dialog">Version Type</div>,
-  formikErrorHandler: jest.fn(),
-}));
-
-jest.mock("./exportDialog/ExportDialog", () => ({
-  __esModule: true,
-  default: () => <div data-testid="export-dialog">Export Dialog</div>,
-  formikErrorHandler: jest.fn(),
-}));
-
-jest.mock("../../common/shareDialog/ShareDialog", () => ({
-  __esModule: true,
-  default: () => <div data-testid="share-dialog">Share Dialog</div>,
-  formikErrorHandler: jest.fn(),
-}));
-
-jest.mock("../../common/reviewDialog/ReviewDialog", () => ({
-  __esModule: true,
-  default: ({ open }: { open: boolean }) =>
-    open ? <div data-testid="review-dialog">Review Dialog</div> : null,
-}));
-
-jest.mock("../../common/viewHumanReadableModal/ViewHRModal", () => ({
-  __esModule: true,
-  default: ({ open, onClose }: { open: boolean; onClose: () => void }) =>
+  // Shared action-center icons + dialogs + export flow (moved to madie-util)
+  exportMeasure: jest.fn(),
+  getNewestMeasureInstance: jest.fn(),
+  ExportAction: () => <div data-testid="export-action">Export Action</div>,
+  ViewHRAction: ({ onClick }: any) => (
+    <button data-testid="view-hr-action-btn" onClick={onClick}>
+      View HR Action
+    </button>
+  ),
+  HistoryAction: ({ onClick }: any) => (
+    <button data-testid="history-action-btn" onClick={onClick}>
+      History Action
+    </button>
+  ),
+  CompareVersionsAction: ({ onClick }: any) => (
+    <button data-testid="compare-versions-action-btn" onClick={onClick}>
+      Compare Versions Action
+    </button>
+  ),
+  ExportDialog: ({ open }: any) =>
+    open ? <div data-testid="export-dialog">Export Dialog</div> : null,
+  ViewHRModal: ({ open, onClose }: any) =>
     open ? (
       <div data-testid="view-human-readable-modal">
         View Human Readable Modal
@@ -111,30 +107,79 @@ jest.mock("../../common/viewHumanReadableModal/ViewHRModal", () => ({
         </button>
       </div>
     ) : null,
+  ViewMeasureHistoryDialog: ({ open, onClose }: any) =>
+    open ? (
+      <div data-testid="view-measure-history-dialog">
+        View Measure History Dialog
+        <button data-testid="view-history-close-btn" onClick={onClose}>
+          Close
+        </button>
+      </div>
+    ) : null,
+  CompareVersionsDialog: ({ open }: any) =>
+    open ? (
+      <div data-testid="compare-versions-dialog">Compare Versions Dialog</div>
+    ) : null,
+  ShareAction: ({ measures, activeTab, onClick }: any) => {
+    const options = activeTab === 1 ? ["Unshare"] : ["Share With", "Unshare"];
+    return (
+      <div>
+        <button data-testid="share-action-btn" disabled={!measures?.length}>
+          Share
+        </button>
+        {options.map((option: string) => (
+          <div
+            key={option}
+            role="menuitem"
+            tabIndex={0}
+            onClick={() => onClick && onClick(option)}
+          >
+            {option}
+          </div>
+        ))}
+      </div>
+    );
+  },
+  ShareDialog: ({ open }: any) =>
+    open ? <div data-testid="share-dialog">Share Dialog</div> : null,
+  TransferAction: ({ measures, onClick }: any) => (
+    <button
+      data-testid="transfer-action-btn"
+      disabled={!measures?.length}
+      onClick={() => onClick && onClick()}
+    >
+      Transfer
+    </button>
+  ),
+  TransferDialog: ({ open }: any) =>
+    open ? <div data-testid="transfer-dialog">Transfer Dialog</div> : null,
+}));
+
+jest.mock("../../common/createVersionDialog/CreateVersionDialog", () => ({
+  __esModule: true,
+  default: () => <div data-testid="create-version-dialog">Version Type</div>,
   formikErrorHandler: jest.fn(),
 }));
-jest.mock(
-  "../../common/viewMeasureHistoryDialog/ViewMeasureHistoryDialog",
-  () => ({
-    __esModule: true,
-    default: ({ open, onClose }: { open: boolean; onClose: () => void }) =>
-      open ? (
-        <div data-testid="view-measure-history-dialog">
-          View Measure History Dialog
-          <button data-testid="view-history-close-btn" onClick={onClose}>
-            Close
-          </button>
-        </div>
-      ) : null,
-  })
-);
+
+let mockCapturedReviewOnSuccess: (() => void | Promise<void>) | undefined;
+
+jest.mock("../../common/reviewDialog/ReviewDialog", () => ({
+  __esModule: true,
+  default: ({
+    open,
+    onSuccess,
+  }: {
+    open: boolean;
+    onSuccess?: () => void | Promise<void>;
+  }) => {
+    mockCapturedReviewOnSuccess = onSuccess;
+    return open ? <div data-testid="review-dialog">Review Dialog</div> : null;
+  },
+}));
+
 jest.mock("./actionCenter/draftAction/DraftAction", () => ({
   __esModule: true,
   default: () => <div data-testid="draft-action">Draft Action</div>,
-}));
-jest.mock("./actionCenter/exportAction/ExportAction", () => ({
-  __esModule: true,
-  default: () => <div data-testid="export-action">Export Action</div>,
 }));
 jest.mock("./measureSearch/Search", () => ({
   __esModule: true,
@@ -3837,6 +3882,148 @@ describe("Measure lock functionality", () => {
       expect(
         screen.getByRole("status", { name: "Composite" })
       ).toBeInTheDocument();
+    });
+  });
+});
+
+describe("Review Status", () => {
+  const measuresWithReview = [
+    { ...measures[0], reviewStatus: "Ready" },
+    { ...measures[1], reviewStatus: "" },
+  ] as unknown as Measure[];
+
+  const renderReviewList = (activeTab = 0) =>
+    render(
+      <ServiceContext.Provider value={serviceConfig}>
+        <MeasureList
+          measureList={measuresWithReview}
+          setMeasureList={setMeasureListMock}
+          setTotalPages={setTotalPagesMock}
+          setTotalItems={setTotalItemsMock}
+          setVisibleItems={setVisibleItemsMock}
+          setOffset={setOffsetMock}
+          setLoading={setLoadingMock}
+          activeTab={activeTab}
+          searchCriteria={null}
+          setSearchCriteria={setSearchCriteriaMock}
+          currentLimit={10}
+          currentPage={0}
+          retrieveMeasures={retrieveMeasuresMock}
+          currentSort="lastModifiedAt"
+          currentDirection="DESC"
+          setCurrentSort={setCurrentSortMock}
+          setCurrentDirection={setCurrentDirectionMock}
+          handlePageChange={handlePageChangeMock}
+          search=""
+          toastOpen={false}
+          toastMessage=""
+          toastType="danger"
+          setToastOpen={setToastOpenMock}
+          setToastMessage={setToastMessageMock}
+          setToastType={setToastTypeMock}
+          onToastClose={onToastCloseMock}
+        />
+      </ServiceContext.Provider>
+    );
+
+  beforeEach(() => {
+    mockCapturedReviewOnSuccess = undefined;
+    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
+      MeasureReviewStatus: true,
+    }));
+  });
+
+  it("should display the Review column when the feature flag is on", async () => {
+    renderReviewList(0);
+
+    expect(
+      await screen.findByRole("columnheader", { name: /review/i })
+    ).toBeInTheDocument();
+  });
+
+  it("should display 'Ready' for reviewed measures and '-' for the rest", async () => {
+    renderReviewList(0);
+
+    const readyRow = (
+      await screen.findByText(measuresWithReview[0].measureName)
+    ).closest("tr");
+    const notReadyRow = (
+      await screen.findByText(measuresWithReview[1].measureName)
+    ).closest("tr");
+
+    expect(
+      within(readyRow as HTMLElement).getByText("Ready")
+    ).toBeInTheDocument();
+    expect(
+      within(notReadyRow as HTMLElement).getByText("-")
+    ).toBeInTheDocument();
+  });
+
+  it("should not display the Review column when the feature flag is off", async () => {
+    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
+      MeasureReviewStatus: false,
+    }));
+    renderReviewList(0);
+
+    await screen.findByText(measuresWithReview[0].measureName);
+    expect(
+      screen.queryByRole("columnheader", { name: /review/i })
+    ).not.toBeInTheDocument();
+  });
+
+  it("should not display the Review column on the All Measures tab", async () => {
+    renderReviewList(2);
+
+    await screen.findByText(measuresWithReview[0].measureName);
+    expect(
+      screen.queryByRole("columnheader", { name: /review/i })
+    ).not.toBeInTheDocument();
+  });
+
+  it("should offer Review as a filter option when the feature flag is on", async () => {
+    renderReviewList(0);
+
+    const filterBy = await screen.findByTestId("filter-by-select");
+    userEvent.click(within(filterBy).getByRole("combobox", { hidden: true }));
+
+    expect(
+      await screen.findByRole("option", { name: "Review" })
+    ).toBeInTheDocument();
+  });
+
+  it("should omit Review from the filter options when the feature flag is off", async () => {
+    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
+      MeasureReviewStatus: false,
+    }));
+    renderReviewList(0);
+
+    const filterBy = await screen.findByTestId("filter-by-select");
+    userEvent.click(within(filterBy).getByRole("combobox", { hidden: true }));
+
+    await screen.findByRole("option", { name: "Measure" });
+    expect(
+      screen.queryByRole("option", { name: "Review" })
+    ).not.toBeInTheDocument();
+  });
+
+  it("should pass an onSuccess handler to the review dialog", async () => {
+    renderReviewList(0);
+
+    await screen.findByText(measuresWithReview[0].measureName);
+    expect(mockCapturedReviewOnSuccess).toBeDefined();
+  });
+
+  it("should refetch the measure list after a review is saved so the status updates without a page refresh", async () => {
+    renderReviewList(0);
+    await screen.findByText(measuresWithReview[0].measureName);
+
+    retrieveMeasuresMock.mockClear();
+    await act(async () => {
+      await mockCapturedReviewOnSuccess!();
+    });
+
+    await waitFor(() => {
+      expect(retrieveMeasuresMock).toHaveBeenCalledTimes(1);
     });
   });
 });

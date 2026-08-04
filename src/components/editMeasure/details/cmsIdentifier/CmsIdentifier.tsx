@@ -1,3 +1,5 @@
+import { formatCmsId } from "@madie/madie-util";
+
 import React from "react";
 import {
   InputLabel,
@@ -6,7 +8,6 @@ import {
   ReadOnlyTextField,
 } from "@madie/madie-design-system/dist/react";
 import GenerateCmsID from "../../../../icons/GenerateCmsID";
-import { formatCmsId } from "../../../../utils/cmsIdFormatter";
 
 export default function CmsIdentifier({
   canEdit,

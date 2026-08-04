@@ -1,3 +1,4 @@
+import { formatCmsId } from "@madie/madie-util";
 import React, { useMemo, useState, useEffect } from "react";
 import {
   ColumnDef,
@@ -35,7 +36,6 @@ import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { TestCase, Measure } from "@madie/madie-models";
 import HowItWorks from "../LeftPanel/ElementsTab/builder/HowItWorks/HowItWorks";
-import { formatCmsId } from "../../../../../../../utils/cmsIdFormatter";
 
 const TH = tw.th`p-3 text-left text-sm font-bold capitalize`;
 
