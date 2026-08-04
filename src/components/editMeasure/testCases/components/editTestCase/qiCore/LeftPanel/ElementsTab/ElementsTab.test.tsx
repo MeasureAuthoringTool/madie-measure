@@ -268,8 +268,7 @@ describe("ElementsTab", () => {
         });
       }
       if (
-        args ===
-        "fhirservice.url/fhir/models/qicore/resources/builder-metadata"
+        args === "fhirservice.url/fhir/models/qicore/resources/builder-metadata"
       ) {
         return Promise.resolve({
           data: {
