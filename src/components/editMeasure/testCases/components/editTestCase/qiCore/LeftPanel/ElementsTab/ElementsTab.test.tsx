@@ -267,6 +267,23 @@ describe("ElementsTab", () => {
           ],
         });
       }
+      if (
+        args ===
+        "fhirservice.url/fhir/models/qicore/resources/builder-metadata"
+      ) {
+        return Promise.resolve({
+          data: {
+            resourcePaths: ["/fhir/us/qicore", "/fhir/us/core"],
+            primaryPatientProfile: {
+              id: "qicore-patient",
+              type: "Patient",
+              title: "QICore Patient",
+              profile:
+                "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient",
+            },
+          },
+        });
+      }
       return Promise.resolve({ data: null });
     });
 

@@ -13,6 +13,11 @@ export interface TestCaseExecutionBundlesDTO {
   modifiedTestCaseIds: string[];
 }
 
+export interface BuilderResourceMetadata {
+  resourcePaths: string[];
+  primaryPatientProfile: ResourceIdentifier;
+}
+
 export class FhirDefinitionsServiceApi {
   constructor(private baseUrl: string, private getAccessToken: () => string) {}
   async getResources(model: Measure["model"]): Promise<ResourceIdentifier[]> {
@@ -28,6 +33,29 @@ export class FhirDefinitionsServiceApi {
       return response.data;
     } catch (error) {
       console.error("Get Resources Error", error?.response);
+      throw new Error(
+        "An error occurred, please try again. If the error persists, please contact the help desk."
+      );
+    }
+  }
+
+  async getBuilderResourceMetadata(
+    model: Measure["model"]
+  ): Promise<BuilderResourceMetadata> {
+    try {
+      const response = await axios.get<BuilderResourceMetadata>(
+        `${this.baseUrl}/fhir/models/${getModelShortName(
+          model
+        )}/resources/builder-metadata`,
+        {
+          headers: {
+            Authorization: `Bearer ${this.getAccessToken()}`,
+          },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Get Builder Resource Metadata Error", error?.response);
       throw new Error(
         "An error occurred, please try again. If the error persists, please contact the help desk."
       );

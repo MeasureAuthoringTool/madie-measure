@@ -212,9 +212,7 @@ const ResourceList = ({
         id: "action",
         cell: ({ row }) => {
           const { original } = row;
-          const isPatient =
-            original.id === "qicore-patient" ||
-            original.id === "us-core-patient";
+          const isPatient = original.type === "Patient";
           const isDisabled = isPatient && isPatientAdded;
           return (
             <>
