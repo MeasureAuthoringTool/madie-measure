@@ -43,6 +43,7 @@ declare module "@madie/madie-util" {
   export interface UserRoles {
     roles: string[];
     isAdmin: boolean;
+    isReviewer: boolean;
   }
 
   export interface ServiceConfig {
@@ -155,6 +156,7 @@ declare module "@madie/madie-util" {
     fetchMeasuresByIds(measureIds: string[]): Promise<any>;
     searchMeasuresByCriteria(
       ownershipTypes: OwnershipType[],
+      isReview: boolean,
       limit: string | number,
       page: number,
       sort: string,

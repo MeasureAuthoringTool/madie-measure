@@ -184,6 +184,7 @@ describe("AddComponentsDialog", () => {
         expect.anything(),
         expect.anything(),
         expect.anything(),
+        expect.anything(),
         expect.objectContaining({
           allowedScoringTypes: [
             MeasureScoring.PROPORTION,
@@ -221,6 +222,7 @@ describe("AddComponentsDialog", () => {
         expect.anything(),
         expect.anything(),
         expect.anything(),
+        expect.anything(),
         expect.objectContaining({
           allowedScoringTypes: [
             MeasureScoring.PROPORTION,
@@ -253,6 +255,7 @@ describe("AddComponentsDialog", () => {
 
     await waitFor(() => {
       expect(mockSearchMeasures).toHaveBeenCalledWith(
+        expect.anything(),
         expect.anything(),
         expect.anything(),
         expect.anything(),
@@ -1060,6 +1063,7 @@ describe("AddComponentsDialog", () => {
         expect.anything(),
         expect.anything(),
         expect.anything(),
+        expect.anything(),
         expect.objectContaining({
           priorityMeasureSets: ["set-A", "set-B"],
         }),
@@ -1301,7 +1305,7 @@ describe("AddComponentsDialog", () => {
       // Verify that only "measureName" is in optionalSearchProperties
       const lastCall =
         mockSearchMeasures.mock.calls[mockSearchMeasures.mock.calls.length - 1];
-      const searchCriteria = lastCall[5];
+      const searchCriteria = lastCall[6];
       expect(searchCriteria.optionalSearchProperties).toEqual(["measureName"]);
       expect(searchCriteria.optionalSearchProperties.length).toBe(1);
     });
@@ -1349,7 +1353,7 @@ describe("AddComponentsDialog", () => {
       // Verify that all filter options are in optionalSearchProperties
       const lastCall =
         mockSearchMeasures.mock.calls[mockSearchMeasures.mock.calls.length - 1];
-      const searchCriteria = lastCall[5];
+      const searchCriteria = lastCall[6];
       expect(searchCriteria.optionalSearchProperties).toEqual([
         "measureName",
         "version",
@@ -1410,7 +1414,7 @@ describe("AddComponentsDialog", () => {
       // After clearing, should have no optional filter properties
       const lastCall =
         mockSearchMeasures.mock.calls[mockSearchMeasures.mock.calls.length - 1];
-      const searchCriteria = lastCall[5];
+      const searchCriteria = lastCall[6];
       expect(searchCriteria.optionalSearchProperties).toEqual([]);
       expect(searchCriteria.searchField).toBe("");
     });
