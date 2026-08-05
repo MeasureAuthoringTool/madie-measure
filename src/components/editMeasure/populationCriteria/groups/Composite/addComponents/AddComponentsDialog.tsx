@@ -442,6 +442,7 @@ export default function AddComponentsDialog({
     measureServiceApi
       .searchMeasuresByCriteria(
         [OwnershipType.ALL],
+        false,
         limit,
         page,
         "lastModifiedAt",
