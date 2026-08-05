@@ -648,16 +648,18 @@ const useTestCaseServiceMockResolved = {
     .fn()
     .mockResolvedValue(["Series 1", "Series 2"]),
   createTestCases: jest.fn().mockResolvedValue({ failed: [], testCases: [] }),
+  shiftQiCoreTestCaseDates: jest.fn().mockResolvedValue({}),
   exportTestCase: jest.fn().mockResolvedValue(
     new Blob([JSON.stringify("exported test data")], {
       type: "application/json",
     })
   ),
-  exportTestCases: jest.fn().mockResolvedValue(
-    new Blob([JSON.stringify("exported test cases data")], {
+  exportTestCases: jest.fn().mockResolvedValue({
+    data: new Blob([JSON.stringify("exported test cases data")], {
       type: "application/json",
-    })
-  ),
+    }),
+    status: 200,
+  }),
 } as unknown as TestCaseServiceApi;
 
 jest.mock("../../../api/useFhirDefinitionsService");
@@ -1467,8 +1469,13 @@ describe("TestCaseList component", () => {
 
     await waitFor(() => {
       expect(
-        screen.getByText("Test cases exported successfully")
-      ).toBeInTheDocument();
+        useTestCaseServiceMockResolved.exportTestCases
+      ).toHaveBeenCalledWith(
+        mockMeasure.id,
+        "COLLECTION",
+        [testCases[2].id],
+        expect.any(AbortSignal)
+      );
     });
   });
 

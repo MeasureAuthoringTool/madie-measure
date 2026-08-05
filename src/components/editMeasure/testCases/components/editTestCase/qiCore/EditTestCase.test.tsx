@@ -309,6 +309,19 @@ describe("EditTestCase component", () => {
     mockedAxios.get.mockImplementation((args) => {
       if (args && args.endsWith("series")) {
         return Promise.resolve({ data: ["SeriesA"] });
+      } else if (args && args.endsWith("resources/builder-metadata")) {
+        return Promise.resolve({
+          data: {
+            resourcePaths: ["/fhir/us/qicore", "/fhir/us/core"],
+            primaryPatientProfile: {
+              id: "qicore-patient",
+              type: "Patient",
+              title: "QICore Patient",
+              profile:
+                "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient",
+            },
+          },
+        });
       } else if (args && args.endsWith("resources")) {
         return Promise.resolve({
           data: [
@@ -1334,6 +1347,19 @@ describe("EditTestCase component", () => {
       mockedAxios.get.mockClear().mockImplementation((args) => {
         if (args && args.endsWith("series")) {
           return Promise.resolve({ data: ["SeriesA"] });
+        } else if (args && args.endsWith("resources/builder-metadata")) {
+          return Promise.resolve({
+            data: {
+              resourcePaths: ["/fhir/us/qicore", "/fhir/us/core"],
+              primaryPatientProfile: {
+                id: "qicore-patient",
+                type: "Patient",
+                title: "QICore Patient",
+                profile:
+                  "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient",
+              },
+            },
+          });
         } else if (args && args.endsWith("resources")) {
           return Promise.resolve({
             data: [...resourceIdentifiers],
@@ -1722,6 +1748,19 @@ describe("EditTestCase component", () => {
       mockedAxios.get.mockClear().mockImplementation((args) => {
         if (args && args.endsWith("series")) {
           return Promise.resolve({ data: ["SeriesA", "SeriesB", "SeriesC"] });
+        } else if (args && args.endsWith("resources/builder-metadata")) {
+          return Promise.resolve({
+            data: {
+              resourcePaths: ["/fhir/us/qicore", "/fhir/us/core"],
+              primaryPatientProfile: {
+                id: "qicore-patient",
+                type: "Patient",
+                title: "QICore Patient",
+                profile:
+                  "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient",
+              },
+            },
+          });
         } else if (args && args.endsWith("resources")) {
           return Promise.resolve({
             data: [...resourceIdentifiers],
@@ -1931,6 +1970,19 @@ describe("EditTestCase component", () => {
       mockedAxios.get.mockClear().mockImplementation((args) => {
         if (args && args.endsWith("series")) {
           return Promise.resolve({ data: ["SeriesA", "SeriesB", "SeriesC"] });
+        } else if (args && args.endsWith("resources/builder-metadata")) {
+          return Promise.resolve({
+            data: {
+              resourcePaths: ["/fhir/us/qicore", "/fhir/us/core"],
+              primaryPatientProfile: {
+                id: "qicore-patient",
+                type: "Patient",
+                title: "QICore Patient",
+                profile:
+                  "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient",
+              },
+            },
+          });
         } else if (args && args.endsWith("resources")) {
           return Promise.resolve({
             data: [...resourceIdentifiers],
@@ -2803,6 +2855,19 @@ describe("EditTestCase component", () => {
       mockedAxios.get.mockClear().mockImplementation((args) => {
         if (args && args.endsWith("series")) {
           return Promise.resolve({ data: ["SeriesA", "SeriesB", "SeriesC"] });
+        } else if (args && args.endsWith("resources/builder-metadata")) {
+          return Promise.resolve({
+            data: {
+              resourcePaths: ["/fhir/us/qicore", "/fhir/us/core"],
+              primaryPatientProfile: {
+                id: "qicore-patient",
+                type: "Patient",
+                title: "QICore Patient",
+                profile:
+                  "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient",
+              },
+            },
+          });
         } else if (args && args.endsWith("resources")) {
           return Promise.resolve({
             data: [...resourceIdentifiers],
@@ -4959,6 +5024,19 @@ describe("EditTestCase QICore Component - Test Case Locked By Other User", () =>
     mockedAxios.get.mockImplementation((args) => {
       if (args && args.endsWith("series")) {
         return Promise.resolve({ data: ["SeriesA"] });
+      } else if (args && args.endsWith("resources/builder-metadata")) {
+        return Promise.resolve({
+          data: {
+            resourcePaths: ["/fhir/us/qicore", "/fhir/us/core"],
+            primaryPatientProfile: {
+              id: "qicore-patient",
+              type: "Patient",
+              title: "QICore Patient",
+              profile:
+                "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient",
+            },
+          },
+        });
       } else if (args && args.endsWith("resources")) {
         return Promise.resolve({
           data: [
@@ -5075,6 +5153,27 @@ describe("Composite Measure Edit test case functionality", () => {
         data: { ...testCaseFixture, createdBy: MEASURE_CREATEDBY },
       });
     });
+    mockedAxios.get.mockImplementation((args) => {
+      if (args && args.endsWith("resources/builder-metadata")) {
+        return Promise.resolve({
+          data: {
+            resourcePaths: ["/fhir/us/qicore", "/fhir/us/core"],
+            primaryPatientProfile: {
+              id: "qicore-patient",
+              type: "Patient",
+              title: "QICore Patient",
+              profile:
+                "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient",
+            },
+          },
+        });
+      } else if (args && args.endsWith("resources")) {
+        return Promise.resolve({ data: [...resourceIdentifiers] });
+      }
+      return Promise.resolve({
+        data: { ...testCaseFixture, createdBy: MEASURE_CREATEDBY },
+      });
+    });
     mockedAxios.post.mockImplementation((args) => {
       if (args && args.endsWith("lock")) {
         return Promise.resolve({
@@ -5156,6 +5255,19 @@ describe("Composite Measure Edit test case functionality", () => {
     mockedAxios.get.mockClear().mockImplementation((args: any) => {
       if (args && args.endsWith("series")) {
         return Promise.resolve({ data: ["DENOM_Pass", "NUMER_Pass"] });
+      } else if (args && args.endsWith("resources/builder-metadata")) {
+        return Promise.resolve({
+          data: {
+            resourcePaths: ["/fhir/us/qicore", "/fhir/us/core"],
+            primaryPatientProfile: {
+              id: "qicore-patient",
+              type: "Patient",
+              title: "QICore Patient",
+              profile:
+                "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient",
+            },
+          },
+        });
       } else if (args && args.endsWith("resources")) {
         return Promise.resolve({ data: [...resourceIdentifiers] });
       }
@@ -5208,6 +5320,19 @@ describe("Composite Measure Edit test case functionality", () => {
     mockedAxios.get.mockClear().mockImplementation((args: any) => {
       if (args && args.endsWith("series")) {
         return Promise.resolve({ data: ["DENOM_Pass", "NUMER_Pass"] });
+      } else if (args && args.endsWith("resources/builder-metadata")) {
+        return Promise.resolve({
+          data: {
+            resourcePaths: ["/fhir/us/qicore", "/fhir/us/core"],
+            primaryPatientProfile: {
+              id: "qicore-patient",
+              type: "Patient",
+              title: "QICore Patient",
+              profile:
+                "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient",
+            },
+          },
+        });
       } else if (args && args.endsWith("resources")) {
         return Promise.resolve({ data: [...resourceIdentifiers] });
       }
