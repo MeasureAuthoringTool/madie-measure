@@ -44,22 +44,26 @@ export const NO_PROFILES_MESSAGE =
   "No Profiles have been added to the test case. Navigate to the Available Elements tab to add profiles.";
 
 /**
- * Returns true if the resource profile belongs to qicore or us-core.
+ * Returns true if the resource profile belongs to an implementation guide
+ * applicable to the selected model.
  */
-export const isQiCoreOrUsCoreResource = (res: ResourceIdentifier): boolean =>
-  res.profile.includes("/us/qicore") || res.profile.includes("/us/core");
+export const isResourceForModel = (
+  res: ResourceIdentifier,
+  resourcePaths: string[]
+): boolean => resourcePaths.some((path) => res.profile.includes(path));
 
 /**
- * Deduplicates, filters to qicore/us-core, sorts alphabetically,
- * and moves QI-Core Patient to the front of the list.
+ * Deduplicates, sorts alphabetically, and moves the patient profile to the
+ * front of the list.
  */
 export const deduplicateAndSortResources = (
-  identifiers: ResourceIdentifier[]
+  identifiers: ResourceIdentifier[],
+  primaryPatientProfileId: string
 ): ResourceIdentifier[] => {
   const sorted = _.uniqBy(identifiers, "profile").sort((a, b) =>
     a.title.localeCompare(b.title)
   );
-  const patientIdx = sorted.findIndex((r) => r.id === "qicore-patient");
+  const patientIdx = sorted.findIndex((r) => r.id === primaryPatientProfileId);
   if (patientIdx > 0) {
     return [
       sorted[patientIdx],
@@ -165,6 +169,9 @@ const Builder = ({
 
   const [selectedResourceID, setSelectedResourceId] = useState<string>(null); // one single source of truth.
   const [resourceIdentifiers, setResourceIdentifiers] = useState([]);
+  const [resourcePaths, setResourcePaths] = useState<string[]>([]);
+  const [primaryPatientProfileId, setPrimaryPatientProfileId] =
+    useState<string>(null);
   const [resources, setResources] = useState<ResourceIdentifier[]>([]);
   const [savedGridID, setSavedGridID] = useState(null);
   const [applyLoading, setApplyLoading] = useState(false);
@@ -184,9 +191,16 @@ const Builder = ({
   useEffect(() => {
     const fetchResources = async () => {
       // we want to filter out base fhir resources, by checking if the id does not start with qicore or us-core
-      const resourceIdentifiers =
-        await fhirDefinitionsService.current.getResources(measure?.model);
+      const [resourceIdentifiers, builderResourceMetadata] = await Promise.all([
+        fhirDefinitionsService.current.getResources(measure?.model),
+        fhirDefinitionsService.current.getBuilderResourceMetadata(
+          measure?.model
+        ),
+      ]);
+      const { resourcePaths, primaryPatientProfile } = builderResourceMetadata;
       setResourceIdentifiers(resourceIdentifiers);
+      setResourcePaths(resourcePaths);
+      setPrimaryPatientProfileId(primaryPatientProfile.id);
       abortController.current = new AbortController();
       fhirElmTranslationService.current
         .fetchRelevantDataElements(measure, abortController.current.signal)
@@ -199,8 +213,10 @@ const Builder = ({
             (relevantElement) => relevantElement.profile
           );
           if (!_.isEmpty(resourceIdentifiers)) {
-            const uniqueResources =
-              deduplicateAndSortResources(resourceIdentifiers);
+            const uniqueResources = deduplicateAndSortResources(
+              resourceIdentifiers,
+              primaryPatientProfile.id
+            );
 
             const filteredResources = _.isEmpty(profiles)
               ? uniqueResources
@@ -300,9 +316,12 @@ const Builder = ({
                 profileMap={profileMap}
                 isComposite={isComposite}
                 onInsertTCClick={onInsertTCClick}
-                resourceIdentifiers={resources.filter(isQiCoreOrUsCoreResource)}
+                resourceIdentifiers={resources.filter((resource) =>
+                  isResourceForModel(resource, resourcePaths)
+                )}
                 allResourceIdentifiers={deduplicateAndSortResources(
-                  resourceIdentifiers
+                  resourceIdentifiers,
+                  primaryPatientProfileId
                 )}
                 measureId={measure?.id}
                 onClick={async (resourceIdentifier: ResourceIdentifier) => {

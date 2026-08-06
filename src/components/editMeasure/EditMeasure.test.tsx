@@ -157,6 +157,7 @@ const mockMeasureServiceApi = {
   fetchMeasures: jest.fn().mockResolvedValue(oneItemResponse),
   getRecentMeasuresByMeasureSetId: jest.fn().mockResolvedValue([measure]),
   fetchMeasure: jest.fn().mockResolvedValue(measure),
+  updateMeasureLock: jest.fn().mockResolvedValue({}),
   getAllPopulationBasisOptions: jest.fn().mockResolvedValue([]),
   getReturnTypesForAllCqlDefinitions: jest.fn().mockResolvedValue({}),
   updateMeasure: jest.fn().mockResolvedValueOnce({ status: 200 }),
