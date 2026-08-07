@@ -319,8 +319,8 @@ const ResourceList = ({
       {isComposite && (
         <div style={{ display: "flex", justifyContent: "flex-end" }}>
           <Tooltip
-            id={`insert-test-case-button-tooltip`}
-            title={"Patient resource required to insert existing test cases."}
+            id="insert-test-case-button-tooltip"
+            title="Patient resource required to insert existing test cases."
             disableFocusListener={isPatientAdded}
             disableHoverListener={isPatientAdded}
             placement="top"
@@ -340,7 +340,7 @@ const ResourceList = ({
             <span>
               <Button
                 type="button"
-                data-testid={`insert-test-case-button`}
+                data-testid="insert-test-case-button"
                 onClick={onInsertTCClick}
                 disabled={!isPatientAdded}
               >
