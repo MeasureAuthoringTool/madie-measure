@@ -48,6 +48,38 @@ describe("MeasureServiceApi", () => {
     expect(valueSetDefinition.url).toEqual(valueSet.url);
   });
 
+  it("should return builder resource metadata for the selected model", async () => {
+    mockedAxios.get.mockResolvedValue({
+      data: {
+        resourcePaths: ["/guides/onc/us-quality-core", "/fhir/us/core"],
+        primaryPatientProfile: {
+          id: "us-quality-core-patient",
+          title: "US Quality Core Patient",
+          type: "Patient",
+          profile:
+            "http://fhir.org/guides/onc/us-quality-core/StructureDefinition/us-quality-core-patient",
+        },
+      },
+    });
+
+    const builderResourceMetadata =
+      await fhirDefinitionsServiceApi.getBuilderResourceMetadata(
+        Model.US_QUALITY_0_5_0
+      );
+
+    expect(builderResourceMetadata.resourcePaths).toEqual([
+      "/guides/onc/us-quality-core",
+      "/fhir/us/core",
+    ]);
+    expect(builderResourceMetadata.primaryPatientProfile.id).toEqual(
+      "us-quality-core-patient"
+    );
+    expect(mockedAxios.get).toHaveBeenCalledWith(
+      "test.url/fhir/models/usqualitycore05/resources/builder-metadata",
+      expect.any(Object)
+    );
+  });
+
   it("should return null if value set definition not found", async () => {
     const url =
       "http://hl7.org/fhir/us/core/ValueSet/us-core-observation-value-codes";

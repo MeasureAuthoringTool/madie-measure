@@ -3,6 +3,7 @@ import Builder, {
   NO_PROFILES_MESSAGE,
   scrollToElementByIdWhenAvailable,
   deduplicateAndSortResources,
+  isResourceForModel,
 } from "./Builder";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
@@ -107,6 +108,15 @@ const defaultResourceIdentifiers = [
 ];
 
 const mockGetResources = jest.fn(() => defaultResourceIdentifiers);
+const mockGetBuilderResourceMetadata = jest.fn(() => ({
+  resourcePaths: ["/fhir/us/qicore", "/fhir/us/core"],
+  primaryPatientProfile: {
+    id: "qicore-patient",
+    title: "QICore Patient",
+    type: "Patient",
+    profile: "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient",
+  },
+}));
 
 const serviceConfig: ServiceConfig = {
   measureService: {
@@ -132,6 +142,7 @@ const serviceConfig: ServiceConfig = {
 jest.mock("../../../../../../api/useFhirDefinitionsService", () => {
   return () => ({
     getResources: mockGetResources,
+    getBuilderResourceMetadata: mockGetBuilderResourceMetadata,
     getResourceTree: mockGetResourceTree,
   });
 });
@@ -864,7 +875,7 @@ describe("deduplicateAndSortResources", () => {
 
   it("should remove duplicate profiles", () => {
     const input = [mockEncounter, mockEncounter, mockPatient];
-    const result = deduplicateAndSortResources(input);
+    const result = deduplicateAndSortResources(input, mockPatient.id);
     expect(result).toHaveLength(2);
     expect(result.map((r) => r.title)).toEqual([
       "QICore Patient",
@@ -872,29 +883,55 @@ describe("deduplicateAndSortResources", () => {
     ]);
   });
 
-  it("should place QICore Patient first regardless of alphabetical order", () => {
+  describe("isResourceForModel", () => {
+    it("uses model-specific resource paths", () => {
+      const usQualityCoreResource = {
+        id: "us-quality-core-patient",
+        title: "US Quality Core Patient",
+        type: "Patient",
+        category: "Base.Individuals",
+        profile:
+          "http://fhir.org/guides/onc/us-quality-core/StructureDefinition/us-quality-core-patient",
+      };
+
+      expect(
+        isResourceForModel(usQualityCoreResource, [
+          "/guides/onc/us-quality-core",
+          "/fhir/us/core",
+        ])
+      ).toBe(true);
+      expect(
+        isResourceForModel(usQualityCoreResource, [
+          "/fhir/us/qicore",
+          "/fhir/us/core",
+        ])
+      ).toBe(false);
+    });
+  });
+
+  it("should place the primary patient profile first regardless of alphabetical order", () => {
     const input = [mockAllergyIntolerance, mockCondition, mockPatient];
-    const result = deduplicateAndSortResources(input);
+    const result = deduplicateAndSortResources(input, mockPatient.id);
     expect(result[0].id).toBe("qicore-patient");
   });
 
   it("should not produce duplicates when called multiple times with the same input", () => {
     const input = [mockPatient, mockEncounter, mockEncounter];
     // Simulate toggling between modes — calling the function multiple times
-    const result1 = deduplicateAndSortResources(input);
-    const result2 = deduplicateAndSortResources(input);
+    const result1 = deduplicateAndSortResources(input, mockPatient.id);
+    const result2 = deduplicateAndSortResources(input, mockPatient.id);
     expect(result1).toEqual(result2);
     expect(result1).toHaveLength(2);
   });
 
-  it("should sort alphabetically (after placing Patient first)", () => {
+  it("should sort alphabetically after placing the primary patient profile first", () => {
     const input = [
       mockProcedure,
       mockPatient,
       mockAllergyIntolerance,
       mockEncounter,
     ];
-    const result = deduplicateAndSortResources(input);
+    const result = deduplicateAndSortResources(input, mockPatient.id);
     expect(result.map((r) => r.title)).toEqual([
       "QICore Patient",
       "QICore AllergyIntolerance",
@@ -904,7 +941,7 @@ describe("deduplicateAndSortResources", () => {
   });
 
   it("should handle empty input", () => {
-    const result = deduplicateAndSortResources([]);
+    const result = deduplicateAndSortResources([], mockPatient.id);
     expect(result).toEqual([]);
   });
 });
