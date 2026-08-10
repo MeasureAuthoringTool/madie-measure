@@ -17,7 +17,7 @@ import {
   useQiCoreResource,
 } from "../../../../util/QiCorePatientProvider";
 import CompositeProfileViews from "./CompositeProfilesViews";
-import ViewTestCaseModal from "./ViewTestCaseModal";
+import ViewTestCaseModal, { getAddedCount } from "./ViewTestCaseModal";
 import { buildInsertedProfiles } from "./insertProfilesFromTestCase";
 import { isValidJson } from "../EditTestCase";
 
@@ -193,6 +193,7 @@ const CompositeLeftPanelContent = ({
           leftPanelActiveTab={leftPanelActiveTab}
           setLeftPanelActiveTab={setLeftPanelActiveTab}
           testCaseCanEdit={testCaseCanEdit}
+          addedCount={getAddedCount(editorVal)}
         />
       </div>
       {/* should only display when available and json is valid */}
