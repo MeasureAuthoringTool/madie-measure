@@ -318,14 +318,36 @@ const ResourceList = ({
     <div id="qi-core-6-tc-builder">
       {isComposite && (
         <div style={{ display: "flex", justifyContent: "flex-end" }}>
-          <Button
-            type="button"
-            data-testid={`insert-test-case-button`}
-            onClick={onInsertTCClick}
-            disabled={!isPatientAdded}
+          <Tooltip
+            id="insert-test-case-button-tooltip"
+            title="Patient resource required to insert existing test cases."
+            disableFocusListener={isPatientAdded}
+            disableHoverListener={isPatientAdded}
+            placement="top"
+            arrow
+            slotProps={{
+              tooltip: {
+                sx: {
+                  zIndex: 9999,
+                  backgroundColor: "#333",
+                  "& .MuiTooltip-arrow": {
+                    color: "#333",
+                  },
+                },
+              },
+            }}
           >
-            Insert Existing Test Case
-          </Button>
+            <span>
+              <Button
+                type="button"
+                data-testid="insert-test-case-button"
+                onClick={onInsertTCClick}
+                disabled={!isPatientAdded}
+              >
+                Insert Existing Test Case
+              </Button>
+            </span>
+          </Tooltip>
         </div>
       )}
       <div id="search-container" tw="mb-5 mt-3">
