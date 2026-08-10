@@ -608,7 +608,7 @@ describe("Measure Page", () => {
       // First call: delayed promise that rejects with canceled when aborted
       (mockMeasureServiceApi.searchMeasuresByCriteria as jest.Mock)
         .mockImplementationOnce((...args) => {
-          const abortCtrl = args[6];
+          const abortCtrl = args[7];
           return new Promise((resolve, reject) => {
             abortCtrl.signal.addEventListener("abort", () =>
               reject(new Error("canceled"))
