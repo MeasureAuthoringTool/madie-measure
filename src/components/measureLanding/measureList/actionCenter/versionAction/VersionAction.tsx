@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import { IconButton } from "@mui/material";
 import Tooltip from "@mui/material/Tooltip";
 import { Measure, Model } from "@madie/madie-models";
-import AccountTreeOutlinedIcon from "@mui/icons-material/AccountTreeOutlined";
+import { Network } from "lucide-react";
 interface PropTypes {
   measures: Measure[];
   onClick: () => void;
@@ -75,7 +75,7 @@ export default function VersionAction(props: PropTypes) {
           disabled={disableVersionBtn}
           data-testid="version-action-btn"
         >
-          <AccountTreeOutlinedIcon />
+          <Network size={20} style={{ transform: "rotate(270deg)" }} />
         </IconButton>
       </span>
     </Tooltip>
