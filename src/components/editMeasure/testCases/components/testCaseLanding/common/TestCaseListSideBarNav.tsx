@@ -181,26 +181,26 @@ const TestCaseListSideBarNav = ({
                   onChange={handleChange}
                   value={endRoute}
                 >
-                  {!isComposite && (
-                    <>
-                      <Tab
-                        label="SDE"
-                        value="sde"
-                        data-testid="nav-link-sde"
-                        type="C"
-                        orientation="vertical"
-                        onChange={handleChange}
-                      />
-                      <Tab
-                        label="RAV"
-                        value="rav"
-                        data-testid="nav-link-rav"
-                        type="C"
-                        orientation="vertical"
-                        onChange={handleChange}
-                      />
-                    </>
-                  )}
+                  {!isComposite && [
+                    <Tab
+                      key="sde"
+                      label="SDE"
+                      value="sde"
+                      data-testid="nav-link-sde"
+                      type="C"
+                      orientation="vertical"
+                      onChange={handleChange}
+                    />,
+                    <Tab
+                      key="rav"
+                      label="RAV"
+                      value="rav"
+                      data-testid="nav-link-rav"
+                      type="C"
+                      orientation="vertical"
+                      onChange={handleChange}
+                    />,
+                  ]}
                   <Tab
                     label="Expansion"
                     value="expansion"
