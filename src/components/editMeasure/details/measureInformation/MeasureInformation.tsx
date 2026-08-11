@@ -55,6 +55,7 @@ interface measureInformationForm {
   endorsements: Array<Endorsement>;
   endorsementId: string;
   intendedVenue?: any;
+  telehealthEligible?: boolean;
 }
 
 interface MeasureInformationProps {
@@ -243,6 +244,7 @@ export default function MeasureInformation(props: MeasureInformationProps) {
     intendedVenue:
       displayIntendedVenue(measure?.measureMetaData?.intendedVenue?.code) ||
       null,
+    telehealthEligible: measure?.measureMetaData?.telehealthEligible ?? false,
   } as measureInformationForm;
 
   const schema =
@@ -417,6 +419,7 @@ export default function MeasureInformation(props: MeasureInformationProps) {
             },
           ],
           intendedVenue: selectedIntendedVenueValue(values?.intendedVenue),
+          telehealthEligible: values.telehealthEligible,
         },
       };
       measureServiceApi
@@ -732,7 +735,7 @@ export default function MeasureInformation(props: MeasureInformationProps) {
         </Box>
 
         {measure?.model !== Model.QDM_5_6 && (
-          <div tw="mb-4 w-1/2">
+          <Box sx={formRowGapped}>
             <Select
               placeHolder={"-"}
               label="Intended Venue"
@@ -760,7 +763,22 @@ export default function MeasureInformation(props: MeasureInformationProps) {
                 </MenuItem>
               ))}
             />
-          </div>
+            <div />
+            <FormControlLabel
+              control={
+                <Checkbox
+                  {...formik.getFieldProps("telehealthEligible")}
+                  checked={formik.values.telehealthEligible}
+                  disabled={!measureCanEdit}
+                  name="telehealthEligible"
+                  id="telehealth-eligible"
+                  data-testid="telehealth-eligible"
+                />
+              }
+              label="Telehealth-eligible"
+            />
+            <div />
+          </Box>
         )}
       </div>
       {measureCanEdit && (
