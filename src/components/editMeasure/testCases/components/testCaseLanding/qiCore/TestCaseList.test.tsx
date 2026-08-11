@@ -2124,6 +2124,20 @@ describe("TestCaseList component", () => {
       measureMetaData: { ...mockMeasure.measureMetaData, composite: true },
     } as unknown as Measure;
 
+    it("does not render the Reports button for a composite measure", async () => {
+      (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
+        OverlappingValueSets: true,
+      }));
+
+      renderTestCaseListComponent([], [], false, compositeMeasure);
+
+      await waitFor(() =>
+        expect(screen.getByTestId("test-case-tbl")).toBeInTheDocument()
+      );
+
+      expect(screen.queryByTestId("reports-button")).toBeNull();
+    });
+
     it("routes the Run Test(s) button through calculateCompositeTestCases for a composite measure", async () => {
       mockCalculateCompositeTestCases.mockClear().mockResolvedValue({
         results: [],
