@@ -124,6 +124,7 @@
     "html-react-parser": "^5.1.18",
     "jszip": "^3.10.1",
     "lodash": "^4.18.1",
+    "lucide-react": "^0.542.0",
     "pretty-bytes": "^6.1.1",
     "query-string": "^7.1.3",
     "react": "^17.0.2",
