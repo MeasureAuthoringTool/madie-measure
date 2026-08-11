@@ -227,21 +227,23 @@ export default function CreateCodeCoverageNavTabs(props: NavTabProps) {
         tw="flex flex-wrap space-x-4 justify-end"
         style={{ overflow: "visible" }}
       >
-        <LoadingButtonWithMenu
-          hasErrors={hasErrors}
-          isExecutionContextReady={executionContextReady}
-          dataTestId="reports-button"
-          label="Reports"
-          menuItems={[
-            {
-              label: "Overlapping Codes",
-              dataTestId: "overlapping-codes",
-              toImplementFunction: onGenerateOverlappingCodesReport,
-            },
-          ]}
-          showOptions={props.showReportOptions}
-          setShowOptions={props.setShowReportOptions}
-        />
+        {!isCompositeMeasure && (
+          <LoadingButtonWithMenu
+            hasErrors={hasErrors}
+            isExecutionContextReady={executionContextReady}
+            dataTestId="reports-button"
+            label="Reports"
+            menuItems={[
+              {
+                label: "Overlapping Codes",
+                dataTestId: "overlapping-codes",
+                toImplementFunction: onGenerateOverlappingCodesReport,
+              },
+            ]}
+            showOptions={props.showReportOptions}
+            setShowOptions={props.setShowReportOptions}
+          />
+        )}
         {canEdit && (
           <>
             <Button
