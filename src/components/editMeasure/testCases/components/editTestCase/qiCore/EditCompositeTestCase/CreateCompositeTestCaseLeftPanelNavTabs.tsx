@@ -9,11 +9,17 @@ export interface NavTabProps {
   leftPanelActiveTab: string;
   setLeftPanelActiveTab: (value: string) => void;
   testCaseCanEdit: boolean;
+  addedCount?: number;
 }
 export default function CreateCompositeTestCaseLeftPanelNavTabs(
   props: NavTabProps
 ) {
-  const { leftPanelActiveTab, setLeftPanelActiveTab, testCaseCanEdit } = props;
+  const {
+    leftPanelActiveTab,
+    setLeftPanelActiveTab,
+    testCaseCanEdit,
+    addedCount,
+  } = props;
   return (
     <>
       <div tw="flex flex-row w-full">
@@ -40,7 +46,7 @@ export default function CreateCompositeTestCaseLeftPanelNavTabs(
               tabIndex={0}
               aria-label="elements tab panel"
               type="D"
-              label={`Added`}
+              label={`Added (${addedCount})`}
               data-testid="elements-tab"
               value="added"
             />

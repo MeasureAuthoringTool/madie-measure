@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { IconButton } from "@mui/material";
 import Tooltip from "@mui/material/Tooltip";
 import { Measure } from "@madie/madie-models";
-import EditCalendarOutlinedIcon from "@mui/icons-material/EditCalendarOutlined";
+import { ClipboardPen } from "lucide-react";
 import { useMeasureServiceApi } from "@madie/madie-util";
 import { Toast } from "@madie/madie-design-system/dist/react";
 
@@ -134,7 +134,7 @@ export default function DraftAction(props: PropTypes) {
           disabled={disableDraftBtn}
           data-testid="draft-action-btn"
         >
-          <EditCalendarOutlinedIcon />
+          <ClipboardPen size={20} />
           <Toast
             toastKey="draft-button-error-toast"
             toastType="danger"
