@@ -20,7 +20,7 @@ const measure = {
 
 describe("ReviewAction", () => {
   it("disables the action when no measures are selected", () => {
-    render(<ReviewAction measures={[]} onClick={() => {}} canEdit={false} />);
+    render(<ReviewAction measures={[]} onClick={() => {}} canReview={false} />);
 
     expect(screen.getByTestId("review-action-btn")).toBeDisabled();
     expect(screen.getByTestId("review-action-tooltip")).toHaveAttribute(
@@ -34,7 +34,7 @@ describe("ReviewAction", () => {
       <ReviewAction
         measures={[measure, { ...measure, measureSetId: "2-3-4-5" }]}
         onClick={() => {}}
-        canEdit={true}
+        canReview={true}
       />
     );
 
@@ -45,9 +45,9 @@ describe("ReviewAction", () => {
     );
   });
 
-  it("disables the action when one measure is selected but the user cannot edit it", () => {
+  it("disables the action when one measure is selected but the user cannot review it", () => {
     render(
-      <ReviewAction measures={[measure]} onClick={() => {}} canEdit={false} />
+      <ReviewAction measures={[measure]} onClick={() => {}} canReview={false} />
     );
 
     expect(screen.getByTestId("review-action-btn")).toBeDisabled();
@@ -57,9 +57,9 @@ describe("ReviewAction", () => {
     );
   });
 
-  it("enables the action when one editable measure is selected", () => {
+  it("enables the action when one reviewable measure is selected", () => {
     render(
-      <ReviewAction measures={[measure]} onClick={() => {}} canEdit={true} />
+      <ReviewAction measures={[measure]} onClick={() => {}} canReview={true} />
     );
 
     expect(screen.getByTestId("review-action-btn")).toBeEnabled();

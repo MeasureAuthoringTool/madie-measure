@@ -7,7 +7,7 @@ import ReviewIcon from "../../../../../icons/ReviewIcon";
 interface PropTypes {
   measures: Measure[];
   onClick: () => void;
-  canEdit: boolean;
+  canReview: boolean;
 }
 
 export const SELECT_MEASURE_TO_UPDATE_REVIEW_STATUS =
@@ -15,19 +15,19 @@ export const SELECT_MEASURE_TO_UPDATE_REVIEW_STATUS =
 export const REVIEW = "Review";
 
 export default function ReviewAction(props: PropTypes) {
-  const { measures, canEdit, onClick } = props;
+  const { measures, canReview, onClick } = props;
   const [disableReviewBtn, setDisableReviewBtn] = useState(true);
   const [tooltipMessage, setTooltipMessage] = useState(
     SELECT_MEASURE_TO_UPDATE_REVIEW_STATUS
   );
   const validateReviewActionState = useCallback(() => {
-    const shouldEnableReview = measures?.length === 1 && canEdit;
+    const shouldEnableReview = measures?.length === 1 && canReview;
 
     setDisableReviewBtn(!shouldEnableReview);
     setTooltipMessage(
       shouldEnableReview ? REVIEW : SELECT_MEASURE_TO_UPDATE_REVIEW_STATUS
     );
-  }, [canEdit, measures]);
+  }, [canReview, measures]);
 
   useEffect(() => {
     validateReviewActionState();

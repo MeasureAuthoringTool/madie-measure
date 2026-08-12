@@ -23,6 +23,7 @@ import {
   exportMeasure as downloadMeasureExport,
   ShareDialog,
   TransferDialog,
+  ManageReviewDialog,
   formatCmsId,
   padCmsId,
 } from "@madie/madie-util";
@@ -1401,20 +1402,29 @@ export default function MeasureList(props: {
         open={compareVersionsDialog}
         onClose={handleCompareVersionsDialogClose}
       />
-      <ReviewDialog
-        open={reviewDialog.open}
-        measure={selectedMeasures[0]}
-        onClose={handleReviewDialogClose}
-        onSuccess={() => {
-          // Refetch so the Review column reflects the status that was just saved
-          doUpdateList();
-          table.resetRowSelection();
-          setSelectedExpandedMeasuresIds([]);
-          setIsRowExpanded(false);
-          setExpandedSectionData([]);
-          setSelectedIdForExpansion(null);
-        }}
-      />
+      {userRoles?.isReviewer ? (
+        <ManageReviewDialog
+          open={reviewDialog.open}
+          entityType="measure"
+          entityId={selectedMeasures[0]?.id}
+          onClose={handleReviewDialogClose}
+        />
+      ) : (
+        <ReviewDialog
+          open={reviewDialog.open}
+          measure={selectedMeasures[0]}
+          onClose={handleReviewDialogClose}
+          onSuccess={() => {
+            // Refetch so the Review column reflects the status that was just saved
+            doUpdateList();
+            table.resetRowSelection();
+            setSelectedExpandedMeasuresIds([]);
+            setIsRowExpanded(false);
+            setExpandedSectionData([]);
+            setSelectedIdForExpansion(null);
+          }}
+        />
+      )}
     </div>
   );
 }

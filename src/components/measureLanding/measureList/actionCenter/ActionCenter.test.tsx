@@ -10,7 +10,14 @@ import {
   checkUserCanDelete,
   MeasureServiceApi,
   useFeatureFlags,
+  useUserRoles,
 } from "@madie/madie-util";
+import {
+  REVIEW,
+  SELECT_MEASURE_TO_UPDATE_REVIEW_STATUS,
+} from "./reviewAction/ReviewAction";
+
+const ALL_REVIEWS_TAB = 3;
 
 const mockMeasureServiceApi = {
   deleteMeasure: jest.fn().mockResolvedValue({}),
@@ -95,11 +102,19 @@ describe("ActionCenter", () => {
       getUserName: mockGetUserName,
     });
     (checkUserCanEdit as jest.Mock).mockImplementation(mockCheckUserCanEdit);
+    // jest.clearAllMocks() keeps configured return values, so reset the default
+    // here to keep each test independent of the ones before it.
+    mockCheckUserCanEdit.mockReturnValue(true);
     (checkUserCanDelete as jest.Mock).mockImplementation(
       mockCheckUserCanDelete
     );
     (useFeatureFlags as jest.Mock).mockReturnValue({
       MeasureReviewStatus: true,
+    });
+    (useUserRoles as jest.Mock).mockReturnValue({
+      roles: [],
+      isAdmin: false,
+      isReviewer: false,
     });
   });
 
@@ -224,6 +239,251 @@ describe("ActionCenter", () => {
     expect(setReviewDialog).toHaveBeenCalledWith({
       open: true,
       measureId: qdmMeasure.id,
+    });
+  });
+
+  // Edit access, not the reviewer role, is what enables Review on the
+  // My Measures / Shared Measures / All Measures tabs.
+  describe.each([
+    ["My Measures", 0],
+    ["Shared Measures", 1],
+    ["All Measures", 2],
+  ])("%s tab", (_tabName, activeTab) => {
+    beforeEach(() => {
+      // Owned or shared with "test user", mirroring checkUserCanEdit.
+      mockCheckUserCanEdit.mockImplementation(
+        (owner: string, acls: any[]) =>
+          owner === "test user" ||
+          !!acls?.some(
+            (acl) =>
+              acl?.userId === "test user" && acl?.roles?.includes("SHARED_WITH")
+          )
+      );
+    });
+
+    it("enables the review action for a non reviewer who owns the selected measure", async () => {
+      render(
+        <ActionCenter
+          measures={[qdmMeasure]}
+          associateCmsId={jest.fn()}
+          exportMeasure={jest.fn()}
+          updateTargetMeasure={jest.fn()}
+          setCreateVersionDialog={jest.fn()}
+          setDraftMeasureDialog={jest.fn()}
+          setDeleteMeasureDialog={jest.fn()}
+          setShareDialog={jest.fn}
+          deleteMeasure={jest.fn()}
+          setViewHumanReadableModal={jest.fn()}
+          activeTab={activeTab}
+          setTransferDialog={jest.fn()}
+        />
+      );
+
+      const reviewButton = await screen.findByTestId("review-action-btn");
+      await waitFor(() => {
+        expect(reviewButton).toBeEnabled();
+      });
+      expect(screen.getByTestId("review-action-tooltip")).toHaveAttribute(
+        "aria-label",
+        REVIEW
+      );
+    });
+
+    it("enables the review action for a non reviewer the measure is shared with", async () => {
+      const sharedMeasure = {
+        ...qdmMeasure,
+        measureSet: {
+          ...mockMeasureSet,
+          owner: "another user",
+          acls: [{ userId: "test user", roles: ["SHARED_WITH"] }],
+        },
+      } as unknown as Measure;
+
+      render(
+        <ActionCenter
+          measures={[sharedMeasure]}
+          associateCmsId={jest.fn()}
+          exportMeasure={jest.fn()}
+          updateTargetMeasure={jest.fn()}
+          setCreateVersionDialog={jest.fn()}
+          setDraftMeasureDialog={jest.fn()}
+          setDeleteMeasureDialog={jest.fn()}
+          setShareDialog={jest.fn}
+          deleteMeasure={jest.fn()}
+          setViewHumanReadableModal={jest.fn()}
+          activeTab={activeTab}
+          setTransferDialog={jest.fn()}
+        />
+      );
+
+      const reviewButton = await screen.findByTestId("review-action-btn");
+      await waitFor(() => {
+        expect(reviewButton).toBeEnabled();
+      });
+    });
+
+    it("disables the review action when the selected measure is neither owned nor shared", async () => {
+      const othersMeasure = {
+        ...qdmMeasure,
+        measureSet: { ...mockMeasureSet, owner: "another user", acls: [] },
+      } as unknown as Measure;
+
+      render(
+        <ActionCenter
+          measures={[othersMeasure]}
+          associateCmsId={jest.fn()}
+          exportMeasure={jest.fn()}
+          updateTargetMeasure={jest.fn()}
+          setCreateVersionDialog={jest.fn()}
+          setDraftMeasureDialog={jest.fn()}
+          setDeleteMeasureDialog={jest.fn()}
+          setShareDialog={jest.fn}
+          deleteMeasure={jest.fn()}
+          setViewHumanReadableModal={jest.fn()}
+          activeTab={activeTab}
+          setTransferDialog={jest.fn()}
+        />
+      );
+
+      const reviewButton = await screen.findByTestId("review-action-btn");
+      await waitFor(() => {
+        expect(reviewButton).toBeDisabled();
+      });
+      expect(screen.getByTestId("review-action-tooltip")).toHaveAttribute(
+        "aria-label",
+        SELECT_MEASURE_TO_UPDATE_REVIEW_STATUS
+      );
+    });
+  });
+
+  it("should enable the review action on the All Reviews tab when exactly one measure is selected, even without edit access", async () => {
+    mockCheckUserCanEdit.mockReturnValue(false);
+    (useUserRoles as jest.Mock).mockReturnValue({
+      roles: ["MADiE-Reviewer"],
+      isAdmin: false,
+      isReviewer: true,
+    });
+
+    render(
+      <ActionCenter
+        measures={[qdmMeasure]}
+        associateCmsId={jest.fn()}
+        exportMeasure={jest.fn()}
+        updateTargetMeasure={jest.fn()}
+        setCreateVersionDialog={jest.fn()}
+        setDraftMeasureDialog={jest.fn()}
+        setDeleteMeasureDialog={jest.fn()}
+        setShareDialog={jest.fn}
+        deleteMeasure={jest.fn()}
+        setViewHumanReadableModal={jest.fn()}
+        activeTab={ALL_REVIEWS_TAB}
+        setTransferDialog={jest.fn()}
+      />
+    );
+
+    const reviewButton = await screen.findByTestId("review-action-btn");
+    await waitFor(() => {
+      expect(reviewButton).toBeEnabled();
+    });
+    expect(screen.getByTestId("review-action-tooltip")).toHaveAttribute(
+      "aria-label",
+      REVIEW
+    );
+  });
+
+  it("should disable the review action on the All Reviews tab when no measures are selected", async () => {
+    mockCheckUserCanEdit.mockReturnValue(false);
+    (useUserRoles as jest.Mock).mockReturnValue({
+      roles: ["MADiE-Reviewer"],
+      isAdmin: false,
+      isReviewer: true,
+    });
+
+    render(
+      <ActionCenter
+        measures={[]}
+        associateCmsId={jest.fn()}
+        exportMeasure={jest.fn()}
+        updateTargetMeasure={jest.fn()}
+        setCreateVersionDialog={jest.fn()}
+        setDraftMeasureDialog={jest.fn()}
+        setDeleteMeasureDialog={jest.fn()}
+        setShareDialog={jest.fn}
+        deleteMeasure={jest.fn()}
+        setViewHumanReadableModal={jest.fn()}
+        activeTab={ALL_REVIEWS_TAB}
+        setTransferDialog={jest.fn()}
+      />
+    );
+
+    const reviewButton = await screen.findByTestId("review-action-btn");
+    await waitFor(() => {
+      expect(reviewButton).toBeDisabled();
+    });
+    expect(screen.getByTestId("review-action-tooltip")).toHaveAttribute(
+      "aria-label",
+      SELECT_MEASURE_TO_UPDATE_REVIEW_STATUS
+    );
+  });
+
+  it("should disable the review action on the All Reviews tab when more than one measure is selected", async () => {
+    mockCheckUserCanEdit.mockReturnValue(false);
+    (useUserRoles as jest.Mock).mockReturnValue({
+      roles: ["MADiE-Reviewer"],
+      isAdmin: false,
+      isReviewer: true,
+    });
+
+    render(
+      <ActionCenter
+        measures={[qdmMeasure, qdmMeasureVersion]}
+        associateCmsId={jest.fn()}
+        exportMeasure={jest.fn()}
+        updateTargetMeasure={jest.fn()}
+        setCreateVersionDialog={jest.fn()}
+        setDraftMeasureDialog={jest.fn()}
+        setDeleteMeasureDialog={jest.fn()}
+        setShareDialog={jest.fn}
+        deleteMeasure={jest.fn()}
+        setViewHumanReadableModal={jest.fn()}
+        activeTab={ALL_REVIEWS_TAB}
+        setTransferDialog={jest.fn()}
+      />
+    );
+
+    const reviewButton = await screen.findByTestId("review-action-btn");
+    await waitFor(() => {
+      expect(reviewButton).toBeDisabled();
+    });
+    expect(screen.getByTestId("review-action-tooltip")).toHaveAttribute(
+      "aria-label",
+      SELECT_MEASURE_TO_UPDATE_REVIEW_STATUS
+    );
+  });
+
+  it("should disable the review action on the All Reviews tab when the user is not a reviewer and cannot edit the measure", async () => {
+    mockCheckUserCanEdit.mockReturnValue(false);
+
+    render(
+      <ActionCenter
+        measures={[qdmMeasure]}
+        associateCmsId={jest.fn()}
+        exportMeasure={jest.fn()}
+        updateTargetMeasure={jest.fn()}
+        setCreateVersionDialog={jest.fn()}
+        setDraftMeasureDialog={jest.fn()}
+        setDeleteMeasureDialog={jest.fn()}
+        setShareDialog={jest.fn}
+        deleteMeasure={jest.fn()}
+        setViewHumanReadableModal={jest.fn()}
+        activeTab={ALL_REVIEWS_TAB}
+        setTransferDialog={jest.fn()}
+      />
+    );
+
+    const reviewButton = await screen.findByTestId("review-action-btn");
+    await waitFor(() => {
+      expect(reviewButton).toBeDisabled();
     });
   });
 

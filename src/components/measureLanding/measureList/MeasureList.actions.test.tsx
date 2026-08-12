@@ -30,6 +30,8 @@ import { Simulate } from "react-dom/test-utils";
 // @ts-ignore
 import {
   checkUserCanEdit,
+  useUserRoles,
+  useFeatureFlags,
   MeasureServiceApi,
   ServiceConfig,
 } from "@madie/madie-util";
@@ -160,6 +162,12 @@ jest.mock("@madie/madie-util", () => ({
         <button data-testid="transfer-cancel-button" onClick={() => onClose()}>
           Cancel
         </button>
+      </div>
+    ) : null,
+  ManageReviewDialog: ({ open, entityType, entityId }: any) =>
+    open ? (
+      <div data-testid="manage-review-dialog">
+        Manage Review Dialog {entityType} {entityId}
       </div>
     ) : null,
 }));
@@ -661,6 +669,66 @@ describe("Action Center Tests", () => {
     expect(baseProps.toastType).toBe("danger");
     expect(baseProps.toastMessage).toBe("");
     expect(baseProps.toastOpen).toBe(false);
+  });
+
+  it("should display the Manage Review dialog when a reviewer clicks the review action", async () => {
+    (useFeatureFlags as jest.Mock).mockReturnValue({
+      ...mockUseFeatureFlagsApi,
+      MeasureReviewStatus: true,
+    });
+    (useUserRoles as jest.Mock).mockReturnValue({
+      roles: ["MADiE-Reviewer"],
+      isAdmin: false,
+      isReviewer: true,
+    });
+
+    const { unmount } = render(
+      <ServiceContext.Provider value={serviceConfig}>
+        <MeasureList {...baseProps} />
+      </ServiceContext.Provider>
+    );
+
+    const checkBoxes = await screen.findAllByRole("checkbox");
+    userEvent.click(checkBoxes[1]);
+    userEvent.click(screen.getByTestId("review-action-btn"));
+
+    await waitFor(() => {
+      expect(screen.getByTestId("manage-review-dialog")).toBeInTheDocument();
+    });
+    expect(screen.queryByTestId("review-dialog")).not.toBeInTheDocument();
+
+    unmount();
+  });
+
+  it("should display the mark ready for review dialog when a non reviewer clicks the review action", async () => {
+    (useFeatureFlags as jest.Mock).mockReturnValue({
+      ...mockUseFeatureFlagsApi,
+      MeasureReviewStatus: true,
+    });
+    (useUserRoles as jest.Mock).mockReturnValue({
+      roles: [],
+      isAdmin: false,
+      isReviewer: false,
+    });
+
+    const { unmount } = render(
+      <ServiceContext.Provider value={serviceConfig}>
+        <MeasureList {...baseProps} />
+      </ServiceContext.Provider>
+    );
+
+    const checkBoxes = await screen.findAllByRole("checkbox");
+    userEvent.click(checkBoxes[1]);
+    userEvent.click(screen.getByTestId("review-action-btn"));
+
+    await waitFor(() => {
+      expect(screen.getByTestId("review-dialog")).toBeInTheDocument();
+    });
+    expect(
+      screen.queryByTestId("manage-review-dialog")
+    ).not.toBeInTheDocument();
+
+    unmount();
   });
 
   it("should display transfer dialog on clicking transfer action button and default toast values on cancel", async () => {
