@@ -20,7 +20,11 @@ import {
   Toast,
 } from "@madie/madie-design-system/dist/react";
 import "./MeasureLanding.scss";
-import { useDocumentTitle, useMeasureServiceApi } from "@madie/madie-util";
+import {
+  useDocumentTitle,
+  useMeasureServiceApi,
+  useUserRoles,
+} from "@madie/madie-util";
 import StatusHandler, {
   INITIAL_STATUS_HANDLER,
 } from "../editMeasure/editor/StatusHandler";
@@ -47,11 +51,13 @@ export default function MeasureLanding() {
   let navigate = useNavigate();
   const measureServiceApi = useRef(useMeasureServiceApi()).current;
   const [measureList, setMeasureList] = useState<Measure[]>([]);
+  const userRoles = useUserRoles();
 
   // Fetches total count of Owned Libraries, Shared Libraries, and All Libraries
   const [ownedMeasuresCount, setOwnedMeasuresCount] = useState<number>(0);
   const [sharedMeasuresCount, setSharedMeasuresCount] = useState<number>(0);
   const [allMeasuresCount, setAllMeasuresCount] = useState<number>(0);
+  const [allReviewsCount, setAllReviewsCount] = useState<number>(0);
 
   // utilities for pagination
   const values = queryString.parse(search);
@@ -146,6 +152,7 @@ export default function MeasureLanding() {
         setOwnedMeasuresCount(data.ownedMeasures);
         setSharedMeasuresCount(data.sharedMeasures);
         setAllMeasuresCount(data.allMeasures);
+        setAllReviewsCount(data.allReviews);
       })
       .catch((error) => {
         if (error.message !== "canceled") {
@@ -181,6 +188,7 @@ export default function MeasureLanding() {
       try {
         const data = await measureServiceApi.searchMeasuresByCriteria(
           ownershipTypeMap[tab] ? [ownershipTypeMap[tab]] : [OwnershipType.ALL],
+          tab === 3 || tab === 4 ? true : false,
           limit,
           page,
           sort,
@@ -393,6 +401,17 @@ export default function MeasureLanding() {
                   setCurrentPage(0);
                 }}
               />
+              {userRoles.isReviewer && (
+                <Tab
+                  tabIndex={0}
+                  type="B"
+                  label={"All Reviews (" + allReviewsCount + ")"}
+                  data-testid="all-measures-tab"
+                  onClick={() => {
+                    setCurrentPage(0);
+                  }}
+                />
+              )}
             </Tabs>
           </div>
           <span tw="flex-grow" />
