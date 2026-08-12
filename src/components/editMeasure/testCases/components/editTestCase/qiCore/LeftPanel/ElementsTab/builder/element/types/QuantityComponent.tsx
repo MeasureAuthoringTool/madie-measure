@@ -47,8 +47,7 @@ const QuantityComponent = ({
       unit,
       system,
     };
-    formik.setFieldValue(label, newQuantity);
-    formik.validateForm();
+    formik.setFieldValue(label, newQuantity, true);
   };
 
   const comparatorPath = `${label}.comparator`;

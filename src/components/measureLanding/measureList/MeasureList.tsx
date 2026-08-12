@@ -516,7 +516,11 @@ export default function MeasureList(props: {
             accessorKey: "reviewStatus",
             enableSorting: false,
             cell: (info) => (
-              <p>{info.row.original.reviewStatus ? "Ready" : "-"}</p>
+              <p>
+                {info.row.original.reviewStatus
+                  ? info.row.original.reviewStatus
+                  : "-"}
+              </p>
             ),
           },
         ]

@@ -29,7 +29,7 @@ function standardizeJson(json: string | undefined | null): string {
   }
 }
 
-function getAddedCount(json: string): number {
+export function getAddedCount(json: string): number {
   if (!json) {
     return 0;
   }
