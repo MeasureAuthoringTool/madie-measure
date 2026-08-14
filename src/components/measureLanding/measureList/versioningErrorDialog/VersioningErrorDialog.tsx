@@ -11,15 +11,11 @@ import {
 import { ExportIcon } from "@madie/madie-util";
 
 import "../exportDialog/ExportDialog.scss";
-const InvalidMeasureNameDialog = ({
-  invalidLibraryDialogOpen,
-  measureName,
-  invalidLibraryErrors,
-  onInvalidLibraryNameDialogClose,
-}) => {
+
+const VersioningErrorDialog = ({ open, measureName, errors, onClose }) => {
   return (
     <Dialog
-      open={invalidLibraryDialogOpen}
+      open={open}
       disableEnforceFocus
       sx={{
         "& .MuiDialog-paper": {
@@ -65,10 +61,10 @@ const InvalidMeasureNameDialog = ({
             </div>
           </div>
           <span className="error-message" data-testid="error-message">
-            Measure CQL Library Name is invalid
+            Unable to version measure.
             <ul>
-              {invalidLibraryErrors.map((miss) => (
-                <li>{miss}</li>
+              {errors.map((error) => (
+                <li key={error}>{error}</li>
               ))}
             </ul>
           </span>
@@ -84,7 +80,7 @@ const InvalidMeasureNameDialog = ({
         }}
       >
         <Button
-          onClick={onInvalidLibraryNameDialogClose}
+          onClick={onClose}
           variant="action"
           style={{ marginTop: 0 }}
           data-testid="invalid-cancel"
@@ -96,4 +92,4 @@ const InvalidMeasureNameDialog = ({
   );
 };
 
-export default InvalidMeasureNameDialog;
+export default VersioningErrorDialog;
