@@ -14,6 +14,7 @@ import {
   Pagination,
   Select,
   TextField,
+  Toggle,
 } from "@madie/madie-design-system/dist/react";
 import tw from "twin.macro";
 import "styled-components/macro";
@@ -21,8 +22,6 @@ import {
   InputAdornment,
   IconButton,
   MenuItem,
-  FormControlLabel,
-  Checkbox,
   Chip,
   Tooltip,
 } from "@mui/material";
@@ -451,30 +450,18 @@ export default function CompositeTestCasesTable({
         </div>
         {/* Hide Invalid Test Cases Toggle */}
         <div tw="flex items-center" style={{ marginTop: "25px" }}>
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={hideInvalidTestCases}
-                onChange={(e) => {
-                  const newValue = e.target.checked;
-                  setHideInvalidTestCases(newValue);
-                  localStorage.setItem(
-                    `hideInvalidTestCases-${selectedMeasure.id}`,
-                    String(newValue)
-                  );
-                  setPage(1);
-                }}
-                data-testid="hide-invalid-test-cases-checkbox"
-                sx={{
-                  width: 24,
-                  height: 24,
-                }}
-              />
-            }
+          <Toggle
+            checked={hideInvalidTestCases}
+            data-testid="hide-invalid-test-cases-checkbox"
+            id="hide-invalid-test-cases"
             label="Hide invalid test cases"
-            sx={{
-              color: "#515151",
-              textTransform: "none",
+            onChange={(_, newValue) => {
+              setHideInvalidTestCases(newValue);
+              localStorage.setItem(
+                `hideInvalidTestCases-${selectedMeasure.id}`,
+                String(newValue)
+              );
+              setPage(1);
             }}
           />
         </div>
