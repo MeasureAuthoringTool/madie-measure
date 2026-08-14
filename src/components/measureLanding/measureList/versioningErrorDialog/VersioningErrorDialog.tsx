@@ -17,6 +17,7 @@ const VersioningErrorDialog = ({ open, measureName, errors, onClose }) => {
     <Dialog
       open={open}
       disableEnforceFocus
+      disableScrollLock
       sx={{
         "& .MuiDialog-paper": {
           position: "relative",
