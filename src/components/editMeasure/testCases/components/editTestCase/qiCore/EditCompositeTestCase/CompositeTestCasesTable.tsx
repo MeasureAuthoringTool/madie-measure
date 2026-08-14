@@ -455,7 +455,8 @@ export default function CompositeTestCasesTable({
             data-testid="hide-invalid-test-cases-checkbox"
             id="hide-invalid-test-cases"
             label="Hide invalid test cases"
-            onChange={(_, newValue) => {
+            onChange={(e) => {
+              const newValue = e.target.checked;
               setHideInvalidTestCases(newValue);
               localStorage.setItem(
                 `hideInvalidTestCases-${selectedMeasure.id}`,
