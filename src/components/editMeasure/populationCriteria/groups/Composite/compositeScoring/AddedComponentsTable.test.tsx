@@ -31,6 +31,13 @@ const measuresFixture: any[] = [
 
 const mockDelete = jest.fn();
 
+// Deletion is confirmation gated; clicking the trash icon only opens the dialog
+const confirmDelete = async () => {
+  await userEvent.click(
+    await screen.findByTestId("delete-dialog-continue-button")
+  );
+};
+
 describe("AddedComponentsTable", () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -38,7 +45,11 @@ describe("AddedComponentsTable", () => {
 
   it("renders nothing when components is empty", () => {
     render(
-      <AddedComponentsTable components={[]} onDeleteComponent={mockDelete} />
+      <AddedComponentsTable
+        components={[]}
+        canEdit={true}
+        onDeleteComponent={mockDelete}
+      />
     );
 
     // component returns null if components.length === 0
@@ -52,6 +63,7 @@ describe("AddedComponentsTable", () => {
     render(
       <AddedComponentsTable
         components={measuresFixture}
+        canEdit={true}
         onDeleteComponent={mockDelete}
       />
     );
@@ -84,6 +96,7 @@ describe("AddedComponentsTable", () => {
     render(
       <AddedComponentsTable
         components={measuresFixture}
+        canEdit={true}
         onDeleteComponent={mockDelete}
       />
     );
@@ -105,6 +118,7 @@ describe("AddedComponentsTable", () => {
     render(
       <AddedComponentsTable
         components={measuresFixture}
+        canEdit={true}
         onDeleteComponent={mockDelete}
       />
     );
@@ -121,6 +135,7 @@ describe("AddedComponentsTable", () => {
     render(
       <AddedComponentsTable
         components={measuresFixture}
+        canEdit={true}
         onDeleteComponent={mockDelete}
       />
     );
@@ -150,12 +165,14 @@ describe("AddedComponentsTable", () => {
     render(
       <AddedComponentsTable
         components={measuresFixture}
+        canEdit={true}
         onDeleteComponent={throwingDelete}
       />
     );
 
     const deleteButton = screen.getByTestId("delete-component-m1");
     await userEvent.click(deleteButton);
+    await confirmDelete();
 
     expect(consoleSpy).toHaveBeenCalled();
     consoleSpy.mockRestore();
@@ -165,6 +182,7 @@ describe("AddedComponentsTable", () => {
     const { rerender } = render(
       <AddedComponentsTable
         components={[measuresFixture[0]]}
+        canEdit={true}
         onDeleteComponent={mockDelete}
       />
     );
@@ -175,6 +193,7 @@ describe("AddedComponentsTable", () => {
     rerender(
       <AddedComponentsTable
         components={measuresFixture}
+        canEdit={true}
         onDeleteComponent={mockDelete}
       />
     );
@@ -183,24 +202,77 @@ describe("AddedComponentsTable", () => {
     expect(screen.getByText("Beta Measure")).toBeInTheDocument();
   });
 
-  it("calls onDeleteComponent with the measure id when delete button is clicked", async () => {
+  it("calls onDeleteComponent with the measure id once the delete is confirmed", async () => {
     render(
       <AddedComponentsTable
         components={measuresFixture}
+        canEdit={true}
         onDeleteComponent={mockDelete}
       />
     );
 
-    const deleteButton = screen.getByTestId("delete-component-m1");
-    await userEvent.click(deleteButton);
+    await userEvent.click(screen.getByTestId("delete-component-m1"));
+
+    const dialog = await screen.findByTestId("delete-dialog");
+    expect(
+      within(dialog).getByText("Delete Component Measure")
+    ).toBeInTheDocument();
+    expect(dialog.textContent).toContain(
+      "Are you sure you want to delete the component measure Alpha Measure?"
+    );
+    expect(dialog.textContent).not.toContain("This Action cannot be undone");
+    expect(mockDelete).not.toHaveBeenCalled();
+
+    await confirmDelete();
 
     expect(mockDelete).toHaveBeenCalledWith("m1");
+    await waitFor(() => {
+      expect(screen.queryByTestId("delete-dialog")).not.toBeInTheDocument();
+    });
+  });
+
+  it("does not delete the component when the confirmation is cancelled", async () => {
+    render(
+      <AddedComponentsTable
+        components={measuresFixture}
+        canEdit={true}
+        onDeleteComponent={mockDelete}
+      />
+    );
+
+    await userEvent.click(screen.getByTestId("delete-component-m1"));
+    await userEvent.click(
+      await screen.findByTestId("delete-dialog-cancel-button")
+    );
+
+    expect(mockDelete).not.toHaveBeenCalled();
+    await waitFor(() => {
+      expect(screen.queryByTestId("delete-dialog")).not.toBeInTheDocument();
+    });
+    // row is still displayed
+    expect(screen.getByText("Alpha Measure")).toBeInTheDocument();
+  });
+
+  it("hides the delete action when canEdit is false", () => {
+    render(
+      <AddedComponentsTable
+        components={measuresFixture}
+        canEdit={false}
+        onDeleteComponent={mockDelete}
+      />
+    );
+
+    expect(screen.getByText("Alpha Measure")).toBeInTheDocument();
+    expect(screen.queryByTestId("delete-component-m1")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("delete-component-m2")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("delete-dialog")).not.toBeInTheDocument();
   });
 
   it("updates the component count in header after deletion", async () => {
     const { rerender } = render(
       <AddedComponentsTable
         components={measuresFixture}
+        canEdit={true}
         onDeleteComponent={mockDelete}
       />
     );
@@ -212,6 +284,7 @@ describe("AddedComponentsTable", () => {
 
     const deleteButton = screen.getByTestId("delete-component-m1");
     await userEvent.click(deleteButton);
+    await confirmDelete();
 
     expect(mockDelete).toHaveBeenCalledWith("m1");
 
@@ -219,6 +292,7 @@ describe("AddedComponentsTable", () => {
     rerender(
       <AddedComponentsTable
         components={[measuresFixture[1]]}
+        canEdit={true}
         onDeleteComponent={mockDelete}
       />
     );
@@ -239,6 +313,7 @@ describe("AddedComponentsTable", () => {
     render(
       <AddedComponentsTable
         components={componentsWithDuplicates}
+        canEdit={true}
         onDeleteComponent={mockDelete}
       />
     );
@@ -251,6 +326,7 @@ describe("AddedComponentsTable", () => {
     // Two rows share "m1" because componentsWithDuplicates has two entries with the same id
     const deleteButtons = screen.getAllByTestId("delete-component-m1");
     await userEvent.click(deleteButtons[0]);
+    await confirmDelete();
 
     expect(mockDelete).toHaveBeenCalledWith("m1");
   });
@@ -268,6 +344,7 @@ describe("AddedComponentsTable", () => {
     render(
       <AddedComponentsTable
         components={[componentWithGroups]}
+        canEdit={true}
         onDeleteComponent={jest.fn()}
       />
     );
@@ -304,6 +381,7 @@ describe("AddedComponentsTable", () => {
     render(
       <AddedComponentsTable
         components={[componentNoGroups]}
+        canEdit={true}
         onDeleteComponent={jest.fn()}
       />
     );
@@ -329,6 +407,7 @@ describe("AddedComponentsTable", () => {
     render(
       <AddedComponentsTable
         components={[componentWithGroups]}
+        canEdit={true}
         onDeleteComponent={mockDelete}
       />
     );
@@ -380,6 +459,7 @@ describe("AddedComponentsTable", () => {
     render(
       <AddedComponentsTable
         components={qiCoreAndQdmMix}
+        canEdit={true}
         onDeleteComponent={mockDelete}
       />
     );
