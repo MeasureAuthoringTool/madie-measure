@@ -1415,7 +1415,6 @@ export default function MeasureList(props: {
           measure={selectedMeasures[0]}
           onClose={handleReviewDialogClose}
           onSuccess={() => {
-            // Refetch so the Review column reflects the status that was just saved
             doUpdateList();
             table.resetRowSelection();
             setSelectedExpandedMeasuresIds([]);

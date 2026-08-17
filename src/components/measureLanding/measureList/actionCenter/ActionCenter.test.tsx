@@ -242,8 +242,6 @@ describe("ActionCenter", () => {
     });
   });
 
-  // Edit access, not the reviewer role, is what enables Review on the
-  // My Measures / Shared Measures / All Measures tabs.
   describe.each([
     ["My Measures", 0],
     ["Shared Measures", 1],
