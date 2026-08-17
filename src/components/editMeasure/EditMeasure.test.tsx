@@ -25,6 +25,7 @@ import {
   useMeasureServiceApi,
   MeasureServiceApi,
   measureStore,
+  useUserRoles,
 } from "@madie/madie-util";
 import { oneItemResponse } from "../__mocks__/mockMeasureResponses";
 import userEvent from "@testing-library/user-event";
@@ -240,6 +241,12 @@ jest.mock("@madie/madie-util", () => ({
         </button>
       </div>
     ) : null,
+  ManageReviewDialog: ({ open, entityType, entityId }: any) =>
+    open ? (
+      <div data-testid="manage-review-dialog">
+        Manage Review Dialog {entityType} {entityId}
+      </div>
+    ) : null,
   useDocumentTitle: jest.fn(),
   useOktaTokens: jest.fn(() => ({
     getAccessToken: () => "test.jwt",
@@ -322,6 +329,44 @@ describe("EditMeasure Component", () => {
 
     const loading = queryByTestId("loading");
     expect(loading).toBeNull();
+  });
+
+  it("should open the Manage Review dialog for reviewers when the review event is triggered", async () => {
+    (useUserRoles as jest.Mock).mockReturnValue({
+      roles: ["MADiE-Reviewer"],
+      isAdmin: false,
+      isReviewer: true,
+    });
+    renderRouter();
+
+    await findByTestId("editMeasure");
+    act(() => {
+      window.dispatchEvent(new Event("review-measure"));
+    });
+
+    await waitFor(() =>
+      expect(queryByTestId("manage-review-dialog")).toBeInTheDocument()
+    );
+    expect(queryByTestId("review-dialog")).not.toBeInTheDocument();
+  });
+
+  it("should open the mark ready for review dialog for non reviewers when the review event is triggered", async () => {
+    (useUserRoles as jest.Mock).mockReturnValue({
+      roles: [],
+      isAdmin: false,
+      isReviewer: false,
+    });
+    renderRouter();
+
+    await findByTestId("editMeasure");
+    act(() => {
+      window.dispatchEvent(new Event("review-measure"));
+    });
+
+    await waitFor(() =>
+      expect(queryByTestId("review-dialog")).toBeInTheDocument()
+    );
+    expect(queryByTestId("manage-review-dialog")).not.toBeInTheDocument();
   });
 
   it("should display a delete dialog when the event is triggered, discards.", async () => {
