@@ -110,8 +110,3 @@ export const ManageReviewDialog = ({ open }: any) =>
   open ? (
     <div data-testid="manage-review-dialog">Manage Review Dialog</div>
   ) : null;
-export const REVIEW_STATUS_OPTIONS = [
-  "Ready for Review",
-  "In Progress",
-  "Complete",
-];
