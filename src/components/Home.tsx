@@ -35,10 +35,6 @@ export default function Home() {
       });
   }, []);
 
-  // Roles are not fetched here: they come from the login response via
-  // userRolesStore. madie-layout has a UserRolesLoader for refreshing them per
-  // app load, which keeps every route consistent instead of measures only.
-
   const errorPage = <div>Error loading service config</div>;
 
   const loadingState = <div>Loading...</div>;
