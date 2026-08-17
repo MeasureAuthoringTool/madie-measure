@@ -18,6 +18,8 @@ import {
 } from "@madie/madie-util";
 import ReviewAction from "./reviewAction/ReviewAction";
 
+const ALL_REVIEWS_TAB = 3;
+
 // Helper to check if user owns all selected measures
 const isOwnerOfAllMeasures = (measures: Measure[]) => {
   return (
@@ -199,6 +201,8 @@ export default function ActionCenter(props: PropTypes) {
     setIsSharedWithUser(isSelectedMeasuresSharedWithUser(measures));
   }, [measures]);
 
+  const canReview =
+    (activeTab === ALL_REVIEWS_TAB && !!userRoles?.isReviewer) || canEdit;
   const PipeSeparator = () => (
     <span
       aria-hidden="true"
@@ -264,7 +268,7 @@ export default function ActionCenter(props: PropTypes) {
           <ReviewAction
             measures={measures}
             onClick={reviewMeasure}
-            canEdit={canEdit}
+            canReview={canReview}
           />
         </>
       )}
