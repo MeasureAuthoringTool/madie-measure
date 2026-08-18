@@ -156,6 +156,10 @@ jest.mock("@madie/madie-util", () => ({
   ),
   TransferDialog: ({ open }: any) =>
     open ? <div data-testid="transfer-dialog">Transfer Dialog</div> : null,
+  ManageReviewDialog: ({ open }: any) =>
+    open ? (
+      <div data-testid="manage-review-dialog">Manage Review Dialog</div>
+    ) : null,
 }));
 
 jest.mock("../../common/createVersionDialog/CreateVersionDialog", () => ({

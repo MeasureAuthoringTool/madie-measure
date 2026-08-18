@@ -344,6 +344,12 @@ declare module "@madie/madie-util" {
     setStatusHandler: Function;
     isAdminTransfer?: boolean;
   }): React.ReactElement | null;
+  export function ManageReviewDialog(props: {
+    open: boolean;
+    onClose: () => void;
+    entityType: "measure" | "library";
+    entityId?: string;
+  }): React.ReactElement | null;
   export function getNewestMeasureInstance(measures: Measure[]): Measure;
 
   export function exportMeasure(

@@ -28,6 +28,7 @@ import {
   ShareDialog,
   TransferDialog,
   validateCompositeMeasure,
+  ManageReviewDialog,
 } from "@madie/madie-util";
 import CreateVersionDialog from "../common/createVersionDialog/CreateVersionDialog";
 import InvalidTestCaseDialog from "../common/invalidTestCaseDialog/InvalidTestCaseDialog";
@@ -861,11 +862,20 @@ export default function EditMeasure() {
             open={viewMeasureHistoryDialog}
             onClose={handleDialogClose}
           />
-          <ReviewDialog
-            open={reviewDialog.open}
-            measure={measure}
-            onClose={handleReviewDialogClose}
-          />
+          {userRoles?.isReviewer ? (
+            <ManageReviewDialog
+              open={reviewDialog.open}
+              entityType="measure"
+              entityId={measure?.id}
+              onClose={handleReviewDialogClose}
+            />
+          ) : (
+            <ReviewDialog
+              open={reviewDialog.open}
+              measure={measure}
+              onClose={handleReviewDialogClose}
+            />
+          )}
           <Toast
             toastKey="measure-information-toast"
             aria-live="polite"
