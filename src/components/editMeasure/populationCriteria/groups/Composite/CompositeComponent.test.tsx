@@ -169,6 +169,9 @@ describe("CompositeComponent", () => {
 
     const deleteButton = screen.getByTestId("delete-component-m1");
     await userEvent.click(deleteButton);
+    await userEvent.click(
+      await screen.findByTestId("delete-dialog-continue-button")
+    );
 
     expect(submitComponentForm).toHaveBeenCalledWith([
       { measureId: "m2", groupId: "g2" },
