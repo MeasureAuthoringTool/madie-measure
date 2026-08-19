@@ -250,6 +250,32 @@ describe("ValidationPanel component", () => {
     );
   });
 
+  it("should preserve line breaks in invalid reference diagnostics", () => {
+    const testCase = {
+      ...testcase,
+      validationStatus: ValidationStatus.INVALID,
+    };
+    const invalidReferenceError = [
+      {
+        severity: "error",
+        diagnostics:
+          "Resource [CarePlan/example] will not be included in execution because the following attributes are a reference that do not resolve within the bundle.\n\n- activity.detail.performer",
+        key: 6,
+      },
+    ];
+
+    const { getByTestId } = render(
+      <ValidationPanel
+        testCase={testCase}
+        validationErrors={invalidReferenceError}
+      />
+    );
+
+    expect(getByTestId("validation-card-6")).toHaveStyle(
+      "white-space: pre-line"
+    );
+  });
+
   it("should render no errors present text when no errors (valid validation status and isQiCoreV6)", () => {
     const validTestCase = {
       ...testcase,

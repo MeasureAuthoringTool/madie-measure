@@ -18,6 +18,8 @@ import {
 } from "@madie/madie-util";
 import ReviewAction from "./reviewAction/ReviewAction";
 
+const ALL_REVIEWS_TAB = 3;
+
 // Helper to check if user owns all selected measures
 const isOwnerOfAllMeasures = (measures: Measure[]) => {
   return (
@@ -199,6 +201,17 @@ export default function ActionCenter(props: PropTypes) {
     setIsSharedWithUser(isSelectedMeasuresSharedWithUser(measures));
   }, [measures]);
 
+  const canReview =
+    (activeTab === ALL_REVIEWS_TAB && !!userRoles?.isReviewer) || canEdit;
+  const PipeSeparator = () => (
+    <span
+      aria-hidden="true"
+      style={{ color: "#8C8C8C", display: "inline-flex", alignItems: "center" }}
+    >
+      |
+    </span>
+  );
+
   return (
     <div data-testid="action-center">
       <DeleteAction
@@ -222,7 +235,16 @@ export default function ActionCenter(props: PropTypes) {
         activeTab={activeTab}
       />
 
+      <TransferAction
+        measures={measures}
+        onClick={transferMeasure}
+        activeTab={activeTab}
+      />
+
       <AssociateCmsIdAction measures={measures} onClick={associateCmsId} />
+
+      <PipeSeparator />
+
       <VersionAction
         measures={measures}
         onClick={versionMeasure}
@@ -233,20 +255,22 @@ export default function ActionCenter(props: PropTypes) {
         onClick={draftMeasure}
         canEdit={canEdit}
       />
+
+      <PipeSeparator />
+
       <ViewHRAction measures={measures} onClick={viewHumanReadable} />
-      <TransferAction
-        measures={measures}
-        onClick={transferMeasure}
-        activeTab={activeTab}
-      />
       <HistoryAction measures={measures} onClick={viewMeasureHistory} />
       <CompareVersionsAction measures={measures} onClick={compareVersions} />
+
       {featureFlags?.MeasureReviewStatus && (
-        <ReviewAction
-          measures={measures}
-          onClick={reviewMeasure}
-          canEdit={canEdit}
-        />
+        <>
+          <PipeSeparator />
+          <ReviewAction
+            measures={measures}
+            onClick={reviewMeasure}
+            canReview={canReview}
+          />
+        </>
       )}
     </div>
   );

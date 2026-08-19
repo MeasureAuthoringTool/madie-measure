@@ -163,6 +163,7 @@ describe("Measure Page", () => {
         mockMeasureServiceApi.searchMeasuresByCriteria
       ).toHaveBeenCalledWith(
         ["OWNED"],
+        false,
         "10",
         0,
         "",
@@ -203,6 +204,7 @@ describe("Measure Page", () => {
         mockMeasureServiceApi.searchMeasuresByCriteria
       ).toHaveBeenCalledWith(
         ["OWNED"],
+        false,
         "10",
         0,
         "",
@@ -237,6 +239,7 @@ describe("Measure Page", () => {
         mockMeasureServiceApi.searchMeasuresByCriteria
       ).toHaveBeenCalledWith(
         ["OWNED"],
+        false,
         "10",
         0,
         "",
@@ -274,6 +277,7 @@ describe("Measure Page", () => {
       ).toHaveBeenNthCalledWith(
         1,
         ["SHARED"],
+        false,
         "10",
         0,
         "",
@@ -302,6 +306,7 @@ describe("Measure Page", () => {
       ).toHaveBeenNthCalledWith(
         1,
         ["ALL"],
+        false,
         "10",
         0,
         "",
@@ -335,6 +340,7 @@ describe("Measure Page", () => {
         mockMeasureServiceApi.searchMeasuresByCriteria
       ).toHaveBeenCalledWith(
         ["OWNED"],
+        false,
         "10",
         0,
         "",
@@ -354,6 +360,7 @@ describe("Measure Page", () => {
         mockMeasureServiceApi.searchMeasuresByCriteria
       ).toHaveBeenCalledWith(
         ["OWNED"],
+        false,
         "10",
         0,
         "",
@@ -385,6 +392,7 @@ describe("Measure Page", () => {
         mockMeasureServiceApi.searchMeasuresByCriteria
       ).toHaveBeenCalledWith(
         ["OWNED"],
+        false,
         "10",
         0,
         "",
@@ -527,6 +535,7 @@ describe("Measure Page", () => {
         mockMeasureServiceApi.searchMeasuresByCriteria
       ).toHaveBeenCalledWith(
         ["OWNED"],
+        false,
         "10",
         0,
         "",
@@ -599,7 +608,7 @@ describe("Measure Page", () => {
       // First call: delayed promise that rejects with canceled when aborted
       (mockMeasureServiceApi.searchMeasuresByCriteria as jest.Mock)
         .mockImplementationOnce((...args) => {
-          const abortCtrl = args[6];
+          const abortCtrl = args[7];
           return new Promise((resolve, reject) => {
             abortCtrl.signal.addEventListener("abort", () =>
               reject(new Error("canceled"))
@@ -752,6 +761,432 @@ describe("Measure Page", () => {
         },
         { timeout: 300 }
       );
+    });
+  });
+
+  describe("localStorage Persistence", () => {
+    test("shouldRestoreTabStateFromLocalStorage", async () => {
+      localStorage.setItem("measurePageTab", "1");
+      renderRouter(["/measures"]);
+
+      await waitFor(() => {
+        expect(mockedUsedNavigate).toHaveBeenCalledWith(
+          "?tab=1&page=1&limit=10",
+          { replace: true }
+        );
+      });
+    });
+
+    test("shouldPersistPaginationOptionsPerTab", async () => {
+      renderRouter(["/measures?tab=0&page=1&limit=10"]);
+
+      await waitFor(() => {
+        expect(
+          mockMeasureServiceApi.searchMeasuresByCriteria
+        ).toHaveBeenCalledWith(
+          ["OWNED"],
+          false,
+          "10",
+          0,
+          "",
+          "",
+          expect.any(Object),
+          expect.any(AbortController)
+        );
+      });
+
+      const sharedMeasuresTab = await screen.findByTestId(
+        "shared-measures-tab"
+      );
+      fireEvent.click(sharedMeasuresTab);
+
+      await waitFor(() => {
+        expect(mockedUsedNavigate).toHaveBeenCalledWith(
+          "?tab=1&page=1&limit=10"
+        );
+      });
+
+      const ownedMeasuresTab = await screen.findByTestId("owned-measures-tab");
+      fireEvent.click(ownedMeasuresTab);
+
+      await waitFor(() => {
+        const tabOptions = localStorage.getItem("ownedMeasuresPageOptions");
+        expect(tabOptions).toBeTruthy();
+        if (tabOptions) {
+          const parsed = JSON.parse(tabOptions);
+          expect(parsed.limit).toBe("10");
+        }
+      });
+    });
+
+    test("shouldUseStoredPaginationWhenReturningToTab", async () => {
+      localStorage.setItem(
+        "ownedMeasuresPageOptions",
+        JSON.stringify({
+          page: 2,
+          limit: 25,
+        })
+      );
+
+      renderRouter(["/measures?tab=1&page=1&limit=10"]);
+
+      const ownedMeasuresTab = await screen.findByTestId("owned-measures-tab");
+      fireEvent.click(ownedMeasuresTab);
+
+      await waitFor(() => {
+        const tabOptions = localStorage.getItem("ownedMeasuresPageOptions");
+        if (tabOptions) {
+          const parsed = JSON.parse(tabOptions);
+          expect(parsed.page).toBe(2);
+          expect(parsed.limit).toBe(25);
+        }
+      });
+    });
+  });
+
+  describe("Measure Counts", () => {
+    test("shouldHandleErrorWhenFetchingMeasureCounts", async () => {
+      (
+        mockMeasureServiceApi.getMeasureCounts as jest.Mock
+      ).mockRejectedValueOnce(new Error("Failed to fetch counts"));
+
+      renderRouter(["/measures?tab=0&page=1&limit=10"]);
+
+      await waitFor(() => {
+        expect(mockMeasureServiceApi.getMeasureCounts).toHaveBeenCalled();
+      });
+
+      const ownedMeasuresTab = screen.getByRole("tab", {
+        name: /Owned Measures/i,
+      });
+      expect(ownedMeasuresTab).toBeInTheDocument();
+    });
+
+    test("shouldUpdateCountsAfterMeasureCreation", async () => {
+      renderRouter(["/measures?tab=0&page=1&limit=10"]);
+
+      await waitFor(() => {
+        expect(mockMeasureServiceApi.getMeasureCounts).toHaveBeenCalledTimes(1);
+      });
+
+      const event = new Event("create");
+      window.dispatchEvent(event);
+
+      await waitFor(() => {
+        expect(mockMeasureServiceApi.getMeasureCounts).toHaveBeenCalledTimes(2);
+      });
+    });
+  });
+
+  describe("Search Criteria Management", () => {
+    test("shouldClearSearchCriteriaOnMeasureCreationEvent", async () => {
+      renderRouter(["/measures?tab=0&page=1&limit=10"]);
+
+      const searchField = (await screen.findByRole(
+        "textbox"
+      )) as HTMLInputElement;
+      fireEvent.change(searchField, { target: { value: "test" } });
+
+      const searchTrigger = screen.getByTestId("measure-trigger-search");
+      fireEvent.click(searchTrigger);
+
+      await waitFor(() => {
+        expect(
+          mockMeasureServiceApi.searchMeasuresByCriteria
+        ).toHaveBeenCalledWith(
+          ["OWNED"],
+          false,
+          "10",
+          0,
+          "",
+          "",
+          { searchField: "test", optionalSearchProperties: expect.any(Array) },
+          expect.any(AbortController)
+        );
+      });
+
+      const event = new Event("create");
+      window.dispatchEvent(event);
+
+      await waitFor(() => {
+        expect(
+          mockMeasureServiceApi.searchMeasuresByCriteria
+        ).toHaveBeenCalledWith(
+          ["OWNED"],
+          false,
+          "10",
+          0,
+          "",
+          "",
+          {
+            searchField: "",
+            optionalSearchProperties: [],
+          },
+          expect.any(AbortController)
+        );
+      });
+    });
+  });
+
+  describe("Tab Switching Behavior", () => {
+    test("shouldResetPageToOneWhenSwitchingTabs", async () => {
+      renderRouter(["/measures?tab=0&page=2&limit=10"]);
+
+      await waitFor(() => {
+        expect(
+          mockMeasureServiceApi.searchMeasuresByCriteria
+        ).toHaveBeenCalledWith(
+          ["OWNED"],
+          false,
+          "10",
+          1,
+          "",
+          "",
+          expect.any(Object),
+          expect.any(AbortController)
+        );
+      });
+
+      const sharedMeasuresTab = await screen.findByTestId(
+        "shared-measures-tab"
+      );
+      fireEvent.click(sharedMeasuresTab);
+
+      await waitFor(() => {
+        expect(mockedUsedNavigate).toHaveBeenCalledWith(
+          "?tab=1&page=1&limit=10"
+        );
+      });
+    });
+
+    test("shouldClearMeasureListWhenSwitchingTabs", async () => {
+      renderRouter(["/measures?tab=0&page=1&limit=10"]);
+
+      const measure1 = await screen.findByText("TestMeasure1");
+      expect(measure1).toBeInTheDocument();
+
+      const sharedMeasuresTab = await screen.findByTestId(
+        "shared-measures-tab"
+      );
+      fireEvent.click(sharedMeasuresTab);
+
+      await waitFor(() => {
+        expect(mockedUsedNavigate).toHaveBeenCalledWith(
+          "?tab=1&page=1&limit=10"
+        );
+      });
+    });
+  });
+
+  describe("Review Tab Functionality", () => {
+    test("shouldDisplayReviewsTabForReviewers", async () => {
+      // Mock useUserRoles to return isReviewer: true
+      const mockUseUserRoles = require("@madie/madie-util").useUserRoles;
+      mockUseUserRoles.mockReturnValueOnce({
+        roles: ["reviewer"],
+        isAdmin: false,
+        isReviewer: true,
+      });
+
+      renderRouter(["/measures?tab=0&page=1&limit=10"]);
+
+      await waitFor(() => {
+        const allReviewsTab = screen.queryByTestId("all-measures-tab");
+        expect(allReviewsTab).toBeInTheDocument();
+      });
+    });
+
+    test("shouldNotDisplayReviewsTabForNonReviewers", async () => {
+      renderRouter(["/measures?tab=0&page=1&limit=10"]);
+
+      await waitFor(() => {
+        expect(
+          mockMeasureServiceApi.searchMeasuresByCriteria
+        ).toHaveBeenCalled();
+      });
+
+      const tabs = screen.getAllByRole("tab");
+      expect(tabs.length).toBe(3);
+    });
+
+    test("shouldCallSearchWithReviewsModeWhenOnReviewTab", async () => {
+      const mockUseUserRoles = require("@madie/madie-util").useUserRoles;
+      mockUseUserRoles.mockReturnValueOnce({
+        roles: ["reviewer"],
+        isAdmin: false,
+        isReviewer: true,
+      });
+
+      renderRouter(["/measures?tab=3&page=1&limit=10"]);
+
+      await waitFor(() => {
+        expect(
+          mockMeasureServiceApi.searchMeasuresByCriteria
+        ).toHaveBeenCalledWith(
+          expect.any(Array),
+          true,
+          "10",
+          0,
+          "",
+          "",
+          expect.any(Object),
+          expect.any(AbortController)
+        );
+      });
+    });
+  });
+
+  describe("URL and Navigation", () => {
+    test("shouldReplaceHistoryWhenUrlIsMissingQueryParams", async () => {
+      renderRouter(["/measures"]);
+
+      await waitFor(() => {
+        expect(mockedUsedNavigate).toHaveBeenCalledWith(
+          "?tab=0&page=1&limit=10",
+          { replace: true }
+        );
+      });
+    });
+
+    test("shouldNotReplaceHistoryWhenUrlHasCompleteQueryParams", async () => {
+      mockedUsedNavigate.mockClear();
+      renderRouter(["/measures?tab=0&page=1&limit=10"]);
+
+      await waitFor(() => {
+        expect(
+          mockMeasureServiceApi.searchMeasuresByCriteria
+        ).toHaveBeenCalled();
+      });
+
+      const calls = mockedUsedNavigate.mock.calls.filter(
+        (call) => call[1]?.replace
+      );
+      expect(calls.length).toBe(0);
+    });
+  });
+
+  describe("Component Cleanup", () => {
+    test("shouldAbortPendingRequestWhenComponentUnmounts", async () => {
+      const { unmount } = render(
+        <ApiContextProvider value={serviceConfig}>
+          <MemoryRouter initialEntries={["/measures?tab=0&page=1&limit=10"]}>
+            <MeasureLanding />
+          </MemoryRouter>
+        </ApiContextProvider>
+      );
+
+      await waitFor(() => {
+        expect(
+          mockMeasureServiceApi.searchMeasuresByCriteria
+        ).toHaveBeenCalled();
+      });
+
+      const abortSpy = jest.spyOn(AbortController.prototype, "abort");
+      unmount();
+
+      expect(abortSpy).toHaveBeenCalled();
+      abortSpy.mockRestore();
+    });
+
+    test("shouldRemoveCreateEventListenerOnComponentUnmount", async () => {
+      const removeEventListenerSpy = jest.spyOn(window, "removeEventListener");
+
+      const { unmount } = render(
+        <ApiContextProvider value={serviceConfig}>
+          <MemoryRouter initialEntries={["/measures?tab=0&page=1&limit=10"]}>
+            <MeasureLanding />
+          </MemoryRouter>
+        </ApiContextProvider>
+      );
+
+      await waitFor(() => {
+        expect(
+          mockMeasureServiceApi.searchMeasuresByCriteria
+        ).toHaveBeenCalled();
+      });
+
+      unmount();
+
+      expect(removeEventListenerSpy).toHaveBeenCalledWith(
+        "create",
+        expect.any(Function),
+        false
+      );
+
+      removeEventListenerSpy.mockRestore();
+    });
+  });
+
+  describe("Error Handling Edge Cases", () => {
+    test("shouldDisplayErrorWhenMeasureCountsRequestFails", async () => {
+      (
+        mockMeasureServiceApi.getMeasureCounts as jest.Mock
+      ).mockRejectedValueOnce(new Error("Network error"));
+
+      renderRouter(["/measures?tab=0&page=1&limit=10"]);
+
+      await waitFor(() => {
+        expect(mockMeasureServiceApi.getMeasureCounts).toHaveBeenCalled();
+      });
+
+      const measure1 = await screen.findByText("TestMeasure1");
+      expect(measure1).toBeInTheDocument();
+    });
+
+    test("shouldNotDisplayErrorWhenMeasureCountsRequestIsCanceled", async () => {
+      (
+        mockMeasureServiceApi.getMeasureCounts as jest.Mock
+      ).mockRejectedValueOnce(new Error("canceled"));
+
+      renderRouter(["/measures?tab=0&page=1&limit=10"]);
+
+      await waitFor(() => {
+        expect(mockMeasureServiceApi.getMeasureCounts).toHaveBeenCalled();
+      });
+
+      expect(
+        screen.queryByTestId("generic-error-text-header")
+      ).not.toBeInTheDocument();
+    });
+  });
+
+  describe("Multiple Simultaneous Operations", () => {
+    test("shouldHandleSearchAndTabSwitchTogether", async () => {
+      renderRouter(["/measures?tab=0&page=1&limit=10"]);
+
+      const searchField = (await screen.findByRole(
+        "textbox"
+      )) as HTMLInputElement;
+      fireEvent.change(searchField, { target: { value: "test" } });
+
+      const searchTrigger = screen.getByTestId("measure-trigger-search");
+      fireEvent.click(searchTrigger);
+
+      await waitFor(() => {
+        expect(
+          mockMeasureServiceApi.searchMeasuresByCriteria
+        ).toHaveBeenCalledWith(
+          ["OWNED"],
+          false,
+          "10",
+          0,
+          "",
+          "",
+          { searchField: "test", optionalSearchProperties: expect.any(Array) },
+          expect.any(AbortController)
+        );
+      });
+
+      const sharedMeasuresTab = await screen.findByTestId(
+        "shared-measures-tab"
+      );
+      fireEvent.click(sharedMeasuresTab);
+
+      await waitFor(() => {
+        expect(mockedUsedNavigate).toHaveBeenCalledWith(
+          "?tab=1&page=1&limit=10"
+        );
+      });
     });
   });
 });

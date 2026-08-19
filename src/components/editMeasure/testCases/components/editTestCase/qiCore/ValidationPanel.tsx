@@ -48,6 +48,7 @@ const styles = {
 
 const ValidationAlertCard = styled.p<AlertProps>(({ status = "default" }) => [
   tw`text-xs bg-white p-3 rounded-xl mx-3 my-1 break-words`,
+  { whiteSpace: "pre-line" },
   styles[status],
 ]);
 

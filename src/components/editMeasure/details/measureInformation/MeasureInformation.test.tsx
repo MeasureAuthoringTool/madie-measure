@@ -458,6 +458,83 @@ describe("MeasureInformation component", () => {
     });
   });
 
+  test("Telehealth-eligible checkbox is enabled and unchecked by default with edit access", async () => {
+    (checkUserCanEdit as jest.Mock).mockImplementation(() => true);
+    render(
+      <MeasureInformation
+        setErrorMessage={setErrorMessage}
+        measureCanEdit={true}
+      />
+    );
+    const telehealth = (await screen.findByRole("checkbox", {
+      name: "Telehealth-eligible",
+    })) as HTMLInputElement;
+    expect(telehealth).toBeInTheDocument();
+    expect(telehealth).toBeEnabled();
+    expect(telehealth).not.toBeChecked();
+  });
+
+  test("Telehealth-eligible checkbox is disabled in read-only mode", async () => {
+    (checkUserCanEdit as jest.Mock).mockImplementation(() => false);
+    render(
+      <MeasureInformation
+        setErrorMessage={setErrorMessage}
+        measureCanEdit={false}
+      />
+    );
+    const telehealth = (await screen.findByRole("checkbox", {
+      name: "Telehealth-eligible",
+    })) as HTMLInputElement;
+    expect(telehealth).toBeInTheDocument();
+    expect(telehealth).toBeDisabled();
+  });
+
+  test("Telehealth-eligible checkbox renders checked when saved on the measure", async () => {
+    measure.measureMetaData.telehealthEligible = true;
+    measureStore.state.mockImplementation(() => measure);
+    (checkUserCanEdit as jest.Mock).mockImplementation(() => true);
+    render(
+      <MeasureInformation
+        setErrorMessage={setErrorMessage}
+        measureCanEdit={true}
+      />
+    );
+    const telehealth = (await screen.findByRole("checkbox", {
+      name: "Telehealth-eligible",
+    })) as HTMLInputElement;
+    expect(telehealth).toBeChecked();
+    expect(telehealth).toBeEnabled();
+  });
+
+  test("Checking Telehealth-eligible makes the form dirty and saves telehealthEligible", async () => {
+    const updateMeasureMock = jest.fn().mockResolvedValueOnce({ status: 200 });
+    mockMeasureServiceApi.updateMeasure = updateMeasureMock;
+    (checkUserCanEdit as jest.Mock).mockImplementation(() => true);
+    render(
+      <MeasureInformation
+        setErrorMessage={setErrorMessage}
+        measureCanEdit={true}
+      />
+    );
+    const telehealth = (await screen.findByRole("checkbox", {
+      name: "Telehealth-eligible",
+    })) as HTMLInputElement;
+    expect(telehealth).not.toBeChecked();
+
+    const saveButton = getByTestId("measurement-information-save-button");
+    expect(saveButton).toBeDisabled();
+
+    fireEvent.click(telehealth);
+    expect(telehealth).toBeChecked();
+
+    await waitFor(() => expect(saveButton).toBeEnabled());
+    fireEvent.click(saveButton);
+
+    await waitFor(() => expect(updateMeasureMock).toHaveBeenCalled());
+    const savedMeasure = updateMeasureMock.mock.calls[0][0];
+    expect(savedMeasure.measureMetaData.telehealthEligible).toBe(true);
+  });
+
   it("Toast error shows when endorsement Id is not alphanumeric", async () => {
     measureStore.state.mockImplementationOnce(() => measure);
     checkUserCanEdit.mockImplementationOnce(() => true);
@@ -566,6 +643,7 @@ describe("MeasureInformation component", () => {
         measureMetaData: {
           experimental: false,
           intendedVenue: null,
+          telehealthEligible: false,
           endorsements: [
             {
               endorsementId: "NQF",
