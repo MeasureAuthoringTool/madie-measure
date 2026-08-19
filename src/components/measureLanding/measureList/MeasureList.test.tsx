@@ -1174,7 +1174,7 @@ describe("Measure List component", () => {
   it("should block versioning and list the composite failures when the composite measure is invalid", async () => {
     const compositeErrors = [
       "Two component measures must be selected",
-      "Component measures measure types invalid",
+      "The measure type of the component measure(s) is invalid",
     ];
     mockCompositeStubs.validateCompositeMeasure.mockResolvedValueOnce(
       compositeErrors
