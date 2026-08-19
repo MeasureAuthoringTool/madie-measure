@@ -1,5 +1,5 @@
 import { formatCmsId } from "@madie/madie-util";
-import React, { useMemo, useState, useEffect } from "react";
+import React, { useMemo, useState } from "react";
 import {
   ColumnDef,
   getCoreRowModel,
@@ -44,6 +44,8 @@ export default function CompositeTestCasesTable({
   testCases,
   validTestCaseIds,
   selectedMeasure,
+  hideInvalidTestCases,
+  onHideInvalidTestCasesChange,
   onBackToMeasures,
   onViewTestCase,
   onInsertProfilesFromTestCase,
@@ -51,6 +53,8 @@ export default function CompositeTestCasesTable({
   testCases: TestCase[];
   validTestCaseIds: Set<string>;
   selectedMeasure: Measure;
+  hideInvalidTestCases: boolean;
+  onHideInvalidTestCasesChange: (hideInvalidTestCases: boolean) => void;
   onBackToMeasures: () => void;
   onViewTestCase?: (testCase: TestCase) => void;
   onInsertTestCase?: (testCase: TestCase) => void;
@@ -63,17 +67,6 @@ export default function CompositeTestCasesTable({
   const [searchText, setSearchText] = useState<string>("");
   const [page, setPage] = useState<number>(1);
   const [limit, setLimit] = useState<number>(10);
-  const [hideInvalidTestCases, setHideInvalidTestCases] =
-    useState<boolean>(false);
-
-  useEffect(() => {
-    const savedSetting = localStorage.getItem(
-      `hideInvalidTestCases-${selectedMeasure.id}`
-    );
-    if (savedSetting !== null) {
-      setHideInvalidTestCases(savedSetting === "true");
-    }
-  }, [selectedMeasure.id]);
 
   const visibleTestCases = useMemo(() => {
     if (hideInvalidTestCases) {
@@ -457,11 +450,7 @@ export default function CompositeTestCasesTable({
             label="Hide invalid test cases"
             onChange={(e) => {
               const newValue = e.target.checked;
-              setHideInvalidTestCases(newValue);
-              localStorage.setItem(
-                `hideInvalidTestCases-${selectedMeasure.id}`,
-                String(newValue)
-              );
+              onHideInvalidTestCasesChange(newValue);
               setPage(1);
             }}
           />

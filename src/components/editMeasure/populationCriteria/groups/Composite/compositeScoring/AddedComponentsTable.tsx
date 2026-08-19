@@ -8,9 +8,12 @@ import {
   SortingState,
   getSortedRowModel,
 } from "@tanstack/react-table";
-import { TruncateText } from "@madie/madie-design-system/dist/react";
+import {
+  MadieDeleteDialog,
+  TruncateText,
+} from "@madie/madie-design-system/dist/react";
 import * as _ from "lodash";
-import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
+import { Trash2 } from "lucide-react";
 import tw from "twin.macro";
 import "styled-components/macro";
 import { convertDate } from "../../../../testCases/components/testCaseLanding/common/TestCaseTable/TestCaseTable";
@@ -28,13 +31,15 @@ const TH = tw.th`p-3 text-left text-sm font-bold capitalize`;
 
 export default function AddedComponentsTable({
   components,
+  canEdit,
   onDeleteComponent,
 }: {
   components: Measure[];
+  canEdit: boolean;
   onDeleteComponent: (componentId: string) => void;
 }) {
   const [hoveredHeader, setHoveredHeader] = useState<string>("");
-  const [loading, setLoading] = useState(false);
+  const [componentToDelete, setComponentToDelete] = useState<Measure>(null);
 
   const [selectedGroupForExpansion, setSelectedGroupForExpansion] =
     useState(null);
@@ -54,18 +59,15 @@ export default function AddedComponentsTable({
   };
 
   const handleDeleteComponent = (measureId: string) => {
-    setLoading(true);
     try {
       onDeleteComponent(measureId);
     } catch (err) {
       console.error("Error deleting component:", err);
-    } finally {
-      setLoading(false);
     }
   };
 
   const columns = useMemo<ColumnDef<Measure>[]>(() => {
-    const columnDefs = [
+    const columnDefs: ColumnDef<Measure>[] = [
       {
         header: "Measure",
         cell: (info) => (
@@ -147,7 +149,11 @@ export default function AddedComponentsTable({
         },
         accessorKey: "expandArrow",
       },
-      {
+    ];
+
+    // Do not display delete action on read only views
+    if (canEdit) {
+      columnDefs.push({
         id: "actions",
         header: null,
         cell: (info) => (
@@ -167,20 +173,19 @@ export default function AddedComponentsTable({
           >
             <IconButton
               size="small"
-              onClick={() => handleDeleteComponent(info.row.original.id)}
-              disabled={loading}
+              onClick={() => setComponentToDelete(info.row.original)}
               data-testid={`delete-component-${info.row.original.id}`}
             >
-              <DeleteOutlinedIcon sx={{ color: "#D92F2F" }} />
+              <Trash2 size={20} color="#D92F2F" />
             </IconButton>
           </Tooltip>
         ),
         accessorKey: "actions",
-      },
-    ];
+      });
+    }
 
     return columnDefs;
-  }, [components, isGroupRowExpanded, selectedGroupForExpansion]);
+  }, [components, canEdit, isGroupRowExpanded, selectedGroupForExpansion]);
   const [sorting, setSorting] = React.useState<SortingState>([]);
 
   const table = useReactTable({
@@ -390,6 +395,23 @@ export default function AddedComponentsTable({
           </table>
         </div>
       </div>
+
+      <MadieDeleteDialog
+        open={!!componentToDelete}
+        onClose={() => setComponentToDelete(null)}
+        onContinue={() => {
+          handleDeleteComponent(componentToDelete.id);
+          setComponentToDelete(null);
+        }}
+        dialogTitle="Delete Component Measure"
+        hideWarning
+        customDialogBody={
+          <>
+            Are you sure you want to delete the component measure{" "}
+            <span className="strong">{componentToDelete?.measureName}</span>
+          </>
+        }
+      />
     </div>
   ) : null;
 }
