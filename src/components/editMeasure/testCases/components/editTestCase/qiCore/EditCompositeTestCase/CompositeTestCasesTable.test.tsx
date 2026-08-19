@@ -68,6 +68,8 @@ describe("CompositeTestCasesTable", () => {
     testCases,
     validTestCaseIds: getValidTestCaseIds(testCases),
     selectedMeasure: mockMeasure,
+    hideInvalidTestCases: false,
+    onHideInvalidTestCasesChange: jest.fn(),
     onBackToMeasures: jest.fn(),
     onViewTestCase: jest.fn(),
     onInsertTestCase: jest.fn(),
@@ -96,6 +98,9 @@ describe("CompositeTestCasesTable", () => {
     expect(screen.getByTestId("tc-filter-by-select")).toBeInTheDocument();
     expect(screen.getByTestId("tc-search")).toBeInTheDocument();
     expect(screen.getByTestId("tc-search-input")).toBeInTheDocument();
+    expect(
+      screen.getByRole("switch", { name: "Hide invalid test cases" })
+    ).not.toBeChecked();
     expect(
       screen.getByTestId("hide-invalid-test-cases-checkbox")
     ).toBeInTheDocument();
@@ -156,53 +161,41 @@ describe("CompositeTestCasesTable", () => {
   });
 
   it("hides invalid test cases when toggle is checked", async () => {
-    render(<CompositeTestCasesTable {...defaultProps} />);
+    render(
+      <CompositeTestCasesTable {...defaultProps} hideInvalidTestCases={true} />
+    );
 
-    expect(screen.getAllByTestId("tc-row-item")).toHaveLength(4);
-    expect(screen.getByText("Invalid TC")).toBeInTheDocument();
-
-    const toggle = screen.getByTestId("hide-invalid-test-cases-checkbox");
-    await userEvent.click(toggle);
-
-    await waitFor(() => {
-      expect(screen.getAllByTestId("tc-row-item")).toHaveLength(3);
-    });
+    expect(screen.getAllByTestId("tc-row-item")).toHaveLength(3);
     expect(screen.queryByText("Invalid TC")).not.toBeInTheDocument();
     expect(screen.getByText("3 Test Cases")).toBeInTheDocument();
   });
 
-  it("shows invalid test cases again when toggle is unchecked", async () => {
-    render(<CompositeTestCasesTable {...defaultProps} />);
+  it("shows invalid test cases again when toggle is unchecked", () => {
+    const { rerender } = render(
+      <CompositeTestCasesTable {...defaultProps} hideInvalidTestCases={true} />
+    );
 
-    const toggle = screen.getByTestId("hide-invalid-test-cases-checkbox");
+    expect(screen.getAllByTestId("tc-row-item")).toHaveLength(3);
 
-    await userEvent.click(toggle);
-    await waitFor(() => {
-      expect(screen.getAllByTestId("tc-row-item")).toHaveLength(3);
-    });
+    rerender(
+      <CompositeTestCasesTable {...defaultProps} hideInvalidTestCases={false} />
+    );
 
-    await userEvent.click(toggle);
-    await waitFor(() => {
-      expect(screen.getAllByTestId("tc-row-item")).toHaveLength(4);
-    });
+    expect(screen.getAllByTestId("tc-row-item")).toHaveLength(4);
     expect(screen.getByText("Invalid TC")).toBeInTheDocument();
   });
 
-  it("shows 'No valid test cases found.' message when toggle is on and all are invalid", async () => {
+  it("shows 'No valid test cases found.' message when toggle is on and all are invalid", () => {
     render(
       <CompositeTestCasesTable
         {...defaultProps}
         testCases={[makeTestCase({ id: "x", validResource: false })]}
         validTestCaseIds={new Set()}
+        hideInvalidTestCases={true}
       />
     );
 
-    const toggle = screen.getByTestId("hide-invalid-test-cases-checkbox");
-    await userEvent.click(toggle);
-
-    await waitFor(() => {
-      expect(screen.getByTestId("no-test-cases-message")).toBeInTheDocument();
-    });
+    expect(screen.getByTestId("no-test-cases-message")).toBeInTheDocument();
     expect(screen.getByText("No valid test cases found.")).toBeInTheDocument();
   });
 
@@ -225,39 +218,19 @@ describe("CompositeTestCasesTable", () => {
     expect(screen.getByTestId("tc-invalid-chip-x")).toBeInTheDocument();
   });
 
-  it("saves hide invalid test cases setting to localStorage when toggled", async () => {
-    const localStorageSetItemSpy = jest.spyOn(Storage.prototype, "setItem");
-    render(<CompositeTestCasesTable {...defaultProps} />);
+  it("reports the new hide invalid test cases value when toggled", async () => {
+    const onHideInvalidTestCasesChange = jest.fn();
+    render(
+      <CompositeTestCasesTable
+        {...defaultProps}
+        onHideInvalidTestCasesChange={onHideInvalidTestCasesChange}
+      />
+    );
 
     const toggle = screen.getByTestId("hide-invalid-test-cases-checkbox");
     await userEvent.click(toggle);
 
-    await waitFor(() => {
-      expect(localStorageSetItemSpy).toHaveBeenCalledWith(
-        `hideInvalidTestCases-${mockMeasure.id}`,
-        "true"
-      );
-    });
-
-    localStorageSetItemSpy.mockRestore();
-  });
-
-  it("loads hide invalid test cases setting from localStorage on mount", async () => {
-    const localStorageGetItemSpy = jest.spyOn(Storage.prototype, "getItem");
-    localStorageGetItemSpy.mockReturnValue("true");
-
-    render(<CompositeTestCasesTable {...defaultProps} />);
-
-    expect(localStorageGetItemSpy).toHaveBeenCalledWith(
-      `hideInvalidTestCases-${mockMeasure.id}`
-    );
-
-    await waitFor(() => {
-      expect(screen.getAllByTestId("tc-row-item")).toHaveLength(3);
-    });
-    expect(screen.queryByText("Invalid TC")).not.toBeInTheDocument();
-
-    localStorageGetItemSpy.mockRestore();
+    expect(onHideInvalidTestCasesChange).toHaveBeenCalledWith(true);
   });
 
   it("resets to page 1 when hide invalid test cases toggle is clicked", async () => {
