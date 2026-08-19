@@ -1,6 +1,6 @@
 import * as mockCmsIdStubs from "../../../../../../__mocks__/cmsIdFormatterStubs";
 import * as React from "react";
-import { render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import AddComponentsDialog, {
   ROW_EXPANSION_ERROR,
@@ -1360,6 +1360,111 @@ describe("AddComponentsDialog", () => {
         "cmsId",
       ]);
       expect(searchCriteria.optionalSearchProperties.length).toBe(3);
+    });
+
+    it("triggers the search when Enter is pressed in the search field", async () => {
+      const mockSearchMeasures = jest
+        .fn()
+        .mockResolvedValue(mockOneItemResponse);
+
+      useMeasureServiceApi.mockReturnValue({
+        searchMeasuresByCriteria: mockSearchMeasures,
+        getMeasuresByMeasureSetId: jest.fn(),
+      });
+
+      render(
+        <AddComponentsDialog
+          open={true}
+          onClose={onCloseMock}
+          measure={mockMeasure}
+          compositeScoring="Opportunity"
+          components={[]}
+          submitComponentForm={jest.fn()}
+        />
+      );
+
+      await waitFor(() => {
+        expect(mockSearchMeasures).toHaveBeenCalled();
+      });
+
+      const searchInput = screen.getByPlaceholderText("Search");
+      userEvent.type(searchInput, "TestSearch");
+
+      mockSearchMeasures.mockClear();
+      fireEvent.keyPress(searchInput, {
+        key: "Enter",
+        code: "Enter",
+        charCode: 13,
+      });
+
+      await waitFor(() => {
+        expect(mockSearchMeasures).toHaveBeenCalled();
+      });
+
+      const lastCall =
+        mockSearchMeasures.mock.calls[mockSearchMeasures.mock.calls.length - 1];
+      expect(lastCall[6].searchField).toBe("TestSearch");
+      expect(lastCall[6].optionalSearchProperties).toEqual([
+        "measureName",
+        "version",
+        "cmsId",
+      ]);
+    });
+
+    it("resets to the first page when a search is triggered from a later page", async () => {
+      const mockSearchMeasures = jest.fn().mockResolvedValue({
+        content: data,
+        totalPages: 3,
+        totalElements: 15,
+        numberOfElements: 5,
+        pageable: { offset: 0 },
+      });
+
+      useMeasureServiceApi.mockReturnValue({
+        searchMeasuresByCriteria: mockSearchMeasures,
+        getMeasuresByMeasureSetId: jest.fn(),
+      });
+
+      render(
+        <AddComponentsDialog
+          open={true}
+          onClose={onCloseMock}
+          measure={mockMeasure}
+          compositeScoring="Opportunity"
+          components={[]}
+          submitComponentForm={jest.fn()}
+        />
+      );
+
+      await waitFor(() => {
+        expect(mockSearchMeasures).toHaveBeenCalled();
+      });
+
+      // Move off the first page
+      const nextPageButton = screen.getByRole("button", { name: /next/i });
+      await userEvent.click(nextPageButton);
+
+      await waitFor(() => {
+        const lastCall =
+          mockSearchMeasures.mock.calls[
+            mockSearchMeasures.mock.calls.length - 1
+          ];
+        expect(lastCall[3]).toBe(1);
+      });
+
+      const searchInput = screen.getByPlaceholderText("Search");
+      userEvent.type(searchInput, "TestSearch");
+      mockSearchMeasures.mockClear();
+      userEvent.click(screen.getByTestId("test-cases-trigger-search"));
+
+      await waitFor(() => {
+        expect(mockSearchMeasures).toHaveBeenCalled();
+      });
+
+      const lastCall =
+        mockSearchMeasures.mock.calls[mockSearchMeasures.mock.calls.length - 1];
+      expect(lastCall[3]).toBe(0);
+      expect(lastCall[6].searchField).toBe("TestSearch");
     });
 
     it("clears filters when clear button is clicked", async () => {
