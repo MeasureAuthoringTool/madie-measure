@@ -75,6 +75,7 @@ jest.mock("react-router-dom", () => ({
 
 const mockMeasureServiceApi = {
   searchMeasuresByCriteria: jest.fn().mockResolvedValue(oneItemResponse),
+  searchMeasuresInReview: jest.fn().mockResolvedValue(oneItemResponse),
   getMeasureCounts: jest.fn().mockResolvedValue({
     ownedMeasures: 5,
     sharedMeasures: 3,
@@ -163,7 +164,6 @@ describe("Measure Page", () => {
         mockMeasureServiceApi.searchMeasuresByCriteria
       ).toHaveBeenCalledWith(
         ["OWNED"],
-        false,
         "10",
         0,
         "",
@@ -204,7 +204,6 @@ describe("Measure Page", () => {
         mockMeasureServiceApi.searchMeasuresByCriteria
       ).toHaveBeenCalledWith(
         ["OWNED"],
-        false,
         "10",
         0,
         "",
@@ -239,7 +238,6 @@ describe("Measure Page", () => {
         mockMeasureServiceApi.searchMeasuresByCriteria
       ).toHaveBeenCalledWith(
         ["OWNED"],
-        false,
         "10",
         0,
         "",
@@ -277,7 +275,6 @@ describe("Measure Page", () => {
       ).toHaveBeenNthCalledWith(
         1,
         ["SHARED"],
-        false,
         "10",
         0,
         "",
@@ -306,7 +303,6 @@ describe("Measure Page", () => {
       ).toHaveBeenNthCalledWith(
         1,
         ["ALL"],
-        false,
         "10",
         0,
         "",
@@ -340,7 +336,6 @@ describe("Measure Page", () => {
         mockMeasureServiceApi.searchMeasuresByCriteria
       ).toHaveBeenCalledWith(
         ["OWNED"],
-        false,
         "10",
         0,
         "",
@@ -360,7 +355,6 @@ describe("Measure Page", () => {
         mockMeasureServiceApi.searchMeasuresByCriteria
       ).toHaveBeenCalledWith(
         ["OWNED"],
-        false,
         "10",
         0,
         "",
@@ -392,7 +386,6 @@ describe("Measure Page", () => {
         mockMeasureServiceApi.searchMeasuresByCriteria
       ).toHaveBeenCalledWith(
         ["OWNED"],
-        false,
         "10",
         0,
         "",
@@ -535,7 +528,6 @@ describe("Measure Page", () => {
         mockMeasureServiceApi.searchMeasuresByCriteria
       ).toHaveBeenCalledWith(
         ["OWNED"],
-        false,
         "10",
         0,
         "",
@@ -608,7 +600,7 @@ describe("Measure Page", () => {
       // First call: delayed promise that rejects with canceled when aborted
       (mockMeasureServiceApi.searchMeasuresByCriteria as jest.Mock)
         .mockImplementationOnce((...args) => {
-          const abortCtrl = args[7];
+          const abortCtrl = args[6];
           return new Promise((resolve, reject) => {
             abortCtrl.signal.addEventListener("abort", () =>
               reject(new Error("canceled"))
@@ -785,7 +777,6 @@ describe("Measure Page", () => {
           mockMeasureServiceApi.searchMeasuresByCriteria
         ).toHaveBeenCalledWith(
           ["OWNED"],
-          false,
           "10",
           0,
           "",
@@ -895,7 +886,6 @@ describe("Measure Page", () => {
           mockMeasureServiceApi.searchMeasuresByCriteria
         ).toHaveBeenCalledWith(
           ["OWNED"],
-          false,
           "10",
           0,
           "",
@@ -913,7 +903,6 @@ describe("Measure Page", () => {
           mockMeasureServiceApi.searchMeasuresByCriteria
         ).toHaveBeenCalledWith(
           ["OWNED"],
-          false,
           "10",
           0,
           "",
@@ -937,7 +926,6 @@ describe("Measure Page", () => {
           mockMeasureServiceApi.searchMeasuresByCriteria
         ).toHaveBeenCalledWith(
           ["OWNED"],
-          false,
           "10",
           1,
           "",
@@ -1009,7 +997,7 @@ describe("Measure Page", () => {
       expect(tabs.length).toBe(3);
     });
 
-    test("shouldCallSearchWithReviewsModeWhenOnReviewTab", async () => {
+    test("shouldCallReviewsApiWhenOnReviewTab", async () => {
       const mockUseUserRoles = require("@madie/madie-util").useUserRoles;
       mockUseUserRoles.mockReturnValueOnce({
         roles: ["reviewer"],
@@ -1021,18 +1009,59 @@ describe("Measure Page", () => {
 
       await waitFor(() => {
         expect(
-          mockMeasureServiceApi.searchMeasuresByCriteria
+          mockMeasureServiceApi.searchMeasuresInReview
         ).toHaveBeenCalledWith(
-          expect.any(Array),
-          true,
           "10",
           0,
           "",
           "",
-          expect.any(Object),
+          { optionalSearchProperties: [], searchField: "" },
           expect.any(AbortController)
         );
       });
+      expect(
+        mockMeasureServiceApi.searchMeasuresByCriteria
+      ).not.toHaveBeenCalled();
+    });
+
+    test("shouldRenderMeasuresReturnedByTheReviewsApi", async () => {
+      const mockUseUserRoles = require("@madie/madie-util").useUserRoles;
+      mockUseUserRoles.mockReturnValue({
+        roles: ["reviewer"],
+        isAdmin: false,
+        isReviewer: true,
+      });
+      (
+        mockMeasureServiceApi.searchMeasuresInReview as jest.Mock
+      ).mockResolvedValue({
+        content: [
+          {
+            id: "review1",
+            measureName: "ReviewMeasure1",
+            model: "QI-Core v4.1.1",
+            version: "1.0.000",
+            lastModifiedAt: "2024-06-01T00:00:00.000Z",
+            measureMetaData: { draft: true },
+            reviewStatus: "Ready",
+          },
+        ],
+        totalPages: 1,
+        totalElements: 1,
+        numberOfElements: 1,
+        pageable: { offset: 0 },
+      });
+
+      renderRouter(["/measures?tab=3&page=1&limit=10"]);
+
+      expect(await screen.findByText("ReviewMeasure1")).toBeInTheDocument();
+      mockUseUserRoles.mockReturnValue({
+        roles: [],
+        isAdmin: false,
+        isReviewer: false,
+      });
+      (
+        mockMeasureServiceApi.searchMeasuresInReview as jest.Mock
+      ).mockResolvedValue(oneItemResponse);
     });
   });
 
@@ -1167,7 +1196,6 @@ describe("Measure Page", () => {
           mockMeasureServiceApi.searchMeasuresByCriteria
         ).toHaveBeenCalledWith(
           ["OWNED"],
-          false,
           "10",
           0,
           "",

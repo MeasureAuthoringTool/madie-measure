@@ -156,13 +156,20 @@ declare module "@madie/madie-util" {
     fetchMeasuresByIds(measureIds: string[]): Promise<any>;
     searchMeasuresByCriteria(
       ownershipTypes: OwnershipType[],
-      isReview: boolean,
       limit: string | number,
       page: number,
       sort: string,
       direction: string,
       searchCriteria: MeasureSearchCriteria,
       abortController: AbortController
+    ): Promise<any>;
+    searchMeasuresInReview(
+      limit: string | number,
+      page: number,
+      sort: string,
+      direction: string,
+      searchCriteria?: MeasureSearchCriteria,
+      abortController?: AbortController
     ): Promise<any>;
 
     createVersion(id: string, versionType: string): Promise<any>;
