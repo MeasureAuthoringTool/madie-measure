@@ -45,6 +45,8 @@ const ownershipTypeMap: Record<number, OwnershipType> = {
   2: OwnershipType.ALL,
 };
 
+const REVIEWS_TAB = 3;
+
 export default function MeasureLanding() {
   useDocumentTitle("MADiE Measures");
   const { search } = useLocation();
@@ -186,16 +188,27 @@ export default function MeasureLanding() {
       const currentRequestId = ++requestIdRef.current;
 
       try {
-        const data = await measureServiceApi.searchMeasuresByCriteria(
-          ownershipTypeMap[tab] ? [ownershipTypeMap[tab]] : [OwnershipType.ALL],
-          tab === 3 || tab === 4 ? true : false,
-          limit,
-          page,
-          sort,
-          direction,
-          searchCriteria,
-          abortController.current as AbortController
-        );
+        const data =
+          tab === REVIEWS_TAB
+            ? await measureServiceApi.searchMeasuresInReview(
+                limit,
+                page,
+                sort,
+                direction,
+                searchCriteria,
+                abortController.current as AbortController
+              )
+            : await measureServiceApi.searchMeasuresByCriteria(
+                ownershipTypeMap[tab]
+                  ? [ownershipTypeMap[tab]]
+                  : [OwnershipType.ALL],
+                limit,
+                page,
+                sort,
+                direction,
+                searchCriteria,
+                abortController.current as AbortController
+              );
 
         if (currentRequestId === requestIdRef.current) {
           setPageProps(data);
