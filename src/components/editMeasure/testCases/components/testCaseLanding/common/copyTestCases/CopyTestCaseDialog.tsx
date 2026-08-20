@@ -148,7 +148,6 @@ const CopyTestCaseDialog = ({ open, onClose, measure, selectedTestCases }) => {
     measureSearchApi.current
       .searchMeasuresByCriteria(
         [OwnershipType.OWNED, OwnershipType.SHARED],
-        false,
         limit,
         page,
         "lastModifiedAt",

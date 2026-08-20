@@ -848,6 +848,7 @@ export default function EditMeasure() {
               open={reviewDialog.open}
               entityType="measure"
               entityId={measure?.id}
+              entitySetId={measure?.measureSetId}
               onClose={handleReviewDialogClose}
             />
           ) : (

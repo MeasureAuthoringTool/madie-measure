@@ -1407,7 +1407,16 @@ export default function MeasureList(props: {
           open={reviewDialog.open}
           entityType="measure"
           entityId={selectedMeasures[0]?.id}
+          entitySetId={selectedMeasures[0]?.measureSetId}
           onClose={handleReviewDialogClose}
+          onSuccess={() => {
+            doUpdateList();
+            table.resetRowSelection();
+            setSelectedExpandedMeasuresIds([]);
+            setIsRowExpanded(false);
+            setExpandedSectionData([]);
+            setSelectedIdForExpansion(null);
+          }}
         />
       ) : (
         <ReviewDialog

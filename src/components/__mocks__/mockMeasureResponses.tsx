@@ -31,12 +31,7 @@ const oneItemResponse = {
 const oneHundredTenTestMeasures = bulkCreate(110);
 
 // number of elements left on page..
-const mockPaginationResponses = (
-  filterByCurrentUser,
-  isReview,
-  limit,
-  page
-) => {
+const mockPaginationResponses = (filterByCurrentUser, limit, page) => {
   return new Promise((resolve) => {
     let visibleEments = oneHundredTenTestMeasures.slice(
       page + 1 * limit,

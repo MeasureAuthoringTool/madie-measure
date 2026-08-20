@@ -156,13 +156,20 @@ declare module "@madie/madie-util" {
     fetchMeasuresByIds(measureIds: string[]): Promise<any>;
     searchMeasuresByCriteria(
       ownershipTypes: OwnershipType[],
-      isReview: boolean,
       limit: string | number,
       page: number,
       sort: string,
       direction: string,
       searchCriteria: MeasureSearchCriteria,
       abortController: AbortController
+    ): Promise<any>;
+    searchMeasuresInReview(
+      limit: string | number,
+      page: number,
+      sort: string,
+      direction: string,
+      searchCriteria?: MeasureSearchCriteria,
+      abortController?: AbortController
     ): Promise<any>;
 
     createVersion(id: string, versionType: string): Promise<any>;
@@ -349,6 +356,8 @@ declare module "@madie/madie-util" {
     onClose: () => void;
     entityType: "measure" | "library";
     entityId?: string;
+    entitySetId?: string;
+    onSuccess?: () => void | Promise<void>;
   }): React.ReactElement | null;
   export function getNewestMeasureInstance(measures: Measure[]): Measure;
 
