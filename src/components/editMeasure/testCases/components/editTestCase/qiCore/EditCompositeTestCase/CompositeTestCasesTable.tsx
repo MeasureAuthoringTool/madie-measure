@@ -1,5 +1,5 @@
 import { formatCmsId } from "@madie/madie-util";
-import React, { useMemo, useState, useEffect } from "react";
+import React, { useMemo, useState } from "react";
 import {
   ColumnDef,
   getCoreRowModel,
@@ -14,6 +14,7 @@ import {
   Pagination,
   Select,
   TextField,
+  Toggle,
 } from "@madie/madie-design-system/dist/react";
 import tw from "twin.macro";
 import "styled-components/macro";
@@ -21,8 +22,6 @@ import {
   InputAdornment,
   IconButton,
   MenuItem,
-  FormControlLabel,
-  Checkbox,
   Chip,
   Tooltip,
 } from "@mui/material";
@@ -45,6 +44,8 @@ export default function CompositeTestCasesTable({
   testCases,
   validTestCaseIds,
   selectedMeasure,
+  hideInvalidTestCases,
+  onHideInvalidTestCasesChange,
   onBackToMeasures,
   onViewTestCase,
   onInsertProfilesFromTestCase,
@@ -52,6 +53,8 @@ export default function CompositeTestCasesTable({
   testCases: TestCase[];
   validTestCaseIds: Set<string>;
   selectedMeasure: Measure;
+  hideInvalidTestCases: boolean;
+  onHideInvalidTestCasesChange: (hideInvalidTestCases: boolean) => void;
   onBackToMeasures: () => void;
   onViewTestCase?: (testCase: TestCase) => void;
   onInsertTestCase?: (testCase: TestCase) => void;
@@ -64,17 +67,6 @@ export default function CompositeTestCasesTable({
   const [searchText, setSearchText] = useState<string>("");
   const [page, setPage] = useState<number>(1);
   const [limit, setLimit] = useState<number>(10);
-  const [hideInvalidTestCases, setHideInvalidTestCases] =
-    useState<boolean>(false);
-
-  useEffect(() => {
-    const savedSetting = localStorage.getItem(
-      `hideInvalidTestCases-${selectedMeasure.id}`
-    );
-    if (savedSetting !== null) {
-      setHideInvalidTestCases(savedSetting === "true");
-    }
-  }, [selectedMeasure.id]);
 
   const visibleTestCases = useMemo(() => {
     if (hideInvalidTestCases) {
@@ -451,30 +443,15 @@ export default function CompositeTestCasesTable({
         </div>
         {/* Hide Invalid Test Cases Toggle */}
         <div tw="flex items-center" style={{ marginTop: "25px" }}>
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={hideInvalidTestCases}
-                onChange={(e) => {
-                  const newValue = e.target.checked;
-                  setHideInvalidTestCases(newValue);
-                  localStorage.setItem(
-                    `hideInvalidTestCases-${selectedMeasure.id}`,
-                    String(newValue)
-                  );
-                  setPage(1);
-                }}
-                data-testid="hide-invalid-test-cases-checkbox"
-                sx={{
-                  width: 24,
-                  height: 24,
-                }}
-              />
-            }
+          <Toggle
+            checked={hideInvalidTestCases}
+            data-testid="hide-invalid-test-cases-checkbox"
+            id="hide-invalid-test-cases"
             label="Hide invalid test cases"
-            sx={{
-              color: "#515151",
-              textTransform: "none",
+            onChange={(e) => {
+              const newValue = e.target.checked;
+              onHideInvalidTestCasesChange(newValue);
+              setPage(1);
             }}
           />
         </div>

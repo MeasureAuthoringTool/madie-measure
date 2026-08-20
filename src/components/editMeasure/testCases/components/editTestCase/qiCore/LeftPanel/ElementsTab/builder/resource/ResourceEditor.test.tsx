@@ -1,8 +1,6 @@
 import * as React from "react";
 import { render, screen, waitFor, within } from "@testing-library/react";
-import ResourceEditor, {
-  deleteMultipleCardinalityElement,
-} from "./ResourceEditor";
+import ResourceEditor from "./ResourceEditor";
 import { QiCoreResourceContext } from "../../../../../../../util/QiCorePatientProvider";
 import mockClaimResponseStructuredDef from "./mockSelectedResourceTree.json";
 import mockSelectedPatientTree from "./mockSelectedPatientTree.json";
@@ -1087,70 +1085,6 @@ describe("ResourceEditor", () => {
 
       /* Commented out: passing when test run individually, but failing when whole test file is run */
       // expect(screen.getByText("*name")).toBeInTheDocument();
-    });
-  });
-});
-describe("Test the ResourceEditor utility functions", () => {
-  const createMockResource = (resourceType: string, props: object) => ({
-    bundleEntry: { resource: { resourceType, ...props } },
-  });
-
-  describe("deleteMultipleCardinalityElement", () => {
-    it("should delete element by index from various name formats and not mutate original array", () => {
-      const mockDispatch = jest.fn();
-      const originalArray = [{ family: "Smith" }, { family: "Doe" }];
-      const mockResource = createMockResource("Patient", {
-        name: [...originalArray],
-      });
-
-      // Test required element format: " *name 1 "
-      deleteMultipleCardinalityElement(
-        " *name 1 ",
-        originalArray,
-        mockResource,
-        "Patient.name",
-        mockDispatch
-      );
-      expect(mockDispatch.mock.calls[0][0].payload.resource.name).toEqual([
-        { family: "Doe" },
-      ]);
-      expect(originalArray).toHaveLength(2); // not mutated
-
-      // Test non-required element format: "performer 2 "
-      mockDispatch.mockClear();
-      const performers = [{ actor: "A" }, { actor: "B" }];
-      const mockResource2 = createMockResource("Immunization", {
-        performer: [...performers],
-      });
-      deleteMultipleCardinalityElement(
-        "performer 2 ",
-        performers,
-        mockResource2,
-        "Immunization.performer",
-        mockDispatch
-      );
-      expect(mockDispatch.mock.calls[0][0].payload.resource.performer).toEqual([
-        { actor: "A" },
-      ]);
-    });
-
-    it("should remove property entirely when deleting last element", () => {
-      const mockDispatch = jest.fn();
-      const mockResource = createMockResource("Immunization", {
-        performer: [{ actor: { reference: "Practitioner/123" } }],
-      });
-
-      deleteMultipleCardinalityElement(
-        "performer",
-        [{ actor: { reference: "Practitioner/123" } }],
-        mockResource,
-        "Immunization.performer",
-        mockDispatch
-      );
-
-      expect(mockDispatch.mock.calls[0][0].payload.resource).not.toHaveProperty(
-        "performer"
-      );
     });
   });
 });

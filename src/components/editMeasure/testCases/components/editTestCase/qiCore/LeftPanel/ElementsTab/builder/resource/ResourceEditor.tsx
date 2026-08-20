@@ -39,6 +39,7 @@ import {
   Tabs,
 } from "@madie/madie-design-system/dist/react";
 import AddElementDialog from "./AddElementDialog";
+import { deleteMultipleCardinalityElement } from "./resourceEditorUtils";
 import useFhirDefinitionsServiceApi from "../../../../../../../api/useFhirDefinitionsService";
 import tw from "twin.macro";
 import "../../../../../../../../../../styles/VerticalSideBarNav.scss";
@@ -348,6 +349,7 @@ const ResourceEditor = ({
     setActiveTab,
     setLastAddedElemPath,
     lastAddedElemPath,
+    measureModel,
   ]);
 
   const addElements = (elements: ElementDefinition[] | null) => {
@@ -625,51 +627,4 @@ const ResourceEditor = ({
     </Box>
   );
 };
-export function deleteMultipleCardinalityElement(
-  elementName: string,
-  element: any[],
-  selectedResource: any,
-  path: string,
-  dispatch: React.Dispatch<any>
-) {
-  const nextEntry = _.cloneDeep(selectedResource.bundleEntry);
-  const strippedPath = path.includes(".")
-    ? path.substring(path.indexOf(".") + 1)
-    : path;
-
-  // If array is empty, just remove the property entirely
-  if (element.length === 0) {
-    _.unset(nextEntry.resource, strippedPath);
-    dispatch({
-      type: ResourceActionType.MODIFY_BUNDLE_ENTRY,
-      payload: nextEntry,
-    });
-    return;
-  }
-
-  // Extract index from elementName (e.g., "performer 1 ", " *name 2 ")
-  const match = elementName.match(/(\d+)\s*$/);
-  let idx: number;
-
-  if (match) {
-    idx = parseInt(match[1]) - 1; // Convert 1-based to 0-based
-  } else if (element.length === 1) {
-    idx = 0; // Single element arrays don't show index in name
-  }
-
-  if (idx >= 0 && idx < element.length) {
-    const updatedElement = element.filter((_, i) => i !== idx);
-
-    if (updatedElement.length === 0) {
-      _.unset(nextEntry.resource, strippedPath);
-    } else {
-      _.set(nextEntry.resource, strippedPath, updatedElement);
-    }
-
-    dispatch({
-      type: ResourceActionType.MODIFY_BUNDLE_ENTRY,
-      payload: nextEntry,
-    });
-  }
-}
 export default ResourceEditor;

@@ -63,6 +63,7 @@ export default function CompositeComponent({
       </div>
       <AddedComponentsTable
         components={componentDetails}
+        canEdit={canEdit}
         onDeleteComponent={handleComponentDelete}
       />
     </div>
