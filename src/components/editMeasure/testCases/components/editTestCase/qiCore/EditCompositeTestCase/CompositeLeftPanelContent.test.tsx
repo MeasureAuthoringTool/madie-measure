@@ -62,8 +62,28 @@ jest.mock("../../../../api/useTestCaseServiceApi", () => ({
 // --- Mock essential child UI components for test isolation ---
 jest.mock("./CompositeTestCasesTable", () => ({
   __esModule: true,
-  default: ({ onInsertProfilesFromTestCase }) => (
+  default: ({
+    hideInvalidTestCases,
+    onBackToMeasures,
+    onHideInvalidTestCasesChange,
+    onInsertProfilesFromTestCase,
+  }) => (
     <div data-testid="composite-test-cases-panel">
+      <span data-testid="hide-invalid-test-cases-state">
+        {String(hideInvalidTestCases)}
+      </span>
+      <button
+        data-testid="toggle-hide-invalid-test-cases"
+        onClick={() => onHideInvalidTestCasesChange?.(!hideInvalidTestCases)}
+      >
+        Toggle hide invalid test cases
+      </button>
+      <button
+        data-testid="back-to-composite-profiles"
+        onClick={onBackToMeasures}
+      >
+        Back to composite profiles
+      </button>
       <button
         data-testid="trigger-insert-callback"
         onClick={() =>
@@ -180,6 +200,37 @@ describe("CompositeLeftPanelContent", () => {
     render(<CompositeLeftPanelContent {...baseProps} />);
 
     expect(screen.getByTestId("available-panel")).toBeInTheDocument();
+  });
+
+  it("retains the hide invalid test cases toggle when returning to composite profiles", async () => {
+    (useQiCoreResource as jest.Mock).mockReturnValue({
+      state: { bundle: { entry: [] } },
+      dispatch: mockDispatch,
+    });
+    render(<CompositeLeftPanelContent {...baseProps} />);
+
+    await openInsertAndRenderCases();
+    expect(
+      screen.getByTestId("hide-invalid-test-cases-state")
+    ).toHaveTextContent("false");
+
+    userEvent.click(screen.getByTestId("toggle-hide-invalid-test-cases"));
+    expect(
+      screen.getByTestId("hide-invalid-test-cases-state")
+    ).toHaveTextContent("true");
+
+    userEvent.click(screen.getByTestId("back-to-composite-profiles"));
+    await waitFor(() => {
+      expect(
+        screen.getByTestId("select-measure-for-test-cases")
+      ).toBeInTheDocument();
+    });
+
+    userEvent.click(screen.getByTestId("select-measure-for-test-cases"));
+    await screen.findByTestId("composite-test-cases-panel");
+    expect(
+      screen.getByTestId("hide-invalid-test-cases-state")
+    ).toHaveTextContent("true");
   });
 
   it("renders json tab", () => {

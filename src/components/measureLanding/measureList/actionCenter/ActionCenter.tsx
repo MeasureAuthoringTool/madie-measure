@@ -115,7 +115,8 @@ export default function ActionCenter(props: PropTypes) {
 
   const exportMeasure = useCallback(
     (exportType: string) => {
-      const elmErrorSeverity = exportType === "Export" ? "Info" : "Error";
+      const elmErrorSeverity =
+        exportType === "Executable Export" ? "Info" : "Error";
       if (measures?.length === 1) {
         updateTargetMeasure(measures[0]);
         onExportMeasure(elmErrorSeverity);

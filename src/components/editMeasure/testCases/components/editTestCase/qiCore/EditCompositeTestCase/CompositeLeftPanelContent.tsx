@@ -36,6 +36,8 @@ const CompositeLeftPanelContent = ({
   const testCaseService = useRef(useTestCaseServiceApi());
   const [selectedMeasure, setSelectedMeasure] = useState<Measure | null>(null);
   const [testCases, setTestCases] = useState<TestCase[]>([]);
+  const [hideInvalidTestCases, setHideInvalidTestCases] =
+    useState<boolean>(false);
   const [loadingTestCases, setLoadingTestCases] = useState(false);
   const [howItWorksOpen, setHowItWorksOpen] = useState<boolean>(false);
   const [viewTestCaseModalOpen, setViewTestCaseModalOpen] =
@@ -236,6 +238,8 @@ const CompositeLeftPanelContent = ({
                     testCases={testCases}
                     validTestCaseIds={validTestCaseIds}
                     selectedMeasure={selectedMeasure}
+                    hideInvalidTestCases={hideInvalidTestCases}
+                    onHideInvalidTestCasesChange={setHideInvalidTestCases}
                     onBackToMeasures={handleBackToMeasures}
                     onInsertProfilesFromTestCase={
                       handleInsertingProfilesIntoTestCase

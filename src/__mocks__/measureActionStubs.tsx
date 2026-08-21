@@ -20,16 +20,16 @@ export const ExportAction = ({ onClick }: any) => (
     <div
       role="menuitem"
       tabIndex={0}
-      onClick={() => onClick && onClick("Export")}
+      onClick={() => onClick && onClick("Executable Export")}
     >
-      Export
+      Executable Export
     </div>
     <div
       role="menuitem"
       tabIndex={0}
-      onClick={() => onClick && onClick("Export for Publishing")}
+      onClick={() => onClick && onClick("Publishable Export")}
     >
-      Export for Publishing
+      Publishable Export
     </div>
   </div>
 );

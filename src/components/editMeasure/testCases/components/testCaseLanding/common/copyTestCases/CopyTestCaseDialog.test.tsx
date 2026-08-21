@@ -341,7 +341,6 @@ describe("Copy Test Case Dialog Component", () => {
     expect(mockSearchMeasuresByCriteriaFn).toHaveBeenNthCalledWith(
       2, // Second call
       ["OWNED", "SHARED"],
-      false,
       5,
       0,
       "lastModifiedAt",
@@ -364,7 +363,6 @@ describe("Copy Test Case Dialog Component", () => {
     expect(mockSearchMeasuresByCriteriaFn).toHaveBeenNthCalledWith(
       3,
       ["OWNED", "SHARED"],
-      false,
       5,
       0,
       "lastModifiedAt",
@@ -386,7 +384,6 @@ describe("Copy Test Case Dialog Component", () => {
     expect(mockSearchMeasuresByCriteriaFn).toHaveBeenNthCalledWith(
       4,
       ["OWNED", "SHARED"],
-      false,
       5,
       0,
       "lastModifiedAt",
