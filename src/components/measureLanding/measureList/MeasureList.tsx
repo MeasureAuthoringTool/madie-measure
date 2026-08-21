@@ -54,7 +54,10 @@ import versionErrorHelper from "../../../utils/versionErrorHelper";
 import InvalidMeasureNameDialog from "./InvalidMeasureNameDialog/InvalidMeasureNameDialog";
 import getLibraryNameErrors from "./InvalidMeasureNameDialog/getLibraryNameErrors";
 import AssociateCmsIdDialog from "./associateCmsIdDialog/AssociateCmsIdDialog";
-import ActionCenter from "./actionCenter/ActionCenter";
+import ActionCenter, {
+  ALL_REVIEWS_TAB,
+  MY_REVIEWS_TAB,
+} from "./actionCenter/ActionCenter";
 import {
   ExpandIcon,
   CollapseIcon,
@@ -66,9 +69,6 @@ import { MeasureSearchCriteria } from "../MeasureLanding";
 import queryString from "query-string";
 import { getTabStorageKey } from "../measureLandingUtils";
 import ReviewDialog from "../../common/reviewDialog/ReviewDialog";
-
-const ALL_REVIEWS_TAB = 3;
-const MY_REVIEWS_TAB = 4;
 
 const COMPONENT_MEASURE_MSG =
   "This measure is a component of a composite measure";
