@@ -214,11 +214,6 @@ export default function ActionCenter(props: PropTypes) {
     </span>
   );
 
-  // "My Reviews" is a read-only to-do list, so it offers no actions at all.
-  if (activeTab === MY_REVIEWS_TAB) {
-    return <div data-testid="action-center" />;
-  }
-
   return (
     <div data-testid="action-center">
       <DeleteAction
