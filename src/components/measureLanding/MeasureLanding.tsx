@@ -46,6 +46,12 @@ const ownershipTypeMap: Record<number, OwnershipType> = {
 };
 
 const REVIEWS_TAB = 3;
+const MY_REVIEWS_TAB = 4;
+
+const reviewOwnershipTypeMap: Record<number, OwnershipType> = {
+  [REVIEWS_TAB]: OwnershipType.ALL,
+  [MY_REVIEWS_TAB]: OwnershipType.OWNED,
+};
 
 export default function MeasureLanding() {
   useDocumentTitle("MADiE Measures");
@@ -60,6 +66,7 @@ export default function MeasureLanding() {
   const [sharedMeasuresCount, setSharedMeasuresCount] = useState<number>(0);
   const [allMeasuresCount, setAllMeasuresCount] = useState<number>(0);
   const [allReviewsCount, setAllReviewsCount] = useState<number>(0);
+  const [myReviewsCount, setMyReviewsCount] = useState<number>(0);
 
   // utilities for pagination
   const values = queryString.parse(search);
@@ -155,6 +162,7 @@ export default function MeasureLanding() {
         setSharedMeasuresCount(data.sharedMeasures);
         setAllMeasuresCount(data.allMeasures);
         setAllReviewsCount(data.allReviews);
+        setMyReviewsCount(data.myReviews);
       })
       .catch((error) => {
         if (error.message !== "canceled") {
@@ -188,27 +196,27 @@ export default function MeasureLanding() {
       const currentRequestId = ++requestIdRef.current;
 
       try {
-        const data =
-          tab === REVIEWS_TAB
-            ? await measureServiceApi.searchMeasuresInReview(
-                limit,
-                page,
-                sort,
-                direction,
-                searchCriteria,
-                abortController.current as AbortController
-              )
-            : await measureServiceApi.searchMeasuresByCriteria(
-                ownershipTypeMap[tab]
-                  ? [ownershipTypeMap[tab]]
-                  : [OwnershipType.ALL],
-                limit,
-                page,
-                sort,
-                direction,
-                searchCriteria,
-                abortController.current as AbortController
-              );
+        const data = reviewOwnershipTypeMap[tab]
+          ? await measureServiceApi.searchMeasuresInReview(
+              [reviewOwnershipTypeMap[tab]],
+              limit,
+              page,
+              sort,
+              direction,
+              searchCriteria,
+              abortController.current as AbortController
+            )
+          : await measureServiceApi.searchMeasuresByCriteria(
+              ownershipTypeMap[tab]
+                ? [ownershipTypeMap[tab]]
+                : [OwnershipType.ALL],
+              limit,
+              page,
+              sort,
+              direction,
+              searchCriteria,
+              abortController.current as AbortController
+            );
 
         if (currentRequestId === requestIdRef.current) {
           setPageProps(data);
@@ -420,6 +428,17 @@ export default function MeasureLanding() {
                   type="B"
                   label={"All Reviews (" + allReviewsCount + ")"}
                   data-testid="all-measures-tab"
+                  onClick={() => {
+                    setCurrentPage(0);
+                  }}
+                />
+              )}
+              {userRoles.isReviewer && (
+                <Tab
+                  tabIndex={0}
+                  type="B"
+                  label={"My Reviews (" + myReviewsCount + ")"}
+                  data-testid="my-reviews-tab"
                   onClick={() => {
                     setCurrentPage(0);
                   }}

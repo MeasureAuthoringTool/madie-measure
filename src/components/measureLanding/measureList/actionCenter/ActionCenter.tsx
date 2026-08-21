@@ -19,6 +19,7 @@ import {
 import ReviewAction from "./reviewAction/ReviewAction";
 
 const ALL_REVIEWS_TAB = 3;
+const MY_REVIEWS_TAB = 4;
 
 // Helper to check if user owns all selected measures
 const isOwnerOfAllMeasures = (measures: Measure[]) => {
@@ -212,6 +213,11 @@ export default function ActionCenter(props: PropTypes) {
       |
     </span>
   );
+
+  // "My Reviews" is a read-only to-do list, so it offers no actions at all.
+  if (activeTab === MY_REVIEWS_TAB) {
+    return <div data-testid="action-center" />;
+  }
 
   return (
     <div data-testid="action-center">

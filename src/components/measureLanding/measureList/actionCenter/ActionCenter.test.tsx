@@ -144,6 +144,41 @@ describe("ActionCenter", () => {
     expect(screen.queryByTestId("review-action-btn")).not.toBeInTheDocument();
   });
 
+  it("should not render any action on the My Reviews tab", () => {
+    mockCheckUserCanEdit.mockReturnValue(true);
+
+    render(
+      <ActionCenter
+        measures={[qdmMeasure]}
+        associateCmsId={jest.fn()}
+        exportMeasure={jest.fn()}
+        updateTargetMeasure={jest.fn()}
+        setCreateVersionDialog={jest.fn()}
+        setDraftMeasureDialog={jest.fn()}
+        setDeleteMeasureDialog={jest.fn()}
+        setShareDialog={jest.fn}
+        deleteMeasure={jest.fn()}
+        setViewHumanReadableModal={jest.fn()}
+        activeTab={4}
+        setTransferDialog={jest.fn()}
+      />
+    );
+
+    expect(screen.getByTestId("action-center")).toBeInTheDocument();
+    expect(screen.getByTestId("action-center")).toBeEmptyDOMElement();
+    [
+      "delete-action-btn",
+      "share-action-btn",
+      "export-action-btn",
+      "draft-action-btn",
+      "version-action-btn",
+      "associate-cms-id-action-btn",
+      "review-action-btn",
+    ].forEach((testId) =>
+      expect(screen.queryByTestId(testId)).not.toBeInTheDocument()
+    );
+  });
+
   it("should render all action components", () => {
     mockCheckUserCanEdit.mockReturnValue(true);
 

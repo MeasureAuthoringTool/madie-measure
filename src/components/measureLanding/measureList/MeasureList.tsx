@@ -67,6 +67,9 @@ import queryString from "query-string";
 import { getTabStorageKey } from "../measureLandingUtils";
 import ReviewDialog from "../../common/reviewDialog/ReviewDialog";
 
+const ALL_REVIEWS_TAB = 3;
+const MY_REVIEWS_TAB = 4;
+
 const COMPONENT_MEASURE_MSG =
   "This measure is a component of a composite measure";
 
@@ -182,14 +185,20 @@ export default function MeasureList(props: {
   const userServiceApi = useRef(useUserServiceApi()).current; //needs to be ref or triggers jest. throws warn
   const featureFlags = useFeatureFlags();
 
+  // The reviewer tabs are all about the review status, so they always show it;
+  // on the owned/shared tabs it rides on the feature flag.
+  const isReviewTab =
+    props.activeTab === ALL_REVIEWS_TAB || props.activeTab === MY_REVIEWS_TAB;
+  const showReviewStatus =
+    isReviewTab ||
+    (!!featureFlags?.MeasureReviewStatus && props.activeTab !== 2);
+
   const filterByOpts = [
     "Measure",
     "Model",
     "Version",
     "CMS ID",
-    ...(featureFlags?.MeasureReviewStatus && props.activeTab !== 2
-      ? ["Review"]
-      : []),
+    ...(showReviewStatus ? ["Review"] : []),
   ];
   const filterMap: Record<string, string> = {
     Measure: "measureName",
@@ -510,7 +519,7 @@ export default function MeasureList(props: {
         new Date(rowA.original.actions.lastModifiedAt).getTime() -
         new Date(rowB.original.actions.lastModifiedAt).getTime(),
     },
-    ...(featureFlags?.MeasureReviewStatus && props.activeTab !== 2
+    ...(showReviewStatus
       ? [
           {
             header: "Review",
@@ -735,7 +744,7 @@ export default function MeasureList(props: {
     selectedIdForExpansion,
     isRowExpanded,
     props.activeTab,
-    featureFlags?.MeasureReviewStatus,
+    showReviewStatus,
   ]);
 
   const expandedcolumns = useMemo<ColumnDef<TCRow>[]>(() => {

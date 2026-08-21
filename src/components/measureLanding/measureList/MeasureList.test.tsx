@@ -3984,6 +3984,45 @@ describe("Review Status", () => {
     ).not.toBeInTheDocument();
   });
 
+  it("should display the Review column on the reviewer tabs even with the feature flag off", async () => {
+    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
+      MeasureReviewStatus: false,
+    }));
+    renderReviewList(4);
+
+    expect(
+      await screen.findByRole("columnheader", { name: /review/i })
+    ).toBeInTheDocument();
+  });
+
+  it("should display the My Reviews columns", async () => {
+    renderReviewList(4);
+
+    await screen.findByText(measuresWithReview[0].measureName);
+    for (const header of [
+      /measure/i,
+      /version/i,
+      /status/i,
+      /model/i,
+      /shared/i,
+      /cms id/i,
+      /updated/i,
+      /review/i,
+      /action/i,
+    ]) {
+      expect(
+        screen.getAllByRole("columnheader", { name: header }).length
+      ).toBeGreaterThan(0);
+    }
+    // Owner is not one of them, and rows are selectable
+    expect(
+      screen.queryByRole("columnheader", { name: /owner/i })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByTestId(`checkbox-${measuresWithReview[0].id}`)
+    ).toBeInTheDocument();
+  });
+
   it("should offer Review as a filter option when the feature flag is on", async () => {
     renderReviewList(0);
 
