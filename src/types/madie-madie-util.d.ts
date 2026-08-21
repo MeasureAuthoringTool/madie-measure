@@ -147,7 +147,7 @@ declare module "@madie/madie-util" {
   export class MeasureServiceApi {
     constructor(baseUrl: string, getAccessToken: () => string);
     fetchMeasure(id: string): Promise<Measure>;
-    fetchMeasureBundle(measure: Measure): Promise<Bundle>;
+    fetchMeasureBundle(measure: Measure, bundleType?: string): Promise<Bundle>;
     getMeasuresByMeasureSetId(
       measureSetId: string,
       sortByLatestVersion?: boolean,
@@ -370,7 +370,8 @@ declare module "@madie/madie-util" {
     setToastOpen: (open: boolean) => void,
     setToastType: (type: string) => void,
     setToastMessage: (message: string) => void,
-    elmErrorSeverity: string
+    elmErrorSeverity: string,
+    bundleType?: string
   ): Promise<void>;
   export function downloadZipFile(
     exportData: any,
