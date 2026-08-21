@@ -134,7 +134,7 @@ const TestCaseRoutes = () => {
         !localErrors.length
       ) {
         measureService.current
-          .fetchMeasureBundle(measure)
+          .fetchMeasureBundle(measure, "calculation")
           .then((bundle: Bundle) => {
             setMeasureBundle(bundle);
           })
