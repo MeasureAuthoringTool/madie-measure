@@ -128,7 +128,7 @@ export const ExportAction = ({ onClick }: any) => (
     role="button"
     tabIndex={0}
     data-testid="export-action"
-    onClick={() => onClick && onClick("Export")}
+    onClick={() => onClick && onClick("Executable Export")}
   >
     Export Action
   </div>

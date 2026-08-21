@@ -2382,7 +2382,7 @@ describe("Measure List component", () => {
     const errorPayload = {
       timestamp: "2025-04-07T00:30:16.103+00:00",
       message:
-        'Measure cannot be exported for publishing because it was versioned prior to MADiE version 2.2.0. Please use a newer version or select "Export" for this measure.',
+        'Measure cannot be exported for publishing because it was versioned prior to MADiE version 2.2.0. Please use a newer version or select "Executable Export" for this measure.',
       status: 404,
       error: "Bad Request",
     };
