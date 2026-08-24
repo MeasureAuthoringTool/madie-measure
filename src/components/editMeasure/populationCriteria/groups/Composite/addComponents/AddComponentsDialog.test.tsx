@@ -2156,4 +2156,67 @@ describe("AddComponentsDialog", () => {
       });
     }
   });
+
+  it("renders translator column and translator version values in main rows", async () => {
+    const mainRowData = [
+      {
+        id: "main-1",
+        measureName: "Translator Main 1",
+        version: "1.0.0",
+        model: "QI-Core v4.1.1",
+        measureSet: { cmsId: 111 },
+        measureSetId: "set-1",
+        lastModifiedAt: "2024-01-01",
+        hasAssociatedMeasures: false,
+        translatorVersion: "1.5.001",
+      },
+      {
+        id: "main-2",
+        measureName: "Translator Main 2",
+        version: "2.0.0",
+        model: "QDM v5.6",
+        measureSet: { cmsId: 222 },
+        measureSetId: "set-2",
+        lastModifiedAt: "2024-01-02",
+        hasAssociatedMeasures: false,
+        translatorVersion: "2.7.000",
+      },
+    ];
+
+    const mockSearchMeasures = jest.fn().mockResolvedValue({
+      content: mainRowData,
+      totalPages: 1,
+      totalElements: 2,
+      numberOfElements: 2,
+      pageable: { offset: 0 },
+    });
+
+    useMeasureServiceApi.mockReturnValue({
+      searchMeasuresByCriteria: mockSearchMeasures,
+      getMeasuresByMeasureSetId: jest.fn(),
+    });
+
+    render(
+      <AddComponentsDialog
+        open={true}
+        onClose={onCloseMock}
+        measure={mockMeasure}
+        compositeScoring="Opportunity"
+        components={[]}
+        submitComponentForm={jest.fn()}
+      />
+    );
+
+    await waitFor(() => {
+      expect(mockSearchMeasures).toHaveBeenCalled();
+    });
+
+    expect(
+      screen.getByRole("columnheader", {
+        name: /translator/i,
+      })
+    ).toBeInTheDocument();
+    expect(screen.getByText("1.5.001")).toBeInTheDocument();
+    expect(screen.getByText("2.7.000")).toBeInTheDocument();
+  });
 });
