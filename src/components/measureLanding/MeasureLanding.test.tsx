@@ -972,7 +972,7 @@ describe("Measure Page", () => {
     test("shouldDisplayReviewsTabForReviewers", async () => {
       // Mock useUserRoles to return isReviewer: true
       const mockUseUserRoles = require("@madie/madie-util").useUserRoles;
-      mockUseUserRoles.mockReturnValueOnce({
+      mockUseUserRoles.mockReturnValue({
         roles: ["reviewer"],
         isAdmin: false,
         isReviewer: true,
@@ -980,9 +980,17 @@ describe("Measure Page", () => {
 
       renderRouter(["/measures?tab=0&page=1&limit=10"]);
 
-      await waitFor(() => {
-        const allReviewsTab = screen.queryByTestId("all-measures-tab");
-        expect(allReviewsTab).toBeInTheDocument();
+      const allReviewsTab = await screen.findByTestId("all-reviews-tab");
+      expect(allReviewsTab).toBeInTheDocument();
+      expect(allReviewsTab).toHaveTextContent("All Reviews (4)");
+      expect(screen.getByTestId("all-measures-tab")).toHaveTextContent(
+        "All Measures (10)"
+      );
+
+      mockUseUserRoles.mockReturnValue({
+        roles: [],
+        isAdmin: false,
+        isReviewer: false,
       });
     });
 
@@ -995,6 +1003,8 @@ describe("Measure Page", () => {
         ).toHaveBeenCalled();
       });
 
+      expect(screen.queryByTestId("all-reviews-tab")).not.toBeInTheDocument();
+      expect(screen.getByTestId("all-measures-tab")).toBeInTheDocument();
       const tabs = screen.getAllByRole("tab");
       expect(tabs.length).toBe(3);
     });

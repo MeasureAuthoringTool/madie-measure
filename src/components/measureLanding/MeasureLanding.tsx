@@ -427,7 +427,7 @@ export default function MeasureLanding() {
                   tabIndex={0}
                   type="B"
                   label={"All Reviews (" + allReviewsCount + ")"}
-                  data-testid="all-measures-tab"
+                  data-testid="all-reviews-tab"
                   onClick={() => {
                     setCurrentPage(0);
                   }}
