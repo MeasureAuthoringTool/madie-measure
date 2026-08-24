@@ -185,8 +185,6 @@ export default function MeasureList(props: {
   const userServiceApi = useRef(useUserServiceApi()).current; //needs to be ref or triggers jest. throws warn
   const featureFlags = useFeatureFlags();
 
-  // The reviewer tabs are all about the review status, so they always show it;
-  // on the owned/shared tabs it rides on the feature flag.
   const isReviewTab =
     props.activeTab === ALL_REVIEWS_TAB || props.activeTab === MY_REVIEWS_TAB;
   const showReviewStatus =

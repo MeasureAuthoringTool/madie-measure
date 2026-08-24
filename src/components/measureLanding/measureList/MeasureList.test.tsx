@@ -4014,7 +4014,6 @@ describe("Review Status", () => {
         screen.getAllByRole("columnheader", { name: header }).length
       ).toBeGreaterThan(0);
     }
-    // Owner is not one of them, and rows are selectable
     expect(
       screen.queryByRole("columnheader", { name: /owner/i })
     ).not.toBeInTheDocument();

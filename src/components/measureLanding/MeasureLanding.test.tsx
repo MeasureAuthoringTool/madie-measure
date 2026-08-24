@@ -1095,7 +1095,6 @@ describe("Measure Page", () => {
         name: "My Reviews (2)",
       });
       expect(myReviewsTab).toBeInTheDocument();
-      // it sits to the right of the All Reviews tab
       const tabs = screen.getAllByRole("tab");
       expect(tabs[tabs.length - 1]).toBe(myReviewsTab);
       expect(tabs[tabs.length - 2]).toHaveTextContent("All Reviews (4)");
