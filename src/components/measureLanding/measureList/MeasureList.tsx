@@ -1417,7 +1417,9 @@ export default function MeasureList(props: {
           entitySetId={selectedMeasures[0]?.measureSetId}
           onClose={handleReviewDialogClose}
           onSuccess={() => {
-            doUpdateList();
+            // Saving a review moves the measure on and off the reviewer tabs, so the
+            // tab counts have to be refetched along with the list.
+            doUpdateList(true);
             table.resetRowSelection();
             setSelectedExpandedMeasuresIds([]);
             setIsRowExpanded(false);
@@ -1431,7 +1433,9 @@ export default function MeasureList(props: {
           measure={selectedMeasures[0]}
           onClose={handleReviewDialogClose}
           onSuccess={() => {
-            doUpdateList();
+            // Saving a review moves the measure on and off the reviewer tabs, so the
+            // tab counts have to be refetched along with the list.
+            doUpdateList(true);
             table.resetRowSelection();
             setSelectedExpandedMeasuresIds([]);
             setIsRowExpanded(false);

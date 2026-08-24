@@ -33,6 +33,7 @@ import {
   useFeatureFlags,
   checkUserCanEdit,
   useUserServiceApi,
+  useUserRoles,
   MeasureServiceApi,
   ServiceConfig,
 } from "@madie/madie-util";
@@ -52,6 +53,8 @@ const mockOktaTokenApi = {
   getAccessToken: jest.fn().mockResolvedValue("test.jwt"),
   getUserName: jest.fn().mockReturnValue("test user"),
 };
+
+let mockCapturedManageReviewOnSuccess: (() => void | Promise<void>) | undefined;
 
 jest.mock("@madie/madie-util", () => ({
   ...mockCmsIdStubs,
@@ -153,10 +156,12 @@ jest.mock("@madie/madie-util", () => ({
   ),
   TransferDialog: ({ open }: any) =>
     open ? <div data-testid="transfer-dialog">Transfer Dialog</div> : null,
-  ManageReviewDialog: ({ open }: any) =>
-    open ? (
+  ManageReviewDialog: ({ open, onSuccess }: any) => {
+    mockCapturedManageReviewOnSuccess = onSuccess;
+    return open ? (
       <div data-testid="manage-review-dialog">Manage Review Dialog</div>
-    ) : null,
+    ) : null;
+  },
 }));
 
 jest.mock("../../common/createVersionDialog/CreateVersionDialog", () => ({
@@ -4055,6 +4060,29 @@ describe("Review Status", () => {
     expect(mockCapturedReviewOnSuccess).toBeDefined();
   });
 
+  it("should refetch the tab counts after a reviewer saves a review", async () => {
+    (useUserRoles as jest.Mock).mockReturnValue({
+      roles: ["MADiE-Reviewer"],
+      isAdmin: false,
+      isReviewer: true,
+    });
+    renderReviewList(0);
+    await screen.findByText(measuresWithReview[0].measureName);
+
+    retrieveMeasuresMock.mockClear();
+    await act(async () => {
+      await mockCapturedManageReviewOnSuccess!();
+    });
+
+    await waitFor(() => {
+      expect(retrieveMeasuresMock).toHaveBeenCalledTimes(1);
+    });
+    // the last argument asks for the tab counts to be refetched, since saving a review
+    // moves the measure on and off the All Reviews and My Reviews tabs
+    expect(retrieveMeasuresMock.mock.calls[0][6]).toBe(true);
+    (useUserRoles as jest.Mock).mockReturnValue({ roles: [], isAdmin: false });
+  });
+
   it("should refetch the measure list after a review is saved so the status updates without a page refresh", async () => {
     renderReviewList(0);
     await screen.findByText(measuresWithReview[0].measureName);
@@ -4067,5 +4095,8 @@ describe("Review Status", () => {
     await waitFor(() => {
       expect(retrieveMeasuresMock).toHaveBeenCalledTimes(1);
     });
+    // the last argument asks for the tab counts to be refetched, since saving a review
+    // moves the measure on and off the All Reviews and My Reviews tabs
+    expect(retrieveMeasuresMock.mock.calls[0][6]).toBe(true);
   });
 });
