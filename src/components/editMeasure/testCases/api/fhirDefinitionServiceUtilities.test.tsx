@@ -223,6 +223,70 @@ describe("FhirDefinitionServiceUtilities", () => {
       ).toBeUndefined();
     });
 
+    it("should exclude nested extension slices and keep only top-level extension slices", () => {
+      const resourceWithNestedExtensionSlices = _.cloneDeep(mockResource);
+      resourceWithNestedExtensionSlices.definition.snapshot.element.push(
+        {
+          id: "Patient.address.extension:address-preferred",
+          path: "Patient.address.extension",
+          sliceName: "address-preferred",
+          min: 0,
+          type: [
+            {
+              code: "Extension",
+              profile: [
+                "http://hl7.org/fhir/StructureDefinition/address-preferred",
+              ],
+            },
+          ],
+        } as any,
+        {
+          id: "Patient.telecom.extension:contactpoint-comment",
+          path: "Patient.telecom.extension",
+          sliceName: "contactpoint-comment",
+          min: 0,
+          type: [
+            {
+              code: "Extension",
+              profile: [
+                "http://hl7.org/fhir/StructureDefinition/contactpoint-comment",
+              ],
+            },
+          ],
+        } as any,
+        {
+          id: "Patient.extension:ethnicity",
+          path: "Patient.extension",
+          sliceName: "ethnicity",
+          min: 0,
+          type: [
+            {
+              code: "Extension",
+              profile: [
+                "http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethnicity",
+              ],
+            },
+          ],
+        } as any
+      );
+
+      const result = getTopLevelElements(resourceWithNestedExtensionSlices);
+
+      expect(
+        result.find(
+          (el) => el.id === "Patient.address.extension:address-preferred"
+        )
+      ).toBeUndefined();
+      expect(
+        result.find(
+          (el) => el.id === "Patient.telecom.extension:contactpoint-comment"
+        )
+      ).toBeUndefined();
+      expect(
+        result.find((el) => el.id === "Patient.extension:ethnicity")
+      ).toBeDefined();
+    });
+
     it("should handle elements without colons normally", () => {
       const result = getTopLevelElements(mockResource);
 
