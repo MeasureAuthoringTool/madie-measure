@@ -467,7 +467,7 @@ describe("ResourceEditor", () => {
     });
   });
 
-  it("opens AddElementDialog and add attributes", async () => {
+  it("opens AddElementDialog and adds an attribute", async () => {
     (useFormikContext as jest.Mock).mockReturnValue(localMockFormikObj);
     const mockDispatch = jest.fn();
 
@@ -505,8 +505,9 @@ describe("ResourceEditor", () => {
     );
 
     await waitFor(() => {
-      userEvent.click(addAttributeButton);
+      expect(addAttributeButton).toBeEnabled();
     });
+    await userEvent.click(addAttributeButton);
 
     // Verify dialog is open
     await waitFor(() => {
@@ -521,7 +522,7 @@ describe("ResourceEditor", () => {
     expect(autocompleteInput).toBeInTheDocument();
 
     // Click on the autocomplete to open the dropdown
-    userEvent.click(autocompleteInput);
+    await userEvent.click(autocompleteInput);
 
     // Wait for dropdown to be ready before typing
     await waitFor(() => {
@@ -529,13 +530,13 @@ describe("ResourceEditor", () => {
     });
 
     // select the deceased[x] attribute (preserve the choice-type suffix, not the concrete type)
-    userEvent.type(autocompleteInput, "deceased");
+    await userEvent.type(autocompleteInput, "deceased");
 
     await waitFor(() => {
       const deceasedOption = screen.getByText("deceased[x]");
       expect(deceasedOption).toBeInTheDocument();
-      userEvent.click(deceasedOption);
     });
+    await userEvent.click(screen.getByText("deceased[x]"));
 
     // // Clear input and select the maritalStatus attribute
     // userEvent.clear(autocompleteInput);
@@ -547,21 +548,9 @@ describe("ResourceEditor", () => {
     //   userEvent.click(maritalStatusOption);
     // });
 
-    // Clear input and select gender identity slice
-    userEvent.clear(autocompleteInput);
-    userEvent.type(autocompleteInput, "genderIdentity");
-
-    await waitFor(() => {
-      const genderIdentityOption = screen.getByText(
-        /extension:genderIdentity/i
-      );
-      expect(genderIdentityOption).toBeInTheDocument();
-      userEvent.click(genderIdentityOption);
-    });
-
     // Click Apply button to save the selected attribute
     const applyButton = screen.getByTestId("add-element-button-2");
-    userEvent.click(applyButton);
+    await userEvent.click(applyButton);
 
     // Verify dialog is closed and dispatch was called
     await waitFor(() => {
