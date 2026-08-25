@@ -164,6 +164,7 @@ declare module "@madie/madie-util" {
       abortController: AbortController
     ): Promise<any>;
     searchMeasuresInReview(
+      ownershipTypes: OwnershipType[],
       limit: string | number,
       page: number,
       sort: string,
