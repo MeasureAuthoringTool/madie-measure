@@ -294,6 +294,54 @@ describe("deleteMultipleCardinalityElement", () => {
         },
       ]);
     });
+
+    it("deletes extension when canonical URL includes a version suffix", () => {
+      const array = [
+        {
+          url: "http://hl7.org/fhir/us/core/StructureDefinition/us-core-birthsex",
+          valueCode: "M",
+        },
+        {
+          url: "http://hl7.org/fhir/us/core/StructureDefinition/us-core-genderIdentity",
+          valueCodeableConcept: { text: "nonbinary" },
+        },
+        {
+          url: "http://hl7.org/fhir/us/core/StructureDefinition/us-core-sex",
+          valueCode: "248152002",
+        },
+        {
+          url: "http://hl7.org/fhir/us/core/StructureDefinition/us-core-tribal-affiliation|6.1.0",
+          extension: [],
+        },
+      ];
+      const resource = createMockResource("Patient", {
+        extension: _.cloneDeep(array),
+      });
+
+      deleteMultipleCardinalityElement(
+        "Extension (Tribal Affiliation)",
+        array,
+        resource,
+        "Patient.extension",
+        mockDispatch
+      );
+
+      expect(mockDispatch).toHaveBeenCalledTimes(1);
+      expect(mockDispatch.mock.calls[0][0].payload.resource.extension).toEqual([
+        {
+          url: "http://hl7.org/fhir/us/core/StructureDefinition/us-core-birthsex",
+          valueCode: "M",
+        },
+        {
+          url: "http://hl7.org/fhir/us/core/StructureDefinition/us-core-genderIdentity",
+          valueCodeableConcept: { text: "nonbinary" },
+        },
+        {
+          url: "http://hl7.org/fhir/us/core/StructureDefinition/us-core-sex",
+          valueCode: "248152002",
+        },
+      ]);
+    });
   });
 
   describe("no match found", () => {

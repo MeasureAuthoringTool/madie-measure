@@ -308,7 +308,7 @@ export default function EditMeasure() {
   useEffect(() => {
     const exportListener = async (event: CustomEvent) => {
       if (event instanceof CustomEvent && event.detail) {
-        const { elmErrorSeverity } = event.detail;
+        const { elmErrorSeverity, bundleType } = event.detail;
         try {
           const measure = await measureServiceApi.fetchMeasure(measureId);
           await exportMeasure(
@@ -320,7 +320,8 @@ export default function EditMeasure() {
             setToastOpen,
             setToastType,
             setToastMessage,
-            elmErrorSeverity
+            elmErrorSeverity,
+            bundleType
           );
         } catch (error) {
           console.error("Error fetching measure:", error);
