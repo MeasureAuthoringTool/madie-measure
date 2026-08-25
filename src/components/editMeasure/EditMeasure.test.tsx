@@ -1,4 +1,5 @@
 import * as mockCmsIdStubs from "../../__mocks__/cmsIdFormatterStubs";
+import * as mockCompositeStubs from "../../__mocks__/compositeValidationStubs";
 import * as React from "react";
 import {
   render,
@@ -34,9 +35,19 @@ jest.mock("./details/MeasureDetails");
 jest.mock("./editor/MeasureEditor");
 jest.mock("../common/createVersionDialog/CreateVersionDialog", () => ({
   __esModule: true,
-  default: jest.fn(() => (
-    <div data-testid="create-version-dialog">Create Version Dialog</div>
-  )),
+  default: jest.fn(({ open, onSubmit }: any) =>
+    open ? (
+      <div data-testid="create-version-dialog">
+        Create Version Dialog
+        <button
+          data-testid="create-version-continue-button"
+          onClick={() => onSubmit("major")}
+        >
+          Continue
+        </button>
+      </div>
+    ) : null
+  ),
 }));
 
 const MeasureEditorMock = MeasureEditor as jest.Mock<JSX.Element>;
@@ -202,6 +213,8 @@ const mockMeasureReviewServiceApi = {
 
 jest.mock("@madie/madie-util", () => ({
   ...mockCmsIdStubs,
+  ...mockCompositeStubs,
+  ExportIcon: () => <span data-testid="export-icon" />,
   useMeasureServiceApi: jest.fn(() => mockMeasureServiceApi),
   useMeasureReviewServiceApi: jest.fn(() => mockMeasureReviewServiceApi),
   useUserServiceApi: jest.fn(() => ({ getOwnerDetails: jest.fn() })),
@@ -760,6 +773,61 @@ describe("EditMeasure Component", () => {
     await waitFor(() =>
       expect(queryByTestId("create-version-dialog")).toBeInTheDocument()
     );
+  });
+
+  // drives the Create Version dialog all the way through to submit
+  const submitVersionDialog = async () => {
+    act(() => {
+      window.dispatchEvent(new Event("version-measure"));
+    });
+    await waitFor(() =>
+      expect(queryByTestId("create-version-dialog")).toBeInTheDocument()
+    );
+
+    fireEvent.click(getByTestId("create-version-continue-button"));
+  };
+
+  it("blocks versioning and lists the composite failures when the composite measure is invalid", async () => {
+    const compositeErrors = [
+      "Two component measures must be selected",
+      "Composite measure score is required",
+    ];
+    mockCompositeStubs.validateCompositeMeasure.mockResolvedValueOnce(
+      compositeErrors
+    );
+    mockMeasureServiceApi.fetchMeasure = jest.fn().mockResolvedValue(measure);
+    mockMeasureServiceApi.checkValidVersion = jest.fn();
+    renderRouter();
+
+    expect(await findByTestId("editMeasure")).toBeInTheDocument();
+    await submitVersionDialog();
+
+    await waitFor(() =>
+      expect(queryByTestId("error-message")).toBeInTheDocument()
+    );
+    expect(queryByText("Unable to version measure.")).toBeInTheDocument();
+    compositeErrors.forEach((message) => {
+      expect(queryByText(message)).toBeInTheDocument();
+    });
+    // the version request is never made
+    expect(mockMeasureServiceApi.checkValidVersion).not.toHaveBeenCalled();
+  });
+
+  it("continues versioning when the composite validations pass", async () => {
+    mockCompositeStubs.validateCompositeMeasure.mockResolvedValueOnce([]);
+    mockMeasureServiceApi.fetchMeasure = jest.fn().mockResolvedValue(measure);
+    mockMeasureServiceApi.checkValidVersion = jest
+      .fn()
+      .mockResolvedValue({ status: 200 });
+    renderRouter();
+
+    expect(await findByTestId("editMeasure")).toBeInTheDocument();
+    await submitVersionDialog();
+
+    await waitFor(() =>
+      expect(mockMeasureServiceApi.checkValidVersion).toHaveBeenCalled()
+    );
+    expect(queryByTestId("error-message")).not.toBeInTheDocument();
   });
 
   it("Version fails with 423.", async () => {

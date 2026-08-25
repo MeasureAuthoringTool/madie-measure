@@ -568,7 +568,7 @@ describe("TestCase component", () => {
     });
   });
 
-  it("should render test case table with validation status for qiCore6 and be sortable", async () => {
+  it("should render test case table with validation status for non-legacy models and be sortable", async () => {
     const deleteTestCase = jest.fn();
     const exportTestCase = jest.fn();
     const onCloneTestCase = jest.fn();
@@ -584,7 +584,7 @@ describe("TestCase component", () => {
       deleteTestCase,
       exportTestCase,
       onCloneTestCase,
-      measures[3],
+      { ...measures[3], model: Model.QICORE_7_0_2 },
       setSelectedTestCasesMock,
       undefined,
       []
@@ -606,6 +606,30 @@ describe("TestCase component", () => {
     expect(buttons[2].textContent).toBe("Validation");
     fireEvent.click(buttons[2]);
   });
+
+  it.each([Model.QICORE, Model.QDM_5_6])(
+    "should not render validation status for legacy model %s",
+    async (model) => {
+      renderWithTestCase(
+        [testCase],
+        true,
+        jest.fn(),
+        jest.fn(),
+        jest.fn(),
+        { ...measures[0], model },
+        jest.fn(),
+        undefined,
+        []
+      );
+
+      const table = await screen.findByTestId("test-case-tbl");
+      const headers = Array.from(table.querySelectorAll("thead th")).map(
+        (header) => header.textContent
+      );
+
+      expect(headers).not.toContain("Validation");
+    }
+  );
 
   it("should render DeleteForeverIcon when canEdit=true, draft=false, and createdBeforeVersioning=true", async () => {
     const deleteTestCase = jest.fn();
