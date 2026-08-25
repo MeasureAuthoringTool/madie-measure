@@ -18,7 +18,8 @@ import {
 } from "@madie/madie-util";
 import ReviewAction from "./reviewAction/ReviewAction";
 
-const ALL_REVIEWS_TAB = 3;
+export const ALL_REVIEWS_TAB = 3;
+export const MY_REVIEWS_TAB = 4;
 
 // Helper to check if user owns all selected measures
 const isOwnerOfAllMeasures = (measures: Measure[]) => {
@@ -115,7 +116,8 @@ export default function ActionCenter(props: PropTypes) {
 
   const exportMeasure = useCallback(
     (exportType: string) => {
-      const elmErrorSeverity = exportType === "Export" ? "Info" : "Error";
+      const elmErrorSeverity =
+        exportType === "Executable Export" ? "Info" : "Error";
       if (measures?.length === 1) {
         updateTargetMeasure(measures[0]);
         onExportMeasure(elmErrorSeverity);
@@ -202,7 +204,9 @@ export default function ActionCenter(props: PropTypes) {
   }, [measures]);
 
   const canReview =
-    (activeTab === ALL_REVIEWS_TAB && !!userRoles?.isReviewer) || canEdit;
+    (activeTab === (ALL_REVIEWS_TAB || MY_REVIEWS_TAB) &&
+      !!userRoles?.isReviewer) ||
+    canEdit;
   const PipeSeparator = () => (
     <span
       aria-hidden="true"

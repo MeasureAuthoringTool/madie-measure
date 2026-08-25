@@ -54,7 +54,10 @@ import versionErrorHelper from "../../../utils/versionErrorHelper";
 import InvalidMeasureNameDialog from "./InvalidMeasureNameDialog/InvalidMeasureNameDialog";
 import getLibraryNameErrors from "./InvalidMeasureNameDialog/getLibraryNameErrors";
 import AssociateCmsIdDialog from "./associateCmsIdDialog/AssociateCmsIdDialog";
-import ActionCenter from "./actionCenter/ActionCenter";
+import ActionCenter, {
+  ALL_REVIEWS_TAB,
+  MY_REVIEWS_TAB,
+} from "./actionCenter/ActionCenter";
 import {
   ExpandIcon,
   CollapseIcon,
@@ -182,14 +185,18 @@ export default function MeasureList(props: {
   const userServiceApi = useRef(useUserServiceApi()).current; //needs to be ref or triggers jest. throws warn
   const featureFlags = useFeatureFlags();
 
+  const isReviewTab =
+    props.activeTab === ALL_REVIEWS_TAB || props.activeTab === MY_REVIEWS_TAB;
+  const showReviewStatus =
+    isReviewTab ||
+    (!!featureFlags?.MeasureReviewStatus && props.activeTab !== 2);
+
   const filterByOpts = [
     "Measure",
     "Model",
     "Version",
     "CMS ID",
-    ...(featureFlags?.MeasureReviewStatus && props.activeTab !== 2
-      ? ["Review"]
-      : []),
+    ...(showReviewStatus ? ["Review"] : []),
   ];
   const filterMap: Record<string, string> = {
     Measure: "measureName",
@@ -510,7 +517,7 @@ export default function MeasureList(props: {
         new Date(rowA.original.actions.lastModifiedAt).getTime() -
         new Date(rowB.original.actions.lastModifiedAt).getTime(),
     },
-    ...(featureFlags?.MeasureReviewStatus && props.activeTab !== 2
+    ...(showReviewStatus
       ? [
           {
             header: "Review",
@@ -735,7 +742,7 @@ export default function MeasureList(props: {
     selectedIdForExpansion,
     isRowExpanded,
     props.activeTab,
-    featureFlags?.MeasureReviewStatus,
+    showReviewStatus,
   ]);
 
   const expandedcolumns = useMemo<ColumnDef<TCRow>[]>(() => {
@@ -1407,7 +1414,16 @@ export default function MeasureList(props: {
           open={reviewDialog.open}
           entityType="measure"
           entityId={selectedMeasures[0]?.id}
+          entitySetId={selectedMeasures[0]?.measureSetId}
           onClose={handleReviewDialogClose}
+          onSuccess={() => {
+            doUpdateList(true);
+            table.resetRowSelection();
+            setSelectedExpandedMeasuresIds([]);
+            setIsRowExpanded(false);
+            setExpandedSectionData([]);
+            setSelectedIdForExpansion(null);
+          }}
         />
       ) : (
         <ReviewDialog
@@ -1415,7 +1431,7 @@ export default function MeasureList(props: {
           measure={selectedMeasures[0]}
           onClose={handleReviewDialogClose}
           onSuccess={() => {
-            doUpdateList();
+            doUpdateList(true);
             table.resetRowSelection();
             setSelectedExpandedMeasuresIds([]);
             setIsRowExpanded(false);

@@ -575,7 +575,7 @@ describe("ActionCenter", () => {
     userEvent.click(await screen.findByTestId("export-action-btn"));
 
     const exportForPublishingButton = await screen.findByRole("menuitem", {
-      name: "Export for Publishing",
+      name: "Publishable Export",
     });
     userEvent.click(exportForPublishingButton);
 
@@ -607,7 +607,7 @@ describe("ActionCenter", () => {
     userEvent.click(await screen.findByTestId("export-action-btn"));
 
     const exportForPublishingButton = await screen.findByRole("menuitem", {
-      name: "Export",
+      name: "Executable Export",
     });
     userEvent.click(exportForPublishingButton);
 

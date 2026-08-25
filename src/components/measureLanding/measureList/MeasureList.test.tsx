@@ -33,6 +33,7 @@ import {
   useFeatureFlags,
   checkUserCanEdit,
   useUserServiceApi,
+  useUserRoles,
   MeasureServiceApi,
   ServiceConfig,
 } from "@madie/madie-util";
@@ -52,6 +53,8 @@ const mockOktaTokenApi = {
   getAccessToken: jest.fn().mockResolvedValue("test.jwt"),
   getUserName: jest.fn().mockReturnValue("test user"),
 };
+
+let mockCapturedManageReviewOnSuccess: (() => void | Promise<void>) | undefined;
 
 jest.mock("@madie/madie-util", () => ({
   ...mockCmsIdStubs,
@@ -153,10 +156,12 @@ jest.mock("@madie/madie-util", () => ({
   ),
   TransferDialog: ({ open }: any) =>
     open ? <div data-testid="transfer-dialog">Transfer Dialog</div> : null,
-  ManageReviewDialog: ({ open }: any) =>
-    open ? (
+  ManageReviewDialog: ({ open, onSuccess }: any) => {
+    mockCapturedManageReviewOnSuccess = onSuccess;
+    return open ? (
       <div data-testid="manage-review-dialog">Manage Review Dialog</div>
-    ) : null,
+    ) : null;
+  },
 }));
 
 jest.mock("../../common/createVersionDialog/CreateVersionDialog", () => ({
@@ -2250,7 +2255,7 @@ describe("Measure List component", () => {
     const errorPayload = {
       timestamp: "2025-04-07T00:30:16.103+00:00",
       message:
-        'Measure cannot be exported for publishing because it was versioned prior to MADiE version 2.2.0. Please use a newer version or select "Export" for this measure.',
+        'Measure cannot be exported for publishing because it was versioned prior to MADiE version 2.2.0. Please use a newer version or select "Executable Export" for this measure.',
       status: 404,
       error: "Bad Request",
     };
@@ -3984,6 +3989,44 @@ describe("Review Status", () => {
     ).not.toBeInTheDocument();
   });
 
+  it("should display the Review column on the reviewer tabs even with the feature flag off", async () => {
+    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
+      MeasureReviewStatus: false,
+    }));
+    renderReviewList(4);
+
+    expect(
+      await screen.findByRole("columnheader", { name: /review/i })
+    ).toBeInTheDocument();
+  });
+
+  it("should display the My Reviews columns", async () => {
+    renderReviewList(4);
+
+    await screen.findByText(measuresWithReview[0].measureName);
+    for (const header of [
+      /measure/i,
+      /version/i,
+      /status/i,
+      /model/i,
+      /shared/i,
+      /cms id/i,
+      /updated/i,
+      /review/i,
+      /action/i,
+    ]) {
+      expect(
+        screen.getAllByRole("columnheader", { name: header }).length
+      ).toBeGreaterThan(0);
+    }
+    expect(
+      screen.queryByRole("columnheader", { name: /owner/i })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByTestId(`checkbox-${measuresWithReview[0].id}`)
+    ).toBeInTheDocument();
+  });
+
   it("should offer Review as a filter option when the feature flag is on", async () => {
     renderReviewList(0);
 
@@ -4017,6 +4060,29 @@ describe("Review Status", () => {
     expect(mockCapturedReviewOnSuccess).toBeDefined();
   });
 
+  it("should refetch the tab counts after a reviewer saves a review", async () => {
+    (useUserRoles as jest.Mock).mockReturnValue({
+      roles: ["MADiE-Reviewer"],
+      isAdmin: false,
+      isReviewer: true,
+    });
+    renderReviewList(0);
+    await screen.findByText(measuresWithReview[0].measureName);
+
+    retrieveMeasuresMock.mockClear();
+    await act(async () => {
+      await mockCapturedManageReviewOnSuccess!();
+    });
+
+    await waitFor(() => {
+      expect(retrieveMeasuresMock).toHaveBeenCalledTimes(1);
+    });
+    // the last argument asks for the tab counts to be refetched, since saving a review
+    // moves the measure on and off the All Reviews and My Reviews tabs
+    expect(retrieveMeasuresMock.mock.calls[0][6]).toBe(true);
+    (useUserRoles as jest.Mock).mockReturnValue({ roles: [], isAdmin: false });
+  });
+
   it("should refetch the measure list after a review is saved so the status updates without a page refresh", async () => {
     renderReviewList(0);
     await screen.findByText(measuresWithReview[0].measureName);
@@ -4029,5 +4095,8 @@ describe("Review Status", () => {
     await waitFor(() => {
       expect(retrieveMeasuresMock).toHaveBeenCalledTimes(1);
     });
+    // the last argument asks for the tab counts to be refetched, since saving a review
+    // moves the measure on and off the All Reviews and My Reviews tabs
+    expect(retrieveMeasuresMock.mock.calls[0][6]).toBe(true);
   });
 });

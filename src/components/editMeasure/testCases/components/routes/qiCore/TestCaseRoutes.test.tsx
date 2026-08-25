@@ -282,7 +282,10 @@ describe("TestCaseRoutes", () => {
         /No Population Criteria is associated with this measure/
       )
     ).not.toBeInTheDocument();
-    expect(mockMeasureServiceApi.fetchMeasureBundle).toHaveBeenCalled();
+    expect(mockMeasureServiceApi.fetchMeasureBundle).toHaveBeenCalledWith(
+      expect.anything(),
+      "calculation"
+    );
   });
 
   it("should show CQL error when measure has cqlErrors", async () => {
