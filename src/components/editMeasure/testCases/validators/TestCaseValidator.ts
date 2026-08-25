@@ -59,10 +59,62 @@ const ScoreSchema = Yup.object({
     .min(0, "Value must be greater than or equal to 0")
     .nullable(),
 });
+
+const PositiveNumberSchema = Yup.mixed().test(
+  "positiveNumber",
+  "Only positive numeric values can be entered in the expected values",
+  function (value) {
+    if (value === undefined || value === null || value === "") {
+      return true;
+    }
+
+    if (!isNaN(+value) && +value >= 0) {
+      return true;
+    }
+
+    return this.createError({
+      message:
+        "Only positive numeric values can be entered in the expected values",
+    });
+  }
+);
+
+const WholePositiveNumberSchema = Yup.mixed().test(
+  "wholePositiveNumber",
+  "Only positive numeric values can be entered in the expected values",
+  function (value) {
+    if (value === undefined || value === null || value === "") {
+      return true;
+    }
+
+    if (isNaN(+value) || +value < 0) {
+      return this.createError({
+        message:
+          "Only positive numeric values can be entered in the expected values",
+      });
+    }
+
+    if (!Number.isInteger(+value) || String(value).includes(".")) {
+      return this.createError({
+        message:
+          "Decimals values cannot be entered in the population expected values",
+      });
+    }
+
+    return true;
+  }
+);
+
 const CompositeScoreExpectedValueSchema = Yup.object({
-  compositeScore: ScoreSchema,
-  denominatorScore: ScoreSchema,
-  numeratorScore: ScoreSchema,
+  denominatorScore: Yup.object({
+    expected: WholePositiveNumberSchema,
+  }),
+  numeratorScore: Yup.object({
+    expected: PositiveNumberSchema,
+  }),
+  compositeScore: Yup.object({
+    expected: PositiveNumberSchema,
+  }),
 });
 export const TestCaseValidator = Yup.object().shape({
   title: Yup.string()
