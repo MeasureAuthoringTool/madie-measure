@@ -52,6 +52,10 @@ export const useMeasureFilterSearch = (
       finalFilterBy: filterBy,
     };
     setFinalSearchAndFilterby(finalSearchAndFilter);
+    // A new search shrinks the result set, so the current page may no longer exist.
+    if (onPageReset) {
+      onPageReset();
+    }
   };
 
   const blankSearchCriteria = () => {

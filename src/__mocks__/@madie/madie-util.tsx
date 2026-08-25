@@ -118,12 +118,17 @@ export const EXPORT_FAILURE_MESSAGE =
 export const getNewestMeasureInstance = jest.fn(
   (measures: any[]) => measures?.[0]
 );
+
+export {
+  getAllowedScoringTypes,
+  validateCompositeMeasure,
+} from "../compositeValidationStubs";
 export const ExportAction = ({ onClick }: any) => (
   <div
     role="button"
     tabIndex={0}
     data-testid="export-action"
-    onClick={() => onClick && onClick("Export")}
+    onClick={() => onClick && onClick("Executable Export")}
   >
     Export Action
   </div>

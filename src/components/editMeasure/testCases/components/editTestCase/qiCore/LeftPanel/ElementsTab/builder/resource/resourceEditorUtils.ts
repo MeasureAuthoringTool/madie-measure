@@ -73,13 +73,15 @@ export function deleteMultipleCardinalityElement(
         return false;
       }
       // Compare against URL tail tokens (e.g. "us-core-sex" → ["us","core","sex"]).
+      // Some canonical URLs include a version suffix after "|" (e.g. "...tribal-affiliation|6.1.0").
       const urlTail = _.toLower(url.split("/").pop() || "");
-      const tailTokens = urlTail.split(/[^a-z0-9]+/).filter(Boolean);
+      const canonicalTail = urlTail.split("|")[0];
+      const tailTokens = canonicalTail.split(/[^a-z0-9]+/).filter(Boolean);
       if (tailTokens.includes(normalizedLabel)) {
         return true;
       }
       // Secondary: normalized tail ends with the label (handles no-separator edge cases).
-      return normalizeForMatch(urlTail).endsWith(normalizedLabel);
+      return normalizeForMatch(canonicalTail).endsWith(normalizedLabel);
     });
 
     return matchedIndex >= 0 ? matchedIndex : null;

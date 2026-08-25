@@ -1,4 +1,5 @@
 import * as mockCmsIdStubs from "../../../__mocks__/cmsIdFormatterStubs";
+import * as mockCompositeStubs from "../../../__mocks__/compositeValidationStubs";
 import * as React from "react";
 import {
   cleanup,
@@ -33,6 +34,7 @@ import {
   useFeatureFlags,
   checkUserCanEdit,
   useUserServiceApi,
+  useUserRoles,
   MeasureServiceApi,
   ServiceConfig,
 } from "@madie/madie-util";
@@ -52,6 +54,8 @@ const mockOktaTokenApi = {
   getAccessToken: jest.fn().mockResolvedValue("test.jwt"),
   getUserName: jest.fn().mockReturnValue("test user"),
 };
+
+let mockCapturedManageReviewOnSuccess: (() => void | Promise<void>) | undefined;
 
 jest.mock("@madie/madie-util", () => ({
   ...mockCmsIdStubs,
@@ -77,6 +81,8 @@ jest.mock("@madie/madie-util", () => ({
       return { unsubscribe: () => null };
     },
   },
+  ...mockCompositeStubs,
+  ExportIcon: () => <span data-testid="export-icon" />,
   // Shared action-center icons + dialogs + export flow (moved to madie-util)
   exportMeasure: jest.fn(),
   getNewestMeasureInstance: jest.fn(),
@@ -153,15 +159,29 @@ jest.mock("@madie/madie-util", () => ({
   ),
   TransferDialog: ({ open }: any) =>
     open ? <div data-testid="transfer-dialog">Transfer Dialog</div> : null,
-  ManageReviewDialog: ({ open }: any) =>
-    open ? (
+  ManageReviewDialog: ({ open, onSuccess }: any) => {
+    mockCapturedManageReviewOnSuccess = onSuccess;
+    return open ? (
       <div data-testid="manage-review-dialog">Manage Review Dialog</div>
-    ) : null,
+    ) : null;
+  },
 }));
 
 jest.mock("../../common/createVersionDialog/CreateVersionDialog", () => ({
   __esModule: true,
-  default: () => <div data-testid="create-version-dialog">Version Type</div>,
+  default: ({ open, onSubmit }: any) => (
+    <div data-testid="create-version-dialog">
+      Version Type
+      {open && (
+        <button
+          data-testid="create-version-continue-button"
+          onClick={() => onSubmit("major")}
+        >
+          Continue
+        </button>
+      )}
+    </div>
+  ),
   formikErrorHandler: jest.fn(),
 }));
 
@@ -1137,6 +1157,123 @@ describe("Measure List component", () => {
       userEvent.click(createVersionButton);
     });
     expect(getByTestId("create-version-dialog")).toBeInTheDocument();
+
+    unmount();
+  });
+
+  // opens the version dialog for the first selectable measure and submits it
+  const openAndSubmitVersionDialog = async (getByTestId) => {
+    const checkBoxes = await screen.findAllByRole("checkbox");
+    act(() => {
+      userEvent.click(checkBoxes[1]);
+    });
+    act(() => {
+      userEvent.click(getByTestId("version-action-btn"));
+    });
+    expect(getByTestId("create-version-dialog")).toBeInTheDocument();
+    act(() => {
+      userEvent.click(getByTestId("create-version-continue-button"));
+    });
+  };
+
+  it("should block versioning and list the composite failures when the composite measure is invalid", async () => {
+    const compositeErrors = [
+      "Two component measures must be selected",
+      "The measure type of the component measure(s) is invalid",
+    ];
+    mockCompositeStubs.validateCompositeMeasure.mockResolvedValueOnce(
+      compositeErrors
+    );
+    mockMeasureServiceApi.fetchMeasure.mockResolvedValueOnce(measures[0]);
+    mockMeasureServiceApi.checkValidVersion = jest.fn();
+
+    const { getByTestId, unmount } = render(
+      <ServiceContext.Provider value={serviceConfig}>
+        <MeasureList
+          measureList={measures}
+          setMeasureList={setMeasureListMock}
+          setTotalPages={setTotalPagesMock}
+          setTotalItems={setTotalItemsMock}
+          setVisibleItems={setVisibleItemsMock}
+          setOffset={setOffsetMock}
+          setLoading={setLoadingMock}
+          activeTab={0}
+          searchCriteria={null}
+          setSearchCriteria={setSearchCriteriaMock}
+          currentLimit={10}
+          currentPage={0}
+          setErrMsg={setErrMsgMock}
+          toastOpen={false}
+          toastMessage=""
+          toastType="danger"
+          setToastOpen={setToastOpenMock}
+          setToastMessage={setToastMessageMock}
+          setToastType={setToastTypeMock}
+          onToastClose={onToastCloseMock}
+          handleToast={handleToastMock}
+        />
+      </ServiceContext.Provider>
+    );
+
+    await openAndSubmitVersionDialog(getByTestId);
+
+    await waitFor(() =>
+      expect(screen.queryByTestId("error-message")).toBeInTheDocument()
+    );
+    expect(
+      screen.queryByText("Unable to version measure.")
+    ).toBeInTheDocument();
+    compositeErrors.forEach((message) => {
+      expect(screen.queryByText(message)).toBeInTheDocument();
+    });
+    // the version request is never made
+    expect(mockMeasureServiceApi.checkValidVersion).not.toHaveBeenCalled();
+
+    unmount();
+  });
+
+  it("should continue versioning when the composite validations pass", async () => {
+    mockCompositeStubs.validateCompositeMeasure.mockResolvedValueOnce([]);
+    mockMeasureServiceApi.fetchMeasure.mockResolvedValueOnce(measures[0]);
+    mockMeasureServiceApi.checkValidVersion = jest
+      .fn()
+      .mockResolvedValue(checkValidSuccess);
+    mockMeasureServiceApi.createVersion.mockResolvedValueOnce({ status: 200 });
+
+    const { getByTestId, unmount } = render(
+      <ServiceContext.Provider value={serviceConfig}>
+        <MeasureList
+          measureList={measures}
+          setMeasureList={setMeasureListMock}
+          setTotalPages={setTotalPagesMock}
+          setTotalItems={setTotalItemsMock}
+          setVisibleItems={setVisibleItemsMock}
+          setOffset={setOffsetMock}
+          setLoading={setLoadingMock}
+          activeTab={0}
+          searchCriteria={null}
+          setSearchCriteria={setSearchCriteriaMock}
+          currentLimit={10}
+          currentPage={0}
+          setErrMsg={setErrMsgMock}
+          toastOpen={false}
+          toastMessage=""
+          toastType="danger"
+          setToastOpen={setToastOpenMock}
+          setToastMessage={setToastMessageMock}
+          setToastType={setToastTypeMock}
+          onToastClose={onToastCloseMock}
+          handleToast={handleToastMock}
+        />
+      </ServiceContext.Provider>
+    );
+
+    await openAndSubmitVersionDialog(getByTestId);
+
+    await waitFor(() =>
+      expect(mockMeasureServiceApi.checkValidVersion).toHaveBeenCalled()
+    );
+    expect(screen.queryByTestId("error-message")).not.toBeInTheDocument();
 
     unmount();
   });
@@ -2250,7 +2387,7 @@ describe("Measure List component", () => {
     const errorPayload = {
       timestamp: "2025-04-07T00:30:16.103+00:00",
       message:
-        'Measure cannot be exported for publishing because it was versioned prior to MADiE version 2.2.0. Please use a newer version or select "Export" for this measure.',
+        'Measure cannot be exported for publishing because it was versioned prior to MADiE version 2.2.0. Please use a newer version or select "Executable Export" for this measure.',
       status: 404,
       error: "Bad Request",
     };
@@ -3984,6 +4121,44 @@ describe("Review Status", () => {
     ).not.toBeInTheDocument();
   });
 
+  it("should display the Review column on the reviewer tabs even with the feature flag off", async () => {
+    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
+      MeasureReviewStatus: false,
+    }));
+    renderReviewList(4);
+
+    expect(
+      await screen.findByRole("columnheader", { name: /review/i })
+    ).toBeInTheDocument();
+  });
+
+  it("should display the My Reviews columns", async () => {
+    renderReviewList(4);
+
+    await screen.findByText(measuresWithReview[0].measureName);
+    for (const header of [
+      /measure/i,
+      /version/i,
+      /status/i,
+      /model/i,
+      /shared/i,
+      /cms id/i,
+      /updated/i,
+      /review/i,
+      /action/i,
+    ]) {
+      expect(
+        screen.getAllByRole("columnheader", { name: header }).length
+      ).toBeGreaterThan(0);
+    }
+    expect(
+      screen.queryByRole("columnheader", { name: /owner/i })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByTestId(`checkbox-${measuresWithReview[0].id}`)
+    ).toBeInTheDocument();
+  });
+
   it("should offer Review as a filter option when the feature flag is on", async () => {
     renderReviewList(0);
 
@@ -4017,6 +4192,29 @@ describe("Review Status", () => {
     expect(mockCapturedReviewOnSuccess).toBeDefined();
   });
 
+  it("should refetch the tab counts after a reviewer saves a review", async () => {
+    (useUserRoles as jest.Mock).mockReturnValue({
+      roles: ["MADiE-Reviewer"],
+      isAdmin: false,
+      isReviewer: true,
+    });
+    renderReviewList(0);
+    await screen.findByText(measuresWithReview[0].measureName);
+
+    retrieveMeasuresMock.mockClear();
+    await act(async () => {
+      await mockCapturedManageReviewOnSuccess!();
+    });
+
+    await waitFor(() => {
+      expect(retrieveMeasuresMock).toHaveBeenCalledTimes(1);
+    });
+    // the last argument asks for the tab counts to be refetched, since saving a review
+    // moves the measure on and off the All Reviews and My Reviews tabs
+    expect(retrieveMeasuresMock.mock.calls[0][6]).toBe(true);
+    (useUserRoles as jest.Mock).mockReturnValue({ roles: [], isAdmin: false });
+  });
+
   it("should refetch the measure list after a review is saved so the status updates without a page refresh", async () => {
     renderReviewList(0);
     await screen.findByText(measuresWithReview[0].measureName);
@@ -4029,5 +4227,8 @@ describe("Review Status", () => {
     await waitFor(() => {
       expect(retrieveMeasuresMock).toHaveBeenCalledTimes(1);
     });
+    // the last argument asks for the tab counts to be refetched, since saving a review
+    // moves the measure on and off the All Reviews and My Reviews tabs
+    expect(retrieveMeasuresMock.mock.calls[0][6]).toBe(true);
   });
 });

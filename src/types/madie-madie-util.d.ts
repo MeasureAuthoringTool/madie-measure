@@ -147,7 +147,7 @@ declare module "@madie/madie-util" {
   export class MeasureServiceApi {
     constructor(baseUrl: string, getAccessToken: () => string);
     fetchMeasure(id: string): Promise<Measure>;
-    fetchMeasureBundle(measure: Measure): Promise<Bundle>;
+    fetchMeasureBundle(measure: Measure, bundleType?: string): Promise<Bundle>;
     getMeasuresByMeasureSetId(
       measureSetId: string,
       sortByLatestVersion?: boolean,
@@ -156,13 +156,21 @@ declare module "@madie/madie-util" {
     fetchMeasuresByIds(measureIds: string[]): Promise<any>;
     searchMeasuresByCriteria(
       ownershipTypes: OwnershipType[],
-      isReview: boolean,
       limit: string | number,
       page: number,
       sort: string,
       direction: string,
       searchCriteria: MeasureSearchCriteria,
       abortController: AbortController
+    ): Promise<any>;
+    searchMeasuresInReview(
+      ownershipTypes: OwnershipType[],
+      limit: string | number,
+      page: number,
+      sort: string,
+      direction: string,
+      searchCriteria?: MeasureSearchCriteria,
+      abortController?: AbortController
     ): Promise<any>;
 
     createVersion(id: string, versionType: string): Promise<any>;
@@ -349,6 +357,8 @@ declare module "@madie/madie-util" {
     onClose: () => void;
     entityType: "measure" | "library";
     entityId?: string;
+    entitySetId?: string;
+    onSuccess?: () => void | Promise<void>;
   }): React.ReactElement | null;
   export function getNewestMeasureInstance(measures: Measure[]): Measure;
 
@@ -361,7 +371,8 @@ declare module "@madie/madie-util" {
     setToastOpen: (open: boolean) => void,
     setToastType: (type: string) => void,
     setToastMessage: (message: string) => void,
-    elmErrorSeverity: string
+    elmErrorSeverity: string,
+    bundleType?: string
   ): Promise<void>;
   export function downloadZipFile(
     exportData: any,
@@ -380,4 +391,20 @@ declare module "@madie/madie-util" {
   ): string;
   export function parseErrorMessageFromBlob(blob: Blob): Promise<string | null>;
   export const EXPORT_FAILURE_MESSAGE: string;
+
+  export const COMPOSITE_VALIDATION_MESSAGES: {
+    TWO_COMPONENTS_REQUIRED: string;
+    SCORING_MUST_BE_COMPOSITE: string;
+    COMPOSITE_SCORING_REQUIRED: string;
+    COMPOSITE_SCORING_INVALID: string;
+    COMPONENT_MEASURE_TYPES_INVALID: string;
+    COMPONENT_POPULATION_BASIS_INVALID: string;
+    UNABLE_TO_VALIDATE_COMPONENTS: string;
+  };
+  export const compositeScoringValues: string[];
+  export function getAllowedScoringTypes(compositeScoring: string): string[];
+  export function validateCompositeMeasure(
+    measure: Measure,
+    measureServiceApi: MeasureServiceApi
+  ): Promise<string[]>;
 }

@@ -9,6 +9,7 @@ import AssociateCmsIdAction, {
   MUST_NOT_HAVE_CMS_ID,
   SELECT_TWO_MEASURES,
   MEASURE_LOCKED_MESSAGE,
+  CANNOT_LINK_COMPOSITE,
 } from "./AccociateCmsIdAction";
 import { Measure, MeasureSet, Model } from "@madie/madie-models";
 import userEvent from "@testing-library/user-event";
@@ -163,6 +164,44 @@ describe("AssociateCmsIdAction", () => {
     expect(screen.getByTestId("associate-cms-id-tooltip")).toHaveAttribute(
       "aria-label",
       MUST_NOT_HAVE_CMS_ID
+    );
+  });
+
+  it("Should disable action btn if the QI-Core measure is a composite measure", () => {
+    const compositeQiCoreMeasure = {
+      ...qiCoreMeasure,
+      measureMetaData: { draft: true, composite: true },
+    } as unknown as Measure;
+
+    render(
+      <AssociateCmsIdAction
+        measures={[qdmMeasure, compositeQiCoreMeasure]}
+        onClick={associateCmsId}
+      />
+    );
+    expect(screen.getByTestId("associate-cms-id-action-btn")).toBeDisabled();
+    expect(screen.getByTestId("associate-cms-id-tooltip")).toHaveAttribute(
+      "aria-label",
+      CANNOT_LINK_COMPOSITE
+    );
+  });
+
+  it("Should enable action btn if the QI-Core measure is explicitly not composite", () => {
+    const nonCompositeQiCoreMeasure = {
+      ...qiCoreMeasure,
+      measureMetaData: { draft: true, composite: false },
+    } as unknown as Measure;
+
+    render(
+      <AssociateCmsIdAction
+        measures={[qdmMeasure, nonCompositeQiCoreMeasure]}
+        onClick={associateCmsId}
+      />
+    );
+    expect(screen.getByTestId("associate-cms-id-action-btn")).toBeEnabled();
+    expect(screen.getByTestId("associate-cms-id-tooltip")).toHaveAttribute(
+      "aria-label",
+      ASSOCIATE_CMS_ID
     );
   });
 
