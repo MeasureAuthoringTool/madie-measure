@@ -278,6 +278,7 @@ describe("AddComponentsDialog", () => {
         version: "1.0.0",
         measureSet: { cmsId: "CMS789" },
         lastModifiedAt: "2024-01-15",
+        translatorVersion: "3.29.0",
       },
       {
         id: "child-2",
@@ -285,6 +286,7 @@ describe("AddComponentsDialog", () => {
         version: "1.1.0",
         measureSet: { cmsId: "CMS790" },
         lastModifiedAt: "2024-01-20",
+        translatorVersion: "3.29.0",
       },
     ]);
 
@@ -345,6 +347,12 @@ describe("AddComponentsDialog", () => {
           },
           { timeout: 3000 }
         );
+
+        await waitFor(() => {
+          expect(screen.getByText("Child Measure 1")).toBeInTheDocument();
+          expect(screen.getByText("Child Measure 2")).toBeInTheDocument();
+          expect(screen.getAllByText("3.29.0")).toHaveLength(2);
+        });
       }
     }
   });
