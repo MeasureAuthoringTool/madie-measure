@@ -188,21 +188,25 @@ const CompositePopulationGrid = ({
         <tr>
           <td />
           <td>Composite Score</td>
-          <td
-            style={{
-              display: "flex",
-              flexDirection: "row",
-              alignItems: "center",
-            }}
-          >
-            <input
-              type="text"
-              size={2}
-              style={disabled ? { border: "none" } : {}}
-              aria-disabled={disabled ? "true" : "false"}
-              {...formik.getFieldProps(`${rootLabel}.compositeScore.expected`)}
-            />
-            <span style={{ fontSize: "32px", marginLeft: "5px" }}>%</span>
+          <td>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "5px",
+              }}
+            >
+              <input
+                type="text"
+                size={2}
+                style={disabled ? { border: "none" } : {}}
+                aria-disabled={disabled ? "true" : "false"}
+                {...formik.getFieldProps(
+                  `${rootLabel}.compositeScore.expected`
+                )}
+              />
+              <span style={{ fontSize: "32px", marginLeft: "5px" }}>%</span>
+            </div>
           </td>
           <td data-testid={`composite-composite-score-${group.displayId}`}>
             {formatValue(group.scores?.compositeScore, true)}
