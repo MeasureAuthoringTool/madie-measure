@@ -1,4 +1,5 @@
 import * as mockCmsIdStubs from "../../../__mocks__/cmsIdFormatterStubs";
+import * as mockCompositeStubs from "../../../__mocks__/compositeValidationStubs";
 import * as React from "react";
 import {
   cleanup,
@@ -80,6 +81,8 @@ jest.mock("@madie/madie-util", () => ({
       return { unsubscribe: () => null };
     },
   },
+  ...mockCompositeStubs,
+  ExportIcon: () => <span data-testid="export-icon" />,
   // Shared action-center icons + dialogs + export flow (moved to madie-util)
   exportMeasure: jest.fn(),
   getNewestMeasureInstance: jest.fn(),
@@ -166,7 +169,19 @@ jest.mock("@madie/madie-util", () => ({
 
 jest.mock("../../common/createVersionDialog/CreateVersionDialog", () => ({
   __esModule: true,
-  default: () => <div data-testid="create-version-dialog">Version Type</div>,
+  default: ({ open, onSubmit }: any) => (
+    <div data-testid="create-version-dialog">
+      Version Type
+      {open && (
+        <button
+          data-testid="create-version-continue-button"
+          onClick={() => onSubmit("major")}
+        >
+          Continue
+        </button>
+      )}
+    </div>
+  ),
   formikErrorHandler: jest.fn(),
 }));
 
@@ -1142,6 +1157,123 @@ describe("Measure List component", () => {
       userEvent.click(createVersionButton);
     });
     expect(getByTestId("create-version-dialog")).toBeInTheDocument();
+
+    unmount();
+  });
+
+  // opens the version dialog for the first selectable measure and submits it
+  const openAndSubmitVersionDialog = async (getByTestId) => {
+    const checkBoxes = await screen.findAllByRole("checkbox");
+    act(() => {
+      userEvent.click(checkBoxes[1]);
+    });
+    act(() => {
+      userEvent.click(getByTestId("version-action-btn"));
+    });
+    expect(getByTestId("create-version-dialog")).toBeInTheDocument();
+    act(() => {
+      userEvent.click(getByTestId("create-version-continue-button"));
+    });
+  };
+
+  it("should block versioning and list the composite failures when the composite measure is invalid", async () => {
+    const compositeErrors = [
+      "Two component measures must be selected",
+      "The measure type of the component measure(s) is invalid",
+    ];
+    mockCompositeStubs.validateCompositeMeasure.mockResolvedValueOnce(
+      compositeErrors
+    );
+    mockMeasureServiceApi.fetchMeasure.mockResolvedValueOnce(measures[0]);
+    mockMeasureServiceApi.checkValidVersion = jest.fn();
+
+    const { getByTestId, unmount } = render(
+      <ServiceContext.Provider value={serviceConfig}>
+        <MeasureList
+          measureList={measures}
+          setMeasureList={setMeasureListMock}
+          setTotalPages={setTotalPagesMock}
+          setTotalItems={setTotalItemsMock}
+          setVisibleItems={setVisibleItemsMock}
+          setOffset={setOffsetMock}
+          setLoading={setLoadingMock}
+          activeTab={0}
+          searchCriteria={null}
+          setSearchCriteria={setSearchCriteriaMock}
+          currentLimit={10}
+          currentPage={0}
+          setErrMsg={setErrMsgMock}
+          toastOpen={false}
+          toastMessage=""
+          toastType="danger"
+          setToastOpen={setToastOpenMock}
+          setToastMessage={setToastMessageMock}
+          setToastType={setToastTypeMock}
+          onToastClose={onToastCloseMock}
+          handleToast={handleToastMock}
+        />
+      </ServiceContext.Provider>
+    );
+
+    await openAndSubmitVersionDialog(getByTestId);
+
+    await waitFor(() =>
+      expect(screen.queryByTestId("error-message")).toBeInTheDocument()
+    );
+    expect(
+      screen.queryByText("Unable to version measure.")
+    ).toBeInTheDocument();
+    compositeErrors.forEach((message) => {
+      expect(screen.queryByText(message)).toBeInTheDocument();
+    });
+    // the version request is never made
+    expect(mockMeasureServiceApi.checkValidVersion).not.toHaveBeenCalled();
+
+    unmount();
+  });
+
+  it("should continue versioning when the composite validations pass", async () => {
+    mockCompositeStubs.validateCompositeMeasure.mockResolvedValueOnce([]);
+    mockMeasureServiceApi.fetchMeasure.mockResolvedValueOnce(measures[0]);
+    mockMeasureServiceApi.checkValidVersion = jest
+      .fn()
+      .mockResolvedValue(checkValidSuccess);
+    mockMeasureServiceApi.createVersion.mockResolvedValueOnce({ status: 200 });
+
+    const { getByTestId, unmount } = render(
+      <ServiceContext.Provider value={serviceConfig}>
+        <MeasureList
+          measureList={measures}
+          setMeasureList={setMeasureListMock}
+          setTotalPages={setTotalPagesMock}
+          setTotalItems={setTotalItemsMock}
+          setVisibleItems={setVisibleItemsMock}
+          setOffset={setOffsetMock}
+          setLoading={setLoadingMock}
+          activeTab={0}
+          searchCriteria={null}
+          setSearchCriteria={setSearchCriteriaMock}
+          currentLimit={10}
+          currentPage={0}
+          setErrMsg={setErrMsgMock}
+          toastOpen={false}
+          toastMessage=""
+          toastType="danger"
+          setToastOpen={setToastOpenMock}
+          setToastMessage={setToastMessageMock}
+          setToastType={setToastTypeMock}
+          onToastClose={onToastCloseMock}
+          handleToast={handleToastMock}
+        />
+      </ServiceContext.Provider>
+    );
+
+    await openAndSubmitVersionDialog(getByTestId);
+
+    await waitFor(() =>
+      expect(mockMeasureServiceApi.checkValidVersion).toHaveBeenCalled()
+    );
+    expect(screen.queryByTestId("error-message")).not.toBeInTheDocument();
 
     unmount();
   });

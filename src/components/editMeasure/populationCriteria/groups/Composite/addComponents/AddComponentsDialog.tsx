@@ -25,11 +25,15 @@ import {
   CollapseIcon,
   ExpandIcon,
 } from "../../../../../../icons/MeasureListTableRightArrowIcons";
-import { Measure, MeasureScoring, OwnershipType } from "@madie/madie-models";
+import { Measure, OwnershipType } from "@madie/madie-models";
 import * as _ from "lodash";
 import tw from "twin.macro";
 import "styled-components/macro";
-import { useMeasureServiceApi, formatCmsId } from "@madie/madie-util";
+import {
+  useMeasureServiceApi,
+  formatCmsId,
+  getAllowedScoringTypes,
+} from "@madie/madie-util";
 import "../../../../../measureLanding/MeasureLanding.scss";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
@@ -401,22 +405,6 @@ export default function AddComponentsDialog({
 
     return columnDefs;
   }, [expandedSectionMap]);
-
-  const getAllowedScoringTypes = (compositeScoring: string) => {
-    if (
-      compositeScoring === "Opportunity" ||
-      compositeScoring === "All-or-nothing"
-    ) {
-      return [MeasureScoring.PROPORTION, MeasureScoring.RATIO];
-    } else if (compositeScoring === "Linear") {
-      return [
-        MeasureScoring.PROPORTION,
-        MeasureScoring.RATIO,
-        MeasureScoring.CONTINUOUS_VARIABLE,
-      ];
-    }
-    return [];
-  };
 
   const fetchMeasures = useCallback(() => {
     if (!measure || !measure.model || !measure.id || !open) {

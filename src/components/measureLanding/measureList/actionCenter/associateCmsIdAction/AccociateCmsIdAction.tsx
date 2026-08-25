@@ -20,6 +20,7 @@ export const ASSOCIATE_CMS_ID = "Associate CMS ID";
 export const SELECT_TWO_MEASURES = "Select two measures";
 export const MEASURE_LOCKED_MESSAGE =
   "Unable to associate measures. Locked while being edited by";
+export const CANNOT_LINK_COMPOSITE = "Cannot link Composite measures";
 
 export default function AssociateCmsIdAction(props: PropTypes) {
   const { measures } = props;
@@ -44,7 +45,9 @@ export default function AssociateCmsIdAction(props: PropTypes) {
         // set button state to disabled by default
         setDisableAssociateCmsIdBtn(true);
 
-        if (
+        if (qiCoreMeasure.measureMetaData?.composite) {
+          setTooltipMessage(CANNOT_LINK_COMPOSITE);
+        } else if (
           qdmMeasure.measureSet.owner.toLowerCase() !==
             userName.toLowerCase() ||
           qiCoreMeasure.measureSet.owner.toLowerCase() !==
