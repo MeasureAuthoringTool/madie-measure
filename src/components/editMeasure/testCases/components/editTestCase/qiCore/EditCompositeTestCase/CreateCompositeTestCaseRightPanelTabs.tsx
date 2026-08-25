@@ -25,7 +25,7 @@ export default function CreateCompositeTestCaseRightPanelTabs(
         aria-label="Actual tab panel"
         type="D"
         value="actual"
-        label="Actual"
+        label="Expected / Actual"
         data-testid="actual-tab"
       />
       <Tab

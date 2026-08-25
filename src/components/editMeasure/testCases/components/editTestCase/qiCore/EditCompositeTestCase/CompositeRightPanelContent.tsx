@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import CreateCompositeTestCaseRightPanelTabs from "./CreateCompositeTestCaseRightPanelTabs";
 import { TextField, TextArea } from "@madie/madie-design-system/dist/react";
 import TestCaseSeries from "../../../createTestCase/TestCaseSeries";
@@ -8,6 +8,7 @@ import { testCaseSeriesStyles, Alert } from "../EditTestCase";
 import { useFormikContext } from "formik";
 import tw, { styled } from "twin.macro";
 import "styled-components/macro";
+import CompositePopulationGrid from "./CompositePopulationGrid.tsx/CompositePopulationGrid";
 
 export default function CompositeRightPanelContent({
   rightPanelActiveTab,
@@ -16,6 +17,7 @@ export default function CompositeRightPanelContent({
   alert,
   setAlert,
   seriesState,
+  isTestCaseExecuted,
   compositeScoresByGroup = [],
 }) {
   const formik: any = useFormikContext();
@@ -25,14 +27,6 @@ export default function CompositeRightPanelContent({
     }
   }
 
-  const formatValue = (value?: number, isPercentage = false): string => {
-    if (value == null) {
-      return "-";
-    }
-    return isPercentage ? `${value}%` : `${value}`;
-  };
-
-  const hasMultipleGroups = compositeScoresByGroup.length > 1;
   return (
     <>
       <div className="tab-container">
@@ -41,38 +35,19 @@ export default function CompositeRightPanelContent({
           setRightPanelActiveTab={setRightPanelActiveTab}
         />
       </div>
-
       <div className="panel-content">
         {rightPanelActiveTab === "actual" && (
           <div data-testid="composite-actual">
-            {compositeScoresByGroup.map((group) => (
-              <div
-                key={group.groupId ?? group.displayId}
-                data-testid={`composite-actual-results-${group.displayId}`}
-                tw="mb-4"
-              >
-                {hasMultipleGroups && (
-                  <div tw="font-semibold mb-1">{group.displayId}</div>
-                )}
-                <div
-                  data-testid={`composite-denominator-score-${group.displayId}`}
-                >
-                  Denominator Score:{" "}
-                  {formatValue(group.scores?.denominatorScore)}
-                </div>
-                <div
-                  data-testid={`composite-numerator-score-${group.displayId}`}
-                >
-                  Numerator Score: {formatValue(group.scores?.numeratorScore)}
-                </div>
-                <div
-                  data-testid={`composite-composite-score-${group.displayId}`}
-                >
-                  Composite Score:{" "}
-                  {formatValue(group.scores?.compositeScore, true)}
-                </div>
-              </div>
-            ))}
+            {compositeScoresByGroup.map((group, index) => {
+              return (
+                <CompositePopulationGrid
+                  disabled={false}
+                  group={group}
+                  isTestCaseExecuted={isTestCaseExecuted}
+                  index={index}
+                />
+              );
+            })}
           </div>
         )}
         {rightPanelActiveTab === "details" && (
