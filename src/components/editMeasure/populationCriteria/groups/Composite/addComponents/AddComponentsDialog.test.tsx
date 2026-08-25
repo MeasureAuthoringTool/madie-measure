@@ -1,4 +1,5 @@
 import * as mockCmsIdStubs from "../../../../../../__mocks__/cmsIdFormatterStubs";
+import * as mockCompositeStubs from "../../../../../../__mocks__/compositeValidationStubs";
 import * as React from "react";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
@@ -46,7 +47,7 @@ const zeroItemResponse = {
 
 jest.mock("@madie/madie-util", () => ({
   ...mockCmsIdStubs,
-
+  ...mockCompositeStubs,
   useMeasureServiceApi: jest.fn(() => ({
     searchMeasuresByCriteria: jest.fn().mockResolvedValue(mockOneItemResponse),
     getMeasuresByMeasureSetId: jest.fn().mockResolvedValue([]),
