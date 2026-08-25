@@ -80,6 +80,8 @@ const mockMeasureServiceApi = {
     ownedMeasures: 5,
     sharedMeasures: 3,
     allMeasures: 10,
+    allReviews: 4,
+    myReviews: 2,
   }),
   transferMeasures: jest.fn().mockResolvedValue({
     status: 200,
@@ -970,7 +972,7 @@ describe("Measure Page", () => {
     test("shouldDisplayReviewsTabForReviewers", async () => {
       // Mock useUserRoles to return isReviewer: true
       const mockUseUserRoles = require("@madie/madie-util").useUserRoles;
-      mockUseUserRoles.mockReturnValueOnce({
+      mockUseUserRoles.mockReturnValue({
         roles: ["reviewer"],
         isAdmin: false,
         isReviewer: true,
@@ -978,9 +980,17 @@ describe("Measure Page", () => {
 
       renderRouter(["/measures?tab=0&page=1&limit=10"]);
 
-      await waitFor(() => {
-        const allReviewsTab = screen.queryByTestId("all-measures-tab");
-        expect(allReviewsTab).toBeInTheDocument();
+      const allReviewsTab = await screen.findByTestId("all-reviews-tab");
+      expect(allReviewsTab).toBeInTheDocument();
+      expect(allReviewsTab).toHaveTextContent("All Reviews (4)");
+      expect(screen.getByTestId("all-measures-tab")).toHaveTextContent(
+        "All Measures (10)"
+      );
+
+      mockUseUserRoles.mockReturnValue({
+        roles: [],
+        isAdmin: false,
+        isReviewer: false,
       });
     });
 
@@ -993,6 +1003,8 @@ describe("Measure Page", () => {
         ).toHaveBeenCalled();
       });
 
+      expect(screen.queryByTestId("all-reviews-tab")).not.toBeInTheDocument();
+      expect(screen.getByTestId("all-measures-tab")).toBeInTheDocument();
       const tabs = screen.getAllByRole("tab");
       expect(tabs.length).toBe(3);
     });
@@ -1011,6 +1023,7 @@ describe("Measure Page", () => {
         expect(
           mockMeasureServiceApi.searchMeasuresInReview
         ).toHaveBeenCalledWith(
+          ["ALL"],
           "10",
           0,
           "",
@@ -1059,6 +1072,116 @@ describe("Measure Page", () => {
         isAdmin: false,
         isReviewer: false,
       });
+      (
+        mockMeasureServiceApi.searchMeasuresInReview as jest.Mock
+      ).mockResolvedValue(oneItemResponse);
+    });
+  });
+
+  describe("My Reviews Tab Functionality", () => {
+    const asReviewer = () => {
+      const mockUseUserRoles = require("@madie/madie-util").useUserRoles;
+      mockUseUserRoles.mockReturnValue({
+        roles: ["reviewer"],
+        isAdmin: false,
+        isReviewer: true,
+      });
+      return mockUseUserRoles;
+    };
+
+    const asNonReviewer = (mockUseUserRoles) =>
+      mockUseUserRoles.mockReturnValue({
+        roles: [],
+        isAdmin: false,
+        isReviewer: false,
+      });
+
+    test("shouldDisplayMyReviewsTabWithCountForReviewers", async () => {
+      const mockUseUserRoles = asReviewer();
+
+      renderRouter(["/measures?tab=0&page=1&limit=10"]);
+
+      const myReviewsTab = await screen.findByRole("tab", {
+        name: "My Reviews (2)",
+      });
+      expect(myReviewsTab).toBeInTheDocument();
+      const tabs = screen.getAllByRole("tab");
+      expect(tabs[tabs.length - 1]).toBe(myReviewsTab);
+      expect(tabs[tabs.length - 2]).toHaveTextContent("All Reviews (4)");
+      asNonReviewer(mockUseUserRoles);
+    });
+
+    test("shouldNotDisplayMyReviewsTabForNonReviewers", async () => {
+      const mockUseUserRoles = require("@madie/madie-util").useUserRoles;
+      mockUseUserRoles.mockReturnValue({
+        roles: [],
+        isAdmin: false,
+        isReviewer: false,
+      });
+
+      renderRouter(["/measures?tab=0&page=1&limit=10"]);
+
+      await waitFor(() => {
+        expect(
+          mockMeasureServiceApi.searchMeasuresByCriteria
+        ).toHaveBeenCalled();
+      });
+      expect(
+        screen.queryByRole("tab", { name: /My Reviews/ })
+      ).not.toBeInTheDocument();
+      expect(screen.getAllByRole("tab").length).toBe(3);
+    });
+
+    test("shouldCallTheReviewsApiWithOwnedOnMyReviewsTab", async () => {
+      const mockUseUserRoles = asReviewer();
+
+      renderRouter(["/measures?tab=4&page=1&limit=10"]);
+
+      await waitFor(() => {
+        expect(
+          mockMeasureServiceApi.searchMeasuresInReview
+        ).toHaveBeenCalledWith(
+          ["OWNED"],
+          "10",
+          0,
+          "",
+          "",
+          { optionalSearchProperties: [], searchField: "" },
+          expect.any(AbortController)
+        );
+      });
+      expect(
+        mockMeasureServiceApi.searchMeasuresByCriteria
+      ).not.toHaveBeenCalled();
+      asNonReviewer(mockUseUserRoles);
+    });
+
+    test("shouldRenderMeasuresAssignedToTheReviewer", async () => {
+      const mockUseUserRoles = asReviewer();
+      (
+        mockMeasureServiceApi.searchMeasuresInReview as jest.Mock
+      ).mockResolvedValue({
+        content: [
+          {
+            id: "assigned1",
+            measureName: "AssignedMeasure1",
+            model: "QI-Core v4.1.1",
+            version: "1.0.000",
+            lastModifiedAt: "2024-06-01T00:00:00.000Z",
+            measureMetaData: { draft: true },
+            reviewStatus: "In Progress",
+          },
+        ],
+        totalPages: 1,
+        totalElements: 1,
+        numberOfElements: 1,
+        pageable: { offset: 0 },
+      });
+
+      renderRouter(["/measures?tab=4&page=1&limit=10"]);
+
+      expect(await screen.findByText("AssignedMeasure1")).toBeInTheDocument();
+      asNonReviewer(mockUseUserRoles);
       (
         mockMeasureServiceApi.searchMeasuresInReview as jest.Mock
       ).mockResolvedValue(oneItemResponse);
