@@ -1399,8 +1399,9 @@ describe("AddComponentsDialog", () => {
 
       const lastCall =
         mockSearchMeasures.mock.calls[mockSearchMeasures.mock.calls.length - 1];
-      expect(lastCall[6].searchField).toBe("TestSearch");
-      expect(lastCall[6].optionalSearchProperties).toEqual([
+      const searchCriteria = lastCall[5];
+      expect(searchCriteria.searchField).toBe("TestSearch");
+      expect(searchCriteria.optionalSearchProperties).toEqual([
         "measureName",
         "version",
         "cmsId",
@@ -1445,7 +1446,7 @@ describe("AddComponentsDialog", () => {
           mockSearchMeasures.mock.calls[
             mockSearchMeasures.mock.calls.length - 1
           ];
-        expect(lastCall[3]).toBe(1);
+        expect(lastCall[2]).toBe(1);
       });
 
       const searchInput = screen.getByPlaceholderText("Search");
@@ -1459,8 +1460,8 @@ describe("AddComponentsDialog", () => {
 
       const lastCall =
         mockSearchMeasures.mock.calls[mockSearchMeasures.mock.calls.length - 1];
-      expect(lastCall[3]).toBe(0);
-      expect(lastCall[6].searchField).toBe("TestSearch");
+      expect(lastCall[2]).toBe(0);
+      expect(lastCall[5].searchField).toBe("TestSearch");
     });
 
     it("clears filters when clear button is clicked", async () => {
