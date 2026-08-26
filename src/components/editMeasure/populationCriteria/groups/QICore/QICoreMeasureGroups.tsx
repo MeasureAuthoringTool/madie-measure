@@ -888,7 +888,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                     label="Measure Type"
                     placeHolder={{ name: "Select Measure Group", value: "" }}
                     defaultValue={formik.values.measureGroupTypes}
-                    required={true}
+                    required={!isCompositeMeasure}
                     readOnly={!canEdit}
                     error={
                       formik.touched.measureGroupTypes &&
