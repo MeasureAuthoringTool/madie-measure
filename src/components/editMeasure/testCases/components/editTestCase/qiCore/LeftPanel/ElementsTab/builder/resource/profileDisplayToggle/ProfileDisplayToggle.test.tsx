@@ -102,4 +102,22 @@ describe("ProfileDisplayToggle component", () => {
       screen.getByText(/Measure-relevant profiles \(7\)/)
     ).toBeInTheDocument();
   });
+
+  it("hides Measure-relevant profiles when the option is disabled", () => {
+    const onChange = jest.fn();
+    render(
+      <ProfileDisplayToggle
+        mode={ProfileDisplayMode.ALL}
+        allProfileCount={50}
+        relevantProfileCount={10}
+        onChange={onChange}
+        showRelevantProfiles={false}
+      />
+    );
+
+    expect(screen.getByLabelText(/All Profiles \(50\)/i)).toBeChecked();
+    expect(
+      screen.queryByLabelText(/Measure-relevant profiles \(10\)/i)
+    ).not.toBeInTheDocument();
+  });
 });

@@ -7,6 +7,7 @@ export interface ProfileDisplayToggleProps {
   allProfileCount: number;
   relevantProfileCount: number;
   onChange: (mode: ProfileDisplayMode) => void;
+  showRelevantProfiles?: boolean;
 }
 
 const ProfileDisplayToggle = ({
@@ -14,6 +15,7 @@ const ProfileDisplayToggle = ({
   allProfileCount,
   relevantProfileCount,
   onChange,
+  showRelevantProfiles = true,
 }: ProfileDisplayToggleProps) => {
   return (
     <RadioGroup
@@ -28,12 +30,14 @@ const ProfileDisplayToggle = ({
         label={`All Profiles (${allProfileCount})`}
         data-testid="all-profiles-option"
       />
-      <FormControlLabel
-        value={ProfileDisplayMode.RELEVANT}
-        control={<Radio data-testid="relevant-profiles-radio" size="small" />}
-        label={`Measure-relevant profiles (${relevantProfileCount})`}
-        data-testid="relevant-profiles-option"
-      />
+      {showRelevantProfiles && (
+        <FormControlLabel
+          value={ProfileDisplayMode.RELEVANT}
+          control={<Radio data-testid="relevant-profiles-radio" size="small" />}
+          label={`Measure-relevant profiles (${relevantProfileCount})`}
+          data-testid="relevant-profiles-option"
+        />
+      )}
     </RadioGroup>
   );
 };
