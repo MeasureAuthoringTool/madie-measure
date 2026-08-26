@@ -19,7 +19,6 @@ import {
   useReactTable,
   flexRender,
   SortingState,
-  getSortedRowModel,
 } from "@tanstack/react-table";
 import {
   CollapseIcon,
@@ -439,13 +438,20 @@ export default function AddComponentsDialog({
       priorityMeasureSets: components?.map((c) => c.measureSetId) || [],
     };
 
+    const currentSort = sorting[0]?.id || "lastModifiedAt";
+    const currentDirection = sorting[0]
+      ? sorting[0].desc
+        ? "DESC"
+        : "ASC"
+      : "DESC";
+
     measureServiceApi
       .searchMeasuresByCriteria(
         [OwnershipType.ALL],
         limit,
         page,
-        "lastModifiedAt",
-        "DESC",
+        currentSort,
+        currentDirection,
         searchCriteria,
         abortController.current
       )
@@ -478,6 +484,7 @@ export default function AddComponentsDialog({
     measureServiceApi,
     limit,
     page,
+    sorting,
   ]);
 
   useEffect(() => {
@@ -490,6 +497,13 @@ export default function AddComponentsDialog({
   }, [fetchMeasures, measure?.id]);
 
   const [rowSelection, setRowSelection] = useState({});
+  const handleSortingChange = (
+    updaterOrValue: React.SetStateAction<SortingState>
+  ) => {
+    setSorting(updaterOrValue);
+    setPage(0);
+  };
+
   const table = useReactTable({
     data: measureList,
     columns,
@@ -500,9 +514,9 @@ export default function AddComponentsDialog({
       maxSize: 500,
     },
     manualPagination: true,
+    manualSorting: true,
     getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    onSortingChange: setSorting,
+    onSortingChange: handleSortingChange,
     state: {
       sorting,
       rowSelection,
