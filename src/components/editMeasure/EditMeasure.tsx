@@ -27,6 +27,7 @@ import {
   exportMeasure,
   ShareDialog,
   TransferDialog,
+  validateCompositeMeasure,
   ManageReviewDialog,
 } from "@madie/madie-util";
 import CreateVersionDialog from "../common/createVersionDialog/CreateVersionDialog";
@@ -34,7 +35,8 @@ import InvalidTestCaseDialog from "../common/invalidTestCaseDialog/InvalidTestCa
 
 import versionErrorHelper from "../../utils/versionErrorHelper";
 
-import getLibraryNameErrors from "../measureLanding/measureList/InvalidMeasureNameDialog/getLibraryNameErrors";
+import getLibraryNameErrors from "../measureLanding/measureList/versioningErrorDialog/getLibraryNameErrors";
+import VersioningErrorDialog from "../measureLanding/measureList/versioningErrorDialog/VersioningErrorDialog";
 import {
   Toast,
   MadieAlert,
@@ -155,6 +157,9 @@ export default function EditMeasure() {
   const [versionHelperText, setVersionHelperText] = useState("");
   const [invalidTestCaseOpen, setInvalidTestCaseOpen] =
     useState<boolean>(false);
+  const [versionErrorDialogOpen, setVersionErrorDialogOpen] =
+    useState<boolean>(false);
+  const [versionErrors, setVersionErrors] = useState<string[]>([]);
   const [versionType, setVersionType] = useState<string>(null);
   const [toastOpen, setToastOpen] = useState<boolean>(false);
   const [toastMessage, setToastMessage] = useState<string>("");
@@ -431,6 +436,8 @@ export default function EditMeasure() {
 
   const handleDialogClose = () => {
     setInvalidTestCaseOpen(false);
+    setVersionErrorDialogOpen(false);
+    setVersionErrors([]);
     setCreateVersionDialog({
       open: false,
       measureId: "",
@@ -526,25 +533,31 @@ export default function EditMeasure() {
         });
     }
   };
-  // intermediary validation step before we check if we can create version
-  const checkValidCqlLibraryName = async (versionType: string) => {
+
+  const showVersionErrors = (errors: string[]) => {
+    setLoading(false);
+    setVersionErrors(errors);
+    setVersionErrorDialogOpen(true);
+    setCreateVersionDialog((prevState) => ({
+      ...prevState,
+      open: false,
+    }));
+  };
+
+  const handleVersionSubmit = async (versionType: string) => {
     setLoading(true);
     try {
       const result = await measureServiceApi?.fetchMeasure(measure.id);
       if (result) {
-        const { cqlLibraryName, model } = result;
-        const errorResults = getLibraryNameErrors(
-          cqlLibraryName,
-          model as Model
-        );
-        if (errorResults.length > 0) {
-          setCreateVersionDialog((prevState) => ({
-            ...prevState,
-            open: false,
-          }));
-        } else {
-          checkCreateVersion(versionType);
+        const versionErrors = [
+          ...getLibraryNameErrors(result.cqlLibraryName, result.model as Model),
+          ...(await validateCompositeMeasure(result, measureServiceApi)),
+        ];
+        if (versionErrors.length > 0) {
+          showVersionErrors(versionErrors);
+          return;
         }
+        checkCreateVersion(versionType);
       }
     } catch (e) {
       setToastMessage(
@@ -802,6 +815,12 @@ export default function EditMeasure() {
             versionType={versionType}
             loading={loading}
           />
+          <VersioningErrorDialog
+            open={versionErrorDialogOpen}
+            onClose={handleDialogClose}
+            measureName={measure?.measureName}
+            errors={versionErrors}
+          />
           <DraftMeasureDialog
             open={draftMeasureDialog.open}
             onClose={handleDialogClose}
@@ -813,7 +832,7 @@ export default function EditMeasure() {
             currentVersion={measure?.version}
             open={createVersionDialog.open}
             onClose={handleDialogClose}
-            onSubmit={checkValidCqlLibraryName}
+            onSubmit={handleVersionSubmit}
             versionHelperText={versionHelperText}
             loading={loading}
             measureId={measure?.id}

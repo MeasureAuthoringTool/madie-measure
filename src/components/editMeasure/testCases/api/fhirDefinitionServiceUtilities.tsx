@@ -569,7 +569,9 @@ export function getTopLevelElements(
             e?.path?.includes(attribute) ||
             e.path.substring(basePath?.length + 1) === attribute
         )) ||
-      (e?.path?.includes("extension") && e?.id.includes(":"))
+      (e?.path?.split(".")?.length === 2 &&
+        e?.path?.includes("extension") &&
+        e?.id.includes(":"))
   );
 
   // Filter out sliced elements (id contains ':') except extension slices
@@ -591,7 +593,6 @@ export function getTopLevelElements(
   });
 
   //for each elementsFiltered, if type contains more than one type, duplicate the element and restrict the type to only that type
-
   filteredWithoutSlices.forEach((element) => {
     if (element?.type?.length > 1) {
       element?.type?.forEach((type, index) => {
