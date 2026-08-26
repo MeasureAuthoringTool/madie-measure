@@ -127,7 +127,8 @@ export default function AddComponentsDialog({
   useEffect(() => {
     setRowSelection((prev) => {
       if (!measureList?.length) {
-        return Object.keys(prev).length ? {} : prev;
+        console.log("CLEARING ROW SELECTION: Prev is??", prev);
+        return prev;
       }
 
       let changed = false;
