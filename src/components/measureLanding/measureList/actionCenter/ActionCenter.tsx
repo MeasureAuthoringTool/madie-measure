@@ -216,7 +216,6 @@ export default function ActionCenter(props: PropTypes) {
     </span>
   );
 
-  // Rendered on every tab; the review tabs render nothing else.
   const reviewAction = featureFlags?.MeasureReviewStatus && (
     <ReviewAction
       measures={measures}
