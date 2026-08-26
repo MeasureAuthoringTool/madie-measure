@@ -1897,9 +1897,13 @@ describe("TestCaseList component", () => {
     ).toBeInTheDocument();
   });
 
-  it("Should display valid test case percentage for QiCore v6 measures", async () => {
-    mockMeasure.model = Model.QICORE_6_0_0;
-    renderTestCaseListComponent();
+  it("Should display valid test case percentage for non-legacy measures", async () => {
+    const measure = {
+      ...mockMeasure,
+      model: Model.QICORE_7_0_2,
+    };
+
+    renderTestCaseListComponent([], ["test"], false, measure);
     const tabElement = await screen.findByTestId("validation-tab");
     expect(tabElement).toBeInTheDocument();
     expect(tabElement).toHaveAttribute("aria-label", "Validation tab panel");
@@ -1932,11 +1936,20 @@ describe("TestCaseList component", () => {
     expect(tabElement).toHaveTextContent("Valid(0)");
   });
 
-  it("Should not display valid test case percentage for QiCore v4 measures", async () => {
-    renderTestCaseListComponent();
-    const tabElement = screen.queryByTestId("validation-tab");
-    expect(tabElement).not.toBeInTheDocument();
-  });
+  it.each([Model.QICORE, Model.QDM_5_6])(
+    "Should not display valid test case percentage for legacy model %s",
+    (model) => {
+      const measure = {
+        ...mockMeasure,
+        model,
+      };
+
+      renderTestCaseListComponent([], ["test"], false, measure);
+
+      const tabElement = screen.queryByTestId("validation-tab");
+      expect(tabElement).not.toBeInTheDocument();
+    }
+  );
 
   it("should disable execute button if CQL risk adjustment type mismatch error exists on measure", async () => {
     mockMeasure.createdBy = MEASURE_CREATEDBY;

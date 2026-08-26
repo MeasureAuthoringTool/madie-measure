@@ -106,6 +106,9 @@ export default function CreateCodeCoverageNavTabs(props: NavTabProps) {
     );
   };
 
+  const supportsTestCaseValidation =
+    measure?.model !== Model.QICORE && measure?.model !== Model.QDM_5_6;
+
   const getValidationResultsDisplay = (label: string) => {
     return (
       <div>
@@ -210,7 +213,7 @@ export default function CreateCodeCoverageNavTabs(props: NavTabProps) {
             data-testid="coverage-tab"
             value="coverage"
           />
-          {_.isEqual(measure?.model, Model.QICORE_6_0_0) && (
+          {supportsTestCaseValidation && (
             <Tab
               type="B"
               tabIndex={0}
