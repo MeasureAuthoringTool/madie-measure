@@ -87,9 +87,13 @@ const ResourceList = ({
   // Profile display mode state
   const [profileDisplayMode, setProfileDisplayMode] =
     useState<ProfileDisplayMode>(() => {
+      if (isComposite) return ProfileDisplayMode.ALL;
       if (!measureId) return ProfileDisplayMode.RELEVANT;
       return getProfileDisplayMode(measureId);
     });
+  const effectiveProfileDisplayMode = isComposite
+    ? ProfileDisplayMode.ALL
+    : profileDisplayMode;
 
   const handleProfileDisplayModeChange = useCallback(
     (mode: ProfileDisplayMode) => {
@@ -103,17 +107,21 @@ const ResourceList = ({
   );
 
   const activeResourceIdentifiers = useMemo(() => {
-    if (profileDisplayMode === ProfileDisplayMode.ALL) {
+    if (effectiveProfileDisplayMode === ProfileDisplayMode.ALL) {
       return allResourceIdentifiers || resourceIdentifiers;
     }
     return resourceIdentifiers;
-  }, [profileDisplayMode, allResourceIdentifiers, resourceIdentifiers]);
+  }, [
+    effectiveProfileDisplayMode,
+    allResourceIdentifiers,
+    resourceIdentifiers,
+  ]);
 
   const profileTableHeader = useMemo(() => {
-    return profileDisplayMode === ProfileDisplayMode.ALL
+    return effectiveProfileDisplayMode === ProfileDisplayMode.ALL
       ? "All Profiles"
       : "Relevant Profiles";
-  }, [profileDisplayMode]);
+  }, [effectiveProfileDisplayMode]);
 
   const managePagination = useCallback(() => {
     const filter = resourceFilter?.trim().toLowerCase() || "";
@@ -379,12 +387,13 @@ const ResourceList = ({
         </div>
         <div className="profile-toggle-wrapper">
           <ProfileDisplayToggle
-            mode={profileDisplayMode}
+            mode={effectiveProfileDisplayMode}
             allProfileCount={
               (allResourceIdentifiers || resourceIdentifiers)?.length || 0
             }
             relevantProfileCount={resourceIdentifiers?.length || 0}
             onChange={handleProfileDisplayModeChange}
+            showRelevantProfiles={!isComposite}
           />
         </div>
       </div>
