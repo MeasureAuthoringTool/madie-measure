@@ -19,8 +19,6 @@ import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import { Measure } from "@madie/madie-models";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 const TH = tw.th`p-3 text-left text-sm font-bold capitalize`;
-const NO_COMPONENTS_MESSAGE =
-  "Composite measure has no components selected. Please return to the population criteria and select component measures to insert test cases";
 
 export default function CompositeMeasuresTable({
   measures,
@@ -227,7 +225,8 @@ export default function CompositeMeasuresTable({
       data-testid="no-components-message"
       style={{ textAlign: "center", color: "#717171", marginTop: 24 }}
     >
-      {NO_COMPONENTS_MESSAGE}
+      Composite measure has no components selected. Please return to the
+      population criteria and select component measures to insert test cases
     </p>
   );
 }
