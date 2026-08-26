@@ -24,11 +24,15 @@ import {
   CollapseIcon,
   ExpandIcon,
 } from "../../../../../../icons/MeasureListTableRightArrowIcons";
-import { Measure, MeasureScoring, OwnershipType } from "@madie/madie-models";
+import { Measure, OwnershipType } from "@madie/madie-models";
 import * as _ from "lodash";
 import tw from "twin.macro";
 import "styled-components/macro";
-import { useMeasureServiceApi, formatCmsId } from "@madie/madie-util";
+import {
+  useMeasureServiceApi,
+  formatCmsId,
+  getAllowedScoringTypes,
+} from "@madie/madie-util";
 import "../../../../../measureLanding/MeasureLanding.scss";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
@@ -59,6 +63,7 @@ type TCRow = {
   hasAssociatedMeasures: boolean;
   cmsId?: string;
   updated: string;
+  translatorVersion: string;
 };
 
 export const ROW_EXPANSION_ERROR =
@@ -158,6 +163,7 @@ export default function AddComponentsDialog({
       actions: measure,
       hasAssociatedMeasures: measure?.hasAssociatedMeasures,
       lastModifiedAt: measure?.lastModifiedAt,
+      translatorVersion: measure?.translatorVersion,
     }));
   };
 
@@ -339,6 +345,17 @@ export default function AddComponentsDialog({
         accessorKey: "measureSet.cmsId",
       },
       {
+        header: "Translator",
+        cell: (info) => (
+          <TruncateText
+            text={info.row.original?.translatorVersion}
+            maxLength={20}
+            dataTestId={`translator-version-${info.row.original.id}`}
+          />
+        ),
+        accessorKey: "translatorVersion",
+      },
+      {
         header: "Updated",
         cell: (info) => {
           const converted = convertDate(info.row.original.lastModifiedAt);
@@ -389,22 +406,6 @@ export default function AddComponentsDialog({
 
     return columnDefs;
   }, [expandedSectionMap]);
-
-  const getAllowedScoringTypes = (compositeScoring: string) => {
-    if (
-      compositeScoring === "Opportunity" ||
-      compositeScoring === "All-or-nothing"
-    ) {
-      return [MeasureScoring.PROPORTION, MeasureScoring.RATIO];
-    } else if (compositeScoring === "Linear") {
-      return [
-        MeasureScoring.PROPORTION,
-        MeasureScoring.RATIO,
-        MeasureScoring.CONTINUOUS_VARIABLE,
-      ];
-    }
-    return [];
-  };
 
   const fetchMeasures = useCallback(() => {
     if (!measure || !measure.model || !measure.id || !open) {
@@ -637,6 +638,17 @@ export default function AddComponentsDialog({
           />
         ),
         accessorKey: "measureSet.cmsId",
+      },
+      {
+        header: "Translator",
+        cell: (info) => (
+          <TruncateText
+            text={info.row.original?.translatorVersion}
+            maxLength={20}
+            dataTestId={`translator-version-${info.row.original.id}`}
+          />
+        ),
+        accessorKey: "translatorVersion",
       },
       {
         header: "Updated",

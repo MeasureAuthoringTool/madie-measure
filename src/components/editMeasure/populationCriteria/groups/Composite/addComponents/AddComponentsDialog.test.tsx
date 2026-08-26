@@ -1,6 +1,7 @@
 import * as mockCmsIdStubs from "../../../../../../__mocks__/cmsIdFormatterStubs";
+import * as mockCompositeStubs from "../../../../../../__mocks__/compositeValidationStubs";
 import * as React from "react";
-import { render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import AddComponentsDialog, {
   ROW_EXPANSION_ERROR,
@@ -46,7 +47,7 @@ const zeroItemResponse = {
 
 jest.mock("@madie/madie-util", () => ({
   ...mockCmsIdStubs,
-
+  ...mockCompositeStubs,
   useMeasureServiceApi: jest.fn(() => ({
     searchMeasuresByCriteria: jest.fn().mockResolvedValue(mockOneItemResponse),
     getMeasuresByMeasureSetId: jest.fn().mockResolvedValue([]),
@@ -278,6 +279,7 @@ describe("AddComponentsDialog", () => {
         version: "1.0.0",
         measureSet: { cmsId: "CMS789" },
         lastModifiedAt: "2024-01-15",
+        translatorVersion: "3.29.0",
       },
       {
         id: "child-2",
@@ -285,6 +287,7 @@ describe("AddComponentsDialog", () => {
         version: "1.1.0",
         measureSet: { cmsId: "CMS790" },
         lastModifiedAt: "2024-01-20",
+        translatorVersion: "3.29.0",
       },
     ]);
 
@@ -345,6 +348,12 @@ describe("AddComponentsDialog", () => {
           },
           { timeout: 3000 }
         );
+
+        await waitFor(() => {
+          expect(screen.getByText("Child Measure 1")).toBeInTheDocument();
+          expect(screen.getByText("Child Measure 2")).toBeInTheDocument();
+          expect(screen.getAllByText("3.29.0")).toHaveLength(2);
+        });
       }
     }
   });
@@ -1424,6 +1433,112 @@ describe("AddComponentsDialog", () => {
       expect(searchCriteria.optionalSearchProperties.length).toBe(3);
     });
 
+    it("triggers the search when Enter is pressed in the search field", async () => {
+      const mockSearchMeasures = jest
+        .fn()
+        .mockResolvedValue(mockOneItemResponse);
+
+      useMeasureServiceApi.mockReturnValue({
+        searchMeasuresByCriteria: mockSearchMeasures,
+        getMeasuresByMeasureSetId: jest.fn(),
+      });
+
+      render(
+        <AddComponentsDialog
+          open={true}
+          onClose={onCloseMock}
+          measure={mockMeasure}
+          compositeScoring="Opportunity"
+          components={[]}
+          submitComponentForm={jest.fn()}
+        />
+      );
+
+      await waitFor(() => {
+        expect(mockSearchMeasures).toHaveBeenCalled();
+      });
+
+      const searchInput = screen.getByPlaceholderText("Search");
+      userEvent.type(searchInput, "TestSearch");
+
+      mockSearchMeasures.mockClear();
+      fireEvent.keyPress(searchInput, {
+        key: "Enter",
+        code: "Enter",
+        charCode: 13,
+      });
+
+      await waitFor(() => {
+        expect(mockSearchMeasures).toHaveBeenCalled();
+      });
+
+      const lastCall =
+        mockSearchMeasures.mock.calls[mockSearchMeasures.mock.calls.length - 1];
+      const searchCriteria = lastCall[5];
+      expect(searchCriteria.searchField).toBe("TestSearch");
+      expect(searchCriteria.optionalSearchProperties).toEqual([
+        "measureName",
+        "version",
+        "cmsId",
+      ]);
+    });
+
+    it("resets to the first page when a search is triggered from a later page", async () => {
+      const mockSearchMeasures = jest.fn().mockResolvedValue({
+        content: data,
+        totalPages: 3,
+        totalElements: 15,
+        numberOfElements: 5,
+        pageable: { offset: 0 },
+      });
+
+      useMeasureServiceApi.mockReturnValue({
+        searchMeasuresByCriteria: mockSearchMeasures,
+        getMeasuresByMeasureSetId: jest.fn(),
+      });
+
+      render(
+        <AddComponentsDialog
+          open={true}
+          onClose={onCloseMock}
+          measure={mockMeasure}
+          compositeScoring="Opportunity"
+          components={[]}
+          submitComponentForm={jest.fn()}
+        />
+      );
+
+      await waitFor(() => {
+        expect(mockSearchMeasures).toHaveBeenCalled();
+      });
+
+      // Move off the first page
+      const nextPageButton = screen.getByRole("button", { name: /next/i });
+      await userEvent.click(nextPageButton);
+
+      await waitFor(() => {
+        const lastCall =
+          mockSearchMeasures.mock.calls[
+            mockSearchMeasures.mock.calls.length - 1
+          ];
+        expect(lastCall[2]).toBe(1);
+      });
+
+      const searchInput = screen.getByPlaceholderText("Search");
+      userEvent.type(searchInput, "TestSearch");
+      mockSearchMeasures.mockClear();
+      userEvent.click(screen.getByTestId("test-cases-trigger-search"));
+
+      await waitFor(() => {
+        expect(mockSearchMeasures).toHaveBeenCalled();
+      });
+
+      const lastCall =
+        mockSearchMeasures.mock.calls[mockSearchMeasures.mock.calls.length - 1];
+      expect(lastCall[2]).toBe(0);
+      expect(lastCall[5].searchField).toBe("TestSearch");
+    });
+
     it("clears filters when clear button is clicked", async () => {
       const mockSearchMeasures = jest
         .fn()
@@ -2221,5 +2336,68 @@ describe("AddComponentsDialog", () => {
         expect(screen.getByText("0333FHIR")).toBeInTheDocument();
       });
     }
+  });
+
+  it("renders translator column and translator version values in main rows", async () => {
+    const mainRowData = [
+      {
+        id: "main-1",
+        measureName: "Translator Main 1",
+        version: "1.0.0",
+        model: "QI-Core v4.1.1",
+        measureSet: { cmsId: 111 },
+        measureSetId: "set-1",
+        lastModifiedAt: "2024-01-01",
+        hasAssociatedMeasures: false,
+        translatorVersion: "1.5.001",
+      },
+      {
+        id: "main-2",
+        measureName: "Translator Main 2",
+        version: "2.0.0",
+        model: "QDM v5.6",
+        measureSet: { cmsId: 222 },
+        measureSetId: "set-2",
+        lastModifiedAt: "2024-01-02",
+        hasAssociatedMeasures: false,
+        translatorVersion: "2.7.000",
+      },
+    ];
+
+    const mockSearchMeasures = jest.fn().mockResolvedValue({
+      content: mainRowData,
+      totalPages: 1,
+      totalElements: 2,
+      numberOfElements: 2,
+      pageable: { offset: 0 },
+    });
+
+    useMeasureServiceApi.mockReturnValue({
+      searchMeasuresByCriteria: mockSearchMeasures,
+      getMeasuresByMeasureSetId: jest.fn(),
+    });
+
+    render(
+      <AddComponentsDialog
+        open={true}
+        onClose={onCloseMock}
+        measure={mockMeasure}
+        compositeScoring="Opportunity"
+        components={[]}
+        submitComponentForm={jest.fn()}
+      />
+    );
+
+    await waitFor(() => {
+      expect(mockSearchMeasures).toHaveBeenCalled();
+    });
+
+    expect(
+      screen.getByRole("columnheader", {
+        name: /translator/i,
+      })
+    ).toBeInTheDocument();
+    expect(screen.getByText("1.5.001")).toBeInTheDocument();
+    expect(screen.getByText("2.7.000")).toBeInTheDocument();
   });
 });

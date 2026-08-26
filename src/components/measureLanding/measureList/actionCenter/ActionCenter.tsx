@@ -18,7 +18,8 @@ import {
 } from "@madie/madie-util";
 import ReviewAction from "./reviewAction/ReviewAction";
 
-const ALL_REVIEWS_TAB = 3;
+export const ALL_REVIEWS_TAB = 3;
+export const MY_REVIEWS_TAB = 4;
 
 // Helper to check if user owns all selected measures
 const isOwnerOfAllMeasures = (measures: Measure[]) => {
@@ -202,8 +203,10 @@ export default function ActionCenter(props: PropTypes) {
     setIsSharedWithUser(isSelectedMeasuresSharedWithUser(measures));
   }, [measures]);
 
-  const canReview =
-    (activeTab === ALL_REVIEWS_TAB && !!userRoles?.isReviewer) || canEdit;
+  const isReviewTab =
+    activeTab === ALL_REVIEWS_TAB || activeTab === MY_REVIEWS_TAB;
+
+  const canReview = (isReviewTab && !!userRoles?.isReviewer) || canEdit;
   const PipeSeparator = () => (
     <span
       aria-hidden="true"
@@ -213,66 +216,74 @@ export default function ActionCenter(props: PropTypes) {
     </span>
   );
 
+  const reviewAction = featureFlags?.MeasureReviewStatus && (
+    <ReviewAction
+      measures={measures}
+      onClick={reviewMeasure}
+      canReview={canReview}
+    />
+  );
+
   return (
     <div data-testid="action-center">
-      <DeleteAction
-        measures={measures}
-        onClick={deleteMeasure}
-        canEdit={
-          canEdit &&
-          checkUserCanDelete(
-            measures?.[0]?.measureSet?.owner,
-            measures?.[0]?.measureMetaData?.draft
-          )
-        }
-      />
-      <ExportAction measures={measures} onClick={exportMeasure} />
-
-      <ShareAction
-        measures={measures}
-        onClick={shareMeasure}
-        isOwner={isOwner}
-        isSharedWithUser={isSharedWithUser}
-        activeTab={activeTab}
-      />
-
-      <TransferAction
-        measures={measures}
-        onClick={transferMeasure}
-        activeTab={activeTab}
-      />
-
-      <AssociateCmsIdAction measures={measures} onClick={associateCmsId} />
-
-      <PipeSeparator />
-
-      <VersionAction
-        measures={measures}
-        onClick={versionMeasure}
-        canEdit={canEdit}
-      />
-      <DraftAction
-        measures={measures}
-        onClick={draftMeasure}
-        canEdit={canEdit}
-      />
-
-      <PipeSeparator />
-
-      <ViewHRAction measures={measures} onClick={viewHumanReadable} />
-      <HistoryAction measures={measures} onClick={viewMeasureHistory} />
-      <CompareVersionsAction measures={measures} onClick={compareVersions} />
-
-      {featureFlags?.MeasureReviewStatus && (
+      {!isReviewTab && (
         <>
-          <PipeSeparator />
-          <ReviewAction
+          <DeleteAction
             measures={measures}
-            onClick={reviewMeasure}
-            canReview={canReview}
+            onClick={deleteMeasure}
+            canEdit={
+              canEdit &&
+              checkUserCanDelete(
+                measures?.[0]?.measureSet?.owner,
+                measures?.[0]?.measureMetaData?.draft
+              )
+            }
           />
+          <ExportAction measures={measures} onClick={exportMeasure} />
+
+          <ShareAction
+            measures={measures}
+            onClick={shareMeasure}
+            isOwner={isOwner}
+            isSharedWithUser={isSharedWithUser}
+            activeTab={activeTab}
+          />
+
+          <TransferAction
+            measures={measures}
+            onClick={transferMeasure}
+            activeTab={activeTab}
+          />
+
+          <AssociateCmsIdAction measures={measures} onClick={associateCmsId} />
+
+          <PipeSeparator />
+
+          <VersionAction
+            measures={measures}
+            onClick={versionMeasure}
+            canEdit={canEdit}
+          />
+          <DraftAction
+            measures={measures}
+            onClick={draftMeasure}
+            canEdit={canEdit}
+          />
+
+          <PipeSeparator />
+
+          <ViewHRAction measures={measures} onClick={viewHumanReadable} />
+          <HistoryAction measures={measures} onClick={viewMeasureHistory} />
+          <CompareVersionsAction
+            measures={measures}
+            onClick={compareVersions}
+          />
+
+          {reviewAction && <PipeSeparator />}
         </>
       )}
+
+      {reviewAction}
     </div>
   );
 }

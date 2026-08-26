@@ -26,6 +26,7 @@ import {
   ManageReviewDialog,
   formatCmsId,
   padCmsId,
+  validateCompositeMeasure,
 } from "@madie/madie-util";
 import { useNavigate } from "react-router-dom";
 import { Chip, Tooltip } from "@mui/material";
@@ -51,10 +52,13 @@ import InvalidTestCaseDialog from "../../common/invalidTestCaseDialog/InvalidTes
 import CreatVersionDialog from "../../common/createVersionDialog/CreateVersionDialog";
 import DraftMeasureDialog from "../../common/draftMeasureDialog/DraftMeasureDialog";
 import versionErrorHelper from "../../../utils/versionErrorHelper";
-import InvalidMeasureNameDialog from "./InvalidMeasureNameDialog/InvalidMeasureNameDialog";
-import getLibraryNameErrors from "./InvalidMeasureNameDialog/getLibraryNameErrors";
+import VersioningErrorDialog from "./versioningErrorDialog/VersioningErrorDialog";
+import getLibraryNameErrors from "./versioningErrorDialog/getLibraryNameErrors";
 import AssociateCmsIdDialog from "./associateCmsIdDialog/AssociateCmsIdDialog";
-import ActionCenter from "./actionCenter/ActionCenter";
+import ActionCenter, {
+  ALL_REVIEWS_TAB,
+  MY_REVIEWS_TAB,
+} from "./actionCenter/ActionCenter";
 import {
   ExpandIcon,
   CollapseIcon,
@@ -182,14 +186,18 @@ export default function MeasureList(props: {
   const userServiceApi = useRef(useUserServiceApi()).current; //needs to be ref or triggers jest. throws warn
   const featureFlags = useFeatureFlags();
 
+  const isReviewTab =
+    props.activeTab === ALL_REVIEWS_TAB || props.activeTab === MY_REVIEWS_TAB;
+  const showReviewStatus =
+    isReviewTab ||
+    (!!featureFlags?.MeasureReviewStatus && props.activeTab !== 2);
+
   const filterByOpts = [
     "Measure",
     "Model",
     "Version",
     "CMS ID",
-    ...(featureFlags?.MeasureReviewStatus && props.activeTab !== 2
-      ? ["Review"]
-      : []),
+    ...(showReviewStatus ? ["Review"] : []),
   ];
   const filterMap: Record<string, string> = {
     Measure: "measureName",
@@ -247,11 +255,9 @@ export default function MeasureList(props: {
     open: false,
     measureId: "",
   });
-  const [invalidLibraryDialogOpen, setInvalidLibraryDialogOpen] =
+  const [versionErrorDialogOpen, setVersionErrorDialogOpen] =
     useState<boolean>(false);
-  const [invalidLibraryErrors, setInvalidLibraryErrors] = useState<string[]>(
-    []
-  );
+  const [versionErrors, setVersionErrors] = useState<string[]>([]);
 
   const [viewHumanReadableModal, setViewHumanReadableModal] = useState({
     open: false,
@@ -510,7 +516,7 @@ export default function MeasureList(props: {
         new Date(rowA.original.actions.lastModifiedAt).getTime() -
         new Date(rowB.original.actions.lastModifiedAt).getTime(),
     },
-    ...(featureFlags?.MeasureReviewStatus && props.activeTab !== 2
+    ...(showReviewStatus
       ? [
           {
             header: "Review",
@@ -735,7 +741,7 @@ export default function MeasureList(props: {
     selectedIdForExpansion,
     isRowExpanded,
     props.activeTab,
-    featureFlags?.MeasureReviewStatus,
+    showReviewStatus,
   ]);
 
   const expandedcolumns = useMemo<ColumnDef<TCRow>[]>(() => {
@@ -842,7 +848,7 @@ export default function MeasureList(props: {
         ];
 
   const handleDialogClose = () => {
-    setInvalidLibraryDialogOpen(false);
+    setVersionErrorDialogOpen(false);
     setInvalidTestCaseOpen(false);
     setCreateVersionDialog({
       open: false,
@@ -851,7 +857,7 @@ export default function MeasureList(props: {
     setDraftMeasureDialog({
       open: false,
     });
-    setInvalidLibraryErrors([]);
+    setVersionErrors([]);
     setVersionHelperText("");
     setViewHumanReadableModal({
       open: false,
@@ -1105,28 +1111,31 @@ export default function MeasureList(props: {
         });
     }
   };
-  // intermediary validation step before we check if we can create version
-  const checkValidCqlLibraryName = async (versionType: string) => {
+
+  const showVersionErrors = (errors: string[]) => {
+    setVersionErrors(errors);
+    setVersionErrorDialogOpen(true);
+    setCreateVersionDialog((prevState) => ({
+      ...prevState,
+      open: false,
+    }));
+  };
+
+  const handleVersionSubmit = async (versionType: string) => {
     try {
       const result = await measureServiceApi?.fetchMeasure(
         targetMeasure.current?.id
       );
       if (result) {
-        const { cqlLibraryName, model } = result;
-        const errorResults = getLibraryNameErrors(
-          cqlLibraryName,
-          model as Model
-        );
-        if (errorResults.length > 0) {
-          setInvalidLibraryErrors(errorResults);
-          setInvalidLibraryDialogOpen(true);
-          setCreateVersionDialog((prevState) => ({
-            ...prevState,
-            open: false,
-          }));
-        } else {
-          checkCreateVersion(versionType);
+        const versionErrors = [
+          ...getLibraryNameErrors(result.cqlLibraryName, result.model as Model),
+          ...(await validateCompositeMeasure(result, measureServiceApi)),
+        ];
+        if (versionErrors.length > 0) {
+          showVersionErrors(versionErrors);
+          return;
         }
+        checkCreateVersion(versionType);
       }
     } catch (e) {
       props.setToastMessage(
@@ -1317,16 +1326,16 @@ export default function MeasureList(props: {
         currentVersion={targetMeasure?.current?.version}
         open={createVersionDialog.open}
         onClose={handleDialogClose}
-        onSubmit={checkValidCqlLibraryName}
+        onSubmit={handleVersionSubmit}
         versionHelperText={versionHelperText}
         loading={loading}
         measureId={targetMeasure?.current?.id}
       />
-      <InvalidMeasureNameDialog
-        invalidLibraryDialogOpen={invalidLibraryDialogOpen}
-        onInvalidLibraryNameDialogClose={handleDialogClose}
+      <VersioningErrorDialog
+        open={versionErrorDialogOpen}
+        onClose={handleDialogClose}
         measureName={targetMeasure?.current?.measureName}
-        invalidLibraryErrors={invalidLibraryErrors}
+        errors={versionErrors}
       />
       <InvalidTestCaseDialog
         open={invalidTestCaseOpen}
@@ -1410,7 +1419,7 @@ export default function MeasureList(props: {
           entitySetId={selectedMeasures[0]?.measureSetId}
           onClose={handleReviewDialogClose}
           onSuccess={() => {
-            doUpdateList();
+            doUpdateList(true);
             table.resetRowSelection();
             setSelectedExpandedMeasuresIds([]);
             setIsRowExpanded(false);
@@ -1424,7 +1433,7 @@ export default function MeasureList(props: {
           measure={selectedMeasures[0]}
           onClose={handleReviewDialogClose}
           onSuccess={() => {
-            doUpdateList();
+            doUpdateList(true);
             table.resetRowSelection();
             setSelectedExpandedMeasuresIds([]);
             setIsRowExpanded(false);
