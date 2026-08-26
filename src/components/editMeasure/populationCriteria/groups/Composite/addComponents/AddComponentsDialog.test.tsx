@@ -279,6 +279,7 @@ describe("AddComponentsDialog", () => {
         version: "1.0.0",
         measureSet: { cmsId: "CMS789" },
         lastModifiedAt: "2024-01-15",
+        translatorVersion: "3.29.0",
       },
       {
         id: "child-2",
@@ -286,6 +287,7 @@ describe("AddComponentsDialog", () => {
         version: "1.1.0",
         measureSet: { cmsId: "CMS790" },
         lastModifiedAt: "2024-01-20",
+        translatorVersion: "3.29.0",
       },
     ]);
 
@@ -346,6 +348,12 @@ describe("AddComponentsDialog", () => {
           },
           { timeout: 3000 }
         );
+
+        await waitFor(() => {
+          expect(screen.getByText("Child Measure 1")).toBeInTheDocument();
+          expect(screen.getByText("Child Measure 2")).toBeInTheDocument();
+          expect(screen.getAllByText("3.29.0")).toHaveLength(2);
+        });
       }
     }
   });
@@ -2262,5 +2270,68 @@ describe("AddComponentsDialog", () => {
         expect(screen.getByText("0333FHIR")).toBeInTheDocument();
       });
     }
+  });
+
+  it("renders translator column and translator version values in main rows", async () => {
+    const mainRowData = [
+      {
+        id: "main-1",
+        measureName: "Translator Main 1",
+        version: "1.0.0",
+        model: "QI-Core v4.1.1",
+        measureSet: { cmsId: 111 },
+        measureSetId: "set-1",
+        lastModifiedAt: "2024-01-01",
+        hasAssociatedMeasures: false,
+        translatorVersion: "1.5.001",
+      },
+      {
+        id: "main-2",
+        measureName: "Translator Main 2",
+        version: "2.0.0",
+        model: "QDM v5.6",
+        measureSet: { cmsId: 222 },
+        measureSetId: "set-2",
+        lastModifiedAt: "2024-01-02",
+        hasAssociatedMeasures: false,
+        translatorVersion: "2.7.000",
+      },
+    ];
+
+    const mockSearchMeasures = jest.fn().mockResolvedValue({
+      content: mainRowData,
+      totalPages: 1,
+      totalElements: 2,
+      numberOfElements: 2,
+      pageable: { offset: 0 },
+    });
+
+    useMeasureServiceApi.mockReturnValue({
+      searchMeasuresByCriteria: mockSearchMeasures,
+      getMeasuresByMeasureSetId: jest.fn(),
+    });
+
+    render(
+      <AddComponentsDialog
+        open={true}
+        onClose={onCloseMock}
+        measure={mockMeasure}
+        compositeScoring="Opportunity"
+        components={[]}
+        submitComponentForm={jest.fn()}
+      />
+    );
+
+    await waitFor(() => {
+      expect(mockSearchMeasures).toHaveBeenCalled();
+    });
+
+    expect(
+      screen.getByRole("columnheader", {
+        name: /translator/i,
+      })
+    ).toBeInTheDocument();
+    expect(screen.getByText("1.5.001")).toBeInTheDocument();
+    expect(screen.getByText("2.7.000")).toBeInTheDocument();
   });
 });

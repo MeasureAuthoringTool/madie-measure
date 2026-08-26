@@ -145,7 +145,8 @@ const TestCaseTable = (props: TestCaseTableProps) => {
   };
 
   const navigate = useNavigate();
-  const isQICore6 = measure?.model === Model.QICORE_6_0_0;
+  const supportsTestCaseValidation =
+    measure?.model !== Model.QICORE && measure?.model !== Model.QDM_5_6;
   const userServiceApi = useRef(useUserServiceApi()).current; //needs to be ref or triggers jest. throws warn
 
   const TH = tw.th`p-3 text-left text-sm font-bold capitalize`;
@@ -328,7 +329,7 @@ const TestCaseTable = (props: TestCaseTableProps) => {
       }
     );
 
-    if (isQICore6) {
+    if (supportsTestCaseValidation) {
       columnDefs.push({
         header: "Validation",
         cell: (info) => (

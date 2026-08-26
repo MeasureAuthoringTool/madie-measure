@@ -64,6 +64,7 @@ type TCRow = {
   hasAssociatedMeasures: boolean;
   cmsId?: string;
   updated: string;
+  translatorVersion: string;
 };
 
 export const ROW_EXPANSION_ERROR =
@@ -163,6 +164,7 @@ export default function AddComponentsDialog({
       actions: measure,
       hasAssociatedMeasures: measure?.hasAssociatedMeasures,
       lastModifiedAt: measure?.lastModifiedAt,
+      translatorVersion: measure?.translatorVersion,
     }));
   };
 
@@ -342,6 +344,17 @@ export default function AddComponentsDialog({
           />
         ),
         accessorKey: "measureSet.cmsId",
+      },
+      {
+        header: "Translator",
+        cell: (info) => (
+          <TruncateText
+            text={info.row.original?.translatorVersion}
+            maxLength={20}
+            dataTestId={`translator-version-${info.row.original.id}`}
+          />
+        ),
+        accessorKey: "translatorVersion",
       },
       {
         header: "Updated",
@@ -611,6 +624,17 @@ export default function AddComponentsDialog({
           />
         ),
         accessorKey: "measureSet.cmsId",
+      },
+      {
+        header: "Translator",
+        cell: (info) => (
+          <TruncateText
+            text={info.row.original?.translatorVersion}
+            maxLength={20}
+            dataTestId={`translator-version-${info.row.original.id}`}
+          />
+        ),
+        accessorKey: "translatorVersion",
       },
       {
         header: "Updated",
