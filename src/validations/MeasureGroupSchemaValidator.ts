@@ -140,10 +140,9 @@ export const measureGroupSchemaValidator = (
       }
       return schema;
     }),
-    measureGroupTypes: Yup.array().min(
-      1,
-      "At least one measure group type is required."
-    ),
+    measureGroupTypes: isCompositeMeasure
+      ? Yup.array().notRequired()
+      : Yup.array().min(1, "At least one measure group type is required."),
     populationBasis: Yup.string()
       .nullable()
       .required("Population Basis is required."),
