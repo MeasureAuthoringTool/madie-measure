@@ -18,6 +18,7 @@ import {
 } from "./reviewAction/ReviewAction";
 
 const ALL_REVIEWS_TAB = 3;
+const MY_REVIEWS_TAB = 4;
 
 const mockMeasureServiceApi = {
   deleteMeasure: jest.fn().mockResolvedValue({}),
@@ -351,6 +352,85 @@ describe("ActionCenter", () => {
         "aria-label",
         SELECT_MEASURE_TO_UPDATE_REVIEW_STATUS
       );
+    });
+  });
+
+  describe.each([
+    ["All Reviews", ALL_REVIEWS_TAB],
+    ["My Reviews", MY_REVIEWS_TAB],
+  ])("%s tab", (_tabName, activeTab) => {
+    it("should only render the review action", async () => {
+      mockCheckUserCanEdit.mockReturnValue(true);
+      mockCheckUserCanDelete.mockReturnValue(true);
+      (useUserRoles as jest.Mock).mockReturnValue({
+        roles: ["MADiE-Reviewer"],
+        isAdmin: true,
+        isReviewer: true,
+      });
+
+      render(
+        <ActionCenter
+          measures={[qdmMeasure]}
+          associateCmsId={jest.fn()}
+          exportMeasure={jest.fn()}
+          updateTargetMeasure={jest.fn()}
+          setCreateVersionDialog={jest.fn()}
+          setDraftMeasureDialog={jest.fn()}
+          setDeleteMeasureDialog={jest.fn()}
+          setShareDialog={jest.fn}
+          deleteMeasure={jest.fn()}
+          setViewHumanReadableModal={jest.fn()}
+          activeTab={activeTab}
+          setTransferDialog={jest.fn()}
+        />
+      );
+
+      expect(
+        await screen.findByTestId("review-action-btn")
+      ).toBeInTheDocument();
+      [
+        "delete-action-btn",
+        "export-action-btn",
+        "share-action-btn",
+        "transfer-action-btn",
+        "associate-cms-id-action-btn",
+        "version-action-btn",
+        "draft-action-btn",
+        "view-hr-action-btn",
+        "compare-versions-action-btn",
+      ].forEach((testId) => {
+        expect(screen.queryByTestId(testId)).not.toBeInTheDocument();
+      });
+    });
+
+    it("should render no actions when the MeasureReviewStatus flag is disabled", () => {
+      (useFeatureFlags as jest.Mock).mockReturnValue({
+        MeasureReviewStatus: false,
+      });
+      (useUserRoles as jest.Mock).mockReturnValue({
+        roles: ["MADiE-Reviewer"],
+        isAdmin: false,
+        isReviewer: true,
+      });
+
+      render(
+        <ActionCenter
+          measures={[qdmMeasure]}
+          associateCmsId={jest.fn()}
+          exportMeasure={jest.fn()}
+          updateTargetMeasure={jest.fn()}
+          setCreateVersionDialog={jest.fn()}
+          setDraftMeasureDialog={jest.fn()}
+          setDeleteMeasureDialog={jest.fn()}
+          setShareDialog={jest.fn}
+          deleteMeasure={jest.fn()}
+          setViewHumanReadableModal={jest.fn()}
+          activeTab={activeTab}
+          setTransferDialog={jest.fn()}
+        />
+      );
+
+      expect(screen.getByTestId("action-center")).toBeEmptyDOMElement();
     });
   });
 
