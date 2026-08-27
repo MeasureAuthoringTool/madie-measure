@@ -220,5 +220,13 @@ export default function CompositeMeasuresTable({
         </div>
       </div>
     </div>
-  ) : null;
+  ) : (
+    <p
+      data-testid="no-components-message"
+      style={{ textAlign: "center", color: "#717171", marginTop: 24 }}
+    >
+      Composite measure has no components selected. Please return to the
+      population criteria and select component measures to insert test cases
+    </p>
+  );
 }
