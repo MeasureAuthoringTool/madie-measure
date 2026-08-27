@@ -27,11 +27,15 @@ describe("CompositeMeasuresTable", () => {
     jest.clearAllMocks();
   });
 
-  it("returns null when measures is empty", () => {
-    const { container } = render(<CompositeMeasuresTable measures={[]} />);
+  it("renders the no-components message when measures is empty", () => {
+    render(<CompositeMeasuresTable measures={[]} />);
+
     expect(screen.queryByTestId("measure-list-tbl")).not.toBeInTheDocument();
-    // also ensure nothing meaningful rendered
-    expect(container).toBeEmptyDOMElement();
+    expect(
+      screen.getByText(
+        "Composite measure has no components selected. Please return to the population criteria and select component measures to insert test cases"
+      )
+    ).toBeInTheDocument();
   });
 
   it("renders table with all columns, rows, and action buttons", () => {
