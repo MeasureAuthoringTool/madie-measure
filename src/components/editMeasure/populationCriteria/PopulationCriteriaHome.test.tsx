@@ -14,7 +14,7 @@ import PopulationCriteriaWrapper from "./PopulationCriteriaWrapper";
 // @ts-ignore
 import { measureStore, MeasureServiceApi } from "@madie/madie-util";
 import { QdmMeasureCQL } from "../../common/QdmMeasureCQL";
-import { Measure, MeasureErrorType } from "@madie/madie-models";
+import { Measure, MeasureErrorType, Model } from "@madie/madie-models";
 import { ELM_JSON, MeasureCQL } from "../../common/MeasureCQL";
 
 const serviceConfig = {
@@ -188,6 +188,12 @@ const renderPopulationCriteriaHomeComponent = async (
       </ApiContextProvider>
     </MemoryRouter>
   );
+};
+
+const usQualityCoreMeasure = {
+  ...QiCoreMeasure,
+  model: Model.US_QUALITY_0_5_0,
+  cql: MeasureCQL,
 };
 
 describe("PopulationCriteriaHome", () => {
@@ -522,6 +528,52 @@ describe("PopulationCriteriaHome", () => {
     expect(
       screen.queryByText("SDE Ethnicity - Include in Report Type")
     ).not.toBeInTheDocument();
+  });
+
+  it("should render the QI-Core Supplemental Data component for US Quality Core measures", async () => {
+    const mockedMeasureState = measureStore as jest.Mocked<{ state }>;
+    mockedMeasureState.state = { ...usQualityCoreMeasure };
+    await renderPopulationCriteriaHomeComponent(
+      "supplemental-data",
+      "supplemental-data"
+    );
+
+    expect(
+      await screen.findByTestId("supplementalDataDescriptionContainer")
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("textbox", { name: "Description" })
+    ).toBeInTheDocument();
+    expect(screen.getAllByRole("combobox").length).toBeGreaterThan(0);
+  });
+
+  it("should render the QI-Core Risk Adjustment component for US Quality Core measures", async () => {
+    const mockedMeasureState = measureStore as jest.Mocked<{ state }>;
+    mockedMeasureState.state = { ...usQualityCoreMeasure };
+    await renderPopulationCriteriaHomeComponent(
+      "risk-adjustment",
+      "risk-adjustment"
+    );
+
+    expect(await screen.findByTestId("risk-adjustment")).toBeInTheDocument();
+    expect(
+      screen.getByTestId("includeInReportType-container")
+    ).toBeInTheDocument();
+  });
+
+  it("should populate the Supplemental Data definitions from CQL for US Quality Core measures", async () => {
+    const mockedMeasureState = measureStore as jest.Mocked<{ state }>;
+    mockedMeasureState.state = { ...usQualityCoreMeasure };
+    await renderPopulationCriteriaHomeComponent(
+      "supplemental-data",
+      "supplemental-data"
+    );
+    await screen.findByTestId("supplementalDataDescriptionContainer");
+
+    userEvent.click(screen.getByRole("button", { name: "Open" }));
+    await waitFor(() => {
+      expect(screen.getByText("SDE Ethnicity")).toBeInTheDocument();
+    });
   });
 
   it("should render the Empty Risk Adjustment page for no measure", async () => {
