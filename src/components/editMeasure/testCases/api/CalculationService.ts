@@ -214,7 +214,7 @@ export class CalculationService {
         patientBundles,
         {
           includeClauseResults: false,
-          trustMetaProfile: true,
+          trustMetaProfile: false,
           buildStatementLevelHTML: true,
           measurementPeriodStart: measurementPeriodStart,
           measurementPeriodEnd: measurementPeriodEnd,
