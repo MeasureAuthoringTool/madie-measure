@@ -4,7 +4,7 @@ import "styled-components/macro";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import PopulationCriteriaSideNav from "./populationCriteriaSideNav/PopulationCriteriaSideNav";
 import { measureStore, useMeasureServiceApi } from "@madie/madie-util";
-import { Measure } from "@madie/madie-models";
+import { isFhirModel, Measure } from "@madie/madie-models";
 import BaseConfiguration from "./baseConfiguration/BaseConfiguration";
 import QDMReporting from "./QDMReporting/QDMReporting";
 import MeasureGroupAlerts from "./groups/MeasureGroupAlerts";
@@ -92,7 +92,7 @@ export function PopulationCriteriaHome({ measureCanEdit }) {
         if (measure?.model?.includes("QDM")) {
           return import("./supplementalData/qdm/SupplementalData");
         }
-        if (measure?.model?.includes("QI-Core")) {
+        if (isFhirModel(measure?.model)) {
           return import("./supplementalData/qiCore/SupplementalData");
         } else {
           return import("./supplementalData/EmptySupplementalData");
@@ -107,7 +107,7 @@ export function PopulationCriteriaHome({ measureCanEdit }) {
         if (measure?.model?.includes("QDM")) {
           return import("./riskAdjustment/qdm/RiskAdjustment");
         }
-        if (measure?.model?.includes("QI-Core")) {
+        if (isFhirModel(measure?.model)) {
           return import("./riskAdjustment/qiCore/RiskAdjustment");
         } else {
           return import("./riskAdjustment/EmptyRiskAdjustment");
