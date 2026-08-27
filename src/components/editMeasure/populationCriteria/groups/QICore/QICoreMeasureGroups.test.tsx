@@ -2517,6 +2517,16 @@ describe("Measure Groups Page", () => {
       expect(cohortOption).not.toBeInTheDocument();
     });
 
+    test("should not require Measure Type for composite measures", async () => {
+      measure.measureMetaData.composite = true;
+      renderMeasureGroupComponent(customProps);
+
+      const measureTypeInput = within(
+        screen.getByTestId("measure-group-type-dropdown")
+      ).getByRole("combobox");
+      expect(measureTypeInput).not.toBeRequired();
+    });
+
     test("should hide Stratifications tab for composite measures", async () => {
       measure.measureMetaData.composite = true;
       renderMeasureGroupComponent(customProps);

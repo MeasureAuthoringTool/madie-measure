@@ -447,6 +447,31 @@ describe("ResourceList component", () => {
       expect(screen.getByLabelText(/All Profiles/i)).not.toBeChecked();
     });
 
+    it("shows only selected All Profiles for composite measures", async () => {
+      localStorage.setItem(
+        "available-elements-profile-mode-measure-1",
+        "RELEVANT"
+      );
+      const onClick = jest.fn();
+      render(
+        <ResourceList
+          resourceIdentifiers={relevantResources}
+          allResourceIdentifiers={allResources}
+          onClick={onClick}
+          isComposite={true}
+          measureId="measure-1"
+        />
+      );
+
+      expect(screen.getByLabelText(/All Profiles \(4\)/i)).toBeChecked();
+      expect(
+        screen.queryByLabelText(/Measure-relevant profiles/i)
+      ).not.toBeInTheDocument();
+
+      const table = await screen.findByTestId("measure-list-tbl");
+      expect(table.querySelectorAll("tbody tr")).toHaveLength(4);
+    });
+
     it("displays correct profile counts", () => {
       const onClick = jest.fn();
       render(
