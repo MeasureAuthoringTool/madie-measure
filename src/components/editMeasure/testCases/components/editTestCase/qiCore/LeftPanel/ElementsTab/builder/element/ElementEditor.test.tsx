@@ -65,9 +65,24 @@ jest.mock("formik", () => ({
   },
 }));
 
-jest.mock("./ElementEditorChildren", () => () => (
-  <div>ElementEditorChildren</div>
-));
+let mockElementEditorChildrenMountCount = 0;
+jest.mock("./ElementEditorChildren", () => {
+  const React = require("react");
+
+  return () => {
+    const [mountNumber] = React.useState(
+      () => ++mockElementEditorChildrenMountCount
+    );
+    return (
+      <div>
+        ElementEditorChildren
+        <span data-testid="element-editor-children-mount-number">
+          {mountNumber}
+        </span>
+      </div>
+    );
+  };
+});
 
 describe("ElementEditor Component", () => {
   const mockOnChange = jest.fn();
@@ -164,6 +179,7 @@ describe("ElementEditor Component", () => {
   };
 
   beforeEach(() => {
+    mockElementEditorChildrenMountCount = 0;
     (useFhirDefinitionsServiceApi as jest.Mock).mockReturnValue(
       mockFhirDefinitionsService
     );
@@ -234,9 +250,15 @@ describe("ElementEditor Component", () => {
     const submitButton = screen.getByTestId("element-editor-submit-button");
     expect(undoButton).toBeEnabled();
     expect(submitButton).toBeEnabled();
+    expect(
+      screen.getByTestId("element-editor-children-mount-number")
+    ).toHaveTextContent("1");
     userEvent.click(undoButton);
     await waitFor(() => {
       expect(mockResetForm).toHaveBeenCalled();
+      expect(
+        screen.getByTestId("element-editor-children-mount-number")
+      ).toHaveTextContent("2");
     });
     userEvent.click(submitButton);
     await waitFor(() => {
