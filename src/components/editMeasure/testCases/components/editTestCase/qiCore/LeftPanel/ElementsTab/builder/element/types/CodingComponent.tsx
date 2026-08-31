@@ -56,16 +56,19 @@ const CodingComponent = ({
       return;
     }
     if (allValueSets && selectedValueSet?.name !== "Custom Code") {
-      let valueSet = allValueSets.find(
-        (vs) => vs.url === value?.extension?.[0]?.valueUri
-      );
+      const valueSetUrl = value?.extension?.[0]?.valueUri;
+      let valueSet = valueSetUrl
+        ? allValueSets.find((vs) => vs.url === valueSetUrl)
+        : undefined;
       // Direct Reference Codes have no extension, so fall back to matching
       // by code + system so the right value set still shows after a delete.
       if (!valueSet && value?.code && value?.system) {
-        valueSet = allValueSets.find((vs) =>
-          vs.expansion?.contains?.some(
-            (c) => c.code === value.code && c.system === value.system
-          )
+        valueSet = allValueSets.find(
+          (vs) =>
+            vs.id?.startsWith("drc-") &&
+            vs.expansion?.contains?.some(
+              (c) => c.code === value.code && c.system === value.system
+            )
         );
       }
       if (valueSet && valueSet?.name !== selectedValueSet?.name) {
@@ -143,7 +146,12 @@ const CodingComponent = ({
   };
 
   const handleCodeSystemChange = (codeSystem: string) => {
-    const partial = { system: codeSystem, code: "", display: "" };
+    const isCustomCode = selectedValueSet?.title === "Custom Code";
+    const partial = {
+      system: codeSystem,
+      code: isCustomCode ? selectedConcept?.code || "" : "",
+      display: isCustomCode ? selectedConcept?.display || "" : "",
+    };
     setSelectedConcept(partial);
     // Push partial coding to Formik so Yup rejects it (system set, code missing)
     onChange(partial);
@@ -371,6 +379,7 @@ const CodingComponent = ({
                     "data-testid": "custom-code-system-input",
                   }}
                   data-testid="custom-code-system"
+                  value={selectedConcept?.system || ""}
                   onChange={(event) =>
                     handleCodeSystemChange(event.target.value)
                   }
@@ -388,6 +397,7 @@ const CodingComponent = ({
                     "data-testid": "custom-code-input",
                   }}
                   data-testid="custom-code"
+                  value={selectedConcept?.code || ""}
                   onChange={(event) => handleCodeChange(event.target.value)}
                 />
               </div>

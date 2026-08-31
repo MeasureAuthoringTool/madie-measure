@@ -152,6 +152,7 @@ const ElementEditor = ({
   // A collection of all labels with without array indeces to serve as constant time lookup in type editor for weather it's required
   const requiredFields = mapElementsRequired(selectedResource); // this includes stuff like name.
   const [formInfo, setFormInfo] = useState(null);
+  const [editorResetKey, setEditorResetKey] = useState(0);
 
   const buildNode = useCallback(
     async (child, resourcePath, resource, nodeList = [], ctx) => {
@@ -335,6 +336,12 @@ const ElementEditor = ({
   }, [elementDefinition?.id, loading]);
   const formik = useFormikContext();
   useFormikResetOnEvent(formik);
+
+  const handleUndo = () => {
+    formik.resetForm();
+    setEditorResetKey((currentKey) => currentKey + 1);
+  };
+
   // on individual apply
   const handleIndividualElementApplyButtonClick = (e) => {
     // this is wrapped in a form and we need to prevent submit on click with e.prevent
@@ -406,6 +413,7 @@ const ElementEditor = ({
         <Box id="element-editor" data-testid="element-editor">
           {/* we need to render not only the current item, but all children */}
           <ElementEditorChildren //recursive render control
+            key={editorResetKey}
             // stuff we need only at the init root
             resourcePath={resourcePath}
             parentStructureDefinition={
@@ -425,8 +433,9 @@ const ElementEditor = ({
                 variant="outline"
                 id="element-editor-undo-button"
                 data-testId="element-editor-undo-button"
+                type="button"
                 disabled={!formik.dirty}
-                onClick={formik.resetForm}
+                onClick={handleUndo}
               >
                 Undo
               </Button>
