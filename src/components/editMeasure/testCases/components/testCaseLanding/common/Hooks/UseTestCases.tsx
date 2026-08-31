@@ -133,6 +133,7 @@ function UseFetchTestCases({ measureId, setErrors }) {
     visibleItems: null,
     offset: 0,
     page: 1,
+    //@ts-ignore
     limit: 10 || "All",
     count: undefined,
     currentSlice: [],

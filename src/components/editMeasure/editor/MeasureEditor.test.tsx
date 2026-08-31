@@ -15,7 +15,7 @@ import {
   isUsingEmpty,
   validateContent,
 } from "@madie/madie-editor";
-import { measureStore, useFeatureFlags } from "@madie/madie-util";
+import { measureStore } from "@madie/madie-util";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 
 const measure = {
@@ -254,7 +254,6 @@ describe("MeasureEditor component", () => {
         return {
           cql: "library testCql version '0.0.000'",
           isLibraryStatementChanged: true,
-          isUsingStatementChanged: false,
           isValueSetChanged: false,
         };
       });
@@ -293,7 +292,6 @@ describe("MeasureEditor component", () => {
         return {
           cql: "library testCql version '0.0.000'",
           isLibraryStatementChanged: true,
-          isUsingStatementChanged: false,
           isValueSetChanged: false,
         };
       });
@@ -351,7 +349,6 @@ describe("MeasureEditor component", () => {
         return {
           cql: "library testCql version '0.0.000'",
           isLibraryStatementChanged: true,
-          isUsingStatementChanged: false,
           isValueSetChanged: false,
         };
       });
@@ -389,7 +386,6 @@ describe("MeasureEditor component", () => {
         return {
           cql: "librarydwwd Test2dvh3wd version '0.0.000'",
           isLibraryStatementChanged: true,
-          isUsingStatementChanged: false,
           isValueSetChanged: false,
         };
       });
@@ -430,7 +426,6 @@ describe("MeasureEditor component", () => {
         return {
           cql: "library AdvancedIllnessandFrailtyExclusion version '1.0.001'\nusing QI-Core version '4.1.1'",
           isLibraryStatementChanged: true,
-          isUsingStatementChanged: false,
           isValueSetChanged: false,
         };
       });
@@ -475,7 +470,6 @@ describe("MeasureEditor component", () => {
         return {
           cql: "library AdvancedIllnessandFrailtyExclusion version '1.0.001'\nusing QI-Core version '4.1.1'",
           isLibraryStatementChanged: true,
-          isUsingStatementChanged: true,
           isValueSetChanged: false,
         };
       });
@@ -701,7 +695,6 @@ describe("MeasureEditor component", () => {
         return {
           cql: "library RemoveConceptTest version '0.0.000'\nusing QDM version '5.6'",
           isLibraryStatementChanged: false,
-          isUsingStatementChanged: false,
           isValueSetChanged: false,
           isConceptRemoved: true,
         };
@@ -948,7 +941,6 @@ describe("EditorWithTerminology", () => {
         return {
           cql: "library RemoveCodeTest version '0.0.000'\nusing QDM version '5.6'",
           isLibraryStatementChanged: false,
-          isUsingStatementChanged: false,
           isValueSetChanged: false,
         };
       });
@@ -995,7 +987,6 @@ describe("EditorWithTerminology", () => {
         return {
           cql: "library ApplyLibraryTest version '0.0.000'\nusing QDM version '5.6'",
           isLibraryStatementChanged: false,
-          isUsingStatementChanged: false,
           isValueSetChanged: false,
         };
       });
@@ -1040,7 +1031,6 @@ describe("EditorWithTerminology", () => {
         return {
           cql: "library ApplyLibraryTest version '0.0.000'\nusing QDM version '5.6'",
           isLibraryStatementChanged: false,
-          isUsingStatementChanged: false,
           isValueSetChanged: false,
         };
       });
@@ -1086,7 +1076,6 @@ describe("EditorWithTerminology", () => {
         return {
           cql: "library ApplyLibraryTest version '0.0.000'\nusing QDM version '5.6'\ninclude TestHelpers version '1.0.000' called EditedHelpers",
           isLibraryStatementChanged: false,
-          isUsingStatementChanged: false,
           isValueSetChanged: false,
         };
       });
@@ -1133,7 +1122,6 @@ describe("EditorWithTerminology", () => {
         return {
           cql: testCql,
           isLibraryStatementChanged: false,
-          isUsingStatementChanged: false,
           isValueSetChanged: false,
         };
       });
@@ -1172,7 +1160,6 @@ describe("EditorWithTerminology", () => {
         return {
           cql: "",
           isLibraryStatementChanged: false,
-          isUsingStatementChanged: false,
           isValueSetChanged: false,
         };
       });
@@ -1264,7 +1251,6 @@ define function MeasureObservation(e Encounter):
         return {
           cql: "library RemoveCodeTest version '0.0.000'\nusing QICore version '4.1.1'",
           isLibraryStatementChanged: false,
-          isUsingStatementChanged: false,
           isValueSetChanged: false,
         };
       });
@@ -1312,7 +1298,6 @@ define function MeasureObservation(e Encounter):
       .mockImplementation(() => ({
         cql: testCql,
         isLibraryStatementChanged: false,
-        isUsingStatementChanged: false,
         isValueSetChanged: false,
       }));
     (validateContent as jest.Mock).mockClear().mockImplementation(() =>
@@ -1355,7 +1340,6 @@ define function MeasureObservation(e Encounter):
       .mockImplementation(() => ({
         cql: testCql,
         isLibraryStatementChanged: false,
-        isUsingStatementChanged: false,
         isValueSetChanged: false,
       }));
     (validateContent as jest.Mock).mockClear().mockImplementation(() =>
@@ -1395,7 +1379,6 @@ define function MeasureObservation(e Encounter):
       .mockImplementation(() => ({
         cql: testCql,
         isLibraryStatementChanged: false,
-        isUsingStatementChanged: false,
         isValueSetChanged: false,
       }));
     (validateContent as jest.Mock).mockClear().mockImplementation(() =>
@@ -1437,7 +1420,6 @@ define function MeasureObservation(e Encounter):
       .mockImplementation(() => ({
         cql: testCql,
         isLibraryStatementChanged: false,
-        isUsingStatementChanged: false,
         isValueSetChanged: false,
       }));
     (validateContent as jest.Mock).mockClear().mockImplementation(() =>
@@ -1476,7 +1458,6 @@ define function MeasureObservation(e Encounter):
       .mockImplementation(() => ({
         cql: testCql,
         isLibraryStatementChanged: false,
-        isUsingStatementChanged: false,
         isValueSetChanged: false,
       }));
     (validateContent as jest.Mock).mockClear().mockImplementation(() =>
@@ -1519,7 +1500,6 @@ define function MeasureObservation(e Encounter):
       .mockImplementation(() => ({
         cql: testCql,
         isLibraryStatementChanged: false,
-        isUsingStatementChanged: false,
         isValueSetChanged: false,
       }));
     (validateContent as jest.Mock).mockClear().mockImplementation(() =>

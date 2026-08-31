@@ -5224,13 +5224,15 @@ describe("Composite Measure Edit test case functionality", () => {
     expect(actualContent).toBeInTheDocument();
     expect(
       screen.getByTestId("composite-denominator-score-Group1_ID")
-    ).toHaveTextContent("Denominator Score: -");
+    ).toHaveTextContent("-");
+
     expect(
       screen.getByTestId("composite-numerator-score-Group1_ID")
-    ).toHaveTextContent("Numerator Score: -");
+    ).toHaveTextContent("-");
+
     expect(
       screen.getByTestId("composite-composite-score-Group1_ID")
-    ).toHaveTextContent("Composite Score: -");
+    ).toHaveTextContent("-");
   });
 
   it("should show details tab but not CQL and Highlighting tabs for composite measure", async () => {
