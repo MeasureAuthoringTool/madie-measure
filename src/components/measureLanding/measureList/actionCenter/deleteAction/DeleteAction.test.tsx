@@ -37,11 +37,13 @@ const qiCoreMeasure = {
 describe("DeleteAction", () => {
   it("Should disable action btn if no measure selected", () => {
     render(<DeleteAction measures={[]} onClick={() => {}} canEdit={true} />);
-    expect(screen.getByTestId("delete-action-btn")).toBeDisabled();
-    expect(screen.getByTestId("delete-action-tooltip")).toHaveAttribute(
-      "aria-label",
-      NOTHING_SELECTED
-    );
+    const deleteButton = screen.getByTestId("delete-action-btn");
+    const deleteTooltip = screen.getByTestId("delete-action-tooltip");
+
+    expect(deleteButton).toBeDisabled();
+    expect(deleteButton).toHaveAccessibleName(DELETE_MEASURE);
+    expect(deleteTooltip.tagName).toBe("DIV");
+    expect(deleteTooltip).toHaveAttribute("aria-label", NOTHING_SELECTED);
   });
 
   it("Should enable action btn if user select one measure ", () => {

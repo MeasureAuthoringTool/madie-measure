@@ -3,6 +3,7 @@ import { render, screen } from "@testing-library/react";
 import { Measure, MeasureSet, Model } from "@madie/madie-models";
 import ReviewAction, {
   REVIEW,
+  REVIEW_ACTION_LABEL,
   SELECT_MEASURE_TO_UPDATE_REVIEW_STATUS,
 } from "./ReviewAction";
 
@@ -22,8 +23,13 @@ describe("ReviewAction", () => {
   it("disables the action when no measures are selected", () => {
     render(<ReviewAction measures={[]} onClick={() => {}} canReview={false} />);
 
-    expect(screen.getByTestId("review-action-btn")).toBeDisabled();
-    expect(screen.getByTestId("review-action-tooltip")).toHaveAttribute(
+    const reviewButton = screen.getByTestId("review-action-btn");
+    const reviewTooltip = screen.getByTestId("review-action-tooltip");
+
+    expect(reviewButton).toBeDisabled();
+    expect(reviewButton).toHaveAccessibleName(REVIEW_ACTION_LABEL);
+    expect(reviewTooltip.tagName).toBe("DIV");
+    expect(reviewTooltip).toHaveAttribute(
       "aria-label",
       SELECT_MEASURE_TO_UPDATE_REVIEW_STATUS
     );

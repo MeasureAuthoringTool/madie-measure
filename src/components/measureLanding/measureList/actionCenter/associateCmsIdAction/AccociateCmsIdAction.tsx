@@ -17,6 +17,7 @@ export const MUST_BE_DRAFT = "QI-Core measure must be in a draft status";
 export const MUST_HAVE_CMS_ID = "QDM measure must contain a CMS ID";
 export const MUST_NOT_HAVE_CMS_ID = "QI-Core measure must NOT contain a CMS ID";
 export const ASSOCIATE_CMS_ID = "Associate CMS ID";
+export const ASSOCIATE_CMS_ID_ACTION_LABEL = "associate CMS ID";
 export const SELECT_TWO_MEASURES = "Select two measures";
 export const MEASURE_LOCKED_MESSAGE =
   "Unable to associate measures. Locked while being edited by";
@@ -102,15 +103,16 @@ export default function AssociateCmsIdAction(props: PropTypes) {
         },
       }}
     >
-      <span>
+      <div role="group" style={{ display: "inline-block" }}>
         <IconButton
           onClick={props.onClick}
           disabled={disableAssociateCmsIdBtn}
           data-testid="associate-cms-id-action-btn"
+          aria-label={ASSOCIATE_CMS_ID_ACTION_LABEL}
         >
           <IconLink />
         </IconButton>
-      </span>
+      </div>
     </Tooltip>
   );
 }

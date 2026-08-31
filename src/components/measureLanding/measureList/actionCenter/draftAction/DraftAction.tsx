@@ -14,7 +14,7 @@ interface PropTypes {
   canEdit: boolean;
 }
 
-export const NOTHING_SELECTED = "Select measure to draft";
+export const NOTHING_SELECTED = "Select a measure to draft";
 export const DRAFT_MEASURE = "Draft measure";
 export const LOOKUP_ERROR = "There was an error checking draftability. ";
 export const MODEL_MISMATCH =
@@ -128,11 +128,12 @@ export default function DraftAction(props: PropTypes) {
         },
       }}
     >
-      <span>
+      <div role="group" style={{ display: "inline-block" }}>
         <IconButton
           onClick={props.onClick}
           disabled={disableDraftBtn}
           data-testid="draft-action-btn"
+          aria-label={DRAFT_MEASURE}
         >
           <ClipboardPen size={20} />
           <Toast
@@ -145,7 +146,7 @@ export default function DraftAction(props: PropTypes) {
             autoHideDuration={6000}
           />
         </IconButton>
-      </span>
+      </div>
     </Tooltip>
   );
 }
