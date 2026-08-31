@@ -4,6 +4,7 @@ import CodingComponent from "./CodingComponent";
 import { ElementDefinition, ValueSet } from "fhir/r4";
 import { Model } from "@madie/madie-models";
 import userEvent from "@testing-library/user-event";
+import { Formik, useFormikContext } from "formik";
 import { ExecutionContextProvider } from "../../../../../../../routes/qiCore/ExecutionContext";
 import axios from "../../../../../../../../../../../api/axios-instance";
 import {
@@ -63,6 +64,32 @@ const mockMeasureValueSet = {
   },
 } as ValueSet;
 
+const FormikCodingHarness = ({ structureDefinition }) => {
+  const formik = useFormikContext<any>();
+  const [resetKey, setResetKey] = React.useState(0);
+
+  const handleUndo = () => {
+    formik.resetForm();
+    setResetKey((currentKey) => currentKey + 1);
+  };
+
+  return (
+    <>
+      <CodingComponent
+        key={resetKey}
+        canEdit={true}
+        structureDefinition={structureDefinition}
+        label="test-label"
+        value={formik.values.coding}
+        onChange={(value) => formik.setFieldValue("coding", value)}
+      />
+      <button type="button" onClick={handleUndo}>
+        Undo
+      </button>
+    </>
+  );
+};
+
 describe("CodingComponent Tests", () => {
   let mockStructureDefinition: ElementDefinition;
   beforeEach(() => {
@@ -73,6 +100,32 @@ describe("CodingComponent Tests", () => {
       },
     } as ElementDefinition;
   });
+
+  const renderExtensibleCoding = (
+    value: any,
+    valueSets: ValueSet[] = [mockMeasureValueSet]
+  ) =>
+    render(
+      <ApiContextProvider value={mockConfig}>
+        <ExecutionContextProvider
+          value={{
+            measureState: [{ model: Model.QICORE } as any, jest.fn()],
+            bundleState: [null, jest.fn()],
+            valueSetsState: [valueSets, jest.fn()],
+            executionContextReady: true,
+            executing: false,
+            setExecuting: jest.fn(),
+            contextFailure: false,
+          }}
+        >
+          <Formik initialValues={{ coding: value }} onSubmit={jest.fn()}>
+            <FormikCodingHarness
+              structureDefinition={mockStructureDefinition}
+            />
+          </Formik>
+        </ExecutionContextProvider>
+      </ApiContextProvider>
+    );
 
   it("renders placeholder when no value set is selected", () => {
     mockedAxios.get.mockResolvedValue({
@@ -335,6 +388,222 @@ describe("CodingComponent Tests", () => {
       system: "http://example.com/custom-system",
       display: "C1",
     });
+
+    fireEvent.change(codeSystem, {
+      target: { value: "http://example.com/updated-system" },
+    });
+
+    expect(code).toHaveValue("C1");
+  });
+
+  it("displays a saved custom code as read only on load", async () => {
+    mockStructureDefinition.binding.strength = "extensible";
+    mockedAxios.get.mockResolvedValue({
+      data: mockBindingValueSet,
+    });
+    const savedCustomCode = {
+      system: "http://example.com/custom-system",
+      code: "CUSTOM",
+      display: "Custom code",
+    };
+
+    renderExtensibleCoding(savedCustomCode);
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole("combobox", {
+          name: "Value Set / Direct Reference Code",
+        })
+      ).toHaveTextContent("- Select -");
+    });
+    expect(screen.getByRole("textbox", { name: "Code System" })).toHaveValue(
+      savedCustomCode.system
+    );
+    expect(
+      screen.getByRole("textbox", { name: "Code System" })
+    ).toHaveAttribute("readonly");
+    expect(screen.getByRole("textbox", { name: "Code" })).toHaveValue(
+      `${savedCustomCode.code} - ${savedCustomCode.display}`
+    );
+    expect(screen.getByRole("textbox", { name: "Code" })).toHaveAttribute(
+      "readonly"
+    );
+  });
+
+  it("displays a saved direct reference code as selected on load", async () => {
+    mockStructureDefinition.binding.strength = "extensible";
+    const directReferenceCode = {
+      ...mockMeasureValueSet,
+      id: "drc-test123",
+      url: "drc-test123",
+      name: "Direct Reference Code",
+      title: "Direct Reference Code",
+    } as ValueSet;
+    const savedCoding = directReferenceCode.expansion.contains[0];
+    mockedAxios.get.mockResolvedValue({
+      data: mockBindingValueSet,
+    });
+
+    renderExtensibleCoding(savedCoding, [directReferenceCode]);
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole("combobox", {
+          name: "Value Set / Direct Reference Code",
+        })
+      ).toHaveTextContent(directReferenceCode.title);
+    });
+    expect(
+      screen.getByRole("combobox", { name: "Code System" })
+    ).toHaveTextContent(savedCoding.system);
+    expect(screen.getByRole("combobox", { name: "Code" })).toHaveTextContent(
+      savedCoding.code
+    );
+  });
+
+  it("resolves a saved value-set coding after its expansion loads", async () => {
+    mockStructureDefinition.binding.strength = "extensible";
+    const savedCoding = {
+      ...mockBindingValueSet.expansion.contains[0],
+      extension: [
+        {
+          url: "http://hl7.org/fhir/StructureDefinition/valueset-reference",
+          valueUri: mockBindingValueSet.url,
+        },
+      ],
+    };
+    mockedAxios.get.mockResolvedValue({
+      data: mockBindingValueSet,
+    });
+
+    renderExtensibleCoding(savedCoding);
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole("combobox", {
+          name: "Value Set / Direct Reference Code",
+        })
+      ).toHaveTextContent(mockBindingValueSet.title);
+    });
+    expect(screen.queryByTestId("custom-code-input")).not.toBeInTheDocument();
+  });
+
+  it("restores the original custom code after undoing a custom code selection", async () => {
+    mockStructureDefinition.binding.strength = "extensible";
+    mockedAxios.get.mockResolvedValue({
+      data: mockBindingValueSet,
+    });
+    const originalCustomCode = {
+      system: "http://example.com/original-system",
+      code: "ORIGINAL",
+      display: "Original code",
+    };
+    renderExtensibleCoding(originalCustomCode);
+
+    const valueSetSelect = screen.getByRole("combobox", {
+      name: "Value Set / Direct Reference Code",
+    });
+    userEvent.click(valueSetSelect);
+    await waitFor(() => {
+      expect(
+        screen.getByTestId("value-set-option-custom-code")
+      ).toBeInTheDocument();
+    });
+    userEvent.click(screen.getByTestId("value-set-option-custom-code"));
+
+    userEvent.type(
+      screen.getByTestId("custom-code-system-input"),
+      "http://example.com/changed-system"
+    );
+    userEvent.type(screen.getByTestId("custom-code-input"), "CHANGED");
+
+    userEvent.click(screen.getByRole("button", { name: "Undo" }));
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole("combobox", {
+          name: "Value Set / Direct Reference Code",
+        })
+      ).toHaveTextContent("- Select -");
+    });
+    expect(screen.getByRole("textbox", { name: "Code System" })).toHaveValue(
+      originalCustomCode.system
+    );
+    expect(
+      screen.getByRole("textbox", { name: "Code System" })
+    ).toHaveAttribute("readonly");
+    expect(screen.getByRole("textbox", { name: "Code" })).toHaveValue(
+      `${originalCustomCode.code} - ${originalCustomCode.display}`
+    );
+    expect(screen.getByRole("textbox", { name: "Code" })).toHaveAttribute(
+      "readonly"
+    );
+  });
+
+  it("restores the original custom code after undoing a value set selection", async () => {
+    mockStructureDefinition.binding.strength = "extensible";
+    mockedAxios.get.mockResolvedValue({
+      data: mockBindingValueSet,
+    });
+    const originalCustomCode = {
+      system: "http://example.com/original-system",
+      code: "ORIGINAL",
+      display: "Original code",
+    };
+    renderExtensibleCoding(originalCustomCode);
+
+    const valueSetSelect = screen.getByRole("combobox", {
+      name: "Value Set / Direct Reference Code",
+    });
+    userEvent.click(valueSetSelect);
+    await waitFor(() => {
+      expect(
+        screen.getByRole("option", { name: mockMeasureValueSet.title })
+      ).toBeInTheDocument();
+    });
+    userEvent.click(
+      screen.getByRole("option", { name: mockMeasureValueSet.title })
+    );
+
+    const codeSystemSelect = screen.getByRole("combobox", {
+      name: "Code System",
+    });
+    userEvent.click(codeSystemSelect);
+    userEvent.click(
+      screen.getByRole("option", {
+        name: mockMeasureValueSet.expansion.contains[1].system,
+      })
+    );
+
+    const codeSelect = screen.getByRole("combobox", { name: "Code" });
+    userEvent.click(codeSelect);
+    userEvent.click(
+      screen.getByRole("option", {
+        name: `${mockMeasureValueSet.expansion.contains[1].code} - ${mockMeasureValueSet.expansion.contains[1].display}`,
+      })
+    );
+
+    userEvent.click(screen.getByRole("button", { name: "Undo" }));
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole("combobox", {
+          name: "Value Set / Direct Reference Code",
+        })
+      ).toHaveTextContent("- Select -");
+    });
+    expect(screen.getByRole("textbox", { name: "Code System" })).toHaveValue(
+      originalCustomCode.system
+    );
+    expect(
+      screen.getByRole("textbox", { name: "Code System" })
+    ).toHaveAttribute("readonly");
+    expect(screen.getByRole("textbox", { name: "Code" })).toHaveValue(
+      `${originalCustomCode.code} - ${originalCustomCode.display}`
+    );
+    expect(screen.getByRole("textbox", { name: "Code" })).toHaveAttribute(
+      "readonly"
+    );
   });
 
   it("updates existing code from a value set", async () => {
