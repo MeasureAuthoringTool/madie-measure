@@ -301,7 +301,7 @@ const MeasureEditor = ({ measureCanEdit, measureLockedBy }) => {
   };
 
   const hasParserErrors = async (val) => {
-    return !!(parseContent(val)?.length > 0);
+    return parseContent(val)?.length > 0;
   };
   const isLoggedInUMLS = (errors: ElmTranslationError[]) => {
     return JSON.stringify(errors).includes("Please log in to UMLS");
@@ -487,11 +487,6 @@ const MeasureEditor = ({ measureCanEdit, measureLockedBy }) => {
               if (updatedCqlObj.isFhirHelpersAliasChanged) {
                 secondaryMessages.push(
                   "FHIRHelpers was incorrectly aliased. MADiE has overwritten the alias with 'FHIRHelpers'."
-                );
-              }
-              if (updatedCqlObj.isUsingStatementChanged) {
-                secondaryMessages.push(
-                  "Incorrect using statement(s) detected. MADiE has corrected it."
                 );
               }
               if (updatedCqlObj.isValueSetChanged) {

@@ -113,6 +113,7 @@ const EditCompositeTestCase = ({
         <Allotment.Pane>
           <div className="right-panel">
             <CompositeRightPanelContent
+              isTestCaseExecuted={executing === false}
               rightPanelActiveTab={rightPanelActiveTab}
               setRightPanelActiveTab={setRightPanelActiveTab}
               testCaseCanEdit={testCaseCanEdit}
