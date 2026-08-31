@@ -35,8 +35,22 @@ import {
   useFeatureFlags,
 } from "@madie/madie-util";
 import { InitialPopulationAssociationType } from "../groupPopulations/GroupPopulation";
+import { updateRichText } from "../../../../../testUtils/richTextEditor.testUtil";
 // fix error about window.scrollto
 global.scrollTo = jest.fn();
+
+jest.mock("@madie/madie-design-system/dist/react", () => ({
+  ...jest.requireActual("@madie/madie-design-system/dist/react"),
+  RichTextEditor: jest.requireActual(
+    "../../../../../testUtils/mockRichTextEditor.testUtil"
+  ).MockRichTextEditor,
+}));
+
+jest.mock("use-debounce", () =>
+  jest
+    .requireActual("../../../../../testUtils/mockRichTextEditor.testUtil")
+    .syncUseDebounceMock()
+);
 
 jest.mock("uuid", () => ({
   v4: jest.fn(),
@@ -354,18 +368,7 @@ describe("Measure Groups Page", () => {
       const editableContent = within(descriptionEditor).getByRole("textbox");
       expect(editableContent).toHaveAttribute("contenteditable", "true");
 
-      await act(async () => {
-        fireEvent.focus(editableContent);
-        fireEvent.input(editableContent, {
-          target: { innerHTML: "new description" },
-        });
-        fireEvent.blur(editableContent);
-      });
-
-      // Wait for debounced update to take effect (250ms delay from TextEditor component)
-      await act(async () => {
-        await new Promise((resolve) => setTimeout(resolve, 350));
-      });
+      await updateRichText(editableContent, "new description");
 
       // select a scoring
       const scoringSelect = screen.getByTestId("scoring-select");
@@ -391,19 +394,7 @@ describe("Measure Groups Page", () => {
       const editableContent1 = within(descriptionEditor1).getByRole("textbox");
       expect(editableContent1).toHaveAttribute("contenteditable", "true");
 
-      await act(async () => {
-        fireEvent.focus(editableContent1);
-        editableContent1.innerHTML = "newVal";
-        fireEvent.input(editableContent1, {
-          target: { innerHTML: "newVal" },
-        });
-        fireEvent.blur(editableContent1);
-      });
-
-      // Wait for debounced update to take effect (250ms delay from TextEditor component)
-      await act(async () => {
-        await new Promise((resolve) => setTimeout(resolve, 350));
-      });
+      await updateRichText(editableContent1, "newVal");
       expect(editableContent1).toHaveTextContent("newVal");
 
       // Select measure group type
@@ -673,19 +664,7 @@ describe("Measure Groups Page", () => {
       const editableContent = within(descriptionEditor).getByRole("textbox");
       expect(editableContent).toHaveAttribute("contenteditable", "true");
 
-      await act(async () => {
-        fireEvent.focus(editableContent);
-        editableContent.innerHTML = "new description";
-        fireEvent.input(editableContent, {
-          target: { innerHTML: "new description" },
-        });
-        fireEvent.blur(editableContent);
-      });
-
-      // Wait for debounced update to take effect (250ms delay from TextEditor component)
-      await act(async () => {
-        await new Promise((resolve) => setTimeout(resolve, 350));
-      });
+      await updateRichText(editableContent, "new description");
 
       // Selects a measure group type
       const measureGroupTypeSelect = screen.getByTestId(
@@ -778,18 +757,7 @@ describe("Measure Groups Page", () => {
       const editableContent1 = within(descriptionEditor1).getByRole("textbox");
       expect(editableContent1).toHaveAttribute("contenteditable", "true");
 
-      await act(async () => {
-        fireEvent.focus(editableContent1);
-        fireEvent.input(editableContent1, {
-          target: { innerHTML: "new description for group 2" },
-        });
-        fireEvent.blur(editableContent1);
-      });
-
-      // Wait for debounced update to take effect (250ms delay from TextEditor component)
-      await act(async () => {
-        await new Promise((resolve) => setTimeout(resolve, 350));
-      });
+      await updateRichText(editableContent1, "new description for group 2");
 
       const measureGroupTypeSelect2 = screen.getByTestId(
         "measure-group-type-dropdown"

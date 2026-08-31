@@ -17,6 +17,20 @@ import {
 import { MeasureServiceApi, useFeatureFlags } from "@madie/madie-util";
 import SupplementalData, { SupplementalDataProps } from "./SupplementalData";
 import { QdmMeasureCQL } from "../../../../common/QdmMeasureCQL";
+import { updateRichText } from "../../../../../testUtils/richTextEditor.testUtil";
+
+jest.mock("@madie/madie-design-system/dist/react", () => ({
+  ...jest.requireActual("@madie/madie-design-system/dist/react"),
+  RichTextEditor: jest.requireActual(
+    "../../../../../testUtils/mockRichTextEditor.testUtil"
+  ).MockRichTextEditor,
+}));
+
+jest.mock("use-debounce", () =>
+  jest
+    .requireActual("../../../../../testUtils/mockRichTextEditor.testUtil")
+    .syncUseDebounceMock()
+);
 
 const serviceConfig = {
   measureService: {
@@ -205,19 +219,7 @@ describe("SupplementalData Component QDM", () => {
     const editableContent = within(descriptionEditor).getByRole("textbox");
     expect(editableContent).toHaveAttribute("contenteditable", "true");
 
-    await act(async () => {
-      fireEvent.focus(editableContent);
-      editableContent.innerHTML = "Updated test description";
-      fireEvent.input(editableContent, {
-        target: { innerHTML: "Updated test description" },
-      });
-      fireEvent.blur(editableContent);
-    });
-
-    // Wait for debounced update to take effect (250ms delay from TextEditor component)
-    await act(async () => {
-      await new Promise((resolve) => setTimeout(resolve, 350));
-    });
+    await updateRichText(editableContent, "Updated test description");
 
     // Wait for save button to be enabled
     await waitFor(

@@ -16,6 +16,20 @@ import {
   useFeatureFlags,
   MeasureServiceApi,
 } from "@madie/madie-util";
+import { updateRichText } from "../../../../testUtils/richTextEditor.testUtil";
+
+jest.mock("@madie/madie-design-system/dist/react", () => ({
+  ...jest.requireActual("@madie/madie-design-system/dist/react"),
+  RichTextEditor: jest.requireActual(
+    "../../../../testUtils/mockRichTextEditor.testUtil"
+  ).MockRichTextEditor,
+}));
+
+jest.mock("use-debounce", () =>
+  jest
+    .requireActual("../../../../testUtils/mockRichTextEditor.testUtil")
+    .syncUseDebounceMock()
+);
 
 const measure = {
   id: "test measure",
@@ -210,19 +224,7 @@ describe("QDMReporting component", () => {
     const editableContent = within(descriptionEditor).getByRole("textbox");
     expect(editableContent).toHaveAttribute("contenteditable", "true");
 
-    await act(async () => {
-      fireEvent.focus(editableContent);
-      editableContent.innerHTML = "test description";
-      fireEvent.input(editableContent, {
-        target: { innerHTML: "test description" },
-      });
-      fireEvent.blur(editableContent);
-    });
-
-    // Wait for debounced update to take effect (250ms delay from TextEditor component)
-    await act(async () => {
-      await new Promise((resolve) => setTimeout(resolve, 350));
-    });
+    await updateRichText(editableContent, "test description");
 
     await selectAnOptionForImprovementNotation(decreasedNotation);
 
@@ -272,19 +274,7 @@ describe("QDMReporting component", () => {
     const editableContent = within(descriptionEditor).getByRole("textbox");
     expect(editableContent).toHaveAttribute("contenteditable", "true");
 
-    await act(async () => {
-      fireEvent.focus(editableContent);
-      editableContent.innerHTML = "Test";
-      fireEvent.input(editableContent, {
-        target: { innerHTML: "Test" },
-      });
-      fireEvent.blur(editableContent);
-    });
-
-    // Wait for debounced update to take effect (250ms delay from TextEditor component)
-    await act(async () => {
-      await new Promise((resolve) => setTimeout(resolve, 350));
-    });
+    await updateRichText(editableContent, "Test");
 
     await selectAnOptionForImprovementNotation(decreasedNotation);
 
@@ -341,19 +331,7 @@ describe("QDMReporting component", () => {
     const editableContent = within(descriptionEditor).getByRole("textbox");
     expect(editableContent).toHaveAttribute("contenteditable", "true");
 
-    await act(async () => {
-      fireEvent.focus(editableContent);
-      editableContent.innerHTML = "Test";
-      fireEvent.input(editableContent, {
-        target: { innerHTML: "Test" },
-      });
-      fireEvent.blur(editableContent);
-    });
-
-    // Wait for debounced update to take effect (250ms delay from TextEditor component)
-    await act(async () => {
-      await new Promise((resolve) => setTimeout(resolve, 350));
-    });
+    await updateRichText(editableContent, "Test");
 
     await selectAnOptionForImprovementNotation(decreasedNotation);
 
@@ -409,19 +387,7 @@ describe("QDMReporting component", () => {
     const editableContent = within(descriptionEditor).getByRole("textbox");
     expect(editableContent).toHaveAttribute("contenteditable", "true");
 
-    await act(async () => {
-      fireEvent.focus(editableContent);
-      editableContent.innerHTML = "test description<";
-      fireEvent.input(editableContent, {
-        target: { innerHTML: "test description" },
-      });
-      fireEvent.blur(editableContent);
-    });
-
-    // Wait for debounced update to take effect (250ms delay from TextEditor component)
-    await act(async () => {
-      await new Promise((resolve) => setTimeout(resolve, 350));
-    });
+    await updateRichText(editableContent, "test description");
     await waitFor(() => expect(saveButton).toBeEnabled());
   });
 
@@ -636,19 +602,7 @@ describe("QDMReporting component", () => {
     const editableContent = within(descriptionEditor).getByRole("textbox");
     expect(editableContent).toHaveAttribute("contenteditable", "true");
 
-    await act(async () => {
-      fireEvent.focus(editableContent);
-      editableContent.innerHTML = "Test";
-      fireEvent.input(editableContent, {
-        target: { innerHTML: "Test" },
-      });
-      fireEvent.blur(editableContent);
-    });
-
-    // Wait for debounced update to take effect (250ms delay from TextEditor component)
-    await act(async () => {
-      await new Promise((resolve) => setTimeout(resolve, 350));
-    });
+    await updateRichText(editableContent, "Test");
 
     await selectAnOptionForImprovementNotation(decreasedNotation);
 

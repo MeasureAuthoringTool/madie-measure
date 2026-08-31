@@ -131,6 +131,7 @@ const mockMeasure = {
   measureMetaData: { draft: true },
   acls: [{ userId: "othertestuser@example.com", roles: ["SHARED_WITH"] }], //#nosec
 } as Measure;
+const initialGroups = [...mockMeasure.groups];
 const mockMeasureServiceApiResolved = {
   fetchMeasure: jest.fn().mockResolvedValue(mockMeasure),
   fetchMeasureBundle: jest
@@ -679,6 +680,78 @@ jest.mock("../common/copyTestCases/CopyTestCaseDialog", () => ({
   ),
 }));
 
+jest.mock("../../createTestCase/CreateNewTestCaseDialog", () => ({
+  __esModule: true,
+  default: ({ open }) =>
+    open ? <div data-testid="create-test-case-dialog" /> : null,
+}));
+
+jest.mock("../common/shiftDates/ShiftDatesDialog", () => {
+  const React = jest.requireActual("react");
+  const MockShiftDatesDialog = ({ open, onClose }) => {
+    const [years, setYears] = React.useState("");
+
+    return open ? (
+      <div role="dialog">
+        <div data-testid="shift-dates-dialog">
+          <input
+            data-testid="shift-dates-input"
+            value={years}
+            onChange={(event) => setYears(event.target.value)}
+          />
+        </div>
+        <button data-testid="shift-dates-cancel-button" onClick={onClose}>
+          Cancel
+        </button>
+        <button
+          data-testid="shift-dates-save-button"
+          disabled={!years}
+          onClick={onClose}
+        >
+          Save
+        </button>
+      </div>
+    ) : null;
+  };
+
+  return {
+    __esModule: true,
+    default: MockShiftDatesDialog,
+  };
+});
+
+jest.mock("../common/TestCaseListSideBarNav", () => {
+  const { useNavigate, useParams } = jest.requireActual("react-router-dom");
+  const MockTestCaseListSideBarNav = ({ allPopulationCriteria }) => {
+    const navigate = useNavigate();
+    const { measureId, criteriaId } = useParams();
+
+    return (
+      <nav aria-label="Test Case Sidebar Navigation">
+        {allPopulationCriteria.map((populationCriteria, index) => (
+          <button
+            key={populationCriteria.id}
+            role="tab"
+            aria-selected={criteriaId === populationCriteria.id}
+            onClick={() =>
+              navigate(
+                `/measures/${measureId}/edit/test-cases/list-page/${populationCriteria.id}`
+              )
+            }
+          >
+            Population Criteria {index + 1}
+          </button>
+        ))}
+      </nav>
+    );
+  };
+
+  return {
+    __esModule: true,
+    default: MockTestCaseListSideBarNav,
+  };
+});
+
 const measureBundle = buildMeasureBundle(mockMeasure);
 const valueSets = [getExampleValueSet()];
 const setMeasure = jest.fn();
@@ -717,6 +790,12 @@ beforeAll(() => {
 
 describe("TestCaseList component", () => {
   beforeEach(() => {
+    mockMeasure.createdBy = MEASURE_CREATEDBY;
+    mockMeasure.groups = [...initialGroups];
+    delete mockMeasure.cqlErrors;
+    delete mockMeasure.testCases;
+    delete mockMeasure.errors;
+
     calculationServiceMock.mockImplementation(() => {
       return calculationServiceMockResolved;
     });

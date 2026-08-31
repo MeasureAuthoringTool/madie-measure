@@ -34,8 +34,23 @@ import {
   useFeatureFlags,
 } from "@madie/madie-util";
 import { InitialPopulationAssociationType } from "../groupPopulations/GroupPopulation";
+import { updateRichText } from "../../../../../testUtils/richTextEditor.testUtil";
 // fix error about window.scrollto
 global.scrollTo = jest.fn();
+
+jest.mock("@madie/madie-design-system/dist/react", () => ({
+  ...jest.requireActual("@madie/madie-design-system/dist/react"),
+  RichTextEditor: jest.requireActual(
+    "../../../../../testUtils/mockRichTextEditor.testUtil"
+  ).MockRichTextEditor,
+}));
+
+jest.mock("use-debounce", () =>
+  jest
+    .requireActual("../../../../../testUtils/mockRichTextEditor.testUtil")
+    .syncUseDebounceMock()
+);
+
 jest.mock("uuid", () => ({
   v4: jest.fn(),
 }));
@@ -226,19 +241,7 @@ describe("Measure Groups Page", () => {
       const editableContent = within(descriptionEditor).getByRole("textbox");
       expect(editableContent).toHaveAttribute("contenteditable", "true");
 
-      await act(async () => {
-        fireEvent.focus(editableContent);
-        editableContent.innerHTML = "newVal";
-        fireEvent.input(editableContent, {
-          target: { innerHTML: "newVal" },
-        });
-        fireEvent.blur(editableContent);
-      });
-
-      // Wait for debounced update to take effect (250ms delay from TextEditor component)
-      await act(async () => {
-        await new Promise((resolve) => setTimeout(resolve, 350));
-      });
+      await updateRichText(editableContent, "newVal");
 
       // update measure..
       await waitFor(() => {
@@ -268,19 +271,7 @@ describe("Measure Groups Page", () => {
       const editableContent = within(descriptionEditor).getByRole("textbox");
       expect(editableContent).toHaveAttribute("contenteditable", "true");
 
-      await act(async () => {
-        fireEvent.focus(editableContent);
-        editableContent.innerHTML = "new description";
-        fireEvent.input(editableContent, {
-          target: { innerHTML: "new description" },
-        });
-        fireEvent.blur(editableContent);
-      });
-
-      // Wait for debounced update to take effect (250ms delay from TextEditor component)
-      await act(async () => {
-        await new Promise((resolve) => setTimeout(resolve, 350));
-      });
+      await updateRichText(editableContent, "new description");
 
       const definitionToUpdate =
         "VTE Prophylaxis by Medication Administered or Device Applied";
@@ -300,19 +291,7 @@ describe("Measure Groups Page", () => {
       const editableContent1 = within(descriptionEditor1).getByRole("textbox");
       expect(editableContent1).toHaveAttribute("contenteditable", "true");
 
-      await act(async () => {
-        fireEvent.focus(editableContent1);
-        editableContent1.innerHTML = "newVal";
-        fireEvent.input(editableContent1, {
-          target: { innerHTML: "newVal" },
-        });
-        fireEvent.blur(editableContent1);
-      });
-
-      // Wait for debounced update to take effect (250ms delay from TextEditor component)
-      await act(async () => {
-        await new Promise((resolve) => setTimeout(resolve, 350));
-      });
+      await updateRichText(editableContent1, "newVal");
 
       // update measure..
       await waitFor(() => {
@@ -372,19 +351,7 @@ describe("Measure Groups Page", () => {
       const editableContent = within(descriptionEditor).getByRole("textbox");
       expect(editableContent).toHaveAttribute("contenteditable", "true");
 
-      await act(async () => {
-        fireEvent.focus(editableContent);
-        editableContent.innerHTML = "new description";
-        fireEvent.input(editableContent, {
-          target: { innerHTML: "new description" },
-        });
-        fireEvent.blur(editableContent);
-      });
-
-      // Wait for debounced update to take effect (250ms delay from TextEditor component)
-      await act(async () => {
-        await new Promise((resolve) => setTimeout(resolve, 350));
-      });
+      await updateRichText(editableContent, "new description");
 
       const groupPopulationInput = screen.getByTestId(
         "select-measure-group-population-input"
@@ -402,19 +369,7 @@ describe("Measure Groups Page", () => {
       const editableContent1 = within(descriptionEditor1).getByRole("textbox");
       expect(editableContent1).toHaveAttribute("contenteditable", "true");
 
-      await act(async () => {
-        fireEvent.focus(editableContent1);
-        editableContent1.innerHTML = "newVal";
-        fireEvent.input(editableContent1, {
-          target: { innerHTML: "newVal" },
-        });
-        fireEvent.blur(editableContent1);
-      });
-
-      // Wait for debounced update to take effect (250ms delay from TextEditor component)
-      await act(async () => {
-        await new Promise((resolve) => setTimeout(resolve, 350));
-      });
+      await updateRichText(editableContent1, "newVal");
 
       expect(editableContent1).toHaveTextContent("newVal");
 
@@ -463,19 +418,7 @@ describe("Measure Groups Page", () => {
       const editableContent = within(descriptionEditor).getByRole("textbox");
       expect(editableContent).toHaveAttribute("contenteditable", "true");
 
-      await act(async () => {
-        fireEvent.focus(editableContent);
-        editableContent.innerHTML = "new description";
-        fireEvent.input(editableContent, {
-          target: { innerHTML: "new description" },
-        });
-        fireEvent.blur(editableContent);
-      });
-
-      // Wait for debounced update to take effect (250ms delay from TextEditor component)
-      await act(async () => {
-        await new Promise((resolve) => setTimeout(resolve, 350));
-      });
+      await updateRichText(editableContent, "new description");
       const groupPopulationInput = screen.getByTestId(
         "select-measure-group-population-input"
       ) as HTMLInputElement;
@@ -491,19 +434,7 @@ describe("Measure Groups Page", () => {
       const editableContent1 = within(descriptionEditor1).getByRole("textbox");
       expect(editableContent1).toHaveAttribute("contenteditable", "true");
 
-      await act(async () => {
-        fireEvent.focus(editableContent1);
-        editableContent1.innerHTML = "newVal";
-        fireEvent.input(editableContent1, {
-          target: { innerHTML: "newVal" },
-        });
-        fireEvent.blur(editableContent1);
-      });
-
-      // Wait for debounced update to take effect (250ms delay from TextEditor component)
-      await act(async () => {
-        await new Promise((resolve) => setTimeout(resolve, 350));
-      });
+      await updateRichText(editableContent1, "newVal");
       expect(editableContent1).toHaveTextContent("newVal");
 
       // saving a  measure..
@@ -1688,19 +1619,7 @@ describe.skip("Tests where serviceApi is mocked, instead of Axios", () => {
     const editableContent = within(descriptionEditor).getByRole("textbox");
     expect(editableContent).toHaveAttribute("contenteditable", "true");
 
-    await act(async () => {
-      fireEvent.focus(editableContent);
-      editableContent.innerHTML = "test description";
-      fireEvent.input(editableContent, {
-        target: { innerHTML: "test description" },
-      });
-      fireEvent.blur(editableContent);
-    });
-
-    // Wait for debounced update to take effect (250ms delay from TextEditor component)
-    await act(async () => {
-      await new Promise((resolve) => setTimeout(resolve, 350));
-    });
+    await updateRichText(editableContent, "test description");
     const groupPopulationInput = screen.getByTestId(
       "select-measure-group-population-input"
     ) as HTMLInputElement;
@@ -1716,19 +1635,7 @@ describe.skip("Tests where serviceApi is mocked, instead of Axios", () => {
     const editableContent1 = within(descriptionEditor1).getByRole("textbox");
     expect(editableContent1).toHaveAttribute("contenteditable", "true");
 
-    await act(async () => {
-      fireEvent.focus(editableContent1);
-      editableContent1.innerHTML = "newVal";
-      fireEvent.input(editableContent1, {
-        target: { innerHTML: "newVal" },
-      });
-      fireEvent.blur(editableContent1);
-    });
-
-    // Wait for debounced update to take effect (250ms delay from TextEditor component)
-    await act(async () => {
-      await new Promise((resolve) => setTimeout(resolve, 350));
-    });
+    await updateRichText(editableContent1, "newVal");
 
     // saving a  measure..
     await act(async () => {

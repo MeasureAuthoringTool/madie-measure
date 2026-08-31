@@ -1093,6 +1093,78 @@ const qdmCalculationServiceMockResolved = {
   getPassingPercentageForTestCases: mockGetPassingPercentageForTestCases,
 } as unknown as QdmCalculationService;
 
+jest.mock("../../createTestCase/CreateNewTestCaseDialog", () => ({
+  __esModule: true,
+  default: ({ open }) =>
+    open ? <div data-testid="create-test-case-dialog" /> : null,
+}));
+
+jest.mock("../common/shiftDates/ShiftDatesDialog", () => {
+  const React = jest.requireActual("react");
+  const MockShiftDatesDialog = ({ open, onClose }) => {
+    const [years, setYears] = React.useState("");
+
+    return open ? (
+      <div role="dialog">
+        <div data-testid="shift-dates-dialog">
+          <input
+            data-testid="shift-dates-input"
+            value={years}
+            onChange={(event) => setYears(event.target.value)}
+          />
+        </div>
+        <button data-testid="shift-dates-cancel-button" onClick={onClose}>
+          Cancel
+        </button>
+        <button
+          data-testid="shift-dates-save-button"
+          disabled={!years}
+          onClick={onClose}
+        >
+          Save
+        </button>
+      </div>
+    ) : null;
+  };
+
+  return {
+    __esModule: true,
+    default: MockShiftDatesDialog,
+  };
+});
+
+jest.mock("../common/TestCaseListSideBarNav", () => {
+  const { useNavigate, useParams } = jest.requireActual("react-router-dom");
+  const MockTestCaseListSideBarNav = ({ allPopulationCriteria }) => {
+    const navigate = useNavigate();
+    const { measureId, criteriaId } = useParams();
+
+    return (
+      <nav aria-label="Test Case Sidebar Navigation">
+        {allPopulationCriteria.map((populationCriteria, index) => (
+          <button
+            key={populationCriteria.id}
+            role="tab"
+            aria-selected={criteriaId === populationCriteria.id}
+            onClick={() =>
+              navigate(
+                `/measures/${measureId}/edit/test-cases/list-page/${populationCriteria.id}`
+              )
+            }
+          >
+            Population Criteria {index + 1}
+          </button>
+        ))}
+      </nav>
+    );
+  };
+
+  return {
+    __esModule: true,
+    default: MockTestCaseListSideBarNav,
+  };
+});
+
 // mocking testCaseService
 jest.mock("../../../api/useTestCaseServiceApi");
 const useTestCaseServiceMock =

@@ -144,6 +144,10 @@ const lockInfo = {
 jest.mock("../../../../../../api/axios-instance");
 const mockedAxios = axios as jest.Mocked<typeof axios>;
 
+jest.mock("../EditTestCaseBreadCrumbs", () => () => (
+  <div data-testid="edit-test-case-breadcrumbs" />
+));
+
 const mockNavigate = jest.fn();
 jest.mock("react-router-dom", () => ({
   ...jest.requireActual("react-router-dom"),

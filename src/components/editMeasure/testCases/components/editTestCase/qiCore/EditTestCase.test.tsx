@@ -60,6 +60,10 @@ jest.setTimeout(60000);
 jest.mock("../../../../../../api/axios-instance");
 const mockedAxios = axios as jest.Mocked<typeof axios>;
 
+jest.mock("../EditTestCaseBreadCrumbs", () => () => (
+  <div data-testid="edit-test-case-breadcrumbs" />
+));
+
 const mockMeasureServiceApi: MeasureServiceApi = {
   updateMeasureTestCaseConfiguration: jest.fn(),
 } as unknown as MeasureServiceApi;

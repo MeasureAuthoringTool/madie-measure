@@ -16,6 +16,17 @@ import {
 import { Measure } from "@madie/madie-models";
 import userEvent from "@testing-library/user-event";
 
+jest.mock("@madie/madie-design-system/dist/react", () => ({
+  ...jest.requireActual("@madie/madie-design-system/dist/react"),
+  Toast: ({ open, message, testId, onClose, closeButtonProps }) =>
+    open ? (
+      <div data-testid={testId}>
+        {message}
+        <button onClick={onClose} {...closeButtonProps} />
+      </div>
+    ) : null,
+}));
+
 const mockHistoryPush = jest.fn();
 
 jest.mock("react-router-dom", () => ({
