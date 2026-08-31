@@ -2,7 +2,7 @@
   "name": "madie-measure",
   "version": "1.0.0",
   "description": "Frontend application for MADiE Measure.",
-  "longDescription": "MADiE Measure is the front-end application supporting digital measure authoring within CMS.",
+  "longDescription": "MADiE Measure is a frontend application that supports digital measure authoring, editing, validation, and review workflows for CMS teams to create, manage, and publish clinical quality measures.",
   "status": "Production",
   "permissions": {
     "licenses": [
@@ -16,7 +16,7 @@
   },
   "organization": "Centers for Medicare & Medicaid Services",
   "repositoryURL": "https://github.com/MeasureAuthoringTool/madie-measure",
-  "repositoryHost": "github.com",
+  "repositoryHost": "github.com/DSACMS",
   "repositoryVisibility": "public",
   "vcs": "git",
   "laborHours": 23781,
