@@ -332,6 +332,15 @@ export default function MeasureList(props: {
 
   const [data, setData] = useState<TCRow[]>([]);
   const [expandedSectionData, setExpandedSectionData] = useState<TCRow[]>([]);
+  // Collapse any expanded row and clear its data when switching tabs
+  const [renderedTab, setRenderedTab] = useState<number>(props.activeTab);
+  if (renderedTab !== props.activeTab) {
+    setRenderedTab(props.activeTab);
+    setIsRowExpanded(false);
+    setSelectedIdForExpansion(null);
+    setSelectedExpandedMeasuresIds([]);
+    setExpandedSectionData(null);
+  }
   // Real names of users who currently have a measure locked for editing,
   // similar to the "in use" chip on the Page Header. Baked into `data` (rather
   // than read directly from the column defs) so resolving names doesn't force

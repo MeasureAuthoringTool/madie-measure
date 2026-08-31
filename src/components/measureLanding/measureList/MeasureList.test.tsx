@@ -3354,35 +3354,37 @@ describe("Measure lock functionality", () => {
         .mockResolvedValue([childMeasure]);
     });
 
+    const measureListOnTab = (activeTab: number) => (
+      <ServiceContext.Provider value={serviceConfig}>
+        <MeasureList
+          measureList={measureWithChildren}
+          setMeasureList={setMeasureListMock}
+          setTotalPages={setTotalPagesMock}
+          setTotalItems={setTotalItemsMock}
+          setVisibleItems={setVisibleItemsMock}
+          setOffset={setOffsetMock}
+          setLoading={setLoadingMock}
+          activeTab={activeTab}
+          searchCriteria={null}
+          setSearchCriteria={setSearchCriteriaMock}
+          currentLimit={10}
+          currentPage={0}
+          setErrMsg={setErrMsgMock}
+          toastOpen={false}
+          toastMessage=""
+          toastType="danger"
+          setToastOpen={setToastOpenMock}
+          setToastMessage={setToastMessageMock}
+          setToastType={setToastTypeMock}
+          onToastClose={onToastCloseMock}
+          handleToast={handleToastMock}
+          setStatusHandler={jest.fn()}
+        />
+      </ServiceContext.Provider>
+    );
+
     const renderWithExpandedChild = async () => {
-      const { container, ...rest } = render(
-        <ServiceContext.Provider value={serviceConfig}>
-          <MeasureList
-            measureList={measureWithChildren}
-            setMeasureList={setMeasureListMock}
-            setTotalPages={setTotalPagesMock}
-            setTotalItems={setTotalItemsMock}
-            setVisibleItems={setVisibleItemsMock}
-            setOffset={setOffsetMock}
-            setLoading={setLoadingMock}
-            activeTab={0}
-            searchCriteria={null}
-            setSearchCriteria={setSearchCriteriaMock}
-            currentLimit={10}
-            currentPage={0}
-            setErrMsg={setErrMsgMock}
-            toastOpen={false}
-            toastMessage=""
-            toastType="danger"
-            setToastOpen={setToastOpenMock}
-            setToastMessage={setToastMessageMock}
-            setToastType={setToastTypeMock}
-            onToastClose={onToastCloseMock}
-            handleToast={handleToastMock}
-            setStatusHandler={jest.fn()}
-          />
-        </ServiceContext.Provider>
-      );
+      const { container, ...rest } = render(measureListOnTab(0));
 
       // Wait for the parent measure row to render
       await screen.findByText("Parent Measure");
@@ -3498,6 +3500,31 @@ describe("Measure lock functionality", () => {
       // CreateVersionDialog opens — handleDialogClose is wired to its onClose,
       // which will reset isRowExpanded/selectedIdForExpansion when the dialog closes.
       expect(screen.getByTestId("create-version-dialog")).toBeInTheDocument();
+    });
+
+    it("switching tabs collapses the expanded row and clears its data", async () => {
+      const { container, rerender } = await renderWithExpandedChild();
+
+      expect(screen.getByText("Child Measure")).toBeInTheDocument();
+      await act(async () => {
+        rerender(measureListOnTab(1));
+      });
+
+      expect(screen.queryByText("Child Measure")).not.toBeInTheDocument();
+      expect(
+        mockMeasureServiceApi.getMeasuresByMeasureSetId
+      ).toHaveBeenCalledTimes(1);
+      const expandButton = container.querySelector(
+        'span[role="button"]'
+      ) as HTMLElement;
+      expect(expandButton).toBeInTheDocument();
+      await act(async () => {
+        userEvent.click(expandButton);
+      });
+      expect(await screen.findByText("Child Measure")).toBeInTheDocument();
+      expect(
+        mockMeasureServiceApi.getMeasuresByMeasureSetId
+      ).toHaveBeenCalledTimes(2);
     });
   });
 
