@@ -43,7 +43,7 @@ export interface TestCasePopulationListProps {
   group?: Group;
   observationResources?: ObservationResources[];
 }
-const StyledIcon = styled(FontAwesomeIcon)(
+export const StyledIcon = styled(FontAwesomeIcon)(
   ({ errors }: { errors: boolean }) => [
     errors ? tw`text-red-700 mr-1.5` : tw`text-green-700 mr-1.5`,
   ]
