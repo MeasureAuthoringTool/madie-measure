@@ -1,11 +1,11 @@
 # This workflow will do the following:
-# - perform a clean install of node dependencies
+# - perform a clean installation of node dependencies
 # - lint the source code for errors
 # - build the source code
-# - run tests and capture code coverage
-# - run end-to-end tests
-# - upload the code coverage report to Codacy
-# - upload the code coverage report to Codecov
+# - run tests in parallel shards and capture code coverage
+# - merge coverage reports from all shards
+# - upload the merged code coverage report to Codacy
+# - upload the merged code coverage report to Codecov
 
 name: Continuous Integration
 
@@ -16,33 +16,16 @@ on:
     branches: [main, develop]
 
 jobs:
-  build:
-    name: Checkout, install, lint, build and test with coverage
+  # ─── Lint & format check (parallel with build) ────────────────────────────
+  lint:
+    name: Lint and format check
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Use Node.js 20.x
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20.x
-
-      - name: Cache node modules
-        uses: actions/cache@v4
-        env:
-          cache-name: cache-node-modules
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-build-${{ env.cache-name }}-
-            ${{ runner.os }}-build-
-            ${{ runner.os }}-
-
-      - name: Install node dependencies
-        run: npm ci
+      - name: Setup Node and install dependencies
+        uses: ./.github/actions/setup-node-deps
 
       - name: Audit dependencies for security vulnerabilities
         run: npm audit --omit=dev --audit-level=${{ secrets.NPM_AUDIT_LEVEL }}
@@ -53,24 +36,110 @@ jobs:
       - name: Check prettier formatting
         run: npm run-script check-format
 
+  # ─── Build (parallel with lint) ───────────────────────────────────────────
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node and install dependencies
+        uses: ./.github/actions/setup-node-deps
+
       - name: Build the source code
         run: npm run build
 
-      - name: Execute test coverage
-        run: npm run-script coverage
+  # ─── Parallel test shards ──────────────────────────────────────────────────
+  test:
+    name: Shard – ${{ matrix.shard.name }}
+    needs: [lint, build]
+    runs-on: ubuntu-latest
 
-      - name: Store the coverage report as an artifact
+    strategy:
+      fail-fast: false # let all shards finish so we always get full coverage
+      matrix:
+        shard:
+          # Shard 1 – test-case editor (largest area)
+          - name: testCases
+            pattern: "src/components/editMeasure/testCases"
+
+          # Shard 2 – population criteria / measure editor
+          - name: populationCriteria
+            pattern: "src/components/editMeasure/(populationCriteria|editor|details|reviewInfo)"
+
+          # Shard 3 – measure landing / common dialogs
+          - name: measureLanding
+            pattern: "src/components/(measureLanding|common|measureRoutes|notfound|config)"
+
+          # Shard 4 – utils, api, and root-level tests
+          - name: utils-and-api
+            pattern: "src/(utils|api|[^/]+\\.test)"
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node and install dependencies
+        uses: ./.github/actions/setup-node-deps
+
+      - name: Execute test coverage for shard
+        run: |
+          npx cross-env BABEL_ENV=test jest \
+            --coverage \
+            --verbose \
+            --testPathPattern="${{ matrix.shard.pattern }}" \
+            --coverageDirectory=coverage
+
+      - name: Upload shard coverage as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-${{ matrix.shard.name }}
+          path: coverage/lcov.info
+          retention-days: 1 # intermediate artifact, only needed for the merge step
+
+  # ─── Merge all shard coverage reports ─────────────────────────────────────
+  merge-coverage:
+    name: Merge coverage reports
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node and install dependencies
+        uses: ./.github/actions/setup-node-deps
+
+      - name: Download all shard coverage artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: coverage-*
+          path: coverage-shards
+
+      # lcov-result-merger merges multiple lcov.info files into one
+      - name: Install lcov-result-merger
+        run: npm install -g lcov-result-merger
+
+      - name: Merge lcov reports
+        run: |
+          mkdir -p coverage
+          lcov-result-merger 'coverage-shards/**/lcov.info' coverage/lcov.info
+          echo "Merged coverage report created:"
+          ls -lh coverage/lcov.info
+
+      - name: Store the merged coverage report as an artifact
         uses: actions/upload-artifact@v4
         with:
           name: coverage
           path: coverage/lcov.info
 
+  # ─── Upload to Codacy ──────────────────────────────────────────────────────
   upload-codacy-coverage:
     name: Upload code coverage to Codacy
-    needs: build
+    needs: merge-coverage
     runs-on: ubuntu-latest
     steps:
-      - name: Download coverage artifact
+      - name: Download merged coverage artifact
         uses: actions/download-artifact@v4
         with:
           name: coverage
@@ -81,14 +150,16 @@ jobs:
           project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
           coverage-reports: lcov.info
 
+  # ─── Upload to Codecov ─────────────────────────────────────────────────────
   upload-codecov-coverage:
     name: Upload code coverage to Codecov
-    needs: build
+    needs: merge-coverage
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-      - name: Download coverage artifact
+
+      - name: Download merged coverage artifact
         uses: actions/download-artifact@v4
         with:
           name: coverage
@@ -98,4 +169,4 @@ jobs:
         with:
           files: ./lcov.info
           fail_ci_if_error: true
-          token: ${{ secrets.CODECOV_TOKEN }} # required
+          token: ${{ secrets.CODECOV_TOKEN }}
