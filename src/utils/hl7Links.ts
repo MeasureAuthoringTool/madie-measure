@@ -33,6 +33,9 @@ export const getHl7ProfileLink = (
   if (id.startsWith("us-core-")) {
     return `https://hl7.org/fhir/us/core/StructureDefinition-${normalizedProfileId}.html`;
   }
+  if (id.startsWith("us-quality-core-")) {
+    return `https://fhir.org/guides/onc/us-quality-core/en/StructureDefinition-${normalizedProfileId}.html`;
+  }
 
   // Fallback
   const parts = normalizedProfileId.split("-");
