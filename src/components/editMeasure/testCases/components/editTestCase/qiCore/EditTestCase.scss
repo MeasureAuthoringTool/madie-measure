@@ -46,6 +46,9 @@
           }
 
           .validation-content {
+            flex: 1;
+            min-height: 0;
+            max-height: calc(100vh - 456px);
             overflow-y: auto;
             margin-top: 1rem;
             width: 100%;
@@ -177,6 +180,10 @@
     }
     &.fullvh {
       height: 100vh;
+
+      .validation-panel.open .validation-content {
+        max-height: calc(100vh - 76px);
+      }
     }
   }
 }
