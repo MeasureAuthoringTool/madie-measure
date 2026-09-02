@@ -174,6 +174,35 @@ describe("ResourceList component", () => {
     );
   });
 
+  it("should open a US Quality Core profile link", async () => {
+    const resourceList = [
+      {
+        id: "us-quality-core-patient",
+        title: "US Quality Core Patient",
+        type: "Patient",
+        category: "Demo",
+        profile:
+          "http://fhir.org/guides/onc/us-quality-core/StructureDefinition/us-quality-core-patient",
+      },
+    ];
+    window.open = jest.fn();
+
+    renderWithExecutionContext(
+      <ResourceList resourceIdentifiers={resourceList} onClick={jest.fn()} />,
+      "US Quality Core v0.5.0"
+    );
+
+    const hl7Button = await screen.findByTestId(
+      "hl7-link-us-quality-core-patient"
+    );
+    await userEvent.click(hl7Button);
+
+    expect(window.open).toHaveBeenCalledWith(
+      "https://fhir.org/guides/onc/us-quality-core/en/StructureDefinition-us-quality-core-patient.html",
+      "_blank"
+    );
+  });
+
   it("should display list of resources limited to 4", async () => {
     const resourceList = generateResources(4);
     const onClick = jest.fn();

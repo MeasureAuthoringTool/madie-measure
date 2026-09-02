@@ -249,6 +249,55 @@ describe("ResourceEditor", () => {
     });
   });
 
+  it("opens the US Quality Core profile link", async () => {
+    localMockResourceState.bundle.entry[0].resource.meta.profile = [
+      "http://fhir.org/guides/onc/us-quality-core/StructureDefinition/us-quality-core-patient",
+    ];
+    (useFormikContext as jest.Mock).mockReturnValue({
+      ...localMockFormikObj,
+      dirty: false,
+    });
+    window.open = jest.fn();
+
+    render(
+      <ExecutionContextProvider
+        value={
+          {
+            measureState: [{ model: "US Quality Core v0.5.0" }, jest.fn()],
+            valueSetsState: localMockckValueSetsState,
+            executionContextReady: true,
+          } as any
+        }
+      >
+        <ApiContextProvider value={mockConfig}>
+          <QiCoreResourceContext.Provider
+            value={{ state: localMockResourceState, dispatch: jest.fn() }}
+          >
+            <ResourceEditor
+              selectedResourceID="446b20b5-dd46-415e-9b9f-9eba6b260743"
+              setValidationSchema={mockSetValidationSchema}
+              setInitialFormikValuesStu6={mockSetInitialFormikValuesStu6}
+              onCancel={mockOnCancel}
+              canEdit={true}
+              applyLoading={false}
+              setApplyLoading={jest.fn()}
+            />
+          </QiCoreResourceContext.Provider>
+        </ApiContextProvider>
+      </ExecutionContextProvider>
+    );
+
+    const hl7Button = await screen.findByTestId(
+      "edit-hl7-link-us-quality-core-patient"
+    );
+    await userEvent.click(hl7Button);
+
+    expect(window.open).toHaveBeenCalledWith(
+      "https://fhir.org/guides/onc/us-quality-core/en/StructureDefinition-us-quality-core-patient.html",
+      "_blank"
+    );
+  });
+
   it.skip("renders the ResourceEditor correctly, can hit dirty check", async () => {
     // Mocked formik obj return dirty true
     (useFormikContext as jest.Mock).mockReturnValue(localMockFormikObj);
