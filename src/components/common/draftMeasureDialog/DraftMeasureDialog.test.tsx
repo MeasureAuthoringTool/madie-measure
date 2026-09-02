@@ -217,33 +217,6 @@ describe("DraftMeasureDialog component", () => {
     expect(screen.getByTestId("create-draft-continue-button")).toBeEnabled();
   });
 
-  it("should render Update Model Version field in readOnly (QICORE6)", async () => {
-    (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-      qiCore7: false,
-    }));
-    const QICore6Measure = { ...measure, model: Model.QICORE_6_0_0 };
-    render(
-      <DraftMeasureDialog
-        open={true}
-        onClose={onCloseFn}
-        onSubmit={onSubmitFn}
-        measure={QICore6Measure}
-        loading={false}
-      />
-    );
-    expect(screen.getByText("Create Draft")).toBeInTheDocument();
-    const measureName = (await screen.findByRole("textbox", {
-      name: "Measure Name",
-    })) as HTMLInputElement;
-    expect(measureName.value).toEqual(measure.measureName);
-
-    const modelSelect = screen.getByTestId(
-      "measure-model-select"
-    ) as HTMLInputElement;
-    expect(modelSelect).toHaveProperty("readOnly", true);
-    expect(modelSelect).toHaveTextContent("QI-Core v6.0.0");
-  });
-
   it("should render Update Model Version field in readOnly (QICORE7)", async () => {
     (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
       qiCore7: true,
@@ -271,7 +244,7 @@ describe("DraftMeasureDialog component", () => {
     expect(modelSelect).toHaveTextContent("QI-Core v7.0.2");
   });
 
-  describe("usQualityCore feature flag - QI-Core v4.1.1 measure", () => {
+  describe("model version options - QI-Core v4.1.1 measure", () => {
     const openDropdown = () => {
       const modelSelect = screen.getByTestId("measure-model-select");
       const dropdown = within(modelSelect).getByRole(
@@ -280,10 +253,9 @@ describe("DraftMeasureDialog component", () => {
       userEvent.click(dropdown);
     };
 
-    it("shows v4.1.1, v6.0.0, v7.0.2, and US Quality Core when both flags are true", async () => {
+    it("shows v4.1.1, v6.0.0, v7.0.2, and US Quality Core when qiCore7 is true", async () => {
       (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
         qiCore7: true,
-        usQualityCore: true,
       }));
       renderComponent();
       openDropdown();
@@ -308,32 +280,9 @@ describe("DraftMeasureDialog component", () => {
       ).not.toBeInTheDocument();
     });
 
-    it("shows v4.1.1, v6.0.0, v7.0.2 when usQualityCore is false and qiCore7 is true", async () => {
-      (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-        qiCore7: true,
-        usQualityCore: false,
-      }));
-      renderComponent();
-      openDropdown();
-
-      expect(
-        await screen.findByTestId("measure-model-option-QI-Core v4.1.1")
-      ).toBeInTheDocument();
-      expect(
-        screen.getByTestId("measure-model-option-QI-Core v6.0.0")
-      ).toBeInTheDocument();
-      expect(
-        screen.getByTestId("measure-model-option-QI-Core v7.0.2")
-      ).toBeInTheDocument();
-      expect(
-        screen.queryByTestId("measure-model-option-US Quality Core v0.5.0")
-      ).not.toBeInTheDocument();
-    });
-
-    it("shows v4.1.1, v6.0.0, US Quality Core when usQualityCore is true and qiCore7 is false", async () => {
+    it("shows v4.1.1, v6.0.0 and US Quality Core when qiCore7 is false", async () => {
       (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
         qiCore7: false,
-        usQualityCore: true,
       }));
       renderComponent();
       openDropdown();
@@ -351,31 +300,9 @@ describe("DraftMeasureDialog component", () => {
         screen.queryByTestId("measure-model-option-QI-Core v7.0.2")
       ).not.toBeInTheDocument();
     });
-
-    it("shows only v4.1.1 and v6.0.0 when both flags are false", async () => {
-      (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-        qiCore7: false,
-        usQualityCore: false,
-      }));
-      renderComponent();
-      openDropdown();
-
-      expect(
-        await screen.findByTestId("measure-model-option-QI-Core v4.1.1")
-      ).toBeInTheDocument();
-      expect(
-        screen.getByTestId("measure-model-option-QI-Core v6.0.0")
-      ).toBeInTheDocument();
-      expect(
-        screen.queryByTestId("measure-model-option-QI-Core v7.0.2")
-      ).not.toBeInTheDocument();
-      expect(
-        screen.queryByTestId("measure-model-option-US Quality Core v0.5.0")
-      ).not.toBeInTheDocument();
-    });
   });
 
-  describe("usQualityCore feature flag - QI-Core v6.0.0 measure", () => {
+  describe("model version options - QI-Core v6.0.0 measure", () => {
     let v6Measure: Measure;
     beforeEach(() => {
       v6Measure = {
@@ -404,10 +331,9 @@ describe("DraftMeasureDialog component", () => {
       userEvent.click(dropdown);
     };
 
-    it("shows v6.0.0, v7.0.2, and US Quality Core when both flags are true", async () => {
+    it("shows v6.0.0, v7.0.2, and US Quality Core when qiCore7 is true", async () => {
       (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
         qiCore7: true,
-        usQualityCore: true,
       }));
       renderV6();
       openDropdown();
@@ -426,29 +352,9 @@ describe("DraftMeasureDialog component", () => {
       ).not.toBeInTheDocument();
     });
 
-    it("shows v6.0.0 and v7.0.2 when usQualityCore is false and qiCore7 is true", async () => {
-      (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-        qiCore7: true,
-        usQualityCore: false,
-      }));
-      renderV6();
-      openDropdown();
-
-      expect(
-        await screen.findByTestId("measure-model-option-QI-Core v6.0.0")
-      ).toBeInTheDocument();
-      expect(
-        screen.getByTestId("measure-model-option-QI-Core v7.0.2")
-      ).toBeInTheDocument();
-      expect(
-        screen.queryByTestId("measure-model-option-US Quality Core v0.5.0")
-      ).not.toBeInTheDocument();
-    });
-
-    it("shows v6.0.0 and US Quality Core when usQualityCore is true and qiCore7 is false", async () => {
+    it("shows v6.0.0 and US Quality Core when qiCore7 is false", async () => {
       (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
         qiCore7: false,
-        usQualityCore: true,
       }));
       renderV6();
       openDropdown();
@@ -463,26 +369,11 @@ describe("DraftMeasureDialog component", () => {
         screen.queryByTestId("measure-model-option-QI-Core v7.0.2")
       ).not.toBeInTheDocument();
     });
-
-    it("locks the field to v6.0.0 when both flags are false", async () => {
-      (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
-        qiCore7: false,
-        usQualityCore: false,
-      }));
-      renderV6();
-
-      const modelSelect = screen.getByTestId(
-        "measure-model-select"
-      ) as HTMLInputElement;
-      expect(modelSelect).toHaveProperty("readOnly", true);
-      expect(modelSelect).toHaveTextContent("QI-Core v6.0.0");
-    });
   });
 
   it("renders Update Model Version as readOnly when measure is US Quality Core v0.5.0", async () => {
     (useFeatureFlags as jest.Mock).mockClear().mockImplementation(() => ({
       qiCore7: true,
-      usQualityCore: true,
     }));
     const usQualityCoreMeasure = {
       ...measure,

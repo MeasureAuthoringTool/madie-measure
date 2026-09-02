@@ -36,7 +36,6 @@ declare module "@madie/madie-util" {
     QICoreCompositeMeasure: boolean;
     DisplayOwner: boolean;
     MakeJSONMatchUI: boolean;
-    usQualityCore?: boolean;
     MeasureReviewStatus?: boolean;
   }
 
