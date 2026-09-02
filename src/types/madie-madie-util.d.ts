@@ -359,6 +359,7 @@ declare module "@madie/madie-util" {
     entitySetId?: string;
     onSuccess?: () => void | Promise<void>;
   }): React.ReactElement | null;
+  export const REVIEW_STATUS_OPTIONS: string[];
   export function getNewestMeasureInstance(measures: Measure[]): Measure;
 
   export function exportMeasure(

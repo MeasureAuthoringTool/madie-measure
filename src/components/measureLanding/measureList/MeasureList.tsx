@@ -24,6 +24,7 @@ import {
   ShareDialog,
   TransferDialog,
   ManageReviewDialog,
+  REVIEW_STATUS_OPTIONS,
   formatCmsId,
   padCmsId,
   validateCompositeMeasure,
@@ -73,6 +74,17 @@ import ReviewDialog from "../../common/reviewDialog/ReviewDialog";
 
 const COMPONENT_MEASURE_MSG =
   "This measure is a component of a composite measure";
+
+export const shouldShowReviewerTooltip = (
+  reviewStatus?: string,
+  reviewers?: string[]
+): boolean => {
+  return (
+    !!reviewStatus &&
+    REVIEW_STATUS_OPTIONS.includes(reviewStatus) &&
+    !!reviewers?.length
+  );
+};
 
 // Export customSort for testing purposes
 export function customSort(a: string, b: string) {
@@ -310,6 +322,7 @@ export default function MeasureList(props: {
         hasAssociatedMeasures: measure?.hasAssociatedMeasures,
         ownerDisplayName: measure?.ownerDisplayName,
         reviewStatus: measure?.reviewStatus,
+        reviewers: measure?.reviewers,
         lockedByDisplayName: lockedBy
           ? lockedByDisplayNames[lockedBy] || lockedBy
           : undefined,
@@ -328,6 +341,7 @@ export default function MeasureList(props: {
     ownerDisplayName?: string;
     lockedByDisplayName?: string;
     reviewStatus?: string;
+    reviewers?: string[];
   };
 
   const [data, setData] = useState<TCRow[]>([]);
@@ -531,13 +545,31 @@ export default function MeasureList(props: {
             header: "Review",
             accessorKey: "reviewStatus",
             enableSorting: false,
-            cell: (info) => (
-              <p>
-                {info.row.original.reviewStatus
-                  ? info.row.original.reviewStatus
-                  : "-"}
-              </p>
-            ),
+            cell: (info) => {
+              const { id, reviewStatus, reviewers } = info.row.original;
+
+              if (!reviewStatus) {
+                return <p>-</p>;
+              }
+
+              if (!shouldShowReviewerTooltip(reviewStatus, reviewers)) {
+                return <p>{reviewStatus}</p>;
+              }
+              return (
+                <Tooltip
+                  title={
+                    <div>
+                      {reviewers.map((reviewer, index) => (
+                        <div key={`${id}-reviewer-${index}`}>{reviewer}</div>
+                      ))}
+                    </div>
+                  }
+                  arrow
+                >
+                  <span>{reviewStatus}</span>
+                </Tooltip>
+              );
+            },
           },
         ]
       : []),
