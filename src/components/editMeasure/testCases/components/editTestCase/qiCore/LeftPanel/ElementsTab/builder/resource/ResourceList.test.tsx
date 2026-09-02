@@ -455,6 +455,13 @@ describe("ResourceList component", () => {
         category: "Clinical",
         profile: "profile-condition",
       },
+      {
+        id: "cross-version-profile-observation",
+        title: "Cross-version Profile Observation",
+        type: "Observation",
+        category: "Clinical",
+        profile: "profile-cross-version-observation",
+      },
     ];
 
     beforeEach(() => {
@@ -566,6 +573,39 @@ describe("ResourceList component", () => {
       const table = await screen.findByTestId("measure-list-tbl");
       const tableRows = table.querySelectorAll("tbody tr");
       expect(tableRows.length).toBe(4);
+    });
+
+    it("hides Cross-version Profiles from All Profiles and search results", async () => {
+      localStorage.setItem("available-elements-profile-mode-measure-1", "ALL");
+      const onClick = jest.fn();
+      render(
+        <ResourceList
+          resourceIdentifiers={relevantResources}
+          allResourceIdentifiers={allResources}
+          onClick={onClick}
+          measureId="measure-1"
+        />
+      );
+
+      const table = await screen.findByTestId("measure-list-tbl");
+      await waitFor(() => {
+        expect(table.querySelectorAll("tbody tr")).toHaveLength(4);
+      });
+      expect(
+        screen.queryByTestId("profile-cross-version-profile-observation")
+      ).not.toBeInTheDocument();
+
+      const searchFieldInput = getByTestId(
+        "search-elements-input-input"
+      ) as HTMLInputElement;
+      userEvent.type(searchFieldInput, "Cross-version Profile{enter}");
+
+      await waitFor(() => {
+        expect(screen.getByTestId("no-profiles-found")).toBeInTheDocument();
+      });
+      expect(
+        screen.queryByTestId("profile-cross-version-profile-observation")
+      ).not.toBeInTheDocument();
     });
 
     it("shows only relevant profiles in relevant mode", async () => {

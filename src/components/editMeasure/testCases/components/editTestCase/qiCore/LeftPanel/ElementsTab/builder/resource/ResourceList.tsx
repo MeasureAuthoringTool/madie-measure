@@ -50,6 +50,9 @@ export interface ResourceListProps {
 }
 const TH = tw.th`p-3 text-left text-sm font-bold capitalize`;
 
+const isCrossVersionProfile = (resource: ResourceIdentifier): boolean =>
+  resource.title.toLowerCase().startsWith("cross-version profile");
+
 const ResourceList = ({
   resourceIdentifiers,
   allResourceIdentifiers,
@@ -106,14 +109,19 @@ const ResourceList = ({
     [measureId]
   );
 
+  const allVisibleResourceIdentifiers = useMemo(() => {
+    const resources = allResourceIdentifiers || resourceIdentifiers;
+    return resources?.filter((resource) => !isCrossVersionProfile(resource));
+  }, [allResourceIdentifiers, resourceIdentifiers]);
+
   const activeResourceIdentifiers = useMemo(() => {
     if (effectiveProfileDisplayMode === ProfileDisplayMode.ALL) {
-      return allResourceIdentifiers || resourceIdentifiers;
+      return allVisibleResourceIdentifiers;
     }
     return resourceIdentifiers;
   }, [
     effectiveProfileDisplayMode,
-    allResourceIdentifiers,
+    allVisibleResourceIdentifiers,
     resourceIdentifiers,
   ]);
 
@@ -388,9 +396,7 @@ const ResourceList = ({
         <div className="profile-toggle-wrapper">
           <ProfileDisplayToggle
             mode={effectiveProfileDisplayMode}
-            allProfileCount={
-              (allResourceIdentifiers || resourceIdentifiers)?.length || 0
-            }
+            allProfileCount={allVisibleResourceIdentifiers?.length || 0}
             relevantProfileCount={resourceIdentifiers?.length || 0}
             onChange={handleProfileDisplayModeChange}
             showRelevantProfiles={!isComposite}
