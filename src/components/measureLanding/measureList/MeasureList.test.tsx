@@ -22,6 +22,7 @@ import {
   MeasureSearchCriteria,
 } from "@madie/madie-models";
 import MeasureList, { customSort } from "./MeasureList";
+import { ALL_REVIEWS_TAB, MY_REVIEWS_TAB } from "./actionCenter/ActionCenter";
 import { oneItemResponse } from "../../__mocks__/mockMeasureResponses";
 import userEvent from "@testing-library/user-event";
 import { v4 as uuid } from "uuid";
@@ -82,6 +83,7 @@ jest.mock("@madie/madie-util", () => ({
     },
   },
   ...mockCompositeStubs,
+  REVIEW_STATUS_OPTIONS: ["Ready", "In Progress", "Complete"],
   ExportIcon: () => <span data-testid="export-icon" />,
   // Shared action-center icons + dialogs + export flow (moved to madie-util)
   exportMeasure: jest.fn(),
@@ -4063,11 +4065,20 @@ describe("Review Status", () => {
     { ...measures[1], reviewStatus: "" },
   ] as unknown as Measure[];
 
-  const renderReviewList = (activeTab = 0) =>
+  const withReviewers = (reviewStatus: string, reviewers?: string[]) =>
+    [
+      {
+        ...measures[0],
+        reviewStatus,
+        reviewers,
+      },
+    ] as unknown as Measure[];
+
+  const renderReviewList = (activeTab = 0, measureList = measuresWithReview) =>
     render(
       <ServiceContext.Provider value={serviceConfig}>
         <MeasureList
-          measureList={measuresWithReview}
+          measureList={measureList}
           setMeasureList={setMeasureListMock}
           setTotalPages={setTotalPagesMock}
           setTotalItems={setTotalItemsMock}
@@ -4260,5 +4271,58 @@ describe("Review Status", () => {
     // the last argument asks for the tab counts to be refetched, since saving a review
     // moves the measure on and off the All Reviews and My Reviews tabs
     expect(retrieveMeasuresMock.mock.calls[0][6]).toBe(true);
+  });
+
+  it.each(["Ready", "In Progress", "Complete"])(
+    "should list the assigned reviewers when hovering over '%s'",
+    async (reviewStatus) => {
+      renderReviewList(
+        0,
+        withReviewers(reviewStatus, ["Ada Lovelace", "Grace Hopper"])
+      );
+
+      const status = await screen.findByText(reviewStatus);
+      userEvent.hover(status);
+
+      const tooltip = await screen.findByRole("tooltip");
+      expect(within(tooltip).getByText("Ada Lovelace")).toBeInTheDocument();
+      expect(within(tooltip).getByText("Grace Hopper")).toBeInTheDocument();
+    }
+  );
+
+  it.each([0, 1, ALL_REVIEWS_TAB, MY_REVIEWS_TAB])(
+    "should show the reviewer tooltip on tab %s",
+    async (activeTab) => {
+      renderReviewList(activeTab, withReviewers("Ready", ["Ada Lovelace"]));
+
+      const status = await screen.findByText("Ready");
+      userEvent.hover(status);
+
+      expect(
+        within(await screen.findByRole("tooltip")).getByText("Ada Lovelace")
+      ).toBeInTheDocument();
+    }
+  );
+
+  it("should not show a tooltip when no reviewers are assigned", async () => {
+    renderReviewList(0, withReviewers("Ready", []));
+
+    const status = await screen.findByText("Ready");
+    userEvent.hover(status);
+
+    await waitFor(() => {
+      expect(screen.queryByRole("tooltip")).not.toBeInTheDocument();
+    });
+  });
+
+  it("should not show a tooltip when the Review column has no value", async () => {
+    renderReviewList(0, withReviewers("", ["Ada Lovelace"]));
+
+    const status = await screen.findByText("-");
+    userEvent.hover(status);
+
+    await waitFor(() => {
+      expect(screen.queryByRole("tooltip")).not.toBeInTheDocument();
+    });
   });
 });

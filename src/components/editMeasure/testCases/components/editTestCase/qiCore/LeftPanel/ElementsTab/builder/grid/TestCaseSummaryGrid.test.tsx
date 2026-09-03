@@ -253,6 +253,50 @@ describe("TestCaseSummaryGrid", () => {
     );
   });
 
+  it("opens the US Quality Core HL7 link using canonical meta.profile", async () => {
+    window.open = jest.fn();
+
+    const usQualityCoreGridData = [
+      {
+        title: "US Quality Core Patient",
+        entry: {
+          resource: {
+            resourceType: "Patient",
+            id: "patient-1",
+            meta: {
+              profile: [
+                "http://fhir.org/guides/onc/us-quality-core/StructureDefinition/us-quality-core-patient",
+              ],
+            },
+          },
+        },
+      },
+    ] as GridDataEntry[];
+
+    render(
+      <ResourceContext.Provider value={[]}>
+        <TestCaseSummaryGrid
+          gridData={usQualityCoreGridData}
+          onRowEdit={mockOnRowEdit}
+          onRowDelete={mockOnRowDelete}
+          testCaseCanEdit={true}
+          measureModel="US Quality Core v0.5.0"
+          readOnly={false}
+        />
+      </ResourceContext.Provider>
+    );
+
+    const hl7Button = await screen.findByTestId(
+      "hl7-link-us-quality-core-patient"
+    );
+    await userEvent.click(hl7Button);
+
+    expect(window.open).toHaveBeenCalledWith(
+      "https://fhir.org/guides/onc/us-quality-core/en/StructureDefinition-us-quality-core-patient.html",
+      "_blank"
+    );
+  });
+
   it("should render the table with no data", () => {
     renderWithResourceContext(
       <TestCaseSummaryGrid

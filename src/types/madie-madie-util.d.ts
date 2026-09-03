@@ -36,7 +36,6 @@ declare module "@madie/madie-util" {
     QICoreCompositeMeasure: boolean;
     DisplayOwner: boolean;
     MakeJSONMatchUI: boolean;
-    usQualityCore?: boolean;
     MeasureReviewStatus?: boolean;
   }
 
@@ -360,6 +359,7 @@ declare module "@madie/madie-util" {
     entitySetId?: string;
     onSuccess?: () => void | Promise<void>;
   }): React.ReactElement | null;
+  export const REVIEW_STATUS_OPTIONS: string[];
   export function getNewestMeasureInstance(measures: Measure[]): Measure;
 
   export function exportMeasure(

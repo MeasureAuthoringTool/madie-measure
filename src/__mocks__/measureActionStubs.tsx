@@ -9,6 +9,7 @@ export const parseErrorMessageFromBlob = jest.fn();
 export const generateTimestampedFileName = jest.fn(
   (baseName: string, extension: string) => `${baseName}_timestamp.${extension}`
 );
+export const REVIEW_STATUS_OPTIONS = ["Ready", "In Progress", "Complete"];
 export const EXPORT_FAILURE_MESSAGE =
   "Unable to Export measure. Package could not be generated. Please try again and contact the Help Desk if the problem persists.";
 export const getNewestMeasureInstance = jest.fn(
