@@ -126,7 +126,7 @@ export default function AddComponentsDialog({
   useEffect(() => {
     setRowSelection((prev) => {
       if (!measureList?.length) {
-        return prev;
+        return Object.keys(prev).length ? {} : prev;
       }
 
       let changed = false;
@@ -334,15 +334,14 @@ export default function AddComponentsDialog({
         header: "CMS ID",
         cell: (info) => (
           <TruncateText
-            text={formatCmsId(
-              info.row.original?.measureSet?.cmsId,
-              info.row.original?.model
-            )}
+            text={formatCmsId(info.getValue(), info.row.original?.model)}
             maxLength={20}
             dataTestId={`measure-cmsId-${info.row.original.id}`}
           />
         ),
-        accessorKey: "measureSet.cmsId",
+        id: "cmsId",
+        accessorFn: (row) => row.measureSet?.cmsId,
+        sortDescFirst: false,
       },
       {
         header: "Translator",
@@ -439,7 +438,10 @@ export default function AddComponentsDialog({
       priorityMeasureSets: components?.map((c) => c.measureSetId) || [],
     };
 
-    const currentSort = sorting[0]?.id || "lastModifiedAt";
+    const currentSort =
+      sorting[0]?.id === "cmsId"
+        ? "measureSet.cmsId"
+        : sorting[0]?.id || "lastModifiedAt";
     const currentDirection = sorting[0]
       ? sorting[0].desc
         ? "DESC"
@@ -515,8 +517,8 @@ export default function AddComponentsDialog({
       maxSize: 500,
     },
     manualPagination: true,
-    manualSorting: true,
     getCoreRowModel: getCoreRowModel(),
+    manualSorting: true,
     onSortingChange: handleSortingChange,
     state: {
       sorting,
