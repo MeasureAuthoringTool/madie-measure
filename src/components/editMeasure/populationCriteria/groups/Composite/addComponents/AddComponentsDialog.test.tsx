@@ -587,72 +587,6 @@ describe("AddComponentsDialog", () => {
     });
   });
 
-  it("requests global sorting and preserves it when changing pages", async () => {
-    const sortedResponse = {
-      content: [data[1], data[0]],
-      totalPages: 3,
-      totalElements: 15,
-      numberOfElements: 2,
-      pageable: { offset: 0 },
-    };
-    const mockSearchMeasures = jest
-      .fn()
-      .mockResolvedValueOnce({
-        content: data,
-        totalPages: 3,
-        totalElements: 15,
-        numberOfElements: 2,
-        pageable: { offset: 0 },
-      })
-      .mockResolvedValue(sortedResponse);
-
-    useMeasureServiceApi.mockReturnValue({
-      searchMeasuresByCriteria: mockSearchMeasures,
-      getMeasuresByMeasureSetId: jest.fn(),
-    });
-
-    render(
-      <AddComponentsDialog
-        open={true}
-        onClose={onCloseMock}
-        measure={mockMeasure}
-        compositeScoring="Opportunity"
-        components={[]}
-        submitComponentForm={jest.fn()}
-      />
-    );
-
-    await waitFor(() => {
-      expect(mockSearchMeasures).toHaveBeenCalledTimes(1);
-    });
-
-    const measureNameHeader = screen.getByRole("button", {
-      name: "Measure Name",
-    });
-    await userEvent.click(measureNameHeader);
-
-    await waitFor(() => {
-      expect(mockSearchMeasures).toHaveBeenCalledTimes(2);
-    });
-    expect(mockSearchMeasures.mock.calls[1][2]).toBe(0);
-    expect(mockSearchMeasures.mock.calls[1][3]).toBe("measureName");
-    expect(mockSearchMeasures.mock.calls[1][4]).toBe("ASC");
-    expect(measureNameHeader).toHaveAttribute("title", "Sort descending");
-
-    const nextPageButton = screen.getByRole("button", { name: /next/i });
-    await userEvent.click(nextPageButton);
-
-    await waitFor(() => {
-      expect(mockSearchMeasures).toHaveBeenCalledTimes(3);
-    });
-    expect(mockSearchMeasures.mock.calls[2][2]).toBe(1);
-    expect(mockSearchMeasures.mock.calls[2][3]).toBe("measureName");
-    expect(mockSearchMeasures.mock.calls[2][4]).toBe("ASC");
-    expect(
-      screen.getByRole("button", { name: "Measure Name" })
-    ).toHaveAttribute("title", "Sort descending");
-  });
-
   it("handles pagination - limit change", async () => {
     const mockSearchMeasures = jest.fn().mockResolvedValue({
       content: data,
@@ -2336,6 +2270,99 @@ describe("AddComponentsDialog", () => {
         expect(screen.getByText("0333FHIR")).toBeInTheDocument();
       });
     }
+  });
+
+  it("requests global CMS ID sorting and preserves it across pages", async () => {
+    const sortableData = [
+      {
+        id: "cms-10",
+        measureName: "CMS Ten",
+        version: "1.0.0",
+        model: "QDM v5.6",
+        measureSet: { cmsId: 10 },
+        measureSetId: "set-10",
+        lastModifiedAt: "2024-01-01",
+        hasAssociatedMeasures: false,
+      },
+      {
+        id: "cms-2",
+        measureName: "CMS Two",
+        version: "1.0.0",
+        model: "QDM v5.6",
+        measureSet: { cmsId: 2 },
+        measureSetId: "set-2",
+        lastModifiedAt: "2024-01-02",
+        hasAssociatedMeasures: false,
+      },
+    ];
+    const mockSearchMeasures = jest
+      .fn()
+      .mockResolvedValueOnce({
+        content: sortableData,
+        totalPages: 2,
+        totalElements: 6,
+        numberOfElements: 2,
+        pageable: { offset: 0 },
+      })
+      .mockResolvedValueOnce({
+        content: [sortableData[1], sortableData[0]],
+        totalPages: 2,
+        totalElements: 6,
+        numberOfElements: 2,
+        pageable: { offset: 0 },
+      })
+      .mockResolvedValueOnce({
+        content: [sortableData[0]],
+        totalPages: 2,
+        totalElements: 6,
+        numberOfElements: 1,
+        pageable: { offset: 5 },
+      });
+
+    useMeasureServiceApi.mockReturnValue({
+      searchMeasuresByCriteria: mockSearchMeasures,
+      getMeasuresByMeasureSetId: jest.fn(),
+    });
+
+    render(
+      <AddComponentsDialog
+        open={true}
+        onClose={onCloseMock}
+        measure={mockMeasure}
+        compositeScoring="Opportunity"
+        components={[]}
+        submitComponentForm={jest.fn()}
+      />
+    );
+
+    await waitFor(() => {
+      expect(mockSearchMeasures).toHaveBeenCalledTimes(1);
+    });
+
+    await userEvent.click(screen.getByRole("button", { name: "CMS ID" }));
+
+    await waitFor(() => {
+      expect(mockSearchMeasures).toHaveBeenCalledTimes(2);
+    });
+    expect(mockSearchMeasures.mock.calls[1][2]).toBe(0);
+    expect(mockSearchMeasures.mock.calls[1][3]).toBe("measureSet.cmsId");
+    expect(mockSearchMeasures.mock.calls[1][4]).toBe("ASC");
+
+    let rows = screen.getAllByTestId("row-item");
+    expect(rows[0]).toHaveTextContent("0002");
+    expect(rows[1]).toHaveTextContent("0010");
+
+    await userEvent.click(screen.getByRole("button", { name: /next/i }));
+
+    await waitFor(() => {
+      expect(mockSearchMeasures).toHaveBeenCalledTimes(3);
+    });
+    expect(mockSearchMeasures.mock.calls[2][2]).toBe(1);
+    expect(mockSearchMeasures.mock.calls[2][3]).toBe("measureSet.cmsId");
+    expect(mockSearchMeasures.mock.calls[2][4]).toBe("ASC");
+
+    rows = screen.getAllByTestId("row-item");
+    expect(rows[0]).toHaveTextContent("0010");
   });
 
   it("renders translator column and translator version values in main rows", async () => {

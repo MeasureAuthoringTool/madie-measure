@@ -19,6 +19,7 @@ import {
   useReactTable,
   flexRender,
   SortingState,
+  getSortedRowModel,
 } from "@tanstack/react-table";
 import {
   CollapseIcon,
@@ -102,6 +103,7 @@ export default function AddComponentsDialog({
   >({});
   const abortController = useRef(null);
   const [expandedRowSelection, setExpandedRowSelection] = useState({});
+  const cmsIdSort = sorting[0]?.id === "cmsId" ? sorting[0] : null;
 
   // Use custom hook for filter and search functionality
   const {
@@ -126,7 +128,7 @@ export default function AddComponentsDialog({
   useEffect(() => {
     setRowSelection((prev) => {
       if (!measureList?.length) {
-        return prev;
+        return Object.keys(prev).length ? {} : prev;
       }
 
       let changed = false;
@@ -342,7 +344,9 @@ export default function AddComponentsDialog({
             dataTestId={`measure-cmsId-${info.row.original.id}`}
           />
         ),
-        accessorKey: "measureSet.cmsId",
+        id: "cmsId",
+        accessorFn: (row) => row.measureSet?.cmsId,
+        sortDescFirst: false,
       },
       {
         header: "Translator",
@@ -439,9 +443,9 @@ export default function AddComponentsDialog({
       priorityMeasureSets: components?.map((c) => c.measureSetId) || [],
     };
 
-    const currentSort = sorting[0]?.id || "lastModifiedAt";
-    const currentDirection = sorting[0]
-      ? sorting[0].desc
+    const currentSort = cmsIdSort ? "measureSet.cmsId" : "lastModifiedAt";
+    const currentDirection = cmsIdSort
+      ? cmsIdSort.desc
         ? "DESC"
         : "ASC"
       : "DESC";
@@ -485,7 +489,7 @@ export default function AddComponentsDialog({
     measureServiceApi,
     limit,
     page,
-    sorting,
+    cmsIdSort,
   ]);
 
   useEffect(() => {
@@ -501,8 +505,14 @@ export default function AddComponentsDialog({
   const handleSortingChange = (
     updaterOrValue: React.SetStateAction<SortingState>
   ) => {
+    const nextSorting =
+      typeof updaterOrValue === "function"
+        ? updaterOrValue(sorting)
+        : updaterOrValue;
     setSorting(updaterOrValue);
-    setPage(0);
+    if (nextSorting[0]?.id === "cmsId" || sorting[0]?.id === "cmsId") {
+      setPage(0);
+    }
   };
 
   const table = useReactTable({
@@ -515,8 +525,9 @@ export default function AddComponentsDialog({
       maxSize: 500,
     },
     manualPagination: true,
-    manualSorting: true,
+    manualSorting: sorting[0]?.id === "cmsId",
     getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
     onSortingChange: handleSortingChange,
     state: {
       sorting,
