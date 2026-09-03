@@ -334,10 +334,7 @@ export default function AddComponentsDialog({
         header: "CMS ID",
         cell: (info) => (
           <TruncateText
-            text={formatCmsId(
-              info.row.original?.measureSet?.cmsId,
-              info.row.original?.model
-            )}
+            text={formatCmsId(info.getValue(), info.row.original?.model)}
             maxLength={20}
             dataTestId={`measure-cmsId-${info.row.original.id}`}
           />
