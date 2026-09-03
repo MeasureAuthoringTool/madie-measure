@@ -8,8 +8,9 @@ interface PropTypes {
   onClick: () => void;
   canEdit: boolean;
 }
-export const NOTHING_SELECTED = "Select measure to version";
+export const NOTHING_SELECTED = "Select a measure to version";
 export const VERSION_MEASURE = "Version measure";
+export const VERSION_ACTION_LABEL = "Version Measure";
 const UNABLE_TO_VERSION = "Unable to version measure.";
 export const MEASURE_LOCKED_MESSAGE =
   UNABLE_TO_VERSION + " Locked while being edited by";
@@ -69,15 +70,16 @@ export default function VersionAction(props: PropTypes) {
         },
       }}
     >
-      <span>
+      <div role="group" style={{ display: "inline-block" }}>
         <IconButton
           onClick={props.onClick}
           disabled={disableVersionBtn}
           data-testid="version-action-btn"
+          aria-label={VERSION_ACTION_LABEL}
         >
           <Network size={20} style={{ transform: "rotate(270deg)" }} />
         </IconButton>
-      </span>
+      </div>
     </Tooltip>
   );
 }

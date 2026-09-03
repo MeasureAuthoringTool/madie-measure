@@ -13,6 +13,7 @@ interface PropTypes {
 export const SELECT_MEASURE_TO_UPDATE_REVIEW_STATUS =
   "Select a measure to update Review status";
 export const REVIEW = "Review";
+export const REVIEW_ACTION_LABEL = "Review a measure";
 
 export default function ReviewAction(props: PropTypes) {
   const { measures, canReview, onClick } = props;
@@ -52,15 +53,16 @@ export default function ReviewAction(props: PropTypes) {
         },
       }}
     >
-      <span>
+      <div role="group" style={{ display: "inline-block" }}>
         <IconButton
           onClick={onClick}
           disabled={disableReviewBtn}
           data-testid="review-action-btn"
+          aria-label={REVIEW_ACTION_LABEL}
         >
           <ReviewIcon disabled={disableReviewBtn} />
         </IconButton>
-      </span>
+      </div>
     </Tooltip>
   );
 }

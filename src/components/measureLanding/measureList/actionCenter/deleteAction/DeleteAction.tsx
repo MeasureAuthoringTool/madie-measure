@@ -9,7 +9,7 @@ interface PropTypes {
   canEdit: boolean;
 }
 
-export const NOTHING_SELECTED = "Select measure to delete";
+export const NOTHING_SELECTED = "Select a measure to delete";
 export const DELETE_MEASURE = "Delete measure";
 const UNABLE_TO_DELETE = "Unable to delete measure.";
 export const MEASURE_LOCKED_MESSAGE =
@@ -69,16 +69,17 @@ export default function DeleteAction(props: PropTypes) {
         },
       }}
     >
-      <span>
+      <div role="group" style={{ display: "inline-block" }}>
         <IconButton
           onClick={() => props.onClick()}
           disabled={disableDeleteBtn}
           data-testid="delete-action-btn"
           className="DeleteClass"
+          aria-label={DELETE_MEASURE}
         >
           <Trash2 size={20} />
         </IconButton>
-      </span>
+      </div>
     </Tooltip>
   );
 }

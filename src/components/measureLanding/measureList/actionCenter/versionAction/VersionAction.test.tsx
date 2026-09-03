@@ -2,6 +2,7 @@ import * as React from "react";
 import { render, screen } from "@testing-library/react";
 import VersionAction, {
   VERSION_MEASURE,
+  VERSION_ACTION_LABEL,
   NOTHING_SELECTED,
   MEASURE_LOCKED_MESSAGE,
   TEST_CASES_LOCKED_MESSAGE,
@@ -41,11 +42,13 @@ const qiCoreMeasureVersioned = {
 describe("VersionAction", () => {
   it("Should disable action btn if no measure selected", () => {
     render(<VersionAction measures={[]} onClick={() => {}} canEdit={true} />);
-    expect(screen.getByTestId("version-action-btn")).toBeDisabled();
-    expect(screen.getByTestId("version-action-tooltip")).toHaveAttribute(
-      "aria-label",
-      NOTHING_SELECTED
-    );
+    const versionButton = screen.getByTestId("version-action-btn");
+    const versionTooltip = screen.getByTestId("version-action-tooltip");
+
+    expect(versionButton).toBeDisabled();
+    expect(versionButton).toHaveAccessibleName(VERSION_ACTION_LABEL);
+    expect(versionTooltip.tagName).toBe("DIV");
+    expect(versionTooltip).toHaveAttribute("aria-label", NOTHING_SELECTED);
   });
 
   it("Should enable action btn if user select one draft measure", () => {

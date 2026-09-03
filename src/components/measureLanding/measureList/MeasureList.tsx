@@ -674,12 +674,13 @@ export default function MeasureList(props: {
             },
           }}
         >
-          <div style={{ width: 16 }}>
+          <div role="group" style={{ width: 16 }}>
             <IndeterminateCheckbox
               checked={table.getIsAllRowsSelected()}
               indeterminate={table.getIsSomePageRowsSelected()}
               onChange={table.getToggleAllPageRowsSelectedHandler()}
               id={`select-all-checkbox`}
+              aria-label="Select All Measures"
             />
           </div>
         </Tooltip>
@@ -714,7 +715,11 @@ export default function MeasureList(props: {
     const t = [
       {
         id: "select", // retain ID so we have the column for checkboxes but the header is blank
-        header: () => <div aria-label="Measure Selection">{getHeader()}</div>,
+        header: () => (
+          <div role="group" aria-label="Measure Selection">
+            {getHeader()}
+          </div>
+        ),
         cell: ({ row }) => {
           return (
             <div className="px-1">
