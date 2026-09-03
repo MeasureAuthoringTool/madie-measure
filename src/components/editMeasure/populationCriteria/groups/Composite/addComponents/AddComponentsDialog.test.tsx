@@ -2365,6 +2365,87 @@ describe("AddComponentsDialog", () => {
     expect(rows[0]).toHaveTextContent("0010");
   });
 
+  it("requests global sorting for other columns and preserves it across pages", async () => {
+    const sortableData = [
+      {
+        ...data[0],
+        measureName: "Zeta Measure",
+      },
+      {
+        ...data[1],
+        measureName: "Alpha Measure",
+      },
+    ];
+    const mockSearchMeasures = jest
+      .fn()
+      .mockResolvedValueOnce({
+        content: sortableData,
+        totalPages: 2,
+        totalElements: 6,
+        numberOfElements: 2,
+        pageable: { offset: 0 },
+      })
+      .mockResolvedValueOnce({
+        content: [sortableData[1], sortableData[0]],
+        totalPages: 2,
+        totalElements: 6,
+        numberOfElements: 2,
+        pageable: { offset: 0 },
+      })
+      .mockResolvedValueOnce({
+        content: [sortableData[0]],
+        totalPages: 2,
+        totalElements: 6,
+        numberOfElements: 1,
+        pageable: { offset: 5 },
+      });
+
+    useMeasureServiceApi.mockReturnValue({
+      searchMeasuresByCriteria: mockSearchMeasures,
+      getMeasuresByMeasureSetId: jest.fn(),
+    });
+
+    render(
+      <AddComponentsDialog
+        open={true}
+        onClose={onCloseMock}
+        measure={mockMeasure}
+        compositeScoring="Opportunity"
+        components={[]}
+        submitComponentForm={jest.fn()}
+      />
+    );
+
+    await waitFor(() => {
+      expect(mockSearchMeasures).toHaveBeenCalledTimes(1);
+    });
+
+    await userEvent.click(screen.getByRole("button", { name: "Measure Name" }));
+
+    await waitFor(() => {
+      expect(mockSearchMeasures).toHaveBeenCalledTimes(2);
+    });
+    expect(mockSearchMeasures.mock.calls[1][2]).toBe(0);
+    expect(mockSearchMeasures.mock.calls[1][3]).toBe("measureName");
+    expect(mockSearchMeasures.mock.calls[1][4]).toBe("ASC");
+
+    let rows = screen.getAllByTestId("row-item");
+    expect(rows[0]).toHaveTextContent("Alpha Measure");
+    expect(rows[1]).toHaveTextContent("Zeta Measure");
+
+    await userEvent.click(screen.getByRole("button", { name: /next/i }));
+
+    await waitFor(() => {
+      expect(mockSearchMeasures).toHaveBeenCalledTimes(3);
+    });
+    expect(mockSearchMeasures.mock.calls[2][2]).toBe(1);
+    expect(mockSearchMeasures.mock.calls[2][3]).toBe("measureName");
+    expect(mockSearchMeasures.mock.calls[2][4]).toBe("ASC");
+
+    rows = screen.getAllByTestId("row-item");
+    expect(rows[0]).toHaveTextContent("Zeta Measure");
+  });
+
   it("renders translator column and translator version values in main rows", async () => {
     const mainRowData = [
       {
