@@ -80,11 +80,13 @@ describe("DraftAction", () => {
 
   it("Should disable action btn if no measure selected", () => {
     render(<DraftAction measures={[]} onClick={() => {}} canEdit={true} />);
-    expect(screen.getByTestId("draft-action-btn")).toBeDisabled();
-    expect(screen.getByTestId("draft-action-tooltip")).toHaveAttribute(
-      "aria-label",
-      NOTHING_SELECTED
-    );
+    const draftButton = screen.getByTestId("draft-action-btn");
+    const draftTooltip = screen.getByTestId("draft-action-tooltip");
+
+    expect(draftButton).toBeDisabled();
+    expect(draftButton).toHaveAccessibleName(DRAFT_MEASURE);
+    expect(draftTooltip.tagName).toBe("DIV");
+    expect(draftTooltip).toHaveAttribute("aria-label", NOTHING_SELECTED);
   });
 
   it("Should enable action btn if user selects one 4.1 measure and there are no 6.0 measures in MeasureSet", async () => {

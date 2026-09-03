@@ -2,6 +2,7 @@ import * as React from "react";
 import { render, screen } from "@testing-library/react";
 import AssociateCmsIdAction, {
   ASSOCIATE_CMS_ID,
+  ASSOCIATE_CMS_ID_ACTION_LABEL,
   MUST_SELECT_ONE_QDM_AND_ONE_QI_CORE_MEASURE,
   MUST_BE_DRAFT,
   MUST_BE_OWNER,
@@ -47,11 +48,13 @@ const associateCmsId = jest.fn();
 describe("AssociateCmsIdAction", () => {
   it("Should disable action btn if no measure selected", () => {
     render(<AssociateCmsIdAction measures={[]} onClick={associateCmsId} />);
-    expect(screen.getByTestId("associate-cms-id-action-btn")).toBeDisabled();
-    expect(screen.getByTestId("associate-cms-id-tooltip")).toHaveAttribute(
-      "aria-label",
-      SELECT_TWO_MEASURES
-    );
+    const associateButton = screen.getByTestId("associate-cms-id-action-btn");
+    const associateTooltip = screen.getByTestId("associate-cms-id-tooltip");
+
+    expect(associateButton).toBeDisabled();
+    expect(associateButton).toHaveAccessibleName(ASSOCIATE_CMS_ID_ACTION_LABEL);
+    expect(associateTooltip.tagName).toBe("DIV");
+    expect(associateTooltip).toHaveAttribute("aria-label", SELECT_TWO_MEASURES);
   });
 
   it("Should disable action btn if user does not select two measures ", () => {

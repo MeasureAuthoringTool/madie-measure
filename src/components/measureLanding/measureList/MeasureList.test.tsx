@@ -2543,6 +2543,9 @@ describe("Measure List component", () => {
     await waitFor(() => {
       expect(checkboxes.length).toBe(6);
     });
+    expect(getByTestId("checkbox-select-all-checkbox")).toHaveAccessibleName(
+      "Select All Measures"
+    );
     unmount();
   });
 
