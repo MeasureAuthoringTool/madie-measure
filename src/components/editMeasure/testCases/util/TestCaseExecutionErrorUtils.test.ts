@@ -2,6 +2,7 @@ import {
   executionBundlePreparationErrorMessage,
   profileMismatchErrorMessage,
   resolveTestCaseExecutionErrorMessage,
+  syntaxErrorMessage,
 } from "./TestCaseExecutionErrorUtils";
 
 describe("resolveTestCaseExecutionErrorMessage", () => {
@@ -23,6 +24,16 @@ describe("resolveTestCaseExecutionErrorMessage", () => {
 
     expect(resolveTestCaseExecutionErrorMessage(error)).toBe(
       executionBundlePreparationErrorMessage
+    );
+  });
+
+  it("returns syntax error message when error is an instance of SyntaxError", () => {
+    const error = new SyntaxError(
+      "Error filtering resource due to unresolved references"
+    );
+
+    expect(resolveTestCaseExecutionErrorMessage(error)).toBe(
+      syntaxErrorMessage
     );
   });
 });
