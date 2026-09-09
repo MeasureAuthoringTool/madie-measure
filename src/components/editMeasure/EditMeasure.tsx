@@ -18,7 +18,9 @@ import {
   measureStore,
   routeHandlerStore,
   useMeasureServiceApi,
+  useMeasureReviewServiceApi,
   checkUserCanEdit,
+  useFeatureFlags,
   useUserRoles,
   useOktaTokens,
   ExportDialog,
@@ -29,6 +31,8 @@ import {
   TransferDialog,
   validateCompositeMeasure,
   ManageReviewDialog,
+  shouldShowReviewCommentLink,
+  ReviewCommentLink,
 } from "@madie/madie-util";
 import CreateVersionDialog from "../common/createVersionDialog/CreateVersionDialog";
 import InvalidTestCaseDialog from "../common/invalidTestCaseDialog/InvalidTestCaseDialog";
@@ -62,15 +66,23 @@ export interface RouteHandlerState {
   canTravel: boolean;
   pendingRoute: string;
 }
+
+type MeasureReview = {
+  status?: string | null;
+  reviewers?: string[];
+};
+
 export default function EditMeasure() {
   const { measureId } = useParams();
   const measureServiceApi = useMeasureServiceApi();
+  const measureReviewServiceApi = useMeasureReviewServiceApi();
   const { updateMeasure } = measureStore;
   const [loading, setLoading] = useState<boolean>(true);
   let navigate = useNavigate();
   const location = useLocation();
   const [currentMeasureId, setCurrentMeasureId] = useState<string>(measureId);
   const userRoles = useUserRoles();
+  const featureFlags = useFeatureFlags();
 
   // Required by every single spa application that has internal routing
   // This will block user from navigating inside madie-measure when the current form is dirty
@@ -166,6 +178,7 @@ export default function EditMeasure() {
   const [toastType, setToastType] = useState<string>("danger");
   const [statusHandler, setStatusHandler] = useState(INITIAL_STATUS_HANDLER);
   const [measure, setMeasure] = useState<any>(measureStore.state);
+  const [measureReview, setMeasureReview] = useState<MeasureReview>(null);
 
   const [downloadState, setDownloadState] = useState(null);
   const [failureMessage, setFailureMessage] = useState(null);
@@ -302,6 +315,48 @@ export default function EditMeasure() {
     const subscription = measureStore.subscribe(setMeasure);
     return () => {
       subscription.unsubscribe();
+    };
+  }, []);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchReview = async () => {
+      if (!measure?.id) {
+        setMeasureReview(null);
+        return;
+      }
+
+      try {
+        const review = await measureReviewServiceApi.getMeasureReview(
+          measure.id
+        );
+        if (isMounted) {
+          setMeasureReview(review as MeasureReview);
+        }
+      } catch {
+        if (isMounted) {
+          setMeasureReview(null);
+        }
+      }
+    };
+
+    fetchReview();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [measure?.id, measureReviewServiceApi]);
+
+  useEffect(() => {
+    const handleReviewSaved = (event: Event) => {
+      const savedReview = (event as CustomEvent<MeasureReview>)?.detail;
+      setMeasureReview(savedReview ?? null);
+    };
+
+    window.addEventListener("review-measure-saved", handleReviewSaved);
+    return () => {
+      window.removeEventListener("review-measure-saved", handleReviewSaved);
     };
   }, []);
 
@@ -666,6 +721,16 @@ export default function EditMeasure() {
   // At this time it appears only possible to have a single error at a time because of the way state is updated.
   const [errorMessage, setErrorMessage] = useState<string>("");
   const isQDM = measure?.model?.includes("QDM");
+  const showReviewCommentLink = shouldShowReviewCommentLink({
+    commentingEnabled: Boolean(featureFlags?.Commenting),
+    currentUser: userName,
+    owner: measure?.measureSet?.owner,
+    acls: measure?.measureSet?.acls,
+    reviewStatus: measureReview?.status,
+    hasReviewerRole: Boolean(userRoles?.isReviewer),
+    assignedReviewers: measureReview?.reviewers,
+  });
+
   return (
     <div data-testid="editMeasure">
       {loading ? (
@@ -685,6 +750,11 @@ export default function EditMeasure() {
         <>
           <div tw="relative" style={{ marginTop: "-48px" }}>
             <EditMeasureNav isQDM={isQDM} />
+            {showReviewCommentLink && (
+              <div className="review-comments-link">
+                <ReviewCommentLink />
+              </div>
+            )}
             <div
               style={{
                 marginLeft: "2rem",

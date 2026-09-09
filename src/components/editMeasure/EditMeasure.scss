@@ -25,3 +25,17 @@
     }
   }
 }
+
+.review-comments-link {
+  position: absolute;
+  top: 11px;
+  right: 2rem;
+  display: inline-flex;
+  align-items: center;
+}
+
+body:has(.minimized-alert) .review-comments-link {
+  right: 11rem;
+  padding-right: 0.8rem;
+  border-right: #ffffffd1 solid 1px;
+}

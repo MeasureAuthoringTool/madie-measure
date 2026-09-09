@@ -37,6 +37,7 @@ declare module "@madie/madie-util" {
     DisplayOwner: boolean;
     MakeJSONMatchUI: boolean;
     MeasureReviewStatus?: boolean;
+    Commenting?: boolean;
   }
 
   export interface UserRoles {
@@ -77,7 +78,18 @@ declare module "@madie/madie-util" {
     measureSetId: string;
     status: ReviewStatus;
     comment: string;
+    reviewers?: string[];
   }
+
+  export function shouldShowReviewCommentLink(args: {
+    commentingEnabled?: boolean;
+    currentUser?: string | null;
+    owner?: string | null;
+    acls?: Array<{ userId?: string; roles?: string[] }> | null;
+    reviewStatus?: string | null;
+    hasReviewerRole?: boolean;
+    assignedReviewers?: string[] | null;
+  }): boolean;
 
   export const measureStore: {
     subscribe: (
@@ -359,6 +371,12 @@ declare module "@madie/madie-util" {
     entitySetId?: string;
     onSuccess?: () => void | Promise<void>;
   }): React.ReactElement | null;
+  export function ReviewCommentLink(props: {
+    onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void;
+    className?: string;
+    style?: React.CSSProperties;
+    dataTestId?: string;
+  }): React.ReactElement;
   export const REVIEW_STATUS_OPTIONS: string[];
   export function getNewestMeasureInstance(measures: Measure[]): Measure;
 
