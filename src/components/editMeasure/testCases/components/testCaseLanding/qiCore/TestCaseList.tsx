@@ -53,6 +53,7 @@ import {
   extractValidationErrorsFromOutcome,
   upsertExecuteInvalidTestCaseWarning,
 } from "../../editTestCase/qiCore/EditTestCaseUtil";
+import { resolveTestCaseExecutionErrorMessage } from "../../../util/TestCaseExecutionErrorUtils";
 
 export const IMPORT_ERROR =
   "An error occurred while importing your test cases. Please try again, or reach out to the Help Desk.";
@@ -515,6 +516,14 @@ const TestCaseList = (props: TestCaseListProps) => {
     setCreateOpen(false);
   };
 
+  const handleTestCaseExecutionError = (error: any) => {
+    console.error("calculateTestCases: error.message = " + error?.message);
+    const errorMessage = resolveTestCaseExecutionErrorMessage(error);
+    if (errorMessage) {
+      setErrors((prevState) => [...prevState, errorMessage]);
+    }
+  };
+
   const executeCompositeTestCases = async () => {
     const filteredTestCases = executeInvalidTestCases
       ? sortedTestCases
@@ -538,7 +547,7 @@ const TestCaseList = (props: TestCaseListProps) => {
           );
         setCompositeCalculationOutput(calculationOutput);
       } catch (error) {
-        console.error("calculateTestCases: error.message = " + error?.message);
+        handleTestCaseExecutionError(error);
       }
     }
   };
@@ -579,32 +588,7 @@ const TestCaseList = (props: TestCaseListProps) => {
           );
         setCalculationOutput(calculationOutput);
       } catch (error) {
-        console.error("calculateTestCases: error.message = " + error?.message);
-
-        const syntaxErrorMessages = [
-          "Unexpected end of JSON input",
-          "Cannot read properties of null (reading 'entry')",
-          "not valid JSON",
-        ];
-        const syntaxErrorMessage =
-          "Some test cases could not be executed due to syntax errors in their definitions. Please review and correct the syntax issues, then try running the tests again.";
-
-        if (
-          error instanceof SyntaxError ||
-          (error?.name && error.name.includes("SyntaxError")) ||
-          syntaxErrorMessages.includes(error?.message)
-        ) {
-          setErrors((prevState) => [...prevState, syntaxErrorMessage]);
-        } else {
-          setErrors((prevState) => [...prevState, error?.message]);
-        }
-
-        if (error.message?.includes("filtering resource")) {
-          setErrors((prevState) => [
-            ...prevState,
-            "An error occurred while preparing the test case execution bundle. Please try again. If the issue continues, please contact helpdesk.",
-          ]);
-        }
+        handleTestCaseExecutionError(error);
       }
       setExecuting(false);
     } else if (_.isNil(filteredTestCases) || _.isEmpty(filteredTestCases)) {
