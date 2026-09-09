@@ -365,6 +365,7 @@ describe("EditMeasure Component", () => {
     );
     (shouldShowReviewCommentLink as jest.Mock).mockReset();
     (shouldShowReviewCommentLink as jest.Mock).mockReturnValue(false);
+    mockMeasureReviewServiceApi.getMeasureReview.mockClear();
     mockMeasureReviewServiceApi.getMeasureReview.mockResolvedValue(null);
     mockedNavigate.mockClear();
   });
@@ -516,6 +517,88 @@ describe("EditMeasure Component", () => {
       ).toBeInTheDocument();
     }
   );
+
+  it("fetches review data when a measure id exists", async () => {
+    const fetchedReview = {
+      status: "READY_FOR_REVIEW",
+      reviewers: ["reviewer user"],
+    };
+    mockMeasureReviewServiceApi.getMeasureReview.mockResolvedValueOnce(
+      fetchedReview
+    );
+
+    renderRouter();
+    await findByTestId("editMeasure");
+
+    await waitFor(() => {
+      expect(mockMeasureReviewServiceApi.getMeasureReview).toHaveBeenCalledWith(
+        measure.id
+      );
+    });
+
+    await waitFor(() => {
+      expect(shouldShowReviewCommentLink).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          reviewStatus: fetchedReview.status,
+          assignedReviewers: fetchedReview.reviewers,
+        })
+      );
+    });
+  });
+
+  it("does not fetch review data when the measure id is missing", async () => {
+    const measureWithoutId = { ...measure, id: undefined } as Measure;
+    measureStore.state.mockImplementation(() => measureWithoutId);
+
+    renderRouter();
+    await findByTestId("editMeasure");
+
+    await waitFor(() => {
+      expect(
+        mockMeasureReviewServiceApi.getMeasureReview
+      ).not.toHaveBeenCalled();
+    });
+  });
+
+  it("handles review fetch failures without crashing", async () => {
+    mockMeasureReviewServiceApi.getMeasureReview.mockRejectedValueOnce(
+      new Error("review fetch failed")
+    );
+
+    renderRouter();
+    await findByTestId("editMeasure");
+
+    await waitFor(() => {
+      expect(mockMeasureReviewServiceApi.getMeasureReview).toHaveBeenCalledWith(
+        measure.id
+      );
+    });
+  });
+
+  it("updates review state when review-measure-saved event is fired", async () => {
+    renderRouter();
+    await findByTestId("editMeasure");
+
+    const savedReview = {
+      status: "IN_PROGRESS",
+      reviewers: ["reviewer user"],
+    };
+
+    act(() => {
+      window.dispatchEvent(
+        new CustomEvent("review-measure-saved", { detail: savedReview })
+      );
+    });
+
+    await waitFor(() => {
+      expect(shouldShowReviewCommentLink).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          reviewStatus: savedReview.status,
+          assignedReviewers: savedReview.reviewers,
+        })
+      );
+    });
+  });
 
   it("should open the Manage Review dialog for reviewers when the review event is triggered", async () => {
     (useUserRoles as jest.Mock).mockReturnValue({
