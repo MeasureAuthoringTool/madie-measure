@@ -100,6 +100,7 @@ import LockedMessageModal from "../../../../../common/lockedMessageModal/LockedM
 import { CustomWarningMessage } from "../../statusHandler/StatusHandler";
 import EditCompositeTestCase from "./EditCompositeTestCase";
 import useServiceConfig from "../../../../../../api/useServiceConfig";
+import { resolveTestCaseExecutionErrorMessage } from "../../../util/TestCaseExecutionErrorUtils";
 
 const TestCaseForm = tw.form`m-3`;
 
@@ -992,20 +993,9 @@ const EditTestCase = (props: EditTestCaseProps) => {
         executionResults[0].detailedResults as DetailedPopulationGroupResult[]
       );
     } catch (error) {
-      const calculationError: AlertProps = error.message?.includes(
-        "filtering resource"
-      )
-        ? {
-            status: "error",
-            message:
-              "An error occurred while preparing the test case execution bundle. Please try again. If the issue continues, please contact helpdesk.",
-          }
-        : {
-            status: "error",
-            message: error.message,
-          };
-      setCalculationErrors(calculationError);
-      setErrors([...errors, error.message]);
+      const errorMessage = resolveTestCaseExecutionErrorMessage(error);
+      setCalculationErrors({ status: "error", message: errorMessage });
+      setErrors([...errors, errorMessage]);
     } finally {
       setExecuting(false);
     }
@@ -1033,8 +1023,9 @@ const EditTestCase = (props: EditTestCaseProps) => {
       setCompositeCalculationOutput(calculationOutput);
     } catch (error) {
       console.error("calculateTestCases: error.message = " + error?.message);
-      setCalculationErrors(error);
-      setErrors([...errors, error.message]);
+      const errorMessage = resolveTestCaseExecutionErrorMessage(error);
+      setCalculationErrors({ status: "error", message: errorMessage });
+      setErrors([...errors, errorMessage]);
     } finally {
       setExecuting(false);
     }
