@@ -17,6 +17,18 @@ interface ReviewDialogProps {
 }
 
 const EMPTY_REVIEW_COMMENT = "<p></p>";
+const REVIEW_ACTIVE_STATUSES = new Set<ReviewStatus>([
+  ReviewStatus.READY_FOR_REVIEW,
+  ReviewStatus.IN_PROGRESS,
+  ReviewStatus.COMPLETE,
+]);
+
+const STATUS_DISPLAY_TEXT: Record<ReviewStatus, string> = {
+  [ReviewStatus.READY_FOR_REVIEW]: "Ready for Review",
+  [ReviewStatus.IN_PROGRESS]: "In Progress",
+  [ReviewStatus.COMPLETE]: "Complete",
+  [ReviewStatus.NOT_READY_FOR_REVIEW]: "Not Ready for Review",
+};
 
 export default function ReviewDialog({
   open,
@@ -27,6 +39,12 @@ export default function ReviewDialog({
   const measureReviewServiceApi = useRef(useMeasureReviewServiceApi()).current;
   const [review, setReview] = useState<MeasureReview | null>(null);
   const [isReviewLoading, setIsReviewLoading] = useState(false);
+  const [isRemoveConfirmationOpen, setIsRemoveConfirmationOpen] =
+    useState(false);
+  const [pendingValues, setPendingValues] = useState<{
+    markAsReady: boolean;
+    comments: string;
+  } | null>(null);
   const [toast, setToast] = useState<{
     toastOpen: boolean;
     toastType: string;
@@ -40,11 +58,69 @@ export default function ReviewDialog({
 
   const initialValues = useMemo(
     () => ({
-      markAsReady: review?.status === ReviewStatus.READY_FOR_REVIEW,
+      markAsReady: review?.status
+        ? REVIEW_ACTIVE_STATUSES.has(review.status)
+        : false,
       comments: review?.comment ?? EMPTY_REVIEW_COMMENT,
     }),
     [review?.status, review?.comment]
   );
+
+  const shouldConfirmRemoval =
+    review?.status === ReviewStatus.IN_PROGRESS ||
+    review?.status === ReviewStatus.COMPLETE;
+
+  const saveReview = async (values: {
+    markAsReady: boolean;
+    comments: string;
+  }) => {
+    if (!measure?.id) {
+      return;
+    }
+
+    const reviewPayload: MeasureReview = {
+      id: review?.id ?? "",
+      measureId: measure.id,
+      measureSetId: measure.measureSetId,
+      status: values.markAsReady
+        ? ReviewStatus.READY_FOR_REVIEW
+        : ReviewStatus.NOT_READY_FOR_REVIEW,
+      comment: values.comments || EMPTY_REVIEW_COMMENT,
+    };
+
+    try {
+      const savedReview = review?.id
+        ? await measureReviewServiceApi.updateMeasureReview(
+            measure.id,
+            reviewPayload
+          )
+        : await measureReviewServiceApi.createMeasureReview(
+            measure.id,
+            reviewPayload
+          );
+
+      setReview(savedReview);
+      setToast({
+        toastOpen: true,
+        toastType: "success",
+        toastMessage: "Review information has been saved successfully.",
+      });
+      await onSuccess?.();
+      // The review status also surfaces in the PageHeader (madie-layout).
+      // Broadcast the persisted review so that the PageHeader can update its display accordingly.
+      window.dispatchEvent(
+        new CustomEvent("review-measure-saved", { detail: savedReview })
+      );
+      onClose();
+    } catch (error) {
+      setToast({
+        toastOpen: true,
+        toastType: "danger",
+        toastMessage:
+          "An error occurred while saving the review. Please try again.",
+      });
+    }
+  };
 
   useEffect(() => {
     let isMounted = true;
@@ -85,52 +161,13 @@ export default function ReviewDialog({
     initialValues,
     enableReinitialize: true,
     onSubmit: async (values) => {
-      if (!measure?.id) {
+      if (shouldConfirmRemoval && !values.markAsReady) {
+        setPendingValues(values);
+        setIsRemoveConfirmationOpen(true);
         return;
       }
 
-      const reviewPayload: MeasureReview = {
-        id: review?.id ?? "",
-        measureId: measure.id,
-        measureSetId: measure.measureSetId,
-        status: values.markAsReady
-          ? ReviewStatus.READY_FOR_REVIEW
-          : ReviewStatus.NOT_READY_FOR_REVIEW,
-        comment: values.comments || EMPTY_REVIEW_COMMENT,
-      };
-
-      try {
-        const savedReview = review?.id
-          ? await measureReviewServiceApi.updateMeasureReview(
-              measure.id,
-              reviewPayload
-            )
-          : await measureReviewServiceApi.createMeasureReview(
-              measure.id,
-              reviewPayload
-            );
-
-        setReview(savedReview);
-        setToast({
-          toastOpen: true,
-          toastType: "success",
-          toastMessage: "Review information has been saved successfully.",
-        });
-        await onSuccess?.();
-        // The review status also surfaces in the PageHeader (madie-layout).
-        // Broadcast the persisted review so that the PageHeader can update its display accordingly.
-        window.dispatchEvent(
-          new CustomEvent("review-measure-saved", { detail: savedReview })
-        );
-        onClose();
-      } catch (error) {
-        setToast({
-          toastOpen: true,
-          toastType: "danger",
-          toastMessage:
-            "An error occurred while saving the review. Please try again.",
-        });
-      }
+      await saveReview(values);
     },
   });
   const { resetForm } = formik;
@@ -138,6 +175,8 @@ export default function ReviewDialog({
   useEffect(() => {
     if (open) {
       resetForm({ values: initialValues });
+      setIsRemoveConfirmationOpen(false);
+      setPendingValues(null);
     }
   }, [open, initialValues, resetForm]);
 
@@ -213,6 +252,55 @@ export default function ReviewDialog({
           </div>
           <Divider sx={{ mt: 2 }} />
         </div>
+      </MadieDialog>
+      <MadieDialog
+        title="Are you sure?"
+        dialogProps={{
+          open: isRemoveConfirmationOpen,
+          onClose: () => {
+            setIsRemoveConfirmationOpen(false);
+            setPendingValues(null);
+          },
+          maxWidth: "sm",
+          fullWidth: true,
+          "data-testid": "review-dialog-remove-confirmation",
+        }}
+        cancelButtonProps={{
+          variant: "outline",
+          cancelText: "Cancel",
+          onClick: () => {
+            setIsRemoveConfirmationOpen(false);
+            setPendingValues(null);
+          },
+          "data-testid": "review-dialog-remove-confirmation-cancel-button",
+        }}
+        continueButtonProps={{
+          variant: "danger",
+          continueText: "Continue",
+          onClick: async () => {
+            if (!pendingValues) {
+              return;
+            }
+            setIsRemoveConfirmationOpen(false);
+            const valuesToSave = pendingValues;
+            setPendingValues(null);
+            await saveReview(valuesToSave);
+          },
+          "data-testid": "review-dialog-remove-confirmation-continue-button",
+        }}
+      >
+        <Divider sx={{ mb: 2 }} />
+        <div data-testid="review-dialog-remove-confirmation-message">
+          You are about to remove this measure from the review process which is
+          {" already "}
+          {
+            STATUS_DISPLAY_TEXT[
+              review?.status ?? ReviewStatus.NOT_READY_FOR_REVIEW
+            ]
+          }
+          . Any existing comments on the measure will be retained.
+        </div>
+        <Divider sx={{ mt: 2 }} />
       </MadieDialog>
       <Toast
         toastKey="review-dialog-toast"
