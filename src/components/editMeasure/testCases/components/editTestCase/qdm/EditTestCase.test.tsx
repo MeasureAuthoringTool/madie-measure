@@ -1073,9 +1073,9 @@ describe("EditTestCase QDM Component", () => {
 
     // Make a change to enable the Save button (change race dropdown)
     const raceSelector = screen.getByRole("combobox", { name: "Race" });
-    userEvent.click(raceSelector);
+    await userEvent.click(raceSelector);
     const raceOptions = await screen.findAllByRole("option");
-    userEvent.click(raceOptions[3]);
+    await userEvent.click(raceOptions[3]);
     expect(raceSelector).toHaveTextContent("White");
 
     const saveButton = getByRole("button", { name: "Save" });
