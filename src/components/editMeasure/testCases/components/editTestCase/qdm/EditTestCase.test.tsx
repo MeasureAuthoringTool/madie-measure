@@ -419,6 +419,52 @@ describe("ElementsTab", () => {
     expect(elements).not.toBeInTheDocument();
   });
 });
+it("should see that the JSON changed", async () => {
+  await waitFor(() => renderEditTestCaseComponent());
+  const runTestCaseButton = screen.getByRole("button", {
+    name: "Run Test",
+  });
+  expect(runTestCaseButton).toBeInTheDocument();
+  expect(screen.getByRole("button", { name: "Save" })).toBeDisabled();
+  expect(
+    screen.getByRole("button", { name: "Discard Changes" })
+  ).toBeDisabled();
+  const raceSelector = screen.getByRole("combobox", { name: "Race" });
+  await userEvent.click(raceSelector);
+  const raceOptions = await screen.findAllByRole("option");
+  expect(raceOptions.length).toBe(4);
+  await userEvent.click(raceOptions[2]);
+  expect(raceSelector).toHaveTextContent("Asian");
+  expect(screen.getByRole("button", { name: "Save" })).not.toBeDisabled();
+  expect(
+    screen.getByRole("button", { name: "Discard Changes" })
+  ).not.toBeDisabled();
+  expect(runTestCaseButton).not.toBeDisabled();
+  await userEvent.click(runTestCaseButton);
+});
+it("should not display tooltip when form has no errors", async () => {
+  testCase.json = JSON.stringify(testCaseJson);
+  await waitFor(() => renderEditTestCaseComponent());
+
+  // Make a change to enable the Save button (change race dropdown)
+  const raceSelector = screen.getByRole("combobox", { name: "Race" });
+  await userEvent.click(raceSelector);
+  const raceOptions = await screen.findAllByRole("option");
+  await userEvent.click(raceOptions[3]);
+  expect(raceSelector).toHaveTextContent("White");
+
+  const saveButton = screen.getByRole("button", { name: "Save" });
+  await waitFor(() => expect(saveButton).not.toBeDisabled());
+
+  // Hover over the button's wrapper span
+  fireEvent.mouseOver(saveButton.closest("span"));
+  // The tooltip should not show any error text
+  await waitFor(() => {
+    expect(screen.queryByText(/title:/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/description:/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/series:/)).not.toBeInTheDocument();
+  });
+}, 12000);
 
 test("LeftPanel navigation works as expected.", async () => {
   CQMConversionMock.mockImplementation(() => {
@@ -514,26 +560,6 @@ describe("EditTestCase QDM Component", () => {
       "test-population-initialPopulation-actual"
     ); // it has no name
     await waitFor(() => expect(actualResult).toBeChecked());
-  });
-
-  it("should see that the JSON changed", async () => {
-    await waitFor(() => renderEditTestCaseComponent());
-    const runTestCaseButton = getByRole("button", {
-      name: "Run Test",
-    });
-    expect(runTestCaseButton).toBeInTheDocument();
-    expect(getByRole("button", { name: "Save" })).toBeDisabled();
-    expect(getByRole("button", { name: "Discard Changes" })).toBeDisabled();
-    const raceSelector = screen.getByRole("combobox", { name: "Race" });
-    userEvent.click(raceSelector);
-    const raceOptions = await screen.findAllByRole("option");
-    expect(raceOptions.length).toBe(4);
-    userEvent.click(raceOptions[2]);
-    expect(raceSelector).toHaveTextContent("Asian");
-    expect(getByRole("button", { name: "Save" })).not.toBeDisabled();
-    expect(getByRole("button", { name: "Discard Changes" })).not.toBeDisabled();
-    expect(runTestCaseButton).not.toBeDisabled();
-    userEvent.click(runTestCaseButton);
   });
 
   it("should render qdm edit test case component along with action buttons", async () => {
@@ -1066,30 +1092,6 @@ describe("EditTestCase QDM Component", () => {
       ).toBeInTheDocument();
     });
   });
-
-  it("should not display tooltip when form has no errors", async () => {
-    testCase.json = JSON.stringify(testCaseJson);
-    await waitFor(() => renderEditTestCaseComponent());
-
-    // Make a change to enable the Save button (change race dropdown)
-    const raceSelector = screen.getByRole("combobox", { name: "Race" });
-    await userEvent.click(raceSelector);
-    const raceOptions = await screen.findAllByRole("option");
-    await userEvent.click(raceOptions[3]);
-    expect(raceSelector).toHaveTextContent("White");
-
-    const saveButton = getByRole("button", { name: "Save" });
-    await waitFor(() => expect(saveButton).not.toBeDisabled());
-
-    // Hover over the button's wrapper span
-    fireEvent.mouseOver(saveButton.closest("span"));
-    // The tooltip should not show any error text
-    await waitFor(() => {
-      expect(screen.queryByText(/title:/)).not.toBeInTheDocument();
-      expect(screen.queryByText(/description:/)).not.toBeInTheDocument();
-      expect(screen.queryByText(/series:/)).not.toBeInTheDocument();
-    });
-  }, 12000);
 
   it("should display tooltip with description error when description exceeds max length", async () => {
     testCase.json = JSON.stringify(testCaseJson);
