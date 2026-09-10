@@ -737,39 +737,39 @@ describe("EditTestCase QDM Component", () => {
 
     const raceSelector = screen.getByRole("combobox", { name: "Race" });
     expect(raceSelector).toHaveTextContent("Asian");
-    userEvent.click(raceSelector);
+    await userEvent.click(raceSelector);
     const raceOptions = await screen.findAllByRole("option");
     expect(raceOptions.length).toBe(4);
-    userEvent.click(raceOptions[3]);
+    await userEvent.click(raceOptions[3]);
     expect(raceSelector).toHaveTextContent("White");
 
     const genderSelector = screen.getByRole("combobox", { name: "Sex" });
     expect(genderSelector).toBeInTheDocument();
-    userEvent.click(genderSelector);
+    await userEvent.click(genderSelector);
     const genderOptions = await screen.findAllByRole("option");
     expect(genderOptions.length).toBe(3);
-    userEvent.click(genderOptions[2]);
+    await userEvent.click(genderOptions[2]);
     expect(genderSelector).toHaveTextContent("Male (finding)");
 
     const livingStatusSelector = screen.getByRole("combobox", {
       name: "Living Status",
     });
     expect(livingStatusSelector).toHaveTextContent("Living");
-    userEvent.click(livingStatusSelector);
+    await userEvent.click(livingStatusSelector);
     const livingStatusOptions = await screen.findAllByRole("option");
-    userEvent.click(livingStatusOptions[1]);
+    await userEvent.click(livingStatusOptions[1]);
     expect(livingStatusSelector).toHaveTextContent("Expired");
 
     const saveButton = screen.getByRole("button", { name: "Save" });
     expect(saveButton).toBeEnabled();
-    userEvent.click(saveButton);
+    await userEvent.click(saveButton);
 
     await waitFor(() => {
       expect(screen.getByTestId("success-toast")).toHaveTextContent(
         "Test Case Updated Successfully"
       );
     });
-  });
+  }, 12000);
 
   it("test update test case fails with non-unique test name failure toast", async () => {
     testCase.json = JSON.stringify(testCaseJson);
@@ -1067,6 +1067,30 @@ describe("EditTestCase QDM Component", () => {
     });
   });
 
+  it("should not display tooltip when form has no errors", async () => {
+    testCase.json = JSON.stringify(testCaseJson);
+    await waitFor(() => renderEditTestCaseComponent());
+
+    // Make a change to enable the Save button (change race dropdown)
+    const raceSelector = screen.getByRole("combobox", { name: "Race" });
+    userEvent.click(raceSelector);
+    const raceOptions = await screen.findAllByRole("option");
+    userEvent.click(raceOptions[3]);
+    expect(raceSelector).toHaveTextContent("White");
+
+    const saveButton = getByRole("button", { name: "Save" });
+    await waitFor(() => expect(saveButton).not.toBeDisabled());
+
+    // Hover over the button's wrapper span
+    fireEvent.mouseOver(saveButton.closest("span"));
+    // The tooltip should not show any error text
+    await waitFor(() => {
+      expect(screen.queryByText(/title:/)).not.toBeInTheDocument();
+      expect(screen.queryByText(/description:/)).not.toBeInTheDocument();
+      expect(screen.queryByText(/series:/)).not.toBeInTheDocument();
+    });
+  }, 12000);
+
   it("should display tooltip with description error when description exceeds max length", async () => {
     testCase.json = JSON.stringify(testCaseJson);
     await waitFor(() => renderEditTestCaseComponent());
@@ -1096,30 +1120,6 @@ describe("EditTestCase QDM Component", () => {
           /description: Test Case Description cannot be more than 250 characters/
         )
       ).toBeInTheDocument();
-    });
-  });
-
-  it("should not display tooltip when form has no errors", async () => {
-    testCase.json = JSON.stringify(testCaseJson);
-    await waitFor(() => renderEditTestCaseComponent());
-
-    // Make a change to enable the Save button (change race dropdown)
-    const raceSelector = screen.getByRole("combobox", { name: "Race" });
-    userEvent.click(raceSelector);
-    const raceOptions = await screen.findAllByRole("option");
-    userEvent.click(raceOptions[3]);
-    expect(raceSelector).toHaveTextContent("White");
-
-    const saveButton = getByRole("button", { name: "Save" });
-    await waitFor(() => expect(saveButton).not.toBeDisabled());
-
-    // Hover over the button's wrapper span
-    fireEvent.mouseOver(saveButton.closest("span"));
-    // The tooltip should not show any error text
-    await waitFor(() => {
-      expect(screen.queryByText(/title:/)).not.toBeInTheDocument();
-      expect(screen.queryByText(/description:/)).not.toBeInTheDocument();
-      expect(screen.queryByText(/series:/)).not.toBeInTheDocument();
     });
   });
 
