@@ -19,16 +19,7 @@ import * as _ from "lodash";
 import "./ReferenceComponent.scss";
 
 const CROSS_VERSION_PROFILE_TITLE_PREFIX = "Cross-version Profile";
-
-const isCrossVersionProfile = (resourceProfile) =>
-  resourceProfile?.title?.startsWith(CROSS_VERSION_PROFILE_TITLE_PREFIX);
-
-const getCanonicalProfileUrl = (profileUrl: string) =>
-  profileUrl?.split("|")[0].replace(/\/$/, "");
-
-const isGenericResourceTarget = (profileUrl: string) =>
-  getCanonicalProfileUrl(profileUrl)?.toLowerCase() ===
-  "http://hl7.org/fhir/structuredefinition/resource";
+const RESOURCE_PROFILE_URL = "http://hl7.org/fhir/StructureDefinition/Resource";
 
 export const getReferenceComponentLabel = (label: string) => {
   //e.g. for label = ClaimResponse.addItem[0].provider[0] return Provider
@@ -63,10 +54,6 @@ export const getProfileMatchTypes = (profileUrl) => {
   return [];
 };
 
-const matchesSelectedProfile = (profileUrl, selectedProfileUrl) =>
-  getCanonicalProfileUrl(profileUrl) ===
-  getCanonicalProfileUrl(selectedProfileUrl);
-
 // Helper function to find the profile URL from reference type
 const findProfileUrlFromReferenceType = (
   referenceType: string,
@@ -92,7 +79,7 @@ export const getFinalOptions = (
   selectedProfileUrl,
   bundleEntries,
   resource,
-  { matchExactProfile = false } = {}
+  isGenericResourceReference = false
 ) => {
   if (!selectedReferenceType || !selectedProfileUrl) return emptyOption;
   const isPatient = selectedReferenceType === "Patient";
@@ -106,8 +93,8 @@ export const getFinalOptions = (
 
     const profiles = entry.resource.meta?.profile || [];
     return profiles.some((profileUrl) =>
-      matchExactProfile
-        ? matchesSelectedProfile(profileUrl, selectedProfileUrl)
+      isGenericResourceReference
+        ? profileUrl === selectedProfileUrl
         : matchTypes.some((type) => profileUrl.includes(type))
     );
   });
@@ -153,7 +140,7 @@ export default function ReferenceComponent({
   const { dispatch, state } = useQiCoreResource();
   const formikContext = useFormikContext();
   // First dropdown Utilities
-  const allResourceProfiles = useContext(ResourceContext); // get all profiles loaded from builder
+  const allResourceProfiles = useContext(ResourceContext);
   const targetProfiles = useMemo(
     () =>
       structureDefinition.type?.find(
@@ -161,14 +148,14 @@ export default function ReferenceComponent({
       )?.targetProfile || [],
     [structureDefinition.type]
   );
-  const isGenericResourceReference = targetProfiles.some(
-    isGenericResourceTarget
-  );
+  const isGenericResourceReference =
+    targetProfiles.includes(RESOURCE_PROFILE_URL);
   const referenceProfiles = useMemo(
     () =>
       (allResourceProfiles || []).filter((profile) =>
         isGenericResourceReference
-          ? !isCrossVersionProfile(profile) && profile.type !== "Resource"
+          ? !profile.title?.startsWith(CROSS_VERSION_PROFILE_TITLE_PREFIX) &&
+            profile.type !== "Resource"
           : targetProfiles.includes(profile.profile)
       ),
     [allResourceProfiles, isGenericResourceReference, targetProfiles]
@@ -177,8 +164,8 @@ export default function ReferenceComponent({
   const [open, setOpen] = useState<boolean>(false);
   const [selectedProfileAddNew, setSelectedProfileAddNew] = useState(null);
 
-  const resourceProfileOptions = useMemo(() => {
-    const options =
+  const resourceProfileOptions = useMemo(
+    () =>
       referenceProfiles
         .filter(
           (r, index, self) =>
@@ -188,13 +175,12 @@ export default function ReferenceComponent({
           label: resourceProfile.title,
           value: resourceProfile.type,
           profile: resourceProfile.profile,
-        })) || [];
-
-    // Sort alphabetically by label
-    return options.sort((a, b) =>
-      a.label.toLowerCase().localeCompare(b.label.toLowerCase())
-    );
-  }, [referenceProfiles]);
+        }))
+        .sort((a, b) =>
+          a.label.toLowerCase().localeCompare(b.label.toLowerCase())
+        ),
+    [referenceProfiles]
+  );
 
   const [selectedReferenceType, setSelectedReferenceType] = useState<string>(
     value?.reference?.split("/")?.[0] || ""
@@ -247,7 +233,7 @@ export default function ReferenceComponent({
     selectedProfileUrl,
     state.bundle.entry,
     resource,
-    { matchExactProfile: isGenericResourceReference }
+    isGenericResourceReference
   );
   const [selectedReferenceId, setSelectedReferenceId] = useState<string>(
     value?.reference || ""
