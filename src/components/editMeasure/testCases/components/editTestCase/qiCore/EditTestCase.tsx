@@ -993,7 +993,11 @@ const EditTestCase = (props: EditTestCaseProps) => {
         executionResults[0].detailedResults as DetailedPopulationGroupResult[]
       );
     } catch (error) {
-      const errorMessage = resolveTestCaseExecutionErrorMessage(error);
+      const errorMessage = resolveTestCaseExecutionErrorMessage(
+        error,
+        measure.elmJson,
+        false
+      );
       setCalculationErrors({ status: "error", message: errorMessage });
       setErrors([...errors, errorMessage]);
     } finally {
@@ -1023,7 +1027,11 @@ const EditTestCase = (props: EditTestCaseProps) => {
       setCompositeCalculationOutput(calculationOutput);
     } catch (error) {
       console.error("calculateTestCases: error.message = " + error?.message);
-      const errorMessage = resolveTestCaseExecutionErrorMessage(error);
+      const errorMessage = resolveTestCaseExecutionErrorMessage(
+        error,
+        measure.elmJson,
+        false
+      );
       setCalculationErrors({ status: "error", message: errorMessage });
       setErrors([...errors, errorMessage]);
     } finally {
