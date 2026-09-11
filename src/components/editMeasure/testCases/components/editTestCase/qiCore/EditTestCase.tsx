@@ -401,7 +401,6 @@ const EditTestCase = (props: EditTestCaseProps) => {
   const testCaseService = useRef(useTestCaseServiceApi());
   const calculation = useRef(calculationService());
   const fhirCqlParsingService = useRef(useFhirCqlParsingService());
-  const abortController = useRef(null);
   const [alert, setAlert] = useState<AlertProps>(null);
   const { errors, setErrors } = props;
   // Toast utilities
@@ -694,18 +693,6 @@ const EditTestCase = (props: EditTestCaseProps) => {
       loadTestCase();
     }
 
-    if (_.isNil(callstackMap) && measure?.cql) {
-      abortController.current = new AbortController();
-      fhirCqlParsingService.current
-        .getDefinitionCallstacks(measure.cql, abortController.current.signal)
-        .then((callstack: CqlDefinitionCallstack) => {
-          setCallstackMap(callstack);
-        })
-        .catch((error) => {
-          console.error(error);
-        });
-    }
-
     const handleUnload = () => {
       testCaseService.current.unlockTestCase(id);
     };
@@ -725,9 +712,6 @@ const EditTestCase = (props: EditTestCaseProps) => {
         window.removeEventListener("beforeunload", handleUnload);
         testCaseService.current.unlockTestCase(id);
       }
-      if (abortController.current) {
-        abortController.current.abort();
-      }
     };
   }, [
     id,
@@ -741,6 +725,26 @@ const EditTestCase = (props: EditTestCaseProps) => {
     canEdit,
     updateUnresolvedPatientReferenceWarnings,
   ]);
+
+  useEffect(() => {
+    if (!measure?.cql) {
+      return;
+    }
+
+    const abortController = new AbortController();
+    fhirCqlParsingService.current
+      .getDefinitionCallstacks(measure.cql, abortController.signal)
+      .then((callstack: CqlDefinitionCallstack) => {
+        setCallstackMap(callstack);
+      })
+      .catch((error) => {
+        if (!abortController.signal.aborted) {
+          console.error(error);
+        }
+      });
+
+    return () => abortController.abort();
+  }, [measure?.cql]);
 
   const testCaseCanEdit = canEdit && !testCase?.testCaseLock;
   const testCaseLockedBy: string = testCase?.testCaseLock?.lockedBy;

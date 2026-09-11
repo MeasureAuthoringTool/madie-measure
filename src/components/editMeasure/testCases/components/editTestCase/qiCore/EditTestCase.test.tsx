@@ -435,6 +435,51 @@ describe("EditTestCase component", () => {
       expect(screen.getByTestId("test-case-cql-editor")).toBeInTheDocument();
     });
 
+    it("should request callstacks once while edit page state loads", async () => {
+      const measureWithCql = {
+        ...defaultMeasure,
+        cql: "define Test: true",
+      } as unknown as Measure;
+      let resolveSeries: (response: AxiosResponse<string[]>) => void = () => {};
+      const seriesResponse = new Promise<AxiosResponse<string[]>>((resolve) => {
+        resolveSeries = resolve;
+      });
+      const defaultGetImplementation = mockedAxios.get.getMockImplementation();
+      const defaultPutImplementation = mockedAxios.put.getMockImplementation();
+
+      mockedAxios.get.mockImplementation((args, config) => {
+        if (args && args.endsWith("series")) {
+          return seriesResponse;
+        }
+        return defaultGetImplementation(args, config);
+      });
+      mockedAxios.put.mockImplementation((args, data, config) => {
+        if (args && args.endsWith("callstacks")) {
+          return new Promise<AxiosResponse>(() => {});
+        }
+        return defaultPutImplementation(args, data, config);
+      });
+
+      const callstackRequests = () =>
+        mockedAxios.put.mock.calls.filter(
+          ([url]) => typeof url === "string" && url.endsWith("callstacks")
+        );
+
+      renderWithRouter(
+        ["/measures/m1234/edit/test-cases"],
+        "/measures/:measureId/edit/test-cases",
+        measureWithCql
+      );
+
+      await waitFor(() => expect(callstackRequests()).toHaveLength(1));
+
+      await act(async () => {
+        resolveSeries({ data: ["SeriesA"] } as AxiosResponse<string[]>);
+      });
+
+      await waitFor(() => expect(callstackRequests()).toHaveLength(1));
+    });
+
     it("Navigating between elements tab and json tab", async () => {
       const measure = {
         ...defaultMeasure,
