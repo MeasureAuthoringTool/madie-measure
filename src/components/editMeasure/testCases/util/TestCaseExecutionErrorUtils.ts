@@ -1,8 +1,24 @@
 export const profileMismatchRegex =
   /Please ensure that meta.profile is properly set on the Patient resource/;
 
-export const profileMismatchErrorMessage =
-  "Test case execution failed. One or more Patient resources are missing the required profile or have a profile that does not correspond to the measure model. Please verify that the Patient resource(s) includes the correct profile for the selected measure model and try again.";
+const getProfileLabel = (profile?: string): string => {
+  const trimmedProfile = profile?.trim();
+  return trimmedProfile ? `${trimmedProfile} profile` : "required profile";
+};
+
+export const profileMismatchErrorMessageListView = (
+  profile?: string
+): string => {
+  const profileLabel = getProfileLabel(profile);
+  return `Test cases execution failed. One or more test cases contain a Patient resource that is missing the ${profileLabel}. Please review your test cases and ensure that each Patient resource includes the ${profileLabel}.`;
+};
+
+export const profileMismatchErrorMessageEditView = (
+  profile?: string
+): string => {
+  const profileLabel = getProfileLabel(profile);
+  return `Test case execution failed. The test case contains a Patient resource that is missing the ${profileLabel}. Please review your test case and ensure that the Patient resource includes the ${profileLabel}.`;
+};
 
 export const executionBundlePreparationErrorMessage =
   "An error occurred while preparing the test case execution bundle. Please try again. If the issue continues, please contact helpdesk.";
@@ -19,7 +35,11 @@ const syntaxErrorMessages = [
 const defaultExecutionErrorMessage =
   "An unexpected error occurred while executing test cases.";
 
-export const resolveTestCaseExecutionErrorMessage = (error: any): string => {
+export const resolveTestCaseExecutionErrorMessage = (
+  error: any,
+  elmJson: string,
+  isListView: boolean
+): string => {
   const errorMessage = error?.message;
   if (
     error instanceof SyntaxError ||
@@ -32,7 +52,20 @@ export const resolveTestCaseExecutionErrorMessage = (error: any): string => {
     return executionBundlePreparationErrorMessage;
   }
   if (errorMessage?.match(profileMismatchRegex)) {
-    return profileMismatchErrorMessage;
+    let patientProfile: string | undefined;
+    try {
+      const elm = JSON.parse(elmJson);
+      const patientDef = elm.library.statements?.def?.find(
+        (statement) => statement.name === "Patient"
+      );
+      patientProfile = patientDef.expression?.operand?.templateId;
+    } catch (e) {
+      console.error(e);
+    }
+    if (isListView) {
+      return profileMismatchErrorMessageListView(patientProfile);
+    }
+    return profileMismatchErrorMessageEditView(patientProfile);
   }
   return errorMessage || defaultExecutionErrorMessage;
 };

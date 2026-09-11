@@ -1,19 +1,53 @@
 import {
   executionBundlePreparationErrorMessage,
-  profileMismatchErrorMessage,
+  profileMismatchErrorMessageEditView,
+  profileMismatchErrorMessageListView,
   resolveTestCaseExecutionErrorMessage,
   syntaxErrorMessage,
 } from "./TestCaseExecutionErrorUtils";
 
 describe("resolveTestCaseExecutionErrorMessage", () => {
-  it("returns profile mismatch message when error matches profileMismatchRegex", () => {
+  const elmJson = JSON.stringify({
+    library: {
+      statements: {
+        def: [
+          {
+            name: "Patient",
+            expression: {
+              operand: {
+                templateId:
+                  "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient",
+              },
+            },
+          },
+        ],
+      },
+    },
+  });
+
+  it("returns list-view profile mismatch message when error matches profileMismatchRegex", () => {
     const error = {
       message:
         "Execution failed. Please ensure that meta.profile is properly set on the Patient resource before running test cases.",
     };
 
-    expect(resolveTestCaseExecutionErrorMessage(error)).toBe(
-      profileMismatchErrorMessage
+    expect(resolveTestCaseExecutionErrorMessage(error, elmJson, true)).toBe(
+      profileMismatchErrorMessageListView(
+        "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+      )
+    );
+  });
+
+  it("returns edit-view profile mismatch message when error matches profileMismatchRegex", () => {
+    const error = {
+      message:
+        "Execution failed. Please ensure that meta.profile is properly set on the Patient resource before running test cases.",
+    };
+
+    expect(resolveTestCaseExecutionErrorMessage(error, elmJson, false)).toBe(
+      profileMismatchErrorMessageEditView(
+        "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+      )
     );
   });
 
@@ -22,7 +56,7 @@ describe("resolveTestCaseExecutionErrorMessage", () => {
       message: "Error filtering resource due to unresolved references",
     };
 
-    expect(resolveTestCaseExecutionErrorMessage(error)).toBe(
+    expect(resolveTestCaseExecutionErrorMessage(error, elmJson, true)).toBe(
       executionBundlePreparationErrorMessage
     );
   });
@@ -32,7 +66,7 @@ describe("resolveTestCaseExecutionErrorMessage", () => {
       "Error filtering resource due to unresolved references"
     );
 
-    expect(resolveTestCaseExecutionErrorMessage(error)).toBe(
+    expect(resolveTestCaseExecutionErrorMessage(error, elmJson, false)).toBe(
       syntaxErrorMessage
     );
   });
