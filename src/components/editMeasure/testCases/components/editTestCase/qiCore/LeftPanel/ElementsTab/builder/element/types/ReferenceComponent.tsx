@@ -18,6 +18,18 @@ import {
 import * as _ from "lodash";
 import "./ReferenceComponent.scss";
 
+const CROSS_VERSION_PROFILE_TITLE_PREFIX = "Cross-version Profile";
+
+const isCrossVersionProfile = (resourceProfile) =>
+  resourceProfile?.title?.startsWith(CROSS_VERSION_PROFILE_TITLE_PREFIX);
+
+const getCanonicalProfileUrl = (profileUrl: string) =>
+  profileUrl?.split("|")[0].replace(/\/$/, "");
+
+const isGenericResourceTarget = (profileUrl: string) =>
+  getCanonicalProfileUrl(profileUrl)?.toLowerCase() ===
+  "http://hl7.org/fhir/structuredefinition/resource";
+
 export const getReferenceComponentLabel = (label: string) => {
   //e.g. for label = ClaimResponse.addItem[0].provider[0] return Provider
   const componentLabel = label
@@ -51,6 +63,10 @@ export const getProfileMatchTypes = (profileUrl) => {
   return [];
 };
 
+const matchesSelectedProfile = (profileUrl, selectedProfileUrl) =>
+  getCanonicalProfileUrl(profileUrl) ===
+  getCanonicalProfileUrl(selectedProfileUrl);
+
 // Helper function to find the profile URL from reference type
 const findProfileUrlFromReferenceType = (
   referenceType: string,
@@ -75,7 +91,8 @@ export const getFinalOptions = (
   selectedReferenceType,
   selectedProfileUrl,
   bundleEntries,
-  resource
+  resource,
+  { matchExactProfile = false } = {}
 ) => {
   if (!selectedReferenceType || !selectedProfileUrl) return emptyOption;
   const isPatient = selectedReferenceType === "Patient";
@@ -88,8 +105,10 @@ export const getFinalOptions = (
     if (entry.resource.id === resource?.id) return false;
 
     const profiles = entry.resource.meta?.profile || [];
-    return profiles.some((url) =>
-      matchTypes.some((type) => url.includes(type))
+    return profiles.some((profileUrl) =>
+      matchExactProfile
+        ? matchesSelectedProfile(profileUrl, selectedProfileUrl)
+        : matchTypes.some((type) => profileUrl.includes(type))
     );
   });
   if (filtered.length === 0) return emptyOption;
@@ -135,19 +154,32 @@ export default function ReferenceComponent({
   const formikContext = useFormikContext();
   // First dropdown Utilities
   const allResourceProfiles = useContext(ResourceContext); // get all profiles loaded from builder
+  const targetProfiles = useMemo(
+    () =>
+      structureDefinition.type?.find(
+        (type: { code: string }) => type.code === "Reference"
+      )?.targetProfile || [],
+    [structureDefinition.type]
+  );
+  const isGenericResourceReference = targetProfiles.some(
+    isGenericResourceTarget
+  );
+  const referenceProfiles = useMemo(
+    () =>
+      (allResourceProfiles || []).filter((profile) =>
+        isGenericResourceReference
+          ? !isCrossVersionProfile(profile) && profile.type !== "Resource"
+          : targetProfiles.includes(profile.profile)
+      ),
+    [allResourceProfiles, isGenericResourceReference, targetProfiles]
+  );
 
   const [open, setOpen] = useState<boolean>(false);
   const [selectedProfileAddNew, setSelectedProfileAddNew] = useState(null);
 
   const resourceProfileOptions = useMemo(() => {
-    const targetProfiles =
-      structureDefinition.type?.find(
-        (type: { code: string }) => type.code === "Reference"
-      )?.targetProfile || [];
-
     const options =
-      allResourceProfiles
-        ?.filter((r) => targetProfiles.includes(r.profile))
+      referenceProfiles
         .filter(
           (r, index, self) =>
             index === self.findIndex((t) => t.profile === r.profile)
@@ -162,16 +194,17 @@ export default function ReferenceComponent({
     return options.sort((a, b) =>
       a.label.toLowerCase().localeCompare(b.label.toLowerCase())
     );
-  }, [allResourceProfiles, structureDefinition.type]);
+  }, [referenceProfiles]);
 
   const [selectedReferenceType, setSelectedReferenceType] = useState<string>(
     value?.reference?.split("/")?.[0] || ""
   ); // will need to default to something if editing existing element
-  const possibleResourceOptionsForAddNew = allResourceProfiles
-    ? allResourceProfiles.filter((r) => {
-        return r.type === selectedReferenceType;
-      })
-    : [];
+  const [selectedProfileUrl, setSelectedProfileUrl] = useState<string>(
+    value?.referenceProfileUrl || ""
+  );
+  const possibleResourceOptionsForAddNew = (
+    isGenericResourceReference ? referenceProfiles : allResourceProfiles || []
+  ).filter((r) => r.type === selectedReferenceType);
   // For now we're going to return lists of each and select index 0. Future story to allow user to pick between them if multiple exist. Observation.
   const qiCoreProfiles = possibleResourceOptionsForAddNew.filter((rp) =>
     rp.profile.includes("qicore")
@@ -193,9 +226,12 @@ export default function ReferenceComponent({
     baseFhirProfiles
   );
 
-  const finalResourceOptionForAddNew = finalList[0];
+  const addNewResourceOptions = isGenericResourceReference
+    ? possibleResourceOptionsForAddNew
+    : finalList;
+  const finalResourceOptionForAddNew = addNewResourceOptions[0];
   // enforce uniqueness on profile.
-  const finalListMappedOptions = finalList
+  const finalListMappedOptions = addNewResourceOptions
     .filter(
       (res, index, self) =>
         index === self.findIndex((r) => r.profile === res.profile)
@@ -205,17 +241,13 @@ export default function ReferenceComponent({
       value: res.profile,
     }));
 
-  // Store selected profile URL instead of just type
-  const [selectedProfileUrl, setSelectedProfileUrl] = useState<string>(
-    value?.referenceProfileUrl || ""
-  );
-
   // Use new getFinalOptions logic
   const finalOptions = getFinalOptions(
     selectedReferenceType,
     selectedProfileUrl,
     state.bundle.entry,
-    resource
+    resource,
+    { matchExactProfile: isGenericResourceReference }
   );
   const [selectedReferenceId, setSelectedReferenceId] = useState<string>(
     value?.reference || ""
@@ -238,13 +270,12 @@ export default function ReferenceComponent({
     if (addNewResources.length === 0) {
       setSelectedReferenceId(newId);
     }
-  }, [value, formikContext.values]); // Use formikContext.values for dependency
+  }, [value, formikContext.values, resourceProfileOptions]); // Use formikContext.values for dependency
 
-  const triggerAddNewFlow = () => {
+  const triggerAddNewFlow = (resourceOption = finalResourceOptionForAddNew) => {
     // what's the list length of possible profiles of type per model
-    const newMadieResource = buildMadieResourceFromResourceIdentifier(
-      finalResourceOptionForAddNew
-    );
+    const newMadieResource =
+      buildMadieResourceFromResourceIdentifier(resourceOption);
     // Append to array instead of overwriting - supports multiple "Add New" references
     const existingResources = formikContext.values["add_new_resources"] || [];
     formikContext.setFieldValue("add_new_resources", [
@@ -346,6 +377,9 @@ export default function ReferenceComponent({
           <Select
             label={`Specify ${
               resourceProfileOptions.find(
+                (opt) => opt.profile === selectedProfileUrl
+              )?.label ||
+              resourceProfileOptions.find(
                 (opt) => opt.value === selectedReferenceType
               )?.label
             }`}
@@ -380,9 +414,14 @@ export default function ReferenceComponent({
                 // Qi-Core is an implementation derived from us-core, which is derived from fhir at the most basal resource type.
                 // say we choose a base fhir type, find most specific list QI-core, us-Core, fhir. If most specific list has more than 1 item, open dropdown
                 // If we slect a qi-core profile type, no dropdown should ever open. It is the most specific
-                if (selectedProfileUrl.includes("qicore")) {
+                if (
+                  isGenericResourceReference &&
+                  addNewResourceOptions.length > 1
+                ) {
+                  setOpen(true);
+                } else if (selectedProfileUrl.includes("qicore")) {
                   triggerAddNewFlow();
-                } else if (finalList?.length > 1) {
+                } else if (addNewResourceOptions.length > 1) {
                   setOpen(true);
                 } else {
                   // what's the list length of possible profiles of type per model
@@ -421,9 +460,14 @@ export default function ReferenceComponent({
           onSubmit: (e) => {
             e.stopPropagation();
             e.preventDefault();
-            const selectedProfile = finalList.find(
+            const selectedProfile = addNewResourceOptions.find(
               (item) => item.profile === selectedProfileAddNew
             );
+            if (isGenericResourceReference) {
+              triggerAddNewFlow(selectedProfile);
+              setOpen(false);
+              return;
+            }
             // generate single resource
             const newMadieResource =
               buildMadieResourceFromResourceIdentifier(selectedProfile);
