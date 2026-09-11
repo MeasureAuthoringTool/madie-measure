@@ -45,25 +45,36 @@ export default function EditMeasureDetailsSideNav(
   };
 
   function getTabLabel(linkInfo) {
+    const statusText = linkInfo.displayCompletedIcon
+      ? "Completed"
+      : linkInfo.displayIncompletedIcon
+      ? "Not completed"
+      : "";
     if (linkInfo.displayCompletedIcon) {
       return (
-        <CompletionIndicator
-          data-testid={`measure-details-completed-icon-${linkInfo.id}`}
-          label={`${linkInfo.title}`}
-          hasErrors={false}
-          displayIcon={true}
-        />
+        <>
+          <CompletionIndicator
+            data-testid={`measure-details-completed-icon-${linkInfo.id}`}
+            label={`${linkInfo.title}`}
+            hasErrors={false}
+            displayIcon={true}
+          />
+          {statusText && <span className="sr-only">{`, ${statusText}`}</span>}
+        </>
       );
     }
 
     if (linkInfo.displayIncompletedIcon) {
       return (
-        <CompletionIndicator
-          data-testid={`measure-details-incompleted-icon-${linkInfo.id}`}
-          label={`${linkInfo.title}`}
-          hasErrors={true}
-          displayIcon={true}
-        />
+        <>
+          <CompletionIndicator
+            data-testid={`measure-details-incompleted-icon-${linkInfo.id}`}
+            label={`${linkInfo.title}`}
+            hasErrors={true}
+            displayIcon={true}
+          />
+          {statusText && <span className="sr-only">{`, ${statusText}`}</span>}
+        </>
       );
     }
 
