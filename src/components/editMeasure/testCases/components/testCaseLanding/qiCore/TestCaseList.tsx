@@ -518,7 +518,11 @@ const TestCaseList = (props: TestCaseListProps) => {
 
   const handleTestCaseExecutionError = (error: any) => {
     console.error("calculateTestCases: error.message = " + error?.message);
-    const errorMessage = resolveTestCaseExecutionErrorMessage(error);
+    const errorMessage = resolveTestCaseExecutionErrorMessage(
+      error,
+      measure.elmJson,
+      true
+    );
     if (errorMessage) {
       setErrors((prevState) => [...prevState, errorMessage]);
     }
