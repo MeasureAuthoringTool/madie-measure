@@ -17,15 +17,19 @@ import {
   GroupPopulation,
   Measure,
   MeasureScoring,
+  Model,
   PopulationExpectedValue,
   TestCase,
 } from "@madie/madie-models";
 import MeasureEditor from "./editor/MeasureEditor";
 // @ts-ignore
 import {
-  useMeasureServiceApi,
+  useMeasureReviewServiceApi,
   MeasureServiceApi,
   measureStore,
+  shouldShowReviewCommentLink,
+  useFeatureFlags,
+  useOktaTokens,
   useUserRoles,
 } from "@madie/madie-util";
 import { oneItemResponse } from "../__mocks__/mockMeasureResponses";
@@ -157,8 +161,13 @@ const measure = {
   model: "QI-Core v4.1.1",
   testCases: testCases,
   measureSetId: "MeasureSetId1",
+  measureSet: {
+    owner: "test user",
+    acls: [{ userId: "shared user", roles: ["SHARED_WITH"] }],
+  },
   measureMetaData: {
     composite: false,
+    draft: true,
   },
 } as unknown as Measure;
 
@@ -260,6 +269,17 @@ jest.mock("@madie/madie-util", () => ({
         Manage Review Dialog {entityType} {entityId}
       </div>
     ) : null,
+  ReviewCommentLink: ({ onClick, className, style, dataTestId }: any) => (
+    <button
+      type="button"
+      data-testid={dataTestId || "review-comments-link"}
+      className={className}
+      style={style}
+      onClick={onClick}
+    >
+      Comments
+    </button>
+  ),
   useDocumentTitle: jest.fn(),
   useOktaTokens: jest.fn(() => ({
     getAccessToken: () => "test.jwt",
@@ -267,9 +287,11 @@ jest.mock("@madie/madie-util", () => ({
   })),
   checkUserCanEdit: jest.fn().mockImplementation(() => true),
   useFeatureFlags: jest.fn(() => ({})),
+  shouldShowReviewCommentLink: jest.fn(),
   useUserRoles: jest.fn(() => ({
     roles: [],
     isAdmin: false,
+    isReviewer: false,
   })),
   measureStore: {
     updateMeasure: jest.fn((measure) => measure),
@@ -322,7 +344,29 @@ const renderRouter = (
 describe("EditMeasure Component", () => {
   beforeEach(() => {
     measureStore.state.mockImplementation(() => measure);
+    measure.model = Model.QICORE_6_0_0;
     measure.testCases = testCases;
+    measure.measureSet = {
+      owner: "test user",
+      acls: [{ userId: "shared user", roles: ["SHARED_WITH"] }],
+    } as any;
+    (useOktaTokens as jest.Mock).mockReturnValue({
+      getAccessToken: () => "test.jwt",
+      getUserName: () => "test user",
+    });
+    (useUserRoles as jest.Mock).mockReturnValue({
+      roles: [],
+      isAdmin: false,
+      isReviewer: false,
+    });
+    (useFeatureFlags as jest.Mock).mockReturnValue({ Commenting: false });
+    (useMeasureReviewServiceApi as jest.Mock).mockReturnValue(
+      mockMeasureReviewServiceApi
+    );
+    (shouldShowReviewCommentLink as jest.Mock).mockReset();
+    (shouldShowReviewCommentLink as jest.Mock).mockReturnValue(false);
+    mockMeasureReviewServiceApi.getMeasureReview.mockClear();
+    mockMeasureReviewServiceApi.getMeasureReview.mockResolvedValue(null);
     mockedNavigate.mockClear();
   });
   afterEach(cleanup);
@@ -342,6 +386,218 @@ describe("EditMeasure Component", () => {
 
     const loading = queryByTestId("loading");
     expect(loading).toBeNull();
+  });
+
+  it("hides Comments when Commenting flag is disabled", async () => {
+    (useFeatureFlags as jest.Mock).mockReturnValue({ Commenting: false });
+    mockMeasureReviewServiceApi.getMeasureReview.mockResolvedValue({
+      status: "READY_FOR_REVIEW",
+      reviewers: ["test user"],
+    });
+
+    renderRouter();
+    await findByTestId("editMeasure");
+
+    expect(queryByTestId("review-comments-link")).not.toBeInTheDocument();
+  });
+
+  it("shows Comments for measure owner in review state", async () => {
+    (shouldShowReviewCommentLink as jest.Mock).mockReturnValue(true);
+    (useFeatureFlags as jest.Mock).mockReturnValue({ Commenting: true });
+    mockMeasureReviewServiceApi.getMeasureReview.mockResolvedValue({
+      status: "READY_FOR_REVIEW",
+      reviewers: [],
+    });
+
+    renderRouter();
+    await findByTestId("editMeasure");
+
+    expect(
+      await screen.findByTestId("review-comments-link")
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Comments" })
+    ).toBeInTheDocument();
+  });
+
+  it("shows Comments for shared user in review state", async () => {
+    (shouldShowReviewCommentLink as jest.Mock).mockReturnValue(true);
+    (useFeatureFlags as jest.Mock).mockReturnValue({ Commenting: true });
+    (useOktaTokens as jest.Mock).mockReturnValue({
+      getAccessToken: () => "test.jwt",
+      getUserName: () => "shared user",
+    });
+    measure.measureSet = {
+      owner: "owner user",
+      acls: [{ userId: "shared user", roles: ["SHARED_WITH"] }],
+    } as any;
+    mockMeasureReviewServiceApi.getMeasureReview.mockResolvedValue({
+      status: "IN_PROGRESS",
+      reviewers: [],
+    });
+
+    renderRouter();
+    await findByTestId("editMeasure");
+
+    expect(
+      await screen.findByTestId("review-comments-link")
+    ).toBeInTheDocument();
+  });
+
+  it("shows Comments for assigned reviewer outside review states", async () => {
+    (shouldShowReviewCommentLink as jest.Mock).mockReturnValue(true);
+    (useFeatureFlags as jest.Mock).mockReturnValue({ Commenting: true });
+    (useOktaTokens as jest.Mock).mockReturnValue({
+      getAccessToken: () => "test.jwt",
+      getUserName: () => "reviewer user",
+    });
+    (useUserRoles as jest.Mock).mockReturnValue({
+      roles: ["MADiE-Reviewer"],
+      isAdmin: false,
+      isReviewer: true,
+    });
+    measure.measureSet = {
+      owner: "owner user",
+      acls: [],
+    } as any;
+    mockMeasureReviewServiceApi.getMeasureReview.mockResolvedValue({
+      status: "NOT_READY_FOR_REVIEW",
+      reviewers: ["reviewer user"],
+    });
+
+    renderRouter();
+    await findByTestId("editMeasure");
+
+    const comments = await screen.findByTestId("review-comments-link");
+    fireEvent.click(comments);
+    expect(mockedNavigate).not.toHaveBeenCalled();
+  });
+
+  it("hides Comments for reviewer not assigned to the measure", async () => {
+    (useFeatureFlags as jest.Mock).mockReturnValue({ Commenting: true });
+    (useOktaTokens as jest.Mock).mockReturnValue({
+      getAccessToken: () => "test.jwt",
+      getUserName: () => "reviewer user",
+    });
+    (useUserRoles as jest.Mock).mockReturnValue({
+      roles: ["MADiE-Reviewer"],
+      isAdmin: false,
+      isReviewer: true,
+    });
+    measure.measureSet = {
+      owner: "owner user",
+      acls: [],
+    } as any;
+    mockMeasureReviewServiceApi.getMeasureReview.mockResolvedValue({
+      status: "NOT_READY_FOR_REVIEW",
+      reviewers: ["another reviewer"],
+    });
+
+    renderRouter();
+    await findByTestId("editMeasure");
+
+    expect(queryByTestId("review-comments-link")).not.toBeInTheDocument();
+  });
+
+  it.each([Model.QICORE_6_0_0, Model.QDM_5_6])(
+    "shows Comments when owner is in review state for model %s",
+    async (model: Model) => {
+      (shouldShowReviewCommentLink as jest.Mock).mockReturnValue(true);
+      (useFeatureFlags as jest.Mock).mockReturnValue({ Commenting: true });
+      mockMeasureReviewServiceApi.getMeasureReview.mockResolvedValue({
+        status: "COMPLETE",
+        reviewers: [],
+      });
+
+      measure.model = model;
+      renderRouter();
+      await findByTestId("editMeasure");
+      expect(
+        await screen.findByTestId("review-comments-link")
+      ).toBeInTheDocument();
+    }
+  );
+
+  it("fetches review data when a measure id exists", async () => {
+    const fetchedReview = {
+      status: "READY_FOR_REVIEW",
+      reviewers: ["reviewer user"],
+    };
+    mockMeasureReviewServiceApi.getMeasureReview.mockResolvedValueOnce(
+      fetchedReview
+    );
+
+    renderRouter();
+    await findByTestId("editMeasure");
+
+    await waitFor(() => {
+      expect(mockMeasureReviewServiceApi.getMeasureReview).toHaveBeenCalledWith(
+        measure.id
+      );
+    });
+
+    await waitFor(() => {
+      expect(shouldShowReviewCommentLink).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          reviewStatus: fetchedReview.status,
+          assignedReviewers: fetchedReview.reviewers,
+        })
+      );
+    });
+  });
+
+  it("does not fetch review data when the measure id is missing", async () => {
+    const measureWithoutId = { ...measure, id: undefined } as Measure;
+    measureStore.state.mockImplementation(() => measureWithoutId);
+
+    renderRouter();
+    await findByTestId("editMeasure");
+
+    await waitFor(() => {
+      expect(
+        mockMeasureReviewServiceApi.getMeasureReview
+      ).not.toHaveBeenCalled();
+    });
+  });
+
+  it("handles review fetch failures without crashing", async () => {
+    mockMeasureReviewServiceApi.getMeasureReview.mockRejectedValueOnce(
+      new Error("review fetch failed")
+    );
+
+    renderRouter();
+    await findByTestId("editMeasure");
+
+    await waitFor(() => {
+      expect(mockMeasureReviewServiceApi.getMeasureReview).toHaveBeenCalledWith(
+        measure.id
+      );
+    });
+  });
+
+  it("updates review state when review-measure-saved event is fired", async () => {
+    renderRouter();
+    await findByTestId("editMeasure");
+
+    const savedReview = {
+      status: "IN_PROGRESS",
+      reviewers: ["reviewer user"],
+    };
+
+    act(() => {
+      window.dispatchEvent(
+        new CustomEvent("review-measure-saved", { detail: savedReview })
+      );
+    });
+
+    await waitFor(() => {
+      expect(shouldShowReviewCommentLink).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          reviewStatus: savedReview.status,
+          assignedReviewers: savedReview.reviewers,
+        })
+      );
+    });
   });
 
   it("should open the Manage Review dialog for reviewers when the review event is triggered", async () => {
