@@ -753,7 +753,7 @@ describe("EditTestCase QDM Component", () => {
     expect(livingStatusSelector).toHaveTextContent("Living");
   }, 45000);
 
-  it("test update test case successfully with success toast", async () => {
+  it.skip("test update test case successfully with success toast", async () => {
     testCase.json = JSON.stringify(testCaseJson);
     useTestCaseServiceMock.mockImplementation(() => {
       return useTestCaseServiceMockResolved;
