@@ -182,6 +182,8 @@ describe("ReviewDialog", () => {
 
     userEvent.click(screen.getByTestId("review-dialog-save-button"));
 
+    expect(screen.queryByText("Are you sure?")).not.toBeInTheDocument();
+
     await waitFor(() => {
       expect(mockUpdateMeasureReview).toHaveBeenCalledWith(
         "measure-1",
@@ -196,6 +198,167 @@ describe("ReviewDialog", () => {
     });
 
     expect(mockCreateMeasureReview).not.toHaveBeenCalled();
+  });
+
+  it("defaults Mark as Ready to ON for IN_PROGRESS and COMPLETE statuses", async () => {
+    mockGetMeasureReview.mockResolvedValueOnce({
+      id: "review-in-progress",
+      measureId: "measure-1",
+      measureSetId: "set-1",
+      status: ReviewStatus.IN_PROGRESS,
+      comment: "<p>in progress</p>",
+    });
+
+    const { rerender } = render(
+      <ReviewDialog open={true} measure={measure} onClose={jest.fn()} />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByLabelText("Mark as Ready")).toBeChecked();
+    });
+
+    mockGetMeasureReview.mockResolvedValueOnce({
+      id: "review-complete",
+      measureId: "measure-1",
+      measureSetId: "set-1",
+      status: ReviewStatus.COMPLETE,
+      comment: "<p>complete</p>",
+    });
+
+    rerender(
+      <ReviewDialog open={false} measure={measure} onClose={jest.fn()} />
+    );
+    rerender(
+      <ReviewDialog open={true} measure={measure} onClose={jest.fn()} />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByLabelText("Mark as Ready")).toBeChecked();
+    });
+  });
+
+  it("shows confirmation before removing IN_PROGRESS review status", async () => {
+    const onClose = jest.fn();
+    const existingReview: MeasureReview = {
+      id: "existing-review-id",
+      measureId: "measure-1",
+      measureSetId: "set-1",
+      status: ReviewStatus.IN_PROGRESS,
+      comment: "<p>in progress</p>",
+    };
+    mockGetMeasureReview.mockResolvedValueOnce(existingReview);
+
+    render(<ReviewDialog open={true} measure={measure} onClose={onClose} />);
+
+    await waitFor(() => {
+      expect(screen.getByLabelText("Mark as Ready")).toBeChecked();
+    });
+
+    userEvent.click(screen.getByTestId("review-dialog-mark-ready-switch"));
+    userEvent.click(screen.getByTestId("review-dialog-save-button"));
+
+    expect(await screen.findByText("Are you sure?")).toBeInTheDocument();
+    expect(screen.getByText(/already In Progress\./)).toBeInTheDocument();
+    expect(mockUpdateMeasureReview).not.toHaveBeenCalled();
+    expect(onClose).not.toHaveBeenCalled();
+  });
+
+  it("still shows confirmation when IN_PROGRESS review payload has no id", async () => {
+    mockGetMeasureReview.mockResolvedValueOnce({
+      id: "",
+      measureId: "measure-1",
+      measureSetId: "set-1",
+      status: ReviewStatus.IN_PROGRESS,
+      comment: "<p>in progress</p>",
+    } as MeasureReview);
+
+    render(<ReviewDialog open={true} measure={measure} onClose={jest.fn()} />);
+
+    await waitFor(() => {
+      expect(screen.getByLabelText("Mark as Ready")).toBeChecked();
+    });
+
+    userEvent.click(screen.getByTestId("review-dialog-mark-ready-switch"));
+    userEvent.click(screen.getByTestId("review-dialog-save-button"));
+
+    expect(await screen.findByText("Are you sure?")).toBeInTheDocument();
+    expect(mockCreateMeasureReview).not.toHaveBeenCalled();
+    expect(mockUpdateMeasureReview).not.toHaveBeenCalled();
+  });
+
+  it("closes confirmation and keeps dialog open when cancel is clicked", async () => {
+    mockGetMeasureReview.mockResolvedValueOnce({
+      id: "existing-review-id",
+      measureId: "measure-1",
+      measureSetId: "set-1",
+      status: ReviewStatus.COMPLETE,
+      comment: "<p>complete</p>",
+    });
+
+    render(<ReviewDialog open={true} measure={measure} onClose={jest.fn()} />);
+
+    await waitFor(() => {
+      expect(screen.getByLabelText("Mark as Ready")).toBeChecked();
+    });
+
+    userEvent.click(screen.getByTestId("review-dialog-mark-ready-switch"));
+    userEvent.click(screen.getByTestId("review-dialog-save-button"));
+
+    expect(await screen.findByText("Are you sure?")).toBeInTheDocument();
+
+    userEvent.click(
+      screen.getByTestId("review-dialog-remove-confirmation-cancel-button")
+    );
+
+    await waitFor(() => {
+      expect(screen.queryByText("Are you sure?")).not.toBeInTheDocument();
+    });
+    expect(
+      screen.getByText("Mark Measure Ready for Review")
+    ).toBeInTheDocument();
+    expect(mockUpdateMeasureReview).not.toHaveBeenCalled();
+  });
+
+  it("continues removal after confirmation for COMPLETE review status", async () => {
+    const onClose = jest.fn();
+    const existingReview: MeasureReview = {
+      id: "existing-review-id",
+      measureId: "measure-1",
+      measureSetId: "set-1",
+      status: ReviewStatus.COMPLETE,
+      comment: "<p>complete</p>",
+    };
+    mockGetMeasureReview.mockResolvedValueOnce(existingReview);
+
+    render(<ReviewDialog open={true} measure={measure} onClose={onClose} />);
+
+    await waitFor(() => {
+      expect(screen.getByLabelText("Mark as Ready")).toBeChecked();
+    });
+
+    userEvent.click(screen.getByTestId("review-dialog-mark-ready-switch"));
+    userEvent.click(screen.getByTestId("review-dialog-save-button"));
+
+    expect(await screen.findByText("Are you sure?")).toBeInTheDocument();
+
+    userEvent.click(
+      screen.getByTestId("review-dialog-remove-confirmation-continue-button")
+    );
+
+    await waitFor(() => {
+      expect(mockUpdateMeasureReview).toHaveBeenCalledWith(
+        "measure-1",
+        expect.objectContaining({
+          id: "existing-review-id",
+          status: ReviewStatus.NOT_READY_FOR_REVIEW,
+          comment: "<p>complete</p>",
+        })
+      );
+    });
+
+    await waitFor(() => {
+      expect(onClose).toHaveBeenCalledTimes(1);
+    });
   });
 
   it("calls onSuccess before onClose so the list refreshes the Review column", async () => {

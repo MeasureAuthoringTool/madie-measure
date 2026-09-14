@@ -209,6 +209,25 @@ describe("TestCaseValidator", () => {
       ).resolves.toBeTruthy();
     });
 
+    it("allows decimals for observation populations with boolean basis", async () => {
+      await expect(
+        TestCaseValidator.validate({
+          ...buildBaseModel(),
+          groupPopulations: [
+            {
+              populationBasis: "boolean",
+              populationValues: [
+                {
+                  name: PopulationType.NUMERATOR_OBSERVATION,
+                  expected: "5.25",
+                },
+              ],
+            },
+          ],
+        })
+      ).resolves.toBeTruthy();
+    });
+
     it("rejects decimals for non observation populations", async () => {
       try {
         await TestCaseValidator.validate({

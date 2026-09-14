@@ -16,15 +16,15 @@ const validateExpectedValue = function (
     return true;
   }
 
-  if (populationBasis === "boolean") {
+  const allowDecimals = observations.includes(populationName);
+
+  if (populationBasis === "boolean" && !allowDecimals) {
     return typeof value === "boolean"
       ? true
       : this.createError({
           message: "Expected value type must match population basis type",
         });
   }
-
-  const allowDecimals = observations.includes(populationName);
 
   if (!isNaN(+value) && +value >= 0) {
     if (
