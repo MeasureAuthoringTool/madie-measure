@@ -763,27 +763,42 @@ describe("EditTestCase QDM Component", () => {
 
     const raceSelector = screen.getByRole("combobox", { name: "Race" });
     expect(raceSelector).toHaveTextContent("Asian");
+    await act(async () => {
+      await userEvent.click(raceSelector);
+    });
     await userEvent.click(raceSelector);
     const raceOptions = await screen.findAllByRole("option");
     expect(raceOptions.length).toBe(4);
-    await userEvent.click(raceOptions[3]);
+    await act(async () => {
+      await userEvent.click(raceOptions[3]);
+    });
     expect(raceSelector).toHaveTextContent("White");
 
     const genderSelector = screen.getByRole("combobox", { name: "Sex" });
     expect(genderSelector).toBeInTheDocument();
-    await userEvent.click(genderSelector);
+
+    await act(async () => {
+      await userEvent.click(genderSelector);
+    });
     const genderOptions = await screen.findAllByRole("option");
     expect(genderOptions.length).toBe(3);
-    await userEvent.click(genderOptions[2]);
+    await act(() => {});
+    await act(async () => {
+      await userEvent.click(genderOptions[2]);
+    });
     expect(genderSelector).toHaveTextContent("Male (finding)");
-
     const livingStatusSelector = screen.getByRole("combobox", {
       name: "Living Status",
     });
     expect(livingStatusSelector).toHaveTextContent("Living");
-    await userEvent.click(livingStatusSelector);
+    await act(async () => {
+      await userEvent.click(livingStatusSelector);
+    });
     const livingStatusOptions = await screen.findAllByRole("option");
-    await userEvent.click(livingStatusOptions[1]);
+    await act(() => {});
+    await act(async () => {
+      await userEvent.click(livingStatusOptions[1]);
+    });
     expect(livingStatusSelector).toHaveTextContent("Expired");
 
     const saveButton = screen.getByRole("button", { name: "Save" });
