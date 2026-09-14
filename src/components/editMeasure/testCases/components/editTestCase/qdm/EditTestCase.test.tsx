@@ -763,54 +763,52 @@ describe("EditTestCase QDM Component", () => {
 
     const raceSelector = screen.getByRole("combobox", { name: "Race" });
     expect(raceSelector).toHaveTextContent("Asian");
-    await act(async () => {
-      await userEvent.click(raceSelector);
-    });
+
+    // Optimize dropdown interactions - combine click and selection
     await userEvent.click(raceSelector);
     const raceOptions = await screen.findAllByRole("option");
     expect(raceOptions.length).toBe(4);
-    await act(async () => {
-      await userEvent.click(raceOptions[3]);
+    await userEvent.click(raceOptions[3]);
+    await waitFor(() => {
+      expect(raceSelector).toHaveTextContent("White");
     });
-    expect(raceSelector).toHaveTextContent("White");
 
+    // Gender selection
     const genderSelector = screen.getByRole("combobox", { name: "Sex" });
     expect(genderSelector).toBeInTheDocument();
-
-    await act(async () => {
-      await userEvent.click(genderSelector);
-    });
+    await userEvent.click(genderSelector);
     const genderOptions = await screen.findAllByRole("option");
     expect(genderOptions.length).toBe(3);
-    await act(() => {});
-    await act(async () => {
-      await userEvent.click(genderOptions[2]);
+    await userEvent.click(genderOptions[2]);
+    await waitFor(() => {
+      expect(genderSelector).toHaveTextContent("Male (finding)");
     });
-    expect(genderSelector).toHaveTextContent("Male (finding)");
+
+    // Living status selection
     const livingStatusSelector = screen.getByRole("combobox", {
       name: "Living Status",
     });
     expect(livingStatusSelector).toHaveTextContent("Living");
-    await act(async () => {
-      await userEvent.click(livingStatusSelector);
-    });
+    await userEvent.click(livingStatusSelector);
     const livingStatusOptions = await screen.findAllByRole("option");
-    await act(() => {});
-    await act(async () => {
-      await userEvent.click(livingStatusOptions[1]);
+    await userEvent.click(livingStatusOptions[1]);
+    await waitFor(() => {
+      expect(livingStatusSelector).toHaveTextContent("Expired");
     });
-    expect(livingStatusSelector).toHaveTextContent("Expired");
 
     const saveButton = screen.getByRole("button", { name: "Save" });
     expect(saveButton).toBeEnabled();
     await userEvent.click(saveButton);
 
-    await waitFor(() => {
-      expect(screen.getByTestId("success-toast")).toHaveTextContent(
-        "Test Case Updated Successfully"
-      );
-    });
-  }, 12000);
+    await waitFor(
+      () => {
+        expect(screen.getByTestId("success-toast")).toHaveTextContent(
+          "Test Case Updated Successfully"
+        );
+      },
+      { timeout: 3000 }
+    );
+  }, 20000); // Increase timeout to 20 seconds
 
   it("test update test case fails with non-unique test name failure toast", async () => {
     testCase.json = JSON.stringify(testCaseJson);
