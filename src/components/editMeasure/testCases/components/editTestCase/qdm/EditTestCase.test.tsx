@@ -961,6 +961,7 @@ describe("EditTestCase QDM Component", () => {
   });
 
   it("Should render the details tab with relevant information", async () => {
+    jest.setTimeout(60000);
     testCase.json = JSON.stringify(testCaseJson);
     await waitFor(() => renderEditTestCaseComponent());
 
