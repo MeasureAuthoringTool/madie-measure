@@ -430,6 +430,8 @@ export default function MeasureInformation(props: MeasureInformationProps) {
             "Measurement Information Updated Successfully",
             true
           );
+          //@ts-ignore
+          document.querySelector('a[href="#page-header"]')?.focus();
           // updating measure will propagate update state site wide.
           updateMeasure(newMeasure);
         })
