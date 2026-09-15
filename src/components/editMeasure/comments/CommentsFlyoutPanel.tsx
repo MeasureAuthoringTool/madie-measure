@@ -107,7 +107,7 @@ const CommentsFlyoutPanel = ({
           />
           <Box className="comments-flyout-panel-actions">
             <Button
-              variant="secondary"
+              variant="outline-secondary"
               disabled={!hasComment}
               onClick={() => setComment("")}
               data-testid="comments-flyout-cancel"
@@ -115,7 +115,7 @@ const CommentsFlyoutPanel = ({
               Cancel
             </Button>
             <Button
-              variant="cyan"
+              variant="outline-cyan"
               disabled={!hasComment}
               data-testid="comments-flyout-add"
             >
