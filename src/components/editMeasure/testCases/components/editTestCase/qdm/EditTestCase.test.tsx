@@ -962,7 +962,7 @@ describe("EditTestCase QDM Component", () => {
 
   it("Should render the details tab with relevant information", async () => {
     testCase.json = JSON.stringify(testCaseJson);
-      renderEditTestCaseComponent()
+    renderEditTestCaseComponent();
 
     const detailsTab = getByRole("tab", { name: "Details tab panel" });
 
@@ -993,7 +993,7 @@ describe("EditTestCase QDM Component", () => {
     // await testTitle("newtesttitle1", true);
 
     await userEvent.type(descriptionInput, "testtestsetse");
-    
+
     await waitFor(() => {
       const saveButton = getByRole("button", { name: "Save" });
       expect(saveButton).toBeEnabled();
@@ -1025,7 +1025,6 @@ describe("EditTestCase QDM Component", () => {
 
     const descriptionInput = screen.getByTestId("test-case-description");
     expect(descriptionInput).toHaveTextContent(testCase.description);
-    
 
     const seriesInput = screen
       .getByTestId("test-case-series")
