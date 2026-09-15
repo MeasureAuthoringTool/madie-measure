@@ -924,6 +924,7 @@ describe("EditTestCase QDM Component", () => {
     );
   });
 
+  // this appears to need to be skipped with the next test.
   it.skip("RightPanel navigation works as expected.", async () => {
     renderEditTestCaseComponent();
     const highlighting = await findByText("Highlighting");
@@ -932,41 +933,42 @@ describe("EditTestCase QDM Component", () => {
     const details = await findByText("Details");
 
     act(() => {
-      fireEvent.click(highlighting);
+      userEvent.click(highlighting);
     });
     await waitFor(() => {
       expect(highlighting).toHaveAttribute("aria-selected", "true");
     });
 
     act(() => {
-      fireEvent.click(expectedActual);
+      userEvent.click(expectedActual);
     });
     await waitFor(() => {
       expect(expectedActual).toHaveAttribute("aria-selected", "true");
     });
 
     act(() => {
-      fireEvent.click(measureCql);
+      userEvent.click(measureCql);
     });
     await waitFor(() => {
       expect(measureCql).toHaveAttribute("aria-selected", "true");
     });
 
     act(() => {
-      fireEvent.click(details);
+      userEvent.click(details);
     });
     await waitFor(() => {
       expect(details).toHaveAttribute("aria-selected", "true");
     });
   });
 
+  // skip
   it("Should render the details tab with relevant information", async () => {
     testCase.json = JSON.stringify(testCaseJson);
     renderEditTestCaseComponent();
 
     const detailsTab = getByRole("tab", { name: "Details tab panel" });
 
-    await fireEvent.click(detailsTab);
+    await userEvent.click(detailsTab);
 
     await waitFor(() => {
       expect(detailsTab).toHaveAttribute("aria-selected", "true");
