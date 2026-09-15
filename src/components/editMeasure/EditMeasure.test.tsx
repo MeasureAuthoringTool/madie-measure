@@ -473,6 +473,29 @@ describe("EditMeasure Component", () => {
     expect(mockedNavigate).not.toHaveBeenCalled();
   });
 
+  it("opens and closes CommentsFlyoutPanel from the Comments link", async () => {
+    (shouldShowReviewCommentLink as jest.Mock).mockReturnValue(true);
+    (useFeatureFlags as jest.Mock).mockReturnValue({ Commenting: true });
+    mockMeasureReviewServiceApi.getMeasureReview.mockResolvedValue({
+      status: "READY_FOR_REVIEW",
+      reviewers: [],
+    });
+
+    renderRouter();
+    await findByTestId("editMeasure");
+
+    userEvent.click(await screen.findByTestId("review-comments-link"));
+    expect(screen.getByTestId("comments-flyout")).toBeInTheDocument();
+    expect(
+      screen.getByText("Add a comment to Name, Version & ID")
+    ).toBeInTheDocument();
+
+    userEvent.click(screen.getByTestId("comments-flyout-close"));
+    await waitFor(() => {
+      expect(screen.queryByTestId("comments-flyout")).not.toBeInTheDocument();
+    });
+  });
+
   it("hides Comments for reviewer not assigned to the measure", async () => {
     (useFeatureFlags as jest.Mock).mockReturnValue({ Commenting: true });
     (useOktaTokens as jest.Mock).mockReturnValue({
