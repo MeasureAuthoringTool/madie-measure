@@ -19,7 +19,11 @@ import useFhirElmTranslationServiceApi, {
 } from "../../../../api/useFhirElmTranslationServiceApi";
 import { Measure, Model } from "@madie/madie-models";
 import { AxiosError, AxiosResponse } from "axios";
-import { parseContent, synchingEditorCqlContent } from "@madie/madie-editor";
+import {
+  parseContent,
+  synchingEditorCqlContent,
+  validateContent,
+} from "@madie/madie-editor";
 import userEvent from "@testing-library/user-event";
 import {
   checkUserCanEdit,
@@ -653,6 +657,41 @@ describe("MeasureInformation component", () => {
           ],
         },
       })
+    );
+  });
+
+  it("should save a CQL Library Name update when UMLS is unauthorized", async () => {
+    mockMeasureServiceApi.updateMeasure = jest.fn().mockResolvedValue({
+      status: 200,
+    });
+    (validateContent as jest.Mock).mockRejectedValueOnce({
+      response: { status: 401 },
+    });
+    render(
+      <MeasureInformation
+        setErrorMessage={setErrorMessage}
+        measureCanEdit={true}
+      />
+    );
+
+    const cqlLibraryName = await screen.findByRole("textbox", {
+      name: "Measure CQL Library Name",
+    });
+    userEvent.clear(cqlLibraryName);
+    userEvent.type(cqlLibraryName, "NewLibName");
+
+    const saveButton = await screen.findByRole("button", { name: "Save" });
+    await waitFor(() => expect(saveButton).toBeEnabled());
+    userEvent.click(saveButton);
+
+    await waitFor(() =>
+      expect(mockMeasureServiceApi.updateMeasure).toHaveBeenCalledWith(
+        expect.objectContaining({
+          cqlLibraryName: "NewLibName",
+          cql: "modified cql",
+          elmJson: measure.elmJson,
+        })
+      )
     );
   });
 
