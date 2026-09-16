@@ -695,6 +695,31 @@ describe("MeasureInformation component", () => {
     );
   });
 
+  it("should rethrow non-401 CQL validation errors", async () => {
+    const validationError = new Error("CQL validation failed");
+    mockMeasureServiceApi.updateMeasure = jest.fn();
+    (validateContent as jest.Mock).mockRejectedValueOnce(validationError);
+    render(
+      <MeasureInformation
+        setErrorMessage={setErrorMessage}
+        measureCanEdit={true}
+      />
+    );
+
+    const cqlLibraryName = await screen.findByRole("textbox", {
+      name: "Measure CQL Library Name",
+    });
+    userEvent.clear(cqlLibraryName);
+    userEvent.type(cqlLibraryName, "NewLibName");
+
+    const saveButton = await screen.findByRole("button", { name: "Save" });
+    await waitFor(() => expect(saveButton).toBeEnabled());
+    userEvent.click(saveButton);
+
+    await waitFor(() => expect(validateContent).toHaveBeenCalled());
+    expect(mockMeasureServiceApi.updateMeasure).not.toHaveBeenCalled();
+  });
+
   it("should render the component with measure's information populated", async () => {
     checkUserCanEdit.mockImplementationOnce(() => true);
     render(
