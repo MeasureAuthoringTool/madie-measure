@@ -397,8 +397,14 @@ export default function MeasureInformation(props: MeasureInformationProps) {
               var updatedElm = JSON.stringify(translation);
             }
           } catch (error: any) {
+            //401 is expected to come from UMLS for not logged in users
             if (error?.status !== 401 && error?.response?.status !== 401) {
-              throw error;
+              handleToast(
+                "danger",
+                "Unable to save measure information. Please try again.",
+                true
+              );
+              return;
             }
           }
         }

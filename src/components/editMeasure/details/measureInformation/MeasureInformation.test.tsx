@@ -695,7 +695,7 @@ describe("MeasureInformation component", () => {
     );
   });
 
-  it("should rethrow non-401 CQL validation errors", async () => {
+  it("should show a toast for non-401 CQL validation errors", async () => {
     const validationError = new Error("CQL validation failed");
     mockMeasureServiceApi.updateMeasure = jest.fn();
     (validateContent as jest.Mock).mockRejectedValueOnce(validationError);
@@ -717,6 +717,11 @@ describe("MeasureInformation component", () => {
     userEvent.click(saveButton);
 
     await waitFor(() => expect(validateContent).toHaveBeenCalled());
+    expect(
+      await screen.findByText(
+        "Unable to save measure information. Please try again."
+      )
+    ).toBeInTheDocument();
     expect(mockMeasureServiceApi.updateMeasure).not.toHaveBeenCalled();
   });
 
