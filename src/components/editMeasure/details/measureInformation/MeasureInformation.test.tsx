@@ -21,7 +21,11 @@ import useFhirElmTranslationServiceApi, {
 } from "../../../../api/useFhirElmTranslationServiceApi";
 import { Measure, Model } from "@madie/madie-models";
 import { AxiosError, AxiosResponse } from "axios";
-import { parseContent, synchingEditorCqlContent } from "@madie/madie-editor";
+import {
+  parseContent,
+  synchingEditorCqlContent,
+  validateContent,
+} from "@madie/madie-editor";
 import userEvent from "@testing-library/user-event";
 import {
   checkUserCanEdit,
@@ -655,6 +659,71 @@ describe("MeasureInformation component", () => {
         },
       })
     );
+  });
+
+  it("should save a CQL Library Name update when UMLS is unauthorized", async () => {
+    mockMeasureServiceApi.updateMeasure = jest.fn().mockResolvedValue({
+      status: 200,
+    });
+    (validateContent as jest.Mock).mockRejectedValueOnce({
+      response: { status: 401 },
+    });
+    render(
+      <MeasureInformation
+        setErrorMessage={setErrorMessage}
+        measureCanEdit={true}
+      />
+    );
+
+    const cqlLibraryName = await screen.findByRole("textbox", {
+      name: "Measure CQL Library Name",
+    });
+    userEvent.clear(cqlLibraryName);
+    userEvent.type(cqlLibraryName, "NewLibName");
+
+    const saveButton = await screen.findByRole("button", { name: "Save" });
+    await waitFor(() => expect(saveButton).toBeEnabled());
+    userEvent.click(saveButton);
+
+    await waitFor(() =>
+      expect(mockMeasureServiceApi.updateMeasure).toHaveBeenCalledWith(
+        expect.objectContaining({
+          cqlLibraryName: "NewLibName",
+          cql: "modified cql",
+          elmJson: measure.elmJson,
+        })
+      )
+    );
+  });
+
+  it("should show a toast for non-401 CQL validation errors", async () => {
+    const validationError = new Error("CQL validation failed");
+    mockMeasureServiceApi.updateMeasure = jest.fn();
+    (validateContent as jest.Mock).mockRejectedValueOnce(validationError);
+    render(
+      <MeasureInformation
+        setErrorMessage={setErrorMessage}
+        measureCanEdit={true}
+      />
+    );
+
+    const cqlLibraryName = await screen.findByRole("textbox", {
+      name: "Measure CQL Library Name",
+    });
+    userEvent.clear(cqlLibraryName);
+    userEvent.type(cqlLibraryName, "NewLibName");
+
+    const saveButton = await screen.findByRole("button", { name: "Save" });
+    await waitFor(() => expect(saveButton).toBeEnabled());
+    userEvent.click(saveButton);
+
+    await waitFor(() => expect(validateContent).toHaveBeenCalled());
+    expect(
+      await screen.findByText(
+        "Unable to save measure information. Please try again."
+      )
+    ).toBeInTheDocument();
+    expect(mockMeasureServiceApi.updateMeasure).not.toHaveBeenCalled();
   });
 
   it("should render the component with measure's information populated", async () => {
