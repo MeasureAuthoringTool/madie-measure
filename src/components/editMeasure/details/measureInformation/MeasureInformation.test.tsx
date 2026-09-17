@@ -9,7 +9,9 @@ import {
   act,
 } from "@testing-library/react";
 
-import MeasureInformation from "./MeasureInformation";
+import MeasureInformation, {
+  CQL_LIBRARY_NAME_RECOMMENDATION,
+} from "./MeasureInformation";
 
 import useQdmElmTranslationServiceApi, {
   QdmElmTranslationServiceApi,
@@ -26,7 +28,6 @@ import {
   measureStore,
   MeasureServiceApi,
   UserServiceApi,
-  useFeatureFlags,
 } from "@madie/madie-util";
 
 const mockHistoryPush = jest.fn();
@@ -690,6 +691,9 @@ describe("MeasureInformation component", () => {
         "cql-library-name-input"
       ) as HTMLInputElement;
       expect(cqlLibraryNameText.value).toBe(measure.cqlLibraryName);
+      expect(
+        screen.getByText(CQL_LIBRARY_NAME_RECOMMENDATION)
+      ).toBeInTheDocument();
       const ecqmTitleText = getByTestId("ecqm-input") as HTMLInputElement;
       expect(ecqmTitleText.value).toBe(measure.ecqmTitle);
 
