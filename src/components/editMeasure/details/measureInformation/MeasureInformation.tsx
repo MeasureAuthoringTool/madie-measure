@@ -63,6 +63,9 @@ interface MeasureInformationProps {
   measureCanEdit: boolean;
 }
 
+export const CQL_LIBRARY_NAME_RECOMMENDATION =
+  "It is strongly recommended that your library name remain under 30 characters";
+
 export default function MeasureInformation(props: MeasureInformationProps) {
   const { setErrorMessage, measureCanEdit } = props;
   const measureServiceApi = useMeasureServiceApi();
@@ -570,6 +573,7 @@ export default function MeasureInformation(props: MeasureInformationProps) {
               onBlur("cqlLibraryName");
             }}
             maxLength={64}
+            recommendation={CQL_LIBRARY_NAME_RECOMMENDATION}
           />
         </Box>
         <Box sx={formRowGapped}>
