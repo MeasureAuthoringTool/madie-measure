@@ -59,6 +59,8 @@ import TestCases from "./testCases/TestCases";
 import { AxiosResponse } from "axios";
 import ReviewDialog from "../common/reviewDialog/ReviewDialog";
 import StatusHandler, { INITIAL_STATUS_HANDLER } from "./editor/StatusHandler";
+import CommentsFlyoutPanel from "./comments/CommentsFlyoutPanel";
+import { getCommentSectionName } from "./comments/getCommentSectionName";
 
 const OBJECT_ID_REGEX = /\/[a-f0-9]{24}/g;
 
@@ -75,7 +77,7 @@ type MeasureReview = {
 export default function EditMeasure() {
   const { measureId } = useParams();
   const measureServiceApi = useMeasureServiceApi();
-  const measureReviewServiceApi = useMeasureReviewServiceApi();
+  const measureReviewServiceApiRef = useRef(useMeasureReviewServiceApi());
   const { updateMeasure } = measureStore;
   const [loading, setLoading] = useState<boolean>(true);
   let navigate = useNavigate();
@@ -179,6 +181,7 @@ export default function EditMeasure() {
   const [statusHandler, setStatusHandler] = useState(INITIAL_STATUS_HANDLER);
   const [measure, setMeasure] = useState<any>(measureStore.state);
   const [measureReview, setMeasureReview] = useState<MeasureReview>(null);
+  const [commentsPanelOpen, setCommentsPanelOpen] = useState(false);
 
   const [downloadState, setDownloadState] = useState(null);
   const [failureMessage, setFailureMessage] = useState(null);
@@ -328,9 +331,8 @@ export default function EditMeasure() {
       }
 
       try {
-        const review = await measureReviewServiceApi.getMeasureReview(
-          measure.id
-        );
+        const review =
+          await measureReviewServiceApiRef.current.getMeasureReview(measure.id);
         if (isMounted) {
           setMeasureReview(review as MeasureReview);
         }
@@ -346,7 +348,7 @@ export default function EditMeasure() {
     return () => {
       isMounted = false;
     };
-  }, [measure?.id, measureReviewServiceApi]);
+  }, [measure?.id]);
 
   useEffect(() => {
     const handleReviewSaved = (event: Event) => {
@@ -730,6 +732,7 @@ export default function EditMeasure() {
     hasReviewerRole: Boolean(userRoles?.isReviewer),
     assignedReviewers: measureReview?.reviewers,
   });
+  const commentSectionName = getCommentSectionName(location.pathname, measure);
 
   return (
     <div data-testid="editMeasure">
@@ -752,7 +755,7 @@ export default function EditMeasure() {
             <EditMeasureNav isQDM={isQDM} />
             {showReviewCommentLink && (
               <div className="review-comments-link">
-                <ReviewCommentLink />
+                <ReviewCommentLink onClick={() => setCommentsPanelOpen(true)} />
               </div>
             )}
             <div
@@ -969,6 +972,11 @@ export default function EditMeasure() {
             open={dialogOpen}
             onContinue={onContinue}
             onClose={onClose}
+          />
+          <CommentsFlyoutPanel
+            open={commentsPanelOpen}
+            onClose={() => setCommentsPanelOpen(false)}
+            sectionName={commentSectionName}
           />
         </>
       )}
