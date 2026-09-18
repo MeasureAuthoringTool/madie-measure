@@ -98,6 +98,15 @@ describe("ReferenceComponent", () => {
   it("returns []", () => {
     expect(getProfileMatchTypes("none")).toEqual([]);
   });
+
+  it("returns ONC US Quality Core match type when profile URL contains onc/us-quality-core", () => {
+    expect(
+      getProfileMatchTypes(
+        "http://hl7.org/fhir/onc/us-quality-core/StructureDefinition/us-quality-core-encounter"
+      )
+    ).toEqual(["/onc/us-quality-core"]);
+  });
+
   it("renders reference type dropdown with correct options", async () => {
     (useQiCoreResource as jest.Mock).mockReturnValue({
       state: { bundle: { entry: [] } },

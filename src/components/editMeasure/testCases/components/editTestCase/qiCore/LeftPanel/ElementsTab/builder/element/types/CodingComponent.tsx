@@ -213,8 +213,8 @@ const CodingComponent = ({
     );
 
     const sortedOtherItems = uniqueItems.sort((a, b) => {
-      const aDisplay = getDisplayValue(a).toLowerCase();
-      const bDisplay = getDisplayValue(b).toLowerCase();
+      const aDisplay = (getDisplayValue(a) ?? "").toLowerCase();
+      const bDisplay = (getDisplayValue(b) ?? "").toLowerCase();
       return aDisplay.localeCompare(bDisplay);
     });
 
