@@ -388,15 +388,27 @@ export default function MeasureInformation(props: MeasureInformationProps) {
       if (INITIAL_VALUES.cqlLibraryName !== values.cqlLibraryName) {
         if (updatedCqlOb && updatedCqlOb.cql?.trim()) {
           const cqlErrors = parseContent(updatedCqlOb.cql);
-          const { errors, translation } = await validateContent(
-            updatedCqlOb.cql,
-            true,
-            terminologyServiceApi,
-            qdmElmTranslationService,
-            fhirElmTranslationService
-          );
-          if (cqlErrors.length === 0 && errors.length === 0) {
-            var updatedElm = JSON.stringify(translation);
+          try {
+            const { errors, translation } = await validateContent(
+              updatedCqlOb.cql,
+              true,
+              terminologyServiceApi,
+              qdmElmTranslationService,
+              fhirElmTranslationService
+            );
+            if (cqlErrors.length === 0 && errors.length === 0) {
+              var updatedElm = JSON.stringify(translation);
+            }
+          } catch (error: any) {
+            //401 is expected to come from UMLS for not logged in users
+            if (error?.status !== 401 && error?.response?.status !== 401) {
+              handleToast(
+                "danger",
+                "Unable to save measure information. Please try again.",
+                true
+              );
+              return;
+            }
           }
         }
       }
