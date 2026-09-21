@@ -164,8 +164,6 @@ describe("ReviewDialog", () => {
           measureId: "measure-1",
           measureSetId: "set-1",
           status: ReviewStatus.NOT_READY_FOR_REVIEW,
-          // Comments are owned by the Comments panel, so the dialog always
-          // sends the empty default rather than the previously persisted text.
           comment: "<p></p>",
         })
       );
