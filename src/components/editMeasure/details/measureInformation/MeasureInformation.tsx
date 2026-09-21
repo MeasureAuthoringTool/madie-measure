@@ -63,6 +63,9 @@ interface MeasureInformationProps {
   measureCanEdit: boolean;
 }
 
+export const CQL_LIBRARY_NAME_RECOMMENDATION =
+  "It is strongly recommended that your library name remain under 30 characters";
+
 export default function MeasureInformation(props: MeasureInformationProps) {
   const { setErrorMessage, measureCanEdit } = props;
   const measureServiceApi = useMeasureServiceApi();
@@ -385,15 +388,27 @@ export default function MeasureInformation(props: MeasureInformationProps) {
       if (INITIAL_VALUES.cqlLibraryName !== values.cqlLibraryName) {
         if (updatedCqlOb && updatedCqlOb.cql?.trim()) {
           const cqlErrors = parseContent(updatedCqlOb.cql);
-          const { errors, translation } = await validateContent(
-            updatedCqlOb.cql,
-            true,
-            terminologyServiceApi,
-            qdmElmTranslationService,
-            fhirElmTranslationService
-          );
-          if (cqlErrors.length === 0 && errors.length === 0) {
-            var updatedElm = JSON.stringify(translation);
+          try {
+            const { errors, translation } = await validateContent(
+              updatedCqlOb.cql,
+              true,
+              terminologyServiceApi,
+              qdmElmTranslationService,
+              fhirElmTranslationService
+            );
+            if (cqlErrors.length === 0 && errors.length === 0) {
+              var updatedElm = JSON.stringify(translation);
+            }
+          } catch (error: any) {
+            //401 is expected to come from UMLS for not logged in users
+            if (error?.status !== 401 && error?.response?.status !== 401) {
+              handleToast(
+                "danger",
+                "Unable to save measure information. Please try again.",
+                true
+              );
+              return;
+            }
           }
         }
       }
@@ -430,6 +445,8 @@ export default function MeasureInformation(props: MeasureInformationProps) {
             "Measurement Information Updated Successfully",
             true
           );
+          //@ts-ignore
+          document.querySelector('a[href="#page-header"]')?.focus();
           // updating measure will propagate update state site wide.
           updateMeasure(newMeasure);
         })
@@ -556,6 +573,7 @@ export default function MeasureInformation(props: MeasureInformationProps) {
               onBlur("cqlLibraryName");
             }}
             maxLength={64}
+            recommendation={CQL_LIBRARY_NAME_RECOMMENDATION}
           />
         </Box>
         <Box sx={formRowGapped}>
