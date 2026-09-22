@@ -20,6 +20,15 @@ const COMMENT_SECTIONS = [
   "Test Cases",
 ];
 
+const getCommentTextContent = (value: string) => {
+  if (!value) {
+    return "";
+  }
+
+  const parsedComment = new DOMParser().parseFromString(value, "text/html");
+  return parsedComment.body.textContent?.replace(/\u00a0/g, " ").trim() || "";
+};
+
 interface CommentsFlyoutPanelProps {
   open: boolean;
   onClose: () => void;
@@ -32,11 +41,7 @@ const CommentsFlyoutPanel = ({
   sectionName,
 }: CommentsFlyoutPanelProps) => {
   const [comment, setComment] = useState("");
-  const hasComment =
-    comment
-      .replace(/<[^>]*>/g, "")
-      .replace(/&nbsp;/g, " ")
-      .trim().length > 0;
+  const hasComment = getCommentTextContent(comment).length > 0;
 
   const handleClose = () => {
     setComment("");
