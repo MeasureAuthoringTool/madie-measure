@@ -396,6 +396,74 @@ describe("CodingComponent Tests", () => {
     expect(code).toHaveValue("C1");
   });
 
+  it("handles undefined value set titles while sorting menu options", async () => {
+    mockStructureDefinition.binding.strength = "extensible";
+    mockedAxios.get.mockResolvedValue({
+      data: mockBindingValueSet,
+    });
+
+    const valueSetWithUndefinedTitle = {
+      ...mockMeasureValueSet,
+      name: "NoTitleValueSet",
+      title: undefined,
+      url: "http://example.com/no-title",
+    } as ValueSet;
+
+    const alphaValueSet = {
+      ...mockMeasureValueSet,
+      name: "AlphaValueSet",
+      title: "Alpha Value Set",
+      url: "http://example.com/alpha",
+    } as ValueSet;
+
+    render(
+      <ApiContextProvider value={mockConfig}>
+        <ExecutionContextProvider
+          value={{
+            measureState: [{ model: Model.QICORE } as any, jest.fn()],
+            bundleState: [null, jest.fn()],
+            valueSetsState: [
+              [valueSetWithUndefinedTitle, alphaValueSet],
+              jest.fn(),
+            ],
+            executionContextReady: true,
+            executing: false,
+            setExecuting: jest.fn(),
+            contextFailure: false,
+          }}
+        >
+          <CodingComponent
+            canEdit={true}
+            structureDefinition={mockStructureDefinition}
+            label="test-label"
+            value={null}
+            onChange={mockOnChange}
+          />
+        </ExecutionContextProvider>
+      </ApiContextProvider>
+    );
+
+    const valueSetSelect = screen.getByRole("combobox", {
+      name: "Value Set / Direct Reference Code",
+    });
+    userEvent.click(valueSetSelect);
+
+    await waitFor(() => {
+      expect(screen.getAllByRole("option")).toHaveLength(4);
+    });
+
+    expect(screen.getAllByRole("option")[0]).toHaveTextContent("Custom Code");
+    expect(
+      screen.getByTestId("value-set-option-NoTitleValueSet")
+    ).toBeInTheDocument();
+    expect(
+      screen.getByTestId("value-set-option-AlphaValueSet")
+    ).toBeInTheDocument();
+    expect(
+      screen.getByTestId(`value-set-option-${mockBindingValueSet.name}`)
+    ).toBeInTheDocument();
+  });
+
   it("displays a saved custom code as read only on load", async () => {
     mockStructureDefinition.binding.strength = "extensible";
     mockedAxios.get.mockResolvedValue({

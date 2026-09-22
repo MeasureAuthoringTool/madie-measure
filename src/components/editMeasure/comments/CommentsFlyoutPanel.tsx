@@ -8,7 +8,7 @@ import {
   IconButton,
   Typography,
 } from "@mui/material";
-import { MessageSquare, ChevronDown, X } from "lucide-react";
+import { MessageSquare, X, ChevronRight } from "lucide-react";
 import { Button, RichTextEditor } from "@madie/madie-design-system/dist/react";
 import "./CommentsFlyoutPanel.scss";
 
@@ -80,7 +80,7 @@ const CommentsFlyoutPanel = ({
               className="comments-flyout-panel-accordion"
             >
               <AccordionSummary
-                expandIcon={<ChevronDown />}
+                expandIcon={<ChevronRight />}
                 className="comments-flyout-panel-accordion-summary"
               >
                 <Typography className="comments-flyout-panel-section-title">
