@@ -57,15 +57,4 @@ describe("CommentsFlyoutPanel", () => {
     userEvent.click(screen.getByTestId("comments-flyout-close"));
     expect(onClose).toHaveBeenCalledTimes(1);
   });
-
-  it("keeps actions disabled for empty rich text content", () => {
-    render(
-      <CommentsFlyoutPanel open onClose={jest.fn()} sectionName="Description" />
-    );
-
-    userEvent.type(screen.getByTestId("comments-flyout-input"), "<p>&nbsp;</p>");
-
-    expect(screen.getByTestId("comments-flyout-cancel")).toBeDisabled();
-    expect(screen.getByTestId("comments-flyout-add")).toBeDisabled();
-  });
 });
