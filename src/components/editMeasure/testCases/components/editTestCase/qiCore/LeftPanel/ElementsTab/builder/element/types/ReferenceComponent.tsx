@@ -47,6 +47,8 @@ export const getHighestPriorityResourceList = (
 // Helper function to determine profile match type and hierarchy
 export const getProfileMatchTypes = (profileUrl) => {
   if (profileUrl.includes("/fhir/us/qicore")) return ["/fhir/us/qicore"];
+  if (profileUrl.includes("/onc/us-quality-core"))
+    return ["/onc/us-quality-core"];
   if (profileUrl.includes("/fhir/us/core"))
     return ["/fhir/us/core", "/fhir/us/qicore"];
   if (profileUrl.includes("/fhir/StructureDefinition/"))

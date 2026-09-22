@@ -1,0 +1,97 @@
+.comments-flyout-panel {
+  width: min(100vw, 420px);
+  height: 100vh;
+  flex-direction: column;
+  display: flex;
+
+  @media (min-width: 600px) {
+    width: 25vw;
+    min-width: 320px;
+  }
+
+  .comments-flyout-panel-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    padding: 16px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+  }
+
+  .comments-flyout-panel-title-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .comments-flyout-panel-title {
+    font-family: Rubik, sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    letter-spacing: 0.8px;
+    color: #212121;
+    white-space: nowrap;
+    line-height: 1.2;
+  }
+
+  .comments-flyout-panel-sections {
+    flex: 1;
+    overflow-y: auto;
+  }
+
+  .comments-flyout-panel-accordion {
+    box-shadow: none;
+    border-bottom: 1px solid #aeb0b5;
+
+    &::before {
+      display: none;
+    }
+
+    .MuiAccordionSummary-content .comments-flyout-panel-section-title {
+      font-family: Rubik, sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      color: #212121;
+      white-space: nowrap;
+    }
+  }
+
+  .comments-flyout-panel-accordion-summary {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    padding: 0 16px;
+    background: rgb(241, 241, 241);
+    border-top-width: medium;
+    border-right-width: medium;
+    border-bottom: 1px solid #eeeeee;
+    border-left-width: medium;
+    border-top-style: none;
+    border-right-style: none;
+    border-left-style: none;
+    border-top-color: currentcolor;
+    border-right-color: currentcolor;
+    border-left-color: currentcolor;
+    border-image: none;
+    cursor: pointer;
+    text-align: left;
+
+    .MuiAccordionSummary-expandIconWrapper.Mui-expanded {
+      transform: rotate(90deg);
+    }
+  }
+
+  .comments-flyout-panel-composer {
+    border-top: 1px solid rgba(0, 0, 0, 0.12);
+    padding: 16px;
+    background-color: #fff;
+  }
+
+  .comments-flyout-panel-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 16px;
+  }
+}
