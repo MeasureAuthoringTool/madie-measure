@@ -480,8 +480,6 @@ export default function ReferenceComponent({
                 add_new_resources: [newMadieResource],
               },
             });
-            // append
-            // setSelectedReferenceId("add_new_id");
             setOpen(false);
           },
           maxWidth: "sm",
