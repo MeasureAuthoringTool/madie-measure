@@ -23,17 +23,20 @@ export const getReferenceComponentLabel = (label: string) => {
   const componentLabel = label
     .split(".")
     ?.pop()
-    ?.replace(/\[.*\]$/, "");
+    ?.replace(/\[.*]$/, "");
   return componentLabel ? _.startCase(componentLabel) : "";
 };
 
 export const getHighestPriorityResourceList = (
   qiCoreProfiles,
+  usQualityCoreProfiles,
   usCoreProfiles,
   baseFhirProfiles
 ) => {
   if (qiCoreProfiles.length > 0) {
     return qiCoreProfiles;
+  } else if (usQualityCoreProfiles.length > 0) {
+    return usQualityCoreProfiles;
   } else if (usCoreProfiles.length > 0) {
     return usCoreProfiles;
   } else {
@@ -41,15 +44,24 @@ export const getHighestPriorityResourceList = (
   }
 };
 
-// Helper function to determine profile match type and hierarchy
+// Helper function to determine profile match type and hierarchy.
+// A less-specific reference target should match equal-or-more-specific
+// resources. Specificity: qicore | us-quality-core > us-core > base FHIR.
+// us-quality-core and us-core both derive from base FHIR, so a base FHIR
+// (or us-core) target must also match us-quality-core resources.
 export const getProfileMatchTypes = (profileUrl) => {
   if (profileUrl.includes("/fhir/us/qicore")) return ["/fhir/us/qicore"];
   if (profileUrl.includes("/onc/us-quality-core"))
     return ["/onc/us-quality-core"];
   if (profileUrl.includes("/fhir/us/core"))
-    return ["/fhir/us/core", "/fhir/us/qicore"];
+    return ["/fhir/us/core", "/onc/us-quality-core", "/fhir/us/qicore"];
   if (profileUrl.includes("/fhir/StructureDefinition/"))
-    return ["/fhir/StructureDefinition/", "/fhir/us/core/", "/fhir/us/qicore/"];
+    return [
+      "/fhir/StructureDefinition/",
+      "/fhir/us/core",
+      "/onc/us-quality-core",
+      "/fhir/us/qicore",
+    ];
   return [];
 };
 
@@ -178,6 +190,11 @@ export default function ReferenceComponent({
   const qiCoreProfiles = possibleResourceOptionsForAddNew.filter((rp) =>
     rp.profile.includes("qicore")
   );
+
+  const usQualityCoreProfiles = possibleResourceOptionsForAddNew.filter((rp) =>
+    rp.profile.includes("/onc/us-quality-core")
+  );
+
   const usCoreProfiles = possibleResourceOptionsForAddNew.filter((rp) =>
     rp.profile.includes("us-core")
   );
@@ -186,11 +203,12 @@ export default function ReferenceComponent({
       rp.profile.includes("fhir/StructureDefinition") &&
       !rp.profile.includes("/us/")
   );
-  // specificity qi-core -> us-core -> base fhir
+  // specificity qi-core | us-quality-core -> us-core -> base fhir
   // if us-core selected, check to see if qi-core is available as well
 
   const finalList = getHighestPriorityResourceList(
     qiCoreProfiles,
+    usQualityCoreProfiles,
     usCoreProfiles,
     baseFhirProfiles
   );
@@ -209,7 +227,7 @@ export default function ReferenceComponent({
 
   // Store selected profile URL instead of just type
   const [selectedProfileUrl, setSelectedProfileUrl] = useState<string>(
-    value?.referenceProfileUrl || ""
+    value?.reference || ""
   );
 
   // Use new getFinalOptions logic
@@ -227,23 +245,38 @@ export default function ReferenceComponent({
   useEffect(() => {
     const newType = value?.reference?.split("/")?.[0] || "";
     const newId = value?.reference || "";
-    setSelectedReferenceType(newType);
 
     // Initialize selectedProfileUrl - derive it from the reference type if it exists
     const initialProfileUrl = findProfileUrlFromReferenceType(
       newType,
       resourceProfileOptions
     );
-    setSelectedProfileUrl(initialProfileUrl);
+    // Only sync the type/profile from the incoming reference when we can
+    // resolve a profile for it. The `value` prop (spread from the parent's
+    // formik.getFieldProps) can lag a render behind formikContext.values, so a
+    // transient empty reference would otherwise clear a valid user selection
+    // (resetting the Reference Type dropdown).
+    if (initialProfileUrl) {
+      setSelectedReferenceType(newType);
+      setSelectedProfileUrl(initialProfileUrl);
+    }
     // if the earmark is present, we do not want to update our local state.
     const addNewResources = formikContext.values["add_new_resources"] || [];
     if (addNewResources.length === 0) {
       setSelectedReferenceId(newId);
     }
-  }, [value, formikContext.values]); // Use formikContext.values for dependency
+    // Re-sync only when the incoming reference string (or the loaded profile
+    // options) changes - not on every formik value change, which caused the
+    // Reference Type box to reset while selecting a value.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [value?.reference, resourceProfileOptions]);
 
   const triggerAddNewFlow = () => {
     // what's the list length of possible profiles of type per model
+    if (!finalResourceOptionForAddNew) {
+      // No matching profile bucket (e.g. unmapped reference type) - nothing to build
+      return;
+    }
     const newMadieResource = buildMadieResourceFromResourceIdentifier(
       finalResourceOptionForAddNew
     );
@@ -448,7 +481,7 @@ export default function ReferenceComponent({
               },
             });
             // append
-            setSelectedReferenceId("add_new_id");
+            // setSelectedReferenceId("add_new_id");
             setOpen(false);
           },
           maxWidth: "sm",

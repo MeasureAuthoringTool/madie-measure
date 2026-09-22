@@ -107,6 +107,66 @@ describe("ReferenceComponent", () => {
     ).toEqual(["/onc/us-quality-core"]);
   });
 
+  it("returns only QICore for a QICore profile URL", () => {
+    expect(
+      getProfileMatchTypes(
+        "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-encounter"
+      )
+    ).toEqual(["/fhir/us/qicore"]);
+  });
+
+  it("includes US Quality Core (and QICore) in the hierarchy for a US Core profile URL", () => {
+    expect(
+      getProfileMatchTypes(
+        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-encounter"
+      )
+    ).toEqual(["/fhir/us/core", "/onc/us-quality-core", "/fhir/us/qicore"]);
+  });
+
+  it("includes US Core, US Quality Core and QICore in the hierarchy for a base FHIR profile URL", () => {
+    expect(
+      getProfileMatchTypes(
+        "http://hl7.org/fhir/StructureDefinition/ServiceRequest"
+      )
+    ).toEqual([
+      "/fhir/StructureDefinition/",
+      "/fhir/us/core",
+      "/onc/us-quality-core",
+      "/fhir/us/qicore",
+    ]);
+  });
+
+  it("matches a US Quality Core resource when the reference target is a base FHIR profile", () => {
+    // Regression guard: Encounter.basedOn targets base FHIR ServiceRequest, but
+    // the resource in the bundle is profiled as US Quality Core. It must still
+    // resolve so the saved reference populates the dropdown.
+    const bundleEntries = [
+      {
+        resource: {
+          resourceType: "ServiceRequest",
+          id: "sr-1",
+          meta: {
+            profile: [
+              "http://fhir.org/guides/onc/us-quality-core/StructureDefinition/us-quality-core-servicerequest",
+            ],
+          },
+        },
+      },
+    ];
+
+    const result = getFinalOptions(
+      "ServiceRequest",
+      "http://hl7.org/fhir/StructureDefinition/ServiceRequest",
+      bundleEntries,
+      undefined
+    );
+
+    expect(result).toEqual([
+      { label: "ServiceRequest/sr-1", value: "ServiceRequest/sr-1" },
+      { label: "ID Not Present (Add New)", value: "add_new_id" },
+    ]);
+  });
+
   it("renders reference type dropdown with correct options", async () => {
     (useQiCoreResource as jest.Mock).mockReturnValue({
       state: { bundle: { entry: [] } },
@@ -859,6 +919,13 @@ describe("ReferenceComponent", () => {
           "http://hl7.org/fhir/us/core/StructureDefinition/us-core-encounter",
       },
     ];
+    const usQualityCoreProfiles = [
+      {
+        id: "encounter-usqualitycore",
+        profile:
+          "http://hl7.org/fhir/us/onc/us-quality-core/StructureDefinition/us-quality-core-encounter",
+      },
+    ];
     const baseFhirProfiles = [
       {
         id: "encounter-base",
@@ -868,14 +935,23 @@ describe("ReferenceComponent", () => {
     expect(
       getHighestPriorityResourceList(
         qiCoreProfiles,
+        usQualityCoreProfiles,
         usCoreProfiles,
         baseFhirProfiles
       )
     ).toBe(qiCoreProfiles);
     expect(
-      getHighestPriorityResourceList([], usCoreProfiles, baseFhirProfiles)
+      getHighestPriorityResourceList(
+        [],
+        usQualityCoreProfiles,
+        usCoreProfiles,
+        baseFhirProfiles
+      )
+    ).toBe(usQualityCoreProfiles);
+    expect(
+      getHighestPriorityResourceList([], [], usCoreProfiles, baseFhirProfiles)
     ).toBe(usCoreProfiles);
-    expect(getHighestPriorityResourceList([], [], baseFhirProfiles)).toBe(
+    expect(getHighestPriorityResourceList([], [], [], baseFhirProfiles)).toBe(
       baseFhirProfiles
     );
   });
