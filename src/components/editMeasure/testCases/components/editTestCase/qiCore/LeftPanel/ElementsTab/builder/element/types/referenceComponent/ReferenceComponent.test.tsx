@@ -4,16 +4,16 @@ import ReferenceComponent, {
   getReferenceComponentLabel,
   getHighestPriorityResourceList,
   getProfileMatchTypes,
-  getFinalOptions,
+  getSpecificResourceOptions,
 } from "./ReferenceComponent";
-import ResourceContext from "../../ResourceContext";
-import { useQiCoreResource } from "../../../../../../../../util/QiCorePatientProvider";
+import ResourceContext from "../../../ResourceContext";
+import { useQiCoreResource } from "../../../../../../../../../util/QiCorePatientProvider";
 import userEvent from "@testing-library/user-event";
 import { FormikProvider, FormikContextType } from "formik";
 
-jest.mock("../../../../../../../../util/QiCorePatientProvider", () => {
+jest.mock("../../../../../../../../../util/QiCorePatientProvider", () => {
   const actual = jest.requireActual(
-    "../../../../../../../../util/QiCorePatientProvider"
+    "../../../../../../../../../util/QiCorePatientProvider"
   );
   return {
     ...actual,
@@ -154,7 +154,7 @@ describe("ReferenceComponent", () => {
       },
     ];
 
-    const result = getFinalOptions(
+    const result = getSpecificResourceOptions(
       "ServiceRequest",
       "http://hl7.org/fhir/StructureDefinition/ServiceRequest",
       bundleEntries,
@@ -1399,7 +1399,7 @@ describe("ReferenceComponent", () => {
 
     const resource = { id: "exclude-me" };
 
-    const result = getFinalOptions(
+    const result = getSpecificResourceOptions(
       selectedReferenceType,
       selectedProfileUrl,
       bundleEntries,
