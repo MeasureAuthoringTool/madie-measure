@@ -128,28 +128,35 @@ export default function ReferenceComponent({
       setSelectedReferenceType(newType);
       setSelectedProfileUrl(initialProfileUrl);
     }
-    // Once the referenced resource actually exists in the bundle it shows up as
-    // a concrete option in the second ("Specify") dropdown. When that happens we
-    // must reflect it as the selected value even if we were still displaying the
-    // "ID Not Present (Add New)" earmark - otherwise the dropdown stays pinned to
-    // "add_new_id" and never populates with the newly added resource. This also
-    // covers the case where `value.reference` did not change across an
-    // apply/re-initialize (same reference string) but the option list did.
-    const referencedResourceIsInBundle =
-      !!newId && specificResourceOptions.some((opt) => opt.value === newId);
-
-    // if the earmark is present, we do not want to update our local state -
-    // unless the referenced resource is now present in the bundle (committed).
+    // if the earmark is present, we do not want to update our local state.
     const addNewResources = formikContext.values["add_new_resources"] || [];
-    if (referencedResourceIsInBundle || addNewResources.length === 0) {
+    if (addNewResources.length === 0) {
       setSelectedReferenceId(newId);
     }
-    // Re-sync when the incoming reference string, the loaded profile options, or
-    // the available specific-resource options change (e.g. the new resource was
-    // committed to the bundle) - not on every formik value change, which caused
-    // the Reference Type box to reset while selecting a value.
+    // Re-sync only when the incoming reference string (or the loaded profile
+    // options) changes - not on every formik value change, which caused the
+    // Reference Type box to reset while selecting a value.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [value?.reference, referenceTypeOptions, specificResourceOptions]);
+  }, [value?.reference, referenceTypeOptions]);
+
+  // Once the referenced resource actually exists in the bundle it shows up as a
+  // concrete option in the second ("Specify") dropdown. When that happens we must
+  // reflect it as the selected value even if we were still displaying the
+  // "ID Not Present (Add New)" earmark - otherwise the dropdown stays pinned to
+  // "add_new_id" and never populates with the newly added resource. This is kept
+  // separate from the type/profile sync above so it only ever touches
+  // selectedReferenceId and never fights the user changing the Reference Type.
+  useEffect(() => {
+    const newId = value?.reference || "";
+    if (!newId) return;
+    const referencedResourceIsInBundle = specificResourceOptions.some(
+      (opt) => opt.value === newId
+    );
+    if (referencedResourceIsInBundle && selectedReferenceId !== newId) {
+      setSelectedReferenceId(newId);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [value?.reference, specificResourceOptions]);
 
   const triggerAddNewFlow = () => {
     // what's the list length of possible profiles of type per model
