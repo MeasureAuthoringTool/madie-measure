@@ -23,6 +23,60 @@ export const getReferenceComponentLabel = (label: string) => {
   return componentLabel ? _.startCase(componentLabel) : "";
 };
 
+// The abstract base FHIR "Resource" type. When an element's reference targets
+// this profile it is a generic `Reference(Resource)` and can point at any
+// resource valid for the measure model - it is never a valid concrete target
+// on its own.
+export const GENERIC_RESOURCE_PROFILE_URL =
+  "http://hl7.org/fhir/StructureDefinition/Resource";
+// Cross-version profile title prefix
+const CROSS_VERSION_PROFILE_TITLE_PREFIX = "Cross-version Profile";
+
+// Detects a generic `Reference(Resource)`: a Reference whose target is the
+// abstract base Resource profile (or which declares no concrete targetProfile).
+export const isGenericResourceReference = (
+  structureDefinition: ElementDefinition
+): boolean => {
+  const targetProfiles =
+    structureDefinition?.type?.find(
+      (type: { code: string }) => type.code === "Reference"
+    )?.targetProfile || [];
+
+  if (targetProfiles.length === 0) return true;
+  return targetProfiles.some((profile) =>
+    profile.includes(GENERIC_RESOURCE_PROFILE_URL)
+  );
+};
+
+// Maps every profile applicable to the measure model to a Reference Type
+// option, de-duplicated by profile URL and sorted by label. Used for generic
+// `Reference(Resource)` where all model profiles are valid targets. The abstract
+// generic Resource profile and cross versioned profiles are excluded because it is not a valid
+// reference target.
+export const mapProfilesToReferenceTypeOptions = (
+  allResourceProfiles: ResourceProfile[]
+): ResourceProfileOption[] =>
+  allResourceProfiles
+    .filter(
+      (resourceProfile) =>
+        !resourceProfile.profile.startsWith(
+          CROSS_VERSION_PROFILE_TITLE_PREFIX
+        ) && resourceProfile.type !== "Resource"
+    )
+    .filter(
+      (resourceProfile, index, profiles) =>
+        index ===
+        profiles.findIndex(
+          (profile) => profile.profile === resourceProfile.profile
+        )
+    )
+    .map((resourceProfile) => ({
+      label: resourceProfile.title,
+      value: resourceProfile.type,
+      profile: resourceProfile.profile,
+    }))
+    .sort((a, b) => a.label.toLowerCase().localeCompare(b.label.toLowerCase()));
+
 export const getHighestPriorityResourceList = (
   qiCoreProfiles: ResourceProfile[],
   usQualityCoreProfiles: ResourceProfile[],
@@ -116,12 +170,23 @@ export const getReferenceTypeOptions = (
   structureDefinition: ElementDefinition,
   allResourceProfiles: ResourceProfile[] | null = []
 ): ResourceProfileOption[] => {
+  const profiles = allResourceProfiles ?? [];
+
+  // Generic `Reference(Resource)`: expand to every profile valid for the
+  // measure model. `allResourceProfiles` is already scoped to the measure model
+  // by the backend (QI-Core -> QI-Core/US Core/base FHIR; US Quality Core ->
+  // US Quality Core/US Core/base FHIR), so no cross-profile options leak in and
+  // the invalid abstract Resource option is dropped by the mapper.
+  if (isGenericResourceReference(structureDefinition)) {
+    return mapProfilesToReferenceTypeOptions(profiles);
+  }
+
   const targetProfiles =
     structureDefinition.type?.find(
       (type: { code: string }) => type.code === "Reference"
     )?.targetProfile || [];
 
-  return (allResourceProfiles ?? [])
+  return profiles
     .filter((resourceProfile) =>
       targetProfiles.includes(resourceProfile.profile)
     )
