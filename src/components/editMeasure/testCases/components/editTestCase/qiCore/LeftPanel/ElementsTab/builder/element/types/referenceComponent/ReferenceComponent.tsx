@@ -15,7 +15,6 @@ import {
   buildMadieResourceFromResourceIdentifier,
   removeUndefinedProperties,
 } from "../../../../../../../../../api/fhirDefinitionServiceUtilities";
-// import "./ReferenceComponent.scss";
 import AddNewReferenceDialog from "./AddNewReferenceDialog";
 import {
   findProfileUrlFromReferenceType,
