@@ -50,6 +50,7 @@ import {
   routeHandlerStore,
   useMeasureServiceApi,
   useTerminologyServiceApi,
+  HowItWorks,
 } from "@madie/madie-util";
 import StatusHandler from "./StatusHandler";
 import "./StatusHandler.scss";
@@ -76,6 +77,14 @@ import LockedMessageModal from "../../common/lockedMessageModal/LockedMessageMod
 import useServiceConfig from "../../../api/useServiceConfig";
 import useFhirElmTranslationServiceApi from "../../../api/useFhirElmTranslationServiceApi";
 import useQdmElmTranslationServiceApi from "../../../api/useQdmElmTranslationServiceApi";
+
+export const CQL_EDITOR_HOW_IT_WORKS =
+  "The CQL Editor is where you create and maintain your measure's Clinical " +
+  "Quality Language (CQL). Use the editor to write CQL, search and replace " +
+  "text, apply value sets and codes, and manage includes, parameters, " +
+  "definitions, and functions. Keyboard users can press Esc to exit the " +
+  "editor, then Tab or Shift + Tab to continue navigating through the page. " +
+  "Remember to save your changes before leaving the editor.";
 
 export const mapErrorsToAceAnnotations = (
   errors: ElmTranslationError[]
@@ -872,6 +881,11 @@ const MeasureEditor = ({ measureCanEdit, measureLockedBy }) => {
           outboundAnnotations={outboundAnnotations}
           hasSubTitle={false}
         />
+      </div>
+      <div id="cql-editor-how-it-works-row">
+        <HowItWorks align="left" contentId="cql-editor-how-it-works">
+          <p>{CQL_EDITOR_HOW_IT_WORKS}</p>
+        </HowItWorks>
       </div>
       <div tw="flex flex-wrap mx-8 shadow-lg rounded-md border border-slate bg-white">
         <div tw="flex-none sm:w-full">

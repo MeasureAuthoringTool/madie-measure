@@ -72,6 +72,9 @@ jest.mock("@madie/madie-util", () => ({
     state: { canTravel: false, pendingPath: "" },
     initialState: { canTravel: false, pendingPath: "" },
   },
+  HowItWorks: ({ children }: any) => (
+    <div data-testid="how-it-works">{children}</div>
+  ),
 }));
 
 const MEASURE_CREATEDBY = "testuser@example.com"; //#nosec
@@ -741,6 +744,21 @@ describe("MeasureEditor component", () => {
     expect(screen.getByTestId("library-warning")).toHaveTextContent(
       "Concept Constructs are not supported in MADiE. It has been removed."
     );
+  });
+  it("hands the CQL editor guidance text to HowItWorks", async () => {
+    renderEditor(measure);
+
+    await waitFor(() => {
+      expect(screen.getByTestId("how-it-works")).toHaveTextContent(
+        "The CQL Editor is where you create and maintain your measure's " +
+          "Clinical Quality Language (CQL). Use the editor to write CQL, " +
+          "search and replace text, apply value sets and codes, and manage " +
+          "includes, parameters, definitions, and functions. Keyboard users " +
+          "can press Esc to exit the editor, then Tab or Shift + Tab to " +
+          "continue navigating through the page. Remember to save your " +
+          "changes before leaving the editor."
+      );
+    });
   });
 });
 

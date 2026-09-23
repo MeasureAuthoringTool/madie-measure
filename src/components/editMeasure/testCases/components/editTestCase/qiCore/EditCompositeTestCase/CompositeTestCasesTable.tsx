@@ -1,4 +1,4 @@
-import { formatCmsId } from "@madie/madie-util";
+import { formatCmsId, HowItWorks } from "@madie/madie-util";
 import React, { useMemo, useState } from "react";
 import {
   ColumnDef,
@@ -34,7 +34,7 @@ import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { TestCase, Measure } from "@madie/madie-models";
-import HowItWorks from "../LeftPanel/ElementsTab/builder/HowItWorks/HowItWorks";
+import { INSERT_TEST_CASE_HOW_IT_WORKS } from "./howItWorksContent";
 
 const TH = tw.th`p-3 text-left text-sm font-bold capitalize`;
 
@@ -290,11 +290,14 @@ export default function CompositeTestCasesTable({
               Back to All Profiles
             </Button>
           </div>
-          <div tw="mb-4" className="how-it-works-flush-left">
+          <div tw="mb-4">
             <HowItWorks
+              align="left"
               isOpen={howItWorksOpen}
               onOpenChange={setHowItWorksOpen}
-            />
+            >
+              {INSERT_TEST_CASE_HOW_IT_WORKS}
+            </HowItWorks>
           </div>
         </>
       ) : (
@@ -317,10 +320,9 @@ export default function CompositeTestCasesTable({
             />
             Back to All Measures
           </Button>
-          <HowItWorks
-            isOpen={howItWorksOpen}
-            onOpenChange={setHowItWorksOpen}
-          />
+          <HowItWorks isOpen={howItWorksOpen} onOpenChange={setHowItWorksOpen}>
+            {INSERT_TEST_CASE_HOW_IT_WORKS}
+          </HowItWorks>
         </div>
       )}
 

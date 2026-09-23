@@ -196,4 +196,19 @@ export const ShareAction = ({ measures, activeTab, onClick }: any) => {
 export const ShareDialog = ({ open }: any) =>
   open ? <div data-testid="share-dialog">Share Dialog</div> : null;
 
+export const HowItWorks = ({ children, align, isOpen, onOpenChange }: any) => (
+  <div data-testid="how-it-works" data-align={align}>
+    {isOpen ? (
+      <div data-testid="how-it-works-content">{children}</div>
+    ) : (
+      <button
+        data-testid="how-it-works-link"
+        onClick={() => onOpenChange && onOpenChange(true)}
+      >
+        How it works
+      </button>
+    )}
+  </div>
+);
+
 export { formatCmsId, padCmsId } from "../cmsIdFormatterStubs";

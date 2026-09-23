@@ -10,13 +10,6 @@ jest.mock("./CompositeMeasuresTable", () => ({
   ),
 }));
 
-jest.mock("../LeftPanel/ElementsTab/builder/HowItWorks/HowItWorks", () => ({
-  __esModule: true,
-  default: ({ isOpen }) => (
-    <div data-testid="how-it-works">{isOpen ? "open" : "closed"}</div>
-  ),
-}));
-
 describe("CompositeProfileViews", () => {
   const defaultProps = {
     howItWorksOpen: false,
@@ -61,13 +54,13 @@ describe("CompositeProfileViews", () => {
     expect(defaultProps.setAvailableTab).toHaveBeenCalledWith("profiles");
   });
 
-  it("applies class when howItWorksOpen is true", () => {
+  it("renders HowItWorks when howItWorksOpen is true", () => {
     render(<CompositeProfilesViews {...defaultProps} howItWorksOpen={true} />);
 
-    const howItWorksContainer =
-      screen.getByTestId("how-it-works").parentElement;
-
-    expect(howItWorksContainer).toHaveClass("how-it-works-flush-left");
+    expect(screen.getByTestId("how-it-works")).toHaveAttribute(
+      "data-align",
+      "left"
+    );
   });
 
   it("does not render completion text when no measures", () => {
