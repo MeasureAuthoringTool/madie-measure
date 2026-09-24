@@ -46,6 +46,8 @@ import {
 import { MeasureSearchFilters } from "../../../../shared/MeasureSearchFilters";
 import styled from "styled-components";
 
+const DEFAULT_PAGE_LIMIT = 5;
+
 const TH = tw.th`p-3 text-left text-sm font-bold capitalize`;
 
 const SelectedRow = styled.tr`
@@ -87,7 +89,7 @@ export default function AddComponentsDialog({
   );
 
   const measureServiceApi = useRef(useMeasureServiceApi()).current;
-  const [limit, setLimit] = useState(5);
+  const [limit, setLimit] = useState(DEFAULT_PAGE_LIMIT);
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState<number>(0);
   const [totalItems, setTotalItems] = useState<number>(0);
@@ -209,6 +211,14 @@ export default function AddComponentsDialog({
       });
     }
   };
+  const resetDialogState = () => {
+    setExpandedRowSelection({});
+    setExpandedSectionMap({});
+    setPage(0);
+    setLimit(DEFAULT_PAGE_LIMIT);
+    setSorting([]);
+    blankSearchCriteria();
+  };
 
   useEffect(() => {
     if (open) {
@@ -219,9 +229,7 @@ export default function AddComponentsDialog({
       });
       setRowSelection(newRowSelection);
     } else {
-      // Reset all expanded state when dialog closes
-      setExpandedRowSelection({});
-      setExpandedSectionMap({});
+      resetDialogState();
     }
   }, [open, preselectedIds]);
 
@@ -868,6 +876,7 @@ export default function AddComponentsDialog({
         }}
         handleLimitChange={(e) => {
           setLimit(e.target.value);
+          setPage(0);
           setMeasureList([]);
         }}
         count={totalPages}

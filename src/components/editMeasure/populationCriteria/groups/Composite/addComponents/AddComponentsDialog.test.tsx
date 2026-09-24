@@ -1260,6 +1260,352 @@ describe("AddComponentsDialog", () => {
     ).not.toBeInTheDocument();
   });
 
+  it("resets to the first page when the dialog is closed and reopened", async () => {
+    const mockSearchMeasures = jest.fn().mockResolvedValue({
+      content: data,
+      totalPages: 3,
+      totalElements: 15,
+      numberOfElements: 5,
+      pageable: { offset: 0 },
+    });
+
+    useMeasureServiceApi.mockReturnValue({
+      searchMeasuresByCriteria: mockSearchMeasures,
+      getMeasuresByMeasureSetId: jest.fn(),
+    });
+
+    const { rerender } = render(
+      <AddComponentsDialog
+        open={true}
+        onClose={onCloseMock}
+        measure={mockMeasure}
+        compositeScoring="Opportunity"
+        components={[]}
+        submitComponentForm={jest.fn()}
+      />
+    );
+
+    await waitFor(() => {
+      expect(mockSearchMeasures).toHaveBeenCalled();
+    });
+
+    await userEvent.click(screen.getByRole("button", { name: /next/i }));
+
+    await waitFor(() => {
+      const lastCall =
+        mockSearchMeasures.mock.calls[mockSearchMeasures.mock.calls.length - 1];
+      expect(lastCall[2]).toBe(1);
+    });
+
+    rerender(
+      <AddComponentsDialog
+        open={false}
+        onClose={onCloseMock}
+        measure={mockMeasure}
+        compositeScoring="Opportunity"
+        components={[]}
+        submitComponentForm={jest.fn()}
+      />
+    );
+
+    mockSearchMeasures.mockClear();
+
+    rerender(
+      <AddComponentsDialog
+        open={true}
+        onClose={onCloseMock}
+        measure={mockMeasure}
+        compositeScoring="Opportunity"
+        components={[]}
+        submitComponentForm={jest.fn()}
+      />
+    );
+
+    await waitFor(() => {
+      expect(mockSearchMeasures).toHaveBeenCalled();
+    });
+
+    const lastCall =
+      mockSearchMeasures.mock.calls[mockSearchMeasures.mock.calls.length - 1];
+    expect(lastCall[2]).toBe(0);
+  });
+
+  it("resets the page size when the dialog is closed and reopened", async () => {
+    const mockSearchMeasures = jest.fn().mockResolvedValue({
+      content: data,
+      totalPages: 3,
+      totalElements: 15,
+      numberOfElements: 5,
+      pageable: { offset: 0 },
+    });
+
+    useMeasureServiceApi.mockReturnValue({
+      searchMeasuresByCriteria: mockSearchMeasures,
+      getMeasuresByMeasureSetId: jest.fn(),
+    });
+
+    const { rerender } = render(
+      <AddComponentsDialog
+        open={true}
+        onClose={onCloseMock}
+        measure={mockMeasure}
+        compositeScoring="Opportunity"
+        components={[]}
+        submitComponentForm={jest.fn()}
+      />
+    );
+
+    await waitFor(() => {
+      expect(mockSearchMeasures).toHaveBeenCalled();
+    });
+
+    const limitSelect = screen
+      .getAllByRole("combobox")
+      .find(
+        (select) =>
+          select.getAttribute("aria-labelledby") === "pagination-limit-select"
+      );
+    await userEvent.click(limitSelect);
+    await userEvent.click(screen.getByRole("option", { name: "10" }));
+
+    await waitFor(() => {
+      const lastCall =
+        mockSearchMeasures.mock.calls[mockSearchMeasures.mock.calls.length - 1];
+      expect(lastCall[1]).toBe(10);
+    });
+
+    rerender(
+      <AddComponentsDialog
+        open={false}
+        onClose={onCloseMock}
+        measure={mockMeasure}
+        compositeScoring="Opportunity"
+        components={[]}
+        submitComponentForm={jest.fn()}
+      />
+    );
+
+    mockSearchMeasures.mockClear();
+
+    rerender(
+      <AddComponentsDialog
+        open={true}
+        onClose={onCloseMock}
+        measure={mockMeasure}
+        compositeScoring="Opportunity"
+        components={[]}
+        submitComponentForm={jest.fn()}
+      />
+    );
+
+    await waitFor(() => {
+      expect(mockSearchMeasures).toHaveBeenCalled();
+    });
+
+    const lastCall =
+      mockSearchMeasures.mock.calls[mockSearchMeasures.mock.calls.length - 1];
+    expect(lastCall[1]).toBe(5);
+  });
+
+  it("resets sorting when the dialog is closed and reopened", async () => {
+    const mockSearchMeasures = jest.fn().mockResolvedValue({
+      content: data,
+      totalPages: 3,
+      totalElements: 15,
+      numberOfElements: 5,
+      pageable: { offset: 0 },
+    });
+
+    useMeasureServiceApi.mockReturnValue({
+      searchMeasuresByCriteria: mockSearchMeasures,
+      getMeasuresByMeasureSetId: jest.fn(),
+    });
+
+    const { rerender } = render(
+      <AddComponentsDialog
+        open={true}
+        onClose={onCloseMock}
+        measure={mockMeasure}
+        compositeScoring="Opportunity"
+        components={[]}
+        submitComponentForm={jest.fn()}
+      />
+    );
+
+    await waitFor(() => {
+      expect(mockSearchMeasures).toHaveBeenCalled();
+    });
+
+    await userEvent.click(screen.getByRole("button", { name: "Measure Name" }));
+
+    await waitFor(() => {
+      const lastCall =
+        mockSearchMeasures.mock.calls[mockSearchMeasures.mock.calls.length - 1];
+      expect(lastCall[3]).toBe("measureName");
+      expect(lastCall[4]).toBe("ASC");
+    });
+
+    rerender(
+      <AddComponentsDialog
+        open={false}
+        onClose={onCloseMock}
+        measure={mockMeasure}
+        compositeScoring="Opportunity"
+        components={[]}
+        submitComponentForm={jest.fn()}
+      />
+    );
+
+    mockSearchMeasures.mockClear();
+
+    rerender(
+      <AddComponentsDialog
+        open={true}
+        onClose={onCloseMock}
+        measure={mockMeasure}
+        compositeScoring="Opportunity"
+        components={[]}
+        submitComponentForm={jest.fn()}
+      />
+    );
+
+    await waitFor(() => {
+      expect(mockSearchMeasures).toHaveBeenCalled();
+    });
+
+    const lastCall =
+      mockSearchMeasures.mock.calls[mockSearchMeasures.mock.calls.length - 1];
+    expect(lastCall[3]).toBe("lastModifiedAt");
+    expect(lastCall[4]).toBe("DESC");
+  });
+
+  it("clears the search criteria when the dialog is closed and reopened", async () => {
+    const mockSearchMeasures = jest.fn().mockResolvedValue({
+      content: data,
+      totalPages: 3,
+      totalElements: 15,
+      numberOfElements: 5,
+      pageable: { offset: 0 },
+    });
+
+    useMeasureServiceApi.mockReturnValue({
+      searchMeasuresByCriteria: mockSearchMeasures,
+      getMeasuresByMeasureSetId: jest.fn(),
+    });
+
+    const { rerender } = render(
+      <AddComponentsDialog
+        open={true}
+        onClose={onCloseMock}
+        measure={mockMeasure}
+        compositeScoring="Opportunity"
+        components={[]}
+        submitComponentForm={jest.fn()}
+      />
+    );
+
+    await waitFor(() => {
+      expect(mockSearchMeasures).toHaveBeenCalled();
+    });
+
+    const searchInput = screen.getByPlaceholderText("Search");
+    userEvent.type(searchInput, "TestSearch");
+    userEvent.click(screen.getByTestId("test-cases-trigger-search"));
+
+    await waitFor(() => {
+      const lastCall =
+        mockSearchMeasures.mock.calls[mockSearchMeasures.mock.calls.length - 1];
+      expect(lastCall[5].searchField).toBe("TestSearch");
+    });
+
+    rerender(
+      <AddComponentsDialog
+        open={false}
+        onClose={onCloseMock}
+        measure={mockMeasure}
+        compositeScoring="Opportunity"
+        components={[]}
+        submitComponentForm={jest.fn()}
+      />
+    );
+
+    mockSearchMeasures.mockClear();
+
+    rerender(
+      <AddComponentsDialog
+        open={true}
+        onClose={onCloseMock}
+        measure={mockMeasure}
+        compositeScoring="Opportunity"
+        components={[]}
+        submitComponentForm={jest.fn()}
+      />
+    );
+
+    await waitFor(() => {
+      expect(mockSearchMeasures).toHaveBeenCalled();
+    });
+
+    const lastCall =
+      mockSearchMeasures.mock.calls[mockSearchMeasures.mock.calls.length - 1];
+    expect(lastCall[5].searchField).toBe("");
+    expect(screen.getByPlaceholderText("Search")).toHaveValue("");
+  });
+
+  it("resets to the first page when the page size is changed", async () => {
+    const mockSearchMeasures = jest.fn().mockResolvedValue({
+      content: data,
+      totalPages: 3,
+      totalElements: 15,
+      numberOfElements: 5,
+      pageable: { offset: 0 },
+    });
+
+    useMeasureServiceApi.mockReturnValue({
+      searchMeasuresByCriteria: mockSearchMeasures,
+      getMeasuresByMeasureSetId: jest.fn(),
+    });
+
+    render(
+      <AddComponentsDialog
+        open={true}
+        onClose={onCloseMock}
+        measure={mockMeasure}
+        compositeScoring="Opportunity"
+        components={[]}
+        submitComponentForm={jest.fn()}
+      />
+    );
+
+    await waitFor(() => {
+      expect(mockSearchMeasures).toHaveBeenCalled();
+    });
+
+    await userEvent.click(screen.getByRole("button", { name: /next/i }));
+
+    await waitFor(() => {
+      const lastCall =
+        mockSearchMeasures.mock.calls[mockSearchMeasures.mock.calls.length - 1];
+      expect(lastCall[2]).toBe(1);
+    });
+
+    const limitSelect = screen
+      .getAllByRole("combobox")
+      .find(
+        (select) =>
+          select.getAttribute("aria-labelledby") === "pagination-limit-select"
+      );
+    await userEvent.click(limitSelect);
+    await userEvent.click(screen.getByRole("option", { name: "10" }));
+
+    await waitFor(() => {
+      const lastCall =
+        mockSearchMeasures.mock.calls[mockSearchMeasures.mock.calls.length - 1];
+      expect(lastCall[1]).toBe(10);
+      expect(lastCall[2]).toBe(0);
+    });
+  });
+
   describe("Filtering", () => {
     it("applies specific filter when FilterBy is selected", async () => {
       const mockSearchMeasures = jest

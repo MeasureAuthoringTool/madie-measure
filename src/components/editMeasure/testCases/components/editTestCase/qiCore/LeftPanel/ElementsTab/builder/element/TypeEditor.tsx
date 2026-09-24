@@ -42,7 +42,7 @@ import QuantityComponent from "./types/QuantityComponent";
 import MoneyComponent from "./types/MoneyComponent";
 import TimingComponent from "./types/TimingComponent";
 import RangeComponent from "./types/RangeComponent";
-import ReferenceComponent from "./types/ReferenceComponent";
+import ReferenceComponent from "./types/referenceComponent/ReferenceComponent";
 import ContentReferenceType from "./contentReferenceType/ContentReferenceType";
 import DecimalComponent from "./types/DecimalComponent";
 import { IntegerType } from "./typesValidations/FhirNumbers";
