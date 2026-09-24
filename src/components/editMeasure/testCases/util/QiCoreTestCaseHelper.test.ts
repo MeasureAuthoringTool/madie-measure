@@ -1,6 +1,8 @@
 import {
   buildDefaultQiCorePatientBundle,
   defaultQiCoreTestCaseJson,
+  defaultFhirTestCaseJson,
+  getDefaultFhirPatientProfile,
   QICORE_PATIENT_PROFILE,
 } from "./QiCoreTestCaseHelper";
 import { TestCase } from "@madie/madie-models";
@@ -53,5 +55,17 @@ describe("QiCoreTestCaseHelper", () => {
     } as TestCase;
     const result = defaultQiCoreTestCaseJson(testCase)!;
     expect(result.json).toBe(existing);
+  });
+
+  it("does not add a default patient for an unsupported model", () => {
+    const testCase = { title: "tc", description: "", series: "" } as TestCase;
+
+    expect(getDefaultFhirPatientProfile("unsupported-model")).toBeUndefined();
+    expect(
+      defaultFhirTestCaseJson(
+        testCase,
+        getDefaultFhirPatientProfile("unsupported-model")
+      )?.json
+    ).toBeUndefined();
   });
 });

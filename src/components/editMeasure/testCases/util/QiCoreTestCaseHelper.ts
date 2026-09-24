@@ -2,8 +2,6 @@ import { Model, TestCase } from "@madie/madie-models";
 import * as _ from "lodash";
 import { v4 as uuidv4 } from "uuid";
 
-export const FHIR_PATIENT_PROFILE =
-  "http://hl7.org/fhir/StructureDefinition/Patient";
 export const QICORE_PATIENT_PROFILE =
   "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient";
 export const US_QUALITY_CORE_PATIENT_PROFILE =
@@ -18,13 +16,11 @@ export function getDefaultFhirPatientProfile(model?: string) {
     case Model.US_QUALITY_0_5_0:
       return US_QUALITY_CORE_PATIENT_PROFILE;
     default:
-      return FHIR_PATIENT_PROFILE;
+      return undefined;
   }
 }
 
-export function buildDefaultFhirPatientBundle(
-  patientProfile = FHIR_PATIENT_PROFILE
-) {
+export function buildDefaultFhirPatientBundle(patientProfile: string) {
   const patientId = uuidv4();
   return {
     id: uuidv4(),
@@ -47,13 +43,13 @@ export function buildDefaultFhirPatientBundle(
 
 export function defaultFhirTestCaseJson(
   testCase: TestCase,
-  patientProfile = FHIR_PATIENT_PROFILE
+  patientProfile?: string
 ) {
   if (_.isNil(testCase)) {
     return;
   }
   const clonedTestCase = _.cloneDeep(testCase);
-  if (_.isEmpty(clonedTestCase.json)) {
+  if (_.isEmpty(clonedTestCase.json) && patientProfile) {
     clonedTestCase.json = JSON.stringify(
       buildDefaultFhirPatientBundle(patientProfile)
     );
