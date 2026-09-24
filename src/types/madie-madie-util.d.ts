@@ -308,14 +308,6 @@ declare module "@madie/madie-util" {
     measures: Measure[];
     onClick: () => void;
   }): React.ReactElement;
-  export function HowItWorks(props?: {
-    children?: React.ReactNode;
-    title?: string;
-    contentId?: string;
-    align?: "left" | "right";
-    isOpen?: boolean;
-    onOpenChange?: (open: boolean) => void;
-  }): React.ReactElement;
   export function ShareAction(props: {
     measures: Measure[];
     onClick: (option: string) => void;

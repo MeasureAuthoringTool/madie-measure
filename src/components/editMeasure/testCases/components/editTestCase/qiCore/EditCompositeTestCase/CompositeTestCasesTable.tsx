@@ -1,4 +1,4 @@
-import { formatCmsId, HowItWorks } from "@madie/madie-util";
+import { formatCmsId } from "@madie/madie-util";
 import React, { useMemo, useState } from "react";
 import {
   ColumnDef,
@@ -11,6 +11,7 @@ import {
 import {
   TruncateText,
   Button,
+  HowItWorks,
   Pagination,
   Select,
   TextField,
@@ -290,7 +291,6 @@ export default function CompositeTestCasesTable({
           </div>
           <div tw="mb-4">
             <HowItWorks
-              align="left"
               isOpen={howItWorksOpen}
               onOpenChange={setHowItWorksOpen}
             >
@@ -318,7 +318,11 @@ export default function CompositeTestCasesTable({
             />
             Back to All Measures
           </Button>
-          <HowItWorks isOpen={howItWorksOpen} onOpenChange={setHowItWorksOpen}>
+          <HowItWorks
+            align="right"
+            isOpen={howItWorksOpen}
+            onOpenChange={setHowItWorksOpen}
+          >
             {INSERT_TEST_CASE_HOW_IT_WORKS}
           </HowItWorks>
         </div>

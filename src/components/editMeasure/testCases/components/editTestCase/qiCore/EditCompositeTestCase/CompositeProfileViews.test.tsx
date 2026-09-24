@@ -57,10 +57,7 @@ describe("CompositeProfileViews", () => {
   it("renders HowItWorks when howItWorksOpen is true", () => {
     render(<CompositeProfilesViews {...defaultProps} howItWorksOpen={true} />);
 
-    expect(screen.getByTestId("how-it-works")).toHaveAttribute(
-      "data-align",
-      "left"
-    );
+    expect(screen.getByTestId("how-it-works-content")).toBeInTheDocument();
   });
 
   it("does not render completion text when no measures", () => {

@@ -23,6 +23,7 @@ import {
 } from "@madie/madie-editor";
 import {
   Button,
+  HowItWorks,
   MadieSpinner,
   MadieDiscardDialog,
   Toast,
@@ -50,7 +51,6 @@ import {
   routeHandlerStore,
   useMeasureServiceApi,
   useTerminologyServiceApi,
-  HowItWorks,
 } from "@madie/madie-util";
 import StatusHandler from "./StatusHandler";
 import "./StatusHandler.scss";
@@ -883,7 +883,7 @@ const MeasureEditor = ({ measureCanEdit, measureLockedBy }) => {
         />
       </div>
       <div id="cql-editor-how-it-works-row">
-        <HowItWorks align="left" contentId="cql-editor-how-it-works">
+        <HowItWorks contentId="cql-editor-how-it-works">
           <p>{CQL_EDITOR_HOW_IT_WORKS}</p>
         </HowItWorks>
       </div>
