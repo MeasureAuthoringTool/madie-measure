@@ -209,9 +209,8 @@ export default function CompositeTestCasesTable({
         cell: (info) => {
           const isInvalid = !validTestCaseIds.has(info.row.original.id);
           return (
-            <>
+            <div tw="flex flex-wrap items-center justify-end gap-4 p-2">
               <Button
-                tw="m-2"
                 type="button"
                 title="View test case"
                 data-testid={`view-test-case-btn-${info.row.original.id}`}
@@ -230,7 +229,6 @@ export default function CompositeTestCasesTable({
               >
                 <span>
                   <Button
-                    tw="m-2"
                     type="button"
                     title="Insert Profiles from Test Case"
                     data-testid={`insert-test-case-btn-${info.row.original.id}`}
@@ -246,7 +244,7 @@ export default function CompositeTestCasesTable({
                   </Button>
                 </span>
               </Tooltip>
-            </>
+            </div>
           );
         },
         accessorKey: "actions",
