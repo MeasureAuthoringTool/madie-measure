@@ -4,16 +4,22 @@ import ReferenceComponent, {
   getReferenceComponentLabel,
   getHighestPriorityResourceList,
   getProfileMatchTypes,
-  getFinalOptions,
+  getSpecificResourceOptions,
 } from "./ReferenceComponent";
-import ResourceContext from "../../ResourceContext";
-import { useQiCoreResource } from "../../../../../../../../util/QiCorePatientProvider";
+import ResourceContext from "../../../ResourceContext";
+import { useQiCoreResource } from "../../../../../../../../../util/QiCorePatientProvider";
 import userEvent from "@testing-library/user-event";
 import { FormikProvider, FormikContextType } from "formik";
+import {
+  GENERIC_RESOURCE_PROFILE_URL,
+  isGenericResourceReference,
+  mapProfilesToReferenceTypeOptions,
+  getReferenceTypeOptions,
+} from "./referenceUtils";
 
-jest.mock("../../../../../../../../util/QiCorePatientProvider", () => {
+jest.mock("../../../../../../../../../util/QiCorePatientProvider", () => {
   const actual = jest.requireActual(
-    "../../../../../../../../util/QiCorePatientProvider"
+    "../../../../../../../../../util/QiCorePatientProvider"
   );
   return {
     ...actual,
@@ -82,15 +88,6 @@ describe("ReferenceComponent", () => {
     },
   ];
 
-  const genericResourceStructureDefinition = {
-    type: [
-      {
-        code: "Reference",
-        targetProfile: ["http://hl7.org/fhir/StructureDefinition/Resource"],
-      },
-    ],
-  };
-
   const structureDefinition = {
     type: [
       {
@@ -115,6 +112,67 @@ describe("ReferenceComponent", () => {
       )
     ).toEqual(["/onc/us-quality-core"]);
   });
+
+  it("returns only QICore for a QICore profile URL", () => {
+    expect(
+      getProfileMatchTypes(
+        "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-encounter"
+      )
+    ).toEqual(["/fhir/us/qicore"]);
+  });
+
+  it("includes US Quality Core (and QICore) in the hierarchy for a US Core profile URL", () => {
+    expect(
+      getProfileMatchTypes(
+        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-encounter"
+      )
+    ).toEqual(["/fhir/us/core", "/onc/us-quality-core", "/fhir/us/qicore"]);
+  });
+
+  it("includes US Core, US Quality Core and QICore in the hierarchy for a base FHIR profile URL", () => {
+    expect(
+      getProfileMatchTypes(
+        "http://hl7.org/fhir/StructureDefinition/ServiceRequest"
+      )
+    ).toEqual([
+      "/fhir/StructureDefinition/",
+      "/fhir/us/core",
+      "/onc/us-quality-core",
+      "/fhir/us/qicore",
+    ]);
+  });
+
+  it("matches a US Quality Core resource when the reference target is a base FHIR profile", () => {
+    // Regression guard: Encounter.basedOn targets base FHIR ServiceRequest, but
+    // the resource in the bundle is profiled as US Quality Core. It must still
+    // resolve so the saved reference populates the dropdown.
+    const bundleEntries = [
+      {
+        resource: {
+          resourceType: "ServiceRequest",
+          id: "sr-1",
+          meta: {
+            profile: [
+              "http://fhir.org/guides/onc/us-quality-core/StructureDefinition/us-quality-core-servicerequest",
+            ],
+          },
+        },
+      },
+    ];
+
+    const result = getSpecificResourceOptions(
+      "ServiceRequest",
+      "http://hl7.org/fhir/StructureDefinition/ServiceRequest",
+      bundleEntries,
+      undefined
+    );
+
+    expect(result).toEqual([
+      { label: "ServiceRequest/sr-1", value: "ServiceRequest/sr-1" },
+      { label: "ID Not Present (Add New)", value: "add_new_id" },
+    ]);
+  });
+
   it("renders reference type dropdown with correct options", async () => {
     (useQiCoreResource as jest.Mock).mockReturnValue({
       state: { bundle: { entry: [] } },
@@ -222,206 +280,6 @@ describe("ReferenceComponent", () => {
     const optionTexts = options.map((opt) => opt.textContent);
     const uniqueOptionTexts = Array.from(new Set(optionTexts));
     expect(optionTexts.length).toBe(uniqueOptionTexts.length);
-  });
-
-  it("shows all model profiles for a generic Resource reference and excludes Cross-version Profiles", async () => {
-    (useQiCoreResource as jest.Mock).mockReturnValue({
-      state: {
-        bundle: {
-          entry: [
-            {
-              resource: {
-                resourceType: "Encounter",
-                id: "encounter-uscore-1",
-                meta: {
-                  profile: [
-                    "http://hl7.org/fhir/us/core/StructureDefinition/us-core-encounter",
-                  ],
-                },
-              },
-            },
-            {
-              resource: {
-                resourceType: "Encounter",
-                id: "encounter-qicore-1",
-                meta: {
-                  profile: [
-                    "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-encounter",
-                  ],
-                },
-              },
-            },
-          ],
-        },
-      },
-    });
-    const profiles = [
-      {
-        id: "resource",
-        title: "Resource",
-        type: "Resource",
-        profile: "http://hl7.org/fhir/StructureDefinition/Resource",
-        category: "TestCategory",
-      },
-      ...baseProfiles,
-      {
-        id: "cross-version-organization",
-        title: "Cross-version Profile: Organization",
-        type: "Organization",
-        profile:
-          "http://hl7.org/fhir/us/qicore/StructureDefinition/cross-version-organization",
-        category: "TestCategory",
-      },
-    ];
-
-    render(
-      <ResourceContext.Provider value={profiles}>
-        <FormikProvider value={mockFormik}>
-          <ReferenceComponent
-            structureDefinition={genericResourceStructureDefinition}
-            canEdit={true}
-            required={false}
-            helperText="Select a reference"
-            error={false}
-            showAddAttributeButton={false}
-            addTitle=""
-            label="test.label"
-          />
-        </FormikProvider>
-      </ResourceContext.Provider>
-    );
-
-    await userEvent.click(screen.getByLabelText("Reference Type"));
-
-    expect(screen.getByTestId("Encounter-option")).toBeInTheDocument();
-    expect(
-      screen.getByTestId("Encounter (US Core)-option")
-    ).toBeInTheDocument();
-    expect(screen.getByTestId("Encounter (QICore)-option")).toBeInTheDocument();
-    expect(screen.queryByTestId("Resource-option")).not.toBeInTheDocument();
-    expect(
-      screen.queryByTestId("Cross-version Profile: Organization-option")
-    ).not.toBeInTheDocument();
-
-    await userEvent.click(screen.getByTestId("Encounter (QICore)-option"));
-    await userEvent.click(
-      screen.getByRole("combobox", { name: /specify encounter \(qicore\)/i })
-    );
-    await userEvent.click(await screen.findByTestId("reference-select-0"));
-
-    const options = await screen.findAllByRole("option");
-    expect(
-      options.some((option) =>
-        option.textContent?.includes("encounter-qicore-1")
-      )
-    ).toBe(true);
-    expect(
-      options.some((option) =>
-        option.textContent?.includes("encounter-uscore-1")
-      )
-    ).toBe(false);
-    expect(
-      options.some((option) => option.textContent?.includes("ID Not Present"))
-    ).toBe(true);
-  });
-
-  it("shows all profile choices when adding a generic Resource profile", async () => {
-    const dispatch = jest.fn();
-    (useQiCoreResource as jest.Mock).mockReturnValue({
-      state: { bundle: { entry: [] } },
-      dispatch,
-    });
-    const organizationProfiles = [
-      {
-        id: "organization",
-        title: "Organization",
-        type: "Organization",
-        profile: "http://hl7.org/fhir/StructureDefinition/Organization",
-        category: "TestCategory",
-      },
-      {
-        id: "us-core-organization",
-        title: "US Core Organization",
-        type: "Organization",
-        profile:
-          "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization",
-        category: "TestCategory",
-      },
-      {
-        id: "qicore-organization",
-        title: "QICore Organization",
-        type: "Organization",
-        profile:
-          "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-organization",
-        category: "TestCategory",
-      },
-    ];
-
-    render(
-      <ResourceContext.Provider value={organizationProfiles}>
-        <FormikProvider value={mockFormik}>
-          <ReferenceComponent
-            structureDefinition={genericResourceStructureDefinition}
-            canEdit={true}
-            required={false}
-            helperText="Select a reference"
-            error={false}
-            showAddAttributeButton={false}
-            addTitle=""
-            label="test.label"
-          />
-        </FormikProvider>
-      </ResourceContext.Provider>
-    );
-
-    await userEvent.click(screen.getByLabelText("Reference Type"));
-    await userEvent.click(screen.getByTestId("QICore Organization-option"));
-    await userEvent.click(
-      screen.getByRole("combobox", { name: /specify qicore organization/i })
-    );
-    await userEvent.click(await screen.findByTestId("reference-select-0"));
-    await userEvent.click(screen.getByText("ID Not Present (Add New)"));
-
-    expect(await screen.findByText("Choose Profile")).toBeVisible();
-    await userEvent.click(screen.getByRole("combobox", { name: "Reference" }));
-
-    expect(
-      screen.getByTestId(
-        "http://hl7.org/fhir/StructureDefinition/Organization-option"
-      )
-    ).toBeInTheDocument();
-    expect(
-      screen.getByTestId(
-        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization-option"
-      )
-    ).toBeInTheDocument();
-    expect(
-      screen.getByTestId(
-        "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-organization-option"
-      )
-    ).toBeInTheDocument();
-    const usCoreOrganizationProfile =
-      "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization";
-    await userEvent.click(
-      screen.getByTestId(`${usCoreOrganizationProfile}-option`)
-    );
-    await userEvent.click(
-      screen.getByTestId("add-new-profile-ref-save-button")
-    );
-
-    expect(mockSetFieldValue).toHaveBeenCalledWith(
-      "test.label.reference",
-      expect.stringMatching(/^Organization\//)
-    );
-    expect(mockSetFieldValue).toHaveBeenCalledWith("add_new_resources", [
-      expect.objectContaining({
-        resource: expect.objectContaining({
-          resourceType: "Organization",
-          meta: { profile: [usCoreOrganizationProfile] },
-        }),
-      }),
-    ]);
-    expect(dispatch).not.toHaveBeenCalled();
   });
 
   it("shows all FHIR, US Core, QICore resources for FHIR base profile", async () => {
@@ -1067,6 +925,13 @@ describe("ReferenceComponent", () => {
           "http://hl7.org/fhir/us/core/StructureDefinition/us-core-encounter",
       },
     ];
+    const usQualityCoreProfiles = [
+      {
+        id: "encounter-usqualitycore",
+        profile:
+          "http://hl7.org/fhir/us/onc/us-quality-core/StructureDefinition/us-quality-core-encounter",
+      },
+    ];
     const baseFhirProfiles = [
       {
         id: "encounter-base",
@@ -1076,14 +941,23 @@ describe("ReferenceComponent", () => {
     expect(
       getHighestPriorityResourceList(
         qiCoreProfiles,
+        usQualityCoreProfiles,
         usCoreProfiles,
         baseFhirProfiles
       )
     ).toBe(qiCoreProfiles);
     expect(
-      getHighestPriorityResourceList([], usCoreProfiles, baseFhirProfiles)
+      getHighestPriorityResourceList(
+        [],
+        usQualityCoreProfiles,
+        usCoreProfiles,
+        baseFhirProfiles
+      )
+    ).toBe(usQualityCoreProfiles);
+    expect(
+      getHighestPriorityResourceList([], [], usCoreProfiles, baseFhirProfiles)
     ).toBe(usCoreProfiles);
-    expect(getHighestPriorityResourceList([], [], baseFhirProfiles)).toBe(
+    expect(getHighestPriorityResourceList([], [], [], baseFhirProfiles)).toBe(
       baseFhirProfiles
     );
   });
@@ -1531,7 +1405,7 @@ describe("ReferenceComponent", () => {
 
     const resource = { id: "exclude-me" };
 
-    const result = getFinalOptions(
+    const result = getSpecificResourceOptions(
       selectedReferenceType,
       selectedProfileUrl,
       bundleEntries,
@@ -1543,5 +1417,403 @@ describe("ReferenceComponent", () => {
 
     // Extra guard: ensure no "add_new_id" present
     expect(result.some((o) => o.value === "add_new_id")).toBe(false);
+  });
+
+  describe("Reference(Resource) generic expansion", () => {
+    const genericStructureDefinition = {
+      type: [
+        {
+          code: "Reference",
+          targetProfile: [GENERIC_RESOURCE_PROFILE_URL],
+        },
+      ],
+    };
+
+    const ORG_BASE = {
+      id: "org-base",
+      title: "Organization",
+      type: "Organization",
+      profile: "http://hl7.org/fhir/StructureDefinition/Organization",
+      category: "TestCategory",
+    };
+    const ORG_USCORE_1 = {
+      id: "org-uscore-1",
+      title: "Organization (US Core)",
+      type: "Organization",
+      profile:
+        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization",
+      category: "TestCategory",
+    };
+    const ORG_USCORE_2 = {
+      id: "org-uscore-2",
+      title: "Organization (US Core Alt)",
+      type: "Organization",
+      profile:
+        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization-alt",
+      category: "TestCategory",
+    };
+    const LOCATION_BASE = {
+      id: "location-base",
+      title: "Location",
+      type: "Location",
+      profile: "http://hl7.org/fhir/StructureDefinition/Location",
+      category: "TestCategory",
+    };
+    const GENERIC_RESOURCE_IDENTIFIER = {
+      id: "resource-generic",
+      title: "Resource",
+      type: "Resource",
+      profile: GENERIC_RESOURCE_PROFILE_URL,
+      category: "TestCategory",
+    };
+    const modelProfiles = [
+      ...baseProfiles, // Encounter base / us-core / qicore
+      ORG_BASE,
+      ORG_USCORE_1,
+      ORG_USCORE_2,
+      LOCATION_BASE,
+      GENERIC_RESOURCE_IDENTIFIER,
+    ];
+
+    it("isGenericResourceReference detects generic and empty targetProfiles", () => {
+      expect(
+        isGenericResourceReference(genericStructureDefinition as any)
+      ).toBe(true);
+      expect(
+        isGenericResourceReference({ type: [{ code: "Reference" }] } as any)
+      ).toBe(true);
+      expect(isGenericResourceReference(structureDefinition as any)).toBe(
+        false
+      );
+    });
+
+    it("mapProfilesToReferenceTypeOptions excludes the abstract Resource profiles and de-duplicates", () => {
+      const options = mapProfilesToReferenceTypeOptions([
+        ORG_BASE,
+        ORG_BASE, // duplicate
+        GENERIC_RESOURCE_IDENTIFIER, // excluded
+      ]);
+      expect(options).toEqual([
+        {
+          label: "Organization",
+          value: "Organization",
+          profile: ORG_BASE.profile,
+        },
+      ]);
+    });
+
+    it("expands the Reference Type dropdown to all model-relevant profiles", async () => {
+      (useQiCoreResource as jest.Mock).mockReturnValue({
+        state: { bundle: { entry: [] } },
+      });
+      render(
+        <ResourceContext.Provider value={modelProfiles}>
+          <FormikProvider value={mockFormik}>
+            <ReferenceComponent
+              structureDefinition={genericStructureDefinition}
+              canEdit={true}
+              required={false}
+              helperText="Select a reference"
+              error={false}
+              showAddAttributeButton={false}
+              addTitle=""
+              label="Provenance.target[0]"
+            />
+          </FormikProvider>
+        </ResourceContext.Provider>
+      );
+
+      await userEvent.click(screen.getByLabelText("Reference Type"));
+      expect(screen.getByTestId("Encounter-option")).toBeInTheDocument();
+      expect(
+        screen.getByTestId("Encounter (US Core)-option")
+      ).toBeInTheDocument();
+      expect(
+        screen.getByTestId("Encounter (QICore)-option")
+      ).toBeInTheDocument();
+      expect(screen.getByTestId("Organization-option")).toBeInTheDocument();
+      expect(
+        screen.getByTestId("Organization (US Core)-option")
+      ).toBeInTheDocument();
+      expect(screen.getByTestId("Location-option")).toBeInTheDocument();
+      // The invalid abstract Resource option is NOT offered
+      expect(screen.queryByTestId("Resource-option")).not.toBeInTheDocument();
+    });
+
+    it("shows matching bundle resource IDs plus add-new for a selected concrete profile", async () => {
+      (useQiCoreResource as jest.Mock).mockReturnValue({
+        state: {
+          bundle: {
+            entry: [
+              {
+                resource: {
+                  resourceType: "Organization",
+                  id: "org-123",
+                  meta: { profile: [ORG_BASE.profile] },
+                },
+              },
+            ],
+          },
+        },
+      });
+      render(
+        <ResourceContext.Provider value={modelProfiles}>
+          <FormikProvider value={mockFormik}>
+            <ReferenceComponent
+              structureDefinition={genericStructureDefinition}
+              canEdit={true}
+              required={false}
+              helperText="Select a reference"
+              error={false}
+              showAddAttributeButton={false}
+              addTitle=""
+              label="Provenance.target[0]"
+            />
+          </FormikProvider>
+        </ResourceContext.Provider>
+      );
+
+      await userEvent.click(screen.getByLabelText("Reference Type"));
+      await userEvent.click(screen.getByTestId("Organization-option"));
+      const combo = screen.getByRole("combobox", {
+        name: /specify organization/i,
+      });
+      await userEvent.click(combo);
+
+      const options = await screen.findAllByRole("option");
+      expect(
+        options.some((opt) => opt.textContent?.includes("Organization/org-123"))
+      ).toBe(true);
+      expect(
+        options.some((opt) => opt.textContent?.includes("ID Not Present"))
+      ).toBe(true);
+    });
+
+    it("shows only add-new when no bundle resources match the selected profile", async () => {
+      (useQiCoreResource as jest.Mock).mockReturnValue({
+        state: { bundle: { entry: [] } },
+      });
+      render(
+        <ResourceContext.Provider value={modelProfiles}>
+          <FormikProvider value={mockFormik}>
+            <ReferenceComponent
+              structureDefinition={genericStructureDefinition}
+              canEdit={true}
+              required={false}
+              helperText="Select a reference"
+              error={false}
+              showAddAttributeButton={false}
+              addTitle=""
+              label="Provenance.target[0]"
+            />
+          </FormikProvider>
+        </ResourceContext.Provider>
+      );
+
+      await userEvent.click(screen.getByLabelText("Reference Type"));
+      await userEvent.click(screen.getByTestId("Organization-option"));
+      const combo = screen.getByRole("combobox", {
+        name: /specify organization/i,
+      });
+      await userEvent.click(combo);
+
+      const options = await screen.findAllByRole("option");
+      expect(options.length).toBe(1);
+      expect(options[0].textContent).toContain("ID Not Present");
+    });
+
+    it("writes the expected reference when an existing ID is selected", async () => {
+      const setFieldValueMock = jest.fn();
+      const formik = {
+        ...mockFormik,
+        setFieldValue: setFieldValueMock,
+      } as unknown as FormikContextType<any>;
+      (useQiCoreResource as jest.Mock).mockReturnValue({
+        state: {
+          bundle: {
+            entry: [
+              {
+                resource: {
+                  resourceType: "Organization",
+                  id: "org-123",
+                  meta: { profile: [ORG_BASE.profile] },
+                },
+              },
+            ],
+          },
+        },
+      });
+      render(
+        <ResourceContext.Provider value={modelProfiles}>
+          <FormikProvider value={formik}>
+            <ReferenceComponent
+              structureDefinition={genericStructureDefinition}
+              canEdit={true}
+              required={false}
+              helperText="Select a reference"
+              error={false}
+              showAddAttributeButton={false}
+              addTitle=""
+              label="Provenance.target[0]"
+            />
+          </FormikProvider>
+        </ResourceContext.Provider>
+      );
+
+      await userEvent.click(screen.getByLabelText("Reference Type"));
+      await userEvent.click(screen.getByTestId("Organization-option"));
+      const combo = screen.getByRole("combobox", {
+        name: /specify organization/i,
+      });
+      await userEvent.click(combo);
+      const options = await screen.findAllByRole("option");
+      const existing = options.find((opt) =>
+        opt.textContent?.includes("Organization/org-123")
+      );
+      await userEvent.click(existing!);
+
+      expect(setFieldValueMock).toHaveBeenCalledWith("Provenance.target[0]", {
+        reference: "Organization/org-123",
+      });
+    });
+
+    it("opens the profile-selection modal on add-new when multiple profiles are applicable", async () => {
+      (useQiCoreResource as jest.Mock).mockReturnValue({
+        state: { bundle: { entry: [] } },
+        dispatch: jest.fn(),
+      });
+      render(
+        <ResourceContext.Provider value={modelProfiles}>
+          <FormikProvider value={mockFormik}>
+            <ReferenceComponent
+              structureDefinition={genericStructureDefinition}
+              canEdit={true}
+              required={false}
+              helperText="Select a reference"
+              error={false}
+              showAddAttributeButton={false}
+              addTitle=""
+              label="Provenance.target[0]"
+            />
+          </FormikProvider>
+        </ResourceContext.Provider>
+      );
+
+      // Organization has two US Core profiles -> add-new must prompt for a profile
+      await userEvent.click(screen.getByLabelText("Reference Type"));
+      await userEvent.click(screen.getByTestId("Organization-option"));
+      const combo = screen.getByRole("combobox", {
+        name: /specify organization/i,
+      });
+      await userEvent.click(combo);
+      await userEvent.click(screen.getByText("ID Not Present (Add New)"));
+
+      await waitFor(() => {
+        expect(screen.getByText("Choose Profile")).toBeVisible();
+      });
+    });
+
+    it("creates the resource without a modal on add-new when only one profile is applicable", async () => {
+      const setFieldValueMock = jest.fn();
+      const formik = {
+        ...mockFormik,
+        values: {},
+        setFieldValue: setFieldValueMock,
+      } as unknown as FormikContextType<any>;
+      (useQiCoreResource as jest.Mock).mockReturnValue({
+        state: { bundle: { entry: [] } },
+        dispatch: jest.fn(),
+      });
+      render(
+        <ResourceContext.Provider value={modelProfiles}>
+          <FormikProvider value={formik}>
+            <ReferenceComponent
+              structureDefinition={genericStructureDefinition}
+              canEdit={true}
+              required={false}
+              helperText="Select a reference"
+              error={false}
+              showAddAttributeButton={false}
+              addTitle=""
+              label="Provenance.target[0]"
+            />
+          </FormikProvider>
+        </ResourceContext.Provider>
+      );
+
+      // Location has a single (base FHIR) profile -> add-new builds it directly
+      await userEvent.click(screen.getByLabelText("Reference Type"));
+      await userEvent.click(screen.getByTestId("Location-option"));
+      const combo = screen.getByRole("combobox", {
+        name: /specify location/i,
+      });
+      await userEvent.click(combo);
+      await userEvent.click(screen.getByText("ID Not Present (Add New)"));
+
+      expect(screen.queryByText("Choose Profile")).not.toBeInTheDocument();
+      expect(setFieldValueMock).toHaveBeenCalledWith(
+        "add_new_resources",
+        expect.arrayContaining([
+          expect.objectContaining({
+            resource: expect.objectContaining({ resourceType: "Location" }),
+          }),
+        ])
+      );
+    });
+
+    it("initializes Reference Type and Specify values when editing a saved generic reference", async () => {
+      (useQiCoreResource as jest.Mock).mockReturnValue({
+        state: {
+          bundle: {
+            entry: [
+              {
+                resource: {
+                  resourceType: "Organization",
+                  id: "org-123",
+                  meta: { profile: [ORG_BASE.profile] },
+                },
+              },
+            ],
+          },
+        },
+      });
+      render(
+        <ResourceContext.Provider value={modelProfiles}>
+          <FormikProvider value={mockFormik}>
+            <ReferenceComponent
+              structureDefinition={genericStructureDefinition}
+              canEdit={true}
+              required={false}
+              helperText="Select a reference"
+              error={false}
+              showAddAttributeButton={false}
+              addTitle=""
+              label="Provenance.target[0]"
+              value={{ reference: "Organization/org-123" }}
+            />
+          </FormikProvider>
+        </ResourceContext.Provider>
+      );
+
+      const referenceTypeSelect = screen.getByLabelText("Reference Type");
+      await waitFor(() => {
+        expect(referenceTypeSelect).toHaveTextContent(/Organization/);
+      });
+      const specify = screen.getByRole("combobox", {
+        name: /specify organization/i,
+      });
+      await waitFor(() => {
+        expect(specify).toHaveTextContent("Organization/org-123");
+      });
+    });
+
+    it("leaves explicitly typed references unchanged", () => {
+      const options = getReferenceTypeOptions(
+        structureDefinition as any,
+        modelProfiles
+      );
+      expect(options.every((opt) => opt.value === "Encounter")).toBe(true);
+      expect(options.some((opt) => opt.value === "Organization")).toBe(false);
+    });
   });
 });
