@@ -437,4 +437,76 @@ describe("Create New Test Case Dialog", () => {
       );
     });
   }, 16000);
+
+  test("defaults json with a US Quality Core Patient bundle when creating a US Quality Core test case", async () => {
+    mockedAxios.post.mockResolvedValue({
+      data: {
+        id: "testID",
+        createdBy: MEASURE_CREATEDBY,
+        description: formikInfo.description,
+        title: formikInfo.title,
+        series: formikInfo.series,
+      },
+    });
+    const measure: Measure = {
+      model: "US Quality Core v0.5.0",
+    } as unknown as Measure;
+    const { getByRole, getByTestId, getByText } = render(
+      <MemoryRouter
+        initialEntries={[
+          `/measures/${mockMeasure.id}/edit/test-cases/list-page`,
+        ]}
+      >
+        <CreateNewTestCaseDialog
+          open={true}
+          onClose={jest.fn()}
+          onSuccess={jest.fn()}
+          measure={measure}
+        />
+      </MemoryRouter>
+    );
+
+    const titleInput = getByTestId(
+      "create-test-case-title-input"
+    ) as HTMLInputElement;
+    userEvent.type(titleInput, formikInfo.title);
+    Simulate.change(titleInput);
+
+    const descriptionInput = getByTestId(
+      "create-test-case-description"
+    ) as HTMLInputElement;
+    userEvent.type(descriptionInput, formikInfo.description);
+    Simulate.change(descriptionInput);
+
+    const seriesInput = getByRole("combobox");
+    userEvent.type(seriesInput, formikInfo.series);
+    const seriesOption = getByText('Add "test case series"');
+    userEvent.click(seriesOption);
+    await waitFor(() => {
+      expect(seriesInput).toHaveValue(formikInfo.series);
+    });
+
+    const saveButton = getByTestId("create-test-case-save-button");
+    userEvent.click(saveButton);
+
+    await waitFor(() => {
+      const postCall = mockedAxios.post.mock.calls.find(([url]) =>
+        String(url).includes("/test-cases")
+      );
+      expect(postCall).toBeDefined();
+      const submittedTestCase = postCall![1] as any;
+      expect(submittedTestCase.json).toBeTruthy();
+      const bundle = JSON.parse(submittedTestCase.json);
+      expect(bundle.resourceType).toBe("Bundle");
+      expect(bundle.type).toBe("collection");
+      expect(bundle.entry).toHaveLength(1);
+      expect(bundle.entry[0].resource.resourceType).toBe("Patient");
+      expect(bundle.entry[0].resource.meta.profile).toEqual([
+        "http://fhir.org/guides/onc/us-quality-core/StructureDefinition/us-quality-core-patient",
+      ]);
+      expect(bundle.entry[0].fullUrl).toBe(
+        `https://madie.cms.gov/Patient/${bundle.entry[0].resource.id}`
+      );
+    });
+  }, 16000);
 });

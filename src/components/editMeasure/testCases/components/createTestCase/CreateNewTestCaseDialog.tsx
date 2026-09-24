@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import queryString from "query-string";
-import { TestCase, Measure } from "@madie/madie-models";
+import { isFhirModel, TestCase, Measure } from "@madie/madie-models";
 import { TestCaseValidator } from "../../validators/TestCaseValidator";
 import {
   MadieDialog,
@@ -16,7 +16,10 @@ import useTestCaseServiceApi from "../../api/useTestCaseServiceApi";
 import TestCaseSeries from "./TestCaseSeries";
 import { sanitizeUserInput } from "../../util/Utils";
 import { defaultTestCaseJson } from "../../util/QdmTestCaseHelper";
-import { defaultQiCoreTestCaseJson } from "../../util/QiCoreTestCaseHelper";
+import {
+  defaultFhirTestCaseJson,
+  getDefaultFhirPatientProfile,
+} from "../../util/QiCoreTestCaseHelper";
 import checkSpecialCharacters from "../../util/checkSpecialCharacters";
 
 interface Toast {
@@ -152,8 +155,11 @@ const CreateNewTestCaseDialog = ({
 
     if (measure?.model?.includes("QDM")) {
       testCase = defaultTestCaseJson(testCase);
-    } else if (measure?.model?.includes("QI-Core")) {
-      testCase = defaultQiCoreTestCaseJson(testCase);
+    } else if (isFhirModel(measure?.model)) {
+      testCase = defaultFhirTestCaseJson(
+        testCase,
+        getDefaultFhirPatientProfile(measure?.model)
+      );
     }
 
     await createTestCase(testCase);
