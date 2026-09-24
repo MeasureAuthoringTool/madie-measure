@@ -340,6 +340,7 @@ export default function ActionCenter(props: ActionCenterProps) {
             <div tw="flex items-center">
               <Tooltip
                 data-testid="delete-tooltip"
+                describeChild
                 title={
                   disableDeleteBtn
                     ? disabledDeleteBtnMessage
@@ -359,7 +360,7 @@ export default function ActionCenter(props: ActionCenterProps) {
                   },
                 }}
               >
-                <div>
+                <div aria-label="Delete Test Case">
                   <IconButton
                     onClick={() => {
                       setDeleteDialogModalOpen(true);
@@ -376,9 +377,10 @@ export default function ActionCenter(props: ActionCenterProps) {
               {isDraft && (
                 <Tooltip
                   data-testid="shift-test-case-dates-tooltip"
+                  describeChild
                   title={
                     disableShiftDatesBtn
-                      ? "Select a test case to shift test case dates"
+                      ? "Select test cases to shift test case dates"
                       : "Shift test case dates"
                   }
                   placement="top"
@@ -395,7 +397,7 @@ export default function ActionCenter(props: ActionCenterProps) {
                     },
                   }}
                 >
-                  <div>
+                  <div aria-label="Shift test case dates">
                     <IconButton
                       onClick={() => {
                         setShiftDatesDialogModalOpen(true);
@@ -414,6 +416,7 @@ export default function ActionCenter(props: ActionCenterProps) {
 
               <Tooltip
                 data-testid="clone-tooltip"
+                describeChild
                 title={cloneTooltipBtnMessage}
                 placement="top"
                 arrow
@@ -429,7 +432,7 @@ export default function ActionCenter(props: ActionCenterProps) {
                   },
                 }}
               >
-                <div>
+                <div aria-label="Clone Test Case">
                   <IconButton
                     onClick={(e) => {
                       onCloneTestCase(selectedTestCases?.[0]);
@@ -446,6 +449,7 @@ export default function ActionCenter(props: ActionCenterProps) {
               {!isQDM && (
                 <Tooltip
                   data-testid="make-json-match-ui-tooltip"
+                  describeChild
                   title={makeJsonMatchUiTooltipMessage}
                   placement="top"
                   arrow
@@ -461,7 +465,7 @@ export default function ActionCenter(props: ActionCenterProps) {
                     },
                   }}
                 >
-                  <div>
+                  <div aria-label="Make JSON Match UI">
                     <IconButton
                       onClick={() => {
                         setMakeJsonMatchUiDialogOpen(true);
@@ -482,9 +486,10 @@ export default function ActionCenter(props: ActionCenterProps) {
 
           <Tooltip
             data-testid="copy-tooltip"
+            describeChild
             title={
               disableCopyBtn
-                ? "Select a test case to copy to another measure"
+                ? "Select test cases to copy to another measure"
                 : "Copy to another measure"
             }
             placement="top"
@@ -501,7 +506,7 @@ export default function ActionCenter(props: ActionCenterProps) {
               },
             }}
           >
-            <div>
+            <div aria-label="Copy to Icon">
               <IconButton
                 onClick={() => {
                   displayTestCaseCopyDialog();
@@ -521,13 +526,14 @@ export default function ActionCenter(props: ActionCenterProps) {
 
           <Tooltip
             data-testid="export-tooltip"
+            describeChild
             title={
               disableExportBtn
                 ? isQDM
                   ? executeAllTestCases
-                    ? "Select a test case to export"
+                    ? "Select test cases to export"
                     : "Test cases must be executed prior to exporting."
-                  : "Select a test case to export"
+                  : "Select test cases to export"
                 : "Export test cases"
             }
             placement="top"
@@ -544,7 +550,7 @@ export default function ActionCenter(props: ActionCenterProps) {
               },
             }}
           >
-            <div>
+            <div aria-label="Export Test case(s)">
               <IconButton
                 disabled={disableExportBtn}
                 data-testid="export-action-btn"
