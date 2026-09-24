@@ -359,17 +359,18 @@ export default function ActionCenter(props: ActionCenterProps) {
                   },
                 }}
               >
-                <span>
+                <div>
                   <IconButton
                     onClick={() => {
                       setDeleteDialogModalOpen(true);
                     }}
                     disabled={disableDeleteBtn}
                     data-testid="delete-action-btn"
+                    aria-label="Delete test case"
                   >
                     <DeleteOutlinedIcon data-testid={`delete-action-icon`} />
                   </IconButton>
-                </span>
+                </div>
               </Tooltip>
 
               {isDraft && (
@@ -377,7 +378,7 @@ export default function ActionCenter(props: ActionCenterProps) {
                   data-testid="shift-test-case-dates-tooltip"
                   title={
                     disableShiftDatesBtn
-                      ? "Select test cases to shift test case dates"
+                      ? "Select a test case to shift test case dates"
                       : "Shift test case dates"
                   }
                   placement="top"
@@ -394,19 +395,20 @@ export default function ActionCenter(props: ActionCenterProps) {
                     },
                   }}
                 >
-                  <span>
+                  <div>
                     <IconButton
                       onClick={() => {
                         setShiftDatesDialogModalOpen(true);
                       }}
                       disabled={disableShiftDatesBtn}
                       data-testid="shift-test-case-dates-action-btn"
+                      aria-label="Shift test case dates"
                     >
                       <EditCalendarOutlinedIcon
                         data-testid={`shift-test-case-dates-action-icon`}
                       />
                     </IconButton>
-                  </span>
+                  </div>
                 </Tooltip>
               )}
 
@@ -427,17 +429,18 @@ export default function ActionCenter(props: ActionCenterProps) {
                   },
                 }}
               >
-                <span>
+                <div>
                   <IconButton
                     onClick={(e) => {
                       onCloneTestCase(selectedTestCases?.[0]);
                     }}
                     disabled={disableCloneBtn}
                     data-testid="clone-action-btn"
+                    aria-label="Clone test case"
                   >
                     <LibraryAddIcon data-testid={`clone-action-icon`} />
                   </IconButton>
-                </span>
+                </div>
               </Tooltip>
 
               {!isQDM && (
@@ -458,19 +461,20 @@ export default function ActionCenter(props: ActionCenterProps) {
                     },
                   }}
                 >
-                  <span>
+                  <div>
                     <IconButton
                       onClick={() => {
                         setMakeJsonMatchUiDialogOpen(true);
                       }}
                       disabled={disableMakeJsonMatchUiBtn}
                       data-testid="make-json-match-ui-action-btn"
+                      aria-label="Make JSON (family/given) match UI (group/title)"
                     >
                       <MakeJsonMatchUiIcon
                         disabled={disableMakeJsonMatchUiBtn}
                       />
                     </IconButton>
-                  </span>
+                  </div>
                 </Tooltip>
               )}
             </div>
@@ -480,7 +484,7 @@ export default function ActionCenter(props: ActionCenterProps) {
             data-testid="copy-tooltip"
             title={
               disableCopyBtn
-                ? "Select test cases to copy to another measure"
+                ? "Select a test case to copy to another measure"
                 : "Copy to another measure"
             }
             placement="top"
@@ -497,13 +501,14 @@ export default function ActionCenter(props: ActionCenterProps) {
               },
             }}
           >
-            <span>
+            <div>
               <IconButton
                 onClick={() => {
                   displayTestCaseCopyDialog();
                 }}
                 disabled={disableCopyBtn}
                 data-testid="copy-action-btn"
+                aria-label="Copy to another measure"
               >
                 <Icon
                   icon="fluent:share-screen-start-24-regular"
@@ -511,7 +516,7 @@ export default function ActionCenter(props: ActionCenterProps) {
                   rotate={45}
                 />
               </IconButton>
-            </span>
+            </div>
           </Tooltip>
 
           <Tooltip
@@ -520,9 +525,9 @@ export default function ActionCenter(props: ActionCenterProps) {
               disableExportBtn
                 ? isQDM
                   ? executeAllTestCases
-                    ? "Select test cases to export"
+                    ? "Select a test case to export"
                     : "Test cases must be executed prior to exporting."
-                  : "Select test cases to export"
+                  : "Select a test case to export"
                 : "Export test cases"
             }
             placement="top"
@@ -539,10 +544,11 @@ export default function ActionCenter(props: ActionCenterProps) {
               },
             }}
           >
-            <span>
+            <div>
               <IconButton
                 disabled={disableExportBtn}
                 data-testid="export-action-btn"
+                aria-label="Export test cases"
                 ref={anchorRef}
                 onClick={() => {
                   if (!disableExportBtn) {
@@ -552,7 +558,7 @@ export default function ActionCenter(props: ActionCenterProps) {
               >
                 <FileUploadOutlinedIcon data-testid="export-action-icon" />
               </IconButton>
-            </span>
+            </div>
           </Tooltip>
 
           <Popper
