@@ -9,6 +9,7 @@ import {
   getSortedRowModel,
 } from "@tanstack/react-table";
 import {
+  Button,
   MadieDeleteDialog,
   TruncateText,
 } from "@madie/madie-design-system/dist/react";
@@ -20,33 +21,55 @@ import { convertDate } from "../../../../testCases/components/testCaseLanding/co
 import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
-import { Measure } from "@madie/madie-models";
-import { IconButton, Tooltip } from "@mui/material";
+import { Component, Group, Measure } from "@madie/madie-models";
+import { IconButton, Switch, Tooltip } from "@mui/material";
 import {
   CollapseIcon,
   ExpandIcon,
 } from "../../../../../../icons/MeasureListTableRightArrowIcons";
+import { useNavigate } from "react-router-dom";
 
 const TH = tw.th`p-3 text-left text-sm font-bold capitalize`;
 
+type ComponentGroup = Group & {
+  description?: string;
+  groupDescription?: string;
+  measureGroupTypes?: string[];
+  type?: string;
+};
+
 export default function AddedComponentsTable({
   components,
+  selectedComponents = [],
   canEdit,
+  onToggleGroup = () => null,
   onDeleteComponent,
 }: {
   components: Measure[];
+  selectedComponents?: Component[];
   canEdit: boolean;
+  onToggleGroup?: (
+    measureId: string,
+    groupId: string,
+    include: boolean
+  ) => void;
   onDeleteComponent: (componentId: string) => void;
 }) {
-  const [hoveredHeader, setHoveredHeader] = useState<string>("");
-  const [componentToDelete, setComponentToDelete] = useState<Measure>(null);
+  const navigate = useNavigate();
+  const [hoveredHeader, setHoveredHeader] = useState<string | null>("");
+  const [componentToDelete, setComponentToDelete] = useState<Measure | null>(
+    null
+  );
 
-  const [selectedGroupForExpansion, setSelectedGroupForExpansion] =
-    useState(null);
+  const [selectedGroupForExpansion, setSelectedGroupForExpansion] = useState<
+    string | null
+  >(null);
   const [isGroupRowExpanded, setIsGroupRowExpanded] = useState<boolean>(false);
-  const [expandedGroupsData, setExpandedGroupsData] = useState<any[]>([]);
+  const [expandedGroupsData, setExpandedGroupsData] = useState<
+    ComponentGroup[]
+  >([]);
 
-  const handleGroupRowClick = (component) => {
+  const handleGroupRowClick = (component: Measure) => {
     if (!isGroupRowExpanded || selectedGroupForExpansion !== component.id) {
       setSelectedGroupForExpansion(component.id);
       setExpandedGroupsData(component.groups || []);
@@ -64,6 +87,39 @@ export default function AddedComponentsTable({
     } catch (err) {
       console.error("Error deleting component:", err);
     }
+  };
+
+  const isGroupIncluded = (measureId: string | null, groupId: string) =>
+    !!measureId &&
+    selectedComponents?.some(
+      (component) =>
+        component.measureId === measureId && component.groupId === groupId
+    );
+
+  const getIncludedGroupCount = (measureId: string | null) =>
+    measureId
+      ? selectedComponents?.filter(
+          (component) => component.measureId === measureId
+        ).length || 0
+      : 0;
+
+  const getGroupType = (group: ComponentGroup) => {
+    if (Array.isArray(group?.measureGroupTypes)) {
+      return group.measureGroupTypes.join(", ") || "-";
+    }
+    return group?.type || "-";
+  };
+
+  const getGroupDescription = (group: ComponentGroup) => {
+    const description = group?.groupDescription || group?.description;
+    if (!description) {
+      return "-";
+    }
+    const descriptionElement = document.createElement("div");
+    descriptionElement.innerHTML = description;
+    return (
+      descriptionElement.textContent || descriptionElement.innerText || "-"
+    );
   };
 
   const columns = useMemo<ColumnDef<Measure>[]>(() => {
@@ -118,7 +174,7 @@ export default function AddedComponentsTable({
       {
         header: "",
         cell: (info) => {
-          const handleKeyDown = (e) => {
+          const handleKeyDown = (e: React.KeyboardEvent<HTMLSpanElement>) => {
             if (e.key === "Enter" || e.key === " ") {
               handleGroupRowClick(info.row.original);
             }
@@ -155,7 +211,7 @@ export default function AddedComponentsTable({
     if (canEdit) {
       columnDefs.push({
         id: "actions",
-        header: null,
+        header: "",
         cell: (info) => (
           <Tooltip
             title="Delete"
@@ -220,8 +276,112 @@ export default function AddedComponentsTable({
         ),
         accessorKey: "displayId",
       },
+      {
+        header: "Type",
+        cell: (info) => (
+          <TruncateText
+            text={getGroupType(info.row.original)}
+            maxLength={80}
+            dataTestId={`group-type-${info.row.original.id}`}
+          />
+        ),
+        accessorKey: "measureGroupTypes",
+      },
+      {
+        header: "Scoring",
+        cell: (info) => (
+          <TruncateText
+            text={info.row.original.scoring || "-"}
+            maxLength={80}
+            dataTestId={`group-scoring-${info.row.original.id}`}
+          />
+        ),
+        accessorKey: "scoring",
+      },
+      {
+        header: "Description",
+        cell: (info) => (
+          <TruncateText
+            text={getGroupDescription(info.row.original)}
+            maxLength={120}
+            dataTestId={`group-description-${info.row.original.id}`}
+          />
+        ),
+        accessorKey: "groupDescription",
+      },
+      {
+        id: "actions",
+        header: "Actions",
+        cell: (info) => {
+          const measureId = selectedGroupForExpansion;
+          const groupIndex = expandedGroupsData.findIndex(
+            (group) => group.id === info.row.original.id
+          );
+          return (
+            <Button
+              variant="outline-filled"
+              data-testid={`view-group-${info.row.original.id}`}
+              // aria-label={`${buttonText} Measure ${
+              //   info.row.original.measureName
+              // } ${info.row.original.version}${
+              //   info.row.original.actions.measureMetaData?.draft ? " Draft" : ""
+              // }${isLockedByOther ? ` (Locked by ${lockedByDisplayName})` : ""}`}
+              onClick={() => {
+                navigate(
+                  `/measures/${measureId}/edit/groups/${groupIndex + 1}`
+                );
+              }}
+              tabIndex={0}
+              role="button"
+            >
+              View
+            </Button>
+          );
+        },
+      },
+      {
+        id: "include",
+        header: "Include",
+        cell: (info) => {
+          const measureId = selectedGroupForExpansion;
+          const groupCount = expandedGroupsData.length;
+          const checked = isGroupIncluded(measureId, info.row.original.id);
+          const includedGroupCount = getIncludedGroupCount(measureId);
+          return (
+            <Switch
+              checked={checked}
+              disabled={
+                !canEdit ||
+                groupCount <= 1 ||
+                (checked && includedGroupCount <= 1)
+              }
+              onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                if (measureId) {
+                  onToggleGroup(
+                    measureId,
+                    info.row.original.id,
+                    event.target.checked
+                  );
+                }
+              }}
+              slotProps={{
+                input: {
+                  "aria-label": `Include ${info.row.original.displayId}`,
+                },
+              }}
+              data-testid={`include-group-${info.row.original.id}`}
+            />
+          );
+        },
+      },
     ];
-  }, []);
+  }, [
+    canEdit,
+    expandedGroupsData,
+    onToggleGroup,
+    selectedComponents,
+    selectedGroupForExpansion,
+  ]);
 
   const uniqueMeasures = _.uniqBy(components, (c) => c.id);
   return components.length > 0 ? (
@@ -376,7 +536,9 @@ export default function AddedComponentsTable({
                                             original: group,
                                           },
                                           getValue: () =>
-                                            group[column.accessorKey],
+                                            group[
+                                              column.accessorKey as keyof ComponentGroup
+                                            ],
                                         }
                                       )}
                                     </td>
@@ -400,7 +562,9 @@ export default function AddedComponentsTable({
         open={!!componentToDelete}
         onClose={() => setComponentToDelete(null)}
         onContinue={() => {
-          handleDeleteComponent(componentToDelete.id);
+          if (componentToDelete) {
+            handleDeleteComponent(componentToDelete.id);
+          }
           setComponentToDelete(null);
         }}
         dialogTitle="Delete Component Measure"

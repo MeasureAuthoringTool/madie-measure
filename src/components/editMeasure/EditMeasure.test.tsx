@@ -31,6 +31,7 @@ import {
   useFeatureFlags,
   useOktaTokens,
   useUserRoles,
+  routeHandlerStore,
 } from "@madie/madie-util";
 import { oneItemResponse } from "../__mocks__/mockMeasureResponses";
 import userEvent from "@testing-library/user-event";
@@ -339,10 +340,13 @@ const renderRouter = (
       <RouterProvider router={router} />
     </ApiContextProvider>
   );
+
+  return router;
 };
 
 describe("EditMeasure Component", () => {
   beforeEach(() => {
+    (routeHandlerStore as any).state = { canTravel: false, pendingPath: "" };
     measureStore.state.mockImplementation(() => measure);
     measure.model = Model.QICORE_6_0_0;
     measure.testCases = testCases;
@@ -386,6 +390,46 @@ describe("EditMeasure Component", () => {
 
     const loading = queryByTestId("loading");
     expect(loading).toBeNull();
+  });
+
+  it("fetches the new measure when the route measure id changes while mounted", async () => {
+    const originalRequest = global.Request;
+    (global as any).Request = jest.fn().mockImplementation((url, init) => ({
+      url,
+      signal: init?.signal,
+      method: init?.method || "GET",
+      headers: init?.headers,
+    }));
+    (routeHandlerStore as any).state = { canTravel: true, pendingPath: "" };
+    mockMeasureServiceApi.fetchMeasure = jest
+      .fn()
+      .mockImplementation((measureId) =>
+        Promise.resolve({ ...measure, id: measureId })
+      );
+
+    try {
+      const router = renderRouter([
+        { pathname: "/measures/measure-1/edit/details/" },
+      ]);
+
+      await waitFor(() => {
+        expect(mockMeasureServiceApi.fetchMeasure).toHaveBeenCalledWith(
+          "measure-1"
+        );
+      });
+
+      await act(async () => {
+        await router.navigate("/measures/measure-2/edit/details/");
+      });
+
+      await waitFor(() => {
+        expect(mockMeasureServiceApi.fetchMeasure).toHaveBeenCalledWith(
+          "measure-2"
+        );
+      });
+    } finally {
+      global.Request = originalRequest;
+    }
   });
 
   it("hides Comments when Commenting flag is disabled", async () => {

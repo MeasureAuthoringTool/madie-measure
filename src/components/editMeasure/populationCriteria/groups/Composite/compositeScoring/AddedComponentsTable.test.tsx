@@ -1,8 +1,21 @@
 import * as React from "react";
-import { render, screen, waitFor, within } from "@testing-library/react";
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 import AddedComponentsTable from "./AddedComponentsTable";
+
+const mockNavigate = jest.fn();
+
+jest.mock("react-router-dom", () => ({
+  ...jest.requireActual("react-router-dom"),
+  useNavigate: () => mockNavigate,
+}));
 
 jest.mock(
   "../../../../testCases/components/testCaseLanding/common/TestCaseTable/TestCaseTable",
@@ -373,6 +386,241 @@ describe("AddedComponentsTable", () => {
     expect(tableContent).toContain("Population1");
     expect(tableContent).toContain("Population2");
     expect(tableContent).toContain("Population3");
+  });
+
+  it("displays group metadata columns and links View to the group details", async () => {
+    const componentWithGroups = {
+      ...measuresFixture[0],
+      groups: [
+        {
+          id: "group1",
+          displayId: "Population1",
+          measureGroupTypes: ["Outcome", "Process"],
+          scoring: "Proportion",
+          groupDescription: "<p>Group one description</p>",
+        },
+        {
+          id: "group2",
+          displayId: "Population2",
+          type: "Patient Reported Outcome",
+          scoring: "Ratio",
+          description: "Group two description",
+        },
+      ],
+    };
+
+    render(
+      <AddedComponentsTable
+        components={[componentWithGroups]}
+        selectedComponents={[{ measureId: "m1", groupId: "group1" } as any]}
+        canEdit={true}
+        onDeleteComponent={jest.fn()}
+      />
+    );
+
+    const rows = screen.getAllByRole("row");
+    const expandButtons = rows[1].querySelectorAll("span[role='button']");
+    const expandButton = expandButtons[expandButtons.length - 1];
+
+    await userEvent.click(expandButton);
+    const expandedRow = await screen.findByTestId("expanded-group-row");
+
+    expect(within(expandedRow).getByText("Type")).toBeInTheDocument();
+    expect(within(expandedRow).getByText("Scoring")).toBeInTheDocument();
+    expect(within(expandedRow).getByText("Description")).toBeInTheDocument();
+    expect(within(expandedRow).getByText("Actions")).toBeInTheDocument();
+    expect(within(expandedRow).getByText("Include")).toBeInTheDocument();
+    expect(
+      within(expandedRow).getByText("Outcome, Process")
+    ).toBeInTheDocument();
+    expect(
+      within(expandedRow).getByText("Patient Reported Outcome")
+    ).toBeInTheDocument();
+    expect(within(expandedRow).getByText("Proportion")).toBeInTheDocument();
+    expect(within(expandedRow).getByText("Ratio")).toBeInTheDocument();
+    expect(
+      within(expandedRow).getByText("Group one description")
+    ).toBeInTheDocument();
+
+    await userEvent.click(within(expandedRow).getByTestId("view-group-group1"));
+    expect(mockNavigate).toHaveBeenCalledWith("/measures/m1/edit/groups/1");
+
+    await userEvent.click(within(expandedRow).getByTestId("view-group-group2"));
+    expect(mockNavigate).toHaveBeenCalledWith("/measures/m1/edit/groups/2");
+  });
+
+  it("checks included groups and calls onToggleGroup when Include changes", async () => {
+    const onToggleGroup = jest.fn();
+    const componentWithGroups = {
+      ...measuresFixture[0],
+      groups: [
+        { id: "group1", displayId: "Population1" },
+        { id: "group2", displayId: "Population2" },
+      ],
+    };
+
+    render(
+      <AddedComponentsTable
+        components={[componentWithGroups]}
+        selectedComponents={[
+          { measureId: "m1", groupId: "group1" } as any,
+          { measureId: "m1", groupId: "group2" } as any,
+        ]}
+        canEdit={true}
+        onToggleGroup={onToggleGroup}
+        onDeleteComponent={jest.fn()}
+      />
+    );
+
+    const rows = screen.getAllByRole("row");
+    const expandButtons = rows[1].querySelectorAll("span[role='button']");
+    const expandButton = expandButtons[expandButtons.length - 1];
+
+    await userEvent.click(expandButton);
+
+    const includedToggle = screen.getByRole("checkbox", {
+      name: "Include Population1",
+    });
+    const excludedToggle = screen.getByRole("checkbox", {
+      name: "Include Population2",
+    });
+
+    expect(includedToggle).toBeChecked();
+    expect(excludedToggle).toBeChecked();
+
+    await userEvent.click(excludedToggle);
+    expect(onToggleGroup).toHaveBeenCalledWith("m1", "group2", false);
+
+    await userEvent.click(includedToggle);
+    expect(onToggleGroup).toHaveBeenCalledWith("m1", "group1", false);
+  });
+
+  it("disables the Include toggle when it is the only included group for a component", async () => {
+    const componentWithGroups = {
+      ...measuresFixture[0],
+      groups: [
+        { id: "group1", displayId: "Population1" },
+        { id: "group2", displayId: "Population2" },
+      ],
+    };
+
+    render(
+      <AddedComponentsTable
+        components={[componentWithGroups]}
+        selectedComponents={[{ measureId: "m1", groupId: "group1" } as any]}
+        canEdit={true}
+        onDeleteComponent={jest.fn()}
+      />
+    );
+
+    const rows = screen.getAllByRole("row");
+    const expandButtons = rows[1].querySelectorAll("span[role='button']");
+    const expandButton = expandButtons[expandButtons.length - 1];
+
+    await userEvent.click(expandButton);
+
+    expect(
+      screen.getByRole("checkbox", { name: "Include Population1" })
+    ).toBeDisabled();
+    expect(
+      screen.getByRole("checkbox", { name: "Include Population2" })
+    ).not.toBeDisabled();
+  });
+
+  it("disables the Include toggle when a component has only one group", async () => {
+    const componentWithOneGroup = {
+      ...measuresFixture[0],
+      groups: [{ id: "group1", displayId: "Population1" }],
+    };
+
+    render(
+      <AddedComponentsTable
+        components={[componentWithOneGroup]}
+        selectedComponents={[{ measureId: "m1", groupId: "group1" } as any]}
+        canEdit={true}
+        onDeleteComponent={jest.fn()}
+      />
+    );
+
+    const rows = screen.getAllByRole("row");
+    const expandButtons = rows[1].querySelectorAll("span[role='button']");
+    const expandButton = expandButtons[expandButtons.length - 1];
+
+    await userEvent.click(expandButton);
+
+    expect(
+      screen.getByRole("checkbox", { name: "Include Population1" })
+    ).toBeDisabled();
+  });
+
+  it("disables Include toggles in read-only mode", async () => {
+    const componentWithGroups = {
+      ...measuresFixture[0],
+      groups: [
+        { id: "group1", displayId: "Population1" },
+        { id: "group2", displayId: "Population2" },
+      ],
+    };
+
+    render(
+      <AddedComponentsTable
+        components={[componentWithGroups]}
+        selectedComponents={[
+          { measureId: "m1", groupId: "group1" } as any,
+          { measureId: "m1", groupId: "group2" } as any,
+        ]}
+        canEdit={false}
+        onDeleteComponent={jest.fn()}
+      />
+    );
+
+    const rows = screen.getAllByRole("row");
+    const expandButtons = rows[1].querySelectorAll("span[role='button']");
+    const expandButton = expandButtons[expandButtons.length - 1];
+
+    await userEvent.click(expandButton);
+
+    expect(
+      screen.getByRole("checkbox", { name: "Include Population1" })
+    ).toBeDisabled();
+    expect(
+      screen.getByRole("checkbox", { name: "Include Population2" })
+    ).toBeDisabled();
+  });
+
+  it("expands and collapses group rows from the keyboard", async () => {
+    const componentWithGroups = {
+      ...measuresFixture[0],
+      groups: [{ id: "group1", displayId: "Population1" }],
+    };
+
+    render(
+      <AddedComponentsTable
+        components={[componentWithGroups]}
+        canEdit={true}
+        onDeleteComponent={jest.fn()}
+      />
+    );
+
+    let rows = screen.getAllByRole("row");
+    let expandButtons = rows[1].querySelectorAll("span[role='button']");
+    let expandButton = expandButtons[expandButtons.length - 1];
+
+    expandButton.focus();
+    fireEvent.keyDown(expandButton, { key: "Enter" });
+    expect(await screen.findByTestId("expanded-group-row")).toBeInTheDocument();
+
+    rows = screen.getAllByRole("row");
+    expandButtons = rows[1].querySelectorAll("span[role='button']");
+    expandButton = expandButtons[expandButtons.length - 1];
+
+    expandButton.focus();
+    fireEvent.keyDown(expandButton, { key: " " });
+    await waitFor(() => {
+      expect(
+        screen.queryByTestId("expanded-group-row")
+      ).not.toBeInTheDocument();
+    });
   });
 
   it("handling when there no groups present", async () => {
