@@ -22,13 +22,8 @@ export const getHl7ProfileLink = (
 
   const id = normalizedProfileId.toLowerCase();
 
-  // QI-Core profiles live under STU6 or STU7
   if (id.startsWith("qicore-")) {
-    //get version number
-    const versionNum = measureModel?.match(/(\d+)(?:\.\d+)?/);
-    const major = versionNum ? parseInt(versionNum[1], 10) : 6;
-    const stu = major >= 7 ? "STU7" : "STU6";
-    return `https://hl7.org/fhir/us/qicore/${stu}/StructureDefinition-${normalizedProfileId}.html`;
+    return `https://hl7.org/fhir/us/qicore/STU6/StructureDefinition-${normalizedProfileId}.html`;
   }
   if (id.startsWith("us-core-")) {
     return `https://hl7.org/fhir/us/core/StructureDefinition-${normalizedProfileId}.html`;

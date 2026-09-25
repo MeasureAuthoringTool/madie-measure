@@ -32,7 +32,6 @@ declare module "@madie/madie-util" {
   export interface FeatureFlags {
     enableQdmRepeatTransfer: boolean;
     qdmHideJson: boolean;
-    qiCore7: boolean;
     QICoreCompositeMeasure: boolean;
     DisplayOwner: boolean;
     MakeJSONMatchUI: boolean;
@@ -62,7 +61,6 @@ declare module "@madie/madie-util" {
       qdmHideJson?: boolean;
       enableQdmRepeatTransfer?: boolean;
       EnhancedTextFormatting?: boolean;
-      qiCore7?: boolean;
       QICoreCompositeMeasure?: boolean;
     };
   }

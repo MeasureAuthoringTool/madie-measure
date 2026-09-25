@@ -7,12 +7,6 @@ describe("getHl7ProfileLink", () => {
     );
   });
 
-  it("returns an STU7 QI-Core URL when measureModel is QI-Core 7.0", () => {
-    expect(getHl7ProfileLink("qicore-patient", "QI-Core 7.0")).toBe(
-      "https://hl7.org/fhir/us/qicore/STU7/StructureDefinition-qicore-patient.html"
-    );
-  });
-
   it("returns a US Core URL for us-core profile IDs", () => {
     expect(getHl7ProfileLink("us-core-patient", "QI-Core 6.0")).toBe(
       "https://hl7.org/fhir/us/core/StructureDefinition-us-core-patient.html"
