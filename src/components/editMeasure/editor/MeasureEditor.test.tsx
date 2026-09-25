@@ -742,6 +742,23 @@ describe("MeasureEditor component", () => {
       "Concept Constructs are not supported in MADiE. It has been removed."
     );
   });
+  it("shows the CQL editor guidance when How it works is opened", async () => {
+    renderEditor(measure);
+
+    userEvent.click(await screen.findByTestId("how-it-works-link"));
+
+    await waitFor(() => {
+      expect(screen.getByTestId("how-it-works-content")).toHaveTextContent(
+        "The CQL Editor is where you create and maintain your measure's " +
+          "Clinical Quality Language (CQL). Use the editor to write CQL, " +
+          "search and replace text, apply value sets and codes, and manage " +
+          "includes, parameters, definitions, and functions. Keyboard users " +
+          "can press Esc to exit the editor, then Tab or Shift + Tab to " +
+          "continue navigating through the page. Remember to save your " +
+          "changes before leaving the editor."
+      );
+    });
+  });
 });
 
 describe("mapElmErrorsToAceAnnotations", () => {
