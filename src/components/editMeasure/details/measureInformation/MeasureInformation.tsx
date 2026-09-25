@@ -248,9 +248,9 @@ export default function MeasureInformation(props: MeasureInformationProps) {
   } as measureInformationForm;
 
   const schema =
-    measure?.model === "QI-Core v4.1.1"
-      ? MeasureSchemaValidator
-      : QdmMeasureSchemaValidator;
+    measure?.model === "QDM v5.6"
+      ? QdmMeasureSchemaValidator
+      : MeasureSchemaValidator;
 
   const formik = useFormik({
     initialValues: { ...INITIAL_VALUES },
