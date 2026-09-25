@@ -104,7 +104,6 @@ const MultipleSelectDropDown = ({
       />
       <Autocomplete
         value={value}
-        aria-required
         size="small"
         limitTags={limitTags}
         multiple={multipleSelect}

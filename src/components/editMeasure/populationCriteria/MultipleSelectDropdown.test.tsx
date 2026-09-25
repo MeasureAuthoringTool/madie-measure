@@ -35,6 +35,24 @@ describe("MultipleSelectDropDown Component", () => {
     expect(screen.queryByText("Option 2")).not.toBeInTheDocument();
   });
 
+  it("Should set aria-required true on the input when required", () => {
+    render(<MultipleSelectDropDown {...props} required={true} />);
+
+    expect(screen.getByTestId("measure-group-type-input")).toHaveAttribute(
+      "aria-required",
+      "true"
+    );
+  });
+
+  it("Should set aria-required false on the input when not required", () => {
+    render(<MultipleSelectDropDown {...props} required={false} />);
+
+    expect(screen.getByTestId("measure-group-type-input")).toHaveAttribute(
+      "aria-required",
+      "false"
+    );
+  });
+
   it("Should render readonly state", () => {
     render(
       <MultipleSelectDropDown {...props} readOnly={true} value={["Option 2"]} />
