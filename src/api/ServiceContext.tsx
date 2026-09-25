@@ -25,7 +25,6 @@ export interface ServiceConfig {
     qdmHideJson?: boolean;
     enableQdmRepeatTransfer?: boolean;
     EnhancedTextFormatting?: boolean;
-    qiCore7?: boolean;
     QICoreCompositeMeasure?: boolean;
   };
 }
