@@ -49,22 +49,20 @@ const TestCaseListSideBarNav = ({
   if (isCollapsed) {
     // Show only the "expand" icon when collapsed
     return (
-      <button
+      <div
         style={{
           display: "flex",
           justifyContent: "center",
           alignItems: "flex-start",
-          cursor: "pointer",
           paddingTop: 16,
           backgroundColor: "#ededed",
         }}
         data-testid="test-case-sidebar-collapsed-button"
-        aria-label="Expand Test Case Sidebar"
-        onClick={() => setIsCollapsed(false)}
       >
         <IconButton
           aria-label="Expand Test Case Sidebar"
           data-testid="test-case-sidebar-expand-icon"
+          onClick={() => setIsCollapsed(false)}
         >
           <ExpansionIcon
             style={{
@@ -73,7 +71,7 @@ const TestCaseListSideBarNav = ({
             titleAccess="Expand Test Case Sidebar"
           />
         </IconButton>
-      </button>
+      </div>
     );
   }
 
