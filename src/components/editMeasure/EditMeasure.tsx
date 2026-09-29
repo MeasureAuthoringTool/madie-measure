@@ -82,9 +82,7 @@ export default function EditMeasure() {
   const [loading, setLoading] = useState<boolean>(true);
   let navigate = useNavigate();
   const location = useLocation();
-  const [currentMeasureId, setCurrentMeasureId] = useState<string | undefined>(
-    measureId
-  );
+  const [currentMeasureId, setCurrentMeasureId] = useState<string>(measureId);
   const userRoles = useUserRoles();
   const featureFlags = useFeatureFlags();
 
@@ -126,22 +124,12 @@ export default function EditMeasure() {
   };
 
   useEffect(() => {
-    if (measureId && measureId !== currentMeasureId) {
-      setLoading(true);
-      setCurrentMeasureId(measureId);
-    }
-  }, [measureId, currentMeasureId]);
-
-  useEffect(() => {
     if (currentMeasureId) {
       loadMeasure();
     }
   }, [currentMeasureId]);
 
   const loadMeasure = () => {
-    if (!currentMeasureId) {
-      return;
-    }
     measureServiceApi
       .fetchMeasure(currentMeasureId)
       .then((value: Measure) => {
