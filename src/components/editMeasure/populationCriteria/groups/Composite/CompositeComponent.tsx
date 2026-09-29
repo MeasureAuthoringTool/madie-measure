@@ -16,7 +16,7 @@ export default function CompositeComponent({
   components: Component[];
   measure: Measure;
   formik: any;
-  submitComponentForm: (any) => void;
+  submitComponentForm: (components: any[]) => void;
 }) {
   const measureServiceApi = useRef(useMeasureServiceApi()).current;
   const [componentDetails, setComponentDetails] = useState([]);
@@ -63,7 +63,23 @@ export default function CompositeComponent({
       </div>
       <AddedComponentsTable
         components={componentDetails}
+        selectedComponents={components}
         canEdit={canEdit}
+        onToggleGroup={(measureId, groupId, include) => {
+          const updatedComponents = include
+            ? _.uniqBy(
+                [...components, { measureId, groupId }],
+                (component) => `${component.measureId}:${component.groupId}`
+              )
+            : components.filter(
+                (component) =>
+                  !(
+                    component.measureId === measureId &&
+                    component.groupId === groupId
+                  )
+              );
+          submitComponentForm(updatedComponents);
+        }}
         onDeleteComponent={handleComponentDelete}
       />
     </div>
