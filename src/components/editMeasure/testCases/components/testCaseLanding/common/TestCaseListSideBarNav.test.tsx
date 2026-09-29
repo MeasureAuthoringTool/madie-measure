@@ -186,11 +186,21 @@ describe("TestCase component", () => {
     );
 
     // Only the expand icon should be visible
-    expect(
-      screen.getByTestId("test-case-sidebar-expand-icon")
-    ).toBeInTheDocument();
+    const collapsedButton = screen.getByTestId(
+      "test-case-sidebar-collapsed-button"
+    );
+    const expandIcon = screen.getByTestId("test-case-sidebar-expand-icon");
 
-    fireEvent.click(screen.getByTestId("test-case-sidebar-expand-icon"));
+    expect(collapsedButton).toBeInTheDocument();
+    expect(expandIcon).toBeInTheDocument();
+    expect(screen.getAllByRole("button")).toHaveLength(1);
+    expect(collapsedButton.tagName).toBe("DIV");
+    expect(expandIcon.tagName).toBe("BUTTON");
+
+    userEvent.tab();
+    expect(expandIcon).toHaveFocus();
+
+    fireEvent.click(expandIcon);
     expect(setIsCollapsed).toHaveBeenCalledWith(false);
   });
 

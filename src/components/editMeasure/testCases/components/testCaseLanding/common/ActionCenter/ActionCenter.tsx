@@ -340,6 +340,7 @@ export default function ActionCenter(props: ActionCenterProps) {
             <div tw="flex items-center">
               <Tooltip
                 data-testid="delete-tooltip"
+                describeChild
                 title={
                   disableDeleteBtn
                     ? disabledDeleteBtnMessage
@@ -359,22 +360,24 @@ export default function ActionCenter(props: ActionCenterProps) {
                   },
                 }}
               >
-                <span>
+                <div aria-label="Delete Test Case">
                   <IconButton
                     onClick={() => {
                       setDeleteDialogModalOpen(true);
                     }}
                     disabled={disableDeleteBtn}
                     data-testid="delete-action-btn"
+                    aria-label="Delete test case"
                   >
                     <DeleteOutlinedIcon data-testid={`delete-action-icon`} />
                   </IconButton>
-                </span>
+                </div>
               </Tooltip>
 
               {isDraft && (
                 <Tooltip
                   data-testid="shift-test-case-dates-tooltip"
+                  describeChild
                   title={
                     disableShiftDatesBtn
                       ? "Select test cases to shift test case dates"
@@ -394,24 +397,26 @@ export default function ActionCenter(props: ActionCenterProps) {
                     },
                   }}
                 >
-                  <span>
+                  <div aria-label="Shift test case dates">
                     <IconButton
                       onClick={() => {
                         setShiftDatesDialogModalOpen(true);
                       }}
                       disabled={disableShiftDatesBtn}
                       data-testid="shift-test-case-dates-action-btn"
+                      aria-label="Shift test case dates"
                     >
                       <EditCalendarOutlinedIcon
                         data-testid={`shift-test-case-dates-action-icon`}
                       />
                     </IconButton>
-                  </span>
+                  </div>
                 </Tooltip>
               )}
 
               <Tooltip
                 data-testid="clone-tooltip"
+                describeChild
                 title={cloneTooltipBtnMessage}
                 placement="top"
                 arrow
@@ -427,22 +432,24 @@ export default function ActionCenter(props: ActionCenterProps) {
                   },
                 }}
               >
-                <span>
+                <div aria-label="Clone Test Case">
                   <IconButton
                     onClick={(e) => {
                       onCloneTestCase(selectedTestCases?.[0]);
                     }}
                     disabled={disableCloneBtn}
                     data-testid="clone-action-btn"
+                    aria-label="Clone test case"
                   >
                     <LibraryAddIcon data-testid={`clone-action-icon`} />
                   </IconButton>
-                </span>
+                </div>
               </Tooltip>
 
               {!isQDM && (
                 <Tooltip
                   data-testid="make-json-match-ui-tooltip"
+                  describeChild
                   title={makeJsonMatchUiTooltipMessage}
                   placement="top"
                   arrow
@@ -458,19 +465,20 @@ export default function ActionCenter(props: ActionCenterProps) {
                     },
                   }}
                 >
-                  <span>
+                  <div aria-label="Make JSON Match UI">
                     <IconButton
                       onClick={() => {
                         setMakeJsonMatchUiDialogOpen(true);
                       }}
                       disabled={disableMakeJsonMatchUiBtn}
                       data-testid="make-json-match-ui-action-btn"
+                      aria-label="Make JSON (family/given) match UI (group/title)"
                     >
                       <MakeJsonMatchUiIcon
                         disabled={disableMakeJsonMatchUiBtn}
                       />
                     </IconButton>
-                  </span>
+                  </div>
                 </Tooltip>
               )}
             </div>
@@ -478,6 +486,7 @@ export default function ActionCenter(props: ActionCenterProps) {
 
           <Tooltip
             data-testid="copy-tooltip"
+            describeChild
             title={
               disableCopyBtn
                 ? "Select test cases to copy to another measure"
@@ -497,13 +506,14 @@ export default function ActionCenter(props: ActionCenterProps) {
               },
             }}
           >
-            <span>
+            <div aria-label="Copy to Icon">
               <IconButton
                 onClick={() => {
                   displayTestCaseCopyDialog();
                 }}
                 disabled={disableCopyBtn}
                 data-testid="copy-action-btn"
+                aria-label="Copy to another measure"
               >
                 <Icon
                   icon="fluent:share-screen-start-24-regular"
@@ -511,11 +521,12 @@ export default function ActionCenter(props: ActionCenterProps) {
                   rotate={45}
                 />
               </IconButton>
-            </span>
+            </div>
           </Tooltip>
 
           <Tooltip
             data-testid="export-tooltip"
+            describeChild
             title={
               disableExportBtn
                 ? isQDM
@@ -539,10 +550,11 @@ export default function ActionCenter(props: ActionCenterProps) {
               },
             }}
           >
-            <span>
+            <div aria-label="Export Test case(s)">
               <IconButton
                 disabled={disableExportBtn}
                 data-testid="export-action-btn"
+                aria-label="Export test cases"
                 ref={anchorRef}
                 onClick={() => {
                   if (!disableExportBtn) {
@@ -552,7 +564,7 @@ export default function ActionCenter(props: ActionCenterProps) {
               >
                 <FileUploadOutlinedIcon data-testid="export-action-icon" />
               </IconButton>
-            </span>
+            </div>
           </Tooltip>
 
           <Popper
