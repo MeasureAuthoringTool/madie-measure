@@ -2,8 +2,8 @@ import React from "react";
 import tw from "twin.macro";
 import "styled-components/macro";
 import CompositeMeasuresTable from "./CompositeMeasuresTable";
-import HowItWorks from "../LeftPanel/ElementsTab/builder/HowItWorks/HowItWorks";
-import { Button } from "@madie/madie-design-system/dist/react";
+import { INSERT_TEST_CASE_HOW_IT_WORKS } from "./howItWorksContent";
+import { Button, HowItWorks } from "@madie/madie-design-system/dist/react";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 
 const CompositeProfileViews = ({
@@ -31,11 +31,13 @@ const CompositeProfileViews = ({
               Back to All Profiles
             </Button>
           </div>
-          <div tw="mb-4" className="how-it-works-flush-left">
+          <div tw="mb-4">
             <HowItWorks
               isOpen={howItWorksOpen}
               onOpenChange={setHowItWorksOpen}
-            />
+            >
+              {INSERT_TEST_CASE_HOW_IT_WORKS}
+            </HowItWorks>
           </div>
         </>
       ) : (
@@ -60,9 +62,12 @@ const CompositeProfileViews = ({
             Back to All Profiles
           </Button>
           <HowItWorks
+            align="right"
             isOpen={howItWorksOpen}
             onOpenChange={setHowItWorksOpen}
-          />
+          >
+            {INSERT_TEST_CASE_HOW_IT_WORKS}
+          </HowItWorks>
         </div>
       )}
 
