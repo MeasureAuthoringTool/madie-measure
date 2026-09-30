@@ -23,3 +23,45 @@ function mockImport(importName) {
 }
 
 jest.setTimeout(30000);
+
+jest.mock(
+  "monaco-editor",
+  () => {
+    return {
+      KeyCode: { Escape: 9 },
+      editor: {
+        defineTheme: jest.fn(),
+        setTheme: jest.fn(),
+      },
+    };
+  },
+  { virtual: true }
+);
+
+jest.mock(
+  "@monaco-editor/react",
+  () => {
+    const React = require("react");
+    const MockMonacoEditor = ({ value, onChange, onMount, options }) => {
+      React.useEffect(() => {
+        const fakeEditor = {
+          getAction: () => ({ run: jest.fn() }),
+        };
+        onMount?.(fakeEditor);
+      }, [onMount]);
+
+      return React.createElement("textarea", {
+        role: "textbox",
+        value: value || "",
+        readOnly: Boolean(options?.readOnly),
+        onChange: (event) => onChange?.(event.target.value),
+      });
+    };
+
+    return {
+      __esModule: true,
+      default: MockMonacoEditor,
+    };
+  },
+  { virtual: true }
+);

@@ -5,11 +5,10 @@ import LeftPanelNavTabs from "./LeftPanelNavTabs";
 import ElementsTab from "./ElementsTab/ElementsTab";
 import { QdmPatientProvider } from "../../../../util/QdmPatientContext";
 import { useFormikContext } from "formik";
-import Editor from "../../../editor/Editor";
 import { DataElement } from "cqm-models";
 import EditorCalculator from "../../calculator/EditorCalculator";
-import { useFeatureFlags } from "@madie/madie-util";
 import CalculatorDialog from "../../calculator/CalculatorDialog";
+import { MadieJsonEditor } from "@madie/madie-editor";
 
 const LeftPanel = (props: {
   canEdit: boolean;
@@ -27,10 +26,10 @@ const LeftPanel = (props: {
     selectedDataElement,
     setSelectedDataElement,
   } = props;
+
   const [activeTab, setActiveTab] = useState<string>("elements");
   const [calculationDialogOpen, setCalculationDialogOpen] = useState(false);
   const formik: any = useFormikContext();
-  const featureFlags = useFeatureFlags();
 
   return (
     <div className="left-panel">
@@ -53,14 +52,14 @@ const LeftPanel = (props: {
             />
           )}
           {activeTab === "json" && (
-            <Editor
+            <MadieJsonEditor
               value={
                 formik.values?.json
                   ? JSON.stringify(JSON.parse(formik.values?.json), null, 2)
                   : ""
               }
               height="100%"
-              readOnly={true}
+              readOnly
             />
           )}
         </QdmPatientProvider>
