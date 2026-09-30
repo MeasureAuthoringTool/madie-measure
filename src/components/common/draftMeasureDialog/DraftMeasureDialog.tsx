@@ -137,10 +137,7 @@ const DraftMeasureDialog = ({ open, onClose, onSubmit, measure, loading }) => {
                   "aria-describedby": "model-select-helper-text",
                   required: true,
                 }}
-                readOnly={
-                  measure?.model === "US Quality Core v0.5.0" ||
-                  (featureFlags?.qiCore7 && measure?.model === "QI-Core v7.0.2")
-                }
+                readOnly={measure?.model === "US Quality Core v0.5.0"}
                 SelectDisplayProps={{
                   "aria-required": "true",
                 }}
@@ -155,11 +152,8 @@ const DraftMeasureDialog = ({ open, onClose, onSubmit, measure, loading }) => {
                     if (measure?.model === "QI-Core v6.0.0") {
                       return (
                         modelKey === "QICORE_6_0_0" ||
-                        modelKey === "QICORE_7_0_2" ||
                         modelKey === "US_QUALITY_0_5_0"
                       );
-                    } else if (measure?.model === "QI-Core v7.0.2") {
-                      return modelKey === "QICORE_7_0_2";
                     } else if (measure?.model === "US Quality Core v0.5.0") {
                       return modelKey === "US_QUALITY_0_5_0";
                     }
@@ -169,8 +163,7 @@ const DraftMeasureDialog = ({ open, onClose, onSubmit, measure, loading }) => {
                     if (
                       !modelKey.startsWith("QDM") &&
                       modelKey !== "FHIR_4_0_1" &&
-                      modelKey !== "US_CORE_6_1_0" &&
-                      (featureFlags?.qiCore7 || modelKey != "QICORE_7_0_2")
+                      modelKey !== "US_CORE_6_1_0"
                     ) {
                       return (
                         <MenuItem

@@ -121,33 +121,6 @@ describe("ResourceList component", () => {
     );
   });
 
-  it("should render an HL7 icon and open the correct QI-Core STU7 profile URL", async () => {
-    const resourceList = [
-      {
-        id: "qicore-patient",
-        title: "QI Core Patient",
-        type: "Patient",
-        category: "Demo",
-        profile: "profile-patient",
-      },
-    ];
-    const onClick = jest.fn();
-    window.open = jest.fn();
-
-    renderWithExecutionContext(
-      <ResourceList resourceIdentifiers={resourceList} onClick={onClick} />,
-      "QI-Core 7.0"
-    );
-
-    const hl7Button = await screen.findByTestId("hl7-link-qicore-patient");
-    expect(hl7Button).toBeInTheDocument();
-    userEvent.click(hl7Button);
-    expect(window.open).toHaveBeenCalledWith(
-      "https://hl7.org/fhir/us/qicore/STU7/StructureDefinition-qicore-patient.html",
-      "_blank"
-    );
-  });
-
   it("should open a US Core profile link when the id starts with us-core", async () => {
     const resourceList = [
       {
