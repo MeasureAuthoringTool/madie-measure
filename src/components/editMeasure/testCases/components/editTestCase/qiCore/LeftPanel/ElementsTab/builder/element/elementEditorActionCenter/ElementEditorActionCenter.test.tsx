@@ -212,4 +212,62 @@ describe("ElementEditorActionCenter Component", () => {
       })
     ).toBeInTheDocument();
   });
+
+  it("tabs through actions only while the action center is open", async () => {
+    const mockRootDefinition = {
+      sliceName: "test-sliceName",
+      path: "test-observation",
+      min: 0,
+      max: "*",
+    };
+    render(
+      <>
+        <ElementEditorActionCenter
+          rootDefinition={mockRootDefinition}
+          numElements={1}
+          handleDelete={mockHandleDelete}
+          addElementOfMultipleCardinality={jest.fn()}
+          elementValue={{}}
+          elementName="name"
+        />
+        <button type="button">Expand All</button>
+      </>
+    );
+
+    const actionCenterButton = screen.getByRole("button", {
+      name: "Element action center",
+    });
+    const expandAllButton = screen.getByRole("button", { name: "Expand All" });
+    const deleteButton = await screen.findByRole("menuitem", {
+      name: "Delete",
+    });
+    const cloneButton = screen.getByRole("menuitem", { name: "Clone" });
+    const addButton = screen.getByRole("menuitem", { name: "Add" });
+
+    expect(deleteButton).toHaveAttribute("tabindex", "-1");
+    expect(cloneButton).toHaveAttribute("tabindex", "-1");
+    expect(addButton).toHaveAttribute("tabindex", "-1");
+
+    await userEvent.tab();
+    expect(actionCenterButton).toHaveFocus();
+    await userEvent.tab();
+    expect(expandAllButton).toHaveFocus();
+
+    await userEvent.click(actionCenterButton);
+    await userEvent.tab();
+    expect(deleteButton).toHaveFocus();
+    await userEvent.tab();
+    expect(cloneButton).toHaveFocus();
+    await userEvent.tab();
+    expect(addButton).toHaveFocus();
+    await userEvent.tab();
+    expect(expandAllButton).toHaveFocus();
+
+    await userEvent.click(actionCenterButton);
+    expect(deleteButton).toHaveAttribute("tabindex", "-1");
+    expect(cloneButton).toHaveAttribute("tabindex", "-1");
+    expect(addButton).toHaveAttribute("tabindex", "-1");
+    await userEvent.tab();
+    expect(expandAllButton).toHaveFocus();
+  });
 });

@@ -191,7 +191,7 @@ const TestCaseSummaryGrid = ({
         onClick: (targetContext: any) => onRowClone?.(targetContext),
       },
       {
-        name: "Remove",
+        name: "Delete",
         icon: <DeleteOutlinedIcon sx={{ color: "#D92F2F" }} />,
         onClick: (targetContext: any) =>
           onRowDelete(targetContext?.entry || targetContext),
@@ -387,7 +387,7 @@ const TestCaseSummaryGrid = ({
                   }
                   placement="top"
                 >
-                  <span>
+                  <div style={{ display: "inline-block" }}>
                     <IconButton
                       data-testid={`action-${entry.resource.id}-${action.name}`}
                       aria-label={action.name}
@@ -395,7 +395,7 @@ const TestCaseSummaryGrid = ({
                       onClick={() => {
                         if (action.disabled) return;
 
-                        if (action.name === "Remove") {
+                        if (action.name === "Delete") {
                           setDeleteTarget(row.original);
                           setDeleteAction(action);
                         } else {
@@ -410,7 +410,7 @@ const TestCaseSummaryGrid = ({
                           })
                         : action.icon}
                     </IconButton>
-                  </span>
+                  </div>
                 </Tooltip>
               ))}
             </div>

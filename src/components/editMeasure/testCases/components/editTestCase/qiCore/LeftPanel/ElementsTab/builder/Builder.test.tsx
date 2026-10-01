@@ -459,7 +459,7 @@ describe("Builder Component", () => {
     });
 
     await screen.findByText("QICore Encounter");
-    const deleteAction = screen.getByTestId("action-ec-1-Remove");
+    const deleteAction = screen.getByTestId("action-ec-1-Delete");
     userEvent.click(deleteAction);
 
     const continueButton = await screen.findByTestId(
