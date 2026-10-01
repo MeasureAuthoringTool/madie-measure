@@ -395,20 +395,22 @@ const Builder = ({
             <>
               <ResourceContextProvider value={resourceIdentifiers}>
                 {_.isEmpty(state?.bundle?.entry) ? (
-                  <MadieAlert
-                    minimizeAlerts={false}
-                    type="warning"
-                    content={
-                      <p
-                        aria-live="polite"
-                        role="alert"
-                        data-testid="no-profiles-alert"
-                      >
-                        {NO_PROFILES_MESSAGE}
-                      </p>
-                    }
-                    canClose={false}
-                  />
+                  <div style={{ marginTop: 16 }}>
+                    <MadieAlert
+                      minimizeAlerts={false}
+                      type="warning"
+                      content={
+                        <p
+                          aria-live="polite"
+                          role="alert"
+                          data-testid="no-profiles-alert"
+                        >
+                          {NO_PROFILES_MESSAGE}
+                        </p>
+                      }
+                      canClose={false}
+                    />
+                  </div>
                 ) : (
                   <>
                     {selectedResourceID && (
