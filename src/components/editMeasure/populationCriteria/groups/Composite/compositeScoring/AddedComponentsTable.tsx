@@ -321,11 +321,7 @@ export default function AddedComponentsTable({
             <Button
               variant="outline-filled"
               data-testid={`view-group-${info.row.original.id}`}
-              // aria-label={`${buttonText} Measure ${
-              //   info.row.original.measureName
-              // } ${info.row.original.version}${
-              //   info.row.original.actions.measureMetaData?.draft ? " Draft" : ""
-              // }${isLockedByOther ? ` (Locked by ${lockedByDisplayName})` : ""}`}
+              aria-label={`View Group ${info.row.original.displayId}`}
               onClick={() => {
                 navigate(
                   `/measures/${measureId}/edit/groups/${groupIndex + 1}`
