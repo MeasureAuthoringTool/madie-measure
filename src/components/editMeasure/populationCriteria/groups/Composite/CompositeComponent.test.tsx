@@ -5,6 +5,13 @@ import userEvent from "@testing-library/user-event";
 import CompositeComponent from "./CompositeComponent";
 import { Measure } from "@madie/madie-models";
 
+const mockNavigate = jest.fn();
+
+jest.mock("react-router-dom", () => ({
+  ...jest.requireActual("react-router-dom"),
+  useNavigate: () => mockNavigate,
+}));
+
 const mockFormik = {
   values: {
     compositeScoring: "",
@@ -175,6 +182,90 @@ describe("CompositeComponent", () => {
 
     expect(submitComponentForm).toHaveBeenCalledWith([
       { measureId: "m2", groupId: "g2" },
+    ]);
+  });
+
+  it("adds a group to selected components when Include is toggled on", async () => {
+    mockMeasureServiceApi.fetchMeasuresByIds.mockResolvedValueOnce([
+      {
+        ...mockMeasureDetails[0],
+        groups: [
+          { id: "g1", displayId: "Population1" },
+          { id: "g2", displayId: "Population2" },
+        ],
+      },
+    ]);
+
+    render(
+      <CompositeComponent
+        canEdit={true}
+        formik={mockFormik}
+        components={[{ measureId: "m1", groupId: "g1" }] as any}
+        measure={measure}
+        submitComponentForm={submitComponentForm}
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText("Alpha Measure")).toBeInTheDocument();
+    });
+
+    const expandButton = screen
+      .getAllByRole("row")[1]
+      .querySelector("span[role='button']");
+    await userEvent.click(expandButton!);
+
+    await userEvent.click(
+      screen.getByRole("checkbox", { name: "Include Population2" })
+    );
+
+    expect(submitComponentForm).toHaveBeenCalledWith([
+      { measureId: "m1", groupId: "g1" },
+      { measureId: "m1", groupId: "g2" },
+    ]);
+  });
+
+  it("removes a group from selected components when Include is toggled off", async () => {
+    mockMeasureServiceApi.fetchMeasuresByIds.mockResolvedValueOnce([
+      {
+        ...mockMeasureDetails[0],
+        groups: [
+          { id: "g1", displayId: "Population1" },
+          { id: "g2", displayId: "Population2" },
+        ],
+      },
+    ]);
+
+    render(
+      <CompositeComponent
+        canEdit={true}
+        formik={mockFormik}
+        components={
+          [
+            { measureId: "m1", groupId: "g1" },
+            { measureId: "m1", groupId: "g2" },
+          ] as any
+        }
+        measure={measure}
+        submitComponentForm={submitComponentForm}
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText("Alpha Measure")).toBeInTheDocument();
+    });
+
+    const expandButton = screen
+      .getAllByRole("row")[1]
+      .querySelector("span[role='button']");
+    await userEvent.click(expandButton!);
+
+    await userEvent.click(
+      screen.getByRole("checkbox", { name: "Include Population2" })
+    );
+
+    expect(submitComponentForm).toHaveBeenCalledWith([
+      { measureId: "m1", groupId: "g1" },
     ]);
   });
 
