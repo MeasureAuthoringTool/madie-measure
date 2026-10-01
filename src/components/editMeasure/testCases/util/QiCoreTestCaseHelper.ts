@@ -11,7 +11,6 @@ export function getDefaultFhirPatientProfile(model?: string) {
   switch (model) {
     case Model.QICORE:
     case Model.QICORE_6_0_0:
-    case Model.QICORE_7_0_2:
       return QICORE_PATIENT_PROFILE;
     case Model.US_QUALITY_0_5_0:
       return US_QUALITY_CORE_PATIENT_PROFILE;

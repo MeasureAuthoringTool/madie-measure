@@ -8,6 +8,7 @@ interface CommentTestCase {
   uuid?: string;
   title?: string;
   name?: string;
+  series?: string;
   groupId?: string;
   groupUuid?: string;
 }
@@ -117,12 +118,8 @@ export const getCommentSectionName = (
         candidate.id === subsection || candidate.uuid === subsection
     );
     if (testCase) {
-      const groupNumber = getGroupNumber(
-        testCase.groupId ?? testCase.groupUuid,
-        measure?.groups
-      );
-      const groupText = groupNumber ? `, Group ${groupNumber}` : "";
-      return `${testCase.title ?? testCase.name ?? "Test Case"}${groupText}`;
+      const title = testCase.title ?? testCase.name ?? "Test Case";
+      return testCase.series ? `${testCase.series} - ${title}` : title;
     }
   }
 

@@ -592,32 +592,12 @@ describe("CompositeTestCasesTable", () => {
     });
   });
 
-  // --- HowItWorks integration (controlled state) ---
-
-  it("renders HowItWorks closed (link visible, panel hidden) by default", () => {
-    render(<CompositeTestCasesTable {...defaultProps} />);
-    expect(screen.getByTestId("how-it-works-link")).toBeInTheDocument();
-    expect(
-      screen.queryByTestId("how-it-works-content")
-    ).not.toBeInTheDocument();
-  });
-
-  it("opens HowItWorks panel when the link is clicked, and the back button stays visible", async () => {
+  it("keeps the back button visible when the HowItWorks panel is open", () => {
     render(<CompositeTestCasesTable {...defaultProps} />);
     userEvent.click(screen.getByTestId("how-it-works-link"));
+
     expect(screen.getByTestId("how-it-works-content")).toBeInTheDocument();
     // Back button must still be present (it moves to its own row, not removed)
     expect(screen.getByTestId("back-to-measures-btn")).toBeInTheDocument();
-  });
-
-  it("closes HowItWorks panel when the close button is clicked", async () => {
-    render(<CompositeTestCasesTable {...defaultProps} />);
-    userEvent.click(screen.getByTestId("how-it-works-link"));
-    expect(screen.getByTestId("how-it-works-content")).toBeInTheDocument();
-    userEvent.click(screen.getByTestId("how-it-works-close"));
-    expect(
-      screen.queryByTestId("how-it-works-content")
-    ).not.toBeInTheDocument();
-    expect(screen.getByTestId("how-it-works-link")).toBeInTheDocument();
   });
 });

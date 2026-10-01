@@ -73,11 +73,32 @@ describe("ActionCenter Component", () => {
       );
 
       expect(screen.getByTestId("delete-action-btn")).toBeInTheDocument();
+      expect(screen.getByTestId("delete-action-btn")).toHaveAttribute(
+        "aria-label",
+        "Delete test case"
+      );
       expect(
         screen.getByTestId("shift-test-case-dates-action-btn")
       ).toBeInTheDocument();
+      expect(
+        screen.getByTestId("shift-test-case-dates-action-btn")
+      ).toHaveAttribute("aria-label", "Shift test case dates");
       expect(screen.getByTestId("clone-action-btn")).toBeInTheDocument();
+      expect(screen.getByTestId("clone-action-btn")).toHaveAttribute(
+        "aria-label",
+        "Clone test case"
+      );
+      expect(
+        screen.getByTestId("make-json-match-ui-action-btn")
+      ).toHaveAttribute(
+        "aria-label",
+        "Make JSON (family/given) match UI (group/title)"
+      );
       expect(screen.getByTestId("export-action-btn")).toBeInTheDocument();
+      expect(screen.getByTestId("export-action-btn")).toHaveAttribute(
+        "aria-label",
+        "Export test cases"
+      );
     });
 
     it("shouldn't display shift test cases button when measure is versioned and EditTestsOnVersionedMeasures feature flag is true", () => {
@@ -127,7 +148,8 @@ describe("ActionCenter Component", () => {
 
     it("should display action buttons based on selected invalid test cases", () => {
       const selectedTestCaseInvalid = [
-        { id: "1", validResource: false, title: "Test Case 1" },
+        { id: "1", validResource: true, title: "Valid Test Case" },
+        { id: "2", validResource: false, title: "Invalid Test Case" },
       ];
       render(
         <MemoryRouter>
@@ -145,6 +167,10 @@ describe("ActionCenter Component", () => {
         screen.getByTestId("shift-test-case-dates-action-btn")
       ).toBeEnabled();
       expect(screen.getByTestId("clone-action-btn")).toBeDisabled();
+      expect(screen.getByTestId("clone-tooltip")).toHaveAttribute(
+        "title",
+        "Select a valid test case to clone"
+      );
       expect(screen.getByTestId("export-action-btn")).toBeEnabled();
     });
 
@@ -164,27 +190,73 @@ describe("ActionCenter Component", () => {
       );
 
       const deleteTooltip = await screen.findByTestId("delete-tooltip");
-      expect(deleteTooltip).toHaveAttribute("aria-label", "Delete test case");
+      expect(deleteTooltip.tagName).toBe("DIV");
+      expect(deleteTooltip).toHaveAttribute("aria-label", "Delete Test Case");
+      expect(deleteTooltip).toHaveAttribute("title", "Delete test case");
 
       const shiftTestCaseDatesTooltip = await screen.findByTestId(
         "shift-test-case-dates-tooltip"
       );
+      expect(shiftTestCaseDatesTooltip.tagName).toBe("DIV");
       expect(shiftTestCaseDatesTooltip).toHaveAttribute(
         "aria-label",
         "Shift test case dates"
       );
+      expect(shiftTestCaseDatesTooltip).toHaveAttribute(
+        "title",
+        "Shift test case dates"
+      );
 
       const cloneTooltip = await screen.findByTestId("clone-tooltip");
-      expect(cloneTooltip).toHaveAttribute("aria-label", "Clone test case");
+      expect(cloneTooltip.tagName).toBe("DIV");
+      expect(cloneTooltip).toHaveAttribute("aria-label", "Clone Test Case");
+      expect(cloneTooltip).toHaveAttribute("title", "Clone test case");
+
+      const makeJsonMatchUiTooltip = await screen.findByTestId(
+        "make-json-match-ui-tooltip"
+      );
+      expect(makeJsonMatchUiTooltip.tagName).toBe("DIV");
+      expect(makeJsonMatchUiTooltip).toHaveAttribute(
+        "aria-label",
+        "Make JSON Match UI"
+      );
+      expect(makeJsonMatchUiTooltip).toHaveAttribute(
+        "title",
+        "Make JSON (family/given) match UI (group/title)"
+      );
 
       const copyTooltip = await screen.findByTestId("copy-tooltip");
-      expect(copyTooltip).toHaveAttribute(
+      expect(copyTooltip.tagName).toBe("DIV");
+      expect(copyTooltip).toHaveAttribute("aria-label", "Copy to Icon");
+      expect(copyTooltip).toHaveAttribute("title", "Copy to another measure");
+
+      const exportTooltip = await screen.findByTestId("export-tooltip");
+      expect(exportTooltip.tagName).toBe("DIV");
+      expect(exportTooltip).toHaveAttribute(
+        "aria-label",
+        "Export Test case(s)"
+      );
+      expect(exportTooltip).toHaveAttribute("title", "Export test cases");
+
+      expect(screen.getByTestId("delete-action-btn")).toHaveAttribute(
+        "aria-label",
+        "Delete test case"
+      );
+      expect(
+        screen.getByTestId("shift-test-case-dates-action-btn")
+      ).toHaveAttribute("aria-label", "Shift test case dates");
+      expect(screen.getByTestId("clone-action-btn")).toHaveAttribute(
+        "aria-label",
+        "Clone test case"
+      );
+      expect(screen.getByTestId("copy-action-btn")).toHaveAttribute(
         "aria-label",
         "Copy to another measure"
       );
-
-      const exportTooltip = await screen.findByTestId("export-tooltip");
-      expect(exportTooltip).toHaveAttribute("aria-label", "Export test cases");
+      expect(screen.getByTestId("export-action-btn")).toHaveAttribute(
+        "aria-label",
+        "Export test cases"
+      );
     });
 
     it("should disable clone button when no test case is selected", () => {
@@ -204,8 +276,45 @@ describe("ActionCenter Component", () => {
 
       expect(cloneBtn).toBeDisabled();
       expect(cloneTooltip).toHaveAttribute(
-        "aria-label",
+        "title",
         "Select a valid test case to clone"
+      );
+    });
+
+    it("should provide consistent selection guidance for disabled action buttons", () => {
+      render(
+        <MemoryRouter>
+          <ActionCenter
+            selectedTestCases={[]}
+            canEdit={true}
+            isQDM={false}
+            isDraft={true}
+          />
+        </MemoryRouter>
+      );
+
+      expect(screen.getByTestId("delete-tooltip")).toHaveAttribute(
+        "title",
+        "Select a test case to delete"
+      );
+      expect(
+        screen.getByTestId("shift-test-case-dates-tooltip")
+      ).toHaveAttribute("title", "Select test cases to shift test case dates");
+      expect(screen.getByTestId("clone-tooltip")).toHaveAttribute(
+        "title",
+        "Select a valid test case to clone"
+      );
+      expect(screen.getByTestId("make-json-match-ui-tooltip")).toHaveAttribute(
+        "title",
+        "Select a test case to make JSON (family/given) match UI (group/title)"
+      );
+      expect(screen.getByTestId("copy-tooltip")).toHaveAttribute(
+        "title",
+        "Select test cases to copy to another measure"
+      );
+      expect(screen.getByTestId("export-tooltip")).toHaveAttribute(
+        "title",
+        "Select test cases to export"
       );
     });
 
@@ -231,7 +340,7 @@ describe("ActionCenter Component", () => {
 
       expect(cloneBtn).toBeDisabled();
       expect(cloneTooltip).toHaveAttribute(
-        "aria-label",
+        "title",
         "The test case title is too long to clone"
       );
     });
@@ -452,7 +561,7 @@ describe("ActionCenter Component", () => {
 
       const exportTooltip = await screen.findByTestId("export-tooltip");
       expect(exportTooltip).toHaveAttribute(
-        "aria-label",
+        "title",
         "Test cases must be executed prior to exporting."
       );
     });
@@ -479,7 +588,7 @@ describe("ActionCenter Component", () => {
 
       const deleteTooltip = await screen.findByTestId("delete-tooltip");
       expect(deleteTooltip).toHaveAttribute(
-        "aria-label",
+        "title",
         "Test cases added prior to versioning cannot be deleted"
       );
       expect(screen.getByTestId("delete-action-btn")).toBeDisabled();
@@ -499,7 +608,7 @@ describe("ActionCenter Component", () => {
 
       const deleteTooltip = await screen.findByTestId("delete-tooltip");
       expect(deleteTooltip).toHaveAttribute(
-        "aria-label",
+        "title",
         "Select a test case to delete"
       );
       expect(screen.getByTestId("delete-action-btn")).toBeDisabled();
@@ -636,7 +745,7 @@ describe("ActionCenter Component", () => {
 
         const tooltip = await screen.findByTestId("make-json-match-ui-tooltip");
         expect(tooltip).toHaveAttribute(
-          "aria-label",
+          "title",
           "Select a test case to make JSON (family/given) match UI (group/title)"
         );
       });
@@ -657,7 +766,7 @@ describe("ActionCenter Component", () => {
 
         const tooltip = await screen.findByTestId("make-json-match-ui-tooltip");
         expect(tooltip).toHaveAttribute(
-          "aria-label",
+          "title",
           "Make JSON (family/given) match UI (group/title)"
         );
       });

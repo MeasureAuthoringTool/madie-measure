@@ -6,21 +6,6 @@ import { useMeasureReviewServiceApi } from "@madie/madie-util";
 import ReviewDialog from "./ReviewDialog";
 import { Measure, ReviewStatus, MeasureReview } from "@madie/madie-models";
 
-jest.mock("@madie/madie-design-system/dist/react", () => {
-  const actual = jest.requireActual("@madie/madie-design-system/dist/react");
-  return {
-    ...actual,
-    RichTextEditor: ({ label, content, onChange }: any) => (
-      <textarea
-        aria-label={label}
-        data-testid="review-comments-textarea"
-        value={content}
-        onChange={(event) => onChange(event.target.value)}
-      />
-    ),
-  };
-});
-
 jest.mock("@madie/madie-util", () => ({
   useMeasureReviewServiceApi: jest.fn(),
 }));
@@ -74,7 +59,7 @@ describe("ReviewDialog", () => {
       screen.getByText("Mark Measure Ready for Review")
     ).toBeInTheDocument();
     expect(screen.getByLabelText("Mark as Ready")).toBeInTheDocument();
-    expect(screen.getByLabelText("Comments")).toBeInTheDocument();
+    expect(screen.queryByLabelText("Comments")).not.toBeInTheDocument();
     expect(screen.getByTestId("review-dialog-save-button")).toBeDisabled();
 
     await waitFor(() => {
@@ -138,19 +123,6 @@ describe("ReviewDialog", () => {
     });
   });
 
-  it("enables Save when comments are modified", async () => {
-    render(<ReviewDialog open={true} measure={measure} onClose={jest.fn()} />);
-
-    expect(screen.getByTestId("review-dialog-save-button")).toBeDisabled();
-
-    const commentEditor = screen.getByTestId("review-comments-textarea");
-    userEvent.type(commentEditor, "Needs one more pass");
-
-    await waitFor(() => {
-      expect(screen.getByTestId("review-dialog-save-button")).toBeEnabled();
-    });
-  });
-
   it("invokes onClose when cancel is clicked", () => {
     const onClose = jest.fn();
     render(<ReviewDialog open={true} measure={measure} onClose={onClose} />);
@@ -192,7 +164,7 @@ describe("ReviewDialog", () => {
           measureId: "measure-1",
           measureSetId: "set-1",
           status: ReviewStatus.NOT_READY_FOR_REVIEW,
-          comment: "<p>already ready</p>",
+          comment: "<p></p>",
         })
       );
     });
@@ -351,7 +323,7 @@ describe("ReviewDialog", () => {
         expect.objectContaining({
           id: "existing-review-id",
           status: ReviewStatus.NOT_READY_FOR_REVIEW,
-          comment: "<p>complete</p>",
+          comment: "<p></p>",
         })
       );
     });

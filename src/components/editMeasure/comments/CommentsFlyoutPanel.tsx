@@ -6,6 +6,7 @@ import {
   Box,
   Drawer,
   IconButton,
+  Tooltip,
   Typography,
 } from "@mui/material";
 import { MessageSquare, X, ChevronRight } from "lucide-react";
@@ -25,6 +26,23 @@ interface CommentsFlyoutPanelProps {
   onClose: () => void;
   sectionName: string;
 }
+
+const MAX_LABEL_LENGTH = 50;
+const getAddCommentLabel = (sectionName: string) => {
+  const fullLabel = `Add a comment to ${sectionName}`;
+  const isLabelTruncated = fullLabel.length > MAX_LABEL_LENGTH;
+
+  if (!isLabelTruncated) {
+    return fullLabel;
+  }
+
+  const displayLabel = `${fullLabel.slice(0, MAX_LABEL_LENGTH)}...`;
+  return (
+    <Tooltip title={fullLabel} arrow>
+      <span>{displayLabel}</span>
+    </Tooltip>
+  );
+};
 
 const CommentsFlyoutPanel = ({
   open,
@@ -99,7 +117,7 @@ const CommentsFlyoutPanel = ({
             id="comments-flyout-input"
             name="comments-flyout-input"
             data-testid="comments-flyout-input"
-            label={`Add a comment to ${sectionName}`}
+            label={getAddCommentLabel(sectionName)}
             content={comment}
             onChange={(value: string) => setComment(value)}
           />

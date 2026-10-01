@@ -32,13 +32,33 @@ describe("getCommentSectionName", () => {
     ).toBe("Population Criteria 2");
   });
 
-  it("resolves a test case title and group", () => {
+  it("resolves a test case title", () => {
     expect(
       getCommentSectionName(
         "/measures/measure-id/edit/test-cases/case-one",
         measure
       )
-    ).toBe("Example case, Group 2");
+    ).toBe("Example case");
+  });
+
+  it("prefixes the test case series when present", () => {
+    const measureWithSeries = {
+      ...measure,
+      testCases: [
+        {
+          id: "case-one",
+          title: "Example case",
+          series: "Series A",
+        },
+      ],
+    };
+
+    expect(
+      getCommentSectionName(
+        "/measures/measure-id/edit/test-cases/case-one",
+        measureWithSeries
+      )
+    ).toBe("Series A - Example case");
   });
 
   it("supports test-case list subsections and trailing slashes", () => {
@@ -116,23 +136,6 @@ describe("getCommentSectionName", () => {
         measure
       )
     ).toBe("Current section");
-  });
-
-  it("resolves test cases by uuid and name with group uuid", () => {
-    const measureWithUuidTestCase = {
-      ...measure,
-      groups: [{ uuid: "group-a" }, { uuid: "group-b" }],
-      testCases: [
-        { uuid: "case-uuid", name: "Named case", groupUuid: "group-a" },
-      ],
-    };
-
-    expect(
-      getCommentSectionName(
-        "/measures/measure-id/edit/test-cases/case-uuid",
-        measureWithUuidTestCase
-      )
-    ).toBe("Named case, Group 1");
   });
 
   it("returns default test case title when title and name are missing", () => {

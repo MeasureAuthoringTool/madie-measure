@@ -1,11 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useFormik } from "formik";
 import { Measure, ReviewStatus, MeasureReview } from "@madie/madie-models";
-import {
-  MadieDialog,
-  RichTextEditor,
-  Toast,
-} from "@madie/madie-design-system/dist/react";
+import { MadieDialog, Toast } from "@madie/madie-design-system/dist/react";
 import { Divider, FormControlLabel, Switch } from "@mui/material";
 import { useMeasureReviewServiceApi } from "@madie/madie-util";
 
@@ -43,7 +39,6 @@ export default function ReviewDialog({
     useState(false);
   const [pendingValues, setPendingValues] = useState<{
     markAsReady: boolean;
-    comments: string;
   } | null>(null);
   const [toast, setToast] = useState<{
     toastOpen: boolean;
@@ -61,19 +56,15 @@ export default function ReviewDialog({
       markAsReady: review?.status
         ? REVIEW_ACTIVE_STATUSES.has(review.status)
         : false,
-      comments: review?.comment ?? EMPTY_REVIEW_COMMENT,
     }),
-    [review?.status, review?.comment]
+    [review?.status]
   );
 
   const shouldConfirmRemoval =
     review?.status === ReviewStatus.IN_PROGRESS ||
     review?.status === ReviewStatus.COMPLETE;
 
-  const saveReview = async (values: {
-    markAsReady: boolean;
-    comments: string;
-  }) => {
+  const saveReview = async (values: { markAsReady: boolean }) => {
     if (!measure?.id) {
       return;
     }
@@ -85,7 +76,7 @@ export default function ReviewDialog({
       status: values.markAsReady
         ? ReviewStatus.READY_FOR_REVIEW
         : ReviewStatus.NOT_READY_FOR_REVIEW,
-      comment: values.comments || EMPTY_REVIEW_COMMENT,
+      comment: EMPTY_REVIEW_COMMENT,
     };
 
     try {
@@ -239,17 +230,6 @@ export default function ReviewDialog({
               },
             }}
           />
-          <div style={{ marginTop: 16 }}>
-            <RichTextEditor
-              id="review-comments"
-              name="reviewComments"
-              label="Comments"
-              content={formik.values.comments}
-              onChange={(value: string) =>
-                formik.setFieldValue("comments", value)
-              }
-            />
-          </div>
           <Divider sx={{ mt: 2 }} />
         </div>
       </MadieDialog>
