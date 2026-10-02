@@ -203,6 +203,7 @@ const EditTestCaseBreadCrumbs = (props: EditTestCaseBreadCrumbsProps) => {
           },
         }}
         IconComponent={ExpandMoreIcon}
+        inputProps={{ "aria-label": testCaseString }}
         value={testCaseString}
         renderValue={() => getTestCaseDropdownLabel(testCaseString, testCase)}
       >

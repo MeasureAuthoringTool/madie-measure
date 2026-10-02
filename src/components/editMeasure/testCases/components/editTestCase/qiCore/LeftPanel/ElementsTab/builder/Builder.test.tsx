@@ -663,6 +663,9 @@ describe("Builder Component", () => {
     expect(successToast).toHaveTextContent(
       "QICore Patient has successfully been applied to the test case. To save your changes please click 'Save'."
     );
+    expect(
+      successToast.closest('[role="status"][aria-live="polite"]')
+    ).toBeInTheDocument();
   });
 });
 
