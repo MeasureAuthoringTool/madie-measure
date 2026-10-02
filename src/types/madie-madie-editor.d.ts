@@ -214,6 +214,6 @@ declare module "@madie/madie-editor" {
   export function isPatientContext(editorVal: string): boolean;
 
   export const MadieTerminologyEditor: FC<EditorPropsType>;
-  export const MadieEditor: FC<EditorPropsType>;
+  export const MadieCqlEditor: FC<EditorPropsType>;
   export const MadieJsonEditor: FC<JsonMonacoEditorProps>;
 }

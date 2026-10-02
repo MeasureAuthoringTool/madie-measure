@@ -59,7 +59,7 @@ jest.mock("@madie/madie-editor", () => {
     });
 
   return {
-    MadieEditor: MockEditor,
+    MadieCqlEditor: MockEditor,
     MadieJsonEditor: MockEditor,
   };
 });

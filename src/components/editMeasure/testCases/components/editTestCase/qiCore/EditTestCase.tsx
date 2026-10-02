@@ -56,7 +56,7 @@ import {
   checkUserCanEdit,
 } from "@madie/madie-util";
 import useExecutionContext from "../../routes/qiCore/useExecutionContext";
-import { MadieEditor } from "@madie/madie-editor";
+import { MadieCqlEditor } from "@madie/madie-editor";
 import CreateTestCaseRightPanelNavTabs from "../../createTestCase/CreateTestCaseRightPanelNavTabs";
 import CreateTestCaseLeftPanelNavTabs from "../../createTestCase/CreateTestCaseLeftPanelNavTabs";
 import ExpectedActual from "../../createTestCase/RightPanel/ExpectedActual/ExpectedActual";
@@ -1357,7 +1357,7 @@ const EditTestCase = (props: EditTestCaseProps) => {
                         id="test-case-cql-editor"
                         style={{ height: "calc(100% - 24px)" }}
                       >
-                        <MadieEditor
+                        <MadieCqlEditor
                           serviceConfig={serviceConfig}
                           value={measure?.cql}
                           height="100%"
