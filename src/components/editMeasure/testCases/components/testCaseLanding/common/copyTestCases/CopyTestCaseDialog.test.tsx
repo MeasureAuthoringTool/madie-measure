@@ -262,19 +262,295 @@ describe("Copy Test Case Dialog Component", () => {
     );
 
     // test sorting
-    const measureNameColumnHeader = await screen.findByRole("button", {
-      name: "Measure Name",
-    });
+    const measureNameColumnHeader = getByTestId("header-measureName");
     expect(measureNameColumnHeader).toHaveAttribute("title", "Sort ascending");
 
-    userEvent.click(measureNameColumnHeader);
+    fireEvent.click(measureNameColumnHeader);
 
     await waitFor(() => {
-      expect(measureNameColumnHeader).toHaveAttribute(
+      expect(getByTestId("header-measureName")).toHaveAttribute(
         "title",
         "Sort descending"
       );
     });
+  });
+
+  it("should sort measures on the server, cycling ascending, descending and cleared", async () => {
+    mockMeasureServiceApi.searchMeasuresByCriteria =
+      mockSearchMeasuresByCriteriaFn;
+
+    useTestCaseServiceMock.mockImplementation(() => {
+      return {
+        getTestCasesByMeasureId: getAllTestCasesFn,
+      } as unknown as TestCaseServiceApi;
+    });
+
+    const test = new AbortController();
+    render(
+      <CopyTestCaseDialog
+        open={true}
+        onClose={() => jest.fn()}
+        measure={mockCurrentMeasure}
+        selectedTestCases={testCases.map((tc) => tc.id)}
+      />
+    );
+
+    await waitFor(() =>
+      expect(mockSearchMeasuresByCriteriaFn).toHaveBeenCalledTimes(1)
+    );
+    expect(mockSearchMeasuresByCriteriaFn).toHaveBeenNthCalledWith(
+      1,
+      ["OWNED", "SHARED"],
+      5,
+      0,
+      "lastModifiedAt",
+      "DESC",
+      {
+        excludeByMeasureIds: ["1"],
+        excludeCompositeMeasures: true,
+        model: "QDM v5.6",
+        optionalSearchProperties: [],
+        searchField: "",
+      },
+      test
+    );
+
+    fireEvent.click(getByTestId("header-measureName"));
+    await waitFor(() =>
+      expect(mockSearchMeasuresByCriteriaFn).toHaveBeenCalledTimes(2)
+    );
+    expect(mockSearchMeasuresByCriteriaFn).toHaveBeenNthCalledWith(
+      2,
+      ["OWNED", "SHARED"],
+      5,
+      0,
+      "measureName",
+      "ASC",
+      {
+        excludeByMeasureIds: ["1"],
+        excludeCompositeMeasures: true,
+        model: "QDM v5.6",
+        optionalSearchProperties: [],
+        searchField: "",
+      },
+      test
+    );
+
+    fireEvent.click(getByTestId("header-measureName"));
+    await waitFor(() =>
+      expect(mockSearchMeasuresByCriteriaFn).toHaveBeenCalledTimes(3)
+    );
+    expect(mockSearchMeasuresByCriteriaFn).toHaveBeenNthCalledWith(
+      3,
+      ["OWNED", "SHARED"],
+      5,
+      0,
+      "measureName",
+      "DESC",
+      {
+        excludeByMeasureIds: ["1"],
+        excludeCompositeMeasures: true,
+        model: "QDM v5.6",
+        optionalSearchProperties: [],
+        searchField: "",
+      },
+      test
+    );
+
+    fireEvent.click(getByTestId("header-measureName"));
+    await waitFor(() =>
+      expect(mockSearchMeasuresByCriteriaFn).toHaveBeenCalledTimes(4)
+    );
+    expect(mockSearchMeasuresByCriteriaFn).toHaveBeenNthCalledWith(
+      4,
+      ["OWNED", "SHARED"],
+      5,
+      0,
+      "",
+      "",
+      {
+        excludeByMeasureIds: ["1"],
+        excludeCompositeMeasures: true,
+        model: "QDM v5.6",
+        optionalSearchProperties: [],
+        searchField: "",
+      },
+      test
+    );
+    expect(getByTestId("header-measureName")).toHaveAttribute(
+      "title",
+      "Sort ascending"
+    );
+
+    fireEvent.click(getByTestId("header-measureSet.cmsId"));
+    await waitFor(() =>
+      expect(mockSearchMeasuresByCriteriaFn).toHaveBeenCalledTimes(5)
+    );
+    expect(mockSearchMeasuresByCriteriaFn).toHaveBeenNthCalledWith(
+      5,
+      ["OWNED", "SHARED"],
+      5,
+      0,
+      "measureSet.cmsId",
+      "ASC",
+      {
+        excludeByMeasureIds: ["1"],
+        excludeCompositeMeasures: true,
+        model: "QDM v5.6",
+        optionalSearchProperties: [],
+        searchField: "",
+      },
+      test
+    );
+
+    fireEvent.click(getByTestId("header-measureMetaData.draft"));
+    await waitFor(() =>
+      expect(mockSearchMeasuresByCriteriaFn).toHaveBeenCalledTimes(6)
+    );
+    expect(mockSearchMeasuresByCriteriaFn).toHaveBeenNthCalledWith(
+      6,
+      ["OWNED", "SHARED"],
+      5,
+      0,
+      "measureMetaData.draft",
+      "ASC",
+      {
+        excludeByMeasureIds: ["1"],
+        excludeCompositeMeasures: true,
+        model: "QDM v5.6",
+        optionalSearchProperties: [],
+        searchField: "",
+      },
+      test
+    );
+  });
+
+  it("should go back to the first page when sorting or searching", async () => {
+    mockMeasureServiceApi.searchMeasuresByCriteria =
+      mockSearchMeasuresByCriteriaFn;
+
+    useTestCaseServiceMock.mockImplementation(() => {
+      return {
+        getTestCasesByMeasureId: getAllTestCasesFn,
+      } as unknown as TestCaseServiceApi;
+    });
+
+    const test = new AbortController();
+    render(
+      <CopyTestCaseDialog
+        open={true}
+        onClose={() => jest.fn()}
+        measure={mockCurrentMeasure}
+        selectedTestCases={testCases.map((tc) => tc.id)}
+      />
+    );
+
+    await waitFor(() =>
+      expect(mockSearchMeasuresByCriteriaFn).toHaveBeenCalledTimes(1)
+    );
+    expect(mockSearchMeasuresByCriteriaFn).toHaveBeenNthCalledWith(
+      1,
+      ["OWNED", "SHARED"],
+      5,
+      0,
+      "lastModifiedAt",
+      "DESC",
+      {
+        excludeByMeasureIds: ["1"],
+        excludeCompositeMeasures: true,
+        model: "QDM v5.6",
+        optionalSearchProperties: [],
+        searchField: "",
+      },
+      test
+    );
+
+    userEvent.click(await findByRole("button", { name: "Go to page 2" }));
+    await waitFor(() =>
+      expect(mockSearchMeasuresByCriteriaFn).toHaveBeenCalledTimes(2)
+    );
+    expect(mockSearchMeasuresByCriteriaFn).toHaveBeenNthCalledWith(
+      2,
+      ["OWNED", "SHARED"],
+      5,
+      1,
+      "lastModifiedAt",
+      "DESC",
+      {
+        excludeByMeasureIds: ["1"],
+        excludeCompositeMeasures: true,
+        model: "QDM v5.6",
+        optionalSearchProperties: [],
+        searchField: "",
+      },
+      test
+    );
+
+    fireEvent.click(getByTestId("header-measureName"));
+    await waitFor(() =>
+      expect(mockSearchMeasuresByCriteriaFn).toHaveBeenCalledTimes(3)
+    );
+    expect(mockSearchMeasuresByCriteriaFn).toHaveBeenNthCalledWith(
+      3,
+      ["OWNED", "SHARED"],
+      5,
+      0,
+      "measureName",
+      "ASC",
+      {
+        excludeByMeasureIds: ["1"],
+        excludeCompositeMeasures: true,
+        model: "QDM v5.6",
+        optionalSearchProperties: [],
+        searchField: "",
+      },
+      test
+    );
+
+    userEvent.click(await findByRole("button", { name: "Go to page 2" }));
+    await waitFor(() =>
+      expect(mockSearchMeasuresByCriteriaFn).toHaveBeenCalledTimes(4)
+    );
+    expect(mockSearchMeasuresByCriteriaFn).toHaveBeenNthCalledWith(
+      4,
+      ["OWNED", "SHARED"],
+      5,
+      1,
+      "measureName",
+      "ASC",
+      {
+        excludeByMeasureIds: ["1"],
+        excludeCompositeMeasures: true,
+        model: "QDM v5.6",
+        optionalSearchProperties: [],
+        searchField: "",
+      },
+      test
+    );
+
+    const searchFieldInput = getByTestId(
+      "test-case-list-search-input"
+    ) as HTMLInputElement;
+    userEvent.type(searchFieldInput, "test{enter}");
+    await waitFor(() =>
+      expect(mockSearchMeasuresByCriteriaFn).toHaveBeenCalledTimes(5)
+    );
+    expect(mockSearchMeasuresByCriteriaFn).toHaveBeenNthCalledWith(
+      5,
+      ["OWNED", "SHARED"],
+      5,
+      0,
+      "measureName",
+      "ASC",
+      {
+        excludeByMeasureIds: ["1"],
+        excludeCompositeMeasures: true,
+        model: "QDM v5.6",
+        optionalSearchProperties: ["measureName", "version", "cmsId"],
+        searchField: "test",
+      },
+      test
+    );
   });
 
   it("Filter and Search, changes, fire, clear", async () => {
