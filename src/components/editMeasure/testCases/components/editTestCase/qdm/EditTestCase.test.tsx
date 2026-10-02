@@ -47,6 +47,23 @@ import { qdmCallStack } from "../groupCoverage/_mocks_/QdmCallStack";
 import testCaseJson from "../../../mockdata/qdm/cohort/testCasePatient.json";
 import { demographicValueSets } from "../../../__mocks__/demographicValueSets";
 
+jest.mock("@madie/madie-editor", () => {
+  const React = require("react");
+
+  const MockEditor = ({ value, onChange, readOnly }) =>
+    React.createElement("textarea", {
+      role: "textbox",
+      value: value || "",
+      readOnly: Boolean(readOnly),
+      onChange: (event) => onChange?.(event.target.value),
+    });
+
+  return {
+    MadieCqlEditor: MockEditor,
+    MadieJsonEditor: MockEditor,
+  };
+});
+
 const serviceConfig = {
   excelExportService: { baseUrl: "base.url" },
   fhirElmTranslationService: { baseUrl: "base.url" },
