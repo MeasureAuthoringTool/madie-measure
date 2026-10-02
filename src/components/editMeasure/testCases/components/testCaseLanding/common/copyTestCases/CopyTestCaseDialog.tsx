@@ -5,40 +5,38 @@ import React, {
   useRef,
   useState,
 } from "react";
-import tw from "twin.macro";
-import "styled-components/macro";
 import { Chip } from "@mui/material";
 import {
   MadieDialog,
   MadieSpinner,
+  MadieTable,
   TruncateText,
   Pagination,
+  SearchAndFilter,
+  useFilterSearch,
+  filterMap,
+  filterByOptions,
 } from "@madie/madie-design-system/dist/react";
 
 import * as _ from "lodash";
 import "../../../../../../measureLanding/MeasureLanding.scss";
+import "./CopyTestCaseDialog.scss";
 import {
   ColumnDef,
   flexRender,
   getCoreRowModel,
-  getSortedRowModel,
-  SortingState,
   useReactTable,
 } from "@tanstack/react-table";
 import {
   ExpandIcon,
   CollapseIcon,
 } from "../../../../../../../icons/MeasureListTableRightArrowIcons";
-import { customSort } from "../Hooks/UseTestCases";
 import {
   Measure,
   OwnershipType,
   TestCase,
   ValidationStatus,
 } from "@madie/madie-models";
-import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore";
-import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
-import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import useTestCaseServiceApi from "../../../../api/useTestCaseServiceApi";
 import Typography from "@mui/material/Typography";
 import {
@@ -46,14 +44,6 @@ import {
   useFeatureFlags,
   formatCmsId,
 } from "@madie/madie-util";
-import {
-  useMeasureFilterSearch,
-  filterMap,
-  filterByOptions,
-} from "../../../../../hooks/useMeasureFilterSearch";
-import { MeasureSearchFilters } from "../../../../../shared/MeasureSearchFilters";
-
-const TH = tw.th`p-3 text-left text-sm font-bold capitalize`;
 
 const CopyTestCaseDialog = ({ open, onClose, measure, selectedTestCases }) => {
   const measureSearchApi = useRef(useMeasureServiceApi());
@@ -63,9 +53,9 @@ const CopyTestCaseDialog = ({ open, onClose, measure, selectedTestCases }) => {
   // utilities for pagination
   const [limit, setLimit] = useState(5);
   const [page, setPage] = useState(0);
-  const [sorting, setSorting] = React.useState<SortingState>([]);
+  const [currentSort, setCurrentSort] = useState<string>("lastModifiedAt");
+  const [currentDirection, setCurrentDirection] = useState<string>("DESC");
   const [selectedRowId, setSelectedRowId] = React.useState<string | null>(null);
-  const [hoveredHeader, setHoveredHeader] = useState<string>("");
   const [totalPages, setTotalPages] = useState<number>(0);
   const [totalItems, setTotalItems] = useState<number>(0);
   const [visibleItems, setVisibleItems] = useState<number>(0);
@@ -79,7 +69,12 @@ const CopyTestCaseDialog = ({ open, onClose, measure, selectedTestCases }) => {
     handleSearch,
     finalizeSearchCriteria,
     blankSearchCriteria,
-  } = useMeasureFilterSearch(() => setPage(0));
+  } = useFilterSearch(() => setPage(0));
+
+  const handleSearchTrigger = () => {
+    finalizeSearchCriteria();
+    setPage(0);
+  };
 
   const [selectedIdForExpansion, setSelectedIdForExpansion] = useState(null);
   const [isRowExpanded, setIsRowExpanded] = useState<boolean>(false);
@@ -150,8 +145,8 @@ const CopyTestCaseDialog = ({ open, onClose, measure, selectedTestCases }) => {
         [OwnershipType.OWNED, OwnershipType.SHARED],
         limit,
         page,
-        "lastModifiedAt",
-        "DESC",
+        currentSort,
+        currentDirection,
         searchCriteria,
         abortController.current
       )
@@ -178,7 +173,35 @@ const CopyTestCaseDialog = ({ open, onClose, measure, selectedTestCases }) => {
       });
     // usually we'd attach the filter conditions as url params, but I don't think it makes sense if it's part of a dialog.
     // may be a smarter way to do this using a non controlled component, but it's not apparent to me now
-  }, [measure, limit, page, finalSearchAndFilterby, open]);
+  }, [
+    measure,
+    limit,
+    page,
+    currentSort,
+    currentDirection,
+    finalSearchAndFilterby,
+    open,
+  ]);
+
+  const handleSort = (sort: string) => {
+    let sortChange = "lastModifiedAt";
+    let directionChange = "DESC";
+    if (sort === currentSort) {
+      if (currentDirection === "ASC") {
+        sortChange = sort;
+        directionChange = "DESC";
+      } else if (currentDirection === "DESC") {
+        sortChange = "";
+        directionChange = "";
+      }
+    } else {
+      sortChange = sort;
+      directionChange = "ASC";
+    }
+    setCurrentSort(sortChange);
+    setCurrentDirection(directionChange);
+    setPage(0);
+  };
 
   const [allTestCases, setAllTestCases] = useState<TestCase[]>([]);
   const retrieveTestCases = useCallback(() => {
@@ -288,8 +311,6 @@ const CopyTestCaseDialog = ({ open, onClose, measure, selectedTestCases }) => {
           />
         ),
         accessorKey: "measureName",
-        sortingFn: (rowA, rowB) =>
-          customSort(rowA.original.measureName, rowB.original.measureName),
       },
       {
         header: "Version",
@@ -303,8 +324,6 @@ const CopyTestCaseDialog = ({ open, onClose, measure, selectedTestCases }) => {
           </>
         ),
         accessorKey: "version",
-        sortingFn: (rowA, rowB) =>
-          customSort(rowA.original.version, rowB.original.version),
       },
       {
         header: "Status",
@@ -329,12 +348,7 @@ const CopyTestCaseDialog = ({ open, onClose, measure, selectedTestCases }) => {
             dataTestId={`measure-cmsId-${info.row.original.id}`}
           />
         ),
-        accessorKey: "cmsId",
-        sortingFn: (rowA, rowB) =>
-          customSort(
-            _.toString(rowA.original.measureSet.cmsId),
-            _.toString(rowB.original.measureSet.cmsId)
-          ),
+        accessorKey: "measureSet.cmsId",
       },
     ];
 
@@ -398,11 +412,6 @@ const CopyTestCaseDialog = ({ open, onClose, measure, selectedTestCases }) => {
     },
     manualPagination: true,
     getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    onSortingChange: setSorting,
-    state: {
-      sorting,
-    },
   });
 
   const onSubmit = async (e) => {
@@ -517,145 +526,55 @@ const CopyTestCaseDialog = ({ open, onClose, measure, selectedTestCases }) => {
     >
       {!executing && !cannotCopy && (
         <div id="measure-landing" data-testid="measure-landing">
-          <MeasureSearchFilters
-            filterBy={filterBy}
-            searchField={searchField}
-            onFilterChange={handleFilter}
-            onSearchChange={handleSearch}
-            onSearchTrigger={finalizeSearchCriteria}
-            onSearchClear={blankSearchCriteria}
-          />
-          <div className="measure-table no-margin-top">
+          <div style={{ margin: "0 32px 40px 32px" }}>
+            <SearchAndFilter
+              filterBy={filterBy}
+              searchField={searchField}
+              onFilterChange={handleFilter}
+              onSearchChange={handleSearch}
+              onSearchTrigger={handleSearchTrigger}
+              onSearchClear={blankSearchCriteria}
+            />
+          </div>
+          {loading && (
+            <div style={{ display: "flex", justifyContent: "center" }}>
+              <MadieSpinner style={{ height: 50, width: 50 }} />
+            </div>
+          )}
+          <div
+            className="measure-table no-margin-top"
+            style={{ display: loading ? "none" : "block" }}
+          >
             <div className="table" style={{ overflow: "auto" }}>
-              <table
-                tw="min-w-full"
-                data-testid="measure-list-tbl"
-                className="ml-table"
-                style={{
-                  borderSpacing: "0 2em !important",
-                  borderBottom: "1px solid rgb(140, 140, 140)",
-                }}
-              >
-                <thead tw="bg-slate">
-                  {table.getHeaderGroups().map((headerGroup) => (
-                    <tr key={headerGroup.id}>
-                      {headerGroup.headers.map((header) => {
-                        const isHovered = hoveredHeader?.includes(header.id);
-                        return (
-                          <TH
-                            key={header.id}
-                            scope="col"
-                            onClick={header.column.getToggleSortingHandler()}
-                            onMouseEnter={() => setHoveredHeader(header.id)}
-                            onMouseLeave={() => setHoveredHeader(null)}
-                            className="header-cell"
-                          >
-                            {header.isPlaceholder ? null : (
-                              <button
-                                className={
-                                  header.column.getCanSort()
-                                    ? "cursor-pointer select-none header-button"
-                                    : "header-button"
-                                }
-                                title={
-                                  header.column.getCanSort()
-                                    ? header.column.getNextSortingOrder() ===
-                                      "asc"
-                                      ? "Sort ascending"
-                                      : header.column.getNextSortingOrder() ===
-                                        "desc"
-                                      ? "Sort descending"
-                                      : "Clear sort"
-                                    : undefined
-                                }
-                              >
-                                <span className="arrowDisplay">
-                                  {header.column.getCanSort() &&
-                                    isHovered &&
-                                    !header.column.getIsSorted() && (
-                                      <UnfoldMoreIcon />
-                                    )}
-                                  {{
-                                    asc: <KeyboardArrowUpIcon />,
-                                    desc: <KeyboardArrowDownIcon />,
-                                  }[header.column.getIsSorted() as string] ??
-                                    null}
-                                </span>
-                                {flexRender(
-                                  header.column.columnDef.header,
-                                  header.getContext()
-                                )}
-                              </button>
-                            )}
-                          </TH>
-                        );
-                      })}
+              <MadieTable
+                table={table}
+                currentSort={currentSort}
+                currentDirection={currentDirection}
+                handleSort={handleSort}
+                id="copyTestCaseMeasureTable"
+                dataTestId="measure-list-tbl"
+                emptyMessage="You don't have any other measures that you own or are shared with you, belonging to the same model."
+                renderExpandedRow={(row) =>
+                  selectedIdForExpansion === row.original.measureSetId &&
+                  expandedSectionData?.map((subRow) => (
+                    <tr key={subRow.id} className="expanded-row">
+                      {expandedColumns.map((column: any) => (
+                        <td key={column?.accessorKey || column.id}>
+                          {column.accessorKey === "measureSet.cmsId"
+                            ? formatCmsId(
+                                subRow?.actions?.measureSet?.cmsId,
+                                subRow?.actions?.model
+                              )
+                            : flexRender(column.cell ?? column.accessorKey, {
+                                row: { original: subRow },
+                                getValue: () => subRow[column.accessorKey],
+                              })}
+                        </td>
+                      ))}
                     </tr>
-                  ))}
-                </thead>
-                <tbody className="table-body" style={{ padding: 20 }}>
-                  {loading ? (
-                    <div style={{ display: "flex", justifyContent: "center" }}>
-                      <MadieSpinner style={{ height: 50, width: 50 }} />
-                    </div>
-                  ) : _.isEmpty(measureList) ? (
-                    <tr>
-                      <td colSpan={columns.length} tw="text-center p-2">
-                        You don't have any other measures that you own or are
-                        shared with you, belonging to the same model.
-                      </td>
-                    </tr>
-                  ) : (
-                    table.getRowModel().rows.map((row) => (
-                      <React.Fragment key={row.id}>
-                        <tr
-                          key={row.id}
-                          className="ml-tr"
-                          data-testid={`row-item`}
-                          style={{
-                            borderTop: "solid 1px #8c8c8c",
-                            borderSpacing: "0 2em !important",
-                          }}
-                        >
-                          {row.getVisibleCells().map((cell) => (
-                            <td
-                              key={cell.id}
-                              data-testid={`measure-name-${cell.id}`}
-                            >
-                              {flexRender(
-                                cell.column.columnDef.cell,
-                                cell.getContext()
-                              )}
-                            </td>
-                          ))}
-                        </tr>
-                        {selectedIdForExpansion === row.original.measureSetId &&
-                          expandedSectionData?.map((subRow) => (
-                            <tr key={subRow.id} className="expanded-row">
-                              {expandedColumns.map((column: any) => (
-                                <td key={column?.accessorKey || column.id}>
-                                  {column.accessorKey === "cmsId"
-                                    ? formatCmsId(
-                                        subRow?.actions?.measureSet?.cmsId,
-                                        subRow?.actions?.model
-                                      )
-                                    : flexRender(
-                                        column.cell ?? column.accessorKey,
-                                        {
-                                          row: { original: subRow },
-                                          getValue: () =>
-                                            subRow[column.accessorKey],
-                                        }
-                                      )}
-                                </td>
-                              ))}
-                            </tr>
-                          ))}
-                      </React.Fragment>
-                    ))
-                  )}
-                </tbody>
-              </table>
+                  ))
+                }
+              />
               <Pagination
                 totalItems={totalItems}
                 visibleItems={visibleItems}
