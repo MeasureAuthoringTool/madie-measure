@@ -200,84 +200,92 @@ const CompositeLeftPanelContent = ({
       </div>
       {/* should only display when available and json is valid */}
       {showAvailableTab && (
-        <div className="panel-content" data-testid="create-panel">
-          <div id="elements-panel">
-            {availableTab === "profiles" && (
-              <div className="panel-content" data-testid="available-panel">
-                <FormikProvider value={formikStu6Context}>
-                  <ElementsTab
-                    setValidationSchema={setValidationSchema}
-                    setInitialFormikValuesStu6={setInitialFormikValuesStu6}
-                    setEditorVal={setEditorVal}
-                    // currently locking to readOnly MAT-9905
-                    canEdit={testCaseCanEdit}
-                    editorVal={editorVal}
-                    testCase={testCase}
-                    activeTab={leftPanelActiveTab}
-                    isComposite={true}
-                    onInsertTCClick={() => setAvailableTab("insert")}
-                  />
-                </FormikProvider>
-              </div>
-            )}
+        <div
+          className="panel-content"
+          id="left-panel-content"
+          data-testid="create-panel"
+        >
+          {availableTab === "profiles" && (
+            <div id="elements-content" data-testid="available-panel">
+              <FormikProvider value={formikStu6Context}>
+                <ElementsTab
+                  setValidationSchema={setValidationSchema}
+                  setInitialFormikValuesStu6={setInitialFormikValuesStu6}
+                  setEditorVal={setEditorVal}
+                  // currently locking to readOnly MAT-9905
+                  canEdit={testCaseCanEdit}
+                  editorVal={editorVal}
+                  testCase={testCase}
+                  activeTab={leftPanelActiveTab}
+                  isComposite={true}
+                  onInsertTCClick={() => setAvailableTab("insert")}
+                />
+              </FormikProvider>
+            </div>
+          )}
 
-            {availableTab === "insert" && (
-              <>
-                {loadingTestCases ? (
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "center",
-                      padding: 40,
-                    }}
-                  >
-                    <MadieSpinner style={{ height: 50, width: 50 }} />
-                  </div>
-                ) : selectedMeasure ? (
-                  <CompositeTestCasesTable
-                    testCases={testCases}
-                    validTestCaseIds={validTestCaseIds}
-                    selectedMeasure={selectedMeasure}
-                    hideInvalidTestCases={hideInvalidTestCases}
-                    onHideInvalidTestCasesChange={setHideInvalidTestCases}
-                    onBackToMeasures={handleBackToMeasures}
-                    onInsertProfilesFromTestCase={
-                      handleInsertingProfilesIntoTestCase
-                    }
-                    onViewTestCase={handleViewTestCase}
+          {availableTab === "insert" && (
+            <div id="elements-panel">
+              {loadingTestCases ? (
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "center",
+                    padding: 40,
+                  }}
+                >
+                  <MadieSpinner style={{ height: 50, width: 50 }} />
+                </div>
+              ) : selectedMeasure ? (
+                <CompositeTestCasesTable
+                  testCases={testCases}
+                  validTestCaseIds={validTestCaseIds}
+                  selectedMeasure={selectedMeasure}
+                  hideInvalidTestCases={hideInvalidTestCases}
+                  onHideInvalidTestCasesChange={setHideInvalidTestCases}
+                  onBackToMeasures={handleBackToMeasures}
+                  onInsertProfilesFromTestCase={
+                    handleInsertingProfilesIntoTestCase
+                  }
+                  onViewTestCase={handleViewTestCase}
+                />
+              ) : (
+                <>
+                  <CompositeProfileViews
+                    howItWorksOpen={howItWorksOpen}
+                    setAvailableTab={setAvailableTab}
+                    setHowItWorksOpen={setHowItWorksOpen}
+                    compositeMeasures={compositeMeasures}
+                    completedMeasureCount={0}
+                    handleSelectTestCase={handleSelectTestCase}
                   />
-                ) : (
-                  <>
-                    <CompositeProfileViews
-                      howItWorksOpen={howItWorksOpen}
-                      setAvailableTab={setAvailableTab}
-                      setHowItWorksOpen={setHowItWorksOpen}
-                      compositeMeasures={compositeMeasures}
-                      completedMeasureCount={0}
-                      handleSelectTestCase={handleSelectTestCase}
-                    />
-                  </>
-                )}
-              </>
-            )}
-          </div>
+                </>
+              )}
+            </div>
+          )}
         </div>
       )}
       {/* should only display when added and json is valid */}
       {showAddedTab && (
-        <div className="panel-content" data-testid="added-panel">
-          <FormikProvider value={formikStu6Context}>
-            <ElementsTab
-              setValidationSchema={setValidationSchema}
-              setInitialFormikValuesStu6={setInitialFormikValuesStu6}
-              setEditorVal={setEditorVal}
-              // currently locking to readOnly MAT-9905
-              canEdit={testCaseCanEdit}
-              editorVal={editorVal}
-              testCase={testCase}
-              activeTab={leftPanelActiveTab}
-            />
-          </FormikProvider>
+        <div
+          className="panel-content"
+          id="left-panel-content"
+          data-testid="added-panel"
+        >
+          <div id="elements-content">
+            <FormikProvider value={formikStu6Context}>
+              <ElementsTab
+                setValidationSchema={setValidationSchema}
+                setInitialFormikValuesStu6={setInitialFormikValuesStu6}
+                setEditorVal={setEditorVal}
+                // currently locking to readOnly MAT-9905
+                canEdit={testCaseCanEdit}
+                editorVal={editorVal}
+                testCase={testCase}
+                activeTab={leftPanelActiveTab}
+              />
+            </FormikProvider>
+          </div>
         </div>
       )}
       {/* should render when json is invalid and leftpanelActiveTab is either added, or available */}

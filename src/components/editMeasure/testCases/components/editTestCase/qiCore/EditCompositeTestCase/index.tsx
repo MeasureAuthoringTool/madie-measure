@@ -92,7 +92,7 @@ const EditCompositeTestCase = ({
   );
 
   return (
-    <div className={`allotment-wrapper`}>
+    <div className="allotment-wrapper fullvh">
       <Allotment ref={allotmentRef} defaultSizes={[70, 26, 4]} vertical={false}>
         <Allotment.Pane>
           <div className="nav-panel">
