@@ -137,6 +137,7 @@ const ElementEditorActionCenter = (props: PropTypes) => {
               }}
               arrow
               slotProps={{
+                fab: { tabIndex: open ? 0 : -1 },
                 tooltip: {
                   sx: {
                     zIndex: 99,
