@@ -1,6 +1,5 @@
 import * as React from "react";
 import * as mockMeasureActionStubs from "../../../../../../__mocks__/measureActionStubs";
-import { ChangeEvent } from "react";
 import {
   act,
   fireEvent,
@@ -60,36 +59,36 @@ jest.setTimeout(60000);
 jest.mock("../../../../../../api/axios-instance");
 const mockedAxios = axios as jest.Mocked<typeof axios>;
 
+jest.mock("@madie/madie-editor", () => {
+  const React = require("react");
+
+  const MockJsonEditor = ({ value, onChange, readOnly }) =>
+    React.createElement("textarea", {
+      role: "textbox",
+      "data-testid": "test-case-json-editor",
+      value: value || "",
+      readOnly: Boolean(readOnly),
+      onChange: (event) => onChange?.(event.target.value),
+    });
+
+  const MockCqlEditor = ({ value, onChange, readOnly }) =>
+    React.createElement("textarea", {
+      role: "textbox",
+      "data-testid": "mock-cql-editor",
+      value: value || "",
+      readOnly: Boolean(readOnly),
+      onChange: (event) => onChange?.(event.target.value),
+    });
+
+  return {
+    MadieCqlEditor: MockCqlEditor,
+    MadieJsonEditor: MockJsonEditor,
+  };
+});
+
 const mockMeasureServiceApi: MeasureServiceApi = {
   updateMeasureTestCaseConfiguration: jest.fn(),
 } as unknown as MeasureServiceApi;
-
-// mock editor to reduce errors and warnings
-const mockEditor = { resize: jest.fn() };
-jest.mock(
-  "../../editor/Editor",
-  () =>
-    ({ setEditor, value, onChange, readOnly }) => {
-      const React = require("react");
-      React.useEffect(() => {
-        if (setEditor) {
-          setEditor(mockEditor);
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-      }, []);
-
-      return (
-        <input
-          data-testid="test-case-json-editor"
-          readOnly={readOnly}
-          value={value}
-          onChange={(e: ChangeEvent<HTMLInputElement>) => {
-            onChange(e.target.value);
-          }}
-        />
-      );
-    }
-);
 
 //value needs to come from Util(feature flag)
 const testCaseAlertToast = false;
@@ -3472,7 +3471,7 @@ describe("EditTestCase component", () => {
       userEvent.click(screen.getByTestId("expectoractual-tab"));
       userEvent.click(screen.getByTestId("measurecql-tab"));
 
-      const editor = screen.getByTestId("measure-editor");
+      const editor = screen.getByTestId("mock-cql-editor");
       expect(editor).toHaveValue("MeasureCql");
     });
 

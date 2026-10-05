@@ -19,10 +19,7 @@ const Editor = ({
   readOnly = false,
 }: EditorPropsType) => {
   return (
-    <div
-      data-testid="test-case-json-editor"
-      style={{ height: "calc(100% - 48px)" }}
-    >
+    <div style={{ height: "calc(100% - 48px)" }}>
       <MadieJsonEditor
         value={value ?? ""}
         width="100%"
@@ -30,6 +27,7 @@ const Editor = ({
         readOnly={Boolean(readOnly)}
         ariaLabel="Test case editor"
         inputTestId="test-case-json-editor-input"
+        testId="test-case-editor-wrapper"
         enableToggleSearchEvent
         onChange={onChange}
       />
