@@ -13,8 +13,6 @@ import useCqmConversionService, {
   CqmConversionService,
 } from "../../../api/CqmModelConversionService";
 // @ts-ignore
-import { useFeatureFlags } from "@madie/madie-util";
-import useMeasureServiceApi from "../../../api/useMeasureServiceApi";
 
 jest.mock("../../../../../../api/axios-instance");
 global.ResizeObserver = jest.fn().mockImplementation(() => ({
@@ -125,6 +123,22 @@ jest.mock("@madie/madie-util", () => ({
     initialState: { canTravel: false, pendingPath: "" },
   },
 }));
+
+jest.mock("@madie/madie-editor", () => {
+  const React = require("react");
+  const MockEditor = ({ value, onChange, readOnly }) =>
+    React.createElement("textarea", {
+      role: "textbox",
+      value: value || "",
+      readOnly: Boolean(readOnly),
+      onChange: (event) => onChange?.(event.target.value),
+    });
+
+  return {
+    MadieCqlEditor: MockEditor,
+    MadieJsonEditor: MockEditor,
+  };
+});
 
 jest.mock(
   "use-resize-observer",
