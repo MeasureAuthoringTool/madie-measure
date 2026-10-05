@@ -5,8 +5,6 @@ export interface EditorPropsType {
   value: string;
   height: string;
   onChange?: (value: string) => void;
-  parseDebounceTime?: number;
-  inboundAnnotations?: unknown[];
   readOnly?: boolean;
 }
 
@@ -14,8 +12,6 @@ const Editor = ({
   height,
   value,
   onChange,
-  parseDebounceTime: _parseDebounceTime = 1500,
-  inboundAnnotations: _inboundAnnotations,
   readOnly = false,
 }: EditorPropsType) => {
   return (
