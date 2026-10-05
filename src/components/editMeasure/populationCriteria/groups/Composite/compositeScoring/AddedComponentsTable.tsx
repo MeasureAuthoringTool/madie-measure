@@ -10,17 +10,13 @@ import {
 } from "@tanstack/react-table";
 import {
   Button,
+  MadieTable,
   MadieDeleteDialog,
   TruncateText,
 } from "@madie/madie-design-system/dist/react";
 import * as _ from "lodash";
 import { Trash2 } from "lucide-react";
-import tw from "twin.macro";
-import "styled-components/macro";
 import { convertDate } from "../../../../testCases/components/testCaseLanding/common/TestCaseTable/TestCaseTable";
-import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore";
-import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
-import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import { Component, Group, Measure } from "@madie/madie-models";
 import { IconButton, Switch, Tooltip } from "@mui/material";
 import {
@@ -28,8 +24,7 @@ import {
   ExpandIcon,
 } from "../../../../../../icons/MeasureListTableRightArrowIcons";
 import { useNavigate } from "react-router-dom";
-
-const TH = tw.th`p-3 text-left text-sm font-bold capitalize`;
+import "./AddedComponentsTable.scss";
 
 type ComponentGroup = Group & {
   description?: string;
@@ -56,7 +51,6 @@ export default function AddedComponentsTable({
   onDeleteComponent: (componentId: string) => void;
 }) {
   const navigate = useNavigate();
-  const [hoveredHeader, setHoveredHeader] = useState<string | null>("");
   const [componentToDelete, setComponentToDelete] = useState<Measure | null>(
     null
   );
@@ -243,6 +237,15 @@ export default function AddedComponentsTable({
     return columnDefs;
   }, [components, canEdit, isGroupRowExpanded, selectedGroupForExpansion]);
   const [sorting, setSorting] = React.useState<SortingState>([]);
+  const handleSort = (sort: string) => {
+    setSorting((currentSorting) => {
+      const activeSort = currentSorting[0];
+      if (activeSort?.id !== sort) {
+        return [{ id: sort, desc: false }];
+      }
+      return activeSort.desc ? [] : [{ id: sort, desc: true }];
+    });
+  };
 
   const table = useReactTable({
     data: components,
@@ -385,172 +388,96 @@ export default function AddedComponentsTable({
       <h3
         style={{ fontWeight: 500, marginBottom: 24 }}
       >{`Selected Composite Measure Components (${uniqueMeasures.length})`}</h3>
-      <div className="measure-table no-margin no-vert-borders no-radius middle-align-row">
+      <div className="measure-table added-components-table no-margin no-vert-borders no-radius middle-align-row">
         <div className="table" style={{ overflow: "auto" }}>
-          <table
-            tw="min-w-full"
-            data-testid="measure-list-tbl"
-            className="ml-table"
-            style={{
-              borderSpacing: "0 2em !important",
-            }}
-          >
-            <thead tw="bg-slate">
-              {table.getHeaderGroups().map((headerGroup) => (
-                <tr key={headerGroup.id}>
-                  {headerGroup.headers.map((header) => {
-                    const isHovered = hoveredHeader?.includes(header.id);
-                    return (
-                      <TH
-                        key={header.id}
-                        scope="col"
-                        onClick={header.column.getToggleSortingHandler()}
-                        onMouseEnter={() => setHoveredHeader(header.id)}
-                        onMouseLeave={() => setHoveredHeader(null)}
-                        className="header-cell"
+          <MadieTable
+            table={table}
+            currentSort={sorting[0]?.id}
+            currentDirection={
+              sorting.length > 0
+                ? sorting[0].desc
+                  ? "DESC"
+                  : "ASC"
+                : undefined
+            }
+            handleSort={handleSort}
+            id="addedComponentsTable"
+            dataTestId="measure-list-tbl"
+            renderExpandedRow={(row) =>
+              selectedGroupForExpansion === row.original.id && (
+                <tr data-testid="expanded-group-row">
+                  <td colSpan={columns.length}>
+                    <div
+                      style={{
+                        paddingLeft: "40px",
+                        paddingTop: "12px",
+                        paddingBottom: "12px",
+                        paddingRight: "40px",
+                      }}
+                    >
+                      <table
+                        style={{
+                          width: "100%",
+                          borderCollapse: "collapse",
+                        }}
                       >
-                        {header.isPlaceholder ? null : (
-                          <button
-                            className={
-                              header.column.getCanSort()
-                                ? "cursor-pointer select-none header-button"
-                                : "header-button"
-                            }
-                            title={
-                              header.column.getCanSort()
-                                ? header.column.getNextSortingOrder() === "asc"
-                                  ? "Sort ascending"
-                                  : header.column.getNextSortingOrder() ===
-                                    "desc"
-                                  ? "Sort descending"
-                                  : "Clear sort"
-                                : undefined
-                            }
-                          >
-                            <span className="arrowDisplay">
-                              {header.column.columnDef.header !== "" &&
-                                header.column.getCanSort() &&
-                                isHovered &&
-                                !header.column.getIsSorted() && (
-                                  <UnfoldMoreIcon />
-                                )}
-                              {header.column.columnDef.header !== "" &&
-                                ({
-                                  asc: <KeyboardArrowUpIcon />,
-                                  desc: <KeyboardArrowDownIcon />,
-                                }[header.column.getIsSorted() as string] ??
-                                  null)}
-                            </span>
-                            {flexRender(
-                              header.column.columnDef.header,
-                              header.getContext()
-                            )}
-                          </button>
-                        )}
-                      </TH>
-                    );
-                  })}
-                </tr>
-              ))}
-            </thead>
-            <tbody className="table-body" style={{ padding: 20 }}>
-              {table.getRowModel().rows.map((row) => (
-                <React.Fragment key={row.id}>
-                  <tr
-                    key={row.id}
-                    className="ml-tr"
-                    data-testid={`row-item`}
-                    style={{
-                      borderTop: "solid 1px #8c8c8c",
-                      borderSpacing: "0 2em !important",
-                    }}
-                  >
-                    {row.getVisibleCells().map((cell) => (
-                      <td key={cell.id} data-testid={`measure-name-${cell.id}`}>
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext()
-                        )}
-                      </td>
-                    ))}
-                  </tr>
-
-                  {selectedGroupForExpansion === row.original.id && (
-                    <tr data-testid={`expanded-group-row`}>
-                      <td colSpan={columns.length}>
-                        <div
-                          style={{
-                            paddingLeft: "40px",
-                            paddingTop: "12px",
-                            paddingBottom: "12px",
-                            paddingRight: "40px",
-                          }}
-                        >
-                          <table
+                        <thead>
+                          <tr
                             style={{
-                              width: "100%",
-                              borderCollapse: "collapse",
+                              backgroundColor: "#ededed",
+                              borderBottom: "1px solid #8c8c8c",
                             }}
                           >
-                            <thead>
-                              <tr
+                            {groupColumns.map((column) => (
+                              <th
+                                key={column.id}
                                 style={{
-                                  backgroundColor: "#ededed",
-                                  borderBottom: "1px solid #8c8c8c",
+                                  padding: "8px 16px",
+                                  textAlign: "left",
+                                  fontWeight: "bold",
                                 }}
                               >
-                                {groupColumns.map((column) => (
-                                  <th
-                                    key={column.id}
-                                    style={{
-                                      padding: "8px 16px",
-                                      textAlign: "left",
-                                      fontWeight: "bold",
-                                    }}
-                                  >
-                                    {column.header}
-                                  </th>
-                                ))}
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {expandedGroupsData?.map((group) => (
-                                <tr
-                                  key={`group-${group.id}`}
-                                  style={{ borderBottom: "1px solid #ddd" }}
+                                {column.header}
+                              </th>
+                            ))}
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {expandedGroupsData?.map((group) => (
+                            <tr
+                              key={`group-${group.id}`}
+                              style={{ borderBottom: "1px solid #ddd" }}
+                            >
+                              {groupColumns.map((column: any) => (
+                                <td
+                                  key={column?.accessorKey || column.id}
+                                  style={{ padding: "8px 16px" }}
                                 >
-                                  {groupColumns.map((column: any) => (
-                                    <td
-                                      key={column?.accessorKey || column.id}
-                                      style={{ padding: "8px 16px" }}
-                                    >
-                                      {flexRender(
-                                        column.cell ?? column.accessorKey,
-                                        {
-                                          row: {
-                                            id: group.id,
-                                            original: group,
-                                          },
-                                          getValue: () =>
-                                            group[
-                                              column.accessorKey as keyof ComponentGroup
-                                            ],
-                                        }
-                                      )}
-                                    </td>
-                                  ))}
-                                </tr>
+                                  {flexRender(
+                                    column.cell ?? column.accessorKey,
+                                    {
+                                      row: {
+                                        id: group.id,
+                                        original: group,
+                                      },
+                                      getValue: () =>
+                                        group[
+                                          column.accessorKey as keyof ComponentGroup
+                                        ],
+                                    }
+                                  )}
+                                </td>
                               ))}
-                            </tbody>
-                          </table>
-                        </div>
-                      </td>
-                    </tr>
-                  )}
-                </React.Fragment>
-              ))}
-            </tbody>
-          </table>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </td>
+                </tr>
+              )
+            }
+          />
         </div>
       </div>
 

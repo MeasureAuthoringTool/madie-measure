@@ -114,17 +114,37 @@ describe("AddedComponentsTable", () => {
       />
     );
 
-    const measureHeaderBtn = screen.getByRole("button", { name: "Measure" });
-    expect(measureHeaderBtn).toHaveAttribute("title", "Sort ascending");
+    expect(screen.getByRole("button", { name: "Measure" })).toHaveAttribute(
+      "title",
+      "Sort ascending"
+    );
 
-    await userEvent.click(measureHeaderBtn);
-    expect(measureHeaderBtn).toHaveAttribute("title", "Sort descending");
+    fireEvent.click(screen.getByRole("button", { name: "Measure" }));
+    expect(screen.getByRole("button", { name: "Measure" })).toHaveAttribute(
+      "title",
+      "Sort descending"
+    );
+    expect(screen.getAllByTestId("row-item")[0]).toHaveTextContent(
+      "Alpha Measure"
+    );
 
-    await userEvent.click(measureHeaderBtn);
-    expect(measureHeaderBtn).toHaveAttribute("title", "Clear sort");
+    fireEvent.click(screen.getByRole("button", { name: "Measure" }));
+    expect(screen.getByRole("button", { name: "Measure" })).toHaveAttribute(
+      "title",
+      "Clear sort"
+    );
+    expect(screen.getAllByTestId("row-item")[0]).toHaveTextContent(
+      "Beta Measure"
+    );
 
-    await userEvent.click(measureHeaderBtn);
-    expect(measureHeaderBtn).toHaveAttribute("title", "Sort ascending");
+    fireEvent.click(screen.getByRole("button", { name: "Measure" }));
+    expect(screen.getByRole("button", { name: "Measure" })).toHaveAttribute(
+      "title",
+      "Sort ascending"
+    );
+    expect(screen.getAllByTestId("row-item")[0]).toHaveTextContent(
+      "Alpha Measure"
+    );
   });
 
   it("shows the 'hover' branch on a sortable header (no assertion on icon accessibility)", async () => {
