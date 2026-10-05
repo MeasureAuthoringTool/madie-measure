@@ -464,7 +464,12 @@ const Builder = ({
       </div>
       <Toast
         toastKey="builder-toast"
-        aria-live="polite"
+        slotProps={{
+          content: {
+            role: toastType === "success" ? "status" : "alert",
+            "aria-live": toastType === "success" ? "polite" : "assertive",
+          },
+        }}
         toastType={toastType}
         testId={
           toastType === "danger"

@@ -192,6 +192,24 @@ describe("EditTestCaseBreadCrumbs", () => {
     expect(selectElement).toHaveTextContent("Case #1: Group1 - Title1");
   });
 
+  it("provides an accessible name for the selected test case", async () => {
+    render(
+      <MemoryRouter>
+        <EditTestCaseBreadCrumbs
+          testCase={testCases[2]}
+          measureId="unknown"
+          canEdit={false}
+        />
+      </MemoryRouter>
+    );
+
+    const selectElement = await screen.findByRole("combobox");
+    expect(selectElement).toHaveAttribute(
+      "aria-label",
+      "Case #3: Group2 - Title3"
+    );
+  });
+
   it("should open the dropdown on click", async () => {
     render(
       <MemoryRouter>

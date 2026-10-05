@@ -247,6 +247,7 @@ const ResourceList = ({
               >
                 <span>
                   <Button
+                    aria-label={`Add ${original.title}`}
                     data-testId={`add-element-${original.id}`}
                     onClick={() => {
                       onClick(original);

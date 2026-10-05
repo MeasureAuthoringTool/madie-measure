@@ -224,9 +224,12 @@ describe("ResourceEditor", () => {
       expect(
         screen.getByText("446b20b5-dd46-415e-9b9f-9eba6b260743")
       ).toBeInTheDocument();
-      expect(
-        screen.getByTestId("close-resource-editor-button")
-      ).toBeInTheDocument();
+      const closeButton = screen.getByTestId("close-resource-editor-button");
+      expect(closeButton).toBeInTheDocument();
+      expect(closeButton).toHaveAttribute(
+        "aria-label",
+        "Close Edit Profile Card"
+      );
 
       expect(
         screen.getByTestId("add-attribute-dialog-button")

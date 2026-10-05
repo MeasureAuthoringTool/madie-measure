@@ -620,10 +620,7 @@ describe("AddComponentsDialog", () => {
 
     const limitSelect = screen
       .getAllByRole("combobox")
-      .find(
-        (select) =>
-          select.getAttribute("aria-labelledby") === "pagination-limit-select"
-      );
+      .find((select) => select.id === "pagination-limit-select");
     userEvent.click(limitSelect);
 
     const option10 = screen.getByRole("option", { name: "10" });
@@ -1361,10 +1358,7 @@ describe("AddComponentsDialog", () => {
 
     const limitSelect = screen
       .getAllByRole("combobox")
-      .find(
-        (select) =>
-          select.getAttribute("aria-labelledby") === "pagination-limit-select"
-      );
+      .find((select) => select.id === "pagination-limit-select");
     await userEvent.click(limitSelect);
     await userEvent.click(screen.getByRole("option", { name: "10" }));
 
@@ -1591,10 +1585,7 @@ describe("AddComponentsDialog", () => {
 
     const limitSelect = screen
       .getAllByRole("combobox")
-      .find(
-        (select) =>
-          select.getAttribute("aria-labelledby") === "pagination-limit-select"
-      );
+      .find((select) => select.id === "pagination-limit-select");
     await userEvent.click(limitSelect);
     await userEvent.click(screen.getByRole("option", { name: "10" }));
 
