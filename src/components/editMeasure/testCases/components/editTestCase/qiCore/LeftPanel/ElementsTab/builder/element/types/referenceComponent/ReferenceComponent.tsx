@@ -119,12 +119,13 @@ export default function ReferenceComponent({
       newType,
       referenceTypeOptions
     );
-    // Only sync the type/profile from the incoming reference when we can
-    // resolve a profile for it. The `value` prop (spread from the parent's
-    // formik.getFieldProps) can lag a render behind formikContext.values, so a
-    // transient empty reference would otherwise clear a valid user selection
-    // (resetting the Reference Type dropdown).
-    if (initialProfileUrl) {
+    const selectedProfileMatchesType = referenceTypeOptions.some(
+      (option) =>
+        option.profile === selectedProfileUrl && option.value === newType
+    );
+    // A reference contains only type/id, so re-derive its profile only when
+    // the current selection does not already match the incoming resource type.
+    if (initialProfileUrl && !selectedProfileMatchesType) {
       setSelectedReferenceType(newType);
       setSelectedProfileUrl(initialProfileUrl);
     }
