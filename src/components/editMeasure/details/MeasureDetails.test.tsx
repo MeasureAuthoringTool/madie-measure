@@ -46,7 +46,7 @@ const measure = {
     guidance: "test",
     clinicalRecommendation: "clinicalRecommendation",
     limitations: "limitations",
-    authoritativeSource: "https://www.cms.gov",
+    authoritativeSource: "https://www.test.org",
     draft: true,
     references: [
       {
