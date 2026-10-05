@@ -342,8 +342,39 @@ describe("TestCaseSummaryGrid", () => {
     const editAction = screen.getByTestId("action-ec-1-Edit");
     expect(editAction).toBeInTheDocument();
     expect(editAction).not.toHaveAttribute("aria-disabled", "true");
-    const deleteAction = screen.getByTestId("action-ec-1-Remove");
+    const deleteAction = screen.getByTestId("action-ec-1-Delete");
     expect(deleteAction).toBeInTheDocument();
+  });
+
+  it("shows Edit, Clone, and Delete tooltips on div wrappers", async () => {
+    renderWithResourceContext(
+      <TestCaseSummaryGrid
+        gridData={gridData}
+        onRowEdit={mockOnRowEdit}
+        onRowDelete={mockOnRowDelete}
+        onRowClone={mockOnRowClone}
+        testCaseCanEdit={true}
+        readOnly={false}
+      />
+    );
+
+    const actions: [string, string][] = [
+      ["action-ec-1-Edit", "Edit"],
+      ["action-ec-1-Clone", "Clone"],
+      ["action-ec-1-Delete", "Delete"],
+    ];
+
+    for (const [testId, tooltipText] of actions) {
+      const action = screen.getByTestId(testId);
+      expect(action.parentElement?.tagName).toBe("DIV");
+
+      await userEvent.hover(action);
+      expect(await screen.findByRole("tooltip")).toHaveTextContent(tooltipText);
+      await userEvent.unhover(action);
+      await waitFor(() => {
+        expect(screen.queryByRole("tooltip")).not.toBeInTheDocument();
+      });
+    }
   });
 
   it("should render Clone action that invokes onRowClone with the GridDataEntry", async () => {
@@ -391,7 +422,7 @@ describe("TestCaseSummaryGrid", () => {
     expect(editAction).toBeDisabled();
 
     // Delete should still be enabled
-    const deleteAction = screen.getByTestId("action-pd-1-Remove");
+    const deleteAction = screen.getByTestId("action-pd-1-Delete");
     expect(deleteAction).toBeInTheDocument();
     expect(deleteAction).not.toHaveAttribute("aria-disabled", "true");
 
@@ -422,7 +453,7 @@ describe("TestCaseSummaryGrid", () => {
     const editAction = screen.getByTestId("action-patient-1-Edit");
     expect(editAction).toBeDisabled();
     // Delete should still be enabled
-    const deleteAction = screen.getByTestId("action-ec-1-Remove");
+    const deleteAction = screen.getByTestId("action-ec-1-Delete");
 
     expect(deleteAction).not.toHaveAttribute("aria-disabled", "true");
     expect(screen.getByText(RESOURCE_TYPE_MISMATCH_ERROR)).toBeInTheDocument();
@@ -501,7 +532,7 @@ describe("TestCaseSummaryGrid", () => {
         readOnly={false}
       />
     );
-    const deleteButton = screen.getByTestId("action-ec-1-Remove");
+    const deleteButton = screen.getByTestId("action-ec-1-Delete");
 
     expect(deleteButton).toBeInTheDocument();
     userEvent.click(deleteButton);
@@ -565,12 +596,12 @@ describe("TestCaseSummaryGrid", () => {
     const cloneAction = screen.queryByTestId("action-patient-123-Clone");
     expect(cloneAction).not.toBeInTheDocument();
 
-    // Edit and Remove should still be present
+    // Edit and Delete should still be present
     const editAction = screen.getByTestId("action-ec-1-Edit");
     expect(editAction).toBeInTheDocument();
 
-    const removeAction = screen.getByTestId("action-ec-1-Remove");
-    expect(removeAction).toBeInTheDocument();
+    const deleteAction = screen.getByTestId("action-ec-1-Delete");
+    expect(deleteAction).toBeInTheDocument();
   });
 
   it("should render Clone action for non-Patient profiles", async () => {
@@ -591,8 +622,8 @@ describe("TestCaseSummaryGrid", () => {
 
     const editAction = screen.getByTestId("action-ec-1-Edit");
     expect(editAction).toBeInTheDocument();
-    const removeAction = screen.getByTestId("action-ec-1-Remove");
-    expect(removeAction).toBeInTheDocument();
+    const deleteAction = screen.getByTestId("action-ec-1-Delete");
+    expect(deleteAction).toBeInTheDocument();
   });
 
   it("should show hover icon and toggle sorting for Profile header", async () => {

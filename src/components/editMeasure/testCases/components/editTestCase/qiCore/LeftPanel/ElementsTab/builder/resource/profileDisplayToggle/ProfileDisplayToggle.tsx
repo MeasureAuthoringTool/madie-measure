@@ -26,14 +26,32 @@ const ProfileDisplayToggle = ({
     >
       <FormControlLabel
         value={ProfileDisplayMode.ALL}
-        control={<Radio data-testid="all-profiles-radio" size="small" />}
+        control={
+          <Radio
+            data-testid="all-profiles-radio"
+            size="small"
+            slotProps={{
+              input: { "aria-label": `All Profiles (${allProfileCount})` },
+            }}
+          />
+        }
         label={`All Profiles (${allProfileCount})`}
         data-testid="all-profiles-option"
       />
       {showRelevantProfiles && (
         <FormControlLabel
           value={ProfileDisplayMode.RELEVANT}
-          control={<Radio data-testid="relevant-profiles-radio" size="small" />}
+          control={
+            <Radio
+              data-testid="relevant-profiles-radio"
+              size="small"
+              slotProps={{
+                input: {
+                  "aria-label": `Measure-relevant profiles (${relevantProfileCount})`,
+                },
+              }}
+            />
+          }
           label={`Measure-relevant profiles (${relevantProfileCount})`}
           data-testid="relevant-profiles-option"
         />

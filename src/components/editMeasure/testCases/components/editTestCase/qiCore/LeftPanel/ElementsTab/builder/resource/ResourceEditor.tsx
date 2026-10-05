@@ -458,6 +458,7 @@ const ResourceEditor = ({
             </Typography>
             <IconButton
               data-testid="close-resource-editor-button"
+              aria-label="Close Edit Profile Card"
               onClick={() => {
                 if (dirty) {
                   setPendingTab(-1);

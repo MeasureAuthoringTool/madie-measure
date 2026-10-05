@@ -557,6 +557,28 @@ describe("ResourceList component", () => {
       expect(tableRows.length).toBe(2);
     });
 
+    it("provides profile-specific add button labels in both profile modes", async () => {
+      const onClick = jest.fn();
+      render(
+        <ResourceList
+          resourceIdentifiers={relevantResources}
+          allResourceIdentifiers={allResources}
+          onClick={onClick}
+          measureId="measure-1"
+        />
+      );
+
+      expect(
+        await screen.findByRole("button", { name: "Add QICore Patient" })
+      ).toBeInTheDocument();
+
+      userEvent.click(screen.getByRole("radio", { name: "All Profiles (4)" }));
+
+      expect(
+        await screen.findByRole("button", { name: "Add FHIR Observation" })
+      ).toBeInTheDocument();
+    });
+
     it("persists selected mode per measure", async () => {
       const onClick = jest.fn();
       render(

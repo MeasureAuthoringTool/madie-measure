@@ -266,6 +266,11 @@ describe("ElementEditor Component", () => {
       expect(
         screen.getByTestId("edit-attribute-success-text")
       ).toBeInTheDocument();
+      expect(
+        screen
+          .getByTestId("edit-attribute-success-text")
+          .closest('[role="status"][aria-live="polite"]')
+      ).toBeInTheDocument();
     });
     userEvent.click(screen.getByTestId("close-toast-button"));
     expect(

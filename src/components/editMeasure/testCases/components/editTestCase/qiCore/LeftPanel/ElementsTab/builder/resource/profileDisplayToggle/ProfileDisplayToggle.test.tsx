@@ -16,10 +16,18 @@ describe("ProfileDisplayToggle component", () => {
       />
     );
 
-    expect(screen.getByLabelText(/All Profiles \(50\)/i)).toBeInTheDocument();
-    expect(
-      screen.getByLabelText(/Measure-relevant profiles \(10\)/i)
-    ).toBeInTheDocument();
+    const allProfilesRadio = screen.getByRole("radio", {
+      name: "All Profiles (50)",
+    });
+    const relevantProfilesRadio = screen.getByRole("radio", {
+      name: "Measure-relevant profiles (10)",
+    });
+
+    expect(allProfilesRadio).toHaveAttribute("aria-label", "All Profiles (50)");
+    expect(relevantProfilesRadio).toHaveAttribute(
+      "aria-label",
+      "Measure-relevant profiles (10)"
+    );
   });
 
   it("defaults to Measure-relevant profiles when mode is RELEVANT", () => {
