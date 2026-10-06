@@ -326,7 +326,14 @@ const ResourceList = ({
   return (
     <div id="qi-core-6-tc-builder">
       {isComposite && (
-        <div style={{ display: "flex", justifyContent: "flex-end" }}>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "flex-end",
+            marginTop: 16,
+            marginRight: 16,
+          }}
+        >
           <Tooltip
             id="insert-test-case-button-tooltip"
             title="Patient resource required to insert existing test cases."
