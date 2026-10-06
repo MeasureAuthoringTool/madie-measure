@@ -1430,7 +1430,8 @@ describe("AddComponentsDialog", () => {
       expect(mockSearchMeasures).toHaveBeenCalled();
     });
 
-    await userEvent.click(screen.getByRole("button", { name: "Measure Name" }));
+    await screen.findByText("Test Measure");
+    fireEvent.click(screen.getByRole("button", { name: "Measure Name" }));
 
     await waitFor(() => {
       const lastCall =
@@ -2676,7 +2677,8 @@ describe("AddComponentsDialog", () => {
       expect(mockSearchMeasures).toHaveBeenCalledTimes(1);
     });
 
-    await userEvent.click(screen.getByRole("button", { name: "CMS ID" }));
+    await screen.findByText("CMS Ten");
+    fireEvent.click(screen.getByRole("button", { name: "CMS ID" }));
 
     await waitFor(() => {
       expect(mockSearchMeasures).toHaveBeenCalledTimes(2);
@@ -2757,7 +2759,8 @@ describe("AddComponentsDialog", () => {
       expect(mockSearchMeasures).toHaveBeenCalledTimes(1);
     });
 
-    await userEvent.click(screen.getByRole("button", { name: "Measure Name" }));
+    await screen.findByText("Zeta Measure");
+    fireEvent.click(screen.getByRole("button", { name: "Measure Name" }));
 
     await waitFor(() => {
       expect(mockSearchMeasures).toHaveBeenCalledTimes(2);

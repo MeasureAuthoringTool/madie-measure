@@ -1,0 +1,35 @@
+.dialog-measure-search-filters {
+  margin: 0 32px 40px;
+
+  > .measure-search-filters {
+    display: flex;
+    flex-direction: row;
+    column-gap: 24px;
+
+    > div {
+      flex-basis: 1;
+      display: flex;
+      flex-direction: row;
+      flex-grow: 1;
+      max-width: 412px;
+    }
+  }
+}
+
+.add-components-table {
+  .tcl-table {
+    border-bottom: 1px solid rgb(140, 140, 140);
+  }
+
+  tr.ml-tr:has(input[type="checkbox"]:checked) {
+    background-color: #e3f2fd;
+  }
+
+  .add-components-table-status {
+    display: flex;
+    justify-content: center;
+    min-width: 200px;
+    padding: 20px 0;
+    text-align: center;
+  }
+}
