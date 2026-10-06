@@ -12,6 +12,11 @@ import {
   Pagination,
   MadieSpinner,
   Toast,
+  MadieTable,
+  SearchAndFilter,
+  useFilterSearch,
+  filterByOptions,
+  filterMap,
 } from "@madie/madie-design-system/dist/react";
 import {
   ColumnDef,
@@ -26,29 +31,29 @@ import {
 } from "../../../../../../icons/MeasureListTableRightArrowIcons";
 import { Measure, OwnershipType } from "@madie/madie-models";
 import * as _ from "lodash";
-import tw from "twin.macro";
-import "styled-components/macro";
 import {
   useMeasureServiceApi,
   formatCmsId,
   getAllowedScoringTypes,
 } from "@madie/madie-util";
 import "../../../../../measureLanding/MeasureLanding.scss";
-import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
-import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
-import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore";
 import { convertDate } from "../../../../testCases/components/testCaseLanding/common/TestCaseTable/TestCaseTable";
-import {
-  filterByOptions,
-  filterMap,
-  useMeasureFilterSearch,
-} from "../../../../hooks/useMeasureFilterSearch";
-import { MeasureSearchFilters } from "../../../../shared/MeasureSearchFilters";
 import styled from "styled-components";
+import "./AddComponentsDialog.scss";
 
 const DEFAULT_PAGE_LIMIT = 5;
 
-const TH = tw.th`p-3 text-left text-sm font-bold capitalize`;
+type TableMeasure = Measure & {
+  isPlaceholder?: boolean;
+  isLoading?: boolean;
+  emptyMessage?: string;
+};
+
+const EMPTY_TABLE_ROW: TableMeasure = {
+  id: "__add-components-table-empty-row__",
+  measureName: "",
+  isPlaceholder: true,
+} as TableMeasure;
 
 const SelectedRow = styled.tr`
   background-color: #e3f2fd;
@@ -96,7 +101,6 @@ export default function AddComponentsDialog({
   const [visibleItems, setVisibleItems] = useState<number>(0);
   const [offset, setOffset] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(false);
-  const [hoveredHeader, setHoveredHeader] = useState<string>("");
   const [sorting, setSorting] = React.useState<SortingState>([]);
   // Map of measureSetId -> expanded sub-rows (supports multiple expanded rows)
   const [expandedSectionMap, setExpandedSectionMap] = useState<
@@ -114,7 +118,7 @@ export default function AddComponentsDialog({
     handleSearch,
     finalizeSearchCriteria,
     blankSearchCriteria,
-  } = useMeasureFilterSearch(() => setPage(0));
+  } = useFilterSearch(() => setPage(0));
 
   const [measureList, setMeasureList] = useState<Measure[]>([]);
 
@@ -270,16 +274,18 @@ export default function AddComponentsDialog({
     }
   }, [expandedSectionMap, preselectedIds, open]);
 
-  const columns = useMemo<ColumnDef<Measure>[]>(() => {
+  const columns = useMemo<ColumnDef<TableMeasure>[]>(() => {
     const columnDefs = [
       {
         id: "select",
         header: ({ table }) => {
-          const visibleRows = table.getRowModel().rows;
+          const visibleRows = table
+            .getRowModel()
+            .rows.filter((row) => !row.original.isPlaceholder);
 
-          const allVisibleSelected = visibleRows.every((row) =>
-            row.getIsSelected()
-          );
+          const allVisibleSelected =
+            visibleRows.length > 0 &&
+            visibleRows.every((row) => row.getIsSelected());
           const someVisibleSelected = visibleRows.some((row) =>
             row.getIsSelected()
           );
@@ -300,6 +306,9 @@ export default function AddComponentsDialog({
           );
         },
         cell: ({ row }) => {
+          if (row.original.isPlaceholder) {
+            return null;
+          }
           return (
             <div style={{ display: "flex", flexDirection: "row", gap: 16 }}>
               <div className="px-1">
@@ -316,55 +325,70 @@ export default function AddComponentsDialog({
       },
       {
         header: "Measure Name",
-        cell: (info) => (
-          <TruncateText
-            text={info.row.original.measureName}
-            maxLength={120}
-            dataTestId={`measure-name-${info.row.original.id}`}
-          />
-        ),
+        cell: (info) =>
+          info.row.original.isPlaceholder ? (
+            <div className="add-components-table-status">
+              {info.row.original.isLoading ? (
+                <MadieSpinner style={{ height: 50, width: 50 }} />
+              ) : (
+                info.row.original.emptyMessage
+              )}
+            </div>
+          ) : (
+            <TruncateText
+              text={info.row.original.measureName}
+              maxLength={120}
+              dataTestId={`measure-name-${info.row.original.id}`}
+            />
+          ),
         accessorKey: "measureName",
       },
       {
         header: "Version",
-        cell: (info) => (
-          <>
-            <TruncateText
-              text={info.row.original.version}
-              maxLength={20}
-              dataTestId={`measure-version-${info.row.original.id}`}
-            />
-          </>
-        ),
+        cell: (info) =>
+          info.row.original.isPlaceholder ? null : (
+            <>
+              <TruncateText
+                text={info.row.original.version}
+                maxLength={20}
+                dataTestId={`measure-version-${info.row.original.id}`}
+              />
+            </>
+          ),
         accessorKey: "version",
       },
       {
         header: "CMS ID",
-        cell: (info) => (
-          <TruncateText
-            text={formatCmsId(info.getValue(), info.row.original?.model)}
-            maxLength={20}
-            dataTestId={`measure-cmsId-${info.row.original.id}`}
-          />
-        ),
+        cell: (info) =>
+          info.row.original.isPlaceholder ? null : (
+            <TruncateText
+              text={formatCmsId(info.getValue(), info.row.original?.model)}
+              maxLength={20}
+              dataTestId={`measure-cmsId-${info.row.original.id}`}
+            />
+          ),
         id: "cmsId",
         accessorFn: (row) => row.measureSet?.cmsId,
         sortDescFirst: false,
       },
       {
         header: "Translator",
-        cell: (info) => (
-          <TruncateText
-            text={info.row.original?.translatorVersion}
-            maxLength={20}
-            dataTestId={`translator-version-${info.row.original.id}`}
-          />
-        ),
+        cell: (info) =>
+          info.row.original.isPlaceholder ? null : (
+            <TruncateText
+              text={info.row.original?.translatorVersion}
+              maxLength={20}
+              dataTestId={`translator-version-${info.row.original.id}`}
+            />
+          ),
         accessorKey: "translatorVersion",
       },
       {
         header: "Updated",
         cell: (info) => {
+          if (info.row.original.isPlaceholder) {
+            return null;
+          }
           const converted = convertDate(info.row.original.lastModifiedAt);
           const { date } = converted;
           return <div>{date}</div>;
@@ -413,6 +437,22 @@ export default function AddComponentsDialog({
 
     return columnDefs;
   }, [expandedSectionMap]);
+
+  const tableData = useMemo<TableMeasure[]>(
+    () =>
+      measureList.length > 0
+        ? measureList
+        : [
+            {
+              ...EMPTY_TABLE_ROW,
+              isLoading: loading,
+              emptyMessage: finalSearchAndFilterby.finalSearchField
+                ? NO_RESULTS
+                : NO_RESULTS_FOR_MODEL,
+            },
+          ],
+    [measureList, loading, finalSearchAndFilterby.finalSearchField]
+  );
 
   const fetchMeasures = useCallback(() => {
     if (!measure || !measure.model || !measure.id || !open) {
@@ -514,9 +554,23 @@ export default function AddComponentsDialog({
     setSorting(updaterOrValue);
     setPage(0);
   };
+  const handleSort = (sort: string) => {
+    setSorting((currentSorting) => {
+      const activeSort = currentSorting[0];
+      if (activeSort?.id !== sort) {
+        return [{ id: sort, desc: false }];
+      }
+      return activeSort.desc ? [] : [{ id: sort, desc: true }];
+    });
+    setPage(0);
+  };
+  const handleSearchTrigger = () => {
+    finalizeSearchCriteria();
+    setPage(0);
+  };
 
   const table = useReactTable({
-    data: measureList,
+    data: tableData,
     columns,
     getRowId: (row) => row.id,
     defaultColumn: {
@@ -703,164 +757,74 @@ export default function AddComponentsDialog({
       }}
       maxWidth={"lg"}
     >
-      <MeasureSearchFilters
-        filterBy={filterBy}
-        searchField={searchField}
-        onFilterChange={handleFilter}
-        onSearchChange={handleSearch}
-        onSearchTrigger={finalizeSearchCriteria}
-        onSearchClear={blankSearchCriteria}
-      />
-      <div className="measure-table no-margin-top">
+      <div className="dialog-measure-search-filters">
+        <SearchAndFilter
+          filterBy={filterBy}
+          searchField={searchField}
+          onFilterChange={handleFilter}
+          onSearchChange={handleSearch}
+          onSearchTrigger={handleSearchTrigger}
+          onSearchClear={blankSearchCriteria}
+          filterByOpts={filterByOptions}
+          textFieldID="test-cases"
+        />
+      </div>
+      <div className="measure-table no-margin-top add-components-table">
         <div className="table" style={{ overflow: "auto" }}>
-          <table
-            tw="min-w-full"
-            data-testid="measure-list-tbl"
-            className="ml-table"
-            style={{
-              borderSpacing: "0 2em !important",
-              borderBottom: "1px solid rgb(140, 140, 140)",
+          <div
+            onClickCapture={(event) => {
+              if (
+                event.target instanceof Element &&
+                event.target.closest("thead button")
+              ) {
+                event.preventDefault();
+              }
             }}
           >
-            <thead tw="bg-slate">
-              {table.getHeaderGroups().map((headerGroup) => (
-                <tr key={headerGroup.id}>
-                  {headerGroup.headers.map((header) => {
-                    const isHovered = hoveredHeader?.includes(header.id);
-                    return (
-                      <TH
-                        key={header.id}
-                        scope="col"
-                        onClick={(e) => {
-                          //prevent bubbling event
-                          e.stopPropagation();
-                          // prevent form submission submission
-                          e.preventDefault();
-                          //call event handler that's attached
-                          header.column.getToggleSortingHandler()(e);
-                        }}
-                        onMouseEnter={() => setHoveredHeader(header.id)}
-                        onMouseLeave={() => setHoveredHeader(null)}
-                        className="header-cell"
-                      >
-                        {header.isPlaceholder ? null : (
-                          <button
-                            className={
-                              header.column.getCanSort()
-                                ? "cursor-pointer select-none header-button"
-                                : "header-button"
-                            }
-                            title={
-                              header.column.getCanSort()
-                                ? header.column.getNextSortingOrder() === "asc"
-                                  ? "Sort ascending"
-                                  : header.column.getNextSortingOrder() ===
-                                    "desc"
-                                  ? "Sort descending"
-                                  : "Clear sort"
-                                : undefined
-                            }
-                          >
-                            <span className="arrowDisplay">
-                              {header.column.columnDef.header !== "" &&
-                                header.column.getCanSort() &&
-                                isHovered &&
-                                !header.column.getIsSorted() && (
-                                  <UnfoldMoreIcon />
-                                )}
-                              {header.column.columnDef.header !== "" &&
-                                ({
-                                  asc: <KeyboardArrowUpIcon />,
-                                  desc: <KeyboardArrowDownIcon />,
-                                }[header.column.getIsSorted() as string] ??
-                                  null)}
-                            </span>
-                            {flexRender(
-                              header.column.columnDef.header,
-                              header.getContext()
-                            )}
-                          </button>
-                        )}
-                      </TH>
-                    );
-                  })}
-                </tr>
-              ))}
-            </thead>
-            <tbody className="table-body" style={{ padding: 20 }}>
-              {loading ? (
-                <div style={{ display: "flex", justifyContent: "center" }}>
-                  <MadieSpinner style={{ height: 50, width: 50 }} />
-                </div>
-              ) : _.isEmpty(measureList) ? (
-                <tr>
-                  <td colSpan={columns.length} tw="text-center p-2">
-                    {finalSearchAndFilterby.finalSearchField
-                      ? NO_RESULTS
-                      : NO_RESULTS_FOR_MODEL}
-                  </td>
-                </tr>
-              ) : (
-                table.getRowModel().rows.map((row) => (
-                  <React.Fragment key={row.id}>
-                    <tr
-                      key={row.id}
-                      className="ml-tr"
-                      data-testid={`row-item`}
-                      style={{
-                        borderTop: "solid 1px #8c8c8c",
-                        borderSpacing: "0 2em !important",
-                        ...(row.getIsSelected() && {
-                          backgroundColor: "#e3f2fd",
-                        }),
-                      }}
-                    >
-                      {row.getVisibleCells().map((cell) => (
-                        <td
-                          key={cell.id}
-                          data-testid={`measure-name-${cell.id}`}
-                        >
-                          {flexRender(
-                            cell.column.columnDef.cell,
-                            cell.getContext()
-                          )}
-                        </td>
-                      ))}
-                    </tr>
-                    {expandedSectionMap[row.original.measureSetId]?.map(
-                      (subRow) => (
-                        <SelectedRow
-                          key={subRow.id}
-                          className="expanded-row"
-                          style={{
-                            backgroundColor: expandedRowSelection[subRow.id]
-                              ? "#e3f2fd"
-                              : "white",
-                            borderTop: "solid 1px #8c8c8c",
-                          }}
-                          data-testid={`expanded-row-${subRow.id}`}
-                        >
-                          {expandedColumns.map((column: any) => (
-                            <td key={column?.accessorKey || column.id}>
-                              {flexRender(column.cell ?? column.accessorKey, {
-                                row: {
-                                  id: subRow.id,
-                                  original: subRow,
-                                  getIsSelected: () =>
-                                    expandedRowSelection[subRow.id] || false,
-                                },
-                                getValue: () => subRow[column.accessorKey],
-                              })}
-                            </td>
-                          ))}
-                        </SelectedRow>
-                      )
-                    )}
-                  </React.Fragment>
+            <MadieTable
+              table={table}
+              currentSort={sorting[0]?.id}
+              currentDirection={
+                sorting.length > 0
+                  ? sorting[0].desc
+                    ? "DESC"
+                    : "ASC"
+                  : undefined
+              }
+              handleSort={handleSort}
+              id="addComponentsDialogTable"
+              dataTestId="measure-list-tbl"
+              renderExpandedRow={(row) =>
+                expandedSectionMap[row.original.measureSetId]?.map((subRow) => (
+                  <SelectedRow
+                    key={subRow.id}
+                    className="expanded-row"
+                    style={{
+                      backgroundColor: expandedRowSelection[subRow.id]
+                        ? "#e3f2fd"
+                        : "white",
+                      borderTop: "solid 1px #8c8c8c",
+                    }}
+                    data-testid={`expanded-row-${subRow.id}`}
+                  >
+                    {expandedColumns.map((column: any) => (
+                      <td key={column?.accessorKey || column.id}>
+                        {flexRender(column.cell ?? column.accessorKey, {
+                          row: {
+                            id: subRow.id,
+                            original: subRow,
+                            getIsSelected: () =>
+                              expandedRowSelection[subRow.id] || false,
+                          },
+                          getValue: () => subRow[column.accessorKey],
+                        })}
+                      </td>
+                    ))}
+                  </SelectedRow>
                 ))
-              )}
-            </tbody>
-          </table>
+              }
+            />
+          </div>
         </div>
       </div>
       <Pagination
