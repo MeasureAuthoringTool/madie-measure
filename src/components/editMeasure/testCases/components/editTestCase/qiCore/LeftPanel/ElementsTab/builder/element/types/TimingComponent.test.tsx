@@ -652,7 +652,7 @@ describe("TimingComponent", () => {
 
     // Test Event (DateTimeComponent)
     const eventDeleteButton = await screen.findByTestId(
-      "delete-button-Event[0]"
+      "delete-button-MedicationRequest.dosageInstruction[0].timing.event[0]"
     );
     expect(eventDeleteButton).toBeInTheDocument();
     userEvent.click(eventDeleteButton);
@@ -679,7 +679,7 @@ describe("TimingComponent", () => {
 
     // Test Time of Day (TimeComponent)
     const timeDeleteButton = await screen.findByTestId(
-      "delete-button-Repeat.Time of Day[0]"
+      "delete-button-MedicationRequest.dosageInstruction[0].timing.repeat.timeOfDay[0]"
     );
     expect(timeDeleteButton).toBeInTheDocument();
     userEvent.click(timeDeleteButton);
@@ -713,7 +713,7 @@ describe("TimingComponent", () => {
 
     // Find the delete button for the only Event element
     const eventDeleteButton = await screen.findByTestId(
-      "delete-button-Event[0]"
+      "delete-button-MedicationRequest.dosageInstruction[0].timing.event[0]"
     );
     expect(eventDeleteButton).toBeInTheDocument();
 
