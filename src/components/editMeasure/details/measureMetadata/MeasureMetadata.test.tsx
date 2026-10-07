@@ -26,6 +26,7 @@ const mockMetaData = {
   disclaimer: "Test Disclaimer",
   rationale: "Test Rationale",
   guidance: "Test Guidance",
+  limitations: "Test Limitation",
   riskAdjustment: "Test Risk Adjustment",
 };
 
@@ -75,6 +76,7 @@ describe("MeasureRationale component", () => {
   const GUIDANCE = "Test Guidance";
   const NEWVALUE = "Test New Value";
   const RISKADJUSTMENT = "Test Risk Adjustment";
+  const LIMITATION = "Test Limitation";
 
   afterEach(cleanup);
 
@@ -196,6 +198,89 @@ describe("MeasureRationale component", () => {
           rationale: undefined,
         },
       });
+    });
+
+    it("should render the rich text editor with the supplied limitation information", () => {
+      render(
+        <MeasureMetadataForm
+          measureMetadataId="Limitation"
+          measureMetadataType="Limitations"
+          header="Limitations"
+          setErrorMessage={setErrorMessage}
+          measureCanEdit={true}
+        />
+      );
+
+      expect(screen.getByTestId("measure-limitations")).toBeInTheDocument();
+      expect(screen.getByRole("textbox")).toHaveTextContent(LIMITATION);
+      expect(getAllByText("Limitations")).toBeTruthy();
+    });
+
+    it("should save the limitation value and display a success toast", async () => {
+      render(
+        <MeasureMetadataForm
+          measureMetadataId="Limitation"
+          measureMetadataType="Limitations"
+          header="Limitations"
+          setErrorMessage={setErrorMessage}
+          measureCanEdit={true}
+        />
+      );
+
+      const limitationEditor = screen.getByRole("textbox");
+      fireEvent.change(limitationEditor, { target: { innerHTML: NEWVALUE } });
+      await waitFor(() => {
+        expect(getByTestId("measure-limitations-save")).toBeEnabled();
+      });
+      userEvent.click(getByTestId("measure-limitations-save"));
+
+      await waitFor(() =>
+        expect(serviceApiMock.updateMeasure).toHaveBeenCalledWith(
+          expect.objectContaining({
+            measureMetaData: expect.objectContaining({
+              limitations: `<p>${NEWVALUE}</p>`,
+            }),
+          })
+        )
+      );
+      expect(
+        await findByTestId("measureLimitationsSuccess")
+      ).toBeInTheDocument();
+      expect(
+        getByText("Measure Limitations Information Saved Successfully")
+      ).toBeInTheDocument();
+    });
+
+    it("should revert the limitation value back to the saved value on discard changes", async () => {
+      render(
+        <MeasureMetadataForm
+          measureMetadataId="Limitation"
+          measureMetadataType="Limitations"
+          header="Limitations"
+          setErrorMessage={setErrorMessage}
+          measureCanEdit={true}
+        />
+      );
+
+      const limitationEditor = screen.getByRole("textbox");
+      fireEvent.change(limitationEditor, { target: { innerHTML: NEWVALUE } });
+      expect(limitationEditor).toHaveTextContent(NEWVALUE);
+
+      const discardButton = getByTestId("discard-button");
+      await waitFor(() => {
+        expect(discardButton).toBeEnabled();
+      });
+      userEvent.click(discardButton);
+      await waitFor(() => {
+        expect(screen.getByTestId("discard-dialog")).toBeInTheDocument();
+      });
+      userEvent.click(
+        screen.getByRole("button", { name: "Yes, Discard All Changes" })
+      );
+
+      await waitFor(() =>
+        expect(screen.getByRole("textbox")).toHaveTextContent(LIMITATION)
+      );
     });
 
     it("should not display validation error and save empty input successfully for metadata that does not need validation", async () => {

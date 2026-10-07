@@ -14,6 +14,7 @@ describe("MeasureMetadataHelper", () => {
   const PURPOSE = "Test Purpose";
   const GUIDANCE = "Test Guidance";
   const CLINICAL = "Test Clinical";
+  const LIMITATION = "Test Limitation";
   const RISKADJUSTMENT = "Test Risk Adjustment";
   const NEWVALUE = "Test New Value";
   const definition = "this is measure definition";
@@ -30,6 +31,7 @@ describe("MeasureMetadataHelper", () => {
       purpose: PURPOSE,
       guidance: GUIDANCE,
       clinicalRecommendation: CLINICAL,
+      limitations: LIMITATION,
       definition: definition,
       riskAdjustment: RISKADJUSTMENT,
       measureSetTitle: MEASURESETTITLE,
@@ -138,6 +140,21 @@ describe("MeasureMetadataHelper", () => {
     expect(actual).toBe("");
   });
 
+  it("should retrieve limitation value", () => {
+    const actual = getInitialValues(measure, "limitations");
+    expect(actual).toBe(LIMITATION);
+  });
+
+  it("should return empty string instead of null when limitation is null", () => {
+    measure = {
+      id: MEASUREID,
+      measureMetaData: { limitations: null } as unknown as MeasureMetadata,
+    } as Measure;
+
+    const actual = getInitialValues(measure, "limitations");
+    expect(actual).toBe("");
+  });
+
   it("should retrieve guidance value", () => {
     const actual = getInitialValues(measure, "guidance-usage");
     expect(actual).toBe(GUIDANCE);
@@ -217,6 +234,11 @@ describe("MeasureMetadataHelper", () => {
   it("should reset clinicalRecommendation value", () => {
     setMeasureMetadata(measure, "clinical-recommendation-statement", NEWVALUE);
     expect(measure.measureMetaData?.clinicalRecommendation).toBe(NEWVALUE);
+  });
+
+  it("should reset limitation value", () => {
+    setMeasureMetadata(measure, "limitations", NEWVALUE);
+    expect(measure.measureMetaData?.limitations).toBe(NEWVALUE);
   });
 
   it("should reset definition value", () => {
