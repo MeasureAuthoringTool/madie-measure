@@ -21,6 +21,7 @@ import EditMeasureDetailsSideNav from "./EditMeasureDetailsSideNav";
 import MeasureReferences from "./MeasureReferences/MeasureReferences";
 import TransmissionFormat from "./TransmissionFormat/TransmissionFormat";
 import MeasureDefinitions from "./MeasureDefinitions/MeasureDefinitions";
+import AuthoritativeSource from "./AuthoritativeSource/AuthoritativeSource";
 import LockedMessageModal from "../../common/lockedMessageModal/LockedMessageModal";
 
 const Grid = tw.div`grid grid-cols-6 auto-cols-max gap-4 mx-8 shadow-lg rounded-md border border-slate overflow-hidden bg-white`;
@@ -70,6 +71,8 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
   const guidanceLink = "measure-guidance";
   const clinicalLink = "measure-clinical-recommendation";
   const definitionLink = "measure-definition";
+  const limitationsLink = "measure-limitations";
+  const authoritativeSourceLink = "measure-authoritative-source";
   const referencesLink = "measure-references";
   const transmissionFormat = "transmission-format";
   const detailsLink = "";
@@ -266,6 +269,24 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
       id: "sideNavMeasureReferences",
       displayCompletedIcon: measure?.measureMetaData.references?.length > 0,
     });
+    links[1].links.splice(
+      links[1].links.findIndex((link) => link.href === measureDefinitionLink),
+      0,
+      {
+        title: "Authoritative Source",
+        href: authoritativeSourceLink,
+        dataTestId: "leftPanelMeasureAuthoritativeSource",
+        id: "sideNavMeasureAuthoritativeSource",
+        displayCompletedIcon: !!measure?.measureMetaData.authoritativeSource,
+      }
+    );
+    links[1].links.push({
+      title: "Limitations",
+      href: limitationsLink,
+      dataTestId: "leftPanelMeasureLimitation",
+      id: "sideNavMeasureLimitation",
+      displayCompletedIcon: !!measure?.measureMetaData.limitations,
+    });
   }
   useEffect(() => {
     setErrorMessage("");
@@ -440,6 +461,31 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
                 }
               />
             </>
+          )}
+          {!isQDM && (
+            <Route
+              path={authoritativeSourceLink}
+              element={
+                <AuthoritativeSource
+                  setErrorMessage={setErrorMessage}
+                  measureCanEdit={measureCanEdit && !measureLockedBy}
+                />
+              }
+            />
+          )}
+          {!isQDM && (
+            <Route
+              path={limitationsLink}
+              element={
+                <MeasureMetadata
+                  measureMetadataId="Limitation"
+                  measureMetadataType="Limitations"
+                  header="Limitations"
+                  setErrorMessage={setErrorMessage}
+                  measureCanEdit={measureCanEdit && !measureLockedBy}
+                />
+              }
+            />
           )}
           {!isQDM && (
             <>

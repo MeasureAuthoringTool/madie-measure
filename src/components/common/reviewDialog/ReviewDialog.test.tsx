@@ -87,7 +87,7 @@ describe("ReviewDialog", () => {
           measureId: "measure-1",
           measureSetId: "set-1",
           status: ReviewStatus.READY_FOR_REVIEW,
-          comment: "<p></p>",
+          comment: [],
         })
       );
     });
@@ -164,7 +164,7 @@ describe("ReviewDialog", () => {
           measureId: "measure-1",
           measureSetId: "set-1",
           status: ReviewStatus.NOT_READY_FOR_REVIEW,
-          comment: "<p></p>",
+          comment: [],
         })
       );
     });
@@ -323,7 +323,7 @@ describe("ReviewDialog", () => {
         expect.objectContaining({
           id: "existing-review-id",
           status: ReviewStatus.NOT_READY_FOR_REVIEW,
-          comment: "<p></p>",
+          comment: [],
         })
       );
     });
