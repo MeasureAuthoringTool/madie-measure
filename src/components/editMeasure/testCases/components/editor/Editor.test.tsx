@@ -1,37 +1,38 @@
 import * as React from "react";
 import Editor from "./Editor";
-import { act, render } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+
+jest.mock("@madie/madie-editor", () => {
+  const React = require("react");
+  return {
+    MadieJsonEditor: ({ value, onChange, readOnly }) =>
+      React.createElement("textarea", {
+        role: "textbox",
+        value: value || "",
+        readOnly: Boolean(readOnly),
+        onChange: (event) => onChange?.(event.target.value),
+      }),
+  };
+});
 
 describe("Test Case Editor component", () => {
   it("should render Editor Component", () => {
     const handleChange = jest.fn();
-    const container = render(<Editor value={null} onChange={handleChange} />);
+    const container = render(
+      <Editor value={""} height="500px" onChange={handleChange} />
+    );
     expect(container).toBeDefined();
   });
 
   it("calls handleChange on change", async () => {
-    jest.useFakeTimers("modern");
     const handleValueChanges = jest.fn();
-    const typedValue = "this is invalid CQL";
-    const outputProps = {
-      height: "500px",
-      value: "",
-      onChange: handleValueChanges,
-      setParseErrors: jest.fn(),
-      handleClick: true,
-      parseDebounceTime: 300,
-      inboundAnnotations: [],
-    };
 
-    await act(async () => {
-      const result = render(<Editor {...outputProps} />);
-      let aceEditor: any = await result.container.querySelector(
-        "#ace-editor-wrapper textarea"
-      );
-      userEvent.paste(aceEditor, typedValue);
-      jest.advanceTimersByTime(600);
-      expect(handleValueChanges).toBeCalledWith(typedValue);
-    });
+    render(<Editor value="" height="500px" onChange={handleValueChanges} />);
+
+    const monacoTextArea = screen.getByRole("textbox");
+    await userEvent.paste(monacoTextArea, "this is invalid CQL");
+
+    expect(handleValueChanges).toBeCalledWith("this is invalid CQL");
   });
 });

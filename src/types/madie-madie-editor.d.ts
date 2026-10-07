@@ -112,8 +112,8 @@ declare module "@madie/madie-editor" {
     ) => void;
     handleDeleteLibrary?: (lib: SelectedLibrary) => void;
     parseDebounceTime?: number;
-    inboundAnnotations?: Ace.Annotation[];
-    inboundErrorMarkers?: Ace.MarkerLike[];
+    inboundAnnotations?: EditorAnnotation[];
+    inboundErrorMarkers?: EditorErrorMarker[];
     height?: string;
     readOnly?: boolean;
     validationsEnabled?: boolean;
@@ -131,6 +131,22 @@ declare module "@madie/madie-editor" {
     // conditional props used to pass up annotations outside of the editor
     setOutboundAnnotations?: Function;
     hasCqlError?: boolean;
+    enableToggleSearchEvent?: boolean;
+  }
+
+  export interface JsonMonacoEditorProps {
+    value: string;
+    onChange?: (value: string) => void;
+    height?: string | number;
+    width?: string | number;
+    readOnly?: boolean;
+    theme?: string;
+    ariaLabel?: string;
+    testId?: string;
+    inputTestId?: string;
+    enableToggleSearchEvent?: false | true | { eventName: string };
+    options?: unknown;
+    onEditorMount?: (editor: unknown, monacoInstance: unknown) => void;
   }
 
   export type ElmTranslationError = {
@@ -199,5 +215,6 @@ declare module "@madie/madie-editor" {
   export function isPatientContext(editorVal: string): boolean;
 
   export const MadieTerminologyEditor: FC<EditorPropsType>;
-  export const MadieEditor: FC<EditorPropsType>;
+  export const MadieCqlEditor: FC<EditorPropsType>;
+  export const MadieJsonEditor: FC<JsonMonacoEditorProps>;
 }
