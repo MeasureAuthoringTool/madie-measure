@@ -70,15 +70,6 @@ declare module "@madie/madie-util" {
     pendingRoute: string;
   }
 
-  export interface MeasureReview {
-    id: string;
-    measureId: string;
-    measureSetId: string;
-    status: ReviewStatus;
-    comment: string;
-    reviewers?: string[];
-  }
-
   export function shouldShowReviewCommentLink(args: {
     commentingEnabled?: boolean;
     currentUser?: string | null;

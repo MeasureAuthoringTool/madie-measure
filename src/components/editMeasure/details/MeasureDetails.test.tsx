@@ -45,6 +45,8 @@ const measure = {
     purpose: "test purpose",
     guidance: "test",
     clinicalRecommendation: "clinicalRecommendation",
+    limitations: "limitations",
+    authoritativeSource: "https://www.test.org",
     draft: true,
     references: [
       {
@@ -566,6 +568,132 @@ describe("MeasureDetails component", () => {
     expect(leftPanelQiCoreMeasureDefinitions).not.toBeNull();
     const measureDefinitionTerms = queryByTestId("measure-definitions");
     expect(measureDefinitionTerms).toBeNull();
+  });
+
+  it("should render the Limitations tab directly below Definition for a QI Core measure", () => {
+    const { getByTestId } = render(
+      <ApiContextProvider value={serviceConfig}>
+        <MemoryRouter
+          initialEntries={[{ pathname: "/foo/measure-limitations" }]}
+        >
+          <Routes>
+            <Route
+              path="/foo/*"
+              element={
+                <MeasureDetails
+                  setErrorMessage={setErrorMessage}
+                  featureFlags={mockUseFeatureFlags()}
+                  isQDM={false}
+                  measureCanEdit={true}
+                  measureLockedBy=""
+                />
+              }
+            />
+          </Routes>
+        </MemoryRouter>
+      </ApiContextProvider>
+    );
+
+    const limitationTab = getByTestId("leftPanelMeasureLimitation");
+    expect(limitationTab).toBeInTheDocument();
+    const definitionTab = getByTestId("leftPanelQiCoreMeasureDefinition");
+    expect(definitionTab.nextSibling).toEqual(limitationTab);
+    expect(
+      getByTestId("measure-details-completed-icon-sideNavMeasureLimitation")
+    ).toBeInTheDocument();
+    expect(screen.getByText("Mock Measure Metadata")).toBeTruthy();
+  });
+
+  it("should not render the Limitations tab for a QDM measure", () => {
+    const { queryByTestId } = render(
+      <ApiContextProvider value={serviceConfig}>
+        <MemoryRouter initialEntries={[{ pathname: "/foo" }]}>
+          <Routes>
+            <Route
+              path="/foo/*"
+              element={
+                <MeasureDetails
+                  setErrorMessage={setErrorMessage}
+                  featureFlags={mockUseFeatureFlags()}
+                  isQDM={true}
+                  measureCanEdit={true}
+                  measureLockedBy=""
+                />
+              }
+            />
+          </Routes>
+        </MemoryRouter>
+      </ApiContextProvider>
+    );
+
+    expect(queryByTestId("leftPanelMeasureLimitation")).toBeNull();
+  });
+
+  it("should render the Authoritative Source tab between References and Definition for a QI Core measure", () => {
+    const { getByTestId } = render(
+      <ApiContextProvider value={serviceConfig}>
+        <MemoryRouter
+          initialEntries={[{ pathname: "/foo/measure-authoritative-source" }]}
+        >
+          <Routes>
+            <Route
+              path="/foo/*"
+              element={
+                <MeasureDetails
+                  setErrorMessage={setErrorMessage}
+                  featureFlags={mockUseFeatureFlags()}
+                  isQDM={false}
+                  measureCanEdit={true}
+                  measureLockedBy=""
+                />
+              }
+            />
+          </Routes>
+        </MemoryRouter>
+      </ApiContextProvider>
+    );
+
+    const authoritativeSourceTab = getByTestId(
+      "leftPanelMeasureAuthoritativeSource"
+    );
+    expect(authoritativeSourceTab).toBeInTheDocument();
+    expect(getByTestId("leftPanelMeasureReferences").nextSibling).toEqual(
+      authoritativeSourceTab
+    );
+    expect(authoritativeSourceTab.nextSibling).toEqual(
+      getByTestId("leftPanelQiCoreMeasureDefinition")
+    );
+    expect(
+      getByTestId(
+        "measure-details-completed-icon-sideNavMeasureAuthoritativeSource"
+      )
+    ).toBeInTheDocument();
+    expect(getByTestId("measure-authoritative-source")).toBeInTheDocument();
+  });
+
+  it("should not render the Authoritative Source tab for a QDM measure", () => {
+    const { queryByTestId } = render(
+      <ApiContextProvider value={serviceConfig}>
+        <MemoryRouter initialEntries={[{ pathname: "/foo" }]}>
+          <Routes>
+            <Route
+              path="/foo/*"
+              element={
+                <MeasureDetails
+                  setErrorMessage={setErrorMessage}
+                  featureFlags={mockUseFeatureFlags()}
+                  isQDM={true}
+                  measureCanEdit={true}
+                  measureLockedBy=""
+                />
+              }
+            />
+          </Routes>
+        </MemoryRouter>
+      </ApiContextProvider>
+    );
+
+    expect(queryByTestId("leftPanelMeasureAuthoritativeSource")).toBeNull();
   });
 
   it("should render the tabs in the measure details side nav with completed icons", () => {
