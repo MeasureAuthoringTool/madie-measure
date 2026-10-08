@@ -279,7 +279,7 @@ const DateTimeComponent = ({
               <span>
                 <IconButton
                   onClick={handleDeleteElement}
-                  data-testid={`delete-button-${label}`}
+                  data-testid={`delete-button-${testIdBase}`}
                   aria-label={`delete ${label}`}
                   size="small"
                 >
