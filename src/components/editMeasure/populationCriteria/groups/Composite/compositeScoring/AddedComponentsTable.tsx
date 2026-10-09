@@ -27,7 +27,6 @@ import {
   CollapseIcon,
   ExpandIcon,
 } from "../../../../../../icons/MeasureListTableRightArrowIcons";
-import { useNavigate } from "react-router-dom";
 
 const TH = tw.th`p-3 text-left text-sm font-bold capitalize`;
 
@@ -55,7 +54,6 @@ export default function AddedComponentsTable({
   ) => void;
   onDeleteComponent: (componentId: string) => void;
 }) {
-  const navigate = useNavigate();
   const [hoveredHeader, setHoveredHeader] = useState<string | null>("");
   const [componentToDelete, setComponentToDelete] = useState<Measure | null>(
     null
@@ -323,8 +321,10 @@ export default function AddedComponentsTable({
               data-testid={`view-group-${info.row.original.id}`}
               aria-label={`View Group ${info.row.original.displayId}`}
               onClick={() => {
-                navigate(
-                  `/measures/${measureId}/edit/groups/${groupIndex + 1}`
+                window.open(
+                  `/measures/${measureId}/edit/groups/${groupIndex + 1}`,
+                  "_blank",
+                  "noopener,noreferrer"
                 );
               }}
               tabIndex={0}
