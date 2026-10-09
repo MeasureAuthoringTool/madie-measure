@@ -366,6 +366,17 @@ declare module "@madie/madie-util" {
     style?: React.CSSProperties;
     dataTestId?: string;
   }): React.ReactElement;
+  export function CommentsFlyoutPanel(props: {
+    open: boolean;
+    onClose: () => void;
+    sectionName: string;
+    entityType: "measure" | "library";
+    readyForReviewBy?: string;
+    readyForReviewAt?: string;
+    sections?: string[];
+  }): React.ReactElement;
+  export const MEASURE_COMMENT_SECTIONS: string[];
+  export const LIBRARY_COMMENT_SECTIONS: string[];
   export const REVIEW_STATUS_OPTIONS: string[];
   export function getNewestMeasureInstance(measures: Measure[]): Measure;
 

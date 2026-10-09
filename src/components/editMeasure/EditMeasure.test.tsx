@@ -281,6 +281,27 @@ jest.mock("@madie/madie-util", () => ({
       Comments
     </button>
   ),
+  CommentsFlyoutPanel: ({
+    open,
+    onClose,
+    sectionName,
+    readyForReviewBy,
+    readyForReviewAt,
+  }: any) =>
+    open ? (
+      <div data-testid="comments-flyout">
+        <span data-testid="comments-flyout-section">{sectionName}</span>
+        <span data-testid="comments-flyout-ready-by">{readyForReviewBy}</span>
+        <span data-testid="comments-flyout-ready-at">{readyForReviewAt}</span>
+        <button
+          type="button"
+          data-testid="comments-flyout-close"
+          onClick={onClose}
+        >
+          Close
+        </button>
+      </div>
+    ) : null,
   useDocumentTitle: jest.fn(),
   useOktaTokens: jest.fn(() => ({
     getAccessToken: () => "test.jwt",
@@ -530,9 +551,9 @@ describe("EditMeasure Component", () => {
 
     userEvent.click(await screen.findByTestId("review-comments-link"));
     expect(screen.getByTestId("comments-flyout")).toBeInTheDocument();
-    expect(
-      screen.getByText("Add a comment to Name, Version & ID")
-    ).toBeInTheDocument();
+    expect(screen.getByTestId("comments-flyout-section")).toHaveTextContent(
+      "Name, Version & ID"
+    );
 
     userEvent.click(screen.getByTestId("comments-flyout-close"));
     await waitFor(() => {

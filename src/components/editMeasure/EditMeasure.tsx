@@ -33,6 +33,7 @@ import {
   ManageReviewDialog,
   shouldShowReviewCommentLink,
   ReviewCommentLink,
+  CommentsFlyoutPanel,
 } from "@madie/madie-util";
 import CreateVersionDialog from "../common/createVersionDialog/CreateVersionDialog";
 import InvalidTestCaseDialog from "../common/invalidTestCaseDialog/InvalidTestCaseDialog";
@@ -59,7 +60,6 @@ import TestCases from "./testCases/TestCases";
 import { AxiosResponse } from "axios";
 import ReviewDialog from "../common/reviewDialog/ReviewDialog";
 import StatusHandler, { INITIAL_STATUS_HANDLER } from "./editor/StatusHandler";
-import CommentsFlyoutPanel from "./comments/CommentsFlyoutPanel";
 import { getCommentSectionName } from "./comments/getCommentSectionName";
 
 const OBJECT_ID_REGEX = /\/[a-f0-9]{24}/g;
@@ -72,6 +72,8 @@ export interface RouteHandlerState {
 type MeasureReview = {
   status?: string | null;
   reviewers?: string[];
+  readyForReviewBy?: string;
+  readyForReviewAt?: string;
 };
 
 export default function EditMeasure() {
@@ -989,6 +991,9 @@ export default function EditMeasure() {
             open={commentsPanelOpen}
             onClose={() => setCommentsPanelOpen(false)}
             sectionName={commentSectionName}
+            entityType="measure"
+            readyForReviewBy={measureReview?.readyForReviewBy}
+            readyForReviewAt={measureReview?.readyForReviewAt}
           />
         </>
       )}
