@@ -72,6 +72,8 @@ export interface RouteHandlerState {
 type MeasureReview = {
   status?: string | null;
   reviewers?: string[];
+  readyForReviewBy?: string;
+  readyForReviewAt?: string;
 };
 
 export default function EditMeasure() {
@@ -989,6 +991,8 @@ export default function EditMeasure() {
             open={commentsPanelOpen}
             onClose={() => setCommentsPanelOpen(false)}
             sectionName={commentSectionName}
+            readyForReviewBy={measureReview?.readyForReviewBy}
+            readyForReviewAt={measureReview?.readyForReviewAt}
           />
         </>
       )}

@@ -366,6 +366,15 @@ declare module "@madie/madie-util" {
     style?: React.CSSProperties;
     dataTestId?: string;
   }): React.ReactElement;
+  export function formatReviewCommentDate(value?: string): string;
+  export function getReadyForReviewMessage(
+    entityType: "measure" | "library"
+  ): string;
+  export function ReviewSubSection(props: {
+    entityType: "measure" | "library";
+    readyForReviewBy?: string;
+    readyForReviewAt?: string;
+  }): React.ReactElement;
   export const REVIEW_STATUS_OPTIONS: string[];
   export function getNewestMeasureInstance(measures: Measure[]): Measure;
 

@@ -289,6 +289,7 @@ jest.mock("@madie/madie-util", () => ({
   checkUserCanEdit: jest.fn().mockImplementation(() => true),
   useFeatureFlags: jest.fn(() => ({})),
   shouldShowReviewCommentLink: jest.fn(),
+  ReviewSubSection: () => <div data-testid="comments-review-subsection" />,
   useUserRoles: jest.fn(() => ({
     roles: [],
     isAdmin: false,
