@@ -26,7 +26,6 @@ interface CommentsFlyoutPanelProps {
   open: boolean;
   onClose: () => void;
   sectionName: string;
-  // From the review document, which the edit page already loads.
   readyForReviewBy?: string;
   readyForReviewAt?: string;
 }
