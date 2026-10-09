@@ -50,7 +50,7 @@ export default function ReferenceComponent({
   resource,
 }: any) {
   const { dispatch, state } = useQiCoreResource();
-  const formikContext = useFormikContext();
+  const formikContext = useFormikContext<any>();
   // First dropdown Utilities
   const allResourceProfiles = useContext(ResourceContext); // get all profiles loaded from builder
 
@@ -96,6 +96,32 @@ export default function ReferenceComponent({
   const [selectedProfileUrl, setSelectedProfileUrl] = useState<string>(
     value?.reference || ""
   );
+  const addNewResources = formikContext.values["add_new_resources"] ?? [];
+
+  // Restore the referenced resource's profile after switching tabs.
+  const referencedResourceProfileUrl = useMemo(() => {
+    if (!value?.reference) return "";
+
+    const referencedResource = [
+      ...(state.bundle.entry ?? []),
+      ...addNewResources,
+    ].find(
+      (entry: { resource?: any }) =>
+        `${entry.resource?.resourceType}/${entry.resource?.id}` ===
+        value.reference
+    )?.resource;
+
+    return (
+      referencedResource?.meta?.profile?.find((profileUrl: string) =>
+        referenceTypeOptions.some((option) => option.profile === profileUrl)
+      ) || ""
+    );
+  }, [
+    addNewResources,
+    referenceTypeOptions,
+    state.bundle.entry,
+    value?.reference,
+  ]);
 
   // specific options for the second dropdown, based on the selected reference type
   const specificResourceOptions = useMemo(
@@ -115,21 +141,20 @@ export default function ReferenceComponent({
     const newId = value?.reference || "";
 
     // Initialize selectedProfileUrl - derive it from the reference type if it exists
-    const initialProfileUrl = findProfileUrlFromReferenceType(
-      newType,
-      referenceTypeOptions
+    const initialProfileUrl =
+      referencedResourceProfileUrl ||
+      findProfileUrlFromReferenceType(newType, referenceTypeOptions);
+    const selectedProfileMatchesType = referenceTypeOptions.some(
+      (option) =>
+        option.profile === selectedProfileUrl && option.value === newType
     );
-    // Only sync the type/profile from the incoming reference when we can
-    // resolve a profile for it. The `value` prop (spread from the parent's
-    // formik.getFieldProps) can lag a render behind formikContext.values, so a
-    // transient empty reference would otherwise clear a valid user selection
-    // (resetting the Reference Type dropdown).
-    if (initialProfileUrl) {
+    // A reference contains only type/id, so re-derive its profile only when
+    // the current selection does not already match the incoming resource type.
+    if (initialProfileUrl && !selectedProfileMatchesType) {
       setSelectedReferenceType(newType);
       setSelectedProfileUrl(initialProfileUrl);
     }
     // if the earmark is present, we do not want to update our local state.
-    const addNewResources = formikContext.values["add_new_resources"] || [];
     if (addNewResources.length === 0) {
       setSelectedReferenceId(newId);
     }
@@ -137,7 +162,7 @@ export default function ReferenceComponent({
     // options) changes - not on every formik value change, which caused the
     // Reference Type box to reset while selecting a value.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [value?.reference, referenceTypeOptions]);
+  }, [value?.reference, referenceTypeOptions, referencedResourceProfileUrl]);
 
   // Once the referenced resource actually exists in the bundle it shows up as a
   // concrete option in the second ("Specify") dropdown. When that happens we must
@@ -168,9 +193,8 @@ export default function ReferenceComponent({
       finalResourceOptionForAddNew
     );
     // Append to array instead of overwriting - supports multiple "Add New" references
-    const existingResources = formikContext.values["add_new_resources"] || [];
     formikContext.setFieldValue("add_new_resources", [
-      ...existingResources,
+      ...addNewResources,
       newMadieResource,
     ]);
     formikContext.setFieldValue(
