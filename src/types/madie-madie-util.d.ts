@@ -370,15 +370,10 @@ declare module "@madie/madie-util" {
   export function getReadyForReviewMessage(
     entityType: "measure" | "library"
   ): string;
-  export function useReviewAuthorName(
-    harpId?: string,
-    enabled?: boolean
-  ): string;
   export function ReviewSubSection(props: {
     entityType: "measure" | "library";
     readyForReviewBy?: string;
     readyForReviewAt?: string;
-    enabled?: boolean;
   }): React.ReactElement;
   export const REVIEW_STATUS_OPTIONS: string[];
   export function getNewestMeasureInstance(measures: Measure[]): Measure;

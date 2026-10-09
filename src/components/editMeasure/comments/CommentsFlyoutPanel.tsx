@@ -122,7 +122,6 @@ const CommentsFlyoutPanel = ({
                     entityType="measure"
                     readyForReviewBy={readyForReviewBy}
                     readyForReviewAt={readyForReviewAt}
-                    enabled={open}
                   />
                 ) : (
                   <div>-</div>
