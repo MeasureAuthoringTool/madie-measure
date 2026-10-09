@@ -366,17 +366,20 @@ declare module "@madie/madie-util" {
     style?: React.CSSProperties;
     dataTestId?: string;
   }): React.ReactElement;
-  export function CommentsFlyoutPanel(props: {
-    open: boolean;
-    onClose: () => void;
-    sectionName: string;
+  export function formatReviewCommentDate(value?: string): string;
+  export function getReadyForReviewMessage(
+    entityType: "measure" | "library"
+  ): string;
+  export function useReviewAuthorName(
+    harpId?: string,
+    enabled?: boolean
+  ): string;
+  export function ReviewSubSection(props: {
     entityType: "measure" | "library";
     readyForReviewBy?: string;
     readyForReviewAt?: string;
-    sections?: string[];
+    enabled?: boolean;
   }): React.ReactElement;
-  export const MEASURE_COMMENT_SECTIONS: string[];
-  export const LIBRARY_COMMENT_SECTIONS: string[];
   export const REVIEW_STATUS_OPTIONS: string[];
   export function getNewestMeasureInstance(measures: Measure[]): Measure;
 
