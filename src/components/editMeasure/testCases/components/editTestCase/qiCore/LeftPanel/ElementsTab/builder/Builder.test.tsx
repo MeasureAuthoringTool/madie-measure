@@ -5,7 +5,7 @@ import Builder, {
   deduplicateAndSortResources,
   isResourceForModel,
 } from "./Builder";
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Measure, Model, TestCase } from "@madie/madie-models";
 import { QiCoreResourceContext } from "../../../../../../util/QiCorePatientProvider";
@@ -107,7 +107,9 @@ const defaultResourceIdentifiers = [
   },
 ];
 
-const mockGetResources = jest.fn(() => defaultResourceIdentifiers);
+const mockGetResources = jest.fn(() =>
+  Promise.resolve(defaultResourceIdentifiers)
+);
 const mockGetBuilderResourceMetadata = jest.fn(() => ({
   resourcePaths: ["/fhir/us/qicore", "/fhir/us/core"],
   primaryPatientProfile: {
@@ -358,7 +360,7 @@ describe("Builder Component", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (useFormikContext as jest.Mock).mockReturnValue({ resetForm: jest.fn() });
-    mockGetResources.mockReturnValue(defaultResourceIdentifiers);
+    mockGetResources.mockResolvedValue(defaultResourceIdentifiers);
     mockGetResourceTree.mockResolvedValue({});
   });
 
@@ -422,9 +424,61 @@ describe("Builder Component", () => {
   it("renders added content when activeTab is added", async () => {
     renderBuilderComponent({ bundleToAdd: mockBundle, activeTab: "added" });
 
-    expect(screen.getByText("Profile")).toBeInTheDocument();
+    expect(await screen.findByText("Profile")).toBeInTheDocument();
     expect(screen.getByRole("table")).toBeInTheDocument();
     expect(screen.queryByRole("progressbar")).not.toBeInTheDocument();
+  });
+
+  it("shows a spinner instead of the empty-state message while profile definitions load", async () => {
+    let resolveResources: (value: typeof defaultResourceIdentifiers) => void;
+    mockGetResources.mockReturnValueOnce(
+      new Promise((resolve) => {
+        resolveResources = resolve;
+      })
+    );
+
+    renderBuilderComponent({ bundleToAdd: { entry: [] }, activeTab: "added" });
+
+    expect(screen.getByTestId("added-profiles-loading")).toBeInTheDocument();
+    expect(screen.getByRole("progressbar")).toBeInTheDocument();
+    expect(screen.queryByText(NO_PROFILES_MESSAGE)).not.toBeInTheDocument();
+    expect(screen.queryByRole("table")).not.toBeInTheDocument();
+
+    await act(async () => {
+      resolveResources(defaultResourceIdentifiers);
+    });
+
+    expect(await screen.findByTestId("no-profiles-alert")).toHaveTextContent(
+      NO_PROFILES_MESSAGE
+    );
+    expect(screen.queryByRole("progressbar")).not.toBeInTheDocument();
+  });
+
+  it("waits for initialization to finish before displaying loaded profiles", async () => {
+    let resolveRelevantElements: (value: []) => void;
+    mockFetchRelevantDataElements.mockReturnValueOnce(
+      new Promise((resolve) => {
+        resolveRelevantElements = resolve;
+      })
+    );
+
+    renderBuilderComponent({ bundleToAdd: mockBundle, activeTab: "added" });
+
+    await waitFor(() =>
+      expect(mockFetchRelevantDataElements).toHaveBeenCalled()
+    );
+    expect(screen.getByRole("progressbar")).toBeInTheDocument();
+    expect(screen.queryByText(NO_PROFILES_MESSAGE)).not.toBeInTheDocument();
+    expect(screen.queryByRole("table")).not.toBeInTheDocument();
+
+    await act(async () => {
+      resolveRelevantElements([]);
+    });
+
+    expect(await screen.findByText("QICore Encounter")).toBeInTheDocument();
+    expect(screen.getByRole("table")).toBeInTheDocument();
+    expect(screen.queryByRole("progressbar")).not.toBeInTheDocument();
+    expect(screen.queryByText(NO_PROFILES_MESSAGE)).not.toBeInTheDocument();
   });
 
   it("shows ResourceEditor when a row is selected for editing in added tab", async () => {
@@ -515,7 +569,7 @@ describe("Builder Component", () => {
   });
 
   it("places qicore patient first even when service returns it later", async () => {
-    mockGetResources.mockReturnValue([
+    mockGetResources.mockResolvedValue([
       defaultResourceIdentifiers[1],
       defaultResourceIdentifiers[2],
       defaultResourceIdentifiers[3],
@@ -576,7 +630,7 @@ describe("Builder Component", () => {
       activeTab: "added",
     });
 
-    expect(screen.getByText("QICore Encounter")).toBeInTheDocument();
+    expect(await screen.findByText("QICore Encounter")).toBeInTheDocument();
     expect(screen.getByText("Observation")).toBeInTheDocument();
     expect(screen.getByText("QICore ServiceRequest")).toBeInTheDocument();
   });
@@ -746,6 +800,7 @@ describe("scrollToElementByIdWhenAvailable", () => {
 
     renderBuilderComponent({ bundleToAdd: mockBundle, activeTab: "added" });
 
+    await screen.findByRole("table");
     expect(screen.queryByRole("progressbar")).not.toBeInTheDocument();
   });
 
@@ -760,6 +815,7 @@ describe("scrollToElementByIdWhenAvailable", () => {
       activeTab: "added",
     });
 
+    await screen.findByRole("table");
     // Check that the wrapper div with relative positioning exists
     const tabContent = container.querySelector('[style*="position: relative"]');
     expect(tabContent).toBeInTheDocument();
@@ -791,6 +847,7 @@ describe("scrollToElementByIdWhenAvailable", () => {
       activeTab: "added",
     });
 
+    await screen.findByRole("table");
     // The ResourceEditor should receive the applyLoading props
     // Verify the wrapper structure that contains ResourceEditor
     const wrapperDiv = container.querySelector('[style*="position: relative"]');
