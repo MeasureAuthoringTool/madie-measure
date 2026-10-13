@@ -10,13 +10,6 @@ import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 import AddedComponentsTable from "./AddedComponentsTable";
 
-const mockNavigate = jest.fn();
-
-jest.mock("react-router-dom", () => ({
-  ...jest.requireActual("react-router-dom"),
-  useNavigate: () => mockNavigate,
-}));
-
 jest.mock(
   "../../../../testCases/components/testCaseLanding/common/TestCaseTable/TestCaseTable",
   () => ({
@@ -442,11 +435,21 @@ describe("AddedComponentsTable", () => {
       within(expandedRow).getByText("Group one description")
     ).toBeInTheDocument();
 
+    const openSpy = jest.spyOn(window, "open").mockImplementation();
     await userEvent.click(within(expandedRow).getByTestId("view-group-group1"));
-    expect(mockNavigate).toHaveBeenCalledWith("/measures/m1/edit/groups/1");
+    expect(openSpy).toHaveBeenCalledWith(
+      "/measures/m1/edit/groups/1",
+      "_blank",
+      "noopener,noreferrer"
+    );
 
     await userEvent.click(within(expandedRow).getByTestId("view-group-group2"));
-    expect(mockNavigate).toHaveBeenCalledWith("/measures/m1/edit/groups/2");
+    expect(openSpy).toHaveBeenLastCalledWith(
+      "/measures/m1/edit/groups/2",
+      "_blank",
+      "noopener,noreferrer"
+    );
+    openSpy.mockRestore();
   });
 
   it("checks included groups and calls onToggleGroup when Include changes", async () => {
