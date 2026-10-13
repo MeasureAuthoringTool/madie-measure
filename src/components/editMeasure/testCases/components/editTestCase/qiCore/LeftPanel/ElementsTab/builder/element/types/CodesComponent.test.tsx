@@ -362,7 +362,9 @@ describe("Codes Component", () => {
     );
 
     for (const code of ["POA-Y", "POA-1", "POA-2", "POA-3"]) {
-      expect(await screen.findByRole("option", { name: code })).toBeInTheDocument();
+      expect(
+        await screen.findByRole("option", { name: code })
+      ).toBeInTheDocument();
     }
   });
 
