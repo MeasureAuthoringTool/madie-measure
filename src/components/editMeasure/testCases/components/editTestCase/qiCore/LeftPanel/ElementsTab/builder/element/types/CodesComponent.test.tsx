@@ -324,6 +324,48 @@ describe("Codes Component", () => {
     });
   });
 
+  it("Should use the code when a concept has no display name", async () => {
+    mockedAxios.get.mockImplementation((url) => {
+      if (url.endsWith("/value-set-definition?url=" + valueSetUrl)) {
+        return Promise.resolve({
+          data: {
+            expansion: {
+              contains: [
+                { code: "POA-Y", display: null },
+                { code: "POA-1", display: "" },
+                { code: "POA-2" },
+                { code: "POA-3", display: "   " },
+              ],
+            },
+          },
+        });
+      }
+    });
+
+    renderWithExecutionContext(
+      <ApiContextProvider value={mockConfig}>
+        <CodesComponent
+          canEdit={true}
+          label={"Present On Admission"}
+          value={"POA-Y"}
+          onChange={onChangeMock}
+          fieldRequired
+          structureDefinition={structureDefinition}
+        />
+      </ApiContextProvider>
+    );
+
+    expect(await screen.findByText("POA-Y")).toBeInTheDocument();
+
+    userEvent.click(
+      screen.getByRole("combobox", { name: "Present On Admission" })
+    );
+
+    for (const code of ["POA-Y", "POA-1", "POA-2", "POA-3"]) {
+      expect(await screen.findByRole("option", { name: code })).toBeInTheDocument();
+    }
+  });
+
   it("Should ignore generating the options when expansion call fails", async () => {
     mockedAxios.get.mockImplementation((url) => {
       if (url.endsWith("expand")) {
