@@ -160,7 +160,7 @@ const AuthoritativeSource = (props: AuthoritativeSourceProps) => {
             Discard Changes
           </Button>
           <Button
-            disabled={!formik.dirty}
+            disabled={!(formik.isValid && formik.dirty)}
             type="submit"
             variant="cyan"
             data-testid="authoritative-source-save"
