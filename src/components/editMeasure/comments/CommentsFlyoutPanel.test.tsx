@@ -18,6 +18,19 @@ jest.mock("@madie/madie-design-system/dist/react", () => ({
     </div>
   ),
 }));
+jest.mock("@madie/madie-util", () => ({
+  ReviewSubSection: ({
+    entityType,
+    readyForReviewBy,
+    readyForReviewAt,
+  }: any) => (
+    <div data-testid="comments-review-subsection">
+      <span data-testid="review-entity-type">{entityType}</span>
+      <span data-testid="review-ready-by">{readyForReviewBy}</span>
+      <span data-testid="review-ready-at">{readyForReviewAt}</span>
+    </div>
+  ),
+}));
 describe("CommentsFlyoutPanel", () => {
   it("renders the sections and keeps actions disabled until text is entered", () => {
     render(
@@ -83,5 +96,33 @@ describe("CommentsFlyoutPanel", () => {
         screen.getByRole("tooltip", { name: fullLabel })
       ).toBeInTheDocument();
     });
+  });
+
+  it("renders the Review sub-section under General", () => {
+    render(
+      <CommentsFlyoutPanel open onClose={jest.fn()} sectionName="Details" />
+    );
+    expect(
+      screen.getByTestId("comments-review-subsection")
+    ).toBeInTheDocument();
+    expect(screen.getByTestId("review-entity-type")).toHaveTextContent(
+      "measure"
+    );
+  });
+
+  it("passes the ready for review details through to the sub-section", () => {
+    render(
+      <CommentsFlyoutPanel
+        open
+        onClose={jest.fn()}
+        sectionName="Details"
+        readyForReviewBy="jjones"
+        readyForReviewAt="2026-08-12T09:00:00"
+      />
+    );
+    expect(screen.getByTestId("review-ready-by")).toHaveTextContent("jjones");
+    expect(screen.getByTestId("review-ready-at")).toHaveTextContent(
+      "2026-08-12T09:00:00"
+    );
   });
 });
