@@ -29,7 +29,7 @@ import {
   CollapseIcon,
   ExpandIcon,
 } from "../../../../../../icons/MeasureListTableRightArrowIcons";
-import { Measure, OwnershipType } from "@madie/madie-models";
+import { MeasureListDTO, OwnershipType } from "@madie/madie-models";
 import * as _ from "lodash";
 import {
   useMeasureServiceApi,
@@ -43,7 +43,7 @@ import "./AddComponentsDialog.scss";
 
 const DEFAULT_PAGE_LIMIT = 5;
 
-type TableMeasure = Measure & {
+type TableMeasure = MeasureListDTO & {
   isPlaceholder?: boolean;
   isLoading?: boolean;
   emptyMessage?: string;
@@ -66,7 +66,7 @@ type TCRow = {
   id: string;
   measureName: string;
   version: string;
-  actions: Measure;
+  actions: MeasureListDTO;
   hasAssociatedMeasures: boolean;
   cmsId?: string;
   updated: string;
@@ -120,7 +120,7 @@ export default function AddComponentsDialog({
     blankSearchCriteria,
   } = useFilterSearch(() => setPage(0));
 
-  const [measureList, setMeasureList] = useState<Measure[]>([]);
+  const [measureList, setMeasureList] = useState<MeasureListDTO[]>([]);
 
   // Toast state
   const [toast, setToast] = useState({
