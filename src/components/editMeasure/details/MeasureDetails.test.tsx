@@ -46,6 +46,7 @@ const measure = {
     guidance: "test",
     clinicalRecommendation: "clinicalRecommendation",
     limitations: "limitations",
+    trendingIssues: "trendingIssues",
     authoritativeSource: "https://www.test.org",
     draft: true,
     references: [
@@ -602,6 +603,67 @@ describe("MeasureDetails component", () => {
       getByTestId("measure-details-completed-icon-sideNavMeasureLimitation")
     ).toBeInTheDocument();
     expect(screen.getByText("Mock Measure Metadata")).toBeTruthy();
+  });
+
+  it("should render the Trending Issues tab directly below Limitations for a QI Core measure", () => {
+    const { getByTestId } = render(
+      <ApiContextProvider value={serviceConfig}>
+        <MemoryRouter
+          initialEntries={[{ pathname: "/foo/measure-trending-issues" }]}
+        >
+          <Routes>
+            <Route
+              path="/foo/*"
+              element={
+                <MeasureDetails
+                  setErrorMessage={setErrorMessage}
+                  featureFlags={mockUseFeatureFlags()}
+                  isQDM={false}
+                  measureCanEdit={true}
+                  measureLockedBy=""
+                />
+              }
+            />
+          </Routes>
+        </MemoryRouter>
+      </ApiContextProvider>
+    );
+
+    const trendingIssuesTab = getByTestId("leftPanelMeasureTrendingIssues");
+    expect(trendingIssuesTab).toBeInTheDocument();
+    // it must sit directly below Limitations
+    expect(getByTestId("leftPanelMeasureLimitation").nextSibling).toEqual(
+      trendingIssuesTab
+    );
+    expect(
+      getByTestId("measure-details-completed-icon-sideNavMeasureTrendingIssues")
+    ).toBeInTheDocument();
+    expect(screen.getByText("Mock Measure Metadata")).toBeTruthy();
+  });
+
+  it("should not render the Trending Issues tab for a QDM measure", () => {
+    const { queryByTestId } = render(
+      <ApiContextProvider value={serviceConfig}>
+        <MemoryRouter initialEntries={[{ pathname: "/foo" }]}>
+          <Routes>
+            <Route
+              path="/foo/*"
+              element={
+                <MeasureDetails
+                  setErrorMessage={setErrorMessage}
+                  featureFlags={mockUseFeatureFlags()}
+                  isQDM={true}
+                  measureCanEdit={true}
+                  measureLockedBy=""
+                />
+              }
+            />
+          </Routes>
+        </MemoryRouter>
+      </ApiContextProvider>
+    );
+
+    expect(queryByTestId("leftPanelMeasureTrendingIssues")).toBeNull();
   });
 
   it("should not render the Limitations tab for a QDM measure", () => {
