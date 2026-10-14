@@ -125,65 +125,6 @@ describe("TestCaseServiceApi Tests", () => {
     );
   });
 
-  it("should handle successfully saving multiple test cases", async () => {
-    const responseDto = {
-      failed: [],
-      testCases: [
-        {
-          id: "1234",
-          title: "TestCase1",
-          validResource: false,
-        } as TestCase,
-        {
-          id: "2345",
-          title: "TestCase2",
-          validResource: false,
-        } as TestCase,
-      ],
-    };
-
-    axios.post = jest.fn().mockResolvedValueOnce({ data: responseDto });
-
-    const testCases: TestCase[] = [
-      {
-        title: "TestCase1",
-      } as TestCase,
-      {
-        title: "TestCase2",
-      } as TestCase,
-    ];
-
-    const response = await testCaseService.createTestCases("M123", testCases);
-    expect(response).toBeTruthy();
-    expect(response).toEqual(responseDto);
-    expect(response.testCases).toHaveLength(2);
-    expect(response.failed).toHaveLength(0);
-  });
-
-  it("should handle error calling saving multiple test cases", async () => {
-    const axiosError: AxiosError = {
-      response: {
-        status: 404,
-        data: {},
-      } as AxiosResponse,
-      toJSON: jest.fn(),
-    } as unknown as AxiosError;
-
-    const testCases: TestCase[] = [
-      {
-        title: "TestCase1",
-      } as TestCase,
-      {
-        title: "TestCase2",
-      } as TestCase,
-    ];
-
-    axios.post = jest.fn().mockRejectedValueOnce(axiosError);
-    await expect(async () => {
-      await testCaseService.createTestCases("M123", testCases);
-    }).rejects.toThrowError("Unable to create new test cases");
-  });
-
   it("test exportQRDA success", async () => {
     const zippedQRDAData = {
       size: 635581,

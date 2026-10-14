@@ -41,11 +41,6 @@ export interface ShiftDatesResponse {
   shifted: string[];
 }
 
-export interface CreateTestCasesResponse {
-  failed: string[];
-  testCases: TestCase[];
-}
-
 export interface ImportTestCasesResponse {
   outcomes: TestCaseImportOutcome[];
   failed: string[];
@@ -244,26 +239,6 @@ export class TestCaseServiceApi {
     } catch (err) {
       const message = `Unable to validate test case bundle`;
       throw new Error(message);
-    }
-  }
-
-  async createTestCases(
-    measureId: string,
-    testCases: TestCase[]
-  ): Promise<CreateTestCasesResponse> {
-    try {
-      const response = await axios.post<CreateTestCasesResponse>(
-        `${this.baseUrl}/measures/${measureId}/test-cases/list`,
-        testCases,
-        {
-          headers: {
-            Authorization: `Bearer ${this.getAccessToken()}`,
-          },
-        }
-      );
-      return response.data;
-    } catch (err) {
-      throw new Error(`Unable to create new test cases`);
     }
   }
 
