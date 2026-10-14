@@ -119,20 +119,37 @@ describe("Authoritative Source page", () => {
     expect(mockUpdateMeasure).toHaveBeenCalledWith(measure);
   });
 
-  it("should not save and should show 'Must be a URI value' when the value is not a URI", async () => {
+  it("should disable save and show 'Must be a URI value' when the value is not a URI", async () => {
+    renderComponent();
+
+    const input = getByTestId("authoritative-source-input");
+    userEvent.clear(input);
+    userEvent.type(input, "www.test.in");
+    fireEvent.blur(input);
+
+    expect(await screen.findByText("Must be a URI value")).toBeInTheDocument();
+    expect(input).toHaveAttribute("aria-invalid", "true");
+    await waitFor(() =>
+      expect(getByTestId("authoritative-source-save")).toBeDisabled()
+    );
+    expect(mockMeasureServiceApi.updateMeasure).not.toHaveBeenCalled();
+  });
+
+  it("should re-enable save once an invalid value is corrected", async () => {
     renderComponent();
 
     const input = getByTestId("authoritative-source-input");
     userEvent.clear(input);
     userEvent.type(input, "www.test.in");
     await waitFor(() =>
+      expect(getByTestId("authoritative-source-save")).toBeDisabled()
+    );
+
+    userEvent.clear(input);
+    userEvent.type(input, "https://www.test.org");
+    await waitFor(() =>
       expect(getByTestId("authoritative-source-save")).toBeEnabled()
     );
-    userEvent.click(getByTestId("authoritative-source-save"));
-
-    expect(await screen.findByText("Must be a URI value")).toBeInTheDocument();
-    expect(mockMeasureServiceApi.updateMeasure).not.toHaveBeenCalled();
-    expect(input).toHaveAttribute("aria-invalid", "true");
   });
 
   it("should revert to the saved value on discard changes", async () => {

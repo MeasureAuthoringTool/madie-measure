@@ -647,7 +647,6 @@ const useTestCaseServiceMockResolved = {
   getTestCaseSeriesForMeasure: jest
     .fn()
     .mockResolvedValue(["Series 1", "Series 2"]),
-  createTestCases: jest.fn().mockResolvedValue({ failed: [], testCases: [] }),
   shiftQiCoreTestCaseDates: jest.fn().mockResolvedValue({}),
   exportTestCase: jest.fn().mockResolvedValue(
     new Blob([JSON.stringify("exported test data")], {
