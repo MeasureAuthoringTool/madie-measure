@@ -1,5 +1,5 @@
 import React from "react";
-import { MadieAlert } from "@madie/madie-design-system/dist/react";
+import MadieAlert from "../../common/MeasureAlerts";
 import * as _ from "lodash";
 
 export const INITIAL_STATUS_HANDLER = {

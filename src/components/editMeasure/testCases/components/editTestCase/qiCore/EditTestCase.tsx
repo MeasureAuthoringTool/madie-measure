@@ -66,7 +66,6 @@ import CalculationResults from "./calculationResults/CalculationResults";
 import {
   Button,
   TextField,
-  MadieAlert,
   MadieSpinner,
   MadieDiscardDialog,
   Toast,
@@ -98,6 +97,7 @@ import EditorCalculator from "../calculator/EditorCalculator";
 import CalculatorDialog from "../calculator/CalculatorDialog";
 import LockedMessageModal from "../../../../../common/lockedMessageModal/LockedMessageModal";
 import { CustomWarningMessage } from "../../statusHandler/StatusHandler";
+import MadieAlert from "../../../../../common/MeasureAlerts";
 import EditCompositeTestCase from "./EditCompositeTestCase";
 import useServiceConfig from "../../../../../../api/useServiceConfig";
 import { resolveTestCaseExecutionErrorMessage } from "../../../util/TestCaseExecutionErrorUtils";

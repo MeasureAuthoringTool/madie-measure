@@ -1,5 +1,5 @@
 import React from "react";
-import { MadieAlert } from "@madie/madie-design-system/dist/react";
+import MadieAlert from "../../../../common/MeasureAlerts";
 
 import "./StatusHandler.scss";
 import { TestCaseImportOutcome } from "@madie/madie-models";

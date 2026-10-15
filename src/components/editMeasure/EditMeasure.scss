@@ -26,16 +26,25 @@
   }
 }
 
-.review-comments-link {
-  position: absolute;
-  top: 11px;
-  right: 2rem;
-  display: inline-flex;
+.edit-measure-header {
+  display: flex;
+  flex-wrap: wrap;
   align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+  padding-right: 2rem;
 }
 
-body:has(.minimized-alert) .review-comments-link {
-  right: 12.4rem;
-  padding-right: 0.8rem;
-  border-right: #ffffffd1 solid 1px;
+.edit-measure-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+  margin-left: auto;
+  color: #fff;
+
+  .review-comments-link {
+    display: inline-flex;
+    align-items: center;
+  }
 }
