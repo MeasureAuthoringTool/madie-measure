@@ -47,6 +47,9 @@ const CodesComponent = ({
     ]);
   };
 
+  const getConceptLabel = (concept: any) =>
+    concept.display?.trim() || concept.code;
+
   const getAndSetCodeValueFromResource = () => {
     // ["Patient", "extension[2]", "value[x]"]
     const splitLabel = label.split(".");
@@ -182,9 +185,9 @@ const CodesComponent = ({
                         index === self.findIndex((t) => t.code === concept.code)
                     )
                     .sort((a, b) =>
-                      (a.display || "")
+                      getConceptLabel(a)
                         .toLowerCase()
-                        .localeCompare((b.display || "").toLowerCase())
+                        .localeCompare(getConceptLabel(b).toLowerCase())
                     )
                     .map((concept) => (
                       <MenuItem
@@ -192,15 +195,18 @@ const CodesComponent = ({
                         value={concept.code}
                         data-testid={`code-option-${concept.code}`}
                       >
-                        {concept.display}
+                        {getConceptLabel(concept)}
                       </MenuItem>
                     ))
                 : []
             }
             value={value}
-            renderValue={() =>
-              codes?.find((concept) => concept.code === codeValue)?.display
-            }
+            renderValue={() => {
+              const selectedConcept = codes?.find(
+                (concept) => concept.code === codeValue
+              );
+              return selectedConcept ? getConceptLabel(selectedConcept) : "";
+            }}
             onChange={(e) => {
               onChange(e.target.value);
               setCodeValue(e.target.value);
