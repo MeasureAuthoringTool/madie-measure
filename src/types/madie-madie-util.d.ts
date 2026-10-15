@@ -17,7 +17,15 @@ declare module "@madie/madie-util" {
     OwnershipType,
     ReviewStatus,
     MeasureSet,
+    MeasureListDTO,
+    MeasureSearchResult,
+    CqlDiffResultDTO,
+    LockInfo,
+    HtmlDiffResponse,
+    SharedUser,
+    MeasureCounts,
   } from "@madie/madie-models";
+  import { AxiosResponse } from "axios";
   import { Bundle } from "fhir/r4";
 
   export type OktaConfig = {
@@ -152,8 +160,8 @@ declare module "@madie/madie-util" {
       measureSetId: string,
       sortByLatestVersion?: boolean,
       searchCriteria?: MeasureSearchCriteria
-    ): Promise<any>;
-    fetchMeasuresByIds(measureIds: string[]): Promise<any>;
+    ): Promise<MeasureListDTO[] | undefined>;
+    fetchMeasuresByIds(measureIds: string[]): Promise<MeasureListDTO[]>;
     searchMeasuresByCriteria(
       ownershipTypes: OwnershipType[],
       limit: string | number,
@@ -162,7 +170,7 @@ declare module "@madie/madie-util" {
       direction: string,
       searchCriteria: MeasureSearchCriteria,
       abortController: AbortController
-    ): Promise<any>;
+    ): Promise<MeasureSearchResult>;
     searchMeasuresInReview(
       ownershipTypes: OwnershipType[],
       limit: string | number,
@@ -171,43 +179,62 @@ declare module "@madie/madie-util" {
       direction: string,
       searchCriteria?: MeasureSearchCriteria,
       abortController?: AbortController
-    ): Promise<any>;
+    ): Promise<MeasureSearchResult>;
 
-    createVersion(id: string, versionType: string): Promise<any>;
-    checkValidVersion(id: string, versionType: string): Promise<any>;
-    checkNextVersionNumber(id: string, versionType: string): Promise<any>;
+    createVersion(
+      id: string,
+      versionType: string
+    ): Promise<AxiosResponse<Measure>>;
+    checkValidVersion(
+      id: string,
+      versionType: string
+    ): Promise<AxiosResponse<void>>;
+    checkNextVersionNumber(
+      id: string,
+      versionType: string
+    ): Promise<string | undefined>;
     draftMeasure(
       measureId: string,
       model: string,
       measureName: string
-    ): Promise<any>;
+    ): Promise<AxiosResponse<Measure>>;
     associateCmsId(
       qiCoreMeasureId: string,
       qdmMeasureId: string,
       copyMetaData: boolean
     ): Promise<MeasureSet>;
-    deleteMeasure(id: string): Promise<any>;
-    unlockMeasures(): Promise<String>;
-    unlockMeasure(measureId: string): Promise<any>;
-    updateMeasureLock(measureId: string): Promise<any>;
+    deleteMeasure(id: string): Promise<AxiosResponse<Measure>>;
+    unlockMeasures(): Promise<string[]>;
+    unlockMeasure(measureId: string): Promise<LockInfo>;
+    updateMeasureLock(measureId: string): Promise<LockInfo>;
     fetchHumanReadable(id: string): Promise<string>;
-    fetchMeasureDraftStatuses(measureSetIds: string[]): Promise<any>;
-    getCqlDiff(oldMeasureId, newMeasureId): Promise<any>;
-    getRecentMeasuresByMeasureSetId(measureSetIds: string[]): Promise<any>;
-    getSharedMeasures(measureIds: string[]): Promise<any>;
-    shareMeasures(measureUserIdMap: Map<string, string[]>): Promise<any>;
-    unshareMeasures(measureUserIdMap: Map<string, string[]>): Promise<any>;
+    fetchMeasureDraftStatuses(
+      measureSetIds: string[]
+    ): Promise<Record<string, boolean>>;
+    getCqlDiff(oldMeasureId, newMeasureId): Promise<CqlDiffResultDTO>;
+    getRecentMeasuresByMeasureSetId(
+      measureSetIds: string[]
+    ): Promise<Measure[] | undefined>;
+    getSharedMeasures(
+      measureIds: string[]
+    ): Promise<Record<string, SharedUser[]>>;
+    shareMeasures(
+      measureUserIdMap: Map<string, string[]>
+    ): Promise<Record<string, Acl[]>>;
+    unshareMeasures(
+      measureUserIdMap: Map<string, string[]>
+    ): Promise<Record<string, Acl[]>>;
     getSharedAccessReportForMeasures(ids: Array<string>): Promise<Blob>;
     transferMeasures(
       measureIds: Array<string>,
       harpId: string,
       retainShareAccess: boolean
-    ): Promise<any>;
-    updateMeasure(measure: Measure): Promise<Response>;
+    ): Promise<AxiosResponse<string[]>>;
+    updateMeasure(measure: Measure): Promise<AxiosResponse<Measure>>;
     getMeasureHistoryLogs(measureId: string): Promise<MeasureHistoryActions[]>;
-    getMeasureCounts(): Promise<any>;
+    getMeasureCounts(): Promise<MeasureCounts>;
     getAllEndorsers(): Promise<EndorsementOrganization[]>;
-    createCmsId(measureSetId: string): Promise<any>;
+    createCmsId(measureSetId: string): Promise<MeasureSet>;
     getReturnTypesForAllCqlFunctions(elmJson: string): {
       [key: string]: string;
     };
@@ -218,7 +245,7 @@ declare module "@madie/madie-util" {
     updateMeasureTestCaseConfiguration(
       testCaseConfig: TestCaseConfiguration,
       measureId: String
-    ): Promise<Response>;
+    ): Promise<AxiosResponse<Measure>>;
     getAllOrganizations(): Promise<Organization[]>;
     updateGroup(group: Group, measureId: string): Promise<Group>;
     createGroup(group: Group, measureId: string): Promise<Group>;
@@ -228,7 +255,7 @@ declare module "@madie/madie-util" {
       measureId: String,
       abortController: AbortController
     ): Promise<Response>;
-    getHumanReadableDiff(oldMeasureId, newMeasureId): Promise<any>;
+    getHumanReadableDiff(oldMeasureId, newMeasureId): Promise<HtmlDiffResponse>;
   }
 
   export class MeasureReviewServiceApi {

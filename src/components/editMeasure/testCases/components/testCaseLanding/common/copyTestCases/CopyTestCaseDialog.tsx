@@ -32,7 +32,7 @@ import {
   CollapseIcon,
 } from "../../../../../../../icons/MeasureListTableRightArrowIcons";
 import {
-  Measure,
+  MeasureListDTO,
   OwnershipType,
   TestCase,
   ValidationStatus,
@@ -85,7 +85,7 @@ const CopyTestCaseDialog = ({ open, onClose, measure, selectedTestCases }) => {
     id: string;
     measureName: string;
     version: string;
-    actions: Measure;
+    actions: MeasureListDTO;
     hasAssociatedMeasures: boolean;
     cmsId?: string;
   };
@@ -101,7 +101,7 @@ const CopyTestCaseDialog = ({ open, onClose, measure, selectedTestCases }) => {
   };
 
   // measures owned or shared for the current user excluding the current measure
-  const [measureList, setMeasureList] = useState<Measure[]>([]);
+  const [measureList, setMeasureList] = useState<MeasureListDTO[]>([]);
   const [offset, setOffset] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(false);
   const [executing, setExecuting] = useState<boolean>(false);
@@ -282,7 +282,7 @@ const CopyTestCaseDialog = ({ open, onClose, measure, selectedTestCases }) => {
     }
   };
 
-  const columns = useMemo<ColumnDef<Measure>[]>(() => {
+  const columns = useMemo<ColumnDef<MeasureListDTO>[]>(() => {
     setContinueDisabled(_.isEmpty(selectedRowId));
     const columnDefs = [];
     columnDefs.push({
@@ -496,7 +496,7 @@ const CopyTestCaseDialog = ({ open, onClose, measure, selectedTestCases }) => {
     onClose();
   };
 
-  const expandedColumns = useMemo<ColumnDef<Measure>[]>(() => {
+  const expandedColumns = useMemo<ColumnDef<MeasureListDTO>[]>(() => {
     return columns;
   }, [columns]);
 
