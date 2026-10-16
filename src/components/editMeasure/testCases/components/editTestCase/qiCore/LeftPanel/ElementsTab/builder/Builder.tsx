@@ -297,10 +297,10 @@ const Builder = ({
     >
       <div className="panel-content-pane" id="tc-builder-panel-content-pane">
         {/* available elements that we don't want to display when a resource is selected */}
-        {activeTab === "available" &&
-          (resourcesLoading ? (
+        {resourcesLoading &&
+          (activeTab === "available" || activeTab === "added") && (
             <div
-              data-testid="available-profiles-loading"
+              data-testid={`${activeTab}-profiles-loading`}
               style={{
                 display: "flex",
                 justifyContent: "center",
@@ -310,69 +310,66 @@ const Builder = ({
             >
               <MadieSpinner style={{ height: 50, width: 50 }} />
             </div>
-          ) : (
-            canEdit && (
-              <ResourceList
-                profileMap={profileMap}
-                isComposite={isComposite}
-                onInsertTCClick={onInsertTCClick}
-                resourceIdentifiers={resources.filter((resource) =>
-                  isResourceForModel(resource, resourcePaths)
-                )}
-                allResourceIdentifiers={deduplicateAndSortResources(
-                  resourceIdentifiers,
-                  primaryPatientProfileId
-                )}
-                measureId={measure?.id}
-                onClick={async (resourceIdentifier: ResourceIdentifier) => {
-                  const newEntry =
-                    buildMadieResourceFromResourceIdentifier(
-                      resourceIdentifier
-                    );
-                  await fhirDefinitionsService.current
-                    .getResourceTree(resourceIdentifier.id, measure?.model)
-                    .then((resourceTree) => {
-                      const selectedResource = {
-                        ...resourceTree,
-                        bundleEntry: newEntry,
-                      };
+          )}
+        {activeTab === "available" && !resourcesLoading && canEdit && (
+          <ResourceList
+            profileMap={profileMap}
+            isComposite={isComposite}
+            onInsertTCClick={onInsertTCClick}
+            resourceIdentifiers={resources.filter((resource) =>
+              isResourceForModel(resource, resourcePaths)
+            )}
+            allResourceIdentifiers={deduplicateAndSortResources(
+              resourceIdentifiers,
+              primaryPatientProfileId
+            )}
+            measureId={measure?.id}
+            onClick={async (resourceIdentifier: ResourceIdentifier) => {
+              const newEntry =
+                buildMadieResourceFromResourceIdentifier(resourceIdentifier);
+              await fhirDefinitionsService.current
+                .getResourceTree(resourceIdentifier.id, measure?.model)
+                .then((resourceTree) => {
+                  const selectedResource = {
+                    ...resourceTree,
+                    bundleEntry: newEntry,
+                  };
 
-                      const topElements = getTopLevelElements(selectedResource);
-                      const requiredElements = [
-                        ...topElements.filter((e) => e.min > 0),
-                      ];
+                  const topElements = getTopLevelElements(selectedResource);
+                  const requiredElements = [
+                    ...topElements.filter((e) => e.min > 0),
+                  ];
 
-                      requiredElements.forEach((element) => {
-                        if (element.min === 1 && element.max === "1") {
-                          if (element.patternCodeableConcept) {
-                            newEntry.resource[getLastPart(element.path)] =
-                              element.base.max === "*"
-                                ? [element.patternCodeableConcept]
-                                : element.patternCodeableConcept;
-                          } else if (element.fixedCode) {
-                            newEntry.resource[getLastPart(element.path)] =
-                              element.base.max === "*"
-                                ? [element.fixedCode]
-                                : element.fixedCode;
-                          }
-                        }
-                      });
-                    });
-                  dispatch({
-                    type: ResourceActionType.ADD_BUNDLE_ENTRY,
-                    payload: newEntry,
+                  requiredElements.forEach((element) => {
+                    if (element.min === 1 && element.max === "1") {
+                      if (element.patternCodeableConcept) {
+                        newEntry.resource[getLastPart(element.path)] =
+                          element.base.max === "*"
+                            ? [element.patternCodeableConcept]
+                            : element.patternCodeableConcept;
+                      } else if (element.fixedCode) {
+                        newEntry.resource[getLastPart(element.path)] =
+                          element.base.max === "*"
+                            ? [element.fixedCode]
+                            : element.fixedCode;
+                      }
+                    }
                   });
-                  setToastType("success");
-                  setToastMessage(
-                    `${resourceIdentifier.title} has successfully been applied to the test case. To save your changes please click 'Save'.`
-                  );
-                  setToastOpen(true);
-                }}
-                isPatientAdded={isPatientAdded}
-              />
-            )
-          ))}
-        {activeTab === "added" && (
+                });
+              dispatch({
+                type: ResourceActionType.ADD_BUNDLE_ENTRY,
+                payload: newEntry,
+              });
+              setToastType("success");
+              setToastMessage(
+                `${resourceIdentifier.title} has successfully been applied to the test case. To save your changes please click 'Save'.`
+              );
+              setToastOpen(true);
+            }}
+            isPatientAdded={isPatientAdded}
+          />
+        )}
+        {activeTab === "added" && !resourcesLoading && (
           <div style={{ position: "relative", minHeight: "400px" }}>
             {applyLoading && (
               <div
