@@ -290,12 +290,6 @@ jest.mock("@madie/madie-util", () => ({
   useFeatureFlags: jest.fn(() => ({})),
   shouldShowReviewCommentLink: jest.fn(),
   ReviewSubSection: () => <div data-testid="comments-review-subsection" />,
-  CommentSubSection: ({ title, children, ...props }: any) => (
-    <div {...props}>
-      <span>{title}</span>
-      {children}
-    </div>
-  ),
   useUserRoles: jest.fn(() => ({
     roles: [],
     isAdmin: false,

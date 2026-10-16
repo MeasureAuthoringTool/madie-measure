@@ -59,7 +59,16 @@ interface SubSectionDefinition {
   route: string;
   name: string;
   scope?: SectionScope;
+  // a few screens drop out of the nav for composite measures
+  hiddenForComposite?: boolean;
 }
+
+interface MeasureContext {
+  isQdm: boolean;
+  isComposite: boolean;
+}
+
+const isPlaceholder = (route: string) => route.startsWith("__");
 
 /*
   Ordered to match the measure details side nav in MeasureDetails.tsx, which is
@@ -101,6 +110,7 @@ const DETAILS_SUB_SECTIONS: SubSectionDefinition[] = [
   order and is expanded out when the sections are built.
 */
 const CRITERIA_PLACEHOLDER = "__criteria__";
+const POPULATION_CRITERIA_PLACEHOLDER = "__population_criteria__";
 
 const POPULATION_CRITERIA_SUB_SECTIONS: SubSectionDefinition[] = [
   { route: "base-configuration", name: "Base Configuration", scope: "qdm" },
@@ -110,10 +120,17 @@ const POPULATION_CRITERIA_SUB_SECTIONS: SubSectionDefinition[] = [
   { route: "risk-adjustment", name: "Risk Adjustment" },
 ];
 
+/*
+  Ordered to match the test case list side nav: the population criteria tabs,
+  then the configuration screens. SDE and RAV are absent on composites.
+*/
 const TEST_CASE_LIST_SUB_SECTIONS: SubSectionDefinition[] = [
-  { route: "", name: "Test Case List" },
-  { route: "sde", name: "SDE" },
-  { route: "rav", name: "RAV" },
+  {
+    route: POPULATION_CRITERIA_PLACEHOLDER,
+    name: POPULATION_CRITERIA_PLACEHOLDER,
+  },
+  { route: "sde", name: "SDE", hiddenForComposite: true },
+  { route: "rav", name: "RAV", hiddenForComposite: true },
   { route: "expansion", name: "Expansion" },
   { route: "execution-options", name: "Execution Options" },
   { route: "test-case-data", name: "Test Case Data" },
@@ -121,7 +138,7 @@ const TEST_CASE_LIST_SUB_SECTIONS: SubSectionDefinition[] = [
 
 const toNameByRoute = (definitions: SubSectionDefinition[]) =>
   definitions
-    .filter((definition) => definition.route !== CRITERIA_PLACEHOLDER)
+    .filter((definition) => !isPlaceholder(definition.route))
     .reduce<Record<string, string>>((names, definition) => {
       names[definition.route] = definition.name;
       return names;
@@ -138,12 +155,13 @@ const isQdmMeasure = (measure?: CommentMeasure | null) =>
 
 const namesInScope = (
   definitions: SubSectionDefinition[],
-  isQdm: boolean
+  { isQdm, isComposite }: MeasureContext
 ): string[] =>
   definitions
     .filter(
       (definition) =>
-        !definition.scope || definition.scope === (isQdm ? "qdm" : "fhir")
+        (!definition.scope || definition.scope === (isQdm ? "qdm" : "fhir")) &&
+        !(definition.hiddenForComposite && isComposite)
     )
     .map((definition) => definition.name);
 
@@ -151,11 +169,14 @@ const namesInScope = (
   Criteria are numbered by their position in the measure. A measure with no
   groups still shows Criteria 1, matching the population criteria side nav.
 */
-const getCriteriaNames = (measure?: CommentMeasure | null): string[] => {
+const getCriteriaNames = (
+  measure: CommentMeasure | null | undefined,
+  label: string
+): string[] => {
   const groupCount = measure?.groups?.length || 1;
   return Array.from(
     { length: groupCount },
-    (_group, index) => `Criteria ${index + 1}`
+    (_group, index) => `${label} ${index + 1}`
   );
 };
 
@@ -180,13 +201,30 @@ const getGroupNumber = (
 export const getCommentSections = (
   measure?: CommentMeasure | null
 ): CommentSection[] => {
-  const isQdm = isQdmMeasure(measure);
-  const criteriaNames = getCriteriaNames(measure);
+  const context: MeasureContext = {
+    isQdm: isQdmMeasure(measure),
+    isComposite: Boolean(measure?.measureMetaData?.composite),
+  };
+  const criteriaNames = getCriteriaNames(measure, "Criteria");
+  const populationCriteriaNames = getCriteriaNames(
+    measure,
+    "Population Criteria"
+  );
+
+  const expandPlaceholders = (names: string[]) =>
+    names.flatMap((name) => {
+      if (name === CRITERIA_PLACEHOLDER) {
+        return criteriaNames;
+      }
+      return name === POPULATION_CRITERIA_PLACEHOLDER
+        ? populationCriteriaNames
+        : name;
+    });
 
   const sections: CommentSection[] = [
     {
       name: COMMENT_MAIN_SECTIONS.DETAILS,
-      subSections: namesInScope(DETAILS_SUB_SECTIONS, isQdm),
+      subSections: namesInScope(DETAILS_SUB_SECTIONS, context),
     },
     {
       name: COMMENT_MAIN_SECTIONS.CQL_EDITOR,
@@ -194,21 +232,20 @@ export const getCommentSections = (
     },
     {
       name: COMMENT_MAIN_SECTIONS.POPULATION_CRITERIA,
-      subSections: namesInScope(
-        POPULATION_CRITERIA_SUB_SECTIONS,
-        isQdm
-      ).flatMap((name) =>
-        name === CRITERIA_PLACEHOLDER ? criteriaNames : name
+      subSections: expandPlaceholders(
+        namesInScope(POPULATION_CRITERIA_SUB_SECTIONS, context)
       ),
     },
     {
       name: COMMENT_MAIN_SECTIONS.TEST_CASES,
-      subSections: namesInScope(TEST_CASE_LIST_SUB_SECTIONS, isQdm),
+      subSections: expandPlaceholders(
+        namesInScope(TEST_CASE_LIST_SUB_SECTIONS, context)
+      ),
     },
   ];
 
   // composite measures have no CQL Editor tab, so they get no header for it
-  return measure?.measureMetaData?.composite
+  return context.isComposite
     ? sections.filter(
         (section) => section.name !== COMMENT_MAIN_SECTIONS.CQL_EDITOR
       )
@@ -221,7 +258,18 @@ const getTestCasesLocation = (
   measure?: CommentMeasure | null
 ): CommentSectionLocation => {
   if (subsection === "list-page") {
-    const listSectionName = TEST_CASE_LIST_SECTIONS[identifier ?? ""];
+    /*
+      The bare list page redirects to the first group's tab, so it resolves to
+      the same sub-section that redirect lands on.
+    */
+    if (!identifier) {
+      return {
+        mainSection: COMMENT_MAIN_SECTIONS.TEST_CASES,
+        subSectionName: "Population Criteria 1",
+      };
+    }
+
+    const listSectionName = TEST_CASE_LIST_SECTIONS[identifier];
     if (listSectionName) {
       return {
         mainSection: COMMENT_MAIN_SECTIONS.TEST_CASES,

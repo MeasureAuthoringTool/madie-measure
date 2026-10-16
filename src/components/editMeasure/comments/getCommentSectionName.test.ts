@@ -121,12 +121,13 @@ describe("getCommentSectionName", () => {
   });
 
   it("maps list-page labels and fallback states", () => {
+    // the bare list page redirects to the first group's tab
     expect(
       getCommentSectionName(
         "/measures/measure-id/edit/test-cases/list-page",
         measure
       )
-    ).toBe("Test Case List");
+    ).toBe("Population Criteria 1");
 
     expect(
       getCommentSectionName(
@@ -185,7 +186,7 @@ describe("getCommentSectionLocation", () => {
     [
       "test-cases/list-page",
       COMMENT_MAIN_SECTIONS.TEST_CASES,
-      "Test Case List",
+      "Population Criteria 1",
     ],
     [
       "test-cases/list-page/execution-options",
@@ -350,6 +351,50 @@ describe("getCommentSections", () => {
         COMMENT_MAIN_SECTIONS.POPULATION_CRITERIA
       )
     ).toEqual(["Criteria 1", "Supplemental Data", "Risk Adjustment"]);
+  });
+
+  it("lists the test case screens in side nav order", () => {
+    expect(
+      subSectionsOf(
+        getCommentSections(measure),
+        COMMENT_MAIN_SECTIONS.TEST_CASES
+      )
+    ).toEqual([
+      "Population Criteria 1",
+      "Population Criteria 2",
+      "SDE",
+      "RAV",
+      "Expansion",
+      "Execution Options",
+      "Test Case Data",
+    ]);
+  });
+
+  it("no longer lists a Test Case List screen", () => {
+    expect(
+      subSectionsOf(
+        getCommentSections(measure),
+        COMMENT_MAIN_SECTIONS.TEST_CASES
+      )
+    ).not.toContain("Test Case List");
+  });
+
+  it("drops SDE and RAV for composite measures", () => {
+    expect(
+      subSectionsOf(
+        getCommentSections({
+          ...measure,
+          measureMetaData: { composite: true },
+        }),
+        COMMENT_MAIN_SECTIONS.TEST_CASES
+      )
+    ).toEqual([
+      "Population Criteria 1",
+      "Population Criteria 2",
+      "Expansion",
+      "Execution Options",
+      "Test Case Data",
+    ]);
   });
 
   it("drops the CQL Editor header for composite measures", () => {

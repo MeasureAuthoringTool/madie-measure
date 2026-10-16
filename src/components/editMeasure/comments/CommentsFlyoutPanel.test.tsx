@@ -23,34 +23,11 @@ jest.mock("@madie/madie-util", () => ({
     entityType,
     readyForReviewBy,
     readyForReviewAt,
-    expanded,
-    onToggle,
-    highlighted,
   }: any) => (
     <div data-testid="comments-review-subsection">
       <span data-testid="review-entity-type">{entityType}</span>
       <span data-testid="review-ready-by">{readyForReviewBy}</span>
       <span data-testid="review-ready-at">{readyForReviewAt}</span>
-    </div>
-  ),
-  CommentSubSection: ({
-    title,
-    children,
-    expanded,
-    onToggle,
-    highlighted,
-    ...props
-  }: any) => (
-    <div {...props} data-highlighted={String(Boolean(highlighted))}>
-      <button
-        data-testid="comments-subsection-title"
-        onClick={() => onToggle?.(!expanded)}
-      >
-        {title}
-      </button>
-      {expanded ? (
-        <div data-testid="comments-subsection-body">{children}</div>
-      ) : null}
     </div>
   ),
 }));
@@ -64,8 +41,21 @@ const sections = [
     name: "Population Criteria",
     subSections: ["Criteria 1", "Criteria 2", "Supplemental Data"],
   },
-  { name: "Test Cases", subSections: ["Test Case List", "SDE"] },
+  { name: "Test Cases", subSections: ["Population Criteria 1", "SDE"] },
 ];
+
+const titlesIn = (container: Element) =>
+  Array.from(
+    container.querySelectorAll(".comments-flyout-subsection-title")
+  ).map((title) => title.textContent);
+
+const rowFor = (title: string) =>
+  screen
+    .getByText(title, { selector: ".comments-flyout-subsection-title" })
+    .closest(".comments-flyout-subsection");
+
+const isHighlighted = (row: Element) =>
+  row.classList.contains("comments-flyout-subsection--current");
 
 describe("CommentsFlyoutPanel", () => {
   it("renders the sections and keeps actions disabled until text is entered", () => {
@@ -167,7 +157,7 @@ describe("CommentsFlyoutPanel", () => {
     );
   });
 
-  it("lists every sub-section of a header, not only the current one", () => {
+  it("shows only the sub-section for the screen the user is on", () => {
     render(
       <CommentsFlyoutPanel
         sections={sections}
@@ -178,25 +168,54 @@ describe("CommentsFlyoutPanel", () => {
       />
     );
 
+    // the screen they are on is listed
     const populationCriteria = screen
       .getByText("Population Criteria")
       .closest(".comments-flyout-panel-accordion");
-    const titles = Array.from(
-      populationCriteria.querySelectorAll(
-        "[data-testid='comments-subsection-title']"
-      )
-    ).map((title) => title.textContent);
-    expect(titles).toEqual(["Criteria 1", "Criteria 2", "Supplemental Data"]);
+    expect(titlesIn(populationCriteria)).toEqual(["Criteria 1"]);
 
-    // a header the user is not on still lists its screens
+    // its siblings have no comments yet, so they stay hidden
+    expect(screen.queryByText("Criteria 2")).not.toBeInTheDocument();
+    expect(screen.queryByText("Supplemental Data")).not.toBeInTheDocument();
+
+    // and so does every other header
     const details = screen
       .getByText("Details")
       .closest(".comments-flyout-panel-accordion");
-    expect(
-      Array.from(
-        details.querySelectorAll("[data-testid='comments-subsection-title']")
-      ).map((title) => title.textContent)
-    ).toEqual(["Name, Version & ID", "Model & Measurement Period"]);
+    expect(titlesIn(details)).toEqual([]);
+  });
+
+  it("keeps sub-sections that already hold comments, wherever the user is", () => {
+    render(
+      <CommentsFlyoutPanel
+        sections={sections}
+        open
+        onClose={jest.fn()}
+        sectionName="CQL Editor"
+        mainSection="CQL Editor"
+        commentedSubSections={[
+          "Details::Model & Measurement Period",
+          "Population Criteria::Criteria 2",
+        ]}
+      />
+    );
+
+    const details = screen
+      .getByText("Details")
+      .closest(".comments-flyout-panel-accordion");
+    expect(titlesIn(details)).toEqual(["Model & Measurement Period"]);
+
+    const populationCriteria = screen
+      .getByText("Population Criteria")
+      .closest(".comments-flyout-panel-accordion");
+    expect(titlesIn(populationCriteria)).toEqual(["Criteria 2"]);
+
+    // the screen they are on is listed alongside the commented ones
+    expect(screen.getByTestId("comments-current-subsection")).toHaveTextContent(
+      "CQL Editor"
+    );
+    // a commented sub-section keeps its catalogue position
+    expect(screen.queryByText("Name, Version & ID")).not.toBeInTheDocument();
   });
 
   it("lists the screen the user is on even when the header does not cover it", () => {
@@ -205,7 +224,7 @@ describe("CommentsFlyoutPanel", () => {
         sections={sections}
         open
         onClose={jest.fn()}
-        sectionName="Population Criteria 2"
+        sectionName="IPP-Pass - Test Case 65"
         mainSection="Test Cases"
       />
     );
@@ -213,11 +232,7 @@ describe("CommentsFlyoutPanel", () => {
     const testCases = screen
       .getByText("Test Cases")
       .closest(".comments-flyout-panel-accordion");
-    expect(
-      Array.from(
-        testCases.querySelectorAll("[data-testid='comments-subsection-title']")
-      ).map((title) => title.textContent)
-    ).toEqual(["Test Case List", "SDE", "Population Criteria 2"]);
+    expect(titlesIn(testCases)).toEqual(["IPP-Pass - Test Case 65"]);
   });
 
   it("shows a details screen sub-section under the Details header", () => {
@@ -278,28 +293,19 @@ describe("CommentsFlyoutPanel", () => {
         onClose={jest.fn()}
         sectionName="Criteria 1"
         mainSection="Population Criteria"
+        commentedSubSections={["Population Criteria::Supplemental Data"]}
       />
     );
 
-    const rowFor = (title: string) =>
-      screen.getByText(title, { selector: "button" }).closest("div");
-
-    // the screen the user is on starts selected and expanded
-    expect(rowFor("Criteria 1")).toHaveAttribute("data-highlighted", "true");
-    expect(screen.getByTestId("comments-subsection-body")).toBeInTheDocument();
-    expect(rowFor("Supplemental Data")).toHaveAttribute(
-      "data-highlighted",
-      "false"
-    );
+    // the screen the user is on starts selected
+    expect(isHighlighted(rowFor("Criteria 1"))).toBe(true);
+    expect(isHighlighted(rowFor("Supplemental Data"))).toBe(false);
 
     userEvent.click(screen.getByText("Supplemental Data"));
 
     // selection follows the click, and only one row is ever selected
-    expect(rowFor("Supplemental Data")).toHaveAttribute(
-      "data-highlighted",
-      "true"
-    );
-    expect(rowFor("Criteria 1")).toHaveAttribute("data-highlighted", "false");
+    expect(isHighlighted(rowFor("Supplemental Data"))).toBe(true);
+    expect(isHighlighted(rowFor("Criteria 1"))).toBe(false);
   });
 
   it("keeps a sub-section selected after it is collapsed again", () => {
@@ -313,16 +319,9 @@ describe("CommentsFlyoutPanel", () => {
       />
     );
 
-    const criteriaOne = screen
-      .getByText("Criteria 1", { selector: "button" })
-      .closest("div");
-
     // collapsing the selected row must not clear the highlight
     userEvent.click(screen.getByText("Criteria 1"));
-    expect(
-      screen.queryByTestId("comments-subsection-body")
-    ).not.toBeInTheDocument();
-    expect(criteriaOne).toHaveAttribute("data-highlighted", "true");
+    expect(isHighlighted(rowFor("Criteria 1"))).toBe(true);
   });
 
   it("selects a sub-section in a header the user is not on", () => {
@@ -333,19 +332,14 @@ describe("CommentsFlyoutPanel", () => {
         onClose={jest.fn()}
         sectionName="CQL Editor"
         mainSection="CQL Editor"
+        commentedSubSections={["Details::Name, Version & ID"]}
       />
     );
 
     userEvent.click(screen.getByText("Name, Version & ID"));
 
-    expect(
-      screen
-        .getByText("Name, Version & ID", { selector: "button" })
-        .closest("div")
-    ).toHaveAttribute("data-highlighted", "true");
-    expect(
-      screen.getByText("CQL Editor", { selector: "button" }).closest("div")
-    ).toHaveAttribute("data-highlighted", "false");
+    expect(isHighlighted(rowFor("Name, Version & ID"))).toBe(true);
+    expect(isHighlighted(rowFor("CQL Editor"))).toBe(false);
   });
 
   it("collapses and expands the main header on click", () => {
