@@ -1280,6 +1280,70 @@ describe("Measure List component", () => {
     unmount();
   });
 
+  it("should list the composite failures when the server rejects a composite the client check passed", async () => {
+    const compositeErrors = [
+      "Composite measure score is required",
+      "Two component measures must be selected",
+    ];
+    mockCompositeStubs.validateCompositeMeasure.mockResolvedValueOnce([]);
+    mockMeasureServiceApi.fetchMeasure.mockResolvedValueOnce(measures[0]);
+    mockMeasureServiceApi.checkValidVersion = jest.fn().mockRejectedValue({
+      response: {
+        status: 400,
+        data: {
+          message: `User userId cannot version Measure with ID ${
+            measures[0].id
+          }. ${compositeErrors.join(", ")}`,
+        },
+      },
+    });
+
+    const { getByTestId, unmount } = render(
+      <ServiceContext.Provider value={serviceConfig}>
+        <MeasureList
+          measureList={measures}
+          setMeasureList={setMeasureListMock}
+          setTotalPages={setTotalPagesMock}
+          setTotalItems={setTotalItemsMock}
+          setVisibleItems={setVisibleItemsMock}
+          setOffset={setOffsetMock}
+          setLoading={setLoadingMock}
+          activeTab={0}
+          searchCriteria={null}
+          setSearchCriteria={setSearchCriteriaMock}
+          currentLimit={10}
+          currentPage={0}
+          setErrMsg={setErrMsgMock}
+          toastOpen={false}
+          toastMessage=""
+          toastType="danger"
+          setToastOpen={setToastOpenMock}
+          setToastMessage={setToastMessageMock}
+          setToastType={setToastTypeMock}
+          onToastClose={onToastCloseMock}
+          handleToast={handleToastMock}
+        />
+      </ServiceContext.Provider>
+    );
+
+    await openAndSubmitVersionDialog(getByTestId);
+
+    await waitFor(() =>
+      expect(screen.queryByTestId("error-message")).toBeInTheDocument()
+    );
+    expect(
+      screen.queryByText("Unable to version measure.")
+    ).toBeInTheDocument();
+    compositeErrors.forEach((message) => {
+      expect(screen.queryByText(message)).toBeInTheDocument();
+    });
+    expect(setToastMessageMock).not.toHaveBeenCalledWith(
+      "Requested measure cannot be versioned"
+    );
+
+    unmount();
+  });
+
   it("should display success message while creating a version of a measure", async () => {
     const success = {
       response: {
