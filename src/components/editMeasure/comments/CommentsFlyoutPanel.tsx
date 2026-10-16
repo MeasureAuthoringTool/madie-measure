@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Accordion,
   AccordionDetails,
@@ -12,20 +12,29 @@ import {
 import { MessageSquare, X, ChevronRight } from "lucide-react";
 import { Button, RichTextEditor } from "@madie/madie-design-system/dist/react";
 import { ReviewSubSection } from "@madie/madie-util";
+import CommentSubSection from "./CommentSubSection";
+import { CommentSection } from "./getCommentSectionName";
 import "./CommentsFlyoutPanel.scss";
 
-const COMMENT_SECTIONS = [
-  "General",
-  "Details",
-  "CQL Editor",
-  "Population Criteria",
-  "Test Cases",
-];
+/*
+  "General" holds the review activity rather than comments on a screen, so it is
+  the one header that no route resolves to.
+*/
+const GENERAL_SECTION = "General";
 
 interface CommentsFlyoutPanelProps {
   open: boolean;
   onClose: () => void;
+  sections: CommentSection[];
   sectionName: string;
+  mainSection?: string;
+  /*
+    Keys (see subSectionKey) of the sub-sections that already hold comments.
+    Those stay listed wherever the user is; everything else stays hidden until
+    it has something to show. Comments themselves are not wired up yet, so this
+    is empty today and the user only sees the screen they are on.
+  */
+  commentedSubSections?: string[];
   readyForReviewBy?: string;
   readyForReviewAt?: string;
 }
@@ -47,19 +56,57 @@ const getAddCommentLabel = (sectionName: string) => {
   );
 };
 
+/*
+  Sub-section names repeat across headers (Criteria 1 and a test case can share
+  a name), so selection is tracked by header and name together.
+*/
+const subSectionKey = (section: string, subSection: string) =>
+  `${section}::${subSection}`;
+
 const CommentsFlyoutPanel = ({
   open,
   onClose,
+  sections,
   sectionName,
+  mainSection,
+  commentedSubSections = [],
   readyForReviewBy,
   readyForReviewAt,
 }: CommentsFlyoutPanelProps) => {
   const [comment, setComment] = useState("");
+  const [expandedSections, setExpandedSections] = useState<string[]>([]);
+  const [expandedSubSections, setExpandedSubSections] = useState<string[]>([]);
+  const [selectedSubSection, setSelectedSubSection] = useState<string>(null);
+  const currentKey = mainSection
+    ? subSectionKey(mainSection, sectionName)
+    : null;
   const hasComment =
     comment
       .replace(/<[^>]*>/g, "")
       .replace(/&nbsp;/g, " ")
       .trim().length > 0;
+
+  useEffect(() => {
+    setExpandedSections(mainSection ? [mainSection] : []);
+    setExpandedSubSections(currentKey ? [currentKey] : []);
+    setSelectedSubSection(currentKey);
+  }, [mainSection, sectionName, open]);
+
+  const toggleSection = (section: string, expanded: boolean) =>
+    setExpandedSections((sections) =>
+      expanded
+        ? [...sections, section]
+        : sections.filter((expandedSection) => expandedSection !== section)
+    );
+
+  const toggleSubSection = (key: string, expanded: boolean) => {
+    setSelectedSubSection(key);
+    setExpandedSubSections((keys) =>
+      expanded
+        ? [...keys, key]
+        : keys.filter((expandedKey) => expandedKey !== key)
+    );
+  };
 
   const handleClose = () => {
     setComment("");
@@ -95,40 +142,94 @@ const CommentsFlyoutPanel = ({
         </Box>
 
         <Box className="comments-flyout-panel-sections">
-          {COMMENT_SECTIONS.map((section) => (
-            <Accordion
-              key={section}
-              disableGutters
-              elevation={0}
-              className="comments-flyout-panel-accordion"
+          <Accordion
+            disableGutters
+            elevation={0}
+            expanded={expandedSections.includes(GENERAL_SECTION)}
+            onChange={(event, expanded) =>
+              toggleSection(GENERAL_SECTION, expanded)
+            }
+            className="comments-flyout-panel-accordion"
+          >
+            <AccordionSummary
+              expandIcon={<ChevronRight />}
+              className="comments-flyout-panel-accordion-summary"
             >
-              <AccordionSummary
-                expandIcon={<ChevronRight />}
-                className="comments-flyout-panel-accordion-summary"
-              >
-                <Typography className="comments-flyout-panel-section-title">
-                  {section}
-                </Typography>
-              </AccordionSummary>
-              <AccordionDetails
-                className={
-                  section === "General"
-                    ? "comments-flyout-panel-general-details"
-                    : undefined
+              <Typography className="comments-flyout-panel-section-title">
+                {GENERAL_SECTION}
+              </Typography>
+            </AccordionSummary>
+            <AccordionDetails className="comments-flyout-panel-section-details">
+              {/* Review stands on its own: it is not part of the selection */}
+              <ReviewSubSection
+                entityType="measure"
+                readyForReviewBy={readyForReviewBy}
+                readyForReviewAt={readyForReviewAt}
+              />
+            </AccordionDetails>
+          </Accordion>
+
+          {sections.map((section) => {
+            const isCurrentSection = section.name === mainSection;
+            /*
+              A sub-section earns its place by holding comments or by being the
+              screen the user is on. The screen they are on is listed even when
+              it is not one of the section's own sub-sections (an individual
+              test case, say), so their comment always has a visible home.
+            */
+            const subSections = section.subSections.filter(
+              (subSection) =>
+                commentedSubSections.includes(
+                  subSectionKey(section.name, subSection)
+                ) ||
+                (isCurrentSection && subSection === sectionName)
+            );
+            if (isCurrentSection && !subSections.includes(sectionName)) {
+              subSections.push(sectionName);
+            }
+
+            return (
+              <Accordion
+                key={section.name}
+                disableGutters
+                elevation={0}
+                expanded={expandedSections.includes(section.name)}
+                onChange={(event, expanded) =>
+                  toggleSection(section.name, expanded)
                 }
+                className="comments-flyout-panel-accordion"
               >
-                {section === "General" ? (
-                  <ReviewSubSection
-                    entityType="measure"
-                    readyForReviewBy={readyForReviewBy}
-                    readyForReviewAt={readyForReviewAt}
-                  />
-                ) : (
-                  <div>-</div>
-                )}
-              </AccordionDetails>
-            </Accordion>
-          ))}
+                <AccordionSummary
+                  expandIcon={<ChevronRight />}
+                  className="comments-flyout-panel-accordion-summary"
+                >
+                  <Typography className="comments-flyout-panel-section-title">
+                    {section.name}
+                  </Typography>
+                </AccordionSummary>
+                <AccordionDetails className="comments-flyout-panel-section-details">
+                  {subSections.map((subSection) => {
+                    const key = subSectionKey(section.name, subSection);
+
+                    return (
+                      <CommentSubSection
+                        key={key}
+                        title={subSection}
+                        highlighted={selectedSubSection === key}
+                        expanded={expandedSubSections.includes(key)}
+                        onToggle={(expanded) => toggleSubSection(key, expanded)}
+                        data-testid={
+                          key === currentKey
+                            ? "comments-current-subsection"
+                            : undefined
+                        }
+                      />
+                    );
+                  })}
+                </AccordionDetails>
+              </Accordion>
+            );
+          })}
         </Box>
 
         <Box className="comments-flyout-panel-composer">
