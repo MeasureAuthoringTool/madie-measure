@@ -31,6 +31,9 @@ export default function getInitialValues(measure: Measure, typeLower: string) {
     case "limitations":
       const limitations = measure?.measureMetaData?.limitations;
       return !!limitations ? limitations : "";
+    case "trending-issues":
+      const trendingIssues = measure?.measureMetaData?.trendingIssues;
+      return !!trendingIssues ? trendingIssues : "";
     case "definition":
       const definition = measure?.measureMetaData?.definition;
       return !!definition ? definition : "";
@@ -71,6 +74,9 @@ export const setMeasureMetadata = (
       break;
     case "limitations":
       measure.measureMetaData.limitations = newValue;
+      break;
+    case "trending-issues":
+      measure.measureMetaData.trendingIssues = newValue;
       break;
     case "definition":
       measure.measureMetaData.definition = newValue;

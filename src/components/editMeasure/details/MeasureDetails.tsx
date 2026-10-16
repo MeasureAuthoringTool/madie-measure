@@ -72,6 +72,7 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
   const clinicalLink = "measure-clinical-recommendation";
   const definitionLink = "measure-definition";
   const limitationsLink = "measure-limitations";
+  const trendingIssuesLink = "measure-trending-issues";
   const authoritativeSourceLink = "measure-authoritative-source";
   const referencesLink = "measure-references";
   const transmissionFormat = "transmission-format";
@@ -287,6 +288,13 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
       id: "sideNavMeasureLimitation",
       displayCompletedIcon: !!measure?.measureMetaData.limitations,
     });
+    links[1].links.push({
+      title: "Trending Issues",
+      href: trendingIssuesLink,
+      dataTestId: "leftPanelMeasureTrendingIssues",
+      id: "sideNavMeasureTrendingIssues",
+      displayCompletedIcon: !!measure?.measureMetaData.trendingIssues,
+    });
   }
   useEffect(() => {
     setErrorMessage("");
@@ -481,6 +489,20 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
                   measureMetadataId="Limitation"
                   measureMetadataType="Limitations"
                   header="Limitations"
+                  setErrorMessage={setErrorMessage}
+                  measureCanEdit={measureCanEdit && !measureLockedBy}
+                />
+              }
+            />
+          )}
+          {!isQDM && (
+            <Route
+              path={trendingIssuesLink}
+              element={
+                <MeasureMetadata
+                  measureMetadataId="TrendingIssues"
+                  measureMetadataType="Trending Issues"
+                  header="Trending Issues"
                   setErrorMessage={setErrorMessage}
                   measureCanEdit={measureCanEdit && !measureLockedBy}
                 />
