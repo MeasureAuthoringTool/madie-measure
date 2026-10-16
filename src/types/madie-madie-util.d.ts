@@ -374,6 +374,18 @@ declare module "@madie/madie-util" {
     entityType: "measure" | "library";
     readyForReviewBy?: string;
     readyForReviewAt?: string;
+    expanded?: boolean;
+    onToggle?: (expanded: boolean) => void;
+    highlighted?: boolean;
+  }): React.ReactElement;
+  export function CommentSubSection(props: {
+    title: string;
+    children?: React.ReactNode;
+    defaultExpanded?: boolean;
+    expanded?: boolean;
+    onToggle?: (expanded: boolean) => void;
+    highlighted?: boolean;
+    "data-testid"?: string;
   }): React.ReactElement;
   export const REVIEW_STATUS_OPTIONS: string[];
   export function getNewestMeasureInstance(measures: Measure[]): Measure;

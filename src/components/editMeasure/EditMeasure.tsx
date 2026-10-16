@@ -60,7 +60,10 @@ import { AxiosResponse } from "axios";
 import ReviewDialog from "../common/reviewDialog/ReviewDialog";
 import StatusHandler, { INITIAL_STATUS_HANDLER } from "./editor/StatusHandler";
 import CommentsFlyoutPanel from "./comments/CommentsFlyoutPanel";
-import { getCommentSectionName } from "./comments/getCommentSectionName";
+import {
+  getCommentSectionLocation,
+  getCommentSections,
+} from "./comments/getCommentSectionName";
 
 const OBJECT_ID_REGEX = /\/[a-f0-9]{24}/g;
 
@@ -746,7 +749,8 @@ export default function EditMeasure() {
     hasReviewerRole: Boolean(userRoles?.isReviewer),
     assignedReviewers: measureReview?.reviewers,
   });
-  const commentSectionName = getCommentSectionName(location.pathname, measure);
+  const commentSection = getCommentSectionLocation(location.pathname, measure);
+  const commentSections = getCommentSections(measure);
 
   return (
     <div data-testid="editMeasure">
@@ -990,7 +994,9 @@ export default function EditMeasure() {
           <CommentsFlyoutPanel
             open={commentsPanelOpen}
             onClose={() => setCommentsPanelOpen(false)}
-            sectionName={commentSectionName}
+            sections={commentSections}
+            sectionName={commentSection.subSectionName}
+            mainSection={commentSection.mainSection}
             readyForReviewBy={measureReview?.readyForReviewBy}
             readyForReviewAt={measureReview?.readyForReviewAt}
           />

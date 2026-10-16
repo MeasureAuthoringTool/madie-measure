@@ -23,6 +23,9 @@ jest.mock("@madie/madie-util", () => ({
     entityType,
     readyForReviewBy,
     readyForReviewAt,
+    expanded,
+    onToggle,
+    highlighted,
   }: any) => (
     <div data-testid="comments-review-subsection">
       <span data-testid="review-entity-type">{entityType}</span>
@@ -30,11 +33,49 @@ jest.mock("@madie/madie-util", () => ({
       <span data-testid="review-ready-at">{readyForReviewAt}</span>
     </div>
   ),
+  CommentSubSection: ({
+    title,
+    children,
+    expanded,
+    onToggle,
+    highlighted,
+    ...props
+  }: any) => (
+    <div {...props} data-highlighted={String(Boolean(highlighted))}>
+      <button
+        data-testid="comments-subsection-title"
+        onClick={() => onToggle?.(!expanded)}
+      >
+        {title}
+      </button>
+      {expanded ? (
+        <div data-testid="comments-subsection-body">{children}</div>
+      ) : null}
+    </div>
+  ),
 }));
+const sections = [
+  {
+    name: "Details",
+    subSections: ["Name, Version & ID", "Model & Measurement Period"],
+  },
+  { name: "CQL Editor", subSections: ["CQL Editor"] },
+  {
+    name: "Population Criteria",
+    subSections: ["Criteria 1", "Criteria 2", "Supplemental Data"],
+  },
+  { name: "Test Cases", subSections: ["Test Case List", "SDE"] },
+];
+
 describe("CommentsFlyoutPanel", () => {
   it("renders the sections and keeps actions disabled until text is entered", () => {
     render(
-      <CommentsFlyoutPanel open onClose={jest.fn()} sectionName="CQL Editor" />
+      <CommentsFlyoutPanel
+        sections={sections}
+        open
+        onClose={jest.fn()}
+        sectionName="CQL Editor"
+      />
     );
     expect(
       screen.getByRole("dialog", { name: "Comments" })
@@ -56,7 +97,12 @@ describe("CommentsFlyoutPanel", () => {
   it("clears the draft on cancel and closes from the close button", () => {
     const onClose = jest.fn();
     render(
-      <CommentsFlyoutPanel open onClose={onClose} sectionName="Description" />
+      <CommentsFlyoutPanel
+        sections={sections}
+        open
+        onClose={onClose}
+        sectionName="Description"
+      />
     );
     const input = screen.getByTestId("comments-flyout-input");
     userEvent.type(input, "<p>Looks good!</p>");
@@ -67,7 +113,12 @@ describe("CommentsFlyoutPanel", () => {
   });
   it("shows the full label without truncation when it is within the max length", () => {
     render(
-      <CommentsFlyoutPanel open onClose={jest.fn()} sectionName="Details" />
+      <CommentsFlyoutPanel
+        sections={sections}
+        open
+        onClose={jest.fn()}
+        sectionName="Details"
+      />
     );
     const label = screen.getByTestId("comments-flyout-label");
     expect(label).toHaveTextContent("Add a comment to Details");
@@ -81,6 +132,7 @@ describe("CommentsFlyoutPanel", () => {
     const fullLabel = `Add a comment to ${longSectionName}`;
     render(
       <CommentsFlyoutPanel
+        sections={sections}
         open
         onClose={jest.fn()}
         sectionName={longSectionName}
@@ -100,7 +152,12 @@ describe("CommentsFlyoutPanel", () => {
 
   it("renders the Review sub-section under General", () => {
     render(
-      <CommentsFlyoutPanel open onClose={jest.fn()} sectionName="Details" />
+      <CommentsFlyoutPanel
+        sections={sections}
+        open
+        onClose={jest.fn()}
+        sectionName="Details"
+      />
     );
     expect(
       screen.getByTestId("comments-review-subsection")
@@ -110,9 +167,230 @@ describe("CommentsFlyoutPanel", () => {
     );
   });
 
+  it("lists every sub-section of a header, not only the current one", () => {
+    render(
+      <CommentsFlyoutPanel
+        sections={sections}
+        open
+        onClose={jest.fn()}
+        sectionName="Criteria 1"
+        mainSection="Population Criteria"
+      />
+    );
+
+    const populationCriteria = screen
+      .getByText("Population Criteria")
+      .closest(".comments-flyout-panel-accordion");
+    const titles = Array.from(
+      populationCriteria.querySelectorAll(
+        "[data-testid='comments-subsection-title']"
+      )
+    ).map((title) => title.textContent);
+    expect(titles).toEqual(["Criteria 1", "Criteria 2", "Supplemental Data"]);
+
+    // a header the user is not on still lists its screens
+    const details = screen
+      .getByText("Details")
+      .closest(".comments-flyout-panel-accordion");
+    expect(
+      Array.from(
+        details.querySelectorAll("[data-testid='comments-subsection-title']")
+      ).map((title) => title.textContent)
+    ).toEqual(["Name, Version & ID", "Model & Measurement Period"]);
+  });
+
+  it("lists the screen the user is on even when the header does not cover it", () => {
+    render(
+      <CommentsFlyoutPanel
+        sections={sections}
+        open
+        onClose={jest.fn()}
+        sectionName="Population Criteria 2"
+        mainSection="Test Cases"
+      />
+    );
+
+    const testCases = screen
+      .getByText("Test Cases")
+      .closest(".comments-flyout-panel-accordion");
+    expect(
+      Array.from(
+        testCases.querySelectorAll("[data-testid='comments-subsection-title']")
+      ).map((title) => title.textContent)
+    ).toEqual(["Test Case List", "SDE", "Population Criteria 2"]);
+  });
+
+  it("shows a details screen sub-section under the Details header", () => {
+    render(
+      <CommentsFlyoutPanel
+        sections={sections}
+        open
+        onClose={jest.fn()}
+        sectionName="Model & Measurement Period"
+        mainSection="Details"
+      />
+    );
+
+    const subSection = screen.getByTestId("comments-current-subsection");
+    expect(subSection).toHaveTextContent("Model & Measurement Period");
+    expect(
+      screen.getByText("Details").closest(".comments-flyout-panel-accordion")
+    ).toContainElement(subSection);
+    // the review activity keeps its own header
+    expect(
+      screen.getByText("General").closest(".comments-flyout-panel-accordion")
+    ).toContainElement(screen.getByTestId("comments-review-subsection"));
+  });
+
+  it("shows the current sub-section under its main header, expanded", () => {
+    render(
+      <CommentsFlyoutPanel
+        sections={sections}
+        open
+        onClose={jest.fn()}
+        sectionName="Criteria 2"
+        mainSection="Population Criteria"
+      />
+    );
+
+    const subSection = screen.getByTestId("comments-current-subsection");
+    expect(subSection).toHaveTextContent("Criteria 2");
+    // it sits under the main header for the screen the user is on
+    expect(
+      screen
+        .getByText("Population Criteria")
+        .closest(".comments-flyout-panel-accordion")
+    ).toContainElement(subSection);
+    // and that header is the one expanded by default
+    expect(
+      screen.getByText("Population Criteria").closest(".MuiAccordion-root")
+    ).toHaveClass("Mui-expanded");
+    expect(
+      screen.getByText("Test Cases").closest(".MuiAccordion-root")
+    ).not.toHaveClass("Mui-expanded");
+  });
+
+  it("moves the blue highlight to whichever sub-section is clicked", () => {
+    render(
+      <CommentsFlyoutPanel
+        sections={sections}
+        open
+        onClose={jest.fn()}
+        sectionName="Criteria 1"
+        mainSection="Population Criteria"
+      />
+    );
+
+    const rowFor = (title: string) =>
+      screen.getByText(title, { selector: "button" }).closest("div");
+
+    // the screen the user is on starts selected and expanded
+    expect(rowFor("Criteria 1")).toHaveAttribute("data-highlighted", "true");
+    expect(screen.getByTestId("comments-subsection-body")).toBeInTheDocument();
+    expect(rowFor("Supplemental Data")).toHaveAttribute(
+      "data-highlighted",
+      "false"
+    );
+
+    userEvent.click(screen.getByText("Supplemental Data"));
+
+    // selection follows the click, and only one row is ever selected
+    expect(rowFor("Supplemental Data")).toHaveAttribute(
+      "data-highlighted",
+      "true"
+    );
+    expect(rowFor("Criteria 1")).toHaveAttribute("data-highlighted", "false");
+  });
+
+  it("keeps a sub-section selected after it is collapsed again", () => {
+    render(
+      <CommentsFlyoutPanel
+        sections={sections}
+        open
+        onClose={jest.fn()}
+        sectionName="Criteria 1"
+        mainSection="Population Criteria"
+      />
+    );
+
+    const criteriaOne = screen
+      .getByText("Criteria 1", { selector: "button" })
+      .closest("div");
+
+    // collapsing the selected row must not clear the highlight
+    userEvent.click(screen.getByText("Criteria 1"));
+    expect(
+      screen.queryByTestId("comments-subsection-body")
+    ).not.toBeInTheDocument();
+    expect(criteriaOne).toHaveAttribute("data-highlighted", "true");
+  });
+
+  it("selects a sub-section in a header the user is not on", () => {
+    render(
+      <CommentsFlyoutPanel
+        sections={sections}
+        open
+        onClose={jest.fn()}
+        sectionName="CQL Editor"
+        mainSection="CQL Editor"
+      />
+    );
+
+    userEvent.click(screen.getByText("Name, Version & ID"));
+
+    expect(
+      screen
+        .getByText("Name, Version & ID", { selector: "button" })
+        .closest("div")
+    ).toHaveAttribute("data-highlighted", "true");
+    expect(
+      screen.getByText("CQL Editor", { selector: "button" }).closest("div")
+    ).toHaveAttribute("data-highlighted", "false");
+  });
+
+  it("collapses and expands the main header on click", () => {
+    render(
+      <CommentsFlyoutPanel
+        sections={sections}
+        open
+        onClose={jest.fn()}
+        sectionName="CQL Editor"
+        mainSection="CQL Editor"
+      />
+    );
+
+    const header = screen.getByText("CQL Editor", {
+      selector: ".comments-flyout-panel-section-title",
+    });
+    const accordion = header.closest(".MuiAccordion-root");
+    expect(accordion).toHaveClass("Mui-expanded");
+
+    userEvent.click(header);
+    expect(accordion).not.toHaveClass("Mui-expanded");
+
+    userEvent.click(header);
+    expect(accordion).toHaveClass("Mui-expanded");
+  });
+
+  it("renders no current sub-section for a route that cannot be commented on", () => {
+    render(
+      <CommentsFlyoutPanel
+        sections={sections}
+        open
+        onClose={jest.fn()}
+        sectionName="Current section"
+      />
+    );
+
+    expect(
+      screen.queryByTestId("comments-current-subsection")
+    ).not.toBeInTheDocument();
+  });
+
   it("passes the ready for review details through to the sub-section", () => {
     render(
       <CommentsFlyoutPanel
+        sections={sections}
         open
         onClose={jest.fn()}
         sectionName="Details"
