@@ -32,6 +32,7 @@ import {
   validateCompositeMeasure,
   ManageReviewDialog,
   shouldShowReviewCommentLink,
+  CommentsFlyoutPanel,
   ReviewCommentLink,
 } from "@madie/madie-util";
 import CreateVersionDialog from "../common/createVersionDialog/CreateVersionDialog";
@@ -59,7 +60,6 @@ import TestCases from "./testCases/TestCases";
 import { AxiosResponse } from "axios";
 import ReviewDialog from "../common/reviewDialog/ReviewDialog";
 import StatusHandler, { INITIAL_STATUS_HANDLER } from "./editor/StatusHandler";
-import CommentsFlyoutPanel from "./comments/CommentsFlyoutPanel";
 import {
   getCommentSectionLocation,
   getCommentSections,
@@ -994,6 +994,7 @@ export default function EditMeasure() {
           <CommentsFlyoutPanel
             open={commentsPanelOpen}
             onClose={() => setCommentsPanelOpen(false)}
+            entityType="measure"
             sections={commentSections}
             sectionName={commentSection.subSectionName}
             mainSection={commentSection.mainSection}
