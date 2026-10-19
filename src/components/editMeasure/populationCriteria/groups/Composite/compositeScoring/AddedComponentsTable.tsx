@@ -181,6 +181,16 @@ export default function AddedComponentsTable({
             <span
               role="button"
               tabIndex={0}
+              aria-label={`${
+                isGroupRowExpanded &&
+                selectedGroupForExpansion === info.row.original.id
+                  ? "Collapse"
+                  : "Expand"
+              } ${info.row.original.measureName}`}
+              aria-expanded={
+                isGroupRowExpanded &&
+                selectedGroupForExpansion === info.row.original.id
+              }
               onClick={() => {
                 handleGroupRowClick(info.row.original);
               }}
@@ -227,6 +237,7 @@ export default function AddedComponentsTable({
           >
             <IconButton
               size="small"
+              aria-label={`Delete component measure ${info.row.original.measureName}`}
               onClick={() => setComponentToDelete(info.row.original)}
               data-testid={`delete-component-${info.row.original.id}`}
             >
@@ -351,6 +362,7 @@ export default function AddedComponentsTable({
                 groupCount <= 1 ||
                 (checked && includedGroupCount <= 1)
               }
+              aria-label={`Include ${info.row.original.displayId}`}
               onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
                 if (measureId) {
                   onToggleGroup(
@@ -477,7 +489,10 @@ export default function AddedComponentsTable({
 
                   {selectedGroupForExpansion === row.original.id && (
                     <tr data-testid={`expanded-group-row`}>
-                      <td colSpan={columns.length}>
+                      <td
+                        colSpan={columns.length}
+                        aria-label={`Expanded details for ${row.original.measureName}`}
+                      >
                         <div
                           style={{
                             paddingLeft: "40px",

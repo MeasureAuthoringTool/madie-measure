@@ -378,20 +378,24 @@ const MeasureDefinitions = (props: MeasureDefinitionsProps) => {
                         <InputAdornment
                           position="start"
                           data-testid="measure-definition-search"
-                          onClick={handleSearch}
-                          style={{ cursor: "pointer" }}
                         >
-                          <SearchIcon />
+                          <IconButton
+                            aria-label="Search definitions"
+                            onClick={handleSearch}
+                          >
+                            <SearchIcon />
+                          </IconButton>
                         </InputAdornment>
                       ),
                       endAdornment: (
                         <InputAdornment
                           data-testid="measure-definition-clear-search"
                           position="end"
-                          style={{ cursor: "pointer" }}
-                          onClick={handleClearSearch}
                         >
-                          <IconButton>
+                          <IconButton
+                            aria-label="Clear definition search"
+                            onClick={handleClearSearch}
+                          >
                             <ClearIcon />
                           </IconButton>
                         </InputAdornment>
@@ -415,6 +419,7 @@ const MeasureDefinitions = (props: MeasureDefinitionsProps) => {
                     variant="outline-filled"
                     className="page-header-action-button"
                     data-testid="create-definition-button"
+                    aria-label="Add Term"
                     onClick={toggleOpen}
                     sx={{
                       display: "flex",
@@ -440,7 +445,11 @@ const MeasureDefinitions = (props: MeasureDefinitionsProps) => {
                 <th scope="col" className="col-header">
                   Definition
                 </th>
-                <th scope="col" className="col-header"></th>
+                <th
+                  scope="col"
+                  className="col-header"
+                  aria-label="Actions"
+                ></th>
               </tr>
             </thead>
             <tbody data-testId="measure-definitions-table-body">

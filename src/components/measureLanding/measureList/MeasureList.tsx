@@ -105,6 +105,7 @@ const MeasureStatusChips = ({ measure }) => {
   return (
     <div
       style={{ display: "inline-flex", gap: 4, flexWrap: "wrap" }}
+      role="group"
       aria-label="Measure status"
     >
       {measure.measureMetaData?.draft && (
@@ -112,6 +113,7 @@ const MeasureStatusChips = ({ measure }) => {
           className="chip-draft"
           label="Draft"
           role="status"
+          tabIndex={0}
           aria-label="Draft"
         />
       )}
@@ -120,6 +122,7 @@ const MeasureStatusChips = ({ measure }) => {
           className="chip-composite"
           label="Composite"
           role="status"
+          tabIndex={0}
           aria-label="Composite"
         />
       )}
@@ -128,6 +131,7 @@ const MeasureStatusChips = ({ measure }) => {
           className="chip-in-composite"
           role="status"
           aria-label={`In Composite: ${COMPONENT_MEASURE_MSG}`} // for 508
+          tabIndex={0}
           label={
             <span
               style={{
@@ -142,7 +146,7 @@ const MeasureStatusChips = ({ measure }) => {
                   sx={{ fontSize: 16 }}
                   aria-label={`${COMPONENT_MEASURE_MSG}`}
                   role="img"
-                  tabIndex={0}
+                  tabIndex={-1}
                   focusable="true"
                 />
               </Tooltip>
@@ -294,6 +298,7 @@ export default function MeasureList(props: {
   const [isRowExpanded, setIsRowExpanded] = useState<boolean>(false);
   const [selectedExpandedMeasuresIds, setSelectedExpandedMeasuresIds] =
     useState([]);
+  const measureListTableContainerRef = useRef<HTMLDivElement>(null);
   const [transferDialog, setTransferDialog] = useState({
     open: false,
     measures: [],
@@ -542,7 +547,22 @@ export default function MeasureList(props: {
     ...(showReviewStatus
       ? [
           {
-            header: "Review",
+            header: () => (
+              <button
+                type="button"
+                tabIndex={0}
+                style={{
+                  padding: 0,
+                  border: 0,
+                  background: "transparent",
+                  color: "inherit",
+                  font: "inherit",
+                  textAlign: "inherit",
+                }}
+              >
+                Review
+              </button>
+            ),
             accessorKey: "reviewStatus",
             enableSorting: false,
             cell: (info) => {
@@ -680,7 +700,7 @@ export default function MeasureList(props: {
               indeterminate={table.getIsSomePageRowsSelected()}
               onChange={table.getToggleAllPageRowsSelectedHandler()}
               id={`select-all-checkbox`}
-              aria-label="Select All Measures"
+              aria-label="Select all measures on this page"
             />
           </div>
         </Tooltip>
@@ -730,6 +750,7 @@ export default function MeasureList(props: {
                   indeterminate: row.getIsSomeSelected(),
                   onChange: row.getToggleSelectedHandler(),
                   id: row.original.id,
+                  "aria-label": `Select measure ${row.original.measureName}`,
                 }}
               />
             </div>
@@ -740,39 +761,37 @@ export default function MeasureList(props: {
     ];
 
     t.push({
-      header: () => <span aria-label="expandArrow"></span>,
+      header: () => <span aria-hidden="true"></span>,
       cell: (info) => {
         if (info.row.original?.hasAssociatedMeasures) {
-          const handleKeyDown = (e) => {
-            if (e.key === "Enter" || e.key === " ") {
-              setSelectedExpandedMeasuresIds([]);
-              handleRowClick(info.row.original.actions);
-            }
-          };
+          const isExpanded =
+            isRowExpanded &&
+            selectedIdForExpansion === info.row.original.actions?.measureSetId;
           return (
-            <span
-              role="button"
-              tabIndex={0}
+            <button
+              type="button"
+              aria-label={`${
+                isExpanded ? "Collapse" : "Expand"
+              } associated measures for ${info.row.original.measureName}`}
+              aria-expanded={isExpanded}
               onClick={() => {
                 setSelectedExpandedMeasuresIds([]);
                 handleRowClick(info.row.original.actions);
               }}
-              onKeyDown={handleKeyDown}
               style={{
                 cursor: "pointer",
                 display: "inline-flex",
                 alignItems: "center",
                 justifyContent: "center",
+                padding: 0,
+                border: 0,
+                background: "transparent",
+                color: "inherit",
+                font: "inherit",
               }}
             >
-              {isRowExpanded &&
-              selectedIdForExpansion ===
-                info.row.original.actions?.measureSetId ? (
-                <CollapseIcon />
-              ) : (
-                <ExpandIcon />
-              )}
-            </span>
+              {isExpanded ? <CollapseIcon /> : <ExpandIcon />}
+            </button>
           );
         } else {
           return <></>;
@@ -803,6 +822,7 @@ export default function MeasureList(props: {
           return (
             <input
               type="checkbox"
+              aria-label={`Select measure ${info.row.original.measureName}`}
               checked={isChecked}
               onChange={(event) => {
                 const checked = event.target.checked;
@@ -1005,6 +1025,29 @@ export default function MeasureList(props: {
       measureId: "",
     });
   };
+
+  useEffect(() => {
+    const container = measureListTableContainerRef.current;
+    if (!container) {
+      return;
+    }
+
+    const makeBodyCellsTabbable = () => {
+      container
+        .querySelectorAll<HTMLTableCellElement>(
+          "#measureListTable tbody td:not([aria-hidden='true'])"
+        )
+        .forEach((cell) => {
+          cell.tabIndex = 0;
+        });
+    };
+
+    makeBodyCellsTabbable();
+    const observer = new MutationObserver(makeBodyCellsTabbable);
+    observer.observe(container, { childList: true, subtree: true });
+
+    return () => observer.disconnect();
+  }, []);
 
   const updateTargetMeasure = (newValue) => {
     targetMeasure.current = newValue;
@@ -1341,33 +1384,35 @@ export default function MeasureList(props: {
           />
         </div>
       </div>
-      <MadieTable
-        table={table}
-        currentSort={props.currentSort}
-        currentDirection={props.currentDirection}
-        handleSort={handleSort}
-        id="measureListTable"
-        dataTestId="measure-list-tbl"
-        renderExpandedRow={(row) =>
-          selectedIdForExpansion === row.original.actions?.measureSetId &&
-          expandedSectionData?.map((subRow) => (
-            <tr key={subRow.id} className="expanded-row">
-              {expandedcolumns.map((column: any) =>
-                column?.accessorKey === "expandArrow" ? (
-                  <td key={`${subRow.id}-expand`}></td>
-                ) : (
-                  <td key={column?.accessorKey || column.id}>
-                    {flexRender(column.cell ?? column.accessorKey, {
-                      row: { original: subRow },
-                      getValue: () => subRow[column.accessorKey],
-                    })}
-                  </td>
-                )
-              )}
-            </tr>
-          ))
-        }
-      />
+      <div ref={measureListTableContainerRef}>
+        <MadieTable
+          table={table}
+          currentSort={props.currentSort}
+          currentDirection={props.currentDirection}
+          handleSort={handleSort}
+          id="measureListTable"
+          dataTestId="measure-list-tbl"
+          renderExpandedRow={(row) =>
+            selectedIdForExpansion === row.original.actions?.measureSetId &&
+            expandedSectionData?.map((subRow) => (
+              <tr key={subRow.id} className="expanded-row">
+                {expandedcolumns.map((column: any) =>
+                  column?.accessorKey === "expandArrow" ? (
+                    <td key={`${subRow.id}-expand`} aria-hidden="true"></td>
+                  ) : (
+                    <td key={column?.accessorKey || column.id}>
+                      {flexRender(column.cell ?? column.accessorKey, {
+                        row: { original: subRow },
+                        getValue: () => subRow[column.accessorKey],
+                      })}
+                    </td>
+                  )
+                )}
+              </tr>
+            ))
+          }
+        />
+      </div>
       <CreatVersionDialog
         currentVersion={targetMeasure?.current?.version}
         open={createVersionDialog.open}

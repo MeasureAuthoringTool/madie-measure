@@ -2544,8 +2544,13 @@ describe("Measure List component", () => {
       expect(checkboxes.length).toBe(6);
     });
     expect(getByTestId("checkbox-select-all-checkbox")).toHaveAccessibleName(
-      "Select All Measures"
+      "Select all measures on this page"
     );
+    measures.forEach((measure) => {
+      expect(getByTestId(`checkbox-${measure.id}`)).toHaveAccessibleName(
+        `Select measure ${measure.measureName}`
+      );
+    });
     unmount();
   });
 
@@ -3391,17 +3396,23 @@ describe("Measure lock functionality", () => {
       // Wait for the parent measure row to render
       await screen.findByText("Parent Measure");
 
-      // Click the expand arrow span[role="button"] inside the table
-      const expandButton = container.querySelector(
-        'span[role="button"]'
-      ) as HTMLElement;
+      // Click the expand button inside the table
+      const expandButton = screen.getByRole("button", {
+        name: "Expand associated measures for Parent Measure",
+      });
       expect(expandButton).toBeInTheDocument();
+      expect(expandButton).toHaveAttribute("aria-expanded", "false");
       await act(async () => {
         userEvent.click(expandButton);
       });
 
       // Wait for the child row to appear
       await screen.findByText("Child Measure");
+      expect(
+        screen.getByRole("button", {
+          name: "Collapse associated measures for Parent Measure",
+        })
+      ).toHaveAttribute("aria-expanded", "true");
 
       // Select the child measure's checkbox
       const checkboxes = screen.getAllByRole("checkbox");
@@ -3516,9 +3527,9 @@ describe("Measure lock functionality", () => {
       expect(
         mockMeasureServiceApi.getMeasuresByMeasureSetId
       ).toHaveBeenCalledTimes(1);
-      const expandButton = container.querySelector(
-        'span[role="button"]'
-      ) as HTMLElement;
+      const expandButton = screen.getByRole("button", {
+        name: "Expand associated measures for Parent Measure",
+      });
       expect(expandButton).toBeInTheDocument();
       await act(async () => {
         userEvent.click(expandButton);
@@ -4118,9 +4129,14 @@ describe("Review Status", () => {
   it("should display the Review column when the feature flag is on", async () => {
     renderReviewList(0);
 
-    expect(
-      await screen.findByRole("columnheader", { name: /review/i })
-    ).toBeInTheDocument();
+    const reviewHeader = await screen.findByRole("columnheader", {
+      name: /review/i,
+    });
+    const reviewHeaderLabel = within(reviewHeader).getByText("Review");
+
+    expect(reviewHeaderLabel).toHaveAttribute("tabindex", "0");
+    reviewHeaderLabel.focus();
+    expect(reviewHeaderLabel).toHaveFocus();
   });
 
   it("should display 'Ready' for reviewed measures and '-' for the rest", async () => {
@@ -4171,6 +4187,23 @@ describe("Review Status", () => {
     expect(
       await screen.findByRole("columnheader", { name: /review/i })
     ).toBeInTheDocument();
+  });
+
+  it("should allow tabbing through body cells, including middle rows", async () => {
+    renderReviewList(0, measures);
+
+    const table = await screen.findByTestId("measure-list-tbl");
+    const rows = Array.from(
+      table.querySelectorAll<HTMLTableRowElement>("tbody tr.ml-tr")
+    );
+    expect(rows).toHaveLength(measures.length);
+
+    const middleRowCells = Array.from(rows[2].querySelectorAll("td"));
+    expect(middleRowCells.every((cell) => cell.tabIndex === 0)).toBe(true);
+
+    middleRowCells[1].focus();
+    await userEvent.tab();
+    expect(middleRowCells[2]).toHaveFocus();
   });
 
   it("should display the My Reviews columns", async () => {
