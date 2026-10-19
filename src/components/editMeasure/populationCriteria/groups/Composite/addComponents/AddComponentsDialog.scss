@@ -17,6 +17,10 @@
 }
 
 .add-components-table {
+  .sticky-table > tr > th {
+    top: 0;
+  }
+
   .tcl-table {
     border-bottom: 1px solid rgb(140, 140, 140);
   }
