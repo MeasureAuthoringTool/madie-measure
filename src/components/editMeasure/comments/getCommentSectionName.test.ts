@@ -121,7 +121,6 @@ describe("getCommentSectionName", () => {
   });
 
   it("maps list-page labels and fallback states", () => {
-    // the bare list page redirects to the first group's tab
     expect(
       getCommentSectionName(
         "/measures/measure-id/edit/test-cases/list-page",
