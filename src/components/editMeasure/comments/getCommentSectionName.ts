@@ -309,7 +309,7 @@ export const getCommentSectionLocation = (
   pathname: string,
   measure?: CommentMeasure | null
 ): CommentSectionLocation => {
-  const path = pathname.replace(/\/+$/, "");
+  const path = (pathname ?? "").replace(/\/+$/, "");
   const editIndex = path.indexOf("/edit/");
   const editPath = editIndex >= 0 ? path.slice(editIndex + 6) : "";
   const segments = editPath.split("/").filter(Boolean);

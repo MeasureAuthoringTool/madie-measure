@@ -240,6 +240,12 @@ describe("getCommentSectionLocation", () => {
     });
   });
 
+  it("does not throw when the route is not known yet", () => {
+    expect(getCommentSectionLocation(undefined, measure)).toEqual({
+      subSectionName: "Current section",
+    });
+  });
+
   it("has no main section outside of the measure edit routes", () => {
     expect(
       getCommentSectionLocation("/measures/measure-id/view/details", measure)
