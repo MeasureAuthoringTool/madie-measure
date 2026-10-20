@@ -489,7 +489,7 @@ export default function EditMeasure() {
     // the server re-runs the composite validations, so list its failures the
     // same way the client side check does
     const compositeErrors = getCompositeValidationErrors(message);
-    if (errorData?.status === 400 && compositeErrors.length > 0) {
+    if (compositeErrors.length > 0) {
       showVersionErrors(compositeErrors);
       return;
     }

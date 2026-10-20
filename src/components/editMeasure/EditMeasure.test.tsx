@@ -1163,11 +1163,11 @@ describe("EditMeasure Component", () => {
     mockMeasureServiceApi.fetchMeasure = jest.fn().mockResolvedValue(measure);
     mockMeasureServiceApi.checkValidVersion = jest.fn().mockRejectedValue({
       response: {
-        status: 400,
+        status: 422,
         data: {
-          message: `User testUser cannot version Measure with ID ${
+          message: `Composite measure with ID ${
             measure.id
-          }. ${compositeErrors.join(", ")}`,
+          } is invalid: ${compositeErrors.join(", ")}`,
         },
       },
     });

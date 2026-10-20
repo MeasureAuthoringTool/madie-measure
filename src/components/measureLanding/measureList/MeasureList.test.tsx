@@ -1289,11 +1289,11 @@ describe("Measure List component", () => {
     mockMeasureServiceApi.fetchMeasure.mockResolvedValueOnce(measures[0]);
     mockMeasureServiceApi.checkValidVersion = jest.fn().mockRejectedValue({
       response: {
-        status: 400,
+        status: 422,
         data: {
-          message: `User userId cannot version Measure with ID ${
+          message: `Composite measure with ID ${
             measures[0].id
-          }. ${compositeErrors.join(", ")}`,
+          } is invalid: ${compositeErrors.join(", ")}`,
         },
       },
     });
