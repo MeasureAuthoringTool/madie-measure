@@ -20,11 +20,6 @@ interface CommentMeasure {
   measureMetaData?: { composite?: boolean };
 }
 
-/*
-  Main headers rendered in the Comments flyout. Every sub-section resolved from
-  the URL belongs to exactly one of them, which is how the panel knows which
-  header to expand and which sub-section to mark as the one the user is on.
-*/
 export const COMMENT_MAIN_SECTIONS = {
   DETAILS: "Details",
   CQL_EDITOR: "CQL Editor",
@@ -52,7 +47,6 @@ const UNKNOWN_SECTION: CommentSectionLocation = {
   subSectionName: FALLBACK_SECTION_NAME,
 };
 
-// a sub-section only exists for one model when it is scoped
 type SectionScope = "qdm" | "fhir";
 
 interface SubSectionDefinition {
@@ -70,12 +64,6 @@ interface MeasureContext {
 
 const isPlaceholder = (route: string) => route.startsWith("__");
 
-/*
-  Ordered to match the measure details side nav in MeasureDetails.tsx, which is
-  the source of truth for which screens exist and in what order. Definition is
-  listed twice because the two models place it differently; scoping means only
-  one of them survives for a given measure.
-*/
 const DETAILS_SUB_SECTIONS: SubSectionDefinition[] = [
   { route: "", name: "Name, Version & ID" },
   { route: "model&measurement-period", name: "Model & Measurement Period" },
@@ -104,11 +92,6 @@ const DETAILS_SUB_SECTIONS: SubSectionDefinition[] = [
   { route: "measure-disclaimer", name: "Disclaimer" },
 ];
 
-/*
-  Ordered to match the population criteria side nav. The Criteria entries are
-  driven by the measure's groups, so a placeholder holds their place in the
-  order and is expanded out when the sections are built.
-*/
 const CRITERIA_PLACEHOLDER = "__criteria__";
 const POPULATION_CRITERIA_PLACEHOLDER = "__population_criteria__";
 
@@ -120,10 +103,6 @@ const POPULATION_CRITERIA_SUB_SECTIONS: SubSectionDefinition[] = [
   { route: "risk-adjustment", name: "Risk Adjustment" },
 ];
 
-/*
-  Ordered to match the test case list side nav: the population criteria tabs,
-  then the configuration screens. SDE and RAV are absent on composites.
-*/
 const TEST_CASE_LIST_SUB_SECTIONS: SubSectionDefinition[] = [
   {
     route: POPULATION_CRITERIA_PLACEHOLDER,
@@ -166,8 +145,7 @@ const namesInScope = (
     .map((definition) => definition.name);
 
 /*
-  Criteria are numbered by their position in the measure. A measure with no
-  groups still shows Criteria 1, matching the population criteria side nav.
+  A measure with no groups still shows Criteria 1, matching the population criteria side nav.
 */
 const getCriteriaNames = (
   measure: CommentMeasure | null | undefined,
@@ -194,10 +172,6 @@ const getGroupNumber = (
   return index >= 0 ? index + 1 : undefined;
 };
 
-/*
-  Every sub-section the panel lists, so that a header the user opens shows the
-  screens it covers rather than only the one they happen to be on.
-*/
 export const getCommentSections = (
   measure?: CommentMeasure | null
 ): CommentSection[] => {
@@ -258,10 +232,6 @@ const getTestCasesLocation = (
   measure?: CommentMeasure | null
 ): CommentSectionLocation => {
   if (subsection === "list-page") {
-    /*
-      The bare list page redirects to the first group's tab, so it resolves to
-      the same sub-section that redirect lands on.
-    */
     if (!identifier) {
       return {
         mainSection: COMMENT_MAIN_SECTIONS.TEST_CASES,
