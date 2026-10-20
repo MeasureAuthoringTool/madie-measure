@@ -22,6 +22,7 @@ import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import { Component, Group, Measure } from "@madie/madie-models";
+import "./AddedComponentsTable.scss";
 import { IconButton, Switch, Tooltip } from "@mui/material";
 import {
   CollapseIcon,
@@ -385,7 +386,7 @@ export default function AddedComponentsTable({
       <h3
         style={{ fontWeight: 500, marginBottom: 24 }}
       >{`Selected Composite Measure Components (${uniqueMeasures.length})`}</h3>
-      <div className="measure-table no-margin no-vert-borders no-radius middle-align-row">
+      <div className="measure-table added-components-table no-margin no-vert-borders no-radius middle-align-row">
         <div className="table" style={{ overflow: "auto" }}>
           <table
             tw="min-w-full"
