@@ -492,7 +492,10 @@ export default function MeasureList(props: {
             cell: (info) => (
               <div>
                 {info.row.original.actions?.measureSet?.acls?.length > 0 && (
-                  <CheckCircleOutlineIcon sx={{ color: "#4CAF50" }} />
+                  <CheckCircleOutlineIcon
+                    titleAccess="Shared"
+                    sx={{ color: "#4CAF50" }}
+                  />
                 )}
               </div>
             ),
@@ -548,22 +551,7 @@ export default function MeasureList(props: {
     ...(showReviewStatus
       ? [
           {
-            header: () => (
-              <button
-                type="button"
-                tabIndex={0}
-                style={{
-                  padding: 0,
-                  border: 0,
-                  background: "transparent",
-                  color: "inherit",
-                  font: "inherit",
-                  textAlign: "inherit",
-                }}
-              >
-                Review
-              </button>
-            ),
+            header: () => <span tabIndex={0}>Review</span>,
             accessorKey: "reviewStatus",
             enableSorting: false,
             cell: (info) => {
@@ -595,12 +583,7 @@ export default function MeasureList(props: {
         ]
       : []),
     {
-      // Use tabIndex={0} for accessibility, and make sure it's not inside a button.
-      header: () => (
-        <button tabIndex={0} aria-label="Edit or View Measure">
-          Action
-        </button>
-      ),
+      header: () => <span tabIndex={0}>Action</span>,
       cell: (info) => {
         const canEdit =
           checkUserCanEdit(
@@ -627,8 +610,6 @@ export default function MeasureList(props: {
             onClick={() => {
               navigate(`/measures/${info.row.original.id}/edit/details/`);
             }}
-            tabIndex={0}
-            role="button"
           >
             {isLockedByOther && (
               <LockOutlinedIcon sx={{ fontSize: 16, marginRight: 0.5 }} />
@@ -1033,13 +1014,25 @@ export default function MeasureList(props: {
       return;
     }
 
+    // Only cells that carry readable content and no focusable control of their
+    // own get a tab stop. Empty cells, and cells whose control (button,
+    // checkbox, status chip) is already tabbable, would otherwise add stops that
+    // announce nothing or focus the same content twice.
+    const focusableSelector =
+      "a[href], button, input, select, textarea, [tabindex]";
     const makeBodyCellsTabbable = () => {
       container
         .querySelectorAll<HTMLTableCellElement>(
           "#measureListTable tbody td:not([aria-hidden='true'])"
         )
         .forEach((cell) => {
-          cell.tabIndex = 0;
+          const hasContent = (cell.textContent || "").trim().length > 0;
+          const hasOwnFocusable = !!cell.querySelector(focusableSelector);
+          if (hasContent && !hasOwnFocusable) {
+            cell.tabIndex = 0;
+          } else {
+            cell.removeAttribute("tabindex");
+          }
         });
     };
 

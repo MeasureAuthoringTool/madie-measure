@@ -4253,7 +4253,7 @@ describe("Review Status", () => {
     ).toBeInTheDocument();
   });
 
-  it("should allow tabbing through body cells, including middle rows", async () => {
+  it("should only tab to body cells that have content and no focusable control of their own", async () => {
     renderReviewList(0, measures);
 
     const table = await screen.findByTestId("measure-list-tbl");
@@ -4262,12 +4262,26 @@ describe("Review Status", () => {
     );
     expect(rows).toHaveLength(measures.length);
 
-    const middleRowCells = Array.from(rows[2].querySelectorAll("td"));
-    expect(middleRowCells.every((cell) => cell.tabIndex === 0)).toBe(true);
+    const cells = Array.from(rows[2].querySelectorAll("td"));
+    cells.forEach((cell) => {
+      const hasContent = (cell.textContent || "").trim().length > 0;
+      const hasOwnFocusable = !!cell.querySelector(
+        "a[href], button, input, select, textarea, [tabindex]"
+      );
+      if (hasContent && !hasOwnFocusable) {
+        expect(cell.tabIndex).toBe(0);
+      } else {
+        expect(cell).not.toHaveAttribute("tabindex");
+      }
+    });
 
-    middleRowCells[1].focus();
-    await userEvent.tab();
-    expect(middleRowCells[2]).toHaveFocus();
+    // the action button is the only stop in the action cell
+    const actionCell = within(rows[2])
+      .getByRole("button", {
+        name: /measure/i,
+      })
+      .closest("td") as HTMLElement;
+    expect(actionCell).not.toHaveAttribute("tabindex");
   });
 
   it("should display the My Reviews columns", async () => {
