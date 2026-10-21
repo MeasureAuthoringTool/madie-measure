@@ -450,4 +450,5 @@ declare module "@madie/madie-util" {
     measure: Measure,
     measureServiceApi: MeasureServiceApi
   ): Promise<string[]>;
+  export function getCompositeValidationErrors(message: string): string[];
 }

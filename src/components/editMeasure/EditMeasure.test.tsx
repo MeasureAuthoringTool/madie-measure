@@ -1154,6 +1154,40 @@ describe("EditMeasure Component", () => {
     expect(queryByTestId("error-message")).not.toBeInTheDocument();
   });
 
+  it("lists the composite failures when the server rejects a composite the client check passed", async () => {
+    const compositeErrors = [
+      "Two component measures must be selected",
+      "The measure type of the component measure(s) is invalid",
+    ];
+    mockCompositeStubs.validateCompositeMeasure.mockResolvedValueOnce([]);
+    mockMeasureServiceApi.fetchMeasure = jest.fn().mockResolvedValue(measure);
+    mockMeasureServiceApi.checkValidVersion = jest.fn().mockRejectedValue({
+      response: {
+        status: 422,
+        data: {
+          message: `Composite measure with ID ${
+            measure.id
+          } is invalid: ${compositeErrors.join(", ")}`,
+        },
+      },
+    });
+    renderRouter();
+
+    expect(await findByTestId("editMeasure")).toBeInTheDocument();
+    await submitVersionDialog();
+
+    await waitFor(() =>
+      expect(queryByTestId("error-message")).toBeInTheDocument()
+    );
+    expect(queryByText("Unable to version measure.")).toBeInTheDocument();
+    compositeErrors.forEach((message) => {
+      expect(queryByText(message)).toBeInTheDocument();
+    });
+    expect(
+      queryByText("Requested measure cannot be versioned")
+    ).not.toBeInTheDocument();
+  });
+
   it("Version fails with 423.", async () => {
     mockMeasureServiceApi.createVersion = jest.fn().mockRejectedValueOnce({
       response: {
