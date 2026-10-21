@@ -409,7 +409,8 @@ describe("EditTestCase component", () => {
       "should set edit-load validation to $validate for $model",
       async ({ model, validate }) => {
         const testCaseUrl = "measure.url/measures/m1234/test-cases/testID";
-        const defaultGetImplementation = mockedAxios.get.getMockImplementation();
+        const defaultGetImplementation =
+          mockedAxios.get.getMockImplementation();
         mockedAxios.get.mockImplementation((url, config) => {
           if (url === testCaseUrl) {
             return Promise.resolve({
