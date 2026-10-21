@@ -28,6 +28,7 @@ import {
   formatCmsId,
   padCmsId,
   validateCompositeMeasure,
+  getCompositeValidationErrors,
 } from "@madie/madie-util";
 import { useNavigate } from "react-router-dom";
 import { Chip, Tooltip } from "@mui/material";
@@ -1083,6 +1084,15 @@ export default function MeasureList(props: {
   const handleCreateError = (error) => {
     const errorData = error?.response;
     const message = errorData?.data?.message;
+
+    // the server re-runs the composite validations, so list its failures the
+    // same way the client side check does
+    const compositeErrors = getCompositeValidationErrors(message);
+    if (compositeErrors.length > 0) {
+      setLoading(false);
+      showVersionErrors(compositeErrors);
+      return;
+    }
 
     props.setToastOpen(true);
     setLoading(false);
