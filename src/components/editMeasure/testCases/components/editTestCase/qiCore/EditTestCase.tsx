@@ -507,9 +507,8 @@ const EditTestCase = (props: EditTestCaseProps) => {
     [setCustomWarningMessages]
   );
 
-  //Model.QICORE means QICore 4.1.1
   const validateOnLoad =
-    measure?.model === Model.QDM || measure?.model === Model.QICORE;
+    measure?.model === "QDM v5.6" || measure?.model === "QI-Core v4.1.1";
   // testCase polling, gets triggered when validationStatus is either Pending or Validating
   useTestCasePolling({
     testCaseId: id,
