@@ -120,7 +120,9 @@ export const getNewestMeasureInstance = jest.fn(
 );
 
 export {
+  COMPOSITE_VALIDATION_MESSAGES,
   getAllowedScoringTypes,
+  getCompositeValidationErrors,
   validateCompositeMeasure,
 } from "../compositeValidationStubs";
 export const ExportAction = ({ onClick }: any) => (

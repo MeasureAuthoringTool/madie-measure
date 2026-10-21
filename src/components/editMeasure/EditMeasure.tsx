@@ -30,6 +30,7 @@ import {
   ShareDialog,
   TransferDialog,
   validateCompositeMeasure,
+  getCompositeValidationErrors,
   ManageReviewDialog,
   shouldShowReviewCommentLink,
   CommentsFlyoutPanel,
@@ -487,6 +488,14 @@ export default function EditMeasure() {
   const handleCreateVersionError = (error) => {
     const errorData = error?.response;
     const message = errorData?.data?.message;
+
+    // the server re-runs the composite validations, so list its failures the
+    // same way the client side check does
+    const compositeErrors = getCompositeValidationErrors(message);
+    if (compositeErrors.length > 0) {
+      showVersionErrors(compositeErrors);
+      return;
+    }
 
     setToastOpen(true);
     setLoading(false);
