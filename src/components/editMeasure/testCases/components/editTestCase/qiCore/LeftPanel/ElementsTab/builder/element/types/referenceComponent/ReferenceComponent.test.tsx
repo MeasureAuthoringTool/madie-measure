@@ -209,6 +209,38 @@ describe("ReferenceComponent", () => {
     expect(screen.getByTestId("reference-label")).toHaveTextContent("Provider");
   });
 
+  it.each(["Encounter", "Encounter (US Core)", "Encounter (QICore)"])(
+    "labels the second dropdown with the selected %s profile, not the first profile of the same type",
+    async (profileTitle) => {
+      (useQiCoreResource as jest.Mock).mockReturnValue({
+        state: { bundle: { entry: [] } },
+      });
+      render(
+        <ResourceContext.Provider value={baseProfiles}>
+          <FormikProvider value={mockFormik}>
+            <ReferenceComponent
+              structureDefinition={structureDefinition}
+              canEdit={true}
+              required={false}
+              helperText="Select a reference"
+              error={false}
+              showAddAttributeButton={false}
+              addTitle=""
+              label="Encounter.participant[0].individual"
+            />
+          </FormikProvider>
+        </ResourceContext.Provider>
+      );
+
+      await userEvent.click(screen.getByLabelText("Reference Type"));
+      await userEvent.click(screen.getByTestId(`${profileTitle}-option`));
+
+      expect(
+        screen.getByRole("combobox", { name: `Select ${profileTitle}` })
+      ).toBeInTheDocument();
+    }
+  );
+
   it("filters out duplicate profiles and shows only unique options", async () => {
     (useQiCoreResource as jest.Mock).mockReturnValue({
       state: { bundle: { entry: [] } },
@@ -345,7 +377,7 @@ describe("ReferenceComponent", () => {
     await userEvent.click(await screen.findByText("Encounter"));
     // Wait for the second dropdown to be present
     const referenceSelect = await screen.findByTestId("reference-select-0");
-    const combo = screen.getByRole("combobox", { name: /specify encounter/i });
+    const combo = screen.getByRole("combobox", { name: "Select Encounter" });
     await userEvent.click(combo);
     await userEvent.click(referenceSelect);
 
@@ -427,7 +459,9 @@ describe("ReferenceComponent", () => {
     await userEvent.click(screen.getByTestId("Encounter (US Core)-option"));
 
     // Wait for the second dropdown to be present
-    const combo = screen.getByRole("combobox", { name: /specify encounter/i });
+    const combo = screen.getByRole("combobox", {
+      name: "Select Encounter (US Core)",
+    });
     await userEvent.click(combo);
     await userEvent.click(await screen.findByTestId("reference-select-0"));
 
@@ -508,7 +542,9 @@ describe("ReferenceComponent", () => {
     await userEvent.click(screen.getByTestId("Encounter (QICore)-option"));
 
     // Wait for the second dropdown to be present
-    const combo = screen.getByRole("combobox", { name: /specify encounter/i });
+    const combo = screen.getByRole("combobox", {
+      name: "Select Encounter (QICore)",
+    });
     await userEvent.click(combo);
     await userEvent.click(await screen.findByTestId("reference-select-0"));
 
@@ -566,7 +602,9 @@ describe("ReferenceComponent", () => {
     await userEvent.click(screen.getByTestId("Encounter (US Core)-option"));
 
     // Wait for the second dropdown to be present
-    const combo = screen.getByRole("combobox", { name: /specify encounter/i });
+    const combo = screen.getByRole("combobox", {
+      name: "Select Encounter (US Core)",
+    });
     await userEvent.click(combo);
     await userEvent.click(await screen.findByTestId("reference-select-0"));
 
@@ -623,7 +661,9 @@ describe("ReferenceComponent", () => {
     await userEvent.click(screen.getByTestId("Encounter (US Core)-option"));
 
     // Wait for the second dropdown to be present
-    const combo = screen.getByRole("combobox", { name: /specify encounter/i });
+    const combo = screen.getByRole("combobox", {
+      name: "Select Encounter (US Core)",
+    });
     await userEvent.click(combo);
     await userEvent.click(await screen.findByTestId("reference-select-0"));
 
@@ -710,7 +750,9 @@ describe("ReferenceComponent", () => {
     await userEvent.click(screen.getByTestId("Encounter (US Core)-option"));
 
     // Wait for the second dropdown to be present
-    const combo = screen.getByRole("combobox", { name: /specify encounter/i });
+    const combo = screen.getByRole("combobox", {
+      name: "Select Encounter (US Core)",
+    });
     await userEvent.click(combo);
     await userEvent.click(await screen.findByTestId("reference-select-0"));
 
@@ -796,7 +838,9 @@ describe("ReferenceComponent", () => {
     await userEvent.click(screen.getByTestId("Encounter (QICore)-option"));
 
     // Wait for the second dropdown to be present
-    const combo = screen.getByRole("combobox", { name: /specify encounter/i });
+    const combo = screen.getByRole("combobox", {
+      name: "Select Encounter (QICore)",
+    });
     await userEvent.click(combo);
     await userEvent.click(await screen.findByTestId("reference-select-0"));
 
@@ -872,7 +916,9 @@ describe("ReferenceComponent", () => {
     await userEvent.click(screen.getByLabelText("Reference Type"));
     await userEvent.click(screen.getByTestId("Encounter (QICore)-option"));
 
-    const combo = screen.getByRole("combobox", { name: /specify encounter/i });
+    const combo = screen.getByRole("combobox", {
+      name: "Select Encounter (QICore)",
+    });
     await userEvent.click(combo);
     await userEvent.click(await screen.findByTestId("reference-select-0"));
 
@@ -1169,7 +1215,7 @@ describe("ReferenceComponent", () => {
 
       // Wait for the second dropdown to be present
       const combo = screen.getByRole("combobox", {
-        name: /specify encounter/i,
+        name: "Select Encounter (QICore)",
       });
       await userEvent.click(combo);
       await userEvent.click(await screen.findByTestId("reference-select-0"));
@@ -1262,7 +1308,7 @@ describe("ReferenceComponent", () => {
 
       // Wait for the second dropdown to be present
       const combo = screen.getByRole("combobox", {
-        name: /specify encounter/i,
+        name: "Select Encounter (QICore)",
       });
       await userEvent.click(combo);
       await userEvent.click(await screen.findByTestId("reference-select-0"));
@@ -1359,7 +1405,7 @@ describe("ReferenceComponent", () => {
       });
 
       const referenceSelect = screen.getByRole("combobox", {
-        name: "Specify Encounter",
+        name: "Select Encounter (QICore)",
       });
       expect(referenceSelect).toBeInTheDocument();
 
@@ -1585,7 +1631,7 @@ describe("ReferenceComponent", () => {
       await userEvent.click(screen.getByLabelText("Reference Type"));
       await userEvent.click(screen.getByTestId("Organization-option"));
       const combo = screen.getByRole("combobox", {
-        name: /specify organization/i,
+        name: "Select Organization",
       });
       await userEvent.click(combo);
 
@@ -1622,7 +1668,7 @@ describe("ReferenceComponent", () => {
       await userEvent.click(screen.getByLabelText("Reference Type"));
       await userEvent.click(screen.getByTestId("Organization-option"));
       const combo = screen.getByRole("combobox", {
-        name: /specify organization/i,
+        name: "Select Organization",
       });
       await userEvent.click(combo);
 
@@ -1672,7 +1718,7 @@ describe("ReferenceComponent", () => {
       await userEvent.click(screen.getByLabelText("Reference Type"));
       await userEvent.click(screen.getByTestId("Organization-option"));
       const combo = screen.getByRole("combobox", {
-        name: /specify organization/i,
+        name: "Select Organization",
       });
       await userEvent.click(combo);
       const options = await screen.findAllByRole("option");
@@ -1712,7 +1758,7 @@ describe("ReferenceComponent", () => {
       await userEvent.click(screen.getByLabelText("Reference Type"));
       await userEvent.click(screen.getByTestId("Organization-option"));
       const combo = screen.getByRole("combobox", {
-        name: /specify organization/i,
+        name: "Select Organization",
       });
       await userEvent.click(combo);
       await userEvent.click(screen.getByText("ID Not Present (Add New)"));
@@ -1754,7 +1800,7 @@ describe("ReferenceComponent", () => {
       await userEvent.click(screen.getByLabelText("Reference Type"));
       await userEvent.click(screen.getByTestId("Location-option"));
       const combo = screen.getByRole("combobox", {
-        name: /specify location/i,
+        name: "Select Location",
       });
       await userEvent.click(combo);
       await userEvent.click(screen.getByText("ID Not Present (Add New)"));
@@ -1770,7 +1816,7 @@ describe("ReferenceComponent", () => {
       );
     });
 
-    it("initializes Reference Type and Specify values when editing a saved generic reference", async () => {
+    it("initializes Reference Type and Select values when editing a saved generic reference", async () => {
       (useQiCoreResource as jest.Mock).mockReturnValue({
         state: {
           bundle: {
@@ -1808,11 +1854,11 @@ describe("ReferenceComponent", () => {
       await waitFor(() => {
         expect(referenceTypeSelect).toHaveTextContent(/Organization/);
       });
-      const specify = screen.getByRole("combobox", {
-        name: /specify organization/i,
+      const resourceSelect = screen.getByRole("combobox", {
+        name: "Select Organization",
       });
       await waitFor(() => {
-        expect(specify).toHaveTextContent("Organization/org-123");
+        expect(resourceSelect).toHaveTextContent("Organization/org-123");
       });
     });
 

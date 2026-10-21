@@ -165,7 +165,7 @@ export default function ReferenceComponent({
   }, [value?.reference, referenceTypeOptions, referencedResourceProfileUrl]);
 
   // Once the referenced resource actually exists in the bundle it shows up as a
-  // concrete option in the second ("Specify") dropdown. When that happens we must
+  // concrete option in the second ("Select <profile>") dropdown. When that happens we must
   // reflect it as the selected value even if we were still displaying the
   // "ID Not Present (Add New)" earmark - otherwise the dropdown stays pinned to
   // "add_new_id" and never populates with the newly added resource. This is kept
@@ -182,6 +182,12 @@ export default function ReferenceComponent({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value?.reference, specificResourceOptions]);
+
+  // Label the second dropdown with the option picked in the first. Several
+  // options can share a `value` (resource type), so match on `profile` (URL).
+  const selectedReferenceTypeLabel =
+    referenceTypeOptions.find((opt) => opt.profile === selectedProfileUrl)
+      ?.label || selectedReferenceType;
 
   const triggerAddNewFlow = () => {
     // what's the list length of possible profiles of type per model
@@ -290,11 +296,7 @@ export default function ReferenceComponent({
       {selectedReferenceType && (
         <div className="element-editor-add-row reference">
           <Select
-            label={`Specify ${
-              referenceTypeOptions.find(
-                (opt) => opt.value === selectedReferenceType
-              )?.label
-            }`}
+            label={`Select ${selectedReferenceTypeLabel}`}
             id={`reference-select-${index}`}
             disabled={!canEdit}
             required={required}
