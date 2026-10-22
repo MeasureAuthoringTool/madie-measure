@@ -1,24 +1,11 @@
-interface CommentGroup {
-  id?: string;
-  uuid?: string;
-}
+import { Measure } from "@madie/madie-models";
+import type { CommentSection } from "@madie/madie-util";
 
-interface CommentTestCase {
-  id?: string;
-  uuid?: string;
-  title?: string;
-  name?: string;
-  series?: string;
-  groupId?: string;
-  groupUuid?: string;
-}
-
-interface CommentMeasure {
-  model?: string;
-  groups?: CommentGroup[];
-  testCases?: CommentTestCase[];
-  measureMetaData?: { composite?: boolean };
-}
+// the slice of a measure the section catalogue depends on
+type CommentMeasure = Pick<
+  Measure,
+  "model" | "groups" | "testCases" | "measureMetaData"
+>;
 
 export const COMMENT_MAIN_SECTIONS = {
   DETAILS: "Details",
@@ -30,17 +17,12 @@ export const COMMENT_MAIN_SECTIONS = {
 export type CommentMainSection =
   (typeof COMMENT_MAIN_SECTIONS)[keyof typeof COMMENT_MAIN_SECTIONS];
 
-export const FALLBACK_SECTION_NAME = "Current section";
+const FALLBACK_SECTION_NAME = "Current section";
 
 export interface CommentSectionLocation {
   // undefined when the route isn't one that can be commented on
   mainSection?: CommentMainSection;
   subSectionName: string;
-}
-
-export interface CommentSection {
-  name: CommentMainSection;
-  subSections: string[];
 }
 
 const UNKNOWN_SECTION: CommentSectionLocation = {
@@ -64,6 +46,11 @@ interface MeasureContext {
 
 const isPlaceholder = (route: string) => route.startsWith("__");
 
+/*
+  Routes and labels mirror the edit measure side navs (MeasureDetails,
+  PopulationCriteriaSideNav, the test case list). Keep them in step when a nav
+  entry is renamed, or stored comments detach from their row.
+*/
 const DETAILS_SUB_SECTIONS: SubSectionDefinition[] = [
   { route: "", name: "Name, Version & ID" },
   { route: "model&measurement-period", name: "Model & Measurement Period" },
@@ -160,15 +147,13 @@ const getCriteriaNames = (
 
 const getGroupNumber = (
   groupId: string | undefined,
-  groups: CommentGroup[] | undefined
+  groups: CommentMeasure["groups"] | undefined
 ): number | undefined => {
   if (!groupId || !groups?.length) {
     return undefined;
   }
 
-  const index = groups.findIndex(
-    (group) => group.id === groupId || group.uuid === groupId
-  );
+  const index = groups.findIndex((group) => group.id === groupId);
   return index >= 0 ? index + 1 : undefined;
 };
 
@@ -247,7 +232,7 @@ const getTestCasesLocation = (
       };
     }
 
-    // anything else on the list page is a group UUID, shown by its position
+    // anything else on the list page is a group id, shown by its position
     const groupNumber = getGroupNumber(identifier, measure?.groups);
     return groupNumber
       ? {
@@ -258,7 +243,7 @@ const getTestCasesLocation = (
   }
 
   const testCase = measure?.testCases?.find(
-    (candidate) => candidate.id === subsection || candidate.uuid === subsection
+    (candidate) => candidate.id === subsection
   );
   if (!testCase) {
     return UNKNOWN_SECTION;
@@ -332,8 +317,3 @@ export const getCommentSectionLocation = (
 
   return UNKNOWN_SECTION;
 };
-
-export const getCommentSectionName = (
-  pathname: string,
-  measure?: CommentMeasure | null
-): string => getCommentSectionLocation(pathname, measure).subSectionName;

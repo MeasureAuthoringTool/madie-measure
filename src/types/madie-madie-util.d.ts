@@ -25,6 +25,8 @@ declare module "@madie/madie-util" {
     SharedUser,
     MeasureCounts,
   } from "@madie/madie-models";
+  // Comment is not re-exported from the installed madie-models index yet
+  import { Comment } from "@madie/madie-models/dist/Comment";
   import { AxiosResponse } from "axios";
   import { Bundle } from "fhir/r4";
 
@@ -393,23 +395,41 @@ declare module "@madie/madie-util" {
     style?: React.CSSProperties;
     dataTestId?: string;
   }): React.ReactElement;
-  export function formatReviewCommentDate(value?: string): string;
-  export function getReadyForReviewMessage(
-    entityType: "measure" | "library"
-  ): string;
-  export function ReviewSubSection(props: {
-    entityType: "measure" | "library";
-    readyForReviewBy?: string;
-    readyForReviewAt?: string;
-  }): React.ReactElement;
+  // statuses in which a measure is part of the review process
+  export const REVIEW_ACTIVE_STATUSES: ReadonlySet<ReviewStatus>;
+
+  export interface CommentSection {
+    name: string;
+    subSections: string[];
+  }
+
+  export interface ReviewComments {
+    review: MeasureReview | null;
+    comments: Comment[];
+    addComment: (comment: Comment) => Promise<void>;
+    updateComment: (comment: Comment) => Promise<void>;
+    deleteComment: (comment: Comment) => Promise<void>;
+  }
+  // loads the review for the entity and owns the comment writes against it
+  export function useReviewComments(
+    entityType: "measure" | "library",
+    entityId: string | undefined,
+    onError?: (message: string) => void
+  ): ReviewComments;
+
   export function CommentsFlyoutPanel(props: {
     open: boolean;
     onClose: () => void;
     entityType: "measure" | "library";
-    sections: { name: string; subSections: string[] }[];
+    sections: CommentSection[];
     sectionName: string;
     mainSection?: string;
-    commentedSubSections?: string[];
+    comments?: Comment[];
+    currentUserName?: string;
+    currentUserId?: string;
+    onAddComment?: (comment: Comment) => void;
+    onUpdateComment?: (comment: Comment) => void;
+    onDeleteComment?: (comment: Comment) => void;
     readyForReviewBy?: string;
     readyForReviewAt?: string;
   }): React.ReactElement;
