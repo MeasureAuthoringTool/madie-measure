@@ -676,7 +676,7 @@ describe("MeasureEditor component", () => {
     );
   });
 
-  it("should remove concept successfully", async () => {
+  it("should remove concept and value set versions successfully", async () => {
     const measureWithCqlCodes = {
       ...measure,
       model: Model.QDM_5_6,
@@ -695,7 +695,7 @@ describe("MeasureEditor component", () => {
         return {
           cql: "library RemoveConceptTest version '0.0.000'\nusing QDM version '5.6'",
           isLibraryStatementChanged: false,
-          isValueSetChanged: false,
+          isValueSetChanged: true,
           isConceptRemoved: true,
         };
       });
@@ -740,6 +740,9 @@ describe("MeasureEditor component", () => {
     });
     expect(screen.getByTestId("library-warning")).toHaveTextContent(
       "Concept Constructs are not supported in MADiE. It has been removed."
+    );
+    expect(screen.getByTestId("library-warning")).toHaveTextContent(
+      "MADiE does not currently support use of value set version directly in CQL at this time. Your value set versions have been removed. Please use the relevant manifest for value set expansion for testing."
     );
   });
   it("shows the CQL editor guidance when How it works is opened", async () => {

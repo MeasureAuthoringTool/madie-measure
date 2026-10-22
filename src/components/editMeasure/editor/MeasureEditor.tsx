@@ -500,7 +500,7 @@ const MeasureEditor = ({ measureCanEdit, measureLockedBy }) => {
               }
               if (updatedCqlObj.isValueSetChanged) {
                 secondaryMessages.push(
-                  "MADiE does not currently support use of value set version directly in measures at this time. Your value set versions have been removed. Please use the relevant manifest for value set expansion for testing."
+                  "MADiE does not currently support use of value set version directly in CQL at this time. Your value set versions have been removed. Please use the relevant manifest for value set expansion for testing."
                 );
               }
               if (updatedCqlObj.isConceptRemoved) {
