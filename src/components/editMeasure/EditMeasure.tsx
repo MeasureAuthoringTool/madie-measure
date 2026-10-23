@@ -33,6 +33,7 @@ import {
   getCompositeValidationErrors,
   ManageReviewDialog,
   shouldShowReviewCommentLink,
+  CommentsFlyoutPanel,
   ReviewCommentLink,
 } from "@madie/madie-util";
 import CreateVersionDialog from "../common/createVersionDialog/CreateVersionDialog";
@@ -60,8 +61,10 @@ import TestCases from "./testCases/TestCases";
 import { AxiosResponse } from "axios";
 import ReviewDialog from "../common/reviewDialog/ReviewDialog";
 import StatusHandler, { INITIAL_STATUS_HANDLER } from "./editor/StatusHandler";
-import CommentsFlyoutPanel from "./comments/CommentsFlyoutPanel";
-import { getCommentSectionName } from "./comments/getCommentSectionName";
+import {
+  getCommentSectionLocation,
+  getCommentSections,
+} from "./comments/CommentUtils";
 
 const OBJECT_ID_REGEX = /\/[a-f0-9]{24}/g;
 
@@ -755,7 +758,8 @@ export default function EditMeasure() {
     hasReviewerRole: Boolean(userRoles?.isReviewer),
     assignedReviewers: measureReview?.reviewers,
   });
-  const commentSectionName = getCommentSectionName(location.pathname, measure);
+  const commentLocation = getCommentSectionLocation(location.pathname, measure);
+  const commentSections = getCommentSections(measure);
 
   return (
     <div data-testid="editMeasure">
@@ -999,7 +1003,9 @@ export default function EditMeasure() {
           <CommentsFlyoutPanel
             open={commentsPanelOpen}
             onClose={() => setCommentsPanelOpen(false)}
-            sectionName={commentSectionName}
+            entityType="measure"
+            sections={commentSections}
+            activeSection={commentLocation}
             readyForReviewBy={measureReview?.readyForReviewBy}
             readyForReviewAt={measureReview?.readyForReviewAt}
           />
