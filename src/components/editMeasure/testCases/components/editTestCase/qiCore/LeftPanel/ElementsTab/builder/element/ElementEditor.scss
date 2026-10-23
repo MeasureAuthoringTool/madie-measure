@@ -38,6 +38,10 @@
       }
     }
 
+    &.reference .MuiInputLabel-root {
+      max-width: none;
+    }
+
     > .element-add-container {
       display: flex;
       flex: 1;
