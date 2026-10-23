@@ -8,6 +8,11 @@ import { Measure, ReviewStatus, MeasureReview } from "@madie/madie-models";
 
 jest.mock("@madie/madie-util", () => ({
   useMeasureReviewServiceApi: jest.fn(),
+  REVIEW_ACTIVE_STATUSES: new Set([
+    "READY_FOR_REVIEW",
+    "IN_PROGRESS",
+    "COMPLETE",
+  ]),
 }));
 
 describe("ReviewDialog", () => {

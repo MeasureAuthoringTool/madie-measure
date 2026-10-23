@@ -1,4 +1,4 @@
-import React, { useEffect, useState, Suspense, useRef } from "react";
+import React, { useEffect, useMemo, useState, Suspense, useRef } from "react";
 import {
   useBlocker,
   Route,
@@ -18,7 +18,7 @@ import {
   measureStore,
   routeHandlerStore,
   useMeasureServiceApi,
-  useMeasureReviewServiceApi,
+  useReviewComments,
   checkUserCanEdit,
   useFeatureFlags,
   useUserRoles,
@@ -33,6 +33,8 @@ import {
   getCompositeValidationErrors,
   ManageReviewDialog,
   shouldShowReviewCommentLink,
+  CommentsFlyoutPanel,
+  useOwnerName,
   ReviewCommentLink,
 } from "@madie/madie-util";
 import CreateVersionDialog from "../common/createVersionDialog/CreateVersionDialog";
@@ -60,8 +62,10 @@ import TestCases from "./testCases/TestCases";
 import { AxiosResponse } from "axios";
 import ReviewDialog from "../common/reviewDialog/ReviewDialog";
 import StatusHandler, { INITIAL_STATUS_HANDLER } from "./editor/StatusHandler";
-import CommentsFlyoutPanel from "./comments/CommentsFlyoutPanel";
-import { getCommentSectionName } from "./comments/getCommentSectionName";
+import {
+  getCommentSectionLocation,
+  getCommentSections,
+} from "./comments/commentSections";
 
 const OBJECT_ID_REGEX = /\/[a-f0-9]{24}/g;
 
@@ -70,17 +74,9 @@ export interface RouteHandlerState {
   pendingRoute: string;
 }
 
-type MeasureReview = {
-  status?: string | null;
-  reviewers?: string[];
-  readyForReviewBy?: string;
-  readyForReviewAt?: string;
-};
-
 export default function EditMeasure() {
   const { measureId } = useParams();
   const measureServiceApi = useMeasureServiceApi();
-  const measureReviewServiceApiRef = useRef(useMeasureReviewServiceApi());
   const { updateMeasure } = measureStore;
   const [loading, setLoading] = useState<boolean>(true);
   let navigate = useNavigate();
@@ -195,8 +191,20 @@ export default function EditMeasure() {
   const [toastType, setToastType] = useState<string>("danger");
   const [statusHandler, setStatusHandler] = useState(INITIAL_STATUS_HANDLER);
   const [measure, setMeasure] = useState<any>(measureStore.state);
-  const [measureReview, setMeasureReview] = useState<MeasureReview>(null);
   const [commentsPanelOpen, setCommentsPanelOpen] = useState(false);
+  const showErrorToast = (message: string) => {
+    setToastType("danger");
+    setToastMessage(message);
+    setToastOpen(true);
+  };
+  // the review document and the comment writes against it
+  const {
+    review: measureReview,
+    comments: reviewComments,
+    addComment,
+    updateComment,
+    deleteComment,
+  } = useReviewComments("measure", measure?.id, showErrorToast);
 
   const [downloadState, setDownloadState] = useState(null);
   const [failureMessage, setFailureMessage] = useState(null);
@@ -222,6 +230,8 @@ export default function EditMeasure() {
 
   const { getUserName } = useOktaTokens();
   const userName = getUserName();
+  // "First Last" when the user service knows the HARP id, else the HARP id
+  const commentAuthorName = useOwnerName(userName);
   const measureLockedBy =
     measure?.measureLock?.lockedBy?.toLowerCase() !== userName.toLowerCase()
       ? measure?.measureLock?.lockedBy
@@ -333,47 +343,6 @@ export default function EditMeasure() {
     const subscription = measureStore.subscribe(setMeasure);
     return () => {
       subscription.unsubscribe();
-    };
-  }, []);
-
-  useEffect(() => {
-    let isMounted = true;
-
-    const fetchReview = async () => {
-      if (!measure?.id) {
-        setMeasureReview(null);
-        return;
-      }
-
-      try {
-        const review =
-          await measureReviewServiceApiRef.current.getMeasureReview(measure.id);
-        if (isMounted) {
-          setMeasureReview(review as MeasureReview);
-        }
-      } catch {
-        if (isMounted) {
-          setMeasureReview(null);
-        }
-      }
-    };
-
-    fetchReview();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [measure?.id]);
-
-  useEffect(() => {
-    const handleReviewSaved = (event: Event) => {
-      const savedReview = (event as CustomEvent<MeasureReview>)?.detail;
-      setMeasureReview(savedReview ?? null);
-    };
-
-    window.addEventListener("review-measure-saved", handleReviewSaved);
-    return () => {
-      window.removeEventListener("review-measure-saved", handleReviewSaved);
     };
   }, []);
 
@@ -755,7 +724,11 @@ export default function EditMeasure() {
     hasReviewerRole: Boolean(userRoles?.isReviewer),
     assignedReviewers: measureReview?.reviewers,
   });
-  const commentSectionName = getCommentSectionName(location.pathname, measure);
+  const commentLocation = useMemo(
+    () => getCommentSectionLocation(location.pathname, measure),
+    [location.pathname, measure]
+  );
+  const commentSections = useMemo(() => getCommentSections(measure), [measure]);
 
   return (
     <div data-testid="editMeasure">
@@ -999,7 +972,16 @@ export default function EditMeasure() {
           <CommentsFlyoutPanel
             open={commentsPanelOpen}
             onClose={() => setCommentsPanelOpen(false)}
-            sectionName={commentSectionName}
+            entityType="measure"
+            sections={commentSections}
+            comments={reviewComments}
+            currentUserName={commentAuthorName}
+            currentUserId={userName}
+            onAddComment={addComment}
+            onUpdateComment={updateComment}
+            onDeleteComment={deleteComment}
+            subSection={commentLocation.subSectionName}
+            mainSection={commentLocation.mainSection}
             readyForReviewBy={measureReview?.readyForReviewBy}
             readyForReviewAt={measureReview?.readyForReviewAt}
           />
