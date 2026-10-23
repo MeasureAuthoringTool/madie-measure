@@ -427,7 +427,7 @@ declare module "@madie/madie-util" {
     onClose: () => void;
     entityType: "measure" | "library";
     sections: CommentSection[];
-    activeSections: CommentSectionLocation;
+    activeSection: CommentSectionLocation;
     comments?: Comment[];
     currentUserName?: string;
     currentUserId?: string;

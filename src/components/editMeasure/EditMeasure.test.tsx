@@ -300,10 +300,10 @@ jest.mock("@madie/madie-util", () => ({
   shouldShowReviewCommentLink: jest.fn(),
   useOwnerName: jest.fn(() => "Jonathan Jones"),
   useReviewComments: jest.fn(() => mockReviewComments),
-  CommentsFlyoutPanel: ({ open, onClose, activeSections }: any) =>
+  CommentsFlyoutPanel: ({ open, onClose, activeSection }: any) =>
     open ? (
       <div data-testid="comments-flyout">
-        <span>{`Add a comment to ${activeSections.activeSubSection}`}</span>
+        <span>{`Add a comment to ${activeSection.activeSubSection}`}</span>
         <button data-testid="comments-flyout-close" onClick={onClose}>
           Close
         </button>
