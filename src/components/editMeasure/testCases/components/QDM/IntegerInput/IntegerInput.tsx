@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { TextField } from "@madie/madie-design-system/dist/react/";
-import "twin.macro";
+
 import "styled-components/macro";
 
 export interface IntegerProps {
@@ -20,8 +20,8 @@ const IntegerInput = ({
 }: IntegerProps) => {
   const [inputValue, setInputValue] = useState<string>();
   return (
-    <div tw="flex flex-row">
-      <div tw="w-32">
+    <div className="mm:flex mm:flex-row">
+      <div className="mm:w-32">
         <TextField
           value={intValue}
           readOnly={!canEdit}

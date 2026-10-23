@@ -102,7 +102,7 @@ describe("DateTimeComponent", () => {
 
     const input = screen.getByTestId(`${YEAR_FORMAT}-field-birthday-input`);
     userEvent.type(input, "2022");
-    expect(handleChange).toBeCalledWith("2022");
+    expect(handleChange).toHaveBeenCalledWith("2022");
   });
 
   test("handles input in YEAR_MONTH format", async () => {
@@ -129,7 +129,7 @@ describe("DateTimeComponent", () => {
     ) as HTMLInputElement;
     userEvent.type(input, "January 2025");
     expect(input.value).toBe("01-2025");
-    expect(handleChange).toBeCalledWith("2025-01");
+    expect(handleChange).toHaveBeenCalledWith("2025-01");
   });
 
   test("handles input in YEAR_MONTH_DAY format", async () => {
@@ -157,7 +157,7 @@ describe("DateTimeComponent", () => {
       `${YEAR_MONTH_DAY_FORMAT}-field-birthday-input`
     );
     userEvent.type(input, "01-01-2025");
-    expect(handleChange).toBeCalledWith("2025-01-01");
+    expect(handleChange).toHaveBeenCalledWith("2025-01-01");
   });
 
   test("AddElementButton functionality works", async () => {
@@ -189,7 +189,7 @@ describe("DateTimeComponent", () => {
       `${YEAR_MONTH_DAY_FORMAT}-field-birthday-input`
     );
     userEvent.type(input, "01-01-2025");
-    expect(handleChange).toBeCalledWith("2025-01-01");
+    expect(handleChange).toHaveBeenCalledWith("2025-01-01");
 
     // Test AddElementButton click
     const addButton = screen.getByText("Add Birthday");

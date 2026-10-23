@@ -1215,7 +1215,7 @@ describe("buildFullValidationSchema", () => {
         },
         { abortEarly: false }
       )
-    ).toThrowError(
+    ).toThrow(
       expect.objectContaining({
         name: "ValidationError",
         inner: expect.arrayContaining([

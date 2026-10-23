@@ -1,8 +1,12 @@
+import styled from "styled-components";
 import React from "react";
-import tw from "twin.macro";
-import GlobalStyles from "./styles/GlobalStyles";
 
-const Notice = tw.span`text-green-700`;
+import GlobalStyles from "./styles/GlobalStyles";
+import "./styles/tailwind.css";
+
+const Notice = styled.span.attrs((): { className: string } => ({
+  className: "mm:text-green-700",
+}))``;
 export default function Root(props) {
   return (
     <>

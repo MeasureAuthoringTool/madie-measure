@@ -249,7 +249,7 @@ describe("SupplementalData Component QDM", () => {
     });
 
     await waitFor(() =>
-      expect(mockMeasureServiceApi.updateMeasure).toBeCalledWith({
+      expect(mockMeasureServiceApi.updateMeasure).toHaveBeenCalledWith({
         ...updatedMeasure,
       })
     );

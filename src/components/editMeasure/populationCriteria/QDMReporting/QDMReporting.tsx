@@ -1,5 +1,6 @@
+import styled from "styled-components";
 import React, { useState, useEffect } from "react";
-import tw from "twin.macro";
+
 import { useFormik } from "formik";
 import { Measure, MeasureLock } from "@madie/madie-models";
 import {
@@ -20,7 +21,9 @@ import { QDMReportingValidator } from "./QDMReportingValidator";
 import _ from "lodash";
 import useFormikResetOnEvent from "../../../common/useFormikResetOnEvent";
 import TextEditor from "../groups/TextEditor";
-const Grid = tw.div`grid grid-cols-2 gap-4   overflow-hidden w-full`;
+const Grid = styled.div.attrs((): { className: string } => ({
+  className: "mm:grid mm:grid-cols-2 mm:gap-4 mm:overflow-hidden mm:w-full",
+}))``;
 const improvementNotationOptions = [
   {
     label: "-",

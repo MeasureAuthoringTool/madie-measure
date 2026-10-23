@@ -1,7 +1,8 @@
+import styled from "styled-components";
 import React, { useState, useMemo, useEffect, useCallback } from "react";
 import { ResourceIdentifier } from "../../../../../../../api/models/ResourceIdentifier";
 import "../../../../../../../../../measureLanding/MeasureLanding.scss";
-import tw from "twin.macro";
+
 import "styled-components/macro";
 import {
   Button,
@@ -48,7 +49,9 @@ export interface ResourceListProps {
   measureId?: string;
   profileMap?: Record<string, number>;
 }
-const TH = tw.th`p-3 text-left text-sm font-bold capitalize`;
+const TH = styled.th.attrs((): { className: string } => ({
+  className: "mm:p-3 mm:text-left mm:text-sm mm:font-bold mm:capitalize",
+}))``;
 
 const ResourceList = ({
   resourceIdentifiers,
@@ -366,7 +369,7 @@ const ResourceList = ({
           </Tooltip>
         </div>
       )}
-      <div id="search-container" tw="mb-5 mt-3">
+      <div id="search-container" className="mm:mb-5 mm:mt-3">
         <div className="search-field-wrapper">
           <TextField
             onChange={({ target }) => {
@@ -412,15 +415,14 @@ const ResourceList = ({
           <div className="measure-table no-margin-top">
             <div className="table" style={{ overflow: "auto" }}>
               <table
-                tw="min-w-full"
                 data-testid="measure-list-tbl"
-                className="ml-table"
+                className="ml-table mm:min-w-full"
                 style={{
                   borderSpacing: "0 2em !important",
                   width: "100%",
                 }}
               >
-                <thead tw="bg-slate">
+                <thead className="mm:bg-slate">
                   {table.getHeaderGroups().map((headerGroup) => (
                     <tr key={headerGroup.id}>
                       {headerGroup.headers.map((header) => {

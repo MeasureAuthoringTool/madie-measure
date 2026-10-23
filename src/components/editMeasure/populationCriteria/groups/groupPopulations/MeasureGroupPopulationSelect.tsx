@@ -60,7 +60,7 @@ const MeasureGroupPopulationSelect = ({
     );
   };
   return (
-    <div data-testid="temp-test-id" tw="relative">
+    <div data-testid="temp-test-id">
       <div className="population-column">
         <Select
           placeHolder={{ name: `Select ${label}`, value: "" }}

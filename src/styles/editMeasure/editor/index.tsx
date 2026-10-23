@@ -1,4 +1,8 @@
-import tw from "twin.macro";
+import styled from "styled-components";
 
-export const MessageText = tw.p`text-sm font-medium`;
-export const SuccessText = tw(MessageText)`text-green-800`;
+export const MessageText = styled.p.attrs((): { className: string } => ({
+  className: "mm:text-sm mm:font-medium",
+}))``;
+export const SuccessText = styled(MessageText).attrs(
+  (): { className: string } => ({ className: "mm:text-green-800" })
+)``;

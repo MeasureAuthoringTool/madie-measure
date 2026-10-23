@@ -1,5 +1,6 @@
+import styled from "styled-components";
 import React, { useEffect, useState, useRef } from "react";
-import tw from "twin.macro";
+
 import {
   Routes,
   Route,
@@ -24,7 +25,10 @@ import MeasureDefinitions from "./MeasureDefinitions/MeasureDefinitions";
 import AuthoritativeSource from "./AuthoritativeSource/AuthoritativeSource";
 import LockedMessageModal from "../../common/lockedMessageModal/LockedMessageModal";
 
-const Grid = tw.div`grid grid-cols-6 auto-cols-max gap-4 mx-8 shadow-lg rounded-md border border-slate overflow-hidden bg-white`;
+const Grid = styled.div.attrs((): { className: string } => ({
+  className:
+    "mm:grid mm:grid-cols-6 mm:auto-cols-max mm:gap-4 mm:mx-8 mm:shadow-lg mm:rounded-md mm:border mm:border-slate mm:overflow-hidden mm:bg-white",
+}))``;
 export interface RouteHandlerState {
   canTravel: boolean;
   pendingRoute: string;

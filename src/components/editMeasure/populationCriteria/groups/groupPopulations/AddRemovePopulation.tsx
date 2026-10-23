@@ -1,8 +1,9 @@
+import styled from "styled-components";
 import React from "react";
 import { InitialPopulationAssociationType } from "./GroupPopulation";
 import { GroupScoring, PopulationType } from "@madie/madie-models";
 import { DSLink } from "@madie/madie-design-system/dist/react";
-import tw, { styled } from "twin.macro";
+
 import { v4 as uuidv4 } from "uuid";
 import * as _ from "lodash";
 import { findPopulations } from "../../PopulationHelper";
@@ -18,7 +19,9 @@ import {
   getAssociationType,
 } from "../../PopulationHelperFunctions";
 
-const FieldSeparator = tw.div`mt-1`;
+const FieldSeparator = styled.div.attrs((): { className: string } => ({
+  className: "mm:mt-1",
+}))``;
 const SoftLabel = styled.label`
   display: block;
   margin-bottom: 5px;

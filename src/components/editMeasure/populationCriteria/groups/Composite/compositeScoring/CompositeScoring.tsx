@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import "styled-components/macro";
-import "twin.macro";
+
 import "../CompositeComponent.scss";
 import { Select, Button } from "@madie/madie-design-system/dist/react";
 import { MenuItem, Box } from "@mui/material";

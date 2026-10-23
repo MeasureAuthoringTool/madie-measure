@@ -887,8 +887,8 @@ const MeasureEditor = ({ measureCanEdit, measureLockedBy }) => {
           <p>{CQL_EDITOR_HOW_IT_WORKS}</p>
         </HowItWorks>
       </div>
-      <div tw="flex flex-wrap mx-8 shadow-lg rounded-md border border-slate bg-white">
-        <div tw="flex-none sm:w-full">
+      <div>
+        <div>
           {valuesetMsg && (
             <SuccessText data-testid="valueset-success">
               {valuesetMsg}
@@ -950,7 +950,6 @@ const MeasureEditor = ({ measureCanEdit, measureLockedBy }) => {
           <>
             <Button
               variant="outline"
-              tw="m-2"
               onClick={() => setDiscardDialogOpen(true)}
               data-testid="reset-cql-btn"
               disabled={isCQLUnchanged}
@@ -959,7 +958,6 @@ const MeasureEditor = ({ measureCanEdit, measureLockedBy }) => {
             </Button>
             <Button
               variant="cyan"
-              tw="m-2"
               onClick={() => updateMeasureCql(editorVal, undefined)}
               data-testid="save-cql-btn"
               id="save-cql-btn"

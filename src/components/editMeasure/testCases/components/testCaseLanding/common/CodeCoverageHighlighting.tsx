@@ -1,11 +1,11 @@
 import React from "react";
-import "twin.macro";
+
 import "styled-components/macro";
 import parse from "html-react-parser";
 
 function CodeCoverageHighlighting({ coverageHTML }) {
   return (
-    <div tw="text-sm p-5" data-testid="code-coverage-highlighting">
+    <div className="mm:text-sm mm:p-5" data-testid="code-coverage-highlighting">
       {coverageHTML && parse(coverageHTML)}
     </div>
   );

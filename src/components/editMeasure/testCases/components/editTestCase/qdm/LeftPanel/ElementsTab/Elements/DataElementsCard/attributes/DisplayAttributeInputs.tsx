@@ -13,7 +13,7 @@ import DecimalInput from "../../../../../../../common/DecimalInput/DecimalInput"
 import DateTimeInput from "../../../../../../../QDM/dateTimeInput/DateTimeInput";
 import QdmEntity from "./QdmEntity";
 import CodeInput from "../../../../../../../QDM/codeInput/CodeInput";
-import "twin.macro";
+
 import "styled-components/macro";
 import useQdmExecutionContext from "../../../../../../../routes/qdm/useQdmExecutionContext";
 import QuantityIntervalInput from "../../../../../../../QDM/quantityIntervalInput/QuantityIntervalInput";
@@ -276,12 +276,14 @@ const DisplayAttributeInputs = ({
 
   return (
     <>
-      <div tw="flex w-3/4">
-        <div tw="flex-grow w-3/4 pt-4">{displayAttributeInput()}</div>
-        <div tw="relative pl-2.5">
+      <div className="mm:flex mm:w-3/4">
+        <div className="mm:grow mm:w-3/4 mm:pt-4">
+          {displayAttributeInput()}
+        </div>
+        <div className="mm:relative mm:pl-2.5">
           {attributeType && !onChangeForComponentType && (
             <Button
-              tw="absolute bottom-0"
+              className="mm:absolute mm:bottom-0"
               variant="outline-filled"
               data-testid="add-attribute-button"
               onClick={handleAttributeChange}

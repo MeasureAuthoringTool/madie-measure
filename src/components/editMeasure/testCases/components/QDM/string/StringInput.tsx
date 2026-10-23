@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import "twin.macro";
+
 import "styled-components/macro";
 import { FormControl } from "@mui/material";
 import { TextField } from "@madie/madie-design-system/dist/react";
@@ -31,9 +31,7 @@ const StringInput = ({
   return (
     <div style={{ width: "134px" }}>
       <FormControl>
-        <h4 className="header" tw="text-blue-800">
-          {title}
-        </h4>
+        <h4 className="header mm:text-blue-800">{title}</h4>
         <TextField
           readOnly={!canEdit}
           label={label}

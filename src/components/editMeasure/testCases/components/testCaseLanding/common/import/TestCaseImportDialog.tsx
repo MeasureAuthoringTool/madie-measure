@@ -1,5 +1,5 @@
 import React, { useCallback, useRef, useState } from "react";
-import "twin.macro";
+
 import "styled-components/macro";
 import {
   Button,
@@ -209,26 +209,29 @@ const TestCaseImportDialog = ({ dialogOpen, handleClose, onImport }) => {
   const renderUploadedFileStatus = () => {
     return (
       <div
-        tw="flex border border-l-4 mt-5 mx-16 mb-1"
+        className="mm:flex mm:border mm:border-l-4 mm:mt-5 mm:mx-16 mm:mb-1"
         data-testid="test-case-preview-header"
       >
-        <div tw="flex items-center justify-between w-full">
-          <div tw="flex items-center">
-            <FolderZipOutlinedIcon tw="m-4 text-lg" />
-            <div tw="ml-1 ">
-              <small tw="block">{uploadedFile.name}</small>
-              <small tw="block">
+        <div className="mm:flex mm:items-center mm:justify-between mm:w-full">
+          <div className="mm:flex mm:items-center">
+            <FolderZipOutlinedIcon className="mm:m-4 mm:text-lg" />
+            <div className="mm:ml-1">
+              <small className="mm:block">{uploadedFile.name}</small>
+              <small className="mm:block">
                 {prettyBytes(uploadedFile.size)} -{" "}
                 {errorMessage ? (
-                  <span tw="text-red">Failed</span>
+                  <span className="mm:text-red">Failed</span>
                 ) : (
-                  <span tw="text-green-550">Complete</span>
+                  <span className="mm:text-green-550">Complete</span>
                 )}
               </small>
             </div>
           </div>
-          <div tw="mx-2 border-l-2">
-            <CloseIcon tw="ml-2" onClick={removeUploadedFile}></CloseIcon>
+          <div className="mm:mx-2 mm:border-l-2">
+            <CloseIcon
+              className="mm:ml-2"
+              onClick={removeUploadedFile}
+            ></CloseIcon>
           </div>
         </div>
       </div>
@@ -282,8 +285,10 @@ const TestCaseImportDialog = ({ dialogOpen, handleClose, onImport }) => {
           {...getRootProps({ className: "dropzone" })}
         >
           <input data-testid="file-drop-input" {...getInputProps()} />
-          <span tw="text-black-100">Drag 'n' drop file to upload </span>
-          <span tw="pb-3" style={{ color: "#666666" }}>
+          <span className="mm:text-black-100">
+            Drag 'n' drop file to upload{" "}
+          </span>
+          <span className="mm:pb-3" style={{ color: "#666666" }}>
             {" "}
             or{" "}
           </span>
@@ -294,24 +299,24 @@ const TestCaseImportDialog = ({ dialogOpen, handleClose, onImport }) => {
           >
             Select File
           </Button>
-          <span tw="pt-3" style={{ color: "#666666" }}>
+          <span className="mm:pt-3" style={{ color: "#666666" }}>
             (.zip)
           </span>
         </div>
         {uploadedFile && renderUploadedFileStatus()}
         {uploadingFileSpinner && (
           <div
-            tw="flex border border-l-4 mt-5 mx-16 mb-1"
+            className="mm:flex mm:border mm:border-l-4 mm:mt-5 mm:mx-16 mm:mb-1"
             data-testid="test-case-preview-header"
           >
-            <div tw="flex items-center ml-80 my-4">
+            <div className="mm:flex mm:items-center mm:ml-80 mm:my-4">
               <CircularProgress size={32} />
             </div>
           </div>
         )}
       </div>
       <div
-        tw="flex items-center ml-20"
+        className="mm:flex mm:items-center mm:ml-20"
         data-testid="test-case-import-error-div"
       >
         {errorMessage && (

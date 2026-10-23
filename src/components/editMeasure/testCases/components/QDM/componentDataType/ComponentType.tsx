@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import "twin.macro";
+
 import "styled-components/macro";
 import CodeInput from "../../QDM/codeInput/CodeInput";
 import { Select } from "@madie/madie-design-system/dist/react";
@@ -85,8 +85,8 @@ const ComponentType = ({
   };
 
   return (
-    <div tw="flex flex-col">
-      <div tw="w-full">
+    <div className="mm:flex mm:flex-col">
+      <div className="mm:w-full">
         <CodeInput
           handleChange={(cqlCode) => saveCodeInput(cqlCode)}
           canEdit={true}
@@ -94,8 +94,8 @@ const ComponentType = ({
           required={false}
         />
       </div>
-      <div tw="flex flex-row">
-        <div tw="w-1/2 pt-4">
+      <div className="mm:flex mm:flex-row">
+        <div className="mm:w-1/2 mm:pt-4">
           <Select
             placeHolder={{
               name: "Select Result",
@@ -118,7 +118,7 @@ const ComponentType = ({
             }}
           />
         </div>
-        <div tw="w-1/2 pl-5">
+        <div className="mm:w-1/2 mm:pl-5">
           <DisplayAttributeInputs
             selectedDataElement={selectedDataElement}
             attributeType={resultType}

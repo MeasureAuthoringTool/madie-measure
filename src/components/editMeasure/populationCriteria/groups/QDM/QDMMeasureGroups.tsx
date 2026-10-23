@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import tw from "twin.macro";
+
 import "styled-components/macro";
 import {
   Measure,
@@ -697,7 +697,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
     return undefined;
   };
   return (
-    <div tw="lg:col-span-5 pl-2 pr-2" data-testid="qdm-groups">
+    <div className="mm:lg:col-span-5 mm:pl-2 mm:pr-2" data-testid="qdm-groups">
       <FormikProvider value={formik}>
         <Toast
           toastKey="population-criteria-toast"
@@ -738,11 +738,11 @@ const MeasureGroups = (props: MeasureGroupProps) => {
           )}
           {pathname.includes("/groups") && (
             <>
-              <div tw="flex pb-2 pt-6">
-                <h2 tw="w-1/2 mb-0" data-testid="title" id="title">
+              <div className="mm:flex mm:pb-2 mm:pt-6">
+                <h2 className="mm:w-1/2 mm:mb-0" data-testid="title" id="title">
                   Population Criteria {measureGroupNumber + 1}
                 </h2>
-                <div tw="w-1/2 self-end">
+                <div className="mm:w-1/2 mm:self-end">
                   <Typography
                     style={{
                       fontSize: 14,
@@ -760,7 +760,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
 
               {/* Form control later should be moved to own component and dynamically rendered by switch based on measure. */}
 
-              <div tw="mb-5">
+              <div className="mm:mb-5">
                 <div>
                   <FormFieldInner>
                     <FieldSeparator>
@@ -968,7 +968,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
               </div>
 
               {canEdit && (
-                <div tw="grid lg:grid-cols-4 gap-4 items-center py-4">
+                <div className="mm:grid mm:lg:grid-cols-4 mm:gap-4 mm:items-center mm:py-4">
                   <Button
                     style={{ width: "30%" }}
                     variant="danger"
@@ -989,7 +989,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                   </Button>
                   <ButtonSpacer>
                     <span
-                      tw="text-sm"
+                      className="mm:text-sm"
                       style={{ color: "#717171" }}
                       data-testid="save-measure-group-validation-message"
                       aria-live="polite" //this triggers every time the user is there.. this intended?
@@ -1002,11 +1002,10 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                         : "You must set all required Populations."}
                     </span>
                   </ButtonSpacer>
-                  <div tw="lg:col-start-4 flex">
+                  <div className="mm:lg:col-start-4 mm:flex">
                     <Button
-                      tw="mx-2"
                       variant="outline"
-                      className="cancel-button"
+                      className="cancel-button mm:mx-2"
                       disabled={!formik.dirty}
                       data-testid="group-form-discard-btn"
                       onClick={() => setDiscardDialogOpen(true)}
@@ -1014,7 +1013,7 @@ const MeasureGroups = (props: MeasureGroupProps) => {
                       Discard Changes
                     </Button>
                     <Button
-                      tw="mx-2"
+                      className="mm:mx-2"
                       style={{ marginTop: "0px" }}
                       variant="cyan"
                       type="submit"

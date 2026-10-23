@@ -7,7 +7,7 @@ import React, {
 } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import queryString from "query-string";
-import "twin.macro";
+
 import "styled-components/macro";
 import MeasureList from "./measureList/MeasureList";
 import { Measure, OwnershipType } from "@madie/madie-models";
@@ -392,7 +392,7 @@ export default function MeasureLanding() {
       </div>
       <div className="measure-table">
         <section
-          tw="flex flex-row"
+          className="mm:flex mm:flex-row"
           style={{ borderBottom: "1px solid #b0b0b0" }}
         >
           <div>
@@ -446,7 +446,7 @@ export default function MeasureLanding() {
               )}
             </Tabs>
           </div>
-          <span tw="flex-grow" />
+          <span className="mm:grow" />
         </section>
         <div>
           {errMsg && !loading && (

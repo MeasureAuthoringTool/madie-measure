@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import "twin.macro";
+
 import "styled-components/macro";
 import { Box, MenuItem } from "@mui/material";
 import { Select } from "@madie/madie-design-system/dist/react";

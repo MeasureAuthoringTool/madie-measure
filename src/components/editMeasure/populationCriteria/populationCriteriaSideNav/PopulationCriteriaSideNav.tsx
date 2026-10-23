@@ -1,5 +1,6 @@
+import styled from "styled-components";
 import React, { useState } from "react";
-import tw from "twin.macro";
+
 import "styled-components/macro";
 import { useLocation, useNavigate } from "react-router-dom";
 import AddIcon from "@mui/icons-material/Add";
@@ -13,7 +14,9 @@ import CompletionIndicator from "../groups/CompletionIndicator";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import ErrorIcon from "@mui/icons-material/Error";
 
-const InnerWrapper = tw.div`flex flex-grow flex-col`;
+const InnerWrapper = styled.div.attrs((): { className: string } => ({
+  className: "mm:flex mm:grow mm:flex-col",
+}))``;
 
 export interface PopulationCriteriaSideNavProp {
   canEdit?: Boolean;

@@ -5,7 +5,7 @@ import {
   Tab,
 } from "@madie/madie-design-system/dist/react";
 import "./CreateTestCaseNavTabs.scss";
-import "twin.macro";
+
 import "styled-components/macro";
 import EditorSearch from "../editTestCase/qiCore/LeftPanel/EditorSearch";
 import EditorCalculator from "../editTestCase/calculator/EditorCalculator";
@@ -39,8 +39,8 @@ export default function CreateTestCaseNavTabs(props: NavTabProps) {
   return (
     <>
       {isBuilderEnabled && (
-        <div tw="flex flex-row w-full">
-          <div tw="basis-11/12">
+        <div className="mm:flex mm:flex-row mm:w-full">
+          <div className="mm:basis-11/12">
             <Tabs
               id="test-case-nav-container"
               value={leftPanelActiveTab}
@@ -82,7 +82,7 @@ export default function CreateTestCaseNavTabs(props: NavTabProps) {
               />
             </Tabs>
           </div>
-          <div tw="ml-auto mr-8 flex">
+          <div className="mm:ml-auto mm:mr-8 mm:flex">
             <EditorCalculator onClick={() => setCalculationDialogOpen(true)} />
             {leftPanelActiveTab === "json" && <EditorSearch />}
           </div>

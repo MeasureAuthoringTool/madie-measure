@@ -1,4 +1,4 @@
-import tw, { styled } from "twin.macro";
+import styled from "styled-components";
 
 export const SubTitle = styled.p`
   color: #505d68;
@@ -7,8 +7,12 @@ export const SubTitle = styled.p`
   max-width: 405px;
 `;
 
-export const SecondIpLabel = tw.span`text-black-50`;
-export const FieldSeparator = tw.div`mt-1`;
+export const SecondIpLabel = styled.span.attrs((): { className: string } => ({
+  className: "mm:text-black-50",
+}))``;
+export const FieldSeparator = styled.div.attrs((): { className: string } => ({
+  className: "mm:mt-1",
+}))``;
 export const SoftLabel = styled.label`
   display: block;
   margin-bottom: 5px;

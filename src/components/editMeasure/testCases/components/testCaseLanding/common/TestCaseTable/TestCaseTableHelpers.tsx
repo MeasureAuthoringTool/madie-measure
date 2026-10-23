@@ -139,7 +139,6 @@ export const TestCaseActionButton = (props) => {
       onClick={(e) => {
         handleOpen(testCase, e);
       }}
-      tw="text-blue-600 hover:text-blue-900"
       data-testid={`select-action-${testCase.id}`}
       aria-label={`select-action-${testCase.title}`}
     >
