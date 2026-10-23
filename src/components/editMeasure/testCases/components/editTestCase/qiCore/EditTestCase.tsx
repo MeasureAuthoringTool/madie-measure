@@ -507,7 +507,8 @@ const EditTestCase = (props: EditTestCaseProps) => {
     [setCustomWarningMessages]
   );
 
-  const isQiCoreV6 = measure?.model === "QI-Core v6.0.0";
+  const validateOnLoad =
+    measure?.model === "QDM v5.6" || measure?.model === "QI-Core v4.1.1";
   // testCase polling, gets triggered when validationStatus is either Pending or Validating
   useTestCasePolling({
     testCaseId: id,
@@ -522,7 +523,7 @@ const EditTestCase = (props: EditTestCaseProps) => {
       nextTc.json = standardizeJson(nextTc);
       setTestCase(nextTc);
     },
-    validateTest: !isQiCoreV6,
+    validateTest: validateOnLoad,
     onError: (error) => {
       showToast(error, "danger");
     },
@@ -629,7 +630,7 @@ const EditTestCase = (props: EditTestCaseProps) => {
 
   const loadTestCase = () => {
     testCaseService.current
-      .getTestCase(id, measureId, !isQiCoreV6)
+      .getTestCase(id, measureId, validateOnLoad)
       .then((tc: TestCase) => {
         const nextTc = _.cloneDeep(tc);
         nextTc.json = standardizeJson(nextTc);
