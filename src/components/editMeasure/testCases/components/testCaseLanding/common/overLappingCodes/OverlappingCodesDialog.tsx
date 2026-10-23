@@ -17,7 +17,7 @@ import {
   Pagination,
   Toast,
 } from "@madie/madie-design-system/dist/react";
-import tw from "twin.macro";
+
 import "styled-components/macro";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowRightIcon from "@mui/icons-material/KeyboardArrowRight";
@@ -40,8 +40,6 @@ interface RowData {
   version: string;
   subRows?: RowData[]; // Optional subRows for nested data
 }
-const TH = tw.th`p-3 text-left text-sm`;
-const TD = tw.td`p-3 text-left text-sm break-keep`;
 
 const Description = ({ valueSet }: { valueSet: OverlappingValueSetDto }) => {
   return (
@@ -56,7 +54,7 @@ const Description = ({ valueSet }: { valueSet: OverlappingValueSetDto }) => {
         <Typography variant="subtitle1" fontWeight="bold">
           {valueSet?.url ? "URL" : "OID"}:
         </Typography>
-        <Typography variant="body1" tw="break-all">
+        <Typography variant="body1" className="mm:break-all">
           {valueSet?.url ? valueSet.url : valueSet.oid}
         </Typography>
       </Box>
@@ -201,17 +199,21 @@ const OverlappingCodesReport = ({
 
   return (
     <>
-      <table tw="min-w-full" data-testid="overlapping-codes-tbl">
-        <thead tw="bg-slate">
+      <table data-testid="overlapping-codes-tbl" className="mm:min-w-full">
+        <thead className="mm:bg-slate">
           {table.getHeaderGroups().map((headerGroup) => (
             <tr key={headerGroup.id}>
               {headerGroup.headers.map((header) => (
-                <TH key={header.id} scope="col">
+                <th
+                  key={header.id}
+                  scope="col"
+                  className="mm:p-3 mm:text-left mm:text-sm"
+                >
                   {flexRender(
                     header.column.columnDef.header,
                     header.getContext()
                   )}
-                </TH>
+                </th>
               ))}
             </tr>
           ))}
@@ -228,15 +230,19 @@ const OverlappingCodesReport = ({
                 }}
               >
                 {row.getVisibleCells().map((cell) => (
-                  <TD key={cell.id} data-testid={`${cell.id}`}>
+                  <td
+                    key={cell.id}
+                    data-testid={`${cell.id}`}
+                    className="mm:p-3 mm:text-left mm:text-sm mm:break-keep"
+                  >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </TD>
+                  </td>
                 ))}
               </tr>
             ))
           ) : (
             <tr>
-              <td colSpan={columns.length} tw="text-center p-2">
+              <td colSpan={columns.length} className="mm:text-center mm:p-2">
                 There are no overlapping codes
               </td>
             </tr>

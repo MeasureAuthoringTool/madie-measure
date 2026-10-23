@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import "twin.macro";
+
 import "styled-components/macro";
 import { RichTextEditor } from "@madie/madie-design-system/dist/react";
 import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";

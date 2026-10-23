@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from "react";
-import tw from "twin.macro";
+
 import {
   useReactTable,
   ColumnDef,
@@ -148,8 +148,6 @@ const TestCaseTable = (props: TestCaseTableProps) => {
   const supportsTestCaseValidation =
     measure?.model !== Model.QICORE && measure?.model !== Model.QDM_5_6;
   const userServiceApi = useRef(useUserServiceApi()).current; //needs to be ref or triggers jest. throws warn
-
-  const TH = tw.th`p-3 text-left text-sm font-bold capitalize`;
 
   const transFormData = (
     testCases: TestCase[],
@@ -544,28 +542,27 @@ const TestCaseTable = (props: TestCaseTableProps) => {
   return (
     <div style={{ overflow: "visible" }}>
       <table
-        tw="min-w-full"
         data-testid="test-case-tbl"
-        className="tcl-table"
+        className="tcl-table mm:min-w-full"
         id="testCaseListTable"
         style={{
           borderSpacing: "0 2em !important",
           overflow: "visible",
         }}
       >
-        <thead tw="bg-slate" className="sticky-table">
+        <thead className="sticky-table mm:bg-slate">
           {table.getHeaderGroups().map((headerGroup) => (
             <tr key={headerGroup.id}>
               {headerGroup.headers.map((header) => {
                 const isHovered = hoveredHeader?.includes(header.id);
                 return (
-                  <TH
+                  <th
                     key={header.id}
                     scope="col"
                     onClick={header.column.getToggleSortingHandler()}
                     onMouseEnter={() => setHoveredHeader(header.id)}
                     onMouseLeave={() => setHoveredHeader(null)}
-                    className="header-cell"
+                    className="header-cell mm:p-3 mm:text-left mm:text-sm mm:font-bold mm:capitalize"
                   >
                     {header.isPlaceholder ? null : header.column.getCanSort() ? (
                       <button
@@ -605,7 +602,7 @@ const TestCaseTable = (props: TestCaseTableProps) => {
                         header.getContext()
                       )
                     )}
-                  </TH>
+                  </th>
                 );
               })}
             </tr>

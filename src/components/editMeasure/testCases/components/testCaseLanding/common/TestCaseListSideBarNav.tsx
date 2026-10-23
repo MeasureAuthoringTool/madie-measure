@@ -1,15 +1,13 @@
 import React, { useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { Group } from "@madie/madie-models";
-import tw from "twin.macro";
+
 import { Tabs, Tab } from "@madie/madie-design-system/dist/react";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import ExpansionIcon from "@mui/icons-material/KeyboardTabOutlined";
 import IconButton from "@mui/material/IconButton";
 import "../../../../../../styles/VerticalSideBarNav.scss";
-
-const InnerWrapper = tw.div`flex flex-grow flex-col`;
 
 export interface TestCaseListSideBarNavProps {
   allPopulationCriteria: Group[];
@@ -77,8 +75,8 @@ const TestCaseListSideBarNav = ({
 
   return (
     <div className="outer-wrapper">
-      <InnerWrapper
-        className="vertical-side-nav"
+      <div
+        className="vertical-side-nav mm:flex mm:grow mm:flex-col"
         id="edit-measure-details-side-nav"
       >
         <nav
@@ -229,7 +227,7 @@ const TestCaseListSideBarNav = ({
             )}
           </>
         </nav>
-      </InnerWrapper>
+      </div>
     </div>
   );
 };

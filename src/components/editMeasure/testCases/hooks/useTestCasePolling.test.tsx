@@ -104,8 +104,10 @@ describe("useTestCasePolling", () => {
     expect(mockedAxios.get).toHaveBeenCalledTimes(2);
 
     // unmount the component
-    await act(async () => {
+    act(() => {
       unmount();
+    });
+    await act(async () => {
       jest.advanceTimersByTime(10000);
     });
 

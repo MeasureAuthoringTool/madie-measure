@@ -131,7 +131,7 @@ const CompositePopulationGrid = ({
           </td>
         </tr>
         {denominatorScoreError && (
-          <tr tw="border-b">
+          <tr>
             <td>
               <span style={{ visibility: "hidden" }} aria-hidden="true">
                 -
@@ -166,7 +166,7 @@ const CompositePopulationGrid = ({
           </td>
         </tr>
         {numeratorScoreError && (
-          <tr tw="border-b">
+          <tr>
             <td>
               <span style={{ visibility: "hidden" }} aria-hidden="true">
                 -
@@ -213,7 +213,7 @@ const CompositePopulationGrid = ({
           </td>
         </tr>
         {compositeScoreError && (
-          <tr tw="border-b">
+          <tr>
             <td>
               <span style={{ visibility: "hidden" }} aria-hidden="true">
                 -

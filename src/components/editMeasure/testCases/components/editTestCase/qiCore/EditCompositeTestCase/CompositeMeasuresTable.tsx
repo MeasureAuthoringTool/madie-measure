@@ -10,7 +10,7 @@ import {
 } from "@tanstack/react-table";
 import { TruncateText, Button } from "@madie/madie-design-system/dist/react";
 import * as _ from "lodash";
-import tw from "twin.macro";
+
 import "styled-components/macro";
 import { convertDate } from "../../../testCaseLanding/common/TestCaseTable/TestCaseTable";
 import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore";
@@ -18,7 +18,6 @@ import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import { Measure } from "@madie/madie-models";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
-const TH = tw.th`p-3 text-left text-sm font-bold capitalize`;
 
 export default function CompositeMeasuresTable({
   measures,
@@ -85,10 +84,10 @@ export default function CompositeMeasuresTable({
         header: null,
         cell: (info) => (
           <Button
-            tw="m-2"
             type="button"
             data-testid={`select-test-case-btn-${info.row.original.id}`}
             onClick={() => onSelectTestCase?.(info.row.original)}
+            className="mm:m-2"
           >
             Select Test Case
             <ChevronRightIcon style={{ height: "20px", width: "20px" }} />
@@ -126,26 +125,25 @@ export default function CompositeMeasuresTable({
       <div className="measure-table no-margin no-vert-borders no-radius middle-align-row">
         <div className="table" style={{ overflow: "auto" }}>
           <table
-            tw="min-w-full"
             data-testid="measure-list-tbl"
-            className="ml-table"
+            className="ml-table mm:min-w-full"
             style={{
               borderSpacing: "0 2em !important",
             }}
           >
-            <thead tw="bg-slate">
+            <thead className="mm:bg-slate">
               {table.getHeaderGroups().map((headerGroup) => (
                 <tr key={headerGroup.id}>
                   {headerGroup.headers.map((header) => {
                     const isHovered = hoveredHeader?.includes(header.id);
                     return (
-                      <TH
+                      <th
                         key={header.id}
                         scope="col"
                         onClick={header.column.getToggleSortingHandler()}
                         onMouseEnter={() => setHoveredHeader(header.id)}
                         onMouseLeave={() => setHoveredHeader(null)}
-                        className="header-cell"
+                        className="header-cell mm:p-3 mm:text-left mm:text-sm mm:font-bold mm:capitalize"
                       >
                         {header.isPlaceholder ? null : (
                           <button
@@ -186,7 +184,7 @@ export default function CompositeMeasuresTable({
                             )}
                           </button>
                         )}
-                      </TH>
+                      </th>
                     );
                   })}
                 </tr>

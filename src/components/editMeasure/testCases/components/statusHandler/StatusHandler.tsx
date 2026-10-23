@@ -3,7 +3,7 @@ import { MadieAlert } from "@madie/madie-design-system/dist/react";
 
 import "./StatusHandler.scss";
 import { TestCaseImportOutcome } from "@madie/madie-models";
-import "twin.macro";
+
 import "styled-components/macro";
 import { EXPORT_ERROR_CHARACTERS_MESSAGE } from "../../util/checkSpecialCharacters";
 import {

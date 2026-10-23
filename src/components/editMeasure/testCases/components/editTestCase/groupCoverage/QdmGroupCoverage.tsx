@@ -9,7 +9,7 @@ import {
   getPopulationAbbreviation,
   isPopulation,
 } from "../../../util/GroupCoverageHelpers";
-import "twin.macro";
+
 import "styled-components/macro";
 import parse from "html-react-parser";
 import { Group, GroupPopulation, SupplementalData } from "@madie/madie-models";
@@ -241,10 +241,9 @@ const QdmGroupCoverage = ({
 
   return (
     <>
-      <div tw="border-b pb-2">
+      <div className="mm:border-b mm:pb-2">
         <Select
           id={"population-criterion-selector"}
-          tw="w-1/4"
           sx={{
             height: "32px",
             borderColor: "transparent",
@@ -294,15 +293,16 @@ const QdmGroupCoverage = ({
             return getCriteriaLabel(index, testCaseGroups.length);
           }}
           onChange={(e) => changeCriteria(e.target.value)}
+          className="mm:w-1/4"
         />
       </div>
       <div
-        tw="flex mt-5"
         key={selectedCriteria}
         style={{ paddingBottom: "7px" }}
         data-testid="group-coverage-container"
+        className="mm:flex mm:mt-5"
       >
-        <div tw="flex-none w-1/5">
+        <div className="mm:flex-none mm:w-1/5">
           <GroupCoverageNav
             id={selectedCriteria}
             populations={getRelevantPopulations()}
@@ -314,7 +314,6 @@ const QdmGroupCoverage = ({
           />
         </div>
         <div
-          tw="flex-auto pl-3"
           style={{
             overflowX: "scroll",
             fontSize: "14px",
@@ -322,6 +321,7 @@ const QdmGroupCoverage = ({
           }}
           id={"cql-highlighting"}
           data-testid={"cql-highlighting"}
+          className="mm:flex-auto mm:pl-3"
         >
           {selectedDefinitionResults &&
             selectedDefinitionResults.map((definitionResults, i) =>

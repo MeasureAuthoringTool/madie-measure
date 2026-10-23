@@ -277,7 +277,7 @@ describe("EditTestCaseBreadCrumbs", () => {
       screen.getByRole("option", { name: "Case #3: Group2 - Title3" })
     );
 
-    expect(mockNavigate).toBeCalledTimes(1);
+    expect(mockNavigate).toHaveBeenCalledTimes(1);
     expect(mockNavigate).toHaveBeenCalledWith(
       "/measures/123/edit/test-cases/3"
     );

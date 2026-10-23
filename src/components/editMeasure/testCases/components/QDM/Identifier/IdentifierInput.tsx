@@ -1,6 +1,6 @@
 import React from "react";
 import { TextField } from "@madie/madie-design-system/dist/react/";
-import "twin.macro";
+
 import "styled-components/macro";
 
 export interface IdentifierProps {
@@ -38,11 +38,9 @@ const IdentifierInput = ({
 
   return (
     <div>
-      <h4 className="header" tw="text-blue-800">
-        {"Identifier"}
-      </h4>
-      <div tw="flex flex-row">
-        <div tw="w-72 mr-4">
+      <h4 className="header mm:text-blue-800">{"Identifier"}</h4>
+      <div className="mm:flex mm:flex-row">
+        <div className="mm:w-72 mm:mr-4">
           <TextField
             value={identifier?.namingSystem}
             label={namingLabel}
@@ -57,7 +55,7 @@ const IdentifierInput = ({
             onChange={(e) => handleNamingSystemChange(e)}
           />
         </div>
-        <div tw="w-28">
+        <div className="mm:w-28">
           <TextField
             value={identifier?.value}
             label={valueLabel}

@@ -1,5 +1,5 @@
 import React from "react";
-import "twin.macro";
+
 import "styled-components/macro";
 import { MadieAlert } from "@madie/madie-design-system/dist/react";
 interface MeasureGroupAlertsTypes {
@@ -11,7 +11,7 @@ interface MeasureGroupAlertsTypes {
 const MeasureGroupAlerts = (props: MeasureGroupAlertsTypes) => {
   const dataTestId = props.type === "error" ? "error-alerts" : "success-alerts";
   return (
-    <div tw="mx-8 my-4">
+    <div className="mm:mx-8 mm:my-4">
       {props.message && (
         <MadieAlert
           type={props.type}

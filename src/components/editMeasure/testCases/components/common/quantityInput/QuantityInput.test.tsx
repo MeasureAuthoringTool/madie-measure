@@ -140,7 +140,7 @@ describe("QuantityInput Component", () => {
     ) as HTMLInputElement;
     expect(quantityFieldInput).toBeInTheDocument();
     expect(quantityFieldInput.value).toBe("");
-    expect(onQuantityChange).toBeCalled();
+    expect(onQuantityChange).toHaveBeenCalled();
     userEvent.type(quantityFieldInput, "-1-");
     expect(onQuantityChange).toHaveBeenNthCalledWith(2, {
       unit: "mg",

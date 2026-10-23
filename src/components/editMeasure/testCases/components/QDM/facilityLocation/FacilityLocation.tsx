@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import "twin.macro";
+
 import "styled-components/macro";
 import {
   CQL,
@@ -35,7 +35,7 @@ const FacilityLocation = ({ onChange, valueSets, canEdit }: Props) => {
         required={true}
         title="Code"
       />
-      <div tw="mt-4">
+      <div className="mm:mt-4">
         <DateTimeInterval
           canEdit={canEdit}
           label="Location Period"

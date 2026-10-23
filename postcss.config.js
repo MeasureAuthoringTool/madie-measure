@@ -1,7 +1,11 @@
 module.exports = {
   plugins: {
-    tailwindcss: {},
+    "@tailwindcss/postcss": {},
     autoprefixer: {},
-    "postcss-preset-env": {},
+    "postcss-preset-env": {
+      features: {
+        "cascade-layers": false,
+      },
+    },
   },
 };

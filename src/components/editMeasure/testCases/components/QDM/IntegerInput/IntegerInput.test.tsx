@@ -72,7 +72,7 @@ describe("IntegerInput Component", () => {
     expect(integerFieldInput).toBeInTheDocument();
     expect(integerFieldInput.value).toBe("0");
     userEvent.type(integerFieldInput, "-");
-    expect(handleChange).not.toBeCalled();
+    expect(handleChange).not.toHaveBeenCalled();
     userEvent.type(integerFieldInput, "{backspace}");
     userEvent.type(integerFieldInput, "1");
     //due to the nature of jest and the component, the 0 will be in the front
