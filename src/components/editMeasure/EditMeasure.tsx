@@ -724,7 +724,7 @@ export default function EditMeasure() {
     hasReviewerRole: Boolean(userRoles?.isReviewer),
     assignedReviewers: measureReview?.reviewers,
   });
-  const commentSection = useMemo(
+  const commentLocation = useMemo(
     () => getCommentSectionLocation(location.pathname, measure),
     [location.pathname, measure]
   );
@@ -980,8 +980,8 @@ export default function EditMeasure() {
             onAddComment={addComment}
             onUpdateComment={updateComment}
             onDeleteComment={deleteComment}
-            sectionName={commentSection.subSectionName}
-            mainSection={commentSection.mainSection}
+            subSection={commentLocation.subSectionName}
+            mainSection={commentLocation.mainSection}
             readyForReviewBy={measureReview?.readyForReviewBy}
             readyForReviewAt={measureReview?.readyForReviewAt}
           />
