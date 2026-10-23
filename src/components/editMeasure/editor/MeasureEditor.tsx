@@ -310,7 +310,9 @@ const MeasureEditor = ({ measureCanEdit, measureLockedBy }) => {
   };
 
   const hasParserErrors = async (val) => {
-    return parseContent(val)?.length > 0;
+    debugger;
+    const hasErrors = parseContent(val)?.length > 0;
+    return hasErrors;
   };
   const isLoggedInUMLS = (errors: ElmTranslationError[]) => {
     return JSON.stringify(errors).includes("Please log in to UMLS");
