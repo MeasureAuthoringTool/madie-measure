@@ -310,7 +310,8 @@ const MeasureEditor = ({ measureCanEdit, measureLockedBy }) => {
   };
 
   const hasParserErrors = async (val) => {
-    return parseContent(val)?.length > 0;
+    const hasErrors = parseContent(val)?.length > 0;
+    return hasErrors;
   };
   const isLoggedInUMLS = (errors: ElmTranslationError[]) => {
     return JSON.stringify(errors).includes("Please log in to UMLS");
@@ -500,7 +501,7 @@ const MeasureEditor = ({ measureCanEdit, measureLockedBy }) => {
               }
               if (updatedCqlObj.isValueSetChanged) {
                 secondaryMessages.push(
-                  "MADiE does not currently support use of value set version directly in measures at this time. Your value set versions have been removed. Please use the relevant manifest for value set expansion for testing."
+                  "MADiE does not currently support use of value set version directly in CQL at this time. Your value set versions have been removed. Please use the relevant manifest for value set expansion for testing."
                 );
               }
               if (updatedCqlObj.isConceptRemoved) {

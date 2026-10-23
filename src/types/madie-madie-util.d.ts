@@ -402,6 +402,20 @@ declare module "@madie/madie-util" {
     readyForReviewBy?: string;
     readyForReviewAt?: string;
   }): React.ReactElement;
+  export interface CommentSectionLocation {
+    activeMainSection?: string;
+    activeSubSection: string;
+  }
+  export function CommentsFlyoutPanel(props: {
+    open: boolean;
+    onClose: () => void;
+    entityType: "measure" | "library";
+    sections: { name: string; subSections: string[] }[];
+    activeSection: CommentSectionLocation;
+    commentedSubSections?: string[];
+    readyForReviewBy?: string;
+    readyForReviewAt?: string;
+  }): React.ReactElement;
   export const REVIEW_STATUS_OPTIONS: string[];
   export function getNewestMeasureInstance(measures: Measure[]): Measure;
 
