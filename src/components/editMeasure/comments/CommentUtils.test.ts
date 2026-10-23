@@ -2,7 +2,7 @@ import {
   COMMENT_MAIN_SECTIONS,
   getCommentSectionLocation,
   getCommentSections,
-} from "./commentSections";
+} from "./CommentUtils";
 
 // the resolver returns { mainSection, subSectionName }; these cases assert the
 // label it lands on

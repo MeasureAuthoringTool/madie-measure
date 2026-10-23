@@ -65,7 +65,7 @@ import StatusHandler, { INITIAL_STATUS_HANDLER } from "./editor/StatusHandler";
 import {
   getCommentSectionLocation,
   getCommentSections,
-} from "./comments/commentSections";
+} from "./comments/CommentUtils";
 
 const OBJECT_ID_REGEX = /\/[a-f0-9]{24}/g;
 
