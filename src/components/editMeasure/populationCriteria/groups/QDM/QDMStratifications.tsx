@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import "twin.macro";
+
 import "styled-components/macro";
 import { MenuItem as MuiMenuItem } from "@mui/material";
 import { Select, DSLink } from "@madie/madie-design-system/dist/react";
@@ -54,10 +54,10 @@ const QDMStratifications = ({
               (strat, i) =>
                 formik.values.stratifications[i].description !==
                   deleteToken && (
-                  <div key={i} tw="mt-6">
-                    <div tw="grid lg:grid-cols-4 gap-4">
-                      <div tw="lg:col-span-2">
-                        <div tw="relative">
+                  <div key={i} className="mm:mt-6">
+                    <div className="mm:grid mm:lg:grid-cols-4 mm:gap-4">
+                      <div className="mm:lg:col-span-2">
+                        <div className="mm:relative">
                           {formik.values.stratifications.length > 2 && (
                             <DSLink
                               className="madie-link"
@@ -113,7 +113,7 @@ const QDMStratifications = ({
                           />
                         </div>
                       </div>
-                      <div tw="lg:col-span-2">
+                      <div className="mm:lg:col-span-2">
                         <TextEditor
                           label={`Stratification ${i + 1} Description`}
                           setFieldValue={formik.setFieldValue}
@@ -128,7 +128,7 @@ const QDMStratifications = ({
                 )
             )}
           {canEdit ? (
-            <div tw="pt-4">
+            <div className="mm:pt-4">
               <DSLink
                 className="madie-link"
                 sx={{
@@ -147,7 +147,7 @@ const QDMStratifications = ({
               </DSLink>
             </div>
           ) : (
-            <div tw="p-4"></div>
+            <div className="mm:p-4"></div>
           )}
         </div>
       )}

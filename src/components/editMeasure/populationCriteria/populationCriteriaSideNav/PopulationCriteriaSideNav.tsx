@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import tw from "twin.macro";
+
 import "styled-components/macro";
 import { useLocation, useNavigate } from "react-router-dom";
 import AddIcon from "@mui/icons-material/Add";
@@ -12,8 +12,6 @@ import { INCOMPLETE, NONE } from "../PopulationCriteriaHome";
 import CompletionIndicator from "../groups/CompletionIndicator";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import ErrorIcon from "@mui/icons-material/Error";
-
-const InnerWrapper = tw.div`flex flex-grow flex-col`;
 
 export interface PopulationCriteriaSideNavProp {
   canEdit?: Boolean;
@@ -154,7 +152,7 @@ export default function PopulationCriteriaSideNav(
 
   return (
     <div className="outer-wrapper">
-      <InnerWrapper className="vertical-side-nav">
+      <div className="vertical-side-nav mm:flex mm:grow mm:flex-col">
         <nav aria-label="Sidebar">
           {isQDM && (
             <Tabs
@@ -310,7 +308,7 @@ export default function PopulationCriteriaSideNav(
             })}
           </Tabs>
         </nav>
-      </InnerWrapper>
+      </div>
     </div>
   );
 }

@@ -823,7 +823,14 @@ describe("AddComponentsDialog", () => {
       "select-composite-measure-components-continue-button"
     );
     await userEvent.click(saveButton);
-    expect(onCloseMock).not.toHaveBeenCalled();
+    await waitFor(() => {
+      expect(submitComponentFormMock).toHaveBeenCalledWith([
+        { measureId: "measure-1", groupId: "pg-1" },
+        { measureId: "measure-1", groupId: "pg-2" },
+        { measureId: "child-valid", groupId: "cg-1" },
+      ]);
+      expect(onCloseMock).toHaveBeenCalledTimes(1);
+    });
   });
 
   it("displays correct CMS ID in expanded rows", async () => {
@@ -2168,7 +2175,9 @@ describe("AddComponentsDialog", () => {
         );
         const uncheckedCheckbox = getCheckbox(uncheckedNestedRow);
         expect(uncheckedCheckbox).not.toBeChecked();
-        expect(uncheckedNestedRow).toHaveStyle({ backgroundColor: "white" });
+        expect(uncheckedNestedRow).toHaveStyle({
+          backgroundColor: "rgb(255, 255, 255)",
+        });
       }
     });
 

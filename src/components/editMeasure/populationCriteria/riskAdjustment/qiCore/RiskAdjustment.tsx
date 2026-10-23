@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import "twin.macro";
+
 import "styled-components/macro";
 import { useFormik } from "formik";
 import useFormikResetOnEvent from "../../../../common/useFormikResetOnEvent";
@@ -189,7 +189,7 @@ const RiskAdjustment = (props: RiskAdjustmentProps) => {
       handleSubmit={formik.handleSubmit}
       onCancel={onCancel}
     >
-      <div tw="flex flex-col" data-testid="risk-adjustment">
+      <div data-testid="risk-adjustment" className="mm:flex mm:flex-col">
         <TextEditor
           label="Description"
           setFieldValue={formik.setFieldValue}
@@ -197,8 +197,8 @@ const RiskAdjustment = (props: RiskAdjustmentProps) => {
           {...formik.getFieldProps("riskAdjustmentDescription")}
         />
       </div>
-      <div tw="flex mt-6 gap-x-3 w-full">
-        <div tw="w-full">
+      <div className="mm:flex mm:mt-6 mm:gap-x-3 mm:w-full">
+        <div className="mm:w-full">
           <MultipleSelectDropDown
             formControl={formik.getFieldProps("riskAdjustments")}
             value={formik.values.riskAdjustments?.map((ra) => ra?.definition)}
@@ -253,8 +253,8 @@ const RiskAdjustment = (props: RiskAdjustmentProps) => {
         </div>
 
         <div
-          tw="w-full flex flex-col"
           data-testid="includeInReportType-container"
+          className="mm:w-full mm:flex mm:flex-col"
         >
           {sortedRiskAdjustments?.map((riskAdjustment: RiskAdjustmentModel) => {
             const idx = formik.values.riskAdjustments?.indexOf(riskAdjustment);
@@ -269,7 +269,6 @@ const RiskAdjustment = (props: RiskAdjustmentProps) => {
                 error={false}
                 helperText=""
                 multipleSelect={true}
-                tw="mb-5"
                 limitTags={2}
                 textFieldInputProps={{
                   "aria-label": `${riskAdjustment.definition} - Include in Report Type`,
@@ -290,6 +289,7 @@ const RiskAdjustment = (props: RiskAdjustmentProps) => {
                   }
                   formik.setFieldValue("riskAdjustments", copied);
                 }}
+                className="mm:mb-5"
               />
             );
           })}

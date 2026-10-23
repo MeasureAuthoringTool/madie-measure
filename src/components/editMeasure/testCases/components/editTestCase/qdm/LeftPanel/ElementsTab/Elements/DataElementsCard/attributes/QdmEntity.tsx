@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import "twin.macro";
+
 import "styled-components/macro";
 import IdentifierInput from "../../../../../../../QDM/Identifier/IdentifierInput";
 import cqmModels from "cqm-models";
@@ -56,7 +56,7 @@ const QdmEntity = ({ setAttributeValue, attributeType, valueSets }) => {
 
   const displayQdmEntityRelatedAttributes = (attributes) =>
     attributes.map((attribute) => (
-      <div key={attribute} tw="mt-4">
+      <div key={attribute} className="mm:mt-4">
         <CodeInput
           handleChange={(val) => handleChange(_.camelCase(attribute), val)}
           canEdit={true}
@@ -86,7 +86,7 @@ const QdmEntity = ({ setAttributeValue, attributeType, valueSets }) => {
     <>
       {attributeType && (
         <>
-          <div tw="mt-4">
+          <div className="mm:mt-4">
             <IdentifierInput
               onIdentifierChange={(val) => handleChange("identifier", val)}
               canEdit={true}
@@ -94,7 +94,7 @@ const QdmEntity = ({ setAttributeValue, attributeType, valueSets }) => {
             />
           </div>
 
-          <div tw="mt-4">
+          <div className="mm:mt-4">
             <StringInput
               label="Id"
               title="Id"

@@ -364,7 +364,7 @@ describe("ActionCenter Component", () => {
       const cloneBtn = screen.getByTestId("clone-action-btn");
       expect(cloneBtn).toBeEnabled();
       userEvent.click(cloneBtn);
-      expect(onCloneTestCase).toBeCalled();
+      expect(onCloneTestCase).toHaveBeenCalled();
     });
 
     it("should export transaction bundle for QI-Core", async () => {

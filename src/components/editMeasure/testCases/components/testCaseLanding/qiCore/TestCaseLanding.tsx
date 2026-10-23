@@ -1,5 +1,5 @@
 import React from "react";
-import "twin.macro";
+
 import "styled-components/macro";
 import TestCaseList from "./TestCaseList";
 import { TestCaseListProps } from "../common/interfaces";

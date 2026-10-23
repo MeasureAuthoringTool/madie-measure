@@ -7,7 +7,7 @@ import {
   useNavigate,
   useLocation,
 } from "react-router-dom";
-import "twin.macro";
+
 import "styled-components/macro";
 import EditMeasureNav from "./EditMeasureNav";
 import MeasureDetails from "./details/MeasureDetails";
@@ -778,7 +778,7 @@ export default function EditMeasure() {
         </div>
       ) : (
         <>
-          <div tw="relative" style={{ marginTop: "-48px" }}>
+          <div style={{ marginTop: "-48px" }} className="mm:relative">
             <EditMeasureNav isQDM={isQDM} />
             {showReviewCommentLink && (
               <div className="review-comments-link">
@@ -797,7 +797,7 @@ export default function EditMeasure() {
                   type="error"
                   content={
                     <>
-                      <h5 tw="py-1">Error found</h5>
+                      <h5 className="mm:py-1">Error found</h5>
                       <p data-testid="edit-measure-alert">{errorMessage}</p>
                     </>
                   }

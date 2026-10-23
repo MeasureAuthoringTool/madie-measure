@@ -17,7 +17,7 @@ import {
 import useExecutionContext from "../../routes/qiCore/useExecutionContext";
 import { TestCasesPassingDetailsProps } from "../common/interfaces";
 import { useFeatureFlags } from "@madie/madie-util";
-import "twin.macro";
+
 import "styled-components/macro";
 import LoadingButton from "../common/loadingButton/LoadingButton";
 import LoadingButtonWithMenu from "../common/loadingButton/LoadingButtonWithMenu";
@@ -158,7 +158,10 @@ export default function CreateCodeCoverageNavTabs(props: NavTabProps) {
     contextFailure;
 
   return (
-    <div tw="flex justify-between items-center" style={{ overflow: "visible" }}>
+    <div
+      style={{ overflow: "visible" }}
+      className="mm:flex mm:justify-between mm:items-center"
+    >
       {isCompositeMeasure ? (
         <CompositeMeasureNavTabs
           activeTab={activeTab}
@@ -227,8 +230,8 @@ export default function CreateCodeCoverageNavTabs(props: NavTabProps) {
         </Tabs>
       )}
       <div
-        tw="flex flex-wrap space-x-4 justify-end"
         style={{ overflow: "visible" }}
+        className="mm:flex mm:flex-wrap mm:legacy-space-x-4 mm:justify-end"
       >
         {!isCompositeMeasure && (
           <LoadingButtonWithMenu

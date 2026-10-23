@@ -4,11 +4,10 @@ import { Tab, Tabs } from "@madie/madie-design-system/dist/react";
 import "../../../styles/VerticalSideBarNav.scss";
 import { Link } from "./MeasureDetails";
 import CompletionIndicator from "../populationCriteria/groups/CompletionIndicator";
-import tw from "twin.macro";
+
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 
-const InnerWrapper = tw.div`flex flex-grow flex-col`;
 export interface EditMeasureDetailsSideNavProps {
   links: Array<Link>;
 }
@@ -89,8 +88,8 @@ export default function EditMeasureDetailsSideNav(
 
   return (
     <div className="outer-wrapper">
-      <InnerWrapper
-        className="vertical-side-nav"
+      <div
+        className="vertical-side-nav mm:flex mm:grow mm:flex-col"
         id="edit-measure-details-side-nav"
       >
         <nav
@@ -142,7 +141,7 @@ export default function EditMeasureDetailsSideNav(
             );
           })}
         </nav>
-      </InnerWrapper>
+      </div>
     </div>
   );
 }

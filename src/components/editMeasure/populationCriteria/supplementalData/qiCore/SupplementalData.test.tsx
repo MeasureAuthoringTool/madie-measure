@@ -320,7 +320,7 @@ describe("SupplementalData Component QI-Core", () => {
     });
 
     await waitFor(() =>
-      expect(mockMeasureServiceApi.updateMeasure).toBeCalledWith({
+      expect(mockMeasureServiceApi.updateMeasure).toHaveBeenCalledWith({
         ...updatedMeasure,
       })
     );

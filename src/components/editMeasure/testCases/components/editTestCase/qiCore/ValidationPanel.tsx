@@ -1,6 +1,6 @@
+import styled from "styled-components";
 import React from "react";
 
-import tw, { styled } from "twin.macro";
 import { TestCase, ValidationStatus } from "@madie/madie-models";
 
 import { Box } from "@mui/material";
@@ -47,7 +47,19 @@ const styles = {
 };
 
 const ValidationAlertCard = styled.p<AlertProps>(({ status = "default" }) => [
-  tw`text-xs bg-white p-3 rounded-xl mx-3 my-1 break-words`,
+  {
+    marginLeft: "0.75rem",
+    marginRight: "0.75rem",
+    marginTop: "0.25rem",
+    marginBottom: "0.25rem",
+    overflowWrap: "break-word",
+    borderRadius: "0.75rem",
+    "--tw-bg-opacity": "1",
+    backgroundColor: "rgb(255 255 255 / var(--tw-bg-opacity, 1))",
+    padding: "0.75rem",
+    fontSize: "0.75rem",
+    lineHeight: "1rem",
+  },
   { whiteSpace: "pre-line" },
   styles[status],
 ]);
