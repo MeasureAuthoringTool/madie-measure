@@ -310,7 +310,6 @@ const MeasureEditor = ({ measureCanEdit, measureLockedBy }) => {
   };
 
   const hasParserErrors = async (val) => {
-    debugger;
     const hasErrors = parseContent(val)?.length > 0;
     return hasErrors;
   };
