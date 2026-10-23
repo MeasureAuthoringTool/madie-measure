@@ -3,7 +3,7 @@ import {
   getCommentSectionLocation,
   getCommentSectionName,
   getCommentSections,
-} from "./getCommentSectionName";
+} from "./CommentUtils";
 
 const measure = {
   model: "QI-Core v6.0.0",
