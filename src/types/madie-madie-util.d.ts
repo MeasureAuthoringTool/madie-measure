@@ -417,13 +417,17 @@ declare module "@madie/madie-util" {
     onError?: (message: string) => void
   ): ReviewComments;
 
+  export interface CommentSectionLocation {
+    activeMainSection?: string;
+    activeSubSection: string;
+  }
+
   export function CommentsFlyoutPanel(props: {
     open: boolean;
     onClose: () => void;
     entityType: "measure" | "library";
     sections: CommentSection[];
-    subSection: string;
-    mainSection?: string;
+    activeSections: CommentSectionLocation;
     comments?: Comment[];
     currentUserName?: string;
     currentUserId?: string;

@@ -980,8 +980,7 @@ export default function EditMeasure() {
             onAddComment={addComment}
             onUpdateComment={updateComment}
             onDeleteComment={deleteComment}
-            subSection={commentLocation.subSectionName}
-            mainSection={commentLocation.mainSection}
+            activeSections={commentLocation}
             readyForReviewBy={measureReview?.readyForReviewBy}
             readyForReviewAt={measureReview?.readyForReviewAt}
           />
