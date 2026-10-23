@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { TextField } from "@madie/madie-design-system/dist/react/";
-import "twin.macro";
+
 import "styled-components/macro";
 import { CQL } from "cqm-models";
 import * as ucum from "@lhncbc/ucum-lhc";
@@ -145,8 +145,8 @@ const QuantityInput = ({
   };
 
   return (
-    <div tw="flex flex-row">
-      <div tw="w-28">
+    <div className="mm:flex mm:flex-row">
+      <div className="mm:w-28">
         <TextField
           value={currentQuantity?.value}
           readOnly={!canEdit}
@@ -178,7 +178,7 @@ const QuantityInput = ({
           }}
         />
       </div>
-      <div tw="w-56">
+      <div className="mm:w-56">
         <TextField
           id={`quantity-unit-input-${label.toLowerCase()}`}
           readOnly={!canEdit}

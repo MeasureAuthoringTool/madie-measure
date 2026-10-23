@@ -79,7 +79,7 @@ describe("ExecutionOptions component", () => {
     await waitFor(() =>
       expect(
         mockMeasureServiceApi.updateMeasureTestCaseConfiguration
-      ).toBeCalledWith({ executeInvalidTestCases: true }, measure.id)
+      ).toHaveBeenCalledWith({ executeInvalidTestCases: true }, measure.id)
     );
   });
 
@@ -102,7 +102,7 @@ describe("ExecutionOptions component", () => {
     await waitFor(() =>
       expect(
         mockMeasureServiceApi.updateMeasureTestCaseConfiguration
-      ).toBeCalledWith({ executeInvalidTestCases: true }, measure.id)
+      ).toHaveBeenCalledWith({ executeInvalidTestCases: true }, measure.id)
     );
 
     const errorToast = screen.getByTestId(

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import "twin.macro";
+
 import "styled-components/macro";
 import { CQL, ValueSet } from "cqm-models";
 import IntegerInput from "../../QDM/IntegerInput/IntegerInput";
@@ -70,7 +70,7 @@ const DiagnosisComponent = ({
       />
 
       {/* Present On Admission Indicator */}
-      <div tw="pt-3 text-blue-800">
+      <div className="mm:pt-3 mm:text-blue-800">
         <CodeInput
           handleChange={(val) => {
             if (val) {
@@ -84,7 +84,7 @@ const DiagnosisComponent = ({
           type="-present-on-admission-indicator"
         />
       </div>
-      <div tw="pt-3 text-blue-800">
+      <div className="mm:pt-3 mm:text-blue-800">
         <IntegerInput
           intValue={null}
           canEdit={canEdit}

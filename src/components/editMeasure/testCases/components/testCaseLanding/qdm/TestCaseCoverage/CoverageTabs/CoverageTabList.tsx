@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import "twin.macro";
+
 import "styled-components/macro";
 import CoverageTab from "./CoverageTab";
 import { startCase } from "lodash";
@@ -138,8 +138,8 @@ const CoverageTabList = ({
           />
         );
       })}
-      <div tw="flex mt-5" key={"1"}>
-        <div tw="flex-none w-1/5"></div>
+      <div key={"1"} className="mm:flex mm:mt-5">
+        <div className="mm:flex-none mm:w-1/5"></div>
         <div></div>
       </div>
     </div>

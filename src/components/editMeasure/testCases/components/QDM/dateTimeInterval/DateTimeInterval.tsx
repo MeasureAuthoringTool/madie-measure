@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { FormControl } from "@mui/material";
-import "twin.macro";
+
 import "styled-components/macro";
 import { CQL } from "cqm-models";
 import DateTimeInput from "../../QDM/dateTimeInput/DateTimeInput";
@@ -74,12 +74,10 @@ const DateTimeInterval = ({
     <div>
       <FormControl>
         {displayAttributeName && (
-          <h4 className="header" tw="text-blue-800">
-            {attributeName}
-          </h4>
+          <h4 className="header mm:text-blue-800">{attributeName}</h4>
         )}
 
-        <div tw="flex flex-row gap-8">
+        <div className="mm:flex mm:flex-row mm:gap-8">
           <DateTimeInput
             canEdit={canEdit}
             label={`${label} - Start`}

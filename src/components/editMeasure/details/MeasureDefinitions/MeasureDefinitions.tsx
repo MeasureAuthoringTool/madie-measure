@@ -10,7 +10,7 @@ import {
   MadieDialog,
   MadieDeleteDialog,
 } from "@madie/madie-design-system/dist/react";
-import "twin.macro";
+
 import SearchIcon from "@mui/icons-material/Search";
 
 import ClearIcon from "@mui/icons-material/Clear";

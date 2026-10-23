@@ -221,7 +221,7 @@ describe("QdmRiskAdjustment Component", () => {
     });
 
     await waitFor(() =>
-      expect(mockMeasureServiceApi.updateMeasure).toBeCalledWith({
+      expect(mockMeasureServiceApi.updateMeasure).toHaveBeenCalledWith({
         ...updatedMeasure,
       })
     );
@@ -344,7 +344,7 @@ describe("QdmRiskAdjustment Component", () => {
     });
 
     await waitFor(() =>
-      expect(mockMeasureServiceApi.updateMeasure).toBeCalledWith({
+      expect(mockMeasureServiceApi.updateMeasure).toHaveBeenCalledWith({
         ...updatedMeasure,
       })
     );
@@ -399,7 +399,7 @@ describe("QdmRiskAdjustment Component", () => {
 
     // Should call service with updated data
     await waitFor(() =>
-      expect(mockMeasureServiceApi.updateMeasure).toBeCalledWith({
+      expect(mockMeasureServiceApi.updateMeasure).toHaveBeenCalledWith({
         ...mockTestMeasure,
         riskAdjustmentDescription: "<p>Updated test description</p>",
       })
@@ -724,7 +724,7 @@ describe("QdmRiskAdjustment Component", () => {
 
     // Should call service with updated data
     await waitFor(() =>
-      expect(mockMeasureServiceApi.updateMeasure).toBeCalledWith({
+      expect(mockMeasureServiceApi.updateMeasure).toHaveBeenCalledWith({
         ...mockTestMeasure,
         riskAdjustmentDescription: "<p>Updated test description</p>",
       })

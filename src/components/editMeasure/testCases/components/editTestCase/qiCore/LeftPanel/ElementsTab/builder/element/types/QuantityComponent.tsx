@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useEffect, useRef } from "react";
 import { TextField, InputLabel } from "@madie/madie-design-system/dist/react/";
-import "twin.macro";
+
 import "styled-components/macro";
 import {
   validate,
@@ -177,7 +177,7 @@ const QuantityComponent = ({
           </div>
 
           {canEdit && (
-            <div tw="mt-5 flex items-center">
+            <div className="mm:mt-5 mm:flex mm:items-center">
               {showDeleteButton && (
                 <Tooltip title="Delete" placement="top" arrow>
                   <span>

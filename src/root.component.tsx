@@ -1,13 +1,13 @@
 import React from "react";
-import tw from "twin.macro";
+import "./styles/tailwind.css";
+
 import GlobalStyles from "./styles/GlobalStyles";
 
-const Notice = tw.span`text-green-700`;
 export default function Root(props) {
   return (
     <>
       <GlobalStyles />
-      <Notice>{props.name} is mounted!</Notice>;
+      <span className="mm:text-green-700">{props.name} is mounted!</span>;
     </>
   );
 }

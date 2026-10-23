@@ -33,6 +33,6 @@ describe("Test Case Editor component", () => {
     const monacoTextArea = screen.getByRole("textbox");
     await userEvent.paste(monacoTextArea, "this is invalid CQL");
 
-    expect(handleValueChanges).toBeCalledWith("this is invalid CQL");
+    expect(handleValueChanges).toHaveBeenCalledWith("this is invalid CQL");
   });
 });

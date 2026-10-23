@@ -1,5 +1,6 @@
+import styled from "styled-components";
 import React from "react";
-import tw, { styled } from "twin.macro";
+
 import * as _ from "lodash";
 import MeasureGroupPopulationSelect from "./MeasureGroupPopulationSelect";
 import { ExpressionDefinition } from ".././QICore/QICoreMeasureGroups";

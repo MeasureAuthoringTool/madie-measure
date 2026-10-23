@@ -1,5 +1,5 @@
 import React from "react";
-import tw from "twin.macro";
+
 import "styled-components/macro";
 import CompositeMeasuresTable from "./CompositeMeasuresTable";
 import { INSERT_TEST_CASE_HOW_IT_WORKS } from "./howItWorksContent";
@@ -18,7 +18,7 @@ const CompositeProfileViews = ({
     <>
       {howItWorksOpen ? (
         <>
-          <div tw="mt-4 mb-4">
+          <div className="mm:mt-4 mm:mb-4">
             <Button
               variant="outline"
               type="button"
@@ -31,7 +31,7 @@ const CompositeProfileViews = ({
               Back to All Profiles
             </Button>
           </div>
-          <div tw="mb-4">
+          <div className="mm:mb-4">
             <HowItWorks
               isOpen={howItWorksOpen}
               onOpenChange={setHowItWorksOpen}
@@ -42,13 +42,13 @@ const CompositeProfileViews = ({
         </>
       ) : (
         <div
-          tw="mt-4 mb-4"
           style={{
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
             width: "100%",
           }}
+          className="mm:mt-4 mm:mb-4"
         >
           <Button
             variant="outline"

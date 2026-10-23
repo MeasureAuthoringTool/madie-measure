@@ -83,7 +83,7 @@ describe("RAVPage component", () => {
     await waitFor(() =>
       expect(
         mockMeasureServiceApi.updateMeasureTestCaseConfiguration
-      ).toBeCalledWith({ ravIncluded: true }, measure.id)
+      ).toHaveBeenCalledWith({ ravIncluded: true }, measure.id)
     );
 
     const successToast = getByTestId("edit-rav-success-text");
@@ -126,7 +126,7 @@ describe("RAVPage component", () => {
     await waitFor(() =>
       expect(
         mockMeasureServiceApi.updateMeasureTestCaseConfiguration
-      ).toBeCalledWith(
+      ).toHaveBeenCalledWith(
         {
           ravIncluded: true,
         },

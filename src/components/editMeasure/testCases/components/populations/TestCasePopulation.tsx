@@ -84,7 +84,6 @@ const TestCasePopulation = ({
   return (
     <React.Fragment key={`fragment-key-${population.name}`}>
       <tr
-        tw="border-b"
         key={population.name}
         data-testid={`test-row-population-id-${population.name}`}
         role="row"
@@ -157,7 +156,7 @@ const TestCasePopulation = ({
         </td>
       </tr>
       {error?.expected && (
-        <tr tw="border-b">
+        <tr>
           <td>
             <span style={{ visibility: "hidden" }} aria-hidden="true">
               -

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import "twin.macro";
+
 import "styled-components/macro";
 import {
   MadieDiscardDialog,
@@ -193,8 +193,8 @@ const SupplementalData = (props: SupplementalDataProps) => {
       onCancel={onCancel}
     >
       <div
-        tw="flex flex-col"
         data-testid="supplementalDataDescriptionContainer"
+        className="mm:flex mm:flex-col"
       >
         <TextEditor
           label="Description"
@@ -203,8 +203,8 @@ const SupplementalData = (props: SupplementalDataProps) => {
           {...formik.getFieldProps("supplementalDataDescription")}
         />
       </div>
-      <div tw="flex mt-6 gap-x-3 w-full">
-        <div tw="w-full">
+      <div className="mm:flex mm:mt-6 mm:gap-x-3 mm:w-full">
+        <div className="mm:w-full">
           <MultipleSelectDropDown
             formControl={formik.getFieldProps("supplementalData")}
             value={formik.values.supplementalData?.map((sd) => sd?.definition)}
@@ -262,8 +262,8 @@ const SupplementalData = (props: SupplementalDataProps) => {
         </div>
 
         <div
-          tw="w-full flex flex-col"
           data-testid="includeInReportType-container"
+          className="mm:w-full mm:flex mm:flex-col"
         >
           {sortedSupplementalData?.map(
             (supplementalData: SupplementalDataModel) => {
@@ -280,7 +280,6 @@ const SupplementalData = (props: SupplementalDataProps) => {
                   error={false}
                   helperText=""
                   multipleSelect={true}
-                  tw="mb-5"
                   limitTags={2}
                   textFieldInputProps={{
                     "aria-label": `${supplementalData.definition} - Include in Report Type`,
@@ -301,6 +300,7 @@ const SupplementalData = (props: SupplementalDataProps) => {
                     }
                     formik.setFieldValue("supplementalData", copied);
                   }}
+                  className="mm:mb-5"
                 />
               );
             }

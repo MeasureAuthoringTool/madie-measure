@@ -45,6 +45,7 @@ module.exports = (webpackConfigEnv, argv) => {
     argv,
     disableHtmlGeneration: true,
     orgPackagesAsExternal: false,
+    outputSystemJS: true,
   });
 
   // This must be updated for any single-spa applications or utilities,

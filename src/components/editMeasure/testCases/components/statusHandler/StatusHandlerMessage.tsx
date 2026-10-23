@@ -1,6 +1,6 @@
 import React from "react";
 import { TestCaseImportOutcome } from "@madie/madie-models";
-import "twin.macro";
+
 import "styled-components/macro";
 
 // TODO: Remove and use createWarningMessage with custom message instead.
@@ -70,7 +70,7 @@ export function createMissingDataElementMessage(
         <div>
           The following data elements in this test case are no longer relevant
           to the measure.
-          <ul tw="ml-5">
+          <ul className="mm:ml-5">
             {missingDataElements.map((el, index) => (
               <li key={index}>{el}</li>
             ))}
@@ -107,7 +107,7 @@ export function createImportMessage(
       <div aria-live="polite" role="alert" data-testid={testDataId}>
         {failedImports.length > 0 && (
           <div>
-            <div tw="font-medium">{failedMessage}</div>
+            <div className="mm:font-medium">{failedMessage}</div>
             <ul>
               {failedImports.map((failedImport, index) => {
                 const family = failedImport?.familyName;
@@ -119,7 +119,9 @@ export function createImportMessage(
                 return (
                   <li key={index} data-testid="failed-test-cases">
                     {names} <br />
-                    <span tw="ml-4">Reason: {failedImport.message}</span>
+                    <span className="mm:ml-4">
+                      Reason: {failedImport.message}
+                    </span>
                   </li>
                 );
               })}
@@ -128,7 +130,7 @@ export function createImportMessage(
         )}
         {successfulImportsWithWarnings?.length > 0 && (
           <div>
-            <div tw="font-medium">
+            <div className="mm:font-medium">
               Following test case(s) were imported successfully, but{" "}
               {successfulImportsWithWarnings[0].message}
             </div>

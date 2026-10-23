@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import "twin.macro";
+
 import "styled-components/macro";
 import { Group } from "@madie/madie-models";
 import * as _ from "lodash";
@@ -39,7 +39,6 @@ const TestCaseLandingWrapper = (props) => {
 
   return (
     <div
-      tw="grid gap-4 mx-8 my-6 shadow-lg rounded-md border border-slate bg-white"
       data-testid="test-case-landing-wrapper"
       style={{
         marginTop: 16,
@@ -47,6 +46,7 @@ const TestCaseLandingWrapper = (props) => {
           isCollapsed ? COLLAPSED_WIDTH : EXPANDED_WIDTH
         }px 1fr`,
       }}
+      className="mm:grid mm:gap-4 mm:mx-8 mm:my-6 mm:shadow-lg mm:rounded-md mm:border mm:border-slate mm:bg-white"
     >
       <TestCaseListSideBarNav
         allPopulationCriteria={measure?.groups}
@@ -55,7 +55,7 @@ const TestCaseLandingWrapper = (props) => {
         isCollapsed={isCollapsed}
         setIsCollapsed={setIsCollapsed}
       />
-      <div tw="pl-2 pr-2">{props.children && props.children}</div>
+      <div className="mm:pl-2 mm:pr-2">{props.children && props.children}</div>
     </div>
   );
 };

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import "twin.macro";
+
 import "styled-components/macro";
 import {
   Select,
@@ -153,9 +153,7 @@ const CodeInput = ({
 
   return (
     <div>
-      <h4 className="header" tw="text-blue-800 pt-4 pb-2">
-        {title}
-      </h4>
+      <h4 className="header mm:text-blue-800 mm:pt-4 mm:pb-2">{title}</h4>
       <Select
         id={`value-set-selector${type}`}
         label="Value Set / Direct Reference Code"
@@ -179,13 +177,12 @@ const CodeInput = ({
         onChange={handleValueSetChange}
       />
       {selectedValueSet && (
-        <div tw="flex mt-3">
+        <div className="mm:flex mm:mt-3">
           {isCustom ? (
             <>
-              <div tw="w-1/2">
+              <div className="mm:w-1/2">
                 <TextField
                   id={`custom-code-system${type}`}
-                  tw="w-full"
                   label="Custom Code System"
                   placeholder="Custom Code System"
                   required={required}
@@ -197,12 +194,12 @@ const CodeInput = ({
                   onChange={(event) =>
                     setSelectedCodeSystemName(event.target.value)
                   }
+                  className="mm:w-full"
                 />
               </div>
-              <div tw="w-1/2 pl-3">
+              <div className="mm:w-1/2 mm:pl-3">
                 <TextField
                   id={`custom-code${type}`}
-                  tw="w-full"
                   label="Custom Code"
                   placeholder="Custom Code"
                   required={required}
@@ -212,12 +209,13 @@ const CodeInput = ({
                   }}
                   data-testid="custom-code"
                   onChange={(event) => setCustomCode(event.target.value)}
+                  className="mm:w-full"
                 />
               </div>
             </>
           ) : (
             <>
-              <div tw="w-1/2">
+              <div className="mm:w-1/2">
                 <Select
                   placeHolder={{
                     name: "Select Code System",
@@ -239,7 +237,7 @@ const CodeInput = ({
                   onChange={handleCodeSystemChange}
                 />
               </div>
-              <div tw="w-1/2 pl-3">
+              <div className="mm:w-1/2 mm:pl-3">
                 <Select
                   label="Code"
                   id={`code-selector${type}`}

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import "twin.macro";
+
 import "styled-components/macro";
 import { TypeComponentProps } from "./TypeComponentProps";
 import Box from "@mui/system/Box";
@@ -214,7 +214,7 @@ const CodesComponent = ({
           />
         </div>
         {canEdit && (
-          <div tw="mt-5 flex items-center">
+          <div className="mm:mt-5 mm:flex mm:items-center">
             {showDeleteButton && (
               <Tooltip title="Delete" placement="top" arrow>
                 <span>

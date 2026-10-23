@@ -1,5 +1,5 @@
 import React, { lazy, useEffect, useMemo, useRef, useState } from "react";
-import "twin.macro";
+
 import "styled-components/macro";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import PopulationCriteriaSideNav from "./populationCriteriaSideNav/PopulationCriteriaSideNav";
@@ -247,12 +247,12 @@ export function PopulationCriteriaHome({ measureCanEdit }) {
       {/* Status handler for Population Criteria tab */}
       <MeasureGroupAlerts {...alertMessage} />
       <div
-        tw="grid lg:grid-cols-6 gap-4 mx-8 shadow-lg rounded-md border bg-white"
         style={{
           borderColor: "#8c8c8c",
           borderRadius: "4px",
           gridTemplateColumns: "minmax(50px, 240px) repeat(5, minmax(0, 1fr))",
         }}
+        className="mm:grid mm:lg:grid-cols-6 mm:gap-4 mm:mx-8 mm:shadow-lg mm:rounded-md mm:border mm:bg-white"
       >
         <PopulationCriteriaSideNav
           canEdit={canEdit}
