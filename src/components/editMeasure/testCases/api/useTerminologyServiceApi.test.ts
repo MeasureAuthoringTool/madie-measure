@@ -188,7 +188,7 @@ describe("TerminologyServiceApi Tests", () => {
       officeVisitMeasureBundle
     );
 
-    expect(axios.put).toBeCalledWith(
+    expect(axios.put).toHaveBeenCalledWith(
       "test.url/terminology/value-sets/expansion/fhir",
       {
         includeDraft: true,
@@ -219,7 +219,7 @@ describe("TerminologyServiceApi Tests", () => {
       testManifestExpansion
     );
 
-    expect(axios.put).toBeCalledWith(
+    expect(axios.put).toHaveBeenCalledWith(
       "test.url/terminology/value-sets/expansion/fhir",
       {
         includeDraft: true,
@@ -372,7 +372,7 @@ describe("TerminologyServiceApi Tests", () => {
       testManifestExpansion,
       abortController.signal
     );
-    expect(axios.put).toBeCalledWith(
+    expect(axios.put).toHaveBeenCalledWith(
       "test.url/terminology/value-sets/expansion/qdm",
       {
         includeDraft: true,
@@ -402,7 +402,7 @@ describe("TerminologyServiceApi Tests", () => {
       null,
       abortController.signal
     );
-    expect(axios.put).toBeCalledWith(
+    expect(axios.put).toHaveBeenCalledWith(
       "test.url/terminology/value-sets/expansion/qdm",
       {
         includeDraft: true,
@@ -430,7 +430,7 @@ describe("TerminologyServiceApi Tests", () => {
       testManifestExpansion,
       abortController.signal
     );
-    expect(axios.put).toBeCalledWith(
+    expect(axios.put).toHaveBeenCalledWith(
       "test.url/terminology/value-sets/expansion/qdm",
       {
         includeDraft: true,
@@ -822,9 +822,12 @@ describe("TerminologyServiceApi Tests", () => {
     axios.get = jest.fn().mockResolvedValue({ data: mockManifests });
 
     const result = await terminologyService.getManifestList();
-    expect(axios.get).toBeCalledWith("test.url/terminology/manifest-list", {
-      headers: { Authorization: "Bearer undefined" },
-    });
+    expect(axios.get).toHaveBeenCalledWith(
+      "test.url/terminology/manifest-list",
+      {
+        headers: { Authorization: "Bearer undefined" },
+      }
+    );
     expect(result.data).toEqual(mockManifests);
   });
 

@@ -43,7 +43,7 @@ const UrlComponent = ({
         {...rest}
       />
       {canEdit && (
-        <div tw="mt-5 flex items-center">
+        <div>
           {showDeleteButton && (
             <Tooltip title="Delete" placement="top" arrow>
               <span>

@@ -1,3 +1,4 @@
+import styled from "styled-components";
 import React, {
   useEffect,
   useState,
@@ -41,13 +42,15 @@ import {
 import AddElementDialog from "./AddElementDialog";
 import { deleteMultipleCardinalityElement } from "./resourceEditorUtils";
 import useFhirDefinitionsServiceApi from "../../../../../../../api/useFhirDefinitionsService";
-import tw from "twin.macro";
+
 import "../../../../../../../../../../styles/VerticalSideBarNav.scss";
 import "./ResourceEditor.scss";
 import { getHl7ProfileLink } from "../../../../../../../../../../utils/hl7Links";
 import useMeasureModel from "../../../../../../routes/qiCore/useMeasureModel";
 
-const InnerWrapper = tw.div`flex-grow flex flex-col`;
+const InnerWrapper = styled.div.attrs((): { className: string } => ({
+  className: "mm:grow mm:flex mm:flex-col",
+}))``;
 
 interface ResourceEditorProps {
   onCancel: () => void;

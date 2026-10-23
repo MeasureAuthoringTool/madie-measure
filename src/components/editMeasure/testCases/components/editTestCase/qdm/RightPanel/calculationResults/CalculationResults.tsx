@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import QdmGroupCoverage from "../../../groupCoverage/QdmGroupCoverage";
 import { isEmpty } from "lodash";
 import { MadieAlert } from "@madie/madie-design-system/dist/react";
-import "twin.macro";
+
 import "styled-components/macro";
 import { CqlDefinitionCallstack } from "../../../groupCoverage/QiCoreGroupCoverage";
 import useQdmCqlParsingService from "../../../../../api/cqlElmTranslationService/useQdmCqlParsingService";
@@ -34,7 +34,7 @@ const CalculationResults = ({
   }, [measureCql]);
 
   return (
-    <div tw="p-5" style={{ paddingRight: ".25rem" }}>
+    <div className="mm:p-5" style={{ paddingRight: ".25rem" }}>
       {!groupCoverageResult && isEmpty(calculationErrors) && (
         <MadieAlert
           type="info"

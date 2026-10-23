@@ -1,5 +1,6 @@
+import styled from "styled-components";
 import React from "react";
-import tw, { styled } from "twin.macro";
+
 import "styled-components/macro";
 import * as _ from "lodash";
 import TestCasePopulation from "./TestCasePopulation";
@@ -45,7 +46,17 @@ export interface TestCasePopulationListProps {
 }
 export const StyledIcon = styled(FontAwesomeIcon)(
   ({ errors }: { errors: boolean }) => [
-    errors ? tw`text-red-700 mr-1.5` : tw`text-green-700 mr-1.5`,
+    errors
+      ? {
+          marginRight: "0.375rem",
+          "--tw-text-opacity": "1",
+          color: "rgb(183 22 44 / var(--tw-text-opacity, 1))",
+        }
+      : {
+          marginRight: "0.375rem",
+          "--tw-text-opacity": "1",
+          color: "rgb(14 154 91 / var(--tw-text-opacity, 1))",
+        },
   ]
 );
 

@@ -9,7 +9,7 @@ import { Accordion } from "@madie/madie-design-system/dist/react";
 import parse from "html-react-parser";
 import { StatementCoverageResult } from "../../../../../util/cqlCoverageBuilder/CqlCoverageBuilder";
 import _, { isNil } from "lodash";
-import "twin.macro";
+
 import "styled-components/macro";
 
 const CoverageTab = ({ definition, definitionResults }: Props) => {

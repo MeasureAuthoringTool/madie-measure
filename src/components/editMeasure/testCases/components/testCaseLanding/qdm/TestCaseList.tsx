@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import "twin.macro";
+
 import "styled-components/macro";
 import _ from "lodash";
 import {
@@ -716,8 +716,7 @@ const TestCaseList = (props: TestCaseListProps) => {
           />
 
           <div
-            className="calc-vh"
-            tw="lg:col-span-5 pl-2 pr-2"
+            className="calc-vh mm:lg:col-span-5 mm:pl-2 mm:pr-2"
             // sticky container lives here.
             // any child between here and sticky target need overflow: visible.
             style={{ overflowY: "auto", overflowX: "hidden" }}
@@ -756,10 +755,10 @@ const TestCaseList = (props: TestCaseListProps) => {
             />
             {activeTab === "passing" && (
               <div
-                tw="overflow-x-auto sm:-mx-6 lg:-mx-8"
+                className="mm:overflow-x-auto mm:sm:-mx-6 mm:lg:-mx-8"
                 style={{ overflow: "visible" }}
               >
-                <div tw="py-2 inline-block min-w-full sm:px-6 lg:px-8">
+                <div className="mm:py-2 mm:inline-block mm:min-w-full mm:sm:px-6 mm:lg:px-8">
                   {!executing && (
                     <>
                       {executionResultLength > 0 && (
@@ -833,8 +832,8 @@ const TestCaseList = (props: TestCaseListProps) => {
               </div>
             )}
             {activeTab === "coverage" && (
-              <div tw="overflow-x-auto sm:-mx-6 lg:-mx-8">
-                <div tw="py-2 inline-block min-w-full sm:px-6 lg:px-8">
+              <div className="mm:overflow-x-auto mm:sm:-mx-6 mm:lg:-mx-8">
+                <div className="mm:py-2 mm:inline-block mm:min-w-full mm:sm:px-6 mm:lg:px-8">
                   <TestCaseCoverage
                     measureGroups={measure.groups}
                     testCases={testCases}

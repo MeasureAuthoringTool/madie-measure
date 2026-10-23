@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import "twin.macro";
+
 import "styled-components/macro";
 import {
   ClickAwayListener,
@@ -251,9 +251,9 @@ export default function ActionCenter(props: ActionCenterProps) {
         opacity: 1,
       }}
     >
-      <div tw="flex py-4 justify-between items-center">
-        <div tw="flex w-1/2 pr-4">
-          <div tw="w-1/2 pr-2">
+      <div className="mm:flex mm:py-4 mm:justify-between mm:items-center">
+        <div className="mm:flex mm:w-1/2 mm:pr-4">
+          <div className="mm:w-1/2 mm:pr-2">
             <Select
               label="Filter By"
               id="filter-by-select"
@@ -286,10 +286,10 @@ export default function ActionCenter(props: ActionCenterProps) {
                 )}
             />
           </div>
-          <div tw="w-1/2 pl-2">
+          <div className="mm:w-1/2 mm:pl-2">
             <TextField
               id="search"
-              tw="w-full"
+              className="mm:w-full"
               label="Search"
               placeholder="Search"
               inputProps={{
@@ -335,9 +335,9 @@ export default function ActionCenter(props: ActionCenterProps) {
         </div>
 
         {/* Action Buttons (Delete, Shift Test Case Dates, Clone, Export) */}
-        <div tw="flex items-center">
+        <div className="mm:flex mm:items-center">
           {canEdit && (
-            <div tw="flex items-center">
+            <div className="mm:flex mm:items-center">
               <Tooltip
                 data-testid="delete-tooltip"
                 describeChild

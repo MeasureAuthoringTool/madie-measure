@@ -134,12 +134,12 @@ describe("Shift Test Case Dates Dialog", () => {
       userEvent.click(saveBtn);
 
       await waitFor(() => {
-        expect(shiftQdmTestCaseDates).toBeCalledTimes(1);
-        expect(setToastOpen).toBeCalledTimes(1);
-        expect(setToastType).toBeCalledTimes(1);
-        expect(setToastType).toBeCalledWith("success");
-        expect(setToastMessage).toBeCalledTimes(1);
-        expect(setToastMessage).toBeCalledWith(
+        expect(shiftQdmTestCaseDates).toHaveBeenCalledTimes(1);
+        expect(setToastOpen).toHaveBeenCalledTimes(1);
+        expect(setToastType).toHaveBeenCalledTimes(1);
+        expect(setToastType).toHaveBeenCalledWith("success");
+        expect(setToastMessage).toHaveBeenCalledTimes(1);
+        expect(setToastMessage).toHaveBeenCalledWith(
           `All Test Case dates successfully shifted.`
         );
       });
@@ -194,15 +194,15 @@ describe("Shift Test Case Dates Dialog", () => {
       userEvent.click(saveBtn);
 
       await waitFor(() => {
-        expect(shiftQdmTestCaseDates).toBeCalledTimes(1);
-        expect(setToastOpen).not.toBeCalledTimes(1);
-        expect(setToastType).not.toBeCalledTimes(1);
-        expect(setToastType).not.toBeCalledWith("success");
-        expect(setToastMessage).not.toBeCalledTimes(1);
-        expect(setToastMessage).not.toBeCalledWith(
+        expect(shiftQdmTestCaseDates).toHaveBeenCalledTimes(1);
+        expect(setToastOpen).not.toHaveBeenCalledTimes(1);
+        expect(setToastType).not.toHaveBeenCalledTimes(1);
+        expect(setToastType).not.toHaveBeenCalledWith("success");
+        expect(setToastMessage).not.toHaveBeenCalledTimes(1);
+        expect(setToastMessage).not.toHaveBeenCalledWith(
           `All Test Case dates successfully shifted.`
         );
-        expect(setShiftTestCaseDatesWarnings).toBeCalledTimes(1);
+        expect(setShiftTestCaseDatesWarnings).toHaveBeenCalledTimes(1);
       });
     });
   });
@@ -253,13 +253,15 @@ describe("Shift Test Case Dates Dialog", () => {
       userEvent.click(saveBtn);
 
       await waitFor(() => {
-        expect(shiftQdmTestCaseDates).toBeCalledTimes(1);
-        expect(setToastOpen).toBeCalledTimes(1);
-        expect(setToastType).toBeCalledTimes(1);
-        expect(setToastType).toBeCalledWith("danger");
-        expect(setToastMessage).toBeCalledTimes(1);
-        expect(setToastMessage).toBeCalledWith(SHIFT_TEST_CASE_DATES_ERROR);
-        expect(setWarnings).not.toBeCalledTimes(1);
+        expect(shiftQdmTestCaseDates).toHaveBeenCalledTimes(1);
+        expect(setToastOpen).toHaveBeenCalledTimes(1);
+        expect(setToastType).toHaveBeenCalledTimes(1);
+        expect(setToastType).toHaveBeenCalledWith("danger");
+        expect(setToastMessage).toHaveBeenCalledTimes(1);
+        expect(setToastMessage).toHaveBeenCalledWith(
+          SHIFT_TEST_CASE_DATES_ERROR
+        );
+        expect(setWarnings).not.toHaveBeenCalledTimes(1);
       });
     });
   });
@@ -310,12 +312,12 @@ describe("Shift Test Case Dates Dialog", () => {
       userEvent.click(saveBtn);
 
       await waitFor(() => {
-        expect(shiftQiCoreTestCaseDates).toBeCalledTimes(1);
-        expect(setToastOpen).toBeCalledTimes(1);
-        expect(setToastType).toBeCalledTimes(1);
-        expect(setToastType).toBeCalledWith("success");
-        expect(setToastMessage).toBeCalledTimes(1);
-        expect(setToastMessage).toBeCalledWith(
+        expect(shiftQiCoreTestCaseDates).toHaveBeenCalledTimes(1);
+        expect(setToastOpen).toHaveBeenCalledTimes(1);
+        expect(setToastType).toHaveBeenCalledTimes(1);
+        expect(setToastType).toHaveBeenCalledWith("success");
+        expect(setToastMessage).toHaveBeenCalledTimes(1);
+        expect(setToastMessage).toHaveBeenCalledWith(
           `All Test Case dates successfully shifted.`
         );
       });
@@ -372,15 +374,15 @@ describe("Shift Test Case Dates Dialog", () => {
       userEvent.click(saveBtn);
 
       await waitFor(() => {
-        expect(shiftQiCoreTestCaseDates).toBeCalledTimes(1);
-        expect(setToastOpen).not.toBeCalledTimes(1);
-        expect(setToastType).not.toBeCalledTimes(1);
-        expect(setToastType).not.toBeCalledWith("success");
-        expect(setToastMessage).not.toBeCalledTimes(1);
-        expect(setToastMessage).not.toBeCalledWith(
+        expect(shiftQiCoreTestCaseDates).toHaveBeenCalledTimes(1);
+        expect(setToastOpen).not.toHaveBeenCalledTimes(1);
+        expect(setToastType).not.toHaveBeenCalledTimes(1);
+        expect(setToastType).not.toHaveBeenCalledWith("success");
+        expect(setToastMessage).not.toHaveBeenCalledTimes(1);
+        expect(setToastMessage).not.toHaveBeenCalledWith(
           `All Test Case dates successfully shifted.`
         );
-        expect(setShiftTestCaseDatesWarnings).toBeCalledTimes(1);
+        expect(setShiftTestCaseDatesWarnings).toHaveBeenCalledTimes(1);
       });
     });
   });
@@ -431,13 +433,15 @@ describe("Shift Test Case Dates Dialog", () => {
       userEvent.click(saveBtn);
 
       await waitFor(() => {
-        expect(shiftQiCoreTestCaseDates).toBeCalledTimes(1);
-        expect(setToastOpen).toBeCalledTimes(1);
-        expect(setToastType).toBeCalledTimes(1);
-        expect(setToastType).toBeCalledWith("danger");
-        expect(setToastMessage).toBeCalledTimes(1);
-        expect(setToastMessage).toBeCalledWith(SHIFT_TEST_CASE_DATES_ERROR);
-        expect(setWarnings).not.toBeCalledTimes(1);
+        expect(shiftQiCoreTestCaseDates).toHaveBeenCalledTimes(1);
+        expect(setToastOpen).toHaveBeenCalledTimes(1);
+        expect(setToastType).toHaveBeenCalledTimes(1);
+        expect(setToastType).toHaveBeenCalledWith("danger");
+        expect(setToastMessage).toHaveBeenCalledTimes(1);
+        expect(setToastMessage).toHaveBeenCalledWith(
+          SHIFT_TEST_CASE_DATES_ERROR
+        );
+        expect(setWarnings).not.toHaveBeenCalledTimes(1);
       });
     });
   });
@@ -488,15 +492,15 @@ describe("Shift Test Case Dates Dialog", () => {
       userEvent.click(saveBtn);
 
       await waitFor(() => {
-        expect(shiftTestCaseDatesApiMock).toBeCalledTimes(1);
-        expect(setToastOpen).toBeCalledTimes(1);
-        expect(setToastType).toBeCalledTimes(1);
-        expect(setToastType).toBeCalledWith("success");
-        expect(setToastMessage).toBeCalledTimes(1);
-        expect(setToastMessage).toBeCalledWith(
+        expect(shiftTestCaseDatesApiMock).toHaveBeenCalledTimes(1);
+        expect(setToastOpen).toHaveBeenCalledTimes(1);
+        expect(setToastType).toHaveBeenCalledTimes(1);
+        expect(setToastType).toHaveBeenCalledWith("success");
+        expect(setToastMessage).toHaveBeenCalledTimes(1);
+        expect(setToastMessage).toHaveBeenCalledWith(
           `All Test Case dates successfully shifted.`
         );
-        expect(setWarnings).not.toBeCalledTimes(1);
+        expect(setWarnings).not.toHaveBeenCalledTimes(1);
       });
     });
   });
@@ -549,15 +553,15 @@ describe("Shift Test Case Dates Dialog", () => {
       userEvent.click(saveBtn);
 
       await waitFor(() => {
-        expect(shiftTestCaseDatesApiMock).toBeCalledTimes(1);
-        expect(setToastOpen).toBeCalledTimes(1);
-        expect(setToastType).toBeCalledTimes(1);
-        expect(setToastType).toBeCalledWith("danger");
-        expect(setToastMessage).toBeCalledTimes(1);
-        expect(setToastMessage).toBeCalledWith(
+        expect(shiftTestCaseDatesApiMock).toHaveBeenCalledTimes(1);
+        expect(setToastOpen).toHaveBeenCalledTimes(1);
+        expect(setToastType).toHaveBeenCalledTimes(1);
+        expect(setToastType).toHaveBeenCalledWith("danger");
+        expect(setToastMessage).toHaveBeenCalledTimes(1);
+        expect(setToastMessage).toHaveBeenCalledWith(
           SHIFT_TEST_CASE_DATES_ERROR_TEST_CASE_LOCKED
         );
-        expect(setWarnings).not.toBeCalledTimes(1);
+        expect(setWarnings).not.toHaveBeenCalledTimes(1);
       });
     });
   });
@@ -610,15 +614,15 @@ describe("Shift Test Case Dates Dialog", () => {
       userEvent.click(saveBtn);
 
       await waitFor(() => {
-        expect(shiftQiCoreTestCaseDates).toBeCalledTimes(1);
-        expect(setToastOpen).toBeCalledTimes(1);
-        expect(setToastType).toBeCalledTimes(1);
-        expect(setToastType).toBeCalledWith("danger");
-        expect(setToastMessage).toBeCalledTimes(1);
-        expect(setToastMessage).toBeCalledWith(
+        expect(shiftQiCoreTestCaseDates).toHaveBeenCalledTimes(1);
+        expect(setToastOpen).toHaveBeenCalledTimes(1);
+        expect(setToastType).toHaveBeenCalledTimes(1);
+        expect(setToastType).toHaveBeenCalledWith("danger");
+        expect(setToastMessage).toHaveBeenCalledTimes(1);
+        expect(setToastMessage).toHaveBeenCalledWith(
           SHIFT_TEST_CASE_DATES_ERROR_TEST_CASE_LOCKED
         );
-        expect(setWarnings).not.toBeCalledTimes(1);
+        expect(setWarnings).not.toHaveBeenCalledTimes(1);
       });
     });
   });

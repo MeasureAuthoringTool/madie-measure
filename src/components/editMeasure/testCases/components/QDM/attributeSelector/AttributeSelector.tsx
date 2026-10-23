@@ -1,5 +1,5 @@
 import React, { ComponentProps } from "react";
-import "twin.macro";
+
 import "styled-components/macro";
 import { Select } from "@madie/madie-design-system/dist/react";
 import { MenuItem } from "@mui/material";
@@ -41,9 +41,9 @@ const AttributeSelector = ({
     ].filter((s) => !_.isNil(s));
   };
   return (
-    <div tw="pt-2">
-      <div tw="flex">
-        <div tw="flex-initial w-4/12">
+    <div className="mm:pt-2">
+      <div className="mm:flex">
+        <div className="mm:flex-initial mm:w-4/12">
           <Select
             placeHolder={{ name: `Select ${attributeProps.label}`, value: "" }}
             {...attributeProps}
@@ -63,7 +63,7 @@ const AttributeSelector = ({
             )}
           />
         </div>
-        <div tw="flex-initial w-3/12 pl-3">
+        <div className="mm:flex-initial mm:w-3/12 mm:pl-3">
           <Select
             placeHolder={{
               name: `Select ${attributeTypeProps.label}`,

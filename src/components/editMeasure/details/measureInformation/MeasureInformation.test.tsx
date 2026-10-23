@@ -623,8 +623,8 @@ describe("MeasureInformation component", () => {
     await waitFor(() => expect(saveButton).toBeEnabled());
 
     userEvent.click(saveButton);
-    await waitFor(() => expect(synchingEditorCqlContent).toBeCalled());
-    await waitFor(() => expect(parseContent).toBeCalled());
+    await waitFor(() => expect(synchingEditorCqlContent).toHaveBeenCalled());
+    await waitFor(() => expect(parseContent).toHaveBeenCalled());
 
     expect(
       await screen.getByText("Measurement Information Updated Successfully")
@@ -640,7 +640,7 @@ describe("MeasureInformation component", () => {
     });
 
     await waitFor(() =>
-      expect(mockMeasureServiceApi.updateMeasure).toBeCalledWith({
+      expect(mockMeasureServiceApi.updateMeasure).toHaveBeenCalledWith({
         ...testMeasure,
         cqlLibraryName: modifiedLibName,
         elmJson: JSON.stringify({ library: modifiedLibName }),

@@ -1,3 +1,4 @@
+import styled from "styled-components";
 import React, {
   useCallback,
   useEffect,
@@ -12,7 +13,7 @@ import CompositeLeftPanelContent from "./CompositeLeftPanelContent";
 import CompositeRightPanelContent from "./CompositeRightPanelContent";
 import { useMeasureServiceApi } from "@madie/madie-util";
 import { AlertProps, shouldDisableRunTestCaseButton } from "../EditTestCase";
-import tw, { styled } from "twin.macro";
+
 import "styled-components/macro";
 import useExecutionContext from "../../../routes/qiCore/useExecutionContext";
 import { Model } from "@madie/madie-models";
@@ -133,13 +134,13 @@ const EditCompositeTestCase = ({
       </Allotment>
 
       {/* button wrap in context */}
-      <div tw="bg-gray-75 w-full sticky bottom-0 left-0 z-40">
+      <div className="mm:bg-gray-75 mm:w-full mm:sticky mm:bottom-0 mm:left-0 mm:z-40">
         <div
-          tw="w-1/2 flex justify-end py-6 float-right"
+          className="mm:w-1/2 mm:flex mm:justify-end mm:py-6 mm:float-right"
           style={{ alignItems: "end" }}
         >
           <Button
-            tw="m-2"
+            className="mm:m-2"
             variant="outline"
             data-testid="edit-test-case-discard-button"
             disabled={!isModified()}
@@ -148,7 +149,7 @@ const EditCompositeTestCase = ({
             Discard Changes
           </Button>
           <Button
-            tw="m-2"
+            className="mm:m-2"
             type="button"
             data-testid="run-test-case-button"
             onClick={calculateCompositeTestCase}
@@ -164,7 +165,7 @@ const EditCompositeTestCase = ({
           </Button>
           <span>
             <Button
-              tw="m-2"
+              className="mm:m-2"
               variant="cyan"
               type="submit"
               data-testid="edit-test-case-save-button"

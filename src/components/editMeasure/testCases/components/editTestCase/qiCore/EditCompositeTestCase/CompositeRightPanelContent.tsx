@@ -1,3 +1,4 @@
+import styled from "styled-components";
 import React, { useState } from "react";
 import CreateCompositeTestCaseRightPanelTabs from "./CreateCompositeTestCaseRightPanelTabs";
 import { TextField, TextArea } from "@madie/madie-design-system/dist/react";
@@ -6,7 +7,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTimes } from "@fortawesome/free-solid-svg-icons";
 import { testCaseSeriesStyles, Alert } from "../EditTestCase";
 import { useFormikContext } from "formik";
-import tw, { styled } from "twin.macro";
+
 import "styled-components/macro";
 import CompositePopulationGrid from "./CompositePopulationGrid.tsx/CompositePopulationGrid";
 
@@ -63,7 +64,7 @@ export default function CompositeRightPanelContent({
                 <button
                   data-testid="close-create-test-case-alert"
                   type="button"
-                  tw="box-content h-4 p-1 ml-3 mb-1.5"
+                  className="mm:box-content mm:h-4 mm:p-1 mm:ml-3 mm:mb-1.5"
                   data-bs-dismiss="alert"
                   aria-label="Close Alert"
                   onClick={() => setAlert(null)}
@@ -95,7 +96,7 @@ export default function CompositeRightPanelContent({
                 {...formik.getFieldProps("title")}
                 maxLength={250}
               />
-              <div tw="mt-6">
+              <div className="mm:mt-6">
                 <TextArea
                   placeholder="Test Case Description"
                   id="test-case-description"
@@ -119,7 +120,7 @@ export default function CompositeRightPanelContent({
                 />
               </div>
 
-              <div tw="mt-6">
+              <div className="mm:mt-6">
                 <TestCaseSeries
                   readOnly={!testCaseCanEdit}
                   value={formik.values.series}

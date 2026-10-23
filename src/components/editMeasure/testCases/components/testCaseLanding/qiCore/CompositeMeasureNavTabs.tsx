@@ -1,6 +1,6 @@
 import React from "react";
 import { Tab, Tabs } from "@madie/madie-design-system/dist/react";
-import "twin.macro";
+
 import "styled-components/macro";
 import { CompositeScores } from "./compositeScores";
 

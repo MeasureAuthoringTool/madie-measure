@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import "twin.macro";
+
 import "styled-components/macro";
 import CoverageTabList from "./CoverageTabs/CoverageTabList";
 import { CqlDefinitionCallstack } from "../../../editTestCase/groupCoverage/QiCoreGroupCoverage";
@@ -48,7 +48,7 @@ const TestCaseCoverage = ({
   }, [measureCql]);
 
   return (
-    <div tw="p-5" style={{ paddingRight: ".25rem" }}>
+    <div className="mm:p-5" style={{ paddingRight: ".25rem" }}>
       <CoverageTabList
         data-testid="coverage-tab-list"
         testCases={testCases}

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import "twin.macro";
+
 import "styled-components/macro";
 import {
   MadieDiscardDialog,
@@ -159,7 +159,7 @@ const SupplementalData = (props: SupplementalDataProps) => {
       handleSubmit={formik.handleSubmit}
       onCancel={onCancel}
     >
-      <div tw="flex flex-col">
+      <div className="mm:flex mm:flex-col">
         <TextEditor
           label="Description"
           setFieldValue={formik.setFieldValue}
@@ -167,7 +167,7 @@ const SupplementalData = (props: SupplementalDataProps) => {
           {...formik.getFieldProps("supplementalDataDescription")}
         />
       </div>
-      <div tw="flex mt-6 w-2/4">
+      <div className="mm:flex mm:mt-6 mm:w-2/4">
         <MultipleSelectDropDown
           formControl={formik.getFieldProps("supplementalData")}
           value={formik.values.supplementalData?.map((sd) => sd?.definition)}

@@ -1,7 +1,10 @@
+import styled from "styled-components";
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import tw from "twin.macro";
-const GoHomeLink = tw.button`text-blue-500 hover:text-blue-900`;
+
+const GoHomeLink = styled.button.attrs((): { className: string } => ({
+  className: "mm:text-blue-500 mm:hover:text-blue-900",
+}))``;
 
 const NotFound = () => {
   let navigate = useNavigate();

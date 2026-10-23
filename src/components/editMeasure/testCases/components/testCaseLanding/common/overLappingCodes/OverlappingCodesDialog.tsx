@@ -1,3 +1,4 @@
+import styled from "styled-components";
 import React, {
   useCallback,
   useEffect,
@@ -17,7 +18,7 @@ import {
   Pagination,
   Toast,
 } from "@madie/madie-design-system/dist/react";
-import tw from "twin.macro";
+
 import "styled-components/macro";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowRightIcon from "@mui/icons-material/KeyboardArrowRight";
@@ -40,8 +41,12 @@ interface RowData {
   version: string;
   subRows?: RowData[]; // Optional subRows for nested data
 }
-const TH = tw.th`p-3 text-left text-sm`;
-const TD = tw.td`p-3 text-left text-sm break-keep`;
+const TH = styled.th.attrs((): { className: string } => ({
+  className: "mm:p-3 mm:text-left mm:text-sm",
+}))``;
+const TD = styled.td.attrs((): { className: string } => ({
+  className: "mm:p-3 mm:text-left mm:text-sm mm:break-keep",
+}))``;
 
 const Description = ({ valueSet }: { valueSet: OverlappingValueSetDto }) => {
   return (
@@ -56,7 +61,7 @@ const Description = ({ valueSet }: { valueSet: OverlappingValueSetDto }) => {
         <Typography variant="subtitle1" fontWeight="bold">
           {valueSet?.url ? "URL" : "OID"}:
         </Typography>
-        <Typography variant="body1" tw="break-all">
+        <Typography variant="body1" className="mm:break-all">
           {valueSet?.url ? valueSet.url : valueSet.oid}
         </Typography>
       </Box>
@@ -201,8 +206,8 @@ const OverlappingCodesReport = ({
 
   return (
     <>
-      <table tw="min-w-full" data-testid="overlapping-codes-tbl">
-        <thead tw="bg-slate">
+      <table className="mm:min-w-full" data-testid="overlapping-codes-tbl">
+        <thead className="mm:bg-slate">
           {table.getHeaderGroups().map((headerGroup) => (
             <tr key={headerGroup.id}>
               {headerGroup.headers.map((header) => (
@@ -236,7 +241,7 @@ const OverlappingCodesReport = ({
             ))
           ) : (
             <tr>
-              <td colSpan={columns.length} tw="text-center p-2">
+              <td colSpan={columns.length} className="mm:text-center mm:p-2">
                 There are no overlapping codes
               </td>
             </tr>

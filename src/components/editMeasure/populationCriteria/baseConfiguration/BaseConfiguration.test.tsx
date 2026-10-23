@@ -221,7 +221,7 @@ describe("Base Configuration component", () => {
     await waitFor(() => expect(saveButton).toBeEnabled());
     fireEvent.click(saveButton);
     await waitFor(() =>
-      expect(mockMeasureServiceApi.updateMeasure).toBeCalledWith({
+      expect(mockMeasureServiceApi.updateMeasure).toHaveBeenCalledWith({
         ...measure,
         scoring: "Cohort",
         baseConfigurationTypes: ["Structure"],
@@ -288,7 +288,7 @@ describe("Base Configuration component", () => {
     await waitFor(() => expect(saveButton).toBeEnabled());
     fireEvent.click(saveButton);
     await waitFor(() =>
-      expect(mockMeasureServiceApi.updateMeasure).toBeCalledWith({
+      expect(mockMeasureServiceApi.updateMeasure).toHaveBeenCalledWith({
         ...measure,
         scoring: "Cohort",
         baseConfigurationTypes: ["Structure"],
@@ -361,7 +361,7 @@ describe("Base Configuration component", () => {
     await waitFor(() => expect(saveButton).toBeEnabled());
     fireEvent.click(saveButton);
     await waitFor(() =>
-      expect(mockMeasureServiceApi.updateMeasure).toBeCalledWith({
+      expect(mockMeasureServiceApi.updateMeasure).toHaveBeenCalledWith({
         ...measure,
         scoring: "Cohort",
         baseConfigurationTypes: ["Structure"],
@@ -423,7 +423,7 @@ describe("Base Configuration component", () => {
     await waitFor(() => expect(saveButton).toBeEnabled());
     fireEvent.click(saveButton);
     await waitFor(() =>
-      expect(mockMeasureServiceApi.updateMeasure).toBeCalledWith({
+      expect(mockMeasureServiceApi.updateMeasure).toHaveBeenCalledWith({
         ...measure,
         scoring: "Cohort",
         baseConfigurationTypes: ["Structure"],
@@ -507,7 +507,7 @@ describe("Base Configuration component", () => {
     await waitFor(() => expect(saveButton).toBeEnabled());
     fireEvent.click(saveButton);
     await waitFor(() =>
-      expect(mockMeasureServiceApi.updateMeasure).toBeCalledWith({
+      expect(mockMeasureServiceApi.updateMeasure).toHaveBeenCalledWith({
         ...measure,
         scoring: "Cohort",
         baseConfigurationTypes: ["Structure"],
@@ -589,7 +589,7 @@ describe("Base Configuration component", () => {
     await waitFor(() => expect(saveButton).toBeEnabled());
     fireEvent.click(saveButton);
     await waitFor(() =>
-      expect(mockMeasureServiceApi.updateMeasure).toBeCalledWith({
+      expect(mockMeasureServiceApi.updateMeasure).toHaveBeenCalledWith({
         ...measure,
         scoring: "Cohort",
         baseConfigurationTypes: ["Structure"],

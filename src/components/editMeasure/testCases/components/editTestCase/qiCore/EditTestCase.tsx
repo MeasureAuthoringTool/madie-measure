@@ -1,3 +1,4 @@
+import styled from "styled-components";
 import React, {
   ReactNode,
   Dispatch,
@@ -12,7 +13,6 @@ import { useNavigate, useParams } from "react-router-dom";
 import { FormikProvider, useFormik } from "formik";
 import EditTestCaseBreadCrumbs from "../EditTestCaseBreadCrumbs";
 
-import tw, { styled } from "twin.macro";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTimes } from "@fortawesome/free-solid-svg-icons";
 import "styled-components/macro";
@@ -102,7 +102,9 @@ import EditCompositeTestCase from "./EditCompositeTestCase";
 import useServiceConfig from "../../../../../../api/useServiceConfig";
 import { resolveTestCaseExecutionErrorMessage } from "../../../util/TestCaseExecutionErrorUtils";
 
-const TestCaseForm = tw.form`m-3`;
+const TestCaseForm = styled.form.attrs((): { className: string } => ({
+  className: "mm:m-3",
+}))``;
 
 export interface AlertProps {
   status?: "success" | "warning" | "error" | "info" | "meta" | null;
@@ -134,7 +136,16 @@ default: #2469B7 vs #b0EEFF  d-L  teal 4.4:1
 
 export const Alert = styled.div<AlertProps>(({ status = "default" }) => [
   styles[status],
-  tw`rounded-lg p-2 m-2 text-base inline-flex items-center w-11/12`,
+  {
+    margin: "0.5rem",
+    display: "inline-flex",
+    width: "91.666667%",
+    alignItems: "center",
+    borderRadius: "0.5rem",
+    padding: "0.5rem",
+    fontSize: "1rem",
+    lineHeight: "1.5rem",
+  },
 ]);
 
 export const testCaseSeriesStyles = {
@@ -1325,7 +1336,7 @@ const EditTestCase = (props: EditTestCaseProps) => {
                     </>
                   ) : (
                     <>
-                      <div tw="float-right mr-4">
+                      <div className="mm:float-right mm:mr-4">
                         <EditorCalculator
                           onClick={() => setCalculationDialogOpen(true)}
                         />
@@ -1474,7 +1485,7 @@ const EditTestCase = (props: EditTestCaseProps) => {
                           <button
                             data-testid="close-create-test-case-alert"
                             type="button"
-                            tw="box-content h-4 p-1 ml-3 mb-1.5"
+                            className="mm:box-content mm:h-4 mm:p-1 mm:ml-3 mm:mb-1.5"
                             data-bs-dismiss="alert"
                             aria-label="Close Alert"
                             onClick={() => setAlert(null)}
@@ -1508,7 +1519,7 @@ const EditTestCase = (props: EditTestCaseProps) => {
                           {...formik.getFieldProps("title")}
                           maxLength={250}
                         />
-                        <div tw="mt-6">
+                        <div className="mm:mt-6">
                           <TextArea
                             placeholder="Test Case Description"
                             id="test-case-description"
@@ -1532,7 +1543,7 @@ const EditTestCase = (props: EditTestCaseProps) => {
                           />
                         </div>
 
-                        <div tw="mt-6">
+                        <div className="mm:mt-6">
                           <TestCaseSeries
                             readOnly={!testCaseCanEdit}
                             value={formik.values.series}
@@ -1561,14 +1572,14 @@ const EditTestCase = (props: EditTestCaseProps) => {
             </Allotment>
 
             {/* button wrap in context */}
-            <div tw="bg-gray-75 w-full sticky bottom-0 left-0 z-40">
+            <div className="mm:bg-gray-75 mm:w-full mm:sticky mm:bottom-0 mm:left-0 mm:z-40">
               <div
-                tw="w-1/2 flex justify-end py-6 float-right"
+                className="mm:w-1/2 mm:flex mm:justify-end mm:py-6 mm:float-right"
                 style={{ alignItems: "end" }}
               >
                 <FormikProvider value={formikStu6Context}>
                   <Button
-                    tw="m-2"
+                    className="mm:m-2"
                     variant="outline"
                     onClick={() => setDiscardDialogOpen(true)}
                     data-testid="edit-test-case-discard-button"
@@ -1577,7 +1588,7 @@ const EditTestCase = (props: EditTestCaseProps) => {
                     Discard Changes
                   </Button>
                   <Button
-                    tw="m-2"
+                    className="mm:m-2"
                     type="button"
                     onClick={calculate}
                     disabled={shouldDisableRunTestCaseButton({
@@ -1610,7 +1621,7 @@ const EditTestCase = (props: EditTestCaseProps) => {
                     >
                       <span>
                         <Button
-                          tw="m-2"
+                          className="mm:m-2"
                           variant="cyan"
                           type="submit"
                           data-testid="edit-test-case-save-button"

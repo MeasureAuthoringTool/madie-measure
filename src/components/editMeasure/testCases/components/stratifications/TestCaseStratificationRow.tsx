@@ -40,7 +40,6 @@ const TestCaseStratificationRow = ({
 
   return (
     <tr
-      tw="border-b"
       key={strataCode}
       data-testid={`strat-row-population-id-${stratification.name}`}
       role="row"

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import "twin.macro";
+
 import "styled-components/macro";
 import Quantity from "../../common/quantityInput/QuantityInput";
 import { CQL } from "cqm-models";
@@ -38,9 +38,9 @@ const RatioInput = ({
 
   return (
     <>
-      <h5 tw="text-blue-800 mb-2">{label}</h5>
-      <div tw="flex flex-row flex-wrap gap-4">
-        <div tw="flex flex-col w-80">
+      <h5 className="mm:text-blue-800 mm:mb-2">{label}</h5>
+      <div className="mm:flex mm:flex-row mm:flex-wrap mm:gap-4">
+        <div className="mm:flex mm:flex-col mm:w-80">
           <Quantity
             quantity={currentRatio.numerator}
             canEdit={canEdit}
@@ -49,7 +49,7 @@ const RatioInput = ({
           />
         </div>
         <div style={{ paddingTop: "30px" }}>:</div>
-        <div tw="flex flex-col w-80">
+        <div className="mm:flex mm:flex-col mm:w-80">
           <Quantity
             quantity={currentRatio.denominator}
             canEdit={canEdit}

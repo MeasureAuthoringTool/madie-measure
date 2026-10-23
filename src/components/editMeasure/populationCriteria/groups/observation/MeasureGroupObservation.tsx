@@ -1,5 +1,5 @@
 import React from "react";
-import "twin.macro";
+
 import "styled-components/macro";
 import MeasureObservationDetails from "./MeasureObservationDetails";
 import {

@@ -1,5 +1,5 @@
 import React from "react";
-import "twin.macro";
+
 import "styled-components/macro";
 import { DisplayAttributes } from "./DataElementsTable";
 import _ from "lodash";
@@ -14,8 +14,8 @@ const generateAttributeCell = (a: DisplayAttributes) => {
     return <div></div>;
   } else {
     return (
-      <div tw="flex flex-col text-xs">
-        <span tw="whitespace-nowrap">
+      <div className="mm:flex mm:flex-col mm:text-xs">
+        <span className="mm:whitespace-nowrap">
           <b>{a?.title}</b> -{" "}
           {a?.title.toLowerCase() === a?.name.toLowerCase() ? "" : a?.name}{" "}
         </span>

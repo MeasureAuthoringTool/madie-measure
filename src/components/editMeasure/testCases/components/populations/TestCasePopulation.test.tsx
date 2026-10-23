@@ -77,7 +77,7 @@ describe("TestCasePopulation component", () => {
     expect(ippActual).not.toBeChecked();
     // actuall will always be disabled.
     // userEvent.click(ippActual);
-    // expect(handleChange).toBeCalledWith({
+    // expect(handleChange).toHaveBeenCalledWith({
     //   name: PopulationType.INITIAL_POPULATION,
     //   expected: false,
     //   actual: true,

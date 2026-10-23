@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import "twin.macro";
+
 import "styled-components/macro";
 import parse from "html-react-parser";
 import _, { isEmpty } from "lodash";
@@ -340,10 +340,10 @@ const QiCoreGroupCoverage = ({
 
   return (
     <>
-      <div tw="border-b pb-2">
+      <div className="mm:border-b mm:pb-2">
         <Select
           id={"population-criterion-selector"}
-          tw="w-1/4"
+          className="mm:w-1/4"
           sx={{
             height: "32px",
             borderColor: "transparent",
@@ -395,8 +395,12 @@ const QiCoreGroupCoverage = ({
           onChange={(e) => changeCriteria(e.target.value)}
         />
       </div>
-      <div tw="flex mt-5" key={selectedCriteria} id="qi-core-coverage">
-        <div tw="flex-none w-1/5">
+      <div
+        className="mm:flex mm:mt-5"
+        key={selectedCriteria}
+        id="qi-core-coverage"
+      >
+        <div className="mm:flex-none mm:w-1/5">
           <GroupCoverageNav
             id={selectedCriteria}
             populations={getRelevantPopulations()}
@@ -412,7 +416,7 @@ const QiCoreGroupCoverage = ({
         {!selectedAllDefinitions ? (
           <div
             style={{ overflowX: "scroll" }}
-            tw="flex-auto p-3"
+            className="mm:flex-auto mm:p-3"
             id={`${selectedHighlightingTab.abbreviation}-highlighting`}
             data-testid={`${selectedHighlightingTab.abbreviation}-highlighting`}
           >
@@ -461,7 +465,7 @@ const QiCoreGroupCoverage = ({
                 return (
                   <div
                     key={index}
-                    tw="flex-auto p-3"
+                    className="mm:flex-auto mm:p-3"
                     id={`${selectedHighlightingTab.name}-highlighting`}
                     data-testid={`${_.camelCase(
                       selectedHighlightingTab.name

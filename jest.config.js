@@ -1,5 +1,6 @@
 module.exports = {
   roots: ["<rootDir>"],
+  testPathIgnorePatterns: ["/node_modules/", "<rootDir>/scripts/"],
   modulePathIgnorePatterns: ["<rootDir>/dist/"],
   testEnvironment: "jsdom",
   transform: {
@@ -9,6 +10,7 @@ module.exports = {
   },
   transformIgnorePatterns: ["node_modules/(?!formik)/"],
   moduleNameMapper: {
+    "^bson$": require.resolve("bson"),
     "\\.(css)$": "identity-obj-proxy",
     "single-spa-react/parcel": "single-spa-react/lib/cjs/parcel.cjs",
     "^react($|/.+)": "<rootDir>/node_modules/react$1", // makes sure all React imports are running off of the one in this package.

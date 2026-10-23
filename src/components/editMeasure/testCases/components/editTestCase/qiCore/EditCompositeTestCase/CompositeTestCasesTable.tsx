@@ -1,3 +1,4 @@
+import styled from "styled-components";
 import { formatCmsId } from "@madie/madie-util";
 import React, { useMemo, useState } from "react";
 import {
@@ -17,7 +18,7 @@ import {
   TextField,
   Toggle,
 } from "@madie/madie-design-system/dist/react";
-import tw from "twin.macro";
+
 import "styled-components/macro";
 import {
   InputAdornment,
@@ -37,7 +38,9 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { TestCase, Measure } from "@madie/madie-models";
 import { INSERT_TEST_CASE_HOW_IT_WORKS } from "./howItWorksContent";
 
-const TH = tw.th`p-3 text-left text-sm font-bold capitalize`;
+const TH = styled.th.attrs((): { className: string } => ({
+  className: "mm:p-3 mm:text-left mm:text-sm mm:font-bold mm:capitalize",
+}))``;
 
 const filterByOptions = ["Group", "Title", "Description"];
 
@@ -210,7 +213,7 @@ export default function CompositeTestCasesTable({
         cell: (info) => {
           const isInvalid = !validTestCaseIds.has(info.row.original.id);
           return (
-            <div tw="flex flex-wrap items-center justify-end gap-4 p-2">
+            <div className="mm:flex mm:flex-wrap mm:items-center mm:justify-end mm:gap-4 mm:p-2">
               <Button
                 type="button"
                 title="View test case"
@@ -276,7 +279,7 @@ export default function CompositeTestCasesTable({
       {/* Back button + How it works */}
       {howItWorksOpen ? (
         <>
-          <div tw="mt-4 mb-4">
+          <div className="mm:mt-4 mm:mb-4">
             <Button
               variant="outline"
               type="button"
@@ -289,7 +292,7 @@ export default function CompositeTestCasesTable({
               Back to All Profiles
             </Button>
           </div>
-          <div tw="mb-4">
+          <div className="mm:mb-4">
             <HowItWorks
               isOpen={howItWorksOpen}
               onOpenChange={setHowItWorksOpen}
@@ -300,7 +303,7 @@ export default function CompositeTestCasesTable({
         </>
       ) : (
         <div
-          tw="mt-4 mb-4"
+          className="mm:mt-4 mm:mb-4"
           style={{
             display: "flex",
             justifyContent: "space-between",
@@ -341,7 +344,7 @@ export default function CompositeTestCasesTable({
       />
 
       {/* Measure info */}
-      <div tw="mb-4">
+      <div className="mm:mb-4">
         <p style={{ fontWeight: 700, margin: 0 }}>
           {selectedMeasure.measureName}
           {cmsId && (
@@ -363,9 +366,9 @@ export default function CompositeTestCasesTable({
       </div>
 
       {/* Search / Filter */}
-      <div tw="flex py-4 items-center">
-        <div tw="flex w-1/2 pr-4">
-          <div tw="w-1/2 pr-2">
+      <div className="mm:flex mm:py-4 mm:items-center">
+        <div className="mm:flex mm:w-1/2 mm:pr-4">
+          <div className="mm:w-1/2 mm:pr-2">
             <Select
               label="Filter By"
               id="tc-filter-by-select"
@@ -398,10 +401,10 @@ export default function CompositeTestCasesTable({
               ]}
             />
           </div>
-          <div tw="w-1/2 pl-2">
+          <div className="mm:w-1/2 mm:pl-2">
             <TextField
               id="tc-search"
-              tw="w-full"
+              className="mm:w-full"
               label="Search"
               placeholder="Search"
               inputProps={{
@@ -446,7 +449,7 @@ export default function CompositeTestCasesTable({
           </div>
         </div>
         {/* Hide Invalid Test Cases Toggle */}
-        <div tw="flex items-center" style={{ marginTop: "25px" }}>
+        <div className="mm:flex mm:items-center" style={{ marginTop: "25px" }}>
           <Toggle
             checked={hideInvalidTestCases}
             data-testid="hide-invalid-test-cases-checkbox"
@@ -467,16 +470,15 @@ export default function CompositeTestCasesTable({
           <div className="measure-table no-margin no-vert-borders no-radius middle-align-row">
             <div className="table" style={{ overflow: "auto" }}>
               <table
-                tw="min-w-full"
                 data-testid="composite-test-cases-tbl"
-                className="ml-table"
+                className="ml-table mm:min-w-full"
                 style={{
                   borderSpacing: "0 2em !important",
                   tableLayout: "fixed",
                   width: "100%",
                 }}
               >
-                <thead tw="bg-slate">
+                <thead className="mm:bg-slate">
                   {table.getHeaderGroups().map((headerGroup) => (
                     <tr key={headerGroup.id}>
                       {headerGroup.headers.map((header) => {

@@ -1,14 +1,17 @@
+import styled from "styled-components";
 import React, { useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { Tab, Tabs } from "@madie/madie-design-system/dist/react";
 import "../../../styles/VerticalSideBarNav.scss";
 import { Link } from "./MeasureDetails";
 import CompletionIndicator from "../populationCriteria/groups/CompletionIndicator";
-import tw from "twin.macro";
+
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 
-const InnerWrapper = tw.div`flex flex-grow flex-col`;
+const InnerWrapper = styled.div.attrs((): { className: string } => ({
+  className: "mm:flex mm:grow mm:flex-col",
+}))``;
 export interface EditMeasureDetailsSideNavProps {
   links: Array<Link>;
 }

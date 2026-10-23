@@ -1,7 +1,8 @@
+import styled from "styled-components";
 import React, { useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { Group } from "@madie/madie-models";
-import tw from "twin.macro";
+
 import { Tabs, Tab } from "@madie/madie-design-system/dist/react";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
@@ -9,7 +10,9 @@ import ExpansionIcon from "@mui/icons-material/KeyboardTabOutlined";
 import IconButton from "@mui/material/IconButton";
 import "../../../../../../styles/VerticalSideBarNav.scss";
 
-const InnerWrapper = tw.div`flex flex-grow flex-col`;
+const InnerWrapper = styled.div.attrs((): { className: string } => ({
+  className: "mm:flex mm:grow mm:flex-col",
+}))``;
 
 export interface TestCaseListSideBarNavProps {
   allPopulationCriteria: Group[];
