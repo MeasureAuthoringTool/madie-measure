@@ -1005,8 +1005,7 @@ export default function EditMeasure() {
             onClose={() => setCommentsPanelOpen(false)}
             entityType="measure"
             sections={commentSections}
-            subSection={commentLocation.subSectionName}
-            mainSection={commentLocation.mainSection}
+            activeSections={commentLocation}
             readyForReviewBy={measureReview?.readyForReviewBy}
             readyForReviewAt={measureReview?.readyForReviewAt}
           />

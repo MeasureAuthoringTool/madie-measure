@@ -402,13 +402,16 @@ declare module "@madie/madie-util" {
     readyForReviewBy?: string;
     readyForReviewAt?: string;
   }): React.ReactElement;
+  export interface CommentSectionLocation {
+    activeMainSection?: string;
+    activeSubSection: string;
+  }
   export function CommentsFlyoutPanel(props: {
     open: boolean;
     onClose: () => void;
     entityType: "measure" | "library";
     sections: { name: string; subSections: string[] }[];
-    subSection: string;
-    mainSection?: string;
+    activeSections: CommentSectionLocation;
     commentedSubSections?: string[];
     readyForReviewBy?: string;
     readyForReviewAt?: string;

@@ -198,31 +198,37 @@ describe("getCommentSectionLocation", () => {
       "Population Criteria 1",
     ],
     ["test-cases/case-one", COMMENT_MAIN_SECTIONS.TEST_CASES, "Example case"],
-  ])("places edit/%s under %s as %s", (route, mainSection, subSectionName) => {
-    expect(locationFor(route)).toEqual({ mainSection, subSectionName });
-  });
+  ])(
+    "places edit/%s under %s as %s",
+    (route, activeMainSection, activeSubSection) => {
+      expect(locationFor(route)).toEqual({
+        activeMainSection,
+        activeSubSection,
+      });
+    }
+  );
 
   it("places the QDM only screens under Population Criteria", () => {
     const qdmMeasure = { ...measure, model: "QDM v5.6" };
 
     expect(locationFor("base-configuration", qdmMeasure)).toEqual({
-      mainSection: COMMENT_MAIN_SECTIONS.POPULATION_CRITERIA,
-      subSectionName: "Base Configuration",
+      activeMainSection: COMMENT_MAIN_SECTIONS.POPULATION_CRITERIA,
+      activeSubSection: "Base Configuration",
     });
     expect(locationFor("reporting", qdmMeasure)).toEqual({
-      mainSection: COMMENT_MAIN_SECTIONS.POPULATION_CRITERIA,
-      subSectionName: "Reporting",
+      activeMainSection: COMMENT_MAIN_SECTIONS.POPULATION_CRITERIA,
+      activeSubSection: "Reporting",
     });
   });
 
   it("maps the details screens that are not in the main nav list", () => {
     expect(locationFor("details/measure-limitations")).toEqual({
-      mainSection: COMMENT_MAIN_SECTIONS.DETAILS,
-      subSectionName: "Limitations",
+      activeMainSection: COMMENT_MAIN_SECTIONS.DETAILS,
+      activeSubSection: "Limitations",
     });
     expect(locationFor("details/measure-authoritative-source")).toEqual({
-      mainSection: COMMENT_MAIN_SECTIONS.DETAILS,
-      subSectionName: "Authoritative Source",
+      activeMainSection: COMMENT_MAIN_SECTIONS.DETAILS,
+      activeSubSection: "Authoritative Source",
     });
   });
 
@@ -236,20 +242,20 @@ describe("getCommentSectionLocation", () => {
     "test-cases/unknown-case",
   ])("has no main section for edit/%s", (route) => {
     expect(locationFor(route)).toEqual({
-      subSectionName: "Current section",
+      activeSubSection: "Current section",
     });
   });
 
   it("does not throw when the route is not known yet", () => {
     expect(getCommentSectionLocation(undefined, measure)).toEqual({
-      subSectionName: "Current section",
+      activeSubSection: "Current section",
     });
   });
 
   it("has no main section outside of the measure edit routes", () => {
     expect(
       getCommentSectionLocation("/measures/measure-id/view/details", measure)
-    ).toEqual({ subSectionName: "Current section" });
+    ).toEqual({ activeSubSection: "Current section" });
   });
 });
 

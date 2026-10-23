@@ -34,8 +34,8 @@ export const FALLBACK_SECTION_NAME = "Current section";
 
 export interface CommentSectionLocation {
   // undefined when the route isn't one that can be commented on
-  mainSection?: CommentMainSection;
-  subSectionName: string;
+  activeMainSection?: CommentMainSection;
+  activeSubSection: string;
 }
 
 export interface CommentSection {
@@ -44,7 +44,7 @@ export interface CommentSection {
 }
 
 const UNKNOWN_SECTION: CommentSectionLocation = {
-  subSectionName: FALLBACK_SECTION_NAME,
+  activeSubSection: FALLBACK_SECTION_NAME,
 };
 
 type SectionScope = "qdm" | "fhir";
@@ -234,16 +234,16 @@ const getTestCasesLocation = (
   if (subsection === "list-page") {
     if (!identifier) {
       return {
-        mainSection: COMMENT_MAIN_SECTIONS.TEST_CASES,
-        subSectionName: "Population Criteria 1",
+        activeMainSection: COMMENT_MAIN_SECTIONS.TEST_CASES,
+        activeSubSection: "Population Criteria 1",
       };
     }
 
     const listSectionName = TEST_CASE_LIST_SECTIONS[identifier];
     if (listSectionName) {
       return {
-        mainSection: COMMENT_MAIN_SECTIONS.TEST_CASES,
-        subSectionName: listSectionName,
+        activeMainSection: COMMENT_MAIN_SECTIONS.TEST_CASES,
+        activeSubSection: listSectionName,
       };
     }
 
@@ -251,8 +251,8 @@ const getTestCasesLocation = (
     const groupNumber = getGroupNumber(identifier, measure?.groups);
     return groupNumber
       ? {
-          mainSection: COMMENT_MAIN_SECTIONS.TEST_CASES,
-          subSectionName: `Population Criteria ${groupNumber}`,
+          activeMainSection: COMMENT_MAIN_SECTIONS.TEST_CASES,
+          activeSubSection: `Population Criteria ${groupNumber}`,
         }
       : UNKNOWN_SECTION;
   }
@@ -266,8 +266,8 @@ const getTestCasesLocation = (
 
   const title = testCase.title ?? testCase.name ?? "Test Case";
   return {
-    mainSection: COMMENT_MAIN_SECTIONS.TEST_CASES,
-    subSectionName: testCase.series ? `${testCase.series} - ${title}` : title,
+    activeMainSection: COMMENT_MAIN_SECTIONS.TEST_CASES,
+    activeSubSection: testCase.series ? `${testCase.series} - ${title}` : title,
   };
 };
 
@@ -290,16 +290,16 @@ export const getCommentSectionLocation = (
     const detailsName = DETAILS_SECTIONS[subsection ?? ""];
     return detailsName
       ? {
-          mainSection: COMMENT_MAIN_SECTIONS.DETAILS,
-          subSectionName: detailsName,
+          activeMainSection: COMMENT_MAIN_SECTIONS.DETAILS,
+          activeSubSection: detailsName,
         }
       : UNKNOWN_SECTION;
   }
 
   if (section === "cql-editor") {
     return {
-      mainSection: COMMENT_MAIN_SECTIONS.CQL_EDITOR,
-      subSectionName: "CQL Editor",
+      activeMainSection: COMMENT_MAIN_SECTIONS.CQL_EDITOR,
+      activeSubSection: "CQL Editor",
     };
   }
 
@@ -307,8 +307,8 @@ export const getCommentSectionLocation = (
     const groupNumber = Number(subsection);
     return Number.isInteger(groupNumber) && groupNumber > 0
       ? {
-          mainSection: COMMENT_MAIN_SECTIONS.POPULATION_CRITERIA,
-          subSectionName: `Criteria ${groupNumber}`,
+          activeMainSection: COMMENT_MAIN_SECTIONS.POPULATION_CRITERIA,
+          activeSubSection: `Criteria ${groupNumber}`,
         }
       : UNKNOWN_SECTION;
   }
@@ -320,8 +320,8 @@ export const getCommentSectionLocation = (
     // Base Configuration and Reporting only exist on QDM measures
     return !definition.scope || definition.scope === (isQdm ? "qdm" : "fhir")
       ? {
-          mainSection: COMMENT_MAIN_SECTIONS.POPULATION_CRITERIA,
-          subSectionName: definition.name,
+          activeMainSection: COMMENT_MAIN_SECTIONS.POPULATION_CRITERIA,
+          activeSubSection: definition.name,
         }
       : UNKNOWN_SECTION;
   }
@@ -336,4 +336,4 @@ export const getCommentSectionLocation = (
 export const getCommentSectionName = (
   pathname: string,
   measure?: CommentMeasure | null
-): string => getCommentSectionLocation(pathname, measure).subSectionName;
+): string => getCommentSectionLocation(pathname, measure).activeSubSection;
