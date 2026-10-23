@@ -290,10 +290,10 @@ jest.mock("@madie/madie-util", () => ({
   useFeatureFlags: jest.fn(() => ({})),
   shouldShowReviewCommentLink: jest.fn(),
   ReviewSubSection: () => <div data-testid="comments-review-subsection" />,
-  CommentsFlyoutPanel: ({ open, onClose, sectionName }: any) =>
+  CommentsFlyoutPanel: ({ open, onClose, subSection }: any) =>
     open ? (
       <div data-testid="comments-flyout">
-        <span>{`Add a comment to ${sectionName}`}</span>
+        <span>{`Add a comment to ${subSection}`}</span>
         <button data-testid="comments-flyout-close" onClick={onClose}>
           Close
         </button>

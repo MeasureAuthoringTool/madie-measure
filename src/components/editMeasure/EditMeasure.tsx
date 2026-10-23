@@ -758,7 +758,7 @@ export default function EditMeasure() {
     hasReviewerRole: Boolean(userRoles?.isReviewer),
     assignedReviewers: measureReview?.reviewers,
   });
-  const commentSection = getCommentSectionLocation(location.pathname, measure);
+  const commentLocation = getCommentSectionLocation(location.pathname, measure);
   const commentSections = getCommentSections(measure);
 
   return (
@@ -1005,8 +1005,8 @@ export default function EditMeasure() {
             onClose={() => setCommentsPanelOpen(false)}
             entityType="measure"
             sections={commentSections}
-            sectionName={commentSection.subSectionName}
-            mainSection={commentSection.mainSection}
+            subSection={commentLocation.subSectionName}
+            mainSection={commentLocation.mainSection}
             readyForReviewBy={measureReview?.readyForReviewBy}
             readyForReviewAt={measureReview?.readyForReviewAt}
           />
