@@ -4,10 +4,10 @@ import {
   getCommentSections,
 } from "./CommentUtils";
 
-// the resolver returns { mainSection, subSectionName }; these cases assert the
+// the resolver returns { activeMainSection, activeSubSection }; these cases assert the
 // label it lands on
 const nameFor = (pathname: string, measure?: any) =>
-  getCommentSectionLocation(pathname, measure).subSectionName;
+  getCommentSectionLocation(pathname, measure).activeSubSection;
 
 const measure = {
   model: "QI-Core v6.0.0",
