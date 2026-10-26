@@ -401,6 +401,40 @@ describe("EditTestCase component", () => {
 
   // TODO: split these into separate groups
   describe("EditTestCase other test cases", () => {
+    it.each([
+      { model: Model.QICORE, validate: true },
+      { model: Model.QICORE_6_0_0, validate: false },
+      { model: Model.US_QUALITY_0_5_0, validate: false },
+    ])(
+      "should set edit-load validation to $validate for $model",
+      async ({ model, validate }) => {
+        const testCaseUrl = "measure.url/measures/m1234/test-cases/testID";
+        const defaultGetImplementation =
+          mockedAxios.get.getMockImplementation();
+        mockedAxios.get.mockImplementation((url, config) => {
+          if (url === testCaseUrl) {
+            return Promise.resolve({
+              data: { id: "testID", title: "Test title", json: "{}" },
+            });
+          }
+          return defaultGetImplementation(url, config);
+        });
+
+        renderWithRouter(
+          ["/measures/m1234/edit/test-cases/testID"],
+          "/measures/:measureId/edit/test-cases/:id",
+          { ...defaultMeasure, model }
+        );
+
+        await waitFor(() => {
+          expect(mockedAxios.get).toHaveBeenCalledWith(
+            testCaseUrl,
+            expect.objectContaining({ params: { validate } })
+          );
+        });
+      }
+    );
+
     it("should render edit test case page", async () => {
       renderWithRouter(
         ["/measures/m1234/edit/test-cases"],
