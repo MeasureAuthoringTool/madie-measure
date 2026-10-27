@@ -433,10 +433,9 @@ declare module "@madie/madie-util" {
     currentUserId?: string;
     onAddComment?: (comment: Comment) => void;
     onUpdateComment?: (comment: Comment) => void;
-    // the delete confirmation stays open until this settles; false keeps it open
     onDeleteComment?: (comment: Comment) => void | Promise<boolean | void>;
-    readyForReviewBy?: string;
-    readyForReviewAt?: string;
+    markedForReviewBy?: string;
+    markedForReviewAt?: string;
   }): React.ReactElement;
   export const REVIEW_STATUS_OPTIONS: string[];
   export function getNewestMeasureInstance(measures: Measure[]): Measure;

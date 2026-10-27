@@ -981,8 +981,8 @@ export default function EditMeasure() {
             onUpdateComment={updateComment}
             onDeleteComment={deleteComment}
             activeSection={commentLocation}
-            readyForReviewBy={measureReview?.readyForReviewBy}
-            readyForReviewAt={measureReview?.readyForReviewAt}
+            markedForReviewBy={measureReview?.markedForReviewBy}
+            markedForReviewAt={measureReview?.markedForReviewAt}
           />
         </>
       )}
