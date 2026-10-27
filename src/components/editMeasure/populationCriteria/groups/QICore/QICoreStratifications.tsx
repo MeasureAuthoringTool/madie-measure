@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import "twin.macro";
+
 import "styled-components/macro";
 import { PopulationType } from "@madie/madie-models";
 import { MenuItem as MuiMenuItem } from "@mui/material";
@@ -91,10 +91,10 @@ const QICoreStratifications = ({
               (strat, i) =>
                 formik.values.stratifications[i].description !==
                   deleteToken && (
-                  <div key={i} tw="mt-6">
-                    <div tw="grid lg:grid-cols-4 gap-4">
-                      <div tw="lg:col-span-1">
-                        <div tw="relative">
+                  <div key={i} className="mm:mt-6">
+                    <div className="mm:grid mm:lg:grid-cols-4 mm:gap-4">
+                      <div className="mm:lg:col-span-1">
+                        <div className="mm:relative">
                           {formik.values.stratifications.length > 2 &&
                             visibleStrats > 2 && (
                               <DSLink
@@ -189,7 +189,7 @@ const QICoreStratifications = ({
                         </div>
                         {/*Association Select*/}
                         {/* Given STU update requirements we're going to default all items */}
-                        <div tw="pt-4">
+                        <div className="mm:pt-4">
                           <MultipleSelectDropDown
                             id={`association-select-${i + 1}`}
                             label={`Association ${i + 1}`}
@@ -263,7 +263,7 @@ const QICoreStratifications = ({
                           />
                         </div>
                       </div>
-                      <div tw="lg:col-span-2">
+                      <div className="mm:lg:col-span-2">
                         <TextEditor
                           readOnly={!canEdit}
                           label={`Stratification ${i + 1} Description`}
@@ -278,7 +278,7 @@ const QICoreStratifications = ({
                 )
             )}
           {canEdit ? (
-            <div tw="pt-4">
+            <div className="mm:pt-4">
               <DSLink
                 className="madie-link"
                 sx={{
@@ -297,7 +297,7 @@ const QICoreStratifications = ({
               </DSLink>
             </div>
           ) : (
-            <div tw="p-4"></div>
+            <div className="mm:p-4"></div>
           )}
         </div>
       )}

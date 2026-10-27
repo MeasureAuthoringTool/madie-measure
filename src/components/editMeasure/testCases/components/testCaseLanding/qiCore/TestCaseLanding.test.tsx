@@ -1,6 +1,6 @@
 import * as React from "react";
 import * as mockMeasureActionStubs from "../../../../../../__mocks__/measureActionStubs";
-import { render, screen } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import TestCaseLanding from "./TestCaseLanding";
 import { MemoryRouter, Routes, Route } from "react-router-dom";
 import {
@@ -21,6 +21,14 @@ import { ExecutionContextProvider } from "../../routes/qiCore/ExecutionContext";
 // @ts-ignore
 import { checkUserCanEdit } from "@madie/madie-util";
 import useFhirDefinitionsServiceApi from "../../../api/useFhirDefinitionsService";
+
+jest.mock("../../../api/useTestCaseServiceApi", () => ({
+  __esModule: true,
+  default: () => ({
+    getTestCasesByMeasureId: jest.fn().mockResolvedValue([]),
+    getTestCaseSeriesForMeasure: jest.fn().mockResolvedValue([]),
+  }),
+}));
 
 const serviceConfig = {
   measureService: {
@@ -118,6 +126,7 @@ jest.mock("@madie/madie-util", () => ({
   useDocumentTitle: jest.fn(),
   measureStore: {
     updateMeasure: jest.fn((measure) => measure),
+    updateTestCases: jest.fn(),
   },
   useOktaTokens: () => ({
     getAccessToken: () => "test.jwt",
@@ -187,7 +196,9 @@ describe("TestCaseLanding component", () => {
   }
 
   it("should render the landing component with a button to create New Case", async () => {
-    renderTestCaseLandingComponent(measure);
+    await act(async () => {
+      renderTestCaseLandingComponent(measure);
+    });
 
     const newTestCase = await screen.findByRole("button", {
       name: "New Case",
@@ -200,7 +211,9 @@ describe("TestCaseLanding component", () => {
       return false;
     });
     const readOnlyMeasure = { ...measure, createdBy: "not me" };
-    renderTestCaseLandingComponent(readOnlyMeasure);
+    await act(async () => {
+      renderTestCaseLandingComponent(readOnlyMeasure);
+    });
     const newTestCase = await screen.queryByRole("button", {
       name: "New Case",
     });

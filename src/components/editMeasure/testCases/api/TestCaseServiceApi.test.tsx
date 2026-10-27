@@ -120,7 +120,7 @@ describe("TestCaseServiceApi Tests", () => {
     axios.post = jest.fn().mockRejectedValueOnce(axiosError);
     await expect(async () => {
       await testCaseService.scanImportFile({});
-    }).rejects.toThrowError(
+    }).rejects.toThrow(
       "Unable to scan the import file. Please try again later."
     );
   });
@@ -142,7 +142,7 @@ describe("TestCaseServiceApi Tests", () => {
       measure: mockMeasure,
       groupDTOs: groupDTOs,
     });
-    expect(axios.put).toBeCalledTimes(1);
+    expect(axios.put).toHaveBeenCalledTimes(1);
     expect(qrdaData).toEqual(zippedQRDAData);
   });
 
@@ -162,7 +162,7 @@ describe("TestCaseServiceApi Tests", () => {
         measure: mockMeasure,
         groupDTOs: groupDTOs,
       });
-      expect(axios.put).toBeCalledTimes(1);
+      expect(axios.put).toHaveBeenCalledTimes(1);
     } catch (error) {
       expect(error.status).toBe(500);
     }
@@ -188,7 +188,7 @@ describe("TestCaseServiceApi Tests", () => {
       testCaseExcelExportDtos
     );
 
-    expect(axios.put).toBeCalledTimes(1);
+    expect(axios.put).toHaveBeenCalledTimes(1);
     expect(result).toEqual(excelBlob);
   });
 
@@ -208,7 +208,7 @@ describe("TestCaseServiceApi Tests", () => {
       testCaseService.exportExcel("testMeasureId", testCaseExcelExportDtos)
     ).rejects.toEqual(errorResponse);
 
-    expect(axios.put).toBeCalledTimes(1);
+    expect(axios.put).toHaveBeenCalledTimes(1);
   });
 
   it("test createTestCase success", async () => {
@@ -246,7 +246,7 @@ describe("TestCaseServiceApi Tests", () => {
 
     try {
       await testCaseService.createTestCase(testCase, "testMeasureId");
-      expect(axios.get).toBeCalledTimes(1);
+      expect(axios.get).toHaveBeenCalledTimes(1);
     } catch (err) {
       expect(err).not.toBeNull();
     }
@@ -270,7 +270,7 @@ describe("TestCaseServiceApi Tests", () => {
       [testCase.id],
       1
     );
-    expect(axios.put).toBeCalledTimes(1);
+    expect(axios.put).toHaveBeenCalledTimes(1);
     expect(result.shifted).toContain("1234");
     expect(result.failed).toEqual([]);
   });
@@ -295,7 +295,7 @@ describe("TestCaseServiceApi Tests", () => {
         [testCase.id],
         1
       );
-      expect(axios.put).toBeCalledTimes(1);
+      expect(axios.put).toHaveBeenCalledTimes(1);
       expect(result).not.toEqual(testCase);
     } catch (err) {
       expect(err).toEqual(new Error(SHIFT_TEST_CASE_DATES_ERROR));
@@ -316,7 +316,7 @@ describe("TestCaseServiceApi Tests", () => {
         [testCase.id],
         1
       );
-      expect(axios.put).toBeCalledTimes(1);
+      expect(axios.put).toHaveBeenCalledTimes(1);
       expect(result).not.toEqual(testCase);
     } catch (err) {
       expect(err).toEqual(new Error(SHIFT_TEST_CASE_DATES_ERROR));
@@ -345,7 +345,7 @@ describe("TestCaseServiceApi Tests", () => {
         [testCase.id],
         1
       );
-      expect(axios.put).toBeCalledTimes(1);
+      expect(axios.put).toHaveBeenCalledTimes(1);
       expect(result).not.toEqual(testCase);
     } catch (err) {
       expect(err).toEqual(
@@ -366,7 +366,7 @@ describe("TestCaseServiceApi Tests", () => {
       ["testCaseId1"],
       1
     );
-    expect(axios.put).toBeCalledTimes(1);
+    expect(axios.put).toHaveBeenCalledTimes(1);
     expect(result.shifted).toContain("1234");
     expect(result.failed).toEqual([]);
   });
@@ -387,7 +387,7 @@ describe("TestCaseServiceApi Tests", () => {
         ["testCaseId1"],
         1
       );
-      expect(axios.get).toBeCalledTimes(1);
+      expect(axios.get).toHaveBeenCalledTimes(1);
       expect(result[0]).not.toEqual(testCases[0]);
     } catch (err) {
       expect(err).toEqual(new Error(SHIFT_TEST_CASE_DATES_ERROR));
@@ -417,7 +417,7 @@ describe("TestCaseServiceApi Tests", () => {
         ["testCaseId1"],
         1
       );
-      expect(axios.get).toBeCalledTimes(1);
+      expect(axios.get).toHaveBeenCalledTimes(1);
       expect(result[0]).not.toEqual(testCases[0]);
     } catch (err) {
       expect(err).toEqual(new Error(SHIFT_TEST_CASE_DATES_ERROR));
@@ -448,7 +448,7 @@ describe("TestCaseServiceApi Tests", () => {
         ["testCaseId1"],
         1
       );
-      expect(axios.get).toBeCalledTimes(1);
+      expect(axios.get).toHaveBeenCalledTimes(1);
       expect(result[0]).not.toEqual(testCases[0]);
     } catch (err) {
       expect(err).toEqual(
@@ -469,7 +469,7 @@ describe("TestCaseServiceApi Tests", () => {
       "testMeasureId",
       1
     );
-    expect(axios.get).toBeCalledTimes(1);
+    expect(axios.get).toHaveBeenCalledTimes(1);
     expect(result.shifted).toContain("1234");
     expect(result.failed).toEqual([]);
   });
@@ -489,7 +489,7 @@ describe("TestCaseServiceApi Tests", () => {
         "testMeasureId",
         1
       );
-      expect(axios.get).toBeCalledTimes(1);
+      expect(axios.get).toHaveBeenCalledTimes(1);
       expect(result[0]).not.toEqual(testCases[0]);
     } catch (err) {
       expect(err).toEqual(new Error(SHIFT_TEST_CASE_DATES_ERROR));
@@ -518,7 +518,7 @@ describe("TestCaseServiceApi Tests", () => {
         "testMeasureId",
         1
       );
-      expect(axios.get).toBeCalledTimes(1);
+      expect(axios.get).toHaveBeenCalledTimes(1);
       expect(result[0]).not.toEqual(testCases[0]);
     } catch (err) {
       expect(err).toEqual(new Error(SHIFT_TEST_CASE_DATES_ERROR));
@@ -548,7 +548,7 @@ describe("TestCaseServiceApi Tests", () => {
         "testMeasureId",
         1
       );
-      expect(axios.get).toBeCalledTimes(1);
+      expect(axios.get).toHaveBeenCalledTimes(1);
       expect(result[0]).not.toEqual(testCases[0]);
     } catch (err) {
       expect(err).toEqual(
@@ -569,7 +569,7 @@ describe("TestCaseServiceApi Tests", () => {
       "testMeasureId",
       1
     );
-    expect(axios.put).toBeCalledTimes(1);
+    expect(axios.put).toHaveBeenCalledTimes(1);
     expect(result.shifted).toContain("1234");
     expect(result.failed).toEqual([]);
   });
@@ -591,7 +591,7 @@ describe("TestCaseServiceApi Tests", () => {
         "testMeasureId",
         1
       );
-      expect(axios.put).toBeCalledTimes(1);
+      expect(axios.put).toHaveBeenCalledTimes(1);
       expect(result[0]).not.toEqual(testCases[0]);
     } catch (err) {
       expect(err).toEqual(new Error(SHIFT_TEST_CASE_DATES_ERROR));
@@ -621,7 +621,7 @@ describe("TestCaseServiceApi Tests", () => {
         "testMeasureId",
         1
       );
-      expect(axios.get).toBeCalledTimes(1);
+      expect(axios.get).toHaveBeenCalledTimes(1);
       expect(result[0]).not.toEqual(testCases[0]);
     } catch (err) {
       expect(err).toEqual(new Error(SHIFT_TEST_CASE_DATES_ERROR));
@@ -651,7 +651,7 @@ describe("TestCaseServiceApi Tests", () => {
         "testMeasureId",
         1
       );
-      expect(axios.get).toBeCalledTimes(1);
+      expect(axios.get).toHaveBeenCalledTimes(1);
       expect(result[0]).not.toEqual(testCases[0]);
     } catch (err) {
       expect(err).toEqual(
@@ -672,7 +672,7 @@ describe("TestCaseServiceApi Tests", () => {
       "testMeasureId",
       "testCaseId"
     );
-    expect(axios.post).toBeCalledTimes(1);
+    expect(axios.post).toHaveBeenCalledTimes(1);
     expect(result).toBe(response);
   });
 
@@ -690,7 +690,7 @@ describe("TestCaseServiceApi Tests", () => {
         "testMeasureId",
         "testCaseId"
       );
-      expect(axios.post).toBeCalledTimes(1);
+      expect(axios.post).toHaveBeenCalledTimes(1);
       expect(result).not.toBe(response);
     } catch (err) {
       expect(err).not.toBeNull();
@@ -704,7 +704,7 @@ describe("TestCaseServiceApi Tests", () => {
     axios.delete = jest.fn().mockResolvedValueOnce({ data: response });
 
     const result = await testCaseService.unlockTestCase("testCaseId");
-    expect(axios.delete).toBeCalledTimes(1);
+    expect(axios.delete).toHaveBeenCalledTimes(1);
     expect(result).toBe(response);
   });
 
@@ -719,7 +719,7 @@ describe("TestCaseServiceApi Tests", () => {
 
     try {
       const result = await testCaseService.unlockTestCase("testCaseId");
-      expect(axios.delete).toBeCalledTimes(1);
+      expect(axios.delete).toHaveBeenCalledTimes(1);
       expect(result).not.toBe(response);
     } catch (err) {
       expect(err).not.toBeNull();
@@ -763,7 +763,7 @@ describe("TestCaseServiceApi Tests", () => {
 
     await expect(async () => {
       await testCaseService.updateTestCase(testCase, "M123");
-    }).rejects.toThrowError(
+    }).rejects.toThrow(
       "Unable to update Test Case. Test Case is locked by: another.user."
     );
   });
@@ -786,7 +786,7 @@ describe("TestCaseServiceApi Tests", () => {
 
     await expect(async () => {
       await testCaseService.updateTestCase(testCase, "M123");
-    }).rejects.toThrowError("Error updating Test Case.");
+    }).rejects.toThrow("Error updating Test Case.");
   });
 
   it("should handle other updateTestCase failure", async () => {
@@ -807,7 +807,7 @@ describe("TestCaseServiceApi Tests", () => {
 
     await expect(async () => {
       await testCaseService.updateTestCase(testCase, "M123");
-    }).rejects.toThrowError("Unable to update test case");
+    }).rejects.toThrow("Unable to update test case");
   });
 
   it("should return updated and failed arrays on success", async () => {

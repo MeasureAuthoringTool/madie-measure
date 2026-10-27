@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import "twin.macro";
+
 import "styled-components/macro";
 import {
   Select,
@@ -214,8 +214,8 @@ const Codes = ({
 
   return (
     <div id="codes" data-testid="codes-section">
-      <div tw="flex md:flex-wrap mt-3">
-        <div tw="w-1/4">
+      <div className="mm:flex mm:md:flex-wrap mm:mt-3">
+        <div className="mm:w-1/4">
           <Select
             readOnly={!canEdit}
             placeHolder={{
@@ -239,11 +239,10 @@ const Codes = ({
         {!_.isEmpty(selectedCodeSystemName) && (
           <>
             {selectedCodeSystemName === "Custom" ? (
-              <div tw="flex md:flex-wrap w-1/2">
-                <div tw="w-1/2 pl-3">
+              <div className="mm:flex mm:md:flex-wrap mm:w-1/2">
+                <div className="mm:w-1/2 mm:pl-3">
                   <TextField
                     id="custom-code-system"
-                    tw="w-full"
                     label="Custom Code System"
                     placeholder="Custom Code System"
                     readOnly={!canEdit}
@@ -254,12 +253,12 @@ const Codes = ({
                     onChange={(event) =>
                       setCustomCodeSystemName(event.target.value)
                     }
+                    className="mm:w-full"
                   />
                 </div>
-                <div tw="w-1/2 pl-3">
+                <div className="mm:w-1/2 mm:pl-3">
                   <TextField
                     id="custom-code"
-                    tw="w-full"
                     label="Custom Code"
                     placeholder="Custom Code"
                     readOnly={!canEdit}
@@ -270,11 +269,12 @@ const Codes = ({
                     onChange={(event) =>
                       setCustomCodeConcept(event.target.value)
                     }
+                    className="mm:w-full"
                   />
                 </div>
               </div>
             ) : (
-              <div tw="w-1/2 pl-3">
+              <div className="mm:w-1/2 mm:pl-3">
                 <Select
                   label="Code"
                   id={"code-selector"}
@@ -312,7 +312,7 @@ const Codes = ({
             )}
           </>
         )}
-        <div tw="w-1/4 py-6 pl-2.5">
+        <div className="mm:w-1/4 mm:py-6 mm:pl-2.5">
           {canEdit && (
             <Button
               variant="outline-filled"
@@ -325,7 +325,7 @@ const Codes = ({
           )}
         </div>
       </div>
-      <div tw="flex flex-wrap gap-2">
+      <div className="mm:flex mm:flex-wrap mm:gap-2">
         {chips.map((chip) => {
           return (
             <Tooltip

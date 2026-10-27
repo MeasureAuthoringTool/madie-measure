@@ -72,7 +72,7 @@ describe("SDEPage component", () => {
     await waitFor(() =>
       expect(
         mockMeasureServiceApi.updateMeasureTestCaseConfiguration
-      ).toBeCalledWith({ sdeIncluded: true }, measure.id)
+      ).toHaveBeenCalledWith({ sdeIncluded: true }, measure.id)
     );
 
     expect(

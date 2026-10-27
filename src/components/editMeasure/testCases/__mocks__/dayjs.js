@@ -1,4 +1,4 @@
-const mock = jest.genMockFromModule("dayjs");
+const mock = jest.createMockFromModule("dayjs");
 const utc = jest.requireActual("dayjs/plugin/utc");
 const timezone = jest.requireActual("dayjs/plugin/timezone");
 const dayjs = jest.requireActual("dayjs");

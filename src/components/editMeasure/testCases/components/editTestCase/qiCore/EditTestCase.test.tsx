@@ -2565,7 +2565,7 @@ describe("EditTestCase component", () => {
         expect(descriptionInput).toHaveTextContent(modifiedDescription);
       });
       userEvent.click(screen.getByRole("button", { name: "Discard Changes" }));
-      expect(mockedAxios.put).toBeCalledTimes(0);
+      expect(mockedAxios.put).toHaveBeenCalledTimes(0);
     });
 
     it("should generate field level error for test case description more than 250 characters", async () => {
@@ -4676,7 +4676,7 @@ describe("EditTestCase component", () => {
         measure
       );
 
-      expect(mockedAxios.post).toBeCalled();
+      expect(mockedAxios.post).toHaveBeenCalled();
     });
 
     it("locking test case fails", () => {
@@ -4717,7 +4717,7 @@ describe("EditTestCase component", () => {
         measure
       );
 
-      expect(mockedAxios.post).toBeCalled();
+      expect(mockedAxios.post).toHaveBeenCalled();
     });
   });
 });

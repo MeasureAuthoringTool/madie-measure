@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import "twin.macro";
+
 import "styled-components/macro";
 import { Chip } from "@mui/material";
 import _ from "lodash";
@@ -64,8 +64,8 @@ const NegationRationale = ({
 
   return (
     <>
-      <div tw="flex w-3/4" data-testid="negation-rationale-div">
-        <div tw="flex-grow w-3/4">
+      <div data-testid="negation-rationale-div" className="mm:flex mm:w-3/4">
+        <div className="mm:grow mm:w-3/4">
           <CodeInput
             handleChange={(val) => {
               if (val) {
@@ -77,15 +77,15 @@ const NegationRationale = ({
             required={false}
           />
         </div>
-        <div tw="relative pl-2.5">
+        <div className="mm:relative mm:pl-2.5">
           {canEdit && (
             <Button
-              tw="absolute bottom-0"
               data-testid="add-negation-rationale"
               onClick={() => {
                 handleChange(negationRationale);
               }}
               disabled={_.isEmpty(negationRationale)}
+              className="mm:absolute mm:bottom-0"
             >
               Add
             </Button>
@@ -93,7 +93,7 @@ const NegationRationale = ({
         </div>
       </div>
       {negationRationaleCode && negationRationaleCode.code && (
-        <div tw="flex flex-wrap gap-2 pt-4">
+        <div className="mm:flex mm:flex-wrap mm:gap-2 mm:pt-4">
           <Chip
             disabled={!canEdit}
             id={`${negationRationaleCode?.system} : ${negationRationaleCode?.code}`}

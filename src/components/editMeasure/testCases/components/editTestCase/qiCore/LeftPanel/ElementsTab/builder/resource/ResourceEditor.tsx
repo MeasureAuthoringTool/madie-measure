@@ -41,13 +41,11 @@ import {
 import AddElementDialog from "./AddElementDialog";
 import { deleteMultipleCardinalityElement } from "./resourceEditorUtils";
 import useFhirDefinitionsServiceApi from "../../../../../../../api/useFhirDefinitionsService";
-import tw from "twin.macro";
+
 import "../../../../../../../../../../styles/VerticalSideBarNav.scss";
 import "./ResourceEditor.scss";
 import { getHl7ProfileLink } from "../../../../../../../../../../utils/hl7Links";
 import useMeasureModel from "../../../../../../routes/qiCore/useMeasureModel";
-
-const InnerWrapper = tw.div`flex-grow flex flex-col`;
 
 interface ResourceEditorProps {
   onCancel: () => void;
@@ -497,8 +495,8 @@ const ResourceEditor = ({
                 )}
               </Box>
               <div className={"outer-wrapper"}>
-                <InnerWrapper
-                  className="vertical-side-nav"
+                <div
+                  className="vertical-side-nav mm:grow mm:flex mm:flex-col"
                   id="resource-editor-side-nav"
                 >
                   <nav aria-label="Sidebar">
@@ -545,7 +543,7 @@ const ResourceEditor = ({
                       })}
                     </Tabs>
                   </nav>
-                </InnerWrapper>
+                </div>
               </div>
             </div>
             <ElementEditor

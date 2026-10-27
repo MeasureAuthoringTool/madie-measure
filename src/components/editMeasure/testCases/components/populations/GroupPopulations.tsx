@@ -1,5 +1,5 @@
 import React from "react";
-import "twin.macro";
+
 import "styled-components/macro";
 import TestCasePopulationList from "./TestCasePopulationList";
 import {
@@ -122,7 +122,7 @@ const GroupPopulations = ({
         );
       })
     ) : (
-      <span tw="text-sm">
+      <span className="mm:text-sm">
         No data for current scoring. Please make sure at least one measure group
         has been created.
       </span>

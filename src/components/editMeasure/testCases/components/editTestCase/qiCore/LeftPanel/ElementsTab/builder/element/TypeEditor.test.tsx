@@ -5834,7 +5834,7 @@ describe("TypeEditor Component", () => {
     expect(complexElementFormik.setFieldValue).toHaveBeenCalled();
 
     waitFor(() =>
-      expect(screen.queryByText("Dose And Rate 2")).toBeCalledWith(
+      expect(screen.queryByText("Dose And Rate 2")).toHaveBeenCalledWith(
         "MedicationRequest.dosageInstruction[0].doseAndRate",
         expect.objectContaining({
           type: {

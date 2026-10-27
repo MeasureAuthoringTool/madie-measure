@@ -6,8 +6,6 @@ import { ExpressionDefinition } from "../QICore/QICoreMeasureGroups";
 import { Select } from "@madie/madie-design-system/dist/react";
 import {
   SubTitle,
-  SecondIpLabel,
-  FieldSeparator,
   SoftLabel,
 } from "../../../../../styles/editMeasure/populationCriteria/groups/groupPopulations";
 
@@ -54,13 +52,13 @@ const MeasureGroupPopulationSelect = ({
   const removeSecondIPLabelTemplate = () => {
     return (
       <div>
-        <SecondIpLabel>Initial Population 2 </SecondIpLabel>
+        <span className="mm:text-black-50">Initial Population 2 </span>
         &nbsp;&nbsp;
       </div>
     );
   };
   return (
-    <div data-testid="temp-test-id" tw="relative">
+    <div data-testid="temp-test-id">
       <div className="population-column">
         <Select
           placeHolder={{ name: `Select ${label}`, value: "" }}

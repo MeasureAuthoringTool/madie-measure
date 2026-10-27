@@ -40,7 +40,6 @@ const TestCaseStratification = ({
   return (
     <React.Fragment key={`fragment-key-${strataCode}`}>
       <tr
-        tw="border-b"
         key={strataCode}
         data-testid={`test-row-population-id-${stratification.name}`}
         role="row"

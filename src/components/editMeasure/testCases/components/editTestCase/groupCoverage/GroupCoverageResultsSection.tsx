@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
-import "twin.macro";
+
 import "styled-components/macro";
 
 const GroupCoverageResultsSection = ({ results }) => {
@@ -12,7 +12,7 @@ const GroupCoverageResultsSection = ({ results }) => {
     setShowGroupCoverageResults(!showGroupCoverageResults);
   };
   return (
-    <div tw="flex-auto p-3">
+    <div className="mm:flex-auto mm:p-3">
       <button
         onClick={(e) => {
           handleResultsCollapse(e);

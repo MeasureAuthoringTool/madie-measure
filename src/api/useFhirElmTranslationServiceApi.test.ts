@@ -8,7 +8,10 @@ import { useOktaTokens } from "@madie/madie-util";
 
 jest.mock("./axios-instance");
 jest.mock("./useServiceConfig");
-jest.mock("@madie/madie-util");
+jest.mock("@madie/madie-util", () => ({
+  ...jest.requireActual("@madie/madie-util"),
+  useOktaTokens: jest.fn(),
+}));
 
 const mockedAxios = axios as jest.Mocked<typeof axios>;
 
