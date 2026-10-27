@@ -327,7 +327,7 @@ const CreateNewTestCaseDialog = ({
                 formik.touched.description && Boolean(formik.errors.description)
               }
               helperText={formikErrorHandler("description")}
-              maxLength={250}
+              maxLength={4000}
             />
           </Box>
           <TestCaseSeries

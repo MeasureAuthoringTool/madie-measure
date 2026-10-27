@@ -42,6 +42,59 @@ describe("Create New Test Case Dialog", () => {
 
   const mockMeasure = { ...formikInfo, id: "test-id" };
   const mockOnSuccess = jest.fn();
+  test.each([
+    ["QDM v5.6", 4000],
+    ["QI-Core v4.1.1", 4000],
+    ["QDM v5.6", 4001],
+    ["QI-Core v4.1.1", 4001],
+  ])("validates %s descriptions with %i characters", async (model, length) => {
+    const description = "a".repeat(length);
+    const savedTestCase = { id: "testID", title: "Valid Title", description };
+    mockedAxios.post.mockResolvedValue({ data: savedTestCase });
+    render(
+      <MemoryRouter>
+        <CreateNewTestCaseDialog
+          open={true}
+          onClose={jest.fn()}
+          onSuccess={mockOnSuccess}
+          measure={{ model, groups: [{ id: "group-id" }] } as Measure}
+        />
+      </MemoryRouter>
+    );
+
+    expect(screen.getByText("0/4000 Characters")).toBeInTheDocument();
+    fireEvent.change(screen.getByTestId("create-test-case-title-input"), {
+      target: { value: "Valid Title" },
+    });
+    const descriptionInput = screen.getByTestId("create-test-case-description");
+    fireEvent.change(descriptionInput, { target: { value: description } });
+    fireEvent.blur(descriptionInput);
+    expect(screen.getByText(`${length}/4000 Characters`)).toBeInTheDocument();
+
+    const saveButton = screen.getByTestId("create-test-case-save-button");
+    if (length === 4000) {
+      await waitFor(() => expect(saveButton).toBeEnabled());
+      userEvent.click(saveButton);
+      await waitFor(() =>
+        expect(mockOnSuccess).toHaveBeenCalledWith([savedTestCase])
+      );
+      expect(mockedAxios.post).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({ description }),
+        expect.anything()
+      );
+    } else {
+      expect(
+        await screen.findByText(
+          "Test Case Description cannot be more than 4000 characters."
+        )
+      ).toBeInTheDocument();
+      expect(saveButton).toBeDisabled();
+      userEvent.click(saveButton);
+      expect(mockedAxios.post).not.toHaveBeenCalled();
+    }
+  });
+
   test("should render all the fields in the test case creation form", async () => {
     const { findByTestId } = render(
       <MemoryRouter

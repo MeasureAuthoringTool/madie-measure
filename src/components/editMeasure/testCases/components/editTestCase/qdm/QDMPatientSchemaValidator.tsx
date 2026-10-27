@@ -4,8 +4,8 @@ import * as ucum from "@lhncbc/ucum-lhc";
 
 export const QDMPatientSchemaValidator = Yup.object().shape({
   description: Yup.string().max(
-    250,
-    "Test Case Description cannot be more than 250 characters."
+    4000,
+    "Test Case Description cannot be more than 4000 characters."
   ),
   title: Yup.string()
     .required("Test Case Title is required.")
