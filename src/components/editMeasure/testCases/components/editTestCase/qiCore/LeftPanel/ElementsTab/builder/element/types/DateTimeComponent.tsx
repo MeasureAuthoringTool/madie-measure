@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import "twin.macro";
+
 import "styled-components/macro";
 import { TypeComponentProps } from "./TypeComponentProps";
 import { MenuItem as MuiMenuItem, IconButton, Tooltip } from "@mui/material";
@@ -273,7 +273,7 @@ const DateTimeComponent = ({
         </LocalizationProvider>
       </Box>
       {canEdit && (
-        <div tw="mt-5 flex items-center">
+        <div className="mm:mt-5 mm:flex mm:items-center">
           {showDeleteButton && (
             <Tooltip title="Delete" placement="top" arrow>
               <span>

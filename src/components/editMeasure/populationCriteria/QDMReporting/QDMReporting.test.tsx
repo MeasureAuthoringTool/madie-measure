@@ -295,7 +295,7 @@ describe("QDMReporting component", () => {
     await waitFor(() => expect(saveButton).toBeEnabled());
     fireEvent.click(saveButton);
     await waitFor(() =>
-      expect(mockMeasureServiceApi.updateMeasure).toBeCalledWith({
+      expect(mockMeasureServiceApi.updateMeasure).toHaveBeenCalledWith({
         ...measure,
         rateAggregation: "<p>Test</p>",
         improvementNotation: "Decreased score indicates improvement",
@@ -364,7 +364,7 @@ describe("QDMReporting component", () => {
     await waitFor(() => expect(saveButton).toBeEnabled());
     fireEvent.click(saveButton);
     await waitFor(() =>
-      expect(mockMeasureServiceApi.updateMeasure).toBeCalledWith({
+      expect(mockMeasureServiceApi.updateMeasure).toHaveBeenCalledWith({
         ...measure,
         rateAggregation: "<p>Test</p>",
         improvementNotation: "Decreased score indicates improvement",
@@ -659,7 +659,7 @@ describe("QDMReporting component", () => {
     await waitFor(() => expect(saveButton).toBeEnabled());
     fireEvent.click(saveButton);
     await waitFor(() =>
-      expect(mockMeasureServiceApi.updateMeasure).toBeCalledWith({
+      expect(mockMeasureServiceApi.updateMeasure).toHaveBeenCalledWith({
         ...measure,
         rateAggregation: "<p>Test</p>",
         improvementNotation: "Decreased score indicates improvement",

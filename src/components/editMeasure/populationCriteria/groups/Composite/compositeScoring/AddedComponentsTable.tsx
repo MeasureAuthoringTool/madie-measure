@@ -15,7 +15,7 @@ import {
 } from "@madie/madie-design-system/dist/react";
 import * as _ from "lodash";
 import { Trash2 } from "lucide-react";
-import tw from "twin.macro";
+
 import "styled-components/macro";
 import { convertDate } from "../../../../testCases/components/testCaseLanding/common/TestCaseTable/TestCaseTable";
 import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore";
@@ -28,8 +28,6 @@ import {
   CollapseIcon,
   ExpandIcon,
 } from "../../../../../../icons/MeasureListTableRightArrowIcons";
-
-const TH = tw.th`p-3 text-left text-sm font-bold capitalize`;
 
 type ComponentGroup = Group & {
   description?: string;
@@ -389,26 +387,25 @@ export default function AddedComponentsTable({
       <div className="measure-table added-components-table no-margin no-vert-borders no-radius middle-align-row">
         <div className="table" style={{ overflow: "auto" }}>
           <table
-            tw="min-w-full"
             data-testid="measure-list-tbl"
-            className="ml-table"
+            className="ml-table mm:min-w-full"
             style={{
               borderSpacing: "0 2em !important",
             }}
           >
-            <thead tw="bg-slate">
+            <thead className="mm:bg-slate">
               {table.getHeaderGroups().map((headerGroup) => (
                 <tr key={headerGroup.id}>
                   {headerGroup.headers.map((header) => {
                     const isHovered = hoveredHeader?.includes(header.id);
                     return (
-                      <TH
+                      <th
                         key={header.id}
                         scope="col"
                         onClick={header.column.getToggleSortingHandler()}
                         onMouseEnter={() => setHoveredHeader(header.id)}
                         onMouseLeave={() => setHoveredHeader(null)}
-                        className="header-cell"
+                        className="header-cell mm:p-3 mm:text-left mm:text-sm mm:font-bold mm:capitalize"
                       >
                         {header.isPlaceholder ? null : (
                           <button
@@ -448,7 +445,7 @@ export default function AddedComponentsTable({
                             )}
                           </button>
                         )}
-                      </TH>
+                      </th>
                     );
                   })}
                 </tr>

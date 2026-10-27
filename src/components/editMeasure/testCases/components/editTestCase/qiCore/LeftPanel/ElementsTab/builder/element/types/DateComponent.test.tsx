@@ -177,7 +177,7 @@ describe("DateComponent", () => {
     );
     userEvent.type(dateFieldInput, "2022");
     expect(dateFieldInput.value).toBe("2022");
-    expect(handleChange).toBeCalledWith("2022");
+    expect(handleChange).toHaveBeenCalledWith("2022");
   });
 
   test("Should handle YEARMONTH", async () => {
@@ -206,7 +206,7 @@ describe("DateComponent", () => {
     );
     userEvent.type(dateFieldInput, "January-2025");
     expect(dateFieldInput.value).toBe("01-2025");
-    expect(handleChange).toBeCalledWith("2025-01");
+    expect(handleChange).toHaveBeenCalledWith("2025-01");
   });
 
   test("Should handle YEARMONTHDAY", async () => {
@@ -237,7 +237,7 @@ describe("DateComponent", () => {
     );
     userEvent.type(dateFieldInput, "01-01-2025");
     expect(dateFieldInput.value).toBe("01-01-2025");
-    expect(handleChange).toBeCalledWith("2025-01-01");
+    expect(handleChange).toHaveBeenCalledWith("2025-01-01");
   });
 
   test(`"Should render ${YEAR_FORMAT}"`, () => {
@@ -257,7 +257,7 @@ describe("DateComponent", () => {
       `${YEAR_FORMAT}-field-birthday-input`
     );
     userEvent.type(dateFieldInput, "1992");
-    expect(handleChange).toBeCalledWith("1992");
+    expect(handleChange).toHaveBeenCalledWith("1992");
   });
 
   test(`"Should render ${YEAR_MONTH_FORMAT}"`, () => {
@@ -277,7 +277,7 @@ describe("DateComponent", () => {
       `${YEAR_MONTH_FORMAT}-field-birthday-input`
     );
     userEvent.type(dateFieldInput, "January 1992");
-    expect(handleChange).toBeCalledWith("1992-01");
+    expect(handleChange).toHaveBeenCalledWith("1992-01");
   });
 
   test(`"Should render ${YEAR_MONTH_DAY_FORMAT}"`, () => {
@@ -299,7 +299,7 @@ describe("DateComponent", () => {
       `${YEAR_MONTH_DAY_FORMAT}-field-birthday-input`
     );
     userEvent.type(dateFieldInput, "01-01-1992");
-    expect(handleChange).toBeCalledWith("1992-01-01");
+    expect(handleChange).toHaveBeenCalledWith("1992-01-01");
   });
 
   test("Should automatically update dateString when format decreases in complexity.", () => {
@@ -324,11 +324,11 @@ describe("DateComponent", () => {
     fireEvent.change(formatSelectorField, {
       target: { value: YEAR_MONTH_FORMAT },
     });
-    expect(handleChange).toBeCalledWith("1992-01");
+    expect(handleChange).toHaveBeenCalledWith("1992-01");
     fireEvent.change(formatSelectorField, {
       target: { value: YEAR_FORMAT },
     });
-    expect(handleChange).toBeCalledWith("1992");
+    expect(handleChange).toHaveBeenCalledWith("1992");
   });
   it("Should get invalid format correctly", () => {
     expect(getCurrentFormat("123123")).toBe("Invalid Format");

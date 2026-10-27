@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import "twin.macro";
+
 import "styled-components/macro";
 import {
   ReadOnlyTextField,
@@ -323,7 +323,7 @@ const CodingComponent = ({
       data-component-type="CodingComponent"
     >
       <div className="element-editor-add-row">
-        <div tw="w-3/4">
+        <div className="mm:w-3/4">
           <Select
             label="Value Set / Direct Reference Code"
             id={`value-set-selector-${label}`}
@@ -344,7 +344,7 @@ const CodingComponent = ({
           />
         </div>
         {canEdit && (
-          <div tw="mt-5 flex items-center">
+          <div className="mm:mt-5 mm:flex mm:items-center">
             {showDeleteButton && (
               <Tooltip title="Delete" placement="top" arrow>
                 <IconButton
@@ -364,13 +364,12 @@ const CodingComponent = ({
         )}
       </div>
       {selectedValueSet && (
-        <div tw="flex mt-3">
+        <div className="mm:flex mm:mt-3">
           {selectedValueSet.title == "Custom Code" ? (
             <>
-              <div tw="w-1/2">
+              <div className="mm:w-1/2">
                 <TextField
                   id="custom-code-system"
-                  tw="w-full"
                   label="Custom Code System"
                   placeholder="Custom Code System"
                   required={true}
@@ -383,12 +382,12 @@ const CodingComponent = ({
                   onChange={(event) =>
                     handleCodeSystemChange(event.target.value)
                   }
+                  className="mm:w-full"
                 />
               </div>
-              <div tw="w-1/2 pl-3">
+              <div className="mm:w-1/2 mm:pl-3">
                 <TextField
                   id="custom-code"
-                  tw="w-full"
                   label="Custom Code"
                   placeholder="Custom Code"
                   required={true}
@@ -399,12 +398,13 @@ const CodingComponent = ({
                   data-testid="custom-code"
                   value={selectedConcept?.code || ""}
                   onChange={(event) => handleCodeChange(event.target.value)}
+                  className="mm:w-full"
                 />
               </div>
             </>
           ) : (
             <>
-              <div tw="w-1/2">
+              <div className="mm:w-1/2">
                 <Select
                   placeHolder={{
                     name: "Select Code System",
@@ -428,7 +428,7 @@ const CodingComponent = ({
                   }
                 />
               </div>
-              <div tw="w-1/2 pl-3">
+              <div className="mm:w-1/2 mm:pl-3">
                 <Select
                   label="Code"
                   id="code-selector"
@@ -461,8 +461,8 @@ const CodingComponent = ({
         (value.system || value.code) &&
         !value.extension && (
           <>
-            <div tw="flex mt-3">
-              <div tw="w-1/2">
+            <div className="mm:flex mm:mt-3">
+              <div className="mm:w-1/2">
                 <ReadOnlyTextField
                   label="Code System"
                   id="code-system"
@@ -470,7 +470,7 @@ const CodingComponent = ({
                   value={value.system}
                 />
               </div>
-              <div tw="w-1/2 pl-3">
+              <div className="mm:w-1/2 mm:pl-3">
                 <ReadOnlyTextField
                   label="Code"
                   id="code"
@@ -483,8 +483,8 @@ const CodingComponent = ({
             </div>
             {canEdit && (
               <div
-                tw="mt-3 text-sm text-red-500"
                 data-testid={`select-valueset-warning-${value.code}`}
+                className="mm:mt-3 mm:text-sm mm:text-red-500"
               >
                 To update code system or code please select a valid value set.
               </div>

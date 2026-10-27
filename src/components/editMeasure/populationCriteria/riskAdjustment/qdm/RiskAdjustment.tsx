@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import "twin.macro";
+
 import "styled-components/macro";
 import { useFormik } from "formik";
 import useFormikResetOnEvent from "../../../../common/useFormikResetOnEvent";
@@ -158,7 +158,7 @@ const RiskAdjustment = (props: RiskAdjustmentProps) => {
       handleSubmit={formik.handleSubmit}
       onCancel={onCancel}
     >
-      <div tw="flex flex-col" data-testid="risk-adjustment">
+      <div data-testid="risk-adjustment" className="mm:flex mm:flex-col">
         <TextEditor
           label="Description"
           setFieldValue={formik.setFieldValue}
@@ -166,7 +166,7 @@ const RiskAdjustment = (props: RiskAdjustmentProps) => {
           {...formik.getFieldProps("riskAdjustmentDescription")}
         />
       </div>
-      <div tw="flex mt-6 w-1/4">
+      <div className="mm:flex mm:mt-6 mm:w-1/4">
         <MultipleSelectDropDown
           formControl={formik.getFieldProps("riskAdjustments")}
           value={formik.values.riskAdjustments?.map((ra) => ra?.definition)}

@@ -258,7 +258,7 @@ describe("QiCore RiskAdjustment Component", () => {
 
     // API call with updated description
     await waitFor(() =>
-      expect(mockMeasureServiceApi.updateMeasure).toBeCalledWith({
+      expect(mockMeasureServiceApi.updateMeasure).toHaveBeenCalledWith({
         ...updatedMeasure,
       })
     );
@@ -363,7 +363,7 @@ describe("QiCore RiskAdjustment Component", () => {
     });
 
     await waitFor(() =>
-      expect(mockMeasureServiceApi.updateMeasure).toBeCalledWith({
+      expect(mockMeasureServiceApi.updateMeasure).toHaveBeenCalledWith({
         ...updatedMeasure,
       })
     );
@@ -417,7 +417,7 @@ describe("QiCore RiskAdjustment Component", () => {
 
     // Should call service with updated data
     await waitFor(() =>
-      expect(mockMeasureServiceApi.updateMeasure).toBeCalledWith({
+      expect(mockMeasureServiceApi.updateMeasure).toHaveBeenCalledWith({
         ...mockTestMeasure,
         riskAdjustmentDescription: "<p>Updated test description</p>",
       })
@@ -697,7 +697,7 @@ describe("QiCore RiskAdjustment Component", () => {
 
     // Should call service with updated data
     await waitFor(() =>
-      expect(mockMeasureServiceApi.updateMeasure).toBeCalledWith({
+      expect(mockMeasureServiceApi.updateMeasure).toHaveBeenCalledWith({
         ...mockTestMeasure,
         riskAdjustmentDescription: "<p>Updated test description</p>",
       })

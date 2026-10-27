@@ -1,6 +1,6 @@
 import React from "react";
 import { TextField } from "@madie/madie-design-system/dist/react/";
-import "twin.macro";
+
 import "styled-components/macro";
 import { TypeComponentProps } from "./TypeComponentProps";
 import AddElementButton from "../../../../../../../common/UIOnlyModelAgnostic/AddElementButton";
@@ -84,7 +84,7 @@ const IntegerComponent = ({
         value={value ?? ""}
       />
       {canEdit && (
-        <div tw="mt-5 flex items-center">
+        <div className="mm:mt-5 mm:flex mm:items-center">
           {showDeleteButton && (
             <Tooltip title="Delete" placement="top" arrow>
               <span>

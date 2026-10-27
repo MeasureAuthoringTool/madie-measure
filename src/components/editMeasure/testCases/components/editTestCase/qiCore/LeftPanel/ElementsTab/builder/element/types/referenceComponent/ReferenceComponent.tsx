@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState, useMemo } from "react";
-import "twin.macro";
+
 import "styled-components/macro";
 import ResourceContext from "../../../ResourceContext";
 import { Select } from "@madie/madie-design-system/dist/react";
@@ -270,7 +270,7 @@ export default function ReferenceComponent({
           error={error}
         />
         {canEdit && (
-          <div tw="mt-5 flex items-center">
+          <div className="mm:mt-5 mm:flex mm:items-center">
             {showDeleteButton && (
               <Tooltip title="Delete" placement="top" arrow>
                 <span>

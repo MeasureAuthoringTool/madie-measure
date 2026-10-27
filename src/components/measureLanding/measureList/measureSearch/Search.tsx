@@ -4,7 +4,7 @@ import _ from "lodash";
 import ClearIcon from "@mui/icons-material/Clear";
 import SearchIcon from "@mui/icons-material/Search";
 import { useFormik } from "formik";
-import "twin.macro";
+
 import "styled-components/macro";
 import { Select, TextField } from "@madie/madie-design-system/dist/react";
 import { MeasureSearchCriteria } from "../../MeasureLanding";

@@ -66,7 +66,7 @@ describe("DecimalInput Component", () => {
     ) as HTMLInputElement;
     expect(DecimalFieldInput).toBeInTheDocument();
     expect(DecimalFieldInput.value).toBe("0");
-    expect(handleChange).not.toBeCalled();
+    expect(handleChange).not.toHaveBeenCalled();
     userEvent.type(DecimalFieldInput, "-");
     //number feild is weird, minimum set to 0, so it will call handlechange with a - but ignore the input
     await expect(handleChange).toHaveBeenNthCalledWith(1, "");

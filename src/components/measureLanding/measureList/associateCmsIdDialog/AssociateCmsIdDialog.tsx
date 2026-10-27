@@ -2,7 +2,7 @@ import { padCmsId } from "@madie/madie-util";
 import React, { useState } from "react";
 import { Measure, Model } from "@madie/madie-models";
 import { MadieDialog } from "@madie/madie-design-system/dist/react";
-import "twin.macro";
+
 import "styled-components/macro";
 import { FormControlLabel, Checkbox } from "@mui/material";
 import WarningIcon from "@mui/icons-material/Warning";

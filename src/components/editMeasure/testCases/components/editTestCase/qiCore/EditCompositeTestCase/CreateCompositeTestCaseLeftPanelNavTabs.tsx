@@ -1,7 +1,7 @@
 import React from "react";
 import { Tabs, Tab } from "@madie/madie-design-system/dist/react";
 import "../../../createTestCase/CreateTestCaseNavTabs.scss";
-import "twin.macro";
+
 import "styled-components/macro";
 import EditorSearch from "../../../editTestCase/qiCore/LeftPanel/EditorSearch";
 
@@ -22,8 +22,8 @@ export default function CreateCompositeTestCaseLeftPanelNavTabs(
   } = props;
   return (
     <>
-      <div tw="flex flex-row w-full">
-        <div tw="basis-11/12">
+      <div className="mm:flex mm:flex-row mm:w-full">
+        <div className="mm:basis-11/12">
           <Tabs
             id="test-case-nav-container"
             value={leftPanelActiveTab}
@@ -60,7 +60,7 @@ export default function CreateCompositeTestCaseLeftPanelNavTabs(
             />
           </Tabs>
         </div>
-        <div tw="ml-auto mr-8 flex">
+        <div className="mm:ml-auto mm:mr-8 mm:flex">
           {leftPanelActiveTab === "json" && <EditorSearch />}
         </div>
       </div>

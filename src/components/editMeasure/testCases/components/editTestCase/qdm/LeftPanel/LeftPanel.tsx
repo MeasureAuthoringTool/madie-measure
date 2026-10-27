@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import "twin.macro";
+
 import "styled-components/macro";
 import LeftPanelNavTabs from "./LeftPanelNavTabs";
 import ElementsTab from "./ElementsTab/ElementsTab";
@@ -35,7 +35,7 @@ const LeftPanel = (props: {
     <div className="left-panel">
       <div className="tab-container">
         <LeftPanelNavTabs activeTab={activeTab} setActiveTab={setActiveTab} />
-        <div tw="ml-auto mr-2">
+        <div className="mm:ml-auto mm:mr-2">
           <EditorCalculator onClick={() => setCalculationDialogOpen(true)} />
         </div>
       </div>
