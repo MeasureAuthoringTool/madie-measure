@@ -1,5 +1,34 @@
 import { TestCaseValidator } from "./TestCaseValidator";
 import { PopulationType } from "@madie/madie-models";
+import { QDMPatientSchemaValidator } from "../components/editTestCase/qdm/QDMPatientSchemaValidator";
+
+describe.each([
+  ["QI-Core", TestCaseValidator],
+  ["QDM", QDMPatientSchemaValidator],
+])("%s test case description validation", (_model, validator) => {
+  it.each([0, 250, 251, 3999, 4000])(
+    "accepts a description with %i characters",
+    async (length) => {
+      await expect(
+        validator.validate({
+          title: "Valid Title",
+          description: "a".repeat(length),
+        })
+      ).resolves.toBeTruthy();
+    }
+  );
+
+  it("rejects a description with 4001 characters", async () => {
+    await expect(
+      validator.validate({
+        title: "Valid Title",
+        description: "a".repeat(4001),
+      })
+    ).rejects.toThrow(
+      "Test Case Description cannot be more than 4000 characters."
+    );
+  });
+});
 
 describe("TestCaseValidator", () => {
   const buildBaseModel = () => ({
@@ -69,19 +98,6 @@ describe("TestCaseValidator", () => {
           description: null,
         })
       ).resolves.toBeTruthy();
-    });
-
-    it("rejects long description", async () => {
-      try {
-        await TestCaseValidator.validate({
-          ...buildBaseModel(),
-          description: "a".repeat(251),
-        });
-      } catch (error: any) {
-        expect(error.errors).toContain(
-          "Test Case Description cannot be more than 250 characters."
-        );
-      }
     });
   });
 

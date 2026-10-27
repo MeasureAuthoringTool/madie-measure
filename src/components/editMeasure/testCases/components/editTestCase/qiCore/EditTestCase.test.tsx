@@ -1822,7 +1822,7 @@ describe("EditTestCase component", () => {
           },
         ],
       } as unknown as TestCase;
-      const testCaseDescription = "modified description";
+      const testCaseDescription = "a".repeat(4000);
       mockedAxios.get.mockClear().mockImplementation((args) => {
         if (args && args.endsWith("series")) {
           return Promise.resolve({ data: ["SeriesA", "SeriesB", "SeriesC"] });
@@ -1888,10 +1888,10 @@ describe("EditTestCase component", () => {
 
       const descriptionInput = screen.getByTestId("test-case-description");
       expect(descriptionInput).toHaveTextContent(testCase.description);
-      userEvent.type(
-        descriptionInput,
-        `{selectall}{del}${testCaseDescription}`
-      );
+      fireEvent.change(descriptionInput, {
+        target: { value: testCaseDescription },
+      });
+      expect(screen.getByText("4000/4000 Characters")).toBeInTheDocument();
 
       userEvent.click(seriesInput);
       const list = await screen.findByRole("listbox");
@@ -1917,6 +1917,7 @@ describe("EditTestCase component", () => {
       expect(calls[0]).toBeTruthy();
       const updatedTestCase = calls[0][1] as TestCase;
       expect(updatedTestCase).toBeTruthy();
+      expect(updatedTestCase.description).toEqual(testCaseDescription);
       expect(updatedTestCase.series).toEqual("SeriesB");
       expect(updatedTestCase.groupPopulations).toEqual([
         {
@@ -2568,7 +2569,7 @@ describe("EditTestCase component", () => {
       expect(mockedAxios.put).toHaveBeenCalledTimes(0);
     });
 
-    it("should generate field level error for test case description more than 250 characters", async () => {
+    it("should generate field level error for test case description more than 4000 characters", async () => {
       const testCase = {
         id: "1234",
         title: "Original Title",
@@ -2609,23 +2610,24 @@ describe("EditTestCase component", () => {
       );
 
       userEvent.click(screen.getByTestId("details-tab"));
-      const testCaseDescription =
-        "abcdefghijklmnopqrstuvwxyabcdefghijklmnopqrstuvwxyabcdefghijklmnopqrstuvwxyabcdefghijklmnopqrstuvwxyabcdefghijklmnopqrstuvwxyabcdefghijklmnopqrstuvwxyabcdefghijklmnopqrstuvwxyabcdefghijklmnopqrstuvwxyabcdefghijklmnopqrstuvwxyabcdefghijklmnopqrstuvwxyzaaa";
+      const testCaseDescription = "a".repeat(4001);
       const descriptionInput = screen.getByTestId("test-case-description");
-      userEvent.type(descriptionInput, testCaseDescription);
+      fireEvent.change(descriptionInput, {
+        target: { value: testCaseDescription },
+      });
 
       fireEvent.blur(descriptionInput);
 
-      testTitle("TC1");
+      await testTitle("TC1");
 
       const createBtn = screen.getByRole("button", { name: "Save" });
       await waitFor(() => {
-        expect(createBtn).toBeDisabled;
+        expect(createBtn).toBeDisabled();
       });
       expect(
         screen.getByTestId("test-case-description-helper-text")
       ).toHaveTextContent(
-        "Test Case Description cannot be more than 250 characters."
+        "Test Case Description cannot be more than 4000 characters."
       );
     });
 
@@ -4593,7 +4595,7 @@ describe("EditTestCase component", () => {
       const descriptionInput = await screen.findByTestId(
         "test-case-description"
       );
-      const longDescription = "a".repeat(251);
+      const longDescription = "a".repeat(4001);
       fireEvent.change(descriptionInput, {
         target: { value: longDescription },
       });
@@ -4608,7 +4610,7 @@ describe("EditTestCase component", () => {
       await waitFor(() => {
         expect(
           screen.getByText(
-            /description: Test Case Description cannot be more than 250 characters/
+            /description: Test Case Description cannot be more than 4000 characters/
           )
         ).toBeInTheDocument();
       });
