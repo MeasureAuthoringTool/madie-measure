@@ -47,11 +47,13 @@ export default function CmsIdentifier({
             {cmsId > 0 ? (
               ""
             ) : (
-              <div>
+              <div style={{ marginTop: "-5px" }}>
                 <MadieTooltip
                   title="Once a CMS Identifier has been generated it may not be modified or removed for any draft or version of a measure."
                   id={`cms-id-tooltip`}
                   tabIndex={0}
+                  height={24}
+                  width={24}
                 />
               </div>
             )}
