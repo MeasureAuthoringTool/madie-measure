@@ -178,7 +178,6 @@ describe("getCommentSectionLocation", () => {
       COMMENT_MAIN_SECTIONS.TEST_CASES,
       "Population Criteria 1",
     ],
-    ["test-cases/case-one", COMMENT_MAIN_SECTIONS.TEST_CASES, "Example case"],
   ])(
     "places edit/%s under %s as %s",
     (route, activeMainSection, activeSubSection) => {
@@ -188,6 +187,14 @@ describe("getCommentSectionLocation", () => {
       });
     }
   );
+
+  it("places an individual test case under Test Cases, keyed by its id", () => {
+    expect(locationFor("test-cases/case-one")).toEqual({
+      activeMainSection: COMMENT_MAIN_SECTIONS.TEST_CASES,
+      activeSubSection: "Example case",
+      activeSubSectionId: "case-one",
+    });
+  });
 
   it("places the QDM only screens under Population Criteria", () => {
     const qdmMeasure = { ...measure, model: "QDM v5.6" };
@@ -359,6 +366,27 @@ describe("getCommentSections", () => {
       "Expansion",
       "Execution Options",
       "Test Case Data",
+      { id: "case-one", name: "Example case" },
+    ]);
+  });
+
+  it("lists each test case by id with its group and title as the name", () => {
+    const measureWithSeries = {
+      ...measure,
+      testCases: [
+        { id: "case-one", title: "Example case", series: "Series A" },
+        { id: "case-two", title: "Other case" },
+      ],
+    };
+
+    expect(
+      subSectionsOf(
+        getCommentSections(measureWithSeries),
+        COMMENT_MAIN_SECTIONS.TEST_CASES
+      ).slice(-2)
+    ).toEqual([
+      { id: "case-one", name: "Series A - Example case" },
+      { id: "case-two", name: "Other case" },
     ]);
   });
 
@@ -386,6 +414,7 @@ describe("getCommentSections", () => {
       "Expansion",
       "Execution Options",
       "Test Case Data",
+      { id: "case-one", name: "Example case" },
     ]);
   });
 

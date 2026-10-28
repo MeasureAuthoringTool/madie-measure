@@ -1,10 +1,11 @@
-import { Measure } from "@madie/madie-models";
-import type { CommentSection } from "@madie/madie-util";
+import { Measure, TestCase } from "@madie/madie-models";
+import type { CommentSection, CommentSubSectionItem } from "@madie/madie-util";
 
 type CommentMeasure = Pick<
   Measure,
   "model" | "groups" | "testCases" | "measureMetaData"
 >;
+type CommentTestCase = Pick<TestCase, "id" | "title" | "name" | "series">;
 
 export const COMMENT_MAIN_SECTIONS = {
   DETAILS: "Details",
@@ -22,6 +23,7 @@ export interface CommentSectionLocation {
   // undefined when the route isn't one that can be commented on
   activeMainSection?: CommentMainSection;
   activeSubSection: string;
+  activeSubSectionId?: string;
 }
 
 const UNKNOWN_SECTION: CommentSectionLocation = {
@@ -144,6 +146,18 @@ const getCriteriaNames = (
   );
 };
 
+const getTestCaseLabel = (testCase: CommentTestCase): string => {
+  const title = testCase.title ?? testCase.name ?? "Test Case";
+  return testCase.series ? `${testCase.series} - ${title}` : title;
+};
+
+const toTestCaseSubSections = (
+  measure?: CommentMeasure | null
+): CommentSubSectionItem[] =>
+  (measure?.testCases ?? [])
+    .filter((testCase) => Boolean(testCase?.id))
+    .map((testCase) => ({ id: testCase.id, name: getTestCaseLabel(testCase) }));
+
 const getGroupNumber = (
   groupId: string | undefined,
   groups: CommentMeasure["groups"] | undefined
@@ -196,9 +210,12 @@ export const getCommentSections = (
     },
     {
       name: COMMENT_MAIN_SECTIONS.TEST_CASES,
-      subSections: expandPlaceholders(
-        namesInScope(TEST_CASE_LIST_SUB_SECTIONS, context)
-      ),
+      subSections: [
+        ...expandPlaceholders(
+          namesInScope(TEST_CASE_LIST_SUB_SECTIONS, context)
+        ),
+        ...toTestCaseSubSections(measure),
+      ],
     },
   ];
 
@@ -248,10 +265,10 @@ const getTestCasesLocation = (
     return UNKNOWN_SECTION;
   }
 
-  const title = testCase.title ?? testCase.name ?? "Test Case";
   return {
     activeMainSection: COMMENT_MAIN_SECTIONS.TEST_CASES,
-    activeSubSection: testCase.series ? `${testCase.series} - ${title}` : title,
+    activeSubSection: getTestCaseLabel(testCase),
+    activeSubSectionId: testCase.id,
   };
 };
 
