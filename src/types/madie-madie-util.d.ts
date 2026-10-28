@@ -24,9 +24,8 @@ declare module "@madie/madie-util" {
     HtmlDiffResponse,
     SharedUser,
     MeasureCounts,
+    Comment,
   } from "@madie/madie-models";
-  // Comment is not re-exported from the installed madie-models index yet
-  import { Comment } from "@madie/madie-models/dist/Comment";
   import { AxiosResponse } from "axios";
   import { Bundle } from "fhir/r4";
 
