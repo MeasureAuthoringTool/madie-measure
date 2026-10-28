@@ -94,7 +94,7 @@
     "@madie/cql-antlr-parser": "^1.0.11",
     "@madie/madie-editor": "^2.1.3",
     "@madie/madie-design-system": "1.2.103",
-    "@madie/madie-models": "^1.4.86",
+    "@madie/madie-models": "^1.4.88",
     "@mui/icons-material": "^6.1.0",
     "@mui/lab": "6.0.1-beta.34",
     "@mui/material": "^6.1.0",
