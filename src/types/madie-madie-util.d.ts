@@ -393,7 +393,6 @@ declare module "@madie/madie-util" {
     style?: React.CSSProperties;
     dataTestId?: string;
   }): React.ReactElement;
-  // statuses in which a measure is part of the review process
   export const REVIEW_ACTIVE_STATUSES: ReadonlySet<ReviewStatus>;
 
   export interface CommentSection {
@@ -408,7 +407,6 @@ declare module "@madie/madie-util" {
     updateComment: (comment: Comment) => Promise<boolean>;
     deleteComment: (comment: Comment) => Promise<boolean>;
   }
-  // loads the review for the entity and owns the comment writes against it
   export function useReviewComments(
     entityType: "measure" | "library",
     entityId: string | undefined,

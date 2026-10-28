@@ -4,8 +4,6 @@ import {
   getCommentSections,
 } from "./CommentUtils";
 
-// the resolver returns { activeMainSection, activeSubSection }; these cases assert the
-// label it lands on
 const nameFor = (pathname: string, measure?: any) =>
   getCommentSectionLocation(pathname, measure).activeSubSection;
 

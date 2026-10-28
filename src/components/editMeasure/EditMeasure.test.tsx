@@ -634,7 +634,6 @@ describe("EditMeasure Component", () => {
     renderRouter();
     await findByTestId("editMeasure");
 
-    // the callback handed to the hook by this render (earlier tests also called it)
     const { calls } = (useReviewComments as jest.Mock).mock;
     const [, , onError] = calls[calls.length - 1];
     act(() => {

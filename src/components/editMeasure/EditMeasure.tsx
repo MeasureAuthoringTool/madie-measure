@@ -197,7 +197,6 @@ export default function EditMeasure() {
     setToastMessage(message);
     setToastOpen(true);
   };
-  // the review document and the comment writes against it
   const {
     review: measureReview,
     comments: reviewComments,
@@ -235,7 +234,6 @@ export default function EditMeasure() {
 
   const { getUserName } = useOktaTokens();
   const userName = getUserName();
-  // "First Last" when the user service knows the HARP id, else the HARP id
   const commentAuthorName = useOwnerName(userName);
   const measureLockedBy =
     measure?.measureLock?.lockedBy?.toLowerCase() !== userName.toLowerCase()

@@ -1,7 +1,6 @@
 import { Measure } from "@madie/madie-models";
 import type { CommentSection } from "@madie/madie-util";
 
-// the slice of a measure the section catalogue depends on
 type CommentMeasure = Pick<
   Measure,
   "model" | "groups" | "testCases" | "measureMetaData"
