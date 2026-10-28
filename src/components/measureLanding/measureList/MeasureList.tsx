@@ -706,7 +706,7 @@ export default function MeasureList(props: {
             },
           }}
         >
-          <div style={{ width: 14 }}>
+          <div role="img" tabIndex={0}>
             <MadieTooltipIcon />
           </div>
         </Tooltip>

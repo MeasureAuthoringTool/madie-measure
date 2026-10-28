@@ -2926,6 +2926,47 @@ describe("Measure List", () => {
     expect(getByText("Updated")).toBeInTheDocument();
   });
 
+  it("should expose a keyboard-focusable selection tooltip on All Measures", async () => {
+    render(
+      <ServiceContext.Provider value={serviceConfig}>
+        <MeasureList
+          measureList={measures}
+          setMeasureList={setMeasureListMock}
+          setTotalPages={setTotalPagesMock}
+          setTotalItems={setTotalItemsMock}
+          setVisibleItems={setVisibleItemsMock}
+          setOffset={setOffsetMock}
+          setLoading={setLoadingMock}
+          activeTab={2}
+          searchCriteria={null}
+          setSearchCriteria={setSearchCriteriaMock}
+          currentLimit={10}
+          currentPage={0}
+          setErrMsg={setErrMsgMock}
+          toastOpen={false}
+          toastMessage=""
+          toastType="danger"
+          setToastOpen={setToastOpenMock}
+          setToastMessage={setToastMessageMock}
+          setToastType={setToastTypeMock}
+          onToastClose={onToastCloseMock}
+          handleToast={handleToastMock}
+        />
+      </ServiceContext.Provider>
+    );
+
+    const selectionHeaderIcon = within(
+      screen.getByRole("group", { name: "Measure Selection" })
+    ).getByRole("img", { name: "Select" });
+    expect(selectionHeaderIcon).toHaveAttribute("tabindex", "0");
+    expect(selectionHeaderIcon).toHaveStyle({ width: "14px" });
+    act(() => {
+      selectionHeaderIcon.focus();
+    });
+    expect(selectionHeaderIcon).toHaveFocus();
+    expect(await screen.findByRole("tooltip")).toHaveTextContent("Select");
+  });
+
   it("should enable sortable columns", async () => {
     const { getByText } = render(
       <ServiceContext.Provider value={serviceConfig}>
