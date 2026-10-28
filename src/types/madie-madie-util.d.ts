@@ -82,8 +82,7 @@ declare module "@madie/madie-util" {
   export function shouldShowReviewCommentLink(args: {
     commentingEnabled?: boolean;
     currentUser?: string | null;
-    owner?: string | null;
-    acls?: Array<{ userId?: string; roles?: string[] }> | null;
+    canEdit?: boolean;
     reviewStatus?: string | null;
     hasReviewerRole?: boolean;
     assignedReviewers?: string[] | null;

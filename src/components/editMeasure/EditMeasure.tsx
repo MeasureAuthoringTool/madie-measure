@@ -228,6 +228,11 @@ export default function EditMeasure() {
     measure?.measureMetaData?.draft
   );
 
+  const measureCanReview: boolean = checkUserCanEdit(
+    measure?.measureSet?.owner,
+    measure?.measureSet?.acls
+  );
+
   const { getUserName } = useOktaTokens();
   const userName = getUserName();
   // "First Last" when the user service knows the HARP id, else the HARP id
@@ -718,8 +723,7 @@ export default function EditMeasure() {
   const showReviewCommentLink = shouldShowReviewCommentLink({
     commentingEnabled: Boolean(featureFlags?.Commenting),
     currentUser: userName,
-    owner: measure?.measureSet?.owner,
-    acls: measure?.measureSet?.acls,
+    canEdit: measureCanReview,
     reviewStatus: measureReview?.status,
     hasReviewerRole: Boolean(userRoles?.isReviewer),
     assignedReviewers: measureReview?.reviewers,
