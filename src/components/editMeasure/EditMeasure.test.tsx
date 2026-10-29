@@ -31,6 +31,7 @@ import {
   useFeatureFlags,
   useOktaTokens,
   useUserRoles,
+  useReviewComments,
   routeHandlerStore,
 } from "@madie/madie-util";
 import { oneItemResponse } from "../__mocks__/mockMeasureResponses";
@@ -221,6 +222,14 @@ const mockMeasureReviewServiceApi = {
     .mockResolvedValue({ id: "existing-review-id" }),
 };
 
+const mockReviewComments = {
+  review: null,
+  comments: [],
+  addComment: jest.fn(),
+  updateComment: jest.fn(),
+  deleteComment: jest.fn(),
+};
+
 jest.mock("@madie/madie-util", () => ({
   ...mockCmsIdStubs,
   ...mockCompositeStubs,
@@ -289,7 +298,8 @@ jest.mock("@madie/madie-util", () => ({
   checkUserCanEdit: jest.fn().mockImplementation(() => true),
   useFeatureFlags: jest.fn(() => ({})),
   shouldShowReviewCommentLink: jest.fn(),
-  ReviewSubSection: () => <div data-testid="comments-review-subsection" />,
+  useOwnerName: jest.fn(() => "Jonathan Jones"),
+  useReviewComments: jest.fn(() => mockReviewComments),
   CommentsFlyoutPanel: ({ open, onClose, activeSection }: any) =>
     open ? (
       <div data-testid="comments-flyout">
@@ -378,6 +388,7 @@ describe("EditMeasure Component", () => {
       mockMeasureReviewServiceApi
     );
     (shouldShowReviewCommentLink as jest.Mock).mockReset();
+    (useReviewComments as jest.Mock).mockReturnValue(mockReviewComments);
     (shouldShowReviewCommentLink as jest.Mock).mockReturnValue(false);
     mockMeasureReviewServiceApi.getMeasureReview.mockClear();
     mockMeasureReviewServiceApi.getMeasureReview.mockResolvedValue(null);
@@ -595,86 +606,43 @@ describe("EditMeasure Component", () => {
     }
   );
 
-  it("fetches review data when a measure id exists", async () => {
-    const fetchedReview = {
-      status: "READY_FOR_REVIEW",
-      reviewers: ["reviewer user"],
-    };
-    mockMeasureReviewServiceApi.getMeasureReview.mockResolvedValueOnce(
-      fetchedReview
-    );
+  it("loads the review through useReviewComments and feeds it to the link visibility check", async () => {
+    (useReviewComments as jest.Mock).mockReturnValue({
+      ...mockReviewComments,
+      review: { status: "READY_FOR_REVIEW", reviewers: ["reviewer user"] },
+    });
 
     renderRouter();
     await findByTestId("editMeasure");
 
-    await waitFor(() => {
-      expect(mockMeasureReviewServiceApi.getMeasureReview).toHaveBeenCalledWith(
-        measure.id
-      );
-    });
-
+    expect(useReviewComments).toHaveBeenCalledWith(
+      "measure",
+      measure.id,
+      expect.any(Function)
+    );
     await waitFor(() => {
       expect(shouldShowReviewCommentLink).toHaveBeenLastCalledWith(
         expect.objectContaining({
-          reviewStatus: fetchedReview.status,
-          assignedReviewers: fetchedReview.reviewers,
+          reviewStatus: "READY_FOR_REVIEW",
+          assignedReviewers: ["reviewer user"],
         })
       );
     });
   });
 
-  it("does not fetch review data when the measure id is missing", async () => {
-    const measureWithoutId = { ...measure, id: undefined } as Measure;
-    measureStore.state.mockImplementation(() => measureWithoutId);
-
+  it("shows a toast when the review comments hook reports an error", async () => {
     renderRouter();
     await findByTestId("editMeasure");
 
-    await waitFor(() => {
-      expect(
-        mockMeasureReviewServiceApi.getMeasureReview
-      ).not.toHaveBeenCalled();
-    });
-  });
-
-  it("handles review fetch failures without crashing", async () => {
-    mockMeasureReviewServiceApi.getMeasureReview.mockRejectedValueOnce(
-      new Error("review fetch failed")
-    );
-
-    renderRouter();
-    await findByTestId("editMeasure");
-
-    await waitFor(() => {
-      expect(mockMeasureReviewServiceApi.getMeasureReview).toHaveBeenCalledWith(
-        measure.id
-      );
-    });
-  });
-
-  it("updates review state when review-measure-saved event is fired", async () => {
-    renderRouter();
-    await findByTestId("editMeasure");
-
-    const savedReview = {
-      status: "IN_PROGRESS",
-      reviewers: ["reviewer user"],
-    };
-
+    const { calls } = (useReviewComments as jest.Mock).mock;
+    const [, , onError] = calls[calls.length - 1];
     act(() => {
-      window.dispatchEvent(
-        new CustomEvent("review-measure-saved", { detail: savedReview })
-      );
+      onError("Error updating comments. Please try again.");
     });
 
-    await waitFor(() => {
-      expect(shouldShowReviewCommentLink).toHaveBeenLastCalledWith(
-        expect.objectContaining({
-          reviewStatus: savedReview.status,
-          assignedReviewers: savedReview.reviewers,
-        })
-      );
-    });
+    expect(
+      await screen.findByText("Error updating comments. Please try again.")
+    ).toBeInTheDocument();
   });
 
   it("should open the Manage Review dialog for reviewers when the review event is triggered", async () => {
