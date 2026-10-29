@@ -146,7 +146,7 @@ const MeasureStatusChips = ({ measure }) => {
                 <InfoOutlinedIcon
                   sx={{ fontSize: 16 }}
                   aria-label={`${COMPONENT_MEASURE_MSG}`}
-                  role="img"
+                  role="tooltip"
                   tabIndex={-1}
                   focusable="true"
                 />
@@ -551,7 +551,7 @@ export default function MeasureList(props: {
     ...(showReviewStatus
       ? [
           {
-            header: () => <span tabIndex={0}>Review</span>,
+            header: () => <span role="button">Review</span>,
             accessorKey: "reviewStatus",
             enableSorting: false,
             cell: (info) => {
@@ -583,7 +583,7 @@ export default function MeasureList(props: {
         ]
       : []),
     {
-      header: () => <span tabIndex={0}>Action</span>,
+      header: () => <span>Action</span>,
       cell: (info) => {
         const canEdit =
           checkUserCanEdit(
@@ -706,7 +706,7 @@ export default function MeasureList(props: {
             },
           }}
         >
-          <div role="img" tabIndex={0}>
+          <div role="tooltip" tabIndex={0}>
             <MadieTooltipIcon />
           </div>
         </Tooltip>
