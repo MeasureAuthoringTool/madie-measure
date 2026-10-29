@@ -92,7 +92,7 @@ describe("ReviewDialog", () => {
           measureId: "measure-1",
           measureSetId: "set-1",
           status: ReviewStatus.READY_FOR_REVIEW,
-          comment: [],
+          comments: [],
         })
       );
     });
@@ -142,7 +142,7 @@ describe("ReviewDialog", () => {
       measureId: "measure-1",
       measureSetId: "set-1",
       status: ReviewStatus.READY_FOR_REVIEW,
-      comment: "<p>already ready</p>",
+      comments: [{ id: "c1", content: "<p>already ready</p>" }],
     };
     mockGetMeasureReview.mockResolvedValueOnce(existingReview);
 
@@ -169,7 +169,7 @@ describe("ReviewDialog", () => {
           measureId: "measure-1",
           measureSetId: "set-1",
           status: ReviewStatus.NOT_READY_FOR_REVIEW,
-          comment: [],
+          comments: [{ id: "c1", content: "<p>already ready</p>" }],
         })
       );
     });
@@ -183,7 +183,7 @@ describe("ReviewDialog", () => {
       measureId: "measure-1",
       measureSetId: "set-1",
       status: ReviewStatus.IN_PROGRESS,
-      comment: "<p>in progress</p>",
+      comments: [],
     });
 
     const { rerender } = render(
@@ -199,7 +199,7 @@ describe("ReviewDialog", () => {
       measureId: "measure-1",
       measureSetId: "set-1",
       status: ReviewStatus.COMPLETE,
-      comment: "<p>complete</p>",
+      comments: [],
     });
 
     rerender(
@@ -221,7 +221,7 @@ describe("ReviewDialog", () => {
       measureId: "measure-1",
       measureSetId: "set-1",
       status: ReviewStatus.IN_PROGRESS,
-      comment: "<p>in progress</p>",
+      comments: [],
     };
     mockGetMeasureReview.mockResolvedValueOnce(existingReview);
 
@@ -246,7 +246,7 @@ describe("ReviewDialog", () => {
       measureId: "measure-1",
       measureSetId: "set-1",
       status: ReviewStatus.IN_PROGRESS,
-      comment: "<p>in progress</p>",
+      comments: [],
     } as MeasureReview);
 
     render(<ReviewDialog open={true} measure={measure} onClose={jest.fn()} />);
@@ -269,7 +269,7 @@ describe("ReviewDialog", () => {
       measureId: "measure-1",
       measureSetId: "set-1",
       status: ReviewStatus.COMPLETE,
-      comment: "<p>complete</p>",
+      comments: [],
     });
 
     render(<ReviewDialog open={true} measure={measure} onClose={jest.fn()} />);
@@ -303,7 +303,7 @@ describe("ReviewDialog", () => {
       measureId: "measure-1",
       measureSetId: "set-1",
       status: ReviewStatus.COMPLETE,
-      comment: "<p>complete</p>",
+      comments: [{ id: "c1", content: "<p>already ready</p>" }],
     };
     mockGetMeasureReview.mockResolvedValueOnce(existingReview);
 
@@ -328,7 +328,7 @@ describe("ReviewDialog", () => {
         expect.objectContaining({
           id: "existing-review-id",
           status: ReviewStatus.NOT_READY_FOR_REVIEW,
-          comment: [],
+          comments: [{ id: "c1", content: "<p>already ready</p>" }],
         })
       );
     });

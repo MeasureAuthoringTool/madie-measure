@@ -72,7 +72,7 @@ export default function ReviewDialog({
       status: values.markAsReady
         ? ReviewStatus.READY_FOR_REVIEW
         : ReviewStatus.NOT_READY_FOR_REVIEW,
-      comment: [],
+      comments: review?.comments ?? [],
     };
 
     try {
