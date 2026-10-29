@@ -96,7 +96,7 @@ const ElementEditorChildrenInner = ({
           marginBottom: hasSubAttributes ? 8 : 24,
         }}
       >
-        <h4 className="header" tabIndex={0}>
+        <h4 className="header">
           {`${getElementName(
             rootDefinition,
             resourcePath,
