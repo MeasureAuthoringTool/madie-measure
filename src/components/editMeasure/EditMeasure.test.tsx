@@ -185,6 +185,7 @@ const mockMeasureServiceApi = {
   updateMeasure: jest.fn().mockResolvedValueOnce({ status: 200 }),
   createVersion: jest.fn().mockResolvedValue({ id: "newVersionId" }),
   deleteMeasure: jest.fn().mockResolvedValue({}),
+  cloneMeasure: jest.fn(),
   checkNextVersionNumber: jest.fn().mockReturnValue("1.0.000"),
   checkValidVersion: jest.fn().mockResolvedValue({ status: 200 }),
   fetchMeasureDraftStatuses: jest.fn().mockResolvedValue({
@@ -998,6 +999,57 @@ describe("EditMeasure Component", () => {
       },
       { timeout: 2000 }
     );
+  });
+
+  describe("clone-measure event", () => {
+    it("clones the measure and sends the admin to their Owned Measures", async () => {
+      mockMeasureServiceApi.cloneMeasure = jest
+        .fn()
+        .mockResolvedValue({ id: "clone-id" });
+      renderRouter();
+      expect(await findByTestId("editMeasure")).toBeInTheDocument();
+
+      act(() => {
+        window.dispatchEvent(new Event("clone-measure"));
+      });
+
+      await waitFor(() =>
+        expect(mockMeasureServiceApi.cloneMeasure).toHaveBeenCalledWith(
+          measure.id
+        )
+      );
+      expect(
+        await findByTestId("edit-measure-information-success-text")
+      ).toHaveTextContent(
+        "Measure successfully cloned. Redirecting to Owned Measures..."
+      );
+      // the toast is shown for 2 seconds before the redirect
+      expect(mockedNavigate).not.toHaveBeenCalledWith("/measures?tab=0&page=1");
+      await waitFor(
+        () =>
+          expect(mockedNavigate).toHaveBeenCalledWith("/measures?tab=0&page=1"),
+        { timeout: 3000 }
+      );
+    });
+
+    it("shows the error and stays on the measure when cloning fails", async () => {
+      mockMeasureServiceApi.cloneMeasure = jest.fn().mockRejectedValueOnce({
+        response: { data: { message: "Unable to clone measure" } },
+      });
+      renderRouter();
+      expect(await findByTestId("editMeasure")).toBeInTheDocument();
+
+      act(() => {
+        window.dispatchEvent(new Event("clone-measure"));
+      });
+
+      await waitFor(() =>
+        expect(screen.getByRole("alert")).toHaveTextContent(
+          "Unable to clone measure"
+        )
+      );
+      expect(mockedNavigate).not.toHaveBeenCalledWith("/measures?tab=0&page=1");
+    });
   });
 
   it("pressing Space on a tab prevents default and triggers click", async () => {
