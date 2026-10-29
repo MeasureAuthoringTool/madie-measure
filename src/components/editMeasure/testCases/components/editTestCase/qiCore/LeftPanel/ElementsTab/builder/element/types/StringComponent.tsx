@@ -17,6 +17,7 @@ const StringComponent = ({
   canEdit,
   fieldRequired,
   helperText,
+  error,
   label = "VALUE",
   structureDefinition,
   stringOnly = false,
@@ -53,6 +54,7 @@ const StringComponent = ({
           "aria-describedby": `string-field-input-helper-text-${testIdBase}`,
           required: fieldRequired,
           "aria-required": fieldRequired,
+          "aria-invalid": Boolean(error),
           readOnly: isRootLabel(label),
         }}
         size="small"
@@ -71,6 +73,7 @@ const StringComponent = ({
         minRows={1}
         maxLength={500}
         {...props}
+        error={Boolean(error)}
       />
       {canEdit && (
         <div className="mm:mt-5 mm:flex mm:items-center">

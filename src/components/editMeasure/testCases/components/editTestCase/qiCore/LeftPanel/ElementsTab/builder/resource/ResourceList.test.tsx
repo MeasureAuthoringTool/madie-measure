@@ -1,7 +1,7 @@
 import * as React from "react";
 import ResourceList from "./ResourceList";
 import { ResourceIdentifier } from "../../../../../../../api/models/ResourceIdentifier";
-import { render, screen, waitFor, act } from "@testing-library/react";
+import { render, screen, waitFor, act, within } from "@testing-library/react";
 import { Simulate } from "react-dom/test-utils";
 import userEvent from "@testing-library/user-event";
 import { ExecutionContextProvider } from "../../../../../../routes/qiCore/ExecutionContext";
@@ -35,6 +35,45 @@ const generateResources = (number: number): ResourceIdentifier[] => {
 };
 
 describe("ResourceList component", () => {
+  it.each([false, true])(
+    "tabs through every resource cell when Patient is already added: %s",
+    async (isPatientAdded) => {
+      const resources = generateResources(2);
+      resources[0].type = "Patient";
+      renderWithExecutionContext(
+        <ResourceList
+          resourceIdentifiers={resources}
+          onClick={jest.fn()}
+          isPatientAdded={isPatientAdded}
+        />
+      );
+
+      const rows = await screen.findAllByTestId("row-item");
+      const cells = within(rows[0]).getAllByRole("cell");
+      cells[0].focus();
+      expect(cells[0]).toHaveFocus();
+      userEvent.tab();
+      expect(
+        within(cells[1]).getByRole("button", {
+          name: "Open HL7 profile for 0",
+        })
+      ).toHaveFocus();
+      userEvent.tab();
+      if (isPatientAdded) {
+        expect(within(cells[2]).getByRole("button")).toBeDisabled();
+        expect(cells[2]).toHaveFocus();
+      } else {
+        expect(
+          within(cells[2]).getByRole("button", { name: "Add title0" })
+        ).toHaveFocus();
+      }
+      userEvent.tab();
+      expect(cells[3]).toHaveFocus();
+      userEvent.tab();
+      expect(within(rows[1]).getAllByRole("cell")[0]).toHaveFocus();
+    }
+  );
+
   afterEach(() => {
     jest.clearAllMocks();
   });

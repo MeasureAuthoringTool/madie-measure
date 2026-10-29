@@ -449,7 +449,7 @@ const ResourceEditor = ({
               <span style={{ color: "125496", fontWeight: 700 }}>
                 ID:&nbsp;&nbsp;
               </span>
-              <span style={{ color: "#333333" }}>
+              <span style={{ color: "#333333" }} tabIndex={0}>
                 {selectedResource?.bundleEntry?.resource?.id}
               </span>
               <div />

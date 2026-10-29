@@ -54,7 +54,7 @@ const IntegerComponent = ({
         data-testid={`integer-field-${testIdBase}`}
         size="small"
         fullWidth
-        error={error}
+        error={Boolean(error)}
         helperText={error}
         onChange={(e) => {
           const inputValue = e.target.value;

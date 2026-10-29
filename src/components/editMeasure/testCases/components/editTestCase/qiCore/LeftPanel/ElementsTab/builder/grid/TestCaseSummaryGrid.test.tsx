@@ -128,6 +128,56 @@ const renderWithResourceContext = (ui: React.ReactElement) =>
   );
 
 describe("TestCaseSummaryGrid", () => {
+  it.each([false, true])(
+    "tabs through profile, HL7, ID, and actions when readOnly is %s",
+    (readOnly) => {
+      renderWithResourceContext(
+        <TestCaseSummaryGrid
+          gridData={[gridData[0], gridData[4]]}
+          onRowEdit={jest.fn()}
+          onRowDelete={jest.fn()}
+          onRowClone={jest.fn()}
+          testCaseCanEdit={!readOnly}
+          measureModel="QI-Core 6.0"
+          readOnly={readOnly}
+        />
+      );
+
+      const rows = screen.getAllByRole("row");
+      const cells = within(rows[1]).getAllByRole("cell");
+      cells[0].focus();
+      expect(cells[0]).toHaveFocus();
+      userEvent.tab();
+      expect(within(cells[1]).getByRole("button")).toHaveFocus();
+      userEvent.tab();
+      expect(cells[2]).toHaveFocus();
+      for (const button of within(cells[3]).getAllByRole("button")) {
+        userEvent.tab();
+        expect(button).toHaveFocus();
+      }
+      userEvent.tab();
+      expect(within(rows[2]).getAllByRole("cell")[0]).toHaveFocus();
+    }
+  );
+
+  it("allows focusing the actions cell when read-only View is disabled", () => {
+    renderWithResourceContext(
+      <TestCaseSummaryGrid
+        gridData={[gridData[1]]}
+        onRowEdit={jest.fn()}
+        onRowDelete={jest.fn()}
+        testCaseCanEdit={false}
+        measureModel="QI-Core 6.0"
+        readOnly
+      />
+    );
+    const cells = within(screen.getAllByRole("row")[1]).getAllByRole("cell");
+    cells[2].focus();
+    userEvent.tab();
+    expect(cells[3]).toHaveFocus();
+    expect(within(cells[3]).getByRole("button")).toBeDisabled();
+  });
+
   const mockOnRowEdit = jest.fn();
   const mockOnRowDelete = jest.fn();
   const mockOnRowClone = jest.fn();
