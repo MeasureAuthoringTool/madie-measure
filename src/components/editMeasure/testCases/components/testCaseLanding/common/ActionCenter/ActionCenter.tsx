@@ -322,7 +322,7 @@ export default function ActionCenter(props: ActionCenterProps) {
                       style={{ cursor: "pointer" }}
                       onClick={handleClearClick}
                     >
-                      <IconButton>
+                      <IconButton aria-label="Clear test case search">
                         <ClearIcon />
                       </IconButton>
                     </InputAdornment>

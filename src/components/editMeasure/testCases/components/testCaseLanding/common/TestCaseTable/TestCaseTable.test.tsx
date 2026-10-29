@@ -301,6 +301,52 @@ const generateTestCases = (number: number) => {
 };
 
 describe("TestCase component", () => {
+  it.each([measures[0], measures[3]])(
+    "allows tabbing through every row cell and labels every checkbox for $model",
+    async (measure) => {
+      renderWithTestCase(
+        [testCase, testCaseNoGroup],
+        true,
+        jest.fn(),
+        jest.fn(),
+        jest.fn(),
+        measure,
+        jest.fn(),
+        undefined,
+        []
+      );
+
+      expect(
+        screen.getByRole("checkbox", { name: "Test Case Selection" })
+      ).toBeInTheDocument();
+      const checkbox = screen.getByRole("checkbox", {
+        name: `Select test case ${testCase.series} - ${testCase.title}`,
+      });
+      expect(
+        screen.getByRole("checkbox", {
+          name: `Select test case ${testCaseNoGroup.title}`,
+        })
+      ).toBeInTheDocument();
+
+      checkbox.focus();
+      expect(checkbox).toHaveFocus();
+      const row = screen.getByTestId("test-case-row-0");
+      const cells = within(row).getAllByRole("cell");
+      for (const cell of cells.slice(1, -1)) {
+        userEvent.tab();
+        expect(cell).toHaveFocus();
+      }
+      userEvent.tab();
+      expect(within(row).getByRole("button")).toHaveFocus();
+      userEvent.tab();
+      expect(
+        screen.getByRole("checkbox", {
+          name: `Select test case ${testCaseNoGroup.title}`,
+        })
+      ).toHaveFocus();
+    }
+  );
+
   afterEach(() => {
     jest.clearAllMocks();
   });
