@@ -551,7 +551,21 @@ export default function MeasureList(props: {
     ...(showReviewStatus
       ? [
           {
-            header: () => <span role="button">Review</span>,
+            header: () => (
+              <button
+                type="button"
+                style={{
+                  padding: 0,
+                  border: 0,
+                  background: "transparent",
+                  color: "inherit",
+                  font: "inherit",
+                  textAlign: "inherit",
+                }}
+              >
+                Review
+              </button>
+            ),
             accessorKey: "reviewStatus",
             enableSorting: false,
             cell: (info) => {
@@ -706,9 +720,20 @@ export default function MeasureList(props: {
             },
           }}
         >
-          <div role="tooltip">
+          <button
+            type="button"
+            aria-label="Select"
+            style={{
+              width: 14,
+              padding: 0,
+              border: 0,
+              background: "transparent",
+              color: "inherit",
+              cursor: "pointer",
+            }}
+          >
             <MadieTooltipIcon />
-          </div>
+          </button>
         </Tooltip>
       );
     }

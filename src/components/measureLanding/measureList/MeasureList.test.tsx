@@ -2957,8 +2957,7 @@ describe("Measure List", () => {
 
     const selectionHeaderIcon = within(
       screen.getByRole("group", { name: "Measure Selection" })
-    ).getByRole("img", { name: "Select" });
-    expect(selectionHeaderIcon).toHaveAttribute("tabindex", "0");
+    ).getByRole("button", { name: "Select" });
     expect(selectionHeaderIcon).toHaveStyle({ width: "14px" });
     act(() => {
       selectionHeaderIcon.focus();
@@ -4237,9 +4236,10 @@ describe("Review Status", () => {
     const reviewHeader = await screen.findByRole("columnheader", {
       name: /review/i,
     });
-    const reviewHeaderLabel = within(reviewHeader).getByText("Review");
+    const reviewHeaderLabel = within(reviewHeader).getByRole("button", {
+      name: "Review",
+    });
 
-    expect(reviewHeaderLabel).toHaveAttribute("tabindex", "0");
     reviewHeaderLabel.focus();
     expect(reviewHeaderLabel).toHaveFocus();
   });
