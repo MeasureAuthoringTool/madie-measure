@@ -540,6 +540,15 @@ const TestCaseSummaryGrid = ({
               {row.getVisibleCells().map((cell) => (
                 <td
                   key={cell.id}
+                  tabIndex={
+                    cell.column.id === "resourceType" ||
+                    cell.column.id === "id" ||
+                    (cell.column.id === "actions" &&
+                      readOnly &&
+                      !row.original.validationResult.isValid)
+                      ? 0
+                      : undefined
+                  }
                   className={
                     cell.column.id === "id"
                       ? "hl7-id-divider"

@@ -9,10 +9,47 @@ import {
   useExpandCollapse,
 } from "./ExpandCollapseContext";
 import { Formik } from "formik";
+import userEvent from "@testing-library/user-event";
 
 const { findByText, findByTestId, queryByTestId } = screen;
 
 describe("TabHeadings", () => {
+  test.each([false, true])(
+    "labels the expansion button and updates its state from startOpen=%s",
+    (startOpen) => {
+      render(
+        <ElementSectionQiCore title="Use" startOpen={startOpen}>
+          Section content
+        </ElementSectionQiCore>
+      );
+      const button = screen.getByRole("button", {
+        name: `${startOpen ? "Collapse" : "Expand"} Use`,
+      });
+      expect(button).toHaveAttribute("aria-expanded", String(startOpen));
+      button.focus();
+      userEvent.keyboard("{Enter}");
+      expect(button).toHaveAccessibleName(
+        `${startOpen ? "Expand" : "Collapse"} Use`
+      );
+      expect(button).toHaveAttribute("aria-expanded", String(!startOpen));
+      userEvent.keyboard(" ");
+      expect(button).toHaveAttribute("aria-expanded", String(startOpen));
+    }
+  );
+
+  test("labels the section delete button", () => {
+    render(
+      <ElementSectionQiCore
+        title="Use"
+        canBeMultipleCardinality
+        handleDeleteElement={jest.fn()}
+      />
+    );
+    expect(
+      screen.getByRole("button", { name: "Delete Use" })
+    ).toBeInTheDocument();
+  });
+
   test("TabHeading does in fact exist with specified text", async () => {
     const title = "FakeTitle";
     render(<ElementSectionQiCore title={title} />);

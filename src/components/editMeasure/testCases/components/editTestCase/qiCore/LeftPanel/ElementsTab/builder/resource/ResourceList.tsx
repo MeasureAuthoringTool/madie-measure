@@ -506,6 +506,15 @@ const ResourceList = ({
                         <td
                           key={cell.id}
                           data-testid={`measure-name-${cell.id}`}
+                          tabIndex={
+                            cell.column.id === "profile" ||
+                            cell.column.id === "added" ||
+                            (cell.column.id === "action" &&
+                              row.original.type === "Patient" &&
+                              isPatientAdded)
+                              ? 0
+                              : undefined
+                          }
                           className={
                             cell.column.id === "hl7"
                               ? "hl7-column"

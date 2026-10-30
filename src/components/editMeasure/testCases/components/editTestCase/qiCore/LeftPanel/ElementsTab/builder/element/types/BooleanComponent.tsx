@@ -56,7 +56,7 @@ const BooleanComponent = ({
           "aria-required": "true",
         }}
         helperText={helperText}
-        error={error}
+        error={Boolean(error)}
         options={booleanOptions}
         {...props}
         value={value === true ? "true" : value === false ? "false" : ""}

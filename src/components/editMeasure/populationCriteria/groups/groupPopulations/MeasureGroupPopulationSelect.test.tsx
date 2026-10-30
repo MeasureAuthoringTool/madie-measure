@@ -153,6 +153,26 @@ const selectorProps = {
 };
 
 describe("Measure Group Population Select Component", () => {
+  test.each([undefined, false, true])(
+    "renders valid ARIA states when error is %s",
+    (error) => {
+      const { container } = render(
+        <MeasureGroupPopulationSelect {...selectorProps} error={error} />
+      );
+      for (const element of container.querySelectorAll(
+        "[aria-required], [aria-invalid]"
+      )) {
+        for (const attribute of ["aria-required", "aria-invalid"]) {
+          if (element.hasAttribute(attribute)) {
+            expect(["true", "false"]).toContain(
+              element.getAttribute(attribute)
+            );
+          }
+        }
+      }
+    }
+  );
+
   test("Component loads when omitting default value and options.", async () => {
     const omitProps = {
       label: "Population Test",

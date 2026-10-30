@@ -416,20 +416,24 @@ const MeasureReferences = (props: MeasureReferencesProps) => {
                         <InputAdornment
                           position="start"
                           data-testid="measure-reference-search"
-                          onClick={handleSearch}
-                          style={{ cursor: "pointer" }}
                         >
-                          <SearchIcon />
+                          <IconButton
+                            aria-label="Search references"
+                            onClick={handleSearch}
+                          >
+                            <SearchIcon />
+                          </IconButton>
                         </InputAdornment>
                       ),
                       endAdornment: (
                         <InputAdornment
                           data-testid="measure-reference-clear-search"
                           position="end"
-                          style={{ cursor: "pointer" }}
-                          onClick={handleClearSearch}
                         >
-                          <IconButton>
+                          <IconButton
+                            aria-label="Clear reference search"
+                            onClick={handleClearSearch}
+                          >
                             <ClearIcon />
                           </IconButton>
                         </InputAdornment>
@@ -452,6 +456,7 @@ const MeasureReferences = (props: MeasureReferencesProps) => {
                     variant="outline-filled"
                     className="page-header-action-button"
                     data-testid="create-reference-button"
+                    aria-label="Add Reference"
                     onClick={toggleOpen}
                   >
                     <AddIcon className="page-header-action-icon" />
@@ -473,7 +478,11 @@ const MeasureReferences = (props: MeasureReferencesProps) => {
                 <th scope="col" className="col-header">
                   References
                 </th>
-                <th scope="col" className="col-header"></th>
+                <th
+                  scope="col"
+                  className="col-header"
+                  aria-label="Actions"
+                ></th>
               </tr>
             </thead>
             <tbody data-testId="measure-references-table-body">

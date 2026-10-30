@@ -15,6 +15,7 @@ const UrlComponent = ({
   showDeleteButton,
   handleDeleteElement,
   name,
+  error,
   ...rest
 }: TypeComponentProps) => {
   const formattedLabel = getMultipleCardinalityLabel(label);
@@ -41,6 +42,7 @@ const UrlComponent = ({
         size="small"
         fullWidth
         {...rest}
+        error={Boolean(error)}
       />
       {canEdit && (
         <div>
