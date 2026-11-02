@@ -133,8 +133,14 @@ export class CalculationService {
       measureBundle,
       TestCaseBundles,
       valueSets,
-      measure.measurementPeriodStart,
-      measure.measurementPeriodEnd,
+      measure?.measurementPeriodStart
+        ? new Date(measure.measurementPeriodStart)
+            .toISOString()
+            .substring(0, 10)
+        : undefined,
+      measure?.measurementPeriodEnd
+        ? new Date(measure.measurementPeriodEnd).toISOString().substring(0, 10)
+        : undefined,
       measure?.testCaseConfiguration?.sdeIncluded,
       measure?.testCaseConfiguration?.ravIncluded
     );
