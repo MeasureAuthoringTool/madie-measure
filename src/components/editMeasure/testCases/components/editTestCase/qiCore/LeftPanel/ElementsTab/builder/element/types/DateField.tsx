@@ -101,7 +101,7 @@ const DateField = ({
                 label,
                 sx: { ...dateTextFieldStyle, ...textFieldSx },
                 placeholder,
-                error: error,
+                error: Boolean(error),
                 helperText: helperText,
                 onBlur: rest?.onBlur,
               };

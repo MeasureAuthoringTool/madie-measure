@@ -2608,8 +2608,13 @@ describe("Measure List component", () => {
       expect(checkboxes.length).toBe(6);
     });
     expect(getByTestId("checkbox-select-all-checkbox")).toHaveAccessibleName(
-      "Select All Measures"
+      "Select all measures on this page"
     );
+    measures.forEach((measure) => {
+      expect(getByTestId(`checkbox-${measure.id}`)).toHaveAccessibleName(
+        `Select measure ${measure.measureName}`
+      );
+    });
     unmount();
   });
 
@@ -2919,6 +2924,46 @@ describe("Measure List", () => {
     expect(getByText("Shared")).toBeInTheDocument();
     expect(getByText("CMS ID")).toBeInTheDocument();
     expect(getByText("Updated")).toBeInTheDocument();
+  });
+
+  it("should expose a keyboard-focusable selection tooltip on All Measures", async () => {
+    render(
+      <ServiceContext.Provider value={serviceConfig}>
+        <MeasureList
+          measureList={measures}
+          setMeasureList={setMeasureListMock}
+          setTotalPages={setTotalPagesMock}
+          setTotalItems={setTotalItemsMock}
+          setVisibleItems={setVisibleItemsMock}
+          setOffset={setOffsetMock}
+          setLoading={setLoadingMock}
+          activeTab={2}
+          searchCriteria={null}
+          setSearchCriteria={setSearchCriteriaMock}
+          currentLimit={10}
+          currentPage={0}
+          setErrMsg={setErrMsgMock}
+          toastOpen={false}
+          toastMessage=""
+          toastType="danger"
+          setToastOpen={setToastOpenMock}
+          setToastMessage={setToastMessageMock}
+          setToastType={setToastTypeMock}
+          onToastClose={onToastCloseMock}
+          handleToast={handleToastMock}
+        />
+      </ServiceContext.Provider>
+    );
+
+    const selectionHeaderIcon = within(
+      screen.getByRole("group", { name: "Measure Selection" })
+    ).getByRole("button", { name: "Select" });
+    expect(selectionHeaderIcon).toHaveStyle({ width: "14px" });
+    act(() => {
+      selectionHeaderIcon.focus();
+    });
+    expect(selectionHeaderIcon).toHaveFocus();
+    expect(await screen.findByRole("tooltip")).toHaveTextContent("Select");
   });
 
   it("should enable sortable columns", async () => {
@@ -3455,17 +3500,23 @@ describe("Measure lock functionality", () => {
       // Wait for the parent measure row to render
       await screen.findByText("Parent Measure");
 
-      // Click the expand arrow span[role="button"] inside the table
-      const expandButton = container.querySelector(
-        'span[role="button"]'
-      ) as HTMLElement;
+      // Click the expand button inside the table
+      const expandButton = screen.getByRole("button", {
+        name: "Expand associated measures for Parent Measure",
+      });
       expect(expandButton).toBeInTheDocument();
+      expect(expandButton).toHaveAttribute("aria-expanded", "false");
       await act(async () => {
         userEvent.click(expandButton);
       });
 
       // Wait for the child row to appear
       await screen.findByText("Child Measure");
+      expect(
+        screen.getByRole("button", {
+          name: "Collapse associated measures for Parent Measure",
+        })
+      ).toHaveAttribute("aria-expanded", "true");
 
       // Select the child measure's checkbox
       const checkboxes = screen.getAllByRole("checkbox");
@@ -3580,9 +3631,9 @@ describe("Measure lock functionality", () => {
       expect(
         mockMeasureServiceApi.getMeasuresByMeasureSetId
       ).toHaveBeenCalledTimes(1);
-      const expandButton = container.querySelector(
-        'span[role="button"]'
-      ) as HTMLElement;
+      const expandButton = screen.getByRole("button", {
+        name: "Expand associated measures for Parent Measure",
+      });
       expect(expandButton).toBeInTheDocument();
       await act(async () => {
         userEvent.click(expandButton);
@@ -4182,9 +4233,15 @@ describe("Review Status", () => {
   it("should display the Review column when the feature flag is on", async () => {
     renderReviewList(0);
 
-    expect(
-      await screen.findByRole("columnheader", { name: /review/i })
-    ).toBeInTheDocument();
+    const reviewHeader = await screen.findByRole("columnheader", {
+      name: /review/i,
+    });
+    const reviewHeaderLabel = within(reviewHeader).getByRole("button", {
+      name: "Review",
+    });
+
+    reviewHeaderLabel.focus();
+    expect(reviewHeaderLabel).toHaveFocus();
   });
 
   it("should display 'Ready' for reviewed measures and '-' for the rest", async () => {
@@ -4235,6 +4292,37 @@ describe("Review Status", () => {
     expect(
       await screen.findByRole("columnheader", { name: /review/i })
     ).toBeInTheDocument();
+  });
+
+  it("should only tab to body cells that have content and no focusable control of their own", async () => {
+    renderReviewList(0, measures);
+
+    const table = await screen.findByTestId("measure-list-tbl");
+    const rows = Array.from(
+      table.querySelectorAll<HTMLTableRowElement>("tbody tr.ml-tr")
+    );
+    expect(rows).toHaveLength(measures.length);
+
+    const cells = Array.from(rows[2].querySelectorAll("td"));
+    cells.forEach((cell) => {
+      const hasContent = (cell.textContent || "").trim().length > 0;
+      const hasOwnFocusable = !!cell.querySelector(
+        "a[href], button, input, select, textarea, [tabindex]"
+      );
+      if (hasContent && !hasOwnFocusable) {
+        expect(cell.tabIndex).toBe(0);
+      } else {
+        expect(cell).not.toHaveAttribute("tabindex");
+      }
+    });
+
+    // the action button is the only stop in the action cell
+    const actionCell = within(rows[2])
+      .getByRole("button", {
+        name: /measure/i,
+      })
+      .closest("td") as HTMLElement;
+    expect(actionCell).not.toHaveAttribute("tabindex");
   });
 
   it("should display the My Reviews columns", async () => {

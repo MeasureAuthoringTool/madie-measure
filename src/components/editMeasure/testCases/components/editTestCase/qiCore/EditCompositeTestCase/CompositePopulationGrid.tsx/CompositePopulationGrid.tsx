@@ -105,7 +105,7 @@ const CompositePopulationGrid = ({
       </caption>
       <thead>
         <tr>
-          <th scope="col"></th>
+          <th scope="col" aria-hidden="true"></th>
           <th scope="col">Population</th>
           <th scope="col">Expected</th>
           <th scope="col">Actual</th>
@@ -113,11 +113,12 @@ const CompositePopulationGrid = ({
       </thead>
       <tbody>
         <tr>
-          <td />
+          <td aria-hidden="true" />
           <td>Denominator</td>
           <td>
             <input
               type="text"
+              aria-label={`Expected denominator score for ${group.displayId}`}
               style={disabled ? { border: "none" } : {}}
               aria-disabled={disabled ? "true" : "false"}
               size={2}
@@ -150,11 +151,12 @@ const CompositePopulationGrid = ({
           </tr>
         )}
         <tr>
-          <td />
+          <td aria-hidden="true" />
           <td>Numerator</td>
           <td>
             <input
               type="text"
+              aria-label={`Expected numerator score for ${group.displayId}`}
               size={2}
               style={disabled ? { border: "none" } : {}}
               aria-disabled={disabled ? "true" : "false"}
@@ -186,7 +188,7 @@ const CompositePopulationGrid = ({
         )}
 
         <tr>
-          <td />
+          <td aria-hidden="true" />
           <td>Composite Score</td>
           <td>
             <div
@@ -198,6 +200,7 @@ const CompositePopulationGrid = ({
             >
               <input
                 type="text"
+                aria-label={`Expected composite score for ${group.displayId}`}
                 size={2}
                 style={disabled ? { border: "none" } : {}}
                 aria-disabled={disabled ? "true" : "false"}

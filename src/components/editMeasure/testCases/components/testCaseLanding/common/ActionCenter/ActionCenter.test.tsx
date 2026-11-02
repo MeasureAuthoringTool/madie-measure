@@ -53,7 +53,9 @@ describe("ActionCenter Component", () => {
       expect.stringContaining("filter=Status&search=test&page=1&limit=10")
     );
 
-    userEvent.click(screen.getByTestId("test-cases-clear-search"));
+    userEvent.click(
+      screen.getByRole("button", { name: "Clear test case search" })
+    );
     expect(mockNavigate).toHaveBeenCalledWith(expect.stringContaining("/"));
   });
 
