@@ -267,7 +267,7 @@ export default function ReferenceComponent({
             setSelectedReferenceId("");
           }}
           helperText={helperText}
-          error={error}
+          error={Boolean(error)}
         />
         {canEdit && (
           <div className="mm:mt-5 mm:flex mm:items-center">
@@ -355,7 +355,7 @@ export default function ReferenceComponent({
             }}
             value={selectedReferenceId}
             helperText={helperText}
-            error={error}
+            error={Boolean(error)}
           />
           <div />
         </div>

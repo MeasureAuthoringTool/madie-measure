@@ -9,6 +9,7 @@ const UriComponent = ({
   canEdit,
   fieldRequired,
   label,
+  error,
   structureDefinition,
   showAddAttributeButton,
   addTitle,
@@ -43,6 +44,7 @@ const UriComponent = ({
         size="small"
         fullWidth
         {...props}
+        error={Boolean(error)}
       />
       {canEdit && (
         <div>

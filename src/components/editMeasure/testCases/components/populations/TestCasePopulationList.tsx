@@ -284,7 +284,7 @@ const TestCasePopulationList = ({
         </caption>
         <thead>
           <tr>
-            <th scope="col"></th>
+            <th scope="col" aria-hidden="true"></th>
             <th scope="col">Population</th>
             <th scope="col">Expected</th>
             <th scope="col">Actual</th>
