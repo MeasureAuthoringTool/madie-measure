@@ -138,6 +138,15 @@
         height: 24px;
         background-color: #c1f6f8;
       }
+
+      .chip-draft,
+      .chip-composite,
+      .chip-in-composite {
+        &:focus-visible {
+          outline: 2px solid #0073c8;
+          outline-offset: 2px;
+        }
+      }
     }
   }
 

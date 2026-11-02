@@ -80,6 +80,8 @@ const ElementSectionQiCore = (props: ElementSectionProps) => {
           <IconButton
             sx={{ "background-color": "rgba(0,0,0, 0.12)" }}
             data-testid={`elements-heading-expansion-button-${title}`}
+            aria-label={`${open ? "Collapse" : "Expand"} ${title}`}
+            aria-expanded={Boolean(open)}
             onClick={() => {
               setOpen(!open);
             }}
@@ -109,6 +111,7 @@ const ElementSectionQiCore = (props: ElementSectionProps) => {
               {canBeMultipleCardinality && (
                 <IconButton
                   data-testid={`elements-delete-button-${title}`}
+                  aria-label={`Delete ${title}`}
                   onClick={props.handleDeleteElement}
                   disabled={!props.handleDeleteElement}
                 >

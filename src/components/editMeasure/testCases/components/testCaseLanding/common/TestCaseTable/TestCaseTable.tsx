@@ -278,6 +278,9 @@ const TestCaseTable = (props: TestCaseTableProps) => {
               disabled={!info.row.getCanSelect()}
               indeterminate={info.row.getIsSomeSelected()}
               onChange={info.row.getToggleSelectedHandler()}
+              aria-label={`Select test case ${
+                info.row.original.group ? `${info.row.original.group} - ` : ""
+              }${info.row.original.title}`}
             />
           </div>
 
@@ -616,7 +619,15 @@ const TestCaseTable = (props: TestCaseTableProps) => {
               data-testid={`test-case-row-${row.id}`}
             >
               {row.getVisibleCells().map((cell) => (
-                <td key={cell.id} data-testid={`test-case-title-${cell.id}`}>
+                <td
+                  key={cell.id}
+                  data-testid={`test-case-title-${cell.id}`}
+                  tabIndex={
+                    cell.column.id === "select" || cell.column.id === "action"
+                      ? undefined
+                      : 0
+                  }
+                >
                   {flexRender(cell.column.columnDef.cell, cell.getContext())}
                 </td>
               ))}
