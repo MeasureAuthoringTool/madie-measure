@@ -116,6 +116,14 @@ export function prettyPrintFhirResource(resource: any): string {
   return prettyFHIRObject(fhirObject, true, 1, 1);
 }
 
+export function toMeasurementPeriodDateString(
+  measurementPeriodDate?: string | number | Date | null
+): string | undefined {
+  return measurementPeriodDate
+    ? new Date(measurementPeriodDate).toISOString().substring(0, 10)
+    : undefined;
+}
+
 // TODO consider converting into a context.
 // OR a re-usable hook.
 export class CalculationService {
@@ -133,14 +141,8 @@ export class CalculationService {
       measureBundle,
       TestCaseBundles,
       valueSets,
-      measure?.measurementPeriodStart
-        ? new Date(measure.measurementPeriodStart)
-            .toISOString()
-            .substring(0, 10)
-        : undefined,
-      measure?.measurementPeriodEnd
-        ? new Date(measure.measurementPeriodEnd).toISOString().substring(0, 10)
-        : undefined,
+      toMeasurementPeriodDateString(measure?.measurementPeriodStart),
+      toMeasurementPeriodDateString(measure?.measurementPeriodEnd),
       measure?.testCaseConfiguration?.sdeIncluded,
       measure?.testCaseConfiguration?.ravIncluded
     );
@@ -182,16 +184,12 @@ export class CalculationService {
         testCaseBundles,
         {
           trustMetaProfile: true,
-          measurementPeriodStart: measure?.measurementPeriodStart
-            ? new Date(measure.measurementPeriodStart)
-                .toISOString()
-                .substring(0, 10)
-            : undefined,
-          measurementPeriodEnd: measure?.measurementPeriodEnd
-            ? new Date(measure.measurementPeriodEnd)
-                .toISOString()
-                .substring(0, 10)
-            : undefined,
+          measurementPeriodStart: toMeasurementPeriodDateString(
+            measure?.measurementPeriodStart
+          ),
+          measurementPeriodEnd: toMeasurementPeriodDateString(
+            measure?.measurementPeriodEnd
+          ),
           reportType: "summary",
         },
         valueSets
