@@ -280,7 +280,33 @@ const MeasureEditor = ({ measureCanEdit, measureLockedBy }) => {
         qdmElmTranslationApi,
         fhirServiceApi
       );
-      const { errors, externalErrors } = result;
+      const isQdm = measure?.model === Model.QDM_5_6;
+      const usings = new CqlAntlr(cql).parse().usings;
+      const invalidUsing = usings.find((using) =>
+        isQdm
+          ? using.name !== "QDM" || using.version !== "'5.6'"
+          : using.name === "QDM"
+      );
+      const modelErrors: ElmTranslationError[] =
+        invalidUsing || (isQdm && usings.length === 0)
+          ? [
+              {
+                startLine: invalidUsing?.start?.line ?? 1,
+                startChar: invalidUsing?.start?.position ?? 0,
+                endLine: invalidUsing?.stop?.line ?? 1,
+                endChar: invalidUsing?.stop?.position ?? 0,
+                errorSeverity: "Error",
+                errorType: "CQL",
+                message:
+                  "Invalid using statement. The using statement must match the selected measure model and version.",
+                targetIncludeLibraryId: "",
+                targetIncludeLibraryVersionId: "",
+                type: "CqlToElmError",
+              },
+            ]
+          : [];
+      const errors = [...(result.errors ?? []), ...modelErrors];
+      const { externalErrors } = result;
       // right now we are only displaying the external errors related to included libraries
       // and only the first error returned by elm translator
       if (errors?.length > 0 || externalErrors?.length > 0) {
@@ -296,13 +322,13 @@ const MeasureEditor = ({ measureCanEdit, measureLockedBy }) => {
             )
         );
       }
-      externalErrors && setErrorMessage(externalErrors[0]?.message);
+      setErrorMessage(modelErrors[0]?.message ?? externalErrors?.[0]?.message);
       if (isLoggedInUMLS(errors)) {
         setValuesetMsg("Please log in to UMLS!");
       }
       setElmAnnotations(mapErrorsToAceAnnotations(errors));
       setErrorMarkers(mapErrorsToAceMarkers(errors));
-      return result;
+      return { ...result, errors };
     } else {
       setElmAnnotations([]);
     }
