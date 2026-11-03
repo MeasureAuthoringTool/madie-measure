@@ -1239,9 +1239,7 @@ describe("TypeEditor Component", () => {
     );
     const dateInput = screen.getByTestId("Issued_instant-input");
     expect(dateInput).toBeInTheDocument();
-    expect(dateInput.getAttribute("aria-invalid")).toBe(
-      errors.Observation.issued
-    );
+    expect(dateInput.getAttribute("aria-invalid")).toBe("true");
   });
 
   test("Instant validation should display field errors", () => {
@@ -1284,9 +1282,7 @@ describe("TypeEditor Component", () => {
     );
     const inputField = screen.getByTestId("Issued_instant-input");
     expect(inputField).toBeInTheDocument();
-    expect(inputField.getAttribute("aria-invalid")).toBe(
-      errors.Observation.issued
-    );
+    expect(inputField.getAttribute("aria-invalid")).toBe("true");
     expect(screen.getByTestId("Issued_instant-helper-text")).toHaveTextContent(
       errors.Observation.issued
     );

@@ -6,7 +6,7 @@ import { RichTextEditor } from "@madie/madie-design-system/dist/react";
 import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
 import BorderColorOutlinedIcon from "@mui/icons-material/BorderColorOutlined";
 import { blue, red } from "@mui/material/colors";
-import { Tooltip } from "@mui/material";
+import { IconButton, Tooltip } from "@mui/material";
 import DOMPurify from "dompurify";
 import "./MeasureMetaDataRow.scss";
 interface MeasureMetaDataRowProps {
@@ -53,14 +53,17 @@ const MeasureMetaDataRow = (props: MeasureMetaDataRowProps) => {
                 },
               }}
             >
-              <DeleteOutlinedIcon
+              <IconButton
+                aria-label={`Delete ${type} ${name}`}
                 onClick={() => {
                   handleClick(id, "delete");
                 }}
                 data-testid={`delete-measure-${type}-${id}`}
-                style={{ cursor: "pointer", marginRight: "8px" }}
-                sx={{ color: red[500] }}
-              />
+                size="small"
+                sx={{ marginRight: "8px" }}
+              >
+                <DeleteOutlinedIcon sx={{ color: red[500] }} />
+              </IconButton>
             </Tooltip>
 
             <Tooltip
@@ -80,14 +83,16 @@ const MeasureMetaDataRow = (props: MeasureMetaDataRowProps) => {
                 },
               }}
             >
-              <BorderColorOutlinedIcon
+              <IconButton
+                aria-label={`Edit ${type} ${name}`}
                 onClick={() => {
                   handleClick(id, "edit");
                 }}
                 data-testid={`edit-measure-${type}-${id}`}
-                style={{ cursor: "pointer" }}
-                sx={{ color: blue[500] }}
-              />
+                size="small"
+              >
+                <BorderColorOutlinedIcon sx={{ color: blue[500] }} />
+              </IconButton>
             </Tooltip>
           </td>
         )}

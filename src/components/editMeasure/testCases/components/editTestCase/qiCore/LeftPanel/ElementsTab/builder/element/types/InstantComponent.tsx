@@ -57,7 +57,7 @@ const InstantComponent = ({
         required={required}
         handleDateTimeChange={handleDateTimeChange}
         dateTimeValue={dateTime}
-        error={error}
+        error={Boolean(error)}
         helperText={helperText}
         onBlur={onBlur}
       />
