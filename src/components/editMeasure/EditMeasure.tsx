@@ -1,4 +1,4 @@
-import React, { useEffect, useState, Suspense, useRef } from "react";
+import React, { useEffect, useMemo, useState, Suspense, useRef } from "react";
 import {
   useBlocker,
   Route,
@@ -18,7 +18,7 @@ import {
   measureStore,
   routeHandlerStore,
   useMeasureServiceApi,
-  useMeasureReviewServiceApi,
+  useReviewComments,
   checkUserCanEdit,
   useFeatureFlags,
   useUserRoles,
@@ -34,6 +34,7 @@ import {
   ManageReviewDialog,
   shouldShowReviewCommentLink,
   CommentsFlyoutPanel,
+  useOwnerName,
   ReviewCommentLink,
 } from "@madie/madie-util";
 import CreateVersionDialog from "../common/createVersionDialog/CreateVersionDialog";
@@ -73,17 +74,9 @@ export interface RouteHandlerState {
   pendingRoute: string;
 }
 
-type MeasureReview = {
-  status?: string | null;
-  reviewers?: string[];
-  readyForReviewBy?: string;
-  readyForReviewAt?: string;
-};
-
 export default function EditMeasure() {
   const { measureId } = useParams();
   const measureServiceApi = useMeasureServiceApi();
-  const measureReviewServiceApiRef = useRef(useMeasureReviewServiceApi());
   const { updateMeasure } = measureStore;
   const [loading, setLoading] = useState<boolean>(true);
   let navigate = useNavigate();
@@ -198,8 +191,19 @@ export default function EditMeasure() {
   const [toastType, setToastType] = useState<string>("danger");
   const [statusHandler, setStatusHandler] = useState(INITIAL_STATUS_HANDLER);
   const [measure, setMeasure] = useState<any>(measureStore.state);
-  const [measureReview, setMeasureReview] = useState<MeasureReview>(null);
   const [commentsPanelOpen, setCommentsPanelOpen] = useState(false);
+  const showErrorToast = (message: string) => {
+    setToastType("danger");
+    setToastMessage(message);
+    setToastOpen(true);
+  };
+  const {
+    review: measureReview,
+    comments: reviewComments,
+    addComment,
+    updateComment,
+    deleteComment,
+  } = useReviewComments("measure", measure?.id, showErrorToast);
 
   const [downloadState, setDownloadState] = useState(null);
   const [failureMessage, setFailureMessage] = useState(null);
@@ -223,8 +227,14 @@ export default function EditMeasure() {
     measure?.measureMetaData?.draft
   );
 
+  const measureCanReview: boolean = checkUserCanEdit(
+    measure?.measureSet?.owner,
+    measure?.measureSet?.acls
+  );
+
   const { getUserName } = useOktaTokens();
   const userName = getUserName();
+  const commentAuthorName = useOwnerName(userName);
   const measureLockedBy =
     measure?.measureLock?.lockedBy?.toLowerCase() !== userName.toLowerCase()
       ? measure?.measureLock?.lockedBy
@@ -333,50 +343,42 @@ export default function EditMeasure() {
   }, [measure, userRoles]);
 
   useEffect(() => {
+    const cloneListener = () => {
+      setLoading(true);
+      measureServiceApi
+        .cloneMeasure(measure?.id)
+        .then(() => {
+          setLoading(false);
+          setToastType("success");
+          setToastMessage(
+            "Measure successfully cloned. Redirecting to Owned Measures..."
+          );
+          setToastOpen(true);
+
+          redirectTimeoutRef.current = setTimeout(() => {
+            navigate("/measures?tab=0&page=1");
+          }, 2000);
+        })
+        .catch((error) => {
+          setLoading(false);
+          setToastType("danger");
+          setToastMessage(
+            error?.response?.data?.message ||
+              "An error occurred, please try again. If the error persists, please contact the help desk."
+          );
+          setToastOpen(true);
+        });
+    };
+    window.addEventListener("clone-measure", cloneListener, false);
+    return () => {
+      window.removeEventListener("clone-measure", cloneListener, false);
+    };
+  }, [measure, measureServiceApi, navigate]);
+
+  useEffect(() => {
     const subscription = measureStore.subscribe(setMeasure);
     return () => {
       subscription.unsubscribe();
-    };
-  }, []);
-
-  useEffect(() => {
-    let isMounted = true;
-
-    const fetchReview = async () => {
-      if (!measure?.id) {
-        setMeasureReview(null);
-        return;
-      }
-
-      try {
-        const review =
-          await measureReviewServiceApiRef.current.getMeasureReview(measure.id);
-        if (isMounted) {
-          setMeasureReview(review as MeasureReview);
-        }
-      } catch {
-        if (isMounted) {
-          setMeasureReview(null);
-        }
-      }
-    };
-
-    fetchReview();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [measure?.id]);
-
-  useEffect(() => {
-    const handleReviewSaved = (event: Event) => {
-      const savedReview = (event as CustomEvent<MeasureReview>)?.detail;
-      setMeasureReview(savedReview ?? null);
-    };
-
-    window.addEventListener("review-measure-saved", handleReviewSaved);
-    return () => {
-      window.removeEventListener("review-measure-saved", handleReviewSaved);
     };
   }, []);
 
@@ -752,14 +754,16 @@ export default function EditMeasure() {
   const showReviewCommentLink = shouldShowReviewCommentLink({
     commentingEnabled: Boolean(featureFlags?.Commenting),
     currentUser: userName,
-    owner: measure?.measureSet?.owner,
-    acls: measure?.measureSet?.acls,
+    canEdit: measureCanReview,
     reviewStatus: measureReview?.status,
     hasReviewerRole: Boolean(userRoles?.isReviewer),
     assignedReviewers: measureReview?.reviewers,
   });
-  const commentLocation = getCommentSectionLocation(location.pathname, measure);
-  const commentSections = getCommentSections(measure);
+  const commentLocation = useMemo(
+    () => getCommentSectionLocation(location.pathname, measure),
+    [location.pathname, measure]
+  );
+  const commentSections = useMemo(() => getCommentSections(measure), [measure]);
 
   return (
     <div data-testid="editMeasure">
@@ -1005,9 +1009,15 @@ export default function EditMeasure() {
             onClose={() => setCommentsPanelOpen(false)}
             entityType="measure"
             sections={commentSections}
+            comments={reviewComments}
+            currentUserName={commentAuthorName}
+            currentUserId={userName}
+            onAddComment={addComment}
+            onUpdateComment={updateComment}
+            onDeleteComment={deleteComment}
             activeSection={commentLocation}
-            readyForReviewBy={measureReview?.readyForReviewBy}
-            readyForReviewAt={measureReview?.readyForReviewAt}
+            markedForReviewBy={measureReview?.markedForReviewBy}
+            markedForReviewAt={measureReview?.markedForReviewAt}
           />
         </>
       )}
