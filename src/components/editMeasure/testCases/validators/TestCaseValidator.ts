@@ -122,7 +122,7 @@ export const TestCaseValidator = Yup.object().shape({
     .matches(/[a-zA-Z]/, "Test Case Title is required.")
     .max(250, "Test Case Title cannot be more than 250 characters."),
   description: Yup.string()
-    .max(250, "Test Case Description cannot be more than 250 characters.")
+    .max(4000, "Test Case Description cannot be more than 4000 characters.")
     .nullable(),
   series: Yup.string()
     .max(250, "Test Case Group cannot be more than 250 characters.")

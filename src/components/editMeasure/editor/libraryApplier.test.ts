@@ -7,6 +7,65 @@ import IncludedLibrary from "@madie/madie-models/dist/IncludedLibrary";
 import { IncludeLibrary } from "@madie/madie-editor";
 
 describe("Library Apply Utility tests", () => {
+  describe("NPM libraries included with a namespace prefix", () => {
+    const npmLibrary = {
+      name: "hl7.fhir.uv.cql.FHIRCommon",
+      alias: "FC",
+      version: "2.0.0",
+    } as IncludeLibrary;
+    const baseCql =
+      "library NpmTest version '0.0.000'\n" +
+      "using QICore version '4.1.1'\n" +
+      "include FHIRHelpers version '4.1.000' called FHIRHelpers";
+    const cqlWithNpmLibrary =
+      baseCql +
+      "\ninclude hl7.fhir.uv.cql.FHIRCommon version '2.0.0' called FC";
+
+    it("Should apply NPM library with its namespace prefix", () => {
+      const result = applyLibrary(baseCql, npmLibrary);
+      expect(result.status).toEqual("success");
+      expect(result.cql).toEqual(cqlWithNpmLibrary);
+    });
+
+    it("Should not apply NPM library twice", () => {
+      const result = applyLibrary(cqlWithNpmLibrary, npmLibrary);
+      expect(result.status).toEqual("info");
+      expect(result.cql).toEqual(cqlWithNpmLibrary);
+    });
+
+    it("Should edit NPM library include", () => {
+      const updatedCql = editLibrary(
+        npmLibrary,
+        { ...npmLibrary, version: "1.0.0", alias: "Common" },
+        cqlWithNpmLibrary
+      );
+      expect(updatedCql).toEqual(
+        baseCql +
+          "\ninclude hl7.fhir.uv.cql.FHIRCommon version '1.0.0' called Common"
+      );
+    });
+
+    it("Should delete NPM library include", () => {
+      expect(deleteIncludedLibrary(cqlWithNpmLibrary, npmLibrary)).toEqual(
+        baseCql
+      );
+    });
+
+    it("Should apply and delete NPM library with a quoted prefix segment", () => {
+      const quotedLibrary = {
+        name: 'fhir.onc."us-quality-core".USQualityCoreCommon',
+        alias: "UQC",
+        version: "0.5.0",
+      } as IncludeLibrary;
+      const result = applyLibrary(baseCql, quotedLibrary);
+      expect(result.cql).toEqual(
+        baseCql +
+          "\ninclude fhir.onc.\"us-quality-core\".USQualityCoreCommon version '0.5.0' called UQC"
+      );
+      expect(deleteIncludedLibrary(result.cql, quotedLibrary)).toEqual(baseCql);
+    });
+  });
+
   it("Should apply Library successfully if there are existing includes", () => {
     const cql =
       "library CaseWhenThen version '0.3.000'\n" +
