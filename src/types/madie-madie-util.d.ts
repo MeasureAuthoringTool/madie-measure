@@ -198,6 +198,7 @@ declare module "@madie/madie-util" {
       model: string,
       measureName: string
     ): Promise<AxiosResponse<Measure>>;
+    cloneMeasure(id: string): Promise<Measure>;
     associateCmsId(
       qiCoreMeasureId: string,
       qdmMeasureId: string,
