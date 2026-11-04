@@ -81,6 +81,7 @@ describe("CompositeRightPanelContent (no module mocks)", () => {
 
     expect(screen.getByText("Title")).toBeInTheDocument();
     expect(screen.getByText("Description")).toBeInTheDocument();
+    expect(screen.getByText("14/4000 Characters")).toBeInTheDocument();
   });
 
   it("sets inputs to readOnly when testCaseCanEdit=false", () => {

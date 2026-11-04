@@ -1537,7 +1537,7 @@ const EditTestCase = (props: EditTestCaseProps) => {
                               Boolean(formik.errors.description)
                             }
                             helperText={formikErrorHandler("description")}
-                            maxLength={250}
+                            maxLength={4000}
                           />
                         </div>
 
