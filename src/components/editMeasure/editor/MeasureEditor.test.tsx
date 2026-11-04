@@ -206,6 +206,119 @@ describe("MeasureEditor component", () => {
     expect(editorContainer.value).toEqual("");
   });
 
+  describe("using statement model validation", () => {
+    const mismatchMessage =
+      "Invalid using statement. The using statement must match the selected measure model and version.";
+    const cases = [
+      ["QDM v5.6", "using QDM version '5.6'", false],
+      ["QDM v5.6", "using QDM version '5.5'", true],
+      ["QDM v5.6", "using FHIR version '4.0.1'", true],
+      ["QDM v5.6", "", true],
+      ["QDM v5.6", "/* using QDM version '5.6' */", true],
+      ["FHIR v4.0.1", "using QDM version '5.6'", true],
+      ["FHIR v4.0.1", "using QDM version '5.5'", true],
+      ["FHIR v4.0.1", "using FHIR version '4.0.1'", false],
+      ["FHIR v4.0.1", "using FHIR version '4.0.0'", false],
+      ["FHIR v4.0.1", "using QICore version '6.0.0'", false],
+      ["FHIR v4.0.1", "", false],
+      ["FHIR v4.0.1", "/* using QDM version '5.6' */", false],
+      ["QI-Core v6.0.0", "using QDM version '5.6'", true],
+    ] as const;
+
+    beforeEach(() => {
+      (validateContent as jest.Mock).mockResolvedValue({
+        errors: [],
+        externalErrors: [],
+        translation: { library: {} },
+      });
+    });
+
+    it.each(cases)(
+      "validates %s with %s (mismatch: %s)",
+      async (model, usingStatement, mismatch) => {
+        renderEditor({
+          ...measure,
+          model,
+          cql: `library testCql version '1.0.001'\n${usingStatement}`,
+        });
+
+        await waitFor(() => expect(validateContent).toHaveBeenCalled());
+        await waitFor(() => {
+          if (mismatch) {
+            expect(
+              screen.getByTestId("generic-error-text-header")
+            ).toHaveTextContent(mismatchMessage);
+            expect(
+              screen.getByText("1 issues found with CQL")
+            ).toBeInTheDocument();
+          } else {
+            expect(screen.queryByText(mismatchMessage)).not.toBeInTheDocument();
+            expect(screen.getByText("CQL is valid")).toBeInTheDocument();
+          }
+        });
+      }
+    );
+
+    it.each(cases)(
+      "saves %s with %s unchanged and cqlErrors=%s",
+      async (model, usingStatement, mismatch) => {
+        const cql = `library testCql version '1.0.001'\n${usingStatement}`;
+        (synchingEditorCqlContent as jest.Mock).mockResolvedValue({ cql });
+        mockMeasureServiceApi.updateMeasure.mockImplementationOnce(
+          async (updatedMeasure) => ({ data: updatedMeasure })
+        );
+        renderEditor({ ...measure, model });
+
+        fireEvent.change(screen.getByTestId("measure-editor"), {
+          target: { value: cql },
+        });
+        fireEvent.click(screen.getByTestId("save-cql-btn"));
+
+        await waitFor(() => {
+          expect(mockMeasureServiceApi.updateMeasure).toHaveBeenCalledWith(
+            expect.objectContaining({ cql, cqlErrors: mismatch })
+          );
+          expect(
+            screen.getByText(
+              mismatch ? "1 issues found with CQL" : "CQL is valid"
+            )
+          ).toBeInTheDocument();
+        });
+      }
+    );
+
+    it("clears the mismatch after saving a corrected using statement", async () => {
+      renderEditor({
+        ...measure,
+        model: Model.QDM_5_6,
+        cql: "library testCql version '1.0.001'\nusing FHIR version '4.0.1'",
+      });
+      await waitFor(() => {
+        expect(
+          screen.getByTestId("generic-error-text-header")
+        ).toHaveTextContent(mismatchMessage);
+      });
+
+      const cql = "library testCql version '1.0.001'\nusing QDM version '5.6'";
+      (synchingEditorCqlContent as jest.Mock).mockResolvedValue({ cql });
+      mockMeasureServiceApi.updateMeasure.mockImplementationOnce(
+        async (updatedMeasure) => ({ data: updatedMeasure })
+      );
+      fireEvent.change(screen.getByTestId("measure-editor"), {
+        target: { value: cql },
+      });
+      fireEvent.click(screen.getByTestId("save-cql-btn"));
+
+      await waitFor(() => {
+        expect(mockMeasureServiceApi.updateMeasure).toHaveBeenCalledWith(
+          expect.objectContaining({ cql, cqlErrors: false })
+        );
+        expect(screen.getByText("CQL is valid")).toBeInTheDocument();
+        expect(screen.queryByText(mismatchMessage)).not.toBeInTheDocument();
+      });
+    });
+  });
+
   it("save measure with empty cql successfully", async () => {
     mockMeasureServiceApi.updateMeasure.mockResolvedValueOnce(measure);
     (validateContent as jest.Mock).mockClear().mockImplementation(() => {
