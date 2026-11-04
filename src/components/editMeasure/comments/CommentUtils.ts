@@ -1,24 +1,11 @@
-interface CommentGroup {
-  id?: string;
-  uuid?: string;
-}
+import { Measure, TestCase } from "@madie/madie-models";
+import type { CommentSection, CommentSubSectionItem } from "@madie/madie-util";
 
-interface CommentTestCase {
-  id?: string;
-  uuid?: string;
-  title?: string;
-  name?: string;
-  series?: string;
-  groupId?: string;
-  groupUuid?: string;
-}
-
-interface CommentMeasure {
-  model?: string;
-  groups?: CommentGroup[];
-  testCases?: CommentTestCase[];
-  measureMetaData?: { composite?: boolean };
-}
+type CommentMeasure = Pick<
+  Measure,
+  "model" | "groups" | "testCases" | "measureMetaData"
+>;
+type CommentTestCase = Pick<TestCase, "id" | "title" | "name" | "series">;
 
 export const COMMENT_MAIN_SECTIONS = {
   DETAILS: "Details",
@@ -30,17 +17,13 @@ export const COMMENT_MAIN_SECTIONS = {
 export type CommentMainSection =
   (typeof COMMENT_MAIN_SECTIONS)[keyof typeof COMMENT_MAIN_SECTIONS];
 
-export const FALLBACK_SECTION_NAME = "Current section";
+const FALLBACK_SECTION_NAME = "Current section";
 
 export interface CommentSectionLocation {
   // undefined when the route isn't one that can be commented on
   activeMainSection?: CommentMainSection;
   activeSubSection: string;
-}
-
-export interface CommentSection {
-  name: CommentMainSection;
-  subSections: string[];
+  activeSubSectionId?: string;
 }
 
 const UNKNOWN_SECTION: CommentSectionLocation = {
@@ -64,6 +47,11 @@ interface MeasureContext {
 
 const isPlaceholder = (route: string) => route.startsWith("__");
 
+/*
+  Routes and labels mirror the edit measure side navs (MeasureDetails,
+  PopulationCriteriaSideNav, the test case list). Keep them in step when a nav
+  entry is renamed, or stored comments detach from their row.
+*/
 const DETAILS_SUB_SECTIONS: SubSectionDefinition[] = [
   { route: "", name: "Name, Version & ID" },
   { route: "model&measurement-period", name: "Model & Measurement Period" },
@@ -158,17 +146,27 @@ const getCriteriaNames = (
   );
 };
 
+const getTestCaseLabel = (testCase: CommentTestCase): string => {
+  const title = testCase.title ?? testCase.name ?? "Test Case";
+  return testCase.series ? `${testCase.series} - ${title}` : title;
+};
+
+const toTestCaseSubSections = (
+  measure?: CommentMeasure | null
+): CommentSubSectionItem[] =>
+  (measure?.testCases ?? [])
+    .filter((testCase) => Boolean(testCase?.id))
+    .map((testCase) => ({ id: testCase.id, name: getTestCaseLabel(testCase) }));
+
 const getGroupNumber = (
   groupId: string | undefined,
-  groups: CommentGroup[] | undefined
+  groups: CommentMeasure["groups"] | undefined
 ): number | undefined => {
   if (!groupId || !groups?.length) {
     return undefined;
   }
 
-  const index = groups.findIndex(
-    (group) => group.id === groupId || group.uuid === groupId
-  );
+  const index = groups.findIndex((group) => group.id === groupId);
   return index >= 0 ? index + 1 : undefined;
 };
 
@@ -212,9 +210,12 @@ export const getCommentSections = (
     },
     {
       name: COMMENT_MAIN_SECTIONS.TEST_CASES,
-      subSections: expandPlaceholders(
-        namesInScope(TEST_CASE_LIST_SUB_SECTIONS, context)
-      ),
+      subSections: [
+        ...expandPlaceholders(
+          namesInScope(TEST_CASE_LIST_SUB_SECTIONS, context)
+        ),
+        ...toTestCaseSubSections(measure),
+      ],
     },
   ];
 
@@ -247,7 +248,7 @@ const getTestCasesLocation = (
       };
     }
 
-    // anything else on the list page is a group UUID, shown by its position
+    // anything else on the list page is a group id, shown by its position
     const groupNumber = getGroupNumber(identifier, measure?.groups);
     return groupNumber
       ? {
@@ -258,16 +259,16 @@ const getTestCasesLocation = (
   }
 
   const testCase = measure?.testCases?.find(
-    (candidate) => candidate.id === subsection || candidate.uuid === subsection
+    (candidate) => candidate.id === subsection
   );
   if (!testCase) {
     return UNKNOWN_SECTION;
   }
 
-  const title = testCase.title ?? testCase.name ?? "Test Case";
   return {
     activeMainSection: COMMENT_MAIN_SECTIONS.TEST_CASES,
-    activeSubSection: testCase.series ? `${testCase.series} - ${title}` : title,
+    activeSubSection: getTestCaseLabel(testCase),
+    activeSubSectionId: testCase.id,
   };
 };
 
