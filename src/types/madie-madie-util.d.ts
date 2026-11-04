@@ -44,6 +44,7 @@ declare module "@madie/madie-util" {
     DisplayOwner: boolean;
     MakeJSONMatchUI: boolean;
     MeasureReviewStatus?: boolean;
+    MeasureChangeVersion?: boolean;
     Commenting?: boolean;
   }
 
@@ -108,6 +109,25 @@ declare module "@madie/madie-util" {
   };
 
   export function useFeatureFlags(): FeatureFlags;
+
+  export function ChangeVersionAction(props: {
+    measures: Measure[];
+    onClick: () => void;
+    canEdit?: boolean;
+  }): JSX.Element;
+
+  export function ChangeVersionDialog(props: {
+    measures: Measure[];
+    open: boolean;
+    onClose: () => void;
+    onSubmit?: (payload: {
+      measure: MeasureListDTO;
+      inCorrectVersion: string;
+      correctVersion?: string;
+      draftVersion: string;
+    }) => Promise<void>;
+    isSubmitting?: boolean;
+  }): JSX.Element | null;
 
   export function useUserRoles(): UserRoles;
 

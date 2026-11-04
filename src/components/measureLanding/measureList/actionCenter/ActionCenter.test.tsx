@@ -97,6 +97,31 @@ const qdmMeasureVersion = {
 } as Measure;
 
 describe("ActionCenter", () => {
+  const renderChangeVersionAction = (
+    activeTab: number,
+    measures: Measure[] = [qdmMeasureVersion],
+    setChangeVersionDialog = jest.fn()
+  ) => {
+    render(
+      <ActionCenter
+        measures={measures}
+        associateCmsId={jest.fn()}
+        exportMeasure={jest.fn()}
+        updateTargetMeasure={jest.fn()}
+        setCreateVersionDialog={jest.fn()}
+        setChangeVersionDialog={setChangeVersionDialog}
+        setDraftMeasureDialog={jest.fn()}
+        setDeleteMeasureDialog={jest.fn()}
+        setShareDialog={jest.fn()}
+        deleteMeasure={jest.fn()}
+        setViewHumanReadableModal={jest.fn()}
+        activeTab={activeTab}
+        setTransferDialog={jest.fn()}
+      />
+    );
+    return setChangeVersionDialog;
+  };
+
   beforeEach(() => {
     jest.clearAllMocks();
     (useOktaTokens as jest.Mock).mockReturnValue({
@@ -118,6 +143,96 @@ describe("ActionCenter", () => {
       isReviewer: false,
     });
   });
+
+  describe.each([0, 1, 2])("Change Version # on tab %s", (activeTab) => {
+    it("hides the icon when the feature flag is disabled", () => {
+      renderChangeVersionAction(activeTab);
+      expect(
+        screen.queryByTestId("change-version-action-btn")
+      ).not.toBeInTheDocument();
+    });
+
+    it("renders after Version and before Draft and opens the dialog", async () => {
+      (useFeatureFlags as jest.Mock).mockReturnValue({
+        MeasureChangeVersion: true,
+      });
+      const setChangeVersionDialog = renderChangeVersionAction(activeTab);
+      const button = screen.getByTestId("change-version-action-btn");
+      await waitFor(() => expect(button).toBeEnabled());
+      expect(
+        screen
+          .getByTestId("version-action-btn")
+          .compareDocumentPosition(button) & Node.DOCUMENT_POSITION_FOLLOWING
+      ).toBeTruthy();
+      expect(
+        button.compareDocumentPosition(screen.getByTestId("draft-action-btn")) &
+          Node.DOCUMENT_POSITION_FOLLOWING
+      ).toBeTruthy();
+      await userEvent.click(button);
+      expect(setChangeVersionDialog).toHaveBeenCalledWith(true);
+    });
+
+    it.each([Model.QDM_5_6, Model.QICORE])(
+      "passes shared access for a non-owner of a %s measure",
+      async (model) => {
+        (useFeatureFlags as jest.Mock).mockReturnValue({
+          MeasureChangeVersion: true,
+        });
+        mockCheckUserCanEdit.mockImplementation(
+          (_owner: string, acls: any[]) =>
+            !!acls?.some((acl) => acl.userId === "test user")
+        );
+        renderChangeVersionAction(activeTab, [
+          {
+            ...qdmMeasureVersion,
+            model,
+            measureSet: {
+              ...mockMeasureSet,
+              owner: "another owner",
+              acls: [{ userId: "test user", roles: ["SHARED_WITH"] }],
+            },
+          } as Measure,
+        ]);
+        await waitFor(() =>
+          expect(screen.getByTestId("change-version-action-btn")).toBeEnabled()
+        );
+      }
+    );
+
+    it("disables the icon without owner or share access, even for an Admin", () => {
+      (useFeatureFlags as jest.Mock).mockReturnValue({
+        MeasureChangeVersion: true,
+      });
+      (useUserRoles as jest.Mock).mockReturnValue({ isAdmin: true });
+      mockCheckUserCanEdit.mockReturnValue(false);
+      renderChangeVersionAction(activeTab);
+      expect(screen.getByTestId("change-version-action-btn")).toBeDisabled();
+    });
+
+    it.each([[[]], [[qdmMeasureVersion, qdmMeasureVersion]]])(
+      "disables the icon for a non-single selection: %j",
+      (measures) => {
+        (useFeatureFlags as jest.Mock).mockReturnValue({
+          MeasureChangeVersion: true,
+        });
+        renderChangeVersionAction(activeTab, measures);
+        expect(screen.getByTestId("change-version-action-btn")).toBeDisabled();
+      }
+    );
+  });
+
+  it.each([ALL_REVIEWS_TAB, MY_REVIEWS_TAB])(
+    "hides Change Version # on review tab %s",
+    (activeTab) => {
+      (useFeatureFlags as jest.Mock).mockReturnValue({
+        MeasureChangeVersion: true,
+      });
+      renderChangeVersionAction(activeTab);
+      expect(
+        screen.queryByTestId("change-version-action-btn")
+      ).not.toBeInTheDocument();
+    }
+  );
 
   it("should not render review action when MeasureReviewStatus flag is disabled", () => {
     mockCheckUserCanEdit.mockReturnValue(true);

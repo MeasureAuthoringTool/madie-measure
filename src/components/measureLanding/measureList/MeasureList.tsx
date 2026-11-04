@@ -20,6 +20,7 @@ import {
   ViewHRModal,
   ViewMeasureHistoryDialog,
   CompareVersionsDialog,
+  ChangeVersionDialog,
   exportMeasure as downloadMeasureExport,
   ShareDialog,
   TransferDialog,
@@ -307,6 +308,7 @@ export default function MeasureList(props: {
   });
   const [compareVersionsDialog, setCompareVersionsDialog] =
     useState<boolean>(false);
+  const [changeVersionDialog, setChangeVersionDialog] = useState(false);
   const [reviewDialog, setReviewDialog] = useState({
     open: false,
     measureId: "",
@@ -1408,6 +1410,7 @@ export default function MeasureList(props: {
             activeTab={props.activeTab}
             setTransferDialog={setTransferDialog}
             setCompareVersionsDialog={setCompareVersionsDialog}
+            setChangeVersionDialog={setChangeVersionDialog}
             setReviewDialog={setReviewDialog}
           />
         </div>
@@ -1530,6 +1533,13 @@ export default function MeasureList(props: {
         open={compareVersionsDialog}
         onClose={handleCompareVersionsDialogClose}
       />
+      {featureFlags?.MeasureChangeVersion && (
+        <ChangeVersionDialog
+          measures={selectedMeasures}
+          open={changeVersionDialog}
+          onClose={() => setChangeVersionDialog(false)}
+        />
+      )}
       {userRoles?.isReviewer ? (
         <ManageReviewDialog
           open={reviewDialog.open}

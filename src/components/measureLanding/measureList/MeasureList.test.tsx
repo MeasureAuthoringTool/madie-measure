@@ -1,5 +1,6 @@
 import * as mockCmsIdStubs from "../../../__mocks__/cmsIdFormatterStubs";
 import * as mockCompositeStubs from "../../../__mocks__/compositeValidationStubs";
+import * as mockMeasureActionStubs from "../../../__mocks__/measureActionStubs";
 import * as React from "react";
 import {
   cleanup,
@@ -38,6 +39,7 @@ import {
   useUserRoles,
   MeasureServiceApi,
   ServiceConfig,
+  ChangeVersionDialog,
 } from "@madie/madie-util";
 import { AxiosError, AxiosResponse } from "axios";
 
@@ -104,6 +106,8 @@ jest.mock("@madie/madie-util", () => ({
       Compare Versions Action
     </button>
   ),
+  ChangeVersionAction: mockMeasureActionStubs.ChangeVersionAction,
+  ChangeVersionDialog: jest.fn(mockMeasureActionStubs.ChangeVersionDialog),
   ExportDialog: ({ open }: any) =>
     open ? <div data-testid="export-dialog">Export Dialog</div> : null,
   ViewHRModal: ({ open, onClose }: any) =>
@@ -486,6 +490,54 @@ describe("Measure List component", () => {
 
   afterEach(() => {
     cleanup();
+  });
+
+  describe("Change Version #", () => {
+    beforeEach(() => {
+      (useFeatureFlags as jest.Mock).mockReturnValue({
+        MeasureChangeVersion: true,
+      });
+    });
+
+    afterEach(() => {
+      (useFeatureFlags as jest.Mock).mockReturnValue(mockUseFeatureFlagsApi);
+    });
+
+    it.each([0, 1, 2])(
+      "opens and cancels without submitting on tab %s",
+      async (activeTab) => {
+        const selected = measures.find(
+          (measure) => !measure.measureMetaData.draft
+        );
+        render(
+          <ServiceContext.Provider value={serviceConfig}>
+            <MeasureList
+              {...baseProps}
+              measureList={[selected]}
+              activeTab={activeTab}
+            />
+          </ServiceContext.Provider>
+        );
+
+        const checkboxes = await screen.findAllByRole("checkbox");
+        await userEvent.click(checkboxes[checkboxes.length - 1]);
+        const button = screen.getByTestId("change-version-action-btn");
+        await waitFor(() => expect(button).toBeEnabled());
+        await userEvent.click(button);
+
+        const dialog = await screen.findByTestId("change-version-dialog");
+        expect(dialog).toHaveTextContent(selected.measureName);
+        const calls = (ChangeVersionDialog as jest.Mock).mock.calls;
+        expect(calls[calls.length - 1][0].onSubmit).toBeUndefined();
+        await userEvent.click(
+          within(dialog).getByTestId("change-version-cancel-button")
+        );
+        expect(
+          screen.queryByTestId("change-version-dialog")
+        ).not.toBeInTheDocument();
+        expect(mockCreateVersion).not.toHaveBeenCalled();
+      }
+    );
   });
 
   it("should display a list of measures", async () => {
