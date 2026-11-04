@@ -24,6 +24,7 @@ declare module "@madie/madie-util" {
     HtmlDiffResponse,
     SharedUser,
     MeasureCounts,
+    Comment,
   } from "@madie/madie-models";
   import { AxiosResponse } from "axios";
   import { Bundle } from "fhir/r4";
@@ -82,8 +83,7 @@ declare module "@madie/madie-util" {
   export function shouldShowReviewCommentLink(args: {
     commentingEnabled?: boolean;
     currentUser?: string | null;
-    owner?: string | null;
-    acls?: Array<{ userId?: string; roles?: string[] }> | null;
+    canEdit?: boolean;
     reviewStatus?: string | null;
     hasReviewerRole?: boolean;
     assignedReviewers?: string[] | null;
@@ -218,6 +218,7 @@ declare module "@madie/madie-util" {
       model: string,
       measureName: string
     ): Promise<AxiosResponse<Measure>>;
+    cloneMeasure(id: string): Promise<Measure>;
     associateCmsId(
       qiCoreMeasureId: string,
       qdmMeasureId: string,
@@ -413,28 +414,51 @@ declare module "@madie/madie-util" {
     style?: React.CSSProperties;
     dataTestId?: string;
   }): React.ReactElement;
-  export function formatReviewCommentDate(value?: string): string;
-  export function getReadyForReviewMessage(
-    entityType: "measure" | "library"
-  ): string;
-  export function ReviewSubSection(props: {
-    entityType: "measure" | "library";
-    readyForReviewBy?: string;
-    readyForReviewAt?: string;
-  }): React.ReactElement;
+  export const REVIEW_ACTIVE_STATUSES: ReadonlySet<ReviewStatus>;
+
+  export interface CommentSubSectionItem {
+    id?: string;
+    name: string;
+  }
+
+  export interface CommentSection {
+    name: string;
+    subSections: Array<string | CommentSubSectionItem>;
+  }
+
+  export interface ReviewComments {
+    review: MeasureReview | null;
+    comments: Comment[];
+    addComment: (comment: Comment) => Promise<boolean>;
+    updateComment: (comment: Comment) => Promise<boolean>;
+    deleteComment: (comment: Comment) => Promise<boolean>;
+  }
+  export function useReviewComments(
+    entityType: "measure" | "library",
+    entityId: string | undefined,
+    onError?: (message: string) => void
+  ): ReviewComments;
+
   export interface CommentSectionLocation {
     activeMainSection?: string;
     activeSubSection: string;
+    activeSubSectionId?: string;
   }
+
   export function CommentsFlyoutPanel(props: {
     open: boolean;
     onClose: () => void;
     entityType: "measure" | "library";
-    sections: { name: string; subSections: string[] }[];
+    sections: CommentSection[];
     activeSection: CommentSectionLocation;
-    commentedSubSections?: string[];
-    readyForReviewBy?: string;
-    readyForReviewAt?: string;
+    comments?: Comment[];
+    currentUserName?: string;
+    currentUserId?: string;
+    onAddComment?: (comment: Comment) => void;
+    onUpdateComment?: (comment: Comment) => void;
+    onDeleteComment?: (comment: Comment) => void | Promise<boolean | void>;
+    markedForReviewBy?: string;
+    markedForReviewAt?: string;
   }): React.ReactElement;
   export const REVIEW_STATUS_OPTIONS: string[];
   export function getNewestMeasureInstance(measures: Measure[]): Measure;

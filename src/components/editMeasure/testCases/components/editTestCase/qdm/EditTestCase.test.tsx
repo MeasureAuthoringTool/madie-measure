@@ -634,7 +634,14 @@ describe("EditTestCase QDM Component", () => {
     userEvent.click(ipCheckbox);
     await waitFor(() => expect(ipCheckbox).not.toBeChecked());
 
-    expect(saveButton).toBeEnabled();
+    userEvent.click(getByRole("tab", { name: "Details tab panel" }));
+    const description = "a".repeat(4000);
+    const descriptionInput = screen.getByTestId("test-case-description");
+    fireEvent.change(descriptionInput, { target: { value: description } });
+    fireEvent.blur(descriptionInput);
+    expect(screen.getByText("4000/4000 Characters")).toBeInTheDocument();
+
+    await waitFor(() => expect(saveButton).toBeEnabled());
     userEvent.click(saveButton);
 
     await waitFor(
@@ -644,6 +651,10 @@ describe("EditTestCase QDM Component", () => {
         );
       },
       { timeout: 1500 }
+    );
+    expect(useTestCaseServiceMockResolved.updateTestCase).toHaveBeenCalledWith(
+      expect.objectContaining({ description }),
+      expect.anything()
     );
   });
 
@@ -1130,7 +1141,7 @@ describe("EditTestCase QDM Component", () => {
     });
 
     const descriptionInput = screen.getByTestId("test-case-description");
-    const longDescription = "a".repeat(251);
+    const longDescription = "a".repeat(4001);
     fireEvent.change(descriptionInput, {
       target: { value: longDescription },
     });
@@ -1143,7 +1154,7 @@ describe("EditTestCase QDM Component", () => {
     await waitFor(() => {
       expect(
         screen.getByText(
-          /description: Test Case Description cannot be more than 250 characters/
+          /description: Test Case Description cannot be more than 4000 characters/
         )
       ).toBeInTheDocument();
     });
