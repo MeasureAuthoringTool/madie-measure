@@ -86,6 +86,7 @@ declare module "@madie/madie-util" {
     reviewStatus?: string | null;
     hasReviewerRole?: boolean;
     assignedReviewers?: string[] | null;
+    hasComments?: boolean;
   }): boolean;
 
   export const measureStore: {

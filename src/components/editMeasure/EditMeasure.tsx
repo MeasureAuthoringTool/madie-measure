@@ -758,6 +758,7 @@ export default function EditMeasure() {
     reviewStatus: measureReview?.status,
     hasReviewerRole: Boolean(userRoles?.isReviewer),
     assignedReviewers: measureReview?.reviewers,
+    hasComments: reviewComments.length > 0,
   });
   const commentLocation = useMemo(
     () => getCommentSectionLocation(location.pathname, measure),
