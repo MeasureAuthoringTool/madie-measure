@@ -333,6 +333,39 @@ export default function EditMeasure() {
   }, [measure, userRoles]);
 
   useEffect(() => {
+    const cloneListener = () => {
+      setLoading(true);
+      measureServiceApi
+        .cloneMeasure(measure?.id)
+        .then(() => {
+          setLoading(false);
+          setToastType("success");
+          setToastMessage(
+            "Measure successfully cloned. Redirecting to Owned Measures..."
+          );
+          setToastOpen(true);
+
+          redirectTimeoutRef.current = setTimeout(() => {
+            navigate("/measures?tab=0&page=1");
+          }, 2000);
+        })
+        .catch((error) => {
+          setLoading(false);
+          setToastType("danger");
+          setToastMessage(
+            error?.response?.data?.message ||
+              "An error occurred, please try again. If the error persists, please contact the help desk."
+          );
+          setToastOpen(true);
+        });
+    };
+    window.addEventListener("clone-measure", cloneListener, false);
+    return () => {
+      window.removeEventListener("clone-measure", cloneListener, false);
+    };
+  }, [measure, measureServiceApi, navigate]);
+
+  useEffect(() => {
     const subscription = measureStore.subscribe(setMeasure);
     return () => {
       subscription.unsubscribe();
