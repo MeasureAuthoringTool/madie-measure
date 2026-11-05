@@ -4,11 +4,7 @@ import Editor from "../../../editor/Editor";
 import CompositeTestCasesTable from "./CompositeTestCasesTable";
 import useTestCaseServiceApi from "../../../../api/useTestCaseServiceApi";
 import { Measure, TestCase } from "@madie/madie-models";
-import {
-  MadieAlert,
-  MadieSpinner,
-  Toast,
-} from "@madie/madie-design-system/dist/react";
+import { MadieSpinner, Toast } from "@madie/madie-design-system/dist/react";
 import "./CompositeLeftPanelContent.scss";
 import { FormikProvider, useFormikContext } from "formik";
 import ElementsTab from "../LeftPanel/ElementsTab/ElementsTab";
@@ -20,6 +16,7 @@ import CompositeProfileViews from "./CompositeProfilesViews";
 import ViewTestCaseModal, { getAddedCount } from "./ViewTestCaseModal";
 import { buildInsertedProfiles } from "./insertProfilesFromTestCase";
 import { isValidJson } from "../EditTestCase";
+import MadieAlert from "../../../../../../common/MeasureAlerts";
 
 const CompositeLeftPanelContent = ({
   leftPanelActiveTab,

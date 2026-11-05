@@ -29,6 +29,10 @@ import StatusHandler, {
   INITIAL_STATUS_HANDLER,
 } from "../editMeasure/editor/StatusHandler";
 import { getTabStorageKey } from "./measureLandingUtils";
+import {
+  MeasureAlertsProvider,
+  MinimizedMeasureAlerts,
+} from "../common/MeasureAlerts";
 
 export interface MeasureSearchCriteria {
   searchField?: string;
@@ -54,6 +58,15 @@ const reviewOwnershipTypeMap: Record<number, OwnershipType> = {
 };
 
 export default function MeasureLanding() {
+  const location = useLocation();
+  return (
+    <MeasureAlertsProvider resetKey={location.pathname + location.search}>
+      <MeasureLandingContent />
+    </MeasureAlertsProvider>
+  );
+}
+
+function MeasureLandingContent() {
   useDocumentTitle("MADiE Measures");
   const { search } = useLocation();
   let navigate = useNavigate();
@@ -393,7 +406,7 @@ export default function MeasureLanding() {
       <div className="measure-table">
         <section
           style={{ borderBottom: "1px solid #b0b0b0" }}
-          className="mm:flex mm:flex-row"
+          className="measure-landing-header"
         >
           <div>
             <Tabs value={activeTab} onChange={handleTabChange} type="B">
@@ -447,6 +460,7 @@ export default function MeasureLanding() {
             </Tabs>
           </div>
           <span className="mm:grow" />
+          <MinimizedMeasureAlerts />
         </section>
         <div>
           {errMsg && !loading && (

@@ -423,6 +423,18 @@ describe("Measure Page", () => {
     expect(error).toBeInTheDocument();
     const errorText = await screen.findByText("Unable to fetch measures");
     expect(errorText).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId("minimize-button-0"));
+    expect(
+      screen.queryByText("Unable to fetch measures")
+    ).not.toBeInTheDocument();
+    const restore = screen.getByRole("button", { name: "Display Alerts" });
+    expect(restore.closest(".measure-landing-header")).toContainElement(
+      screen.getByTestId("owned-measures-tab")
+    );
+    fireEvent.click(restore);
+    expect(screen.getByText("Unable to fetch measures")).toBeInTheDocument();
+    expect(screen.queryByTestId("minimized-alert")).not.toBeInTheDocument();
   });
 
   it("Should not display errors when fetching measures is canceled", async () => {

@@ -7,12 +7,15 @@
 
   #status-handler-container {
     margin: 10px 32px 0;
-
-    .minimized-alert {
-      margin-top: -60px;
-      margin-right: 20px;
-    }
   }
+}
+
+.measure-landing-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+  padding-right: 16px;
 }
 
 .measure-table {
