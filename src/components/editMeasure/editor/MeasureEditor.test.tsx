@@ -1,4 +1,10 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import * as React from "react";
 import MeasureEditor, {
   mapErrorsToAceAnnotations,
@@ -15,8 +21,13 @@ import {
   isUsingEmpty,
   validateContent,
 } from "@madie/madie-editor";
+import * as madieEditor from "@madie/madie-editor";
 import { measureStore } from "@madie/madie-util";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
+import MeasureAlert, {
+  MeasureAlertsProvider,
+  MinimizedMeasureAlerts,
+} from "../../common/MeasureAlerts";
 
 const measure = {
   id: "abcd-pqrs-xyz",
@@ -185,6 +196,99 @@ describe("MeasureEditor component", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseFeatureFlags.mockReturnValue({});
+  });
+
+  it("shares the restore control and count with editor warnings", async () => {
+    const terminologyEditor = jest
+      .spyOn(madieEditor, "MadieTerminologyEditor")
+      .mockImplementation(
+        ({
+          AlertComponent,
+        }: {
+          AlertComponent?: React.ComponentType<
+            React.ComponentProps<typeof MeasureAlert>
+          >;
+        }) =>
+          AlertComponent ? (
+            <div data-testid="editor-warning">
+              {React.createElement(AlertComponent, {
+                type: "warning",
+                content: "Saved codes warning",
+                canClose: false,
+              })}
+            </div>
+          ) : null
+      );
+
+    try {
+      measureStore.state.mockImplementationOnce(() => measure);
+      render(
+        <MeasureAlertsProvider>
+          <header data-testid="editor-alert-actions">
+            <MinimizedMeasureAlerts />
+          </header>
+          <MeasureAlert
+            canClose={false}
+            alertProps={{ "data-testid": "measure-alert" }}
+            content={
+              <ul>
+                <li>Measure error 1</li>
+                <li>Measure error 2</li>
+              </ul>
+            }
+          />
+          <ApiContextProvider value={serviceConfig}>
+            <MemoryRouter
+              initialEntries={[`/measures/${measure.id}/cql-editor`]}
+            >
+              <Routes>
+                <Route
+                  path="/measures/:measureId/cql-editor"
+                  element={
+                    <MeasureEditor
+                      measureCanEdit={true}
+                      measureLockedBy={undefined}
+                    />
+                  }
+                />
+              </Routes>
+            </MemoryRouter>
+          </ApiContextProvider>
+        </MeasureAlertsProvider>
+      );
+
+      const warning = await screen.findByText("Saved codes warning");
+      fireEvent.click(
+        within(screen.getByTestId("editor-warning")).getByRole("button", {
+          name: "Minimize",
+        })
+      );
+      expect(warning).not.toBeInTheDocument();
+      expect(
+        within(screen.getByTestId("editor-alert-actions")).getByRole("button", {
+          name: "Display Alerts",
+        })
+      ).toBeInTheDocument();
+      expect(
+        screen.getAllByRole("button", { name: /Display Alerts/ })
+      ).toHaveLength(1);
+
+      fireEvent.click(
+        within(screen.getByTestId("measure-alert")).getByRole("button", {
+          name: "Minimize",
+        })
+      );
+      fireEvent.click(
+        within(screen.getByTestId("editor-alert-actions")).getByRole("button", {
+          name: "Display Alerts (2)",
+        })
+      );
+      expect(screen.getByText("Saved codes warning")).toBeInTheDocument();
+      expect(screen.getByText("Measure error 1")).toBeInTheDocument();
+      expect(screen.queryByTestId("minimized-alert")).not.toBeInTheDocument();
+    } finally {
+      terminologyEditor.mockRestore();
+    }
   });
 
   it("should mount measure editor component with measure cql", async () => {

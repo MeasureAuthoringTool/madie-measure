@@ -46,7 +46,6 @@ import getLibraryNameErrors from "../measureLanding/measureList/versioningErrorD
 import VersioningErrorDialog from "../measureLanding/measureList/versioningErrorDialog/VersioningErrorDialog";
 import {
   Toast,
-  MadieAlert,
   MadieDeleteDialog,
   MadieDiscardDialog,
   MadieSpinner,
@@ -66,6 +65,10 @@ import {
   getCommentSectionLocation,
   getCommentSections,
 } from "./comments/CommentUtils";
+import MadieAlert, {
+  MeasureAlertsProvider,
+  MinimizedMeasureAlerts,
+} from "../common/MeasureAlerts";
 
 const OBJECT_ID_REGEX = /\/[a-f0-9]{24}/g;
 
@@ -75,6 +78,15 @@ export interface RouteHandlerState {
 }
 
 export default function EditMeasure() {
+  const location = useLocation();
+  return (
+    <MeasureAlertsProvider resetKey={location.pathname}>
+      <EditMeasureContent />
+    </MeasureAlertsProvider>
+  );
+}
+
+function EditMeasureContent() {
   const { measureId } = useParams();
   const measureServiceApi = useMeasureServiceApi();
   const { updateMeasure } = measureStore;
@@ -784,12 +796,19 @@ export default function EditMeasure() {
       ) : (
         <>
           <div style={{ marginTop: "-48px" }} className="mm:relative">
-            <EditMeasureNav isQDM={isQDM} />
-            {showReviewCommentLink && (
-              <div className="review-comments-link">
-                <ReviewCommentLink onClick={() => setCommentsPanelOpen(true)} />
+            <div className="edit-measure-header">
+              <EditMeasureNav isQDM={isQDM} />
+              <div className="edit-measure-actions">
+                {showReviewCommentLink && (
+                  <div className="review-comments-link">
+                    <ReviewCommentLink
+                      onClick={() => setCommentsPanelOpen(true)}
+                    />
+                  </div>
+                )}
+                <MinimizedMeasureAlerts />
               </div>
-            )}
+            </div>
             <div
               style={{
                 marginLeft: "2rem",

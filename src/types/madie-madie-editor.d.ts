@@ -1,6 +1,7 @@
 declare module "@madie/madie-editor" {
-  import { FC } from "react";
+  import { ComponentProps, ComponentType, FC } from "react";
   import { Code } from "@madie/madie-models";
+  import type { MadieAlert } from "@madie/madie-design-system/dist/react";
 
   export type EditorAnnotation = {
     row?: number;
@@ -132,6 +133,7 @@ declare module "@madie/madie-editor" {
     setOutboundAnnotations?: Function;
     hasCqlError?: boolean;
     enableToggleSearchEvent?: boolean;
+    AlertComponent?: ComponentType<ComponentProps<typeof MadieAlert>>;
   }
 
   export interface JsonMonacoEditorProps {

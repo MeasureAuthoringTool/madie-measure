@@ -36,6 +36,7 @@ import {
 } from "@madie/madie-util";
 import { oneItemResponse } from "../__mocks__/mockMeasureResponses";
 import userEvent from "@testing-library/user-event";
+import MeasureAlert from "../common/MeasureAlerts";
 
 jest.mock("./details/MeasureDetails");
 jest.mock("./editor/MeasureEditor");
@@ -484,6 +485,46 @@ describe("EditMeasure Component", () => {
     expect(
       screen.getByRole("button", { name: "Comments" })
     ).toBeInTheDocument();
+  });
+
+  it("places minimized editor alerts beside Comments and restores them", async () => {
+    (shouldShowReviewCommentLink as jest.Mock).mockReturnValue(true);
+    MeasureEditorMock.mockImplementation(() => (
+      <MeasureAlert
+        canClose={false}
+        content={
+          <ul>
+            <li>Check the CQL expression</li>
+          </ul>
+        }
+      />
+    ));
+
+    try {
+      renderRouter([{ pathname: "/measures/fakeid/edit/cql-editor" }]);
+      await screen.findByText("Check the CQL expression");
+      fireEvent.click(screen.getByTestId("minimize-button-0"));
+
+      const comments = screen.getByTestId("review-comments-link");
+      const restore = screen.getByRole("button", {
+        name: "Display Alerts (1)",
+      });
+      expect(comments.closest(".edit-measure-actions")).toContainElement(
+        restore
+      );
+      expect(
+        screen.queryByText("Check the CQL expression")
+      ).not.toBeInTheDocument();
+
+      fireEvent.click(restore);
+      expect(screen.getByText("Check the CQL expression")).toBeInTheDocument();
+      expect(screen.queryByTestId("minimized-alert")).not.toBeInTheDocument();
+      expect(comments).toBeInTheDocument();
+    } finally {
+      MeasureEditorMock.mockImplementation(() => (
+        <div>library testCql version '1.0.000'</div>
+      ));
+    }
   });
 
   it("shows Comments for shared user in review state", async () => {
