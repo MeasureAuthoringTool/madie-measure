@@ -53,6 +53,7 @@ import {
   useTerminologyServiceApi,
 } from "@madie/madie-util";
 import StatusHandler from "./StatusHandler";
+import MeasureAlert from "../../common/MeasureAlerts";
 import "./StatusHandler.scss";
 
 import "./MeasureEditor.scss";
@@ -958,6 +959,7 @@ const MeasureEditor = ({ measureCanEdit, measureLockedBy }) => {
               resetCql={resetCql}
               getCqlDefinitionReturnTypes={getCqlDefinitionReturnTypes}
               hasCqlError={error}
+              AlertComponent={MeasureAlert}
             />
           )}
           {processing && (
