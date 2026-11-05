@@ -1,9 +1,11 @@
 import {
   COMMENT_MAIN_SECTIONS,
   getCommentSectionLocation,
-  getCommentSectionName,
   getCommentSections,
 } from "./CommentUtils";
+
+const nameFor = (pathname: string, measure?: any) =>
+  getCommentSectionLocation(pathname, measure).activeSubSection;
 
 const measure = {
   model: "QI-Core v6.0.0",
@@ -11,7 +13,7 @@ const measure = {
   testCases: [{ id: "case-one", title: "Example case", groupId: "group-two" }],
 };
 
-describe("getCommentSectionName", () => {
+describe("sub-section names", () => {
   it.each([
     ["details", "Name, Version & ID"],
     ["details/model&measurement-period", "Model & Measurement Period"],
@@ -23,14 +25,14 @@ describe("getCommentSectionName", () => {
     ["supplemental-data", "Supplemental Data"],
     ["risk-adjustment", "Risk Adjustment"],
   ])("maps edit/%s to %s", (route, expected) => {
-    expect(
-      getCommentSectionName(`/measures/measure-id/edit/${route}`, measure)
-    ).toBe(expected);
+    expect(nameFor(`/measures/measure-id/edit/${route}`, measure)).toBe(
+      expected
+    );
   });
 
   it("maps a test-case group UUID to its population criteria number", () => {
     expect(
-      getCommentSectionName(
+      nameFor(
         "/measures/measure-id/edit/test-cases/list-page/group-two",
         measure
       )
@@ -39,10 +41,7 @@ describe("getCommentSectionName", () => {
 
   it("resolves a test case title", () => {
     expect(
-      getCommentSectionName(
-        "/measures/measure-id/edit/test-cases/case-one",
-        measure
-      )
+      nameFor("/measures/measure-id/edit/test-cases/case-one", measure)
     ).toBe("Example case");
   });
 
@@ -59,7 +58,7 @@ describe("getCommentSectionName", () => {
     };
 
     expect(
-      getCommentSectionName(
+      nameFor(
         "/measures/measure-id/edit/test-cases/case-one",
         measureWithSeries
       )
@@ -68,75 +67,57 @@ describe("getCommentSectionName", () => {
 
   it("supports test-case list subsections and trailing slashes", () => {
     expect(
-      getCommentSectionName(
-        "/measures/measure-id/edit/test-cases/list-page/sde/",
-        measure
-      )
+      nameFor("/measures/measure-id/edit/test-cases/list-page/sde/", measure)
     ).toBe("SDE");
   });
 
   it("returns a safe fallback for an unknown route", () => {
-    expect(
-      getCommentSectionName("/measures/measure-id/edit/unknown", measure)
-    ).toBe("Current section");
+    expect(nameFor("/measures/measure-id/edit/unknown", measure)).toBe(
+      "Current section"
+    );
   });
 
   it("maps base-configuration and reporting for QDM measures", () => {
     const qdmMeasure = { ...measure, model: "QDM v5.6" };
 
     expect(
-      getCommentSectionName(
-        "/measures/measure-id/edit/base-configuration",
-        qdmMeasure
-      )
+      nameFor("/measures/measure-id/edit/base-configuration", qdmMeasure)
     ).toBe("Base Configuration");
 
-    expect(
-      getCommentSectionName("/measures/measure-id/edit/reporting", qdmMeasure)
-    ).toBe("Reporting");
+    expect(nameFor("/measures/measure-id/edit/reporting", qdmMeasure)).toBe(
+      "Reporting"
+    );
   });
 
   it("returns fallback labels for unsupported paths and non-QDM conditional routes", () => {
     expect(
-      getCommentSectionName(
-        "/measures/measure-id/edit/base-configuration",
-        measure
-      )
+      nameFor("/measures/measure-id/edit/base-configuration", measure)
     ).toBe("Current section");
 
-    expect(
-      getCommentSectionName("/measures/measure-id/edit/reporting", measure)
-    ).toBe("Current section");
+    expect(nameFor("/measures/measure-id/edit/reporting", measure)).toBe(
+      "Current section"
+    );
 
     expect(
-      getCommentSectionName(
-        "/measures/measure-id/edit/groups/not-a-number",
-        measure
-      )
+      nameFor("/measures/measure-id/edit/groups/not-a-number", measure)
     ).toBe("Current section");
 
-    expect(
-      getCommentSectionName("/measures/measure-id/view/details", measure)
-    ).toBe("Current section");
+    expect(nameFor("/measures/measure-id/view/details", measure)).toBe(
+      "Current section"
+    );
   });
 
   it("maps list-page labels and fallback states", () => {
     expect(
-      getCommentSectionName(
-        "/measures/measure-id/edit/test-cases/list-page",
-        measure
-      )
+      nameFor("/measures/measure-id/edit/test-cases/list-page", measure)
     ).toBe("Population Criteria 1");
 
     expect(
-      getCommentSectionName(
-        "/measures/measure-id/edit/test-cases/list-page/rav",
-        measure
-      )
+      nameFor("/measures/measure-id/edit/test-cases/list-page/rav", measure)
     ).toBe("RAV");
 
     expect(
-      getCommentSectionName(
+      nameFor(
         "/measures/measure-id/edit/test-cases/list-page/unknown-group",
         measure
       )
@@ -150,7 +131,7 @@ describe("getCommentSectionName", () => {
     };
 
     expect(
-      getCommentSectionName(
+      nameFor(
         "/measures/measure-id/edit/test-cases/case-no-name",
         unnamedCaseMeasure
       )
@@ -197,7 +178,6 @@ describe("getCommentSectionLocation", () => {
       COMMENT_MAIN_SECTIONS.TEST_CASES,
       "Population Criteria 1",
     ],
-    ["test-cases/case-one", COMMENT_MAIN_SECTIONS.TEST_CASES, "Example case"],
   ])(
     "places edit/%s under %s as %s",
     (route, activeMainSection, activeSubSection) => {
@@ -207,6 +187,14 @@ describe("getCommentSectionLocation", () => {
       });
     }
   );
+
+  it("places an individual test case under Test Cases, keyed by its id", () => {
+    expect(locationFor("test-cases/case-one")).toEqual({
+      activeMainSection: COMMENT_MAIN_SECTIONS.TEST_CASES,
+      activeSubSection: "Example case",
+      activeSubSectionId: "case-one",
+    });
+  });
 
   it("places the QDM only screens under Population Criteria", () => {
     const qdmMeasure = { ...measure, model: "QDM v5.6" };
@@ -378,6 +366,27 @@ describe("getCommentSections", () => {
       "Expansion",
       "Execution Options",
       "Test Case Data",
+      { id: "case-one", name: "Example case" },
+    ]);
+  });
+
+  it("lists each test case by id with its group and title as the name", () => {
+    const measureWithSeries = {
+      ...measure,
+      testCases: [
+        { id: "case-one", title: "Example case", series: "Series A" },
+        { id: "case-two", title: "Other case" },
+      ],
+    };
+
+    expect(
+      subSectionsOf(
+        getCommentSections(measureWithSeries),
+        COMMENT_MAIN_SECTIONS.TEST_CASES
+      ).slice(-2)
+    ).toEqual([
+      { id: "case-one", name: "Series A - Example case" },
+      { id: "case-two", name: "Other case" },
     ]);
   });
 
@@ -405,6 +414,7 @@ describe("getCommentSections", () => {
       "Expansion",
       "Execution Options",
       "Test Case Data",
+      { id: "case-one", name: "Example case" },
     ]);
   });
 
