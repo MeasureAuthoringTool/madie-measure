@@ -3,11 +3,9 @@ import { render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import TestCasePopulationList, {
   determineGroupResult,
-  determineGroupResultStratification,
 } from "./TestCasePopulationList";
 import {
   DisplayPopulationValue,
-  DisplayStratificationValue,
   MeasureScoring,
   PopulationType,
 } from "@madie/madie-models";
@@ -274,6 +272,40 @@ describe("TestCasePopulationList component", () => {
 
     // MUI Tooltip will render into the DOM; TestCasePopulation sets title via html-react-parser
     expect(await screen.findByLabelText(tooltipText)).toBeInTheDocument();
+  });
+
+  it("should render observation population when no resource matches the group", () => {
+    const testCasePopulations: DisplayPopulationValue[] = [
+      {
+        id: "obs-0",
+        name: PopulationType.MEASURE_POPULATION_OBSERVATION,
+        expected: 1,
+        actual: 1,
+      },
+    ];
+
+    render(
+      <MemoryRouter>
+        <TestCasePopulationList
+          populations={testCasePopulations}
+          populationBasis="number"
+          content="population"
+          i={0}
+          scoring={MeasureScoring.RATIO}
+          observationResources={
+            [
+              {
+                groupId: "different-group",
+                relations: [],
+              },
+            ] as ObservationResources[]
+          }
+          group={{ displayId: "group-1" } as any}
+        />
+      </MemoryRouter>
+    );
+
+    expect(screen.getByText("Measure Observation")).toBeInTheDocument();
   });
 
   it("should render ratio observations", async () => {
