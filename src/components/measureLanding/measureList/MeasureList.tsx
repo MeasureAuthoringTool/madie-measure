@@ -1533,13 +1533,11 @@ export default function MeasureList(props: {
         open={compareVersionsDialog}
         onClose={handleCompareVersionsDialogClose}
       />
-      {featureFlags?.MeasureChangeVersion && (
-        <ChangeVersionDialog
-          measures={selectedMeasures}
-          open={changeVersionDialog}
-          onClose={() => setChangeVersionDialog(false)}
-        />
-      )}
+      <ChangeVersionDialog
+        measures={selectedMeasures}
+        open={changeVersionDialog}
+        onClose={() => setChangeVersionDialog(false)}
+      />
       {userRoles?.isReviewer ? (
         <ManageReviewDialog
           open={reviewDialog.open}
