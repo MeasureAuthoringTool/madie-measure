@@ -1,10 +1,4 @@
-import {
-  fireEvent,
-  render,
-  screen,
-  waitFor,
-  within,
-} from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import * as React from "react";
 import clearAllMocks = jest.clearAllMocks;
@@ -106,7 +100,7 @@ describe("DraftMeasureDialog component", () => {
     expect(measureName.value).toEqual(measure.measureName);
     expect(await screen.findByText("Create Draft")).toBeInTheDocument();
     expect(await screen.findByText("Update Model Version")).toBeInTheDocument();
-    expect(await screen.findByText("QI-Core v4.1.1")).toBeInTheDocument();
+    expect(await screen.findByText("QI-Core v6.0.0")).toBeInTheDocument();
 
     expect(screen.getByTestId("create-draft-continue-button")).toBeEnabled();
   });
@@ -123,7 +117,7 @@ describe("DraftMeasureDialog component", () => {
     const modelInput = screen.getByTestId(
       "measure-model-input"
     ) as HTMLInputElement;
-    expect(modelInput.value).toBe("QI-Core v4.1.1");
+    expect(modelInput.value).toBe("QI-Core v6.0.0");
 
     const modelSelect = screen.getByTestId("measure-model-select");
     const modelSelectDropdown = within(modelSelect).getByRole(
@@ -131,11 +125,14 @@ describe("DraftMeasureDialog component", () => {
     ) as HTMLInputElement;
     userEvent.click(modelSelectDropdown);
 
-    fireEvent.change(modelInput, {
-      target: { value: "QI-Core v6.0.0" },
-    });
+    expect(
+      screen.getAllByRole("option").map((option) => option.textContent)
+    ).toEqual([Model.QICORE_6_0_0, Model.US_QUALITY_0_5_0]);
+    userEvent.click(
+      screen.getByRole("option", { name: Model.US_QUALITY_0_5_0 })
+    );
 
-    expect(modelInput.value).toBe("QI-Core v6.0.0");
+    expect(modelInput.value).toBe(Model.US_QUALITY_0_5_0);
 
     expect(screen.getByTestId("create-draft-continue-button")).toBeEnabled();
   });
@@ -172,18 +169,29 @@ describe("DraftMeasureDialog component", () => {
     renderComponent();
     userEvent.click(screen.getByText(/Continue/i));
     await waitFor(() => {
-      expect(onSubmitFn).toHaveBeenCalled();
+      expect(onSubmitFn).toHaveBeenCalledWith(
+        measure.measureName,
+        Model.QICORE_6_0_0
+      );
     });
   });
 
-  describe("model version options - QI-Core v4.1.1 measure", () => {
-    const openDropdown = () => {
-      const modelSelect = screen.getByTestId("measure-model-select");
-      const dropdown = within(modelSelect).getByRole(
-        "combobox"
-      ) as HTMLInputElement;
-      userEvent.click(dropdown);
-    };
+  it("should draft a QI-Core v4.1.1 measure as US Quality Core v0.5.0", async () => {
+    renderComponent();
+    userEvent.click(
+      within(screen.getByTestId("measure-model-select")).getByRole("combobox")
+    );
+    userEvent.click(
+      screen.getByRole("option", { name: Model.US_QUALITY_0_5_0 })
+    );
+    userEvent.click(screen.getByRole("button", { name: "Continue" }));
+    await waitFor(() => {
+      expect(onSubmitFn).toHaveBeenCalledWith(
+        measure.measureName,
+        Model.US_QUALITY_0_5_0
+      );
+    });
+    expect(measure.model).toBe(Model.QICORE);
   });
 
   it("renders Update Model Version as readOnly when measure is US Quality Core v0.5.0", async () => {
