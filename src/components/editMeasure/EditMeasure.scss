@@ -26,16 +26,34 @@
   }
 }
 
-.review-comments-link {
-  position: absolute;
-  top: 11px;
-  right: 2rem;
-  display: inline-flex;
+.edit-measure-header {
+  display: flex;
+  flex-wrap: wrap;
   align-items: center;
+  gap: 0.5rem;
+  padding-right: 2rem;
+
+  > :first-child {
+    flex: 1;
+    min-width: 0;
+  }
 }
 
-body:has(.minimized-alert) .review-comments-link {
-  right: 12.4rem;
-  padding-right: 0.8rem;
-  border-right: #ffffffd1 solid 1px;
+.edit-measure-header-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.8rem;
+  margin-left: auto;
+  color: #fff;
+
+  > :focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 2px;
+  }
+
+  > :not(:first-child) {
+    padding-left: 0.8rem;
+    border-left: #ffffffd1 solid 1px;
+  }
 }

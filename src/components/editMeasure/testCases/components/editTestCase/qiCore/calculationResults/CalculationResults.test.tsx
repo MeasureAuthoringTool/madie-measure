@@ -15,6 +15,7 @@ import userEvent from "@testing-library/user-event";
 import { useFeatureFlags } from "@madie/madie-util";
 
 jest.mock("@madie/madie-util", () => ({
+  MadieAlert: require("@madie/madie-design-system/dist/react").MadieAlert,
   useFeatureFlags: jest.fn().mockReturnValue({}),
 }));
 

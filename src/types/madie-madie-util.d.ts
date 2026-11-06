@@ -1,4 +1,9 @@
 declare module "@madie/madie-util" {
+  export const MadieAlert: React.ComponentType<any>;
+  export const MinimizedAlertsProvider: React.ComponentType<{
+    children: React.ReactNode;
+  }>;
+  export const MinimizedAlertsControl: React.ComponentType;
   export function padCmsId(cmsId: number | string | null | undefined): string;
   export function formatCmsId(
     cmsId: number | string | null | undefined,
