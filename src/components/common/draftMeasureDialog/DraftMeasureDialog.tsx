@@ -39,8 +39,7 @@ const DraftMeasureDialog = ({ open, onClose, onSubmit, measure, loading }) => {
   const formik = useFormik({
     initialValues: {
       measureName: measure?.measureName,
-      model:
-        measure?.model === Model.QICORE ? Model.QICORE_6_0_0 : measure?.model,
+      model: measure?.model,
     },
     validationSchema: Yup.object().shape({ measureName: MeasureNameSchema }),
     enableReinitialize: true,
@@ -163,7 +162,6 @@ const DraftMeasureDialog = ({ open, onClose, onSubmit, measure, loading }) => {
                   .map((modelKey) => {
                     if (
                       !modelKey.startsWith("QDM") &&
-                      modelKey !== "QICORE" &&
                       modelKey !== "FHIR_4_0_1" &&
                       modelKey !== "US_CORE_6_1_0"
                     ) {
