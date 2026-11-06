@@ -678,10 +678,7 @@ export class CalculationService {
       relations: observationRelations,
     };
 
-    if (result.relations && result.relations.length > 0) {
-      return result;
-    }
-    return null;
+    return result.relations.length > 0 ? result : null;
   };
 
   findMeasureGroupPopulation(

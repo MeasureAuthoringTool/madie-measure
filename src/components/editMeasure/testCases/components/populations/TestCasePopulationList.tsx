@@ -312,7 +312,7 @@ const TestCasePopulationList = ({
                 observationResources && observationResources.length > 0
                   ? observationResources
                       .find((value) => value.groupId === group?.displayId)
-                      .relations?.find(
+                      ?.relations?.find(
                         (value) =>
                           value.index ===
                           parseInt(population.id.match(/\d+$/)?.[0] || null)
