@@ -79,7 +79,7 @@ jest.mock("../../../../../../../../api/useFhirDefinitionsService", () => ({
 jest.mock("../../../../../../../../api/useTerminologyServiceApi", () => ({
   __esModule: true,
   default: () => ({
-    getValueSetsExpansionForOids: jest.fn().mockResolvedValue([]),
+    getValueSetsExpansionForUrls: jest.fn().mockResolvedValue([]),
   }),
 }));
 

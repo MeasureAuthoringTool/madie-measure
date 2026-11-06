@@ -43,7 +43,7 @@ useFhirDefinitionsServiceApiMock.mockImplementation(
 const useTerminologyServiceApiMock =
   useTerminologyServiceApi as jest.Mock<TerminologyServiceApi>;
 useTerminologyServiceApiMock.mockImplementation(() => ({
-  getValueSetsExpansionForOids: jest.fn().mockResolvedValue([]),
+  getValueSetsExpansionForUrls: jest.fn().mockResolvedValue([]),
 }));
 
 // Formik mocks

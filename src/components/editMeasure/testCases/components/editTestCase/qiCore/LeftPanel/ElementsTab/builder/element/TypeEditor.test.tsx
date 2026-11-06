@@ -259,7 +259,7 @@ jest.mock("../../../../../../../api/useTerminologyServiceApi");
 const useTerminologyServiceApiMock =
   useTerminologyServiceApi as jest.Mock<TerminologyServiceApi>;
 const terminologyServiceApiMock = {
-  getValueSetsExpansionForOids: jest.fn().mockResolvedValue([]),
+  getValueSetsExpansionForUrls: jest.fn().mockResolvedValue([]),
 } as unknown as TerminologyServiceApi;
 useTerminologyServiceApiMock.mockImplementation(
   () => terminologyServiceApiMock
@@ -2456,7 +2456,7 @@ describe("TypeEditor Component", () => {
     useTerminologyServiceApiMock.mockImplementation(
       () =>
         ({
-          getValueSetsExpansionForOids: jest
+          getValueSetsExpansionForUrls: jest
             .fn()
             .mockResolvedValue(valueSetExpansionBirthSex),
         } as unknown as TerminologyServiceApi)
