@@ -38,6 +38,7 @@ const mockMeasureServiceApi = {
 };
 
 jest.mock("@madie/madie-util", () => ({
+  MadieAlert: require("@madie/madie-design-system/dist/react").MadieAlert,
   useMeasureServiceApi: jest.fn(() => mockMeasureServiceApi),
   useOwnerName: jest.fn((harpId) => harpId),
   useDocumentTitle: jest.fn(),

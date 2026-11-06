@@ -36,6 +36,9 @@ import {
   CommentsFlyoutPanel,
   useOwnerName,
   ReviewCommentLink,
+  MadieAlert,
+  MinimizedAlertsProvider,
+  MinimizedAlertsControl,
 } from "@madie/madie-util";
 import CreateVersionDialog from "../common/createVersionDialog/CreateVersionDialog";
 import InvalidTestCaseDialog from "../common/invalidTestCaseDialog/InvalidTestCaseDialog";
@@ -46,7 +49,6 @@ import getLibraryNameErrors from "../measureLanding/measureList/versioningErrorD
 import VersioningErrorDialog from "../measureLanding/measureList/versioningErrorDialog/VersioningErrorDialog";
 import {
   Toast,
-  MadieAlert,
   MadieDeleteDialog,
   MadieDiscardDialog,
   MadieSpinner,
@@ -75,6 +77,15 @@ export interface RouteHandlerState {
 }
 
 export default function EditMeasure() {
+  const { measureId } = useParams();
+  return (
+    <MinimizedAlertsProvider key={measureId}>
+      <EditMeasureContent />
+    </MinimizedAlertsProvider>
+  );
+}
+
+function EditMeasureContent() {
   const { measureId } = useParams();
   const measureServiceApi = useMeasureServiceApi();
   const { updateMeasure } = measureStore;
@@ -784,12 +795,17 @@ export default function EditMeasure() {
       ) : (
         <>
           <div style={{ marginTop: "-48px" }} className="mm:relative">
-            <EditMeasureNav isQDM={isQDM} />
-            {showReviewCommentLink && (
-              <div className="review-comments-link">
-                <ReviewCommentLink onClick={() => setCommentsPanelOpen(true)} />
+            <div className="edit-measure-header">
+              <EditMeasureNav isQDM={isQDM} />
+              <div className="edit-measure-header-actions">
+                {showReviewCommentLink && (
+                  <ReviewCommentLink
+                    onClick={() => setCommentsPanelOpen(true)}
+                  />
+                )}
+                <MinimizedAlertsControl />
               </div>
-            )}
+            </div>
             <div
               style={{
                 marginLeft: "2rem",
