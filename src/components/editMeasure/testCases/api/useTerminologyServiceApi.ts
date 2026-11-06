@@ -15,12 +15,28 @@ export type ValueSetSearchParams = {
   version?: string;
 };
 
+export type FhirValueSetSearchParams = {
+  url: string;
+};
+
 type ValueSetsSearchCriteria = {
   includeDraft: boolean;
   activeOnly: string;
   manifestExpansion: ManifestExpansion;
   valueSetParams: ValueSetSearchParams[];
 };
+
+type FhirValueSetsSearchCriteria = {
+  profile: string;
+  includeDraft: string;
+  activeOnly: string;
+  manifestExpansion?: ManifestExpansion;
+  includeExpansion: boolean;
+  valueSetParams: FhirValueSetSearchParams[];
+};
+
+const cleanValueSetUrl = (url: string): string =>
+  url.replace(/^['"]+|['"]+$/g, "").trim();
 
 type CQLCodeWithCodeSystemOid = {
   cqlCode: CQL.CQLCode;
@@ -31,27 +47,34 @@ export class TerminologyServiceApi {
   constructor(private baseUrl: string, private getAccessToken: () => string) {}
 
   async getExpansion(
-    valueSetParams: ValueSetSearchParams[],
+    valueSetParams: FhirValueSetSearchParams[],
     manifestExpansion?: ManifestExpansion
-  ) {
-    if (!valueSetParams?.length) {
+  ): Promise<ValueSet[]> {
+    const cleanedParams: FhirValueSetSearchParams[] = (valueSetParams ?? [])
+      .filter((param) => !!param?.url)
+      .map((param) => ({ url: cleanValueSetUrl(param.url) }))
+      .filter((param) => !!param.url);
+    if (!cleanedParams.length) {
       return [];
     }
 
-    const searchCriteria = {
-      includeDraft: true,
+    const searchCriteria: FhirValueSetsSearchCriteria = {
+      profile: "",
+      includeDraft: "true",
       activeOnly: manifestExpansion ? "true" : "false",
       manifestExpansion: manifestExpansion,
-      valueSetParams: valueSetParams,
-    } as ValueSetsSearchCriteria;
+      includeExpansion: true,
+      valueSetParams: cleanedParams,
+    };
 
     try {
       const response = await axios.put(
-        `${this.baseUrl}/terminology/value-sets/expansion/fhir`,
+        `${this.baseUrl}/terminology/value-sets/fhir`,
         searchCriteria,
         {
           headers: {
             Authorization: `Bearer ${this.getAccessToken()}`,
+            "Content-Type": "application/json",
           },
         }
       );
@@ -83,13 +106,13 @@ export class TerminologyServiceApi {
     if (!measureBundle) {
       return [];
     }
-    const valueSetSearchParams = this.getValueSetsOIdsFromBundle(measureBundle);
+    const valueSetSearchParams = this.getValueSetUrlsFromBundle(measureBundle);
     if (!valueSetSearchParams?.length) {
       return [];
     }
 
     const batchSize = 10;
-    const batches: ValueSetSearchParams[][] = _.chunk(
+    const batches: FhirValueSetSearchParams[][] = _.chunk(
       valueSetSearchParams,
       batchSize
     );
@@ -101,13 +124,13 @@ export class TerminologyServiceApi {
     return results.flat();
   }
 
-  async getValueSetsExpansionForOids(oids: string[]): Promise<ValueSet[]> {
-    if (!oids) {
+  async getValueSetsExpansionForUrls(urls: string[]): Promise<ValueSet[]> {
+    if (!urls?.length) {
       return [];
     }
-    const valueSetSearchParams = oids.map((oid) => {
-      return { oid: oid };
-    });
+    const valueSetSearchParams: FhirValueSetSearchParams[] = urls.map(
+      (url) => ({ url })
+    );
     return this.getExpansion(valueSetSearchParams);
   }
 
@@ -216,9 +239,9 @@ export class TerminologyServiceApi {
   }
 
   /**
-   * Extract the ValueSet OIDs used in measure & including libraries
+   * Extract the ValueSet URLs used in measure & including libraries
    */
-  getValueSetsOIdsFromBundle(measureBundle: Bundle): ValueSetSearchParams[] {
+  getValueSetUrlsFromBundle(measureBundle: Bundle): FhirValueSetSearchParams[] {
     if (measureBundle?.entry) {
       return measureBundle.entry
         .filter((entry) => entry.resource?.resourceType === "Library")
@@ -232,21 +255,18 @@ export class TerminologyServiceApi {
                 artifact?.resource &&
                 artifact.resource.includes("/ValueSet/")
               ) {
-                const oid = this.getOidFromString(artifact.resource);
-                if (oid) {
-                  libVs.push({ oid: oid, url: artifact.resource });
-                }
+                libVs.push({ url: artifact.resource });
               }
               return libVs;
             },
-            [] as ValueSetSearchParams[]
+            [] as FhirValueSetSearchParams[]
           );
           if (libVs) {
             return allVs.concat(libVs);
           } else {
             return allVs;
           }
-        }, [] as ValueSetSearchParams[]);
+        }, [] as FhirValueSetSearchParams[]);
     }
     return [];
   }

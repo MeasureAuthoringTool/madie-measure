@@ -572,12 +572,12 @@ describe("Codes Component", () => {
       expect(birthSexInput).toHaveValue("");
     });
 
-    it("calls getCodes with OIDs when valueSet definition has compose.include.valueSet", async () => {
+    it("calls getCodes with ValueSet URLs when valueSet definition has compose.include.valueSet", async () => {
       const getValueSetDefinitionMock = jest
         .fn()
         .mockResolvedValue(mockExpansionResponseWithExtension);
 
-      const getValueSetsExpansionForOidsMock = jest
+      const getValueSetsExpansionForUrlsMock = jest
         .fn()
         .mockResolvedValue(valueSetsExpansion);
 
@@ -595,7 +595,7 @@ describe("Codes Component", () => {
           "default"
         )
         .mockReturnValue({
-          getValueSetsExpansionForOids: getValueSetsExpansionForOidsMock,
+          getValueSetsExpansionForUrls: getValueSetsExpansionForUrlsMock,
         });
 
       render(
@@ -611,10 +611,10 @@ describe("Codes Component", () => {
       );
 
       await waitFor(() => {
-        // OIDs should be extracted and getCodes called
-        expect(getValueSetsExpansionForOidsMock).toHaveBeenCalledWith([
-          "2.16.840.1.113762.1.4.1",
-          "2.16.840.1.113762.1.4.1021.103",
+        // ValueSet URLs should be extracted and getCodes called
+        expect(getValueSetsExpansionForUrlsMock).toHaveBeenCalledWith([
+          "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1",
+          "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1021.103",
         ]);
       });
     });

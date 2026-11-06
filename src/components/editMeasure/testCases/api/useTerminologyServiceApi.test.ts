@@ -189,19 +189,25 @@ describe("TerminologyServiceApi Tests", () => {
     );
 
     expect(axios.put).toHaveBeenCalledWith(
-      "test.url/terminology/value-sets/expansion/fhir",
+      "test.url/terminology/value-sets/fhir",
       {
-        includeDraft: true,
+        profile: "",
+        includeDraft: "true",
         manifestExpansion: undefined,
         activeOnly: "false",
+        includeExpansion: true,
         valueSetParams: [
           {
-            oid: "2.16.840.1.113883.3.464.1003.101.12.1001",
             url: "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1001",
           },
         ],
       },
-      { headers: { Authorization: "Bearer undefined" } }
+      {
+        headers: {
+          Authorization: "Bearer undefined",
+          "Content-Type": "application/json",
+        },
+      }
     );
 
     expect(result.length).toEqual(1);
@@ -220,22 +226,28 @@ describe("TerminologyServiceApi Tests", () => {
     );
 
     expect(axios.put).toHaveBeenCalledWith(
-      "test.url/terminology/value-sets/expansion/fhir",
+      "test.url/terminology/value-sets/fhir",
       {
-        includeDraft: true,
+        profile: "",
+        includeDraft: "true",
         manifestExpansion: {
           fullUrl: "https://cts.nlm.nih.gov/fhir/Library/mu2-update-2015-05-01",
           id: "mu2-update-2015-05-01",
         },
         activeOnly: "true",
+        includeExpansion: true,
         valueSetParams: [
           {
-            oid: "2.16.840.1.113883.3.464.1003.101.12.1001",
             url: "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1001",
           },
         ],
       },
-      { headers: { Authorization: "Bearer undefined" } }
+      {
+        headers: {
+          Authorization: "Bearer undefined",
+          "Content-Type": "application/json",
+        },
+      }
     );
 
     expect(result.length).toEqual(1);
@@ -332,26 +344,44 @@ describe("TerminologyServiceApi Tests", () => {
     }
   });
 
-  it("Should return expansions for value set oids", async () => {
+  it("Should return expansions for value set urls", async () => {
     axios.put = jest
       .fn()
       .mockResolvedValue({ status: 200, data: [officeVisitValueSet] });
     const oid = "2.16.840.1.113883.3.464.1003.101.12.1001";
+    const url = `http://cts.nlm.nih.gov/fhir/ValueSet/${oid}`;
     const valueSets: ValueSet[] =
-      await terminologyService.getValueSetsExpansionForOids([oid]);
+      await terminologyService.getValueSetsExpansionForUrls([`'${url}'`]);
+    expect(axios.put).toHaveBeenCalledWith(
+      "test.url/terminology/value-sets/fhir",
+      expect.objectContaining({
+        includeExpansion: true,
+        valueSetParams: [{ url }],
+      }),
+      expect.anything()
+    );
     expect(valueSets.length).toEqual(1);
     expect(valueSets[0].name).toEqual("Office Visit");
     expect(valueSets[0].id).toEqual(oid);
     expect(valueSets[0].compose.include[0].concept.length).toEqual(5);
   });
 
-  it("Should return empty expansion list if oids not provided", async () => {
+  it("Should return empty expansion list if urls not provided", async () => {
     axios.put = jest
       .fn()
       .mockResolvedValue({ status: 200, data: [officeVisitValueSet] });
     const valueSets: ValueSet[] =
-      await terminologyService.getValueSetsExpansionForOids([]);
+      await terminologyService.getValueSetsExpansionForUrls([]);
     expect(valueSets.length).toEqual(0);
+    expect(axios.put).not.toHaveBeenCalled();
+  });
+
+  it("Should return empty expansion list if only blank urls provided", async () => {
+    axios.put = jest.fn();
+    const valueSets: ValueSet[] =
+      await terminologyService.getValueSetsExpansionForUrls(["", "''"]);
+    expect(valueSets.length).toEqual(0);
+    expect(axios.put).not.toHaveBeenCalled();
   });
 
   it("gives no ValueSets when no cqm measure provided", async () => {
@@ -727,20 +757,20 @@ describe("TerminologyServiceApi Tests", () => {
     expect(result).toBeNull();
   });
 
-  it("test getValueSetsOIdsFromBundle if bundle is null", () => {
-    const result = terminologyService.getValueSetsOIdsFromBundle(null);
+  it("test getValueSetUrlsFromBundle if bundle is null", () => {
+    const result = terminologyService.getValueSetUrlsFromBundle(null);
     expect(_.isEmpty(result)).toBe(true);
   });
 
-  it("test getValueSetsOIdsFromBundle no bundle entry available", () => {
+  it("test getValueSetUrlsFromBundle no bundle entry available", () => {
     const bundle = {
       resourceType: "Bundle",
     } as fhir4.Bundle;
-    const result = terminologyService.getValueSetsOIdsFromBundle(bundle);
+    const result = terminologyService.getValueSetUrlsFromBundle(bundle);
     expect(_.isEmpty(result)).toBe(true);
   });
 
-  it("test getValueSetsOIdsFromBundle if measure entry not found", () => {
+  it("test getValueSetUrlsFromBundle if measure entry not found", () => {
     const bundle = {
       resourceType: "Bundle",
       entry: [
@@ -752,7 +782,7 @@ describe("TerminologyServiceApi Tests", () => {
         } as fhir4.BundleEntry,
       ],
     } as fhir4.Bundle;
-    const result = terminologyService.getValueSetsOIdsFromBundle(bundle);
+    const result = terminologyService.getValueSetUrlsFromBundle(bundle);
     expect(_.isEmpty(result)).toBe(true);
   });
 
@@ -810,8 +840,8 @@ describe("TerminologyServiceApi Tests", () => {
     expect(_.isEmpty(result)).toBe(true);
   });
 
-  it("Should return empty expansion list if oids is null", async () => {
-    const result = await terminologyService.getValueSetsExpansionForOids(null);
+  it("Should return empty expansion list if urls is null", async () => {
+    const result = await terminologyService.getValueSetsExpansionForUrls(null);
     expect(result).toEqual([]);
   });
 
@@ -846,7 +876,7 @@ describe("TerminologyServiceApi Tests", () => {
     expect(result).toBe("2.16.840.1.113883.3.464.1003.101.12.1001");
   });
 
-  it("test getValueSetsOIdsFromBundle with Library having relatedArtifacts", () => {
+  it("test getValueSetUrlsFromBundle with Library having relatedArtifacts", () => {
     const bundle = {
       resourceType: "Bundle",
       entry: [
@@ -870,12 +900,14 @@ describe("TerminologyServiceApi Tests", () => {
         } as fhir4.BundleEntry,
       ],
     } as fhir4.Bundle;
-    const result = terminologyService.getValueSetsOIdsFromBundle(bundle);
+    const result = terminologyService.getValueSetUrlsFromBundle(bundle);
     expect(result.length).toBe(1);
-    expect(result[0].oid).toBe("2.16.840.1.113883.3.464.1003.101.12.1001");
+    expect(result[0]).toEqual({
+      url: "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1001",
+    });
   });
 
-  it("test getValueSetsOIdsFromBundle with Library having no relatedArtifacts", () => {
+  it("test getValueSetUrlsFromBundle with Library having no relatedArtifacts", () => {
     const bundle = {
       resourceType: "Bundle",
       entry: [
@@ -888,7 +920,7 @@ describe("TerminologyServiceApi Tests", () => {
         } as fhir4.BundleEntry,
       ],
     } as fhir4.Bundle;
-    const result = terminologyService.getValueSetsOIdsFromBundle(bundle);
+    const result = terminologyService.getValueSetUrlsFromBundle(bundle);
     expect(result).toEqual([]);
   });
 

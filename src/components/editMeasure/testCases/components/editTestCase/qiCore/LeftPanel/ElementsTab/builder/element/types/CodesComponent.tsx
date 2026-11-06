@@ -77,9 +77,9 @@ const CodesComponent = ({
       }
     }
   };
-  const getCodes = (oids: string[]) => {
+  const getCodes = (valueSetUrls: string[]) => {
     terminologyService.current
-      .getValueSetsExpansionForOids(oids)
+      .getValueSetsExpansionForUrls(valueSetUrls)
       .then((valueSets) => {
         if (!_.isEmpty(valueSets)) {
           valueSets.forEach((valueSet) => {
@@ -101,7 +101,7 @@ const CodesComponent = ({
       })
       .catch((error) => {
         console.error(
-          `An error occurred while fetching valueSet expansion for oids [${oids}]`,
+          `An error occurred while fetching valueSet expansion for valueSet urls [${valueSetUrls}]`,
           error
         );
       });
@@ -138,14 +138,12 @@ const CodesComponent = ({
                 URLs for birthsex from valueSet.compose.include:
                 http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1, http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1021.103
               */
-              const oids = valueSet.compose.include.flatMap(
+              const valueSetUrls: string[] = valueSet.compose.include.flatMap(
                 (include) =>
-                  include.valueSet?.[0]?.substring(
-                    include.valueSet[0].lastIndexOf("/") + 1
-                  ) || []
+                  include.valueSet?.[0] ? [include.valueSet[0]] : []
               );
-              if (!_.isEmpty(oids)) {
-                getCodes(oids);
+              if (!_.isEmpty(valueSetUrls)) {
+                getCodes(valueSetUrls);
               }
             }
           })
