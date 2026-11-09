@@ -433,6 +433,10 @@ declare module "@madie/madie-util" {
     addComment: (comment: Comment) => Promise<boolean>;
     updateComment: (comment: Comment) => Promise<boolean>;
     deleteComment: (comment: Comment) => Promise<boolean>;
+    addReply: (parent: Comment, reply: Comment) => Promise<boolean>;
+    updateReply: (parent: Comment, reply: Comment) => Promise<boolean>;
+    deleteReply: (parent: Comment, reply: Comment) => Promise<boolean>;
+    reloadReview: () => Promise<void>;
   }
   export function useReviewComments(
     entityType: "measure" | "library",
@@ -449,6 +453,7 @@ declare module "@madie/madie-util" {
   export function CommentsFlyoutPanel(props: {
     open: boolean;
     onClose: () => void;
+    onOpen?: () => void;
     entityType: "measure" | "library";
     sections: CommentSection[];
     activeSection: CommentSectionLocation;
@@ -458,6 +463,18 @@ declare module "@madie/madie-util" {
     onAddComment?: (comment: Comment) => void;
     onUpdateComment?: (comment: Comment) => void | Promise<boolean | void>;
     onDeleteComment?: (comment: Comment) => void | Promise<boolean | void>;
+    onAddReply?: (
+      parent: Comment,
+      reply: Comment
+    ) => void | Promise<boolean | void>;
+    onUpdateReply?: (
+      parent: Comment,
+      reply: Comment
+    ) => void | Promise<boolean | void>;
+    onDeleteReply?: (
+      parent: Comment,
+      reply: Comment
+    ) => void | Promise<boolean | void>;
     markedForReviewBy?: string;
     markedForReviewAt?: string;
   }): React.ReactElement;

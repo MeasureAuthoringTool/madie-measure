@@ -203,6 +203,10 @@ export default function EditMeasure() {
     addComment,
     updateComment,
     deleteComment,
+    addReply,
+    updateReply,
+    deleteReply,
+    reloadReview,
   } = useReviewComments("measure", measure?.id, showErrorToast);
 
   const [downloadState, setDownloadState] = useState(null);
@@ -1016,6 +1020,10 @@ export default function EditMeasure() {
             onAddComment={addComment}
             onUpdateComment={updateComment}
             onDeleteComment={deleteComment}
+            onAddReply={addReply}
+            onOpen={reloadReview}
+            onUpdateReply={updateReply}
+            onDeleteReply={deleteReply}
             activeSection={commentLocation}
             markedForReviewBy={measureReview?.markedForReviewBy}
             markedForReviewAt={measureReview?.markedForReviewAt}
