@@ -49,6 +49,24 @@ export const CompareVersionsAction = ({ onClick }: any) => (
     Compare Versions Action
   </button>
 );
+export const ChangeVersionAction = ({ measures, canEdit, onClick }: any) => (
+  <button
+    data-testid="change-version-action-btn"
+    disabled={!canEdit || measures?.length !== 1}
+    onClick={onClick}
+  >
+    Change Version #
+  </button>
+);
+export const ChangeVersionDialog = ({ measures, open, onClose }: any) =>
+  open ? (
+    <div data-testid="change-version-dialog">
+      {measures[0]?.measureName}
+      <button data-testid="change-version-cancel-button" onClick={onClose}>
+        Cancel
+      </button>
+    </div>
+  ) : null;
 export const ExportDialog = ({ open }: any) =>
   open ? <div data-testid="export-dialog">Export Dialog</div> : null;
 export const ExportIcon = () => <span data-testid="export-icon" />;

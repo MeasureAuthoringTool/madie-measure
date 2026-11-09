@@ -15,6 +15,7 @@ import {
   CompareVersionsAction,
   ShareAction,
   TransferAction,
+  ChangeVersionAction,
 } from "@madie/madie-util";
 import ReviewAction from "./reviewAction/ReviewAction";
 
@@ -37,6 +38,7 @@ interface PropTypes {
   exportMeasure: (elmErrorSeverity: string) => void;
   updateTargetMeasure: (measure: Measure) => void;
   setCreateVersionDialog: any;
+  setChangeVersionDialog?: React.Dispatch<React.SetStateAction<boolean>>;
   setDraftMeasureDialog: any;
   setDeleteMeasureDialog: any;
   setViewMeasureHistoryDialog?: any;
@@ -56,6 +58,7 @@ export default function ActionCenter(props: PropTypes) {
     exportMeasure: onExportMeasure,
     setCompareVersionsDialog,
     setCreateVersionDialog,
+    setChangeVersionDialog,
     setDeleteMeasureDialog,
     setDraftMeasureDialog,
     setShareDialog,
@@ -264,6 +267,13 @@ export default function ActionCenter(props: PropTypes) {
             onClick={versionMeasure}
             canEdit={canEdit}
           />
+          {featureFlags?.MeasureChangeVersion && (
+            <ChangeVersionAction
+              measures={measures}
+              canEdit={canEdit}
+              onClick={() => setChangeVersionDialog?.(true)}
+            />
+          )}
           <DraftAction
             measures={measures}
             onClick={draftMeasure}
