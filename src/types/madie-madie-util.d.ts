@@ -436,7 +436,7 @@ declare module "@madie/madie-util" {
     currentUserName?: string;
     currentUserId?: string;
     onAddComment?: (comment: Comment) => void;
-    onUpdateComment?: (comment: Comment) => void;
+    onUpdateComment?: (comment: Comment) => void | Promise<boolean | void>;
     onDeleteComment?: (comment: Comment) => void | Promise<boolean | void>;
     markedForReviewBy?: string;
     markedForReviewAt?: string;
