@@ -1,4 +1,5 @@
 import * as mockCmsIdStubs from "../../../__mocks__/cmsIdFormatterStubs";
+import * as mockMeasureActionStubs from "../../../__mocks__/measureActionStubs";
 import * as React from "react";
 import {
   cleanup,
@@ -124,6 +125,7 @@ jest.mock("@madie/madie-util", () => ({
     open ? (
       <div data-testid="compare-versions-dialog">Compare Versions Dialog</div>
     ) : null,
+  ChangeVersionDialog: mockMeasureActionStubs.ChangeVersionDialog,
   ShareAction: ({ measures, activeTab, onClick }: any) => {
     const options = activeTab === 1 ? ["Unshare"] : ["Share With", "Unshare"];
     return (
