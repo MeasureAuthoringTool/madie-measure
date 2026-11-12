@@ -314,6 +314,8 @@ const qdmCalculationServiceMockResolved = {
 
 jest.mock("@madie/madie-util", () => ({
   ...mockMeasureActionStubs,
+  MadieAlert: jest.requireActual("@madie/madie-design-system/dist/react")
+    .MadieAlert,
   useOwnerName: jest.fn((harpId) => harpId),
   useDocumentTitle: jest.fn(),
   useFeatureFlags: jest.fn(() => {
