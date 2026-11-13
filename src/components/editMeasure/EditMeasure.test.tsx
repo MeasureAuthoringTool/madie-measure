@@ -232,6 +232,9 @@ const mockReviewComments = {
 };
 
 jest.mock("@madie/madie-util", () => ({
+  MadieAlert: require("@madie/madie-design-system/dist/react").MadieAlert,
+  MinimizedAlertsProvider: ({ children }) => children,
+  MinimizedAlertsControl: () => <span data-testid="minimized-alert-control" />,
   ...mockCmsIdStubs,
   ...mockCompositeStubs,
   ExportIcon: () => <span data-testid="export-icon" />,
@@ -514,6 +517,9 @@ describe("EditMeasure Component", () => {
     expect(
       await screen.findByRole("button", { name: "Comments (4)" })
     ).toBeInTheDocument();
+    expect(screen.getByTestId("review-comments-link").parentElement).toBe(
+      screen.getByTestId("minimized-alert-control").parentElement
+    );
   });
 
   it("shows Comments for shared user in review state", async () => {
