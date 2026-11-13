@@ -419,7 +419,9 @@ declare module "@madie/madie-util" {
     className?: string;
     style?: React.CSSProperties;
     dataTestId?: string;
+    commentCount?: number;
   }): React.ReactElement;
+  export function countComments(comments?: Comment[]): number;
   export const REVIEW_ACTIVE_STATUSES: ReadonlySet<ReviewStatus>;
 
   export interface CommentSubSectionItem {

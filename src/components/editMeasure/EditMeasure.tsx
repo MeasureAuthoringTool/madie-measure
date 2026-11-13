@@ -36,6 +36,7 @@ import {
   CommentsFlyoutPanel,
   useOwnerName,
   ReviewCommentLink,
+  countComments,
   MadieAlert,
   MinimizedAlertsProvider,
   MinimizedAlertsControl,
@@ -805,6 +806,7 @@ function EditMeasureContent() {
                 {showReviewCommentLink && (
                   <ReviewCommentLink
                     onClick={() => setCommentsPanelOpen(true)}
+                    commentCount={countComments(reviewComments)}
                   />
                 )}
                 <MinimizedAlertsControl />
