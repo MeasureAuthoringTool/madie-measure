@@ -36,6 +36,7 @@ import {
   CommentsFlyoutPanel,
   useOwnerName,
   ReviewCommentLink,
+  countComments,
 } from "@madie/madie-util";
 import CreateVersionDialog from "../common/createVersionDialog/CreateVersionDialog";
 import InvalidTestCaseDialog from "../common/invalidTestCaseDialog/InvalidTestCaseDialog";
@@ -791,7 +792,10 @@ export default function EditMeasure() {
             <EditMeasureNav isQDM={isQDM} />
             {showReviewCommentLink && (
               <div className="review-comments-link">
-                <ReviewCommentLink onClick={() => setCommentsPanelOpen(true)} />
+                <ReviewCommentLink
+                  onClick={() => setCommentsPanelOpen(true)}
+                  commentCount={countComments(reviewComments)}
+                />
               </div>
             )}
             <div

@@ -280,7 +280,13 @@ jest.mock("@madie/madie-util", () => ({
         Manage Review Dialog {entityType} {entityId}
       </div>
     ) : null,
-  ReviewCommentLink: ({ onClick, className, style, dataTestId }: any) => (
+  ReviewCommentLink: ({
+    onClick,
+    className,
+    style,
+    dataTestId,
+    commentCount,
+  }: any) => (
     <button
       type="button"
       data-testid={dataTestId || "review-comments-link"}
@@ -288,9 +294,14 @@ jest.mock("@madie/madie-util", () => ({
       style={style}
       onClick={onClick}
     >
-      Comments
+      {commentCount === undefined ? "Comments" : `Comments (${commentCount})`}
     </button>
   ),
+  countComments: (comments: any[]) =>
+    (comments ?? []).reduce(
+      (total, comment) => total + 1 + (comment.replies?.length ?? 0),
+      0
+    ),
   useDocumentTitle: jest.fn(),
   useOktaTokens: jest.fn(() => ({
     getAccessToken: () => "test.jwt",
@@ -482,7 +493,26 @@ describe("EditMeasure Component", () => {
       await screen.findByTestId("review-comments-link")
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: "Comments" })
+      screen.getByRole("button", { name: "Comments (0)" })
+    ).toBeInTheDocument();
+  });
+
+  it("shows the total of comments and replies in the Comments link", async () => {
+    (shouldShowReviewCommentLink as jest.Mock).mockReturnValue(true);
+    (useFeatureFlags as jest.Mock).mockReturnValue({ Commenting: true });
+    (useReviewComments as jest.Mock).mockReturnValue({
+      ...mockReviewComments,
+      comments: [
+        { id: "c1", replies: [{ id: "r1" }, { id: "r2" }] },
+        { id: "c2" },
+      ],
+    });
+
+    renderRouter();
+    await findByTestId("editMeasure");
+
+    expect(
+      await screen.findByRole("button", { name: "Comments (4)" })
     ).toBeInTheDocument();
   });
 
