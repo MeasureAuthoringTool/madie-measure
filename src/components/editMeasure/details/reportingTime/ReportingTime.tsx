@@ -17,7 +17,6 @@ import { MeasureLock } from "@madie/madie-models";
 import { useFormik } from "formik";
 import useFormikResetOnEvent from "../../../common/useFormikResetOnEvent";
 import useFhirDefinitionsServiceApi from "../../testCases/api/useFhirDefinitionsService";
-import useTerminologyServiceApi from "../../testCases/api/useTerminologyServiceApi";
 
 const UNITS_OF_TIME = "http://hl7.org/fhir/ValueSet/units-of-time";
 
@@ -44,7 +43,6 @@ const ReportingTime = ({
   const [toastOpen, setToastOpen] = useState(false);
   const measureService = useMeasureServiceApi();
   const fhirService = useRef(useFhirDefinitionsServiceApi()).current;
-  const terminologyService = useRef(useTerminologyServiceApi()).current;
   const repeat = measure?.measureMetaData?.reportingTiming?.repeat;
 
   useEffect(() => {
@@ -54,30 +52,15 @@ const ReportingTime = ({
 
   useEffect(() => {
     let active = true;
+    setUnits([]);
+    setUnitsError(false);
     const loadUnits = async () => {
       try {
         const valueSet = await fhirService.getValueSetDefinition(
           UNITS_OF_TIME,
           measure.model
         );
-        let concepts = valueSet?.expansion?.contains || [];
-        if (!concepts.length) {
-          concepts =
-            valueSet?.compose?.include?.flatMap(
-              (include) => include.concept || []
-            ) || [];
-        }
-        const urls =
-          valueSet?.compose?.include?.flatMap(
-            (include) => include.valueSet || []
-          ) || [];
-        if (!concepts.length && urls.length) {
-          const expansions =
-            await terminologyService.getValueSetsExpansionForUrls(urls);
-          concepts = expansions.flatMap(
-            (expansion) => expansion.expansion?.contains || []
-          );
-        }
+        const concepts = valueSet?.expansion?.contains || [];
         const options = concepts
           .filter((concept) => concept.code)
           .map((concept) => ({ code: concept.code, display: concept.display }));
@@ -91,7 +74,7 @@ const ReportingTime = ({
     return () => {
       active = false;
     };
-  }, [measure?.model, fhirService, terminologyService]);
+  }, [measure?.model, fhirService]);
 
   const formik = useFormik<FormValues>({
     initialValues: {
@@ -209,6 +192,10 @@ const ReportingTime = ({
             gridTemplateColumns: { xs: "1fr", md: "repeat(4, minmax(0, 1fr))" },
             alignItems: "start",
             gap: 3,
+            "& #periodUnit-helper-text:not(.Mui-error), & #timeOfDay-helper-text:not(.Mui-error)":
+              {
+                visibility: "hidden",
+              },
             "& .MuiFormHelperText-root.Mui-error": {
               color: "#AE1C1C !important",
             },
@@ -225,7 +212,7 @@ const ReportingTime = ({
               inputMode: "numeric",
             }}
             error={!!fieldError("frequency")}
-            recommendation={
+            helperText={
               fieldError("frequency") || "Enter a positive whole number"
             }
             onKeyDown={(event) => {
@@ -247,7 +234,7 @@ const ReportingTime = ({
               inputMode: "decimal",
             }}
             error={!!fieldError("period")}
-            recommendation={fieldError("period") || "Enter a decimal value"}
+            helperText={fieldError("period") || "Enter a decimal value"}
             {...formik.getFieldProps("period")}
           />
           <Select
@@ -257,6 +244,8 @@ const ReportingTime = ({
             readOnly={!measureCanEdit}
             size="small"
             inputProps={{ "data-testid": "reporting-period-unit" }}
+            error={!!fieldError("periodUnit")}
+            helperText={fieldError("periodUnit") || " "}
             value={formik.values.periodUnit}
             onChange={(event) =>
               formik.setFieldValue("periodUnit", event.target.value)
@@ -276,15 +265,10 @@ const ReportingTime = ({
             size="small"
             inputProps={{ "data-testid": "reporting-time-of-day" }}
             error={!!fieldError("timeOfDay")}
-            recommendation={fieldError("timeOfDay")}
+            helperText={fieldError("timeOfDay") || " "}
             {...formik.getFieldProps("timeOfDay")}
           />
         </Box>
-        {unitsError && (
-          <p role="alert">
-            Unable to load period units. Please try again later.
-          </p>
-        )}
       </div>
       {measureCanEdit && (
         <div className="form-actions">
@@ -306,6 +290,15 @@ const ReportingTime = ({
           </Button>
         </div>
       )}
+      <Toast
+        toastKey="reporting-time-units-error"
+        toastType="danger"
+        testId="reporting-time-units-error"
+        open={unitsError}
+        message="No units available"
+        onClose={() => setUnitsError(false)}
+        autoHideDuration={10000}
+      />
       <Toast
         toastKey="reporting-time-toast"
         toastType="success"

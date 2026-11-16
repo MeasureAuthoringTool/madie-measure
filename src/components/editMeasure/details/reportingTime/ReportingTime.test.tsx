@@ -52,7 +52,7 @@ describe("ReportingTime", () => {
       <ReportingTime setErrorMessage={mockSetError} measureCanEdit={canEdit} />
     );
 
-  it("places field guidance below the inputs and associates it with each field", async () => {
+  it("places field guidance above the inputs", async () => {
     renderForm();
     const frequency = screen.getByTestId("reporting-frequency");
     const period = screen.getByTestId("reporting-period");
@@ -65,17 +65,44 @@ describe("ReportingTime", () => {
     expect(screen.getByText("Indicates required field")).toBeInTheDocument();
     expect(
       frequency.compareDocumentPosition(frequencyGuidance) &
-        Node.DOCUMENT_POSITION_FOLLOWING
+        Node.DOCUMENT_POSITION_PRECEDING
     ).toBeTruthy();
     expect(
       period.compareDocumentPosition(periodGuidance) &
-        Node.DOCUMENT_POSITION_FOLLOWING
+        Node.DOCUMENT_POSITION_PRECEDING
     ).toBeTruthy();
     expect(frequency).toHaveAccessibleDescription(
       "Enter a positive whole number"
     );
     expect(period).toHaveAccessibleDescription("Enter a decimal value");
+    expect(screen.getByTestId("periodUnit-helper-text")).toHaveStyle(
+      "visibility: hidden"
+    );
+    expect(screen.getByTestId("timeOfDay-helper-text")).toHaveStyle(
+      "visibility: hidden"
+    );
     await waitFor(() => expect(mockGetValueSet).toHaveBeenCalled());
+  });
+
+  it("shows required field errors above and associated with their inputs", async () => {
+    renderForm();
+    await waitFor(() => expect(mockGetValueSet).toHaveBeenCalled());
+    const frequency = screen.getByTestId("reporting-frequency");
+    const period = screen.getByTestId("reporting-period");
+    const unit = screen.getByRole("combobox", { name: /Period Unit/ });
+    fireEvent.blur(frequency);
+    fireEvent.blur(period);
+    fireEvent.blur(unit);
+    await waitFor(() => {
+      expect(frequency).toHaveAccessibleDescription(
+        "Enter a positive whole number."
+      );
+      expect(period).toHaveAccessibleDescription(
+        "Enter a non-negative decimal value."
+      );
+      expect(unit).toHaveAccessibleDescription("Select a period unit.");
+      expect(screen.getByTestId("periodUnit-helper-text")).toBeVisible();
+    });
   });
 
   it("loads units and saves valid timing while rejecting invalid values", async () => {
@@ -156,24 +183,36 @@ describe("ReportingTime", () => {
   it("shows a loading failure and does not allow saving without units", async () => {
     mockGetValueSet.mockResolvedValue(null);
     renderForm();
-    expect(await screen.findByRole("alert")).toHaveTextContent(
-      "Unable to load period units"
-    );
+    expect(await screen.findByText("No units available")).toBeInTheDocument();
     userEvent.type(screen.getByTestId("reporting-frequency"), "1");
     userEvent.type(screen.getByTestId("reporting-period"), "1");
     expect(screen.getByRole("button", { name: "Save" })).toBeDisabled();
   });
 
-  it("uses value set concepts and saves without an optional time", async () => {
+  it("does not expand or use compose concepts when the expansion is unavailable", async () => {
     mockGetValueSet.mockResolvedValue({
       expansion: { contains: [] },
-      compose: { include: [{ concept: [{ code: "h", display: "hour" }] }] },
+      compose: {
+        include: [
+          { concept: [{ code: "h", display: "hour" }], valueSet: ["url"] },
+        ],
+      },
     });
+    renderForm();
+    expect(await screen.findByText("No units available")).toBeInTheDocument();
+    expect(mockExpand).not.toHaveBeenCalled();
+    fireEvent.mouseDown(screen.getByRole("combobox", { name: /Period Unit/ }));
+    expect(
+      screen.queryByRole("option", { name: "hour" })
+    ).not.toBeInTheDocument();
+  });
+
+  it("saves without an optional time", async () => {
     renderForm();
     userEvent.type(screen.getByTestId("reporting-frequency"), "1");
     userEvent.type(screen.getByTestId("reporting-period"), "0");
     fireEvent.mouseDown(screen.getByRole("combobox", { name: /Period Unit/ }));
-    fireEvent.click(await screen.findByRole("option", { name: "hour" }));
+    fireEvent.click(await screen.findByRole("option", { name: "day" }));
     const save = screen.getByRole("button", { name: "Save" });
     await waitFor(() => expect(save).toBeEnabled());
     userEvent.click(save);
@@ -183,7 +222,7 @@ describe("ReportingTime", () => {
           measureMetaData: {
             description: "Existing",
             reportingTiming: {
-              repeat: { frequency: 1, period: 0, periodUnit: "h" },
+              repeat: { frequency: 1, period: 0, periodUnit: "d" },
             },
           },
         })
