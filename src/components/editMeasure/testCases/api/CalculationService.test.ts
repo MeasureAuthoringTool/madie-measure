@@ -989,6 +989,35 @@ describe("CalculationService Tests", () => {
       expect(output).toEqual(expected);
     });
 
+    it("should default null observations to zero", () => {
+      const episodeResults = [
+        {
+          episodeId: "episode-1",
+          populationResults: [
+            {
+              populationType: FqmPopulationType.OBSERV,
+              criteriaExpression: "observation",
+              result: true,
+              populationId: "observation-id",
+              criteriaReferenceId: "observation-id",
+              observations: null,
+            },
+          ],
+        },
+      ] as unknown as Parameters<CalculationService["buildEpisodeResults"]>[0];
+
+      const output = calculationService.buildEpisodeResults(episodeResults);
+
+      expect(output.observations["observation-id"]).toEqual({
+        populationType: FqmPopulationType.OBSERV,
+        criteriaExpression: "observation",
+        result: true,
+        populationId: "observation-id",
+        criteriaReferenceId: "observation-id",
+        observations: [0],
+      });
+    });
+
     it("should return test case results for episode based cohort stratification", () => {
       const popGroupResults: DetailedPopulationGroupResult[] = [
         {

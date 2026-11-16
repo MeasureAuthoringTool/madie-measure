@@ -2,7 +2,7 @@ import React from "react";
 import "styled-components/macro";
 import { isEmpty } from "lodash";
 import { DetailedPopulationGroupResult } from "fqm-execution/build/types/Calculator";
-import { MadieAlert } from "@madie/madie-design-system/dist/react";
+import { MadieAlert, useFeatureFlags } from "@madie/madie-util";
 import {
   GroupPopulation,
   PopulationType,
@@ -10,7 +10,6 @@ import {
   Group,
   RiskAdjustment,
 } from "@madie/madie-models";
-import { useFeatureFlags } from "@madie/madie-util";
 import { Relevance } from "fqm-execution";
 import QiCoreGroupCoverage, {
   CqlDefinitionCallstack,

@@ -23,6 +23,7 @@ const useCqlParsingServiceMockResolved = {
 import { calculationResults } from "../../../groupCoverage/_mocks_/QdmCalculationResults";
 
 jest.mock("@madie/madie-util", () => ({
+  MadieAlert: require("@madie/madie-design-system/dist/react").MadieAlert,
   useFeatureFlags: jest.fn(() => ({})),
 }));
 

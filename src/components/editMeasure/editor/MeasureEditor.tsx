@@ -51,6 +51,7 @@ import {
   routeHandlerStore,
   useMeasureServiceApi,
   useTerminologyServiceApi,
+  MadieAlert,
 } from "@madie/madie-util";
 import StatusHandler from "./StatusHandler";
 import "./StatusHandler.scss";
@@ -926,6 +927,7 @@ const MeasureEditor = ({ measureCanEdit, measureLockedBy }) => {
           )}
           {!processing && (
             <MadieTerminologyEditor
+              AlertComponent={MadieAlert}
               serviceConfig={serviceConfig}
               handleApplyCode={handleApplyCode}
               handleApplyValueSet={handleUpdateVs}

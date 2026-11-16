@@ -369,7 +369,7 @@ export class CalculationService {
           for (const populationResult of episodeResult.populationResults) {
             if (
               populationResult.populationType === FqmPopulationType.OBSERV &&
-              populationResult.observations
+              populationResult.result === true
             ) {
               const id = populationResult.populationId;
               if (results.observations[id]) {
@@ -381,7 +381,9 @@ export class CalculationService {
                 results.observations[id] = {
                   ...populationResult,
                   result: true,
-                  observations: _.cloneDeep(populationResult.observations),
+                  observations: _.cloneDeep(populationResult.observations) ?? [
+                    0,
+                  ],
                 };
               }
             } else if (

@@ -99,6 +99,7 @@ jest.mock("@madie/madie-design-system/dist/react", () => ({
 }));
 
 jest.mock("@madie/madie-util", () => ({
+  MadieAlert: require("@madie/madie-design-system/dist/react").MadieAlert,
   // feature flags removed for minimizeAlerts; returning empty object for compatibility
   useFeatureFlags: () => ({}),
 }));

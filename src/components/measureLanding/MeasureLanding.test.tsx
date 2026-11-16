@@ -100,6 +100,7 @@ const mockMeasureReviewServiceApi = {
 jest.mock("@madie/madie-util", () => ({
   ...mockMeasureActionStubs,
   ...mockCmsIdStubs,
+  MadieAlert: require("@madie/madie-design-system/dist/react").MadieAlert,
   useMeasureServiceApi: jest.fn(() => mockMeasureServiceApi),
   useMeasureReviewServiceApi: jest.fn(() => mockMeasureReviewServiceApi),
   useUserServiceApi: jest.fn(() => ({ getOwnerDetails: jest.fn() })),

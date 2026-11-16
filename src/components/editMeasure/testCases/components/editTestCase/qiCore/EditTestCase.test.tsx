@@ -113,6 +113,7 @@ const MEASURE_CREATEDBY = "testuser";
 let mockApplyDefaults = false;
 jest.mock("@madie/madie-util", () => {
   return {
+    MadieAlert: require("@madie/madie-design-system/dist/react").MadieAlert,
     ...mockMeasureActionStubs,
     useMeasureServiceApi: jest.fn(() => mockMeasureServiceApi),
     useOwnerName: jest.fn((harpId) => harpId),

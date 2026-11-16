@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+export { MadieAlert } from "@madie/madie-design-system/dist/react";
 // These functions are listed so that they can be referenced in jest files since jest cannot see browser.
 // some functions are copy pasted from the source since their side effects are required for tests.
 export function useKeyPress(targetKey) {

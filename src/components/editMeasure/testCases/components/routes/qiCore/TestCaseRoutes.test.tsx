@@ -80,6 +80,7 @@ const mockMeasure = {
 };
 
 jest.mock("@madie/madie-util", () => ({
+  MadieAlert: require("@madie/madie-design-system/dist/react").MadieAlert,
   useMeasureServiceApi: jest.fn(() => mockMeasureServiceApi),
   useDocumentTitle: jest.fn(),
   measureStore: {
