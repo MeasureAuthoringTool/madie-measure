@@ -36,6 +36,7 @@ import {
   CommentsFlyoutPanel,
   useOwnerName,
   ReviewCommentLink,
+  countComments,
   MadieAlert,
   MinimizedAlertsProvider,
   MinimizedAlertsControl,
@@ -775,6 +776,9 @@ function EditMeasureContent() {
     assignedReviewers: measureReview?.reviewers,
     hasComments: reviewComments.length > 0,
   });
+  // Review carries a ready-for-review note once the measure is marked
+  const hasReviewNote = Boolean(measureReview?.markedForReviewAt);
+
   const commentLocation = useMemo(
     () => getCommentSectionLocation(location.pathname, measure),
     [location.pathname, measure]
@@ -805,6 +809,7 @@ function EditMeasureContent() {
                 {showReviewCommentLink && (
                   <ReviewCommentLink
                     onClick={() => setCommentsPanelOpen(true)}
+                    commentCount={countComments(reviewComments, hasReviewNote)}
                   />
                 )}
                 <MinimizedAlertsControl />
