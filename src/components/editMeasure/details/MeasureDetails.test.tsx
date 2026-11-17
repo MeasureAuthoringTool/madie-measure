@@ -109,6 +109,9 @@ const mockMeasureServiceApi: MeasureServiceApi = {
 
 jest.mock("./measureInformation/MeasureInformation");
 jest.mock("./measureMetadata/MeasureMetadata");
+jest.mock("./reportingTime/ReportingTime", () => () => (
+  <div>Reporting Time form</div>
+));
 jest.mock("@madie/madie-util", () => ({
   useMeasureServiceApi: jest.fn(() => mockMeasureServiceApi),
   useUserServiceApi: jest.fn(() => ({
@@ -166,6 +169,128 @@ const serviceConfig = {
 const { getByText, getByTestId } = screen;
 
 describe("MeasureDetails component", () => {
+  it("marks saved reporting time complete and opens its route", () => {
+    measureStore.state.mockImplementationOnce(() => ({
+      ...measure,
+      measureMetaData: {
+        ...measure.measureMetaData,
+        reportingTiming: {
+          repeat: { frequency: 1, period: 0, periodUnit: "d" },
+        },
+      },
+    }));
+    render(
+      <MemoryRouter initialEntries={["/foo/reporting-time"]}>
+        <Routes>
+          <Route
+            path="/foo/*"
+            element={
+              <MeasureDetails
+                setErrorMessage={setErrorMessage}
+                isQDM={false}
+                measureCanEdit={false}
+                measureLockedBy=""
+              />
+            }
+          />
+        </Routes>
+      </MemoryRouter>
+    );
+    expect(screen.getByText("Reporting Time form")).toBeInTheDocument();
+    expect(
+      screen.getByTestId("measure-details-completed-icon-sideNavReportingTime")
+    ).toBeInTheDocument();
+    expect(screen.getByTestId("leftPanelReportingTime")).toHaveTextContent(
+      "Completed"
+    );
+    expect(
+      screen.queryByTestId(
+        "measure-details-incompleted-icon-sideNavReportingTime"
+      )
+    ).not.toBeInTheDocument();
+  });
+
+  it.each([
+    undefined,
+    { frequency: 0, period: 1, periodUnit: "d" },
+    { frequency: 1, periodUnit: "d" },
+    { frequency: 1, period: 1 },
+  ])("shows no icon for incomplete reporting time", (repeat) => {
+    measureStore.state.mockImplementationOnce(() => ({
+      ...measure,
+      measureMetaData: {
+        ...measure.measureMetaData,
+        reportingTiming: repeat ? { repeat } : undefined,
+      },
+    }));
+    render(
+      <MemoryRouter initialEntries={["/foo"]}>
+        <Routes>
+          <Route
+            path="/foo/*"
+            element={
+              <MeasureDetails
+                setErrorMessage={setErrorMessage}
+                isQDM={false}
+                measureCanEdit={false}
+                measureLockedBy=""
+              />
+            }
+          />
+        </Routes>
+      </MemoryRouter>
+    );
+    expect(
+      screen.queryByTestId(
+        "measure-details-incompleted-icon-sideNavReportingTime"
+      )
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId(
+        "measure-details-completed-icon-sideNavReportingTime"
+      )
+    ).not.toBeInTheDocument();
+  });
+
+  it.each([false, true])(
+    "shows reporting time only for FHIR measures (isQDM=%s)",
+    (isQDM) => {
+      render(
+        <MemoryRouter initialEntries={["/foo"]}>
+          <Routes>
+            <Route
+              path="/foo/*"
+              element={
+                <MeasureDetails
+                  setErrorMessage={setErrorMessage}
+                  isQDM={isQDM}
+                  measureCanEdit={false}
+                  measureLockedBy=""
+                />
+              }
+            />
+          </Routes>
+        </MemoryRouter>
+      );
+      const nav = screen.queryByTestId("leftPanelReportingTime");
+      if (isQDM) {
+        expect(nav).not.toBeInTheDocument();
+      } else {
+        expect(nav).toBeInTheDocument();
+        expect(
+          screen
+            .getByTestId("leftPanelModelAndMeasurementPeriod")
+            .compareDocumentPosition(nav) & Node.DOCUMENT_POSITION_FOLLOWING
+        ).toBeTruthy();
+        expect(
+          nav.compareDocumentPosition(
+            screen.getByTestId("leftPanelMeasureSteward")
+          ) & Node.DOCUMENT_POSITION_FOLLOWING
+        ).toBeTruthy();
+      }
+    }
+  );
+
   it("should render the MeasureInformation component for default URL", () => {
     render(
       <ApiContextProvider value={serviceConfig}>

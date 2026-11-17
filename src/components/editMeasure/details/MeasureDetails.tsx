@@ -23,6 +23,7 @@ import TransmissionFormat from "./TransmissionFormat/TransmissionFormat";
 import MeasureDefinitions from "./MeasureDefinitions/MeasureDefinitions";
 import AuthoritativeSource from "./AuthoritativeSource/AuthoritativeSource";
 import LockedMessageModal from "../../common/lockedMessageModal/LockedMessageModal";
+import ReportingTime from "./reportingTime/ReportingTime";
 
 export interface RouteHandlerState {
   canTravel: boolean;
@@ -61,6 +62,7 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
   const location = useLocation();
   const { pathname } = location;
   const modelPeriodLink = "model&measurement-period";
+  const reportingTimeLink = "reporting-time";
   const stewardLink = "measure-steward";
   const descriptionLink = "measure-description";
   const copyrightLink = "measure-copyright";
@@ -247,6 +249,19 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
       displayCompletedIcon: !!measure?.measureMetaData.measureSetTitle,
     });
   } else {
+    const repeat = measure?.measureMetaData?.reportingTiming?.repeat;
+    const reportingTimeComplete = !!(
+      repeat?.frequency > 0 &&
+      repeat?.period != null &&
+      repeat?.periodUnit
+    );
+    links[0].links.splice(2, 0, {
+      title: "Reporting Time",
+      href: reportingTimeLink,
+      dataTestId: "leftPanelReportingTime",
+      id: "sideNavReportingTime",
+      displayCompletedIcon: reportingTimeComplete,
+    });
     links[1].links.push({
       title: "Definition",
       href: measureDefinitionLink,
@@ -327,6 +342,17 @@ export default function MeasureDetails(props: MeasureDetailsProps) {
               />
             }
           />
+          {!isQDM && (
+            <Route
+              path={reportingTimeLink}
+              element={
+                <ReportingTime
+                  setErrorMessage={setErrorMessage}
+                  measureCanEdit={measureCanEdit && !measureLockedBy}
+                />
+              }
+            />
+          )}
           <Route
             path={stewardLink}
             element={
