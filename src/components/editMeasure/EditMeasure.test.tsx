@@ -300,10 +300,10 @@ jest.mock("@madie/madie-util", () => ({
       {commentCount === undefined ? "Comments" : `Comments (${commentCount})`}
     </button>
   ),
-  countComments: (comments: any[]) =>
+  countComments: (comments: any[], hasReviewNote?: boolean) =>
     (comments ?? []).reduce(
       (total, comment) => total + 1 + (comment.replies?.length ?? 0),
-      0
+      hasReviewNote ? 1 : 0
     ),
   useDocumentTitle: jest.fn(),
   useOktaTokens: jest.fn(() => ({
@@ -497,6 +497,28 @@ describe("EditMeasure Component", () => {
     ).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: "Comments (0)" })
+    ).toBeInTheDocument();
+  });
+
+  it("counts the ready-for-review note in the Comments link", async () => {
+    (shouldShowReviewCommentLink as jest.Mock).mockReturnValue(true);
+    (useFeatureFlags as jest.Mock).mockReturnValue({ Commenting: true });
+    (useReviewComments as jest.Mock).mockReturnValue({
+      ...mockReviewComments,
+      review: {
+        status: "READY_FOR_REVIEW",
+        markedForReviewBy: "test user",
+        markedForReviewAt: "2026-08-12T09:00:00",
+      },
+      comments: [],
+    });
+
+    renderRouter();
+    await findByTestId("editMeasure");
+
+    // no real comments yet, but General > Review holds the ready-for-review note
+    expect(
+      await screen.findByRole("button", { name: "Comments (1)" })
     ).toBeInTheDocument();
   });
 
