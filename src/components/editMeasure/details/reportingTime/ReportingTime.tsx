@@ -91,7 +91,7 @@ const ReportingTime = ({
         !/^[1-9]\d*$/.test(values.frequency) ||
         Number(values.frequency) > 2147483647
       )
-        errors.frequency = "Enter a positive whole number.";
+        errors.frequency = "Positive Integer is required (ie 1, 2, 4)";
       if (
         !/^(0|[1-9]\d*)(\.\d+)?$/.test(values.period) ||
         !Number.isFinite(Number(values.period))
@@ -192,10 +192,6 @@ const ReportingTime = ({
             gridTemplateColumns: { xs: "1fr", md: "repeat(4, minmax(0, 1fr))" },
             alignItems: "start",
             gap: 3,
-            "& #periodUnit-helper-text:not(.Mui-error), & #timeOfDay-helper-text:not(.Mui-error)":
-              {
-                visibility: "hidden",
-              },
             "& .MuiFormHelperText-root.Mui-error": {
               color: "#AE1C1C !important",
             },
@@ -212,9 +208,8 @@ const ReportingTime = ({
               inputMode: "numeric",
             }}
             error={!!fieldError("frequency")}
-            helperText={
-              fieldError("frequency") || "Enter a positive whole number"
-            }
+            helperText={fieldError("frequency") || undefined}
+            recommendation="Enter a positive whole number"
             onKeyDown={(event) => {
               if (event.shiftKey && event.key === "Tab") {
                 event.preventDefault();
@@ -234,7 +229,8 @@ const ReportingTime = ({
               inputMode: "decimal",
             }}
             error={!!fieldError("period")}
-            helperText={fieldError("period") || "Enter a decimal value"}
+            helperText={fieldError("period") || undefined}
+            recommendation="Enter a decimal value"
             {...formik.getFieldProps("period")}
           />
           <Select
@@ -245,7 +241,7 @@ const ReportingTime = ({
             size="small"
             inputProps={{ "data-testid": "reporting-period-unit" }}
             error={!!fieldError("periodUnit")}
-            helperText={fieldError("periodUnit") || " "}
+            helperText={fieldError("periodUnit") || undefined}
             value={formik.values.periodUnit}
             onChange={(event) =>
               formik.setFieldValue("periodUnit", event.target.value)
@@ -265,7 +261,7 @@ const ReportingTime = ({
             size="small"
             inputProps={{ "data-testid": "reporting-time-of-day" }}
             error={!!fieldError("timeOfDay")}
-            helperText={fieldError("timeOfDay") || " "}
+            helperText={fieldError("timeOfDay") || undefined}
             {...formik.getFieldProps("timeOfDay")}
           />
         </Box>
