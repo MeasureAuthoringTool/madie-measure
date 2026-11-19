@@ -108,6 +108,37 @@ export const getOidFromString = (
   return oidString?.split("ValueSet/")[1];
 };
 
+export const useTerminologyServiceApi = jest.fn(() => ({
+  checkLogin: jest.fn().mockResolvedValue(true),
+  loginUMLS: jest.fn().mockResolvedValue("success"),
+  getExpansion: jest.fn().mockResolvedValue([]),
+  getValueSetsExpansionForBundle: jest.fn().mockResolvedValue([]),
+  getValueSetsExpansionForUrls: jest.fn().mockResolvedValue([]),
+  getQdmValueSetsExpansion: jest.fn().mockResolvedValue([]),
+  getValueSetsOIDsFromCqmMeasure: jest.fn(() => []),
+  getValueSetUrlsFromBundle: jest.fn(() => []),
+  getFhirValueSetsForDRCs: jest.fn(() => []),
+  getValueSetsForDRCs: jest.fn(() => []),
+  getOidFromString: jest.fn(() => null),
+  getDrcOid: jest.fn(() => undefined),
+  getManifestList: jest.fn().mockResolvedValue({ data: [], status: 200 }),
+}));
+
+export const useFhirElmTranslationServiceApi = jest.fn(() => ({
+  translateCqlToElm: jest.fn().mockResolvedValue({}),
+  fetchTranslatorVersion: jest.fn().mockResolvedValue("1.0.0"),
+  fetchRelevantDataElements: jest.fn().mockResolvedValue([]),
+}));
+
+export const useQdmElmTranslationServiceApi = jest.fn(() => ({
+  translateCqlToElm: jest.fn().mockResolvedValue({}),
+  fetchTranslatorVersion: jest.fn().mockResolvedValue("1.0.0"),
+}));
+
+export const useOrganizationApi = jest.fn(() => ({
+  getAllOrganizations: jest.fn().mockResolvedValue([]),
+}));
+
 export const exportMeasure = jest.fn();
 export const downloadZipFile = jest.fn();
 export const parseErrorMessageFromBlob = jest.fn();

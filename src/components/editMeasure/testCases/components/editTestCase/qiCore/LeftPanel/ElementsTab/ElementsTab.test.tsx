@@ -170,9 +170,15 @@ const serviceConfig: ServiceConfig = {
   },
 };
 let mockApplyDefaults = false;
+const mockFetchRelevantDataElements = jest.fn();
+
 jest.mock("@madie/madie-util", () => {
   return {
     useDocumentTitle: jest.fn(),
+    useFhirElmTranslationServiceApi: jest.fn(() => ({
+      fetchRelevantDataElements: (...args) =>
+        mockFetchRelevantDataElements(...args),
+    })),
     useFeatureFlags: () => {
       return {
         applyDefaults: mockApplyDefaults,
@@ -286,19 +292,13 @@ describe("ElementsTab", () => {
       return Promise.resolve({ data: null });
     });
 
-    mockedAxios.put.mockImplementation((args) => {
-      if (args === "fhir-cql-to-elm.com/fhir/cql/relevant-elements") {
-        return Promise.resolve({
-          data: [
-            {
-              profile:
-                "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-adverseevent",
-              type: "AdverseEvent",
-            },
-          ],
-        });
-      }
-    });
+    mockFetchRelevantDataElements.mockResolvedValue([
+      {
+        profile:
+          "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-adverseevent",
+        type: "AdverseEvent",
+      },
+    ]);
   });
   afterEach(() => {
     jest.clearAllMocks();

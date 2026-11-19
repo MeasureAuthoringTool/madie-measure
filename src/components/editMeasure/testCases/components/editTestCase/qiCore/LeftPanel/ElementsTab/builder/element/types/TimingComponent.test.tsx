@@ -12,14 +12,14 @@ import TimingComponent from "./TimingComponent";
 import useFhirDefinitionsServiceApi, {
   FhirDefinitionsServiceApi,
 } from "../../../../../../../../api/useFhirDefinitionsService";
-import useTerminologyServiceApi, {
-  TerminologyServiceApi,
-} from "../../../../../../../../api/useTerminologyServiceApi";
+import {
+  useTerminologyServiceApi,
+  type TerminologyServiceApi,
+} from "@madie/madie-util";
 import userEvent from "@testing-library/user-event";
 import { YEAR_FORMAT } from "./DateTimeComponent";
 
 jest.mock("../../../../../../../../api/useFhirDefinitionsService");
-jest.mock("../../../../../../../../api/useTerminologyServiceApi");
 
 const useFhirDefinitionsServiceApiMock =
   useFhirDefinitionsServiceApi as jest.Mock<FhirDefinitionsServiceApi>;

@@ -8,7 +8,7 @@ import { Select } from "@madie/madie-design-system/dist/react";
 import * as _ from "lodash";
 import useFhirDefinitionsServiceApi from "../../../../../../../../api/useFhirDefinitionsService";
 import { getValueSetUrl } from "../../../../../../../../api/fhirDefinitionServiceUtilities";
-import useTerminologyServiceApi from "../../../../../../../../api/useTerminologyServiceApi";
+import { useTerminologyServiceApi } from "@madie/madie-util";
 import AddElementButton from "../../../../../../../common/UIOnlyModelAgnostic/AddElementButton";
 import "./CodesComponent.scss";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";

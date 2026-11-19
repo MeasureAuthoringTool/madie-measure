@@ -39,9 +39,9 @@ jest.mock("../../../../api/useFhirDefinitionsService", () => ({
   }),
 }));
 
-jest.mock("../../../../../../../api/useFhirElmTranslationServiceApi", () => ({
-  __esModule: true,
-  default: () => ({
+jest.mock("@madie/madie-util", () => ({
+  ...jest.requireActual("@madie/madie-util"),
+  useFhirElmTranslationServiceApi: () => ({
     fetchRelevantDataElements: jest
       .fn()
       .mockReturnValue(new Promise(() => undefined)),

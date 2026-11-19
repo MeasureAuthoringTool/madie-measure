@@ -167,15 +167,13 @@ const mockFetchRelevantDataElements = jest.fn(() =>
     },
   ])
 );
-jest.mock(
-  "../../../../../../../../../api/useFhirElmTranslationServiceApi",
-  () => {
-    return () => ({
-      fetchRelevantDataElements: (...args) =>
-        mockFetchRelevantDataElements(...args),
-    });
-  }
-);
+jest.mock("@madie/madie-util", () => ({
+  ...jest.requireActual("@madie/madie-util"),
+  useFhirElmTranslationServiceApi: () => ({
+    fetchRelevantDataElements: (...args) =>
+      mockFetchRelevantDataElements(...args),
+  }),
+}));
 const mockMeasure = {
   id: "test",
   model: Model.QICORE,

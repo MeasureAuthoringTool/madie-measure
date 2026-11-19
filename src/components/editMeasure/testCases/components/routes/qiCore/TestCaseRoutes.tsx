@@ -7,9 +7,9 @@ import {
   measureStore,
   useFeatureFlags,
   useMeasureServiceApi,
+  useTerminologyServiceApi,
 } from "@madie/madie-util";
 import { Bundle, ValueSet } from "fhir/r4";
-import useTerminologyServiceApi from "../../../api/useTerminologyServiceApi";
 import { ExecutionContextProvider } from "./ExecutionContext";
 
 import * as _ from "lodash";
