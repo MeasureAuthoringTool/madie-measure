@@ -86,23 +86,19 @@ jest.mock("@madie/madie-util", () => ({
     initialState: { canTravel: true, pendingPath: "" },
   },
   checkUserCanEdit: jest.fn().mockResolvedValue(true),
-  useOrganizationApi: jest.fn(() => mockOrganizationApi),
 }));
 
 const mockMeasureServiceApi: MeasureServiceApi = {
   updateMeasure: jest.fn().mockResolvedValue({ status: 200 }),
-} as unknown as MeasureServiceApi;
-
-const mockOrganizationApi = {
   getAllOrganizations: jest.fn().mockResolvedValue(organizationList),
-};
+} as unknown as MeasureServiceApi;
 
 describe("Steward and Developers component", () => {
   beforeEach(() => {
     mockMeasureServiceApi.updateMeasure = jest
       .fn()
       .mockResolvedValueOnce({ status: 200 });
-    mockOrganizationApi.getAllOrganizations = jest
+    mockMeasureServiceApi.getAllOrganizations = jest
       .fn()
       .mockResolvedValue(organizationList);
     mockMeasure.measureMetaData = { ...mockMetaData };
@@ -186,7 +182,7 @@ describe("Steward and Developers component", () => {
     mockMeasureServiceApi.updateMeasure = jest
       .fn()
       .mockResolvedValue(undefined);
-    mockOrganizationApi.getAllOrganizations = jest
+    mockMeasureServiceApi.getAllOrganizations = jest
       .fn()
       .mockRejectedValue(undefined);
 
@@ -356,7 +352,7 @@ describe("Steward and Developers component", () => {
     mockMeasureServiceApi.updateMeasure = jest
       .fn()
       .mockRejectedValue(undefined);
-    mockOrganizationApi.getAllOrganizations = jest
+    mockMeasureServiceApi.getAllOrganizations = jest
       .fn()
       .mockResolvedValue(organizationList);
 
@@ -472,7 +468,7 @@ describe("Steward and Developers component", () => {
         },
       },
     });
-    mockOrganizationApi.getAllOrganizations = jest
+    mockMeasureServiceApi.getAllOrganizations = jest
       .fn()
       .mockResolvedValue(organizationList);
 
