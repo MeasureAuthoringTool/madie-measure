@@ -12,9 +12,10 @@ import TypeEditor from "./TypeEditor";
 import useFhirDefinitionsServiceApi, {
   FhirDefinitionsServiceApi,
 } from "../../../../../../../api/useFhirDefinitionsService";
-import useTerminologyServiceApi, {
-  TerminologyServiceApi,
-} from "../../../../../../../api/useTerminologyServiceApi";
+import {
+  useTerminologyServiceApi,
+  type TerminologyServiceApi,
+} from "@madie/madie-util";
 import { FormikProvider, FormikContextType, FormikProps } from "formik";
 import { RequiredFieldsProvider } from "./RequiredFieldsContext";
 import mockRequiredFields from "./mockRequiredFields";
@@ -76,6 +77,7 @@ jest.mock("@madie/madie-util", () => ({
   useOktaTokens: () => ({
     getAccessToken: () => "test.jwt",
   }),
+  useTerminologyServiceApi: jest.fn(),
 }));
 
 // jest.mock("./types/MoneyComponent", () => ({ label }: any) => (
@@ -255,7 +257,6 @@ jest.mock("../../../../../../../api/fhirDefinitionServiceUtilities", () => {
   };
 });
 
-jest.mock("../../../../../../../api/useTerminologyServiceApi");
 const useTerminologyServiceApiMock =
   useTerminologyServiceApi as jest.Mock<TerminologyServiceApi>;
 const terminologyServiceApiMock = {

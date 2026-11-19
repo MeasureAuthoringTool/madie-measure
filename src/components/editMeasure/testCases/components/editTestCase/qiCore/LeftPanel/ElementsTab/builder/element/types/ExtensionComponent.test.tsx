@@ -66,6 +66,9 @@ jest.mock("@madie/madie-util", () => ({
   useOktaTokens: () => ({
     getAccessToken: () => "test.jwt",
   }),
+  useTerminologyServiceApi: () => ({
+    getValueSetsExpansionForUrls: jest.fn().mockResolvedValue([]),
+  }),
 }));
 
 jest.mock("../../../../../../../../api/useFhirDefinitionsService", () => ({
@@ -73,13 +76,6 @@ jest.mock("../../../../../../../../api/useFhirDefinitionsService", () => ({
   default: () => ({
     getResourceTree: jest.fn().mockResolvedValue(null),
     getValueSetDefinition: jest.fn().mockResolvedValue(null),
-  }),
-}));
-
-jest.mock("../../../../../../../../api/useTerminologyServiceApi", () => ({
-  __esModule: true,
-  default: () => ({
-    getValueSetsExpansionForUrls: jest.fn().mockResolvedValue([]),
   }),
 }));
 

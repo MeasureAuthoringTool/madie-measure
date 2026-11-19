@@ -79,9 +79,17 @@ const mockMeasure = {
   createdBy: MEASURE_CREATEDBY,
 };
 
+const mockGetFhirValueSetsForDRCs = jest.fn();
+const mockGetValueSetsExpansionForBundle = jest.fn();
+
 jest.mock("@madie/madie-util", () => ({
   MadieAlert: require("@madie/madie-design-system/dist/react").MadieAlert,
   useMeasureServiceApi: jest.fn(() => mockMeasureServiceApi),
+  useTerminologyServiceApi: jest.fn(() => ({
+    getFhirValueSetsForDRCs: (...args) => mockGetFhirValueSetsForDRCs(...args),
+    getValueSetsExpansionForBundle: (...args) =>
+      mockGetValueSetsExpansionForBundle(...args),
+  })),
   useDocumentTitle: jest.fn(),
   measureStore: {
     updateMeasure: jest.fn((measure) => measure),
@@ -123,6 +131,11 @@ const mockMeasureServiceApi: MeasureServiceApi = {
   deleteMeasureGroup: jest.fn(),
 } as unknown as MeasureServiceApi;
 describe("TestCaseRoutes", () => {
+  beforeEach(() => {
+    mockGetFhirValueSetsForDRCs.mockReturnValue([]);
+    mockGetValueSetsExpansionForBundle.mockResolvedValue(valueSets);
+  });
+
   afterEach(() => {
     jest.clearAllMocks();
     mockMeasure.errors = [];
@@ -794,7 +807,11 @@ describe("TestCaseRoutes", () => {
       });
     });
 
-    mockedAxios.put.mockRejectedValue(new Error("VALUE SET ERRORS"));
+    mockGetValueSetsExpansionForBundle.mockRejectedValue(
+      new Error(
+        "An error occurred, please try again. If the error persists, please contact the help desk. (003)"
+      )
+    );
     render(
       <MemoryRouter
         initialEntries={["/measures/m1234/edit/test-cases/list-page"]}

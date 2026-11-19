@@ -17,7 +17,7 @@ import {
 } from "../../../../../../util/QiCorePatientProvider";
 import useFhirDefinitionsServiceApi from "../../../../../../api/useFhirDefinitionsService";
 import { ResourceIdentifier } from "../../../../../../api/models/ResourceIdentifier";
-import useFhirElmTranslationServiceApi from "../../../../../../../../../api/useFhirElmTranslationServiceApi";
+import { useFhirElmTranslationServiceApi } from "@madie/madie-util";
 import useExecutionContext from "../../../../../routes/qiCore/useExecutionContext";
 import {
   MadieSpinner,

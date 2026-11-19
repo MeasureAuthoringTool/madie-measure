@@ -51,6 +51,8 @@ import {
   routeHandlerStore,
   useMeasureServiceApi,
   useTerminologyServiceApi,
+  useFhirElmTranslationServiceApi,
+  useQdmElmTranslationServiceApi,
   MadieAlert,
 } from "@madie/madie-util";
 import StatusHandler from "./StatusHandler";
@@ -76,8 +78,6 @@ import applyCQLFunction, {
 import { useParams } from "react-router";
 import LockedMessageModal from "../../common/lockedMessageModal/LockedMessageModal";
 import useServiceConfig from "../../../api/useServiceConfig";
-import useFhirElmTranslationServiceApi from "../../../api/useFhirElmTranslationServiceApi";
-import useQdmElmTranslationServiceApi from "../../../api/useQdmElmTranslationServiceApi";
 
 export const CQL_EDITOR_HOW_IT_WORKS =
   "The CQL Editor is where you create and maintain your measure's Clinical " +
