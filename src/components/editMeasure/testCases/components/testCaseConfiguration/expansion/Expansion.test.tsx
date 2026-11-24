@@ -81,8 +81,13 @@ const mockMeasureServiceApi: MeasureServiceApi = {
 jest.mock("../../../../../../api/axios-instance");
 const mockedAxios = axios as jest.Mocked<typeof axios>;
 
+const mockGetManifestList = jest.fn();
+
 jest.mock("@madie/madie-util", () => ({
   useMeasureServiceApi: jest.fn(() => mockMeasureServiceApi),
+  useTerminologyServiceApi: jest.fn(() => ({
+    getManifestList: (...args) => mockGetManifestList(...args),
+  })),
   measureStore: {
     updateMeasure: jest.fn((measure) => measure),
     state: jest.fn().mockImplementation(() => measure),
@@ -133,16 +138,9 @@ describe("Expansion component", () => {
     mockMeasureServiceApi.updateMeasureTestCaseConfiguration = jest
       .fn()
       .mockResolvedValue(measureWithTestCaseConfiguration);
-    mockedAxios.get.mockImplementation((args) => {
-      if (
-        args &&
-        args.startsWith(mockServiceConfig.terminologyService.baseUrl)
-      ) {
-        return Promise.resolve({
-          data: mockManifestList,
-          status: 200,
-        });
-      }
+    mockGetManifestList.mockResolvedValue({
+      data: mockManifestList,
+      status: 200,
     });
     renderExpansionComponent();
 
@@ -199,16 +197,9 @@ describe("Expansion component", () => {
   });
 
   it("Should disable save buttons when values match previously selected values from measure store", async () => {
-    mockedAxios.get.mockImplementation((args) => {
-      if (
-        args &&
-        args.startsWith(mockServiceConfig.terminologyService.baseUrl)
-      ) {
-        return Promise.resolve({
-          data: mockManifestList,
-          status: 200,
-        });
-      }
+    mockGetManifestList.mockResolvedValue({
+      data: mockManifestList,
+      status: 200,
     });
     renderExpansionComponent();
 
@@ -256,21 +247,14 @@ describe("Expansion component", () => {
   });
 
   it("Should throw a toast error when we are unable to fetch manifest list from service", async () => {
-    mockedAxios.get.mockImplementation((args) => {
-      if (
-        args &&
-        args.startsWith(mockServiceConfig.terminologyService.baseUrl)
-      ) {
-        return Promise.reject({
-          response: {
-            data: {
-              message:
-                "401 Unauthorized from GET https://uat-cts.nlm.nih.gov/fhir/Library",
-            },
-            status: 401,
-          },
-        });
-      }
+    mockGetManifestList.mockRejectedValue({
+      response: {
+        data: {
+          message:
+            "401 Unauthorized from GET https://uat-cts.nlm.nih.gov/fhir/Library",
+        },
+        status: 401,
+      },
     });
     renderExpansionComponent();
 
@@ -305,16 +289,9 @@ describe("Expansion component", () => {
     measureStore.state.mockImplementation(
       () => measureWithTestCaseConfiguration
     );
-    mockedAxios.get.mockImplementation((args) => {
-      if (
-        args &&
-        args.startsWith(mockServiceConfig.terminologyService.baseUrl)
-      ) {
-        return Promise.resolve({
-          data: mockManifestList,
-          status: 200,
-        });
-      }
+    mockGetManifestList.mockResolvedValue({
+      data: mockManifestList,
+      status: 200,
     });
     renderExpansionComponent();
     const latestRadioInput = screen.getByLabelText(

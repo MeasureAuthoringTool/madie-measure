@@ -9,11 +9,10 @@ import {
 import { Formik } from "formik";
 import { ExecutionContextProvider } from "../../../../../../../routes/qiCore/ExecutionContext";
 import RatioComponent from "./RatioComponent";
-import useTerminologyServiceApi, {
-  TerminologyServiceApi,
-} from "../../../../../../../../api/useTerminologyServiceApi";
-
-jest.mock("../../../../../../../../api/useTerminologyServiceApi");
+import {
+  useTerminologyServiceApi,
+  type TerminologyServiceApi,
+} from "@madie/madie-util";
 
 jest.mock("../../../../../../../common/quantityInput/validate", () => ({
   validate: (unitValue: string) => {

@@ -30,9 +30,12 @@ declare module "@madie/madie-util" {
     SharedUser,
     MeasureCounts,
     Comment,
+    ManifestExpansion,
+    Organization,
   } from "@madie/madie-models";
   import { AxiosResponse } from "axios";
-  import { Bundle } from "fhir/r4";
+  import { Bundle, ValueSet as FhirValueSet } from "fhir/r4";
+  import { CqmMeasure, ValueSet as QdmValueSet } from "cqm-models";
 
   export type OktaConfig = {
     baseUrl: string;
@@ -170,13 +173,81 @@ declare module "@madie/madie-util" {
   export function useOnClickOutside(ref: any, handler: any): void;
   export function wafIntercept(): void;
 
+  export type ValueSetSearchParams = {
+    oid: string;
+    url?: string;
+    release?: string;
+    version?: string;
+  };
+
+  export type FhirValueSetSearchParams = {
+    url: string;
+  };
+
   export class TerminologyServiceApi {
     constructor(baseUrl: string, getAccessToken: () => string);
     checkLogin(): Promise<Boolean>;
     loginUMLS(apiKey: string): Promise<string>;
+    getExpansion(
+      valueSetParams: FhirValueSetSearchParams[],
+      manifestExpansion?: ManifestExpansion
+    ): Promise<FhirValueSet[]>;
+    getValueSetsExpansionForBundle(
+      measureBundle: Bundle,
+      manifestExpansion?: ManifestExpansion
+    ): Promise<FhirValueSet[]>;
+    getValueSetsExpansionForUrls(urls: string[]): Promise<FhirValueSet[]>;
+    getQdmValueSetsExpansion(
+      cqmMeasure: CqmMeasure,
+      manifestExpansion: ManifestExpansion,
+      signal: AbortSignal
+    ): Promise<QdmValueSet[]>;
+    getValueSetsOIDsFromCqmMeasure(
+      cqmMeasure: CqmMeasure
+    ): ValueSetSearchParams[];
+    getValueSetUrlsFromBundle(
+      measureBundle: Bundle
+    ): FhirValueSetSearchParams[];
+    getFhirValueSetsForDRCs(measureBundle: Bundle): FhirValueSet[];
+    getOidFromString(oidString: string): string;
+    getValueSetsForDRCs(cqmMeasure: CqmMeasure): FhirValueSet[];
+    getDrcOid(cqmMeasure: CqmMeasure, code: string): string;
+    getManifestList(): Promise<AxiosResponse<ManifestExpansion[]>>;
   }
 
   export function useTerminologyServiceApi(): TerminologyServiceApi;
+
+  export interface RelevantElement {
+    type: string;
+    profile: string;
+  }
+
+  export class FhirElmTranslationServiceApi {
+    constructor(baseUrl: string, getAccessToken: () => string);
+    translateCqlToElm(cql: string, checkContext: boolean): Promise<any>;
+    fetchTranslatorVersion(draft: boolean): Promise<string>;
+    fetchRelevantDataElements(
+      measure: Measure,
+      signal?: AbortSignal
+    ): Promise<Array<RelevantElement>>;
+  }
+
+  export function useFhirElmTranslationServiceApi(): FhirElmTranslationServiceApi;
+
+  export class QdmElmTranslationServiceApi {
+    constructor(baseUrl: string, getAccessToken: () => string);
+    translateCqlToElm(cql: string): Promise<any>;
+    fetchTranslatorVersion(draft: boolean): Promise<string>;
+  }
+
+  export function useQdmElmTranslationServiceApi(): QdmElmTranslationServiceApi;
+
+  export class OrganizationApi {
+    constructor(baseUrl: string, getAccessToken: () => string);
+    getAllOrganizations(): Promise<Organization[]>;
+  }
+
+  export function useOrganizationApi(): OrganizationApi;
 
   export class MeasureServiceApi {
     constructor(baseUrl: string, getAccessToken: () => string);

@@ -83,9 +83,17 @@ jest.mock(
   () => () =>
     <div data-testid="copy-test-case-dialog">Mock Copy Test Case Dialog</div>
 );
+const mockGetValueSetsForDRCs = jest.fn();
+const mockGetQdmValueSetsExpansion = jest.fn();
+
 jest.mock("@madie/madie-util", () => ({
   MadieAlert: require("@madie/madie-design-system/dist/react").MadieAlert,
   ...mockMeasureActionStubs,
+  useTerminologyServiceApi: jest.fn(() => ({
+    getValueSetsForDRCs: (...args) => mockGetValueSetsForDRCs(...args),
+    getQdmValueSetsExpansion: (...args) =>
+      mockGetQdmValueSetsExpansion(...args),
+  })),
   // useMeasureServiceApi: jest.fn(() => ( {
   //   //fetchMeasureBundle: jest.fn().mockResolvedValue({}),
   // })) ,
@@ -169,6 +177,8 @@ describe("TestCaseRoutes", () => {
   beforeEach(() => {
     mockedAxios.put.mockResolvedValue({ data: {} });
     mockedAxios.delete.mockResolvedValue({ data: {} });
+    mockGetValueSetsForDRCs.mockReturnValue([]);
+    mockGetQdmValueSetsExpansion.mockResolvedValue([]);
     CQMConversionMock.mockImplementation(() => {
       return useCqmConversionServiceMockResolved;
     });

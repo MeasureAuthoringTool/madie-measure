@@ -47,11 +47,19 @@ const mockMeasureServiceApi = {
   updateMeasureLock: jest.fn().mockResolvedValue({}),
 };
 
+const mockElmTranslationServiceApi = {
+  translateCqlToElm: jest.fn().mockResolvedValue({}),
+  fetchTranslatorVersion: jest.fn().mockResolvedValue("1.0.0"),
+  fetchRelevantDataElements: jest.fn().mockResolvedValue([]),
+};
+
 jest.mock("@madie/madie-util", () => ({
   MadieAlert: require("@madie/madie-design-system/dist/react").MadieAlert,
   useMeasureServiceApi: jest.fn(() => mockMeasureServiceApi),
   useOwnerName: jest.fn((harpId) => harpId),
   useTerminologyServiceApi: jest.fn(() => mockMeasureServiceApi),
+  useFhirElmTranslationServiceApi: jest.fn(() => mockElmTranslationServiceApi),
+  useQdmElmTranslationServiceApi: jest.fn(() => mockElmTranslationServiceApi),
   useDocumentTitle: jest.fn(),
   useOktaTokens: jest.fn(() => ({
     getAccessToken: () => "test.jwt",

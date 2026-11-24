@@ -111,11 +111,21 @@ const serviceConfig: ServiceConfig = {
 };
 const MEASURE_CREATEDBY = "testuser";
 let mockApplyDefaults = false;
+const mockFetchRelevantDataElements = jest.fn();
+
 jest.mock("@madie/madie-util", () => {
   return {
     MadieAlert: require("@madie/madie-design-system/dist/react").MadieAlert,
     ...mockMeasureActionStubs,
     useMeasureServiceApi: jest.fn(() => mockMeasureServiceApi),
+    useFhirElmTranslationServiceApi: jest.fn(() => ({
+      fetchRelevantDataElements: (...args) =>
+        mockFetchRelevantDataElements(...args),
+    })),
+    useTerminologyServiceApi: jest.fn(() => ({
+      getFhirValueSetsForDRCs: () => [],
+      getValueSetsExpansionForBundle: () => Promise.resolve([]),
+    })),
     useOwnerName: jest.fn((harpId) => harpId),
     useDocumentTitle: jest.fn(),
     useFeatureFlags: jest.fn(() => {
@@ -362,19 +372,13 @@ describe("EditTestCase component", () => {
       }
       return Promise.resolve({ data: null });
     });
-    mockedAxios.put.mockImplementation((args) => {
-      if (args && args.endsWith("relevant-elements")) {
-        return Promise.resolve({
-          data: [
-            {
-              profile:
-                "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-adverseevent",
-              type: "AdverseEvent",
-            },
-          ],
-        });
-      }
-    });
+    mockFetchRelevantDataElements.mockResolvedValue([
+      {
+        profile:
+          "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-adverseevent",
+        type: "AdverseEvent",
+      },
+    ]);
     mockedAxios.post.mockImplementation((args) => {
       if (args && args.endsWith("lock")) {
         return Promise.resolve({
@@ -538,24 +542,18 @@ describe("EditTestCase component", () => {
         ...defaultMeasure,
         model: Model.QICORE_6_0_0,
       } as unknown as Measure;
-      mockedAxios.put.mockImplementation((args) => {
-        if (args && args.endsWith("relevant-elements")) {
-          return Promise.resolve({
-            data: [
-              {
-                profile:
-                  "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-adverseevent",
-                type: "AdverseEvent",
-              },
-              {
-                profile:
-                  "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-medicationstatement",
-                type: "MedicationStatement",
-              },
-            ],
-          });
-        }
-      });
+      mockFetchRelevantDataElements.mockResolvedValue([
+        {
+          profile:
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-adverseevent",
+          type: "AdverseEvent",
+        },
+        {
+          profile:
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-medicationstatement",
+          type: "MedicationStatement",
+        },
+      ]);
 
       renderWithRouter(
         ["/measures/m1234/edit/test-cases"],
@@ -581,14 +579,9 @@ describe("EditTestCase component", () => {
         ...defaultMeasure,
         model: Model.QICORE_6_0_0,
       } as unknown as Measure;
-      const axiosError: AxiosError = {
-        response: {
-          status: 404,
-          data: {},
-        } as AxiosResponse,
-        toJSON: jest.fn(),
-      } as unknown as AxiosError;
-      mockedAxios.put.mockClear().mockRejectedValue(axiosError);
+      // the service swallows the failure and yields no relevant elements
+      mockedAxios.put.mockClear();
+      mockFetchRelevantDataElements.mockResolvedValue([]);
 
       renderWithRouter(
         ["/measures/m1234/edit/test-cases"],

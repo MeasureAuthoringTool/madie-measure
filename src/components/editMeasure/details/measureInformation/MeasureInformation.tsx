@@ -27,6 +27,8 @@ import {
   useMeasureServiceApi,
   useUserServiceApi,
   useTerminologyServiceApi,
+  useQdmElmTranslationServiceApi,
+  useFhirElmTranslationServiceApi,
 } from "@madie/madie-util";
 import { Box } from "@mui/system";
 import {
@@ -37,8 +39,6 @@ import {
 import "./MeasureInformation.scss";
 import CmsIdentifier from "../cmsIdentifier/CmsIdentifier";
 import { QdmMeasureSchemaValidator } from "../../../../validations/QDMMeasureSchemaValidator";
-import useQdmElmTranslationServiceApi from "../../../../api/useQdmElmTranslationServiceApi";
-import useFhirElmTranslationServiceApi from "../../../../api/useFhirElmTranslationServiceApi";
 import GenerateCmsIdConfirmationDialog from "../cmsIdentifier/GenerateCmsIdConfirmationDialog";
 import _ from "lodash";
 

@@ -11,10 +11,9 @@ import {
   MeasureErrorType,
   TestCaseImportOutcome,
 } from "@madie/madie-models";
-import { measureStore } from "@madie/madie-util";
+import { measureStore, useTerminologyServiceApi } from "@madie/madie-util";
 import { CqmMeasure, ValueSet } from "cqm-models";
 import useCqmConversionService from "../../../api/CqmModelConversionService";
-import useTerminologyServiceApi from "../../../api/useTerminologyServiceApi";
 import { QdmExecutionContextProvider } from "./QdmExecutionContext";
 import TestCaseLandingWrapper from "../../testCaseLanding/common/TestCaseLandingWrapper";
 import _ from "lodash";

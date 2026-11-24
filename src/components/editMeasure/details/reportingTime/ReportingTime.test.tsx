@@ -11,6 +11,9 @@ const mockSetError = jest.fn();
 
 jest.mock("@madie/madie-util", () => ({
   useMeasureServiceApi: () => ({ updateMeasure: mockUpdate }),
+  useTerminologyServiceApi: () => ({
+    getValueSetsExpansionForUrls: (...args) => mockExpand(...args),
+  }),
   measureStore: {
     state: {},
     subscribe: jest.fn(() => ({ unsubscribe: jest.fn() })),
@@ -20,9 +23,6 @@ jest.mock("@madie/madie-util", () => ({
 }));
 jest.mock("../../testCases/api/useFhirDefinitionsService", () => () => ({
   getValueSetDefinition: mockGetValueSet,
-}));
-jest.mock("../../testCases/api/useTerminologyServiceApi", () => () => ({
-  getValueSetsExpansionForUrls: mockExpand,
 }));
 
 describe("ReportingTime", () => {

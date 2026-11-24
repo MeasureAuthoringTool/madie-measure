@@ -278,8 +278,14 @@ const renderWithExecutionContext = (ui: React.ReactElement) =>
     </ExecutionContextProvider>
   );
 
+const mockGetValueSetsExpansionForUrls = jest.fn();
+
 jest.mock("@madie/madie-util", () => ({
   useOktaTokens: () => ({ getAccessToken: () => "test.jwt" }),
+  useTerminologyServiceApi: () => ({
+    getValueSetsExpansionForUrls: (...args) =>
+      mockGetValueSetsExpansionForUrls(...args),
+  }),
 }));
 
 describe("Codes Component", () => {
@@ -476,19 +482,7 @@ describe("Codes Component", () => {
           return Promise.resolve({ data: mockExpansionResponseWithExtension });
         }
       });
-      mockedAxios.put.mockImplementation((url, body, config) => {
-        if (
-          url === "terminology-service.com/ValueSet/$expand" &&
-          Array.isArray((body as any).valueSet) &&
-          (body as any).valueSet.includes(oids[0]) &&
-          (body as any).valueSet.includes(oids[1]) &&
-          config.headers.Authorization === "Bearer test.jwt"
-        ) {
-          return Promise.resolve({ data: valueSetsExpansion });
-        }
-        // Optionally, return a default for other calls
-        return Promise.resolve({ data: {} });
-      });
+      mockGetValueSetsExpansionForUrls.mockResolvedValue(valueSetsExpansion);
     });
     it("should fetch value set expansion", async () => {
       renderWithExecutionContext(
@@ -510,7 +504,7 @@ describe("Codes Component", () => {
       );
 
       await waitFor(() => {
-        expect(axios.put).toHaveBeenCalled();
+        expect(mockGetValueSetsExpansionForUrls).toHaveBeenCalled();
       });
     });
 
@@ -562,7 +556,7 @@ describe("Codes Component", () => {
         { headers: { Authorization: "Bearer test.jwt" } }
       );
       await waitFor(() => {
-        expect(axios.put).not.toHaveBeenCalled();
+        expect(mockGetValueSetsExpansionForUrls).not.toHaveBeenCalled();
       });
 
       const birthSexInput = screen.getByTestId(
@@ -577,9 +571,7 @@ describe("Codes Component", () => {
         .fn()
         .mockResolvedValue(mockExpansionResponseWithExtension);
 
-      const getValueSetsExpansionForUrlsMock = jest
-        .fn()
-        .mockResolvedValue(valueSetsExpansion);
+      mockGetValueSetsExpansionForUrls.mockResolvedValue(valueSetsExpansion);
 
       jest
         .spyOn(
@@ -588,14 +580,6 @@ describe("Codes Component", () => {
         )
         .mockReturnValue({
           getValueSetDefinition: getValueSetDefinitionMock,
-        });
-      jest
-        .spyOn(
-          require("../../../../../../../../api/useTerminologyServiceApi"),
-          "default"
-        )
-        .mockReturnValue({
-          getValueSetsExpansionForUrls: getValueSetsExpansionForUrlsMock,
         });
 
       render(
@@ -612,7 +596,7 @@ describe("Codes Component", () => {
 
       await waitFor(() => {
         // ValueSet URLs should be extracted and getCodes called
-        expect(getValueSetsExpansionForUrlsMock).toHaveBeenCalledWith([
+        expect(mockGetValueSetsExpansionForUrls).toHaveBeenCalledWith([
           "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1",
           "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1021.103",
         ]);

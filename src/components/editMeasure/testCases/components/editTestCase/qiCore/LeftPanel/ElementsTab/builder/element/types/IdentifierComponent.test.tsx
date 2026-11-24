@@ -6,13 +6,13 @@ import IdentifierComponent from "./IdentifierComponent";
 import useFhirDefinitionsServiceApi, {
   FhirDefinitionsServiceApi,
 } from "../../../../../../../../api/useFhirDefinitionsService";
-import useTerminologyServiceApi, {
-  TerminologyServiceApi,
-} from "../../../../../../../../api/useTerminologyServiceApi";
+import {
+  useTerminologyServiceApi,
+  type TerminologyServiceApi,
+} from "@madie/madie-util";
 import userEvent from "@testing-library/user-event";
 
 jest.mock("../../../../../../../../api/useFhirDefinitionsService");
-jest.mock("../../../../../../../../api/useTerminologyServiceApi");
 
 const useFhirDefinitionsServiceApiMock =
   useFhirDefinitionsServiceApi as jest.Mock<FhirDefinitionsServiceApi>;

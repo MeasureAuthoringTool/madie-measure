@@ -13,11 +13,11 @@ import {
   checkUserCanEdit,
   routeHandlerStore,
   useMeasureServiceApi,
+  useTerminologyServiceApi,
 } from "@madie/madie-util";
 import "../testCaseConfiguration.scss";
 import { MenuItem, Typography } from "@mui/material";
 import * as Yup from "yup";
-import useTerminologyServiceApi from "../../../api/useTerminologyServiceApi";
 import useFormikResetOnEvent from "../../../../../common/useFormikResetOnEvent";
 
 // The Expansion component now displays the manifest 'title' in the dropdown and as the selected value, but stores the 'id' in DB.

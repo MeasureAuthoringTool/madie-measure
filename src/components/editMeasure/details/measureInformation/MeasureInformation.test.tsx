@@ -13,12 +13,6 @@ import MeasureInformation, {
   CQL_LIBRARY_NAME_RECOMMENDATION,
 } from "./MeasureInformation";
 
-import useQdmElmTranslationServiceApi, {
-  QdmElmTranslationServiceApi,
-} from "../../../../api/useQdmElmTranslationServiceApi";
-import useFhirElmTranslationServiceApi, {
-  FhirElmTranslationServiceApi,
-} from "../../../../api/useFhirElmTranslationServiceApi";
 import { Measure, Model } from "@madie/madie-models";
 import { AxiosError, AxiosResponse } from "axios";
 import {
@@ -32,6 +26,10 @@ import {
   measureStore,
   MeasureServiceApi,
   UserServiceApi,
+  useQdmElmTranslationServiceApi,
+  useFhirElmTranslationServiceApi,
+  type QdmElmTranslationServiceApi,
+  type FhirElmTranslationServiceApi,
 } from "@madie/madie-util";
 
 const mockHistoryPush = jest.fn();
@@ -41,8 +39,6 @@ jest.mock("react-router-dom", () => ({
   useNavigate: () => mockHistoryPush,
 }));
 
-jest.mock("../../../../api/useQdmElmTranslationServiceApi");
-jest.mock("../../../../api/useFhirElmTranslationServiceApi");
 const useQdmElmTranslationServiceApiMock =
   useQdmElmTranslationServiceApi as jest.Mock<QdmElmTranslationServiceApi>;
 const useFhirElmTranslationServiceApiMock =
@@ -146,6 +142,8 @@ jest.mock("@madie/madie-util", () => ({
     return true;
   }),
   useTerminologyServiceApi: jest.fn(() => ({})),
+  useQdmElmTranslationServiceApi: jest.fn(),
+  useFhirElmTranslationServiceApi: jest.fn(),
 }));
 
 const axiosError: AxiosError = {
