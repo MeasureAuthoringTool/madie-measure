@@ -52,7 +52,7 @@ describe("ReportingTime", () => {
       <ReportingTime setErrorMessage={mockSetError} measureCanEdit={canEdit} />
     );
 
-  it("places field guidance above the inputs", async () => {
+  it("places field guidance below the inputs", async () => {
     renderForm();
     const frequency = screen.getByTestId("reporting-frequency");
     const period = screen.getByTestId("reporting-period");
@@ -65,22 +65,26 @@ describe("ReportingTime", () => {
     expect(screen.getByText("Indicates required field")).toBeInTheDocument();
     expect(
       frequency.compareDocumentPosition(frequencyGuidance) &
-        Node.DOCUMENT_POSITION_PRECEDING
+        Node.DOCUMENT_POSITION_FOLLOWING
     ).toBeTruthy();
     expect(
       period.compareDocumentPosition(periodGuidance) &
-        Node.DOCUMENT_POSITION_PRECEDING
+        Node.DOCUMENT_POSITION_FOLLOWING
     ).toBeTruthy();
     expect(frequency).toHaveAccessibleDescription(
-      "Enter a positive whole number"
+      /Enter a positive whole number/
     );
-    expect(period).toHaveAccessibleDescription("Enter a decimal value");
-    expect(screen.getByTestId("periodUnit-helper-text")).toHaveStyle(
-      "visibility: hidden"
-    );
-    expect(screen.getByTestId("timeOfDay-helper-text")).toHaveStyle(
-      "visibility: hidden"
-    );
+    expect(period).toHaveAccessibleDescription(/Enter a decimal value/);
+    expect(
+      screen.queryByTestId("frequency-helper-text")
+    ).not.toBeInTheDocument();
+    expect(screen.queryByTestId("period-helper-text")).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId("periodUnit-helper-text")
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId("timeOfDay-helper-text")
+    ).not.toBeInTheDocument();
     await waitFor(() => expect(mockGetValueSet).toHaveBeenCalled());
   });
 
@@ -95,12 +99,22 @@ describe("ReportingTime", () => {
     fireEvent.blur(unit);
     await waitFor(() => {
       expect(frequency).toHaveAccessibleDescription(
-        "Enter a positive whole number."
+        "Positive Integer is required (ie 1, 2, 4) Enter a positive whole number"
       );
       expect(period).toHaveAccessibleDescription(
-        "Enter a non-negative decimal value."
+        "Enter a non-negative decimal value. Enter a decimal value"
       );
       expect(unit).toHaveAccessibleDescription("Select a period unit.");
+      expect(
+        frequency.compareDocumentPosition(
+          screen.getByText("Positive Integer is required (ie 1, 2, 4)")
+        ) & Node.DOCUMENT_POSITION_PRECEDING
+      ).toBeTruthy();
+      expect(
+        period.compareDocumentPosition(
+          screen.getByText("Enter a non-negative decimal value.")
+        ) & Node.DOCUMENT_POSITION_PRECEDING
+      ).toBeTruthy();
       expect(screen.getByTestId("periodUnit-helper-text")).toBeVisible();
     });
   });
