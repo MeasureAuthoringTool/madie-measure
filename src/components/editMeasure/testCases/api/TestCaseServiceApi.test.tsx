@@ -16,8 +16,11 @@ import {
   TestCaseExcelExportDto,
 } from "@madie/madie-models";
 import { measureCql } from "../components/editTestCase/groupCoverage/_mocks_/QdmCovergaeMeasureCql";
+import { gzipJson } from "../../../../api/gzipJson";
 
 jest.mock("../../../../api/axios-instance");
+// jsdom has no CompressionStream; gzipJson itself is tested in src/api/gzipJson.test.ts.
+jest.mock("../../../../api/gzipJson");
 
 const mockMeasure = {
   id: "1",
@@ -168,12 +171,14 @@ describe("TestCaseServiceApi Tests", () => {
     }
   });
 
-  it("test exportExcel success", async () => {
+  it("test exportExcel success sends the DTOs gzipped", async () => {
     const excelBlob = new Blob(["excel-data"], {
       type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     });
     const successResponse = { status: 200, data: excelBlob };
     axios.put = jest.fn().mockResolvedValueOnce(successResponse);
+    const gzippedBody = new Blob(["gzipped"]);
+    (gzipJson as jest.Mock).mockResolvedValueOnce(gzippedBody);
 
     const testCaseExcelExportDtos: TestCaseExcelExportDto[] = [
       {
@@ -188,7 +193,19 @@ describe("TestCaseServiceApi Tests", () => {
       testCaseExcelExportDtos
     );
 
+    expect(gzipJson).toHaveBeenCalledWith(testCaseExcelExportDtos);
     expect(axios.put).toHaveBeenCalledTimes(1);
+    expect(axios.put).toHaveBeenCalledWith(
+      "test.url/measures/testMeasureId/test-cases/excel",
+      gzippedBody,
+      expect.objectContaining({
+        headers: expect.objectContaining({
+          "Content-Type": "application/json",
+          "Content-Encoding": "gzip",
+        }),
+        responseType: "blob",
+      })
+    );
     expect(result).toEqual(excelBlob);
   });
 
