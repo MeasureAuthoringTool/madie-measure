@@ -15,6 +15,7 @@ import {
 import { useOktaTokens } from "@madie/madie-util";
 import { ScanValidationDto } from "./models/ScanValidationDto";
 import { MadieError } from "../util/Utils";
+import { gzipJson } from "../../../../api/gzipJson";
 
 export interface QrdaTestCaseDTO {
   testCaseId: string;
@@ -310,12 +311,15 @@ export class TestCaseServiceApi {
     measureId: string,
     testCaseExcelExportDtos: TestCaseExcelExportDto[]
   ): Promise<Blob> {
+    // Sent gzipped: uncompressed, large measures exceed the CMS WAF's 10 MB request limit.
     const response = await axios.put(
       `${this.baseUrl}/measures/${measureId}/test-cases/excel`,
-      testCaseExcelExportDtos,
+      await gzipJson(testCaseExcelExportDtos),
       {
         headers: {
           Authorization: `Bearer ${this.getAccessToken()}`,
+          "Content-Type": "application/json",
+          "Content-Encoding": "gzip",
         },
         responseType: "blob",
         maxBodyLength: Infinity,
